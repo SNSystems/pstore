@@ -1,0 +1,89 @@
+# -*- Python -*-
+# Configuration file for the 'lit' test runner.
+
+import errno
+import lit
+import mmap
+import os
+import platform
+import sys
+import tempfile
+
+
+def can_mmap_path (path):
+    """Returns true if the given path allows the use of memory-mapped files."""
+    
+    result = True
+    with tempfile.NamedTemporaryFile (mode = 'w+t', dir = path) as f:
+        # We need to put some data in the file: can't memory map it if the file is empty.
+        f.write ("Hello World")
+        f.flush ()
+
+        try:
+            mm = mmap.mmap (f.fileno (), 0)
+            mm.close ()
+        except EnvironmentError as ex:
+            if ex.errno == errno.EINVAL:
+                result = False
+    return result
+        
+
+def data_store_path ():
+    '''Returns the path to use for data stores. Since the data stores relies on
+    being able to memory-map file, we need to find a local path that allows
+    this. Normally one can use the test directory, but if this is a directory
+    on a virtual machine that's been mapped from the host (and that's how I
+    tend to roll), then it doesn't work and an alternative has to be found.'''
+    
+    if can_mmap_path (config.test_exec_root):
+        return config.test_exec_root
+    return tempfile.gettempdir ()
+
+
+
+# name: The name of this test suite.
+config.name = 'PStore'
+
+if platform.system () == 'Windows':
+    # We've got a "known" copy the core tools stashed locally, so let's put that 
+    # path on the head of the PATH environment variable.
+    path = os.path.join ('@CMAKE_CURRENT_SOURCE_DIR@', 'system_tests', 'gnuwin32')
+    path = os.path.pathsep.join ((path, config.environment ['PATH']))
+    config.environment ['PATH'] = path
+
+        
+# suffixes: A list of file extensions to treat as test files.
+config.suffixes = [
+    '.cpp',
+    '.t',
+    '.test',
+]
+
+# testFormat: The test format to use to interpret tests.
+config.test_format = lit.formats.ShTest ()
+
+# test_source_root:
+# The filesystem path to the test suite root. For out-of-dir builds, this is the
+# directory that will be scanned for tests.
+config.test_source_root = os.path.join ('@CMAKE_CURRENT_SOURCE_DIR@', 'system_tests')
+
+# test_exec_root:
+# For out-of-dir builds, the path to the test suite root inside the object
+# directory. This is where tests will be run and temporary output files placed.
+config.test_exec_root = os.path.join ('@LIT_CONFIG_DIR@', 'system_tests')
+if not os.path.exists (config.test_exec_root):
+    os.mkdir (config.test_exec_root)
+
+# target_triple: Used by ShTest format for XFAIL checks.
+config.target_triple = 'foo'
+
+# available_features: Used by ShTest format for REQUIRES checks.
+# add 'serialize' if '--param examples' was specified on the command line.
+if lit_config.params.get ('examples') is not None:
+    config.available_features.add ('examples')
+
+config.substitutions.append (('%binaries', '@LIT_CONFIG_DIR@'))
+config.substitutions.append (('%foo', 'this-is-foo'))
+config.substitutions.append (('%stores', data_store_path ()))
+config.substitutions.append (('%python', sys.executable))
+#eof lit.cfg

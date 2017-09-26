@@ -1,0 +1,17 @@
+//*                   __ _        *
+//*   ___ ___  _ __  / _(_) __ _  *
+//*  / __/ _ \| '_ \| |_| |/ _` | *
+//* | (_| (_) | | | |  _| | (_| | *
+//*  \___\___/|_| |_|_| |_|\__, | *
+//*                        |___/  *
+// Copyright (c) 2015-2016 by Sony Interactive Entertainment, Inc.
+/// \file config.hpp
+/// \brief Contains macros which determine the behavior of the PStore library Vacuum tool.
+/// \note The file config.hpp is created from config.hpp.in by CMakeLists.txt. Do
+///       not hand-edit config.hpp!
+
+#ifndef VACUUM_CONFIG_HPP
+#define VACUUM_CONFIG_HPP  (1)
+
+#endif // VACUUM_CONFIG_HPP
+// eof config.hpp

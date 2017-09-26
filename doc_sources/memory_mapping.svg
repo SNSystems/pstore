@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" viewBox="42 43 1214 828" width="879" height="588.75" preserveAspectRatio="xMinYMin meet" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<defs>
+		<linearGradient x1="0" x2="1" id="Gradient" gradientUnits="userSpaceOnUse">
+			<stop offset="0" stop-color="white"/>
+			<stop offset="1" stop-color="#004080" stop-opacity=".19"/>
+		</linearGradient>
+		<linearGradient id="Obj_Gradient" xlink:href="#Gradient" gradientTransform="translate(649.13385,413.85827) rotate(90) scale(110.55118)"/>
+		<marker id="ground_symbol" orient="auto" overflow="visible" markerUnits="strokeWidth" markerWidth="6" markerHeight="9" refX="0" refY="4.5">
+			<g stroke="black" stroke-linecap="round">
+				<line x1="0" y1="9" x2="0" y2="0"/>
+				<line x1="2" y1="7.5" x2="2" y2="1.5"/>
+				<line x1="4" y1="6" x2="4" y2="3"/>
+				<line x1="6" y1="4.5" x2="6" y2="4.5"/>
+			</g>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="DimensionArrow_Marker" viewBox="-1 -9 14 18" markerWidth="14" markerHeight="18" color="black">
+			<path d="M 0 0 L 12 0 M 12 7.5 L 12 -7.5 M 0 3 L 10.5 0 L 0 -3" fill="none" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="DimensionArrow_Marker_2" viewBox="-13 -9 14 18" markerWidth="14" markerHeight="18" color="black">
+			<path d="M 0 0 L -12 0 M -12 -7.5 L -12 7.5 M 0 -3 L -10.5 0 L 0 3" fill="none" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+			<path d="M 4.8 0 L 0 0 M 0 -1.8 L 4.8 0 L 0 1.8" fill="none" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker_2" viewBox="-1 -4 10 8" markerWidth="10" markerHeight="8" color="black">
+			<path d="M 7.2 0 L 0 0 M 0 -2.7 L 7.2 0 L 0 2.7" fill="none" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<linearGradient id="Obj_Gradient_2" xlink:href="#Gradient_2" gradientTransform="translate(504.85038 290.55118) rotate(180) scale(24.661417)"/>
+		<linearGradient id="Obj_Gradient_3" xlink:href="#Gradient" gradientTransform="translate(649.13385 697.32283) rotate(90) scale(172.91338)"/>
+		<linearGradient x1="0" x2="1" id="Gradient_3" gradientUnits="userSpaceOnUse">
+			<stop offset="0" stop-color="white"/>
+			<stop offset="1" stop-color="#004080" stop-opacity=".19"/>
+		</linearGradient>
+		<linearGradient id="Obj_Gradient_4" xlink:href="#Gradient_3" gradientTransform="translate(649.13385 522.5223) rotate(90) scale(172.91338)"/>
+		<marker id="filled_arrow_marker" orient="auto" overflow="visible" markerUnits="strokeWidth" markerWidth="4" markerHeight="4">
+			<path d="M4,2 L4,-2 L0,0 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="FilledArrow_Marker" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="black">
+			<path d="M 4.8,0 L 0,-1.8 L 0,1.8 Z" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+		</marker>
+		<marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker_3" viewBox="-1 -3 7 6" markerWidth="7" markerHeight="6" color="#400080">
+			<path d="M 4.8,0 L 0,0 M 0,-1.8 L 4.8,0 L 0,1.8" fill="none" stroke="currentColor" stroke-width="1"/>
+		</marker>
+	</defs>
+	<g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1" font-family="sans-serif" stroke-linecap="round" stroke-linejoin="round">
+		<rect x="43" width="1213" y="413.85827" height="110.55118" fill="url(#Obj_Gradient)"/><!-- segment background gradient -->
+		<rect x="43" width="1213" y="697.32283" height="172.91338" fill="url(#Obj_Gradient_3)"/><!-- file background gradient -->
+		<rect x="43" width="1213" y="522.5223" height="172.91338" fill="url(#Obj_Gradient_4)"/><!-- region background gradient -->
+		<g>
+			<title>Segment view</title>
+			<text transform="translate(970, 456.88976)" fill="black">
+				<tspan font-size="16" font-weight="bold" x="0" y="14">Segment + offset pointer view</tspan>
+				<tspan font-family="monospace" font-size="11" x="0" y="34">pointer = mpt [<tspan fill="#2b839f">segment</tspan>] + offset;</tspan>
+			</text>
+			<g><!-- address bit fields -->
+				<g transform="translate(81,47)" text-anchor="middle" font-size="14" fill="black"><!-- address field labels -->
+					<text>
+						<tspan x="133.5" y="13">bits 40-63</tspan>
+						<tspan x="133.5" y="28">unused</tspan>
+					</text>
+					<text>
+						<tspan x="369" y="13">bits 20-39</tspan>
+						<tspan x="369" y="28">segment index</tspan>
+					</text>
+					<text>
+						<tspan x="588" y="13">bits 0-19</tspan>
+						<tspan x="588" y="28">segment offset</tspan>
+					</text>
+				</g>
+				<g stroke="black" stroke-width="1" transform="translate(81,82)" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)"><!-- address field dimension lines -->
+					<line x1="14" x2="253"/>
+					<line x1="277" x2="461"/>
+					<line x1="485" x2="691"/>
+				</g>
+			</g>
+			<g transform="translate(81,101)" stroke-width="1" stroke="black" text-anchor="middle" font-size="11">
+				<title>db::address bit layout</title>
+				<g><!-- bits56-63 -->
+					<title>bits 55-63</title>
+					<g id="white_byte">
+						<rect x="0" width="11" height="20"/>
+						<rect x="11" width="11" height="20"/>
+						<rect x="22" width="11" height="20"/>
+						<rect x="33" width="11" height="20"/>
+						<rect x="44" width="11" height="20"/>
+						<rect x="55" width="11" height="20"/>
+						<rect x="66" width="11" height="20"/>
+						<rect x="77" width="11" height="20"/>
+						<rect width="88" height="20" fill="none" stroke-width="3"/>
+					</g>
+					<text x="5.5" y="-4" fill="black" stroke="none">63</text>
+				</g>
+				<g transform="translate(88,0)"><!-- bits 48-55 -->
+					<title>bits 48-55</title>
+					<use xlink:href="#white_byte"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">55</text>
+				</g>
+				<g transform="translate(176,0)"><!-- bits 40-47 -->
+					<title>bits 40-47</title>
+					<use xlink:href="#white_byte"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">47</text>
+				</g>
+				<g transform="translate(264,0)"><!-- bits 32-39 -->
+					<title>bits 32-39</title>
+					<use xlink:href="#white_byte" fill="#fc6"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">39</text>
+				</g>
+				<g transform="translate(352,0)"><!-- bits 24-31 -->
+					<title>bits 24-31</title>
+					<use xlink:href="#white_byte" fill="#fc6"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">31</text>
+				</g>
+				<g transform="translate(440,0)"><!-- bits 16-23 -->
+					<title>bits 16-23</title>
+					<g fill="#fc6">
+						<rect x="0" width="11" height="20"/>
+						<rect x="11" width="11" height="20"/>
+						<rect x="22" width="11" height="20"/>
+					</g>
+					<g stroke-width="1" fill="#cf6">
+						<rect x="33" width="11" height="20"/>
+						<rect x="44" width="11" height="20"/>
+						<rect x="55" width="11" height="20"/>
+						<rect x="66" width="11" height="20"/>
+						<rect x="77" width="11" height="20"/>
+					</g>
+					<rect width="88" height="20" stroke-width="3"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">23</text>
+				</g>
+				<g transform="translate(528,0)"><!-- bits 8-15 -->
+					<title>bits 8-15</title>
+					<use xlink:href="#white_byte" fill="#cf6"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">15</text>
+				</g>
+				<g transform="translate(616,0)"><!-- bits 0-7 -->
+					<title>bits 0-7</title>
+					<use xlink:href="#white_byte" fill="#cf6"/>
+					<text x="5.5" y="-4" fill="black" stroke="none">7</text>
+				</g>
+			</g>
+			<text font-size="16" font-weight="bold" transform="translate(970,98)" fill="black" y="14">db::address structure</text>
+			<g>
+				<path d="M345,128 L345,136 L554,136 L554,128" stroke="black" stroke-linecap="butt" stroke-width="2"/><!-- segment projection lines -->
+				<line x1="445.5" y1="136" x2="445.5" y2="215" marker-end="url(#StickArrow_Marker_2)" stroke="black" stroke-linecap="butt" stroke-width="2"/><!-- line from bit field to mpt -->
+				<g font-size="16" fill="black">
+					<rect x="443.5" y="166" width="4" height="36" fill="white"/>
+					<text x="441.5" y="179" text-anchor="middle" font-weight="bold">Segment Address Table (SAT)</text>
+					<text x="441.5" y="199" text-anchor="middle">(segment base addresses; always 2<tspan baseline-shift="super" font-size="11">20</tspan> entries)</text>
+				</g>
+			</g>
+			<g stroke="black" font-size="12" stroke-width="2" text-anchor="middle">
+				<title>In-memory segments</title>
+				<g stroke-dasharray="3,3" stroke="gray"><!-- dashed "elision" lines for the segment table -->
+					<line x1="435" y1="445" x2="526" y2="445"/>
+					<line x1="435" y1="484" x2="526" y2="484"/>
+				</g>
+				<g><!-- segment #0 -->
+					<rect x="277" y="445" width="79" height="39" fill="white"/>
+					<text fill="black" stroke="none" x="316.5" y="517">Segment 0</text>
+					<line x1="289" y1="499" x2="344" y2="499" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke-width="1"/>
+				</g>
+				<g><!-- segment #1 -->
+					<rect x="356" y="445" width="79" height="39" fill="white"/>
+					<text x="395.5" y="517" fill="black" stroke="none">Segment 1</text>
+					<line x1="368" y1="499" x2="423" y2="499" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke-width="1"/>
+				</g>
+				<g><!-- segment 2^12-1 -->
+					<rect x="526" y="445" width="79" height="39" fill="white"/>
+					<line x1="538" y1="499" x2="593" y2="499" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke-width="1"/>
+					<text stroke="none" y="517" x="565.5" fill="black">Segment 2<tspan baseline-shift="super" font-size="9">12</tspan>-1</text>
+				</g>
+				<g><!-- segment 2^12 -->
+					<rect x="659" y="445" width="79" height="39" fill="white"/>
+					<line x1="671" y1="499" x2="727" y2="499" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke-width="1"/>
+					<text stroke="none" fill="black" x="698.5" y="517">Segment 2<tspan baseline-shift="super" font-size="9">12</tspan>
+					</text>
+				</g>
+				<g><!-- segment 2^12+1 -->
+					<rect x="738" y="445" width="79" height="39" fill="white"/>
+					<line x1="751" y1="499" x2="806" y2="499" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke-width="1"/>
+					<text stroke="none" fill="black" x="777.5" y="517">Segment 2<tspan baseline-shift="super" font-size="9">12</tspan>+1</text>
+				</g>
+			</g>
+			<g font-size="16" fill="black" font-weight="500" text-anchor="middle" stroke-width="2"><!-- the mpt boxes -->
+				<title>Master pointer table</title>
+				<line x1="403" y1="232" x2="403" y2="416" stroke-dasharray="3,3" stroke="gray"/>
+				<line x1="480" y1="232" x2="480" y2="416" stroke-dasharray="3,3" stroke="gray"/>
+				<g transform="translate(403,232)">
+					<rect width="77" height="23" fill="white" stroke="black"/>
+					<text x="38.5" y="18">0</text>
+				</g>
+				<g transform="translate(403,255)">
+					<rect width="77" height="23" fill="white" stroke="black"/>
+					<text x="38.5" y="18">1</text>
+				</g>
+				<g transform="translate (403,324)">
+					<rect width="77" height="23" fill="white" stroke="black"/>
+					<text x="38.5" y="18">2<tspan baseline-shift="super" font-size="11">12</tspan>-1</text>
+				</g>
+				<g transform="translate (403,347)">
+					<rect width="77" height="23" fill="white" stroke="black"/>
+					<text x="38.5" y="18">2<tspan baseline-shift="super" font-size="11">12</tspan>
+					</text>
+				</g>
+				<g transform="translate (403,370)">
+					<rect width="77" height="23" fill="white" stroke="black"/>
+					<text x="38.5" y="18">2<tspan baseline-shift="super" font-size="11">12</tspan>+1</text>
+				</g>
+				<rect x="403" y="393" width="77" height="23" fill="white" stroke="black"/>
+			</g>
+			<path d="M 415.74456,243.77953 L 399.84456,243.77953 L 284.70078,243.77953 C 280.2825,243.77953 277,247.36125 277,251.77953 L277,429.13937 L 277,432.13937" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-width="2"/><!-- arrow from mpt[0] to segment 0 box -->
+			<path d="M 415.74456,266.45669 L 399.84456,266.45669 L 364.07086,266.45669 C 359.65259,266.45669 356,270.03841 356,274.45669 L 356,429.13937 L 356,432.13937" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-width="2"/><!-- arrow from mpt[0] to segment 0 box -->
+			<path d="M 465.83024 334.48819 L 481.73024 334.48819 L 518.1496 334.48819 C 522.56788 334.48819 526.1496 338.0699 526.1496 342.48819 L 526.1496 350.66535 M 529.3996 350.66535 L 522.8996 350.66535 M 529.3996 363.66535 L 522.8996 363.66535 M 526.1496 363.66535 L 526.1496 373.34252 M 529.3996 373.34252 L 522.8996 373.34252 M 529.3996 386.34252 L 522.8996 386.34252 M 526.1496 386.34252 L 526.1496 429.13937 L 526.1496 432.13937" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-width="2"/>
+			<path d="M 465.83024,357.16535 L 481.73024,357.16535 L 651.37795,357.16535 C 655.79623,357.16535 659.37795,360.74707 659.37795,365.16535 L 659.37795,373.34252 M 662.62795,373.34252 L 656.12795,373.34252 M 662.62795,386.34252 L 656.12795,386.34252 M 659.37795,386.34252 L 659.37795,429.13937 L 659.37795,432.13937" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-width="2"/>
+			<path d="M 465.83024,379.84252 L 481.73024,379.84252 L 730.74803,379.84252 C 735.1663 379.84252 738.74803,383.42424 738.74803 387.84252 L 738.74803,429.13937 L 738.74803 432.13937" marker-end="url(#StickArrow_Marker)" stroke="black" stroke-linecap="butt" stroke-width="2"/>
+			<line x1="468.56692" y1="402.51968" x2="490.96062" y2="402.51968" marker-end="url(#ground_symbol)" stroke-width="2" stroke="black"/>
+		</g>
+		<g>
+			<title>Memory Map</title>
+			<g text-anchor="middle" font-size="16">
+				<title>Map view table</title>
+				<text transform="translate(53,567)" fill="black" font-weight="bold">
+					<tspan x="33" y="14">Map</tspan>
+					<tspan x="33" y="32">View</tspan>
+					<tspan x="33" y="50">Table</tspan>
+				</text>
+				<g fill="#400080" fill-opacity=".17" stroke="#400080" stroke-width="2">
+					<rect x="117" y="570" width="57" height="23"/>
+					<rect x="117" y="593" width="57" height="23"/>
+				</g>
+				<g fill="black">
+					<text x="145.5" y="586">0</text>
+					<text x="145.5" y="609">1</text>
+				</g>
+			</g>
+			<g>
+				<title>Memory-mapped regions</title>
+				<rect x="277" y="581" width="328.8189" height="39.685038" fill="white" stroke="#400080" stroke-width="2"/><!-- region 0 box -->
+				<text font-size="14" transform="translate(387.5039 643.76513)" fill="black">
+					<tspan x="7.474121" y="13">Region 0…<tspan font-style="italic">n</tspan> - 1</tspan>
+					<tspan x=".07470703" y="30">(full size: 2<tspan baseline-shift="super" font-size="10">32</tspan> bytes)</tspan>
+				</text>
+				<rect x="659.37795" y="581.10236" width="158.74016" height="39.685038" stroke="#400080" fill="white" stroke-width="2"/><!-- region n box -->
+				<text transform="translate(661.89688,642.8691)" fill="black" font-size="14">
+					<tspan x="35.139648" y="13">Region <tspan font-style="italic">n</tspan></tspan>
+					<tspan x=".14404297" y="30">(2<tspan baseline-shift="super" font-size="10">20</tspan> ≥ size &lt; 2<tspan baseline-shift="super" font-size="10">32</tspan> bytes)</tspan>
+				</text>
+				<text transform="translate(970,592.7716)" fill="black" font-size="16" font-weight="bold" x="0" y="14">Memory mapping views</text>
+			</g>
+			<g marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_2)" stroke="black" stroke-width="1"><!-- dimension lines for the regions -->
+				<line x1="288.70059" y1="631" x2="593.51988" y2="631"/><!-- region 0..n-1 dimension arrow -->
+				<line x1="671.37795" y1="631" x2="806.1181" y2="631"/><!-- region n dimension arrow -->
+			</g>
+			<text transform="translate(970,774.18893)" fill="black" font-size="16" font-weight="bold" x="0" y="14">Physical ﬁle</text>
+			<g>
+				<title>Physical file</title>
+				<g transform="translate(274,762)" stroke="black" fill="white" stroke-width="2"><!-- file box and labels -->
+					<rect x="0" y="0" width="488" height="39"/><!-- file box -->
+					<rect x="0" y="0" width="25" height="39"/><!-- header box -->
+					<rect x="463" y="0" width="25" height="39"/><!-- trailer box -->
+					<g marker-start="url(#filled_arrow_marker)" font-size="14" text-anchor="middle" fill="black"><!-- file header arrow and label -->
+						<line x1="12.5" x2="12.5" y1="43" y2="68"/>
+						<text x="12.5" y="81" stroke="none">header</text>
+						<line x1="475.5" x2="475.5" y1="43" y2="68"/>
+						<text x="475.5" y="81" stroke="none">trailer</text>
+					</g>
+					<line x1="329" y1="1" x2="329" y2="38" stroke-dasharray="3,3" stroke-linecap="butt" stroke="gray"/>
+				</g>
+				<g stroke="black" stroke-width="1" stroke-dasharray="8,4,1,4">
+					<title>Projection lines showing the physical file mapped to regions and segments</title>
+					<line x1="277" y1="580.10236" x2="277" y2="484.7244"/>
+					<line x1="605.51968" y1="581.10236" x2="605.51968" y2="484.7244"/>
+					<line x1="659.37795" y1="580.10236" x2="659.37795" y2="484.7244"/>
+					<line x1="273.86614" y1="797.86614" x2="276.68478" y2="621.78727"/>
+					<line x1="602.70503" y1="761.5199" x2="605.51968" y2="620.7874"/>
+					<line x1="603.05643" y1="761.5912" x2="659.37795" y2="620.7874"/>
+					<line x1="818.1181" y1="580.10236" x2="818.1181" y2="484.7244"/>
+					<line x1="761.4252" y1="762.5197" x2="818.1181" y2="620.7874"/><!-- from "file" rhs to "region n" rhs -->
+				</g>
+			</g>
+			<path d="M 161.31403 581.10236 L 228.77559 581.10236 M 228.77559 577.85236 L 228.77559 584.35236 M 241.77559 577.85236 L 241.77559 584.35236 M 241.77559 581 L 263.80078 581" marker-end="url(#StickArrow_Marker_3)" stroke="#400080" stroke-linecap="butt" stroke-width="2"/>
+			<path d="M 161.31403,603.77952 L 177.21403,603.77952 L 227.27559,603.77952 C 231.69387,603.77952 235.27559,600.1978 235.27559,595.77952 L 235.27559,586.77165 L 235.27559,572.0945 C 235.27559,567.6762 238.85731,564.0945 243.27559,564.0945 L 598.11023,564.0945 L 610.61023,564.0945 C 615.0285,564.0945 618.61023,567.6762 618.61023,572.0945 L 618.61023,573.10236 C 618.61023,577.52064 622.19195,581 626.61023,581 L 643.47795,581 L 646.47795,581" marker-end="url(#StickArrow_Marker_3)" stroke="#400080" stroke-linecap="butt" stroke-width="2"/>
+		</g>
+	</g>
+</svg>

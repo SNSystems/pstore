@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="9 37 360 215" width="480" height="215">
+	<defs>
+		<marker id="arrowhead" viewBox="0 0 60 60" refX="60" refY="30" markerUnits="strokeWidth" markerWidth="6" markerHeight="8" orient="auto">
+			<path d="M 0 0 L 60 30 L 0 60 z" fill="context-stroke"/>
+		</marker>
+	</defs>
+	<g fill="none" font-family="Helvetica" font-size="12" text-anchor="middle">
+		<g transform="translate(107.5,50)">
+			<rect stroke="gray" height="41" width="75" rx="10" ry="10"/>
+			<text fill="black" transform="translate (37.5,0)">
+				<tspan x="0" y="19">Message</tspan>
+				<tspan x="0" y="33">pool</tspan>
+			</text>
+		</g>
+		<g transform="translate(10,122)">
+			<rect stroke="gray" height="41" width="75" rx="10" ry="10"/>
+			<text fill="black" transform="translate (37.5,0)">
+				<tspan x="0" y="19">Command</tspan>
+				<tspan x="0" y="33">loop</tspan>
+			</text>
+		</g>
+		<g transform="translate(205,122)">
+			<rect stroke="gray" height="41" width="75" rx="10" ry="10"/>
+			<text fill="black" transform="translate (37.5,0)">
+				<tspan x="0" y="19">Read</tspan>
+				<tspan x="0" y="33">loop</tspan>
+			</text>
+		</g>
+		<g transform="translate(107.5,194)">
+			<rect stroke="gray" height="41" width="75" rx="10" ry="10"/>
+			<text fill="black" transform="translate (37.5,0)">
+				<tspan x="0" y="19">Command</tspan>
+				<tspan x="0" y="33">queue</tspan>
+			</text>
+		</g>
+		<g transform="translate(294,50)">
+			<rect stroke="gray" height="41" width="75"/>
+			<text fill="black" transform="translate(37.5,0)">
+				<tspan x="0" y="19">New</tspan>
+				<tspan x="0" y="33">Buffer</tspan>
+			</text>
+		</g>
+		<g stroke="black" stroke-width="2" marker-end="url(#arrowhead)">
+			<!-- From "message pool" to "command loop" -->
+			<line x1="107.5" y1="70.5" x2="75.26" y2="122" />
+			<!-- From "command loop" to "command queue" -->
+			<line x1="75.26" y1="163" x2="107.5" y2="214.5"/>
+			<!-- From "command queue" to "read loop" -->
+			<line x1="182.5" y1="214.5" x2="214.7395" y2="163"/>
+			<!-- From "read loop" to "message pool" -->
+			<line x1="214.7395" y1="122" x2="182.5" y2="70.5"/>
+			<!-- From "new buffer" to "read loop" -->
+			<line x1="294" y1="70.5" x2="242.5" y2="122"/>
+		</g>
+		<text font-size="10" transform="translate(310,100)" fill="black">
+			<tspan x="0" y="8">Used if</tspan>
+			<tspan x="0" y="20">message pool</tspan>
+			<tspan x="0" y="32">is empty</tspan>
+		</text>
+	</g>
+</svg>

@@ -1,0 +1,16 @@
+//===- pstore/tools/sieve/config.hpp ---------------------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+#cmakedefine PSTORE_IS_INSIDE_LLVM  1
+
+#endif //CONFIG_HPP
+//eof:config.hpp

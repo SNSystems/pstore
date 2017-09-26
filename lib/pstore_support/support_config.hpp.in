@@ -1,0 +1,38 @@
+//===- lib/pstore_support/support_config.hpp ------------------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+
+#ifndef PSTORE_SUPPORT_CONFIG_HPP
+#define PSTORE_SUPPORT_CONFIG_HPP (1)
+
+#cmakedefine PSTORE_VENDOR_ID   "@PSTORE_VENDOR_ID@"
+
+/// Defined if Apple System Log API is available. Probably only on Apple platforms.
+#cmakedefine PSTORE_HAVE_ASL_H 1
+/// Defined if the POSIX syslog API is available.
+#cmakedefine PSTORE_HAVE_SYS_LOG_H 1
+
+/// Defined if the C11 localtime_s() API is available.
+#cmakedefine PSTORE_HAVE_LOCALTIME_S  1
+/// Defined if the POSIX localtime_r() API is available.
+#cmakedefine PSTORE_HAVE_LOCALTIME_R  1
+
+
+/// The time members of struct stat might be called st_Xtimespec (of type struct timespec)
+/// or st_Xtime (and be of type time_t). This macro is defined in the former situation.
+#cmakedefine PSTORE_STAT_TIMESPEC  1
+
+#cmakedefine PSTORE_PTHREAD_SETNAME_NP_2_ARGS  1
+#cmakedefine PSTORE_PTHREAD_SETNAME_NP_1_ARG  1
+#cmakedefine PSTORE_PTHREAD_SET_NAME_NP  1
+
+/// Is the macOS _NSGetExecutablePath() function available?
+#cmakedefine PSTORE_HAVE_NSGETEXECUTABLEPATH  1
+
+#endif // PSTORE_SUPPORT_CONFIG_HPP
+//eof:lib/pstore_support/support_config.hpp

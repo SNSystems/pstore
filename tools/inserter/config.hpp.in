@@ -1,0 +1,2 @@
+#cmakedefine PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H  (1)
+

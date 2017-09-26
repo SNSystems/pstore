@@ -1,0 +1,8 @@
+#ifndef PSTORE_DUMP_CONFIG_HPP
+#define PSTORE_DUMP_CONFIG_HPP  1
+
+#cmakedefine PSTORE_IS_INSIDE_LLVM  1
+
+#endif // PSTORE_DUMP_CONFIG_HPP
+//eof tools/dump/dump_config.hpp
+

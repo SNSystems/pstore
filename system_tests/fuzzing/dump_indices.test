@@ -1,0 +1,10 @@
+# This test fuzzes input to the dump utility's --indices switch.
+
+# %binaries = the directories containing the executable binaries
+# %stores = a directory in which data stores may be created
+# %T = the test output directory
+# %S = the test source directory
+
+RUN: "%python" "%S/fuzz.py" --temp-dir="%stores" --binary-dir="%binaries" -- dump_indices "%binaries/pstore-dump" --indices
+
+#eof dump_indices.test

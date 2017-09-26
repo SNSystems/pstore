@@ -1,0 +1,3 @@
+#cmakedefine PSTORE_IS_INSIDE_LLVM  1
+
+//eof:tools/index_structure/index_structure_config.hpp

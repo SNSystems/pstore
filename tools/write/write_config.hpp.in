@@ -1,0 +1,8 @@
+#ifndef PSTORE_WRITE_CONFIG_HPP
+#define PSTORE_WRITE_CONFIG_HPP  1
+
+#cmakedefine PSTORE_IS_INSIDE_LLVM  1
+
+#endif // PSTORE_WRITE_CONFIG_HPP
+//eof tools/write/write_config.hpp
+

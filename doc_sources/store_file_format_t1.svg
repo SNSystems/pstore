@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" viewBox="0 0 879 248" width="527.4pt" height="148.8pt" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <defs>
+        <font-face font-family="Times">
+            <font-face-src>
+                <font-face-name name="Times-Roman"/>
+            </font-face-src>
+        </font-face>
+
+        <pattern id="basicPattern" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
+            <circle cx="5" cy="5" r="5" fill="#b3b3b3" />
+        </pattern>
+
+
+        <marker id="DimensionArrow_Marker" orient="auto" overflow="visible" markerUnits="strokeWidth" viewBox="-1 -5 8 10" markerWidth="8" markerHeight="10" color="black">
+            <path d="M 0,0  L 5.76,0   M 5.76,3.6   L 5.76,-3.6  M 0,2   L 5,0   L 0,-2" fill="none" stroke="currentColor" stroke-width="1"/>
+        </marker>
+        <marker id="DimensionArrow_Marker_st" orient="auto" overflow="visible" markerUnits="strokeWidth" viewBox="-7 -5 8 10" markerWidth="8" markerHeight="10" color="black">
+            <path d="M 0,0  L -5.76,0   M -5.76,-3.6 L -5.76,3.6   M 0,-2  L -5,0  L 0,2" fill="none" stroke="currentColor" stroke-width="1"/>
+        </marker>
+        <marker id="ground_symbol" orient="auto" overflow="visible" markerUnits="strokeWidth" markerWidth="6" markerHeight="9" refX="0" refY="4.5">
+            <g stroke="red" stroke-linecap="round">
+                <line x1="0" y1="9" x2="0" y2="0"/>
+                <line x1="2" y1="7.5" x2="2" y2="1.5"/>
+                <line x1="4" y1="6" x2="4" y2="3"/>
+                <line x1="6" y1="4.5" x2="6" y2="4.5"/>
+            </g>
+        </marker>
+
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="DimensionArrow_Marker_3" markerWidth="7" markerHeight="6" refX="0" refY="3" color="black">
+            <path d="M0,3 L7,3 M0,0 L7,3 M0,6 L7,3 M7,6 L7,0"  fill="none" stroke="currentColor" stroke-width="1"/>
+        </marker>
+
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="DimensionArrow_Marker_4" markerWidth="7" markerHeight="6" refX="7" refY="3" color="black">
+            <g fill="none" stroke="currentColor" stroke-width="1">
+                <line x1="7" y1="3" x2="0" y2="3"/>
+                <line x1="7" y1="0" x2="0" y2="3"/>
+                <line x1="7" y1="6" x2="0" y2="3"/>
+                <line x1="0" y1="6" x2="0" y2="0"/>
+            </g>
+        </marker>
+
+        <marker orient="auto" overflow="visible" markerUnits="strokeWidth" id="StickArrow_Marker" viewBox="-1 -4 8 8" markerWidth="8" markerHeight="8" color="red">
+            <path d="M 5.76 0 L 0 0 M 0 -2.16 L 5.76 0 L 0 2.16" fill="none" stroke="currentColor" stroke-width="1"/>
+        </marker>
+    </defs>
+    <g stroke="none" stroke-opacity="1" stroke-dasharray="none" fill="none" fill-opacity="1">
+        <g stroke-linecap="round" stroke-linejoin="round" font-family="Times" font-size="15">
+
+            <text text-anchor="middle" x="453" y="27" font-size="19" fill="black">Segment 0</text> <!-- title text(1) -->
+            <text text-anchor="middle" x="453" y="48" fill="black">(2<tspan baseline-shift="super" font-size="10">12</tspan> bytes)</text> <!-- title text(2) -->
+
+            <line x1="40" y1="57" x2="867.22015" y2="57" marker-end="url(#DimensionArrow_Marker)" marker-start="url(#DimensionArrow_Marker_st)" stroke="black" stroke-width="2"/><!-- top 2^20 dimension line -->
+            <g  stroke="black" stroke-width="1" stroke-dasharray="8,4,1,4"> <!-- the left and right-hand boundary lines for segment(0) -->
+                <line x1="28" y1="55" x2="28" y2="254" /><!-- left -->
+                <line x1="878" y1="55" x2="878" y2="254"/><!-- right -->
+            </g>
+
+            <line x1="35" y1="107" x2="72" y2="107" marker-start="url(#DimensionArrow_Marker_4)"  marker-end="url(#DimensionArrow_Marker_3)" stroke="black" stroke-width="1"/>
+            <text x="33.584683" y="94" fill="black">header</text>
+            <line x1="86" y1="99" x2="106" y2="99" marker-start="url(#DimensionArrow_Marker_4)" marker-end="url(#DimensionArrow_Marker_3)" stroke="black" stroke-width="1"/>
+            <text x="79" y="86" fill="black">footer (<tspan font-style="italic">t</tspan><tspan baseline-shift="sub" font-size="10">0</tspan>)</text>
+            <line x1="120" y1="107" x2="389" y2="107" marker-start="url(#DimensionArrow_Marker_4)" marker-end="url(#DimensionArrow_Marker_3)" stroke="black" stroke-width="1"/>
+            <text x="226" y="94" fill="black">data (<tspan font-style="italic">t</tspan><tspan baseline-shift="sub" font-size="10">1</tspan>)</text>
+            <line x1="403" y1="99" x2="423" y2="99" marker-start="url(#DimensionArrow_Marker_4)" marker-end="url(#DimensionArrow_Marker_3)" stroke="black" stroke-width="1"/>
+            <text x="396" y="86" fill="black">footer (<tspan font-style="italic">t</tspan><tspan baseline-shift="sub" font-size="10">1</tspan>)</text>
+
+            <g  stroke="black" stroke-width="1"> <!-- projection lines -->
+                <line x1="79" y1="99" x2="79" y2="142"/><!-- projection line at end of header arrow -->
+                <line x1="113" y1="99" x2="113" y2="142"/><!-- projection line: footer(t0)/data(t1) -->
+                <line x1="396" y1="99" x2="396" y2="142"/><!-- projection line: data(t1)/footer(t1) -->
+                <line x1="430" y1="99" x2="430" y2="142"/><!-- projection line: footer(t1) [right] -->
+            </g>
+
+            <!-- footer(t0) to ground line -->
+            <path d="M96,204 L96,212 L96,216 M100,216 L93,216 M100,229 L93,229 M96,229 L96,230  C96,233 94,236 90,236 L82,236  C82,236 82,236 82,236  L75,236  C74,236 74,236 74,236 L66,236" stroke="red" marker-end="url(#ground_symbol)" stroke-width="2"/>
+            <g><!-- the red "head" arrow -->
+                <path d="M53,146  L53,130  C 53,127 56,124 59,124  L366,124  L394,124  C 395,124 396,125 396,126  L396,129  L396,132" marker-end="url(#StickArrow_Marker)" stroke="red" stroke-width="2"/>
+                <rect x="60" y="127" width="30" height="12" fill="white"/>
+                <text x="60" y="137" fill="black">head</text>
+            </g>
+            <g><!-- prev line -->
+                <path d="M 414,204  L 414,216  C 414,220 411,222 408,222  L 155,222  C 155,222 155,222 155,222  L 85,222  C 83,222 80,221 80,219 L80,218" marker-end="url(#StickArrow_Marker)" stroke="red" stroke-width="2"/>
+                <text x="376.98937" y="235.8082" fill="black">prev</text>
+            </g>
+            <g fill-opacity=".5" stroke="black" stroke-width="2"><!-- The boxes themselves -->
+                <rect x="28" y="146" width="51" height="58" fill="#804000"/><!-- header box -->
+                <rect x="79" y="146" width="34" height="58" fill="#408000"/><!-- footer t0 box -->
+                <rect x="113" y="146" width="283" height="58" fill="#97b3de"/><!-- data t1 box -->
+                <rect x="396" y="146" width="34" height="58" fill="#408000"/><!-- footer t1 box -->
+                <rect x="430" y="146" width="448" height="58" fill="url(#basicPattern)"/><!-- unused box -->
+            </g>
+        </g>
+    </g>
+</svg>

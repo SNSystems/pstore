@@ -1,0 +1,13 @@
+## A test which runs pstore broker and its "broker poker" utility to fire
+## messages at it. We check that the broker responds correctly to those
+## commands.
+
+# %binaries = the directories containing the executable binaries
+# %T = the test output directory
+# %S = the test source directory
+
+RUN: python "%S/broker1.py" "%binaries" > "%T/broker1_actual.txt"
+RUN: diff "%T/broker1_actual.txt" "%S/broker1_expected.txt"
+
+#eof broker1.test
+

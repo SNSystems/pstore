@@ -1,0 +1,18 @@
+//===- lib/pstore_broker_intf/broker_intf_config.hpp ---------------------===//
+//
+//                     The LLVM Compiler Infrastructure
+//
+// This file is dual licensed under the MIT and the University of Illinois Open
+// Source Licenses. See LICENSE.TXT for details.
+//
+//===----------------------------------------------------------------------===//
+/// \file config.hpp
+/// \brief Contains macros which determine the behavior of the PStore library.
+
+#ifndef PSTORE_BROKER_INTF_CONFIG_HPP
+#define PSTORE_BROKER_INTF_CONFIG_HPP  (1)
+
+#cmakedefine PSTORE_VENDOR_ID   "@PSTORE_VENDOR_ID@"
+
+#endif // PSTORE_BROKER_INTF_CONFIG_HPP
+//eof:lib/pstore_broker_intf/broker_intf_config.hpp

@@ -1,0 +1,12 @@
+# %binaries = the directories containing the executable binaries
+# %stores = a directory in which data stores may be created
+# %T = the test output directory
+# %S = the test source directory
+
+# Try to run the hamt_test.exe.
+
+# Delete an existing folder.
+RUN: rm -rf "%T/hamt_test"
+
+RUN: mkdir "%T/hamt_test"
+RUN: "%binaries/pstore-hamt-test" "%T/hamt_test/foo.db"

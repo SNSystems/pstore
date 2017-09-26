@@ -1,0 +1,43 @@
+# This test generates three primes-filled files, records each of them in
+# a data store, extracts them and compares the resulting output to the
+# original files. All three files are added in a single transaction.
+
+
+# %binaries = the directories containing the executable binaries
+# %stores = a directory in which data stores may be created
+# %T = the test output directory
+# %S = the test source directory
+
+
+# Delete an existing data store (we don't want to end up appending to it)
+RUN: rm -f "%stores/put2.db"
+
+
+# Create a directory to hold the test outputs.
+RUN: rm -r -f "%T/put2"
+RUN: mkdir "%T/put2"
+
+
+
+# Generate test data: three files full of 16-bit big-endian primes.
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=100 -o "%T/put2/inp100.bin"
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=1000 -o "%T/put2/inp1000.bin"
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=10000 -o "%T/put2/inp10000.bin"
+
+
+# Copy the put1.bin file into the data store with the key 'p1'
+RUN: "%binaries/pstore-write" "--add-file=p100,%T/put2/inp100.bin" \
+RUN:                          "--add-file=p1000,%T/put2/inp1000.bin" \
+RUN:                          "--add-file=p10000,%T/put2/inp10000.bin" \
+RUN:                          "%stores/put2.db"
+
+# Read the threes keys and extract the resulting data in correspondingly named files
+# in the test output directory
+RUN: "%binaries/pstore-read" "%stores/put2.db" p100 > "%T/put2/p100"
+RUN: "%binaries/pstore-read" "%stores/put2.db" p1000 > "%T/put2/p1000"
+RUN: "%binaries/pstore-read" "%stores/put2.db" p10000 > "%T/put2/p10000"
+
+# Check that the data made the round trip successfully.
+RUN: diff "%T/put2/p100" "%T/put2/inp100.bin"
+RUN: diff "%T/put2/p1000" "%T/put2/inp1000.bin"
+RUN: diff "%T/put2/p10000" "%T/put2/inp10000.bin"

@@ -1,0 +1,354 @@
+//*                  _        *
+//*  _ __ ___   __ _(_)_ __   *
+//* | '_ ` _ \ / _` | | '_ \  *
+//* | | | | | | (_| | | | | | *
+//* |_| |_| |_|\__,_|_|_| |_| *
+//*                           *
+//===- tools/hamt_test/main.cpp -------------------------------------------===//
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// All rights reserved.
+// 
+// Developed by: 
+//   Toolchain Team 
+//   SN Systems, Ltd. 
+//   www.snsystems.com
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal with the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+// 
+// - Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimers.
+// 
+// - Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimers in the
+//   documentation and/or other materials provided with the distribution.
+// 
+// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
+//   Inc. nor the names of its contributors may be used to endorse or
+//   promote products derived from this Software without specific prior
+//   written permission.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+//===----------------------------------------------------------------------===//
+/// \file main.cpp
+/// \brief A small utility which can be used to check the HAMT index.
+
+#include <cmath>
+#include <future>
+#include <vector>
+
+#include "pstore_cmd_util/cl/command_line.h"
+#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
+#include "pstore/database.hpp"
+#include "pstore/transaction.hpp"
+
+// Local includes
+#include "./print.hpp"
+
+#ifdef _WIN32
+#define NATIVE_TEXT(x) _TEXT(x)
+#else
+#define NATIVE_TEXT(x) x
+#endif
+
+namespace {
+
+#if defined(_WIN32) && defined(_UNICODE)
+    auto & error_stream = std::wcerr;
+#else
+    auto & error_stream = std::cerr;
+#endif
+
+    using namespace pstore::cmd_util;
+
+    cl::opt<std::string>
+        data_file (cl::Positional,
+                   cl::desc ("Path of the pstore repository to use for index test."), cl::Required);
+
+} // (anonymous namespace)
+
+namespace {
+
+    // A simple linear congruential random number generator from Numerical Recipes
+    // Note that we're using a custom random number generator rather than the standard library
+    // in order to guarantee that the numbers it produces are stable across different runs
+    // and platforms.
+    class random_number_generator {
+    public:
+        explicit random_number_generator (unsigned s = 0)
+                : seed_{s % IM} {}
+
+        double operator() () {
+            seed_ = (IA * seed_ + IC) % IM;
+            return seed_ / double(IM);
+        }
+
+    private:
+        static unsigned const IM = 714025;
+        static unsigned const IA = 1366;
+        static unsigned const IC = 150889;
+
+        unsigned seed_;
+    };
+
+} // (anonymous namespace)
+
+namespace {
+    using random_list = std::vector<std::pair<pstore::index::digest, pstore::address>>;
+    using less_map =
+        std::map<pstore::index::digest, pstore::address, std::less<pstore::index::digest>>;
+    using greater_map =
+        std::map<pstore::index::digest, pstore::address, std::greater<pstore::index::digest>>;
+
+    template <typename InputIt, typename UnaryFunction>
+    void parallel_for_each (InputIt first, InputIt last, UnaryFunction fn) {
+        auto it_distance = std::distance (first, last);
+        if (it_distance <= 0) {
+            return;
+        }
+
+        using difference_type = typename std::iterator_traits<InputIt>::difference_type;
+        using udifference_type = typename std::make_unsigned<difference_type>::type;
+        using wide_type =
+            typename std::conditional<sizeof (udifference_type) >= sizeof (unsigned int),
+                                      udifference_type, unsigned int>::type;
+        auto num_elements = static_cast<wide_type> (it_distance);
+
+        auto const num_threads =
+            std::min (static_cast<wide_type> (std::max (std::thread::hardware_concurrency (), 1U)),
+                      num_elements);
+        auto const partition_size = (num_elements + num_threads - 1) / num_threads;
+        assert (partition_size * num_threads >= num_elements);
+
+        std::vector<std::future<void>> futures;
+        futures.reserve (num_threads);
+
+        while (first != last) {
+            wide_type const distance = std::min (partition_size, num_elements);
+            auto next = first;
+            assert (distance >= 0 &&
+                    distance < static_cast<udifference_type> (
+                                   std::numeric_limits<difference_type>::max ()));
+
+            std::advance (next, static_cast<difference_type> (distance));
+
+            // Create an asynchronous task which will sequentially process from 'first' to
+            // 'next' invoking f() for each data member.
+            futures.push_back (std::async (
+                std::launch::async,
+                [&fn](InputIt fst, InputIt lst) { std::for_each (fst, lst, fn); }, first, next));
+
+            first = next;
+            assert (num_elements >= distance);
+            num_elements -= distance;
+        }
+        assert (num_elements == 0);
+        assert (futures.size () == num_threads);
+
+        // Join
+        for (auto & f : futures) {
+            f.wait ();
+        }
+    }
+
+    /// Generate the map from a random key to null address.
+    /// \param num_keys the total number of random keys.
+    random_list generate_random_keys_map (std::size_t const num_keys) {
+        random_list l;
+        random_number_generator random;
+
+        auto uint32_rnum = [&random]() {
+            return static_cast<std::uint64_t> (
+                std::llrint (random () * std::numeric_limits<std::uint32_t>::max ()));
+        };
+
+        l.reserve (num_keys);
+        for (auto ctr = std::size_t{0}; ctr < num_keys; ++ctr) {
+            auto const r1 = uint32_rnum ();
+            auto const r2 = uint32_rnum ();
+            auto const r3 = uint32_rnum ();
+            auto const r4 = uint32_rnum ();
+
+            auto const key = pstore::index::digest{(r1 << 32) | r2, (r3 << 32) | r4};
+            l.push_back (std::make_pair (key, pstore::address::null ()));
+        }
+        return l;
+    }
+
+    /// Generate the ordered map from a key to null address.
+    /// \param num_keys the total number of keys minus two.
+    /// \param step the difference between two consecutive keys.
+    template <typename Map>
+    Map generate_ordered_map (std::size_t num_keys, std::size_t const step) {
+        Map map;
+        map[std::numeric_limits<std::uint64_t>::max ()] = pstore::address::null ();
+        do {
+            std::uint64_t v = step * num_keys - num_keys;
+            auto const key = pstore::index::digest{v, v};
+            map[key] = pstore::address::null ();
+        } while (num_keys--);
+        return map;
+    }
+
+    /// Insert all keys of the maps into the database and update the mapped value to the expected
+    /// database address.
+    ///
+    /// \param index A database index.
+    /// \param maps It is an input and output parameter. The mapped values are updated once the
+    ///        values are saved into the database. It stores the actual map in the database.
+    template <typename Map>
+    void insert (pstore::index::digest_index & index, Map & maps) {
+        pstore::database & db = index.db ();
+
+        // Start a transaction...
+        auto transaction = pstore::begin (db);
+
+        // Give the fixed size mapped value, since the tests are mainly focus on
+        // inserting/finding a key.
+        std::array<std::uint8_t, 2> const value{{0, 1}};
+
+        for (auto & kv : maps) {
+            // Allocate space in the transaction for the value block
+            auto addr = pstore::address::null ();
+            std::shared_ptr<std::uint8_t> ptr;
+            std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (value.size ());
+
+            // Copy the value to the store.
+            std::copy (std::begin (value), std::end (value), ptr.get ());
+
+            // Update the mapped value.
+            kv.second = addr;
+
+            // Add the key/value pair to the index.
+            index.insert_or_assign (transaction, kv.first, pstore::record (addr, value.size ()));
+        }
+
+        transaction.commit ();
+    }
+
+    /// Find all keys of the map (expected_results) in the database. Return true if all keys are in
+    /// the database. Otherwise, return false.
+    ///
+    /// \param index  A database index.
+    /// \param expected_results  A expected index which is saved in the database.
+    /// \param test_name  A test name which is used to provide the useful error information.
+    /// \returns True if the test was successful, false otherwise.
+    template <typename Map>
+    bool find (pstore::index::digest_index const & index, Map const & expected_results,
+               std::string const & test_name) {
+        std::atomic<bool> is_found (true);
+        auto check_key = [&index, &test_name, &is_found](typename Map::value_type value) {
+            auto it = index.find (value.first);
+            if (it == index.cend ()) {
+                print_cerr ("Test name:", test_name, " Error: ", value.first, ": not found");
+                is_found = false;
+            } else if (it->second.addr != value.second) {
+                print_cerr ("Test name:", test_name, " Error: The address of ", value.first,
+                            " is not correct, the expected address: ", value.second);
+                is_found = false;
+            }
+            // For debugging.
+            // print_cout (it->first, ", ", it->second);
+        };
+        parallel_for_each (std::begin (expected_results), std::end (expected_results), check_key);
+        return is_found.load ();
+    }
+} // (anonymous namespace)
+
+#ifdef PSTORE_CPP_EXCEPTIONS
+#define TRY try
+#define CATCH(ex, code) catch (ex) code
+#else
+#define TRY
+#define CATCH(ex, code)
+#endif
+
+#ifdef _WIN32
+int _tmain (int argc, TCHAR * argv[]) {
+#else
+int main (int argc, char * argv[]) {
+#endif
+    int exit_code = EXIT_SUCCESS;
+
+    TRY {
+#if defined (_WIN32)
+        std::vector<std::string> args;
+        args.reserve (argc);
+        std::transform (argv, argv + argc, std::back_inserter (args), [] (TCHAR * str) { return pstore::utf::from_native_string (str); });
+        auto first = std::begin (args);
+        auto last = std::end (args);
+#else
+        auto first = argv;
+        auto last = argv + argc;
+#endif
+        cl::ParseCommandLineOptions (first, last, "Tests the pstore index code");
+
+
+        pstore::database database (std::string{data_file}, true /*writable*/);
+        database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+
+        auto index = database.get_digest_index ();
+
+        // In random number generator, the number is repeated after 300,000. The number of 2 ^ 18 is
+        // closest to 300,000. Therefore, the num_keys is 2 ^ 18.
+        auto const num_keys = std::size_t{1} << 18;
+        auto const value_step = std::size_t{1} << 46; // (2 ^ 64 / 2 ^ 18)
+
+        // Case 1a: generate the map with random keys.
+        random_list map1 = generate_random_keys_map (num_keys);
+        // Case 1b: insert the random keys.
+        insert<random_list> (*index, map1);
+        // Case 1c: find the random keys.
+        if (!find<random_list> (*index, map1, "random key tests")) {
+            exit_code = EXIT_FAILURE;
+        }
+
+        // Case 2a: generate the map with increasing keys.
+        less_map map2 = generate_ordered_map<less_map> (num_keys, value_step);
+        // Case 2b: insert the increasing key.
+        insert<less_map> (*index, map2);
+        // Case 2c: find the increasing key.
+        if (!find<less_map> (*index, map2, "increasing key tests")) {
+            exit_code = EXIT_FAILURE;
+        }
+
+        // Case 3a: generate the map with decreasing keys .
+        greater_map map3 = generate_ordered_map<greater_map> (num_keys, value_step);
+        // Case 3b: insert the decreasing key.
+        insert<greater_map> (*index, map3);
+        // Case 3c: find the decreasing key.
+        if (!find<greater_map> (*index, map3, "decreasing key tests")) {
+            exit_code = EXIT_FAILURE;
+        }
+
+        // TODO: test the following keys {0, num_keys*value_step, value_step-1,
+        // num_keys*value_step-num_keys, 2*value_step-2...}
+
+        database.close ();
+    }
+    CATCH (std::exception const & ex, {
+        auto what = ex.what ();
+        error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (what)
+                     << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    CATCH (..., {
+        std::cerr << "An unknown error occurred." << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+
+    return exit_code;
+}
+
+// eof: tools/hamt_test/main.cpp

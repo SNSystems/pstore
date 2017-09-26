@@ -1,0 +1,3 @@
+Writing: foo(42)
+Wrote these bytes: 2a 00 00 00
+Read: foo(42)

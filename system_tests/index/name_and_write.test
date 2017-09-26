@@ -1,0 +1,36 @@
+# %binaries = the directories containing the executable binaries
+# %stores = a directory in which data stores may be created
+# %T = the test output directory
+# %S = the test source directory
+
+# Delete an existing data store.
+RUN: rm -f %stores/name_and_write.db
+
+# Write four values into the data store
+RUN: "%binaries/pstore-write" "--add=key1,value1" "%stores/name_and_write.db"
+RUN: "%binaries/pstore-write" "--add=key2,value2" "%stores/name_and_write.db"
+RUN: "%binaries/pstore-write" "--add-string=key3" "%stores/name_and_write.db"
+RUN: "%binaries/pstore-write" "--add-string=key4" "%stores/name_and_write.db"
+
+RUN: echo "%stores"
+# Read the keys and store the resulting data in a file named read
+# in the test output directory
+RUN: "%binaries/pstore-read" "%stores/name_and_write.db" key1 > "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" "%stores/name_and_write.db" key2 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" "%stores/name_and_write.db" key3 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" "%stores/name_and_write.db" key4 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" --strings "%stores/name_and_write.db" key1 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" --strings "%stores/name_and_write.db" key2 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" --strings "%stores/name_and_write.db" key3 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+RUN: "%binaries/pstore-read" --strings "%stores/name_and_write.db" key4 >> "%T/name_and_write"
+RUN: echo '.' >>  "%T/name_and_write"
+
+# Check that the data made the round trip successfully.
+RUN: diff "%T/name_and_write" "%S/name_and_write_expected.txt"
