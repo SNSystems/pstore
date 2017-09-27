@@ -5,14 +5,14 @@
 //* |_| |_| |_|\__,_|_| |_|\__, |_|\___| *
 //*                        |___/         *
 //===- tools/mangle/mangle.cpp --------------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -42,53 +42,53 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file mangle.cpp
+/// \brief A simple file header fuzzer.
 /// The basic technique here is based on Ilja van Sprundel's "mangle.c", although this is a
-/// new implementation in C++11 and using our libraries for portability. The original code is
-/// GPLed.
-// FIXME: check the license is okay.
-// Here's the comment from the original source file:
-// https://ext4.wiki.kernel.org/index.php/Filesystem_Testing_Tools/mangle.c
-//* This code is based on:
-/*
-  trivial binary file fuzzer by Ilja van Sprundel.
-  It's usage is very simple, it takes a filename and headersize
-  as input. it will then change approximatly between 0 and 10% of
-  the header with random bytes (biased towards the highest bit set)
-
-  obviously you need a bash script or something as a wrapper !
-
-  so far this broke: - libmagic (used file)
-                     - preview (osX pdf viewer)
-                     - xpdf (hang, not a crash ...)
-                     - mach-o loading (osX 10.3.7, seems to be fixed later)
-                     - qnx elf loader (panics almost instantly, yikes !)
-                     - FreeBSD elf loading
-                     - openoffice
-                     - amp
-                     - osX image loading (.dmg)
-                     - libbfd (used objdump)
-                     - libtiff (used tiff2pdf)
-                     - xine (division by 0, took 20 minutes of fuzzing)
-                     - OpenBSD elf loading (3.7 on a sparc)
-                     - unixware 713 elf loading
-                     - DragonFlyBSD elf loading
-                     - solaris 10 elf loading
-                     - cistron-radiusd
-                     - linux ext2fs (2.4.29) image loading (division by 0)
-                     - linux reiserfs (2.4.29) image loading (instant panic !!!)
-                     - linux jfs (2.4.29) image loading (long (uninteruptable) loop, 2 oopses)
-                     - linux xfs (2.4.29) image loading (instant panic)
-                     - windows macromedia flash .swf loading (obviously the windows version of
-  mangle needs a few tweaks to work ...)
-                     - Quicktime player 7.0.1 for MacOS X
-                     - totem
-                     - gnumeric
-                     - vlc
-                     - mplayer
-                     - python bytecode interpreter
-                     - realplayer 10.0.6.776 (GOLD)
-                     - dvips
- */
+/// new implementation in C++11 and using our libraries for portability.
+///
+/// Here is the comment from the top of the original source file
+/// (http://www.digitaldwarf.be/products/mangle.c):
+/// ---
+///  trivial binary file fuzzer by Ilja van Sprundel.
+///  It's usage is very simple, it takes a filename and headersize
+///  as input. it will then change approximatly between 0 and 10% of
+///  the header with random bytes (biased towards the highest bit set)
+///
+///  obviously you need a bash script or something as a wrapper !
+///
+///  so far this broke:
+///  - libmagic (used file)
+///  - preview (osX pdf viewer)
+///  - xpdf (hang, not a crash ...)
+///  - mach-o loading (osX 10.3.7, seems to be fixed later)
+///  - qnx elf loader (panics almost instantly, yikes !)
+///  - FreeBSD elf loading
+///  - openoffice
+///  - amp
+///  - osX image loading (.dmg)
+///  - libbfd (used objdump)
+///  - libtiff (used tiff2pdf)
+///  - xine (division by 0, took 20 minutes of fuzzing)
+///  - OpenBSD elf loading (3.7 on a sparc)
+///  - unixware 713 elf loading
+///  - DragonFlyBSD elf loading
+///  - solaris 10 elf loading
+///  - cistron-radiusd
+///  - linux ext2fs (2.4.29) image loading (division by 0)
+///  - linux reiserfs (2.4.29) image loading (instant panic !!!)
+///  - linux jfs (2.4.29) image loading (long (uninteruptable) loop, 2 oopses)
+///  - linux xfs (2.4.29) image loading (instant panic)
+///  - windows macromedia flash .swf loading (obviously the windows version of mangle needs a few
+///  tweaks to work ...)
+///  - Quicktime player 7.0.1 for MacOS X
+///  - totem
+///  - gnumeric
+///  - vlc
+///  - mplayer
+///  - python bytecode interpreter
+///  - realplayer 10.0.6.776 (GOLD)
+///  - dvips
+/// ---
 
 #include <cstdint>
 #include <limits>
@@ -128,11 +128,11 @@ namespace {
 }
 
 #ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY  try
-#define CATCH(ex,proc)  catch (ex) proc
+#define TRY try
+#define CATCH(ex, proc) catch (ex) proc
 #else
 #define TRY
-#define CATCH(ex,proc)
+#define CATCH(ex, proc)
 #endif
 
 int main (int argc, char ** argv) {
