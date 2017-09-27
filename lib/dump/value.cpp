@@ -5,14 +5,14 @@
 //*   \_/ \__,_|_|\__,_|\___| *
 //*                           *
 //===- lib/dump/value.cpp -------------------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -61,7 +61,7 @@ namespace value {
 
     template <typename OStream>
     OStream & indent::write (OStream & os, typename OStream::char_type c) const {
-        for (int ctr = 0; ctr < count_; ++ctr) {
+        for (auto ctr = 0U; ctr < count_; ++ctr) {
             os << c;
         }
         return os;
@@ -156,7 +156,8 @@ namespace value {
     OStream & string::write_character (OStream & os, UCharType ch) {
         // Control characters are U+0000 through U+001F. Allow everything
         // else through as UTF-8.
-        auto const uch = static_cast<typename std::make_unsigned<typename OStream::char_type>::type> (ch);
+        auto const uch =
+            static_cast<typename std::make_unsigned<typename OStream::char_type>::type> (ch);
         if (uch < 128 && std::isprint (uch)) {
             os << ch;
         } else {
@@ -202,7 +203,7 @@ namespace value {
             case '"':
                 os << "\\\"";
                 break;
-            default: 
+            default:
                 write_character (os, ch);
                 break;
             }
@@ -497,8 +498,73 @@ namespace value {
             : property (std::move (rhs.property))
             , val (std::move (rhs.val)) {}
 
+} // namespace value
 
+namespace {
+    // We accumulate a number of lines out encoded binary in a single string object
+    // rather than writing individual characters to the output stream one at a time.
+    template <typename OStream>
+    struct accumulator {
+        accumulator (OStream & os, value::indent const & ind);
 
+        /// Append a single character to the output.
+        void write (char c);
+
+        /// Flush any remaining output.
+        void flush ();
+
+    private:
+        static constexpr unsigned line_width_ = 80U;
+        static constexpr unsigned num_lines_to_accumulate_ = 50U;
+
+        OStream & os_;
+        unsigned const chars_to_reserve_;
+
+        using char_type = typename OStream::char_type;
+        std::basic_string<char_type> const indent_string_;
+        std::size_t width_ = 0;
+        std::size_t line_count_ = 0;
+        std::basic_string<char_type> lines_;
+    };
+
+    template <typename OStream>
+    accumulator<OStream>::accumulator (OStream & os, value::indent const & ind)
+            : os_{os}
+            , chars_to_reserve_ {(ind.size () + line_width_ + 1U) * num_lines_to_accumulate_}
+            , indent_string_{ind.str<char_type> ()} {
+        lines_.reserve (chars_to_reserve_);
+    }
+
+    template <typename OStream>
+    void accumulator<OStream>::write (char c) {
+        if (width_ == 0) {
+            lines_ += indent_string_;
+        }
+        lines_ += c;
+        if (++width_ >= line_width_) {
+            lines_ += '\n';
+            width_ = 0;
+            if (++line_count_ >= num_lines_to_accumulate_) {
+                os_ << lines_;
+                line_count_ = 0;
+
+                lines_.clear ();
+                lines_.reserve (chars_to_reserve_);
+            }
+        }
+    }
+
+    template <typename OStream>
+    void accumulator<OStream>::flush () {
+        os_ << lines_;
+
+        width_ = 0U;
+        line_count_ = 0U;
+        lines_.clear ();
+    }
+} // (anonymous namespace)
+
+namespace value {
     //*******************
     //*   b i n a r y   *
     //*******************
@@ -511,18 +577,7 @@ namespace value {
                                          "abcdefghijklmnopqrstuvwxyz"
                                          "0123456789+/"};
 
-        int width = 0;
-
-        auto write = [&os, &width, ind](char c) {
-            if (width == 0) {
-                os << ind;
-            }
-            os << c;
-            if (++width >= 80) {
-                os << '\n';
-                width = 0;
-            }
-        };
+        accumulator<OStream> acc (os, ind);
 
         os << "!!binary |\n";
 
@@ -537,10 +592,10 @@ namespace value {
             temp += (*it);
             ++it;
 
-            write (alphabet[(temp & 0x00FC0000) >> 18]);
-            write (alphabet[(temp & 0x0003F000) >> 12]);
-            write (alphabet[(temp & 0x00000FC0) >> 6]);
-            write (alphabet[(temp & 0x0000003F)]);
+            acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
+            acc.write (alphabet[(temp & 0x0003F000) >> 12]);
+            acc.write (alphabet[(temp & 0x00000FC0) >> 6]);
+            acc.write (alphabet[(temp & 0x0000003F)]);
         }
 
         switch (size % 3) {
@@ -549,26 +604,27 @@ namespace value {
 
         case 1:
             temp = static_cast<std::uint32_t> ((*it++) << 16);
-            write (alphabet[(temp & 0x00FC0000) >> 18]);
-            write (alphabet[(temp & 0x0003F000) >> 12]);
-            write ('=');
-            write ('=');
+            acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
+            acc.write (alphabet[(temp & 0x0003F000) >> 12]);
+            acc.write ('=');
+            acc.write ('=');
             break;
 
         case 2:
             temp = static_cast<std::uint32_t> ((*it++) << 16);
             temp += static_cast<std::uint32_t> ((*it++) << 8);
 
-            write (alphabet[(temp & 0x00FC0000) >> 18]);
-            write (alphabet[(temp & 0x0003F000) >> 12]);
-            write (alphabet[(temp & 0x00000FC0) >> 6]);
-            write ('=');
+            acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
+            acc.write (alphabet[(temp & 0x0003F000) >> 12]);
+            acc.write (alphabet[(temp & 0x00000FC0) >> 6]);
+            acc.write ('=');
             break;
 
         default:
             assert (false);
             break;
         }
+        acc.flush ();
         assert (it == std::end (v_));
         return os;
     }

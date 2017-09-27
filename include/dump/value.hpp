@@ -65,7 +65,7 @@ namespace value {
     class indent {
     public:
         indent () = default;
-        indent next (int distance) const {
+        indent next (unsigned distance) const {
             return indent{count_ + distance};
         }
 
@@ -75,10 +75,12 @@ namespace value {
         template <typename CharType>
         std::basic_string<CharType> str () const;
 
+        unsigned size () const { return count_; }
+
     private:
-        explicit indent (int count)
+        explicit indent (unsigned count)
                 : count_ (count) {}
-        int count_ = 0;
+        unsigned count_ = 0U;
     };
 
     std::ostream & operator<< (std::ostream & os, indent const & ind);
