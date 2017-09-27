@@ -154,7 +154,6 @@ namespace pstore {
 #if PSTORE_CPP_EXCEPTIONS
         throw std::system_error {e};
 #else
-        // FIXME: at least emit an error to stderr
         std::cerr << "Error: " << e.message() << '\n';
         std::exit (EXIT_FAILURE);
 #endif

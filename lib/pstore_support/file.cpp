@@ -264,7 +264,7 @@ namespace pstore {
         // latest_time
         // ~~~~~~~~~~~
         std::time_t in_memory::latest_time () const {
-            return 0; // FIXME: at least return the creation time.
+            return 0; // TODO: could return the creation time. Does that make more sense?
         }
 
 

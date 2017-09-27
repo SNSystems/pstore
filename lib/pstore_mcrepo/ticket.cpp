@@ -45,13 +45,6 @@
 
 using namespace pstore::repo;
 
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//* 						  *
-
 // operator new
 // ~~~~~~~~~~~~
 void * ticket::operator new (std::size_t s, nMembers size) {

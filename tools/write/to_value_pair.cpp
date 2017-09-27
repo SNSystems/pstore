@@ -67,6 +67,4 @@ std::pair <std::string, std::string> to_value_pair (char const * option) {
     }
     return std::make_pair (key, value);
 }
-// eof to_value_pair.cpp
-
 // eof: tools/write/to_value_pair.cpp
