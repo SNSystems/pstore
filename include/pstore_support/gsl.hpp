@@ -240,10 +240,12 @@ namespace pstore {
                     static_assert (
                         Other == Extent || Other == dynamic_extent,
                         "Mismatch between fixed-size extent and size of initializing data.");
+                    (void) ext;
                     assert (ext.size () == Extent);
                 }
 
                 extent_type (index_type size) {
+                    (void) size;
                     assert (size == Extent);
                 }
 
