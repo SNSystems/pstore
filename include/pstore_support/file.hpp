@@ -245,7 +245,10 @@ namespace pstore {
             template <typename SpanType, typename = typename std::enable_if<std::is_standard_layout<
                                              typename SpanType::element_type>::value>::type>
             std::size_t read_span (SpanType const & s) {
-                return this->read_buffer (s.data (), s.size_bytes ());
+                auto const size = s.size_bytes ();
+                assert (size >= 0);
+                using utype = typename std::make_unsigned<decltype (size)>::type;
+                return this->read_buffer (s.data (), static_cast <utype> (s.size_bytes ()));
             }
 
             /// \brief Reads a series of raw bytes from the file as an instance of type T.
