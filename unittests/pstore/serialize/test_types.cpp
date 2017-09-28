@@ -155,7 +155,7 @@ TEST_F (SerializeSpanFallback, Write) {
     auto const ret = pstore::serialize::archive::void_type {};
     EXPECT_CALL (arch, write (_)).Times (2).WillRepeatedly (Return (ret));
     EXPECT_CALL (arch, read (_)).Times (0);
-    pstore::serialize::write (arch, ::pstore::gsl2::span <simple_struct> {my});
+    pstore::serialize::write (arch, ::pstore::gsl::span <simple_struct> {my});
 }
 TEST_F (SerializeSpanFallback, Read) {
     using ::testing::_;
@@ -164,7 +164,7 @@ TEST_F (SerializeSpanFallback, Read) {
     std::array <simple_struct, 2> arr;
     EXPECT_CALL (arch, write (_)).Times (0);
     EXPECT_CALL (arch, read (_)).Times (2);
-    pstore::serialize::read (arch, ::pstore::gsl2::span <simple_struct> {arr});
+    pstore::serialize::read (arch, ::pstore::gsl::span <simple_struct> {arr});
 }
 
 
@@ -181,8 +181,8 @@ namespace {
         class mock_span_archive {
         public:
             using result_type = pstore::serialize::archive::void_type;
-            MOCK_METHOD1 (writen, result_type (::pstore::gsl2::span<simple_struct>));
-            MOCK_METHOD1 (readn, void (::pstore::gsl2::span<simple_struct>));
+            MOCK_METHOD1 (writen, result_type (::pstore::gsl::span<simple_struct>));
+            MOCK_METHOD1 (readn, void (::pstore::gsl::span<simple_struct>));
         };
     };
 } // (anonymous namespace)
@@ -216,7 +216,7 @@ TEST_F (SerializeSpan, Write) {
     EXPECT_CALL (arch, readn (_)).Times (0);
 
     std::array <simple_struct, 2> my;
-    ::pstore::gsl2::span <simple_struct> span {my};
+    ::pstore::gsl::span <simple_struct> span {my};
     pstore::serialize::write (arch, span);
 }
 TEST_F (SerializeSpan, Read) {
@@ -227,7 +227,7 @@ TEST_F (SerializeSpan, Read) {
     EXPECT_CALL (arch, readn (_)).Times (1);
 
     std::array <simple_struct, 2> my;
-    pstore::serialize::read (arch, ::pstore::gsl2::span <simple_struct> {my});
+    pstore::serialize::read (arch, ::pstore::gsl::span <simple_struct> {my});
 }
 
 
@@ -263,7 +263,7 @@ TEST_F (ArchiveSpanFallback, Write) {
     EXPECT_CALL (archive, get (_)).Times (0);
 
     std::array <int, 3> arr;
-    pstore::serialize::write (archive, ::pstore::gsl2::span <int> (arr));
+    pstore::serialize::write (archive, ::pstore::gsl::span <int> (arr));
 }
 TEST_F (ArchiveSpanFallback, Read) {
     using ::testing::_;
@@ -280,7 +280,7 @@ TEST_F (ArchiveSpanFallback, Read) {
     EXPECT_CALL (archive, get (_)).InSequence (seq).WillOnce (SetArgReferee<0> (19));
 
     std::array<int, 3> arr {{ 0, 0, 0 }};
-    pstore::serialize::read (archive, ::pstore::gsl2::span<int> {arr});
+    pstore::serialize::read (archive, ::pstore::gsl::span<int> {arr});
 
     EXPECT_THAT (arr, ContainerEq (std::array <int, 3> {{ 13, 17, 19 }}));
 }
@@ -300,8 +300,8 @@ namespace {
 
             // The span methods. We can't mock the template function directly so calls
             // are forwarded to the mock (get/putn_mock) from the real thing (getn/putn). 
-            MOCK_METHOD1 (putn_mock, result_type (::pstore::gsl2::span<int>));
-            MOCK_METHOD1 (getn_mock, void (::pstore::gsl2::span<int>));
+            MOCK_METHOD1 (putn_mock, result_type (::pstore::gsl::span<int>));
+            MOCK_METHOD1 (getn_mock, void (::pstore::gsl::span<int>));
 
             template <typename SpanType>
                 result_type putn (SpanType span) {
@@ -329,7 +329,7 @@ TEST_F (ArchiveSpan, WriteSpan) {
     EXPECT_CALL (archive, getn_mock (_)).Times (0);
 
     std::array <int, 3> arr {{0}};
-    pstore::serialize::write (archive, ::pstore::gsl2::span <int> (arr));
+    pstore::serialize::write (archive, ::pstore::gsl::span <int> (arr));
 }
 
 // Writes a span containing a single element. This should be optimized to a write of the element
@@ -344,7 +344,7 @@ TEST_F (ArchiveSpan, WriteSingleElementSpan) {
     EXPECT_CALL (archive, putn_mock (_)).Times (0);
 
     int a;
-    pstore::serialize::write (archive, ::pstore::gsl2::span <int, 1> (&a, 1));
+    pstore::serialize::write (archive, ::pstore::gsl::span <int, 1> (&a, 1));
 }
 TEST_F (ArchiveSpan, ReadSpan) {
     using ::testing::_;
@@ -357,12 +357,12 @@ TEST_F (ArchiveSpan, ReadSpan) {
     EXPECT_CALL (archive, put (_)).Times (0);
     EXPECT_CALL (archive, putn_mock (_)).Times (0);
     EXPECT_CALL (archive, get (_)).Times (0);
-    EXPECT_CALL (archive, getn_mock (_)).WillOnce (Invoke ([expected] (::pstore::gsl2::span <int> sp) {
+    EXPECT_CALL (archive, getn_mock (_)).WillOnce (Invoke ([expected] (::pstore::gsl::span <int> sp) {
         std::copy (std::begin (expected), std::end (expected), std::begin (sp));
     }));
 
     std::array<int, 3> arr;
-    auto span = ::pstore::gsl2::make_span (arr);
+    auto span = ::pstore::gsl::make_span (arr);
     pstore::serialize::read (archive, span);
     EXPECT_THAT (arr, ContainerEq (expected));
 }
@@ -375,7 +375,7 @@ TEST_F (ArchiveSpan, ReadSingleElementSpan) {
     EXPECT_CALL (archive, getn_mock (_)).Times (0);
 
     std::array <int, 1> a;
-    pstore::serialize::read (archive, ::pstore::gsl2::make_span (a));
+    pstore::serialize::read (archive, ::pstore::gsl::make_span (a));
     EXPECT_EQ (a[0], 23);
 }
 

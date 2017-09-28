@@ -58,8 +58,8 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        void send_message (writer & wr, bool error_on_timeout, ::pstore::gsl2::czstring verb,
-                           ::pstore::gsl2::czstring path) {
+        void send_message (writer & wr, bool error_on_timeout, ::pstore::gsl::czstring verb,
+                           ::pstore::gsl::czstring path) {
             assert (verb != nullptr);
 
             auto payload = std::string{verb};

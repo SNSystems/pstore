@@ -84,7 +84,7 @@ namespace pstore {
         auto next_size = std::max (buffer.capacity (), std::size_t{2});
         do {
             buffer.resize (next_size);
-            size = get_process_path (::pstore::gsl2::make_span (buffer));
+            size = get_process_path (::pstore::gsl::make_span (buffer));
             next_size = std::max (size, next_size + next_size / 2U);
         } while ((size == 0 || size >= buffer.size ()) && next_size < max_reasonable_size);
         if (next_size >= max_reasonable_size) {
@@ -116,7 +116,7 @@ namespace pstore {
             static_assert (std::is_same <typename SpanType::element_type, int>::value,
                            "mib must be a span of integers");
 
-            auto read_link = [&](::pstore::gsl2::span<char> b) -> std::size_t {
+            auto read_link = [&](::pstore::gsl::span<char> b) -> std::size_t {
                 assert (b.size () >= 0);
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;

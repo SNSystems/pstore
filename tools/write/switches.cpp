@@ -70,7 +70,7 @@ namespace {
 #endif
 
     option::ArgStatus add (option::Option const & option, bool msg,
-                           ::pstore::gsl2::czstring value_kind) {
+                           ::pstore::gsl::czstring value_kind) {
         std::pair<std::string, std::string> resl =
             to_value_pair (pstore::utf::from_native_string (option.arg).c_str ());
         if (resl.first.length () == 0 && resl.second.length () == 0) {

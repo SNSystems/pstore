@@ -120,7 +120,7 @@ TEST_F (GenerationIterator, ZeroTransactionPrevPointerIsBeyondTheFileEnd) {
         // flush before we try to exercise the generation_iterator.
         auto footer = db_->getrw<pstore::trailer> (db_->footer_pos ());
         footer->a.prev_generation = pstore::address::make (file_->size ());
-        footer->crc = pstore::crc32 (::pstore::gsl2::span<pstore::trailer::body> (&(footer.get ())->a, 1));
+        footer->crc = pstore::crc32 (::pstore::gsl::span<pstore::trailer::body> (&(footer.get ())->a, 1));
         ASSERT_TRUE (footer->crc_is_valid ());
     }
 

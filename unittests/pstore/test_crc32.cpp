@@ -48,14 +48,14 @@
 
 TEST (Crc32, Empty) {
     char empty;
-    EXPECT_EQ (pstore::crc32 (::pstore::gsl2::make_span (&empty, &empty)), ~0U);
+    EXPECT_EQ (pstore::crc32 (::pstore::gsl::make_span (&empty, &empty)), ~0U);
 }
 TEST (Crc32, SingleChar) {
     char empty [] { 'a' };
-    EXPECT_EQ (pstore::crc32 (::pstore::gsl2::make_span (empty)), 0xc54aae31U);
+    EXPECT_EQ (pstore::crc32 (::pstore::gsl::make_span (empty)), 0xc54aae31U);
 }
 TEST (Crc32, Sequence) {
     auto str = "hello";
-    EXPECT_EQ (pstore::crc32 (::pstore::gsl2::make_span (str, std::strlen (str))), 0x0fcdae64U);
+    EXPECT_EQ (pstore::crc32 (::pstore::gsl::make_span (str, std::strlen (str))), 0x0fcdae64U);
 }
 // eof: unittests/pstore/test_crc32.cpp

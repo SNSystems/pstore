@@ -116,7 +116,7 @@ TEST_F (DbArchive, ReadAUint64Span) {
     // Now the read the array back again.
     pstore::serialize::archive::database_reader archive (db, addr);
     std::array<std::uint64_t, 2> actual;
-    pstore::serialize::read (archive, ::pstore::gsl2::span<std::uint64_t>{actual});
+    pstore::serialize::read (archive, ::pstore::gsl::span<std::uint64_t>{actual});
 
     EXPECT_THAT (original, ContainerEq (actual));
 }
@@ -154,7 +154,7 @@ TEST_F (DbArchive, WriteAUint64Span) {
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
     auto archive = pstore::serialize::archive::make_writer (transaction);
     auto where = pstore::address::make (db.size ());
-    pstore::serialize::write (archive, ::pstore::gsl2::make_span (original));
+    pstore::serialize::write (archive, ::pstore::gsl::make_span (original));
 
     // Now read that value back again using the raw pstore API and check that the round-trip was
     // successful.
@@ -194,7 +194,7 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     std::array<std::uint64_t, 2> original{{
         UINT64_C (0x0011223344556677), UINT64_C (0x8899AABBCCDDEEFF),
     }};
-    auto const span = ::pstore::gsl2::make_span (original);
+    auto const span = ::pstore::gsl::make_span (original);
 
     mock_mutex mutex;
     mock_transaction transaction (db, std::unique_lock<mock_mutex>{mutex});
@@ -265,7 +265,7 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
         .WillOnce (invoke_base_get);
 
     pstore::serialize::archive::database_reader archive (db, addr);
-    pstore::serialize::read (archive, ::pstore::gsl2::span<std::uint64_t>{actual});
+    pstore::serialize::read (archive, ::pstore::gsl::span<std::uint64_t>{actual});
 }
 
 // eof: unittests/pstore/test_db_archive.cpp

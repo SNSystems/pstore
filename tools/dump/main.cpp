@@ -139,7 +139,7 @@ namespace {
     }
 
 
-    std::uint64_t file_size (::pstore::gsl2::czstring path) {
+    std::uint64_t file_size (::pstore::gsl::czstring path) {
         errno = 0;
 #ifdef _WIN32
         struct __stat64 buf;

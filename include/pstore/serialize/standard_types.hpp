@@ -101,10 +101,10 @@ namespace pstore {
                 if (length_bytes == 1) {
                     *(last++) = 0;
                 }
-                auto const resl = serialize::write (archive, ::pstore::gsl2::make_span (&(*first), &(*last)));
+                auto const resl = serialize::write (archive, ::pstore::gsl::make_span (&(*first), &(*last)));
 
                 // Emit the string body.
-                serialize::write (archive, ::pstore::gsl2::make_span (str));
+                serialize::write (archive, ::pstore::gsl::make_span (str));
                 return resl;
             }
 
@@ -123,7 +123,7 @@ namespace pstore {
                 // First read the two initial bytes. These contain the variable length value
                 // but might not be enough for the entire value.
                 static_assert (varint::max_output_length >= 2, "maximum encoded varint length must be >= 2");
-                serialize::read_uninit (archive, ::pstore::gsl2::make_span (encoded_length.data (), 2));
+                serialize::read_uninit (archive, ::pstore::gsl::make_span (encoded_length.data (), 2));
 
                 auto varint_length = varint::decode_size (std::begin (encoded_length));
                 assert (varint_length > 0);
@@ -132,7 +132,7 @@ namespace pstore {
                 if (varint_length > 2) {
                     assert (varint_length <= encoded_length.size ());
                     serialize::read_uninit (archive,
-                                            ::pstore::gsl2::make_span (encoded_length.data () + 2, varint_length - 2));
+                                            ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
                 }
 
                 // Read the body of the string.
@@ -153,7 +153,7 @@ namespace pstore {
                 // FIXME: const_cast will not be necessary with the C++17 standard library.
                 auto data = const_cast<char *> (str.data ());
                 auto size = static_cast <std::ptrdiff_t> (length);
-                serialize::read_uninit (archive, ::pstore::gsl2::make_span (data, size));
+                serialize::read_uninit (archive, ::pstore::gsl::make_span (data, size));
 
                 // Release ownership from the deleter so that the initialized object is returned to the caller.
                 deleter.release ();

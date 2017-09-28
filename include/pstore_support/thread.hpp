@@ -76,8 +76,8 @@ namespace pstore {
 #endif
 
         constexpr std::size_t name_size = 16;
-        void set_name (::pstore::gsl2::czstring name);
-        char const * get_name (::pstore::gsl2::span<char, name_size> name /*out*/);
+        void set_name (::pstore::gsl::czstring name);
+        char const * get_name (::pstore::gsl::span<char, name_size> name /*out*/);
         std::string get_name ();
 
         thread_id_type get_id ();

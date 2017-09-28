@@ -108,7 +108,7 @@ namespace broker {
             return res;
         }
 
-        std::string build_command_line (::pstore::gsl2::czstring * argv) {
+        std::string build_command_line (::pstore::gsl::czstring * argv) {
             std::string command_line;
             auto separator = "";
             for (char const ** arg = argv; *arg != nullptr; ++arg) {
@@ -121,7 +121,7 @@ namespace broker {
 
     } // namespace win32
 
-    process_identifier spawn (::pstore::gsl2::czstring exe_path, ::pstore::gsl2::czstring * argv) {
+    process_identifier spawn (::pstore::gsl::czstring exe_path, ::pstore::gsl::czstring * argv) {
         auto const exe_path_utf16 = pstore::utf::win32::to16 (exe_path);
         auto const command_line = pstore::utf::win32::to16 (win32::build_command_line (argv));
 

@@ -60,10 +60,10 @@
 namespace {
     class ProcessFileName : public ::testing::Test {
     protected:
-        static auto get_process_path (::pstore::gsl2::span<char> b) -> std::size_t;
+        static auto get_process_path (::pstore::gsl::span<char> b) -> std::size_t;
     };
 
-    auto ProcessFileName::get_process_path (::pstore::gsl2::span<char> b) -> std::size_t {
+    auto ProcessFileName::get_process_path (::pstore::gsl::span<char> b) -> std::size_t {
         char const result[] = "process path";
         auto num_to_copy = std::min (static_cast<std::ptrdiff_t> (sizeof (result) - 1), b.size ());
         auto begin = std::begin (b);
@@ -95,7 +95,7 @@ TEST_F (ProcessFileName, BufferContentsWithInitialSize) {
 
 TEST_F (ProcessFileName, GetProcessPathAlwaysReturns0) {
     std::vector<char> buffer;
-    auto get_process_path = [](::pstore::gsl2::span<char>) -> std::size_t { return 0; };
+    auto get_process_path = [](::pstore::gsl::span<char>) -> std::size_t { return 0; };
     check_for_error ([&] () {
         pstore::process_file_name (get_process_path, buffer);
     }, pstore::error_code::unknown_process_path);
@@ -119,11 +119,11 @@ namespace {
 
     class ProcessFileNameFreeBSD : public ::testing::Test {
     public:
-        ProcessFileNameFreeBSD () : command_ {::pstore::gsl2::make_span (command_array_)} {}
+        ProcessFileNameFreeBSD () : command_ {::pstore::gsl::make_span (command_array_)} {}
 
     protected:
         std::vector<int> command_array_{1, 2, 3};
-        ::pstore::gsl2::span <int> command_;
+        ::pstore::gsl::span <int> command_;
 
         static auto bind (sysctl_mock2 * cb)
             -> std::function<int(int const *, unsigned int, void *, std::size_t *, void const *,

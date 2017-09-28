@@ -346,7 +346,7 @@ namespace pstore {
             // insert_child
             // ~~~~~~~~~~~~
             void internal_node::insert_child (hash_type const hash, index_pointer const leaf,
-                                              ::pstore::gsl2::not_null<parent_stack *> parents) {
+                                              ::pstore::gsl::not_null<parent_stack *> parents) {
                 auto const hash_index = hash & details::hash_index_mask;
                 auto const bit_pos = hash_type{1} << hash_index;
                 assert (bit_pos != 0); // guarantee that we didn't shift the bit to oblivion
@@ -360,7 +360,7 @@ namespace pstore {
 
                 // Move elements from [index..old_size) to [index+1..old_size+1)
                 {
-                    auto const children_span = ::pstore::gsl2::make_span (children_);
+                    auto const children_span = ::pstore::gsl::make_span (children_);
                     auto const num_to_move = old_size - index;
 
                     auto const span = children_span.subspan (index, num_to_move);

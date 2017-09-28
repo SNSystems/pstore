@@ -109,7 +109,7 @@ namespace pstore {
 namespace pstore {
     namespace index {
 
-        using ::pstore::gsl2::not_null;
+        using ::pstore::gsl::not_null;
 
         namespace details {
 

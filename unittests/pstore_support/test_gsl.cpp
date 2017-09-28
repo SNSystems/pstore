@@ -70,7 +70,7 @@
 
 #include "pstore/make_unique.hpp"
 
-using namespace ::pstore::gsl2;
+using namespace ::pstore::gsl;
 
 namespace {
     struct BaseClass {

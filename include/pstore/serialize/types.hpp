@@ -344,13 +344,13 @@ namespace pstore {
         }
         /// A read of a span of 1 is optimized into a read of an individual value.
         template <typename Archive, typename ElementType>
-        void read_uninit (Archive & archive, ::pstore::gsl2::span<ElementType, 1> uninit_span) {
+        void read_uninit (Archive & archive, ::pstore::gsl::span<ElementType, 1> uninit_span) {
             assert (uninit_span.size () == 1);
             serializer<ElementType>::read (archive, uninit_span[0]);
         }
 
         template <typename Archive, typename ElementType, std::ptrdiff_t Extent>
-        void read_uninit (Archive & archive, ::pstore::gsl2::span<ElementType, Extent> uninit_span) {
+        void read_uninit (Archive & archive, ::pstore::gsl::span<ElementType, Extent> uninit_span) {
             details::readn_helper<Archive>::readn (archive, uninit_span);
         }
 
@@ -392,13 +392,13 @@ namespace pstore {
         /// \brief Read a span containing a single value from an archive.
         /// This is optimized as a read of a single value.
         template <typename Archive, typename Ty>
-        void read (Archive & archive, ::pstore::gsl2::span<Ty, 1> span) {
+        void read (Archive & archive, ::pstore::gsl::span<Ty, 1> span) {
             assert (span.size () == 1U);
             span[0] = read<Ty> (archive);
         }
 
         template <typename Archive, typename ElementType, std::ptrdiff_t Extent>
-        void read (Archive & archive, ::pstore::gsl2::span<ElementType, Extent> span) {
+        void read (Archive & archive, ::pstore::gsl::span<ElementType, Extent> span) {
             for (auto & element : span) {
                 element.~ElementType ();
             }
@@ -421,14 +421,14 @@ namespace pstore {
 
         /// \brief Write a span of elements to an archive.
         template <typename Archive, typename ElementType, std::ptrdiff_t Extent>
-        auto write (Archive & archive, ::pstore::gsl2::span<ElementType, Extent> sp) ->
+        auto write (Archive & archive, ::pstore::gsl::span<ElementType, Extent> sp) ->
             typename Archive::result_type {
             return details::writen_helper<Archive>::writen (archive, sp);
         }
 
         /// \brief Write a single-element span to an archive.
         template <typename Archive, typename ElementType>
-        auto write (Archive & archive, ::pstore::gsl2::span<ElementType, 1> sp) ->
+        auto write (Archive & archive, ::pstore::gsl::span<ElementType, 1> sp) ->
             typename Archive::result_type {
             // (note not static_assert because VS2015 does not consider
             // gsl::span<ElementType,1>::size () to be constexpr.)

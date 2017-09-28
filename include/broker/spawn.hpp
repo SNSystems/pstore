@@ -80,7 +80,7 @@ namespace broker {
         /// Takes an array of command-line argument strings and converts them
         /// to a single string
         /// \note This function is exposed to enable it to be unit tested.
-        std::string build_command_line (::pstore::gsl2::czstring * argv);
+        std::string build_command_line (::pstore::gsl::czstring * argv);
     } // namespace win32
 #endif
 
@@ -92,7 +92,7 @@ namespace broker {
 
     /// Starts the process at the location given by `exe_path` and with the arguments
     /// supplied in a null-terminated array of czstrings.
-    process_identifier spawn (::pstore::gsl2::czstring exe_path, ::pstore::gsl2::czstring * argv);
+    process_identifier spawn (::pstore::gsl::czstring exe_path, ::pstore::gsl::czstring * argv);
 
 } // namespace broker
 

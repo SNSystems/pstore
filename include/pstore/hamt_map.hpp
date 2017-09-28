@@ -60,7 +60,7 @@ namespace pstore {
     class transaction;
 
     namespace index {
-        using gsl2::not_null;
+        using ::pstore::gsl::not_null;
 
         inline index_base::~index_base () {}
 #ifdef _WIN32

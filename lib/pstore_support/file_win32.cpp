@@ -306,7 +306,7 @@ namespace pstore {
 
         // read
         // ~~~~
-        std::size_t file_handle::read_buffer (::pstore::gsl2::not_null<void *> buffer, std::size_t size) {
+        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t size) {
             this->ensure_open ();
 
             auto reader = [this](void * ptr, DWORD num_to_read) -> DWORD {
@@ -326,7 +326,7 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (::pstore::gsl2::not_null<void const *> buffer, std::size_t size) {
+        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t size) {
             this->ensure_open ();
 
             auto writer = [this](std::uint8_t const * ptr, DWORD num_to_write) -> DWORD {

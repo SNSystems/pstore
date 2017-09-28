@@ -109,7 +109,7 @@ namespace pstore {
         public:
             basic_logger ();
 
-            static ::pstore::gsl2::czstring priority_string (priority p);
+            static ::pstore::gsl::czstring priority_string (priority p);
             static std::string get_current_thread_name ();
 
             static constexpr std::size_t const time_buffer_size = sizeof "YYYY-MM-DDTHH:mm:SS+ZZZZ";

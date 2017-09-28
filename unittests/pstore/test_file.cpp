@@ -115,10 +115,10 @@ namespace {
         std::uint64_t tell () override {
             return 0;
         }
-        std::size_t read_buffer (::pstore::gsl2::not_null<void *>, std::size_t) override {
+        std::size_t read_buffer (::pstore::gsl::not_null<void *>, std::size_t) override {
             return 0;
         }
-        void write_buffer (::pstore::gsl2::not_null<void const *>, std::size_t) override {}
+        void write_buffer (::pstore::gsl::not_null<void const *>, std::size_t) override {}
         std::uint64_t size () override {
             return 0;
         }
@@ -568,7 +568,7 @@ namespace {
 
 TEST_F (NativeFile, ReadEmptyFile) {
     char c [2];
-    EXPECT_EQ (0U, file_.read_span (::pstore::gsl2::make_span (c)));
+    EXPECT_EQ (0U, file_.read_span (::pstore::gsl::make_span (c)));
 
     check_for_error ([this] () {
         long l;
@@ -584,7 +584,7 @@ TEST_F (NativeFile, ReadTinyFile) {
     file_.seek (0U);
 
     char c [2];
-    EXPECT_EQ (sizeof (char), file_.read_span (::pstore::gsl2::make_span (c)));
+    EXPECT_EQ (sizeof (char), file_.read_span (::pstore::gsl::make_span (c)));
 
     check_for_error ([this] () {
         file_.seek (0U);
@@ -600,7 +600,7 @@ TEST_F (NativeFile, ReadTinyFile) {
     // Now check the success condition: where the file just contains enough data.
     file_.seek (0U);
     char c2 [1];
-    EXPECT_EQ (sizeof (c2), file_.read_span (::pstore::gsl2::make_span (c2)));
+    EXPECT_EQ (sizeof (c2), file_.read_span (::pstore::gsl::make_span (c2)));
 }
 
 

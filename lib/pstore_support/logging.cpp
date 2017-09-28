@@ -342,7 +342,7 @@ namespace pstore {
         // ~~~
         void basic_logger::log (priority p, std::string const & message) {
             std::array <char, time_buffer_size> time_buffer;
-            std::size_t r = time_string (std::time (nullptr), ::pstore::gsl2::make_span (time_buffer));
+            std::size_t r = time_string (std::time (nullptr), ::pstore::gsl::make_span (time_buffer));
             assert (r == sizeof (time_buffer) - 1);
             auto time_str = time_buffer.data ();
             std::ostringstream str;
@@ -355,7 +355,7 @@ namespace pstore {
 
         // priority_string
         // ~~~~~~~~~~~~~~~
-        ::pstore::gsl2::czstring basic_logger::priority_string (priority p) {
+        ::pstore::gsl::czstring basic_logger::priority_string (priority p) {
             switch (p) {
             case priority::emergency:
                 return "emergency";

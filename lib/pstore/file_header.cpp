@@ -101,7 +101,7 @@ namespace pstore {
     // get_crc
     // ~~~~~~~
     std::uint32_t header::get_crc () const noexcept {
-        return crc32 (::pstore::gsl2::make_span (&this->a, 1));
+        return crc32 (::pstore::gsl::make_span (&this->a, 1));
     }
 }
 
@@ -124,7 +124,7 @@ namespace pstore {
     // get_crc
     // ~~~~~~~
     std::uint32_t trailer::get_crc () const noexcept {
-        return crc32 (::pstore::gsl2::make_span (&this->a, 1));
+        return crc32 (::pstore::gsl::make_span (&this->a, 1));
     }
 
     // validate [static]

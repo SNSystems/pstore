@@ -165,7 +165,7 @@ namespace pstore {
         std::size_t length (char const * str, std::size_t nbytes);
 
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
-        std::size_t length (::pstore::gsl2::czstring str);
+        std::size_t length (::pstore::gsl::czstring str);
 
         inline std::size_t length (std::nullptr_t) { return 0; }
         ///@}
@@ -173,7 +173,7 @@ namespace pstore {
         ///@{
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the buffer at str
-        char const * index (::pstore::gsl2::czstring str, std::size_t pos);
+        char const * index (::pstore::gsl::czstring str, std::size_t pos);
 
         /// Returns an iterator to the beginning of the pos'th UTF-8 codepoint
         /// in the range given by first and last.

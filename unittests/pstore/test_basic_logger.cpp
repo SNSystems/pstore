@@ -152,7 +152,7 @@ namespace {
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
     time_zone_setter tzs ("UTC0");
     std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl2::make_span (buffer_));
+        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     this->canonicalize_sign ();
@@ -162,7 +162,7 @@ TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
 TEST_F (BasicLoggerTimeFixture, EpochInJST) {
     time_zone_setter tzs ("JST-9"); // Japan
     std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl2::make_span (buffer_));
+        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1970-01-01T09:00:00+0900", buffer_.data ());
@@ -176,7 +176,7 @@ TEST_F (BasicLoggerTimeFixture, EpochInPST) {
     // A.M., and ends on the last Sunday of October at 2:00 A.M.
     time_zone_setter tzs ("PST8PDT");
     std::size_t r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl2::make_span (buffer_));
+        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1969-12-31T16:00:00-0800", buffer_.data ());
@@ -186,7 +186,7 @@ TEST_F (BasicLoggerTimeFixture, ArbitraryPointInTime) {
     time_zone_setter tzs ("UTC0");
     std::time_t const time{1447134860};
     std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (time, ::pstore::gsl2::make_span (buffer_));
+        ::pstore::logging::basic_logger::time_string (time, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     this->canonicalize_sign ();
     EXPECT_STREQ ("2015-11-10T05:54:20-0000", buffer_.data ());

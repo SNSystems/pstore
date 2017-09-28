@@ -183,7 +183,7 @@ namespace pstore {
         public:
             system_error (std::error_code code, std::string const & user_message,
                           std::string const & path);
-            system_error (std::error_code code, ::pstore::gsl2::czstring user_message,
+            system_error (std::error_code code, ::pstore::gsl::czstring user_message,
                           std::string const & path);
 
             std::string path () const {
@@ -359,7 +359,7 @@ namespace pstore {
             /// There must be at least nbytes available.
             /// \param nbytes  The number of bytes that are to be read.
             /// \returns The number of bytes actually read.
-            virtual std::size_t read_buffer (::pstore::gsl2::not_null<void *> buffer, std::size_t nbytes) = 0;
+            virtual std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) = 0;
 
             /// \brief Writes nbytes to the file, reading them from the location given by buffer.
             ///
@@ -369,7 +369,7 @@ namespace pstore {
             /// \param buffer  A pointer to the memory containing the data to be written. At least
             /// 'nbytes' must be available.
             /// \param nbytes  The number of bytes that are to be written.
-            virtual void write_buffer (::pstore::gsl2::not_null<void const *> buffer, std::size_t nbytes) = 0;
+            virtual void write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t nbytes) = 0;
 
             ///@}
         };
@@ -573,14 +573,14 @@ namespace pstore {
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            std::size_t read_buffer (::pstore::gsl2::not_null<void *> buffer, std::size_t nbytes) override;
+            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) override;
 
             /// Writes writes nbytes to the file, reading them from the location given by ptr. The
             /// file position indicator for the file is incremented by the number of bytes written.
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            void write_buffer (::pstore::gsl2::not_null<void const *> ptr, std::size_t nbytes) override;
+            void write_buffer (::pstore::gsl::not_null<void const *> ptr, std::size_t nbytes) override;
 
         private:
             /// The base address of the buffer used by the in-memory file.
@@ -701,8 +701,8 @@ namespace pstore {
             std::uint64_t tell () override;
 
         private:
-            std::size_t read_buffer (::pstore::gsl2::not_null<void *> buffer, std::size_t nbytes) override;
-            void write_buffer (::pstore::gsl2::not_null<void const *> buffer, std::size_t nbytes) override;
+            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) override;
+            void write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t nbytes) override;
 
         public:
             std::uint64_t size () override;

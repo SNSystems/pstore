@@ -58,7 +58,7 @@
 
 namespace broker {
 
-    pid_t spawn (::pstore::gsl2::czstring exe_path, ::pstore::gsl2::czstring * argv) {
+    pid_t spawn (::pstore::gsl::czstring exe_path, ::pstore::gsl::czstring * argv) {
 
         auto const child_pid = ::fork ();
         switch (child_pid) {

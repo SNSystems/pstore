@@ -58,11 +58,11 @@ namespace pstore {
             if (str == nullptr) {
                 return 0;
             }
-            return length (::pstore::gsl2::make_span (str, nbytes));
+            return length (::pstore::gsl::make_span (str, nbytes));
         }
 
         // returns the number of utf8 code points in the nul-terminated buffer at str
-        std::size_t length (::pstore::gsl2::czstring str) {
+        std::size_t length (::pstore::gsl::czstring str) {
             if (str == nullptr) {
                 return 0;
             }
@@ -74,22 +74,22 @@ namespace pstore {
         // ~~~~~
         // returns a pointer to the beginning of the pos'th utf8 codepoint
         // in the buffer at s
-        char const * index (::pstore::gsl2::czstring str, std::size_t pos) {
+        char const * index (::pstore::gsl::czstring str, std::size_t pos) {
             if (str == nullptr) {
                 return nullptr;
             }
-            return index (::pstore::gsl2::make_span (str, std::strlen (str)), pos);
+            return index (::pstore::gsl::make_span (str, std::strlen (str)), pos);
         }
 
         // slice
         // ~~~~~
         // converts codepoint indices start and end to byte offsets in the buffer at s
-        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (::pstore::gsl2::czstring s, std::ptrdiff_t start,
+        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (::pstore::gsl::czstring s, std::ptrdiff_t start,
                                                          std::ptrdiff_t end) {
             if (s == nullptr) {
                 return std::make_pair (-1, -1);
             }
-            auto const span = ::pstore::gsl2::make_span (s, std::strlen (s));
+            auto const span = ::pstore::gsl::make_span (s, std::strlen (s));
             auto p1 = index (span, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
             auto p2 = index (span, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
             return std::make_pair ((p1 != nullptr) ? p1 - s : -1, (p2 != nullptr) ? p2 - s : -1);

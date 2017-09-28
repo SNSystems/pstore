@@ -215,7 +215,7 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t file_handle::read_buffer (::pstore::gsl2::not_null<void *> buffer,
+        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer,
                                               std::size_t nbytes) {
             // TODO: handle the case where nbytes > ssize_t max.
             assert (nbytes <= std::numeric_limits<ssize_t>::max ());
@@ -231,7 +231,7 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (::pstore::gsl2::not_null<void const *> buffer,
+        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer,
                                         std::size_t nbytes) {
             this->ensure_open ();
 

@@ -73,8 +73,8 @@ namespace pstore {
         ///   broker should execute.
         /// \param path  A null-terminated character string which contains the parameter for the
         ///   broker command. Pass nullptr if no parameter is required for the command.
-        void send_message (writer & wr, bool error_on_timeout, ::pstore::gsl2::czstring verb,
-                           ::pstore::gsl2::czstring path);
+        void send_message (writer & wr, bool error_on_timeout, ::pstore::gsl::czstring verb,
+                           ::pstore::gsl::czstring path);
 
     } // namespace broker
 } // namespace pstore

@@ -121,7 +121,7 @@ namespace pstore {
 
     std::string process_file_name () {
         std::string path = link_path ();
-        auto read_link = [&path](::pstore::gsl2::span<char> buffer) {
+        auto read_link = [&path](::pstore::gsl::span<char> buffer) {
             assert (buffer.size () <= SSIZE_MAX);
             ssize_t const num_chars = ::readlink (path.c_str (), buffer.data (), buffer.size ());
             if (num_chars < 0) {

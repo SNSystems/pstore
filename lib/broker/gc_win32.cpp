@@ -102,7 +102,7 @@ namespace {
     /// \p processes collection and the \p cv condition-variable. An existing contents are destroyed.
     template <typename ProcessBimap>
     void build_object_vector (ProcessBimap const & processes, pstore::signal_cv const & cv,
-                              ::pstore::gsl2::not_null<std::vector<HANDLE> *> v) {
+                              ::pstore::gsl::not_null<std::vector<HANDLE> *> v) {
         // The size of the vector is rounded up in order to reduce the probability of a memory
         // allocation being required when the vector is resized. In typical use, the number of
         // elements in the output vector will likely be small (less than round_to?)

@@ -56,7 +56,7 @@
 #include <vector>
 
 namespace pstore {
-    namespace gsl2 {
+    namespace gsl {
         //
         // czstring and wzstring
         //

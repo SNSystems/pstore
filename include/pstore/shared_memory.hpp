@@ -89,7 +89,7 @@ namespace pstore {
         /// \param arr  An array into which the characters are copied.
         /// \return A pointer to the output null-terminated string. Equivalent to arr.data ().
         template <typename SpanType>
-        auto shm_name (std::string const & name, SpanType arr) -> ::pstore::gsl2::zstring {
+        auto shm_name (std::string const & name, SpanType arr) -> ::pstore::gsl::zstring {
 
             static_assert (SpanType::extent >= 2, "The posix_mutex_name span must be fixed size and able to hold "
                                    "at least 2 characters");
@@ -105,11 +105,11 @@ namespace pstore {
         }
 
         template <std::size_t N>
-        auto shm_name (std::string const & name, std::array<char, N> & arr) -> ::pstore::gsl2::zstring {
+        auto shm_name (std::string const & name, std::array<char, N> & arr) -> ::pstore::gsl::zstring {
 
             static_assert (N <= std::numeric_limits<std::ptrdiff_t>::max (),
                            "array size must not exected ptrdiff_t max");
-            return shm_name (name, ::pstore::gsl2::make_span (arr));
+            return shm_name (name, ::pstore::gsl::make_span (arr));
         }
         ///@}
 
@@ -160,7 +160,7 @@ namespace pstore {
         public:
             /// Constructs the mutex. The mutex is in unlocked state after the constructor
             /// completes.
-            explicit spin_lock (::pstore::gsl2::not_null<std::atomic_flag *> lock)
+            explicit spin_lock (::pstore::gsl::not_null<std::atomic_flag *> lock)
                     : lock_ (lock) {}
 
             // No copying or assignment.

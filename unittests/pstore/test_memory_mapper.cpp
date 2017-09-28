@@ -135,7 +135,7 @@ TEST_F (MemoryMapperFixture, MemoryMapThenCheckFileContents) {
 
     backing_store.seek (0);
     std::vector<std::uint8_t> contents (size);
-    backing_store.read_span (::pstore::gsl2::make_span (contents));
+    backing_store.read_span (::pstore::gsl::make_span (contents));
 
     std::vector<std::uint8_t> expected (size);
     std::fill (expected.begin (), expected.end (), std::uint8_t{0});

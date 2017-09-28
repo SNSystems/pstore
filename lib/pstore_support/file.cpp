@@ -198,13 +198,13 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t in_memory::read_buffer (::pstore::gsl2::not_null<void *> ptr, std::size_t nbytes) {
+        std::size_t in_memory::read_buffer (::pstore::gsl::not_null<void *> ptr, std::size_t nbytes) {
             if (pos_ + nbytes > eof_) {
                 nbytes = eof_ - pos_;
             }
 
             using element_type = decltype (buffer_)::element_type;
-            auto span = ::pstore::gsl2::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
+            auto span = ::pstore::gsl::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
             std::copy (std::begin (span), std::end (span),
                        static_cast<element_type *> (ptr.get ()));
 
@@ -214,15 +214,15 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void in_memory::write_buffer (::pstore::gsl2::not_null<void const *> ptr, std::size_t nbytes) {
+        void in_memory::write_buffer (::pstore::gsl::not_null<void const *> ptr, std::size_t nbytes) {
             this->check_writable ();
             if (pos_ + nbytes > length_) {
                 raise (std::errc::invalid_argument);
             }
 
             using element_type = decltype (buffer_)::element_type;
-            auto dest_span = ::pstore::gsl2::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
-            auto src_span = ::pstore::gsl2::make_span (static_cast<element_type const *> (ptr.get ()), nbytes);
+            auto dest_span = ::pstore::gsl::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
+            auto src_span = ::pstore::gsl::make_span (static_cast<element_type const *> (ptr.get ()), nbytes);
             std::copy (std::begin (src_span), std::end (src_span), std::begin (dest_span));
 
             pos_ += nbytes;

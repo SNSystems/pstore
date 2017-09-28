@@ -116,7 +116,7 @@ namespace {
 
             // Copy from the source file to the data store. The destination for the read_span() is
             // the memory that we just allocated in the data store.
-            auto span = ::pstore::gsl2::make_span (ptr.get (), static_cast<std::ptrdiff_t> (size));
+            auto span = ::pstore::gsl::make_span (ptr.get (), static_cast<std::ptrdiff_t> (size));
             std::size_t bytes_read = file.read_span (span);
 
             auto const expected_size = span.size_bytes ();
