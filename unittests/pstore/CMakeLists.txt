@@ -56,7 +56,6 @@ add_pstore_unit_test (pstore-unit-tests
     test_crc32.cpp
     test_database.cpp
     test_db_archive.cpp
-    test_file.cpp
     test_file_handle.cpp
     test_file_header.cpp
     test_fnv.cpp

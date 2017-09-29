@@ -5,14 +5,14 @@
 //* |_| |_|_|\___| *
 //*                *
 //===- lib/pstore_support/file.cpp ----------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -198,33 +198,63 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t in_memory::read_buffer (::pstore::gsl::not_null<void *> ptr, std::size_t nbytes) {
-            if (pos_ + nbytes > eof_) {
+        std::size_t in_memory::read_buffer (gsl::not_null<void *> ptr, std::size_t nbytes) {
+            // The second half of this check is to catch integer overflows.
+            if (pos_ + nbytes > eof_ || pos_ + nbytes < pos_) {
                 nbytes = eof_ - pos_;
             }
 
             using element_type = decltype (buffer_)::element_type;
-            auto span = ::pstore::gsl::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
+            using index_type = gsl::span<decltype (buffer_)::element_type>::index_type;
+
+#ifndef NDEBUG
+            {
+                constexpr auto max = std::numeric_limits<index_type>::max ();
+                assert (length_ <= max && pos_ <= max && nbytes <= max);
+            }
+#endif
+            auto const length = static_cast<index_type> (length_);
+            auto const pos = static_cast<index_type> (pos_);
+            auto span = gsl::make_span (buffer_.get (), length)
+                            .subspan (pos, static_cast<index_type> (nbytes));
             std::copy (std::begin (span), std::end (span),
                        static_cast<element_type *> (ptr.get ()));
 
+            assert (pos_ + nbytes >= pos_);
             pos_ += nbytes;
             return nbytes;
         }
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void in_memory::write_buffer (::pstore::gsl::not_null<void const *> ptr, std::size_t nbytes) {
+        void in_memory::write_buffer (gsl::not_null<void const *> ptr, std::size_t nbytes) {
             this->check_writable ();
-            if (pos_ + nbytes > length_) {
+            // The second half of this check is to catch integer overflows.
+            if (pos_ + nbytes > length_ || pos_ + nbytes < pos_) {
                 raise (std::errc::invalid_argument);
             }
 
             using element_type = decltype (buffer_)::element_type;
-            auto dest_span = ::pstore::gsl::make_span (buffer_.get (), length_).subspan (pos_, nbytes);
-            auto src_span = ::pstore::gsl::make_span (static_cast<element_type const *> (ptr.get ()), nbytes);
-            std::copy (std::begin (src_span), std::end (src_span), std::begin (dest_span));
+            using index_type = gsl::span<element_type>::index_type;
+#ifndef NDEBUG
+            {
+                // TODO: if nbytes > index_type max if would be much better to split the
+                // write into two pieces rather than just fail...
+                constexpr auto max = std::numeric_limits<index_type>::max ();
+                assert (length_ <= max && pos_ <= max && nbytes <= max);
+            }
+#endif
+            auto dest_span =
+                gsl::make_span (buffer_.get (), static_cast<index_type> (length_))
+                    .subspan (static_cast<index_type> (pos_), static_cast<index_type> (nbytes));
+            auto src_span = gsl::make_span (static_cast<element_type const *> (ptr.get ()),
+                                            static_cast<index_type> (nbytes));
 
+            static_assert (std::is_same<decltype (src_span)::index_type, index_type>::value,
+                           "expected index_type of src_span and dest_span to be the same");
+
+            std::copy (std::begin (src_span), std::end (src_span), std::begin (dest_span));
+            assert (pos_ + nbytes >= pos_);
             pos_ += nbytes;
             if (pos_ > eof_) {
                 eof_ = pos_;
@@ -237,7 +267,6 @@ namespace pstore {
             if (position > eof_) {
                 raise (std::errc::invalid_argument);
             }
-
             pos_ = position;
         }
 
@@ -269,9 +298,18 @@ namespace pstore {
 
 
 #if PSTORE_CPP_EXCEPTIONS
-#define PSTORE_NO_EX_ESCAPE(x)  do { try { x; } catch (...) {} } while (0)
+#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
+    do {                                                                                           \
+        try {                                                                                      \
+            x;                                                                                     \
+        } catch (...) {                                                                            \
+        }                                                                                          \
+    } while (0)
 #else
-#define PSTORE_NO_EX_ESCAPE(x)  do { x; } while (0)
+#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
+    do {                                                                                           \
+        x;                                                                                         \
+    } while (0)
 #endif
 
         //*    __ _ _        _                     _ _        *

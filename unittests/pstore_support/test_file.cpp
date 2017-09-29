@@ -4,7 +4,7 @@
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- unittests/pstore/test_file.cpp -------------------------------------===//
+//===- unittests/pstore_support/test_file.cpp -----------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
 // All rights reserved.
 // 
@@ -472,6 +472,23 @@ TEST_F (MemoryFile, WriteToInitiallyEmptyFile) {
     EXPECT_TRUE (std::equal (buffer.get (), buffer.get () + elements, source));
 }
 
+TEST_F (MemoryFile, CrazyWriteSize) {
+    constexpr std::size_t elements = 10;
+    auto buffer = this->make_buffer (elements);
+    std::fill (buffer.get (), buffer.get () + elements, std::uint8_t{0});
+    pstore::file::in_memory mf (buffer, elements);
+
+    mf.write (std::numeric_limits <std::uint32_t>::max ());
+    mf.seek (4);
+    auto const length = std::numeric_limits <std::size_t>::max () - std::size_t{2};
+    char const * source = "Hello";
+    mf.write_buffer (source, length);
+    EXPECT_EQ (5U, mf.tell ());
+    EXPECT_EQ (5U, mf.size ());
+
+    EXPECT_TRUE (std::equal (buffer.get (), buffer.get () + elements, source));
+}
+
 TEST_F (MemoryFile, Seek) {
     constexpr std::size_t elements = 5;
     char const source_string[elements + 1]{"abcde"};
@@ -735,4 +752,4 @@ TEST_F (EnvironmentSaveFixture, TaintedEnvironmentInvalidPath) {
 #endif
 
 #endif //_WIN32
-// eof: unittests/pstore/test_file.cpp
+// eof: unittests/pstore_support/test_file.cpp

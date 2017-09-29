@@ -43,7 +43,9 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 set (PSTORE_SUPPORT_UNIT_TEST_SRC
+    check_for_error.hpp
     test_error.cpp
+    test_file.cpp
     test_gsl.cpp
     test_small_vector.cpp
     test_utf.cpp
