@@ -482,11 +482,7 @@ TEST_F (MemoryFile, CrazyWriteSize) {
     mf.seek (4);
     auto const length = std::numeric_limits <std::size_t>::max () - std::size_t{2};
     char const * source = "Hello";
-    mf.write_buffer (source, length);
-    EXPECT_EQ (5U, mf.tell ());
-    EXPECT_EQ (5U, mf.size ());
-
-    EXPECT_TRUE (std::equal (buffer.get (), buffer.get () + elements, source));
+    check_for_error ([&] { mf.write_buffer (source, length); }, std::errc::invalid_argument);
 }
 
 TEST_F (MemoryFile, Seek) {
