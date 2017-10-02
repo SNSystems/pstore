@@ -4,15 +4,15 @@
 //* | |_| | (__|   <  __/ |_  *
 //*  \__|_|\___|_|\_\___|\__| *
 //*                           *
-//===- include/pstore_mcrepo/ticket.h -------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+//===- include/pstore_mcrepo/ticket.hpp -----------------------------------===//
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPO_TICKET_H
-#define PSTORE_MCREPO_TICKET_H
+#ifndef PSTORE_MCREPO_TICKET_HPP
+#define PSTORE_MCREPO_TICKET_HPP
 
 #include "pstore/transaction.hpp"
 
@@ -66,12 +66,12 @@ namespace pstore {
         enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
 #undef X
 
-		//*  _   _    _       _                     _              *
-		//* | |_(_)__| |_____| |_   _ __  ___ _ __ | |__  ___ _ _  *
-		//* |  _| / _| / / -_)  _| | '  \/ -_) '  \| '_ \/ -_) '_| *
-		//*  \__|_\__|_\_\___|\__| |_|_|_\___|_|_|_|_.__/\___|_|   *
-		//* 													   *
-		struct ticket_member {
+        //*  _   _    _       _                     _              *
+        //* | |_(_)__| |_____| |_   _ __  ___ _ __ | |__  ___ _ _  *
+        //* |  _| / _| / / -_)  _| | '  \/ -_) '  \| '_ \/ -_) '_| *
+        //*  \__|_\__|_\_\___|\__| |_|_|_\___|_|_|_|_.__/\___|_|   *
+        //*                                                        *
+        struct ticket_member {
             pstore::index::digest digest;
             pstore::address name;
             std::uint8_t linkage;
@@ -96,12 +96,12 @@ namespace pstore {
         static_assert (offsetof (ticket_member, padding2) == 28,
                        "Padding2 offset differs from expected value");
 
-		//*  _   _    _       _    *
-		//* | |_(_)__| |_____| |_  *
-		//* |  _| / _| / / -_)  _| *
-		//*  \__|_\__|_\_\___|\__| *
-		//* 					   *
-		class ticket {
+        //*  _   _    _       _    *
+        //* | |_(_)__| |_____| |_  *
+        //* |  _| / _| / / -_)  _| *
+        //*  \__|_\__|_\_\___|\__| *
+        //*                        *
+	class ticket {
         public:
             using iterator = ticket_member *;
             using const_iterator = ticket_member const *;
@@ -219,7 +219,7 @@ namespace pstore {
                        "Ticket must satisfy StandardLayoutType");
 
         // alloc
-        // ~~~~~~~~
+        // ~~~~~
         template <typename TransactionType>
         pstore::record ticket::alloc (TransactionType & transaction, pstore::address path,
                                       std::vector<ticket_member> const & members) {
@@ -241,5 +241,5 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-#endif // PSTORE_MCREPO_TICKET_H
-// eof: include/pstore_mcrepo/ticket.h
+#endif // PSTORE_MCREPO_TICKET_HPP
+// eof: include/pstore_mcrepo/ticket.hpp

@@ -1,10 +1,10 @@
-//*  ____                               _                          *
-//* / ___| _ __   __ _ _ __ ___  ___   / \   _ __ _ __ __ _ _   _  *
-//* \___ \| '_ \ / _` | '__/ __|/ _ \ / _ \ | '__| '__/ _` | | | | *
-//*  ___) | |_) | (_| | |  \__ \  __// ___ \| |  | | | (_| | |_| | *
-//* |____/| .__/ \__,_|_|  |___/\___/_/   \_\_|  |_|  \__,_|\__, | *
-//*       |_|                                               |___/  *
-//===- include/pstore_mcrepo/SparseArray.h --------------------------------===//
+//*                                                              *
+//*  ___ _ __   __ _ _ __ ___  ___    __ _ _ __ _ __ __ _ _   _  *
+//* / __| '_ \ / _` | '__/ __|/ _ \  / _` | '__| '__/ _` | | | | *
+//* \__ \ |_) | (_| | |  \__ \  __/ | (_| | |  | | | (_| | |_| | *
+//* |___/ .__/ \__,_|_|  |___/\___|  \__,_|_|  |_|  \__,_|\__, | *
+//*     |_|                                               |___/  *
+//===- include/pstore_mcrepo/sparse_array.hpp -----------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_H
-#define PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_H
+#ifndef PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
+#define PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
 
 #include <algorithm>
 #include <array>
@@ -679,5 +679,5 @@ namespace std {
 
 } // end namespace std
 
-#endif // PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_H
-// eof: include/pstore_mcrepo/SparseArray.h
+#endif // PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
+// eof: include/pstore_mcrepo/sparse_array.hpp

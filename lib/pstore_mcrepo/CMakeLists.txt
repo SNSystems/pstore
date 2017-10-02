@@ -43,14 +43,13 @@
 #===----------------------------------------------------------------------===//
 set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore_mcrepo")
 add_pstore_library (pstore-mcrepo
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/Aligned.h"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/Fragment.h"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/SparseArray.h"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/ticket.h"
-    Fragment.cpp
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/aligned.hpp"
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/sparse_array.hpp"
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/ticket.hpp"
+    fragment.cpp
     ticket.cpp
 )
 target_link_libraries (pstore-mcrepo pstore)
-#eof CMakeLists.txt
 
 # eof: lib/pstore_mcrepo/CMakeLists.txt

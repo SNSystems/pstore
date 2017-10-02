@@ -1,10 +1,10 @@
-//*     _    _ _                      _  *
-//*    / \  | (_) __ _ _ __   ___  __| | *
-//*   / _ \ | | |/ _` | '_ \ / _ \/ _` | *
-//*  / ___ \| | | (_| | | | |  __/ (_| | *
-//* /_/   \_\_|_|\__, |_| |_|\___|\__,_| *
-//*              |___/                   *
-//===- include/pstore_mcrepo/Aligned.h ------------------------------------===//
+//*        _ _                      _  *
+//*   __ _| (_) __ _ _ __   ___  __| | *
+//*  / _` | | |/ _` | '_ \ / _ \/ _` | *
+//* | (_| | | | (_| | | | |  __/ (_| | *
+//*  \__,_|_|_|\__, |_| |_|\___|\__,_| *
+//*            |___/                   *
+//===- include/pstore_mcrepo/aligned.hpp ----------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPOFRAGMENT_ALIGNED_H
-#define PSTORE_MCREPOFRAGMENT_ALIGNED_H
+#ifndef PSTORE_MCREPOFRAGMENT_ALIGNED_HPP
+#define PSTORE_MCREPOFRAGMENT_ALIGNED_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -101,5 +101,5 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-#endif // PSTORE_MCREPOFRAGMENT_ALIGNED_H
-// eof: include/pstore_mcrepo/Aligned.h
+#endif // PSTORE_MCREPOFRAGMENT_ALIGNED_HPP
+// eof: include/pstore_mcrepo/aligned.hpp

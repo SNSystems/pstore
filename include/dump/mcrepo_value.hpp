@@ -45,8 +45,8 @@
 #define DUMP_MCREPO_VALUE_HPP
 
 #include "value.hpp"
-#include "pstore_mcrepo/Fragment.h"
-#include "pstore_mcrepo/ticket.h"
+#include "pstore_mcrepo/fragment.hpp"
+#include "pstore_mcrepo/ticket.hpp"
 
 namespace value {
 

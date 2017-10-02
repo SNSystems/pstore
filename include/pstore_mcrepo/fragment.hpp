@@ -1,10 +1,10 @@
-//*  _____                                     _    *
-//* |  ___| __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
-//* | |_ | '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
-//* |  _|| | | (_| | (_| | | | | | |  __/ | | | |_  *
-//* |_|  |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
-//*                 |___/                           *
-//===- include/pstore_mcrepo/Fragment.h -----------------------------------===//
+//*   __                                      _    *
+//*  / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
+//* | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
+//* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
+//* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
+//*                |___/                           *
+//===- include/pstore_mcrepo/fragment.hpp ---------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPO_FRAGMENT_H
-#define PSTORE_MCREPO_FRAGMENT_H
+#ifndef PSTORE_MCREPO_FRAGMENT_HPP
+#define PSTORE_MCREPO_FRAGMENT_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -56,8 +56,8 @@
 #include "pstore/address.hpp"
 #include "pstore/file_header.hpp"
 #include "pstore/transaction.hpp"
-#include "pstore_mcrepo/Aligned.h"
-#include "pstore_mcrepo/SparseArray.h"
+#include "pstore_mcrepo/aligned.hpp"
+#include "pstore_mcrepo/sparse_array.hpp"
 #include "pstore_support/small_vector.hpp"
 
 namespace pstore {
@@ -697,5 +697,5 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-#endif // PSTORE_MCREPO_FRAGMENT_H
-// eof: include/pstore_mcrepo/Fragment.h
+#endif // PSTORE_MCREPO_FRAGMENT_HPP
+// eof: include/pstore_mcrepo/fragment.hpp
