@@ -100,7 +100,7 @@ namespace value {
     value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment) {
         array::container array;
 
-        for (auto const key : fragment.sections ().getIndices ()) {
+        for (auto const key : fragment.sections ().get_indices ()) {
             auto const type = static_cast<pstore::repo::section_type> (key);
             array.emplace_back (make_value (object::container{
                 {"type", make_value (type)}, {"contents", make_value (db, fragment[type])}}));

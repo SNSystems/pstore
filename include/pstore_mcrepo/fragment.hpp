@@ -525,7 +525,7 @@ namespace pstore {
             template <typename Iterator>
             void populate (Iterator first, Iterator last);
 
-            using member_array = SparseArray<std::uint64_t>;
+            using member_array = sparse_array<std::uint64_t>;
 
             section const & operator[] (section_type key) const;
             std::size_t num_sections () const {
@@ -611,9 +611,9 @@ namespace pstore {
 
         template <typename OStream>
         OStream & operator<< (OStream & os, fragment const & frag) {
-            for (auto const Key : frag.sections ().getIndices ()) {
-                auto const Type = static_cast<section_type> (Key);
-                os << Type << ": " << frag[Type] << '\n';
+            for (auto const key : frag.sections ().get_indices ()) {
+                auto const type = static_cast<section_type> (key);
+                os << type << ": " << frag[type] << '\n';
             }
             return os;
         }

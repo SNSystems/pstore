@@ -62,44 +62,44 @@ namespace pstore {
     namespace repo {
 
 #ifdef _MSC_VER
-        // TODO: VC2017 won't allow popCount to be constexpr. Sigh.
-        inline unsigned popCount (unsigned char x) {
+        // TODO: VC2017 won't allow pop_count to be constexpr. Sigh.
+        inline unsigned pop_count (unsigned char x) {
             static_assert (sizeof (unsigned char) <= sizeof (unsigned __int16),
                            "Expected unsigned char to be 16 bits or less");
             return __popcnt16 (x);
         }
-        inline unsigned popCount (unsigned short x) {
+        inline unsigned pop_count (unsigned short x) {
             static_assert (sizeof (unsigned short) == sizeof (unsigned __int16),
                            "Expected unsigned short to be 16 bits");
             return __popcnt16 (x);
         }
-        inline unsigned popCount (unsigned x) {
+        inline unsigned pop_count (unsigned x) {
             return __popcnt (x);
         }
-        inline unsigned popCount (unsigned long x) {
+        inline unsigned pop_count (unsigned long x) {
             static_assert (sizeof (unsigned long) == sizeof (unsigned int),
                            "Expected sizeof unsigned long to match sizeof unsigned int");
-            return popCount (static_cast<unsigned int> (x));
+            return pop_count (static_cast<unsigned int> (x));
         }
-        inline unsigned popCount (unsigned long long x) {
+        inline unsigned pop_count (unsigned long long x) {
             static_assert (sizeof (unsigned long long) == sizeof (unsigned __int64),
                            "Expected unsigned long long to be 64 bits");
             return static_cast<unsigned> (__popcnt64 (x));
         }
 #else
-        inline constexpr unsigned popCount (unsigned char x) {
+        inline constexpr unsigned pop_count (unsigned char x) {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned popCount (unsigned short x) {
+        inline constexpr unsigned pop_count (unsigned short x) {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned popCount (unsigned x) {
+        inline constexpr unsigned pop_count (unsigned x) {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned popCount (unsigned long x) {
+        inline constexpr unsigned pop_count (unsigned long x) {
             return static_cast<unsigned> (__builtin_popcountl (x));
         }
-        inline constexpr unsigned popCount (unsigned long long x) {
+        inline constexpr unsigned pop_count (unsigned long long x) {
             return static_cast<unsigned> (__builtin_popcountll (x));
         }
 #endif
@@ -130,103 +130,101 @@ namespace pstore {
                 using iterator_category =
                     typename std::iterator_traits<Iterator>::iterator_category;
 
-                PairFieldIterator (Iterator It, Accessor Acc)
-                        : It_{std::move (It)}
-                        , Acc_{std::move (Acc)} {}
+                PairFieldIterator (Iterator it, Accessor acc)
+                        : it_{std::move (it)}
+                        , acc_{std::move (acc)} {}
 
-                difference_type operator- (PairFieldIterator const & Other) const {
-                    return It_ - Other.It_;
+                difference_type operator- (PairFieldIterator const & other) const {
+                    return it_ - other.it_;
                 }
 
-                PairFieldIterator & operator+= (difference_type Rhs) {
-                    It_ += Rhs;
+                PairFieldIterator & operator+= (difference_type rhs) {
+                    it_ += rhs;
                     return *this;
                 }
-                PairFieldIterator & operator-= (difference_type Rhs) {
-                    It_ -= Rhs;
+                PairFieldIterator & operator-= (difference_type rhs) {
+                    it_ -= rhs;
                     return *this;
                 }
 
-                PairFieldIterator operator- (difference_type Rhs) {
+                PairFieldIterator operator- (difference_type rhs) {
                     PairFieldIterator res{*this};
-                    It_ -= Rhs;
+                    it_ -= rhs;
                     return res;
                 }
-                PairFieldIterator operator+ (difference_type Rhs) {
-                    PairFieldIterator Res{*this};
-                    It_ += Rhs;
-                    return Res;
+                PairFieldIterator operator+ (difference_type rhs) {
+                    PairFieldIterator res{*this};
+                    it_ += rhs;
+                    return res;
                 }
 
                 PairFieldIterator & operator++ () {
-                    It_++;
+                    it_++;
                     return *this;
                 }
                 PairFieldIterator operator++ (int) {
-                    auto RetVal = *this;
+                    auto ret_val = *this;
                     ++(*this);
-                    return RetVal;
+                    return ret_val;
                 }
-                bool operator< (PairFieldIterator const & Other) const {
-                    return It_ < Other.It_;
+                bool operator< (PairFieldIterator const & other) const {
+                    return it_ < other.it_;
                 }
-                bool operator== (PairFieldIterator const & Other) const {
-                    return It_ == Other.It_ && Acc_ == Other.Acc_;
+                bool operator== (PairFieldIterator const & other) const {
+                    return it_ == other.it_ && acc_ == other.acc_;
                 }
-                bool operator!= (PairFieldIterator const & Other) const {
-                    return !(*this == Other);
+                bool operator!= (PairFieldIterator const & other) const {
+                    return !(*this == other);
                 }
 
                 const_reference operator* () const {
                     // Delegate the actual deferencing of the iterator to the accessor function.
-                    return Acc_ (It_);
+                    return acc_ (it_);
                 }
                 const_pointer operator-> () const {
                     // Delegate the actual deferencing of the iterator to the accessor function.
-                    // Since we statically assert that the return type of Acc_ is a reference,
+                    // Since we statically assert that the return type of acc_ is a reference,
                     // we can take the address of its returned value.
-                    return &Acc_ (It_);
+                    return &acc_ (it_);
                 }
 
             private:
-                Iterator It_;
+                Iterator it_;
                 /// An accessor function which will be used to extract one of the field
                 /// members from the referenced value.
-                Accessor Acc_;
+                Accessor acc_;
             };
 
-            // TODO: firstAccessor() was originally a lambda defined inside
-            // makePairFieldIterator() but this is rejected by VS2017.
-            /// Returns a reference to the 'first' field from the value produce by
-            /// dereferencing iterator 'It'.
+            // TODO: first_accessor/second_accessor() was originally a lambda defined inside
+            // make_pair_field_iterator() but this is rejected by VS2017. Could this be better done with std::get<>()?
+            /// Returns a reference to the 'first' field from the value produced by
+            /// dereferencing iterator 'it'.
             template <typename Iterator>
-            inline auto firstAccessor (Iterator It)
+            inline auto first_accessor (Iterator it)
                 -> decltype (std::iterator_traits<Iterator>::value_type::first) const & {
-                return It->first;
+                return it->first;
             }
 
-            // TODO: secondAccessor() was originally a lambda defined inside
-            // makePairFieldIterator() but this is rejected by VS2017.
             /// Returns a reference to the 'second' field from the value produce by
-            /// dereferencing iterator 'It'.
+            /// dereferencing iterator 'it'.
             template <typename Iterator>
-            inline auto secondAccessor (Iterator It)
+            inline auto second_accessor (Iterator it)
                 -> decltype (std::iterator_traits<Iterator>::value_type::second) const & {
-                return It->second;
+                return it->second;
             }
 
             template <typename Iterator, typename Accessor>
-            auto makePairFieldIterator (Iterator It, Accessor Acc)
+            auto make_pair_field_iterator (Iterator it, Accessor acc)
                 -> PairFieldIterator<Iterator, Accessor> {
-                return {It, Acc};
+                return {it, acc};
             }
 
         } // end namespace details
 
         template <typename ValueType, typename BitmapType = std::uint64_t>
-        class SparseArray {
+        class sparse_array {
             template <typename V, typename B>
-            friend bool operator== (SparseArray<V, B> const & Lhs, SparseArray<V, B> const & Rhs);
+            friend bool operator== (sparse_array<V, B> const & lhs, sparse_array<V, B> const & rhs);
 
         public:
             using value_type = ValueType;
@@ -238,53 +236,58 @@ namespace pstore {
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-            SparseArray (SparseArray const &) = delete;
-            SparseArray (SparseArray &&) = delete;
-            SparseArray & operator= (SparseArray const &) = delete;
-            SparseArray & operator= (SparseArray &&) = delete;
+            sparse_array (sparse_array const &) = delete;
+            sparse_array (sparse_array &&) = delete;
+            sparse_array & operator= (sparse_array const &) = delete;
+            sparse_array & operator= (sparse_array &&) = delete;
 
-            ~SparseArray ();
+            ~sparse_array ();
 
+            /// Constructs a sparse_array index instance where the indices are extraced from an iterator range [first_index, last_index) and the values at each index are given by the range [first_value,last_value).
+            /// The number of elements in each range must be the same.
             template <typename IteratorIdx, typename IteratorV>
-            static auto make_unique (IteratorIdx FirstIndex, IteratorIdx LastIndex,
-                                     IteratorV FirstValue, IteratorV LastValue)
-                -> std::unique_ptr<SparseArray>;
+            static auto make_unique (IteratorIdx first_index, IteratorIdx last_index,
+                                     IteratorV first_value, IteratorV last_value)
+                -> std::unique_ptr<sparse_array>;
 
             template <typename IteratorIdx>
-            static auto make_unique (IteratorIdx FirstIndex, IteratorIdx LastIndex,
-                                     std::initializer_list<ValueType> Values)
-                -> std::unique_ptr<SparseArray>;
+            static auto make_unique (IteratorIdx first_index, IteratorIdx last_index,
+                                     std::initializer_list<ValueType> values)
+                -> std::unique_ptr<sparse_array>;
 
             template <typename Iterator>
-            static auto make_unique (Iterator begin, Iterator end) -> std::unique_ptr<SparseArray>;
+            static auto make_unique (Iterator begin, Iterator end) -> std::unique_ptr<sparse_array>;
 
-            static auto make_unique (std::initializer_list<size_type> Indices,
-                                     std::initializer_list<ValueType> Values = {})
-                -> std::unique_ptr<SparseArray>;
+            static auto make_unique (std::initializer_list<size_type> indices,
+                                     std::initializer_list<ValueType> values = {})
+                -> std::unique_ptr<sparse_array>;
 
             static auto make_unique (std::initializer_list<std::pair<size_type, ValueType>> v)
-                -> std::unique_ptr<SparseArray> {
+                -> std::unique_ptr<sparse_array> {
                 return make_unique (std::begin (v), std::end (v));
             }
 
             /// \name Capacity
             ///@{
             constexpr bool empty () const noexcept {
-                return Bitmap_ == 0;
+                return bitmap_ == 0;
             }
             constexpr size_type size () const noexcept {
-                return popCount (Bitmap_);
+                return pop_count (bitmap_);
             }
+
+            /// Returns the maximum number of indices that could be contained by an instance of this sparse_array type.
             static constexpr size_type max_size () noexcept {
                 return sizeof (BitmapType) * 8;
             }
 
+            /// Returns true if the spare array has an index 'pos'.
             bool has_index (size_type pos) const noexcept {
                 if (pos >= max_size ()) {
                     return false;
                 }
                 auto const bit_position = BitmapType{1} << pos;
-                return (Bitmap_ & bit_position) != 0;
+                return (bitmap_ & bit_position) != 0;
             }
             ///@}
 
@@ -331,7 +334,7 @@ namespace pstore {
                 return rend ();
             }
 
-            class Indices {
+            class indices {
             public:
                 class const_iterator {
                 public:
@@ -341,29 +344,29 @@ namespace pstore {
                     using pointer = value_type const *;
                     using reference = value_type const &;
 
-                    const_iterator (BitmapType Bitmap)
-                            : Bitmap_{Bitmap}
-                            , Pos_{0} {
+                    const_iterator (BitmapType bitmap)
+                            : bitmap_{bitmap}
+                            , pos_{0} {
                         next ();
                     }
 
-                    bool operator== (const_iterator const & Rhs) const {
-                        return Bitmap_ == Rhs.Bitmap_;
+                    bool operator== (const_iterator const & rhs) const {
+                        return bitmap_ == rhs.bitmap_;
                     }
-                    bool operator!= (const_iterator const & Rhs) const {
-                        return !operator== (Rhs);
+                    bool operator!= (const_iterator const & rhs) const {
+                        return !operator== (rhs);
                     }
 
                     reference operator* () const {
-                        return Pos_;
+                        return pos_;
                     }
                     pointer operator-> () const {
-                        return Pos_;
+                        return pos_;
                     }
 
                     const_iterator & operator++ () {
-                        Bitmap_ >>= 1;
-                        ++Pos_;
+                        bitmap_ >>= 1;
+                        ++pos_;
                         next ();
                         return *this;
                     }
@@ -376,27 +379,27 @@ namespace pstore {
 
                 private:
                     void next () {
-                        for (; Bitmap_ != 0 && (Bitmap_ & 1U) == 0U; ++Pos_, Bitmap_ >>= 1) {
+                        for (; bitmap_ != 0 && (bitmap_ & 1U) == 0U; ++pos_, bitmap_ >>= 1) {
                         }
                     }
-                    BitmapType Bitmap_;
-                    std::size_t Pos_;
+                    BitmapType bitmap_;
+                    std::size_t pos_;
                 };
-                explicit Indices (SparseArray const & Arr)
-                        : Bitmap_{Arr.Bitmap_} {}
+                explicit indices (sparse_array const & arr)
+                        : bitmap_{arr.bitmap_} {}
                 const_iterator begin () const {
-                    return {Bitmap_};
+                    return {bitmap_};
                 }
                 const_iterator end () const {
                     return {0};
                 }
 
             private:
-                BitmapType const Bitmap_;
+                BitmapType const bitmap_;
             };
 
-            Indices getIndices () const {
-                return Indices{*this};
+            indices get_indices () const {
+                return indices{*this};
             }
 
             ///@}
@@ -405,169 +408,169 @@ namespace pstore {
             ///@{
 
             ValueType * data () {
-                return &Elems_[0];
+                return &elements_[0];
             }
             const ValueType * data () const {
-                return &Elems_[0];
+                return &elements_[0];
             }
 
-            reference operator[] (size_type Pos) {
-                SparseArray const * cthis = this;
-                return const_cast<reference> (cthis->operator[] (Pos));
+            reference operator[] (size_type pos) {
+                sparse_array const * cthis = this;
+                return const_cast<reference> (cthis->operator[] (pos));
             }
-            const_reference operator[] (size_type Pos) const {
-                assert (Pos < max_size ());
-                auto const BitPosition = BitmapType{1} << Pos;
-                assert ((Bitmap_ & BitPosition) != 0);
-                auto const Mask = BitPosition - 1U;
-                auto const Index = popCount (Bitmap_ & Mask);
-                return Elems_[Index];
+            const_reference operator[] (size_type pos) const {
+                assert (pos < max_size ());
+                auto const bit_position = BitmapType{1} << pos;
+                assert ((bitmap_ & bit_position) != 0);
+                auto const mask = bit_position - 1U;
+                auto const index = pop_count (bitmap_ & mask);
+                return elements_[index];
             }
 
-            reference at (size_type Pos) {
-                SparseArray const * cthis = this;
-                return const_cast<reference> (cthis->at (Pos));
+            reference at (size_type pos) {
+                sparse_array const * cthis = this;
+                return const_cast<reference> (cthis->at (pos));
             }
-            const_reference at (size_type Pos) const {
-                if (Pos < max_size ()) {
-                    auto const BitPosition = BitmapType{1} << Pos;
-                    if ((Bitmap_ & BitPosition) != 0) {
-                        auto const Mask = BitPosition - 1U;
-                        auto const Index = popCount (Bitmap_ & Mask);
-                        return Elems_[Index];
+            const_reference at (size_type pos) const {
+                if (pos < max_size ()) {
+                    auto const bit_position = BitmapType{1} << pos;
+                    if ((bitmap_ & bit_position) != 0) {
+                        auto const mask = bit_position - 1U;
+                        auto const index = pop_count (bitmap_ & mask);
+                        return elements_[index];
                     }
                 }
-                assert (!"SparseArray::at out_of_range");
+                assert (!"sparse_array::at out_of_range");
             }
 
             ///@}
 
-            void fill (ValueType const & Value) {
-                std::fill_n (begin (), size (), Value);
+            void fill (ValueType const & value) {
+                std::fill_n (begin (), size (), value);
             }
 
             constexpr std::size_t size_bytes () const {
-                return SparseArray::size_bytes (this->size ());
+                return sparse_array::size_bytes (this->size ());
             }
-            static constexpr std::size_t size_bytes (std::size_t NumEntries) {
-                static_assert (sizeof (Elems_) / sizeof (ValueType) == 1U,
-                               "Expected Elems_ to be an array of 1 ValueType");
-                return sizeof (SparseArray) +
-                       (std::max (std::size_t{1}, NumEntries) - 1U) * sizeof (ValueType);
+            static constexpr std::size_t size_bytes (std::size_t num_entries) {
+                static_assert (sizeof (elements_) / sizeof (ValueType) == 1U,
+                               "Expected elements_ to be an array of 1 ValueType");
+                return sizeof (sparse_array) +
+                       (std::max (std::size_t{1}, num_entries) - 1U) * sizeof (ValueType);
             }
 
             template <typename InputIterator>
-            static std::size_t allocateBytes (std::size_t Count, InputIterator First,
-                                              InputIterator Last) {
+            static std::size_t allocate_bytes (std::size_t count, InputIterator first,
+                                               InputIterator last) {
                 // There will always be sufficient storage for at least 1 instance of
                 // ValueType (this comes from the built-in array).
-                static_assert (sizeof (Elems_) / sizeof (ValueType) == 1U,
-                               "Expected Elems_ to be an array of 1 ValueType");
-                auto const Elements = std::max (popCount (bitmap (First, Last)), 1U);
-                return Count - sizeof (Elems_) + Elements * sizeof (ValueType);
+                static_assert (sizeof (elements_) / sizeof (ValueType) == 1U,
+                               "Expected elements_ to be an array of 1 ValueType");
+                auto const elements = std::max (pop_count (bitmap (first, last)), 1U);
+                return count - sizeof (elements_) + elements * sizeof (ValueType);
             }
 
-            static void * operator new (std::size_t /*Count*/, void * Ptr) {
-                return Ptr;
+            static void * operator new (std::size_t /*count*/, void * ptr) {
+                return ptr;
             }
-            static void operator delete (void * /*Ptr*/, void * /*Place*/) {}
-            static void operator delete (void * P) {
-                ::operator delete (P);
+            static void operator delete (void * /*ptr*/, void * /*place*/) {}
+            static void operator delete (void * p) {
+                ::operator delete (p);
             }
 
             /// Constructs a sparse array whose available indices are defined by the
-            /// iterator range from [FirstIndex,LastIndex) and the values assigned to
+            /// iterator range from [first_index,last_index) and the values assigned to
             /// those indices are given by [FirstValue, LastValue). If the number of
-            /// elements in [FirstValue, LastValue) is less than the number of elements in
-            /// [FirstIndex,LastIndex), the remaining values are default-constructed; if
+            /// elements in [first_value, last_value) is less than the number of elements in
+            /// [first_index,last_index), the remaining values are default-constructed; if
             /// it is greater then the remaining values are ignored.
             template <typename IteratorIdx, typename IteratorV>
-            SparseArray (IteratorIdx FirstIndex, IteratorIdx LastIndex, IteratorV FirstValue,
-                         IteratorV LastValue);
+            sparse_array (IteratorIdx first_index, IteratorIdx last_index, IteratorV first_value,
+                          IteratorV last_value);
+
             /// Constructs a sparse array whose available indices are defined by the
-            /// iterator range from [FirstIndex,LastIndex) and whose corresponding values
+            /// iterator range from [first_index,last_index) and whose corresponding values
             /// are default constructed.
             template <typename IteratorIdx>
-            SparseArray (IteratorIdx FirstIndex, IteratorIdx LastIndex);
+            sparse_array (IteratorIdx first_index, IteratorIdx last_index);
 
         private:
-            /// \param Count  The number of bytes to allocate (to which the storage
-            /// required for the array
-            /// elements will be added).
-            /// \param IndicesFirst  The beginning of the range of index values.
-            /// \param IndicesLast  The end of the range of index values.
+            /// \param count  The number of bytes to allocate (to which the storage
+            /// required for the array elements will be added).
+            /// \param indices_first  The beginning of the range of index values.
+            /// \param indices_last  The end of the range of index values.
             /// \returns A pointer to the newly allocated memory block.
             template <typename InputIterator>
-            static void * operator new (std::size_t Count, InputIterator IndicesFirst,
-                                        InputIterator IndicesLast) {
+            static void * operator new (std::size_t count, InputIterator indices_first,
+                                        InputIterator indices_last) {
                 return ::operator new (
-                    SparseArray::allocateBytes (Count, IndicesFirst, IndicesLast));
+                    sparse_array::allocate_bytes (count, indices_first, indices_last));
             }
 
             /// Placement delete member function to match the placement new member
             /// function which takes two input iterators.
             template <typename InputIterator>
-            static void operator delete (void * P, InputIterator /*IndicesFirst*/,
-                                         InputIterator /*IndicesLast*/) {
-                return ::operator delete (P);
+            static void operator delete (void * p, InputIterator /*indices_first*/,
+                                         InputIterator /*indices_last*/) {
+                return ::operator delete (p);
             }
 
-            BitmapType const Bitmap_;
-            ValueType Elems_[1];
+            BitmapType const bitmap_;
+            ValueType elements_[1];
 
             /// Computes the bitmap value given a pair of iterators which will produce the
             /// sequence of indices to be present in a sparse array.
             template <typename InputIterator>
-            static BitmapType bitmap (InputIterator First, InputIterator Last);
+            static BitmapType bitmap (InputIterator first, InputIterator last);
         };
 
         // (ctor)
         // ~~~~~~
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx, typename IteratorV>
-        SparseArray<ValueType, BitmapType>::SparseArray (IteratorIdx FirstIndex,
-                                                         IteratorIdx LastIndex,
-                                                         IteratorV FirstValue, IteratorV LastValue)
-                : Bitmap_{bitmap (FirstIndex, LastIndex)} {
+        sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
+                                                          IteratorIdx last_index,
+                                                          IteratorV first_value, IteratorV last_value)
+                : bitmap_{bitmap (first_index, last_index)} {
 
             // Deal with the first element. This is the odd-one-out becuase it's in the
             // declaration of the object and will have been default-constructed by the
             // compiler.
-            if (FirstIndex != LastIndex) {
-                if (FirstValue != LastValue) {
-                    Elems_[0] = *(FirstValue++);
+            if (first_index != last_index) {
+                if (first_value != last_value) {
+                    elements_[0] = *(first_value++);
                 }
-                ++FirstIndex;
+                ++first_index;
             }
 
-            auto Out = &Elems_[1];
+            auto out = &elements_[1];
 
             // Now construct any remaining elements into the uninitialized memory past the
             // end of the object using placement new.
-            for (; FirstIndex != LastIndex && FirstValue != LastValue;
-                 ++FirstIndex, ++FirstValue, ++Out) {
-                new (Out) ValueType (*FirstValue);
+            for (; first_index != last_index && first_value != last_value;
+                 ++first_index, ++first_value, ++out) {
+                new (out) ValueType (*first_value);
             }
             // Default-construct any remaining objects for which we don't have a value.
-            for (; FirstIndex != LastIndex; ++FirstIndex, ++Out) {
-                new (Out) ValueType ();
+            for (; first_index != last_index; ++first_index, ++out) {
+                new (out) ValueType ();
             }
         }
 
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx>
-        SparseArray<ValueType, BitmapType>::SparseArray (IteratorIdx FirstIndex,
-                                                         IteratorIdx LastIndex)
-                : Bitmap_{bitmap (FirstIndex, LastIndex)} {}
+        sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
+                                                          IteratorIdx last_index)
+                : bitmap_{bitmap (first_index, last_index)} {}
 
         // (dtor)
         // ~~~~~~
         template <typename ValueType, typename BitmapType>
-        SparseArray<ValueType, BitmapType>::~SparseArray () {
-            auto const Elements = size ();
-            if (Elements > 1) {
-                for (auto It = &Elems_[1], end = &Elems_[0] + Elements; It != end; ++It) {
-                    It->~ValueType ();
+        sparse_array<ValueType, BitmapType>::~sparse_array () {
+            auto const elements = size ();
+            if (elements > 1) {
+                for (auto it = &elements_[1], end = &elements_[0] + elements; it != end; ++it) {
+                    it->~ValueType ();
                 }
             }
         }
@@ -576,85 +579,85 @@ namespace pstore {
         // ~~~~~~~~~~~
         template <typename ValueType, typename BitmapType>
         template <typename Iterator>
-        auto SparseArray<ValueType, BitmapType>::make_unique (Iterator Begin, Iterator End)
-            -> std::unique_ptr<SparseArray> {
+        auto sparse_array<ValueType, BitmapType>::make_unique (Iterator begin, Iterator end)
+            -> std::unique_ptr<sparse_array> {
 
-            auto BeginFirst =
-                details::makePairFieldIterator (Begin, details::firstAccessor<Iterator>);
-            auto EndFirst = details::makePairFieldIterator (End, details::firstAccessor<Iterator>);
-            auto BeginSecond =
-                details::makePairFieldIterator (Begin, details::secondAccessor<Iterator>);
-            auto EndSecond =
-                details::makePairFieldIterator (End, details::secondAccessor<Iterator>);
-            return std::unique_ptr<SparseArray<ValueType, BitmapType>>{
-                new (BeginFirst, EndFirst)
-                    SparseArray<ValueType> (BeginFirst, EndFirst, BeginSecond, EndSecond)};
+            auto begin_first =
+                details::make_pair_field_iterator (begin, details::first_accessor<Iterator>);
+            auto end_first = details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
+            auto begin_second =
+                details::make_pair_field_iterator (begin, details::second_accessor<Iterator>);
+            auto end_second =
+                details::make_pair_field_iterator (end, details::second_accessor<Iterator>);
+            return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
+                new (begin_first, end_first)
+                    sparse_array<ValueType> (begin_first, end_first, begin_second, end_second)};
         }
 
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx, typename IteratorV>
-        auto SparseArray<ValueType, BitmapType>::make_unique (IteratorIdx FirstIndex,
-                                                              IteratorIdx LastIndex,
-                                                              IteratorV FirstValue,
-                                                              IteratorV LastValue)
-            -> std::unique_ptr<SparseArray> {
+        auto sparse_array<ValueType, BitmapType>::make_unique (IteratorIdx first_index,
+                                                              IteratorIdx last_index,
+                                                              IteratorV first_value,
+                                                              IteratorV last_value)
+            -> std::unique_ptr<sparse_array> {
 
-            return std::unique_ptr<SparseArray<ValueType>>{
-                new (FirstIndex, LastIndex)
-                    SparseArray<ValueType> (FirstIndex, LastIndex, FirstValue, LastValue)};
+            return std::unique_ptr<sparse_array<ValueType>>{
+                new (first_index, last_index)
+                    sparse_array<ValueType> (first_index, last_index, first_value, last_value)};
         }
 
         template <typename ValueType, typename BitmapType>
         auto
-        SparseArray<ValueType, BitmapType>::make_unique (std::initializer_list<size_type> Indices,
-                                                         std::initializer_list<ValueType> Values)
-            -> std::unique_ptr<SparseArray> {
+        sparse_array<ValueType, BitmapType>::make_unique (std::initializer_list<size_type> indices,
+                                                         std::initializer_list<ValueType> values)
+            -> std::unique_ptr<sparse_array> {
 
-            return make_unique (std::begin (Indices), std::end (Indices), std::begin (Values),
-                                std::end (Values));
+            return make_unique (std::begin (indices), std::end (indices), std::begin (values),
+                                std::end (values));
         }
 
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx>
-        auto SparseArray<ValueType, BitmapType>::make_unique (
-            IteratorIdx FirstIndex, IteratorIdx LastIndex, std::initializer_list<ValueType> Values)
-            -> std::unique_ptr<SparseArray> {
+        auto sparse_array<ValueType, BitmapType>::make_unique (
+            IteratorIdx first_index, IteratorIdx last_index, std::initializer_list<ValueType> values)
+            -> std::unique_ptr<sparse_array> {
 
-            return std::unique_ptr<SparseArray<ValueType>>{
-                new (FirstIndex, LastIndex) SparseArray<ValueType> (
-                    FirstIndex, LastIndex, std::begin (Values), std::end (Values))};
+            return std::unique_ptr<sparse_array<ValueType>>{
+                new (first_index, last_index) sparse_array<ValueType> (
+                    first_index, last_index, std::begin (values), std::end (values))};
         }
 
         // bitmap
         // ~~~~~~
         template <typename ValueType, typename BitmapType>
         template <typename InputIterator>
-        BitmapType SparseArray<ValueType, BitmapType>::bitmap (InputIterator First,
-                                                               InputIterator Last) {
-            using IterValueType = typename std::iterator_traits<InputIterator>::value_type;
-            auto Op = [](BitmapType Bm, IterValueType V) {
-                auto Idx = static_cast<unsigned> (V);
-                assert (Idx >= 0 && Idx < max_size ());
-                return Bm | (BitmapType{1} << Idx);
+        BitmapType sparse_array<ValueType, BitmapType>::bitmap (InputIterator first,
+                                                               InputIterator last) {
+            using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
+            auto op = [](BitmapType mm, iter_value_type v) {
+                auto idx = static_cast<unsigned> (v);
+                assert (idx >= 0 && idx < max_size ());
+                return mm | (BitmapType{1} << idx);
             };
-            return std::accumulate (First, Last, BitmapType{0}, Op);
+            return std::accumulate (first, last, BitmapType{0}, op);
         }
 
         // operator==
         // ~~~~~~~~~~
         template <typename ValueType, typename BitmapType>
-        inline bool operator== (SparseArray<ValueType, BitmapType> const & Lhs,
-                                SparseArray<ValueType, BitmapType> const & Rhs) {
-            return Lhs.Bitmap_ == Rhs.Bitmap_ &&
-                   std::equal (std::begin (Lhs), std::end (Lhs), std::begin (Rhs));
+        inline bool operator== (sparse_array<ValueType, BitmapType> const & lhs,
+                                sparse_array<ValueType, BitmapType> const & rhs) {
+            return lhs.bitmap_ == rhs.bitmap_ &&
+                   std::equal (std::begin (lhs), std::end (lhs), std::begin (rhs));
         }
 
         // operator!=
         // ~~~~~~~~~~
         template <typename ValueType, typename BitmapType>
-        inline bool operator!= (SparseArray<ValueType, BitmapType> const & Lhs,
-                                SparseArray<ValueType, BitmapType> const & Rhs) {
-            return !(Lhs == Rhs);
+        inline bool operator!= (sparse_array<ValueType, BitmapType> const & lhs,
+                                sparse_array<ValueType, BitmapType> const & rhs) {
+            return !(lhs == rhs);
         }
     } // end namespace repo
 } // end namespace pstore
@@ -663,18 +666,18 @@ namespace std {
 
     template <std::size_t Ip, typename ValueType, typename BitmapType>
     inline constexpr ValueType &
-    get (pstore::repo::SparseArray<ValueType, BitmapType> & Arr) noexcept {
-        static_assert (Ip < pstore::repo::SparseArray<ValueType, BitmapType>::max_size (),
-                       "Index out of bounds in std::get<> (SparseArray)");
-        return Arr[Ip];
+    get (pstore::repo::sparse_array<ValueType, BitmapType> & arr) noexcept {
+        static_assert (Ip < pstore::repo::sparse_array<ValueType, BitmapType>::max_size (),
+                       "Index out of bounds in std::get<> (sparse_array)");
+        return arr[Ip];
     }
 
     template <std::size_t Ip, typename ValueType, typename BitmapType>
     inline constexpr ValueType const &
-    get (pstore::repo::SparseArray<ValueType, BitmapType> const & Arr) noexcept {
-        static_assert (Ip < pstore::repo::SparseArray<ValueType, BitmapType>::max_size (),
-                       "Index out of bounds in std::get<> (const SparseArray)");
-        return Arr[Ip];
+    get (pstore::repo::sparse_array<ValueType, BitmapType> const & arr) noexcept {
+        static_assert (Ip < pstore::repo::sparse_array<ValueType, BitmapType>::max_size (),
+                       "Index out of bounds in std::get<> (const sparse_array)");
+        return arr[Ip];
     }
 
 } // end namespace std
