@@ -6,14 +6,14 @@
 #* |_.__/ \___/|_|_|\___|_|  | .__/|_|\__,_|\__\___| *
 #*                           |_|                     *
 #===- utils/boilerplate/boilerplate.py ------------------------------------===//
-# Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+# Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
-# 
-# Developed by: 
-#   Toolchain Team 
-#   SN Systems, Ltd. 
+#
+# Developed by:
+#   Toolchain Team
+#   SN Systems, Ltd.
 #   www.snsystems.com
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal with the Software without restriction, including
@@ -21,19 +21,19 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # - Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimers.
-# 
+#
 # - Redistributions in binary form must reproduce the above copyright
 #   notice, this list of conditions and the following disclaimers in the
 #   documentation and/or other materials provided with the distribution.
-# 
+#
 # - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 #   Inc. nor the names of its contributors may be used to endorse or
 #   promote products derived from this Software without specific prior
 #   written permission.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -51,12 +51,12 @@ import subprocess
 import sys
 
 license_text = \
-'''Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+'''Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 All rights reserved.
 
-Developed by: 
-  Toolchain Team 
-  SN Systems, Ltd. 
+Developed by:
+  Toolchain Team
+  SN Systems, Ltd.
   www.snsystems.com
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -90,10 +90,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 
 
 def strip_lines (lines, index, comment_char):
+    """Removes leading and trailing comment lines from the file."""
+
     # Remove any leading blank lines
     while len (lines) > 0 and lines [index] == '':
         del lines [index]
-    # Remove leading comment lines.
+    # Remove trailing comment lines.
     while len (lines) > 0 and lines [index][:len(comment_char)] == comment_char and lines [index][:3] != '///':
         del lines [index]
     return lines
@@ -137,7 +139,9 @@ def get_path_line (path, comment_char):
 
 
 def get_license (comment_char):
-    return '\n'.join ([ comment_char + ' ' + l for l in license_text.splitlines (False) ]) + '\n'
+    license = [ comment_char + ' ' + l for l in license_text.splitlines (False) ]
+    license = [ l.rstrip (' ') for l in license ]
+    return '\n'.join (license) + '\n'
 
 
 COMMENT_MAPPING = {
