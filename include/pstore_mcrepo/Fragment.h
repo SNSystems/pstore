@@ -63,103 +63,105 @@
 namespace pstore {
     namespace repo {
 
-        //*  ___     _                     _ ___ _                *
-        //* |_ _|_ _| |_ ___ _ _ _ _  __ _| | __(_)_ ___  _ _ __  *
-        //*  | || ' \  _/ -_) '_| ' \/ _` | | _|| \ \ / || | '_ \ *
-        //* |___|_||_\__\___|_| |_||_\__,_|_|_| |_/_\_\\_,_| .__/ *
+        //*  _     _                     _    __ _                *
+        //* (_)_ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+        //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+        //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                |_|    *
-        struct InternalFixup {
-            std::uint8_t Section;
-            std::uint8_t Type;
-            std::uint16_t Padding;
-            std::uint32_t Offset;
-            std::uint32_t Addend;
+        struct internal_fixup {
+            std::uint8_t section;
+            std::uint8_t type;
+            std::uint16_t padding;
+            std::uint32_t offset;
+            std::uint32_t addend;
         };
 
-        static_assert (std::is_standard_layout<InternalFixup>::value,
-                       "InternalFixup must satisfy StandardLayoutType");
+        static_assert (std::is_standard_layout<internal_fixup>::value,
+                       "internal_fixup must satisfy StandardLayoutType");
 
-        static_assert (offsetof (InternalFixup, Section) == 0,
-                       "Section offset differs from expected value");
-        static_assert (offsetof (InternalFixup, Type) == 1,
-                       "Type offset differs from expected value");
-        static_assert (offsetof (InternalFixup, Padding) == 2,
-                       "Padding offset differs from expected value");
-        static_assert (offsetof (InternalFixup, Offset) == 4,
-                       "Offset offset differs from expected value");
-        static_assert (offsetof (InternalFixup, Addend) == 8,
-                       "Addend offset differs from expected value");
-        static_assert (sizeof (InternalFixup) == 12, "InternalFixup size does not match expected");
+        static_assert (offsetof (internal_fixup, section) == 0,
+                       "section offset differs from expected value");
+        static_assert (offsetof (internal_fixup, type) == 1,
+                       "type offset differs from expected value");
+        static_assert (offsetof (internal_fixup, padding) == 2,
+                       "padding offset differs from expected value");
+        static_assert (offsetof (internal_fixup, offset) == 4,
+                       "offset offset differs from expected value");
+        static_assert (offsetof (internal_fixup, addend) == 8,
+                       "addend offset differs from expected value");
+        static_assert (sizeof (internal_fixup) == 12,
+                       "internal_fixup size does not match expected");
 
-        //*  ___     _                     _ ___ _                *
-        //* | __|_ _| |_ ___ _ _ _ _  __ _| | __(_)_ ___  _ _ __  *
-        //* | _|\ \ /  _/ -_) '_| ' \/ _` | | _|| \ \ / || | '_ \ *
-        //* |___/_\_\\__\___|_| |_||_\__,_|_|_| |_/_\_\\_,_| .__/ *
-        //*                                                |_|    *
-        struct ExternalFixup {
-            pstore::address Name;
-            std::uint8_t Type;
+        //*          _                     _    __ _                *
+        //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+        //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+        //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
+        //*                                                  |_|    *
+        struct external_fixup {
+            pstore::address name;
+            std::uint8_t type;
             // FIXME: much padding here.
-            std::uint64_t Offset;
-            std::uint64_t Addend;
+            std::uint64_t offset;
+            std::uint64_t addend;
         };
 
-        static_assert (std::is_standard_layout<ExternalFixup>::value,
-                       "ExternalFixup must satisfy StandardLayoutType");
-        static_assert (offsetof (ExternalFixup, Name) == 0,
-                       "Name offset differs from expected value");
-        static_assert (offsetof (ExternalFixup, Type) == 8,
-                       "Type offset differs from expected value");
-        static_assert (offsetof (ExternalFixup, Offset) == 16,
-                       "Offset offset differs from expected value");
-        static_assert (offsetof (ExternalFixup, Addend) == 24,
-                       "Addend offset differs from expected value");
+        static_assert (std::is_standard_layout<external_fixup>::value,
+                       "external_fixup must satisfy StandardLayoutType");
+        static_assert (offsetof (external_fixup, name) == 0,
+                       "name offset differs from expected value");
+        static_assert (offsetof (external_fixup, type) == 8,
+                       "type offset differs from expected value");
+        static_assert (offsetof (external_fixup, offset) == 16,
+                       "offset offset differs from expected value");
+        static_assert (offsetof (external_fixup, addend) == 24,
+                       "addend offset differs from expected value");
         // static_assert (offsetof (external_fixup, padding3) == 20, "padding3 offset
         // differs from expected value");
-        static_assert (sizeof (ExternalFixup) == 32, "ExternalFixup size does not match expected");
+        static_assert (sizeof (external_fixup) == 32,
+                       "external_fixup size does not match expected");
 
-        //*  ___         _   _           *
-        //* / __| ___ __| |_(_)___ _ _   *
-        //* \__ \/ -_) _|  _| / _ \ ' \  *
-        //* |___/\___\__|\__|_\___/_||_| *
-        //*                              *
-        class Section {
-            friend struct SectionCheck;
+        //*             _   _           *
+        //*  ___ ___ __| |_(_)___ _ _   *
+        //* (_-</ -_) _|  _| / _ \ ' \  *
+        //* /__/\___\__|\__|_\___/_||_| *
+        //*                             *
+        class section {
+            friend struct section_check;
 
         public:
-            /// Describes the three members of a Section as three pairs of iterators: one
+            /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
             template <typename DataRangeType, typename IFixupRangeType, typename XFixupRangeType>
-            struct Sources {
-                DataRangeType DataRange;
-                IFixupRangeType IfixupsRange;
-                XFixupRangeType XfixupsRange;
+            struct sources {
+                DataRangeType data_range;
+                IFixupRangeType ifixups_range;
+                XFixupRangeType xfixups_range;
             };
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            static inline auto makeSources (DataRange const & D, IFixupRange const & I,
-                                            XFixupRange const & X)
-                -> Sources<DataRange, IFixupRange, XFixupRange> {
-                return {D, I, X};
+            static inline auto make_sources (DataRange const & d, IFixupRange const & i,
+                                             XFixupRange const & x)
+                -> sources<DataRange, IFixupRange, XFixupRange> {
+                return {d, i, x};
             }
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            Section (DataRange const & D, IFixupRange const & I, XFixupRange const & X);
+            section (DataRange const & d, IFixupRange const & i, XFixupRange const & x);
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            Section (Sources<DataRange, IFixupRange, XFixupRange> const & Src)
-                    : Section (Src.DataRange, Src.IfixupsRange, Src.XfixupsRange) {}
+            section (sources<DataRange, IFixupRange, XFixupRange> const & src)
+                    : section (src.data_range, src.ifixups_range, src.xfixups_range) {}
 
-            Section (Section const &) = delete;
-            Section & operator= (Section const &) = delete;
-            Section (Section &&) = delete;
-            Section & operator= (Section &&) = delete;
+            section (section const &) = delete;
+            section & operator= (section const &) = delete;
+            section (section &&) = delete;
+            section & operator= (section &&) = delete;
 
             /// A simple wrapper around the elements of one of the three arrays that make
             /// up a section. Enables the use of standard algorithms as well as
             /// range-based for loops on these collections.
             template <typename ValueType>
-            class Container {
+            class container {
             public:
                 using value_type = ValueType const;
                 using size_type = std::size_t;
@@ -171,16 +173,16 @@ namespace pstore {
                 using iterator = const_pointer;
                 using const_iterator = iterator;
 
-                Container (const_pointer Begin, const_pointer End)
-                        : Begin_{Begin}
-                        , End_{End} {
-                    assert (End >= Begin);
+                container (const_pointer begin, const_pointer end)
+                        : begin_{begin}
+                        , end_{end} {
+                    assert (end >= begin);
                 }
                 iterator begin () const {
-                    return Begin_;
+                    return begin_;
                 }
                 iterator end () const {
-                    return End_;
+                    return end_;
                 }
                 const_iterator cbegin () const {
                     return begin ();
@@ -190,25 +192,25 @@ namespace pstore {
                 }
 
                 size_type size () const {
-                    return End_ - Begin_;
+                    return end_ - begin_;
                 }
 
             private:
-                const_pointer Begin_;
-                const_pointer End_;
+                const_pointer begin_;
+                const_pointer end_;
             };
 
-            Container<std::uint8_t> data () const {
-                auto Begin = alignedPtr<std::uint8_t> (this + 1);
-                return {Begin, Begin + DataSize_};
+            container<std::uint8_t> data () const {
+                auto begin = aligned_ptr<std::uint8_t> (this + 1);
+                return {begin, begin + data_size_};
             }
-            Container<InternalFixup> ifixups () const {
-                auto Begin = alignedPtr<InternalFixup> (data ().end ());
-                return {Begin, Begin + NumIfixups_};
+            container<internal_fixup> ifixups () const {
+                auto begin = aligned_ptr<internal_fixup> (data ().end ());
+                return {begin, begin + num_ifixups_};
             }
-            Container<ExternalFixup> xfixups () const {
-                auto Begin = alignedPtr<ExternalFixup> (ifixups ().end ());
-                return {Begin, Begin + NumXfixups_};
+            container<external_fixup> xfixups () const {
+                auto begin = aligned_ptr<external_fixup> (ifixups ().end ());
+                return {begin, begin + num_xfixups_};
             }
 
             ///@{
@@ -216,115 +218,115 @@ namespace pstore {
             /// occupied by a fragment instance.
 
             /// \returns The number of bytes occupied by this fragment section.
-            std::size_t sizeBytes () const;
+            std::size_t size_bytes () const;
 
             /// \returns The number of bytes needed to accommodate a fragment section with
             /// the given number of data bytes and fixups.
-            static std::size_t sizeBytes (std::size_t DataSize, std::size_t NumIfixups,
-                                          std::size_t NumXfixups);
+            static std::size_t size_bytes (std::size_t data_size, std::size_t num_ifixups,
+                                           std::size_t num_xfixups);
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            static std::size_t sizeBytes (DataRange const & D, IFixupRange const & I,
-                                          XFixupRange const & X);
+            static std::size_t size_bytes (DataRange const & d, IFixupRange const & i,
+                                           XFixupRange const & x);
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
             static std::size_t
-            sizeBytes (Sources<DataRange, IFixupRange, XFixupRange> const & Src) {
-                return sizeBytes (Src.DataRange, Src.IfixupsRange, Src.XfixupsRange);
+            size_bytes (sources<DataRange, IFixupRange, XFixupRange> const & src) {
+                return size_bytes (src.data_range, src.ifixups_range, src.xfixups_range);
             }
             ///@}
 
         private:
-            std::uint32_t NumIfixups_ = 0;
-            std::uint32_t NumXfixups_ = 0;
-            std::uint64_t DataSize_ = 0;
+            std::uint32_t num_ifixups_ = 0;
+            std::uint32_t num_xfixups_ = 0;
+            std::uint64_t data_size_ = 0;
 
             /// A helper function which returns the distance between two iterators,
             /// clamped to the maximum range of IntType.
             template <typename IntType, typename Iterator>
-            static IntType setSize (Iterator First, Iterator Last);
+            static IntType set_size (Iterator first, Iterator last);
 
             /// Calculates the size of a region in the section including any necessary
             /// preceeding alignment bytes.
-            /// \param Pos The starting offset within the section.
-            /// \param Num The number of instance of type Ty.
+            /// \param pos  The starting offset within the section.
+            /// \param num  The number of instance of type Ty.
             /// \returns Number of bytes occupied by the elements.
             template <typename Ty>
-            static inline std::size_t partSizeBytes (std::size_t Pos, std::size_t Num) {
-                if (Num > 0) {
-                    Pos = aligned<Ty> (Pos) + Num * sizeof (Ty);
+            static inline std::size_t part_size_bytes (std::size_t pos, std::size_t num) {
+                if (num > 0) {
+                    pos = aligned<Ty> (pos) + num * sizeof (Ty);
                 }
-                return Pos;
+                return pos;
             }
         };
 
-        static_assert (std::is_standard_layout<Section>::value,
-                       "Section must satisfy StandardLayoutType");
+        static_assert (std::is_standard_layout<section>::value,
+                       "section must satisfy StandardLayoutType");
 
-        /// A trivial class which exists solely to verify the layout of the Section type
+        /// A trivial class which exists solely to verify the layout of the section type
         /// (including its private member variables and is declared as a friend of it.
-        struct SectionCheck {
-            static_assert (offsetof (Section, NumIfixups_) == 0,
-                           "NumIfixups_ offset differs from expected value");
-            static_assert (offsetof (Section, NumXfixups_) == 4,
-                           "NumXfixups_ offset differs from expected value");
-            static_assert (offsetof (Section, DataSize_) == 8,
-                           "DataSize_ offset differs from expected value");
-            static_assert (sizeof (Section) == 16, "Section size does not match expected");
+        struct section_check {
+            static_assert (offsetof (section, num_ifixups_) == 0,
+                           "num_ifixups_ offset differs from expected value");
+            static_assert (offsetof (section, num_xfixups_) == 4,
+                           "num_xfixups_ offset differs from expected value");
+            static_assert (offsetof (section, data_size_) == 8,
+                           "data_size_ offset differs from expected value");
+            static_assert (sizeof (section) == 16, "section size does not match expected");
         };
 
         // (ctor)
         // ~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
-        Section::Section (DataRange const & D, IFixupRange const & I, XFixupRange const & X) {
-            auto const Start = reinterpret_cast<std::uint8_t *> (this);
-            auto P = reinterpret_cast<std::uint8_t *> (this + 1);
+        section::section (DataRange const & d, IFixupRange const & i, XFixupRange const & x) {
+            auto const start = reinterpret_cast<std::uint8_t *> (this);
+            auto p = reinterpret_cast<std::uint8_t *> (this + 1);
 
-            if (D.first != D.second) {
-                P = std::copy (D.first, D.second, alignedPtr<std::uint8_t> (P));
-                DataSize_ = Section::setSize<decltype (DataSize_)> (D.first, D.second);
+            if (d.first != d.second) {
+                p = std::copy (d.first, d.second, aligned_ptr<std::uint8_t> (p));
+                data_size_ = section::set_size<decltype (data_size_)> (d.first, d.second);
             }
-            if (I.first != I.second) {
-                P = reinterpret_cast<std::uint8_t *> (
-                    std::copy (I.first, I.second, alignedPtr<InternalFixup> (P)));
-                NumIfixups_ = Section::setSize<decltype (NumIfixups_)> (I.first, I.second);
+            if (i.first != i.second) {
+                p = reinterpret_cast<std::uint8_t *> (
+                    std::copy (i.first, i.second, aligned_ptr<internal_fixup> (p)));
+                num_ifixups_ = section::set_size<decltype (num_ifixups_)> (i.first, i.second);
             }
-            if (X.first != X.second) {
-                P = reinterpret_cast<std::uint8_t *> (
-                    std::copy (X.first, X.second, alignedPtr<ExternalFixup> (P)));
-                NumXfixups_ = Section::setSize<decltype (NumXfixups_)> (X.first, X.second);
+            if (x.first != x.second) {
+                p = reinterpret_cast<std::uint8_t *> (
+                    std::copy (x.first, x.second, aligned_ptr<external_fixup> (p)));
+                num_xfixups_ = section::set_size<decltype (num_xfixups_)> (x.first, x.second);
             }
-            assert (P >= Start && static_cast<std::size_t> (P - Start) == sizeBytes (D, I, X));
+            assert (p >= start && static_cast<std::size_t> (p - start) == size_bytes (d, i, x));
         }
 
-        // setSize
-        // ~~~~~~~
+        // set_size
+        // ~~~~~~~~
         template <typename IntType, typename Iterator>
-        inline IntType Section::setSize (Iterator First, Iterator Last) {
+        inline IntType section::set_size (Iterator first, Iterator last) {
             static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
-            auto const Size = std::distance (First, Last);
-            assert (Size >= 0);
+            auto const size = std::distance (first, last);
+            assert (size >= 0);
 
-            auto const USize =
-                static_cast<typename std::make_unsigned<decltype (Size)>::type> (Size);
-            assert (USize >= std::numeric_limits<IntType>::min ());
-            assert (USize <= std::numeric_limits<IntType>::max ());
+            auto const usize =
+                static_cast<typename std::make_unsigned<decltype (size)>::type> (size);
+            assert (usize >= std::numeric_limits<IntType>::min ());
+            assert (usize <= std::numeric_limits<IntType>::max ());
 
-            return static_cast<IntType> (Size);
+            return static_cast<IntType> (size);
         }
 
-        // SizeBytes
-        // ~~~~~~~~~
+        // size_bytes
+        // ~~~~~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
-        std::size_t Section::sizeBytes (DataRange const & D, IFixupRange const & I,
-                                        XFixupRange const & X) {
-            auto const DataSize = std::distance (D.first, D.second);
-            auto const NumIfixups = std::distance (I.first, I.second);
-            auto const NumXfixups = std::distance (X.first, X.second);
-            assert (DataSize >= 0 && NumIfixups >= 0 && NumXfixups >= 0);
-            return sizeBytes (static_cast<std::size_t> (DataSize),
-                              static_cast<std::size_t> (NumIfixups),
-                              static_cast<std::size_t> (NumXfixups));
+        std::size_t section::size_bytes (DataRange const & d, IFixupRange const & i,
+                                         XFixupRange const & x) {
+            auto const data_size = std::distance (d.first, d.second);
+            auto const num_ifixups = std::distance (i.first, i.second);
+            auto const num_xfixups = std::distance (x.first, x.second);
+            assert (data_size >= 0 && num_ifixups >= 0 && num_xfixups >= 0);
+            return size_bytes (static_cast<std::size_t> (data_size),
+                               static_cast<std::size_t> (num_ifixups),
+                               static_cast<std::size_t> (num_xfixups));
         }
 
 // FIXME: the members of this collection are drawn from
@@ -350,105 +352,106 @@ namespace pstore {
     X (Metadata)
 
 #define X(a) a,
-        enum class SectionType : std::uint8_t { PSTORE_REPO_SECTION_TYPES };
+        enum class section_type : std::uint8_t { PSTORE_REPO_SECTION_TYPES };
 #undef X
 
-        struct SectionContent {
-            SectionContent () = default;
-            SectionContent (SectionContent const &) = default;
-            SectionContent (SectionContent &&) = default;
-            SectionContent & operator= (SectionContent const &) = default;
-            SectionContent & operator= (SectionContent &&) = default;
+        struct section_content {
+            section_content () = default;
+            section_content (section_content const &) = default;
+            section_content (section_content &&) = default;
+            section_content & operator= (section_content const &) = default;
+            section_content & operator= (section_content &&) = default;
 
             template <typename Iterator>
-            using Range = std::pair<Iterator, Iterator>;
+            using range = std::pair<Iterator, Iterator>;
 
             template <typename Iterator>
-            static inline auto makeRange (Iterator Begin, Iterator End) -> Range<Iterator> {
-                return {Begin, End};
+            static inline auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
+                return {begin, end};
             }
 
-            explicit SectionContent (SectionType St)
-                    : Type{St} {}
+            explicit section_content (section_type st)
+                    : type{st} {}
 
-            SectionType Type;
-            small_vector<char, 128> Data;
-            std::vector<InternalFixup> Ifixups;
-            std::vector<ExternalFixup> Xfixups;
+            section_type type;
+            small_vector<char, 128> data;
+            std::vector<internal_fixup> ifixups;
+            std::vector<external_fixup> xfixups;
 
-            auto makeSources () const
-                -> Section::Sources<Range<decltype (Data)::const_iterator>,
-                                    Range<decltype (Ifixups)::const_iterator>,
-                                    Range<decltype (Xfixups)::const_iterator>> {
+            auto make_sources () const
+                -> section::sources<range<decltype (data)::const_iterator>,
+                                    range<decltype (ifixups)::const_iterator>,
+                                    range<decltype (xfixups)::const_iterator>> {
 
-                return Section::makeSources (makeRange (std::begin (Data), std::end (Data)),
-                                             makeRange (std::begin (Ifixups), std::end (Ifixups)),
-                                             makeRange (std::begin (Xfixups), std::end (Xfixups)));
+                return section::make_sources (
+                    make_range (std::begin (data), std::end (data)),
+                    make_range (std::begin (ifixups), std::end (ifixups)),
+                    make_range (std::begin (xfixups), std::end (xfixups)));
             }
         };
 
         namespace details {
 
-            /// An iterator adaptor which produces a value_type of 'SectionType const' from
+            /// An iterator adaptor which produces a value_type of 'section_type const' from
             /// values deferences from the supplied underlying iterator.
             template <typename Iterator>
-            class ContentTypeIterator {
+            class content_type_iterator {
             public:
-                using value_type = SectionType const;
+                using value_type = section_type const;
                 using difference_type = typename std::iterator_traits<Iterator>::difference_type;
                 using pointer = value_type *;
                 using reference = value_type &;
                 using iterator_category = std::input_iterator_tag;
 
-                ContentTypeIterator ()
-                        : It_{} {}
-                explicit ContentTypeIterator (Iterator It)
-                        : It_{It} {}
-                ContentTypeIterator (ContentTypeIterator const & Rhs)
-                        : It_{Rhs.It_} {}
-                ContentTypeIterator & operator= (ContentTypeIterator const & Rhs) {
-                    It_ = Rhs.It_;
+                content_type_iterator ()
+                        : it_{} {}
+                explicit content_type_iterator (Iterator it)
+                        : it_{it} {}
+                content_type_iterator (content_type_iterator const & rhs)
+                        : it_{rhs.it_} {}
+                content_type_iterator & operator= (content_type_iterator const & rhs) {
+                    it_ = rhs.it_;
                     return *this;
                 }
-                bool operator== (ContentTypeIterator const & Rhs) const {
-                    return It_ == Rhs.It_;
+                bool operator== (content_type_iterator const & rhs) const {
+                    return it_ == rhs.it_;
                 }
-                bool operator!= (ContentTypeIterator const & Rhs) const {
-                    return !(operator== (Rhs));
+                bool operator!= (content_type_iterator const & rhs) const {
+                    return !(operator== (rhs));
                 }
-                ContentTypeIterator & operator++ () {
-                    ++It_;
+                content_type_iterator & operator++ () {
+                    ++it_;
                     return *this;
                 }
-                ContentTypeIterator operator++ (int) {
-                    ContentTypeIterator Old{*this};
-                    It_++;
-                    return Old;
+                content_type_iterator operator++ (int) {
+                    content_type_iterator old{*this};
+                    it_++;
+                    return old;
                 }
 
                 reference operator* () const {
-                    return (*It_).Type;
+                    return (*it_).type;
                 }
                 pointer operator-> () const {
-                    return &(*It_).Type;
+                    return &(*it_).type;
                 }
                 reference operator[] (difference_type n) const {
-                    return It_[n].Type;
+                    return it_[n].type;
                 }
 
             private:
-                Iterator It_;
+                Iterator it_;
             };
 
             template <typename Iterator>
-            inline ContentTypeIterator<Iterator> makeContentTypeIterator (Iterator It) {
-                return ContentTypeIterator<Iterator> (It);
+            inline content_type_iterator<Iterator> make_content_type_iterator (Iterator it) {
+                return content_type_iterator<Iterator> (it);
             }
 
             /// An iterator adaptor which produces a value_type of dereferences the
             /// value_type of the wrapped iterator.
             template <typename Iterator>
-            class SectionContentIterator {
+            class section_content_iterator {
             public:
                 using value_type = typename std::pointer_traits<
                     typename std::pointer_traits<Iterator>::element_type>::element_type;
@@ -457,224 +460,238 @@ namespace pstore {
                 using reference = value_type &;
                 using iterator_category = std::input_iterator_tag;
 
-                SectionContentIterator ()
-                        : It_{} {}
-                explicit SectionContentIterator (Iterator It)
-                        : It_{It} {}
-                SectionContentIterator (SectionContentIterator const & Rhs)
-                        : It_{Rhs.It_} {}
-                SectionContentIterator & operator= (SectionContentIterator const & Rhs) {
-                    It_ = Rhs.It_;
+                section_content_iterator ()
+                        : it_{} {}
+                explicit section_content_iterator (Iterator it)
+                        : it_{it} {}
+                section_content_iterator (section_content_iterator const & rhs)
+                        : it_{rhs.it_} {}
+                section_content_iterator & operator= (section_content_iterator const & rhs) {
+                    it_ = rhs.it_;
                     return *this;
                 }
-                bool operator== (SectionContentIterator const & Rhs) const {
-                    return It_ == Rhs.It_;
+                bool operator== (section_content_iterator const & rhs) const {
+                    return it_ == rhs.it_;
                 }
-                bool operator!= (SectionContentIterator const & Rhs) const {
-                    return !(operator== (Rhs));
+                bool operator!= (section_content_iterator const & rhs) const {
+                    return !(operator== (rhs));
                 }
-                SectionContentIterator & operator++ () {
-                    ++It_;
+                section_content_iterator & operator++ () {
+                    ++it_;
                     return *this;
                 }
-                SectionContentIterator operator++ (int) {
-                    SectionContentIterator Old{*this};
-                    It_++;
-                    return Old;
+                section_content_iterator operator++ (int) {
+                    section_content_iterator old{*this};
+                    it_++;
+                    return old;
                 }
 
                 reference operator* () const {
-                    return **It_;
+                    return **it_;
                 }
                 pointer operator-> () const {
-                    return &(**It_);
+                    return &(**it_);
                 }
                 reference operator[] (difference_type n) const {
-                    return *(It_[n]);
+                    return *(it_[n]);
                 }
 
             private:
-                Iterator It_;
+                Iterator it_;
             };
 
             template <typename Iterator>
-            inline SectionContentIterator<Iterator> makeSectionContentIterator (Iterator It) {
-                return SectionContentIterator<Iterator> (It);
+            inline section_content_iterator<Iterator> make_section_content_iterator (Iterator it) {
+                return section_content_iterator<Iterator> (it);
             }
 
         } // end namespace details
 
-        //*  ___                            _    *
-        //* | __| _ __ _ __ _ _ __  ___ _ _| |_  *
-        //* | _| '_/ _` / _` | '  \/ -_) ' \  _| *
-        //* |_||_| \__,_\__, |_|_|_\___|_||_\__| *
-        //*             |___/                    *
-        class Fragment {
+        //*   __                             _    *
+        //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
+        //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| *
+        //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| *
+        //*              |___/                    *
+        class fragment {
         public:
-            struct Deleter {
-                void operator() (void * P);
+            struct deleter {
+                void operator() (void * p);
             };
 
             template <typename TransactionType, typename Iterator>
-            static auto alloc (TransactionType & transaction, Iterator First, Iterator Last)
+            static auto alloc (TransactionType & transaction, Iterator first, Iterator last)
                 -> pstore::record;
 
             template <typename Iterator>
-            void populate (Iterator First, Iterator Last) {
-                // Point past the end of the sparse array.
-                auto Out = reinterpret_cast<std::uint8_t *> (this) + Arr_.size_bytes ();
+            void populate (Iterator first, Iterator last);
 
-                // Copy the contents of each of the segments to the fragment.
-                std::for_each (First, Last, [&Out, this](SectionContent const & C) {
-                    Out = reinterpret_cast<std::uint8_t *> (alignedPtr<Section> (Out));
-                    auto Scn = new (Out) Section (C.makeSources ());
-                    auto Offset = reinterpret_cast<std::uintptr_t> (Scn) -
-                                  reinterpret_cast<std::uintptr_t> (this);
-                    Arr_[static_cast<unsigned> (C.Type)] = Offset;
-                    Out += Scn->sizeBytes ();
-                });
+            using member_array = SparseArray<std::uint64_t>;
+
+            section const & operator[] (section_type key) const;
+            std::size_t num_sections () const {
+                return arr_.size ();
             }
-
-            using MemberArray = SparseArray<std::uint64_t>;
-
-            Section const & operator[] (SectionType Key) const;
-            std::size_t numSections () const {
-                return Arr_.size ();
-            }
-            MemberArray const & sections () const {
-                return Arr_;
+            member_array const & sections () const {
+                return arr_;
             }
 
             /// Returns the number of bytes of storage that is required for a fragment containing
             /// the sections defined by [first, last).
             template <typename Iterator>
-            static std::size_t sizeBytes (Iterator First, Iterator Last) {
-                auto const NumSections = std::distance (First, Last);
-                assert (NumSections >= 0);
-
-                // Space needed by the section offset array.
-                std::size_t SizeBytes = decltype (Fragment::Arr_)::size_bytes (NumSections);
-                // Now the storage for each of the sections
-                std::for_each (First, Last, [&SizeBytes](SectionContent const & C) {
-                    SizeBytes = aligned<Section> (SizeBytes);
-                    SizeBytes += Section::sizeBytes (C.makeSources ());
-                });
-                return SizeBytes;
-            }
+            static std::size_t size_bytes (Iterator first, Iterator last);
 
         private:
             template <typename IteratorIdx>
-            Fragment (IteratorIdx FirstIndex, IteratorIdx LastIndex)
-                    : Arr_ (FirstIndex, LastIndex) {}
+            fragment (IteratorIdx first_index, IteratorIdx last_index)
+                    : arr_ (first_index, last_index) {}
 
-            Section const & offsetToSection (std::uint64_t Offset) const {
-                auto Ptr = reinterpret_cast<std::uint8_t const *> (this) + Offset;
-                assert (reinterpret_cast<std::uintptr_t> (Ptr) % alignof (Section) == 0);
-                return *reinterpret_cast<Section const *> (Ptr);
+            section const & offset_to_section (std::uint64_t offset) const {
+                auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+                assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
+                return *reinterpret_cast<section const *> (ptr);
             }
 
-            MemberArray Arr_;
+            member_array arr_;
         };
 
 
-// operator<<
-// ~~~~~~~~~~
 #define X(a)                                                                                       \
-    case (SectionType::a):                                                                         \
-        Name = #a;                                                                                 \
+    case (section_type::a):                                                                        \
+        name = #a;                                                                                 \
         break;
+
+        // operator<<
+        // ~~~~~~~~~~
         template <typename OStream>
-        OStream & operator<< (OStream & OS, SectionType T) {
-            char const * Name = "*unknown*";
-            switch (T) { PSTORE_REPO_SECTION_TYPES }
-            return OS << Name;
+        OStream & operator<< (OStream & os, section_type st) {
+            char const * name = "*unknown*";
+            switch (st) { PSTORE_REPO_SECTION_TYPES }
+            return os << name;
         }
 #undef X
 
         template <typename OStream>
-        OStream & operator<< (OStream & OS, InternalFixup const & Ifx) {
-            using TypeT = typename std::common_type<unsigned, decltype (Ifx.Type)>::type;
-            return OS << "{section:" << static_cast<unsigned> (Ifx.Section)
-                      << ",type:" << static_cast<TypeT> (Ifx.Type) << ",offset:" << Ifx.Offset
-                      << ",addend:" << Ifx.Addend << "}";
+        OStream & operator<< (OStream & os, internal_fixup const & ifx) {
+            using TypeT = typename std::common_type<unsigned, decltype (ifx.type)>::type;
+            return os << "{section:" << static_cast<unsigned> (ifx.section)
+                      << ",type:" << static_cast<TypeT> (ifx.type) << ",offset:" << ifx.offset
+                      << ",addend:" << ifx.addend << "}";
         }
 
         template <typename OStream>
-        OStream & operator<< (OStream & OS, ExternalFixup const & Xfx) {
-            using TypeT = typename std::common_type<unsigned, decltype (Xfx.Type)>::type;
-            return OS << R"({name:")" << Xfx.Name.absolute () << R"(",type:)"
-                      << static_cast<TypeT> (Xfx.Type) << ",offset:" << Xfx.Offset
-                      << ",addend:" << Xfx.Addend << "}";
+        OStream & operator<< (OStream & os, external_fixup const & xfx) {
+            using TypeT = typename std::common_type<unsigned, decltype (xfx.type)>::type;
+            return os << R"({name:")" << xfx.name.absolute () << R"(",type:)"
+                      << static_cast<TypeT> (xfx.type) << ",offset:" << xfx.offset
+                      << ",addend:" << xfx.addend << "}";
         }
 
         template <typename OStream>
-        OStream & operator<< (OStream & OS, Section const & Scn) {
+        OStream & operator<< (OStream & os, section const & scn) {
             auto digit_to_hex = [](unsigned v) {
                 assert (v < 0x10);
                 return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
             };
 
-            char const * Indent = "\n  ";
-            OS << '{' << Indent << "data: ";
-            for (uint8_t V : Scn.data ()) {
-                OS << "0x" << digit_to_hex (V >> 4) << digit_to_hex (V & 0xF) << ',';
+            char const * indent = "\n  ";
+            os << '{' << indent << "data: ";
+            for (uint8_t v : scn.data ()) {
+                os << "0x" << digit_to_hex (v >> 4) << digit_to_hex (v & 0xF) << ',';
             }
-            OS << Indent << "ifixups: [ ";
-            for (auto const & Ifixup : Scn.ifixups ()) {
-                OS << Ifixup << ", ";
+            os << indent << "ifixups: [ ";
+            for (auto const & ifixup : scn.ifixups ()) {
+                os << ifixup << ", ";
             }
-            OS << ']' << Indent << "xfixups: [ ";
-            for (auto const & Xfixup : Scn.xfixups ()) {
-                OS << Xfixup << ", ";
+            os << ']' << indent << "xfixups: [ ";
+            for (auto const & xfixup : scn.xfixups ()) {
+                os << xfixup << ", ";
             }
-            return OS << "]\n}";
+            return os << "]\n}";
         }
 
         template <typename OStream>
-        OStream & operator<< (OStream & OS, Fragment const & Frag) {
-            for (auto const Key : Frag.sections ().getIndices ()) {
-                auto const Type = static_cast<SectionType> (Key);
-                OS << Type << ": " << Frag[Type] << '\n';
+        OStream & operator<< (OStream & os, fragment const & frag) {
+            for (auto const Key : frag.sections ().getIndices ()) {
+                auto const Type = static_cast<section_type> (Key);
+                os << Type << ": " << frag[Type] << '\n';
             }
-            return OS;
+            return os;
         }
 
+        // alloc
+        // ~~~~~
         template <typename TransactionType, typename Iterator>
-        auto Fragment::alloc (TransactionType & Transaction, Iterator First, Iterator Last)
+        auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
             -> pstore::record {
             static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
-                                         SectionContent>::value),
-                           "Iterator value_type should be SectionContent");
+                                         section_content>::value),
+                           "Iterator value_type should be section_content");
 
             // Compute the number of bytes of storage that we'll need for this fragment.
-            auto Size = Fragment::sizeBytes (First, Last);
+            auto size = fragment::size_bytes (first, last);
 
             // Allocate storage for the fragment including its three arrays.
-            std::pair<std::shared_ptr<void>, pstore::address> Storage =
-                Transaction.alloc_rw (Size, alignof (Fragment));
-            auto Ptr = Storage.first;
+            std::pair<std::shared_ptr<void>, pstore::address> storage =
+                transaction.alloc_rw (size, alignof (fragment));
+            auto ptr = storage.first;
 
             // Construct the basic fragment structure into this memory.
-            auto FragmentPtr = new (Ptr.get ()) Fragment (details::makeContentTypeIterator (First),
-                                                          details::makeContentTypeIterator (Last));
+            auto fragment_ptr =
+                new (ptr.get ()) fragment (details::make_content_type_iterator (first),
+                                           details::make_content_type_iterator (last));
             // Point past the end of the sparse array.
-            auto Out =
-                reinterpret_cast<std::uint8_t *> (FragmentPtr) + FragmentPtr->Arr_.size_bytes ();
+            auto out =
+                reinterpret_cast<std::uint8_t *> (fragment_ptr) + fragment_ptr->arr_.size_bytes ();
 
             // Copy the contents of each of the segments to the fragment.
-            std::for_each (First, Last, [&Out, FragmentPtr](SectionContent const & C) {
-                Out = reinterpret_cast<std::uint8_t *> (alignedPtr<Section> (Out));
-                auto Scn = new (Out) Section (C.makeSources ());
-                auto Offset = reinterpret_cast<std::uintptr_t> (Scn) -
-                              reinterpret_cast<std::uintptr_t> (FragmentPtr);
-                FragmentPtr->Arr_[static_cast<unsigned> (C.Type)] = Offset;
-                Out += Scn->sizeBytes ();
+            std::for_each (first, last, [&out, fragment_ptr](section_content const & c) {
+                out = reinterpret_cast<std::uint8_t *> (aligned_ptr<section> (out));
+                auto scn = new (out) section (c.make_sources ());
+                auto offset = reinterpret_cast<std::uintptr_t> (scn) -
+                              reinterpret_cast<std::uintptr_t> (fragment_ptr);
+                fragment_ptr->arr_[static_cast<unsigned> (c.type)] = offset;
+                out += scn->size_bytes ();
             });
 
-            assert (Out >= Ptr.get () &&
+            assert (out >= ptr.get () &&
                     static_cast<std::size_t> (
-                        Out - reinterpret_cast<std::uint8_t *> (Ptr.get ())) == Size);
-            return {Storage.second, Size};
+                        out - reinterpret_cast<std::uint8_t *> (ptr.get ())) == size);
+            return {storage.second, size};
+        }
+
+        // populate
+        // ~~~~~~~~
+        template <typename Iterator>
+        void fragment::populate (Iterator first, Iterator last) {
+            // Point past the end of the sparse array.
+            auto out = reinterpret_cast<std::uint8_t *> (this) + arr_.size_bytes ();
+
+            // Copy the contents of each of the segments to the fragment.
+            std::for_each (first, last, [&out, this](section_content const & c) {
+                out = reinterpret_cast<std::uint8_t *> (aligned_ptr<section> (out));
+                auto scn = new (out) section (c.make_sources ());
+                auto offset = reinterpret_cast<std::uintptr_t> (scn) -
+                              reinterpret_cast<std::uintptr_t> (this);
+                arr_[static_cast<unsigned> (c.type)] = offset;
+                out += scn->size_bytes ();
+            });
+        }
+
+        // size_bytes
+        // ~~~~~~~~~~
+        template <typename Iterator>
+        std::size_t fragment::size_bytes (Iterator first, Iterator last) {
+            auto const num_sections = std::distance (first, last);
+            assert (num_sections >= 0);
+
+            // Space needed by the section offset array.
+            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (num_sections);
+            // Now the storage for each of the sections
+            std::for_each (first, last, [&size_bytes](section_content const & c) {
+                size_bytes = aligned<section> (size_bytes);
+                size_bytes += section::size_bytes (c.make_sources ());
+            });
+            return size_bytes;
         }
 
     } // end namespace repo

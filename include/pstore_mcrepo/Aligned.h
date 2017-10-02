@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef LLVM_MCREPOFRAGMENT_ALIGNED_H
-#define LLVM_MCREPOFRAGMENT_ALIGNED_H
+#ifndef PSTORE_MCREPOFRAGMENT_ALIGNED_H
+#define PSTORE_MCREPOFRAGMENT_ALIGNED_H
 
 #include <cassert>
 #include <cstdint>
@@ -53,28 +53,28 @@ namespace pstore {
 
         /// \returns True if the input value is a power of 2.
         template <typename Ty, typename = typename std::enable_if<std::is_unsigned<Ty>::value>>
-        inline bool isPowerOfTwo (Ty n) {
+        inline bool is_power_of_two (Ty n) {
             //  if a number n is a power of 2 then bitwise & of n and n-1 will be zero.
             return n && !(n & (n - 1U));
         }
 
-        /// \param V  The value to be aligned.
-        /// \param Align  The alignment required for 'v'.
+        /// \param v  The value to be aligned.
+        /// \param align  The alignment required for 'v'.
         /// \returns  The value closest to but greater than or equal to 'V' for which
-        /// V%Align is zero.
+        /// v modulo align is zero.
         template <typename IntType>
-        inline IntType aligned (IntType V, std::size_t Align) {
-            assert (isPowerOfTwo (Align));
-            return (V + Align - 1U) & ~(Align - 1U);
+        inline IntType aligned (IntType v, std::size_t align) {
+            assert (is_power_of_two (align));
+            return (v + align - 1U) & ~(align - 1U);
         }
 
-        /// \param V  The value to be aligned.
+        /// \param v  The value to be aligned.
         /// \returns  The value closest to but greater than or equal to 'V' for which
-        /// V%alignof(decltype(V)) is zero.
+        /// V modulo alignof(decltype(v)) is zero.
         template <typename AlignType, typename IntType,
                   typename = std::enable_if<std::is_integral<IntType>::value>>
-        inline IntType aligned (IntType V) {
-            return aligned (V, alignof (AlignType));
+        inline IntType aligned (IntType v) {
+            return aligned (v, alignof (AlignType));
         }
 
         template <typename PointeeType>
@@ -89,11 +89,11 @@ namespace pstore {
         }
 
         template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-        inline DestPointeeType * alignedPtr (SrcPointeeType * v) {
+        inline DestPointeeType * aligned_ptr (SrcPointeeType * v) {
             return aligned<DestPointeeType> (reinterpret_cast<void *> (v));
         }
         template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-        inline DestPointeeType const * alignedPtr (SrcPointeeType const * p) {
+        inline DestPointeeType const * aligned_ptr (SrcPointeeType const * p) {
             auto v = reinterpret_cast<void const *> (p);
             return aligned<DestPointeeType> (const_cast<void *> (v));
         }
@@ -101,5 +101,5 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-#endif // LLVM_MCREPOFRAGMENT_ALIGNED_H
+#endif // PSTORE_MCREPOFRAGMENT_ALIGNED_H
 // eof: include/pstore_mcrepo/Aligned.h

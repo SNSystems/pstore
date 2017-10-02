@@ -45,45 +45,45 @@
 
 using namespace pstore::repo;
 
-//*  ___         _   _           *
-//* / __| ___ __| |_(_)___ _ _   *
-//* \__ \/ -_) _|  _| / _ \ ' \  *
-//* |___/\___\__|\__|_\___/_||_| *
-//*                              *
-// sizeBytes
-// ~~~~~~~~~
-std::size_t Section::sizeBytes (std::size_t DataSize, std::size_t NumIfixups,
-                                std::size_t NumXfixups) {
-    auto Result = sizeof (Section);
-    Result = Section::partSizeBytes<std::uint8_t> (Result, DataSize);
-    Result = Section::partSizeBytes<InternalFixup> (Result, NumIfixups);
-    Result = Section::partSizeBytes<ExternalFixup> (Result, NumXfixups);
-    return Result;
+//*             _   _           *
+//*  ___ ___ __| |_(_)___ _ _   *
+//* (_-</ -_) _|  _| / _ \ ' \  *
+//* /__/\___\__|\__|_\___/_||_| *
+//*                             *
+// size_bytes
+// ~~~~~~~~~~
+std::size_t section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
+                                 std::size_t num_xfixups) {
+    auto result = sizeof (section);
+    result = section::part_size_bytes<std::uint8_t> (result, data_size);
+    result = section::part_size_bytes<internal_fixup> (result, num_ifixups);
+    result = section::part_size_bytes<external_fixup> (result, num_xfixups);
+    return result;
 }
 
-std::size_t Section::sizeBytes () const {
-    return Section::sizeBytes (data ().size (), ifixups ().size (), xfixups ().size ());
+std::size_t section::size_bytes () const {
+    return section::size_bytes (data ().size (), ifixups ().size (), xfixups ().size ());
 }
 
-//*  ___                            _    *
-//* | __| _ __ _ __ _ _ __  ___ _ _| |_  *
-//* | _| '_/ _` / _` | '  \/ -_) ' \  _| *
-//* |_||_| \__,_\__, |_|_|_\___|_||_\__| *
-//*             |___/                    *
-// Deleter::operator()
+//*   __                             _    *
+//*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
+//* |  _| '_/ _` / _` | '  \/ -_) ' \  _| *
+//* |_| |_| \__,_\__, |_|_|_\___|_||_\__| *
+//*              |___/                    *
+// deleter::operator()
 // ~~~~~~~~~~~~~~~~~~~
-void Fragment::Deleter::operator() (void * P) {
-    auto Bytes = reinterpret_cast<std::uint8_t *> (P);
-    delete[] Bytes;
+void fragment::deleter::operator() (void * p) {
+    auto bytes = reinterpret_cast<std::uint8_t *> (p);
+    delete[] bytes;
 }
 
 // operator[]
 // ~~~~~~~~~~
-Section const & Fragment::operator[] (SectionType Key) const {
-    auto Offset = Arr_[static_cast<std::size_t> (Key)];
-    auto Ptr = reinterpret_cast<std::uint8_t const *> (this) + Offset;
-    assert (reinterpret_cast<std::uintptr_t> (Ptr) % alignof (Section) == 0);
-    return *reinterpret_cast<Section const *> (Ptr);
+section const & fragment::operator[] (section_type key) const {
+    auto offset = arr_[static_cast<std::size_t> (key)];
+    auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+    assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
+    return *reinterpret_cast<section const *> (ptr);
 }
 
 // eof: lib/pstore_mcrepo/Fragment.cpp

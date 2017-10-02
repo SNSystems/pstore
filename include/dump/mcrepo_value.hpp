@@ -5,14 +5,14 @@
 //* |_| |_| |_|\___|_|  \___| .__/ \___/    \_/ \__,_|_|\__,_|\___| *
 //*                         |_|                                     *
 //===- include/dump/mcrepo_value.hpp --------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -50,11 +50,11 @@
 
 namespace value {
 
-    value_ptr make_value (pstore::repo::SectionType t);
-    value_ptr make_value (pstore::repo::InternalFixup const & ifx);
-    value_ptr make_value (pstore::database & db, pstore::repo::ExternalFixup const & xfx);
-    value_ptr make_value (pstore::database & db, pstore::repo::Section const & section);
-    value_ptr make_value (pstore::database & db, pstore::repo::Fragment const & fragment);
+    value_ptr make_value (pstore::repo::section_type t);
+    value_ptr make_value (pstore::repo::internal_fixup const & ifx);
+    value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx);
+    value_ptr make_value (pstore::database & db, pstore::repo::section const & section);
+    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment);
 
 
     value_ptr make_fragments (pstore::database & db);
