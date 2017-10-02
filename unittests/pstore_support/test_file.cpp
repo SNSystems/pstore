@@ -101,32 +101,17 @@ namespace {
     // A file class which is used to mock the lock() and unlock() methods.
     class mock_file final : public ::pstore::file::file_base {
     public:
-        void close () override {}
-        bool is_open () const override {
-            return false;
-        }
-        bool is_writable () const override {
-            return false;
-        }
-        std::string path () const override {
-            return "path";
-        }
-        void seek (std::uint64_t) override {}
-        std::uint64_t tell () override {
-            return 0;
-        }
-        std::size_t read_buffer (::pstore::gsl::not_null<void *>, std::size_t) override {
-            return 0;
-        }
-        void write_buffer (::pstore::gsl::not_null<void const *>, std::size_t) override {}
-        std::uint64_t size () override {
-            return 0;
-        }
-        void truncate (std::uint64_t) override {}
-        std::time_t latest_time () const override {
-            return 0;
-        }
-
+        MOCK_METHOD0 (close, void ());
+        MOCK_CONST_METHOD0 (is_open, bool ());
+        MOCK_CONST_METHOD0 (is_writable, bool ());
+        MOCK_CONST_METHOD0 (path, std::string ());
+        MOCK_METHOD1 (seek, void (std::uint64_t));
+        MOCK_METHOD0 (tell, std::uint64_t ());
+        MOCK_METHOD2 (read_buffer, std::size_t (pstore::gsl::not_null<void *>, std::size_t));
+        MOCK_METHOD2 (write_buffer, void (pstore::gsl::not_null<void const *>, std::size_t));
+        MOCK_METHOD0 (size, std::uint64_t());
+        MOCK_METHOD1 (truncate, void (std::uint64_t));
+        MOCK_CONST_METHOD0 (latest_time, std::time_t());
 
         MOCK_METHOD4 (lock, bool(std::uint64_t, std::size_t, lock_kind, blocking_mode));
         MOCK_METHOD2 (unlock, void(std::uint64_t, std::size_t));
@@ -143,9 +128,24 @@ TEST (RangeLock, InitialState) {
 }
 
 TEST (RangeLock, ExplicitInitialization) {
+    using ::testing::_;
     mock_file file;
 
-    using ::testing::_;
+    // These expectations are present to suppress a warning from clang about the member functions
+    // being unused...
+    EXPECT_CALL (file, close ()).Times (0);
+    EXPECT_CALL (file, is_open ()).Times (0);
+    EXPECT_CALL (file, is_writable ()).Times (0);
+    EXPECT_CALL (file, path ()).Times (0);
+    EXPECT_CALL (file, seek (_)).Times (0);
+    EXPECT_CALL (file, tell ()).Times (0);
+    EXPECT_CALL (file, read_buffer (_, _)).Times (0);
+    EXPECT_CALL (file, write_buffer (_, _)).Times (0);
+    EXPECT_CALL (file, size ()).Times (0);
+    EXPECT_CALL (file, truncate (_)).Times (0);
+    EXPECT_CALL (file, latest_time ()).Times (0);
+
+    // Now the real test.
     EXPECT_CALL (file, lock (_, _, _, _)).Times (0);
     EXPECT_CALL (file, unlock (_, _)).Times (0);
 
