@@ -58,6 +58,13 @@
 #include "check_for_error.hpp"
 
 namespace {
+    template <typename T>
+    typename std::make_unsigned <T>::type as_unsigned (T x) {
+        using utype = typename std::make_unsigned <T>::type;
+        assert (x >= 0);
+        return static_cast <utype> (x);
+    }
+
     class ProcessFileName : public ::testing::Test {
     protected:
         static auto get_process_path (::pstore::gsl::span<char> b) -> std::size_t;
@@ -68,7 +75,7 @@ namespace {
         auto num_to_copy = std::min (static_cast<std::ptrdiff_t> (sizeof (result) - 1), b.size ());
         auto begin = std::begin (b);
         auto out = std::copy_n (result, num_to_copy, begin);
-        return std::distance (begin, out);
+        return as_unsigned (std::distance (begin, out));
     }
 }
 

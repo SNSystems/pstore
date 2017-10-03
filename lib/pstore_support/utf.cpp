@@ -58,15 +58,14 @@ namespace pstore {
             if (str == nullptr) {
                 return 0;
             }
-            return length (::pstore::gsl::make_span (str, nbytes));
+            return length (str, str + nbytes);
         }
 
-        // returns the number of utf8 code points in the nul-terminated buffer at str
         std::size_t length (::pstore::gsl::czstring str) {
             if (str == nullptr) {
                 return 0;
             }
-            return length (str, std::strlen (str));
+            return length (str, str + std::strlen (str));
         }
 
 
@@ -78,7 +77,9 @@ namespace pstore {
             if (str == nullptr) {
                 return nullptr;
             }
-            return index (::pstore::gsl::make_span (str, std::strlen (str)), pos);
+            char const * end = str + std::strlen (str);
+            char const * result = index (str, end, pos);
+            return result != end ? result : nullptr;
         }
 
         // slice
@@ -89,10 +90,12 @@ namespace pstore {
             if (s == nullptr) {
                 return std::make_pair (-1, -1);
             }
-            auto const span = ::pstore::gsl::make_span (s, std::strlen (s));
-            auto p1 = index (span, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
-            auto p2 = index (span, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
-            return std::make_pair ((p1 != nullptr) ? p1 - s : -1, (p2 != nullptr) ? p2 - s : -1);
+
+            auto const first = s;
+            auto const last = s + strlen (s);
+            auto p1 = index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
+            auto p2 = index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
+            return std::make_pair ((p1 != last) ? p1 - s : -1, (p2 != last) ? p2 - s : -1);
         }
     } // namespace utf
 } // namespace pstore

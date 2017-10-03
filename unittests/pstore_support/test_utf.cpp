@@ -84,7 +84,6 @@ TEST_F (SimpleAsciiFixture, LengthWithNulTerminatedString) {
 }
 TEST_F (SimpleAsciiFixture, IndexCStr) {
     char const * strz = str.c_str ();
-    char const * null = nullptr;
     ASSERT_EQ (strz + 0, pstore::utf::index (strz, 0));
     ASSERT_EQ (strz + 1, pstore::utf::index (strz, 1));
     ASSERT_EQ (strz + 2, pstore::utf::index (strz, 2));
@@ -94,8 +93,8 @@ TEST_F (SimpleAsciiFixture, IndexCStr) {
     ASSERT_EQ (strz + 6, pstore::utf::index (strz, 6));
     ASSERT_EQ (strz + 7, pstore::utf::index (strz, 7));
     ASSERT_EQ (strz + 8, pstore::utf::index (strz, 8));
-    ASSERT_EQ (null, pstore::utf::index (strz, 9));
-    ASSERT_EQ (null, pstore::utf::index (strz, std::numeric_limits<std::size_t>::max ()));
+    ASSERT_EQ (nullptr, pstore::utf::index (strz, 9));
+    ASSERT_EQ (nullptr, pstore::utf::index (strz, std::numeric_limits<std::size_t>::max ()));
 }
 TEST_F (SimpleAsciiFixture, IndexStdString) {
     std::string::const_iterator begin = std::begin (str);

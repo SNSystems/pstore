@@ -150,13 +150,25 @@ namespace pstore {
             return (static_cast<uchar_type> (c) & 0xC0) != 0x80;
         }
 
-        template <typename SpanType>
-        std::size_t length (SpanType span) {
-            return std::count_if (span.begin (), span.end (),
-                                  [](char c) { return is_utf_char_start (c); });
+        ///@{
+        /// Returns the number of UTF-8 code-points in a sequence.
+
+        template <typename Iterator>
+        std::size_t length (Iterator first, Iterator last) {
+            auto const result = std::count_if (first, last,
+                                               [](char c) { return is_utf_char_start (c); });
+            assert (result >= 0);
+            using utype = typename std::make_unsigned <decltype (result)>::type;
+            static_assert (std::numeric_limits <utype>::max () <= std::numeric_limits <std::size_t>::max (),
+                           "std::size_t cannot hold result of count_if");
+            return static_cast <std::size_t> (result);
         }
 
-        ///@{
+        template <typename SpanType>
+        std::size_t length (SpanType span) {
+            return length (span.begin (), span.end ());
+        }
+
         /// Returns the number of UTF-8 code points in the buffer given by a start address and
         /// length.
         /// \param str  The buffer start address.
@@ -171,6 +183,8 @@ namespace pstore {
         ///@}
 
         ///@{
+        /// Returns a reference to the beingng of the pos'th UTF-8 code-point in a sequence.
+
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the buffer at str
         char const * index (::pstore::gsl::czstring str, std::size_t pos);

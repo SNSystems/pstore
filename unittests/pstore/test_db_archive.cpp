@@ -203,7 +203,7 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     // and alignment requirement of the entire span.
     auto invoke_base_allocate = Invoke (&transaction, &mock_transaction::base_allocate);
     EXPECT_CALL (transaction, allocate (_, _)).WillRepeatedly (invoke_base_allocate);
-    EXPECT_CALL (transaction, allocate (span.size_bytes (), alignof (std::uint64_t)))
+    EXPECT_CALL (transaction, allocate (sizeof (original), alignof (std::uint64_t)))
         .Times (1)
         .WillOnce (invoke_base_allocate);
 
