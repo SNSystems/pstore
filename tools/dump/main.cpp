@@ -134,6 +134,8 @@ auto & error_stream =
     }
 
     value::value_ptr make_shared_memory (pstore::database & db, bool no_times) {
+        (void) no_times;
+
         // Shared memory is not used except on Windows.
         value::object::container result;
         result.emplace_back ("name", value::make_value (db.shared_memory_name ()));

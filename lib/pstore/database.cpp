@@ -125,6 +125,8 @@ namespace pstore {
     // finish_init
     // ~~~~~~~~~~~
     void database::finish_init (bool access_tick_enabled) {
+        (void) access_tick_enabled;
+
         assert (file ()->is_open ());
 
         // Build the initial segment address table.

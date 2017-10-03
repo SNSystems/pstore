@@ -64,7 +64,7 @@ sample_service::~sample_service () {
 /// \note start_handler() must return to the operating system after the service's operation has
 /// begun: it must not block.
 
-void sample_service::start_handler (DWORD argc, TCHAR * argv[]) {
+void sample_service::start_handler (DWORD /*argc*/, TCHAR * /*argv*/[]) {
     // Log a service start message to the Application log.
     this->write_event_log_entry ("CppWindowsService in OnStart", event_type::information);
     thread_ = std::thread ([this]() { this->worker (); });

@@ -86,7 +86,7 @@ namespace {
     //***************
     //* quit thread *
     //***************
-    void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> src_db) {
+    void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> /*src_db*/) {
         TRY {
             pstore::threads::set_name ("quit");
             pstore::logging::create_log_stream ("vacuum.quit");
