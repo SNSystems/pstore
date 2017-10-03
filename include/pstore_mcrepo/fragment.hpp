@@ -192,7 +192,8 @@ namespace pstore {
                 }
 
                 size_type size () const {
-                    return end_ - begin_;
+                    assert (end_ >= begin_);
+                    return static_cast<size_type> (end_ - begin_);
                 }
 
             private:
@@ -683,9 +684,12 @@ namespace pstore {
         std::size_t fragment::size_bytes (Iterator first, Iterator last) {
             auto const num_sections = std::distance (first, last);
             assert (num_sections >= 0);
+            auto const unum_sections =
+                static_cast<typename std::make_unsigned<decltype (num_sections)>::type> (
+                    num_sections);
 
             // Space needed by the section offset array.
-            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (num_sections);
+            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (unum_sections);
             // Now the storage for each of the sections
             std::for_each (first, last, [&size_bytes](section_content const & c) {
                 size_bytes = aligned<section> (size_bytes);

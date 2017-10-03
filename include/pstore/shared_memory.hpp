@@ -5,14 +5,14 @@
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
 //===- include/pstore/shared_memory.hpp -----------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -57,17 +57,17 @@
 #include <string>
 
 #ifdef _WIN32
-    #define WIN32_LEAN_AND_MEAN
-    #include <Windows.h>
-    #include "pstore_support/utf.hpp"
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#include "pstore_support/utf.hpp"
 #else // !_WIN32
-    #include <system_error>
+#include <system_error>
 
-    #include <errno.h>
-    #include <fcntl.h>
-    #include <sys/mman.h>
-    #include <sys/stat.h>
-    #include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #endif // !_WIN32
 
 #include "pstore_support/error.hpp"
@@ -90,22 +90,27 @@ namespace pstore {
         /// \return A pointer to the output null-terminated string. Equivalent to arr.data ().
         template <typename SpanType>
         auto shm_name (std::string const & name, SpanType arr) -> ::pstore::gsl::zstring {
+            using difference_type = std::iterator_traits<std::string::const_iterator>::difference_type;
 
-            static_assert (SpanType::extent >= 2, "The posix_mutex_name span must be fixed size and able to hold "
-                                   "at least 2 characters");
+            static_assert (SpanType::extent >= 2,
+                           "The posix_mutex_name span must be fixed size and able to hold "
+                           "at least 2 characters");
             auto out = arr.begin ();
             *(out++) = '/';
 
             auto name_begin = std::begin (name);
             auto name_end = name_begin;
-            std::advance (name_end, std::min (SpanType::extent - std::size_t{2}, name.length ()));
+            assert (name.length () <= std::numeric_limits <difference_type>::max ());
+            auto const name_length = static_cast <difference_type> (name.length ());
+            std::advance (name_end, std::min (SpanType::extent - 2, name_length));
             out = std::copy (name_begin, name_end, out);
             *out = '\0';
             return arr.data ();
         }
 
         template <std::size_t N>
-        auto shm_name (std::string const & name, std::array<char, N> & arr) -> ::pstore::gsl::zstring {
+        auto shm_name (std::string const & name, std::array<char, N> & arr)
+            -> ::pstore::gsl::zstring {
 
             static_assert (N <= std::numeric_limits<std::ptrdiff_t>::max (),
                            "array size must not exected ptrdiff_t max");
@@ -261,11 +266,11 @@ namespace pstore {
     /// A function which returns the maximum length of a shared memory object name.
     std::size_t get_pshmnamlen ();
 
-    //***************************
-    //* shared_memory::shm_name *
-    //***************************
-    // (ctor)
-    // ~~~~~~
+//***************************
+//* shared_memory::shm_name *
+//***************************
+// (ctor)
+// ~~~~~~
 #ifdef _WIN32
     template <typename Ty>
     shared_memory<Ty>::shared_memory::shm_name::shm_name (std::string const & name)
@@ -282,7 +287,8 @@ namespace pstore {
         std::size_t const len = get_pshmnamlen ();
         name_.reserve (len);
         name_ = '/';
-        std::copy_n (std::begin (name), std::min (name.length (), len - 1), std::back_inserter (name_));
+        std::copy_n (std::begin (name), std::min (name.length (), len - 1),
+                     std::back_inserter (name_));
     }
 #endif
     template <typename Ty>
@@ -407,7 +413,7 @@ namespace pstore {
     template <typename Ty>
     void shared_memory<Ty>::unmap (value_type * p) {
         if (::munmap (p, sizeof (Ty)) == -1) {
-            raise (errno_erc {errno}, "munmap");
+            raise (errno_erc{errno}, "munmap");
         }
     }
 
@@ -418,7 +424,7 @@ namespace pstore {
         auto ptr = static_cast<value_type *> (
             ::mmap (NULL, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
         if (ptr == MAP_FAILED) {
-            raise (errno_erc {errno}, "mmap");
+            raise (errno_erc{errno}, "mmap");
         }
         return {ptr, &unmap};
     }
@@ -480,9 +486,9 @@ namespace pstore {
             if (error == ENAMETOOLONG) {
                 std::ostringstream str;
                 str << "shared memory object name (" << name << ") is too long";
-                raise (errno_erc {error}, str.str ());
+                raise (errno_erc{error}, str.str ());
             } else {
-                raise (errno_erc {error}, "shm_open");
+                raise (errno_erc{error}, "shm_open");
             }
         }
 
@@ -490,11 +496,11 @@ namespace pstore {
         // then we need to grow it before the memory map operation.
         struct stat st;
         if (::fstat (fd, &st) == -1) {
-            raise (errno_erc {errno}, "fstat");
+            raise (errno_erc{errno}, "fstat");
         }
         if (st.st_size < static_cast<off_t> (sizeof (Ty))) {
             if (::ftruncate (fd, sizeof (Ty)) == -1) {
-                raise (errno_erc {errno}, "ftruncate");
+                raise (errno_erc{errno}, "ftruncate");
             }
         }
         return fd;

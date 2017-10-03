@@ -69,15 +69,15 @@
 #endif
 
 namespace {
-    unsigned hex_to_digit (unsigned digit) {
+    unsigned hex_to_digit (char digit) {
         if (digit >= 'a' && digit <= 'f') {
-            return digit - ('a' - 10);
+            return static_cast <unsigned> (digit) - ('a' - 10);
         }
         if (digit >= 'A' && digit <= 'F') {
-            return digit - ('A' - 10);
+            return static_cast <unsigned> (digit) - ('A' - 10);
         }
         if (digit >= '0' && digit <= '9') {
-            return digit - '0';
+            return static_cast <unsigned> (digit) - '0';
         }
         raise (pstore::error_code::uuid_parse_error);
     }
@@ -182,7 +182,7 @@ namespace pstore {
         }
         auto out = make_hex_decoder (std::begin (data_));
         auto count = 0U;
-        for (unsigned digit : str) {
+        for (auto digit : str) {
             switch (count++) {
             case 8:
             case 13:

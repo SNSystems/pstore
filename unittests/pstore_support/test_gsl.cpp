@@ -605,7 +605,6 @@ TEST (GslSpan, FromStdArrayConstConstructor) {
     }
 }
 
-#if 1
 TEST (GslSpan, FromUniquePointerConstruction) {
     {
         auto ptr = std::make_unique<int>(4);
@@ -636,9 +635,9 @@ TEST (GslSpan, FromUniquePointerConstruction) {
         }
     }
     {
-        auto arr = std::make_unique<int[]>(4);
-        for (auto i = 0; i < 4; i++) {
-            arr[i] = i + 1;
+        auto arr = std::make_unique<int[]>(4U);
+        for (auto i = 0U; i < 4U; i++) {
+            arr[i] = static_cast <int> (i) + 1;
         }
 
         {
@@ -670,7 +669,7 @@ TEST (GslSpan, FromUniquePointerConstruction) {
         }
     }
 }
-#endif
+
 #if 0
 TEST (GslSpan, FromSharedPointerConstruction) {
     {

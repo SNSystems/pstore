@@ -5,14 +5,14 @@
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
 //===- lib/pstore_support/logging.cpp -------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -70,31 +70,44 @@ namespace pstore {
     namespace logging {
 
 #if PSTORE_HAVE_LOCALTIME_S
-
         struct tm basic_logger::local_time (time_t const & clock) {
             struct tm result;
             if (errno_t const err = localtime_s (&result, &clock)) {
-                raise (errno_erc {errno}, "localtime_s");
+                raise (errno_erc{errno}, "localtime_s");
             }
             return result;
         }
-
 #elif PSTORE_HAVE_LOCALTIME_R
-
-        struct tm basic_logger::local_time (time_t const & timer) {
+        struct tm basic_logger::local_time (time_t const & clock) {
             errno = 0;
             struct tm result {};
-            struct tm * res = localtime_r (&timer, &result);
+            struct tm * res = localtime_r (&clock, &result);
             if (res == nullptr) {
-                raise (errno_erc {errno}, "localtime_r");
+                raise (errno_erc{errno}, "localtime_r");
             }
             assert (res == &result);
             return result;
         }
-
 #else
 #error "Need localtime_r() or localtime_s()"
 #endif
+
+        // time_string
+        // ~~~~~~~~~~~
+        std::size_t basic_logger::time_string (std::time_t t,
+                                               gsl::span<char, time_buffer_size> const & buffer) {
+            static_assert (time_buffer_size > 1, "time_buffer_size is too small");
+
+            struct tm tm_time = local_time (t);
+            static constexpr char const * iso8601_format = "%FT%T%z";
+            std::size_t const r =
+                std::strftime (buffer.data (), time_buffer_size, iso8601_format, &tm_time);
+            assert (buffer.size () >= 1);
+            // guarantee NUL termination.
+            buffer[buffer.size () - 1] = '\0';
+            return r;
+        }
+
     } // end namespace logging
 } // end namespace pstore
 
@@ -126,10 +139,11 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    /// If the 'ident' string is empty, we pass nullptr to asl_open() so it will use the calling process name.
+    /// If the 'ident' string is empty, we pass nullptr to asl_open() so it will use the calling
+    /// process name.
     asl_logger::asl_logger (std::string const & ident)
-            : client_ (::asl_open (ident.length () > 0 ? ident.c_str () : nullptr,
-                                   PSTORE_VENDOR_ID, ASL_OPT_STDERR)) {
+            : client_ (::asl_open (ident.length () > 0 ? ident.c_str () : nullptr, PSTORE_VENDOR_ID,
+                                   ASL_OPT_STDERR)) {
 
         if (client_ == nullptr) {
             pstore::raise (std::errc::invalid_argument, "asl_open");
@@ -341,8 +355,9 @@ namespace pstore {
         // log
         // ~~~
         void basic_logger::log (priority p, std::string const & message) {
-            std::array <char, time_buffer_size> time_buffer;
-            std::size_t r = time_string (std::time (nullptr), ::pstore::gsl::make_span (time_buffer));
+            std::array<char, time_buffer_size> time_buffer;
+            std::size_t r =
+                time_string (std::time (nullptr), ::pstore::gsl::make_span (time_buffer));
             assert (r == sizeof (time_buffer) - 1);
             auto time_str = time_buffer.data ();
             std::ostringstream str;
