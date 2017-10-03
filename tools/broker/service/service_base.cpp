@@ -334,7 +334,7 @@ void service_base::set_service_status (DWORD current_state, DWORD win32_exit_cod
 void service_base::write_event_log_entry (char const * message, event_type type) {
     std::array<TCHAR const *, 2> lpszStrings = {{nullptr}};
 
-    TCHAR const pszMessage[] = TEXT ("it happened"); // FIXME FFS. Convert to UTF16.
+    TCHAR const pszMessage[] = TEXT ("it happened"); // FIXME: Convert message to UTF16.
     // TODO: shouldn't this be open for longer?
     if (HANDLE event_source = ::RegisterEventSource (NULL, name_.c_str ())) {
         auto t = WORD{0};
@@ -382,7 +382,7 @@ void service_base::write_event_log_entry (char const * message, event_type type)
 /// \param errcode  The error code.
 void service_base::write_error_log_entry (char const * func, DWORD errcode) {
     char message[260];
-    std::snprintf (message, sizeof (message), "%s failed w/err 0x%08lx", func, errcode);
+    (void) std::snprintf (message, sizeof (message), "%s failed w/err 0x%08lx", func, errcode);
     message[sizeof (message) - 1] = '\0';
     this->write_event_log_entry (message, event_type::error);
 }
