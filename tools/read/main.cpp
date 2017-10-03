@@ -135,14 +135,16 @@ namespace {
 
                 std::uint64_t size = r.size;
                 constexpr auto const stream_size_max = std::numeric_limits<std::streamsize>::max ();
+                static_assert (stream_size_max > 0, "streamsize must be able to hold positive values");
                 set_output_stream_to_binary (stdout);
 
                 while (size > 0) {
                     std::streamsize const size_to_write = size > stream_size_max
                                                               ? stream_size_max
                                                               : static_cast<std::streamsize> (size);
+                    assert (size_to_write > 0);
                     out.write (reinterpret_cast<char const *> (ptr.get ()), size_to_write);
-                    size -= size_to_write;
+                    size -= static_cast <std::make_unsigned <decltype (size_to_write)>::type> (size_to_write);
                 }
             }
         }

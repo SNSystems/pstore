@@ -67,7 +67,7 @@ bool set_from_name (indices_bitset * const bs, std::string const & name) {
         using udifference_type = std::make_unsigned<decltype (position)>::type;
         assert (position >= 0 && static_cast <udifference_type> (position) < index_names.size ());
 
-        bs->set (position);
+        bs->set (static_cast <udifference_type> (position));
     }
     return true;
 }

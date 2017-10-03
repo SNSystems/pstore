@@ -152,13 +152,12 @@ namespace value {
 
     // write_character
     // ~~~~~~~~~~~~~~~
-    template <typename OStream, typename UCharType>
-    OStream & string::write_character (OStream & os, UCharType ch) {
+    template <typename OStream>
+    OStream & string::write_character (OStream & os, char ch) {
         // Control characters are U+0000 through U+001F. Allow everything
         // else through as UTF-8.
-        auto const uch =
-            static_cast<typename std::make_unsigned<typename OStream::char_type>::type> (ch);
-        if (uch < 128 && std::isprint (uch)) {
+        auto const uch = static_cast<unsigned char> (ch);
+        if (uch < 128U && std::isprint (static_cast <int> (ch))) {
             os << ch;
         } else {
             write_codepoint_hex (os, uch);
@@ -171,7 +170,7 @@ namespace value {
     template <typename OStream>
     OStream & string::write_quoted (OStream & os, std::string const & v) {
         os << "\"";
-        for (auto ch : v) {
+        for (char const ch : v) {
             switch (ch) {
             case '\0':
                 os << "\\0";

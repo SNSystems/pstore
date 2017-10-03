@@ -69,7 +69,10 @@ namespace {
         auto begin = std::find_if_not (str.begin (), end, is_ws);
 
         std::string result;
-        result.reserve (std::distance (begin, end));
+        auto const new_length = std::distance (begin, end);
+        assert (new_length >= 0);
+
+        result.reserve (static_cast <std::make_unsigned <decltype (new_length)>::type> (new_length));
         std::transform (begin, end, std::back_inserter (result),
                         [](char c) { return static_cast<char> (std::tolower (c)); });
         return result;

@@ -5,14 +5,14 @@
 //* |_| |_|\___|_| .__/  *
 //*              |_|     *
 //===- lib/pstore_cmd_util/cl/help.cpp ------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -53,7 +53,7 @@
 namespace {
 
     template <typename T, std::size_t Size>
-    constexpr std::size_t array_elements (T(&)[Size]){
+    constexpr std::size_t array_elements (T (&)[Size]) {
         return Size;
     }
 
@@ -82,33 +82,38 @@ namespace pstore {
                 return false;
             }
 
-            int help::max_option_length () {
+            int help::max_option_length () const {
                 auto max_opt_len = std::size_t{0};
                 for (option const * op : cl::option::all ()) {
                     if (op != this && !op->is_alias ()) {
                         max_opt_len = std::max (max_opt_len, op->name ().length ());
                     }
                 }
-                return static_cast <int> (std::min (max_opt_len, overlong_opt_max));
+                return static_cast<int> (std::min (max_opt_len, overlong_opt_max));
             }
 
             void help::show (std::ostream & os) {
-                static constexpr char const prefix [] = "  -";
-                static constexpr char const separator [] = " - ";
-                static constexpr std::size_t const prefix_len = array_elements (prefix) - 1U;
-                static constexpr std::size_t const separator_len = array_elements (separator) - 1U;
+                static constexpr char const prefix[] = "  -";
+                static constexpr char const separator[] = " - ";
+                static constexpr auto const prefix_len =
+                    static_cast<int> (array_elements (prefix) - 1U);
+                static constexpr auto const separator_len =
+                    static_cast<int> (array_elements (separator) - 1U);
 
                 os << "OVERVIEW: " << overview_ << "\n\nOPTIONS:\n";
 
                 int const max_opt_len = max_option_length ();
-                auto const indent = static_cast <int> (prefix_len + max_opt_len + separator_len);
+                int const indent = prefix_len + max_opt_len + separator_len;
 
                 for (option const * op : cl::option::all ()) {
                     if (op != this && !op->is_alias ()) {
-                        os << prefix << std::left << std::setw (max_opt_len) << op->name () << separator;
+                        os << prefix << std::left << std::setw (max_opt_len) << op->name ()
+                           << separator;
                         std::string const & description = op->description ();
                         auto is_first = true;
-                        for (auto it = word_wrapper (description, max_width), end = word_wrapper::end (description, max_width); it != end; ++it) {
+                        for (auto it = word_wrapper (description, max_width),
+                                  end = word_wrapper::end (description, max_width);
+                             it != end; ++it) {
                             if (!is_first || op->name ().length () > overlong_opt_max) {
                                 os << '\n' << std::setw (indent) << ' ';
                             }

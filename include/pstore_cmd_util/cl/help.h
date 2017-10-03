@@ -77,7 +77,7 @@ namespace pstore {
                                "overlong_opt_max is too huge!");
                 static constexpr std::size_t max_width = 78;
 
-                int max_option_length ();
+                int max_option_length () const;
 
                 std::string const overview_;
             };

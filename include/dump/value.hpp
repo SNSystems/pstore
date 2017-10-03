@@ -326,8 +326,8 @@ namespace value {
         template <typename OStream>
         static OStream & write_unquoted (OStream & os, std::string const & v);
 
-        template <typename OStream, typename UCharType>
-        static OStream & write_character (OStream & os, UCharType ch);
+        template <typename OStream>
+        static OStream & write_character (OStream & os, char ch);
 
         /// Writes a non-trivial string which contains non-printable characters. Simple escape
         /// characters are used where possible but Unicode code-points are converted to hex where
