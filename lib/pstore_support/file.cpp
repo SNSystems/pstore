@@ -150,6 +150,9 @@ namespace pstore {
             if (locked_) {
                 return false;
             }
+            // Should this assert be at the start of the function? Otherwise the
+            // doc comment should be changed from "A calling process must not
+            // own the range_lock"
             assert (file_ != nullptr && !locked_);
             if (file_ != nullptr) {
                 file_->lock (offset_, size_, kind_, file_base::blocking_mode::blocking);
@@ -280,6 +283,9 @@ namespace pstore {
             if (size > length_) {
                 raise (std::errc::invalid_argument);
             }
+
+            // This makes the function more like a 'resize' than a 'truncate',
+            // I would consider renaming it.
             if (size > eof_) {
                 // Fill from the current end of file to the end of the newly available region.
                 std::uint8_t * const base = buffer_.get ();

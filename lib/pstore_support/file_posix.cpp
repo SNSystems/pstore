@@ -5,14 +5,14 @@
 //* |_| |_|_|\___| *
 //*                *
 //===- lib/pstore_support/file_posix.cpp ----------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
- //*   __ _ _                        _       *
+ //*   __ _ _                        _       * // Duplicate title?
 //*  / _(_) | ___   _ __   ___  ___(_)_  __ *
 //* | |_| | |/ _ \ | '_ \ / _ \/ __| \ \/ / *
 //* |  _| | |  __/ | |_) | (_) \__ \ |>  <  *
@@ -140,7 +140,7 @@ namespace pstore {
         void file_handle::open (unique, std::string const & directory) {
             this->close ();
 
-            // assert (path::is_directory (directory));
+            // assert (path::is_directory (directory)); // Is this needed?
             // TODO: path::join should be able to write to a back_inserter so that we can avoid this
             // intermediate string object.
             std::string const path = path::join (directory, "pst-XXXXXX");
