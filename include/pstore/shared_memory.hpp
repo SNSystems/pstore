@@ -90,7 +90,9 @@ namespace pstore {
         /// \return A pointer to the output null-terminated string. Equivalent to arr.data ().
         template <typename SpanType>
         auto shm_name (std::string const & name, SpanType arr) -> ::pstore::gsl::zstring {
-            using difference_type = std::iterator_traits<std::string::const_iterator>::difference_type;
+            using difference_type =
+                std::iterator_traits<std::string::const_iterator>::difference_type;
+            using udifference_type = std::make_unsigned<difference_type>::type;
 
             static_assert (SpanType::extent >= 2,
                            "The posix_mutex_name span must be fixed size and able to hold "
@@ -100,8 +102,9 @@ namespace pstore {
 
             auto name_begin = std::begin (name);
             auto name_end = name_begin;
-            assert (name.length () <= std::numeric_limits <difference_type>::max ());
-            auto const name_length = static_cast <difference_type> (name.length ());
+            assert (name.length () <=
+                    static_cast<udifference_type> (std::numeric_limits<difference_type>::max ()));
+            auto const name_length = static_cast<difference_type> (name.length ());
             std::advance (name_end, std::min (SpanType::extent - 2, name_length));
             out = std::copy (name_begin, name_end, out);
             *out = '\0';
