@@ -57,7 +57,9 @@ import boilerplate
 
 def main ():
     base_path = os.getcwd ()
-    patterns = [ "*.h", "*.hpp", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py" ]
+    patterns = [ "*.h", "*.hpp", "*.hpp.in", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py", "Doxyfile.in" ]
+
+    # The collection of directories into which this utility will not decend.
     exclude = frozenset ([".git", "3rd_party", "lit"])
 
     for root, dirs, files in os.walk (base_path, topdown=True):
