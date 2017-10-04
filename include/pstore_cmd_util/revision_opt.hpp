@@ -4,7 +4,7 @@
 //* | | |  __/\ V /| \__ \ | (_) | | | | | (_) | |_) | |_  *
 //* |_|  \___| \_/ |_|___/_|\___/|_| |_|  \___/| .__/ \__| *
 //*                                            |_|         *
-//===- include/pstore_cmd_util/revision_opt.h -----------------------------===//
+//===- include/pstore_cmd_util/revision_opt.hpp ---------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_REVISION_OPT_H
-#define PSTORE_CMD_UTIL_REVISION_OPT_H
+#ifndef PSTORE_CMD_UTIL_REVISION_OPT_HPP
+#define PSTORE_CMD_UTIL_REVISION_OPT_HPP
 
 #include <string>
 #include "pstore/head_revision.hpp"
@@ -58,5 +58,5 @@ namespace pstore {
     } // namespace cmd_util
 } // namespace pstore
 
-#endif // PSTORE_CMD_UTIL_REVISION_OPT_H
-// eof: include/pstore_cmd_util/revision_opt.h
+#endif // PSTORE_CMD_UTIL_REVISION_OPT_HPP
+// eof: include/pstore_cmd_util/revision_opt.hpp

@@ -46,13 +46,13 @@ set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore_cmd_util")
 include (add_pstore)
 set (PSTORE_CMD_UTIL_SRC )
 set (PSTORE_CMD_UTIL_CL_SRC
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/maybe.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/modifiers.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/option.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/word_wrapper.h"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/maybe.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/modifiers.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/option.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/word_wrapper.hpp"
     cl/command_line.cpp
     cl/help.cpp
     cl/modifiers.cpp
@@ -64,8 +64,8 @@ list (APPEND PSTORE_CMD_UTIL_SRC ${PSTORE_CMD_UTIL_CL_SRC})
 source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC})
 
 set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/str_to_revision.h"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/revision_opt.h"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/str_to_revision.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/revision_opt.hpp"
     str_to_revision.cpp
     revision_opt.cpp
 )

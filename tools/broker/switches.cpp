@@ -48,7 +48,7 @@
 #include <vector>
 
 #include "pstore/make_unique.hpp"
-#include "pstore_cmd_util/cl/command_line.h"
+#include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_support/utf.hpp"
 
 using namespace pstore::cmd_util;

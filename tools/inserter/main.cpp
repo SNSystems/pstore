@@ -69,7 +69,7 @@ using TCHAR = char;
 #endif
 
 // pstore includes.
-#include "pstore_cmd_util/cl/command_line.h"
+#include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"

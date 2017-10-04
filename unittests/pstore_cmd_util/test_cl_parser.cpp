@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/cl/parser.h"
+#include "pstore_cmd_util/cl/parser.hpp"
 #include "gtest/gtest.h"
 
 TEST (ClParser, SimpleString) {

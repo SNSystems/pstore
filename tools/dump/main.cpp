@@ -60,7 +60,7 @@
 #include "pstore/hamt_set.hpp"
 #include "pstore/shared_memory.hpp"
 #include "pstore/vacuum_intf.hpp"
-#include "pstore_cmd_util/str_to_revision.h"
+#include "pstore_cmd_util/str_to_revision.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp"

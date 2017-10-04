@@ -4,7 +4,7 @@
 //*  \ V  V / (_) | | | (_| |  \ V  V /| | | (_| | |_) | |_) |  __/ |    *
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
-//===- include/pstore_cmd_util/cl/word_wrapper.h --------------------------===//
+//===- include/pstore_cmd_util/cl/word_wrapper.hpp ------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_WORD_WRAPPER_H
-#define PSTORE_CMD_UTIL_CL_WORD_WRAPPER_H
+#ifndef PSTORE_CMD_UTIL_CL_WORD_WRAPPER_HPP
+#define PSTORE_CMD_UTIL_CL_WORD_WRAPPER_HPP
 
 #include <cstdlib>
 #include <iterator>
@@ -91,5 +91,5 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif //PSTORE_CMD_UTIL_CL_WORD_WRAPPER_H
-// eof: include/pstore_cmd_util/cl/word_wrapper.h
+#endif // PSTORE_CMD_UTIL_CL_WORD_WRAPPER_HPP
+// eof: include/pstore_cmd_util/cl/word_wrapper.hpp

@@ -4,7 +4,7 @@
 //* | (_| (_) | | | | | | | | | | | (_| | | | | (_| | | | | | | |  __/ *
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
-//===- include/pstore_cmd_util/cl/command_line.h --------------------------===//
+//===- include/pstore_cmd_util/cl/command_line.hpp ------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,15 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_COMMAND_LINE_H
-#define PSTORE_CMD_UTIL_CL_COMMAND_LINE_H
+#ifndef PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
+#define PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
 
 #include <iostream>
 #include <string>
 #include <tuple>
 
-#include "pstore_cmd_util/cl/help.h"
-#include "pstore_cmd_util/cl/modifiers.h"
+#include "pstore_cmd_util/cl/help.hpp"
+#include "pstore_cmd_util/cl/modifiers.hpp"
 #include "pstore_support/path.hpp"
 
 namespace pstore {
@@ -81,15 +81,13 @@ namespace pstore {
                             handler = nullptr;
                         } else {
                             // A double-dash argument on its own indicates that the following are
-                            // positional
-                            // arguments.
+                            // positional arguments.
                             if (arg_name == "--") {
                                 ++first_arg; // swallow this argument.
                                 break;
                             }
                             // If this argument has no leading dash, this and the following are
-                            // positional
-                            // arguments.
+                            // positional arguments.
                             if (arg_name.empty () || arg_name.front () != '-') {
                                 break;
                             }
@@ -180,7 +178,7 @@ namespace pstore {
                     std::tie (first_arg, ok) =
                         parse_option_arguments (first_arg, last_arg, program_name, *errs);
 
-                    if (!parser_positional_arguments(first_arg, last_arg)) {
+                    if (!parser_positional_arguments (first_arg, last_arg)) {
                         ok = false;
                     }
 
@@ -214,5 +212,5 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif // PSRTORE_CMD_UTIL_CL_COMMAND_LINE_H
-// eof: include/pstore_cmd_util/cl/command_line.h
+#endif // PSRTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
+// eof: include/pstore_cmd_util/cl/command_line.hpp

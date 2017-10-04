@@ -50,8 +50,8 @@
 #include "optionparser.h"
 
 // pstore
-#include "pstore_cmd_util/str_to_revision.h"
-#include "pstore_cmd_util/revision_opt.h"
+#include "pstore_cmd_util/str_to_revision.hpp"
+#include "pstore_cmd_util/revision_opt.hpp"
 #include "pstore_support/utf.hpp"
 
 

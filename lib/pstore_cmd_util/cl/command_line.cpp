@@ -41,11 +41,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/cl/command_line.h"
+#include "pstore_cmd_util/cl/command_line.hpp"
 
 #include <iostream>
 
-#include "pstore_cmd_util/cl/option.h"
+#include "pstore_cmd_util/cl/option.hpp"
 
 namespace pstore {
 namespace cmd_util {

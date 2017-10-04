@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_cmd_util/str_to_revision.h"
+#include "pstore_cmd_util/str_to_revision.hpp"
 
 #include <utility>
 #include "gmock/gmock.h"

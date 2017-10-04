@@ -45,7 +45,7 @@
 /// \brief Provides str_to_revision() which is used by the utility applications to decode the user's
 /// choice of store revision number.
 
-#include "pstore_cmd_util/str_to_revision.h"
+#include "pstore_cmd_util/str_to_revision.hpp"
 
 #include <algorithm>
 #include <cassert>

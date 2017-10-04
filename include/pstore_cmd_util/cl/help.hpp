@@ -1,10 +1,10 @@
-//*      _          _                         _     _              *
-//*  ___| |_ _ __  | |_ ___    _ __ _____   _(_)___(_) ___  _ __   *
-//* / __| __| '__| | __/ _ \  | '__/ _ \ \ / / / __| |/ _ \| '_ \  *
-//* \__ \ |_| |    | || (_) | | | |  __/\ V /| \__ \ | (_) | | | | *
-//* |___/\__|_|     \__\___/  |_|  \___| \_/ |_|___/_|\___/|_| |_| *
-//*                                                                *
-//===- include/pstore_cmd_util/str_to_revision.h --------------------------===//
+//*  _          _        *
+//* | |__   ___| |_ __   *
+//* | '_ \ / _ \ | '_ \  *
+//* | | | |  __/ | |_) | *
+//* |_| |_|\___|_| .__/  *
+//*              |_|     *
+//===- include/pstore_cmd_util/cl/help.hpp --------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,25 +41,51 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file str_to_revision.h
-/// \brief Converts a string to a pair containing a revision number and boolean indicating whether
-/// the conversion was successful.
+#ifndef PSTORE_CMD_UTIL_CL_HELP_HPP
+#define PSTORE_CMD_UTIL_CL_HELP_HPP
 
-#ifndef PSTORE_STR_TO_REVISION_H
-#define PSTORE_STR_TO_REVISION_H
-
-#include <string>
-#include <utility>
+#include <limits>
+#include "pstore_cmd_util/cl/option.hpp"
 
 namespace pstore {
+    namespace cmd_util {
+        namespace cl {
 
-    /// Converts a string to a revision number. Leading and trailing whitespace is ignored, the text
-    /// "head" (regardless of case) will become pstore::database::head_revision.
-    /// \returns A pair containing the converted revision number (or 0 if the input was not valid).
-    /// The boolean value in the pair result is true for valid input, false otherwise.
+            class help : public option {
+            public:
+                template <class... Mods>
+                explicit help (std::string const & program_overview, Mods const &... mods)
+                        : overview_{program_overview} {
 
-    std::pair<unsigned, bool> str_to_revision (std::string const & str);
-}
+                    static_assert (max_width > overlong_opt_max,
+                                   "Must allow some space for the descriptions!");
+                    apply (*this, mods...);
+                }
 
-#endif // PSTORE_STR_TO_REVISION_H
-// eof: include/pstore_cmd_util/str_to_revision.h
+                help (help const &) = delete;
+                help & operator= (help const &) = delete;
+
+                bool takes_argument () const override;
+                void add_occurrence () override;
+                parser_base * get_parser () override;
+                bool value (std::string const & v) override;
+
+                void show (std::ostream & os);
+
+            private:
+                static constexpr std::size_t overlong_opt_max = 20;
+                static_assert (overlong_opt_max <= std::numeric_limits<int>::max (),
+                               "overlong_opt_max is too huge!");
+                static constexpr std::size_t max_width = 78;
+
+                int max_option_length () const;
+
+                std::string const overview_;
+            };
+
+        } // namespace cl
+    }     // namespace cmd_util
+} // namespace pstore
+
+#endif // PSTORE_CMD_UTIL_CL_HELP_HPP
+// eof: include/pstore_cmd_util/cl/help.hpp
