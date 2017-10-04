@@ -140,16 +140,14 @@ namespace pstore {
         /// a newly allocated block, and to copy from a contiguous block back to the store.
         ///
         /// The template traits argument controls the direction of copy: either
-        /// copy_from_store_traits
-        /// or copy_to_store_traits may be used.
+        /// copy_from_store_traits or copy_to_store_traits may be used.
         ///
         /// \param addr    The store address of the data to be copied.
         /// \param size    The number of bytes to be copied.
         /// \param p       A pointer to a block of memory of at least 'size' bytes.
         /// \param copier  A function that will perform the actual copy. The expected type of the
         ///                function's arguments are controlled by the 'traits' template argument.
-        ///                The
-        ///                function will be passed 3 arguments:
+        ///                The function will be passed 3 arguments:
         ///                - Traits::in_store_pointer: An address lying within the data store.
         ///                - Traits::temp_pointer: A pointer within the memory block given by
         ///                [p,p+size).
@@ -187,13 +185,6 @@ namespace pstore {
         }
 
     private:
-        static std::uint64_t round_down (std::uint64_t const page_size, std::uint64_t v) {
-            return v & ~(page_size - 1U);
-        }
-        static address round_down (std::uint64_t const page_size, address v) {
-            return {round_down (page_size, v.absolute ())};
-        }
-
         static sat_iterator slice_region_into_segments (std::shared_ptr<memory_mapper_base> region,
                                                         sat_iterator segment_it,
                                                         sat_iterator segment_end);

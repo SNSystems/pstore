@@ -46,6 +46,33 @@
 #include "pstore/storage.hpp"
 #include "pstore/file_header.hpp"
 
+namespace {
+    
+    ///@{
+    /// Rounds the value 'v' down the next lowest multiple of 'boundary'.
+    /// The result is equivalent to a function such as:
+    ///     round_down x b = x - x `mod` b
+
+    /// \param x  The value to be rounded.
+    /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
+    /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0
+    std::uint64_t round_down (std::uint64_t x, std::uint64_t b) {
+        assert (pstore::is_power_of_two (b));
+        std::uint64_t const r = x & ~(b - 1U);
+        assert (r <= x && r % b == 0);
+        return r;
+    }
+    
+    /// \param x  The value to be rounded.
+    /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
+    /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0
+    pstore::address round_down (pstore::address x, std::uint64_t b) {
+        return {round_down (x.absolute (), b)};
+    }
+    ///@}
+
+} // (anonymous namespace)
+
 namespace pstore {
 
     constexpr std::uint64_t storage::full_region_size;
@@ -153,9 +180,9 @@ namespace pstore {
         std::uint64_t const page_size = memory_mapper::page_size (*page_size_);
         assert (page_size > 0 && is_power_of_two (page_size));
 
-        first = std::max (round_down (page_size, first),
-                          address::make (round_down (page_size, sizeof (header) + page_size - 1U)));
-        last = round_down (page_size, last);
+        first = std::max (round_down (first, page_size),
+                          address::make (round_down (sizeof (header) + page_size - 1U, page_size)));
+        last = round_down (last, page_size);
 
         for (auto region_it = regions_.rbegin (), end = regions_.rend (); region_it != end;
              ++region_it) {
