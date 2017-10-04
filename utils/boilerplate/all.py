@@ -48,27 +48,33 @@ names match on of a set of globbing patterns will be modified.
 """
 
 from __future__ import print_function
+
+import fnmatch
 import glob
+import itertools
 import os
 import sys
 
 import boilerplate
 
+
 def main ():
     base_path = os.getcwd ()
-    patterns = [ "*.h", "*.hpp", "*.hpp.in", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py", "Doxyfile.in" ]
+    patterns = ["*.h", "*.hpp", "*.hpp.in", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py", "Doxyfile.in"]
 
-    # The collection of directories into which this utility will not decend.
-    exclude = frozenset ([".git", "3rd_party", "lit"])
+    # The collection of directories into which this utility will not descend.
+    exclude = frozenset (itertools.chain ([".git", "3rd_party", "lit"], glob.iglob ("build_*")))
 
+    all_paths = []
     for root, dirs, files in os.walk (base_path, topdown=True):
         dirs [:] = [d for d in dirs if d not in exclude]
-        for d in dirs:
-            dirpath = os.path.join (root, d)
-            for pattern in patterns:
-                for p in glob.iglob (os.path.join (dirpath, pattern)):
-                    boilerplate.boilerplate_out (path=p, base_path=base_path, inplace=True)
+        for pattern in patterns:
+            all_paths += [os.path.join (root, file_name) for file_name in files if fnmatch.fnmatch (file_name, pattern)]
+
+    for path in all_paths:
+        boilerplate.boilerplate_out (path=path, base_path=base_path, inplace=True)
     return 0
+
 
 if __name__ == '__main__':
     sys.exit (main ())
