@@ -135,6 +135,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
 
+    "${PSTORE_INCLUDE_DIR}/pstore_support/ctype.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/error.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/file.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/file_posix.hpp"

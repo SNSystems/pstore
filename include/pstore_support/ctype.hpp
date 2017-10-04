@@ -1,10 +1,10 @@
-//*            _ _ _    *
-//*  ___ _ __ | (_) |_  *
-//* / __| '_ \| | | __| *
-//* \__ \ |_) | | | |_  *
-//* |___/ .__/|_|_|\__| *
-//*     |_|             *
-//===- unittests/dump/split.hpp -------------------------------------------===//
+//*       _                     *
+//*   ___| |_ _   _ _ __   ___  *
+//*  / __| __| | | | '_ \ / _ \ *
+//* | (__| |_| |_| | |_) |  __/ *
+//*  \___|\__|\__, | .__/ \___| *
+//*           |___/|_|          *
+//===- include/pstore_support/ctype.hpp -----------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,52 +41,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef SPLIT_HPP
-#define SPLIT_HPP
+/// \file ctype.hpp
 
-#include <algorithm>
+#ifndef PSTORE_SUPPORT_CTYPE_HPP
+#define PSTORE_SUPPORT_CTYPE_HPP
+
 #include <cctype>
 #include <cwctype>
-#include <iterator>
-#include <string>
-#include <vector>
 
-#include "pstore_support/ctype.hpp"
+namespace pstore {
 
-template <typename StringType>
-std::vector<StringType> split_lines (StringType const & s) {
-    std::vector<StringType> result;
-    typename StringType::size_type pos = 0;
-    bool done = false;
-    while (!done) {
-        auto const cr_pos = s.find_first_of ('\n', pos);
-        done = (cr_pos == StringType::npos);
-        auto count = done ? StringType::npos : cr_pos - pos;
-        result.emplace_back (s, pos, count);
-        pos = cr_pos + 1;
+    inline bool isspace (char c) {
+        // std::isspace() has undefined behavior if the input value is not representable as unsigned
+        // char and not not equal to EOF.
+        auto const uc = static_cast<unsigned char> (c);
+        // TODO: std::isspace()'s behavior is affected by the current locale, but our "locale" is
+        // always UTF-8.
+        return std::isspace (static_cast<int> (uc)) != 0;
     }
-    return result;
-}
 
-template <typename StringType>
-std::vector<StringType> split_tokens (StringType const & s) {
-    std::vector<StringType> result;
-
-    typedef typename StringType::value_type char_type;
-    auto is_space = [](char_type c) { return pstore::isspace (c); };
-
-    auto it = std::begin (s);
-    auto end = std::end (s);
-    while (it != end) {
-        it = std::find_if_not (it, end, is_space); // skip leading whitespace
-        auto start = it;
-        it = std::find_if (it, end, is_space);
-        if (start != it) {
-            result.emplace_back (start, it);
-        }
+    inline bool isspace (wchar_t c) {
+        return std::iswspace (c) != 0;
     }
-    return result;
-}
 
-#endif // SPLIT_HPP
-// eof: unittests/dump/split.hpp
+} // namespace pstore
+
+#endif // PSTORE_SUPPORT_CTYPE_HPP
+// eof: include/pstore_support/ctype.hpp

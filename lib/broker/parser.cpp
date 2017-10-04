@@ -61,15 +61,22 @@ namespace {
     using iterator = std::string::const_iterator;
     using range = std::pair<iterator, iterator>;
 
+    auto is_space = [](char c) {
+        // std::isspace() has undefined behavior if the input value is not representable as unsigned
+        // char and not not equal to EOF.
+        auto const uc = static_cast<unsigned char> (c);
+        return std::isspace (static_cast<int> (uc)) != 0;
+    };
+
     iterator skip_ws (iterator first, iterator last) {
-        if (first != last && std::isspace (*first)) {
+        if (first != last && is_space (*first)) {
             ++first;
         }
         return first;
     }
 
     auto extract_word_no_ws (iterator first, iterator last) -> range {
-        return {first, std::find_if (first, last, [](char c) { return std::isspace (c); })};
+        return {first, std::find_if (first, last, is_space)};
     }
 
     auto extract_word (iterator first, iterator last) -> range {

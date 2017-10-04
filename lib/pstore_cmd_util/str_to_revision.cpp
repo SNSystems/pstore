@@ -41,8 +41,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
-// Copyright (c) 2015-2017 by Sony Interactive Entertainment Inc.
 /// \file str_to_revision.cpp
 /// \brief Provides str_to_revision() which is used by the utility applications to decode the user's
 /// choice of store revision number.
@@ -54,15 +52,16 @@
 #include <cctype>
 #include <climits>
 #include <cstdlib>
+#include <type_traits>
 
 #include "pstore/head_revision.hpp"
+#include "pstore_support/ctype.hpp"
 
 namespace {
     /// Returns a copy of the input string with any leading or trailing whitespace removed and all
     /// characters converted to lower-case.
     std::string trim_and_lowercase (std::string const & str) {
-        auto is_ws = [](char c) { return std::isspace (c); };
-
+        auto is_ws = [] (char c) { return pstore::isspace (c); };
         // Remove trailing whitespace.
         auto end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
         // Skip leading whitespace.
