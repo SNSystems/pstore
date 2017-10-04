@@ -1,10 +1,10 @@
-//*  _____                                     _    *
-//* |  ___| __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
-//* | |_ | '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
-//* |  _|| | | (_| | (_| | | | | | |  __/ | | | |_  *
-//* |_|  |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
-//*                 |___/                           *
-//===- lib/pstore_mcrepo/Fragment.cpp -------------------------------------===//
+//*   __                                      _    *
+//*  / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
+//* | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
+//* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
+//* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
+//*                |___/                           *
+//===- lib/pstore_mcrepo/fragment.cpp -------------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -86,4 +86,4 @@ section const & fragment::operator[] (section_type key) const {
     return *reinterpret_cast<section const *> (ptr);
 }
 
-// eof: lib/pstore_mcrepo/Fragment.cpp
+// eof: lib/pstore_mcrepo/fragment.cpp
