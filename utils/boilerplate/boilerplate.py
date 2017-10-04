@@ -199,13 +199,18 @@ def boilerplate (path, base_path, comment_char=None, figlet_enabled=True):
     with open (path) as f:
         lines = f.readlines ()
 
+    shebang = lines [0] if len (lines) > 0 and lines [0] [:2] == '#!' else None
+    if shebang is not None:
+        del lines [0]
+
     # Remove any leading and trailing blank lines and comments
-    has_shebang = len (lines) > 0 and lines [0] [:2] == '#!'
-    lines = strip_lines (lines, 1 if has_shebang else 0, comment_char)
+    lines = strip_lines (lines, 0, comment_char)
     lines = strip_lines (lines, -1, comment_char)
 
     tu_name = tu_name_from_path (subpath)
-    prolog = [lines [0]] if has_shebang else []
+    prolog = []
+    if shebang is not None:
+        prolog += [ shebang ]
 
     if figlet_enabled:
         prolog += figlet (tu_name, comment_char)
