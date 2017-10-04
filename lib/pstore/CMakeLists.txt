@@ -5,14 +5,14 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/pstore/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+# Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
-# 
-# Developed by: 
-#   Toolchain Team 
-#   SN Systems, Ltd. 
+#
+# Developed by:
+#   Toolchain Team
+#   SN Systems, Ltd.
 #   www.snsystems.com
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # - Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimers.
-# 
+#
 # - Redistributions in binary form must reproduce the above copyright
 #   notice, this list of conditions and the following disclaimers in the
 #   documentation and/or other materials provided with the distribution.
-# 
+#
 # - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 #   Inc. nor the names of its contributors may be used to endorse or
 #   promote products derived from this Software without specific prior
 #   written permission.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -155,16 +155,16 @@ source_group (serialize FILES ${PSTORE_SERIALIZE_SRC})
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)
-    #set (LLVM_REQUIRES_EH Yes)
+    #set (LLVM_REQUIRES_EH Yes) # Can these be removed?
     #set (LLVM_REQUIRES_RTTI Yes)
 
     add_pstore_library (pstore STATIC
         ${PSTORE_SRC}
-  
+
         ADDITIONAL_HEADER_DIRS
         "${PSTORE_PUBLIC_INCLUDE_DIR}"
     )
-    #target_include_directories (pstore PUBLIC "${PSTORE_ROOT_DIR}/include")
+    #target_include_directories (pstore PUBLIC "${PSTORE_ROOT_DIR}/include") # And this?
     target_include_directories (pstore PUBLIC
         $<BUILD_INTERFACE:${PSTORE_PUBLIC_INCLUDE_DIR}/..>
         $<INSTALL_INTERFACE:include>

@@ -5,14 +5,14 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/CMakeLists.txt ------------------------------------------------===//
-# Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+# Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
-# 
-# Developed by: 
-#   Toolchain Team 
-#   SN Systems, Ltd. 
+#
+# Developed by:
+#   Toolchain Team
+#   SN Systems, Ltd.
 #   www.snsystems.com
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 # distribute, sublicense, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # - Redistributions of source code must retain the above copyright notice,
 #   this list of conditions and the following disclaimers.
-# 
+#
 # - Redistributions in binary form must reproduce the above copyright
 #   notice, this list of conditions and the following disclaimers in the
 #   documentation and/or other materials provided with the distribution.
-# 
+#
 # - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 #   Inc. nor the names of its contributors may be used to endorse or
 #   promote products derived from this Software without specific prior
 #   written permission.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -41,14 +41,14 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (broker)
+add_subdirectory (broker) # Comment here? and for write?
 add_subdirectory (broker_poker) # A utility for exercising the broker agent.
 add_subdirectory (dump)         # Dumps pstore contents as YAML.
 add_subdirectory (hamt_test)    # A utility to check the HAMT index
 add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz DOT graphs.
 add_subdirectory (inserter)     # A utility to exercise the digest index
 add_subdirectory (mangle)       # A simple file fuzzing utility
-add_subdirectory (read)         # A utility for reading the write or strings index. 
+add_subdirectory (read)         # A utility for reading the write or strings index.
 add_subdirectory (sieve)        # A utility to generate data for the system tests
 add_subdirectory (vacuum)       # Data store garbage collector utility
 add_subdirectory (write)
