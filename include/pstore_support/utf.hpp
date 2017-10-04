@@ -53,6 +53,8 @@
 #include <cstddef>
 #include <string>
 
+#include "pstore_support/portab.hpp"
+
 #include "pstore_support/gsl.hpp"
 
 #if defined(_WIN32)
