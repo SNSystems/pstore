@@ -76,14 +76,10 @@
 #include <limits>
 #include <ostream>
 
-//#include "pstore_support/file.hpp"
 #include "pstore/address.hpp"
 #include "pstore/serialize/types.hpp"
 #include "pstore/uuid.hpp"
-
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert (x, #x)
-#endif
+#include "pstore_support/portab.hpp"
 
 namespace pstore {
 
@@ -102,9 +98,9 @@ namespace pstore {
         std::uint64_t size = UINT64_C (0);
     };
 
-    STATIC_ASSERT (offsetof (record, addr) == 0);
-    STATIC_ASSERT (offsetof (record, size) == 8);
-    STATIC_ASSERT (sizeof (record) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (record, addr) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (record, size) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (record) == 16);
 
     inline std::ostream & operator<< (std::ostream & os, record const & r) {
         return os << "{addr:" << r.addr << ",size:" << r.size << "}";
@@ -186,19 +182,19 @@ namespace pstore {
         std::atomic<address> footer_pos;
     };
 
-    STATIC_ASSERT (offsetof (header::body, signature1) == 0);
-    STATIC_ASSERT (offsetof (header::body, signature2) == 4);
-    STATIC_ASSERT (offsetof (header::body, version) == 8);
-    STATIC_ASSERT (offsetof (header::body, header_size) == 12);
-    STATIC_ASSERT (offsetof (header::body, uuid) == 16);
-    STATIC_ASSERT (sizeof (header::body) == 32);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, signature1) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, signature2) == 4);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, version) == 8);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, header_size) == 12);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, uuid) == 16);
+    PSTORE_STATIC_ASSERT (sizeof (header::body) == 32);
 
-    STATIC_ASSERT (offsetof (header, a) == 0);
-    STATIC_ASSERT (offsetof (header, crc) == 32);
-    STATIC_ASSERT (offsetof (header, unused2) == 40);
-    STATIC_ASSERT (offsetof (header, footer_pos) == 48);
-    STATIC_ASSERT (alignof (header) == 8);
-    STATIC_ASSERT (sizeof (header) == 56);
+    PSTORE_STATIC_ASSERT (offsetof (header, a) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (header, crc) == 32);
+    PSTORE_STATIC_ASSERT (offsetof (header, unused2) == 40);
+    PSTORE_STATIC_ASSERT (offsetof (header, footer_pos) == 48);
+    PSTORE_STATIC_ASSERT (alignof (header) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (header) == 56);
 
 
     class database;
@@ -269,22 +265,23 @@ namespace pstore {
         std::array<std::uint8_t, 8> signature2 = default_signature2;
     };
 
-    STATIC_ASSERT (offsetof (trailer::body, signature1) == 0);
-    STATIC_ASSERT (offsetof (trailer::body, generation) == 8);
-    STATIC_ASSERT (offsetof (trailer::body, unused1) == 12);
-    STATIC_ASSERT (offsetof (trailer::body, size) == 16);
-    STATIC_ASSERT (offsetof (trailer::body, time) == 24);
-    STATIC_ASSERT (offsetof (trailer::body, prev_generation) == 32);
-    STATIC_ASSERT (offsetof (trailer::body, index_records) == 40);
-    STATIC_ASSERT (offsetof (trailer::body, unused2) == 72);
-    STATIC_ASSERT (offsetof (trailer::body, unused3) == 76);
-    STATIC_ASSERT (sizeof (trailer::body) == 80);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, signature1) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, generation) == 8);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused1) == 12);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, size) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, time) == 24);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, prev_generation) == 32);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, index_records) == 40);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused2) == 72);
+    PSTORE_STATIC_ASSERT (offsetof (trailer::body, unused3) == 76);
+    PSTORE_STATIC_ASSERT (sizeof (trailer::body) == 80);
 
-    STATIC_ASSERT (offsetof (trailer, a) == 0);
-    STATIC_ASSERT (offsetof (trailer, crc) == 80);
-    STATIC_ASSERT (offsetof (trailer, signature2) == 88);
-    STATIC_ASSERT (alignof (trailer) == 8);
-    STATIC_ASSERT (sizeof (trailer) == 96);
+    PSTORE_STATIC_ASSERT (offsetof (trailer, a) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (trailer, crc) == 80);
+    PSTORE_STATIC_ASSERT (offsetof (trailer, signature2) == 88);
+    PSTORE_STATIC_ASSERT (alignof (trailer) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (trailer) == 96);
+
 } // namespace pstore
 #endif // PSTORE_FILE_HEADER_HPP
 // eof: include/pstore/file_header.hpp

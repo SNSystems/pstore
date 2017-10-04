@@ -235,8 +235,8 @@ TEST_F (EmptyStore, GetLocationOverflows) {
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     auto const addr = std::numeric_limits<pstore::address>::max ();
-    STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
-                   std::numeric_limits<std::uint64_t>::max ());
+    PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
+                          std::numeric_limits<std::uint64_t>::max ());
     std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
     ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
     check_for_error ([&] () {
@@ -281,7 +281,7 @@ TEST_F (EmptyStore, Allocate16BytesAligned1024) {
 
     constexpr unsigned size = 16;
     constexpr unsigned align = 1024;
-    STATIC_ASSERT (align > sizeof (pstore::header) + sizeof (pstore::trailer));
+    PSTORE_STATIC_ASSERT (align > sizeof (pstore::header) + sizeof (pstore::trailer));
 
     pstore::address addr = db.allocate (lock, size, align);
     EXPECT_EQ (0U, addr.absolute () % align);

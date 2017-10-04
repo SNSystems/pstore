@@ -48,10 +48,7 @@
 #include "pstore/address.hpp"
 #include "pstore/make_unique.hpp"
 #include "pstore/region.hpp"
-
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert (x, #x)
-#endif
+#include "pstore_support/portab.hpp"
 
 namespace pstore {
     template <typename Ty, typename = typename std::enable_if<std::is_unsigned<Ty>::value>>
@@ -96,7 +93,7 @@ namespace pstore {
         static auto constexpr full_region_size = UINT64_C (1) << 32; // 4 Gigabytes
         static auto constexpr min_region_size = UINT64_C (1) << 22;  // 4 Megabytes
         // Check that full_region_size is a multiple of min_region_size
-        STATIC_ASSERT (full_region_size % min_region_size == 0);
+        PSTORE_STATIC_ASSERT (full_region_size % min_region_size == 0);
 
         using region_container = std::vector<region::memory_mapper_ptr>;
 
@@ -235,8 +232,8 @@ namespace pstore {
     void storage::copy (address addr, std::size_t size, typename Traits::temp_pointer p,
                         Function copier) const {
 
-        STATIC_ASSERT (std::numeric_limits<std::size_t>::max () <=
-                       std::numeric_limits<std::uint64_t>::max ());
+        PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () <=
+                              std::numeric_limits<std::uint64_t>::max ());
         address::segment_type segment = addr.segment ();
         assert (segment < sat_elements);
         sat_entry const & segment_pointer = (*sat_)[segment];

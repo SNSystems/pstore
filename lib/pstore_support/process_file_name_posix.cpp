@@ -48,12 +48,9 @@
 #if !defined(_WIN32)
 
 #include "pstore_support/error.hpp"
+#include "pstore_support/portab.hpp"
 #include "pstore_support/small_vector.hpp"
 #include "support_config.hpp"
-
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert (x, #x)
-#endif
 
 #if PSTORE_HAVE_NSGETEXECUTABLEPATH
 
@@ -131,8 +128,8 @@ namespace pstore {
                 str << "readlink() of \"" << path << "\" failed";
                 raise (errno_erc{error}, str.str ());
             }
-            STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
-                           std::numeric_limits<ssize_t>::max ());
+            PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
+                                  std::numeric_limits<ssize_t>::max ());
             return static_cast<std::size_t> (num_chars);
         };
 

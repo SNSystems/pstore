@@ -164,7 +164,7 @@ auto & error_stream =
             raise (pstore::errno_erc{errno}, str.str ());
         }
 
-        STATIC_ASSERT (sizeof (buf.st_size) == sizeof (std::uint64_t));
+        PSTORE_STATIC_ASSERT (sizeof (buf.st_size) == sizeof (std::uint64_t));
         assert (buf.st_size >= 0);
         return static_cast<std::uint64_t> (buf.st_size);
     }

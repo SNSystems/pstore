@@ -57,11 +57,6 @@
 #include "pstore_support/error.hpp"
 #include "pstore_support/random.hpp"
 
-// FIXME: copied from any number of places.
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert (x, #x)
-#endif
-
 #ifdef __clang__
 #define PSTORE_FALLTHROUGH [[clang::fallthrough]]
 #else
@@ -164,13 +159,13 @@ namespace pstore {
         assert (std::distance (std::begin (data_), out) +
                     std::distance (std::begin (u.Data4), std::end (u.Data4)) ==
                 elements);
-        STATIC_ASSERT (sizeof (u.Data4[0]) == sizeof (std::uint8_t));
+        PSTORE_STATIC_ASSERT (sizeof (u.Data4[0]) == sizeof (std::uint8_t));
         std::copy (std::begin (u.Data4), std::end (u.Data4), out);
     }
 #elif defined(__APPLE__)
     uuid::uuid (uuid_t const & bytes) {
-        STATIC_ASSERT (sizeof (bytes[0]) == sizeof (value_type));
-        STATIC_ASSERT (sizeof (bytes) / sizeof (bytes[0]) == elements);
+        PSTORE_STATIC_ASSERT (sizeof (bytes[0]) == sizeof (value_type));
+        PSTORE_STATIC_ASSERT (sizeof (bytes) / sizeof (bytes[0]) == elements);
         std::copy (std::begin (bytes), std::end (bytes), data_.begin ());
     }
 #endif

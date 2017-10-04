@@ -242,12 +242,12 @@ namespace pstore {
             };
 
 
-            STATIC_ASSERT (sizeof (index_pointer) == 8);
-            STATIC_ASSERT (offsetof (index_pointer, addr) == 0);
-            STATIC_ASSERT (sizeof (index_pointer::internal) == sizeof (index_pointer::addr));
-            STATIC_ASSERT (offsetof (index_pointer, internal) == 0);
-            STATIC_ASSERT (sizeof (index_pointer::linear) == sizeof (index_pointer::addr));
-            STATIC_ASSERT (offsetof (index_pointer, linear) == 0);
+            PSTORE_STATIC_ASSERT (sizeof (index_pointer) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (index_pointer, addr) == 0);
+            PSTORE_STATIC_ASSERT (sizeof (index_pointer::internal) == sizeof (index_pointer::addr));
+            PSTORE_STATIC_ASSERT (offsetof (index_pointer, internal) == 0);
+            PSTORE_STATIC_ASSERT (sizeof (index_pointer::linear) == sizeof (index_pointer::addr));
+            PSTORE_STATIC_ASSERT (offsetof (index_pointer, linear) == 0);
 
 
             //*                         _     _                   *

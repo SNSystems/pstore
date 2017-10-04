@@ -423,7 +423,7 @@ namespace pstore {
     template <typename LockGuard>
     template <typename Ty>
     inline auto transaction<LockGuard>::getro (address const & sop) -> std::shared_ptr<Ty const> {
-        STATIC_ASSERT (std::is_standard_layout<Ty>::value);
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value);
         return db_.getro<Ty const> (sop);
     }
 

@@ -77,8 +77,8 @@ namespace pstore {
     header::header ()
             : footer_pos () {
 
-        STATIC_ASSERT (sizeof (file_signature1[0]) == sizeof (a.signature1[0]));
-        STATIC_ASSERT (sizeof (file_signature1) == sizeof (a.signature1));
+        PSTORE_STATIC_ASSERT (sizeof (file_signature1[0]) == sizeof (a.signature1[0]));
+        PSTORE_STATIC_ASSERT (sizeof (file_signature1) == sizeof (a.signature1));
         assert (footer_pos.is_lock_free ());
 
         a.signature1 = file_signature1;

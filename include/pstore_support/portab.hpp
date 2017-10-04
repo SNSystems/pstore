@@ -88,6 +88,11 @@
     #endif
 #endif
 
+#ifndef PSTORE_STATIC_ASSERT
+/// A single-argument version of static_assert. Remove once we can run the compiler in C++14 mode.
+#define PSTORE_STATIC_ASSERT(x) static_assert (x, #x)
+#endif
+
 #endif // PSTORE_SUPPORT_PORTAB_HPP
 //eof:include/pstore_support/portab.hpp
 

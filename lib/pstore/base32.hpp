@@ -56,10 +56,7 @@
 #include <type_traits>
 
 #include "pstore/uint128.hpp"
-
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert ((x), #x)
-#endif
+#include "pstore_support/portab.hpp"
 
 namespace pstore {
     namespace base32 {
@@ -72,7 +69,7 @@ namespace pstore {
         /// the resulting output has the least significant digit first.
         template <typename IntType, typename OutputIterator>
         OutputIterator convert (IntType val, OutputIterator out) {
-            STATIC_ASSERT (std::is_unsigned<IntType>::value);
+            PSTORE_STATIC_ASSERT (std::is_unsigned<IntType>::value);
             constexpr auto mask = (1U << 5) - 1U;
             assert (mask == alphabet.size () - 1U);
             do {

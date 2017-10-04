@@ -53,16 +53,13 @@
 #include <cstdlib> // abort
 #include <string>
 
+#include "pstore_support/portab.hpp"
+
 #if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <Rpc.h>
 #elif defined(__APPLE__)
 #include <uuid/uuid.h>
-#endif
-
-// FIXME: copied from any number of places.
-#ifndef STATIC_ASSERT
-#define STATIC_ASSERT(x) static_assert ((x), #x)
 #endif
 
 namespace pstore {
@@ -166,8 +163,8 @@ namespace pstore {
             return static_cast<std::uint8_t> ((t >> (num * 8)) & 0xff);
         }
     };
-    STATIC_ASSERT (std::is_standard_layout<uuid>::value);
-    STATIC_ASSERT (sizeof (uuid) == 16);
+    PSTORE_STATIC_ASSERT (std::is_standard_layout<uuid>::value);
+    PSTORE_STATIC_ASSERT (sizeof (uuid) == 16);
 
     std::ostream & operator<< (std::ostream & os, uuid::version_type v);
     std::ostream & operator<< (std::ostream & os, uuid::variant_type v);

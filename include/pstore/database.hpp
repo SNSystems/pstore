@@ -604,7 +604,7 @@ namespace pstore {
     template <typename Ty>
     auto database::getrw (address addr, std::size_t elements) -> std::shared_ptr<Ty> {
         assert (addr.absolute () % alignof (Ty) == 0);
-        STATIC_ASSERT (std::is_standard_layout<Ty>::value);
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value);
         auto const size = sizeof (Ty) * elements;
         std::shared_ptr<void> result = this->getrw (addr, size);
         return std::static_pointer_cast<Ty> (result);
