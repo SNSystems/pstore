@@ -66,7 +66,7 @@ class recorder;
 class scavenger;
 
 /// A class which is responsible for managing the command queue and which provides the
-/// thread_entry() funtion for pulling commands from the queue and executing them.
+/// thread_entry() function for pulling commands from the queue and executing them.
 class command_processor {
 public:
     explicit command_processor (unsigned const num_read_threads)

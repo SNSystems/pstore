@@ -47,7 +47,10 @@ int main () {
     auto const key = std::string{"key"};
     auto const value = std::string{"hello world\n"};
 
+    // Clarify literal 'true' parameter.
     pstore::database db ("./write_example.db", true);
+    // Could be worth calling this something more descriptive than 't' for the
+    // example.
     auto t = pstore::begin (db); // Start a transaction
 
     {

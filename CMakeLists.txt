@@ -50,12 +50,15 @@
 #
 # Copyright (c) 2015-2016 by Sony Interactive Entertainment, Inc.
 
+# Missing the full spiel here?
+
 cmake_minimum_required (VERSION 3.1)
 
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
 # Set to YES (or NO) to enable (or disable) building with clang on Linux.
 # TODO: allow this to be controlled from the outside world.
+# I don't think it will be hard to do this and get rid of the TODO.
 if (UNIX AND NOT APPLE)
   set (FORCE_CLANG NO)
 endif ()
@@ -129,6 +132,7 @@ set (PSTORE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 
 if (FORCE_CLANG)
+    # Could these flag variants be under options rather than commented out?
     set (CLANG_SANITIZER_FLAGS  "-fsanitize=undefined,address")
     #set (CLANG_SANITIZER_FLAGS  "-fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins  -I/media/psf/Home/realwork/libcxx_msan/include -I/media/psf/Home/realwork/libcxx_msan/include/c++/v1 -Wno-reserved-id-macro -Wno-deprecated")
     set (CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CLANG_SANITIZER_FLAGS}")
@@ -176,6 +180,8 @@ if (NOT DEFINED PSTORE_VENDOR_ID)
 endif ()
 
 
+# You also worked this out earlier in a different way before calling
+# project(pstore).
 # Try to work out whether the pstore library is being built inside the
 # larger LLVM framework or if it's a standalone build.
 
@@ -185,12 +191,12 @@ if (LLVM_MAIN_SRC_DIR)
 endif ()
 
 
-
+# Some fixes and suggestions inline:
 # The pstore header and footer structures include crc32 values as an aid to validation:
-# if the CRC value doesn't match then the structure is not valid. However, is the CRC
+# if the CRC value doesn't match then the structure is not valid. However, if the CRC
 # does match then this is not an absolute guarantee that the remaining fields can be
-# trusted. For this reason. it's possible to build with the CRC checks disabled to make
-# finding bugs in the validity checks quicker and easier.
+# trusted. For this reason, it's possible to build with the CRC checks disabled to make
+# finding bugs in the validity checks (e.g. fuzzing) quicker and easier.
 option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and footer records. Disable for fuzzing." Yes)
 
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
@@ -198,7 +204,7 @@ option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to beh
 
 
 #
-# If we're using the a fuzzing library (e.g. American Fuzzy Lop)
+# If we're using the fuzzing library (e.g. American Fuzzy Lop)
 # disable the library's CRC validation checks and create the
 # smallest files that we can to reduce the wasted work that the
 # tool will need to perform.

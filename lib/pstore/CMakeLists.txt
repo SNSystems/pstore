@@ -155,16 +155,16 @@ source_group (serialize FILES ${PSTORE_SERIALIZE_SRC})
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)
-    #set (LLVM_REQUIRES_EH Yes)
+    #set (LLVM_REQUIRES_EH Yes) # Can these be removed?
     #set (LLVM_REQUIRES_RTTI Yes)
 
     add_pstore_library (pstore STATIC
         ${PSTORE_SRC}
-  
+
         ADDITIONAL_HEADER_DIRS
         "${PSTORE_PUBLIC_INCLUDE_DIR}"
     )
-    #target_include_directories (pstore PUBLIC "${PSTORE_ROOT_DIR}/include")
+    #target_include_directories (pstore PUBLIC "${PSTORE_ROOT_DIR}/include") # And this?
     target_include_directories (pstore PUBLIC
         $<BUILD_INTERFACE:${PSTORE_PUBLIC_INCLUDE_DIR}/..>
         $<INSTALL_INTERFACE:include>

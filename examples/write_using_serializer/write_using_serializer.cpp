@@ -55,7 +55,10 @@ int main () {
     auto const key = std::string{"key"};
     auto const value = std::string{"hello world\n"};
 
+    // Clarify literal 'true' parameter.
     database db ("./write_using_serializer.db", true);
+    // Could be worth calling this something more descriptive than 't' for the
+    // example.
     auto t = begin (db); // Start a transaction
 
     {

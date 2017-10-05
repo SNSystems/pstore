@@ -72,11 +72,11 @@ public:
     bool presentr (Right const & b) const;
 
     // Search the 'left' entries in the bimap for value l2 which is a type implicitly convertable to
-    // Left.
+    // Left. // Out of sync with implementation comments below>
     template <typename L2>
     void erasel (L2 const & l2);
     // Search the 'right' entries in the bimap for value r2 which is a type implicitly convertable
-    // to Right.
+    // to Right. // Out of sync with implementation comments below>
     template <typename R2>
     void eraser (R2 const & r2);
 

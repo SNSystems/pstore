@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
- //*   __ _ _                        _       *
+ //*   __ _ _                        _       * // Duplicate title?
 //*  / _(_) | ___   _ __   ___  ___(_)_  __ *
 //* | |_| | |/ _ \ | '_ \ / _ \/ __| \ \/ / *
 //* |  _| | |  __/ | |_) | (_) \__ \ |>  <  *
@@ -140,7 +140,7 @@ namespace pstore {
         void file_handle::open (unique, std::string const & directory) {
             this->close ();
 
-            // assert (path::is_directory (directory));
+            // assert (path::is_directory (directory)); // Is this needed?
             // TODO: path::join should be able to write to a back_inserter so that we can avoid this
             // intermediate string object.
             std::string const path = path::join (directory, "pst-XXXXXX");

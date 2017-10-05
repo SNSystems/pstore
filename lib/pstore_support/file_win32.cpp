@@ -422,9 +422,8 @@ namespace pstore {
                                     &overlapped); // "overlapped"
             if (!ok) {
                 // If the LOCKFILE_FAIL_IMMEDIATELY flag is specified and an exclusive lock is
-                // requested for a range of a file
-                // that already has a shared or exclusive lock, the function returns the error
-                // ERROR_IO_PENDING.
+                // requested for a range of a file that already has a shared or exclusive lock,
+                // the function returns the error ERROR_IO_PENDING.
                 DWORD const last_error = ::GetLastError ();
                 if (block == blocking_mode::non_blocking && last_error == ERROR_IO_PENDING) {
                     got_lock = false;

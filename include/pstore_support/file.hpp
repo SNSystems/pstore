@@ -80,13 +80,12 @@ namespace pstore {
             // name_from_template
             // ~~~~~~~~~~~~~~~~~~
             /// \brief The name_from_template() function takes the given file name template and
-            /// returns a string where a portion of it to create a file name.
+            /// returns a string ???where a portion of it to create a file name???.
             ///
             /// The template may be any file name with some number of `Xs' appended to it, for
             /// example /tmp/temp.XXXXXX. The trailing `Xs' are replaced with a unique alphanumeric
             /// combination. The number of unique file names mktemp() can return depends on the
-            /// number of `Xs'
-            /// provided.
+            /// number of `Xs' provided.
             ///
             /// \tparam RandomGenerator  A Callable object with the signature equivalent to
             /// std::function<unsigned(unsigned). The function's result must be in the range 0
@@ -94,9 +93,8 @@ namespace pstore {
             ///
             /// \param tmpl  A template string which forms the basis for the result string. Any
             /// trailing X characters are replaced by characters derived from the result of the
-            /// `rng`
-            /// function.
-            /// \param rng  A random number generator function which
+            /// `rng` function.
+            /// \param rng  A random number generator function which ...
             ///
             /// \return A string derived from the `tmpl` argument but with trailing 'X's replaced by
             /// random characters from.
@@ -117,6 +115,7 @@ namespace pstore {
                 /// Replace the sequence of 'X's with random characters.
                 auto num_x = std::distance (it.base (), tmpl.end ());
                 while (num_x--) {
+                    // Add capital letters for more unique names?
                     static std::string const alphabet{"abcdefghijklmnopqrstuvwxyz0123456789_"};
 
                     auto const index = rng (static_cast<unsigned> (alphabet.length ()));
@@ -147,7 +146,7 @@ namespace pstore {
             /// callback.
             /// \param size  The total number of bytes to be processed.
             /// \param function  This function is called repeatedly to operate on each portion of
-            /// the with the buffer parameter
+            /// the buffer parameter
             /// \return The sum of the values returned by `function`.
             template <typename WidthType, typename PointeeType, typename Function>
             std::size_t split (PointeeType * buffer, std::size_t size, Function const & function) {
@@ -232,9 +231,10 @@ namespace pstore {
             /// \brief Obtains the current value of the position indicator for the file.
             virtual std::uint64_t tell () = 0;
 
+            /// Doc comment?
             virtual std::time_t latest_time () const = 0;
 
-        public:
+        public: // <-- duplicate public
             ///@{
             /// \brief Reads instances of a standard-layout type from the file.
 
@@ -395,7 +395,7 @@ namespace pstore {
         ///
         /// The behavior of the program is undefined if a range lock is destroyed while still owned.
         /// The range_lock class satisfies all requirements of Lockable and StandardLayoutType; it
-        /// is neither copyable nor movable.
+        /// is neither copyable nor movable. // It is movable.
         ///
         /// \note range_lock is usually not accessed directly: std::unique_lock and std::lock_guard
         /// are used to manage locking in exception-safe manner. The class is a relatively thin
@@ -445,6 +445,12 @@ namespace pstore {
 
             /// \brief Releases the file range lock which should be previously be locked by a call
             /// to lock() or try_lock().
+
+            /// It might be better to clarify that nothing happens if the lock
+            /// isn't locked. When I see "should" my first thought is
+            /// "what happens if I don't". Or assert in the impl and change this
+            /// comment to "must".
+
             /// Throws no exceptions.
             /// FIXME: Throws no exceptions.
             void unlock ();
@@ -558,7 +564,7 @@ namespace pstore {
 
             bool lock (std::uint64_t /*offset*/, std::size_t /*size*/, lock_kind /*lt*/,
                        blocking_mode /*bl*/) override {
-                return true;
+                return true; // This needs a comment or to be implemented or something.
             }
             void unlock (std::uint64_t /*offset*/, std::size_t /*size*/) override {}
 
@@ -642,7 +648,7 @@ namespace pstore {
             /// \enum writable_mode
             /// \brief Controls whether the file_handle constructor produces a read-only or
             /// read/write object.
-            enum class writable_mode {
+            enum class writable_mode { // Why not use this for in_memory as well?
                 read_only,
                 read_write,
             };
