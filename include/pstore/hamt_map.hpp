@@ -5,14 +5,14 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/  *
 //*                                             |_|     *
 //===- include/pstore/hamt_map.hpp ----------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc. 
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
-// 
-// Developed by: 
-//   Toolchain Team 
-//   SN Systems, Ltd. 
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
 //   www.snsystems.com
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the
 // "Software"), to deal with the Software without restriction, including
@@ -20,19 +20,19 @@
 // distribute, sublicense, and/or sell copies of the Software, and to
 // permit persons to whom the Software is furnished to do so, subject to
 // the following conditions:
-// 
+//
 // - Redistributions of source code must retain the above copyright notice,
 //   this list of conditions and the following disclaimers.
-// 
+//
 // - Redistributions in binary form must reproduce the above copyright
 //   notice, this list of conditions and the following disclaimers in the
 //   documentation and/or other materials provided with the distribution.
-// 
+//
 // - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
 //   Inc. nor the names of its contributors may be used to endorse or
 //   promote products derived from this Software without specific prior
 //   written permission.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 // OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 // MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -202,7 +202,7 @@ namespace pstore {
             using iterator = iterator_base<false>;
             using const_iterator = iterator_base<true>;
 
-            /// A associative container that contains key-value pairs with unique keys.
+            /// An associative container that contains key-value pairs with unique keys.
             ///
             /// \param db A database which will contain the result of the hamt_map.
             /// \param ip An index root address.
@@ -272,13 +272,13 @@ namespace pstore {
             auto insert (transaction<LockType> & transaction, value_type const & value)
                 -> std::pair<iterator, bool>;
 
-            /// A top-level function of inserting a node into a hamt_map. All iterators are
+            /// A top-level function for inserting a node into a hamt_map. All iterators are
             /// invalidated.
             template <typename LockType>
             auto insert_or_assign (transaction<LockType> & transaction, value_type const & value)
                 -> std::pair<iterator, bool>;
 
-            /// A public function API of inserting a node into a hamt_map. All iterators are
+            /// A public function API for inserting a node into a hamt_map. All iterators are
             /// invalidated.
             template <typename LockType>
             auto insert_or_assign (transaction<LockType> & transaction, KeyType const & key,
