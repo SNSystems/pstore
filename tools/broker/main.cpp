@@ -94,6 +94,19 @@ namespace {
         return fut;
     }
 
+    /// Creates a weak_ptr from a shared_ptr. This can be done implicitly, but I want to make the
+    /// conversion
+    /// explicit.
+    template <typename T>
+    std::weak_ptr<T> make_weak (std::shared_ptr<T> const & p) {
+        return {p};
+    }
+
+    void thread_init (std::string const & name) {
+        pstore::threads::set_name (name.c_str ());
+        pstore::logging::create_log_stream ("broker." + name);
+    }
+
 } // end anonymous namespace
 
 #if defined(_WIN32)
@@ -101,7 +114,6 @@ int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif
-    int exit_code = EXIT_SUCCESS;
     try {
         pstore::threads::set_name ("main");
         pstore::logging::create_log_stream ("broker.main");
@@ -124,7 +136,7 @@ int main (int argc, char * argv[]) {
         // auto const path = std::make_unique<fifo_path> ();
         pstore::logging::log (pstore::logging::priority::notice, "opening pipe");
 
-        pstore::broker::fifo_path fifo;
+        pstore::broker::fifo_path fifo {opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
         auto commands = std::make_shared<command_processor> (num_read_threads);
@@ -132,26 +144,23 @@ int main (int argc, char * argv[]) {
         commands->attach_scavenger (scav);
 
         pstore::logging::log (pstore::logging::priority::notice, "starting threads");
-        std::thread quit = create_quit_thread (commands, scav, num_read_threads);
+        std::thread quit =
+            create_quit_thread (make_weak (commands), make_weak (scav), num_read_threads);
 
         futures.push_back (create_thread ([&fifo, &commands]() {
-            pstore::threads::set_name ("command");
-            pstore::logging::create_log_stream ("broker.command");
+            thread_init ("command");
             commands->thread_entry (fifo);
         }));
 
         futures.push_back (create_thread ([&commands, &scav]() {
-            pstore::threads::set_name ("scavenger");
-            pstore::logging::create_log_stream ("broker.scavenger");
+            thread_init ("scavenger");
             scav->thread_entry ();
         }));
 
         futures.push_back (create_thread ([]() {
-            pstore::threads::set_name ("gcwatch");
-            pstore::logging::create_log_stream ("broker.gcwatch");
+            thread_init ("gcwatch");
             broker::gc_process_watch_thread ();
         }));
-
 
         if (opt.playback_path) {
             player playback_file (*opt.playback_path);
@@ -171,6 +180,7 @@ int main (int argc, char * argv[]) {
 
         pstore::logging::log (pstore::logging::priority::notice, "waiting");
         for (auto & f : futures) {
+            assert (f.valid ());
             f.get ();
         }
         notify_quit_thread ();

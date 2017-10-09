@@ -59,9 +59,20 @@ import sys
 import threading
 import time
 
+IS_WINDOWS = platform.system () == 'Windows'
+
+
+# TODO: shared with broker_kill.py
+def pipe_root_dir ():
+    return r"\\.\pipe" if IS_WINDOWS else '/tmp'
+
+PIPE_PATH = os.path.join (pipe_root_dir (), 'broker1.pipe')
+
 # Arguments which will cause the broker-poker to tell the broker to echo 100
 # sequentially numbered messages to stdout before exiting.
-POKER_ARGS = ['--flood', '100', '--kill']
+POKER_ARGS = ['--flood', '100', '--kill', '--pipe-path', PIPE_PATH]
+
+BROKER_ARGS = ['--pipe-path', PIPE_PATH]
 
 # The default process timeout in seconds
 DEFAULT_PROCESS_TIMEOUT = 2 * 60.0
@@ -134,11 +145,15 @@ class TimedProcess (threading.Thread):
             raise subprocess.CalledProcessError (return_code, self.__cmd)
 
 
+# TODO: shared with broker_kill.py
 def executable (path):
-    if platform.system() == 'Windows':
+    if IS_WINDOWS:
         path += '.exe'
     return path
 
+
+
+argv0 = None
 
 def report_error (tool_name, timed_process):
     ok = True
@@ -154,7 +169,9 @@ def report_error (tool_name, timed_process):
 
 def main (argv):
     exit_code = 0
+    global argv0
     argv0 = sys.argv[0]
+
     parser = argparse.ArgumentParser (description='Test the broker by using the poker to fire messages at it.')
     parser.add_argument ('exe_path', help='The path of the pstore binaries')
     parser.add_argument ('--timeout', help='Process timeout in seconds', type=float, default=DEFAULT_PROCESS_TIMEOUT)
@@ -173,7 +190,7 @@ def main (argv):
         return 1
     
     # Start both processes and wait for them to exit.
-    cmd = [broker_path]
+    cmd = [broker_path] + BROKER_ARGS
     print ("Running broker: %s" % (cmd,), file=sys.stderr)
     broker = TimedProcess (args=cmd, timeout=args.timeout, name='broker')
     broker.start ()

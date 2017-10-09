@@ -44,6 +44,8 @@
 #ifndef PSTORE_CMD_UTIL_CL_MAYBE_HPP
 #define PSTORE_CMD_UTIL_CL_MAYBE_HPP
 
+#include <iostream>
+
 #include <cassert>
 #include <new>
 #include <stdexcept>
@@ -64,6 +66,36 @@ namespace pstore {
                 static maybe<T> nothing () {
                     return maybe ();
                 }
+
+                maybe () {}
+                maybe (T const & value) {
+                    new (&storage_) T (value);
+                    valid_ = true;
+                }
+                maybe (T && value) {
+                    new (&storage_) T (std::move (value));
+                    valid_ = true;
+                }
+
+                maybe (maybe const & rhs) {
+                    if (rhs) {
+                        new (&storage_) T (rhs.value ());
+                    }
+                    valid_ = rhs.valid_;
+                }
+
+                ~maybe () {
+                    this->reset ();
+                }
+
+                void reset () {
+                    if (valid_) {
+                        this->value ().~T ();
+                    }
+                    valid_ = false;
+                }
+                maybe & operator= (maybe <T> const & rhs);
+                maybe & operator= (T const & rhs);
 
                 T const & operator* () const {
                     return *(operator-> ());
@@ -95,40 +127,39 @@ namespace pstore {
                     return valid_ ? this->value () : default_value;
                 }
 
-            public:
-                maybe () {}
-                maybe (T const & value) {
-                    new (&storage_) T (value);
-                    valid_ = true;
-                }
-                maybe (T && value) {
-                    new (&storage_) T (std::move (value));
-                    valid_ = true;
-                }
-
-                maybe (maybe const & rhs) {
-                    if (rhs) {
-                        new (&storage_) T (rhs.value ());
-                    }
-                    valid_ = rhs.valid_;
-                }
-
-                ~maybe () {
-                    this->reset ();
-                }
-
-                void reset () {
-                    if (valid_) {
-                        this->value ().~T ();
-                    }
-                    valid_ = false;
-                }
-
             private:
                 bool valid_ = false;
                 typename std::aligned_storage<sizeof (T), alignof (T)>::type storage_;
             };
 
+            // operator=
+            // ~~~~~~~~~
+            template <typename T>
+            maybe<T> & maybe<T>::operator= (T const & rhs) {
+                if (this->has_value ()) {
+                    T temp = rhs;
+                    std::swap (this->value (), temp);
+                } else {
+                    new (&storage_) T (rhs);
+                    valid_ = true;
+                }
+                return *this;
+            }
+
+            template <typename T>
+            maybe<T> & maybe<T>::operator= (maybe <T> const & rhs) {
+                if (this != &rhs) {
+                    if (!rhs.has_value ()) {
+                        this->reset ();
+                    } else {
+                        this->operator= (rhs.value ());
+                    }
+                }
+                return *this;
+            }
+
+            // value
+            // ~~~~~
             template <typename T>
             T & maybe<T>::value () {
 #if PSTORE_CPP_EXCEPTIONS
@@ -141,11 +172,16 @@ namespace pstore {
                 return *(*this);
             }
 
+
+            // just
+            // ~~~~
             template <typename T>
             inline maybe<T> just (T const value) {
                 return {value};
             }
 
+            // nothing
+            // ~~~~~~~
             template <typename T>
             inline maybe<T> nothing () {
                 return maybe<T>::nothing ();

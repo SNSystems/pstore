@@ -66,42 +66,108 @@
 #include "broker/quit.hpp"
 #include "broker/recorder.hpp"
 
+// ctor
+// ~~~~
+command_processor::command_processor (unsigned const num_read_threads)
+        : num_read_threads_{num_read_threads} {
+
+    assert (std::is_sorted (std::begin (commands_), std::end (commands_), command_entry_compare));
+}
+
+// suicide
+// ~~~~~~~
+void command_processor::suicide (pstore::broker::fifo_path const &,
+                                 broker::broker_command const &) {
+    std::shared_ptr<scavenger> scav = scavenger_.get ();
+    shutdown (this, scav.get (), -1, num_read_threads_);
+}
+
+// quit
+// ~~~~
+void command_processor::quit (pstore::broker::fifo_path const & fifo,
+                              broker::broker_command const &) {
+    // Shut down a single pipe-reader thread if the 'done' flag has been set by a call to
+    // shutdown().
+    if (!done) {
+        this->log ("_QUIT ignored: not shutting down");
+    } else {
+        this->log ("waking one reader thread");
+
+        // Post a message back to one of the read-loop threads. Since 'done' is now true, it
+        // will exit as soon as it is woken up by the presence of the new data (the content
+        // of the message doesn't matter at all).
+        pstore::broker::writer wr (fifo);
+        wr.write (pstore::broker::message_type{}, true /*issue error on timeout*/);
+    }
+}
+
+// cquit
+// ~~~~~
+void command_processor::cquit (pstore::broker::fifo_path const &,
+                               broker::broker_command const &) {
+    commands_done_ = true;
+}
+
+// gc
+// ~~
+void command_processor::gc (pstore::broker::fifo_path const &,
+                            broker::broker_command const & c) {
+    broker::start_vacuum (c.path);
+}
+
+// echo
+// ~~~~
+void command_processor::echo (pstore::broker::fifo_path const &,
+                              broker::broker_command const & c) {
+    std::printf ("ECHO:%s\n", c.path.c_str ());
+}
+
+// nop
+// ~~~
+void command_processor::nop (pstore::broker::fifo_path const &,
+                             broker::broker_command const &) {}
+
+// unknown
+// ~~~~~~~
+void command_processor::unknown (broker::broker_command const & c) const {
+    pstore::logging::log (pstore::logging::priority::error, "unknown verb:", c.verb);
+}
+
+
+// log
+// ~~~
+void command_processor::log (broker::broker_command const & c) const {
+    pstore::logging::log (pstore::logging::priority::info, "verb:", c.verb, " path:",
+                          c.path.substr (0, 32));
+}
+
+void command_processor::log (pstore::gsl::czstring str) const {
+    pstore::logging::log (pstore::logging::priority::info, str);
+}
+
+std::array<command_processor::command_entry, 6> const command_processor::commands_{{
+    {"ECHO", &command_processor::echo},
+    {"GC", &command_processor::gc},
+    {"NOP", &command_processor::nop},
+    {"SUICIDE", &command_processor::suicide}, // initiate the broker shutdown.
+    {"_CQUIT", &command_processor::cquit}, // exit this command processor thread.
+    {"_QUIT", &command_processor::quit}, //  shut down a single pipe-reader thread.
+}};
+
 // process_command
 // ~~~~~~~~~~~~~~~
 void command_processor::process_command (pstore::broker::fifo_path const & fifo,
                                          pstore::broker::message_type const & msg) {
-
     auto const command = this->parse (msg);
     if (broker::broker_command const * const c = command.get ()) {
-        pstore::logging::log (pstore::logging::priority::info, "verb:", c->verb, " path:",
-                              c->path.substr (0, 32));
-
-        if (c->verb == "SUICIDE") {
-            std::shared_ptr<scavenger> scav = scavenger_.get ();
-            shutdown (this, scav.get (), -1, num_read_threads_);
-        } else if (c->verb == "_QUIT") {
-            // Shut down a single pipe-reader thread if the 'done' flag has been set by a call to
-            // shutdown().
-            if (!done) {
-                pstore::logging::log (pstore::logging::priority::info,
-                                      "_QUIT ignored: not shutting down");
-            } else {
-                pstore::logging::log (pstore::logging::priority::info, "waking one reader thread");
-
-                // Post a message back to one of the read-loop threads. Since 'done' is now true, it
-                // will exit as soon as it is woken up by the presence of the new data (the content
-                // of the message doesn't matter at all).
-                pstore::broker::writer wr (fifo);
-                wr.write (pstore::broker::message_type{}, true/*issue error on timeout*/);
-            }
-        } else if (c->verb == "_CQUIT") {
-            commands_done_ = true;
-        } else if (c->verb == "GC") {
-            broker::start_vacuum (c->path);
-        } else if (c->verb == "ECHO") {
-            std::printf ("ECHO:%s\n", c->path.c_str ());
+        this->log (*c);
+        auto it =
+            std::lower_bound (std::begin (commands_), std::end (commands_),
+                              command_entry (c->verb.c_str (), nullptr), command_entry_compare);
+        if (it != std::end (commands_) && c->verb == std::get<0> (*it)) {
+            std::get<1> (*it) (this, fifo, *c);
         } else {
-            pstore::logging::log (pstore::logging::priority::error, "unknown verb:", c->verb);
+            this->unknown (*c);
         }
     }
 }

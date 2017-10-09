@@ -48,7 +48,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file fifo_path_common.cpp
-/// \brief Portions of the implementation of the broker::fifo_path class that are common to all target
+/// \brief Portions of the implementation of the broker::fifo_path class that are common to all
+/// target
 /// platforms.
 
 #include "pstore_broker_intf/fifo_path.hpp"
@@ -62,25 +63,25 @@
 namespace pstore {
     namespace broker {
 
-        char const * const fifo_path::pipe_name = PSTORE_VENDOR_ID ".pstore_broker.fifo";
+        char const * const fifo_path::default_pipe_name = PSTORE_VENDOR_ID ".pstore_broker.fifo";
 
         // (ctor)
         // ~~~~~~
-        fifo_path::fifo_path (duration_type retry_timeout, unsigned max_retries,
-                              update_callback cb)
-                : path_{get_path ()}
+        fifo_path::fifo_path (gsl::czstring pipe_path, duration_type retry_timeout,
+                              unsigned max_retries, update_callback cb)
+                : path_{pipe_path == nullptr ? get_default_path () : pipe_path}
                 , retry_timeout_{retry_timeout}
-                , max_retries_ {max_retries}
+                , max_retries_{max_retries}
                 , update_cb_{std::move (cb)} {}
 
-        fifo_path::fifo_path (update_callback cb)
-                : fifo_path (duration_type{0}, 0, cb) {}
+        fifo_path::fifo_path (gsl::czstring pipe_path, update_callback cb)
+                : fifo_path (pipe_path, duration_type{0}, 0, cb) {}
 
         // open
         // ~~~~
         auto fifo_path::open_client_pipe () const -> client_pipe {
 
-            client_pipe fd {};
+            client_pipe fd{};
             auto retries = 0U;
             do {
                 update_cb_ (operation::open);

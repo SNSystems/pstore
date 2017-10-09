@@ -71,6 +71,7 @@
 #include "broker/globals.hpp"
 #include "broker/message_pool.hpp"
 #include "broker/recorder.hpp"
+#include "broker/quit.hpp"
 
 namespace {
     //*                           _    *
@@ -345,10 +346,12 @@ void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & re
         }
     } catch (std::exception const & ex) {
         pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
-        throw;
+        exit_code = EXIT_FAILURE;
+        notify_quit_thread ();
     } catch (...) {
         pstore::logging::log (pstore::logging::priority::error, "unknown error");
-        throw;
+        exit_code = EXIT_FAILURE;
+        notify_quit_thread ();
     }
     pstore::logging::log (pstore::logging::priority::notice, "exiting read loop");
 }

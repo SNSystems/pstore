@@ -123,7 +123,8 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        pstore::broker::fifo_path fifo (opt.retry_timeout, opt.max_retries);
+        pstore::gsl::czstring pipe_path = opt.pipe_path.has_value () ? opt.pipe_path.value ().c_str () : nullptr;
+        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout, opt.max_retries);
         pstore::broker::writer wr (fifo, opt.retry_timeout, opt.max_retries);
 
         if (opt.flood > 0) {

@@ -161,7 +161,7 @@ namespace pstore {
             // thus there won't be an EOF and as a result select() won't return unless someone
             // writes to the FIFO.
 
-            client_pipe fdwrite = ::open (path_.c_str (), O_WRONLY | O_NONBLOCK); // NOLINT
+            client_pipe fdwrite = ::open (path.c_str (), O_WRONLY | O_NONBLOCK); // NOLINT
             if (fdwrite.get () < 0) {
                 int const err = errno;
 
@@ -184,11 +184,11 @@ namespace pstore {
             std::this_thread::sleep_for (timeout);
         }
 
-        // get_path
-        // ~~~~~~~~
-        std::string fifo_path::get_path () {
+        // get_default_path
+        // ~~~~~~~~~~~~~~~~
+        std::string fifo_path::get_default_path () {
             // TODO: consider using /run/user/<userid> on Linux?
-            return std::string{"/var/tmp/"} + pipe_name;
+            return std::string{"/var/tmp/"} + default_pipe_name;
         }
 
     } // namespace broker

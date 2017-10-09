@@ -49,6 +49,8 @@
 #include <string>
 #include <utility>
 
+#include "pstore_cmd_util/cl/maybe.hpp"
+
 #ifdef _WIN32
 #include <tchar.h>
 #define NATIVE_TEXT(str) _TEXT(str)
@@ -64,6 +66,8 @@ struct switches {
     std::string path;
     std::chrono::milliseconds retry_timeout = std::chrono::milliseconds (500);
     unsigned max_retries = 10;
+
+    pstore::cmd_util::cl::maybe <std::string> pipe_path;
 
     unsigned flood = 0;
     bool kill = false;

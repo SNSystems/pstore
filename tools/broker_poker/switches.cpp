@@ -48,18 +48,23 @@
 #include <vector>
 #include "optionparser.h"
 #include "pstore_support/utf.hpp"
+
 namespace {
+
 #if defined(_WIN32) && defined(_UNICODE)
     auto & error_stream = std::wcerr;
+
     unsigned long str_to_ul (TCHAR const * str, TCHAR ** str_end) {
         return std::wcstoul (str, str_end, 10);
     }
 #else
     auto & error_stream = std::cerr;
+
     unsigned long str_to_ul (char const * str, char ** str_end) {
         return std::strtoul (str, str_end, 10);
     }
 #endif
+
 } // (anonymous namespace)
 
 
@@ -94,12 +99,24 @@ namespace {
         return option::ARG_ILLEGAL;
     }
 
+    option::ArgStatus path (option::Option const & option, bool msg) {
+        if (option.arg == nullptr || option.arg [0] == '\0') {
+            if (msg) {
+                error_stream << NATIVE_TEXT ("Option '") << option.name
+                             << NATIVE_TEXT ("' requires a path\n'");
+            }
+            return option::ARG_ILLEGAL;
+        }
+        return option::ARG_OK;
+    }
+
     enum option_index {
         flood_opt,
         help_opt,
         kill_opt,
         retry_opt,
         max_retries_opt,
+        pipe_path_opt,
         unknown_opt,
     };
 
@@ -124,6 +141,10 @@ namespace {
         {max_retries_opt, 0, NATIVE_TEXT(""), NATIVE_TEXT ("max-retries"), numeric,
          NATIVE_TEXT ("  --max-retries      \t"
                       "Maximum number of retries that will be attempted.")},
+
+        {pipe_path_opt, 0, NATIVE_TEXT(""), NATIVE_TEXT ("pipe-path"), path,
+         NATIVE_TEXT ("  --pipe-path      \t"
+                      "Overrides the path of the FIFO from which commands will be read.")},
 
         {0, 0, 0, 0, 0, 0},
     };
@@ -164,6 +185,10 @@ std::pair<switches, int> get_switches (int argc, TCHAR * argv []) {
     if (auto & max_wait = options[max_retries_opt]) {
         result.max_retries = static_cast <unsigned> (str_to_ul (max_wait.arg, nullptr));
     } 
+
+    if (auto & pipe_path = options [pipe_path_opt]) {
+        result.pipe_path = pstore::cmd_util::cl::just (pstore::utf::from_native_string (pipe_path.arg));
+    }
 
     if (num_non_option_arguments > 0) {
         auto const non_opts = parse.nonOptions ();

@@ -51,6 +51,7 @@
 #include <functional>
 #include <string>
 #include <tuple>
+#include "pstore_support/gsl.hpp"
 #include "./unique_handle.hpp"
 
 namespace pstore {
@@ -71,7 +72,7 @@ namespace pstore {
 
                 server_pipe (unique_fd && read, unique_fd && write)
                         : fd_{std::move (read), std::move (write)} {}
-                ~server_pipe() = default;
+                ~server_pipe () = default;
                 server_pipe (server_pipe &&) = default;
                 server_pipe & operator= (server_pipe &&) = default;
 
@@ -98,8 +99,11 @@ namespace pstore {
             static void default_update_cb (operation) {}
 
 
-            explicit fifo_path (update_callback cb = default_update_cb);
-            fifo_path (duration_type retry_timeout, unsigned max_retries,
+            /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default path (as defined at configure time) is used.
+            fifo_path (gsl::czstring pipe_path, update_callback cb = default_update_cb);
+
+            /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default path (as defined at configure time) is used.
+            fifo_path (gsl::czstring pipe_path, duration_type retry_timeout, unsigned max_retries,
                        update_callback cb = default_update_cb);
             ~fifo_path ();
 
@@ -120,9 +124,9 @@ namespace pstore {
             }
 
         private:
-            static char const * const pipe_name;
+            static char const * const default_pipe_name;
 
-            static std::string get_path ();
+            static std::string get_default_path ();
             client_pipe open_impl () const;
             void wait_until_impl (std::chrono::milliseconds timeout) const;
 

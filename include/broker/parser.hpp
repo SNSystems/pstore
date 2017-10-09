@@ -67,6 +67,12 @@ namespace broker {
                 : verb{v}
                 , path{p} {}
 
+        bool operator== (broker_command const & rhs) const {
+            return verb == rhs.verb && path == rhs.path;
+        }
+        bool operator!= (broker_command const & rhs) const {
+            return !operator== (rhs);
+        }
         std::string verb;
         std::string path;
     };

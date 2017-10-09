@@ -46,11 +46,15 @@
 #ifndef PSTORE_BROKER_COMMAND_HPP
 #define PSTORE_BROKER_COMMAND_HPP
 
+#include <array>
 #include <atomic>
+#include <cstring>
 #include <mutex>
+#include <tuple>
 
 // pstore includes
 #include "pstore_broker_intf/message_type.hpp"
+#include "pstore_support/gsl.hpp"
 
 // local includes
 #include "./message_queue.hpp"
@@ -69,8 +73,8 @@ class scavenger;
 /// thread_entry() funtion for pulling commands from the queue and executing them.
 class command_processor {
 public:
-    explicit command_processor (unsigned const num_read_threads)
-            : num_read_threads_{num_read_threads} {}
+    explicit command_processor (unsigned const num_read_threads);
+    virtual ~command_processor () = default;
 
     // No copying or assignment.
     command_processor (command_processor const &) = delete;
@@ -91,6 +95,10 @@ public:
     void clear_queue ();
 
     void scavenge ();
+
+    /// \note Public for unit testing.
+    void process_command (pstore::broker::fifo_path const & fifo,
+                          pstore::broker::message_type const & msg);
 
 private:
     std::atomic<bool> commands_done_{false};
@@ -124,13 +132,58 @@ private:
     std::mutex cmds_mut_;
     broker::partial_cmds cmds_;
 
+    /// The number of read threads running. At shutdown time this is used to instruct each
+    /// of them to exit safely.
     unsigned const num_read_threads_;
-
-    void process_command (pstore::broker::fifo_path const & fifo,
-                          pstore::broker::message_type const & msg);
 
     auto parse (pstore::broker::message_type const & msg)
         -> std::unique_ptr<broker::broker_command>;
+
+    using handler = std::function<void(command_processor *, pstore::broker::fifo_path const & fifo,
+                                       broker::broker_command const &)>;
+    using command_entry = std::tuple<char const *, handler>;
+    /// A predicate function used to sort and search a container of command_entry instances.
+    static bool command_entry_compare (command_entry const & a, command_entry const & b) {
+        return std::strcmp (std::get<0> (a), std::get<0> (b)) < 0;
+    }
+
+    static std::array<command_entry, 6> const commands_;
+
+    ///@{
+    /// Functions responsible for processing each of the commands to which the broker will respond
+    /// in some way.
+    /// \note Virtual to enable unit testing.
+
+    /// Initiates the shut-down of the broker process.
+    virtual void suicide (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+
+    /// Shuts down a single pipe-reader thread if the 'done' flag has been set by a call to
+    /// ::shutdown().
+    virtual void quit (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+
+    /// Calling this function causes the command_processor thread to exit.
+    virtual void cquit (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+
+    /// Starts the garbage collection for a path (specified in the command path) if not already
+    /// running.
+    virtual void gc (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+
+    /// Echoes the command path text to stdout.
+    virtual void echo (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+
+    /// A simple no-op command.
+    virtual void nop (pstore::broker::fifo_path const & fifo, broker::broker_command const & c);
+    ///@}
+
+    /// Called to report the receipt of an unknown command verb.
+    /// \note Virtual to enable unit testing.
+    virtual void unknown (broker::broker_command const & c) const;
+
+    ///@{
+    /// \note Virtual to enable unit testing.
+    virtual void log (broker::broker_command const & c) const;
+    virtual void log (pstore::gsl::czstring str) const;
+    ///@}
 };
 
 #endif // PSTORE_BROKER_COMMAND_HPP

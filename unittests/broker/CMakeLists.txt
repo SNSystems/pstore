@@ -43,21 +43,12 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
-set (PSTORE_BROKER_UNIT_TEST_SRC
+add_pstore_unit_test (pstore-broker-unit-tests
     test_bimap.cpp
+    test_command.cpp
     test_parser.cpp
     test_spawn.cpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_unit_test (pstore-broker-unit-tests
-        ${PSTORE_BROKER_UNIT_TEST_SRC}
-        DEPENDS pstore-broker-lib
-    )
-else ()
-    add_pstore_unit_test (pstore-broker-unit-tests
-        ${PSTORE_BROKER_UNIT_TEST_SRC}
-    )
-endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-broker-unit-tests pstore-broker-lib)
 
 # eof: unittests/broker/CMakeLists.txt

@@ -64,6 +64,7 @@ using pstore_tchar = char;
 struct switches {
     std::unique_ptr <std::string> playback_path;
     std::unique_ptr <std::string> record_path;
+    std::unique_ptr <std::string> pipe_path;
 };
 
 std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);

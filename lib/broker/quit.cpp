@@ -77,6 +77,7 @@
 #include "broker/scavenger.hpp"
 
 namespace {
+
     // TODO: these are shared with the command processor and should be somewhere common.
     std::string const read_loop_quit_command{"_QUIT"};
     std::string const command_loop_quit_command{"_CQUIT"};
@@ -94,7 +95,8 @@ namespace {
                                                                    std::uint16_t{1}, message);
         cp.push_command (std::move (msg), nullptr);
     }
-}
+
+} // (anonymous namespace)
 
 // shutdown
 // ~~~~~~~~
@@ -130,8 +132,8 @@ namespace {
     //***************
     //* quit thread *
     //***************
-    void quit_thread (std::weak_ptr<command_processor> const & cp,
-                      std::weak_ptr<scavenger> const & scav, unsigned num_read_threads) {
+    void quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
+                      unsigned num_read_threads) {
         try {
             pstore::threads::set_name ("quit");
             pstore::logging::create_log_stream ("broker.quit");
@@ -152,6 +154,7 @@ namespace {
             if (cp_sptr) {
                 cp_sptr->clear_queue ();
             }
+
             auto scav_sptr = scav.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads);
         } catch (std::exception const & ex) {
@@ -166,6 +169,7 @@ namespace {
     // ~~~~~~~~~~~~~~
     /// A signal handler entry point.
     void signal_handler (int sig) {
+        exit_code = sig;
         pstore::errno_saver saver;
         quit_info.notify (sig);
     }
@@ -181,9 +185,10 @@ void notify_quit_thread () {
 
 // create_quit_thread
 // ~~~~~~~~~~~~~~~~~~
-std::thread create_quit_thread (std::weak_ptr<command_processor> const & cp,
-                                std::weak_ptr<scavenger> const & scav, unsigned num_read_threads) {
-    std::thread quit (quit_thread, std::ref (cp), std::ref (scav), num_read_threads);
+std::thread create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
+                                unsigned num_read_threads) {
+    std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads);
+
     pstore::register_signal_handler (SIGINT, signal_handler);
     pstore::register_signal_handler (SIGTERM, signal_handler);
 #ifdef _WIN32

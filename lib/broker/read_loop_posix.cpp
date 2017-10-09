@@ -59,15 +59,18 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
+// pstore includes
 #include "pstore_broker_intf/fifo_path.hpp"
 #include "pstore_broker_intf/message_type.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/logging.hpp"
 
+// Local includes
 #include "broker/globals.hpp"
 #include "broker/command.hpp"
 #include "broker/message_pool.hpp"
 #include "broker/recorder.hpp"
+#include "broker/quit.hpp"
 
 
 namespace {
@@ -145,11 +148,14 @@ void read_loop (pstore::broker::fifo_path & fifo, std::shared_ptr<recorder> & re
         }
     } catch (std::exception const & ex) {
         pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
-        throw;
+        exit_code = EXIT_FAILURE;
+        notify_quit_thread ();
     } catch (...) {
         pstore::logging::log (pstore::logging::priority::error, "unknown error");
-        throw;
+        exit_code = EXIT_FAILURE;
+        notify_quit_thread ();
     }
+    pstore::logging::log (pstore::logging::priority::notice, "exiting read loop");
 }
 #endif // _WIN32
 // eof: lib/broker/read_loop_posix.cpp

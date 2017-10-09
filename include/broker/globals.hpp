@@ -49,6 +49,7 @@
 #include <atomic>
 
 extern std::atomic <bool> done;
+extern std::atomic <int> exit_code;
 
 #endif // PSTORE_BROKER_GLOBALS_HPP
 // eof: include/broker/globals.hpp

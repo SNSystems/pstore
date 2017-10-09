@@ -61,10 +61,10 @@ namespace pstore {
         // ~~~~~~
         fifo_path::~fifo_path () {}
 
-        // get_path
-        // ~~~~~~~~
-        std::string fifo_path::get_path () {
-            return std::string{R"(\\.\pipe\)"} + pipe_name;
+        // get_default_path
+        // ~~~~~~~~~~~~~~~~
+        std::string fifo_path::get_default_path () {
+            return std::string{R"(\\.\pipe\)"} + default_pipe_name;
         }
 
 #if 0
@@ -76,9 +76,9 @@ namespace pstore {
         // open_impl
         // ~~~~~~~~~
         auto fifo_path::open_impl () const -> client_pipe {
-            auto const name = this->get_path ();
-            auto const name16 = pstore::utf::win32::to16 (name);
-            client_pipe fd = ::CreateFileW (name16.c_str (), // pipe name
+            auto const path = this->get ();
+            auto const path16 = pstore::utf::win32::to16 (path);
+            client_pipe fd = ::CreateFileW (path16.c_str (), // pipe name
                                             GENERIC_WRITE,   // write access
                                             0,               // no sharing
                                             nullptr,         // default security attributes
@@ -90,7 +90,7 @@ namespace pstore {
                 DWORD const errcode = ::GetLastError ();
                 if (errcode != ERROR_PIPE_BUSY && errcode != ERROR_FILE_NOT_FOUND) {
                     std::ostringstream str;
-                    str << "Could not open pipe (" << name << ")";
+                    str << "Could not open pipe (" << path << ")";
                     raise (::pstore::win32_erc (errcode), str.str ());
                 }
             }
@@ -100,16 +100,16 @@ namespace pstore {
         // wait_until_impl
         // ~~~~~~~~~~~~~~~
         void fifo_path::wait_until_impl (std::chrono::milliseconds timeout) const {
-            auto const name = this->get_path ();
-            auto const name16 = pstore::utf::win32::to16 (name);
+            auto const path= this->get ();
+            auto const path16 = pstore::utf::win32::to16 (path);
 
             auto const ms = timeout.count ();
             auto const timeout_ms = ms < 1 ? DWORD{NMPWAIT_USE_DEFAULT_WAIT} : static_cast <DWORD> (ms);
-            if (!::WaitNamedPipeW (name16.c_str (), timeout_ms)) {
+            if (!::WaitNamedPipeW (path16.c_str (), timeout_ms)) {
                 DWORD const errcode = ::GetLastError ();
                 if (errcode != ERROR_SEM_TIMEOUT && errcode != ERROR_FILE_NOT_FOUND) {
                     std::ostringstream str;
-                    str << "Could not open pipe (" << name << "): wait time out";
+                    str << "Could not open pipe (" << path << "): wait time out";
                     raise (::pstore::win32_erc (errcode), str.str ());
                 } else {
                     ::Sleep (timeout_ms);

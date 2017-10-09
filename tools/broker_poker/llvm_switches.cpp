@@ -46,12 +46,20 @@
 
 #if PSTORE_IS_INSIDE_LLVM
 #include <cstdlib>
+
 #include "llvm/Support/CommandLine.h"
+#include "pstore_cmd_util/cl/maybe.hpp"
 #include "pstore_support/utf.hpp"
 
 namespace {
 
     using namespace llvm;
+
+    cl::opt<std::string> PipePath (
+        "pipe-path",
+        cl::desc("Overrides the FIFO path to which messages are written."),
+        cl::init("")
+    );
 
     cl::opt<unsigned> Flood(
         "flood",
@@ -80,6 +88,13 @@ namespace {
     cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc("<verb>"));
     cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc("<path>"));
 
+    auto pathOption (std::string const & path) -> pstore::cmd_util::cl::maybe <std::string> {
+        if (path.length () > 0) {
+            return pstore::cmd_util::cl::just (path);
+        }
+        return pstore::cmd_util::cl::nothing <std::string> ();
+    }
+
 } // anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, char * argv []) {
@@ -92,6 +107,7 @@ std::pair<switches, int> get_switches (int argc, char * argv []) {
     Result.max_retries = MaxRetries;
     Result.flood = Flood;
     Result.kill = Kill;
+    Result.pipe_path = pathOption (PipePath);
     return {Result, EXIT_SUCCESS};
 }
 
