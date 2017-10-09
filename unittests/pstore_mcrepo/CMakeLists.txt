@@ -42,8 +42,11 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-mcrepo-unit-tests
+    transaction.hpp
+    transaction.cpp
     test_sparse_array.cpp
     test_fragment.cpp
+    test_ticket.cpp
 )
 target_link_libraries (pstore-mcrepo-unit-tests pstore-mcrepo)
 

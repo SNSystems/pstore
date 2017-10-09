@@ -72,12 +72,17 @@ namespace pstore {
         //*  \__|_\__|_\_\___|\__| |_|_|_\___|_|_|_|_.__/\___|_|   *
         //*                                                        *
         struct ticket_member {
+            ticket_member (pstore::index::digest d, pstore::address n, std::uint8_t l, bool c)
+                    : digest (d)
+                    , name (n)
+                    , linkage (l)
+                    , comdat (c) {}
             pstore::index::digest digest;
             pstore::address name;
             std::uint8_t linkage;
             bool comdat;
-            std::uint16_t padding1;
-            std::uint32_t padding2;
+            std::uint16_t padding1 = 0;
+            std::uint32_t padding2 = 0;
         };
 
         static_assert (std::is_standard_layout<ticket_member>::value,
