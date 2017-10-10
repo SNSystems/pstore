@@ -72,6 +72,7 @@ add_pstore_unit_test (pstore-unit-tests
     test_sync.cpp
     test_transaction.cpp
     test_two_connections.cpp
+    test_uint128.cpp
     test_uuid.cpp
     test_varint.cpp
 )
