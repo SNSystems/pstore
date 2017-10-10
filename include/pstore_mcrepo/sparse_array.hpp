@@ -73,7 +73,7 @@ namespace pstore {
             /// and return the value of the first or second field of the referenced
             /// std::pair<> instance.
             template <typename Iterator, typename Accessor>
-            class PairFieldIterator {
+            class pair_field_iterator {
                 using return_type = typename std::result_of<Accessor (Iterator)>::type;
                 static_assert (std::is_reference<return_type>::value,
                                "return type from Accessor must be a reference");
@@ -89,50 +89,50 @@ namespace pstore {
                 using iterator_category =
                     typename std::iterator_traits<Iterator>::iterator_category;
 
-                PairFieldIterator (Iterator it, Accessor acc)
+                pair_field_iterator (Iterator it, Accessor acc)
                         : it_{std::move (it)}
                         , acc_{std::move (acc)} {}
 
-                difference_type operator- (PairFieldIterator const & other) const {
+                difference_type operator- (pair_field_iterator const & other) const {
                     return it_ - other.it_;
                 }
 
-                PairFieldIterator & operator+= (difference_type rhs) {
+                pair_field_iterator & operator+= (difference_type rhs) {
                     it_ += rhs;
                     return *this;
                 }
-                PairFieldIterator & operator-= (difference_type rhs) {
+                pair_field_iterator & operator-= (difference_type rhs) {
                     it_ -= rhs;
                     return *this;
                 }
 
-                PairFieldIterator operator- (difference_type rhs) {
-                    PairFieldIterator res{*this};
+                pair_field_iterator operator- (difference_type rhs) {
+                    pair_field_iterator res{*this};
                     it_ -= rhs;
                     return res;
                 }
-                PairFieldIterator operator+ (difference_type rhs) {
-                    PairFieldIterator res{*this};
+                pair_field_iterator operator+ (difference_type rhs) {
+                    pair_field_iterator res{*this};
                     it_ += rhs;
                     return res;
                 }
 
-                PairFieldIterator & operator++ () {
+                pair_field_iterator & operator++ () {
                     it_++;
                     return *this;
                 }
-                PairFieldIterator operator++ (int) {
+                pair_field_iterator operator++ (int) {
                     auto ret_val = *this;
                     ++(*this);
                     return ret_val;
                 }
-                bool operator< (PairFieldIterator const & other) const {
+                bool operator< (pair_field_iterator const & other) const {
                     return it_ < other.it_;
                 }
-                bool operator== (PairFieldIterator const & other) const {
+                bool operator== (pair_field_iterator const & other) const {
                     return it_ == other.it_ && acc_ == other.acc_;
                 }
-                bool operator!= (PairFieldIterator const & other) const {
+                bool operator!= (pair_field_iterator const & other) const {
                     return !(*this == other);
                 }
 
@@ -174,7 +174,7 @@ namespace pstore {
 
             template <typename Iterator, typename Accessor>
             auto make_pair_field_iterator (Iterator it, Accessor acc)
-                -> PairFieldIterator<Iterator, Accessor> {
+                -> pair_field_iterator<Iterator, Accessor> {
                 return {it, acc};
             }
 
