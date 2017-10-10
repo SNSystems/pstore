@@ -55,10 +55,10 @@
 namespace pstore {
 
     struct uint128 {
-        uint128 ()
+        constexpr uint128 () noexcept
                 : v_{0U, 0U} {}
         template <typename IntType>
-        uint128 (IntType v)
+        constexpr uint128 (IntType v) noexcept
                 : v_{0U, v} {
             static_assert (std::is_integral<IntType>::value, "IntType must be integral");
             static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
@@ -66,15 +66,15 @@ namespace pstore {
                                std::numeric_limits<std::uint64_t>::max (),
                            "IntType must have a range <= uint64_t");
         }
-        uint128 (std::uint64_t high, std::uint64_t low)
+        constexpr uint128 (std::uint64_t high, std::uint64_t low) noexcept
                 : v_{high, low} {}
 
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
         /// value.
-        explicit uint128 (std::uint8_t const * bytes)
+        explicit constexpr uint128 (std::uint8_t const * bytes) noexcept
                 : v_{bytes_to_uint64 (&bytes[0]), bytes_to_uint64 (&bytes[8])} {}
 
-        uint128 (std::array<std::uint8_t, 16> const & bytes)
+        uint128 (std::array<std::uint8_t, 16> const & bytes) noexcept
                 : uint128 (bytes.data ()) {}
 
         uint128 (uint128 const &) = default;
@@ -112,7 +112,7 @@ namespace pstore {
     private:
         std::pair<std::uint64_t, std::uint64_t> v_;
 
-        static std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept {
+        static constexpr std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept {
             return std::uint64_t{bytes[7]} << 56 | std::uint64_t{bytes[6]} << 48 |
                    std::uint64_t{bytes[5]} << 40 | std::uint64_t{bytes[4]} << 32 |
                    std::uint64_t{bytes[3]} << 24 | std::uint64_t{bytes[2]} << 16 |

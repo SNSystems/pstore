@@ -47,39 +47,25 @@
 #include <memory>
 #include <vector>
 
+#include "transaction.hpp"
+
 using namespace pstore::repo;
 
 
 namespace {
-    class transaction {
-    public:
-        auto alloc_rw (std::size_t size, unsigned /*align*/)
-            -> std::pair<std::shared_ptr<void>, pstore::address> {
-            auto ptr = std::shared_ptr<std::uint8_t> (new std::uint8_t[size],
-                                                      [](std::uint8_t * p) { delete[] p; });
-            storage.push_back (ptr);
-
-            static_assert (sizeof (std::uint8_t *) >= sizeof (pstore::address),
-                           "expected address to be no larger than a pointer");
-            return std::make_pair (ptr,
-                                   pstore::address{reinterpret_cast<std::uintptr_t> (ptr.get ())});
-        }
-
-        std::vector<std::shared_ptr<std::uint8_t>> storage;
-    };
-
     class FragmentTest : public ::testing::Test {
     protected:
         transaction transaction_;
     };
-}
+} // namespace
 
 TEST_F (FragmentTest, Empty) {
     std::vector<section_content> c;
     pstore::record record = fragment::alloc (transaction_, std::begin (c), std::end (c));
     auto f = reinterpret_cast<fragment const *> (record.addr.absolute ());
 
-    assert (transaction_.storage.back ().get () == reinterpret_cast<std::uint8_t const *> (f));
+    assert (transaction_.get_storage ().begin ()->first ==
+            reinterpret_cast<std::uint8_t const *> (f));
     EXPECT_EQ (0U, f->num_sections ());
 }
 
@@ -90,9 +76,9 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     std::vector<section_content> c{rodata};
     auto record = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
-    assert (transaction_.storage.back ().get () ==
+    assert (transaction_.get_storage ().begin ()->first ==
             reinterpret_cast<std::uint8_t const *> (record.addr.absolute ()));
-    auto f = reinterpret_cast<fragment const *> (transaction_.storage.back ().get ());
+    auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
     std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::ReadOnly)};

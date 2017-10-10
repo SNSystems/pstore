@@ -110,7 +110,7 @@ namespace {
         static unsigned ctors;
     };
     unsigned ctor_counter::ctors;
-}
+} // namespace
 
 TEST (RepoSparseArray, IndexInitializationListCtorCheck) {
     ctor_counter::ctors = 0;
@@ -127,7 +127,7 @@ TEST (RepoSparseArray, IteratorInitialization) {
     std::array<int, 3> v1{{1, 2, 3}};
 
     auto arrp = sparse_array<int>::make_unique (std::begin (i1), std::end (i1), std::begin (v1),
-                                               std::end (v1));
+                                                std::end (v1));
     auto & arr = *arrp;
 
     EXPECT_EQ (arr[0], 1);
@@ -142,7 +142,7 @@ TEST (RepoSparseArray, IteratorInitializationTooFewValues) {
     std::vector<int> v1{1};
 
     auto arrp = sparse_array<int>::make_unique (std::begin (i1), std::end (i1), std::begin (v1),
-                                               std::end (v1));
+                                                std::end (v1));
     auto & arr = *arrp;
 
     EXPECT_EQ (arr[0], 1);
@@ -157,7 +157,7 @@ TEST (RepoSparseArray, IteratorInitializationTooManyValues) {
     std::vector<int> v1{3, 5, 7};
 
     auto arrp = sparse_array<int>::make_unique (std::begin (i1), std::end (i1), std::begin (v1),
-                                               std::end (v1));
+                                                std::end (v1));
     auto & arr = *arrp;
 
     EXPECT_FALSE (arr.has_index (0));
