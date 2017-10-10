@@ -42,128 +42,69 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
-
-#if !PSTORE_IS_INSIDE_LLVM
+#include <cstdlib>
 #include <iostream>
-
-//3rd-party
-#include "optionparser.h"
+#if PSTORE_IS_INSIDE_LLVM
+    #include "llvm/Support/CommandLine.h"
+    using namespace llvm;
+#else
+    #include "pstore_cmd_util/cl/command_line.hpp"
+    using namespace pstore::cmd_util;
+#endif
 
 // pstore
 #include "pstore_cmd_util/str_to_revision.hpp"
 #include "pstore_cmd_util/revision_opt.hpp"
 #include "pstore_support/utf.hpp"
 
-
 namespace {
 
 #if defined(_WIN32) && defined(_UNICODE)
     auto & error_stream = std::wcerr;
-    auto & out_stream = std::wcout;
 #else
     auto & error_stream = std::cerr;
-    auto & out_stream = std::cout;
 #endif
 
-    enum option_index {
-        unknown_opt,
-        help_opt,
-        revision_opt,
-    };
+    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>> Revision (
+        "revision",
+        cl::desc ("The starting revision number (or 'HEAD')")
+    );
+    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
-    option::ArgStatus revision (option::Option const & option, bool msg) {
-        auto r = pstore::str_to_revision (pstore::utf::from_native_string (option.arg));
-        if (r.second) {
-            return option::ARG_OK;
-        }
-        if (msg) {
-            error_stream << "Option '" << option.name
-                         << "' requires an argument which may be a revision number or 'HEAD'";
-            if (option.arg) {
-                error_stream << " (got '" << option.arg << "')";
-            }
-            error_stream << '\n';
-        }
-        return option::ARG_ILLEGAL;
-    }
+    cl::opt<std::string> DbPath (cl::Positional, cl::desc("database-path"));
+    cl::list <std::string> IndexNames (cl::Positional, cl::Optional, cl::OneOrMore, cl::desc ("<index-name>..."));
 
-
-    option::Descriptor usage[] = {
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("Usage: pstore_index_structure [options] database-path <index-name>...\n\nOptions:")},
-        {help_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("help"), option::Arg::None,
-         NATIVE_TEXT ("  --help        \tPrint usage and exit.")},
-        {revision_opt, 0, NATIVE_TEXT ("r"), NATIVE_TEXT ("revision"), revision,
-         NATIVE_TEXT ("  --revision, -r  \tThe starting revision number (or 'HEAD').")},
-        {0, 0, 0, 0, 0, 0},
-    };
 
     std::string usage_help () {
-        std::ostringstream os;
-        os << "USAGE: pstore_index_struct [options] database-path <index-name>...\n\n"
-           << "Dumps the internal structure of one of more pstore indexes. index-name may be any of: ";
+        std::ostringstream usage;
+        usage << "pstore index structure\n\n";
+
+        usage << "Dumps the internal structure of one of more pstore indexes. index-name may be any of: ";
         char const * separator = "";
         for (auto const & in: index_names) {
-            os << separator << '\'' << in << '\'';
+            usage << separator << '\'' << in << '\'';
             separator = ", ";
         }
-        os << " ('*' may be used as a shortcut for all names).\n"
-           << "\nOptions:\n";
-        return os.str ();
-     }
+        usage << " ('*' may be used as a shortcut for all names).\n";
+        return usage.str ();
+    }
 
 } // (anonymous namespace)
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv []) {
+    cl::ParseCommandLineOptions (argc, argv, usage_help ());
+
     switches sw;
+    sw.revision = static_cast <pstore::cmd_util::revision_opt> (Revision).r;
+    sw.db_path = DbPath;
 
-    argc -= (argc > 0);
-    argv += (argc > 0);
-
-    auto const usage_str = pstore::utf::to_native_string (usage_help ());
-    usage [0].help = usage_str.c_str ();
-
-    option::Stats stats (usage, argc, argv);
-    std::vector<option::Option> options (stats.options_max);
-    std::vector<option::Option> buffer (stats.buffer_max);
-    option::Parser parse (usage, argc, argv, options.data (), buffer.data ());
-    if (parse.error ()) {
-        return {sw, EXIT_FAILURE};
-    }
-
-    if (options[help_opt] || parse.nonOptionsCount () < 1) {
-        option::printUsage (out_stream, usage);
-        return {sw, EXIT_FAILURE};
-    }
-
-    if (option::Option const * unknown = options[unknown_opt]) {
-        for (; unknown != nullptr; unknown = unknown->next ()) {
-            out_stream << NATIVE_TEXT ("Unknown option: ")
-                       << unknown->name
-                       << NATIVE_TEXT ("\n");
-        }
-        return {{}, EXIT_FAILURE};
-    }
-
-    if (auto const & option = options[revision_opt]) {
-        unsigned rev;
-        bool is_valid;
-        std::tie (rev, is_valid) =
-            pstore::str_to_revision (pstore::utf::from_native_string (option.arg));
-        assert (is_valid);
-        sw.revision = rev;
-    }
-
-    sw.db_path = pstore::utf::from_native_string (parse.nonOption (0));
-    for (int count = 1, non_options_count = parse.nonOptionsCount (); count < non_options_count; ++count) {
-        std::string const name = pstore::utf::from_native_string (parse.nonOption (count));
-        if (!set_from_name (&sw.selected, name)) {
-            error_stream << NATIVE_TEXT ("Unknown index \"") << pstore::utf::to_native_string (name) << NATIVE_TEXT ("\"\n");
+    for (auto const & Name: IndexNames) {
+        if (!set_from_name (&sw.selected, Name)) {
+            error_stream << NATIVE_TEXT ("Unknown index ") << pstore::utf::to_native_string (Name) << NATIVE_TEXT ("\n");
             return {sw, EXIT_FAILURE};
         }
     }
-
     return {sw, EXIT_SUCCESS};
 }
-#endif //PSTORE_IS_INSIDE_LLVM
+
 // eof: tools/index_structure/switches.cpp

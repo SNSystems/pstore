@@ -54,8 +54,9 @@ namespace pstore {
             class help : public option {
             public:
                 template <class... Mods>
-                explicit help (std::string const & program_overview, Mods const &... mods)
-                        : overview_{program_overview} {
+                explicit help (std::string const & program_name, std::string const & program_overview, Mods const &... mods)
+                        : program_name_ {program_name}
+                        , overview_{program_overview} {
 
                     static_assert (max_width > overlong_opt_max,
                                    "Must allow some space for the descriptions!");
@@ -79,7 +80,12 @@ namespace pstore {
                 static constexpr std::size_t max_width = 78;
 
                 int max_option_length () const;
+                /// Returns true if the program has any non-positional arguments.
+                bool has_switches () const;
+                /// Writes the program's usage string to the given output stream.
+                void usage (std::ostream & os) const;
 
+                std::string const program_name_;
                 std::string const overview_;
             };
 

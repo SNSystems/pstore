@@ -213,6 +213,37 @@ namespace pstore {
             } // namespace details
             extern details::required const Required;
 
+            //*           _   _               _  *
+            //*  ___ _ __| |_(_)___ _ _  __ _| | *
+            //* / _ \ '_ \  _| / _ \ ' \/ _` | | *
+            //* \___/ .__/\__|_\___/_||_\__,_|_| *
+            //*     |_|                          *
+            namespace details {
+                struct optional {
+                    template <typename Opt>
+                    void apply (Opt & o) const {
+                        o.set_num_occurrences (num_occurrences::optional);
+                    }
+                };
+            } // namespace details
+            extern details::required const Optional;
+
+            //*                                              *
+            //*  ___ _ _  ___   ___ _ _   _ __  ___ _ _ ___  *
+            //* / _ \ ' \/ -_) / _ \ '_| | '  \/ _ \ '_/ -_) *
+            //* \___/_||_\___| \___/_|   |_|_|_\___/_| \___| *
+            //*                                              *
+            namespace details {
+                struct one_or_more {
+                    template <typename Opt>
+                    void apply (Opt & o) const {
+                        bool is_optional = o.get_num_occurrences () == num_occurrences::optional;
+                        o.set_num_occurrences (is_optional ? num_occurrences::zero_or_more : num_occurrences::one_or_more);
+                    }
+                };
+            } // namespace details
+            extern details::required const OneOrMore;
+
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore

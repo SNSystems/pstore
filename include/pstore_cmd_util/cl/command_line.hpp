@@ -171,8 +171,8 @@ namespace pstore {
                         errs = &std::cerr;
                     }
 
-                    help help (overview, name ("help"));
                     std::string const program_name = pstore::path::base_name (*(first_arg++));
+                    help help (program_name, overview, name ("help"));
 
                     bool ok = true;
                     std::tie (first_arg, ok) =

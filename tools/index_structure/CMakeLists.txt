@@ -51,7 +51,6 @@ configure_file (
 add_pstore_executable (pstore-index-structure
     "${CMAKE_CURRENT_BINARY_DIR}/index_structure_config.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/index_structure_config.hpp.in"
-    llvm_switches.cpp
     index_structure.cpp
     indices.hpp
     indices.cpp
@@ -62,8 +61,6 @@ add_pstore_executable (pstore-index-structure
 target_include_directories (pstore-index-structure PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-index-structure LLVMSupport)
-else ()
-    target_link_libraries (pstore-index-structure optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-index-structure pstore pstore-cmd-util)
 

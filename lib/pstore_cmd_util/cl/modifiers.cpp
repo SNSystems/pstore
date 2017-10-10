@@ -55,6 +55,8 @@ namespace cl {
 
     details::positional const Positional;
     details::required const Required;
+    details::required const Optional;
+    details::required const OneOrMore;
 
 } // namespace cl
 } // namespace cmd_util

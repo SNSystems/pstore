@@ -72,16 +72,26 @@ namespace pstore {
             constexpr std::size_t help::overlong_opt_max;
             constexpr std::size_t help::max_width;
 
+            // takes_argument
+            // ~~~~~~~~~~~~~~
             bool help::takes_argument () const {
                 return false;
             }
+
+            // get_parser
+            // ~~~~~~~~~~
             parser_base * help::get_parser () {
                 return nullptr;
             }
+
+            // value
+            // ~~~~~
             bool help::value (std::string const &) {
                 return false;
             }
 
+            // max_option_length
+            // ~~~~~~~~~~~~~~~~~
             int help::max_option_length () const {
                 auto max_opt_len = std::size_t{0};
                 for (option const * op : cl::option::all ()) {
@@ -92,6 +102,34 @@ namespace pstore {
                 return static_cast<int> (std::min (max_opt_len, overlong_opt_max));
             }
 
+            // has_switches
+            // ~~~~~~~~~~~~
+            bool help::has_switches () const {
+                for (option const * op : cl::option::all ()) {
+                    if (op != this && !op->is_alias () && !op->is_positional ()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // usage
+            // ~~~~~
+            void help::usage (std::ostream & os) const {
+                os << "USAGE: " << program_name_;
+                if (this->has_switches ()) {
+                    os << " [options]";
+                }
+
+                for (option const * op : cl::option::all ()) {
+                    if (op != this && op->is_positional ()) {
+                        os << ' ' << op->description ();
+                    }
+                }
+            }
+
+            // show
+            // ~~~~
             void help::show (std::ostream & os) {
                 static constexpr char const prefix[] = "  -";
                 static constexpr char const separator[] = " - ";
@@ -100,13 +138,15 @@ namespace pstore {
                 static constexpr auto const separator_len =
                     static_cast<int> (array_elements (separator) - 1U);
 
-                os << "OVERVIEW: " << overview_ << "\n\nOPTIONS:\n";
+                os << "OVERVIEW: " << overview_ << "\n";
+                usage (os);
+                os << "\n\nOPTIONS:\n";
 
                 int const max_opt_len = max_option_length ();
                 int const indent = prefix_len + max_opt_len + separator_len;
 
                 for (option const * op : cl::option::all ()) {
-                    if (op != this && !op->is_alias ()) {
+                    if (op != this && !op->is_alias () && !op->is_positional ()) {
                         os << prefix << std::left << std::setw (max_opt_len) << op->name ()
                            << separator;
                         std::string const & description = op->description ();
@@ -125,6 +165,8 @@ namespace pstore {
                 }
             }
 
+            // add_occurrence
+            // ~~~~~~~~~~~~~~
             void help::add_occurrence () {
                 this->show (std::cout);
                 std::exit (EXIT_FAILURE);
