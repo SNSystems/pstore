@@ -113,24 +113,23 @@ namespace pstore {
     }
 
 
-    constexpr bool operator== (uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator== (uint128 const & lhs, uint128 const & rhs) noexcept {
         return lhs.high () == rhs.high () && lhs.low () == rhs.low ();
     }
-    constexpr bool operator!= (uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator!= (uint128 const & lhs, uint128 const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
 
-
-    constexpr bool operator< (uint128 const & lhs, uint128 const & rhs)  noexcept {
+    inline constexpr bool operator< (uint128 const & lhs, uint128 const & rhs)  noexcept {
         return lhs.high () < rhs.high () || (!(rhs.high () < lhs.high ()) && lhs.low () < rhs.low ());
     }
-    constexpr bool operator> (uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator> (uint128 const & lhs, uint128 const & rhs) noexcept {
         return rhs < lhs;
     }
-    constexpr bool operator>= (uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator>= (uint128 const & lhs, uint128 const & rhs) noexcept {
         return !(lhs < rhs);
     }
-    constexpr bool operator<=(uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator<=(uint128 const & lhs, uint128 const & rhs) noexcept {
         return !(rhs < lhs);
     }
 
