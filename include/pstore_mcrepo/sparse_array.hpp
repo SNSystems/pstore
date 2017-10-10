@@ -155,7 +155,8 @@ namespace pstore {
             };
 
             // TODO: first_accessor/second_accessor() was originally a lambda defined inside
-            // make_pair_field_iterator() but this is rejected by VS2017. Could this be better done with std::get<>()?
+            // make_pair_field_iterator() but this is rejected by VS2017. Could this be better done
+            // with std::get<>()?
             /// Returns a reference to the 'first' field from the value produced by
             /// dereferencing iterator 'it'.
             template <typename Iterator>
@@ -202,7 +203,9 @@ namespace pstore {
 
             ~sparse_array ();
 
-            /// Constructs a sparse_array index instance where the indices are extraced from an iterator range [first_index, last_index) and the values at each index are given by the range [first_value,last_value).
+            /// Constructs a sparse_array index instance where the indices are extraced from an
+            /// iterator range [first_index, last_index) and the values at each index are given by
+            /// the range [first_value,last_value).
             /// The number of elements in each range must be the same.
             template <typename IteratorIdx, typename IteratorV>
             static auto make_unique (IteratorIdx first_index, IteratorIdx last_index,
@@ -235,7 +238,8 @@ namespace pstore {
                 return bit_count::pop_count (bitmap_);
             }
 
-            /// Returns the maximum number of indices that could be contained by an instance of this sparse_array type.
+            /// Returns the maximum number of indices that could be contained by an instance of this
+            /// sparse_array type.
             static constexpr size_type max_size () noexcept {
                 return sizeof (BitmapType) * 8;
             }
@@ -488,8 +492,9 @@ namespace pstore {
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx, typename IteratorV>
         sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
-                                                          IteratorIdx last_index,
-                                                          IteratorV first_value, IteratorV last_value)
+                                                           IteratorIdx last_index,
+                                                           IteratorV first_value,
+                                                           IteratorV last_value)
                 : bitmap_{bitmap (first_index, last_index)} {
 
             // Deal with the first element. This is the odd-one-out becuase it's in the
@@ -519,7 +524,7 @@ namespace pstore {
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx>
         sparse_array<ValueType, BitmapType>::sparse_array (IteratorIdx first_index,
-                                                          IteratorIdx last_index)
+                                                           IteratorIdx last_index)
                 : bitmap_{bitmap (first_index, last_index)} {}
 
         // (dtor)
@@ -543,7 +548,8 @@ namespace pstore {
 
             auto begin_first =
                 details::make_pair_field_iterator (begin, details::first_accessor<Iterator>);
-            auto end_first = details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
+            auto end_first =
+                details::make_pair_field_iterator (end, details::first_accessor<Iterator>);
             auto begin_second =
                 details::make_pair_field_iterator (begin, details::second_accessor<Iterator>);
             auto end_second =
@@ -556,9 +562,9 @@ namespace pstore {
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx, typename IteratorV>
         auto sparse_array<ValueType, BitmapType>::make_unique (IteratorIdx first_index,
-                                                              IteratorIdx last_index,
-                                                              IteratorV first_value,
-                                                              IteratorV last_value)
+                                                               IteratorIdx last_index,
+                                                               IteratorV first_value,
+                                                               IteratorV last_value)
             -> std::unique_ptr<sparse_array> {
 
             return std::unique_ptr<sparse_array<ValueType>>{
@@ -569,7 +575,7 @@ namespace pstore {
         template <typename ValueType, typename BitmapType>
         auto
         sparse_array<ValueType, BitmapType>::make_unique (std::initializer_list<size_type> indices,
-                                                         std::initializer_list<ValueType> values)
+                                                          std::initializer_list<ValueType> values)
             -> std::unique_ptr<sparse_array> {
 
             return make_unique (std::begin (indices), std::end (indices), std::begin (values),
@@ -578,8 +584,10 @@ namespace pstore {
 
         template <typename ValueType, typename BitmapType>
         template <typename IteratorIdx>
-        auto sparse_array<ValueType, BitmapType>::make_unique (
-            IteratorIdx first_index, IteratorIdx last_index, std::initializer_list<ValueType> values)
+        auto
+        sparse_array<ValueType, BitmapType>::make_unique (IteratorIdx first_index,
+                                                          IteratorIdx last_index,
+                                                          std::initializer_list<ValueType> values)
             -> std::unique_ptr<sparse_array> {
 
             return std::unique_ptr<sparse_array<ValueType>>{
@@ -592,7 +600,7 @@ namespace pstore {
         template <typename ValueType, typename BitmapType>
         template <typename InputIterator>
         BitmapType sparse_array<ValueType, BitmapType>::bitmap (InputIterator first,
-                                                               InputIterator last) {
+                                                                InputIterator last) {
             using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
             auto op = [](BitmapType mm, iter_value_type v) {
                 auto idx = static_cast<unsigned> (v);
