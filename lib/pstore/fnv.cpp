@@ -59,6 +59,11 @@
 
 namespace {
 
+#ifdef NO_FNV_GCC_OPTIMIZATION
+    /// 64 bit magic FNV-1a prime
+    constexpr auto fnv_64_prime = UINT64_C (0x100000001b3);
+#endif
+
     inline std::uint64_t append (std::uint8_t v, std::uint64_t hval) {
         // xor the bottom with the current octet
         hval ^= static_cast<std::uint64_t> (v);
@@ -75,12 +80,6 @@ namespace {
 } // (anonymous namespace)
 
 namespace pstore {
-
-#ifdef NO_FNV_GCC_OPTIMIZATION
-    /// 64 bit magic FNV-1a prime
-    constexpr auto fnv_64_prime = UINT64_C (0x100000001b3);
-#endif
-
 
     std::uint64_t fnv_64a_buf (void const * buf, std::size_t len, std::uint64_t hval) {
         // FNV-1a hash each octet of the buffer
