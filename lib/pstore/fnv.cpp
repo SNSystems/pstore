@@ -57,6 +57,23 @@
 
 #include "pstore/fnv.hpp"
 
+namespace {
+
+    inline std::uint64_t append (std::uint8_t v, std::uint64_t hval) {
+        // xor the bottom with the current octet
+        hval ^= static_cast<std::uint64_t> (v);
+
+// multiply by the 64 bit FNV magic prime mod 2^64
+#ifdef NO_FNV_GCC_OPTIMIZATION
+        hval *= fnv_64_prime;
+#else
+        hval += (hval << 1) + (hval << 4) + (hval << 5) + (hval << 7) + (hval << 8) + (hval << 40);
+#endif
+        return hval;
+    }
+
+} // (anonymous namespace)
+
 namespace pstore {
 
 #ifdef NO_FNV_GCC_OPTIMIZATION
@@ -68,16 +85,7 @@ namespace pstore {
     std::uint64_t fnv_64a_buf (void const * buf, std::size_t len, std::uint64_t hval) {
         // FNV-1a hash each octet of the buffer
         for (auto it = static_cast<uint8_t const *> (buf), end = it + len; it < end; ++it) {
-            // xor the bottom with the current octet
-            hval ^= static_cast<std::uint64_t> (*it);
-
-// multiply by the 64 bit FNV magic prime mod 2^64
-#ifdef NO_FNV_GCC_OPTIMIZATION
-            hval *= fnv_64_prime;
-#else
-            hval +=
-                (hval << 1) + (hval << 4) + (hval << 5) + (hval << 7) + (hval << 8) + (hval << 40);
-#endif
+            hval = append (*it, hval);
         }
         return hval;
     }
@@ -86,16 +94,7 @@ namespace pstore {
     std::uint64_t fnv_64a_str (char const * str, std::uint64_t hval) {
         // FNV-1a hash each octet of the string
         for (auto s = reinterpret_cast<uint8_t const *> (str); *s != '\0'; ++s) {
-            // xor the bottom with the current octet
-            hval ^= static_cast<std::uint64_t> (*s);
-
-// multiply by the 64 bit FNV magic prime mod 2^64
-#ifdef NO_FNV_GCC_OPTIMIZATION
-            hval *= fnv_64_prime;
-#else
-            hval +=
-                (hval << 1) + (hval << 4) + (hval << 5) + (hval << 7) + (hval << 8) + (hval << 40);
-#endif
+            hval = append (*s, hval);
         }
         return hval;
     }
