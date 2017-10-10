@@ -60,8 +60,8 @@ public:
     explicit recorder (std::string const & path);
     ~recorder ();
 
-    recorder (recorder const & ) = delete;
-    recorder & operator== (recorder const & ) = delete;
+    recorder (recorder const &) = delete;
+    recorder & operator== (recorder const &) = delete;
 
     void record (pstore::broker::message_type const & cmd);
 
@@ -75,8 +75,8 @@ public:
     explicit player (std::string const & path);
     ~player ();
 
-    player (player const & ) = delete;
-    player & operator== (player const & ) = delete;
+    player (player const &) = delete;
+    player & operator== (player const &) = delete;
 
     pstore::broker::message_ptr read ();
 

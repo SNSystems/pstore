@@ -77,7 +77,8 @@ namespace broker {
 // FIXME: get this name from the cmake script. Don't hard-wire it here.
 #ifdef _WIN32
         static constexpr auto vacuumd_name = "vacuumd.exe";
-        using process_bimap = bimap<std::string, broker::process_identifier, std::less<std::string>, broker::pointer_compare<HANDLE>>;
+        using process_bimap = bimap<std::string, broker::process_identifier, std::less<std::string>,
+                                    broker::pointer_compare<HANDLE>>;
 #else
         static constexpr auto vacuumd_name = "vacuumd";
         using process_bimap = bimap<std::string, pid_t>;

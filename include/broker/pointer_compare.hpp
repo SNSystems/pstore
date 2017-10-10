@@ -52,9 +52,10 @@
 
 namespace broker {
 
-    /// A type which can used by the ordered containers (set<>, map<>, and the local bimap<>) to perform key
-    /// comparison where the keys are one of the various types of smart or raw pointer. shared_ptr<> and
-    /// unique_ptr<> instances are converted to the underlying raw type before comparison.
+    /// A type which can used by the ordered containers (set<>, map<>, and the local bimap<>) to
+    /// perform key comparison where the keys are one of the various types of smart or raw pointer.
+    /// shared_ptr<> and unique_ptr<> instances are converted to the underlying raw type before
+    /// comparison.
     template <typename Ptr>
     struct pointer_compare {
         static_assert (std::is_pointer<Ptr>::value, "Ptr must be a pointer type");
@@ -93,7 +94,6 @@ namespace broker {
 
 } // namespace broker
 
-#endif //PSTORE_BROKER_POINTER_COMPARE_HPP
-//eof:pointer_compare.hpp
+#endif // PSTORE_BROKER_POINTER_COMPARE_HPP
 
 // eof: include/broker/pointer_compare.hpp
