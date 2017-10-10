@@ -71,18 +71,18 @@ namespace {
     void pr_exit (HANDLE process) {
         DWORD const pid = ::GetProcessId (process);
 
-        auto exit_code = DWORD{0};
-        if (::GetExitCodeProcess (process, &exit_code) == 0) {
+        auto child_exit_code = DWORD{0};
+        if (::GetExitCodeProcess (process, &child_exit_code) == 0) {
             raise (::pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
         }
 
-        bool is_normal_termination = (exit_code == EXIT_SUCCESS) || (exit_code == EXIT_FAILURE);
+        bool is_normal_termination = (child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE);
         if (is_normal_termination) {
             pstore::logging::log (pstore::logging::priority::info, "GC process ", pid,
-                          " exited. Normal termination, exit status = ", exit_code);
+                          " exited. Normal termination, exit status = ", child_exit_code);
         } else {
             pstore::logging::log (pstore::logging::priority::error, "GC process ", pid,
-                          " exited. Abnormal termination, exit status = ", exit_code);
+                          " exited. Abnormal termination, exit status = ", child_exit_code);
         }
     }
 
