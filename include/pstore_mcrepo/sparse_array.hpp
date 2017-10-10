@@ -58,51 +58,10 @@
 #include <intrin.h>
 #endif
 
+#include "pstore/bit_count.hpp"
+
 namespace pstore {
     namespace repo {
-
-#ifdef _MSC_VER
-        // TODO: VC2017 won't allow pop_count to be constexpr. Sigh.
-        inline unsigned pop_count (unsigned char x) {
-            static_assert (sizeof (unsigned char) <= sizeof (unsigned __int16),
-                           "Expected unsigned char to be 16 bits or less");
-            return __popcnt16 (x);
-        }
-        inline unsigned pop_count (unsigned short x) {
-            static_assert (sizeof (unsigned short) == sizeof (unsigned __int16),
-                           "Expected unsigned short to be 16 bits");
-            return __popcnt16 (x);
-        }
-        inline unsigned pop_count (unsigned x) {
-            return __popcnt (x);
-        }
-        inline unsigned pop_count (unsigned long x) {
-            static_assert (sizeof (unsigned long) == sizeof (unsigned int),
-                           "Expected sizeof unsigned long to match sizeof unsigned int");
-            return pop_count (static_cast<unsigned int> (x));
-        }
-        inline unsigned pop_count (unsigned long long x) {
-            static_assert (sizeof (unsigned long long) == sizeof (unsigned __int64),
-                           "Expected unsigned long long to be 64 bits");
-            return static_cast<unsigned> (__popcnt64 (x));
-        }
-#else
-        inline constexpr unsigned pop_count (unsigned char x) {
-            return static_cast<unsigned> (__builtin_popcount (x));
-        }
-        inline constexpr unsigned pop_count (unsigned short x) {
-            return static_cast<unsigned> (__builtin_popcount (x));
-        }
-        inline constexpr unsigned pop_count (unsigned x) {
-            return static_cast<unsigned> (__builtin_popcount (x));
-        }
-        inline constexpr unsigned pop_count (unsigned long x) {
-            return static_cast<unsigned> (__builtin_popcountl (x));
-        }
-        inline constexpr unsigned pop_count (unsigned long long x) {
-            return static_cast<unsigned> (__builtin_popcountll (x));
-        }
-#endif
 
         namespace details {
 
@@ -273,7 +232,7 @@ namespace pstore {
                 return bitmap_ == 0;
             }
             constexpr size_type size () const noexcept {
-                return pop_count (bitmap_);
+                return bit_count::pop_count (bitmap_);
             }
 
             /// Returns the maximum number of indices that could be contained by an instance of this sparse_array type.
@@ -423,7 +382,7 @@ namespace pstore {
                 auto const bit_position = BitmapType{1} << pos;
                 assert ((bitmap_ & bit_position) != 0);
                 auto const mask = bit_position - 1U;
-                auto const index = pop_count (bitmap_ & mask);
+                auto const index = bit_count::pop_count (bitmap_ & mask);
                 return elements_[index];
             }
 
@@ -466,7 +425,7 @@ namespace pstore {
                 // ValueType (this comes from the built-in array).
                 static_assert (sizeof (elements_) / sizeof (ValueType) == 1U,
                                "Expected elements_ to be an array of 1 ValueType");
-                auto const elements = std::max (pop_count (bitmap (first, last)), 1U);
+                auto const elements = std::max (bit_count::pop_count (bitmap (first, last)), 1U);
                 return count - sizeof (elements_) + elements * sizeof (ValueType);
             }
 
