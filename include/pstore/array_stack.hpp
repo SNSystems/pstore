@@ -54,12 +54,12 @@
 
 namespace pstore {
 
-    /// A simple wrapper for std::array which gtives the functionality of a stack,
+    /// A simple wrapper for std::array which provides the functionality of a stack,
     /// specifically a FILO (first-in, last-out) data structure. Its interface is
     /// close to that of std::stack<>, but an additional class is necessary because
     /// std::array<> does not fully meet the requirements of std::stack<>.
     ///
-    /// The this object if the stack is known a priori to be small and of known
+    /// Use this class if the stack size is known a priori to be small and of known
     /// maximum depth.
 
     template <class Ty, std::size_t Size>

@@ -202,7 +202,7 @@ namespace pstore {
             using iterator = iterator_base<false>;
             using const_iterator = iterator_base<true>;
 
-            /// A associative container that contains key-value pairs with unique keys.
+            /// An associative container that contains key-value pairs with unique keys.
             ///
             /// \param db A database which will contain the result of the hamt_map.
             /// \param ip An index root address.
@@ -272,14 +272,29 @@ namespace pstore {
             auto insert (transaction<LockType> & transaction, value_type const & value)
                 -> std::pair<iterator, bool>;
 
-            /// A top-level function of inserting a node into a hamt_map. All iterators are
-            /// invalidated.
+            /// If a key equivalent to value.first already exists in the container, assigns
+            /// value.second
+            /// to the mapped type. If the key does not exists, inserts the new value as if by
+            /// insert().
+            ///
+            /// \param transaction  The transaction to which new data will be appended.
+            /// \param value  The key-value pair to be inserted or updated.
+            /// \result The bool component is true if the insertion took place and false if the
+            /// assignment took place. The iterator component points at the element inserted or
+            /// updated.
             template <typename LockType>
             auto insert_or_assign (transaction<LockType> & transaction, value_type const & value)
                 -> std::pair<iterator, bool>;
 
             /// A public function API of inserting a node into a hamt_map. All iterators are
             /// invalidated.
+            ///
+            /// \param transaction  The transaction to which new data will be appended.
+            /// \param key  The key the used both to look up and to insert if not found.
+            /// \param value  The value that will be associated with 'key' after the call.
+            /// \result The bool component is true if the insertion took place and false if the
+            /// assignment took place. The iterator component points at the element inserted or
+            /// updated.
             template <typename LockType>
             auto insert_or_assign (transaction<LockType> & transaction, KeyType const & key,
                                    ValueType const & value) -> std::pair<iterator, bool>;
@@ -784,7 +799,8 @@ namespace pstore {
                     }
                     key_exists = true;
                 } else {
-                    auto const existing_hash = static_cast<hash_type> ((hash_ (existing_key) >> shifts));
+                    auto const existing_hash =
+                        static_cast<hash_type> ((hash_ (existing_key) >> shifts));
                     result = this->insert_into_leaf (transaction, node, value, existing_hash, hash,
                                                      shifts, parents);
                 }

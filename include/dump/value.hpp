@@ -284,7 +284,7 @@ namespace value {
     //*********************
     //*   b o o l e a n   *
     //*********************
-    /// \brief An class used to write a boolean values to an ostream.
+    /// \brief A class used to write a boolean values to an ostream.
     class boolean final : public value {
     public:
         explicit boolean (bool v)
