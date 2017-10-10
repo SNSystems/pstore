@@ -71,15 +71,24 @@ public:
     bool presentl (Left const & a) const;
     bool presentr (Right const & b) const;
 
-    // Search the 'left' entries in the bimap for value l2 which is a type implicitly convertable to
-    // Left.
+    ///@{
+    /// Remove the element (if one exists) with a key equivalent to the supplied value.
+
+    /// Searches the bimap for an element with a left key of type L2 (which must be implicitly
+    /// convertable to type Left) and, if one exists, removes it.
+    /// \param l2  Left key of the element to remove.
     template <typename L2>
     void erasel (L2 const & l2);
-    // Search the 'right' entries in the bimap for value r2 which is a type implicitly convertable
-    // to Right.
+
+    /// Searches the bimap for an element with a right key of type R2 (which must be implicitly
+    /// convertable to type Right) and, if one exists, removes it.
+    /// \param r2  Right key of the element to remove.
     template <typename R2>
     void eraser (R2 const & r2);
 
+    ///@}
+
+    /// Returns the number of elements in the container.
     std::size_t size () const {
         return left_.size ();
     }
@@ -212,8 +221,6 @@ bool bimap<L, R, Lcmp, Rcmp>::presentr (R const & r) const {
 
 // erase
 // ~~~~~
-/// Searches the bimap for a key of type L2 (which must be implicitly convertable to type Left) and
-/// if found removes it and its corresponding Right instance.
 template <typename L, typename R, typename Lcmp, typename Rcmp>
 template <typename L2>
 void bimap<L, R, Lcmp, Rcmp>::erasel (L2 const & l2) {
@@ -223,8 +230,7 @@ void bimap<L, R, Lcmp, Rcmp>::erasel (L2 const & l2) {
         left_.erase (it->first);
     }
 }
-/// Searches the bimap for a key of type R2 (which must be implicitly convertable to type Right) and
-/// if found removes it and its corresponding Left instance.
+
 template <typename L, typename R, typename Lcmp, typename Rcmp>
 template <typename R2>
 void bimap<L, R, Lcmp, Rcmp>::eraser (R2 const & r2) {
