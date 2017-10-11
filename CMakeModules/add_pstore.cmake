@@ -115,6 +115,11 @@ function (add_pstore_library target_name)
 
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
+        # On Windows, we're a "Unicode" app.
+        if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+            target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
+        endif ()
+
         # for config.hpp
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
     endif (PSTORE_IS_INSIDE_LLVM)

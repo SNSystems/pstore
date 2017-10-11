@@ -208,6 +208,13 @@ namespace pstore {
                 ParseCommandLineOptions (argv, argv + argc, overview, errs);
             }
 
+#ifdef _WIN32
+            /// For Windows, a variation on the ParseCommandLineOptions functions which takes the
+            /// arguments as UTF-16 strings and converts them to UTF-8 as expected by the rest of
+            /// the code.
+            void ParseCommandLineOptions (int argc, wchar_t * argv[], std::string const & overview,
+                                          std::ostream * errs = nullptr);
+#endif
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore

@@ -285,18 +285,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     TRY {
-#if defined(_WIN32)
-        std::vector<std::string> args;
-        args.reserve (argc);
-        std::transform (argv, argv + argc, std::back_inserter (args),
-                        [](TCHAR * str) { return pstore::utf::from_native_string (str); });
-        auto first = std::begin (args);
-        auto last = std::end (args);
-#else
-        auto first = argv;
-        auto last = argv + argc;
-#endif
-        cl::ParseCommandLineOptions (first, last, "Tests the pstore index code");
+        cl::ParseCommandLineOptions (argc, argv, "Tests the pstore index code");
 
 
         pstore::database database (std::string{data_file}, true /*writable*/);

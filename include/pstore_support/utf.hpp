@@ -157,13 +157,14 @@ namespace pstore {
 
         template <typename Iterator>
         std::size_t length (Iterator first, Iterator last) {
-            auto const result = std::count_if (first, last,
-                                               [](char c) { return is_utf_char_start (c); });
+            auto const result =
+                std::count_if (first, last, [](char c) { return is_utf_char_start (c); });
             assert (result >= 0);
-            using utype = typename std::make_unsigned <decltype (result)>::type;
-            static_assert (std::numeric_limits <utype>::max () <= std::numeric_limits <std::size_t>::max (),
+            using utype = typename std::make_unsigned<decltype (result)>::type;
+            static_assert (std::numeric_limits<utype>::max () <=
+                               std::numeric_limits<std::size_t>::max (),
                            "std::size_t cannot hold result of count_if");
-            return static_cast <std::size_t> (result);
+            return static_cast<std::size_t> (result);
         }
 
         template <typename SpanType>
@@ -181,7 +182,9 @@ namespace pstore {
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
         std::size_t length (::pstore::gsl::czstring str);
 
-        inline std::size_t length (std::nullptr_t) { return 0; }
+        inline std::size_t length (std::nullptr_t) {
+            return 0;
+        }
         ///@}
 
         ///@{

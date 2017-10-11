@@ -99,15 +99,7 @@ namespace {
 int _tmain (int argc, TCHAR * argv[]) {
     int exit_code = EXIT_SUCCESS;
     try {
-
-        {
-            std::vector<std::string> args;
-            args.reserve (argc);
-            std::transform (argv, argv + argc, std::back_inserter (args), [] (TCHAR * str) { return pstore::utf::from_native_string (str); });
-            auto first = std::begin (args);
-            auto last = std::end (args);
-            cl::ParseCommandLineOptions (std::begin (args), std::end (args), "pstore broker server");
-        }
+        cl::ParseCommandLineOptions (argc, argv, "pstore broker server");
 
         if (install_opt && remove_opt) {
             std::cerr << "--install and --remove cannot be specified together!\n";

@@ -85,18 +85,7 @@ namespace {
 
 
 std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]) {
-
-#if defined (_WIN32)
-    std::vector<std::string> args;
-    args.reserve (argc);
-    std::transform (argv, argv + argc, std::back_inserter (args), [] (TCHAR * str) { return pstore::utf::from_native_string (str); });
-    auto first = std::begin (args);
-    auto last = std::end (args);
-#else
-    auto first = argv;
-    auto last = argv + argc;
-#endif
-    cl::ParseCommandLineOptions (first, last, "pstore broker agent");
+    cl::ParseCommandLineOptions (argc, argv, "pstore broker agent");
 
     switches result;
     result.playback_path = path_option (playback_path);
