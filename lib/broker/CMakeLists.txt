@@ -51,11 +51,13 @@ configure_file (
 )
 set (PSTORE_BROKER_LIB_SRC
     "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-	"${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/command.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/globals.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/gc.hpp"
+    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/globals.hpp"
+    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/intrusive_list.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_pool.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_queue.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/parser.hpp"

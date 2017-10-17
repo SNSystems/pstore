@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker/switches.hpp ------------------------------------------===//
+//*   __ _                 _                                 *
+//*  / _| | ___   ___   __| |  ___  ___ _ ____   _____ _ __  *
+//* | |_| |/ _ \ / _ \ / _` | / __|/ _ \ '__\ \ / / _ \ '__| *
+//* |  _| | (_) | (_) | (_| | \__ \  __/ |   \ V /  __/ |    *
+//* |_| |_|\___/ \___/ \__,_| |___/\___|_|    \_/ \___|_|    *
+//*                                                          *
+//===- tools/broker_poker/flood_server.hpp --------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,33 +42,14 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef SWITCHES_HPP
-#define SWITCHES_HPP
+#ifndef PSTORE_BROKER_POKER_FLOOD_SERVER_HPP
+#define PSTORE_BROKER_POKER_FLOOD_SERVER_HPP
 
-#include <memory>
-#include <string>
-#include <tuple>
+#include <chrono>
+#include "pstore_support/gsl.hpp"
 
-#ifdef _WIN32
-#include <tchar.h>
-#endif
+void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds retry_timeout,
+                   unsigned max_retries, unsigned long num);
 
-#include "config.hpp"
-
-#if defined (_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
-
-struct switches {
-    std::unique_ptr <std::string> playback_path;
-    std::unique_ptr <std::string> record_path;
-    std::unique_ptr <std::string> pipe_path;
-    unsigned num_read_threads = 2U;
-};
-
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
-
-#endif // SWITCHES_HPP
-// eof: tools/broker/switches.hpp
+#endif // PSTORE_BROKER_POKER_FLOOD_SERVER_HPP
+// eof: tools/broker_poker/flood_server.hpp

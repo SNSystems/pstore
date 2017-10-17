@@ -56,6 +56,7 @@
 
 // platform includes
 #ifdef _WIN32
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #else
@@ -63,26 +64,18 @@
 #endif
 
 #include "pstore_support/portab.hpp"
+#include "pstore_support/gsl.hpp"
 #include "pstore_support/utf.hpp"
 #include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/message_type.hpp"
 #include "pstore_broker_intf/send_message.hpp"
 #include "pstore_broker_intf/writer.hpp"
 
+#include "flood_server.hpp"
 #include "switches.hpp"
+#include <thread>
 
 namespace {
     constexpr bool error_on_timeout = true;
-
-    void flood_server (pstore::broker::writer & wr, unsigned long const num) {
-        std::string path;
-        path.reserve (num);
-        for (auto message = 0UL; message < num; ++message) {
-            path += message % 10 + '0';
-            pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
-        }
-    }
-
 } // (anonymous namespace)
 
 
@@ -124,12 +117,13 @@ int main (int argc, char * argv[]) {
         }
 
         pstore::gsl::czstring pipe_path = opt.pipe_path.has_value () ? opt.pipe_path.value ().c_str () : nullptr;
-        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout, opt.max_retries);
-        pstore::broker::writer wr (fifo, opt.retry_timeout, opt.max_retries);
 
         if (opt.flood > 0) {
-            flood_server (wr, opt.flood);
+            flood_server (pipe_path, opt.retry_timeout, opt.max_retries, opt.flood);
         }
+
+        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout, opt.max_retries);
+        pstore::broker::writer wr (fifo, opt.retry_timeout, opt.max_retries);
 
         if (opt.verb.length () > 0) {
             char const * path_str = (opt.path.length () > 0) ? opt.path.c_str () : nullptr;

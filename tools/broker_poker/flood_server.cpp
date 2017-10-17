@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker/switches.hpp ------------------------------------------===//
+//*   __ _                 _                                 *
+//*  / _| | ___   ___   __| |  ___  ___ _ ____   _____ _ __  *
+//* | |_| |/ _ \ / _ \ / _` | / __|/ _ \ '__\ \ / / _ \ '__| *
+//* |  _| | (_) | (_) | (_| | \__ \  __/ |   \ V /  __/ |    *
+//* |_| |_|\___/ \___/ \__,_| |___/\___|_|    \_/ \___|_|    *
+//*                                                          *
+//===- tools/broker_poker/flood_server.cpp --------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,33 +42,38 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef SWITCHES_HPP
-#define SWITCHES_HPP
+#include "flood_server.hpp"
 
-#include <memory>
 #include <string>
-#include <tuple>
 
-#ifdef _WIN32
-#include <tchar.h>
-#endif
+#include "pstore_broker_intf/fifo_path.hpp"
+#include "pstore_broker_intf/send_message.hpp"
+#include "pstore_broker_intf/writer.hpp"
+#include "pstore_cmd_util/iota_generator.hpp"
+#include "pstore_cmd_util/parallel_for_each.hpp"
 
-#include "config.hpp"
+void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds retry_timeout,
+                   unsigned max_retries, unsigned long num) {
+    std::string path;
+    path.reserve (num);
 
-#if defined (_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
+    auto begin = pstore::cmd_util::iota_generator ();
+    auto end = pstore::cmd_util::iota_generator (num);
+    pstore::cmd_util::parallel_for_each (
+        begin, end, 
+        [pipe_path, retry_timeout, max_retries](unsigned long count) {
+            pstore::broker::fifo_path fifo (pipe_path, retry_timeout, max_retries);
+            pstore::broker::writer wr (fifo, retry_timeout, max_retries);
 
-struct switches {
-    std::unique_ptr <std::string> playback_path;
-    std::unique_ptr <std::string> record_path;
-    std::unique_ptr <std::string> pipe_path;
-    unsigned num_read_threads = 2U;
-};
+            std::string path;
+            path.reserve (count);
+            for (auto ctr = 0UL; ctr <= count; ++ctr) {
+                path += ctr % 10 + '0';
+            }
 
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
+            constexpr bool error_on_timeout = true;
+            pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
+        });
+}
 
-#endif // SWITCHES_HPP
-// eof: tools/broker/switches.hpp
+// eof: tools/broker_poker/flood_server.cpp

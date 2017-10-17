@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker/switches.hpp ------------------------------------------===//
+//*  _       _                                          _              *
+//* (_) ___ | |_ __ _    __ _  ___ _ __   ___ _ __ __ _| |_ ___  _ __  *
+//* | |/ _ \| __/ _` |  / _` |/ _ \ '_ \ / _ \ '__/ _` | __/ _ \| '__| *
+//* | | (_) | || (_| | | (_| |  __/ | | |  __/ | | (_| | || (_) | |    *
+//* |_|\___/ \__\__,_|  \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|    *
+//*                     |___/                                          *
+//===- unittests/pstore_cmd_util/test_iota_generator.cpp ------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,33 +42,33 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef SWITCHES_HPP
-#define SWITCHES_HPP
+#include "pstore_cmd_util/iota_generator.hpp"
+#include <gtest/gtest.h>
 
-#include <memory>
-#include <string>
-#include <tuple>
+TEST (IotaGenerator, InitialValue) {
+    pstore::cmd_util::iota_generator g1;
+    EXPECT_EQ (*g1, 0UL);
 
-#ifdef _WIN32
-#include <tchar.h>
-#endif
+    pstore::cmd_util::iota_generator g2 (3);
+    EXPECT_EQ (*g2, 3UL);
+}
 
-#include "config.hpp"
+TEST (IotaGenerator, Compare) {
+    pstore::cmd_util::iota_generator g1 (3);
+    pstore::cmd_util::iota_generator g2 (3);
+    pstore::cmd_util::iota_generator g3 (5);
+    EXPECT_EQ (*g1, *g2);
+    EXPECT_NE (*g1, *g3);
+}
 
-#if defined (_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
+TEST (IotaGenerator, Increment) {
+    pstore::cmd_util::iota_generator g1 (3);
+    pstore::cmd_util::iota_generator post = g1++;
+    EXPECT_EQ (post, pstore::cmd_util::iota_generator (3));
+    EXPECT_EQ (g1, pstore::cmd_util::iota_generator (4));
 
-struct switches {
-    std::unique_ptr <std::string> playback_path;
-    std::unique_ptr <std::string> record_path;
-    std::unique_ptr <std::string> pipe_path;
-    unsigned num_read_threads = 2U;
-};
-
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
-
-#endif // SWITCHES_HPP
-// eof: tools/broker/switches.hpp
+    pstore::cmd_util::iota_generator pre = ++g1;
+    EXPECT_EQ (pre, pstore::cmd_util::iota_generator (5));
+    EXPECT_EQ (g1, pstore::cmd_util::iota_generator (5));
+}
+// eof: unittests/pstore_cmd_util/test_iota_generator.cpp

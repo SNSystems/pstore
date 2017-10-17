@@ -72,7 +72,12 @@ namespace {
         cl::desc ("Overrides the path of the FIFO from which commands will be read")
     );
 
-    
+    cl::opt<unsigned> num_read_threads (
+        "num-read-threads",
+        cl::desc ("The number of pipe reading threads"),
+        cl::init (2U)
+    );
+
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
         if (path.length () > 0) {
@@ -91,6 +96,7 @@ std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]) {
     result.playback_path = path_option (playback_path);
     result.record_path = path_option (record_path);
     result.pipe_path = path_option (pipe_path);
+    result.num_read_threads = num_read_threads;
     return {std::move (result), EXIT_SUCCESS};
 }
 

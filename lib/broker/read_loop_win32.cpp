@@ -1,3 +1,4 @@
+#include <iostream>
 //*                     _   _                    *
 //*  _ __ ___  __ _  __| | | | ___   ___  _ __   *
 //* | '__/ _ \/ _` |/ _` | | |/ _ \ / _ \| '_ \  *
@@ -53,27 +54,204 @@
 #include <array>
 #include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <memory>
 #include <utility>
 
 // Platform includes
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 // pstore includes
 #include "pstore_broker_intf/fifo_path.hpp"
 #include "pstore_broker_intf/message_type.hpp"
 #include "pstore_broker_intf/unique_handle.hpp"
+#include "pstore_support/gsl.hpp"
 #include "pstore_support/logging.hpp"
 #include "pstore_support/utf.hpp"
 
 // Local includes
 #include "broker/command.hpp"
 #include "broker/globals.hpp"
+#include "broker/intrusive_list.hpp"
 #include "broker/message_pool.hpp"
-#include "broker/recorder.hpp"
 #include "broker/quit.hpp"
+#include "broker/recorder.hpp"
 
 namespace {
+    using namespace pstore::gsl;
+
+    //*                  _          *
+    //*  _ _ ___ __ _ __| |___ _ _  *
+    //* | '_/ -_) _` / _` / -_) '_| *
+    //* |_| \___\__,_\__,_\___|_|   *
+    //*                             *
+    class reader {
+    public:
+        reader () = default;
+        reader (pstore::broker::unique_handle && ph, not_null<command_processor *> cp,
+                recorder * record_file);
+
+        ~reader () noexcept;
+
+        reader * initiate_read ();
+        void cancel ();
+
+        list_member<reader> & get_list_member () { return listm_; }
+
+    private:
+        /// Must be the first object in the structure. The address of this member is passed to the
+        /// read_completed() function when the OS notifies us of the completion of a read.
+        OVERLAPPED overlap_ = {0};
+
+        list_member <reader> listm_;
+
+        pstore::broker::unique_handle pipe_handle_;
+        pstore::broker::message_ptr request_;
+
+        command_processor * command_processor_ = nullptr;
+        recorder * record_file_ = nullptr;
+
+        /// Is a read using this buffer in progress? Used as a debugging check to ensure that
+        /// the object is not "active" when it is being destroyed.
+        bool is_in_flight_ = false;
+
+        bool read ();
+        static VOID WINAPI read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap);
+
+        void completed ();
+        void completed_with_error ();
+
+        /// Called when the series of reads for a connection has been completed. This function
+        /// removes the reader from the list of in-flight reads and deletes the associated object.
+        ///
+        /// \param r  The reader instance to be removed and deleted.
+        /// \returns Always nullptr
+        static reader * done (reader * r) noexcept;
+    };
+
+
+    // (ctor)
+    // ~~~~~~
+    reader::reader (pstore::broker::unique_handle && ph, not_null<command_processor *> cp,
+                    recorder * record_file)
+            : pipe_handle_{std::move (ph)}
+            , command_processor_{cp}
+            , record_file_{record_file} {
+        using T = std::remove_pointer<decltype (this)>::type;
+        static_assert (offsetof (T, overlap_) == 0,
+                       "OVERLAPPED must be the first member of the request structure");
+        assert (pipe_handle_.valid ());
+    }
+
+    // (dtor)
+    // ~~~~~~
+    reader::~reader () noexcept {
+        assert (!is_in_flight_);
+        // Close this pipe instance.
+        if (pipe_handle_.valid ()) {
+            ::DisconnectNamedPipe (pipe_handle_.get ());
+        }
+    }
+
+    // done
+    // ~~~~
+    reader * reader::done (reader * r) noexcept {
+        assert (!r->is_in_flight_);
+        intrusive_list<reader>::erase (r);
+        delete r;
+        return nullptr;
+    }
+
+    // initiate_read
+    // ~~~~~~~~~~~~~
+    reader * reader::initiate_read () {
+        // Start an asynchronous read. This will either start to read data if it's available
+        // or signal (by returning nullptr) that we've read all of the data already. In the latter
+        // case we tear down this reader instance by calling done().
+        return this->read () ? this : done (this);
+    }
+
+    // cancel
+    // ~~~~~~
+    void reader::cancel () {
+        ::CancelIoEx (pipe_handle_.get (), &overlap_);
+    }
+
+    // read
+    // ~~~~
+    /// \return True if the pipe read does not return an error. If false is returned, the client has
+    /// gone away and this pipe instance should be closed.
+    bool reader::read () {
+        assert (!is_in_flight_);
+
+        // Pull a buffer from pool to use for storing the data read from the pipe connection.
+        assert (request_.get () == nullptr);
+        request_ = pool.get_from_pool ();
+
+        // Start the read and call read_completed() when it finishes.
+        assert (sizeof (*request_) <= std::numeric_limits<DWORD>::max ());
+        is_in_flight_ = ::ReadFileEx (pipe_handle_.get (), request_.get (),
+                                      static_cast<DWORD> (sizeof (*request_)), &overlap_,
+                                      &read_completed) != FALSE;
+        return is_in_flight_;
+    }
+
+    // read_completed
+    // ~~~~~~~~~~~~~~
+    /// An I/O completion routine that's called after a read request completes.
+    /// If we've received a complete message, then it is queued for processing. We then try to read
+    /// more from the client.
+    ///
+    /// \param errcode  The I/O completion status: one of the system error codes.
+    /// \param bytes_read  This number of bytes transferred.
+    /// \param overlap  A pointer to the OVERLAPPED structure specified by the asynchronous I/O
+    /// function.
+    VOID WINAPI reader::read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap) {
+        auto * r = reinterpret_cast<reader *> (overlap);
+        assert (r != nullptr);
+
+        try {
+            r->is_in_flight_ = false;
+
+            if (errcode == ERROR_SUCCESS && bytes_read != 0) {
+                if (bytes_read != pstore::broker::message_size) {
+                    pstore::logging::log (pstore::logging::priority::error,
+                                          "partial message received (length=", bytes_read, ")");
+                    r->completed_with_error ();
+                } else {
+                    // The read operation has finished successfully, so process the request.
+                    r->completed ();
+                }
+            } else {
+                pstore::logging::log (pstore::logging::priority::error, "error received ", errcode);
+                r->completed_with_error ();
+            }
+
+            // Try reading some more from this pipe client.
+            r = r->initiate_read ();
+        } catch (std::exception const & ex) {
+            pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
+            // This object should now kill itself?
+        } catch (...) {
+            pstore::logging::log (pstore::logging::priority::error, "unknown error");
+            // This object should now kill itself?
+        }
+    }
+
+    // completed
+    // ~~~~~~~~~
+    void reader::completed () {
+        assert (command_processor_ != nullptr);
+        command_processor_->push_command (std::move (request_), record_file_);
+    }
+
+    void reader::completed_with_error () {
+        request_.reset ();
+    }
+
+
     //*                           _    *
     //*  _ _ ___ __ _ _  _ ___ __| |_  *
     //* | '_/ -_) _` | || / -_|_-<  _| *
@@ -82,120 +260,81 @@ namespace {
     /// Manages the process of asynchronously reading from the named pipe.
     class request {
     public:
-        explicit request (command_processor * const cp, recorder * const record_file);
+        explicit request (not_null<command_processor *> cp, recorder * record_file);
+
         void attach_pipe (pstore::broker::unique_handle && p);
+        ~request ();
+
+        void cancel ();
 
     private:
-        class reader {
-        public:
-            explicit reader (pstore::broker::unique_handle && ph, command_processor * const cp,
-                             recorder * const record_file);
-            ~reader ();
+        intrusive_list <reader> list_;
 
-            bool initiate (OVERLAPPED & overlap, LPOVERLAPPED_COMPLETION_ROUTINE completion);
-            void completed ();
-
-        private:
-            pstore::broker::unique_handle pipe_handle_;
-            pstore::broker::message_ptr request_;
-
-            command_processor * const command_processor_;
-            recorder * const record_file_;
-        };
-
-        void initiate_read ();
-        static VOID WINAPI read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap);
-        OVERLAPPED overlap_ = {0};
-        std::unique_ptr<reader> pipe_;
-
-        command_processor * const command_processor_;
+        not_null<command_processor *> command_processor_;
         recorder * const record_file_;
+
+        /// A class used to insert a reader instance into the list of extant reads and
+        /// move it from that list unless ownership has been released (by a call to the
+        /// release() method).
+        class raii_insert {
+        public:
+            raii_insert (intrusive_list <reader> & list, reader * r) noexcept;
+            ~raii_insert () noexcept;
+            reader * release () noexcept;
+        private:
+            reader * r_;
+        };
     };
 
     // (ctor)
     // ~~~~~~
-    request::request (command_processor * const cp, recorder * const record_file)
+    request::request (not_null<command_processor *> cp, recorder * record_file)
             : command_processor_{cp}
-            , record_file_{record_file} {
-        static_assert (offsetof (request, overlap_) == 0,
-                       "OVERLAPPED must be the first member of the request structure");
-    }
+            , record_file_{record_file} {}
 
-    // initiate_read
-    // ~~~~~~~~~~~~~
-    void request::initiate_read () {
-        if (!pipe_->initiate (overlap_, read_completed)) {
-            // Close this pipe instance.
-            pipe_.reset ();
-        }
-    }
+    // (dtor)
+    // ~~~~~~
+    request::~request () {}
 
     // attach_pipe
     // ~~~~~~~~~~~
     /// Associates the given pipe handle with this request object and starts a read operation.
-    void request::attach_pipe (pstore::broker::unique_handle && p) {
-        pipe_ = std::make_unique<reader> (std::move (p), command_processor_, record_file_);
-        this->initiate_read ();
+    void request::attach_pipe (pstore::broker::unique_handle && pipe) {
+        auto r = std::make_unique <reader> (std::move (pipe), command_processor_, record_file_);
+
+        // Insert this new object into the list of active reads. We now have two pointers to it:
+        // the unique_ptr and the one in the list.
+        raii_insert inserter (list_, r.get ());
+
+        r->initiate_read ();
+
+        inserter.release ();
+        r.release ();
     }
 
-    // read_completed
-    // ~~~~~~~~~~~~~~
-    /// An I/O completion routine that's called after a read request completes.
-    VOID WINAPI request::read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap) {
-        try {
-            auto & req = *reinterpret_cast<request *> (overlap);
-            if (errcode == ERROR_SUCCESS && bytes_read != 0) {
-                if (bytes_read != pstore::broker::message_size) {
-                    pstore::logging::log (pstore::logging::priority::error, "partial message received (length=",
-                                  bytes_read, ")");
-                } else {
-                    // The read operation has finished, so process the request.
-                    req.pipe_->completed ();
-                }
-            }
-            // Try reading some more from this pipe client.
-            req.initiate_read ();
-        } catch (std::exception const & ex) {
-            pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
-        } catch (...) {
-            pstore::logging::log (pstore::logging::priority::error, "unknown error");
+    // cancel
+    // ~~~~~~
+    void request::cancel () {
+        list_.check ();
+        for (reader & r : list_) {
+            r.cancel ();
         }
     }
 
-    // (ctor)
-    // ~~~~~~
-    request::reader::reader (pstore::broker::unique_handle && ph, command_processor * const cp,
-                             recorder * const record_file)
-            : pipe_handle_{std::move (ph)}
-            , command_processor_{cp}
-            , record_file_{record_file} {
-        assert (pipe_handle_.valid ());
+    request::raii_insert::raii_insert (intrusive_list <reader> & list, reader * r) noexcept : r_ {r} {
+        list.insert_before (r, list.tail ());
     }
 
-    // (dtor)
-    // ~~~~~~
-    request::reader::~reader () {
-        assert (pipe_handle_.valid ());
-        ::DisconnectNamedPipe (pipe_handle_.get ());
+    request::raii_insert::~raii_insert () noexcept {
+        if (r_) {
+            intrusive_list <reader>::erase (r_);
+        }
     }
 
-    // initiate
-    // ~~~~~~~~
-    /// \return True if the pipe read does not return an error. If false is returned, the client has
-    /// gone away and this pipe instance should be closed.
-    bool request::reader::initiate (OVERLAPPED & overlap,
-                                    LPOVERLAPPED_COMPLETION_ROUTINE completion) {
-        assert (sizeof (*request_) <= std::numeric_limits<DWORD>::max ());
-        request_ = pool.get_from_pool ();
-        return ::ReadFileEx (pipe_handle_.get (), request_.get (),
-                             static_cast<DWORD> (sizeof (*request_)), &overlap,
-                             completion) != FALSE;
-    }
-
-    // completed
-    // ~~~~~~~~~
-    void request::reader::completed () {
-        command_processor_->push_command (std::move (request_), record_file_);
+    reader * request::raii_insert::release () noexcept { 
+        auto result = r_;
+        r_ = nullptr;
+        return result;
     }
 
 } // (anonymous namespace)
@@ -251,7 +390,7 @@ namespace {
     std::pair<pstore::broker::unique_handle, bool>
     create_and_connect_instance (std::wstring const & pipe_name, OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
-        static constexpr auto default_pipe_timeout = DWORD{5 * 1000};
+        static constexpr auto default_pipe_timeout = DWORD{5 * 1000}; // TODO: make this user-configurable.
 
         pstore::broker::unique_handle pipe =
             ::CreateNamedPipeW (pipe_name.c_str (),
@@ -293,7 +432,8 @@ namespace {
 void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & record_file,
                 std::shared_ptr<command_processor> & cp) {
     try {
-        pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe (", path.get (), ")");
+        pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe (",
+                              path.get (), ")");
         auto const pipe_name = pstore::utf::win32::to16 (path.get ());
 
         // Create one event object for the connect operation.
@@ -344,6 +484,9 @@ void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & re
                 raise (::pstore::win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
             }
         }
+
+        // Try to cancel any reads that are still in-flight.
+        req.cancel ();
     } catch (std::exception const & ex) {
         pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
         exit_code = EXIT_FAILURE;

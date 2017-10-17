@@ -48,10 +48,11 @@
 #include <future>
 #include <vector>
 
-#include "pstore_cmd_util/cl/command_line.hpp"
-#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 #include "pstore/database.hpp"
 #include "pstore/transaction.hpp"
+#include "pstore_cmd_util/cl/command_line.hpp"
+#include "pstore_cmd_util/parallel_for_each.hpp"
+#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
 #include "./print.hpp"
@@ -113,57 +114,6 @@ namespace {
         std::map<pstore::index::digest, pstore::address, std::less<pstore::index::digest>>;
     using greater_map =
         std::map<pstore::index::digest, pstore::address, std::greater<pstore::index::digest>>;
-
-    template <typename InputIt, typename UnaryFunction>
-    void parallel_for_each (InputIt first, InputIt last, UnaryFunction fn) {
-        auto it_distance = std::distance (first, last);
-        if (it_distance <= 0) {
-            return;
-        }
-
-        using difference_type = typename std::iterator_traits<InputIt>::difference_type;
-        using udifference_type = typename std::make_unsigned<difference_type>::type;
-        using wide_type =
-            typename std::conditional<sizeof (udifference_type) >= sizeof (unsigned int),
-                                      udifference_type, unsigned int>::type;
-        auto num_elements = static_cast<wide_type> (it_distance);
-
-        auto const num_threads =
-            std::min (static_cast<wide_type> (std::max (std::thread::hardware_concurrency (), 1U)),
-                      num_elements);
-        auto const partition_size = (num_elements + num_threads - 1) / num_threads;
-        assert (partition_size * num_threads >= num_elements);
-
-        std::vector<std::future<void>> futures;
-        futures.reserve (num_threads);
-
-        while (first != last) {
-            wide_type const distance = std::min (partition_size, num_elements);
-            auto next = first;
-            assert (distance >= 0 &&
-                    distance < static_cast<udifference_type> (
-                                   std::numeric_limits<difference_type>::max ()));
-
-            std::advance (next, static_cast<difference_type> (distance));
-
-            // Create an asynchronous task which will sequentially process from 'first' to
-            // 'next' invoking f() for each data member.
-            futures.push_back (std::async (
-                std::launch::async,
-                [&fn](InputIt fst, InputIt lst) { std::for_each (fst, lst, fn); }, first, next));
-
-            first = next;
-            assert (num_elements >= distance);
-            num_elements -= distance;
-        }
-        assert (num_elements == 0);
-        assert (futures.size () == num_threads);
-
-        // Join
-        for (auto & f : futures) {
-            f.wait ();
-        }
-    }
 
     /// Generate the map from a random key to null address.
     /// \param num_keys the total number of random keys.
@@ -264,7 +214,8 @@ namespace {
             // For debugging.
             // print_cout (it->first, ", ", it->second);
         };
-        parallel_for_each (std::begin (expected_results), std::end (expected_results), check_key);
+        pstore::cmd_util::parallel_for_each (std::begin (expected_results),
+                                             std::end (expected_results), check_key);
         return is_found.load ();
     }
 } // (anonymous namespace)

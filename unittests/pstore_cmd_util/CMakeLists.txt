@@ -44,6 +44,7 @@
 add_pstore_unit_test (pstore-cmd-util-tests
     test_cl_parser.cpp
     test_command_line.cpp
+    test_iota_generator.cpp
     test_maybe.cpp
     test_str_to_revision.cpp
     test_word_wrapper.cpp

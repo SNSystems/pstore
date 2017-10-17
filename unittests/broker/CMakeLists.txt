@@ -46,9 +46,14 @@ include (add_pstore)
 add_pstore_unit_test (pstore-broker-unit-tests
     test_bimap.cpp
     test_command.cpp
+    test_intrusive_list.cpp
     test_parser.cpp
     test_spawn.cpp
 )
+
+# Access the library's private include directory.
+target_include_directories (pstore-broker-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/pstore")
+
 target_link_libraries (pstore-broker-unit-tests pstore-broker-lib)
 
 # eof: unittests/broker/CMakeLists.txt

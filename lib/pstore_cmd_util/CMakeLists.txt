@@ -72,6 +72,11 @@ set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
 list (APPEND PSTORE_CMD_UTIL_SRC ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
 source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
 
+
+list (APPEND PSTORE_CMD_UTIL_SRC
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/iota_generator.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/parallel_for_each.hpp"
+)
 add_pstore_library (pstore-cmd-util STATIC ${PSTORE_CMD_UTIL_SRC})
 target_link_libraries (pstore-cmd-util pstore-support-lib)
 

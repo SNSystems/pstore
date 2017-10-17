@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker/switches.hpp ------------------------------------------===//
+//*  _       _                  _             _ _     _    *
+//* (_)_ __ | |_ _ __ _   _ ___(_)_   _____  | (_)___| |_  *
+//* | | '_ \| __| '__| | | / __| \ \ / / _ \ | | / __| __| *
+//* | | | | | |_| |  | |_| \__ \ |\ V /  __/ | | \__ \ |_  *
+//* |_|_| |_|\__|_|   \__,_|___/_| \_/ \___| |_|_|___/\__| *
+//*                                                        *
+//===- unittests/broker/test_intrusive_list.cpp ---------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,34 +41,58 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include "broker/intrusive_list.hpp"
+#include <gtest/gtest.h>
 
-#ifndef SWITCHES_HPP
-#define SWITCHES_HPP
+namespace {
+    struct value {
+        value ()
+                : v{0} {}
+        explicit value (int v_)
+                : v{v_} {}
+        list_member<value> & get_list_member () {
+            return list_memb;
+        }
 
-#include <memory>
-#include <string>
-#include <tuple>
+        int const v;
+        list_member<value> list_memb;
+    };
+}
 
-#ifdef _WIN32
-#include <tchar.h>
-#endif
+TEST (IntrusiveList, Empty) {
+    intrusive_list<value> v;
+    EXPECT_EQ (0, std::distance (v.begin (), v.end ()));
+}
 
-#include "config.hpp"
+TEST (IntrusiveList, OneElement) {
+    value member {47};
 
-#if defined (_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
+    intrusive_list<value> v;
+    v.insert_before (&member, v.tail ());
 
-struct switches {
-    std::unique_ptr <std::string> playback_path;
-    std::unique_ptr <std::string> record_path;
-    std::unique_ptr <std::string> pipe_path;
-    unsigned num_read_threads = 2U;
-};
+    ASSERT_EQ (1, std::distance (v.begin (), v.end ()));
+    EXPECT_EQ (v.begin ()->v, 47);
 
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
+    v.erase (&member);
+    EXPECT_EQ (0, std::distance (v.begin (), v.end ()));
+    EXPECT_EQ (v.begin (), v.end ());
+}
 
-#endif // SWITCHES_HPP
-// eof: tools/broker/switches.hpp
+TEST (IntrusiveList, IteratorIncrement) {
+    value member {7};
+    intrusive_list<value> v;
+    v.insert_before (&member, v.tail ());
+
+    intrusive_list<value>::iterator begin = v.begin ();
+    intrusive_list<value>::iterator it = begin;
+    ++it;
+    intrusive_list<value>::iterator it2 = begin;
+    it2++;
+    EXPECT_EQ (it, it2);
+
+    --it;
+    it2--;
+    EXPECT_EQ (it, it2);
+    EXPECT_EQ (it, begin);
+}
+// eof: unittests/broker/test_intrusive_list.cpp

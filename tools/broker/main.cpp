@@ -74,9 +74,6 @@
 
 namespace {
 
-    // TODO: add a command line switch to allow the user to control this value.
-    constexpr auto num_read_threads = 2U;
-
     // create_thread
     // ~~~~~~~~~~~~~
     template <class Function, class... Args>
@@ -139,13 +136,13 @@ int main (int argc, char * argv[]) {
         pstore::broker::fifo_path fifo {opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
-        auto commands = std::make_shared<command_processor> (num_read_threads);
+        auto commands = std::make_shared<command_processor> (opt.num_read_threads);
         auto scav = std::make_shared<scavenger> (commands);
         commands->attach_scavenger (scav);
 
         pstore::logging::log (pstore::logging::priority::notice, "starting threads");
         std::thread quit =
-            create_quit_thread (make_weak (commands), make_weak (scav), num_read_threads);
+            create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads);
 
         futures.push_back (create_thread ([&fifo, &commands]() {
             thread_init ("command");
@@ -169,7 +166,7 @@ int main (int argc, char * argv[]) {
             }
             shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/);
         } else {
-            for (auto ctr = 0U; ctr < num_read_threads; ++ctr) {
+            for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                 futures.push_back (create_thread ([&fifo, &record_file, &commands]() {
                     pstore::threads::set_name ("read");
                     pstore::logging::create_log_stream ("broker.read");
