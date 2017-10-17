@@ -53,8 +53,8 @@ else ()
                        ALL
                        DEPENDS
                                pstore_examples_serialize
-                               example_write_basic
-                               example_write_using_serializer
+                               example-write-basic
+                               example-write-using-serializer
                        COMMENT "Building pstore Examples"
                        VERBATIM)
 

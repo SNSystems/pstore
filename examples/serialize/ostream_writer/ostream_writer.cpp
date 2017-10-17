@@ -93,6 +93,6 @@ int main () {
     std::array<int, 3> values{{179, 127, 73}};
 
     // Write the sequence of values as a span.
-    pstore::serialize::write (writer, pstore::gsl2::make_span (values));
+    pstore::serialize::write (writer, pstore::gsl::make_span (values));
 }
 // eof: examples/serialize/ostream_writer/ostream_writer.cpp

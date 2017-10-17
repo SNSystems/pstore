@@ -108,7 +108,7 @@ int main () {
         std::copy (std::begin (src), std::end (src), std::ostream_iterator<foo> (std::cout, " "));
         std::cout << std::endl;
 
-        pstore::serialize::write (writer, pstore::gsl2::make_span (src));
+        pstore::serialize::write (writer, pstore::gsl::make_span (src));
         std::cout << "Wrote these bytes: " << writer << '\n';
     }
 
@@ -117,7 +117,7 @@ int main () {
         auto reader = pstore::serialize::archive::make_reader (std::begin (bytes));
 
         std::array <foo, 2> dest;
-        pstore::serialize::read (reader, pstore::gsl2::make_span (dest));
+        pstore::serialize::read (reader, pstore::gsl::make_span (dest));
 
         std::cout << "Read: ";
         std::copy (std::begin (dest), std::end (dest), std::ostream_iterator<foo> (std::cout, " "));

@@ -77,7 +77,7 @@ namespace {
     void read_an_array_of_ints (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
         std::array <int, 2> arr;
-        serialize::read (reader, gsl2::make_span <int> (arr));
+        serialize::read (reader, gsl::make_span <int> (arr));
         std::cout << "Reading an array of ints produced " << arr [0] << ", " << arr [1] << '\n';
     }
 

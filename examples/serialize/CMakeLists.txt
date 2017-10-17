@@ -55,15 +55,15 @@ add_subdirectory (write_pod_struct)
 add_custom_target (pstore_examples_serialize
                    ALL
                    DEPENDS
-                           example_istream_reader
-                           example_nonpod1
-                           example_nonpod2
-                           example_nonpod_multiple
-                           example_ostream_writer
-                           example_vector_int_reader
-                           example_vector_string_reader
-                           example_write_integers
-                           example_write_pod_struct
+                           example-istream-reader
+                           example-nonpod1
+                           example-nonpod2
+                           example-nonpod-multiple
+                           example-ostream-writer
+                           example-vector-int-reader
+                           example-vector-string-reader
+                           example-write-integers
+                           example-write-pod-struct
                    COMMENT "Building Serialization Examples"
                    VERBATIM)
 # eof: examples/serialize/CMakeLists.txt

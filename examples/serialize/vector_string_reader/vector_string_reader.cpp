@@ -84,7 +84,7 @@ namespace {
     void read_an_array_of_strings (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
         std::array <std::string, 2> arr;
-        serialize::read (reader, gsl2::make_span (arr));
+        serialize::read (reader, gsl::make_span (arr));
         std::cout << "Reading an array of strings produced \"" << arr [0] << "\" and \"" << arr [1] << "\"\n";
     }
 
