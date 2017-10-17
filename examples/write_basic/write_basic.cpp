@@ -47,7 +47,7 @@ int main () {
     auto const key = std::string{"key"};
     auto const value = std::string{"hello world\n"};
 
-    pstore::database db ("./write_example.db", true);
+    pstore::database db ("./write_example.db", pstore::database::access_mode::writable);
     auto t = pstore::begin (db); // Start a transaction
 
     {

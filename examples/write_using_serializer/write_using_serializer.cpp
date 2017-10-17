@@ -55,7 +55,7 @@ int main () {
     auto const key = std::string{"key"};
     auto const value = std::string{"hello world\n"};
 
-    database db ("./write_using_serializer.db", true);
+    database db ("./write_using_serializer.db", pstore::database::access_mode::writable);
     auto t = begin (db); // Start a transaction
 
     {
