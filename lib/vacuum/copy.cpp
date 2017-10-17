@@ -64,10 +64,10 @@
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
-#define CATCH(ex,code)  catch (ex) code
+#define CATCH(ex, code) catch (ex) code
 #else
 #define TRY
-#define CATCH(ex,code)
+#define CATCH(ex, code)
 #endif
 
 namespace {
@@ -134,8 +134,8 @@ namespace vacuum {
                 bool copy_aborted = false;
                 // TODO: a new constructor to make a uniquely named file in the same directory as
                 // 'from'
-                auto destination =
-                    std::make_unique<pstore::database> (source->path () + ".gc", true /*writable*/);
+                auto destination = std::make_unique<pstore::database> (
+                    source->path () + ".gc", pstore::database::access_mode::writable);
 
                 // We don't want our pristine new store to be vacuumed; it doesn't need it.
                 destination->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -207,13 +207,14 @@ namespace vacuum {
                     pstore::file::rename (destination_path, source_path);
                 }
             }
-        } CATCH (std::exception const & ex, {
+        }
+        CATCH (std::exception const & ex, {
             pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
                                   ex.what ());
-        }) CATCH (..., {
+        })
+        CATCH (..., {
             pstore::logging::log (pstore::logging::priority::error, "Unknown error");
         })
-
         pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
     }
 } // end namespace vacuum

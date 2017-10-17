@@ -216,7 +216,7 @@ int main (int argc, char * argv[]) {
 
         value::array::container output;
         for (std::string const & path : opt.paths) {
-            pstore::database db (path, false /*writable*/);
+            pstore::database db (path, pstore::database::access_mode::read_only);
 
             db.sync (opt.revision);
 

@@ -94,8 +94,8 @@ namespace pstore {
 namespace pstore {
     constexpr std::size_t const database::sync_name_length;
 
-    database::database (std::string const & path, bool writable, bool access_tick_enabled)
-            : storage_{database::open (path, writable)}
+    database::database (std::string const & path, access_mode am, bool access_tick_enabled)
+            : storage_{database::open (path, am)}
             , size_{database::get_footer_pos (*this->file ())} {
 
         this->finish_init (access_tick_enabled);
@@ -187,7 +187,7 @@ namespace pstore {
     // clear_index_cache
     // ~~~~~~~~~~~~~~~~~
     void database::clear_index_cache () {
-        for (std::unique_ptr<index::index_base> & index:indices_) {
+        for (std::unique_ptr<index::index_base> & index : indices_) {
             index.reset ();
         }
     }
@@ -321,14 +321,15 @@ namespace pstore {
 
     // open [static]
     // ~~~~
-    auto database::open (std::string const & path, bool writable)
+    auto database::open (std::string const & path, access_mode am)
         -> std::shared_ptr<file::file_handle> {
 
         using present_mode = file::file_handle::present_mode;
 
         auto const create_mode = file::file_handle::create_mode::open_existing;
-        auto const write_mode = writable ? file::file_handle::writable_mode::read_write
-                                         : file::file_handle::writable_mode::read_only;
+        auto const write_mode = (am == access_mode::writable)
+                                    ? file::file_handle::writable_mode::read_write
+                                    : file::file_handle::writable_mode::read_only;
 
         auto file = std::make_shared<file::file_handle> ();
         file->open (path, create_mode, write_mode, present_mode::allow_not_found);
@@ -337,7 +338,7 @@ namespace pstore {
         }
 
 
-        if (!writable) {
+        if (am != access_mode::writable) {
             raise (std::errc::no_such_file_or_directory, path);
         }
 
@@ -433,8 +434,8 @@ namespace pstore {
 
     // get
     // ~~~
-    auto database::get (address addr, std::size_t size, bool initialized,
-                        bool writable) const -> std::shared_ptr<void const> {
+    auto database::get (address addr, std::size_t size, bool initialized, bool writable) const
+        -> std::shared_ptr<void const> {
         if (closed_) {
             raise (pstore::error_code::store_closed);
         }
@@ -493,7 +494,7 @@ namespace pstore {
     template <typename IndexType>
     auto database::get_index (enum trailer::indices which, bool create) -> IndexType * {
         auto const which_pos = static_cast<std::underlying_type<decltype (which)>::type> (which);
-        auto & dx = indices_ [which_pos];
+        auto & dx = indices_[which_pos];
 
         // Have we already loaded this index?
         if (dx.get () == nullptr) {

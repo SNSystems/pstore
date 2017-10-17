@@ -152,7 +152,7 @@ int main (int argc, char * argv[]) {
         // once the collection is complete, we'll rename the temporary file that has been created
         // to the real file name that we're replacing. If the target file isn't writable, we
         // shouldn't try to replace it with the newer version.
-        auto src_db = std::make_shared<pstore::database> (src_path, true /*writable*/,
+        auto src_db = std::make_shared<pstore::database> (src_path, pstore::database::access_mode::writable,
                                                           false /*access tick enabled*/);
 
         vacuum::status st;

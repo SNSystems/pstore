@@ -214,7 +214,7 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        pstore::database db (opt.db_path, false/*writable*/);
+        pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
         db.sync (opt.revision);
 
         dump_if_selected <indices::digest> (opt, db);

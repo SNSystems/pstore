@@ -233,7 +233,7 @@ int main (int argc, char * argv[]) {
     TRY {
         cl::ParseCommandLineOptions (argc, argv, "Exerices the pstore index code");
 
-        pstore::database database (std::string{data_file}, true /*writable*/);
+        pstore::database database (std::string{data_file}, pstore::database::access_mode::writable);
 
         auto index = database.get_digest_index ();
 

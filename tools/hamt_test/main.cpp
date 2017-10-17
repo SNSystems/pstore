@@ -239,7 +239,7 @@ int main (int argc, char * argv[]) {
         cl::ParseCommandLineOptions (argc, argv, "Tests the pstore index code");
 
 
-        pstore::database database (std::string{data_file}, true /*writable*/);
+        pstore::database database (std::string{data_file}, pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
         auto index = database.get_digest_index ();

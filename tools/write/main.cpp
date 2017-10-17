@@ -188,7 +188,7 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        pstore::database database (opt.db_path, true /*writable*/);
+        pstore::database database (opt.db_path, pstore::database::access_mode::writable);
         database.set_vacuum_mode (opt.vmode);
 
         {

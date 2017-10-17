@@ -95,7 +95,8 @@ namespace pstore {
     /// by type Ty.
     ///
     /// \param v  The value to be aligned.
-    /// \returns  The value that must be added to 'v' in order that it has the alignment required by type Ty.
+    /// \returns  The value that must be added to 'v' in order that it has the alignment required by
+    /// type Ty.
     template <typename Ty>
     inline Ty calc_alignment (Ty v) {
         return calc_alignment (v, alignof (Ty));
@@ -229,7 +230,15 @@ namespace pstore {
 
     class database {
     public:
-        explicit database (std::string const & path, bool writable,
+        enum class access_mode { read_only, writable };
+
+        /// Creates a database instance give the path of the file to use.
+        ///
+        /// \param path  The path of the file containing the database.
+        /// \param am  The requested access mode. If the file does not exist and writable access is
+        /// requested, a new empty database is created. If read-only access is requested and the
+        /// file does not exist, an error is raised.
+        explicit database (std::string const & path, access_mode am,
                            bool access_tick_enabled = true);
 
         /// Create a database from a pre-opened file. This interface is intended to enable
@@ -514,12 +523,12 @@ namespace pstore {
         /// is held on the file.
         ///
         /// \param path  The path to the file to be opened.
-        /// \param writable  True if the resulting database should be writable: the file will
-        ///                  be created if it does not already exist. If false and the file does
-        ///                  not exist, the returned file handle will be a nullptr.
+        /// \param am  The database access mode. If writable, the file will be created if it does
+        /// not already exist. If read-only and the file does not exist, the returned file handle
+        /// will be a nullptr.
         /// \returns A file handle to the opened database file which may be null if the file could
         /// not be opened.
-        static auto open (std::string const & path, bool writable)
+        static auto open (std::string const & path, access_mode am)
             -> std::shared_ptr<file::file_handle>;
 
         /// Completes the initialization of a database instance. This function should be called by
@@ -581,7 +590,6 @@ namespace pstore {
 
         return footer_pos;
     }
-
 
 
 
