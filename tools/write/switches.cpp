@@ -155,8 +155,8 @@ namespace {
              " May be repeated to add several keys.")},
         {compact_opt, 0, NATIVE_TEXT ("n"), NATIVE_TEXT ("compact"), compact_mode,
          NATIVE_TEXT ("  -c,--compact  \t"
-                      "Set the compaction mode. Argument must one of: 'off', "
-                      "'now', 'delayed'.")},
+                      "Set the compaction mode. Argument must one of: 'disabled', "
+                      "'immediate', 'background'.")},
         {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
          NATIVE_TEXT ("\nExamples:\n"
                       "  write \t Writes some stuff somewhere.\n")},

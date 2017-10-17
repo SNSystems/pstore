@@ -83,7 +83,7 @@ namespace {
         "kill",
         cl::desc ("Ask the broker to quit after commands have been processed.")
     );
-    cl::alias Kill2 ("m", cl::desc ("Alias for --kill"), cl::aliasopt (Kill));
+    cl::alias Kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (Kill));
 
     cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc("<verb>"));
     cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc("<path>"));

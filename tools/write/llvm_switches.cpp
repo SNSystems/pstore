@@ -53,7 +53,7 @@
 #include "pstore_support/gsl.hpp"
 #include "pstore_support/utf.hpp"
 
-#include "switches.hpp"
+#include "error.hpp"
 #include "to_value_pair.hpp"
 
 namespace {
@@ -82,8 +82,23 @@ namespace {
                                  cl::Required);
     cl::list<std::string> Files (cl::Positional, cl::desc ("<filename>..."));
 
-    cl::opt<pstore::database::vacuum_mode> VacuumMode ("compact", cl::desc ("Set the compaction mode"));
+    cl::opt<std::string> VacuumMode ("compact", cl::Optional,
+                                     cl::desc ("Set the compaction mode. Argument must one of: "
+                                               "'disabled', 'immediate', 'background'."));
     cl::alias VacuumMode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (VacuumMode));
+
+    pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
+        if (opt == "disabled") {
+            return pstore::database::vacuum_mode::disabled;
+        } else if (opt == "immediate") {
+            return pstore::database::vacuum_mode::immediate;
+        } else if (opt == "background") {
+            return pstore::database::vacuum_mode::background;
+        }
+
+        pstore::raise_error_code (
+            std::make_error_code (write_error_code::unrecognized_compaction_mode));
+    }
 
 } // end anonymous namespace
 
@@ -97,7 +112,9 @@ std::pair<switches, int> get_switches (int argc, char * argv[]) {
     switches result;
 
     result.db_path = pstore::utf::from_native_string (DbPath);
-    result.vmode = VacuumMode;
+    if (!VacuumMode.empty ()) {
+        result.vmode = to_vacuum_mode (pstore::utf::from_native_string (VacuumMode));
+    }
 
     std::transform (std::begin (Add), std::end (Add), std::back_inserter (result.add),
                     make_value_pair);

@@ -165,7 +165,7 @@ function (add_pstore_example name)
     add_pstore_executable (example-${name} ${ARGN})
     set_target_properties (example-${name} PROPERTIES EXCLUDE_FROM_ALL 1)
     set_target_properties (example-${name} PROPERTIES FOLDER "pstore examples")
-    target_link_libraries (example-${name} PRIVATE pstore-support-lib pstore)
+    target_link_libraries (example-${name} pstore-support-lib pstore)
 endfunction (add_pstore_example)
 
 

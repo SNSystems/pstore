@@ -59,7 +59,7 @@ namespace {
 
     using namespace llvm;
 
-	// FIXME: Need to remove RevisionOpt since the same code is in pstore-dump!
+    // FIXME: Need to remove RevisionOpt since the same code is in pstore-dump!
     // based on DiagnosticInfo.cpp/PassRemarksOpt.
     struct RevisionOpt {
         unsigned r = pstore::head_revision;
@@ -79,6 +79,7 @@ namespace {
 
     cl::opt<RevisionOpt, false, cl::parser<std::string>>
         Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
+    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
     cl::opt<std::string> DbPath (cl::Positional,
                                  cl::desc ("Path of the pstore repository to be read."),
@@ -89,6 +90,7 @@ namespace {
     cl::opt<bool>
         StringMode ("strings", cl::init (false),
                     cl::desc ("Reads from the 'strings' index rather than the 'names' index."));
+    cl::alias StringMode2 ("s", cl::desc ("Alias for --strings"), cl::aliasopt (StringMode));
 
 
 } // end anonymous namespace

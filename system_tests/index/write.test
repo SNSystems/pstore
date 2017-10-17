@@ -32,7 +32,7 @@ RUN: "%binaries/pstore-write" "--add=k1,new_value1" "%stores/write.db"
 # in the test output directory
 RUN: "%binaries/pstore-read" "%stores/write.db" k1 >> "%T/write"
 RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "-r 1" "%stores/write.db" k1 >> "%T/write"
+RUN: "%binaries/pstore-read" "-r" "1" "%stores/write.db" k1 >> "%T/write"
 RUN: echo '.' >>  "%T/write"
 
 # Check that the data made the round trip successfully.
