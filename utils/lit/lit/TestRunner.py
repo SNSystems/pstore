@@ -287,6 +287,16 @@ def _executeShCmd(cmd, shenv, results, timeoutHelper):
         lit.util.mkdir_p(dir)
         return 0
 
+    if cmd.commands[0].args[0] == 'diff':
+        if len(cmd.commands) != 1:
+            raise ValueError("'diff' cannot be part of a pipeline")
+        if len(cmd.commands[0].args) != 3:
+            raise ValueError("'diff' needs to specify both a fromfile and tofile")
+        fromfile = cmd.commands[0].args[1]
+        tofile = cmd.commands[0].args[2]
+        lit.util.diff(fromfile, tofile)
+        return 0
+
     procs = []
     input = subprocess.PIPE
     stderrTempFiles = []

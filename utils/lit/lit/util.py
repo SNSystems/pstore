@@ -7,6 +7,7 @@ import signal
 import subprocess
 import sys
 import threading
+import difflib
 
 def to_bytes(str):
     # Encode to UTF-8 to get binary data.
@@ -66,6 +67,15 @@ def mkdir_p(path):
         # Ignore EEXIST, which may occur during a race condition.
         if e.errno != errno.EEXIST:
             raise
+
+def diff(fromfile, tofile):
+    """diff(fromfile, tofile) - Compare files line by line."""
+    with open(fromfile, 'r') as f1, open(tofile, 'r') as f2:
+        for diff in difflib.context_diff(f1.readlines(),
+                                         f2.readlines(),
+                                         fromfile,
+                                         tofile):
+            sys.stdout.write(diff)
 
 def capture(args, env=None):
     """capture(command) - Run the given command (or argv list) in a shell and
