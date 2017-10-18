@@ -1,5 +1,5 @@
 # Try to dump a missing data store.
 XFAIL: *
-RUN: mkdir "%T/dump_missing_file"
+RUN: mkdir -p "%T/dump_missing_file"
 RUN: "%binaries/dump" --log "%T/dump_missing_file/foo.db"
 

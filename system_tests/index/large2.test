@@ -15,7 +15,7 @@ RUN: rm -f "%stores/large2.db"
 
 # Create a directory to hold the test outputs.
 RUN: rm -r -f "%T/large2"
-RUN: mkdir "%T/large2"
+RUN: mkdir -p "%T/large2"
 
 
 

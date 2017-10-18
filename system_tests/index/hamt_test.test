@@ -8,5 +8,5 @@
 # Delete an existing folder.
 RUN: rm -rf "%T/hamt_test"
 
-RUN: mkdir "%T/hamt_test"
+RUN: mkdir -p "%T/hamt_test"
 RUN: "%binaries/pstore-hamt-test" "%T/hamt_test/foo.db"

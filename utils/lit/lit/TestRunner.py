@@ -277,6 +277,16 @@ def _executeShCmd(cmd, shenv, results, timeoutHelper):
         updateEnv(shenv, cmd.commands[0])
         return 0
 
+    if cmd.commands[0].args[0] == 'mkdir':
+        if len(cmd.commands) != 1:
+            raise ValueError("'mkdir' cannot be part of a pipeline")
+        if len(cmd.commands[0].args) != 3 and cmd.commands[0].args[1] != '-p':
+            raise ValueError("'mkdir' supports only -p option")
+        dir = cmd.commands[0].args[2]
+        # Create the directory if it does not already exist.
+        lit.util.mkdir_p(dir)
+        return 0
+
     procs = []
     input = subprocess.PIPE
     stderrTempFiles = []
