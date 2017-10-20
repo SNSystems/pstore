@@ -52,7 +52,7 @@ add_subdirectory (vector_string_reader)
 add_subdirectory (write_integers)
 add_subdirectory (write_pod_struct)
     
-add_custom_target (pstore_examples_serialize
+add_custom_target (pstore-examples-serialize
                    ALL
                    DEPENDS
                            example-istream-reader

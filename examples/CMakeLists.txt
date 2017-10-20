@@ -49,10 +49,10 @@ else ()
     add_subdirectory (write_basic)
     add_subdirectory (write_using_serializer)
 
-    add_custom_target (pstore_examples
+    add_custom_target (pstore-examples
                        ALL
                        DEPENDS
-                               pstore_examples_serialize
+                               pstore-examples-serialize
                                example-write-basic
                                example-write-using-serializer
                        COMMENT "Building pstore Examples"
