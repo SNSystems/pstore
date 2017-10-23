@@ -15,7 +15,7 @@ RUN: rm -f "%stores/put3.db"
 
 # Create a directory to hold the test outputs.
 RUN: rm -r -f "%T/put3"
-RUN: mkdir "%T/put3"
+RUN: mkdir -p "%T/put3"
 
 
 
