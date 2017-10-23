@@ -146,12 +146,12 @@ void command_processor::log (pstore::gsl::czstring str) const {
 }
 
 std::array<command_processor::command_entry, 6> const command_processor::commands_{{
-    {"ECHO", &command_processor::echo},
-    {"GC", &command_processor::gc},
-    {"NOP", &command_processor::nop},
-    {"SUICIDE", &command_processor::suicide}, // initiate the broker shutdown.
-    {"_CQUIT", &command_processor::cquit}, // exit this command processor thread.
-    {"_QUIT", &command_processor::quit}, //  shut down a single pipe-reader thread.
+    command_processor::command_entry ("ECHO", &command_processor::echo),
+    command_processor::command_entry ("GC", &command_processor::gc),
+    command_processor::command_entry ("NOP", &command_processor::nop),
+    command_processor::command_entry ("SUICIDE", &command_processor::suicide), // initiate the broker shutdown.
+    command_processor::command_entry ("_CQUIT", &command_processor::cquit), // exit this command processor thread.
+    command_processor::command_entry ("_QUIT", &command_processor::quit), //  shut down a single pipe-reader thread.
 }};
 
 // process_command
