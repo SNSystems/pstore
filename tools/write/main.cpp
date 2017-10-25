@@ -59,37 +59,24 @@
 using TCHAR = char;
 #endif
 
-// 3rd party inludes
-//#include "optionparser.h"
-
 // pstore includes.
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
-#include "pstore/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/transaction.hpp"
+#include "pstore_support/error.hpp"
+#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
 #include "switches.hpp"
-
-
 
 namespace {
 
 #if defined(_WIN32) && defined(_UNICODE)
     auto & error_stream = std::wcerr;
-    auto & out_stream = std::wcout;
 #else
     auto & error_stream = std::cerr;
-    auto & out_stream = std::cout;
 #endif
-
-}
-
-
-namespace {
 
     bool add_file (pstore::transaction<pstore::transaction_lock> & transaction,
                    pstore::index::write_index & names, std::string const & key,
@@ -104,10 +91,6 @@ namespace {
             ok = false;
         } else {
             auto const size = file.size ();
-
-            using pstore::utf::to_native_string;
-            out_stream << to_native_string (key) << NATIVE_TEXT (" ... ") << to_native_string (path)
-                       << '\n';
 
             // Allocate space in the transaction for 'size' bytes.
             auto addr = pstore::address::null ();
@@ -169,14 +152,6 @@ int _tmain (int argc, TCHAR * argv[]) {
 int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
-
-    // Seed the random number generator from the current time.
-    // TODO: I've got one based on the MT rng in file::temporaryfile (for Windows);
-    // use that throughout the core of the store code?
-    {
-        time_t timer;
-        std::srand (static_cast<unsigned int> (std::time (&timer)));
-    }
 
     using pstore::utf::to_native_string;
     using pstore::utf::from_native_string;
