@@ -219,4 +219,11 @@ if (CLANG_TIDY_FOUND)
 else()
     message (WARNING "clang-tidy executable was not found.")
 endif()
+
+
+include (check_atomic)
+if (NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB)
+    target_link_libraries(pstore PRIVATE atomic)
+endif()
+
 # eof: lib/pstore/CMakeLists.txt
