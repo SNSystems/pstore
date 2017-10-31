@@ -89,7 +89,7 @@ TEST_F (ProcessFileName, BufferContents) {
 }
 
 TEST_F (ProcessFileName, BufferContentsWithInitialSize) {
-    pstore::small_vector<char, 128> buffer{128};
+    pstore::small_vector<char, 128> buffer(std::size_t{128});
     ASSERT_GE (128U, buffer.capacity ());
     std::size_t length = pstore::process_file_name (&get_process_path, buffer);
     EXPECT_EQ (length, 12U);

@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- tools/CMakeLists.txt ------------------------------------------------===//
+#===- tools/fraggle/CMakeLists.txt ----------------------------------------===//
 # Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,16 +41,15 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (broker)
-add_subdirectory (broker_poker) # A utility for exercising the broker agent.
-add_subdirectory (dump)         # Dumps pstore contents as YAML.
-add_subdirectory (fraggle)      # Generates dummy tickets and fragments for testing.
-add_subdirectory (hamt_test)    # A utility to check the HAMT index
-add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz DOT graphs.
-add_subdirectory (inserter)     # A utility to exercise the digest index
-add_subdirectory (mangle)       # A simple file fuzzing utility
-add_subdirectory (read)         # A utility for reading the write or strings index. 
-add_subdirectory (sieve)        # A utility to generate data for the system tests
-add_subdirectory (vacuum)       # Data store garbage collector utility
-add_subdirectory (write)
-# eof: tools/CMakeLists.txt
+
+add_pstore_executable (pstore-fraggle
+    fraggle.cpp
+    fibonacci_generator.hpp
+)
+
+if (PSTORE_IS_INSIDE_LLVM)
+    target_link_libraries (pstore-fraggle LLVMSupport)
+endif (PSTORE_IS_INSIDE_LLVM)
+target_link_libraries (pstore-fraggle pstore pstore-mcrepo pstore-cmd-util)
+
+# eof: tools/fraggle/CMakeLists.txt

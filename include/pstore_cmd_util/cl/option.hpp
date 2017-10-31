@@ -154,6 +154,9 @@ namespace pstore {
                 }
 
                 operator T () const {
+                    return get ();
+                }
+                T get () const {
                     return value_;
                 }
 

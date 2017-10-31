@@ -92,8 +92,9 @@ namespace pstore {
         auto shm_name (std::string const & name, SpanType arr) -> ::pstore::gsl::zstring {
             using difference_type =
                 std::iterator_traits<std::string::const_iterator>::difference_type;
+#ifndef NDEBUG
             using udifference_type = std::make_unsigned<difference_type>::type;
-
+#endif
             static_assert (SpanType::extent >= 2,
                            "The posix_mutex_name span must be fixed size and able to hold "
                            "at least 2 characters");

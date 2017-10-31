@@ -280,7 +280,9 @@ namespace pstore {
         // ~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
         section::section (DataRange const & d, IFixupRange const & i, XFixupRange const & x) {
+#ifndef NDEBUG
             auto const start = reinterpret_cast<std::uint8_t *> (this);
+#endif
             auto p = reinterpret_cast<std::uint8_t *> (this + 1);
 
             if (d.first != d.second) {
@@ -308,11 +310,12 @@ namespace pstore {
             auto const size = std::distance (first, last);
             assert (size >= 0);
 
+#ifndef NDEBUG
             auto const usize =
                 static_cast<typename std::make_unsigned<decltype (size)>::type> (size);
             assert (usize >= std::numeric_limits<IntType>::min ());
             assert (usize <= std::numeric_limits<IntType>::max ());
-
+#endif
             return static_cast<IntType> (size);
         }
 
@@ -357,7 +360,8 @@ namespace pstore {
 #undef X
 
         struct section_content {
-            section_content () = default;
+            explicit section_content (section_type st)
+                    : type{st} {}
             section_content (section_content const &) = default;
             section_content (section_content &&) = default;
             section_content & operator= (section_content const &) = default;
@@ -370,9 +374,6 @@ namespace pstore {
             static inline auto make_range (Iterator begin, Iterator end) -> range<Iterator> {
                 return {begin, end};
             }
-
-            explicit section_content (section_type st)
-                    : type{st} {}
 
             section_type type;
             small_vector<char, 128> data;

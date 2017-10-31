@@ -83,6 +83,8 @@ namespace pstore {
         /// Constructs the buffer with the given initial numbe of elements.
         explicit small_vector (std::size_t required_elements);
 
+        small_vector (std::initializer_list<ElementType> init);
+
         // Move is supported.
         small_vector (small_vector && other);
         small_vector & operator= (small_vector && other);
@@ -203,6 +205,7 @@ namespace pstore {
 
         template <typename InputIt>
         void assign (InputIt first, InputIt last);
+
         void assign (std::initializer_list<ElementType> ilist) {
             this->assign (std::begin (ilist), std::end (ilist));
         }
@@ -230,7 +233,7 @@ namespace pstore {
         std::vector<ElementType> big_buffer_;
 
         /// Will point to either small_buffer_.data() or big_buffer_.data()
-        ElementType * buffer_;
+        ElementType * buffer_ = nullptr;
 
         /// Returns true if the given number of elements will fit in the space
         /// allocated for the "small" in-object buffer.
@@ -248,8 +251,7 @@ namespace pstore {
     // ~~~~~~
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::size_t required_elements)
-            : elements_ (required_elements)
-            , buffer_ (nullptr) {
+            : elements_ (required_elements) {
 
         if (!is_small (required_elements)) {
             big_buffer_.resize (required_elements);
@@ -271,6 +273,15 @@ namespace pstore {
 
         this->set_buffer_ptr (elements_);
     }
+
+    template <typename ElementType, std::size_t BodyElements>
+    small_vector<ElementType, BodyElements>::small_vector (std::initializer_list<ElementType> init)
+        : elements_ (init.size ()) {
+
+        this->set_buffer_ptr (elements_);
+        std::copy (std::begin (init), std::end (init), this->begin ());
+    }
+
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (small_vector const & rhs)

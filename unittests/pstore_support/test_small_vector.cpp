@@ -56,14 +56,14 @@ TEST (SmallVector, DefaultCtor) {
 }
 
 TEST (SmallVector, ExplicitCtorLessThanStackBuffer) {
-    pstore::small_vector<int, 8> b (5);
+    pstore::small_vector<int, 8> b (std::size_t{5});
     EXPECT_EQ (5U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_EQ (5U * sizeof (int), b.size_bytes ());
 }
 
 TEST (SmallVector, ExplicitCtor0) {
-    pstore::small_vector<int, 8> b (0);
+    pstore::small_vector<int, 8> b (std::size_t{0});
     EXPECT_EQ (0U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_EQ (0U * sizeof (int), b.size_bytes ());
@@ -71,22 +71,35 @@ TEST (SmallVector, ExplicitCtor0) {
 }
 
 TEST (SmallVector, ExplicitCtorGreaterThanStackBuffer) {
-    pstore::small_vector<int, 8> b (10);
+    pstore::small_vector<int, 8> b (std::size_t {10});
     EXPECT_EQ (10U, b.size ());
     EXPECT_EQ (10U, b.capacity ());
     EXPECT_EQ (10 * sizeof (int), b.size_bytes ());
 }
 
+TEST (SmallVector, CtorInitializerList) {
+    pstore::small_vector<int, 8> b {1, 2, 3};
+    EXPECT_EQ (3U, b.size ());
+    EXPECT_EQ (8U, b.capacity ());
+    EXPECT_THAT (b, ::testing::ElementsAre (1, 2, 3));
+}
+
 TEST (SmallVector, MoveCtor) {
-    pstore::small_vector<int, 4> a {4};
+    pstore::small_vector<int, 4> a (std::size_t {4});
     std::iota (a.begin (), a.end (), 0); // fill with increasing values
     pstore::small_vector<int, 4> b (std::move (a));
 
     EXPECT_THAT (b, ::testing::ElementsAre (0, 1, 2, 3));
 }
 
+TEST (SmallVector, AssignInitializerList) {
+    pstore::small_vector<int, 3> b {1, 2, 3};
+    b.assign ({4, 5, 6, 7});
+    EXPECT_THAT (b, ::testing::ElementsAre (4, 5, 6, 7));
+}
+
 TEST (SmallVector, SizeAfterResizeLarger) {
-    pstore::small_vector<int, 4> b{4};
+    pstore::small_vector<int, 4> b(std::size_t{4});
     std::size_t const size{10};
     b.resize (size);
     EXPECT_EQ (size, b.size ());
@@ -95,10 +108,10 @@ TEST (SmallVector, SizeAfterResizeLarger) {
 }
 
 TEST (SmallVector, ContentsAfterResizeLarger) {
-    constexpr auto orig_size = 8U;
-    constexpr auto new_size = 10U;
+    constexpr auto orig_size = std::size_t{8};
+    constexpr auto new_size = std::size_t{10};
   
-    pstore::small_vector<int, orig_size> b {orig_size};
+    pstore::small_vector<int, orig_size> b (orig_size);
     std::iota (std::begin (b), std::end (b), 37);
     b.resize (new_size);
     ASSERT_EQ (b.size (), new_size);
@@ -109,7 +122,7 @@ TEST (SmallVector, ContentsAfterResizeLarger) {
 }
 
 TEST (SmallVector, SizeAfterResizeSmaller) {
-    pstore::small_vector<int, 8> b {8};
+    pstore::small_vector<int, 8> b (std::size_t{8});
     b.resize (5);
     EXPECT_EQ (5U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
@@ -117,7 +130,7 @@ TEST (SmallVector, SizeAfterResizeSmaller) {
 }
 
 TEST (SmallVector, SizeAfterResize0) {
-    pstore::small_vector<int, 8> b {8};
+    pstore::small_vector<int, 8> b (std::size_t{8});
     b.resize (0);
     EXPECT_EQ (0U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
@@ -125,13 +138,13 @@ TEST (SmallVector, SizeAfterResize0) {
 }
 
 TEST (SmallVector, DataAndConstDataMatch) {
-    pstore::small_vector<int, 8> b {8};
+    pstore::small_vector<int, 8> b (std::size_t{8});
     auto const * const bconst = &b;
     EXPECT_EQ (bconst->data (), b.data ());
 }
 
 TEST (SmallVector, IteratorNonConst) {
-    pstore::small_vector<int, 4> buffer {4};
+    pstore::small_vector<int, 4> buffer (std::size_t{4});
 
     // I populate the buffer manually here to ensure coverage of basic iterator
     // operations, but use std::iota() elsewhere to keep the tests simple.
@@ -153,7 +166,7 @@ TEST (SmallVector, IteratorNonConst) {
 }
 
 TEST (SmallVector, IteratorConstFromNonConstContainer) {
-    pstore::small_vector<int, 4> buffer{4};
+    pstore::small_vector<int, 4> buffer (std::size_t{4});
     std::iota (buffer.begin (), buffer.end (), 42);
 
     {
@@ -170,7 +183,7 @@ TEST (SmallVector, IteratorConstFromNonConstContainer) {
 }
 
 TEST (SmallVector, IteratorConstIteratorFromConstContainer) {
-    pstore::small_vector<int, 4> buffer{4};
+    pstore::small_vector<int, 4> buffer (std::size_t{4});
     std::iota (buffer.begin (), buffer.end (), 42);
 
     auto const & cbuffer = buffer;
@@ -179,7 +192,7 @@ TEST (SmallVector, IteratorConstIteratorFromConstContainer) {
 }
 
 TEST (SmallVector, IteratorNonConstReverse) {
-    pstore::small_vector<int, 4> buffer{4};
+    pstore::small_vector<int, 4> buffer (std::size_t{4});
     std::iota (buffer.begin (), buffer.end (), 42);
 
     {
@@ -196,7 +209,7 @@ TEST (SmallVector, IteratorConstReverse) {
     // Wrap the buffer construction code in a lambda to hide the non-const
     // small_vector instance.
     auto const & cbuffer = []() {
-        pstore::small_vector<int, 4> buffer{4};
+        pstore::small_vector<int, 4> buffer(std::size_t{4});
         std::iota (std::begin (buffer), std::end (buffer), 42); // fill with increasing values
         return buffer;
     }();
@@ -206,7 +219,7 @@ TEST (SmallVector, IteratorConstReverse) {
 }
 
 TEST (SmallVector, ElementAccess) {
-    pstore::small_vector<int, 4> buffer{4};
+    pstore::small_vector<int, 4> buffer (std::size_t{4});
     int count = 42;
     for (std::size_t index = 0, end = buffer.size (); index != end; ++index) {
         buffer[index] = count++;
@@ -217,8 +230,8 @@ TEST (SmallVector, ElementAccess) {
 }
 
 TEST (SmallVector, MoveSmall) {
-    pstore::small_vector<int, 4> a {3};
-    pstore::small_vector<int, 4> b {4};
+    pstore::small_vector<int, 4> a (std::size_t{3});
+    pstore::small_vector<int, 4> b (std::size_t{4});
     std::fill (std::begin (a), std::end (a), 0);
     std::fill (std::begin (b), std::end (b), 73);
 
@@ -229,8 +242,8 @@ TEST (SmallVector, MoveSmall) {
 TEST (SmallVector, MoveLarge) {
     // The two containers start out with different sizes; one uses the small
     // buffer, the other, large.
-    pstore::small_vector<int, 3> a (0);
-    pstore::small_vector<int, 3> b (4);
+    pstore::small_vector<int, 3> a (std::size_t{0});
+    pstore::small_vector<int, 3> b (std::size_t{4});
     std::fill (std::begin (a), std::end (a), 0);
     std::fill (std::begin (b), std::end (b), 73);
     a = std::move (b);
@@ -241,7 +254,7 @@ TEST (SmallVector, MoveLarge) {
 TEST (SmallVector, Clear) {
     // The two containers start out with different sizes; one uses the small
     // buffer, the other, large.
-    pstore::small_vector<int> a (4);
+    pstore::small_vector<int> a (std::size_t{4});
     EXPECT_EQ (4U, a.size ());
     a.clear ();
     EXPECT_EQ (0U, a.size ());
@@ -261,7 +274,7 @@ TEST (SmallVector, PushBack) {
 }
 
 TEST (SmallVector, AppendIteratorRange) {
-    pstore::small_vector<int, 4> a{4};
+    pstore::small_vector<int, 4> a (std::size_t{4});
     std::iota (std::begin (a), std::end (a), 0);
 
     std::array <int, 4> extra;
