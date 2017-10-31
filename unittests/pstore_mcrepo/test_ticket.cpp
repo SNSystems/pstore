@@ -72,10 +72,9 @@ TEST_F (TicketTest, SingleMember) {
     constexpr auto output_file_path = pstore::address{64U};
     constexpr auto digest = pstore::index::digest{28U};
     constexpr auto name = pstore::address{32U};
-    constexpr std::uint8_t linkage = 2U;
-    constexpr bool is_comdat = true;
+    constexpr auto linkage = pstore::repo::linkage_type::external;
 
-    ticket_member sm{digest, name, linkage, is_comdat};
+    ticket_member sm{digest, name, linkage};
 
     std::vector<ticket_member> v{sm};
     ticket::alloc (transaction_, output_file_path, v);
@@ -89,7 +88,6 @@ TEST_F (TicketTest, SingleMember) {
     EXPECT_EQ (digest, (*t)[0].digest.low ());
     EXPECT_EQ (name, (*t)[0].name);
     EXPECT_EQ (linkage, (*t)[0].linkage);
-    EXPECT_EQ (is_comdat, (*t)[0].comdat);
 }
 
 TEST_F (TicketTest, MultipleMembers) {
@@ -97,11 +95,10 @@ TEST_F (TicketTest, MultipleMembers) {
     constexpr auto digest1 = pstore::index::digest{128U};
     constexpr auto digest2 = pstore::index::digest{144U};
     constexpr auto name = pstore::address{16U};
-    constexpr std::uint8_t linkage = 2U;
-    constexpr bool is_comdat = false;
+    constexpr auto linkage = pstore::repo::linkage_type::external;
 
-    ticket_member mm1{digest1, name, linkage, is_comdat};
-    ticket_member mm2{digest2, name + 24U, linkage, !is_comdat};
+    ticket_member mm1{digest1, name, linkage};
+    ticket_member mm2{digest2, name + 24U, linkage};
 
     std::vector<ticket_member> v{mm1, mm2};
     ticket::alloc (transaction_, output_file_path, v);

@@ -146,9 +146,7 @@ int main (int argc, char * argv[]) {
                 pstore::index::digest const digest{digest_half, digest_half};
                 fragment_index->insert (transaction, std::make_pair (digest, fragment_pos));
 
-                ticket_members.emplace_back (digest, name_addr,
-                                             static_cast <std::uint8_t> (pstore::repo::linkage_type::ExternalLinkage),
-                                             false /*is comdat*/);
+                ticket_members.emplace_back (digest, name_addr, pstore::repo::linkage_type::external);
             }
 
             std::string const ticket_path =

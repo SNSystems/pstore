@@ -50,17 +50,10 @@ namespace pstore {
     namespace repo {
 
 #define PSTORE_REPO_LINKAGE_TYPES                                                                  \
-    X (ExternalLinkage)                                                                            \
-    X (ExternalWeakLinkage)                                                                        \
-    X (PrivateLinkage)                                                                             \
-    X (InternalLinkage)                                                                            \
-    X (AvailableExternallyLinkage)                                                                 \
-    X (LinkOnceAnyLinkage)                                                                         \
-    X (LinkOnceODRLinkage)                                                                         \
-    X (WeakAnyLinkage)                                                                             \
-    X (WeakODRLinkage)                                                                             \
-    X (AppendingLinkage)                                                                           \
-    X (CommonLinkage)
+    X (external)                                                                                   \
+    X (internal)                                                                                   \
+    X (common)                                                                                     \
+    X (linkonce)
 
 #define X(a) a,
         enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
@@ -71,16 +64,20 @@ namespace pstore {
         //* |  _| / _| / / -_)  _| | '  \/ -_) '  \| '_ \/ -_) '_| *
         //*  \__|_\__|_\_\___|\__| |_|_|_\___|_|_|_|_.__/\___|_|   *
         //*                                                        *
+        /// \brief Represents an individual element in a ticket.
+        /// The ticket member provides the connection between a symbol name, its linkage, and
+        /// the fragment which holds the associated data.
         struct ticket_member {
-            ticket_member (pstore::index::digest d, pstore::address n, std::uint8_t l, bool c)
+            /// \param d  The fragment digest for this ticket.
+            /// \param n  Symbol name address.
+            /// \param l  The symbol linkage.
+            ticket_member (pstore::index::digest d, pstore::address n, linkage_type l)
                     : digest (d)
                     , name (n)
-                    , linkage (l)
-                    , comdat (c) {}
+                    , linkage (l) {}
             pstore::index::digest digest;
             pstore::address name;
-            std::uint8_t linkage;
-            bool comdat;
+            linkage_type linkage;
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
         };
@@ -94,8 +91,6 @@ namespace pstore {
                        "Name offset differs from expected value");
         static_assert (offsetof (ticket_member, linkage) == 24,
                        "Linkage offset differs from expected value");
-        static_assert (offsetof (ticket_member, comdat) == 25,
-                       "Comdat offset differs from expected value");
         static_assert (offsetof (ticket_member, padding1) == 26,
                        "Padding1 offset differs from expected value");
         static_assert (offsetof (ticket_member, padding2) == 28,
@@ -106,7 +101,8 @@ namespace pstore {
         //* |  _| / _| / / -_)  _| *
         //*  \__|_\__|_\_\___|\__| *
         //*                        *
-	class ticket {
+        /// \brief A ticket is a holder for zero or more `ticket_member` instances.
+        class ticket {
         public:
             using iterator = ticket_member *;
             using const_iterator = ticket_member const *;

@@ -138,14 +138,10 @@ namespace value {
 
     value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member) {
         pstore::serialize::archive::database_reader archive (db, member.name);
-        std::string const name = pstore::serialize::read<std::string> (archive);
-        auto const linkage = static_cast<pstore::repo::linkage_type> (member.linkage);
-
         return make_value (object::container{
             {"digest", make_value (member.digest)},
-            {"name", make_value (name)},
-            {"linkage", make_value (linkage)},
-            {"comdat", make_value (member.comdat)},
+            {"name", make_value (pstore::serialize::read<std::string> (archive))},
+            {"linkage", make_value (member.linkage)},
         });
     }
 
