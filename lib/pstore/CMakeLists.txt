@@ -222,7 +222,7 @@ endif()
 
 
 include (check_atomic)
-if (NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB)
+if (NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB AND PSTORE_HAVE_CXX_ATOMICS_WITH_LIB)
     target_link_libraries(pstore PRIVATE atomic)
 endif()
 
