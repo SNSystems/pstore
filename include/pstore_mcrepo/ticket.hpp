@@ -124,13 +124,13 @@ namespace pstore {
             static pstore::record alloc (TransactionType & transaction, pstore::address path,
                                          std::vector<ticket_member> const & members);
 
-            /// \brief Returns a pointer to a Ticket which is in-store.
+            /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
             /// \param db  The database from which the ticket should be loaded.
             /// \param record  A record to the ticket location in the store.
             /// \result  A pointer to the ticket in-store memory.
-            static auto get_ticket (pstore::database const & db, pstore::record const & record)
-                -> std::shared_ptr<ticket const>;
+            static std::shared_ptr<ticket const> load (pstore::database const & db,
+                                                       pstore::record const & record);
 
             ///@}
 

@@ -1,10 +1,10 @@
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//*                           *
-//===- lib/pstore_mcrepo/ticket.cpp ---------------------------------------===//
+//*                                                   *
+//*  _ __ ___ _ __   ___     ___ _ __ _ __ ___  _ __  *
+//* | '__/ _ \ '_ \ / _ \   / _ \ '__| '__/ _ \| '__| *
+//* | | |  __/ |_) | (_) | |  __/ |  | | | (_) | |    *
+//* |_|  \___| .__/ \___/   \___|_|  |_|  \___/|_|    *
+//*          |_|                                      *
+//===- include/pstore_mcrepo/repo_error.hpp -------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,38 +41,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_mcrepo/ticket.hpp"
-#include "pstore_mcrepo/repo_error.hpp"
+#ifndef PSTORE_MCREPO_ERROR_HPP
+#define PSTORE_MCREPO_ERROR_HPP
 
-using namespace pstore::repo;
+#include <string>
+#include <system_error>
+#include <type_traits>
+#include "pstore_support/error.hpp"
 
-// operator new
-// ~~~~~~~~~~~~
-void * ticket::operator new (std::size_t s, nMembers size) {
-    std::size_t const actual_bytes = ticket::size_bytes (size.n);
-    assert (actual_bytes >= s);
-    return ::operator new (actual_bytes);
-}
+namespace pstore {
+    namespace repo {
 
-// operator delete
-// ~~~~~~~~~~~~~~~
-void ticket::operator delete (void * p, nMembers /*size*/) {
-    ::operator delete (p);
-}
+        enum class error_code {
+            bad_fragment_record = 1,
+            bad_ticket_record,
+        };
 
-void ticket::operator delete (void * p) {
-    ::operator delete (p);
-}
+        class error_category : public std::error_category {
+        public:
+            error_category () noexcept = default;
+            char const * name () const noexcept override;
+            std::string message (int error) const override;
+        };
 
-// load
-// ~~~~
-auto ticket::load (pstore::database const & db, pstore::record const & location)
-    -> std::shared_ptr<ticket const> {
-    auto t = std::static_pointer_cast<ticket const> (db.getro (location.addr, location.size));
-    if (t->size_bytes () != location.size) {
-        raise_error_code (std::make_error_code (error_code::bad_ticket_record));
-    }
-    return t;
-}
+    } // namespace repo
+} // namespace pstore
 
-// eof: lib/pstore_mcrepo/ticket.cpp
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::repo::error_code> : public std::true_type {};
+
+    std::error_code make_error_code (pstore::repo::error_code e);
+
+} // namespace std
+
+#endif // PSTORE_MCREPO_ERROR_HPP
+// eof: include/pstore_mcrepo/repo_error.hpp

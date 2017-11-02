@@ -520,9 +520,22 @@ namespace pstore {
                 void operator() (void * p);
             };
 
-            template <typename TransactionType, typename Iterator>
-            static auto alloc (TransactionType & transaction, Iterator first, Iterator last)
-                -> pstore::record;
+            /// \tparam Transaction  The type of the database transaction.
+            /// \tparam Iterator  An iterator which will yield values of type `section_content`.
+            /// \param transaction  The transaction to which the fragment should be appended.
+            /// \param first  The beginning of the range of `section_content` values.
+            /// \param last  The end of the range of `section_content` values.
+            template <typename Transaction, typename Iterator>
+            static pstore::record alloc (Transaction & transaction, Iterator first, Iterator last);
+
+            /// Provides a pointer to an individual fragment instance given a database an a record
+            /// describing its address and size.
+            ///
+            /// \param db  The database from which the fragment is to be read.
+            /// \param location  The address and size of the fragment data.
+            /// \returns  A pointer to the fragment instance.
+            static std::shared_ptr<fragment const> load (pstore::database const & db,
+                                                         pstore::record const & location);
 
             template <typename Iterator>
             void populate (Iterator first, Iterator last);
@@ -533,44 +546,48 @@ namespace pstore {
             std::size_t num_sections () const {
                 return arr_.size ();
             }
+            /// Returns the array of section offsets.
             member_array const & sections () const {
                 return arr_;
             }
 
-            /// Returns the number of bytes of storage that is required for a fragment containing
+            /// Returns the number of bytes of storage that are required for a fragment containing
             /// the sections defined by [first, last).
+            ///
+            /// \tparam Iterator An iterator which will yield values of type `section_content`.
+            /// \param first  The beginning of the range of `section_content` values.
+            /// \param last  The end of the range of `section_content` values.
             template <typename Iterator>
             static std::size_t size_bytes (Iterator first, Iterator last);
+
+            /// Returns the number of bytes of storage that are required for a fragment containing
+            /// the sections defined by [first, last).
+            std::size_t size_bytes () const;
 
         private:
             template <typename IteratorIdx>
             fragment (IteratorIdx first_index, IteratorIdx last_index)
                     : arr_ (first_index, last_index) {}
 
-            section const & offset_to_section (std::uint64_t offset) const {
-                auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
-                assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
-                return *reinterpret_cast<section const *> (ptr);
-            }
+            section const & offset_to_section (std::uint64_t offset) const;
 
+            /// A sparse array of offsets to each of the contained sections.
             member_array arr_;
         };
-
-
-#define X(a)                                                                                       \
-    case (section_type::a):                                                                        \
-        name = #a;                                                                                 \
-        break;
 
         // operator<<
         // ~~~~~~~~~~
         template <typename OStream>
         OStream & operator<< (OStream & os, section_type st) {
+#define X(a)                                                                                       \
+    case (section_type::a):                                                                        \
+        name = #a;                                                                                 \
+        break;
             char const * name = "*unknown*";
             switch (st) { PSTORE_REPO_SECTION_TYPES }
             return os << name;
-        }
 #undef X
+        }
 
         template <typename OStream>
         OStream & operator<< (OStream & os, internal_fixup const & ifx) {
@@ -658,6 +675,7 @@ namespace pstore {
             assert (out >= ptr.get () &&
                     static_cast<std::size_t> (
                         out - reinterpret_cast<std::uint8_t *> (ptr.get ())) == size);
+            assert (size == fragment_ptr->size_bytes ());
             return {storage.second, size};
         }
 

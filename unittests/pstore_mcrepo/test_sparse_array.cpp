@@ -265,4 +265,13 @@ TEST (RepoSparseArray, SizeBytesAgree) {
     EXPECT_EQ (sparse_array<int>::make_unique ({1, 3, 5, 7, 11})->size_bytes (),
                sparse_array<int>::size_bytes (5));
 }
+
+TEST (RepoSparseArray, FrontAndBack) {
+    std::vector<std::size_t> indices{2, 3, 5, 7};
+    auto arr = sparse_array<int>::make_unique (std::begin (indices), std::end (indices),
+                                               {11, 13, 17, 19});
+    EXPECT_EQ (arr->front (), 11);
+    EXPECT_EQ (arr->back (), 19);
+}
+
 // eof: unittests/pstore_mcrepo/test_sparse_array.cpp

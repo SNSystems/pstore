@@ -115,10 +115,9 @@ namespace value {
 
             array::container members;
             for (auto const & kvp : *digests) {
-                auto F =
-                    std::static_pointer_cast<pstore::repo::fragment const> (db.getro (kvp.second));
+                auto fragment = pstore::repo::fragment::load (db, kvp.second);
                 result.emplace_back (make_value (object::container{
-                    {"digest", make_value (kvp.first)}, {"fragment", make_value (db, *F)}}));
+                    {"digest", make_value (kvp.first)}, {"fragment", make_value (db, *fragment)}}));
             }
         }
         return make_value (result);
@@ -169,9 +168,9 @@ namespace value {
                 db.get_ticket_index (false /* create */)) {
 
             for (auto const & kvp : *tickets) {
-                auto T = pstore::repo::ticket::get_ticket (db, kvp.second);
+                auto const ticket = pstore::repo::ticket::load (db, kvp.second);
                 result.emplace_back (make_value (object::container{
-                    {"uuid", make_value (kvp.first)}, {"ticket", make_value (db, T)}}));
+                    {"uuid", make_value (kvp.first)}, {"ticket", make_value (db, ticket)}}));
             }
         }
         return make_value (result);

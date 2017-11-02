@@ -1,10 +1,10 @@
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//*                           *
-//===- lib/pstore_mcrepo/ticket.cpp ---------------------------------------===//
+//*                                                   *
+//*  _ __ ___ _ __   ___     ___ _ __ _ __ ___  _ __  *
+//* | '__/ _ \ '_ \ / _ \   / _ \ '__| '__/ _ \| '__| *
+//* | | |  __/ |_) | (_) | |  __/ |  | | | (_) | |    *
+//* |_|  \___| .__/ \___/   \___|_|  |_|  \___/|_|    *
+//*          |_|                                      *
+//===- lib/pstore_mcrepo/repo_error.cpp -----------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,38 +41,45 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_mcrepo/ticket.hpp"
 #include "pstore_mcrepo/repo_error.hpp"
 
-using namespace pstore::repo;
+namespace pstore {
+    namespace repo {
 
-// operator new
-// ~~~~~~~~~~~~
-void * ticket::operator new (std::size_t s, nMembers size) {
-    std::size_t const actual_bytes = ticket::size_bytes (size.n);
-    assert (actual_bytes >= s);
-    return ::operator new (actual_bytes);
-}
+        char const * error_category::name () const noexcept {
+            return "pstore_mcrepo category";
+        }
 
-// operator delete
-// ~~~~~~~~~~~~~~~
-void ticket::operator delete (void * p, nMembers /*size*/) {
-    ::operator delete (p);
-}
+        std::string error_category::message (int error) const {
+            switch (static_cast<error_code> (error)) {
+            case error_code::bad_fragment_record:
+                return "bad fragment record";
+            case error_code::bad_ticket_record:
+                return "bad ticket record";
+            }
+            return "unknown error";
+        }
 
-void ticket::operator delete (void * p) {
-    ::operator delete (p);
-}
+    } // namespace repo
+} // namespace pstore
 
-// load
-// ~~~~
-auto ticket::load (pstore::database const & db, pstore::record const & location)
-    -> std::shared_ptr<ticket const> {
-    auto t = std::static_pointer_cast<ticket const> (db.getro (location.addr, location.size));
-    if (t->size_bytes () != location.size) {
-        raise_error_code (std::make_error_code (error_code::bad_ticket_record));
+namespace {
+
+    std::error_category const & get_error_category () {
+        static pstore::repo::error_category const cat;
+        return cat;
     }
-    return t;
-}
 
-// eof: lib/pstore_mcrepo/ticket.cpp
+} // (anonymous namespace)
+
+namespace std {
+
+    std::error_code make_error_code (pstore::repo::error_code e) {
+        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                       "base type of error_code must be int to permit safe static cast");
+        return {static_cast<int> (e), get_error_category ()};
+    }
+
+} // namespace std
+
+// eof: lib/pstore_mcrepo/repo_error.cpp

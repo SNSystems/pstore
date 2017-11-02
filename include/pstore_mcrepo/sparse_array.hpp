@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
-#define PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
+#ifndef PSTORE_MCREPO_SPARSE_ARRAY_HPP
+#define PSTORE_MCREPO_SPARSE_ARRAY_HPP
 
 #include <algorithm>
 #include <array>
@@ -181,6 +181,16 @@ namespace pstore {
 
         } // end namespace details
 
+        /// \brief A sparse array type.
+        ///
+        /// A sparse array implementation which uses a bitmap value (whose type is given by the
+        /// BitmapType template parameter) to manage the collection of
+        /// members. Each position in that bitmap represents the presence or absence of a value at
+        /// the corresponding index. A bitmap value of 1 would mean that a single element at index 0
+        /// is present; a bitmap value of 0b101 indices that members 0 and 2 are available.
+        /// The array members are contiguous. The position of a specific index can be computed as:
+        /// `P(v & ((1 << x) - 1))` where P is the population count function, v is the bitmap-value,
+        /// and x is the required index.
         template <typename ValueType, typename BitmapType = std::uint64_t>
         class sparse_array {
             template <typename V, typename B>
@@ -406,6 +416,31 @@ namespace pstore {
                 assert (!"sparse_array::at out_of_range");
             }
 
+            /// Returns a reference to the first element in the container. Calling front() on an
+            /// empty container is undefined.
+            reference front () {
+                assert (!empty ());
+                return (*this)[front_index ()];
+            }
+            /// Returns a reference to the first element in the container. Calling front() on an
+            /// empty container is undefined.
+            const_reference front () const {
+                assert (!empty ());
+                return (*this)[front_index ()];
+            }
+            /// Returns a reference to the last element in the container. Calling back() on an empty
+            /// container is undefined.
+            reference back () {
+                assert (!empty ());
+                return (*this)[back_index ()];
+            }
+            /// Returns a reference to the last element in the container. Calling back() on an empty
+            /// container is undefined.
+            const_reference back () const {
+                assert (!empty ());
+                return (*this)[back_index ()];
+            }
+
             ///@}
 
             void fill (ValueType const & value) {
@@ -476,6 +511,15 @@ namespace pstore {
             static void operator delete (void * p, InputIterator /*indices_first*/,
                                          InputIterator /*indices_last*/) {
                 return ::operator delete (p);
+            }
+
+            unsigned front_index () const {
+                assert (!empty ());
+                return pstore::bit_count::ctz (bitmap_);
+            }
+            unsigned back_index () const {
+                assert (!empty ());
+                return sizeof (bitmap_) * 8U - pstore::bit_count::clz (bitmap_) - 1U;
             }
 
             BitmapType const bitmap_;
@@ -649,5 +693,5 @@ namespace std {
 
 } // end namespace std
 
-#endif // PSTORE_MCREPOFRAGMENT_SPARSE_ARRAY_HPP
+#endif // PSTORE_MCREPO_SPARSE_ARRAY_HPP
 // eof: include/pstore_mcrepo/sparse_array.hpp

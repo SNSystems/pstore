@@ -42,6 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore_mcrepo/fragment.hpp"
+#include "pstore_mcrepo/repo_error.hpp"
 
 using namespace pstore::repo;
 
@@ -77,6 +78,17 @@ void fragment::deleter::operator() (void * p) {
     delete[] bytes;
 }
 
+// load
+// ~~~~
+std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
+                                                pstore::record const & location) {
+    auto f = std::static_pointer_cast<fragment const> (db.getro (location.addr, location.size));
+    if (f->size_bytes () != location.size) {
+        raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+    }
+    return f;
+}
+
 // operator[]
 // ~~~~~~~~~~
 section const & fragment::operator[] (section_type key) const {
@@ -84,6 +96,25 @@ section const & fragment::operator[] (section_type key) const {
     auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
     assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
     return *reinterpret_cast<section const *> (ptr);
+}
+
+// offset_to_section
+// ~~~~~~~~~~~~~~~~~
+section const & fragment::offset_to_section (std::uint64_t offset) const {
+    auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+    assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
+    return *reinterpret_cast<section const *> (ptr);
+}
+
+// size_bytes
+// ~~~~~~~~~~
+std::size_t fragment::size_bytes () const {
+    if (arr_.size () == 0) {
+        return sizeof (*this);
+    }
+    auto const last_section_offset = arr_.back ();
+    auto const & section = offset_to_section (last_section_offset);
+    return last_section_offset + section.size_bytes ();
 }
 
 // eof: lib/pstore_mcrepo/fragment.cpp
