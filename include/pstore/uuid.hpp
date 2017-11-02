@@ -96,7 +96,7 @@ namespace pstore {
         /// Converts a string following the convention defined by RFC4122 to a UUID.
         explicit uuid (std::string const & s);
 
-        /// A constructor intended for use in unit tests to construct a specific UUID.
+        /// A constructor used to construct a specific UUID from its binary value.
         uuid (container_type c)
                 : data_ (std::move (c)) {}
 
