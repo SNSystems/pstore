@@ -1,0 +1,3 @@
+# Check error on a unsupported mkdir (only does not support -i option).
+#
+# RUN: mkdir -i temp

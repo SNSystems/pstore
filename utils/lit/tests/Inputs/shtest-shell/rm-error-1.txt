@@ -1,0 +1,3 @@
+# Check error on a unsupported rm (only does not support -i option).
+#
+# RUN: rm -f -i temp

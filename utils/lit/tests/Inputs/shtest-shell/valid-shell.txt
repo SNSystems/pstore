@@ -1,0 +1,26 @@
+# Check mkdir and rm operations.
+#
+# RUN: rm -f -r %T/test
+# RUN: mkdir -p %T/test
+# RUN: cd %T/test
+# RUN: rm -rf test1
+# RUN: mkdir test1
+# RUN: cd test1
+# RUN: rm -rf %T/test1 %T/test2 %T/test3
+# RUN: mkdir -p %T/test1 %T/test2 %T/test3
+# RUN: cd %T/test1
+# RUN: cd %T/test2
+# RUN: cd %T/test3
+
+# Check diff operations.
+#
+# RUN: echo "hello" > %t
+# RUN: echo "hello" > %t1
+# RUN: diff %t %t1
+
+# Check rm operations.
+#
+# RUN: rm -f %T/test/temp.txt
+# RUN: rm -fr %T/test
+# RUN: rm -f %T/test.txt
+# RUN: rm -r -f %T/*

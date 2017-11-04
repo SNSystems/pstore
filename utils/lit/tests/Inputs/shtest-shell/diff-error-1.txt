@@ -1,0 +1,3 @@
+# Check error on a unsupported diff (only supports a fromfile and tofile).
+#
+# RUN: diff -u temp1.txt temp2.txt

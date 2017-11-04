@@ -1,7 +1,11 @@
 from __future__ import absolute_import
+import difflib
+import itertools
 import os, signal, subprocess, sys
 import re
+import stat
 import platform
+import shutil
 import tempfile
 import threading
 
@@ -302,6 +306,105 @@ def executeBuiltinEcho(cmd, shenv):
         return stdout.getvalue()
     return ""
 
+def check_option_in_arg(option, arg, flag):
+    arg_without_option = filter(lambda char: char != option, arg)
+    flag = flag or (len(arg_without_option) != len(arg))
+    return flag, arg_without_option
+
+def executeBuiltinMkdir(cmd):
+    """executeBuiltinMkdir - Create new directories."""
+    # Implement mkdir flags. We only support -p option.
+    args = cmd.args[1:]
+    dirs = None
+    parent = False
+    for idx, arg in enumerate(args):
+        if arg[0] != '-':
+            dirs = args[idx:]
+            break
+        parent, remaining_arg = check_option_in_arg('p', arg[1:], parent)
+        if len(remaining_arg) > 0:
+            raise InternalShellError(cmd, "Unsupported: 'mkdir' does not "
+                                          "support -%s option" % remaining_arg)
+
+    if dirs is None:
+        raise InternalShellError(cmd, "Error: 'mkdir' is missing an operand")
+
+    for dir in dirs:
+        if parent:
+            lit.util.mkdir_p(dir)
+        else:
+            try:
+                os.mkdir(dir)
+            except OSError as e:
+                raise InternalShellError(cmd, "Error: 'mkdir' command failed")
+
+def executeBuiltinDiff(cmd):
+    """executeBuiltinDiff - Compare files line by line."""
+    if len(cmd.args) != 3:
+        raise InternalShellError(cmd, "Error: 'diff' only "
+                                      "supports a fromfile and tofile")
+
+    fromfile = cmd.args[1]
+    tofile = cmd.args[2]
+    different = False
+    try:
+        with open(fromfile, 'r') as f1, open(tofile, 'r') as f2:
+            for diff in difflib.context_diff(f1.readlines(),
+                                             f2.readlines(),
+                                             fromfile,
+                                             tofile):
+                sys.stdout.write(diff)
+                different = True
+    except IOError as e:
+        raise InternalShellError(cmd, "Error: 'diff' command failed")
+
+    if different:
+        raise InternalShellError(cmd, "Error: The contexts "
+                                      "of fromfile and tofile are different")
+
+def executeBuiltinRm(cmd, cmd_shenv):
+    """executeBuiltinRm - Removes (deletes) files or directories."""
+    # Expand all glob expressions
+    args = cmd.args[1:]
+    args = expand_glob_expressions(args, cmd_shenv.cwd)
+
+    # Implement rm flags. We only support -f and in combination with -r.
+    dirs = None
+    force = False
+    recursive = False
+    for idx, arg in enumerate(args):
+        if arg [0] != '-':
+            dirs = args[idx:]
+            break
+        force, arg = check_option_in_arg('f', arg[1:], force)
+        recursive, arg = check_option_in_arg('r', arg, recursive)
+        if len(arg) > 0:
+            raise InternalShellError(cmd, "Unsupported: 'rm' does not "
+                                          "support -%s option" % arg)
+
+    def on_rm_error(func, path, exc_info):
+        # path contains the path of the file that couldn't be removed
+        # let's just assume that it's read-only and remove it.
+        os.chmod(path, stat.S_IMODE( os.stat(path).st_mode) | stat.S_IWRITE)
+        os.remove(path)
+
+    for dir in dirs:
+        if force and not os.path.exists(dir):
+            continue
+        try:
+            if os.path.isdir(dir):
+                if not recursive:
+                    raise InternalShellError(cmd, "Error: "
+                                                  "%s is a directory" % dir)
+                shutil.rmtree(dir, onerror = on_rm_error if force else None)
+            else:
+                if force and not os.access(dir, os.W_OK):
+                    os.chmod(dir,
+                             stat.S_IMODE(os.stat(dir).st_mode) | stat.S_IWRITE)
+                os.remove(dir)
+        except OSError as e:
+            raise InternalShellError(cmd, "Error: 'rm' command failed")
+
 def processRedirects(cmd, stdin_source, cmd_shenv, opened_files):
     """Return the standard fds for cmd after applying redirects
 
@@ -458,6 +561,27 @@ def _executeShCmd(cmd, shenv, results, timeoutHelper):
         if len(cmd.commands[0].args) != 2:
             raise ValueError("'export' supports only one argument")
         updateEnv(shenv, cmd.commands[0])
+        return 0
+
+    if cmd.commands[0].args[0] == 'mkdir':
+        if len(cmd.commands) != 1:
+            raise InternalShellError(cmd.commands[0], "Unsupported: 'mkdir' "
+                                     "cannot be part of a pipeline")
+        executeBuiltinMkdir(cmd.commands[0])
+        return 0
+
+    if cmd.commands[0].args[0] == 'diff':
+        if len(cmd.commands) != 1:
+            raise InternalShellError(cmd.commands[0], "Unsupported: 'diff' "
+                                     "cannot be part of a pipeline")
+        executeBuiltinDiff(cmd.commands[0])
+        return 0
+
+    if cmd.commands[0].args[0] == 'rm':
+        if len(cmd.commands) != 1:
+            raise InternalShellError(cmd.commands[0], "Unsupported: 'rm' "
+                                     "cannot be part of a pipeline")
+        executeBuiltinRm(cmd.commands[0], shenv)
         return 0
 
     procs = []
