@@ -191,6 +191,10 @@ namespace pstore {
                     return end ();
                 }
 
+                const_pointer data () const {
+                    return begin_;
+                }
+
                 size_type size () const {
                     assert (end_ >= begin_);
                     return static_cast<size_type> (end_ - begin_);
