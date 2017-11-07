@@ -75,7 +75,9 @@ namespace value {
         template <typename CharType>
         std::basic_string<CharType> str () const;
 
-        unsigned size () const { return count_; }
+        unsigned size () const {
+            return count_;
+        }
 
     private:
         explicit indent (unsigned count)
@@ -100,12 +102,22 @@ namespace value {
         value (value const &) = default;
         value & operator= (value const &) = default;
 
-        virtual object * dynamic_cast_object () { return nullptr; }
-        virtual object const * dynamic_cast_object () const { return nullptr; }
-        virtual number_base * dynamic_cast_number () { return nullptr; }
-        virtual number_base const * dynamic_cast_number () const { return nullptr; }
+        virtual object * dynamic_cast_object () {
+            return nullptr;
+        }
+        virtual object const * dynamic_cast_object () const {
+            return nullptr;
+        }
+        virtual number_base * dynamic_cast_number () {
+            return nullptr;
+        }
+        virtual number_base const * dynamic_cast_number () const {
+            return nullptr;
+        }
 
-        virtual bool is_number_like () const { return false; }
+        virtual bool is_number_like () const {
+            return false;
+        }
 
         virtual std::ostream & write (std::ostream & os) const;
         virtual std::wostream & write (std::wostream & os) const;
@@ -128,10 +140,16 @@ namespace value {
     public:
         ~number_base ();
 
-        number_base * dynamic_cast_number () override { return this; }
-        number_base const * dynamic_cast_number () const override { return this; }
+        number_base * dynamic_cast_number () override {
+            return this;
+        }
+        number_base const * dynamic_cast_number () const override {
+            return this;
+        }
 
-        bool is_number_like () const override { return true; }
+        bool is_number_like () const override {
+            return true;
+        }
 
         static void hex () {
             default_base_ = 16U;
@@ -339,8 +357,8 @@ namespace value {
         template <typename OStream>
         static OStream & write_quoted (OStream & os, std::string const & v);
 
-        template <typename OStream,
-                  typename UCharType = typename std::make_unsigned<typename OStream::char_type>::type>
+        template <typename OStream, typename UCharType = typename std::make_unsigned<
+                                        typename OStream::char_type>::type>
         static OStream & write_codepoint_hex (OStream & os, UCharType ch);
 
         std::string v_;
@@ -474,8 +492,12 @@ namespace value {
         object & operator= (object const &) = delete;
         object & operator= (object &&) = delete;
 
-        object * dynamic_cast_object () override { return this; }
-        object const * dynamic_cast_object () const override { return this; }
+        object * dynamic_cast_object () override {
+            return this;
+        }
+        object const * dynamic_cast_object () const override {
+            return this;
+        }
 
         value_ptr get (std::string const & name);
 
@@ -593,8 +615,7 @@ namespace value {
     }
 
     /// \brief  Makes a value object which represents a heterogeneous array from a collection of
-    /// value
-    ///         objects.
+    /// value objects.
     inline value_ptr make_value (array::container && members) {
         auto v = std::make_shared<array> (std::move (members));
         return std::static_pointer_cast<value, array> (v);
