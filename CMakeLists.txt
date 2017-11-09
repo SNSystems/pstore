@@ -345,14 +345,14 @@ if (PSTORE_EXAMPLES)
 endif ()
 
 # Add a target to the build which will run the system tests.
-add_custom_target (pstore_system_tests
+add_custom_target (pstore-system-tests
     COMMAND "${PYTHON_EXECUTABLE}" "${LIT_EXECUTABLE}" ${LIT_PARAMS} -s -v "$<TARGET_FILE_DIR:pstore-write>"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMENT "Running system tests with LIT"
     VERBATIM
 )
-set_target_properties (pstore_system_tests PROPERTIES FOLDER "pstore tests")
-add_dependencies (pstore_system_tests
+set_target_properties (pstore-system-tests PROPERTIES FOLDER "pstore tests")
+add_dependencies (pstore-system-tests
     pstore-broker-poker
     pstore-brokerd
     pstore-dump
@@ -364,7 +364,7 @@ add_dependencies (pstore_system_tests
     pstore-write
 )
 if (PSTORE_EXAMPLES)
-   add_dependencies (pstore_system_tests pstore_examples)
+   add_dependencies (pstore-system-tests pstore-examples)
 endif ()
 
 
