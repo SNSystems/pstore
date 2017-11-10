@@ -655,8 +655,7 @@ namespace pstore {
                 static signature_type const signature;
 
                 /// A magic number for internal nodes in the store. Acts as a quick integrity test
-                /// for
-                /// the index structures.
+                /// for the index structures.
                 signature_type signature_;
 
                 /// For each index in the children array, the corresponding bit is set in this field
