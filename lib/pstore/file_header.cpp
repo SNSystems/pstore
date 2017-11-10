@@ -103,7 +103,7 @@ namespace pstore {
     std::uint32_t header::get_crc () const noexcept {
         return crc32 (::pstore::gsl::make_span (&this->a, 1));
     }
-}
+} // namespace pstore
 
 namespace pstore {
     std::array<std::uint8_t, 8> trailer::default_signature1{

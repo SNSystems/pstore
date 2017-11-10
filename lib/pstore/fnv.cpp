@@ -77,7 +77,7 @@ namespace {
         return hval;
     }
 
-} // (anonymous namespace)
+} // end anonymous namespace
 
 namespace pstore {
 

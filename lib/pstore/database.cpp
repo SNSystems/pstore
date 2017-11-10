@@ -396,7 +396,7 @@ namespace {
         using in_store_pointer = std::uint8_t *;
         using temp_pointer = std::uint8_t const *;
     };
-}
+} // end anonymous namespace
 
 namespace pstore {
 

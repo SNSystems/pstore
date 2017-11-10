@@ -71,9 +71,6 @@ namespace pstore {
                     database_writer_policy (transaction_type & trans)
                             : transaction_ (trans) {}
 
-                    database_writer_policy (database_writer_policy const &) = default;
-                    database_writer_policy & operator= (database_writer_policy const &) = default;
-
                     /// Writes an instance of a standard-layout type T to the database.
                     /// \param value  The value to be written to the output container.
                     template <typename Ty>

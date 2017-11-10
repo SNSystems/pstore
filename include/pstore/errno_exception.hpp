@@ -61,9 +61,9 @@ namespace pstore {
         errno_exception (int errcode, std::string const & message);
 
         errno_exception (errno_exception const &) = default;
-        errno_exception (errno_exception &&) = default;
+        errno_exception (errno_exception &&) noexcept = default;
         errno_exception & operator= (errno_exception const &) = default;
-        errno_exception & operator= (errno_exception &&) = default;
+        errno_exception & operator= (errno_exception &&) noexcept = default;
 
         ~errno_exception () override;
     };

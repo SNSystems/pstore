@@ -50,7 +50,7 @@
 
 namespace pstore {
     std::uint64_t milliseconds_since_epoch ();
-}
+} // namespace pstore
 
 #endif // PSTORE_TIME_HPP
 // eof: include/pstore/time.hpp

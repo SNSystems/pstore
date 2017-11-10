@@ -45,6 +45,4 @@
 /// \brief Data store transaction implementation
 #include "pstore/transaction.hpp"
 
-namespace pstore {
-}
 // eof: lib/pstore/transaction.cpp

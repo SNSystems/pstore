@@ -373,7 +373,7 @@ namespace pstore {
         std::unique_ptr <factory> get_factory (std::shared_ptr <file::in_memory> file,
                                                std::uint64_t full_size,
                                                std::uint64_t min_size);
-    } // namdspace region
+    } // namespace region
 } // namespace pstore
 #endif // PSTORE_REGION_HPP
 // eof: include/pstore/region.hpp

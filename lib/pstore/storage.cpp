@@ -71,7 +71,7 @@ namespace {
     }
     ///@}
 
-} // (anonymous namespace)
+} // end anonymous namespace
 
 namespace pstore {
 

@@ -69,9 +69,9 @@ namespace pstore {
         system_page_size_interface () = default;
         virtual ~system_page_size_interface () noexcept = default;
 
-        system_page_size_interface (system_page_size_interface &&) = default;
+        system_page_size_interface (system_page_size_interface &&) noexcept = default;
         system_page_size_interface (system_page_size_interface const &) = default;
-        system_page_size_interface & operator= (system_page_size_interface &&) = default;
+        system_page_size_interface & operator= (system_page_size_interface &&) noexcept = default;
         system_page_size_interface & operator= (system_page_size_interface const &) = default;
 
         virtual unsigned get () const = 0;
@@ -97,9 +97,9 @@ namespace pstore {
     public:
         virtual ~memory_mapper_base () = 0;
 
-        memory_mapper_base (memory_mapper_base &&) = default;
+        memory_mapper_base (memory_mapper_base &&) noexcept = default;
         memory_mapper_base (memory_mapper_base const &) = default;
-        memory_mapper_base & operator= (memory_mapper_base &&) = default;
+        memory_mapper_base & operator= (memory_mapper_base &&) noexcept = default;
         memory_mapper_base & operator= (memory_mapper_base const &) = default;
 
         //@{

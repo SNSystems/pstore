@@ -183,8 +183,8 @@ namespace pstore {
                 writer_base & operator= (writer_base const & ) = delete;
 
                 // Move is allowed.
-                writer_base (writer_base && ) = default;
-                writer_base & operator=(writer_base && ) = default;
+                writer_base (writer_base && ) noexcept = default;
+                writer_base & operator=(writer_base && ) noexcept = default;
 
                 virtual ~writer_base () {
                     this->flush ();
@@ -360,7 +360,7 @@ namespace pstore {
                 private:
                     container & bytes_; ///< The container into which written data is accumulated.
                 };
-            }
+            } // namespace details
 
             // *******************************
             // *  v e c t o r _ w r i t e r  *
@@ -464,7 +464,7 @@ namespace pstore {
                     /// buffer range.
                     std::uint8_t * last_;
                 };
-            }
+            } // namespace details
 
             class buffer_writer final : public writer_base<details::buffer_writer_policy> {
             public:
@@ -537,7 +537,7 @@ namespace pstore {
 
                     void flush () {}
                 };
-            }
+            } // namespace details
 
             class null final : public writer_base<details::null_policy> {
             public:

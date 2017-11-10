@@ -110,7 +110,7 @@ namespace {
     auto make_hex_decoder (OutputIterator out) -> hex_decoder <OutputIterator> {
         return hex_decoder <OutputIterator> (out);
     }
-}
+} // end anonymous namespace
 
 namespace pstore {
 

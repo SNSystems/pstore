@@ -52,6 +52,6 @@ namespace pstore {
             : std::system_error (std::error_code (errcode, std::generic_category ()), message) {}
 
     errno_exception::~errno_exception () = default;
-}
+} // namespace pstore
 
 // eof: lib/pstore/errno_exception.cpp

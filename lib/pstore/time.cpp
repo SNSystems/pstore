@@ -54,7 +54,7 @@ namespace {
         return static_cast <U> (std::numeric_limits <T>::max ());
     }
 
-} // (anonymous namespace)
+} // end anonymous namespace
 
 namespace pstore {
 

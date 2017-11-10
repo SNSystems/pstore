@@ -68,7 +68,7 @@ namespace {
         });
         return os;
     }
-}
+} // end anonymous namespace
 
 
 namespace pstore {

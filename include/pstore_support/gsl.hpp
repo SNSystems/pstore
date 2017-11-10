@@ -233,7 +233,7 @@ namespace pstore {
 
                 static_assert (Extent >= 0, "A fixed-size span must be >= 0 in size.");
 
-                constexpr extent_type () noexcept {}
+                constexpr extent_type () noexcept = default;
 
                 template <index_type Other>
                 extent_type (extent_type<Other> ext) {
@@ -528,7 +528,7 @@ namespace pstore {
             template <typename ElementType>
             struct calculate_byte_size<ElementType, dynamic_extent>
                 : std::integral_constant<std::ptrdiff_t, dynamic_extent> {};
-        }
+        } // namespace details
 
         // [span.objectrep], views of object representation
         template <typename ElementType, std::ptrdiff_t Extent>

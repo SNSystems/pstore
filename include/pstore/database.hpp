@@ -259,8 +259,8 @@ namespace pstore {
         virtual ~database () noexcept;
 
         // Standard move behaviour.
-        database (database &&) = default;
-        database & operator= (database &&) = default;
+        database (database &&) noexcept = default;
+        database & operator= (database &&) noexcept = default;
 
         // No assignment or copying.
         database (database const &) = delete;

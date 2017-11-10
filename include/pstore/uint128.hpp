@@ -81,10 +81,10 @@ namespace pstore {
                 : uint128 (bytes.data ()) {}
 
         uint128 (uint128 const &) = default;
-        uint128 (uint128 &&) = default;
+        uint128 (uint128 &&) noexcept = default;
 
         uint128 & operator= (uint128 const &) = default;
-        uint128 & operator= (uint128 &&) = default;
+        uint128 & operator= (uint128 &&) noexcept = default;
 
         constexpr std::uint64_t high () const noexcept {
             return high_;

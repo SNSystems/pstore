@@ -423,11 +423,10 @@ namespace pstore {
             /// terminates while holding any ownership of the lock.
             ~range_lock () noexcept;
 
-            /// Move assignment operator. Replaces the contents with those of other using move
-            /// semantics.
-            /// If prior to the call *this has an associated mutex and has acquired ownership of it,
-            /// the mutex is unlocked.
-            range_lock & operator= (range_lock && other);
+            /// Move assignment operator. Replaces the contents with those of "other" using move
+            /// semantics. If prior to the call *this has an associated mutex and has acquired ownership of it,
+            /// the mutex is unlocked. If this operation fails, the resulting exception is dropped.
+            range_lock & operator= (range_lock && other) noexcept;
 
             // No copying or assignment.
             range_lock (range_lock const & other) = delete;

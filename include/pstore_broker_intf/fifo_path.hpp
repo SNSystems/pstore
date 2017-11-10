@@ -75,8 +75,8 @@ namespace pstore {
                 server_pipe (unique_fd && read, unique_fd && write)
                         : fd_{std::move (read), std::move (write)} {}
                 ~server_pipe () = default;
-                server_pipe (server_pipe &&) = default;
-                server_pipe & operator= (server_pipe &&) = default;
+                server_pipe (server_pipe &&) noexcept = default;
+                server_pipe & operator= (server_pipe &&) noexcept = default;
 
                 // No copying or assignment.
                 server_pipe (server_pipe const &) = delete;

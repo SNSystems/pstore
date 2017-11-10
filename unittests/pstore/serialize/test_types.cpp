@@ -240,9 +240,11 @@ namespace {
         public:
             using result_type = pstore::serialize::archive::void_type;
 
-            mock_fallback_policy () {}
-            mock_fallback_policy (mock_fallback_policy const & ) {}
-            mock_fallback_policy & operator= (mock_fallback_policy const & ) { return *this; }
+            mock_fallback_policy () noexcept {}
+            mock_fallback_policy (mock_fallback_policy const & ) noexcept {}
+            mock_fallback_policy (mock_fallback_policy && ) noexcept {}
+            mock_fallback_policy & operator= (mock_fallback_policy const & ) noexcept { return *this; }
+            //mock_fallback_policy & operator= (mock_fallback_policy && ) noexcept { return *this; }
             MOCK_METHOD1 (put, result_type (int const &));
             void flush () {}
         };

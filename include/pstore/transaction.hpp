@@ -178,8 +178,8 @@ namespace pstore {
         ///@}
 
         // Move is supported
-        transaction (transaction && rhs);
-        transaction & operator= (transaction && rhs);
+        transaction (transaction && rhs) noexcept;
+        transaction & operator= (transaction && rhs) noexcept;
 
         // No assignment or copying.
         transaction (transaction const &) = delete;
@@ -224,7 +224,7 @@ namespace pstore {
             mut_.lock ();
             owned_ = true;
         }
-        lock_guard (lock_guard && rhs)
+        lock_guard (lock_guard && rhs) noexcept
                 : mut_{std::move (rhs.mut_)} {
 
             owned_ = rhs.owned_;
@@ -238,7 +238,7 @@ namespace pstore {
             }
         }
 
-        lock_guard & operator= (lock_guard && rhs) {
+        lock_guard & operator= (lock_guard && rhs) noexcept {
             if (this != &rhs) {
                 mut_ = std::move (rhs.mut_);
                 owned_ = rhs.owned_;
@@ -265,8 +265,8 @@ namespace pstore {
                       pstore::file::file_base::lock_kind::exclusive_write} {}
 
         // Move.
-        transaction_mutex (transaction_mutex && ) = default;
-        transaction_mutex & operator= (transaction_mutex && ) = default;
+        transaction_mutex (transaction_mutex && ) noexcept = default;
+        transaction_mutex & operator= (transaction_mutex && ) noexcept = default;
 
         // No copying or assignment
         transaction_mutex (transaction_mutex const & ) = delete;
@@ -319,7 +319,7 @@ namespace pstore {
         assert (!this->is_open ());
     }
     template <typename LockGuard>
-    transaction<LockGuard>::transaction (transaction && rhs)
+    transaction<LockGuard>::transaction (transaction && rhs) noexcept
             : db_ {rhs.db_}
             , lock_ {std::move (rhs.lock_)}
             , first_ {std::move (rhs.first_)} {
@@ -339,7 +339,7 @@ namespace pstore {
     // operator=
     // ~~~~~~~~~
     template <typename LockGuard>
-    auto transaction<LockGuard>::operator= (transaction && rhs) -> transaction & {
+    auto transaction<LockGuard>::operator= (transaction && rhs) noexcept -> transaction & {
         db_ = std::move (rhs.db_);
         lock_ = std::move (rhs.lock_);
         first_ = std::move (rhs.first_);

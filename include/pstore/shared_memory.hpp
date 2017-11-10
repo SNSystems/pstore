@@ -133,12 +133,12 @@ namespace pstore {
         shared_memory ();
         explicit shared_memory (std::string const & name);
         shared_memory (shared_memory const &) = delete;
-        shared_memory (shared_memory && rhs);
+        shared_memory (shared_memory && rhs) noexcept;
 
         ~shared_memory ();
 
         shared_memory & operator= (shared_memory const &) = delete;
-        shared_memory & operator= (shared_memory && rhs);
+        shared_memory & operator= (shared_memory && rhs) noexcept;
 
         Ty & operator* () {
             return *get ();
@@ -250,11 +250,11 @@ namespace pstore {
         public:
             shm_name () = default;
             explicit shm_name (std::string const & name);
-            shm_name (shm_name && rhs);
+            shm_name (shm_name && rhs) noexcept = default;
             shm_name (shm_name const & rhs) = delete;
 
             shm_name & operator= (shm_name const & rhs) = delete;
-            shm_name & operator= (shm_name && rhs);
+            shm_name & operator= (shm_name && rhs) noexcept = default;
 
             char const * c_str () const;
             bool empty () const;
@@ -294,22 +294,6 @@ namespace pstore {
                      std::back_inserter (name_));
     }
 #endif
-    template <typename Ty>
-    shared_memory<Ty>::shared_memory::shm_name::shm_name (shm_name && rhs)
-            : name_ (std::move (rhs.name_)) {
-
-        rhs.name_.clear ();
-    }
-    // operator=
-    // ~~~~~~~~~
-    template <typename Ty>
-    auto shared_memory<Ty>::shared_memory::shm_name::operator= (shm_name && rhs) -> shm_name & {
-        if (this != &rhs) {
-            name_ = std::move (rhs.name_);
-            rhs.name_.clear ();
-        }
-        return *this;
-    }
     // c_str
     // ~~~~~
     template <typename Ty>
@@ -356,7 +340,7 @@ namespace pstore {
     }
 
     template <typename Ty>
-    shared_memory<Ty>::shared_memory (shared_memory && rhs)
+    shared_memory<Ty>::shared_memory (shared_memory && rhs) noexcept
             : name_ (std::move (rhs.name_))
             , ptr_ (std::move (rhs.ptr_)) {}
 
@@ -374,7 +358,7 @@ namespace pstore {
     // operator=
     // ~~~~~~~~~
     template <typename Ty>
-    auto shared_memory<Ty>::operator= (shared_memory && rhs) -> shared_memory & {
+    auto shared_memory<Ty>::operator= (shared_memory && rhs) noexcept -> shared_memory & {
         if (this != &rhs) {
             name_ = std::move (rhs.name_);
             ptr_ = std::move (rhs.ptr_);

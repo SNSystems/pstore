@@ -100,8 +100,8 @@ namespace pstore {
             update_callback update_cb_;
         };
 
-    } // namespace pstore
-} // namespace broker
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_INTF_WRITER_HPP
 // eof: include/pstore_broker_intf/writer.hpp

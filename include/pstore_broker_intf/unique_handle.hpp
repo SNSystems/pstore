@@ -68,7 +68,7 @@ namespace pstore {
                     : value_{fd}
                     , delete_{d} {}
             unique_value (unique_value const &) = delete;
-            unique_value (unique_value && rhs)
+            unique_value (unique_value && rhs) noexcept
                     : value_{rhs.release ()}
                     , delete_{std::move (rhs.delete_)} {}
             ~unique_value () noexcept {

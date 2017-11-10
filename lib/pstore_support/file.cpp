@@ -90,6 +90,20 @@ namespace pstore {
             return stream.str ();
         }
 
+#if PSTORE_CPP_EXCEPTIONS
+#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
+    do {                                                                                           \
+        try {                                                                                      \
+            x;                                                                                     \
+        } catch (...) {                                                                            \
+        }                                                                                          \
+    } while (0)
+#else
+#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
+    do {                                                                                           \
+        x;                                                                                         \
+    } while (0)
+#endif
 
         //*                                _            _      *
         //*   _ __ __ _ _ __   __ _  ___  | | ___   ___| | __  *
@@ -129,9 +143,9 @@ namespace pstore {
 
         // operator=
         // ~~~~~~~~~
-        range_lock & range_lock::operator= (range_lock && other) {
+        range_lock & range_lock::operator= (range_lock && other) noexcept {
             if (&other != this) {
-                this->unlock ();
+                PSTORE_NO_EX_ESCAPE (this->unlock ());
                 file_ = other.file_;
                 offset_ = other.offset_;
                 size_ = other.size_;
@@ -297,20 +311,6 @@ namespace pstore {
         }
 
 
-#if PSTORE_CPP_EXCEPTIONS
-#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
-    do {                                                                                           \
-        try {                                                                                      \
-            x;                                                                                     \
-        } catch (...) {                                                                            \
-        }                                                                                          \
-    } while (0)
-#else
-#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
-    do {                                                                                           \
-        x;                                                                                         \
-    } while (0)
-#endif
 
         //*    __ _ _        _                     _ _        *
         //*   / _(_) | ___  | |__   __ _ _ __   __| | | ___   *

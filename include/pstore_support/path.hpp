@@ -72,7 +72,7 @@ namespace pstore {
             inline std::string join (std::string const & path, std::string const & b) {
                 return join (path, {b});
             }
-        }
+        } // namespace posix
 
         /// \brief Win32-specific path name handling.
         namespace win32 {
@@ -85,7 +85,7 @@ namespace pstore {
             inline std::string join (std::string const & path, std::string const & b) {
                 return join (path, {b});
             }
-        }
+        } // namespace win32
 
         inline std::pair<std::string, std::string> split_drive (std::string const & path) {
             return PSTORE_PLATFORM_NS::split_drive (path);
