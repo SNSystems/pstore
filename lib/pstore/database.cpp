@@ -53,12 +53,12 @@
 #include <system_error>
 #include <type_traits>
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/utf.hpp"
-#include "pstore_support/path.hpp"
-#include "pstore_support/portab.hpp"
 #include "pstore/start_vacuum.hpp"
 #include "pstore/transaction.hpp"
+#include "pstore_support/error.hpp"
+#include "pstore_support/path.hpp"
+#include "pstore_support/portab.hpp"
+#include "pstore_support/utf.hpp"
 
 #include "base32.hpp"
 #include "config.hpp"

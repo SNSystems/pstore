@@ -61,12 +61,11 @@
 #include <Windows.h>
 #include "pstore_support/utf.hpp"
 #else // !_WIN32
-#include <system_error>
-
-#include <errno.h>
+#include <cerrno>
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
+#include <system_error>
 #include <unistd.h>
 #endif // !_WIN32
 

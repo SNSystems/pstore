@@ -142,8 +142,8 @@
 #include <type_traits>
 #include <vector>
 
-#include "pstore_support/error.hpp"
 #include "pstore/serialize/common.hpp"
+#include "pstore_support/error.hpp"
 
 namespace pstore {
     namespace serialize {

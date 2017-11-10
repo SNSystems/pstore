@@ -51,7 +51,9 @@
 #include <functional>
 #include <string>
 #include <tuple>
+
 #include "pstore_support/gsl.hpp"
+
 #include "./unique_handle.hpp"
 
 namespace pstore {

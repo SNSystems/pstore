@@ -127,8 +127,8 @@
 #include <cstring>     // for std::memcpy
 #include <type_traits> // for std::is_standard_layout, aligned_storage, etc.
 
-#include "pstore_support/gsl.hpp"
 #include "pstore/serialize/common.hpp"
+#include "pstore_support/gsl.hpp"
 
 namespace pstore {
     namespace serialize {

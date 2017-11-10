@@ -48,10 +48,10 @@
 #ifndef PSTORE_BROKER_SEND_MESSAGE_HPP
 #define PSTORE_BROKER_SEND_MESSAGE_HPP (1)
 
-#include "pstore_broker_intf/unique_handle.hpp"
-
 #include <cstdint>
 #include <string>
+
+#include "pstore_broker_intf/unique_handle.hpp"
 #include "pstore_support/gsl.hpp"
 
 namespace pstore {

@@ -48,8 +48,8 @@
 #ifndef PSTORE_DB_ARCHIVE_HPP
 #define PSTORE_DB_ARCHIVE_HPP
 
-#include "pstore_support/error.hpp"
 #include "pstore/address.hpp"
+#include "pstore_support/error.hpp"
 
 namespace pstore {
     namespace serialize {

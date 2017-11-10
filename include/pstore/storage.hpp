@@ -45,6 +45,7 @@
 
 #include <cassert>
 #include <memory>
+
 #include "pstore/address.hpp"
 #include "pstore/make_unique.hpp"
 #include "pstore/region.hpp"
