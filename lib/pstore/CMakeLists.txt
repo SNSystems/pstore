@@ -204,10 +204,10 @@ if (CLANG_TIDY_FOUND)
     endforeach (P)
 
     add_custom_target(
-        clang-tidy
+        pstore-clang-tidy
         COMMAND "${CLANG_TIDY}"
         ${CLANG_TIDY_CHECKS}
-        -header-filter="${CMAKE_CURRENT_SOURCE_DIR}/../include/*\\.hpp"
+        -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
         ${SOURCE_FILES}
         --
         -std=c++14
