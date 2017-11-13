@@ -91,6 +91,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <functional>
 #include <iosfwd>
 #include <limits>
 #include <type_traits>
@@ -320,7 +321,24 @@ namespace std {
         static constexpr const bool tinyness_before = base::tinyness_before;
         static constexpr const float_round_style round_style = base::round_style;
     };
-} // end namespace std
+
+    //*  _                  _      *
+    //* | |__    __ _  ___ | |__   *
+    //* | '_ \  / _` |/ __|| '_ \  *
+    //* | | | || (_| |\__ \| | | | *
+    //* |_| |_| \__,_||___/|_| |_| *
+    //*                            *
+    template <>
+    struct hash<pstore::address> {
+        using argument_type = pstore::address;
+        using result_type = std::size_t;
+
+        result_type operator() (argument_type s) const {
+            auto abs = s.absolute ();
+            return std::hash<decltype (abs)>{}(abs);
+        }
+    };
+} // namespace std
 
 #endif // PSTORE_ADDRESS_HPP
 // eof: include/pstore/address.hpp
