@@ -13,7 +13,7 @@ Platforms
 --
 pstore is built and tested on a variety of platforms:
 
-- Windows (building wth Visual Studio 2017)
+- Windows (building wth Visual Studio 2017 version 15.4.1)
 - macOS (building with Xcode 9.0)
 - Linux (Ubuntu 16.04 LTS building with GCC 6.3)
 
