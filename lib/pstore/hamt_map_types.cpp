@@ -60,6 +60,7 @@ namespace pstore {
             // operator new
             // ~~~~~~~~~~~~
             void * linear_node::operator new (std::size_t s, nchildren size) {
+                (void) s;
                 std::size_t const actual_bytes = linear_node::size_bytes (size.n);
                 assert (actual_bytes >= s);
                 return ::operator new (actual_bytes);
@@ -93,7 +94,7 @@ namespace pstore {
                 static_assert (offsetof (linear_node, leaves_) == 16,
                                "offset of the first child must be 16");
 
-                std::fill_n (leaves_, size, address::null ());
+                std::fill_n (std::begin (leaves_), size, address::null ());
             }
 
 
