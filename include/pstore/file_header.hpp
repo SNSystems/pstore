@@ -90,7 +90,9 @@ namespace pstore {
         constexpr record (address addr_, std::uint64_t size_) noexcept : addr (addr_),
                                                                          size (size_) {}
         record (record const & rhs) noexcept = default;
+        record (record && rhs) noexcept = default;
         record & operator= (record const &) noexcept = default;
+        record & operator= (record &&) noexcept = default;
 
         /// The address of the data associated with this record.
         address addr = address::null ();
