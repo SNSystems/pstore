@@ -409,7 +409,7 @@ namespace pstore {
     template <typename Ty>
     auto shared_memory<Ty>::mmap (os_file_handle fd) -> pointer_type {
         auto ptr = static_cast<value_type *> (
-            ::mmap (NULL, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
+            ::mmap (nullptr, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
         if (ptr == MAP_FAILED) {
             raise (errno_erc{errno}, "mmap");
         }
