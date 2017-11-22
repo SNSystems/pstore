@@ -138,7 +138,7 @@ namespace value {
     /// \brief  An intermediate abstract base class for number types.
     class number_base : public value {
     public:
-        ~number_base ();
+        ~number_base () override;
 
         number_base * dynamic_cast_number () override {
             return this;
