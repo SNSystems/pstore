@@ -48,14 +48,15 @@
         <rect y="144" width="184" height="24"/>
       </g>
       <g transform="translate(52,12)" fill="black">
-        <text y="0" dominant-baseline="central">Align</text>
-        <text y="24" dominant-baseline="central">NumIfixups</text>
-        <text y="48" dominant-baseline="central">NumXfixups</text>
-        <text y="72" dominant-baseline="central">DataSize</text>
-
-        <text y="96" dominant-baseline="central">Data</text>
-        <text y="120" dominant-baseline="central">Ifixups</text>
-        <text y="144" dominant-baseline="central">Xfixups</text>
+        <text y="0" dominant-baseline="central">align_</text>
+        <text y="24" dominant-baseline="central">num_ifixups_</text>
+        <text y="48" dominant-baseline="central">num_xfixups_</text>
+        <text y="72" dominant-baseline="central">data_size_</text>
+      </g>
+      <g transform="translate(92,12)" fill="black">
+        <text y="96" dominant-baseline="central">data[]</text>
+        <text y="120" dominant-baseline="central">internal_fixup[]</text>
+        <text y="144" dominant-baseline="central">external_fixup[]</text>
       </g>
     </g>
 
@@ -72,14 +73,15 @@
         <rect y="144" width="184" height="24"/>
       </g>
       <g transform="translate(52,12)" fill="black">
-        <text y="0" dominant-baseline="central">Align</text>
-        <text y="24" dominant-baseline="central">NumIfixups</text>
-        <text y="48" dominant-baseline="central">NumXfixups</text>
-        <text y="72" dominant-baseline="central">DataSize</text>
-
-        <text y="96" dominant-baseline="central">Data</text>
-        <text y="120" dominant-baseline="central">Ifixups</text>
-        <text y="144" dominant-baseline="central">Xfixups</text>
+        <text y="0" dominant-baseline="central">align_</text>
+        <text y="24" dominant-baseline="central">num_ifixups_</text>
+        <text y="48" dominant-baseline="central">num_xfixups_</text>
+        <text y="72" dominant-baseline="central">data_size_</text>
+      </g>
+      <g transform="translate(92,12)" fill="black">	
+        <text y="96" dominant-baseline="central">data[]</text>
+        <text y="120" dominant-baseline="central">internal_fixup[]</text>
+        <text y="144" dominant-baseline="central">external_fixup[]</text>
       </g>
     </g>
 
@@ -87,7 +89,7 @@
       <!-- line from offset #0 to first section array -->
       <path d="M 40 86  H 16  V 160  H 35"/>
       <!-- line from offset #1 to second section array -->
-      <path d="M 40 110  H 26  V 155  A 3 5, 0, 0, 0, 26 165  V 342  H 35"/>
+      <path d="M 40 110  H 26  V 155  A 3 5, 0, 0, 0, 26 165  V 344  H 35"/>
     </g>
   </g>
 </svg>
