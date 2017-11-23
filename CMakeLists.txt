@@ -185,6 +185,9 @@ if (LLVM_MAIN_SRC_DIR)
 endif ()
 
 
+include (TestBigEndian)
+TEST_BIG_ENDIAN (PSTORE_IS_BIG_ENDIAN)
+
 
 # The pstore header and footer structures include crc32 values as an aid to validation:
 # if the CRC value doesn't match then the structure is not valid. However, is the CRC

@@ -81,9 +81,10 @@ The number of entries in each of these arrays is given by the DataSize, NumIFixu
 
 Field    | Size (bytes) | Description
 -------- | ------------ | -----------
-NumIFixups | 4 |
-NumXFixups | 4 |
-DataSize   | 8 |
+Align      | 1 | The alignment of this section, expressed as a power of 2.
+NumIFixups | 3 | The number of internal fixup records contained within this section.
+NumXFixups | 4 | The number of external fixup records contained within this section.
+DataSize   | 8 | The number of bytes of payload data containing within this section.
 
 ### Internal Fixups
 Internal fixups are those fixups which refer to other sections within the same fragment. Because the target fragment is known, these fixups improve performance by avoiding searches of the fragment index.

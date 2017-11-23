@@ -41,8 +41,19 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
+
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrepo_config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrepo_config.hpp"
+    ESCAPE_QUOTES
+)
+
+
 set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore_mcrepo")
 add_pstore_library (pstore-mcrepo
+    "${CMAKE_CURRENT_SOURCE_DIR}/mcrepo_config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/mcrepo_config.hpp"
+    
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/aligned.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/repo_error.hpp"

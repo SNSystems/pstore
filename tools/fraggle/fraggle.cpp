@@ -128,8 +128,9 @@ int main (int argc, char * argv[]) {
                 pstore::address const name_addr =
                     names->insert (transaction, name).first.get_address ();
 
-                pstore::repo::section_content data_section (pstore::repo::section_type::ReadOnly);
-                std::vector <std::uint32_t> values;
+                pstore::repo::section_content data_section (pstore::repo::section_type::ReadOnly,
+                                                            std::uint8_t{1} /*alignment*/);
+                std::vector<std::uint32_t> values;
                 values.reserve (section_size.get ());
                 fib = copy_n2 (fib, section_size.get (), std::back_inserter (values));
                 for (auto v : values) {
@@ -146,22 +147,26 @@ int main (int argc, char * argv[]) {
                 pstore::index::digest const digest{digest_half, digest_half};
                 fragment_index->insert (transaction, std::make_pair (digest, fragment_pos));
 
-                ticket_members.emplace_back (digest, name_addr, pstore::repo::linkage_type::external);
+                ticket_members.emplace_back (digest, name_addr,
+                                             pstore::repo::linkage_type::external);
             }
 
             std::string const ticket_path =
                 pstore::path::join (output_dir, "t" + std::to_string (ticket_ctr) + ".o");
             pstore::uuid ticket_uuid;
             {
-                pstore::address const ticket_path_addr = names->insert (transaction, ticket_path).first.get_address ();
-                pstore::record ticket_pos = pstore::repo::ticket::alloc (transaction, ticket_path_addr, ticket_members);
+                pstore::address const ticket_path_addr =
+                    names->insert (transaction, ticket_path).first.get_address ();
+                pstore::record ticket_pos =
+                    pstore::repo::ticket::alloc (transaction, ticket_path_addr, ticket_members);
                 ticket_index->insert (transaction, std::make_pair (ticket_uuid, ticket_pos));
             }
 
             transaction.commit ();
 
             {
-                static std::array<char, 8> const ticket_file_signature{{'R', 'e', 'p', 'o', 'U', 'u', 'i', 'd'}};
+                static std::array<char, 8> const ticket_file_signature{
+                    {'R', 'e', 'p', 'o', 'U', 'u', 'i', 'd'}};
                 std::ofstream ticket_file (ticket_path.c_str (),
                                            std::ios_base::out | std::ios_base::binary);
                 ticket_file.write (ticket_file_signature.data (), ticket_file_signature.size ());

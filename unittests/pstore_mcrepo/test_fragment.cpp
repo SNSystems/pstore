@@ -70,10 +70,10 @@ TEST_F (FragmentTest, Empty) {
 }
 
 TEST_F (FragmentTest, MakeReadOnlySection) {
-    section_content rodata{section_type::ReadOnly};
+    std::vector<section_content> c;
+    c.emplace_back (section_type::ReadOnly, std::uint8_t{2} /*alignment*/);
+    section_content & rodata = c.back ();
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
-
-    std::vector<section_content> c{rodata};
     auto record = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
     assert (transaction_.get_storage ().begin ()->first ==
@@ -93,8 +93,54 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     auto rodata_end = std::end (rodata.data);
     ASSERT_EQ (std::distance (data_begin, data_end), std::distance (rodata_begin, rodata_end));
     EXPECT_TRUE (std::equal (data_begin, data_end, rodata_begin));
+    EXPECT_EQ (2U, s.align ());
     EXPECT_EQ (0U, s.ifixups ().size ());
     EXPECT_EQ (0U, s.xfixups ().size ());
+}
+
+TEST_F (FragmentTest, MakeTextSectionWithFixups) {
+    using ::testing::ElementsAreArray;
+    using ::testing::ElementsAre;
+
+    std::vector<std::uint8_t> const original{'t', 'e', 'x', 't'};
+
+    std::vector<section_content> c;
+    c.emplace_back (section_type::Text, std::uint8_t{4} /*alignment*/);
+    {
+        // Build the text section's contents and fixups.
+        section_content & text = c.back ();
+        text.data.assign (std::begin (original), std::end (original));
+        text.ifixups.emplace_back (internal_fixup{1, 1, 1, 1});
+        text.ifixups.emplace_back (internal_fixup{2, 2, 2, 2});
+        text.xfixups.emplace_back (external_fixup{pstore::address{3}, 3, 3, 3});
+        text.xfixups.emplace_back (external_fixup{pstore::address{4}, 4, 4, 4});
+        text.xfixups.emplace_back (external_fixup{pstore::address{5}, 5, 5, 5});
+    }
+
+    auto record = fragment::alloc (transaction_, std::begin (c), std::end (c));
+
+    assert (transaction_.get_storage ().begin ()->first ==
+            reinterpret_cast<std::uint8_t const *> (record.addr.absolute ()));
+    auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
+
+
+    std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::Text)};
+    auto indices = f->sections ().get_indices ();
+    std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
+    EXPECT_THAT (actual, ::testing::ContainerEq (expected));
+
+    section const & s = (*f)[section_type::Text];
+    EXPECT_EQ (4U, s.align ());
+    EXPECT_EQ (4U, s.data ().size ());
+    EXPECT_EQ (2U, s.ifixups ().size ());
+    EXPECT_EQ (3U, s.xfixups ().size ());
+
+    EXPECT_THAT (s.data (), ElementsAreArray (original));
+    EXPECT_THAT (s.ifixups (),
+                 ElementsAre (internal_fixup{1, 1, 1, 1}, internal_fixup{2, 2, 2, 2}));
+    EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{pstore::address{3}, 3, 3, 3},
+                                            external_fixup{pstore::address{4}, 4, 4, 4},
+                                            external_fixup{pstore::address{5}, 5, 5, 5}));
 }
 
 // eof: unittests/pstore_mcrepo/test_fragment.cpp

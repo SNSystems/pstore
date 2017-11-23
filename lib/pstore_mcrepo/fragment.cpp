@@ -44,6 +44,8 @@
 #include "pstore_mcrepo/fragment.hpp"
 #include "pstore_mcrepo/repo_error.hpp"
 
+#include "mcrepo_config.hpp"
+
 using namespace pstore::repo;
 
 //*             _   _           *
@@ -64,6 +66,35 @@ std::size_t section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
 
 std::size_t section::size_bytes () const {
     return section::size_bytes (data ().size (), ifixups ().size (), xfixups ().size ());
+}
+
+// three_byte_integer::get
+// ~~~~~~~~~~~~~~~~~~~~~~~
+std::uint32_t section::three_byte_integer::get (std::uint8_t const * src) noexcept {
+    number result;
+#if PSTORE_IS_BIG_ENDIAN
+    result.bytes[0] = 0;
+    std::memcpy (&result[1], src, 3);
+#else
+    std::memcpy (&result, src, 3);
+    result.bytes[3] = 0;
+#endif
+    return result.value;
+}
+
+// three_byte_integer::set
+// ~~~~~~~~~~~~~~~~~~~~~~~
+void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noexcept {
+    constexpr auto out_bytes = std::size_t{3};
+    number num;
+    num.value = v;
+
+#if PSTORE_IS_BIG_ENDIAN
+    constexpr auto first_byte = sizeof (std::uint32_t) - num_bytes;
+#else
+    constexpr auto first_byte = 0U;
+#endif
+    std::memcpy (out, &num.bytes[first_byte], out_bytes);
 }
 
 //*   __                             _    *
