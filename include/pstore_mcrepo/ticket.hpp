@@ -50,9 +50,10 @@ namespace pstore {
     namespace repo {
 
 #define PSTORE_REPO_LINKAGE_TYPES                                                                  \
+    X (append)                                                                                     \
+    X (common)                                                                                     \
     X (external)                                                                                   \
     X (internal)                                                                                   \
-    X (common)                                                                                     \
     X (linkonce)
 
 #define X(a) a,
