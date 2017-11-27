@@ -112,6 +112,7 @@ set (PSTORE_SUPPORT_SRC
     crc32.cpp
     fnv.cpp
     time.cpp
+    uint128.cpp
     uuid.cpp
 )
 list (APPEND PSTORE_SRC ${PSTORE_SUPPORT_SRC})

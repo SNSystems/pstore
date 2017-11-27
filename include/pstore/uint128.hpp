@@ -49,6 +49,7 @@
 #include <cstdint>
 #include <limits>
 #include <ostream>
+#include <string>
 #include <type_traits>
 #include <utility>
 
@@ -92,6 +93,8 @@ namespace pstore {
         constexpr std::uint64_t low () const noexcept {
             return low_;
         }
+
+        std::string to_hex_string () const;
 
     private:
         std::uint64_t high_ = 0U;

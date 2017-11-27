@@ -122,26 +122,7 @@ namespace value {
     }
 
     value_ptr make_value (pstore::index::digest const & d) {
-
-        auto digit_to_hex = [] (unsigned v) {
-            assert (v < 0x10);
-            return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
-        };
-
-        std::string str;
-        str.reserve (32);
-
-        std::uint64_t const high = d.high ();
-        for (int shift = 64 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((high >> shift) & 0x0F);
-        }
-
-        std::uint64_t const low = d.low ();
-        for (int shift = 64 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((low >> shift) & 0x0F);
-        }
-
-        return make_value (str);
+        return make_value (d.to_hex_string ());
     }
 
 

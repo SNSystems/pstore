@@ -104,4 +104,14 @@ TEST (UInt128, Lt) {
     EXPECT_TRUE (pstore::uint128 (1, 2) <= pstore::uint128 (2, 1));
     EXPECT_TRUE (pstore::uint128 (1, 1) <= pstore::uint128 (1, 1));
 }
+
+TEST (Uint128, ToHexString) {
+    EXPECT_EQ (pstore::uint128 (0, 0).to_hex_string (), "00000000000000000000000000000000");
+    EXPECT_EQ (pstore::uint128 (1, 2).to_hex_string (), "00000000000000010000000000000002");
+    EXPECT_EQ (pstore::uint128 (std::numeric_limits<std::uint64_t>::max (),
+                                std::numeric_limits<std::uint64_t>::max ())
+                   .to_hex_string (),
+               "ffffffffffffffffffffffffffffffff");
+}
+
 // eof: unittests/pstore/test_uint128.cpp
