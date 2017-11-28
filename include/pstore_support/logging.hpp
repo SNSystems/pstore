@@ -62,14 +62,14 @@ namespace pstore {
     namespace logging {
 
         enum class priority {
-            emergency, // system is unusable
-            alert,     // action must be taken immediately
-            critical,  // critical conditions
-            error,     // error conditions
-            warning,   // warning conditions
-            notice,    // normal, but significant, condition
-            info,      // informational message
-            debug      // debug-level message
+            emergency, ///< system is unusable
+            alert,     ///< action must be taken immediately
+            critical,  ///< critical conditions
+            error,     ///< error conditions
+            warning,   ///< warning conditions
+            notice,    ///< normal, but significant, condition
+            info,      ///< informational message
+            debug      ///< debug-level message
         };
 
 
@@ -205,18 +205,15 @@ namespace pstore {
         template <typename StreamTraits, typename FileSystemTraits>
         class basic_rotating_log final : public basic_logger {
         public:
-            /// \param base_name The base file name to which an integer is appended for backup
+            /// \param base_name  The base file name to which an integer is appended for backup
             /// files.
-            /// \param max_bytes The maximum number of bytes to which an active log file is allowed
-            /// to
-            ///                  grow before we perform a rotatation and begin writing that a new
-            ///                  file. Set to 0 to allow the size to be unlimited (implying that
-            ///                  rotation will never occur).
-            /// \param num_backups The number of backup files to created and rotated. Set to 0 to
-            /// cause
-            ///                    no backups to be made.
+            /// \param max_bytes  The maximum number of bytes to which an active log file is allowed
+            /// to grow before we perform a rotatation and begin writing that a new file. Set to 0
+            /// to allow the size to be unlimited (implying that rotation will never occur).
+            /// \param num_backups  The number of backup files to created and rotated. Set to 0 to
+            /// cause no backups to be made.
             /// \note  Both num_backups_ and max_size_ must be greater than zero before rollover is
-            ///        enabled.
+            /// enabled.
 
             basic_rotating_log (std::string const & base_name, std::ios_base::streamoff max_bytes,
                                 unsigned num_backups, StreamTraits const & traits = StreamTraits (),
@@ -225,8 +222,7 @@ namespace pstore {
 
             /// \brief Writes the supplied string to the log.
             /// If the current log file would become too large (as defined by the max_bytes
-            /// constructor
-            /// parameter), then a rotation is performed.
+            /// constructor parameter), then a rotation is performed.
             void log_impl (std::string const & message) override;
 
             /// (for testing)
