@@ -149,7 +149,7 @@ int main (int argc, char * argv[]) {
             commands->thread_entry (fifo);
         }));
 
-        futures.push_back (create_thread ([&commands, &scav]() {
+        futures.push_back (create_thread ([&scav]() {
             thread_init ("scavenger");
             scav->thread_entry ();
         }));
