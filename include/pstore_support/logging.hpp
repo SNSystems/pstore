@@ -221,7 +221,7 @@ namespace pstore {
             basic_rotating_log (std::string const & base_name, std::ios_base::streamoff max_bytes,
                                 unsigned num_backups, StreamTraits const & traits = StreamTraits (),
                                 FileSystemTraits const & fs_traits = FileSystemTraits ());
-            ~basic_rotating_log ();
+            ~basic_rotating_log () override;
 
             /// \brief Writes the supplied string to the log.
             /// If the current log file would become too large (as defined by the max_bytes
