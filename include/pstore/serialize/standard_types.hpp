@@ -101,7 +101,8 @@ namespace pstore {
                 if (length_bytes == 1) {
                     *(last++) = 0;
                 }
-                auto const resl = serialize::write (archive, ::pstore::gsl::make_span (&(*first), &(*last)));
+                auto const resl =
+                    serialize::write (archive, ::pstore::gsl::make_span (&(*first), &(*last)));
 
                 // Emit the string body.
                 serialize::write (archive, ::pstore::gsl::make_span (str));
@@ -122,8 +123,10 @@ namespace pstore {
                 std::array<std::uint8_t, varint::max_output_length> encoded_length;
                 // First read the two initial bytes. These contain the variable length value
                 // but might not be enough for the entire value.
-                static_assert (varint::max_output_length >= 2, "maximum encoded varint length must be >= 2");
-                serialize::read_uninit (archive, ::pstore::gsl::make_span (encoded_length.data (), 2));
+                static_assert (varint::max_output_length >= 2,
+                               "maximum encoded varint length must be >= 2");
+                serialize::read_uninit (archive,
+                                        ::pstore::gsl::make_span (encoded_length.data (), 2));
 
                 auto varint_length = varint::decode_size (std::begin (encoded_length));
                 assert (varint_length > 0);
@@ -131,8 +134,9 @@ namespace pstore {
                 // length value.
                 if (varint_length > 2) {
                     assert (varint_length <= encoded_length.size ());
-                    serialize::read_uninit (archive,
-                                            ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
+                    serialize::read_uninit (
+                        archive,
+                        ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
                 }
 
                 // Read the body of the string.
@@ -140,11 +144,11 @@ namespace pstore {
 
                 // Deleter will ensure that the string is destroyed on exit if an exception is
                 // raised here.
-                auto dtor = [] (value_type * p) {
+                auto dtor = [](value_type * p) {
                     using namespace std;
                     p->~string ();
                 };
-                std::unique_ptr <value_type, decltype (dtor)> deleter (&str, dtor);
+                std::unique_ptr<value_type, decltype (dtor)> deleter (&str, dtor);
 
                 auto const length = varint::decode (std::begin (encoded_length), varint_length);
                 str.resize (length);
@@ -152,10 +156,11 @@ namespace pstore {
                 // Now read the body of the string.
                 // FIXME: const_cast will not be necessary with the C++17 standard library.
                 auto data = const_cast<char *> (str.data ());
-                auto size = static_cast <std::ptrdiff_t> (length);
+                auto size = static_cast<std::ptrdiff_t> (length);
                 serialize::read_uninit (archive, ::pstore::gsl::make_span (data, size));
 
-                // Release ownership from the deleter so that the initialized object is returned to the caller.
+                // Release ownership from the deleter so that the initialized object is returned to
+                // the caller.
                 deleter.release ();
             }
         };
@@ -247,15 +252,15 @@ namespace pstore {
             /// \param value  The de-serialized std::atomic value.
             template <typename Archive>
             static void read (Archive & archive, value_type & value) {
-                serialize::read_uninit <T> (archive, value);
+                serialize::read_uninit<T> (archive, value);
             }
         };
 
 
         /// \brief A serializer for std::pair<T,U>
         template <typename T, typename U>
-        struct serializer<std::pair <T, U>> {
-            using value_type = std::pair <T, U>;
+        struct serializer<std::pair<T, U>> {
+            using value_type = std::pair<T, U>;
 
             /// \brief Writes an instance of `std::pair<>` to an archive.
             ///
@@ -275,7 +280,8 @@ namespace pstore {
             /// \brief Reads an instance of `std::pair<>` from an archive.
             ///
             /// \param archive  The archiver from which the value will be read.
-            /// \param value  A reference to uninitialized memory into which the de-serialized pair will be read.
+            /// \param value  A reference to uninitialized memory into which the de-serialized pair
+            /// will be read.
             template <typename Archive>
             static void read (Archive & archive, value_type & value) {
                 serialize::read_uninit (archive, value.first);

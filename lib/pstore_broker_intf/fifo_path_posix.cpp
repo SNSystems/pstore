@@ -116,7 +116,7 @@ namespace pstore {
                 if (errcode != 0) {
                     std::ostringstream str;
                     str << "Could not create FIFO (" << path << ")";
-                    raise (::pstore::errno_erc {errcode}, str.str ());
+                    raise (::pstore::errno_erc{errcode}, str.str ());
                 }
             }
 
@@ -131,7 +131,7 @@ namespace pstore {
 
             int errcode = 0;
             unique_fd fdread = ::open (path, O_RDONLY | O_NONBLOCK); // NOLINT
-            unique_fd fdwrite {};
+            unique_fd fdwrite{};
             if (fdread.get () < 0) {
                 errcode = errno;
             } else {
@@ -144,7 +144,7 @@ namespace pstore {
             if (errcode != 0) {
                 std::ostringstream str;
                 str << "Could not open FIFO (" << path << ")";
-                raise (::pstore::errno_erc {errcode}, str.str ());
+                raise (::pstore::errno_erc{errcode}, str.str ());
             }
 
             return {std::move (fdread), std::move (fdwrite)};
@@ -172,7 +172,7 @@ namespace pstore {
                 if (err != ENOENT && err != ENXIO) {
                     std::ostringstream str;
                     str << "Could not open FIFO (" << path << ")";
-                    raise (::pstore::errno_erc {err}, str.str ());
+                    raise (::pstore::errno_erc{err}, str.str ());
                 }
             }
             return fdwrite;

@@ -70,10 +70,10 @@
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
-#define CATCH(ex,code)  catch (ex) code
+#define CATCH(ex, code) catch (ex) code
 #else
 #define TRY
-#define CATCH(ex,code)
+#define CATCH(ex, code)
 #endif
 
 namespace {

@@ -60,7 +60,7 @@ namespace pstore {
             return (x + y - 1) / y * y;
         }
 
-        typedef std::shared_ptr<memory_mapper_base>  memory_mapper_ptr;
+        typedef std::shared_ptr<memory_mapper_base> memory_mapper_ptr;
 
 
         //*                  _               _           _ _     _             *
@@ -92,7 +92,7 @@ namespace pstore {
 
             // No assignment or copying.
             region_builder (region_builder const &) = delete;
-            region_builder & operator=(region_builder const &) = delete;
+            region_builder & operator= (region_builder const &) = delete;
 
             /// \param bytes_to_map The number of bytes to be mapped.
             /// \returns A collection of memory-mapped regions.
@@ -113,8 +113,8 @@ namespace pstore {
                          std::uint64_t bytes_to_map);
 
         private:
-            void push (container_type * const regions, std::uint64_t file_size, std::uint64_t offset,
-                       std::uint64_t size);
+            void push (container_type * const regions, std::uint64_t file_size,
+                       std::uint64_t offset, std::uint64_t size);
 
             /// Checks the region-builder's post-condition that all of the regions are sorted
             /// and contiguous starting at an offset of 0.
@@ -124,19 +124,21 @@ namespace pstore {
             /// created.
             std::shared_ptr<File> file_;
 
-            std::uint64_t const full_size_;    ///< The number of bytes in a "full size" memory-mapped region.
-            std::uint64_t const minimum_size_; ///< The number of bytes in a "minimum size" memory-mapped region.
+            std::uint64_t const
+                full_size_; ///< The number of bytes in a "full size" memory-mapped region.
+            std::uint64_t const
+                minimum_size_; ///< The number of bytes in a "minimum size" memory-mapped region.
         };
 
         // region_builder
         // ~~~~~~~~~~~~~~
         template <typename File, typename MemoryMapper>
-        region_builder<File, MemoryMapper>::region_builder (std::shared_ptr<File> file,
-                                                            std::uint64_t const full_size,
-                                                            std::uint64_t const minimum_size) noexcept
-            : file_ (file),
-              full_size_ (full_size),
-              minimum_size_ (minimum_size) {
+        region_builder<File, MemoryMapper>::region_builder (
+            std::shared_ptr<File> file, std::uint64_t const full_size,
+            std::uint64_t const minimum_size) noexcept
+                : file_ (file)
+                , full_size_ (full_size)
+                , minimum_size_ (minimum_size) {
 
             assert (full_size >= minimum_size && full_size_ % minimum_size_ == 0);
         }
@@ -173,7 +175,7 @@ namespace pstore {
         auto region_builder<File, MemoryMapper>::operator() (std::uint64_t bytes_to_map)
             -> container_type {
             container_type regions;
-            this->append (&regions, 0/*offset*/, bytes_to_map);
+            this->append (&regions, 0 /*offset*/, bytes_to_map);
             return regions;
         }
 
@@ -181,8 +183,8 @@ namespace pstore {
         // ~~~~
         template <typename File, typename MemoryMapper>
         void region_builder<File, MemoryMapper>::push (container_type * const regions,
-                                                       std::uint64_t /*file_size*/, std::uint64_t offset,
-                                                       std::uint64_t size) {
+                                                       std::uint64_t /*file_size*/,
+                                                       std::uint64_t offset, std::uint64_t size) {
 
             assert (regions != nullptr);
             assert (size >= minimum_size_);
@@ -197,17 +199,18 @@ namespace pstore {
         // check_regions_are_contiguous
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename File, typename MemoryMapper>
-        void region_builder<File, MemoryMapper>::check_regions_are_contiguous (container_type const & regions) {
-    #ifdef NDEBUG
+        void region_builder<File, MemoryMapper>::check_regions_are_contiguous (
+            container_type const & regions) {
+#ifdef NDEBUG
             (void) regions;
-    #else
+#else
             // Check that the regions are contiguous and sorted.
             std::uint64_t p = 0;
             for (pstore::region::memory_mapper_ptr region : regions) {
                 assert (region->offset () == p);
                 p += region->size ();
             }
-    #endif
+#endif
         }
 
 
@@ -240,32 +243,33 @@ namespace pstore {
             virtual std::vector<memory_mapper_ptr> init () = 0;
 
             virtual void add (std::vector<memory_mapper_ptr> * const regions,
-                              std::uint64_t original_size,
-                              std::uint64_t new_size) = 0;
+                              std::uint64_t original_size, std::uint64_t new_size) = 0;
 
-            virtual std::shared_ptr <file::file_base> file () = 0;
+            virtual std::shared_ptr<file::file_base> file () = 0;
 
-            std::uint64_t full_size () const { return full_size_; }
-            std::uint64_t min_size () const { return min_size_; }
+            std::uint64_t full_size () const {
+                return full_size_;
+            }
+            std::uint64_t min_size () const {
+                return min_size_;
+            }
 
         protected:
             /// \note full_size modulo minimum_size must be 0.
             /// \param full_size  The size of the largest memory-mapped file region.
             /// \param min_size  The size of the smallest memory-mapped file region.
             factory (std::uint64_t full_size, std::uint64_t min_size)
-                    : full_size_ {full_size}
-                    , min_size_ {min_size} {
+                    : full_size_{full_size}
+                    , min_size_{min_size} {
                 assert (full_size_ % min_size_ == 0);
             }
 
             template <typename File, typename MemoryMapper>
-            auto create (std::shared_ptr <File> file) -> std::vector<memory_mapper_ptr>;
+            auto create (std::shared_ptr<File> file) -> std::vector<memory_mapper_ptr>;
 
             template <typename File, typename MemoryMapper>
-            void append (std::shared_ptr <File> file,
-                         std::vector<memory_mapper_ptr> * const regions,
-                         std::uint64_t original_size,
-                         std::uint64_t new_size);
+            void append (std::shared_ptr<File> file, std::vector<memory_mapper_ptr> * const regions,
+                         std::uint64_t original_size, std::uint64_t new_size);
 
         private:
             std::uint64_t full_size_;
@@ -320,19 +324,17 @@ namespace pstore {
             /// \param file An open file containing the data to be memory-mapped.
             /// \param full_size  The size of the largest memory-mapped file region.
             /// \param min_size  The size of the smallest memory-mapped file region.
-            explicit file_based_factory (std::shared_ptr <file::file_handle> file,
-                                         std::uint64_t full_size,
-                                         std::uint64_t min_size);
+            explicit file_based_factory (std::shared_ptr<file::file_handle> file,
+                                         std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * const regions,
-                      std::uint64_t original_size,
+            void add (std::vector<memory_mapper_ptr> * const regions, std::uint64_t original_size,
                       std::uint64_t new_size) override;
 
-            std::shared_ptr <file::file_base> file () override;
+            std::shared_ptr<file::file_base> file () override;
 
         private:
-            std::shared_ptr <file::file_handle> file_;
+            std::shared_ptr<file::file_handle> file_;
         };
 
 
@@ -348,31 +350,26 @@ namespace pstore {
             /// \param file An open file containing the data to be memory-mapped.
             /// \param full_size  The size of the largest memory-mapped file region.
             /// \param min_size  The size of the smallest memory-mapped file region.
-            explicit mem_based_factory (std::shared_ptr <file::in_memory> file,
-                                        std::uint64_t full_size,
-                                        std::uint64_t min_size);
+            explicit mem_based_factory (std::shared_ptr<file::in_memory> file,
+                                        std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * const regions,
-                      std::uint64_t original_size,
+            void add (std::vector<memory_mapper_ptr> * const regions, std::uint64_t original_size,
                       std::uint64_t new_size) override;
 
-            std::shared_ptr <file::file_base> file () override;
+            std::shared_ptr<file::file_base> file () override;
 
         private:
-            std::shared_ptr <file::in_memory> file_;
+            std::shared_ptr<file::in_memory> file_;
         };
 
 
 
+        std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> file,
+                                              std::uint64_t full_size, std::uint64_t min_size);
 
-        std::unique_ptr <factory> get_factory (std::shared_ptr <file::file_handle> file,
-                                               std::uint64_t full_size,
-                                               std::uint64_t min_size);
-
-        std::unique_ptr <factory> get_factory (std::shared_ptr <file::in_memory> file,
-                                               std::uint64_t full_size,
-                                               std::uint64_t min_size);
+        std::unique_ptr<factory> get_factory (std::shared_ptr<file::in_memory> file,
+                                              std::uint64_t full_size, std::uint64_t min_size);
     } // namespace region
 } // namespace pstore
 #endif // PSTORE_REGION_HPP

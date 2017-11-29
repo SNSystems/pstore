@@ -257,7 +257,8 @@ namespace pstore {
     };
 
 
-    /// A mutex which is used to protect a pstore file from being simultaneously written by multiple threads or processes.
+    /// A mutex which is used to protect a pstore file from being simultaneously written by multiple
+    /// threads or processes.
     class transaction_mutex {
     public:
         explicit transaction_mutex (database & db)
@@ -265,12 +266,12 @@ namespace pstore {
                       pstore::file::file_base::lock_kind::exclusive_write} {}
 
         // Move.
-        transaction_mutex (transaction_mutex && ) noexcept = default;
-        transaction_mutex & operator= (transaction_mutex && ) noexcept = default;
+        transaction_mutex (transaction_mutex &&) noexcept = default;
+        transaction_mutex & operator= (transaction_mutex &&) noexcept = default;
 
         // No copying or assignment
-        transaction_mutex (transaction_mutex const & ) = delete;
-        transaction_mutex & operator= (transaction_mutex const & ) = delete;
+        transaction_mutex (transaction_mutex const &) = delete;
+        transaction_mutex & operator= (transaction_mutex const &) = delete;
 
         void lock () {
             rl_.lock ();
@@ -320,9 +321,9 @@ namespace pstore {
     }
     template <typename LockGuard>
     transaction<LockGuard>::transaction (transaction && rhs) noexcept
-            : db_ {rhs.db_}
-            , lock_ {std::move (rhs.lock_)}
-            , first_ {std::move (rhs.first_)} {
+            : db_{rhs.db_}
+            , lock_{std::move (rhs.lock_)}
+            , first_{std::move (rhs.first_)} {
 
         rhs.first_ = address::null ();
         assert (!rhs.is_open ());

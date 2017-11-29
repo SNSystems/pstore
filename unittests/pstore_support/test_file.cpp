@@ -101,17 +101,17 @@ namespace {
     // A file class which is used to mock the lock() and unlock() methods.
     class mock_file final : public ::pstore::file::file_base {
     public:
-        MOCK_METHOD0 (close, void ());
-        MOCK_CONST_METHOD0 (is_open, bool ());
-        MOCK_CONST_METHOD0 (is_writable, bool ());
+        MOCK_METHOD0 (close, void());
+        MOCK_CONST_METHOD0 (is_open, bool());
+        MOCK_CONST_METHOD0 (is_writable, bool());
         MOCK_CONST_METHOD0 (path, std::string ());
-        MOCK_METHOD1 (seek, void (std::uint64_t));
+        MOCK_METHOD1 (seek, void(std::uint64_t));
         MOCK_METHOD0 (tell, std::uint64_t ());
         MOCK_METHOD2 (read_buffer, std::size_t (pstore::gsl::not_null<void *>, std::size_t));
-        MOCK_METHOD2 (write_buffer, void (pstore::gsl::not_null<void const *>, std::size_t));
-        MOCK_METHOD0 (size, std::uint64_t());
-        MOCK_METHOD1 (truncate, void (std::uint64_t));
-        MOCK_CONST_METHOD0 (latest_time, std::time_t());
+        MOCK_METHOD2 (write_buffer, void(pstore::gsl::not_null<void const *>, std::size_t));
+        MOCK_METHOD0 (size, std::uint64_t ());
+        MOCK_METHOD1 (truncate, void(std::uint64_t));
+        MOCK_CONST_METHOD0 (latest_time, std::time_t ());
 
         MOCK_METHOD4 (lock, bool(std::uint64_t, std::size_t, lock_kind, blocking_mode));
         MOCK_METHOD2 (unlock, void(std::uint64_t, std::size_t));
@@ -478,9 +478,9 @@ TEST_F (MemoryFile, CrazyWriteSize) {
     std::fill (buffer.get (), buffer.get () + elements, std::uint8_t{0});
     pstore::file::in_memory mf (buffer, elements);
 
-    mf.write (std::numeric_limits <std::uint32_t>::max ());
+    mf.write (std::numeric_limits<std::uint32_t>::max ());
     mf.seek (4);
-    auto const length = std::numeric_limits <std::size_t>::max () - std::size_t{2};
+    auto const length = std::numeric_limits<std::size_t>::max () - std::size_t{2};
     char const * source = "Hello";
     check_for_error ([&] { mf.write_buffer (source, length); }, std::errc::invalid_argument);
 }
@@ -516,9 +516,7 @@ TEST_F (MemoryFile, Seek) {
     }
 
     // Seek past EOF
-    check_for_error ([&mf] () {
-        mf.seek (127);
-    }, std::errc::invalid_argument);
+    check_for_error ([&mf]() { mf.seek (127); }, std::errc::invalid_argument);
     EXPECT_EQ (5U, mf.tell ());
 }
 
@@ -542,9 +540,7 @@ TEST_F (MemoryFile, Truncate) {
     mf.truncate (0);
     EXPECT_EQ (0U, mf.size ());
     EXPECT_EQ (0U, mf.tell ());
-    check_for_error ([&mf] () {
-        mf.truncate (6);
-    }, std::errc::invalid_argument);
+    check_for_error ([&mf]() { mf.truncate (6); }, std::errc::invalid_argument);
     EXPECT_EQ (0U, mf.tell ());
 
 
@@ -573,6 +569,7 @@ namespace {
         ~NativeFile () {
             file_.close ();
         }
+
     protected:
         pstore::file::file_handle file_;
     };
@@ -580,14 +577,15 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (NativeFile, ReadEmptyFile) {
-    char c [2];
+    char c[2];
     EXPECT_EQ (0U, file_.read_span (::pstore::gsl::make_span (c)));
 
-    check_for_error ([this] () {
-        long l;
-        file_.read (&l);
-    },
-    pstore::error_code::did_not_read_number_of_bytes_requested);
+    check_for_error (
+        [this]() {
+            long l;
+            file_.read (&l);
+        },
+        pstore::error_code::did_not_read_number_of_bytes_requested);
 
     EXPECT_EQ (0U, file_.tell ());
 }
@@ -596,15 +594,16 @@ TEST_F (NativeFile, ReadTinyFile) {
     file_.write ('a');
     file_.seek (0U);
 
-    char c [2];
+    char c[2];
     EXPECT_EQ (sizeof (char), file_.read_span (::pstore::gsl::make_span (c)));
 
-    check_for_error ([this] () {
-        file_.seek (0U);
-        long l;
-        file_.read (&l);
-    },
-    pstore::error_code::did_not_read_number_of_bytes_requested);
+    check_for_error (
+        [this]() {
+            file_.seek (0U);
+            long l;
+            file_.read (&l);
+        },
+        pstore::error_code::did_not_read_number_of_bytes_requested);
 
     // I expect the file's contents to have been read by the call to file_read<>() and hence the
     // file position should have changed.
@@ -612,7 +611,7 @@ TEST_F (NativeFile, ReadTinyFile) {
 
     // Now check the success condition: where the file just contains enough data.
     file_.seek (0U);
-    char c2 [1];
+    char c2[1];
     EXPECT_EQ (sizeof (c2), file_.read_span (::pstore::gsl::make_span (c2)));
 }
 

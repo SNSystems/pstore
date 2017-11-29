@@ -66,7 +66,7 @@ TEST (WordWrapper, TwoLines) {
         lines.push_back (s);
         ++it;
     }
-    EXPECT_THAT (lines, ::testing::ElementsAre("one", "two"));
+    EXPECT_THAT (lines, ::testing::ElementsAre ("one", "two"));
 }
 
 TEST (WordWrapper, LongWordShortLine) {

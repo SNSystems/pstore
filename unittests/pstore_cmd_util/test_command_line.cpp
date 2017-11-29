@@ -54,7 +54,7 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    class ClCommandLine: public ::testing::Test {
+    class ClCommandLine : public ::testing::Test {
     public:
         ClCommandLine ();
         ~ClCommandLine ();
@@ -68,18 +68,19 @@ namespace {
         }
 
         bool parse_command_line_options (std::ostream & errors) {
-            return cl::details::ParseCommandLineOptions (std::begin (strings_), std::end (strings_), "overview", &errors);
+            return cl::details::ParseCommandLineOptions (std::begin (strings_), std::end (strings_),
+                                                         "overview", &errors);
         }
 
     private:
-        std::list <std::string> strings_;
+        std::list<std::string> strings_;
     };
 
     ClCommandLine::ClCommandLine () {
-        cl::option::reset_container();
+        cl::option::reset_container ();
     }
     ClCommandLine::~ClCommandLine () {
-        cl::option::reset_container();
+        cl::option::reset_container ();
         strings_.clear ();
     }
 
@@ -94,7 +95,7 @@ TEST_F (ClCommandLine, StringOption) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string {option}, "hello");
+    EXPECT_EQ (std::string{option}, "hello");
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
@@ -104,19 +105,19 @@ TEST_F (ClCommandLine, StringOptionEquals) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string {option}, "hello");
+    EXPECT_EQ (std::string{option}, "hello");
 }
 
 TEST_F (ClCommandLine, StringPositional) {
     cl::opt<std::string> option ("arg", cl::Positional);
-    EXPECT_EQ (std::string {option}, "") << "Expected inital string value to be empty";
+    EXPECT_EQ (std::string{option}, "") << "Expected inital string value to be empty";
 
     this->add ("progname", "hello");
     std::ostringstream errors;
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string {option}, "hello");
+    EXPECT_EQ (std::string{option}, "hello");
 }
 
 TEST_F (ClCommandLine, RequiredStringPositional) {

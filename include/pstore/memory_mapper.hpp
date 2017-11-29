@@ -157,10 +157,10 @@ namespace pstore {
         /// \param size         The number of mapped bytes.
         memory_mapper_base (std::shared_ptr<void> ptr, bool is_writable, std::uint64_t offset,
                             std::uint64_t size)
-                : ptr_ {std::move (ptr)}
-                , is_writable_ {is_writable}
-                , offset_ {offset}
-                , size_ {size} {}
+                : ptr_{std::move (ptr)}
+                , is_writable_{is_writable}
+                , offset_{offset}
+                , size_{size} {}
 
     private:
         /// \brief Marks the range of addresses given by addr and len as read-only.

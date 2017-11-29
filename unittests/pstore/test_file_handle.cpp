@@ -56,7 +56,7 @@ namespace {
     protected:
         struct mock_callback {
             MOCK_CONST_METHOD2 (call, std::size_t (void const * p, std::size_t size));
-            std::size_t operator () (void const * p, std::size_t size) const  {
+            std::size_t operator() (void const * p, std::size_t size) const {
                 return call (p, size);
             }
         };
@@ -67,26 +67,24 @@ namespace {
 TYPED_TEST_CASE_P (SplitFixture);
 
 TYPED_TEST_P (SplitFixture, Empty) {
-    TypeParam buffer {};
-    constexpr std::size_t size {0};
+    TypeParam buffer{};
+    constexpr std::size_t size{0};
     EXPECT_CALL (this->callback, call (&buffer, size)).Times (0);
 
     using pstore::file::details::split;
-    std::size_t const total = split <std::uint16_t> (&buffer, size, this->callback);
+    std::size_t const total = split<std::uint16_t> (&buffer, size, this->callback);
     EXPECT_EQ (size, total);
 }
 
 TYPED_TEST_P (SplitFixture, Small) {
-    constexpr std::size_t size {10};
-    TypeParam buffer [size] = {};
+    constexpr std::size_t size{10};
+    TypeParam buffer[size] = {};
 
     using ::testing::Return;
-    EXPECT_CALL (this->callback, call (buffer, size))
-        .Times (1)
-        .WillOnce (Return (size));
+    EXPECT_CALL (this->callback, call (buffer, size)).Times (1).WillOnce (Return (size));
 
     using pstore::file::details::split;
-    std::size_t const total = split <std::uint16_t> (buffer, sizeof (buffer), this->callback);
+    std::size_t const total = split<std::uint16_t> (buffer, sizeof (buffer), this->callback);
     EXPECT_EQ (size, total);
 }
 
@@ -97,7 +95,7 @@ TYPED_TEST_P (SplitFixture, Uint8Max) {
     EXPECT_CALL (this->callback, call (ptr, size)).Times (1).WillOnce (Return (size));
 
     using pstore::file::details::split;
-    std::size_t const total = split <std::uint8_t> (ptr, size, this->callback);
+    std::size_t const total = split<std::uint8_t> (ptr, size, this->callback);
     EXPECT_EQ (size, total);
 }
 
@@ -108,7 +106,7 @@ TYPED_TEST_P (SplitFixture, Uint16Max) {
     EXPECT_CALL (this->callback, call (ptr, size)).Times (1).WillOnce (Return (size));
 
     using pstore::file::details::split;
-    std::size_t const total = split <std::uint16_t> (ptr, size, this->callback);
+    std::size_t const total = split<std::uint16_t> (ptr, size, this->callback);
     EXPECT_EQ (size, total);
 }
 
@@ -117,20 +115,18 @@ TYPED_TEST_P (SplitFixture, SplitUint16MaxPlus1) {
         TypeParam * ptr;
         std::size_t size;
     };
-    params const call1 { nullptr, std::numeric_limits <std::uint16_t>::max () };
-    params const call2 { call1.ptr + call1.size, 1U };
+    params const call1{nullptr, std::numeric_limits<std::uint16_t>::max ()};
+    params const call2{call1.ptr + call1.size, 1U};
     auto const total_size = call1.size + call2.size;
 
     // Set up expectations for the callback.
     using ::testing::Return;
-    EXPECT_CALL (this->callback, call (call1.ptr, call1.size))
-        .WillOnce (Return (call1.size));
-    EXPECT_CALL (this->callback, call (call2.ptr, call2.size))
-        .WillOnce (Return (call2.size));
+    EXPECT_CALL (this->callback, call (call1.ptr, call1.size)).WillOnce (Return (call1.size));
+    EXPECT_CALL (this->callback, call (call2.ptr, call2.size)).WillOnce (Return (call2.size));
 
     // Perform the split() call.
     using ::pstore::file::details::split;
-    std::size_t const total = split <std::uint16_t> (call1.ptr, total_size, this->callback);
+    std::size_t const total = split<std::uint16_t> (call1.ptr, total_size, this->callback);
 
     // Check the return value.
     EXPECT_EQ (total_size, total);
@@ -141,9 +137,9 @@ TYPED_TEST_P (SplitFixture, SplitUint8TwiceMaxPlus1) {
         TypeParam * ptr;
         std::size_t size;
     };
-    params const call1 { nullptr, std::numeric_limits <std::uint8_t>::max () };
-    params const call2 { call1.ptr + call1.size, std::numeric_limits <std::uint8_t>::max () };
-    params const call3 { call2.ptr + call2.size, 1U };
+    params const call1{nullptr, std::numeric_limits<std::uint8_t>::max ()};
+    params const call2{call1.ptr + call1.size, std::numeric_limits<std::uint8_t>::max ()};
+    params const call3{call2.ptr + call2.size, 1U};
     auto const total_size = call1.size + call2.size + call3.size;
 
     // Set up expectations for the callback.
@@ -154,18 +150,13 @@ TYPED_TEST_P (SplitFixture, SplitUint8TwiceMaxPlus1) {
 
     // Perform the split() call.
     using ::pstore::file::details::split;
-    std::size_t const total = split <std::uint8_t> (call1.ptr, total_size, this->callback);
+    std::size_t const total = split<std::uint8_t> (call1.ptr, total_size, this->callback);
 
     // Check the return value.
     EXPECT_EQ (total_size, total);
 }
 
-REGISTER_TYPED_TEST_CASE_P (SplitFixture,
-                            Empty,
-                            Small,
-                            Uint8Max,
-                            Uint16Max,
-                            SplitUint16MaxPlus1,
+REGISTER_TYPED_TEST_CASE_P (SplitFixture, Empty, Small, Uint8Max, Uint16Max, SplitUint16MaxPlus1,
                             SplitUint8TwiceMaxPlus1);
 
 INSTANTIATE_TYPED_TEST_CASE_P (Const, SplitFixture, std::uint8_t const);

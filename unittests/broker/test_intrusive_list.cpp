@@ -65,7 +65,7 @@ TEST (IntrusiveList, Empty) {
 }
 
 TEST (IntrusiveList, OneElement) {
-    value member {47};
+    value member{47};
 
     intrusive_list<value> v;
     v.insert_before (&member, v.tail ());
@@ -79,7 +79,7 @@ TEST (IntrusiveList, OneElement) {
 }
 
 TEST (IntrusiveList, IteratorIncrement) {
-    value member {7};
+    value member{7};
     intrusive_list<value> v;
     v.insert_before (&member, v.tail ());
 

@@ -53,95 +53,103 @@
 
 namespace {
     template <typename CharType>
-        class Number : public ::testing::Test {
-        public:
-            void SetUp () final {
-                base_ = value::number_base::default_base ();
+    class Number : public ::testing::Test {
+    public:
+        void SetUp () final {
+            base_ = value::number_base::default_base ();
+        }
+        void TearDown () final {
+            switch (base_) {
+            case 8:
+                value::number_base::oct ();
+                break;
+            case 10:
+                value::number_base::dec ();
+                break;
+            case 16:
+                value::number_base::hex ();
+                break;
+            default:
+                ASSERT_TRUE (false);
+                break;
             }
-            void TearDown () final {
-                switch (base_) {
-                case 8: value::number_base::oct (); break;
-                case 10: value::number_base::dec (); break;
-                case 16: value::number_base::hex (); break;
-                default: ASSERT_TRUE (false); break;
-                }
-            }
+        }
 
-        protected:
-            std::basic_ostringstream <CharType> out;
+    protected:
+        std::basic_ostringstream<CharType> out;
 
-        private:
-            unsigned base_ = 0;
-        };
+    private:
+        unsigned base_ = 0;
+    };
 }
 
-typedef ::testing::Types <char, wchar_t>  CharacterTypes;
+typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Number, CharacterTypes);
 
 TYPED_TEST (Number, N0ExplicitBase8) {
-    value::number <int> v (0, 8);
+    value::number<int> v (0, 8);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("0");
+    auto const & expected = convert<TypeParam> ("0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N0ExplicitBase10) {
-    value::number <int> v (0, 10);
+    value::number<int> v (0, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("0");
+    auto const & expected = convert<TypeParam> ("0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N0ExplicitBase16) {
-    value::number <int> v (0, 16);
+    value::number<int> v (0, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("0x0");
+    auto const & expected = convert<TypeParam> ("0x0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N10ExplicitBase10) {
-    value::number <int> v (10, 10);
+    value::number<int> v (10, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("10");
+    auto const & expected = convert<TypeParam> ("10");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N15ExplicitBase16) {
-    value::number <int> v (15, 16);
+    value::number<int> v (15, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("0xf");
+    auto const & expected = convert<TypeParam> ("0xf");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N10DefaultBase8) {
     value::number_base::oct ();
-    value::number <int> v (10);
+    value::number<int> v (10);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("012");
+    auto const & expected = convert<TypeParam> ("012");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N10DefaultBase10) {
     value::number_base::dec ();
-    value::number <int> v (10, 10);
+    value::number<int> v (10, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("10");
+    auto const & expected = convert<TypeParam> ("10");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N10DefaultBase16) {
     value::number_base::hex ();
-    value::number <int> v (10, 16);
+    value::number<int> v (10, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("0xa");
+    auto const & expected = convert<TypeParam> ("0xa");
     EXPECT_EQ (expected, actual);
 }
 // eof: unittests/dump/test_number.cpp

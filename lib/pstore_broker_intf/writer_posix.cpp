@@ -61,7 +61,7 @@ namespace pstore {
             if (!ok) {
                 int const err = errno;
                 if (err != EAGAIN && err != EWOULDBLOCK && err != EPIPE) {
-                    raise (errno_erc {err}, "write to broker pipe");
+                    raise (errno_erc{err}, "write to broker pipe");
                 }
             }
             return ok;

@@ -60,8 +60,7 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
     auto begin = pstore::cmd_util::iota_generator ();
     auto end = pstore::cmd_util::iota_generator (num);
     pstore::cmd_util::parallel_for_each (
-        begin, end, 
-        [pipe_path, retry_timeout, max_retries](unsigned long count) {
+        begin, end, [pipe_path, retry_timeout, max_retries](unsigned long count) {
             pstore::broker::fifo_path fifo (pipe_path, retry_timeout, max_retries);
             pstore::broker::writer wr (fifo, retry_timeout, max_retries);
 

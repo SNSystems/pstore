@@ -103,29 +103,25 @@ void command_processor::quit (pstore::broker::fifo_path const & fifo,
 
 // cquit
 // ~~~~~
-void command_processor::cquit (pstore::broker::fifo_path const &,
-                               broker::broker_command const &) {
+void command_processor::cquit (pstore::broker::fifo_path const &, broker::broker_command const &) {
     commands_done_ = true;
 }
 
 // gc
 // ~~
-void command_processor::gc (pstore::broker::fifo_path const &,
-                            broker::broker_command const & c) {
+void command_processor::gc (pstore::broker::fifo_path const &, broker::broker_command const & c) {
     broker::start_vacuum (c.path);
 }
 
 // echo
 // ~~~~
-void command_processor::echo (pstore::broker::fifo_path const &,
-                              broker::broker_command const & c) {
+void command_processor::echo (pstore::broker::fifo_path const &, broker::broker_command const & c) {
     std::printf ("ECHO:%s\n", c.path.c_str ());
 }
 
 // nop
 // ~~~
-void command_processor::nop (pstore::broker::fifo_path const &,
-                             broker::broker_command const &) {}
+void command_processor::nop (pstore::broker::fifo_path const &, broker::broker_command const &) {}
 
 // unknown
 // ~~~~~~~
@@ -149,9 +145,12 @@ std::array<command_processor::command_entry, 6> const command_processor::command
     command_processor::command_entry ("ECHO", &command_processor::echo),
     command_processor::command_entry ("GC", &command_processor::gc),
     command_processor::command_entry ("NOP", &command_processor::nop),
-    command_processor::command_entry ("SUICIDE", &command_processor::suicide), // initiate the broker shutdown.
-    command_processor::command_entry ("_CQUIT", &command_processor::cquit), // exit this command processor thread.
-    command_processor::command_entry ("_QUIT", &command_processor::quit), //  shut down a single pipe-reader thread.
+    command_processor::command_entry ("SUICIDE",
+                                      &command_processor::suicide), // initiate the broker shutdown.
+    command_processor::command_entry (
+        "_CQUIT", &command_processor::cquit), // exit this command processor thread.
+    command_processor::command_entry (
+        "_QUIT", &command_processor::quit), //  shut down a single pipe-reader thread.
 }};
 
 // process_command

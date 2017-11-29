@@ -46,7 +46,7 @@
 #include <type_traits>
 
 #define X(a) #a,
-std::vector <char const *> const index_names { INDICES };
+std::vector<char const *> const index_names{INDICES};
 #undef X
 
 bool set_from_name (indices_bitset * const bs, std::string const & name) {
@@ -58,19 +58,21 @@ bool set_from_name (indices_bitset * const bs, std::string const & name) {
     } else {
         auto begin = std::begin (index_names);
         auto end = std::end (index_names);
-        auto it = std::find_if (begin, end, [&name] (decltype (index_names)::value_type const & v) { return v == name; });
+        auto it = std::find_if (begin, end, [&name](decltype (index_names)::value_type const & v) {
+            return v == name;
+        });
         if (it == end) {
             return false;
         }
 
         auto const position = std::distance (begin, it);
         using udifference_type = std::make_unsigned<decltype (position)>::type;
-        assert (position >= 0 && static_cast <udifference_type> (position) < index_names.size ());
+        assert (position >= 0 && static_cast<udifference_type> (position) < index_names.size ());
 
-        bs->set (static_cast <udifference_type> (position));
+        bs->set (static_cast<udifference_type> (position));
     }
     return true;
 }
-//eof:tools/index_structure/indices.cpp
+// eof:tools/index_structure/indices.cpp
 
 // eof: tools/index_structure/indices.cpp

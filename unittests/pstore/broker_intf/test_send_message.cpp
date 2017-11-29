@@ -54,19 +54,22 @@
 
 namespace {
 
-    auto make_pipe () -> pstore::broker::fifo_path::client_pipe  {
+    auto make_pipe () -> pstore::broker::fifo_path::client_pipe {
         return {};
     }
 
     class mock_writer : public pstore::broker::writer {
     public:
-        mock_writer () : pstore::broker::writer (make_pipe ()) { }
-        MOCK_METHOD1(write_impl, bool (pstore::broker::message_type const &));
+        mock_writer ()
+                : pstore::broker::writer (make_pipe ()) {}
+        MOCK_METHOD1 (write_impl, bool(pstore::broker::message_type const &));
     };
 
     class BrokerSendMessage : public ::testing::Test {
     public:
-        BrokerSendMessage () : message_id_ {pstore::broker::next_message_id ()} {}
+        BrokerSendMessage ()
+                : message_id_{pstore::broker::next_message_id ()} {}
+
     protected:
         std::uint32_t const message_id_;
     };
@@ -79,11 +82,10 @@ TEST_F (BrokerSendMessage, SinglePart) {
     using ::testing::Return;
 
     mock_writer wr;
-    pstore::broker::message_type const expected {message_id_, 0, 1, "hello world"};
-    EXPECT_CALL (wr, write_impl (Eq (expected)))
-        .WillOnce (Return (true));
+    pstore::broker::message_type const expected{message_id_, 0, 1, "hello world"};
+    EXPECT_CALL (wr, write_impl (Eq (expected))).WillOnce (Return (true));
 
-    pstore::broker::send_message (wr, true/*error on timeout*/, "hello", "world");
+    pstore::broker::send_message (wr, true /*error on timeout*/, "hello", "world");
 }
 
 TEST_F (BrokerSendMessage, TwoParts) {
@@ -101,14 +103,14 @@ TEST_F (BrokerSendMessage, TwoParts) {
 
     mock_writer wr;
 
-    pstore::broker::message_type const expected1 (message_id_, 0, 2, verb + ' ' + std::string (part1_chars, 'p'));
-    pstore::broker::message_type const expected2 (message_id_, 1, 2, std::string (part2_chars, 'p'));
-    EXPECT_CALL (wr, write_impl (Eq (expected1)))
-        .WillOnce (Return (true));
-    EXPECT_CALL (wr, write_impl (Eq (expected2)))
-        .WillOnce (Return (true));
+    pstore::broker::message_type const expected1 (message_id_, 0, 2,
+                                                  verb + ' ' + std::string (part1_chars, 'p'));
+    pstore::broker::message_type const expected2 (message_id_, 1, 2,
+                                                  std::string (part2_chars, 'p'));
+    EXPECT_CALL (wr, write_impl (Eq (expected1))).WillOnce (Return (true));
+    EXPECT_CALL (wr, write_impl (Eq (expected2))).WillOnce (Return (true));
 
-    pstore::broker::send_message (wr, true/*error on timeout*/, verb.c_str (), path.c_str ());
+    pstore::broker::send_message (wr, true /*error on timeout*/, verb.c_str (), path.c_str ());
 }
 
 // eof: unittests/pstore/broker_intf/test_send_message.cpp

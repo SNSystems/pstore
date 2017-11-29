@@ -61,7 +61,7 @@ namespace {
     /// Returns a copy of the input string with any leading or trailing whitespace removed and all
     /// characters converted to lower-case.
     std::string trim_and_lowercase (std::string const & str) {
-        auto is_ws = [] (char c) { return pstore::isspace (c); };
+        auto is_ws = [](char c) { return pstore::isspace (c); };
         // Remove trailing whitespace.
         auto end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
         // Skip leading whitespace.
@@ -71,7 +71,7 @@ namespace {
         auto const new_length = std::distance (begin, end);
         assert (new_length >= 0);
 
-        result.reserve (static_cast <std::make_unsigned <decltype (new_length)>::type> (new_length));
+        result.reserve (static_cast<std::make_unsigned<decltype (new_length)>::type> (new_length));
         std::transform (begin, end, std::back_inserter (result),
                         [](char c) { return static_cast<char> (std::tolower (c)); });
         return result;

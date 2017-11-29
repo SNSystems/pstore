@@ -89,7 +89,7 @@ namespace {
             std::string s{str};
             // Convert the string to lower case.
             std::transform (std::begin (s), std::end (s), std::begin (s),
-                            [](char c) { return static_cast <char> (std::tolower (c)); });
+                            [](char c) { return static_cast<char> (std::tolower (c)); });
 
             auto it = endians.find (s);
             if (it != endians.end ()) {

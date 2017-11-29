@@ -45,7 +45,7 @@
 /// \brief Functions to operate on native file paths.
 
 #ifndef PSTORE_PATH_HPP
-#define PSTORE_PATH_HPP  (1)
+#define PSTORE_PATH_HPP (1)
 
 #include <initializer_list>
 #include <string>
@@ -58,7 +58,8 @@
 #endif
 
 namespace pstore {
-    /// \brief The 'path' namespace contains all of the functions that are used to manipulated host file paths.
+    /// \brief The 'path' namespace contains all of the functions that are used to manipulated host
+    /// file paths.
     namespace path {
 
         /// \brief POSIX-specific path name handling.

@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_WRITE_SWITCHES_HPP
-#define PSTORE_WRITE_SWITCHES_HPP  1
+#define PSTORE_WRITE_SWITCHES_HPP 1
 
 #include <list>
 #include <string>
@@ -50,7 +50,7 @@
 
 #ifdef _WIN32
 #include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT(str)
+#define NATIVE_TEXT(str) _TEXT (str)
 #else
 typedef char TCHAR;
 #define NATIVE_TEXT(str) str
@@ -61,9 +61,9 @@ typedef char TCHAR;
 
 struct switches {
     std::string db_path;
-	std::string key;
-	unsigned revision = pstore::head_revision;
-	bool string_mode = false;
+    std::string key;
+    unsigned revision = pstore::head_revision;
+    bool string_mode = false;
 };
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -72,5 +72,5 @@ std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
 std::pair<switches, int> get_switches (int argc, char * argv[]);
 #endif
 
-#endif //PSTORE_WRITE_SWITCHES_HPP
+#endif // PSTORE_WRITE_SWITCHES_HPP
 // eof: tools/read/switches.hpp

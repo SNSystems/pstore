@@ -136,7 +136,7 @@ namespace pstore {
             // advantage of that if it turns out that we're in a hurry.
             int const err = pthread_threadid_np (pthread_self (), &id);
             if (err != 0) {
-                raise (errno_erc {err});
+                raise (errno_erc{err});
             }
             return id;
 #elif defined(__linux__)
@@ -162,7 +162,7 @@ namespace pstore {
             // - the slightly differently named form used in FreeBSD.
             int err = 0;
             if (name == nullptr) {
-                raise (errno_erc {EINVAL});
+                raise (errno_erc{EINVAL});
             }
 #if PSTORE_PTHREAD_SETNAME_NP_1_ARG
             err = pthread_setname_np (name);
@@ -174,7 +174,7 @@ namespace pstore {
 #error "pthread_setname was not available"
 #endif
             if (err != 0) {
-                raise (errno_erc {err}, "pthread_set_name_np");
+                raise (errno_erc{err}, "pthread_set_name_np");
             }
 
 #ifdef __FreeBSD__
@@ -186,15 +186,16 @@ namespace pstore {
         char const * get_name (::pstore::gsl::span<char, name_size> name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
-                raise (errno_erc {EINVAL});
+                raise (errno_erc{EINVAL});
             }
 #ifdef __FreeBSD__
             std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
 #else
             assert (length == name.size_bytes ());
-            int err = pthread_getname_np (pthread_self (), name.data (), static_cast <std::size_t> (length));
+            int err = pthread_getname_np (pthread_self (), name.data (),
+                                          static_cast<std::size_t> (length));
             if (err != 0) {
-                raise (errno_erc {err}, "pthread_getname_np");
+                raise (errno_erc{err}, "pthread_getname_np");
             }
 #endif
             name[length - 1] = '\0';
@@ -204,7 +205,7 @@ namespace pstore {
 #endif // _WIN32
 
         std::string get_name () {
-            std::array <char, name_size> buffer;
+            std::array<char, name_size> buffer;
             return {get_name (::pstore::gsl::make_span (buffer))};
         }
     } // namespace thread

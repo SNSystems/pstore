@@ -369,8 +369,8 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
 namespace {
     using mock_lock = std::unique_lock<mock_mutex>;
 
-    void append_int (pstore::transaction <mock_lock> & transaction, int v) {
-        *(transaction.alloc_rw <int> ().first) = v;
+    void append_int (pstore::transaction<mock_lock> & transaction, int v) {
+        *(transaction.alloc_rw<int> ().first) = v;
     }
 }
 
@@ -426,9 +426,9 @@ TEST_F (Transaction, GetRwInt) {
 
         // A call to get(). First argument (address) must lie beyond the initial transaction
         // and must request a writable int.
-        EXPECT_CALL (*db_.get (),
-                     get (Ge (pstore::address::make (sizeof (pstore::header) + sizeof (pstore::trailer))),
-                          sizeof (int), false, true))
+        EXPECT_CALL (*db_.get (), get (Ge (pstore::address::make (sizeof (pstore::header) +
+                                                                  sizeof (pstore::trailer))),
+                                       sizeof (int), false, true))
             .After (allocate_int)
             .WillOnce (Invoke (db_.get (), &mock_database::base_get));
     }

@@ -44,21 +44,21 @@
 #include "pstore_cmd_util/cl/modifiers.hpp"
 
 namespace pstore {
-namespace cmd_util {
-namespace cl {
+    namespace cmd_util {
+        namespace cl {
 
-    desc::desc (std::string const & str)
-            : desc_ (str) {}
+            desc::desc (std::string const & str)
+                    : desc_ (str) {}
 
-    aliasopt::aliasopt (option & o)
-            : original_ (o) {}
+            aliasopt::aliasopt (option & o)
+                    : original_ (o) {}
 
-    details::positional const Positional;
-    details::required const Required;
-    details::required const Optional;
-    details::required const OneOrMore;
+            details::positional const Positional;
+            details::required const Required;
+            details::required const Optional;
+            details::required const OneOrMore;
 
-} // namespace cl
-} // namespace cmd_util
+        } // namespace cl
+    }     // namespace cmd_util
 } // namespace pstore
 // eof: lib/pstore_cmd_util/cl/modifiers.cpp

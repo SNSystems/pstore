@@ -147,7 +147,8 @@ namespace pstore {
                 footer->signature2 != trailer::default_signature2) {
 
                 ok = false;
-            } else if (pos >= address::make (sizeof (trailer)) && prev_pos > pos - sizeof (trailer)) {
+            } else if (pos >= address::make (sizeof (trailer)) &&
+                       prev_pos > pos - sizeof (trailer)) {
                 // The previous trailer must lie before the current one in the file,
                 // be separated by at least the size of the trailer and agree with the location
                 // given by the current trailer's 'size' field.
@@ -156,8 +157,8 @@ namespace pstore {
                 ok = false;
             } else {
                 auto const transaction_first_byte = prev_pos == address::null ()
-                                                  ? address::make (sizeof (header))
-                                                  : prev_pos + sizeof (trailer);
+                                                        ? address::make (sizeof (header))
+                                                        : prev_pos + sizeof (trailer);
                 if (pos - footer->a.size != transaction_first_byte) {
                     ok = false;
                 }

@@ -44,44 +44,43 @@
 #include "pstore_cmd_util/cl/parser.hpp"
 
 namespace pstore {
-namespace cmd_util {
-namespace cl {
-    //*                               _                   *
-    //*  _ __  __ _ _ _ ___ ___ _ _  | |__  __ _ ___ ___  *
-    //* | '_ \/ _` | '_(_-</ -_) '_| | '_ \/ _` (_-</ -_) *
-    //* | .__/\__,_|_| /__/\___|_|   |_.__/\__,_/__/\___| *
-    //* |_|                                               *
-    parser_base::~parser_base () {}
+    namespace cmd_util {
+        namespace cl {
+            //*                               _                   *
+            //*  _ __  __ _ _ _ ___ ___ _ _  | |__  __ _ ___ ___  *
+            //* | '_ \/ _` | '_(_-</ -_) '_| | '_ \/ _` (_-</ -_) *
+            //* | .__/\__,_|_| /__/\___|_|   |_.__/\__,_/__/\___| *
+            //* |_|                                               *
+            parser_base::~parser_base () {}
 
-    void parser_base::add_literal_option (std::string const & name, int value,
-                                          std::string const & description) {
-        literals_.emplace_back (name, value, description);
-    }
-
-
-    //*                                  _       _            *
-    //*  _ __  __ _ _ _ ___ ___ _ _   __| |_ _ _(_)_ _  __ _  *
-    //* | '_ \/ _` | '_(_-</ -_) '_| (_-<  _| '_| | ' \/ _` | *
-    //* | .__/\__,_|_| /__/\___|_|   /__/\__|_| |_|_||_\__, | *
-    //* |_|                                            |___/  *
-
-    parser<std::string>::~parser () {
-    }
-
-    maybe <std::string> parser<std::string>::operator () (std::string const & v) const {
-        auto begin = this->begin ();
-        auto end = this->end ();
-        if (std::distance (begin, end) != 0) {
-            auto it =
-                std::find_if (begin, end, [&v](literal const & lit) { return v == lit.name; });
-            if (it == this->end ()) {
-                return nothing <std::string> ();
+            void parser_base::add_literal_option (std::string const & name, int value,
+                                                  std::string const & description) {
+                literals_.emplace_back (name, value, description);
             }
-        }
-        return just (v);
-    }
 
-} // namespace cl
-} // namespace cmd_util
+
+            //*                                  _       _            *
+            //*  _ __  __ _ _ _ ___ ___ _ _   __| |_ _ _(_)_ _  __ _  *
+            //* | '_ \/ _` | '_(_-</ -_) '_| (_-<  _| '_| | ' \/ _` | *
+            //* | .__/\__,_|_| /__/\___|_|   /__/\__|_| |_|_||_\__, | *
+            //* |_|                                            |___/  *
+
+            parser<std::string>::~parser () {}
+
+            maybe<std::string> parser<std::string>::operator() (std::string const & v) const {
+                auto begin = this->begin ();
+                auto end = this->end ();
+                if (std::distance (begin, end) != 0) {
+                    auto it = std::find_if (begin, end,
+                                            [&v](literal const & lit) { return v == lit.name; });
+                    if (it == this->end ()) {
+                        return nothing<std::string> ();
+                    }
+                }
+                return just (v);
+            }
+
+        } // namespace cl
+    }     // namespace cmd_util
 } // namespace pstore
 // eof: lib/pstore_cmd_util/cl/parser.cpp

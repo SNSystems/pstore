@@ -51,33 +51,25 @@
 namespace {
 
     using namespace llvm;
-    cl::opt<switches::endian> Endian(
-        "endian",
-        cl::desc ("The endian-ness of the output data"),
-        cl::values(
-            cl::OptionEnumValue {"big", int(switches::endian::big), "Big-endian"},
-            cl::OptionEnumValue {"little", int (switches::endian::little), "Little-endian"},
-            cl::OptionEnumValue {"native", int (switches::endian::native), "The endian-ness of the host machine"}
-        ),
-        cl::init(switches::endian::native)
-    );
-    cl::alias Endian2("e", cl::desc ("Alias for --endian"), cl::aliasopt(Endian));
+    cl::opt<switches::endian> Endian (
+        "endian", cl::desc ("The endian-ness of the output data"),
+        cl::values (cl::OptionEnumValue{"big", int(switches::endian::big), "Big-endian"},
+                    cl::OptionEnumValue{"little", int(switches::endian::little), "Little-endian"},
+                    cl::OptionEnumValue{"native", int(switches::endian::native),
+                                        "The endian-ness of the host machine"}),
+        cl::init (switches::endian::native));
+    cl::alias Endian2 ("e", cl::desc ("Alias for --endian"), cl::aliasopt (Endian));
 
 
-    cl::opt<unsigned> Maximum(
-        "maximum",
-        cl::desc("The maximum prime value"),
-        cl::init(100) // FIXME: duplicated in switches.cpp
-    );
-    cl::alias Maximum2("m", cl::desc("Alias for --maximum"), cl::aliasopt (Maximum));
+    cl::opt<unsigned> Maximum ("maximum", cl::desc ("The maximum prime value"),
+                               cl::init (100) // FIXME: duplicated in switches.cpp
+                               );
+    cl::alias Maximum2 ("m", cl::desc ("Alias for --maximum"), cl::aliasopt (Maximum));
 
 
-    cl::opt<std::string> Output (
-        "output",
-        cl::desc("Output file name. (Default: standard-out)"),
-        cl::init("-")
-    );
-    cl::alias Output2("o", cl::desc("Alias for --output"), cl::aliasopt (Output));
+    cl::opt<std::string> Output ("output", cl::desc ("Output file name. (Default: standard-out)"),
+                                 cl::init ("-"));
+    cl::alias Output2 ("o", cl::desc ("Alias for --output"), cl::aliasopt (Output));
 
 } // anonymous namespace
 
@@ -87,8 +79,7 @@ namespace switches {
         llvm::cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
 
         user_options Result;
-        Result.output =
-            std::make_shared<std::string> (pstore::utf::from_native_string(Output));
+        Result.output = std::make_shared<std::string> (pstore::utf::from_native_string (Output));
         Result.endianness = Endian;
         Result.maximum = Maximum;
         return Result;

@@ -54,8 +54,8 @@
 int main () {
     // Create the archive. This will be the sink for the data that we're about
     // to write.
-    std::vector <std::uint8_t> bytes;
-    pstore::serialize::archive::vector_writer writer {bytes};
+    std::vector<std::uint8_t> bytes;
+    pstore::serialize::archive::vector_writer writer{bytes};
 
     // Write two integers to the archive.
     pstore::serialize::write (writer, 10, 20);

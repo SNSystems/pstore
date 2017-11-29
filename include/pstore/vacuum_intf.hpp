@@ -44,14 +44,14 @@
 /// \file vacuum_intf.hpp
 
 #ifndef PSTORE_VACUUM_INTF_HPP
-#define PSTORE_VACUUM_INTF_HPP  (1)
+#define PSTORE_VACUUM_INTF_HPP (1)
 
 #include <atomic>
 #include <cstdint>
 
 #include <ctime>
 
-#if defined (_WIN32)
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #else
@@ -61,29 +61,30 @@
 
 namespace pstore {
 
-#if defined (_WIN32)
-    typedef DWORD  pid_t;
+#if defined(_WIN32)
+    typedef DWORD pid_t;
 #else
-    typedef ::pid_t  pid_t;
+    typedef ::pid_t pid_t;
 #endif // !defined (_WIN32)
 
 
 
-struct shared {
-    static constexpr auto not_running = pid_t {0};
-    static constexpr auto starting = static_cast <pid_t> (-1);
+    struct shared {
+        static constexpr auto not_running = pid_t{0};
+        static constexpr auto starting = static_cast<pid_t> (-1);
 
-    shared ();
+        shared ();
 
-    std::atomic <pid_t> pid{0};
-    /// The time at which the process was started, in milliseconds since the epoch.
-    std::atomic <std::uint64_t> start_time{0};
-    std::atomic <std::time_t> time{0};
+        std::atomic<pid_t> pid{0};
+        /// The time at which the process was started, in milliseconds since the epoch.
+        std::atomic<std::uint64_t> start_time{0};
+        std::atomic<std::time_t> time{0};
 
-    /// A value which is periodically incremented whilst a pstore instance is open on the system.
-    /// This can be used to detect that the pstore is in use by another process.
-    std::atomic <std::uint64_t> open_tick;
-};
+        /// A value which is periodically incremented whilst a pstore instance is open on the
+        /// system.
+        /// This can be used to detect that the pstore is in use by another process.
+        std::atomic<std::uint64_t> open_tick;
+    };
 
 } // namespace pstore
 #endif // PSTORE_VACUUM_INTF_HPP

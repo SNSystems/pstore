@@ -59,10 +59,10 @@
 
 namespace {
     template <typename T>
-    typename std::make_unsigned <T>::type as_unsigned (T x) {
-        using utype = typename std::make_unsigned <T>::type;
+    typename std::make_unsigned<T>::type as_unsigned (T x) {
+        using utype = typename std::make_unsigned<T>::type;
         assert (x >= 0);
-        return static_cast <utype> (x);
+        return static_cast<utype> (x);
     }
 
     class ProcessFileName : public ::testing::Test {
@@ -89,7 +89,7 @@ TEST_F (ProcessFileName, BufferContents) {
 }
 
 TEST_F (ProcessFileName, BufferContentsWithInitialSize) {
-    pstore::small_vector<char, 128> buffer(std::size_t{128});
+    pstore::small_vector<char, 128> buffer (std::size_t{128});
     ASSERT_GE (128U, buffer.capacity ());
     std::size_t length = pstore::process_file_name (&get_process_path, buffer);
     EXPECT_EQ (length, 12U);
@@ -103,9 +103,8 @@ TEST_F (ProcessFileName, BufferContentsWithInitialSize) {
 TEST_F (ProcessFileName, GetProcessPathAlwaysReturns0) {
     std::vector<char> buffer;
     auto get_process_path = [](::pstore::gsl::span<char>) -> std::size_t { return 0; };
-    check_for_error ([&] () {
-        pstore::process_file_name (get_process_path, buffer);
-    }, pstore::error_code::unknown_process_path);
+    check_for_error ([&]() { pstore::process_file_name (get_process_path, buffer); },
+                     pstore::error_code::unknown_process_path);
 }
 
 
@@ -126,11 +125,12 @@ namespace {
 
     class ProcessFileNameFreeBSD : public ::testing::Test {
     public:
-        ProcessFileNameFreeBSD () : command_ {::pstore::gsl::make_span (command_array_)} {}
+        ProcessFileNameFreeBSD ()
+                : command_{::pstore::gsl::make_span (command_array_)} {}
 
     protected:
         std::vector<int> command_array_{1, 2, 3};
-        ::pstore::gsl::span <int> command_;
+        ::pstore::gsl::span<int> command_;
 
         static auto bind (sysctl_mock2 * cb)
             -> std::function<int(int const *, unsigned int, void *, std::size_t *, void const *,
@@ -176,11 +176,11 @@ TEST_F (ProcessFileNameFreeBSD, RaisesError) {
         .WillRepeatedly (DoAll (Assign (&errno, EPERM), Return (-1)));
 
     using namespace std::placeholders;
-    auto fn = [this, &callback] () {
+    auto fn = [this, &callback]() {
         std::vector<char> buffer;
         ::pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
     };
-    check_for_error (fn, ::pstore::errno_erc {EPERM});
+    check_for_error (fn, ::pstore::errno_erc{EPERM});
 #endif
 }
 
@@ -194,9 +194,9 @@ TEST_F (ProcessFileNameFreeBSD, AlwaysRaisesNoMem) {
         .WillRepeatedly (DoAll (Assign (&errno, ENOMEM), Return (-1)));
 
     std::vector<char> buffer;
-    check_for_error ([&] () {
-        pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
-    }, pstore::error_code::unknown_process_path);
+    check_for_error (
+        [&]() { pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer); },
+        pstore::error_code::unknown_process_path);
 }
 
 TEST_F (ProcessFileNameFreeBSD, BufferContents) {

@@ -74,21 +74,21 @@
 
 namespace {
 
-auto & out_stream =
+    auto & out_stream =
 #if defined(_WIN32) && defined(_UNICODE)
-    std::wcout;
+        std::wcout;
 #else
-    std::cout;
+        std::cout;
 #endif
 
 #ifdef PSTORE_CPP_EXCEPTIONS
-auto & error_stream =
+    auto & error_stream =
 #if defined(_WIN32) && defined(_UNICODE)
-    std::wcerr;
+        std::wcerr;
 #else
-    std::cerr;
+        std::cerr;
 #endif
-#endif //PSTORE_CPP_EXCEPTIONS
+#endif // PSTORE_CPP_EXCEPTIONS
 
     template <typename Index>
     auto make_index (char const * name, Index const & index) -> value::value_ptr {
@@ -100,8 +100,7 @@ auto & error_stream =
         }
 
         return value::make_value (value::object::container{
-            {"name", value::make_value (name)},
-            {"members", value::make_value (members)},
+            {"name", value::make_value (name)}, {"members", value::make_value (members)},
         });
     }
 

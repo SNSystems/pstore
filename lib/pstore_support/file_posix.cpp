@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
- //*   __ _ _                        _       *
+//*   __ _ _                        _       *
 //*  / _(_) | ___   _ __   ___  ___(_)_  __ *
 //* | |_| | |/ _ \ | '_ \ / _ \/ __| \ \/ / *
 //* |  _| | |  __/ | |_) | (_) \__ \ |>  <  *
@@ -81,7 +81,7 @@ namespace {
     PSTORE_NO_RETURN void raise_file_error (int err, MessageStr message, PathStr path) {
         std::ostringstream str;
         str << message << " \"" << path << "\"";
-        raise (::pstore::errno_erc {err}, str.str ());
+        raise (::pstore::errno_erc{err}, str.str ());
     }
 
 } // end anonymous namespace
@@ -157,7 +157,7 @@ namespace pstore {
             is_writable_ = true;
 
             if (file_ == -1) {
-                raise (::pstore::errno_erc {err}, "Unable to create temporary file");
+                raise (::pstore::errno_erc{err}, "Unable to create temporary file");
             }
         }
 
@@ -165,7 +165,7 @@ namespace pstore {
             this->open (unique{}, directory);
             if (::unlink (this->path ().c_str ()) == -1) {
                 int const err = errno;
-                raise (::pstore::errno_erc {err}, "Unable to delete temporary file");
+                raise (::pstore::errno_erc{err}, "Unable to delete temporary file");
             }
         }
 
@@ -423,7 +423,7 @@ namespace pstore {
 
                 std::ostringstream message;
                 message << "Unable to rename " << quoted (from) << " to " << quoted (to);
-                raise (errno_erc {last_error}, message.str ());
+                raise (errno_erc{last_error}, message.str ());
             }
         }
 

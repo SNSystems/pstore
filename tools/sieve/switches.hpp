@@ -76,13 +76,13 @@ namespace switches {
     };
 
     struct user_options {
-        std::shared_ptr <std::string> output;
+        std::shared_ptr<std::string> output;
         endian endianness;
         unsigned long maximum;
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
         static user_options get (int argc, TCHAR * argv[]);
 #else
-		static user_options get(int argc, char * argv[]);
+        static user_options get (int argc, char * argv[]);
 #endif
     };
 }

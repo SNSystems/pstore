@@ -67,6 +67,6 @@ int main () {
         index->insert_or_assign (t, key, record{addr, size});
     }
 
-    t.commit ();  // Finalize the transaction.
+    t.commit (); // Finalize the transaction.
 }
 // eof: examples/write_using_serializer/write_using_serializer.cpp

@@ -79,7 +79,7 @@ namespace pstore {
     unsigned system_page_size::sysconf () {
         long result = ::sysconf (_SC_PAGESIZE);
         if (result == -1) {
-            raise (errno_erc {errno}, "sysconf(_SC_PAGESIZE)");
+            raise (errno_erc{errno}, "sysconf(_SC_PAGESIZE)");
         }
         assert (result > 0 && result <= std::numeric_limits<unsigned>::max ());
         return static_cast<unsigned> (result);
@@ -94,7 +94,7 @@ namespace pstore {
     // ~~~~~~~~~
     void memory_mapper_base::read_only_impl (void * addr, std::size_t len) {
         if (::mprotect (addr, len, PROT_READ) == -1) {
-            raise (errno_erc {errno}, "mprotect");
+            raise (errno_erc{errno}, "mprotect");
         }
     }
 
@@ -132,12 +132,12 @@ namespace pstore {
             int const last_error = errno;
             std::ostringstream message;
             message << R"(Could not memory map file )" << file.path () << '\"';
-            raise (errno_erc {last_error}, message.str ());
+            raise (errno_erc{last_error}, message.str ());
         }
 
         auto deleter = [length](void * p) {
             if (::munmap (p, length) == -1) {
-                raise (errno_erc {errno}, "munmap");
+                raise (errno_erc{errno}, "munmap");
             }
         };
         return std::shared_ptr<void> (ptr, deleter);

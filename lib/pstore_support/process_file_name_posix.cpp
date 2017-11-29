@@ -61,8 +61,8 @@
 namespace pstore {
 
     std::string process_file_name () {
-        small_vector<char, _POSIX_PATH_MAX> buffer(std::size_t{_POSIX_PATH_MAX});
-        auto buffer_size = static_cast <std::uint32_t> (buffer.size ());
+        small_vector<char, _POSIX_PATH_MAX> buffer (std::size_t{_POSIX_PATH_MAX});
+        auto buffer_size = static_cast<std::uint32_t> (buffer.size ());
         int resl = ::_NSGetExecutablePath (buffer.data (), &buffer_size);
         if (resl == -1) {
             // Note that _NSGetExecutablePath will modify buffer_size to tell us the correct amount

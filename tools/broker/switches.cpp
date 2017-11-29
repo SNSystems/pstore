@@ -55,28 +55,21 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::opt<std::string>  record_path (
-        "record",
-        cl::desc ("Record received messages in the named output file")
-    );
+    cl::opt<std::string>
+        record_path ("record", cl::desc ("Record received messages in the named output file"));
     cl::alias record_path2 ("r", cl::desc ("Alias for --record"), cl::aliasopt (record_path));
 
-    cl::opt<std::string> playback_path (
-        "playback",
-        cl::desc ("Play back messages from the named file")
-    );
+    cl::opt<std::string> playback_path ("playback",
+                                        cl::desc ("Play back messages from the named file"));
     cl::alias playback_path2 ("p", cl::desc ("Alias for --playback"), cl::aliasopt (playback_path));
 
-    cl::opt<std::string> pipe_path (
-        "pipe-path",
-        cl::desc ("Overrides the path of the FIFO from which commands will be read")
-    );
+    cl::opt<std::string>
+        pipe_path ("pipe-path",
+                   cl::desc ("Overrides the path of the FIFO from which commands will be read"));
 
-    cl::opt<unsigned> num_read_threads (
-        "num-read-threads",
-        cl::desc ("The number of pipe reading threads"),
-        cl::init (2U)
-    );
+    cl::opt<unsigned> num_read_threads ("num-read-threads",
+                                        cl::desc ("The number of pipe reading threads"),
+                                        cl::init (2U));
 
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
@@ -89,7 +82,7 @@ namespace {
 } // end anonymous namespace
 
 
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]) {
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker agent");
 
     switches result;

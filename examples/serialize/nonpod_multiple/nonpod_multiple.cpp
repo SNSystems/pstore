@@ -54,7 +54,8 @@ namespace {
 
     public:
         foo () {}
-        foo (int a) : a_ (a) {}
+        foo (int a)
+                : a_ (a) {}
         std::ostream & write (std::ostream & os) const;
 
     private:
@@ -79,7 +80,8 @@ namespace pstore {
             // Writes an instance of foo to an archive. The data stream contains
             // a single int value.
             template <typename Archive>
-            static auto write (Archive & archive, foo const & value) -> typename Archive::result_type {
+            static auto write (Archive & archive, foo const & value) ->
+                typename Archive::result_type {
                 return serialize::write (archive, value.a_);
             }
 
@@ -97,12 +99,12 @@ namespace pstore {
 
 int main () {
     // This is the container into which the vector_writer will place the serialized data.
-    std::vector <std::uint8_t> bytes;
+    std::vector<std::uint8_t> bytes;
 
     // First write an array of "foo" instance to the "bytes" container.
     {
         pstore::serialize::archive::vector_writer writer (bytes);
-        std::array <foo, 2> src {{37, 42}};
+        std::array<foo, 2> src{{37, 42}};
 
         std::cout << "Writing: ";
         std::copy (std::begin (src), std::end (src), std::ostream_iterator<foo> (std::cout, " "));
@@ -116,7 +118,7 @@ int main () {
     {
         auto reader = pstore::serialize::archive::make_reader (std::begin (bytes));
 
-        std::array <foo, 2> dest;
+        std::array<foo, 2> dest;
         pstore::serialize::read (reader, pstore::gsl::make_span (dest));
 
         std::cout << "Read: ";

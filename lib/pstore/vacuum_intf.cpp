@@ -52,8 +52,7 @@ namespace pstore {
     //* /__/_||_\__,_|_| \___\__,_| *
     //*                             *
     shared::shared ()
-            : open_tick (milliseconds_since_epoch ()) {
-    }
+            : open_tick (milliseconds_since_epoch ()) {}
 
 } // namespace pstore
 

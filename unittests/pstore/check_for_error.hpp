@@ -74,22 +74,22 @@ void check_for_error (Function fn, pstore::error_code err) {
 
 template <typename Function>
 void check_for_error (Function fn, std::errc err) {
-    check_for_error (fn, static_cast<int> (err),  std::generic_category ());
+    check_for_error (fn, static_cast<int> (err), std::generic_category ());
 }
 
 template <typename Function>
 void check_for_error (Function fn, pstore::errno_erc err) {
-    check_for_error (fn, err.get (),  std::generic_category ());
+    check_for_error (fn, err.get (), std::generic_category ());
 }
 
 #ifdef _WIN32
 template <typename Function>
 void check_for_error (Function fn, pstore::win32_erc err) {
-    check_for_error (fn, err.get (),  std::system_category ());
+    check_for_error (fn, err.get (), std::system_category ());
 }
 #endif //_WIN32
 
-#endif //CHECK_FOR_ERROR_HPP
-//eof check_for_error.hpp
+#endif // CHECK_FOR_ERROR_HPP
+// eof check_for_error.hpp
 
 // eof: unittests/pstore/check_for_error.hpp

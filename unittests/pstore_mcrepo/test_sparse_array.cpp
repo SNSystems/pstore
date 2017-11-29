@@ -268,8 +268,8 @@ TEST (RepoSparseArray, SizeBytesAgree) {
 
 TEST (RepoSparseArray, FrontAndBack) {
     std::vector<std::size_t> indices{2, 3, 5, 7};
-    auto arr = sparse_array<int>::make_unique (std::begin (indices), std::end (indices),
-                                               {11, 13, 17, 19});
+    auto arr =
+        sparse_array<int>::make_unique (std::begin (indices), std::end (indices), {11, 13, 17, 19});
     EXPECT_EQ (arr->front (), 11);
     EXPECT_EQ (arr->back (), 19);
 }

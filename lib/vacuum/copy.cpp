@@ -212,9 +212,7 @@ namespace vacuum {
             pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
                                   ex.what ());
         })
-        CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
-        })
+        CATCH (..., { pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
         pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
     }
 } // end namespace vacuum

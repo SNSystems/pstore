@@ -49,11 +49,11 @@
 #include <string>
 
 template <typename CharType>
-    std::basic_string <CharType> convert (char const * str);
+std::basic_string<CharType> convert (char const * str);
 template <>
-    std::basic_string <char> convert (char const * str);
+std::basic_string<char> convert (char const * str);
 template <>
-    std::basic_string <wchar_t> convert (char const * str);
+std::basic_string<wchar_t> convert (char const * str);
 
 #endif // CONVERT_HPP
 // eof: unittests/dump/convert.hpp

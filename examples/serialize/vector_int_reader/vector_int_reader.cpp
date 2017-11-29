@@ -55,7 +55,7 @@ using namespace pstore;
 namespace {
     template <typename InputIterator>
     std::ostream & dump (std::ostream & os, InputIterator begin, InputIterator end) {
-        pstore::serialize::ios_flags_saver flags {os};
+        pstore::serialize::ios_flags_saver flags{os};
         auto separator = "";
         os << std::setfill ('0') << std::hex;
         std::for_each (begin, end, [&](unsigned v) {
@@ -65,33 +65,32 @@ namespace {
         return os;
     }
 
-    using container_type = std::vector <std::uint8_t>;
+    using container_type = std::vector<std::uint8_t>;
 
     void read_one_int_at_a_time (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
-        int v1 = serialize::read <int> (reader);
-        int v2 = serialize::read <int> (reader);
+        int v1 = serialize::read<int> (reader);
+        int v2 = serialize::read<int> (reader);
         std::cout << "Reading one int at a time produced " << v1 << ", " << v2 << '\n';
     }
 
     void read_an_array_of_ints (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
-        std::array <int, 2> arr;
-        serialize::read (reader, gsl::make_span <int> (arr));
-        std::cout << "Reading an array of ints produced " << arr [0] << ", " << arr [1] << '\n';
+        std::array<int, 2> arr;
+        serialize::read (reader, gsl::make_span<int> (arr));
+        std::cout << "Reading an array of ints produced " << arr[0] << ", " << arr[1] << '\n';
     }
 
     void read_a_series_of_ints (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
-        auto v0 = serialize::read <int> (reader);
-        auto v1 = serialize::read <int> (reader);
+        auto v0 = serialize::read<int> (reader);
+        auto v1 = serialize::read<int> (reader);
         std::cout << "Reading a series of ints produced " << v0 << ", " << v1 << '\n';
     }
-
 }
 
 int main () {
-    container_type const data {0x1e, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00};
+    container_type const data{0x1e, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00};
 
     std::cout << "Reading two ints from the following input data:\n";
     dump (std::cout, std::begin (data), std::end (data));

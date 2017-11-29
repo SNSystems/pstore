@@ -123,23 +123,23 @@ struct intrusive_list {
     }
 
 private:
-    std::unique_ptr <T> head_;
-    std::unique_ptr <T> tail_;
+    std::unique_ptr<T> head_;
+    std::unique_ptr<T> tail_;
 };
 
 // (ctor)
 // ~~~~~~
 template <typename T>
 intrusive_list<T>::intrusive_list ()
-        : head_{std::unique_ptr <T> (new T)}
-        , tail_{std::unique_ptr <T> (new T)} {
+        : head_{std::unique_ptr<T> (new T)}
+        , tail_{std::unique_ptr<T> (new T)} {
     head_->get_list_member ().next = tail_.get ();
     tail_->get_list_member ().prev = head_.get ();
 }
 
 template <typename T>
 std::size_t intrusive_list<T>::size () const {
-    return static_cast <std::size_t> (std::distance (this->begin (), this->end ()));
+    return static_cast<std::size_t> (std::distance (this->begin (), this->end ()));
 }
 
 // check

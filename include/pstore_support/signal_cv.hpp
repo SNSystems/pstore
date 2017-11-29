@@ -53,7 +53,8 @@
 
 namespace pstore {
 
-    /// On POSIX, This class implements the "self pipe trick" to enable a signal handler to call notify() to
+    /// On POSIX, This class implements the "self pipe trick" to enable a signal handler to call
+    /// notify() to
     /// wake up a thread waiting on wait(). On Windows, an Event object is used to provide similar
     /// condition-variable-like behavior.
     class signal_cv {
@@ -75,8 +76,8 @@ namespace pstore {
         void wait (std::unique_lock<std::mutex> & lock);
 
         /// \param signal  The signal number responsible for the "wake".
-        /// \note On POSIX, this function is called from a signal handler. It must only call signal-safe
-        /// functions.
+        /// \note On POSIX, this function is called from a signal handler. It must only call
+        /// signal-safe functions.
         void notify (int signal) noexcept;
 
         int signal () const {

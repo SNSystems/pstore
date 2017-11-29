@@ -74,8 +74,7 @@ namespace pstore {
         // ~~~~~~
         message_type::message_type (std::uint32_t mid, std::uint16_t pno, std::uint16_t nump,
                                     std::string const & content)
-                : message_type (mid, pno, nump, std::begin (content), std::end (content)) {
-        }
+                : message_type (mid, pno, nump, std::begin (content), std::end (content)) {}
 
         // operator==
         // ~~~~~~~~~~

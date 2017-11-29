@@ -50,7 +50,8 @@
 namespace {
     struct AddressFixture : public ::testing::Test {
         pstore::address expected_address (std::uint64_t segment, std::uint64_t offset) const {
-            return pstore::address::make ((segment << pstore::address::offset_number_bits) | offset);
+            return pstore::address::make ((segment << pstore::address::offset_number_bits) |
+                                          offset);
         }
 
         static constexpr pstore::address::offset_type max_offset = pstore::address::max_offset;

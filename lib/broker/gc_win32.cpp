@@ -76,13 +76,14 @@ namespace {
             raise (::pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
         }
 
-        bool is_normal_termination = (child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE);
+        bool is_normal_termination =
+            (child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE);
         if (is_normal_termination) {
             pstore::logging::log (pstore::logging::priority::info, "GC process ", pid,
-                          " exited. Normal termination, exit status = ", child_exit_code);
+                                  " exited. Normal termination, exit status = ", child_exit_code);
         } else {
             pstore::logging::log (pstore::logging::priority::error, "GC process ", pid,
-                          " exited. Abnormal termination, exit status = ", child_exit_code);
+                                  " exited. Abnormal termination, exit status = ", child_exit_code);
         }
     }
 
@@ -99,7 +100,8 @@ namespace {
     /// \param cv  A condition-variable-like object which is used to wake the thread in the
     /// event of a child process exiting.
     /// \param[out] v  A vector which will on return contain the process handles from the
-    /// \p processes collection and the \p cv condition-variable. An existing contents are destroyed.
+    /// \p processes collection and the \p cv condition-variable. An existing contents are
+    /// destroyed.
     template <typename ProcessBimap>
     void build_object_vector (ProcessBimap const & processes, pstore::signal_cv const & cv,
                               ::pstore::gsl::not_null<std::vector<HANDLE> *> v) {
@@ -130,7 +132,8 @@ namespace broker {
 
         while (!done) {
             try {
-                pstore::logging::log (pstore::logging::priority::info, "waiting for a GC process to complete");
+                pstore::logging::log (pstore::logging::priority::info,
+                                      "waiting for a GC process to complete");
 
                 build_object_vector (processes_, cv_, &object_vector);
                 // FIXME: handle the (highly unlikely) case where this assertion would fire.
@@ -139,7 +142,7 @@ namespace broker {
                 lock.unlock ();
                 DWORD const wmo_timeout = 60 * 1000; // 60 second timeout.
                 DWORD wmo_res = ::WaitForMultipleObjects (
-                    static_cast <DWORD> (object_vector.size ()), object_vector.data (),
+                    static_cast<DWORD> (object_vector.size ()), object_vector.data (),
                     FALSE /*wait all*/, wmo_timeout);
                 lock.lock ();
 
@@ -150,10 +153,12 @@ namespace broker {
 
                 if (wmo_res == WAIT_FAILED) {
                     auto errcode = ::GetLastError ();
-                    pstore::logging::log (pstore::logging::priority::error, "WaitForMultipleObjects error ",
-                                  errcode); // FIXME: exception
+                    pstore::logging::log (pstore::logging::priority::error,
+                                          "WaitForMultipleObjects error ",
+                                          errcode); // FIXME: exception
                 } else if (wmo_res == WAIT_TIMEOUT) {
-                    pstore::logging::log (pstore::logging::priority::info, "WaitForMultipleObjects timeout");
+                    pstore::logging::log (pstore::logging::priority::info,
+                                          "WaitForMultipleObjects timeout");
                 } else if (wmo_res >= WAIT_OBJECT_0) {
                     // Extract the handle that caused us to wake.
                     HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
@@ -169,7 +174,8 @@ namespace broker {
                     // TODO: more conditions here?
                 }
             } catch (std::exception const & ex) {
-                pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", ex.what ());
+                pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
+                                      ex.what ());
                 // TODO: delay before restarting. Don't restart after e.g. bad_alloc?
             } catch (...) {
                 pstore::logging::log (pstore::logging::priority::error, "Unknown error");

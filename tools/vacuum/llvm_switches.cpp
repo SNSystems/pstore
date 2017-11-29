@@ -55,15 +55,16 @@ using namespace llvm;
 
 namespace {
 
-    cl::opt<std::string> Path (cl::Positional, cl::desc("Path of the pstore repository to be vacuumed."));
+    cl::opt<std::string> Path (cl::Positional,
+                               cl::desc ("Path of the pstore repository to be vacuumed."));
 
 } // end anonymous namespace
 
-std::pair <vacuum::user_options, int> get_switches (int argc, char * argv []) {
+std::pair<vacuum::user_options, int> get_switches (int argc, char * argv[]) {
     llvm::cl::ParseCommandLineOptions (argc, argv, "pstore vacuum utility\n");
 
     vacuum::user_options opt;
-    opt.src_path = pstore::utf::from_native_string(Path);
+    opt.src_path = pstore::utf::from_native_string (Path);
 
     return {opt, EXIT_SUCCESS};
 }

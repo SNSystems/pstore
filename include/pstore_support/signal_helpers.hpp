@@ -56,7 +56,8 @@ namespace pstore {
     // ensure that we don't splat the value that the in-flight code may depend upon.
     class errno_saver {
     public:
-        errno_saver () noexcept : old_{errno} {
+        errno_saver () noexcept
+                : old_{errno} {
             errno = 0;
         }
         errno_saver (errno_saver const &) = delete;

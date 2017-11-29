@@ -137,8 +137,7 @@ namespace pstore {
             class database_reader {
             public:
                 /// Constructs the reader using an input databasE and an address.
-                database_reader (pstore::database const & db,
-                                 pstore::address const addr)
+                database_reader (pstore::database const & db, pstore::address const addr)
                         : db_ (db)
                         , addr_ (addr) {}
 
@@ -149,8 +148,8 @@ namespace pstore {
                 /// placed.
                 ///
                 /// \tparam Ty  A standard-layout type.
-                template <typename Ty,
-                          typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
+                template <typename Ty, typename = typename std::enable_if<
+                                           std::is_standard_layout<Ty>::value>::type>
                 void get (Ty & v);
 
                 /// Reads a span of a trivial type from the current store address.
@@ -158,8 +157,9 @@ namespace pstore {
                 /// \param span  A span of uninitialized memory into which the data will be placed.
                 ///
                 /// \tparam SpanType  A GSL span which describes a range of uninitialized memory.
-                template <typename SpanType, typename = typename std::enable_if<std::is_standard_layout<
-                                                 typename SpanType::element_type>::value>::type>
+                template <typename SpanType,
+                          typename = typename std::enable_if<std::is_standard_layout<
+                              typename SpanType::element_type>::value>::type>
                 void getn (SpanType span);
 
             private:

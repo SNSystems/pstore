@@ -116,7 +116,8 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        pstore::gsl::czstring pipe_path = opt.pipe_path.has_value () ? opt.pipe_path.value ().c_str () : nullptr;
+        pstore::gsl::czstring pipe_path =
+            opt.pipe_path.has_value () ? opt.pipe_path.value ().c_str () : nullptr;
 
         if (opt.flood > 0) {
             flood_server (pipe_path, opt.retry_timeout, opt.max_retries, opt.flood);

@@ -60,11 +60,12 @@ namespace pstore {
         constexpr uint128 () noexcept = default;
 
         constexpr uint128 (std::uint64_t high, std::uint64_t low) noexcept
-                : high_{high}, low_{low} {}
+                : high_{high}
+                , low_{low} {}
 
         template <typename IntType>
         constexpr uint128 (IntType v) noexcept
-                : low_(v) {
+                : low_ (v) {
             static_assert (std::is_integral<IntType>::value, "IntType must be integral");
             static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
             static_assert (std::numeric_limits<IntType>::max () <=
@@ -123,8 +124,9 @@ namespace pstore {
         return !operator== (lhs, rhs);
     }
 
-    inline constexpr bool operator< (uint128 const & lhs, uint128 const & rhs)  noexcept {
-        return lhs.high () < rhs.high () || (!(rhs.high () < lhs.high ()) && lhs.low () < rhs.low ());
+    inline constexpr bool operator< (uint128 const & lhs, uint128 const & rhs) noexcept {
+        return lhs.high () < rhs.high () ||
+               (!(rhs.high () < lhs.high ()) && lhs.low () < rhs.low ());
     }
     inline constexpr bool operator> (uint128 const & lhs, uint128 const & rhs) noexcept {
         return rhs < lhs;
@@ -132,7 +134,7 @@ namespace pstore {
     inline constexpr bool operator>= (uint128 const & lhs, uint128 const & rhs) noexcept {
         return !(lhs < rhs);
     }
-    inline constexpr bool operator<=(uint128 const & lhs, uint128 const & rhs) noexcept {
+    inline constexpr bool operator<= (uint128 const & lhs, uint128 const & rhs) noexcept {
         return !(rhs < lhs);
     }
 

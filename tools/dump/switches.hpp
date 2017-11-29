@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_DUMP_SWITCHES_HPP
-#define PSTORE_DUMP_SWITCHES_HPP  1
+#define PSTORE_DUMP_SWITCHES_HPP 1
 
 #include <list>
 #include <string>
@@ -50,7 +50,7 @@
 
 #ifdef _WIN32
 #include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT(str)
+#define NATIVE_TEXT(str) _TEXT (str)
 #else
 typedef char TCHAR;
 #define NATIVE_TEXT(str) str
@@ -63,7 +63,7 @@ struct switches {
     bool show_all = false;
     bool show_contents = false;
     bool show_fragments = false;
-	bool show_tickets = false;
+    bool show_tickets = false;
     bool show_header = false;
     bool show_indices = false;
     bool show_log = false;
@@ -75,7 +75,7 @@ struct switches {
     bool expanded_addresses = false;
     bool no_times = false;
 
-    std::list <std::string> paths;
+    std::list<std::string> paths;
 };
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -84,5 +84,5 @@ std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
 std::pair<switches, int> get_switches (int argc, char * argv[]);
 #endif
 
-#endif //PSTORE_DUMP_SWITCHES_HPP
+#endif // PSTORE_DUMP_SWITCHES_HPP
 // eof: tools/dump/switches.hpp

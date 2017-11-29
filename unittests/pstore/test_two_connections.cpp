@@ -97,13 +97,12 @@ namespace {
         pstore::database second;
     };
 
-namespace {
-    template <typename Transaction>
-    void append_int (Transaction & transaction, int v) {
-        *(transaction.template alloc_rw <int> ().first) = v;
+    namespace {
+        template <typename Transaction>
+        void append_int (Transaction & transaction, int v) {
+            *(transaction.template alloc_rw<int> ().first) = v;
+        }
     }
-}
-
 }
 
 TEST_F (TwoConnections, CommitToFirstConnectionDoesNotAffectFooterPosForSecond) {

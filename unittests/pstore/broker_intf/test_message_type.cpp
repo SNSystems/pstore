@@ -67,7 +67,7 @@ TEST (BrokerMessageType, EmptyString) {
     std::uint16_t const part = 21;
     std::uint16_t const num_parts = 1234;
 
-    pstore::broker::message_type const actual {mid, part, num_parts, ""};
+    pstore::broker::message_type const actual{mid, part, num_parts, ""};
 
     EXPECT_EQ (actual.sender_id, pstore::broker::message_type::process_id);
     EXPECT_EQ (actual.message_id, mid);
@@ -80,7 +80,7 @@ TEST (BrokerMessageType, EmptyString) {
 
 TEST (BrokerMessageType, ShortString) {
     std::string const payload = "hello world";
-    pstore::broker::message_type const actual {0, 0, 1, payload};
+    pstore::broker::message_type const actual{0, 0, 1, payload};
 
     pstore::broker::message_type::payload_type expected_payload{{'\0'}};
     std::copy (std::begin (payload), std::end (payload), std::begin (expected_payload));
@@ -91,7 +91,7 @@ TEST (BrokerMessageType, ShortString) {
 TEST (BrokerMessageType, LongStringIsTruncated) {
     std::string const long_payload (pstore::broker::message_type::payload_chars + 1, 'A');
 
-    pstore::broker::message_type const actual {0, 0, 1, long_payload};
+    pstore::broker::message_type const actual{0, 0, 1, long_payload};
 
     pstore::broker::message_type::payload_type expected_payload;
     std::fill (std::begin (expected_payload), std::end (expected_payload), 'A');
@@ -103,7 +103,7 @@ TEST (BrokerMessageType, LongStringIsTruncated) {
 
 TEST (BrokerMessageType, ShortPayloadUsingIterator) {
     std::string const payload = "hello world";
-    pstore::broker::message_type const actual {0, 0, 1, std::begin (payload), std::end (payload)};
+    pstore::broker::message_type const actual{0, 0, 1, std::begin (payload), std::end (payload)};
 
     pstore::broker::message_type::payload_type expected_payload{{'\0'}};
     std::copy (std::begin (payload), std::end (payload), std::begin (expected_payload));
@@ -116,17 +116,17 @@ namespace {
     template <typename OutputIterator>
     void generate (OutputIterator out, std::size_t num) {
         auto ctr = 0U;
-        std::generate_n (out, num, [&ctr] () -> char { return ctr++ % 26 + 'A'; });
+        std::generate_n (out, num, [&ctr]() -> char { return ctr++ % 26 + 'A'; });
     }
-
 }
 
 TEST (BrokerMessageType, MaxLengthIteratorRange) {
     std::string long_payload;
-    constexpr auto num = std::size_t {pstore::broker::message_type::payload_chars};
+    constexpr auto num = std::size_t{pstore::broker::message_type::payload_chars};
     generate (std::back_inserter (long_payload), num);
 
-    pstore::broker::message_type const actual {0, 0, 1, std::begin (long_payload), std::end (long_payload)};
+    pstore::broker::message_type const actual{0, 0, 1, std::begin (long_payload),
+                                              std::end (long_payload)};
 
     pstore::broker::message_type::payload_type expected_payload;
     generate (std::begin (expected_payload), expected_payload.size ());
@@ -134,11 +134,13 @@ TEST (BrokerMessageType, MaxLengthIteratorRange) {
 }
 
 TEST (BrokerMessageType, TooLongIteratorRangeIsTruncated) {
-    std::list<char> long_payload; // deliberately using list<> because it's quite different from array<>/string.
+    std::list<char>
+        long_payload; // deliberately using list<> because it's quite different from array<>/string.
     constexpr auto num = std::size_t{pstore::broker::message_type::payload_chars + 1};
     generate (std::back_inserter (long_payload), num);
 
-    pstore::broker::message_type const actual (0, 0, 1, std::begin (long_payload), std::end (long_payload));
+    pstore::broker::message_type const actual (0, 0, 1, std::begin (long_payload),
+                                               std::end (long_payload));
 
     pstore::broker::message_type::payload_type expected_payload;
     generate (std::begin (expected_payload), expected_payload.size ());
@@ -148,9 +150,9 @@ TEST (BrokerMessageType, TooLongIteratorRangeIsTruncated) {
 
 
 TEST (BrokerMessageType, NegativeDistanceBetweenIterators) {
-    char const payload [] = "payload";
+    char const payload[] = "payload";
     auto last = payload;
-    auto first = payload + sizeof (payload) / sizeof (payload [0]);
+    auto first = payload + sizeof (payload) / sizeof (payload[0]);
 
     pstore::broker::message_type const actual (0, 0, 1, first, last);
 

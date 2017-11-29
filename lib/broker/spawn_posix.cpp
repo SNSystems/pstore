@@ -64,7 +64,7 @@ namespace broker {
         switch (child_pid) {
         // When fork() returns -1, an error happened.
         case -1:
-            raise (pstore::errno_erc {errno}, "fork");
+            raise (pstore::errno_erc{errno}, "fork");
         // When fork() returns 0, we are in the child process.
         case 0: {
             try {
@@ -74,7 +74,7 @@ namespace broker {
                 ::execv (exe_path, const_cast<char **> (argv));
 
                 // If execv returns, it must have failed.
-                raise (pstore::errno_erc {errno}, "execv");
+                raise (pstore::errno_erc{errno}, "execv");
             } catch (std::exception const & ex) {
                 pstore::logging::log (pstore::logging::priority::error, "fork error: ", ex.what ());
             } catch (...) {

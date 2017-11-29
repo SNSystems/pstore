@@ -105,13 +105,13 @@ namespace {
         auto where = pstore::address::null ();
         {
             // Allocate storage for string 'value' and copy the data into it.
-            std::shared_ptr <char> ptr;
-            std::tie (ptr, where) = transaction.alloc_rw <char> (value.length ());
+            std::shared_ptr<char> ptr;
+            std::tie (ptr, where) = transaction.alloc_rw<char> (value.length ());
             std::copy (std::begin (value), std::end (value), ptr.get ());
         }
 
         auto index = db_->get_write_index ();
-        index->insert_or_assign (transaction, key, pstore::record {where, value.length ()});
+        index->insert_or_assign (transaction, key, pstore::record{where, value.length ()});
     }
 
     // find
@@ -181,9 +181,7 @@ TEST_F (SyncFixture, SyncBetweenVersions) {
 
 TEST_F (SyncFixture, SyncToBadVersions) {
 
-    check_for_error ([this] () {
-        db_->sync (1);
-    }, pstore::error_code::unknown_revision);
+    check_for_error ([this]() { db_->sync (1); }, pstore::error_code::unknown_revision);
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
@@ -197,8 +195,6 @@ TEST_F (SyncFixture, SyncToBadVersions) {
         t2.commit ();
     }
 
-    check_for_error ([this] () {
-        db_->sync (3);
-    }, pstore::error_code::unknown_revision);
+    check_for_error ([this]() { db_->sync (3); }, pstore::error_code::unknown_revision);
 }
 // eof: unittests/pstore/test_sync.cpp

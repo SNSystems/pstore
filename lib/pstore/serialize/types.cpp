@@ -50,23 +50,23 @@ namespace pstore {
 
 #ifndef NDEBUG
         void flood (void * ptr, std::size_t size) {
-            static std::array<std::uint8_t, 4> const deadbeef {{ 0xDE, 0xAD, 0xBE, 0xEF }};
+            static std::array<std::uint8_t, 4> const deadbeef{{0xDE, 0xAD, 0xBE, 0xEF}};
 
-            auto byte = reinterpret_cast <std::uint8_t *> (ptr);
+            auto byte = reinterpret_cast<std::uint8_t *> (ptr);
             auto end = byte + size;
 
             auto const end1 = byte + (size & ~3U);
             assert (end1 <= end);
             for (; byte < end1; byte += 4) {
-                byte [0] = deadbeef [0];
-                byte [1] = deadbeef [1];
-                byte [2] = deadbeef [2];
-                byte [3] = deadbeef [3];
+                byte[0] = deadbeef[0];
+                byte[1] = deadbeef[1];
+                byte[2] = deadbeef[2];
+                byte[3] = deadbeef[3];
             }
 
             auto index = 0U;
             for (; byte < end; ++byte) {
-                *byte = deadbeef [index];
+                *byte = deadbeef[index];
                 ++index;
                 if (index >= deadbeef.size ()) {
                     index = 0U;

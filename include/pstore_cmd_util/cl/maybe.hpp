@@ -94,7 +94,7 @@ namespace pstore {
                     }
                     valid_ = false;
                 }
-                maybe & operator= (maybe <T> const & rhs);
+                maybe & operator= (maybe<T> const & rhs);
                 maybe & operator= (T const & rhs);
 
                 T const & operator* () const {
@@ -147,7 +147,7 @@ namespace pstore {
             }
 
             template <typename T>
-            maybe<T> & maybe<T>::operator= (maybe <T> const & rhs) {
+            maybe<T> & maybe<T>::operator= (maybe<T> const & rhs) {
                 if (this != &rhs) {
                     if (!rhs.has_value ()) {
                         this->reset ();

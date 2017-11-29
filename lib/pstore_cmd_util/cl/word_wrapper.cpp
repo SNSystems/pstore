@@ -98,9 +98,9 @@ namespace pstore {
                     }
                     if (end_pos_ == start_pos_) {
                         // We got back to the start without finding a separator! We can't allow the
-                        // next() operation to produce nothing (unless start_pos_ is at the end already).
-                        // Try searching forward. This line will be too long, but that's better that
-                        // looping forever.
+                        // next() operation to produce nothing (unless start_pos_ is at the end
+                        // already). Try searching forward. This line will be too long, but that's
+                        // better than looping forever.
                         while (end_pos_ < length && text_[end_pos_] != ' ') {
                             ++end_pos_;
                         }
@@ -116,7 +116,7 @@ namespace pstore {
                 start_pos_ = end_pos_;
             }
 
-        } //namespace cl
-    } //namespace cmd_util
-} //namespace pstore
+        } // namespace cl
+    }     // namespace cmd_util
+} // namespace pstore
 // eof: lib/pstore_cmd_util/cl/word_wrapper.cpp

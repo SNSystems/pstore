@@ -65,7 +65,7 @@ namespace pstore {
     template <class Ty, std::size_t Size>
     class array_stack {
     public:
-        using container_type = std::array<Ty, Size> ;
+        using container_type = std::array<Ty, Size>;
         using value_type = typename container_type::value_type;
         using reference = typename container_type::reference;
         using const_reference = typename container_type::const_reference;
@@ -86,17 +86,17 @@ namespace pstore {
         }
 
         /// Returns an iterator pointing to the first element in the stack.
-		typename container_type::const_iterator begin () const {
+        typename container_type::const_iterator begin () const {
             return std::begin (c_);
-		}
+        }
 
-		typename container_type::const_iterator end () const {
-			return std::begin (c_) + elements_;
-		}
+        typename container_type::const_iterator end () const {
+            return std::begin (c_) + elements_;
+        }
 
         bool operator!= (array_stack const & other) const {
             return !operator== (other);
-		}
+        }
 
         /// \name Capacity
         ///@{

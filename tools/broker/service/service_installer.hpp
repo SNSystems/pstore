@@ -50,8 +50,8 @@
 #include <Windows.h>
 #include "pstore_support/gsl.hpp"
 
-using tzstring = ::pstore::gsl::basic_zstring <TCHAR>;
-using ctzstring = ::pstore::gsl::basic_zstring <TCHAR const>;
+using tzstring = ::pstore::gsl::basic_zstring<TCHAR>;
+using ctzstring = ::pstore::gsl::basic_zstring<TCHAR const>;
 
 
 

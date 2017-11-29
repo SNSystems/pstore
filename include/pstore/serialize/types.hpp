@@ -357,9 +357,8 @@ namespace pstore {
 
 #ifndef NDEBUG
         void flood (void * ptr, std::size_t size);
-#else 
-        inline void flood (void *, std::size_t ) {
-        }
+#else
+        inline void flood (void *, std::size_t) {}
 #endif
         template <typename T>
         inline void flood (T * t) {
@@ -376,7 +375,7 @@ namespace pstore {
         template <typename Ty, typename Archive>
         Ty read (Archive & archive) {
             using T2 = typename std::remove_const<Ty>::type;
-            typename std::aligned_storage <sizeof (T2), alignof (T2)>::type uninit_buffer;
+            typename std::aligned_storage<sizeof (T2), alignof (T2)>::type uninit_buffer;
             flood (&uninit_buffer);
 
             // Deserialize into the uninitialized buffer.
@@ -384,8 +383,8 @@ namespace pstore {
             read_uninit (archive, str);
 
             // This object will destroy the remains of the T2 instance in uninit_buffer.
-            auto dtor = [] (T2 * p) { p->~T2 (); };
-            std::unique_ptr <T2, decltype (dtor)> d (&str, dtor);
+            auto dtor = [](T2 * p) { p->~T2 (); };
+            std::unique_ptr<T2, decltype (dtor)> d (&str, dtor);
             return std::move (str);
         }
 

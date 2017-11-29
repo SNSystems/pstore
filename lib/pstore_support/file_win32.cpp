@@ -139,7 +139,8 @@ namespace {
 
         unsigned tries = 10;
         while (tries-- > 0) {
-            std::string const path = name_from_template (tmpl, [] (unsigned max) { return rng.get (max); });
+            std::string const path =
+                name_from_template (tmpl, [](unsigned max) { return rng.get (max); });
             HANDLE const handle = create_new_file (path, is_temporary);
             // create_new_file() returns INVALID_HANDLE_VALUE if the file exists;
             // we dream up a new name and try again.
@@ -228,7 +229,8 @@ namespace pstore {
 
             // mkstemp() returns the actual name of the temporary file that was created
             // as well as the open handle.
-            std::tie (file_, path_) = mkstemp (path::join (directory, "pst-XXXXXX"), true /*is_temporary*/);
+            std::tie (file_, path_) =
+                mkstemp (path::join (directory, "pst-XXXXXX"), true /*is_temporary*/);
         }
 
         /// Create a new, uniquely named, file in the specified directory.
@@ -241,7 +243,8 @@ namespace pstore {
             //
             // We set the is_temporary parameter to false so that we don't create
             // it as a Windows temporary file (which is deleted on close).
-            std::tie (file_, path_) = mkstemp (path::join (directory, "pst-XXXXXX"), false /*is_temporary*/);
+            std::tie (file_, path_) =
+                mkstemp (path::join (directory, "pst-XXXXXX"), false /*is_temporary*/);
         }
 
         // close
@@ -306,7 +309,8 @@ namespace pstore {
 
         // read
         // ~~~~
-        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t size) {
+        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer,
+                                              std::size_t size) {
             this->ensure_open ();
 
             auto reader = [this](void * ptr, DWORD num_to_read) -> DWORD {
@@ -326,7 +330,8 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t size) {
+        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer,
+                                        std::size_t size) {
             this->ensure_open ();
 
             auto writer = [this](std::uint8_t const * ptr, DWORD num_to_write) -> DWORD {
@@ -511,7 +516,6 @@ namespace pstore {
                     raise (win32_erc (last_error), "GetTempPathW");
                 } else if (num_code_units != temp_path.size ()) {
                     raise (std::errc::no_buffer_space, "GetTempPathW");
-
                 }
             }
 

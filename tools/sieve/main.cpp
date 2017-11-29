@@ -63,7 +63,7 @@
 
 #ifdef PSTORE_IS_INSIDE_LLVM
 #define TRY
-#define CATCH(ex,body)
+#define CATCH(ex, body)
 #else
 #define TRY try
 #define CATCH(ex, body) catch (ex) body
@@ -74,19 +74,19 @@ namespace {
 
     template <typename IntType>
     std::vector<IntType> sieve (unsigned long top_value) {
-        assert (top_value <= std::numeric_limits <IntType>::max ());
+        assert (top_value <= std::numeric_limits<IntType>::max ());
 
         std::vector<IntType> result;
         result.push_back (1);
         result.push_back (2);
 
-        std::vector <bool> is_prime ((top_value + 1) / 2 /*count*/, 1/*value*/);
+        std::vector<bool> is_prime ((top_value + 1) / 2 /*count*/, 1 /*value*/);
         for (auto ctr = 3UL; ctr <= top_value; ctr += 2) {
-            if (is_prime [ctr / 2]) {
-                result.push_back (static_cast <IntType> (ctr));
+            if (is_prime[ctr / 2]) {
+                result.push_back (static_cast<IntType> (ctr));
 
                 for (auto multiple = ctr * ctr; multiple <= top_value; multiple += 2 * ctr) {
-                    is_prime [multiple / 2] = 0;
+                    is_prime[multiple / 2] = 0;
                 }
             }
         }
@@ -97,7 +97,7 @@ namespace {
 
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-int _tmain (int argc, TCHAR * argv []) {
+int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif

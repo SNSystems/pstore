@@ -50,7 +50,7 @@
 #include <vector>
 // 3rd-party
 #include "optionparser.h"
-//pstore
+// pstore
 #include "pstore_cmd_util/str_to_revision.hpp"
 #include "pstore_support/utf.hpp"
 
@@ -69,7 +69,7 @@ namespace {
         all_opt,
         contents_opt,
         fragments_opt,
-		tickets_opt,
+        tickets_opt,
         header_opt,
         indices_opt,
         log_opt,
@@ -107,7 +107,7 @@ namespace {
         {fragments_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("fragments"), option::Arg::None,
          NATIVE_TEXT ("  --fragments     \tDump the contents of the fragments index.")},
         {tickets_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("tickets"), option::Arg::None,
-		 NATIVE_TEXT ("  --tickets       \tDump the contents of the tickets index.") },
+         NATIVE_TEXT ("  --tickets       \tDump the contents of the tickets index.")},
         {header_opt, 0, NATIVE_TEXT ("h"), NATIVE_TEXT ("header"), option::Arg::None,
          NATIVE_TEXT ("  --header, -h  \tDump the file header.")},
         {indices_opt, 0, NATIVE_TEXT ("i"), NATIVE_TEXT ("indices"), option::Arg::None,
@@ -128,8 +128,10 @@ namespace {
          NATIVE_TEXT ("  --no-times \ttimes are displayed as a fixed value.")},
         {hex_opt, 0, NATIVE_TEXT ("x"), NATIVE_TEXT ("hex"), option::Arg::None,
          NATIVE_TEXT ("  --hex, -x  \tEmit numeric values in hexademical notation.")},
-        {expanded_addresses_opt, 0, NATIVE_TEXT(""), NATIVE_TEXT ("expanded-addresses"), option::Arg::None,
-         NATIVE_TEXT ("  --expanded-addresses  \tEmit addresses as explicit segment/offset objects.")},
+        {expanded_addresses_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("expanded-addresses"),
+         option::Arg::None,
+         NATIVE_TEXT (
+             "  --expanded-addresses  \tEmit addresses as explicit segment/offset objects.")},
 
         {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
          NATIVE_TEXT ("\nExamples:\n"
@@ -141,8 +143,8 @@ namespace {
 } // end of anonymous namespace
 
 
-std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
-   // Skip program name argv[0] if present
+std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
+    // Skip program name argv[0] if present
     argc -= (argc > 0);
     argv += (argc > 0);
 
@@ -161,8 +163,7 @@ std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
 
     if (option::Option const * unknown = options[unknown_opt]) {
         for (; unknown != nullptr; unknown = unknown->next ()) {
-            out_stream << NATIVE_TEXT ("Unknown option: ") << unknown->name
-                       << NATIVE_TEXT ("\n");
+            out_stream << NATIVE_TEXT ("Unknown option: ") << unknown->name << NATIVE_TEXT ("\n");
         }
         return {{}, EXIT_FAILURE};
     }
@@ -170,7 +171,7 @@ std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
     switches result;
     result.show_contents = options[contents_opt] != nullptr;
     result.show_fragments = options[fragments_opt] != nullptr;
-	result.show_tickets = options[tickets_opt] != nullptr;
+    result.show_tickets = options[tickets_opt] != nullptr;
     result.show_header = options[header_opt] != nullptr;
     result.show_indices = options[indices_opt] != nullptr;
     result.show_log = options[log_opt] != nullptr;
@@ -193,13 +194,13 @@ std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
 
 
     TCHAR const ** path = parse.nonOptions ();
-    std::for_each (path, path + parse.nonOptionsCount(), [&result] (TCHAR const * p) {
+    std::for_each (path, path + parse.nonOptionsCount (), [&result](TCHAR const * p) {
         result.paths.emplace_back (pstore::utf::from_native_string (p));
     });
-    
+
     return {result, EXIT_SUCCESS};
 }
 
-#endif //!PSTORE_IS_INSIDE_LLVM
+#endif //! PSTORE_IS_INSIDE_LLVM
 
 // eof: tools/dump/switches.cpp

@@ -60,7 +60,7 @@ namespace pstore {
 
     class heartbeat {
     public:
-        static std::shared_ptr <heartbeat> get ();
+        static std::shared_ptr<heartbeat> get ();
 
         ~heartbeat ();
 
@@ -78,7 +78,7 @@ namespace pstore {
         template <typename T>
         static key_type to_key_type (T * t) {
             static_assert (sizeof (key_type) <= sizeof (t), "heartbeat::key_type is too small");
-            return reinterpret_cast <key_type> (t);
+            return reinterpret_cast<key_type> (t);
         }
 
         using callback = std::function<void(key_type)>;
@@ -122,7 +122,8 @@ namespace pstore {
             using duration_type = std::chrono::milliseconds;
             /// The duration used for the worker thread's sleep time when no callbacks are attached.
             static duration_type const delay_time_;
-            /// The duration used for the worker thread's sleep time when one or more callbacks are attached.
+            /// The duration used for the worker thread's sleep time when one or more callbacks are
+            /// attached.
             static duration_type const max_time_;
 
             /// The time for which the thread will sleep before waking to perform a step of the
@@ -154,7 +155,7 @@ namespace pstore {
             worker_thread worker;
             std::thread thread;
         };
-        std::unique_ptr <state> state_;
+        std::unique_ptr<state> state_;
     };
 } // namespace pstore
 #endif // PSTORE_HEARTBEAT_HPP

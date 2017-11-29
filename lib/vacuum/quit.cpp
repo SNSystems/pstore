@@ -71,11 +71,11 @@
 #include "vacuum/watch.hpp"
 
 #ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY  try
-#define CATCH(ex,handler)  catch(ex) handler
+#define TRY try
+#define CATCH(ex, handler) catch (ex) handler
 #else
 #define TRY
-#define CATCH(ex,handler)
+#define CATCH(ex, handler)
 #endif
 
 
@@ -106,11 +106,11 @@ namespace {
             // vacuum::wst.complete_cv.notify_all ();
             pstore::logging::log (pstore::logging::priority::notice,
                                   "Marked job as done. Notified start_watch_cv and complete_cv.");
-        } CATCH (std::exception const & ex, {
-            pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ());
-        }) CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "unknown exception");
-        })
+        }
+        CATCH (std::exception const & ex,
+               { pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ()); })
+        CATCH (...,
+               { pstore::logging::log (pstore::logging::priority::error, "unknown exception"); })
     }
 
 

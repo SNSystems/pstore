@@ -64,7 +64,7 @@ namespace {
     enum option_index {
         unknown_opt,
         help_opt,
-        //daemon_opt,
+        // daemon_opt,
         // verbose_opt,
     };
 
@@ -83,7 +83,7 @@ namespace {
     };
 } // end anonymous namespace
 
-std::pair <vacuum::user_options, int> get_switches (int argc, TCHAR * argv []) {
+std::pair<vacuum::user_options, int> get_switches (int argc, TCHAR * argv[]) {
     int exit_code = EXIT_SUCCESS;
     vacuum::user_options opt;
 
@@ -120,7 +120,7 @@ std::pair <vacuum::user_options, int> get_switches (int argc, TCHAR * argv []) {
     return {opt, exit_code};
 }
 
-#endif //PSTORE_IS_INSIDE_LLVM
-//eof:tools/vacuum/switches.cpp
+#endif // PSTORE_IS_INSIDE_LLVM
+// eof:tools/vacuum/switches.cpp
 
 // eof: tools/vacuum/switches.cpp

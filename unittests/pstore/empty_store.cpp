@@ -47,21 +47,21 @@
 
 #ifdef _WIN32
 
-std::shared_ptr <std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
     size += align - 1U;
 
-    auto ptr = reinterpret_cast <std::uint8_t *> (::VirtualAlloc (nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+    auto ptr = reinterpret_cast<std::uint8_t *> (
+        ::VirtualAlloc (nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
     if (ptr == nullptr) {
         DWORD const last_error = ::GetLastError ();
         raise (pstore::win32_erc (last_error), "VirtualAlloc");
     }
 
-    auto deleter = [ptr] (std::uint8_t * ) {
-        ::VirtualFree (ptr, 0, MEM_RELEASE); 
-    };
-    auto const mask = ~(std::uintptr_t {align} - 1);
-    auto ptr_aligned = reinterpret_cast <std::uint8_t *> ((reinterpret_cast <std::uintptr_t> (ptr) + align - 1) & mask);
-    return std::shared_ptr <std::uint8_t> (ptr_aligned, deleter);
+    auto deleter = [ptr](std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
+    auto const mask = ~(std::uintptr_t{align} - 1);
+    auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+        (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+    return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
 }
 
 #else
@@ -71,27 +71,25 @@ std::shared_ptr <std::uint8_t> aligned_valloc (std::size_t size, unsigned align)
 // MAP_ANONYMOUS isn't defined by POSIX, but both macOS and Linux support it.
 // Earlier versions of macOS provided the MAP_ANON name for the flag.
 #ifndef MAP_ANONYMOUS
-#define MAP_ANONYMOUS  MAP_ANON
+#define MAP_ANONYMOUS MAP_ANON
 #endif
 
-std::shared_ptr <std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
     size += align - 1U;
 
     auto ptr = ::mmap (nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (ptr == nullptr) {
-        raise (pstore::errno_erc {errno}, "mmap");
+        raise (pstore::errno_erc{errno}, "mmap");
     }
 
-    auto deleter = [ptr, size] (std::uint8_t * ) {
-        ::munmap (ptr, size);
-    };
-    auto const mask = ~(std::uintptr_t {align} - 1);
-    auto ptr_aligned = reinterpret_cast <std::uint8_t *> ((reinterpret_cast <std::uintptr_t> (ptr) + align - 1) & mask);
-    return std::shared_ptr <std::uint8_t> (ptr_aligned, deleter);
+    auto deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
+    auto const mask = ~(std::uintptr_t{align} - 1);
+    auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+        (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+    return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
 }
 
 #endif // _WIN32
-
 
 
 
@@ -102,7 +100,7 @@ void EmptyStore::SetUp () {
 
     constexpr std::size_t page_size = 4096;
     buffer_ = aligned_valloc (file_size, page_size);
-    file_ = std::make_shared <pstore::file::in_memory> (buffer_, file_size);
+    file_ = std::make_shared<pstore::file::in_memory> (buffer_, file_size);
     pstore::database::build_new_store (*file_);
 }
 

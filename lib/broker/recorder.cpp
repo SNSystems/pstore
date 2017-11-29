@@ -64,13 +64,12 @@ recorder::recorder (std::string const & path) {
 
 // (dtor)
 // ~~~~~~
-recorder::~recorder () {
-}
+recorder::~recorder () {}
 
 // record
 // ~~~~~~
 void recorder::record (pstore::broker::message_type const & cmd) {
-    std::unique_lock <decltype (mut_)> lock (mut_);
+    std::unique_lock<decltype (mut_)> lock (mut_);
     file_.write (cmd);
 }
 
@@ -89,14 +88,13 @@ player::player (std::string const & path) {
 
 // (dtor)
 // ~~~~~~
-player::~player () {
-}
+player::~player () {}
 
 // read
 // ~~~~
 pstore::broker::message_ptr player::read () {
     pstore::broker::message_ptr msg = pool.get_from_pool ();
-    std::unique_lock <decltype (mut_)> lock (mut_);
+    std::unique_lock<decltype (mut_)> lock (mut_);
     file_.read (msg.get ());
     return msg;
 }

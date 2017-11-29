@@ -69,7 +69,7 @@ namespace {
     pstore::address append_uint64 (Transaction & transaction, std::uint64_t v) {
         auto addr = pstore::address::null ();
         std::shared_ptr<std::uint64_t> ptr;
-        std::tie (ptr, addr) = transaction.template alloc_rw <std::uint64_t> ();
+        std::tie (ptr, addr) = transaction.template alloc_rw<std::uint64_t> ();
         *ptr = v;
         return addr;
     }
@@ -224,10 +224,9 @@ namespace {
                 this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
             }
 
-            MOCK_CONST_METHOD4 (get,
-                                std::shared_ptr<void const> (pstore::address, std::size_t,
-                                                             bool /*is_initialized*/,
-                                                             bool /*is_writable*/));
+            MOCK_CONST_METHOD4 (get, std::shared_ptr<void const> (pstore::address, std::size_t,
+                                                                  bool /*is_initialized*/,
+                                                                  bool /*is_writable*/));
 
             auto base_get (pstore::address const & addr, std::size_t size, bool is_initialized,
                            bool is_writable) const -> std::shared_ptr<void const> {

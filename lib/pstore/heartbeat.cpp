@@ -50,11 +50,11 @@
 #include "pstore_support/thread.hpp"
 
 #ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY  try
-#define CATCH(ex,code) catch (ex) code
+#define TRY try
+#define CATCH(ex, code) catch (ex) code
 #else
 #define TRY
-#define CATCH(ex,code)
+#define CATCH(ex, code)
 #endif
 
 namespace pstore {
@@ -62,7 +62,8 @@ namespace pstore {
     // ******************************
     // * heartbeat :: worker thread *
     // ******************************
-    heartbeat::worker_thread::duration_type const heartbeat::worker_thread::delay_time_ = std::chrono::seconds (1);
+    heartbeat::worker_thread::duration_type const heartbeat::worker_thread::delay_time_ =
+        std::chrono::seconds (1);
 
     heartbeat::worker_thread::duration_type const heartbeat::worker_thread::max_time_ =
         duration_type::max ();
@@ -104,9 +105,10 @@ namespace pstore {
                 this->step ();
                 cv_.wait_for (lock, *sleep_time_);
             }
-        } CATCH (..., {
-            // Something bad happened. What's a girl to do?
-        })
+        }
+        CATCH (..., {
+                        // Something bad happened. What's a girl to do?
+                    })
     }
 
     void heartbeat::worker_thread::stop () noexcept {
@@ -119,8 +121,8 @@ namespace pstore {
     //*************
     //* heartbeat *
     //*************
-    std::shared_ptr <heartbeat> heartbeat::get () {
-        static std::shared_ptr <heartbeat> t (new heartbeat);
+    std::shared_ptr<heartbeat> heartbeat::get () {
+        static std::shared_ptr<heartbeat> t (new heartbeat);
         return t;
     }
 
@@ -133,7 +135,7 @@ namespace pstore {
 
     void heartbeat::attach (key_type key, callback cb) {
         if (!state_) {
-            state_ = std::make_unique <state> ();
+            state_ = std::make_unique<state> ();
             auto & w = state_->worker;
             state_->thread = std::thread ([&w]() { w.run (); });
         }

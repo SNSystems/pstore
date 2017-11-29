@@ -51,7 +51,8 @@ namespace {
         friend struct pstore::serialize::serializer<foo>;
 
     public:
-        explicit foo (int a) : a_ (a) {}
+        explicit foo (int a)
+                : a_ (a) {}
         std::ostream & write (std::ostream & os) const;
 
     private:
@@ -77,8 +78,8 @@ namespace pstore {
             // Writes an instance of foo to an archive. The data stream contains
             // a single int value.
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & value)
-                -> typename Archive::result_type {
+            static auto write (Archive & archive, value_type const & value) ->
+                typename Archive::result_type {
 
                 return serialize::write (archive, value.a_);
             }
@@ -93,7 +94,7 @@ namespace pstore {
 } // namespace pstore
 
 int main () {
-    std::vector <std::uint8_t> bytes;
+    std::vector<std::uint8_t> bytes;
     {
         pstore::serialize::archive::vector_writer writer (bytes);
         {

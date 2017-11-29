@@ -139,11 +139,11 @@ namespace pstore {
                         : internal{tag_node (p)} {}
                 index_pointer (linear_node * p)
                         : linear{tag_node (p)} {}
-                index_pointer (index_pointer const & ) = default;
-                index_pointer (index_pointer && ) noexcept = default;
+                index_pointer (index_pointer const &) = default;
+                index_pointer (index_pointer &&) noexcept = default;
 
-                index_pointer & operator= (index_pointer const & ) = default;
-                index_pointer & operator= (index_pointer && ) noexcept = default;
+                index_pointer & operator= (index_pointer const &) = default;
+                index_pointer & operator= (index_pointer &&) noexcept = default;
                 index_pointer & operator= (address const & a) {
                     addr = a;
                     return *this;
@@ -296,7 +296,7 @@ namespace pstore {
                 using iterator = address *;
                 using const_iterator = address const *;
 
-                void * operator new (std::size_t ) = delete;
+                void * operator new (std::size_t) = delete;
                 void operator delete (void * p);
 
                 ~linear_node () = default;

@@ -50,9 +50,9 @@
 /// Splits a null-terminated character string into two pieces at the first
 /// instance of a comma. If no comma is found, or the first character is
 /// a comma, then this is an error and two zero-length strings are returned.
-std::pair <std::string, std::string> to_value_pair (char const * option);
+std::pair<std::string, std::string> to_value_pair (char const * option);
 
-inline std::pair <std::string, std::string> to_value_pair (std::string const & option) {
+inline std::pair<std::string, std::string> to_value_pair (std::string const & option) {
     return to_value_pair (option.c_str ());
 }
 

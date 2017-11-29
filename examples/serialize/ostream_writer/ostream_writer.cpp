@@ -60,8 +60,8 @@ namespace {
                 : os_ (os) {}
 
         // Writes an object of standard-layout type Ty to the output stream.
-        // A return type of 'void_type' is used in the case that the archive writer policy does not have
-        // a sensible value that it could return to the caller.
+        // A return type of 'void_type' is used in the case that the archive writer policy does not
+        // have a sensible value that it could return to the caller.
         template <typename Ty>
         auto put (Ty const & t) -> result_type {
             static_assert (std::is_standard_layout<Ty>::value, "Ty is not standard-layout");

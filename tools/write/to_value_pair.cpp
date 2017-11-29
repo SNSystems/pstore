@@ -47,20 +47,20 @@
 #include <cstring>
 #include <utility>
 
-std::pair <std::string, std::string> to_value_pair (char const * option) {
+std::pair<std::string, std::string> to_value_pair (char const * option) {
     std::string key;
     std::string value;
-    
-    if (option != nullptr && option [0] != '\0') {
+
+    if (option != nullptr && option[0] != '\0') {
         if (char const * comma = std::strchr (option, ',')) {
             assert (comma >= option);
-            key.assign (option, static_cast <std::string::size_type> (comma - option));
+            key.assign (option, static_cast<std::string::size_type> (comma - option));
             value.assign (comma + 1);
         } else {
             key.assign (option);
         }
     }
-    
+
     if (key.length () == 0 || value.length () == 0) {
         key.clear ();
         value.clear ();

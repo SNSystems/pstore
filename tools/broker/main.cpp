@@ -133,7 +133,7 @@ int main (int argc, char * argv[]) {
         // auto const path = std::make_unique<fifo_path> ();
         pstore::logging::log (pstore::logging::priority::notice, "opening pipe");
 
-        pstore::broker::fifo_path fifo {opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
+        pstore::broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
         auto commands = std::make_shared<command_processor> (opt.num_read_threads);

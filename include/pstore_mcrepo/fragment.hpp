@@ -76,10 +76,10 @@ namespace pstore {
                     , padding{0}
                     , offset{offset_}
                     , addend{addend_} {}
-            internal_fixup (internal_fixup const & ) noexcept = default;
-            internal_fixup (internal_fixup && ) noexcept = default;
-            internal_fixup & operator= (internal_fixup const & ) noexcept = default;
-            internal_fixup & operator= (internal_fixup && ) noexcept = default;
+            internal_fixup (internal_fixup const &) noexcept = default;
+            internal_fixup (internal_fixup &&) noexcept = default;
+            internal_fixup & operator= (internal_fixup const &) noexcept = default;
+            internal_fixup & operator= (internal_fixup &&) noexcept = default;
 
             bool operator== (internal_fixup const & rhs) const noexcept {
                 return section == rhs.section && type == rhs.type && offset == rhs.offset &&
@@ -275,7 +275,8 @@ namespace pstore {
             /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
             /// expressed as an align_ value of 3).
             std::uint8_t align_;
-            /// The number of internal fixups, stored as a three byte integer (see `section::three_byte_integer`).
+            /// The number of internal fixups, stored as a three byte integer (see
+            /// `section::three_byte_integer`).
             std::uint8_t num_ifixups_[3];
             /// The number of external fixups in this section.
             std::uint32_t num_xfixups_ = 0;

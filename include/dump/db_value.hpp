@@ -52,8 +52,8 @@ namespace value {
     class address final : public value {
     public:
         explicit address (pstore::address addr)
-            : addr_ {addr}, expanded_ {default_expanded_} {
-        }
+                : addr_{addr}
+                , expanded_{default_expanded_} {}
 
         bool is_number_like () const override {
             // A non-expanded address is printed just like a number.

@@ -79,7 +79,8 @@ namespace pstore {
                     : t_ (rhs.get ())
                     , is_first_{false} {}
 
-            /// Construct from a type that is implicitly convertible to T. This is considered equivalent to assignment.
+            /// Construct from a type that is implicitly convertible to T. This is considered
+            /// equivalent to assignment.
             template <typename Other>
             sticky_assign (Other const & t)
                     : t_ (t)

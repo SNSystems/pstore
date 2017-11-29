@@ -87,8 +87,9 @@ namespace pstore {
     /// key or an associated value.
     struct record {
         constexpr record () noexcept {}
-        constexpr record (address addr_, std::uint64_t size_) noexcept : addr (addr_),
-                                                                         size (size_) {}
+        constexpr record (address addr_, std::uint64_t size_) noexcept
+                : addr (addr_)
+                , size (size_) {}
         record (record const & rhs) noexcept = default;
         record (record && rhs) noexcept = default;
         record & operator= (record const &) noexcept = default;
@@ -109,14 +110,15 @@ namespace pstore {
     }
 
     namespace serialize {
-        /// \brief A specialization which teaches the serialization framework how to read and write instances of
-        /// `record`.
+        /// \brief A specialization which teaches the serialization framework how to read and write
+        /// instances of `record`.
         template <>
         struct serializer<record> {
             using value_type = record;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & r) -> typename Archive::result_type {
+            static auto write (Archive & archive, value_type const & r) ->
+                typename Archive::result_type {
                 auto resl = serialize::write (archive, r.addr.absolute ());
                 serialize::write (archive, r.size);
                 return resl;
@@ -124,7 +126,7 @@ namespace pstore {
             template <typename Archive>
             static void read (Archive & archive, value_type & r) {
                 auto addr = address::make (serialize::read<std::uint64_t> (archive));
-                auto size = serialize::read <std::uint64_t> (archive);
+                auto size = serialize::read<std::uint64_t> (archive);
                 new (&r) record (addr, size);
             }
         };
@@ -204,8 +206,8 @@ namespace pstore {
     /// \brief The transaction footer structure.
     /// An copy of this structure is written to the data store at the end of each transaction block.
     /// pstore::header::footer_pos holds the address of the latest _complete_ instance and is
-    /// updated
-    /// once a transaction has been completely written to memory. Once written it is read-only.
+    /// updated once a transaction has been completely written to memory. Once written it is
+    /// read-only.
     struct trailer {
         static std::array<std::uint8_t, 8> default_signature1;
         static std::array<std::uint8_t, 8> default_signature2;
@@ -222,7 +224,7 @@ namespace pstore {
         enum indices {
             write,
             digest,
-			ticket,
+            ticket,
             name,
             last,
         };
@@ -237,8 +239,7 @@ namespace pstore {
             std::uint32_t unused1{0};
 
             /// The number of bytes contained by this transaction. The value does not include the
-            /// size
-            /// of the footer record.
+            /// size of the footer record.
             std::atomic<std::uint64_t> size{0};
 
             /// The time at which the transaction was committed, in milliseconds since the epoch.

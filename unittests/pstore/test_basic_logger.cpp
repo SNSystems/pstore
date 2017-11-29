@@ -129,7 +129,7 @@ namespace {
     //*   B a s i c L o g g e r T i m e F i x t u r e   *
     //***************************************************
     struct BasicLoggerTimeFixture : public ::testing::Test {
-        std::array <char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
+        std::array<char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
         static constexpr unsigned const sign_index_ = 19;
 
         // If the time zone offset is 0, 0he standard library could legimately describe that
@@ -151,8 +151,8 @@ namespace {
 
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
     time_zone_setter tzs ("UTC0");
-    std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t const r = ::pstore::logging::basic_logger::time_string (
+        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     this->canonicalize_sign ();
@@ -161,8 +161,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
 
 TEST_F (BasicLoggerTimeFixture, EpochInJST) {
     time_zone_setter tzs ("JST-9"); // Japan
-    std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t const r = ::pstore::logging::basic_logger::time_string (
+        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1970-01-01T09:00:00+0900", buffer_.data ());
@@ -175,8 +175,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInPST) {
     // Since it isn't specified, daylight saving time starts on the first Sunday of April at 2:00
     // A.M., and ends on the last Sunday of October at 2:00 A.M.
     time_zone_setter tzs ("PST8PDT");
-    std::size_t r =
-        ::pstore::logging::basic_logger::time_string (std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t r = ::pstore::logging::basic_logger::time_string (
+        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1969-12-31T16:00:00-0800", buffer_.data ());

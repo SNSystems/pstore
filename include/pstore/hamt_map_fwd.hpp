@@ -51,8 +51,9 @@
 namespace pstore {
     namespace index {
 
-        /// This class provides a common base from which each of the real index types derives. This avoids
-        /// the lower-level storage code needing to know about the types that these indices contain.
+        /// This class provides a common base from which each of the real index types derives. This
+        /// avoids the lower-level storage code needing to know about the types that these indices
+        /// contain.
         class index_base {
         public:
             virtual ~index_base () = 0;

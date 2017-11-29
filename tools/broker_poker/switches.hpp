@@ -53,7 +53,7 @@
 
 #ifdef _WIN32
 #include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT(str)
+#define NATIVE_TEXT(str) _TEXT (str)
 #else
 typedef char TCHAR;
 #define NATIVE_TEXT(str) str
@@ -67,19 +67,19 @@ struct switches {
     std::chrono::milliseconds retry_timeout = std::chrono::milliseconds (500);
     unsigned max_retries = 10;
 
-    pstore::cmd_util::cl::maybe <std::string> pipe_path;
+    pstore::cmd_util::cl::maybe<std::string> pipe_path;
 
     unsigned flood = 0;
     bool kill = false;
 };
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-std::pair<switches, int> get_switches(int argc, TCHAR * argv[]);
+std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
 #else
-std::pair<switches, int> get_switches (int argc, char * argv []);
+std::pair<switches, int> get_switches (int argc, char * argv[]);
 #endif
 
-#endif //PSTORE_BROKER_POKER_SWITCHES_HPP
-//eof:tools/broker_poker/switches.hpp
+#endif // PSTORE_BROKER_POKER_SWITCHES_HPP
+// eof:tools/broker_poker/switches.hpp
 
 // eof: tools/broker_poker/switches.hpp

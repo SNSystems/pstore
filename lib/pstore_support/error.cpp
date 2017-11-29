@@ -60,9 +60,9 @@ char const * pstore::error_category::name () const noexcept {
 std::string pstore::error_category::message (int error) const {
     static_assert (std::is_same<std::underlying_type<error_code>::type, decltype (error)>::value,
                    "base type of pstore::error_code must be int to permit safe static cast");
-#define X(a) \
-case error_code::a: \
-    return #a;
+#define X(a)                                                                                       \
+    case error_code::a:                                                                            \
+        return #a;
 
     switch (static_cast<error_code> (error)) { PSTORE_ERROR_CODES }
 #undef X

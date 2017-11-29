@@ -238,7 +238,8 @@ namespace pstore {
                     template <typename Opt>
                     void apply (Opt & o) const {
                         bool is_optional = o.get_num_occurrences () == num_occurrences::optional;
-                        o.set_num_occurrences (is_optional ? num_occurrences::zero_or_more : num_occurrences::one_or_more);
+                        o.set_num_occurrences (is_optional ? num_occurrences::zero_or_more
+                                                           : num_occurrences::one_or_more);
                     }
                 };
             } // namespace details

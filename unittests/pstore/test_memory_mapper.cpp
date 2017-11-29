@@ -84,8 +84,7 @@ namespace {
         }
 
     private:
-        std::unique_ptr<pstore::file::file_handle>
-            file_;
+        std::unique_ptr<pstore::file::file_handle> file_;
     };
 
     std::size_t MemoryMapperFixture::page_size () {

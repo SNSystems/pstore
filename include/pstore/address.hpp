@@ -101,7 +101,7 @@
 namespace pstore {
 
 #if defined(__cpp_constexpr) && __cpp_constexpr >= 201304
-#define PSTORE_CONST_EXPR_ASSERT(cond)  assert (cond)
+#define PSTORE_CONST_EXPR_ASSERT(cond) assert (cond)
 #else
 #define PSTORE_CONST_EXPR_ASSERT(cond)
 #endif
@@ -170,15 +170,15 @@ namespace pstore {
             return *this;
         }
 
-		address operator|= (std::uint64_t mask) {
-			whole |= mask;
-			return *this;
-		}
+        address operator|= (std::uint64_t mask) {
+            whole |= mask;
+            return *this;
+        }
 
-		address operator&= (std::uint64_t mask) {
-			whole &= mask;
-			return *this;
-		}
+        address operator&= (std::uint64_t mask) {
+            whole &= mask;
+            return *this;
+        }
 
         segment_type segment () const {
             constexpr auto const segment_mask = std::uint64_t{max_segment} << offset_number_bits;

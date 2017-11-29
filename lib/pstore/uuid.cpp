@@ -66,13 +66,13 @@
 namespace {
     unsigned hex_to_digit (char digit) {
         if (digit >= 'a' && digit <= 'f') {
-            return static_cast <unsigned> (digit) - ('a' - 10);
+            return static_cast<unsigned> (digit) - ('a' - 10);
         }
         if (digit >= 'A' && digit <= 'F') {
-            return static_cast <unsigned> (digit) - ('A' - 10);
+            return static_cast<unsigned> (digit) - ('A' - 10);
         }
         if (digit >= '0' && digit <= '9') {
-            return static_cast <unsigned> (digit) - '0';
+            return static_cast<unsigned> (digit) - '0';
         }
         raise (pstore::error_code::uuid_parse_error);
     }
@@ -86,7 +86,8 @@ namespace {
     template <typename OutputIterator>
     class hex_decoder {
     public:
-        explicit hex_decoder (OutputIterator out) : out_ {out} {}
+        explicit hex_decoder (OutputIterator out)
+                : out_{out} {}
 
         OutputIterator append (unsigned value) {
             assert (value < 16U);
@@ -99,7 +100,9 @@ namespace {
             return out_;
         }
 
-        bool is_high () const { return is_high_; }
+        bool is_high () const {
+            return is_high_;
+        }
 
     private:
         OutputIterator out_;
@@ -107,8 +110,8 @@ namespace {
     };
 
     template <typename OutputIterator>
-    auto make_hex_decoder (OutputIterator out) -> hex_decoder <OutputIterator> {
-        return hex_decoder <OutputIterator> (out);
+    auto make_hex_decoder (OutputIterator out) -> hex_decoder<OutputIterator> {
+        return hex_decoder<OutputIterator> (out);
     }
 } // end anonymous namespace
 
@@ -125,11 +128,11 @@ namespace pstore {
         std::generate (std::begin (data_), std::end (data_), generator);
 
         // Set variant: must be 0b10xxxxxx
-        data_[variant_octet] &= 0xBF; //0b10111111;
-        data_[variant_octet] |= 0x80; //0b10000000;
+        data_[variant_octet] &= 0xBF; // 0b10111111;
+        data_[variant_octet] |= 0x80; // 0b10000000;
 
         // Set version: must be 0b0100xxxx
-        data_[version_octet] &= 0x4F; //0b01001111;
+        data_[version_octet] &= 0x4F; // 0b01001111;
         data_[version_octet] |= static_cast<std::uint8_t> (version_type::random_number_based) << 4;
 
         assert (this->variant () == uuid::variant_type::rfc_4122);
@@ -199,16 +202,16 @@ namespace pstore {
     // ~~~~~~~
     auto uuid::variant () const noexcept -> variant_type {
         auto const octet = data_[variant_octet];
-        if ((octet & 0x80/*0b10000000*/) == 0x00/*0b00000000*/) { // 0b0xxxxxxx
+        if ((octet & 0x80 /*0b10000000*/) == 0x00 /*0b00000000*/) { // 0b0xxxxxxx
             return variant_type::ncs;
         }
-        if ((octet & 0xC0/*0b11000000*/) == 0x80/*0b10000000*/) { // 0b10xxxxxx
+        if ((octet & 0xC0 /*0b11000000*/) == 0x80 /*0b10000000*/) { // 0b10xxxxxx
             return variant_type::rfc_4122;
         }
-        if ((octet & 0xE0/*0b11100000*/) == 0xC0/*0b11000000*/) { // 0b110xxxxx
+        if ((octet & 0xE0 /*0b11100000*/) == 0xC0 /*0b11000000*/) { // 0b110xxxxx
             return variant_type::microsoft;
         }
-        assert ((octet & 0xE0/*0b11100000*/) == 0xE0/*0b11100000*/); // 0b111xxxx
+        assert ((octet & 0xE0 /*0b11100000*/) == 0xE0 /*0b11100000*/); // 0b111xxxx
         return variant_type::future;
     }
 

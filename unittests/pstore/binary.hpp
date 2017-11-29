@@ -50,7 +50,8 @@
 
 /// The binary template is used to write binary constants (or at least it is until we can fully
 /// switch to C++14). The first template argument is the type of the constant; each of the remaining
-/// arguments must be either 0 or 1 to represent the value at each bit position. The most significant
+/// arguments must be either 0 or 1 to represent the value at each bit position. The most
+/// significant
 /// bit is written first.
 template <typename T, unsigned V0, unsigned... Values>
 struct binary {

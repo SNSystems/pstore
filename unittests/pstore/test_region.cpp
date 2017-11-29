@@ -62,7 +62,7 @@ TEST_F (Region, Single) {
     constexpr std::size_t size = 32;
 
     auto sp = this->make_array (size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, size, size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, size, size);
 
     pstore::region::mem_based_factory factory (file, size, size);
     std::vector<std::shared_ptr<pstore::memory_mapper_base>> result = factory.init ();
@@ -81,7 +81,7 @@ TEST_F (Region, UnderSizedFile) {
     constexpr std::size_t region_size = 32;
 
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, file_size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, file_size, file_size);
 
     pstore::region::mem_based_factory factory (file, region_size, region_size);
     auto result = factory.init ();
@@ -101,7 +101,7 @@ TEST_F (Region, OneLargeOneSmallRegion) {
     constexpr std::size_t file_size = big_region_size + small_region_size;
 
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, file_size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, file_size, file_size);
 
     pstore::region::mem_based_factory factory (file, big_region_size, small_region_size);
     std::vector<std::shared_ptr<pstore::memory_mapper_base>> result = factory.init ();
@@ -136,7 +136,7 @@ TEST_F (Region, TwoSmallRegions) {
     // the "minimum" size, but no larger than "full" size to avoid requesting too much
     // contiguous address space.
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, file_size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, file_size, file_size);
 
     pstore::region::mem_based_factory factory (file, big_region_size, small_region_size);
     std::vector<std::shared_ptr<pstore::memory_mapper_base>> result = factory.init ();
@@ -158,7 +158,8 @@ TEST_F (Region, OneLargeOneSmallRegionReadOnly) {
     constexpr std::size_t file_size = big_region_size + small_region_size;
 
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, file_size, false/*writable*/);
+    auto file =
+        std::make_shared<pstore::file::in_memory> (sp, file_size, file_size, false /*writable*/);
 
     pstore::region::mem_based_factory factory (file, big_region_size, small_region_size);
     auto result = factory.init ();
@@ -179,7 +180,8 @@ TEST_F (Region, OneLargeOneSmallRegionReadOnly) {
         EXPECT_EQ (expected, actual);
         EXPECT_EQ (big_region_size, region1.offset ());
         EXPECT_EQ (small_region_size, region1.size ());
-        EXPECT_FALSE (region1.is_writable ()) << "The 2nd region of 2 should not be writable because the file is not writable";
+        EXPECT_FALSE (region1.is_writable ())
+            << "The 2nd region of 2 should not be writable because the file is not writable";
     }
 }
 
@@ -190,7 +192,7 @@ TEST_F (Region, OversizedFile) {
     constexpr std::size_t file_size = big_region_size + small_region_size + xxl;
 
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, file_size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, file_size, file_size);
 
     pstore::region::mem_based_factory factory (file, big_region_size, small_region_size);
     auto result = factory.init ();
@@ -223,7 +225,7 @@ TEST_F (Region, GrowByMinimumSize) {
 
     // Make a file which contains big-region bytes.
     auto sp = this->make_array (file_size);
-    auto file = std::make_shared <pstore::file::in_memory> (sp, file_size, big_region_size);
+    auto file = std::make_shared<pstore::file::in_memory> (sp, file_size, big_region_size);
 
     pstore::region::mem_based_factory factory (file, big_region_size, small_region_size);
     auto result = factory.init ();

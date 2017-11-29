@@ -80,7 +80,7 @@ TEST (PosixMutexName, OutputBufferTooSmall) {
 }
 
 TEST (PosixMutexName, OutputBufferTooSmallExplicitSpan) {
-    std::array <char, 4> arr;
+    std::array<char, 4> arr;
     char const * actual = pstore::posix::shm_name ("name", ::pstore::gsl::make_span (arr));
     EXPECT_THAT (actual, ::testing::StrEq ("/na"));
 }

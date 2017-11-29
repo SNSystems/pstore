@@ -248,11 +248,12 @@ namespace pstore {
                 auto const size = s.size_bytes ();
                 assert (size >= 0);
                 using utype = typename std::make_unsigned<decltype (size)>::type;
-                return this->read_buffer (s.data (), static_cast <utype> (s.size_bytes ()));
+                return this->read_buffer (s.data (), static_cast<utype> (s.size_bytes ()));
             }
 
             /// \brief Reads a series of raw bytes from the file as an instance of type T.
-            template <typename T, typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+            template <typename T,
+                      typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
             void read (T * const t) {
                 assert (t != nullptr);
                 std::size_t bytes_read = this->read_buffer (t, sizeof (T));
@@ -271,7 +272,8 @@ namespace pstore {
             }
 
             /// \brief Writes 't' as a series of raw bytes to the file.
-            template <typename T, typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+            template <typename T,
+                      typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
             void write (T const & t) {
                 this->write_buffer (&t, sizeof (T));
             }
@@ -359,7 +361,8 @@ namespace pstore {
             /// There must be at least nbytes available.
             /// \param nbytes  The number of bytes that are to be read.
             /// \returns The number of bytes actually read.
-            virtual std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) = 0;
+            virtual std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
+                                             std::size_t nbytes) = 0;
 
             /// \brief Writes nbytes to the file, reading them from the location given by buffer.
             ///
@@ -369,7 +372,8 @@ namespace pstore {
             /// \param buffer  A pointer to the memory containing the data to be written. At least
             /// 'nbytes' must be available.
             /// \param nbytes  The number of bytes that are to be written.
-            virtual void write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t nbytes) = 0;
+            virtual void write_buffer (::pstore::gsl::not_null<void const *> buffer,
+                                       std::size_t nbytes) = 0;
 
             ///@}
         };
@@ -424,8 +428,9 @@ namespace pstore {
             ~range_lock () noexcept;
 
             /// Move assignment operator. Replaces the contents with those of "other" using move
-            /// semantics. If prior to the call *this has an associated mutex and has acquired ownership of it,
-            /// the mutex is unlocked. If this operation fails, the resulting exception is dropped.
+            /// semantics. If prior to the call *this has an associated mutex and has acquired
+            /// ownership of it, the mutex is unlocked. If this operation fails, the resulting
+            /// exception is dropped.
             range_lock & operator= (range_lock && other) noexcept;
 
             // No copying or assignment.
@@ -572,14 +577,16 @@ namespace pstore {
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) override;
+            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
+                                     std::size_t nbytes) override;
 
             /// Writes writes nbytes to the file, reading them from the location given by ptr. The
             /// file position indicator for the file is incremented by the number of bytes written.
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            void write_buffer (::pstore::gsl::not_null<void const *> ptr, std::size_t nbytes) override;
+            void write_buffer (::pstore::gsl::not_null<void const *> ptr,
+                               std::size_t nbytes) override;
 
         private:
             /// The base address of the buffer used by the in-memory file.
@@ -624,8 +631,7 @@ namespace pstore {
 
             /// \enum present_mode
             /// \brief Controls the behavior of the file_handle constructor when passed a path which
-            /// does
-            /// not already exist.
+            /// does not already exist.
             enum class present_mode {
                 /// If opening a file that does not exist, an exception will not be raised. The
                 /// condition can be detected by calling is_open() and testing for a true result. If
@@ -700,8 +706,10 @@ namespace pstore {
             std::uint64_t tell () override;
 
         private:
-            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer, std::size_t nbytes) override;
-            void write_buffer (::pstore::gsl::not_null<void const *> buffer, std::size_t nbytes) override;
+            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
+                                     std::size_t nbytes) override;
+            void write_buffer (::pstore::gsl::not_null<void const *> buffer,
+                               std::size_t nbytes) override;
 
         public:
             std::uint64_t size () override;

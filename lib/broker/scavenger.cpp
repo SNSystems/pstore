@@ -56,7 +56,8 @@
 void scavenger::thread_entry () {
     try {
         std::unique_lock<decltype (mut_)> lock (mut_);
-        auto const sleep_time = std::chrono::seconds (10 * 60); // TODO: make this configurable by the user.
+        auto const sleep_time =
+            std::chrono::seconds (10 * 60); // TODO: make this configurable by the user.
         for (;;) {
             cv_.wait_for (lock, sleep_time);
             pstore::logging::log (pstore::logging::priority::info, "begin scavenging");

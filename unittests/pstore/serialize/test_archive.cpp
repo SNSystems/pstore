@@ -54,7 +54,7 @@
 #include "check_for_error.hpp"
 
 TEST (SerializeArchiveVectorWriter, Write1Byte) {
-    std::vector <std::uint8_t> bytes;
+    std::vector<std::uint8_t> bytes;
     bytes.reserve (1);
 
     pstore::serialize::archive::vector_writer writer (bytes);
@@ -70,7 +70,7 @@ TEST (SerializeArchiveVectorWriter, Write1Byte) {
 }
 
 TEST (SerializeArchiveVectorWriter, WriteAnInt) {
-    std::vector <std::uint8_t> bytes;
+    std::vector<std::uint8_t> bytes;
     bytes.reserve (sizeof (int));
     pstore::serialize::archive::vector_writer writer (bytes);
     writer.put (42);
@@ -113,7 +113,7 @@ TEST (SerializeArchiveNull, WriteTwoInts) {
 
 TEST (SerializeArchiveNull, WriteSpan) {
     pstore::serialize::archive::null writer;
-    std::array <int,2> arr {{13,17}};
+    std::array<int, 2> arr{{13, 17}};
     writer.putn (::pstore::gsl::make_span (arr));
     EXPECT_EQ (sizeof (int) * 2, writer.bytes_consumed ());
     EXPECT_EQ (sizeof (int) * 2, writer.bytes_produced ());
@@ -129,9 +129,7 @@ TEST (SerializeBufferReader, ReadByte) {
 TEST (SerializeBufferReader, ReadPastEnd) {
     std::array<std::uint8_t, 1> buffer{{28}};
     pstore::serialize::archive::buffer_reader reader (::pstore::gsl::make_span (buffer));
-    check_for_error ([&reader] () {
-        reader.get<std::uint16_t> ();
-    }, std::errc::no_buffer_space);
+    check_for_error ([&reader]() { reader.get<std::uint16_t> (); }, std::errc::no_buffer_space);
 }
 
 // eof: unittests/pstore/serialize/test_archive.cpp

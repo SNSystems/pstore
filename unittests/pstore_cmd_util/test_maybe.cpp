@@ -54,14 +54,12 @@ namespace {
     class value {
     public:
         value (int v)
-                : v_ { std::make_unique <int> (v) } {
-        }
+                : v_{std::make_unique<int> (v)} {}
         value (value const & v)
-                : v_ { std::make_unique <int> (v.get ()) } {
-        }
+                : v_{std::make_unique<int> (v.get ())} {}
 
         value & operator= (value const & rhs) {
-            v_ = std::make_unique <int> (rhs.get ());
+            v_ = std::make_unique<int> (rhs.get ());
             return *this;
         }
 
@@ -69,26 +67,28 @@ namespace {
             return this->get () == rhs.get ();
         }
 
-        int get () const { return *v_; }
+        int get () const {
+            return *v_;
+        }
 
     private:
-        std::unique_ptr <int> v_;
+        std::unique_ptr<int> v_;
     };
 
 } // (anonymous namespace)
 
 TEST (Maybe, NoValue) {
-    maybe <value> m;
+    maybe<value> m;
     EXPECT_FALSE (m.has_value ());
     EXPECT_FALSE (m);
 }
 
 TEST (Maybe, Nothing) {
-    EXPECT_EQ (nothing <value> (), maybe <value> ());
+    EXPECT_EQ (nothing<value> (), maybe<value> ());
 }
 
 TEST (Maybe, Value) {
-    maybe <value> m (42);
+    maybe<value> m (42);
     EXPECT_TRUE (m.has_value ());
     EXPECT_TRUE (m);
     EXPECT_EQ (m.value (), value (42));
@@ -98,15 +98,15 @@ TEST (Maybe, Value) {
 }
 
 TEST (Maybe, ValueOr) {
-    maybe <value> m1;
+    maybe<value> m1;
     EXPECT_EQ (m1.value_or (37), 37);
 
-    maybe <value> m2 (5);
+    maybe<value> m2 (5);
     EXPECT_EQ (m2.value_or (37), 5);
 }
 
 TEST (Maybe, Assign) {
-    maybe <value> m;
+    maybe<value> m;
 
     // First assignment, m has no value
     m.operator= (43);
@@ -121,7 +121,7 @@ TEST (Maybe, Assign) {
     EXPECT_EQ (m.value (), 44);
 
     // Third assignment, m holds a value, assigning nothing.
-    m.operator= (nothing <value> ());
+    m.operator= (nothing<value> ());
     EXPECT_FALSE (m.has_value ());
 }
 

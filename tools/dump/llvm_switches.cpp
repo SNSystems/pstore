@@ -58,11 +58,14 @@ namespace {
 
     cl::OptionCategory WhatCat ("Options controlling what is dumped");
 
-    cl::opt<bool> Contents ("contents", cl::desc ("Emit a raw dump of the transaction contents"), cl::cat (WhatCat));
+    cl::opt<bool> Contents ("contents", cl::desc ("Emit a raw dump of the transaction contents"),
+                            cl::cat (WhatCat));
     cl::alias Contents2 ("c", cl::desc ("Alias for --contents"), cl::aliasopt (Contents));
 
-    cl::opt<bool> Fragments ("fragments", cl::desc ("Dump the contents of the fragments index"), cl::cat (WhatCat));
-	cl::opt<bool> Tickets("tickets", cl::desc("Dump the contents of the tickets index"), cl::cat(WhatCat));
+    cl::opt<bool> Fragments ("fragments", cl::desc ("Dump the contents of the fragments index"),
+                             cl::cat (WhatCat));
+    cl::opt<bool> Tickets ("tickets", cl::desc ("Dump the contents of the tickets index"),
+                           cl::cat (WhatCat));
     cl::opt<bool> Header ("header", cl::desc ("Dump the file header"), cl::cat (WhatCat));
     cl::alias Header2 ("h", cl::desc ("Alias for --header"), cl::aliasopt (Header));
 
@@ -72,45 +75,54 @@ namespace {
     cl::opt<bool> Log ("log", cl::desc ("List the generations"), cl::cat (WhatCat));
     cl::alias Log2 ("l", cl::desc ("Alias for --log"), cl::aliasopt (Log));
 
-    cl::opt<bool> All ("all", cl::desc ("Show store-related output. Equivalent to: --contents --header --indices --log"), cl::cat (WhatCat));
+    cl::opt<bool> All (
+        "all",
+        cl::desc ("Show store-related output. Equivalent to: --contents --header --indices --log"),
+        cl::cat (WhatCat));
     cl::alias All2 ("a", cl::desc ("Alias for --all"), cl::aliasopt (All));
 
-    cl::opt<bool> SharedMemory ("shared-memory", cl::desc ("Dumps the shared-memory block"), cl::cat (WhatCat));
-    cl::alias SharedMemory2 ("s", cl::desc ("Alias for --shared-memory"), cl::aliasopt (SharedMemory));
+    cl::opt<bool> SharedMemory ("shared-memory", cl::desc ("Dumps the shared-memory block"),
+                                cl::cat (WhatCat));
+    cl::alias SharedMemory2 ("s", cl::desc ("Alias for --shared-memory"),
+                             cl::aliasopt (SharedMemory));
 
 
-    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>> Revision (
-        "revision",
-        cl::desc ("The starting revision number (or 'HEAD')")
-    );
+    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
 
     cl::OptionCategory HowCat ("Options controlling how fields are emitted");
 
-    cl::opt<bool> NoTimes ("no-times", cl::desc ("Times are displayed as a fixed value (for testing)"), cl::cat (HowCat));
-    cl::opt<bool> Hex ("hex", cl::desc ("Emit number values in hexadecimal notation"), cl::cat (HowCat));
+    cl::opt<bool> NoTimes ("no-times",
+                           cl::desc ("Times are displayed as a fixed value (for testing)"),
+                           cl::cat (HowCat));
+    cl::opt<bool> Hex ("hex", cl::desc ("Emit number values in hexadecimal notation"),
+                       cl::cat (HowCat));
     cl::alias Hex2 ("x", cl::desc ("Alias for --hex"), cl::aliasopt (Hex));
 
-    cl::opt<bool> ExpandedAddresses ("expanded-addresses", cl::desc ("Emit address values as an explicit segment/offset object"), cl::cat (HowCat));
+    cl::opt<bool>
+        ExpandedAddresses ("expanded-addresses",
+                           cl::desc ("Emit address values as an explicit segment/offset object"),
+                           cl::cat (HowCat));
 
-    cl::list <std::string> Paths (cl::Positional, cl::desc ("<filename>..."));
+    cl::list<std::string> Paths (cl::Positional, cl::desc ("<filename>..."));
 
 } // anonymous namespace
 
-std::pair <switches, int> get_switches (int argc, char * argv []) {
+std::pair<switches, int> get_switches (int argc, char * argv[]) {
     llvm::cl::ParseCommandLineOptions (argc, argv, "pstore dump utility\n");
 
     switches result;
     result.show_contents = Contents;
     result.show_fragments = Fragments;
-	result.show_tickets = Tickets;
+    result.show_tickets = Tickets;
     result.show_header = Header;
     result.show_indices = Indices;
     result.show_log = Log;
     result.show_shared = SharedMemory;
     result.show_all = All;
-    result.revision = static_cast <pstore::cmd_util::revision_opt> (Revision).r;
+    result.revision = static_cast<pstore::cmd_util::revision_opt> (Revision).r;
 
     result.hex = Hex;
     result.no_times = NoTimes;

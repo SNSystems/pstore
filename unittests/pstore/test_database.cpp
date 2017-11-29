@@ -103,9 +103,7 @@ namespace {
     }
 
     void OpenCorruptStore::check_database_open (pstore::error_code err) const {
-        auto fn = [this] () {
-            pstore::database{file_};
-        };
+        auto fn = [this]() { pstore::database{file_}; };
         check_for_error (fn, err);
     }
 } // end anonymous namespace
@@ -214,9 +212,7 @@ TEST_F (EmptyStore, GetEndPastLogicalEOF) {
 
     auto const addr = pstore::address::null ();
     std::size_t size = db.size () + 1;
-    check_for_error ([&] () {
-        db.getro (addr, size);
-    }, pstore::error_code::bad_address);
+    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
 }
 
 TEST_F (EmptyStore, GetStartPastLogicalEOF) {
@@ -225,9 +221,7 @@ TEST_F (EmptyStore, GetStartPastLogicalEOF) {
 
     auto const addr = pstore::address::make (db.size () + 1);
     std::size_t size = 1;
-    check_for_error ([&] () {
-        db.getro (addr, size);
-    }, pstore::error_code::bad_address);
+    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
 }
 
 TEST_F (EmptyStore, GetLocationOverflows) {
@@ -239,9 +233,7 @@ TEST_F (EmptyStore, GetLocationOverflows) {
                           std::numeric_limits<std::uint64_t>::max ());
     std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
     ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
-    check_for_error ([&] () {
-        db.getro (addr, size);
-    }, pstore::error_code::bad_address);
+    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
 }
 
 
@@ -343,11 +335,11 @@ namespace {
 
 namespace {
     template <typename T, typename U>
-    std::shared_ptr <T> cast (std::shared_ptr <U> p) {
+    std::shared_ptr<T> cast (std::shared_ptr<U> p) {
 #ifdef PSTORE_CPP_RTTI
-        return std::dynamic_pointer_cast <T> (p);
+        return std::dynamic_pointer_cast<T> (p);
 #else
-        return std::static_pointer_cast <T> (p);
+        return std::static_pointer_cast<T> (p);
 #endif
     }
 } // end anonymous namespace

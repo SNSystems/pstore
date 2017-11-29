@@ -45,8 +45,8 @@
 #define PSTORE_SUPPORT_PORTAB_HPP
 
 #ifdef __cpp_exceptions
-#define PSTORE_CPP_EXCEPTIONS  __cpp_exceptions
-#elif defined (_MSC_VER) && defined (_CPPUNWIND)
+#define PSTORE_CPP_EXCEPTIONS __cpp_exceptions
+#elif defined(_MSC_VER) && defined(_CPPUNWIND)
 #define PSTORE_CPP_EXCEPTIONS 199711
 #else
 #undef PSTORE_CPP_EXCEPTIONS
@@ -54,8 +54,8 @@
 
 
 #ifdef __cpp_rtti
-#define PSTORE_CPP_RTTI  __cpp_rtti
-#elif defined (_MSC_VER) && defined (_CPPRTTI)
+#define PSTORE_CPP_RTTI __cpp_rtti
+#elif defined(_MSC_VER) && defined(_CPPRTTI)
 #define PSTORE_CPP_RTTI 199711
 #else
 #undef PSTORE_CPP_RTTI
@@ -63,29 +63,29 @@
 
 
 #ifdef __has_cpp_attribute
-#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE  __has_cpp_attribute (noreturn)
+#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE __has_cpp_attribute (noreturn)
 #else
-#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE  0
+#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE 0
 #endif
 
 #if PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE
-    #define PSTORE_NO_RETURN  [[noreturn]]
-#elif defined (_MSC_VER)
-    #define PSTORE_NO_RETURN  __declspec(noreturn)
+#define PSTORE_NO_RETURN [[noreturn]]
+#elif defined(_MSC_VER)
+#define PSTORE_NO_RETURN __declspec(noreturn)
 #else
-    #define PSTORE_NO_RETURN  __attribute__(noreturn)
+#define PSTORE_NO_RETURN __attribute__ (noreturn)
 #endif
 
 #ifdef _WIN32
-    #ifdef min
-        #undef min
-    #endif
-    #ifdef max
-        #undef max
-    #endif
-    #ifndef NOMINMAX
-        #define NOMINMAX
-    #endif
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #endif
 
 #ifndef PSTORE_STATIC_ASSERT
@@ -94,6 +94,6 @@
 #endif
 
 #endif // PSTORE_SUPPORT_PORTAB_HPP
-//eof:include/pstore_support/portab.hpp
+// eof:include/pstore_support/portab.hpp
 
 // eof: include/pstore_support/portab.hpp

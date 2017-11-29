@@ -49,11 +49,11 @@
 #include <vector>
 #include "pstore/database.hpp"
 
-#define INDICES \
-    X(digest) \
-    X(ticket) \
-    X(name) \
-    X(write)
+#define INDICES                                                                                    \
+    X (digest)                                                                                     \
+    X (ticket)                                                                                     \
+    X (name)                                                                                       \
+    X (write)
 
 #define X(a) a,
 enum class indices : unsigned { INDICES last };
@@ -71,9 +71,9 @@ struct index_accessor<indices::digest> {
 
 template <>
 struct index_accessor<indices::ticket> {
-	static decltype (&pstore::database::get_ticket_index) get() {
-		return &pstore::database::get_ticket_index;
-	}
+    static decltype (&pstore::database::get_ticket_index) get () {
+        return &pstore::database::get_ticket_index;
+    }
 };
 
 template <>
@@ -92,12 +92,13 @@ struct index_accessor<indices::write> {
 
 
 
-using indices_bitset = std::bitset <static_cast <std::underlying_type <indices>::type> (indices::last)>;
-extern std::vector <char const *> const index_names;
+using indices_bitset =
+    std::bitset<static_cast<std::underlying_type<indices>::type> (indices::last)>;
+extern std::vector<char const *> const index_names;
 
 bool set_from_name (indices_bitset * const bs, std::string const & name);
 
 #endif // PSTORE_INDEX_STRUCTURE_INDICES_HPP
-//eof:tools/index_structure/indices.hpp
+// eof:tools/index_structure/indices.hpp
 
 // eof: tools/index_structure/indices.hpp

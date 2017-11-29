@@ -44,13 +44,13 @@
 /// \file start_vacuum.hpp
 
 #ifndef PSTORE_START_VACUUM_HPP
-#define PSTORE_START_VACUUM_HPP  (1)
+#define PSTORE_START_VACUUM_HPP (1)
 
 namespace pstore {
 
     class database;
     void start_vacuum (database const & db);
-    
+
 } // namespace pstore
 
 #endif // PSTORE_START_VACUUM_HPP

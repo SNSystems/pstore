@@ -55,24 +55,22 @@ namespace {
     template <typename CharType>
     class Object : public ::testing::Test {
     public:
-        void SetUp () final {
-        }
-        void TearDown () final {
-        }
+        void SetUp () final {}
+        void TearDown () final {}
+
     protected:
-        std::basic_ostringstream <CharType> out;
+        std::basic_ostringstream<CharType> out;
     };
-    
 }
 
-typedef ::testing::Types <char, wchar_t>  CharacterTypes;
+typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Object, CharacterTypes);
 
 TYPED_TEST (Object, Empty) {
     value::object v;
     v.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected = convert <TypeParam> ("{ }");
+    auto const & expected = convert<TypeParam> ("{ }");
     EXPECT_EQ (expected, actual);
 }
 
@@ -81,9 +79,8 @@ TYPED_TEST (Object, SingleNumber) {
     v.write (this->out);
     auto const & actual = this->out.str ();
     EXPECT_THAT (split_tokens (actual),
-                 ::testing::ElementsAre (convert <TypeParam> ("key"),
-                                         convert <TypeParam> (":"),
-                                         convert <TypeParam> ("0x2a")));
+                 ::testing::ElementsAre (convert<TypeParam> ("key"), convert<TypeParam> (":"),
+                                         convert<TypeParam> ("0x2a")));
 }
 
 TYPED_TEST (Object, TwoNumbers) {
@@ -95,13 +92,11 @@ TYPED_TEST (Object, TwoNumbers) {
     auto const lines = split_lines (this->out.str ());
     ASSERT_EQ (2U, lines.size ());
     EXPECT_THAT (split_tokens (lines.at (0)),
-                 ::testing::ElementsAre (convert <TypeParam> ("k1"),
-                                         convert <TypeParam> (":"),
-                                         convert <TypeParam> ("0x2a")));
+                 ::testing::ElementsAre (convert<TypeParam> ("k1"), convert<TypeParam> (":"),
+                                         convert<TypeParam> ("0x2a")));
     EXPECT_THAT (split_tokens (lines.at (1)),
-                 ::testing::ElementsAre (convert <TypeParam> ("k2"),
-                                         convert <TypeParam> (":"),
-                                         convert <TypeParam> ("0x2b")));
+                 ::testing::ElementsAre (convert<TypeParam> ("k2"), convert<TypeParam> (":"),
+                                         convert<TypeParam> ("0x2b")));
 }
 
 TYPED_TEST (Object, KeyWithColon) {
@@ -112,9 +107,8 @@ TYPED_TEST (Object, KeyWithColon) {
 
     auto const actual = this->out.str ();
     EXPECT_THAT (split_tokens (actual),
-                 ::testing::ElementsAre (convert <TypeParam> ("k1:k2"),
-                                         convert <TypeParam> (":"),
-                                         convert <TypeParam> ("0x2a")));
+                 ::testing::ElementsAre (convert<TypeParam> ("k1:k2"), convert<TypeParam> (":"),
+                                         convert<TypeParam> ("0x2a")));
 }
 
 TYPED_TEST (Object, KeyWithColonSpace) {
@@ -123,7 +117,7 @@ TYPED_TEST (Object, KeyWithColonSpace) {
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
-    auto const expected = convert <TypeParam> ("\"k1: k2\" : 0x2a");
+    auto const expected = convert<TypeParam> ("\"k1: k2\" : 0x2a");
     EXPECT_EQ (expected, actual);
 }
 
@@ -132,8 +126,8 @@ TYPED_TEST (Object, KeyNeedingQuoting) {
         {"  k1", value::make_number (42)},
     }};
     v.write (this->out);
-    auto const actual   = this->out.str ();
-    auto const expected = convert <TypeParam> ("\"  k1\" : 0x2a");
+    auto const actual = this->out.str ();
+    auto const expected = convert<TypeParam> ("\"  k1\" : 0x2a");
     EXPECT_EQ (expected, actual);
 }
 
@@ -142,9 +136,9 @@ TYPED_TEST (Object, ValueAlignment) {
         {"short", value::make_number (42)}, {"much_longer", value::make_number (43)},
     }};
     v.write (this->out);
-    auto const actual   = this->out.str ();
-    auto const expected = convert <TypeParam> ("short       : 0x2a\n"
-                                               "much_longer : 0x2b");
+    auto const actual = this->out.str ();
+    auto const expected = convert<TypeParam> ("short       : 0x2a\n"
+                                              "much_longer : 0x2b");
     EXPECT_EQ (expected, actual);
 }
 
@@ -157,11 +151,10 @@ TYPED_TEST (Object, Nested) {
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
-    auto const expected = convert <TypeParam> (
-        "k1 : value1\n"
-        "k2 : \n"
-        "    ik1 : iv1\n"
-        "    ik2 : iv2");
+    auto const expected = convert<TypeParam> ("k1 : value1\n"
+                                              "k2 : \n"
+                                              "    ik1 : iv1\n"
+                                              "    ik2 : iv2");
     EXPECT_EQ (expected, actual);
 }
 

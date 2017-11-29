@@ -46,7 +46,7 @@
 /// \file copy.hpp
 
 #ifndef VACUUM_COPY_HPP
-#define VACUUM_COPY_HPP  (1)
+#define VACUUM_COPY_HPP (1)
 
 #include <memory>
 
@@ -56,7 +56,8 @@ namespace pstore {
 namespace vacuum {
     struct status;
     struct user_options;
-    void copy (std::shared_ptr <pstore::database> source, status * const st, user_options const & opt);
+    void copy (std::shared_ptr<pstore::database> source, status * const st,
+               user_options const & opt);
 }
 
 #endif // VACUUM_COPY_HPP

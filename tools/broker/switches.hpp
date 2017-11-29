@@ -55,20 +55,20 @@
 
 #include "config.hpp"
 
-#if defined (_WIN32)
+#if defined(_WIN32)
 using pstore_tchar = TCHAR;
 #else
 using pstore_tchar = char;
 #endif
 
 struct switches {
-    std::unique_ptr <std::string> playback_path;
-    std::unique_ptr <std::string> record_path;
-    std::unique_ptr <std::string> pipe_path;
+    std::unique_ptr<std::string> playback_path;
+    std::unique_ptr<std::string> record_path;
+    std::unique_ptr<std::string> pipe_path;
     unsigned num_read_threads = 2U;
 };
 
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // SWITCHES_HPP
 // eof: tools/broker/switches.hpp

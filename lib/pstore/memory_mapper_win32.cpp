@@ -73,7 +73,8 @@ namespace {
     /// A simple RAII-style class for managing a Win32 file mapping.
     class file_mapping {
     public:
-        file_mapping (pstore::file::file_handle & file, bool write_enabled, std::size_t mapping_size);
+        file_mapping (pstore::file::file_handle & file, bool write_enabled,
+                      std::size_t mapping_size);
         ~file_mapping () noexcept;
 
         HANDLE handle () {
@@ -88,7 +89,8 @@ namespace {
         HANDLE mapping_;
     };
 
-    file_mapping::file_mapping (pstore::file::file_handle & file, bool write_enabled, std::size_t mapping_size)
+    file_mapping::file_mapping (pstore::file::file_handle & file, bool write_enabled,
+                                std::size_t mapping_size)
             : mapping_ (::CreateFileMapping (file.raw_handle (),
                                              nullptr, // security attributes
                                              write_enabled ? PAGE_READWRITE : PAGE_READONLY,

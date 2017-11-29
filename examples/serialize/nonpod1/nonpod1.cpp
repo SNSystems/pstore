@@ -51,16 +51,16 @@ namespace {
     public:
         explicit foo (int a)
                 : a_ (a) {}
-        foo (foo const & ) = default;
+        foo (foo const &) = default;
 
         // The presence of virtual methods in this class means that it is not "standard layout".
         virtual ~foo () {}
 
-        foo & operator= (foo const & ) = default;
+        foo & operator= (foo const &) = default;
 
-        // Archival methods. The following two methods can be implemented on "non-standard layout" types to
-        // enable reading from and writing to an archive. An alternative approach (which also
-        // applies to standard layout types) is to write implement an explicit specialization
+        // Archival methods. The following two methods can be implemented on "non-standard layout"
+        // types to enable reading from and writing to an archive. An alternative approach (which
+        // also applies to standard layout types) is to write implement an explicit specialization
         // of pstore::serialize::serializer<Ty>.
 
         template <typename Archive>
@@ -86,11 +86,11 @@ namespace {
 }
 
 int main () {
-    std::vector <std::uint8_t> bytes;
+    std::vector<std::uint8_t> bytes;
 
     // Serialize an instance of "foo" to the "bytes" vector.
     {
-        pstore::serialize::archive::vector_writer writer {bytes};
+        pstore::serialize::archive::vector_writer writer{bytes};
         {
             foo f (42);
             std::cout << "Writing: " << f << '\n';

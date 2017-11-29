@@ -46,36 +46,36 @@
 #include "gmock/gmock.h"
 
 TEST (StickyAssign, Construction) {
-    pstore::serialize::sticky_assign <int> default_init;
+    pstore::serialize::sticky_assign<int> default_init;
     EXPECT_EQ (0, default_init.get ());
 
-    pstore::serialize::sticky_assign <int> explicit_init (32);
+    pstore::serialize::sticky_assign<int> explicit_init (32);
     EXPECT_EQ (32, explicit_init.get ());
 }
 
 TEST (StickyAssign, FirstAssignmentAfterDefaultConstruction) {
-    pstore::serialize::sticky_assign <int> v;
+    pstore::serialize::sticky_assign<int> v;
     v = 73;
     EXPECT_EQ (73, v.get ());
 }
 
 TEST (StickyAssign, TwoAssignmentsAfterDefaultConstruction) {
-    pstore::serialize::sticky_assign <int> v;
+    pstore::serialize::sticky_assign<int> v;
     v = 17;
     v = 42;
     EXPECT_EQ (17, v.get ());
 }
 
 TEST (StickyAssign, FirstAssignmentAfterInitialization) {
-    pstore::serialize::sticky_assign <int> v (17);
+    pstore::serialize::sticky_assign<int> v (17);
     v = 73;
     EXPECT_EQ (17, v.get ());
 }
 
 TEST (StickyAssign, Copy) {
-    pstore::serialize::sticky_assign <int> v1; // default construct v1.
-    pstore::serialize::sticky_assign <int> v2 (v1); // value construct v2.
-    v2 = 42; // assignment to v2 is ignored.
+    pstore::serialize::sticky_assign<int> v1;      // default construct v1.
+    pstore::serialize::sticky_assign<int> v2 (v1); // value construct v2.
+    v2 = 42;                                       // assignment to v2 is ignored.
     EXPECT_EQ (0, v2.get ());
 }
 

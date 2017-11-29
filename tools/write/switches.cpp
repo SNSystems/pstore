@@ -91,7 +91,7 @@ namespace {
     }
 
     option::ArgStatus add_string (option::Option const & option, bool msg) {
-        if (option.arg == nullptr || option.arg [0] == '\0') {
+        if (option.arg == nullptr || option.arg[0] == '\0') {
             if (msg) {
                 error_stream << NATIVE_TEXT ("Option '") << option.name
                              << NATIVE_TEXT ("' requires a key string\n'");
@@ -101,7 +101,7 @@ namespace {
         return option::ARG_OK;
     }
 
-     pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
+    pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
         if (opt == "disabled") {
             return pstore::database::vacuum_mode::disabled;
         } else if (opt == "immediate") {
@@ -110,7 +110,8 @@ namespace {
             return pstore::database::vacuum_mode::background;
         }
 
-        pstore::raise_error_code (std::make_error_code (write_error_code::unrecognized_compaction_mode));
+        pstore::raise_error_code (
+            std::make_error_code (write_error_code::unrecognized_compaction_mode));
     }
 
     option::ArgStatus compact_mode (option::Option const & option, bool msg) {
@@ -167,7 +168,7 @@ namespace {
 } // (anonymous namespace)
 
 
-std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
+std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
     switches sw;
 
     argc -= (argc > 0);
@@ -202,7 +203,8 @@ std::pair <switches, int> get_switches (int argc, TCHAR * argv []) {
 
     sw.db_path = pstore::utf::from_native_string (parse.nonOption (0));
 
-    for (int count = 1, non_options_count = parse.nonOptionsCount (); count < non_options_count; ++count) {
+    for (int count = 1, non_options_count = parse.nonOptionsCount (); count < non_options_count;
+         ++count) {
         std::string const path = pstore::utf::from_native_string (parse.nonOption (count));
         sw.files.emplace_back (path, path);
     }

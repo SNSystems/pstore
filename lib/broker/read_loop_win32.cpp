@@ -98,14 +98,16 @@ namespace {
         reader * initiate_read ();
         void cancel ();
 
-        list_member<reader> & get_list_member () { return listm_; }
+        list_member<reader> & get_list_member () {
+            return listm_;
+        }
 
     private:
         /// Must be the first object in the structure. The address of this member is passed to the
         /// read_completed() function when the OS notifies us of the completion of a read.
         OVERLAPPED overlap_ = {0};
 
-        list_member <reader> listm_;
+        list_member<reader> listm_;
 
         pstore::broker::unique_handle pipe_handle_;
         pstore::broker::message_ptr request_;
@@ -268,7 +270,7 @@ namespace {
         void cancel ();
 
     private:
-        intrusive_list <reader> list_;
+        intrusive_list<reader> list_;
 
         not_null<command_processor *> command_processor_;
         recorder * const record_file_;
@@ -278,9 +280,10 @@ namespace {
         /// release() method).
         class raii_insert {
         public:
-            raii_insert (intrusive_list <reader> & list, reader * r) noexcept;
+            raii_insert (intrusive_list<reader> & list, reader * r) noexcept;
             ~raii_insert () noexcept;
             reader * release () noexcept;
+
         private:
             reader * r_;
         };
@@ -300,7 +303,7 @@ namespace {
     // ~~~~~~~~~~~
     /// Associates the given pipe handle with this request object and starts a read operation.
     void request::attach_pipe (pstore::broker::unique_handle && pipe) {
-        auto r = std::make_unique <reader> (std::move (pipe), command_processor_, record_file_);
+        auto r = std::make_unique<reader> (std::move (pipe), command_processor_, record_file_);
 
         // Insert this new object into the list of active reads. We now have two pointers to it:
         // the unique_ptr and the one in the list.
@@ -321,17 +324,18 @@ namespace {
         }
     }
 
-    request::raii_insert::raii_insert (intrusive_list <reader> & list, reader * r) noexcept : r_ {r} {
+    request::raii_insert::raii_insert (intrusive_list<reader> & list, reader * r) noexcept
+            : r_{r} {
         list.insert_before (r, list.tail ());
     }
 
     request::raii_insert::~raii_insert () noexcept {
         if (r_) {
-            intrusive_list <reader>::erase (r_);
+            intrusive_list<reader>::erase (r_);
         }
     }
 
-    reader * request::raii_insert::release () noexcept { 
+    reader * request::raii_insert::release () noexcept {
         auto result = r_;
         r_ = nullptr;
         return result;
@@ -390,7 +394,8 @@ namespace {
     std::pair<pstore::broker::unique_handle, bool>
     create_and_connect_instance (std::wstring const & pipe_name, OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
-        static constexpr auto default_pipe_timeout = DWORD{5 * 1000}; // TODO: make this user-configurable.
+        static constexpr auto default_pipe_timeout =
+            DWORD{5 * 1000}; // TODO: make this user-configurable.
 
         pstore::broker::unique_handle pipe =
             ::CreateNamedPipeW (pipe_name.c_str (),

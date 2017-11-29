@@ -100,11 +100,12 @@ namespace pstore {
         // wait_until_impl
         // ~~~~~~~~~~~~~~~
         void fifo_path::wait_until_impl (std::chrono::milliseconds timeout) const {
-            auto const path= this->get ();
+            auto const path = this->get ();
             auto const path16 = pstore::utf::win32::to16 (path);
 
             auto const ms = timeout.count ();
-            auto const timeout_ms = ms < 1 ? DWORD{NMPWAIT_USE_DEFAULT_WAIT} : static_cast <DWORD> (ms);
+            auto const timeout_ms =
+                ms < 1 ? DWORD{NMPWAIT_USE_DEFAULT_WAIT} : static_cast<DWORD> (ms);
             if (!::WaitNamedPipeW (path16.c_str (), timeout_ms)) {
                 DWORD const errcode = ::GetLastError ();
                 if (errcode != ERROR_SEM_TIMEOUT && errcode != ERROR_FILE_NOT_FOUND) {
@@ -119,6 +120,6 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif //_WIN32
-//eof:lib/pstore_broker_intf/fifo_path_win32.cpp
+// eof:lib/pstore_broker_intf/fifo_path_win32.cpp
 
 // eof: lib/pstore_broker_intf/fifo_path_win32.cpp

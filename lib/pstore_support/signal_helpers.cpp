@@ -69,9 +69,9 @@ namespace pstore {
         act.sa_handler = func;
         sigemptyset (&act.sa_mask);
         act.sa_flags = 0;
-    #ifdef SA_INTERRUPT
+#ifdef SA_INTERRUPT
         act.sa_flags |= SA_INTERRUPT;
-    #endif
+#endif
         struct sigaction oact;
         if (sigaction (signo, &act, &oact) < 0) {
             return SIG_ERR;

@@ -85,16 +85,18 @@ namespace pstore {
         // slice
         // ~~~~~
         // converts codepoint indices start and end to byte offsets in the buffer at s
-        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (::pstore::gsl::czstring s, std::ptrdiff_t start,
-                                                         std::ptrdiff_t end) {
+        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (::pstore::gsl::czstring s,
+                                                         std::ptrdiff_t start, std::ptrdiff_t end) {
             if (s == nullptr) {
                 return std::make_pair (-1, -1);
             }
 
             auto const first = s;
             auto const last = s + strlen (s);
-            auto p1 = index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
-            auto p2 = index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
+            auto p1 =
+                index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
+            auto p2 =
+                index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
             return std::make_pair ((p1 != last) ? p1 - s : -1, (p2 != last) ? p2 - s : -1);
         }
     } // namespace utf

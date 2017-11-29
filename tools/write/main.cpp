@@ -106,7 +106,7 @@ namespace {
             assert (expected_size >= 0);
             if (bytes_read !=
                 static_cast<std::make_unsigned<decltype (expected_size)>::type> (expected_size)) {
-                error_stream <<  NATIVE_TEXT ("Did not read the number of bytes requested");
+                error_stream << NATIVE_TEXT ("Did not read the number of bytes requested");
                 std::exit (EXIT_FAILURE);
             }
 
@@ -139,11 +139,11 @@ namespace {
 
 
 #if PSTORE_CPP_EXCEPTIONS
-#define TRY  try
-#define CATCH(ex,code) catch (ex) code
+#define TRY try
+#define CATCH(ex, code) catch (ex) code
 #else
 #define TRY
-#define CATCH(ex,code)
+#define CATCH(ex, code)
 #endif
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -176,13 +176,13 @@ int main (int argc, char * argv[]) {
 
             // Scan through the string value arguments from the command line. These are of
             // the form key,value where value is a string which is stored directly.
-            for (std::pair <std::string, std::string> const & v : opt.add) {
+            for (std::pair<std::string, std::string> const & v : opt.add) {
                 write->insert_or_assign (transaction, v.first,
                                          append_string (transaction, v.second));
             }
 
             // Now record the files requested on the command line.
-            for (std::pair <std::string, std::string> const & v : opt.files) {
+            for (std::pair<std::string, std::string> const & v : opt.files) {
                 if (!add_file (transaction, *write, v.first, v.second)) {
                     error_stream << to_native_string (v.second)
                                  << NATIVE_TEXT (": No such file or directory\n");

@@ -58,13 +58,13 @@ int main () {
         std::shared_ptr<char> ptr;
         std::tie (ptr, addr) = t.template alloc_rw<char> (size);
 
-        std::memcpy (ptr.get (), value.data (), size);   // Copy it to the store.
+        std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
 
         // Tell the index about this new data.
         auto index = db.get_write_index ();
         index->insert_or_assign (t, key, pstore::record{addr, size});
     }
 
-    t.commit ();  // Finalize the transaction.
+    t.commit (); // Finalize the transaction.
 }
 // eof: examples/write_basic/write_basic.cpp

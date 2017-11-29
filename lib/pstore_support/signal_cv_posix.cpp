@@ -59,13 +59,13 @@ namespace pstore {
     // (ctor)
     // ~~~~~~
     signal_cv::signal_cv ()
-            : read_fd_ {}
-            , write_fd_ {} {
+            : read_fd_{}
+            , write_fd_{} {
 
         enum { read_index, write_index, last_index };
         int fds_[last_index] = {0};
         if (::pipe (&fds_[0]) == -1) {
-            raise (errno_erc {errno}, "pipe");
+            raise (errno_erc{errno}, "pipe");
         }
 
         read_fd_.reset (fds_[read_index]);
@@ -82,7 +82,7 @@ namespace pstore {
     // ~~~~
     void signal_cv::wait () {
         auto const read_fd = read_fd_.get ();
-        fd_set readfds {};
+        fd_set readfds{};
         FD_ZERO (&readfds);
         // Add the read end of pipe to 'readfds'.
         FD_SET (read_fd, &readfds); // NOLINT
@@ -94,13 +94,13 @@ namespace pstore {
                 continue; // Restart if interrupted by signal.
             }
             if (err == -1) {
-                raise (errno_erc {errno}, "select");
+                raise (errno_erc{errno}, "select");
             }
 
-            char buffer {};
+            char buffer{};
             ssize_t bytes_read = ::read (read_fd, &buffer, sizeof (buffer));
             if (bytes_read == -1) {
-                raise (errno_erc {errno}, "read");
+                raise (errno_erc{errno}, "read");
             }
         } while (!FD_ISSET (read_fd, &readfds));
     }
@@ -120,13 +120,13 @@ namespace pstore {
     // make_non_blocking
     // ~~~~~~~~~~~~~~~~~
     void signal_cv::make_non_blocking (int fd) {
-        int flags = ::fcntl (fd, F_GETFL);// NOLINT
+        int flags = ::fcntl (fd, F_GETFL); // NOLINT
         if (flags == -1) {
-            raise (errno_erc {errno}, "fcntl");
+            raise (errno_erc{errno}, "fcntl");
         }
         flags |= O_NONBLOCK;
-        if (::fcntl (fd, F_SETFL, flags) == -1) {// NOLINT
-            raise (errno_erc {errno}, "fcntl");
+        if (::fcntl (fd, F_SETFL, flags) == -1) { // NOLINT
+            raise (errno_erc{errno}, "fcntl");
         }
     }
 

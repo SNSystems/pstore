@@ -71,13 +71,13 @@
 
 namespace pstore {
 
-std::size_t get_pshmnamlen () {
+    std::size_t get_pshmnamlen () {
 #ifdef _WIN32
-    return MAX_PATH;
+        return MAX_PATH;
 #else
-    return PSHMNAMLEN;
+        return PSHMNAMLEN;
 #endif
-}
+    }
 
 } // namespace pstore
 // eof: lib/pstore/shared_memory.cpp

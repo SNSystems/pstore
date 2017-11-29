@@ -95,7 +95,8 @@ namespace pstore {
                 using value_type = typename std::remove_const<element_type_>::type;
                 using difference_type = typename Span::index_type;
 
-                using reference = typename std::conditional<IsConst, element_type_ const, element_type_>::type &;
+                using reference =
+                    typename std::conditional<IsConst, element_type_ const, element_type_>::type &;
                 using pointer = typename std::add_pointer<reference>::type;
 
                 constexpr span_iterator () noexcept
@@ -177,11 +178,13 @@ namespace pstore {
                     return *(*this + n);
                 }
 
-                constexpr friend bool operator== (span_iterator const & lhs, span_iterator const & rhs) noexcept {
+                constexpr friend bool operator== (span_iterator const & lhs,
+                                                  span_iterator const & rhs) noexcept {
                     return lhs.span_ == rhs.span_ && lhs.index_ == rhs.index_;
                 }
 
-                constexpr friend bool operator!= (span_iterator const & lhs, span_iterator const & rhs) noexcept {
+                constexpr friend bool operator!= (span_iterator const & lhs,
+                                                  span_iterator const & rhs) noexcept {
                     return !(lhs == rhs);
                 }
 
@@ -190,15 +193,18 @@ namespace pstore {
                     return lhs.index_ < rhs.index_;
                 }
 
-                friend bool operator<= (span_iterator const & lhs, span_iterator const & rhs) noexcept {
+                friend bool operator<= (span_iterator const & lhs,
+                                        span_iterator const & rhs) noexcept {
                     return !(rhs < lhs);
                 }
 
-                friend bool operator> (span_iterator const & lhs, span_iterator const & rhs) noexcept {
+                friend bool operator> (span_iterator const & lhs,
+                                       span_iterator const & rhs) noexcept {
                     return rhs < lhs;
                 }
 
-                friend bool operator>= (span_iterator const & lhs, span_iterator const & rhs) noexcept {
+                friend bool operator>= (span_iterator const & lhs,
+                                        span_iterator const & rhs) noexcept {
                     return !(rhs > lhs);
                 }
 
@@ -378,8 +384,8 @@ namespace pstore {
                 return {data () + (size () - count), count};
             }
 
-            span<element_type, dynamic_extent>
-            subspan (index_type offset, index_type count = dynamic_extent) const {
+            span<element_type, dynamic_extent> subspan (index_type offset,
+                                                        index_type count = dynamic_extent) const {
                 assert ((offset == 0 || (offset > 0 && offset <= size ())) &&
                         (count == dynamic_extent || (count >= 0 && offset + count <= size ())));
                 return {data () + offset, count == dynamic_extent ? size () - offset : count};
@@ -478,7 +484,8 @@ namespace pstore {
         constexpr bool operator== (span<ElementType, FirstExtent> const & lhs,
                                    span<ElementType, SecondExtent> const & rhs) {
 
-            return lhs.size () == rhs.size () && std::equal (lhs.begin (), lhs.end (), rhs.begin ());
+            return lhs.size () == rhs.size () &&
+                   std::equal (lhs.begin (), lhs.end (), rhs.begin ());
         }
 
         template <typename ElementType, std::ptrdiff_t Extent>

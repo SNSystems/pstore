@@ -71,21 +71,21 @@ TEST (SmallVector, ExplicitCtor0) {
 }
 
 TEST (SmallVector, ExplicitCtorGreaterThanStackBuffer) {
-    pstore::small_vector<int, 8> b (std::size_t {10});
+    pstore::small_vector<int, 8> b (std::size_t{10});
     EXPECT_EQ (10U, b.size ());
     EXPECT_EQ (10U, b.capacity ());
     EXPECT_EQ (10 * sizeof (int), b.size_bytes ());
 }
 
 TEST (SmallVector, CtorInitializerList) {
-    pstore::small_vector<int, 8> b {1, 2, 3};
+    pstore::small_vector<int, 8> b{1, 2, 3};
     EXPECT_EQ (3U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_THAT (b, ::testing::ElementsAre (1, 2, 3));
 }
 
 TEST (SmallVector, MoveCtor) {
-    pstore::small_vector<int, 4> a (std::size_t {4});
+    pstore::small_vector<int, 4> a (std::size_t{4});
     std::iota (a.begin (), a.end (), 0); // fill with increasing values
     pstore::small_vector<int, 4> b (std::move (a));
 
@@ -93,13 +93,13 @@ TEST (SmallVector, MoveCtor) {
 }
 
 TEST (SmallVector, AssignInitializerList) {
-    pstore::small_vector<int, 3> b {1, 2, 3};
+    pstore::small_vector<int, 3> b{1, 2, 3};
     b.assign ({4, 5, 6, 7});
     EXPECT_THAT (b, ::testing::ElementsAre (4, 5, 6, 7));
 }
 
 TEST (SmallVector, SizeAfterResizeLarger) {
-    pstore::small_vector<int, 4> b(std::size_t{4});
+    pstore::small_vector<int, 4> b (std::size_t{4});
     std::size_t const size{10};
     b.resize (size);
     EXPECT_EQ (size, b.size ());
@@ -110,7 +110,7 @@ TEST (SmallVector, SizeAfterResizeLarger) {
 TEST (SmallVector, ContentsAfterResizeLarger) {
     constexpr auto orig_size = std::size_t{8};
     constexpr auto new_size = std::size_t{10};
-  
+
     pstore::small_vector<int, orig_size> b (orig_size);
     std::iota (std::begin (b), std::end (b), 37);
     b.resize (new_size);
@@ -209,7 +209,7 @@ TEST (SmallVector, IteratorConstReverse) {
     // Wrap the buffer construction code in a lambda to hide the non-const
     // small_vector instance.
     auto const & cbuffer = []() {
-        pstore::small_vector<int, 4> buffer(std::size_t{4});
+        pstore::small_vector<int, 4> buffer (std::size_t{4});
         std::iota (std::begin (buffer), std::end (buffer), 42); // fill with increasing values
         return buffer;
     }();
@@ -277,7 +277,7 @@ TEST (SmallVector, AppendIteratorRange) {
     pstore::small_vector<int, 4> a (std::size_t{4});
     std::iota (std::begin (a), std::end (a), 0);
 
-    std::array <int, 4> extra;
+    std::array<int, 4> extra;
     std::iota (std::begin (extra), std::end (extra), 100);
 
     a.append (std::begin (extra), std::end (extra));

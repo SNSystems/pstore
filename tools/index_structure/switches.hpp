@@ -54,33 +54,33 @@
 
 #ifdef _WIN32
 #include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT(str)
+#define NATIVE_TEXT(str) _TEXT (str)
 #else
 typedef char TCHAR;
 #define NATIVE_TEXT(str) str
 #endif
 
-#if defined (_WIN32) && !PSTORE_IS_INSIDE_LLVM
+#if defined(_WIN32) && !PSTORE_IS_INSIDE_LLVM
 using pstore_tchar = TCHAR;
 #else
 using pstore_tchar = char;
 #endif
 
 struct switches {
-    std::bitset <static_cast <std::underlying_type <indices>::type> (indices::last)> selected;
+    std::bitset<static_cast<std::underlying_type<indices>::type> (indices::last)> selected;
     unsigned revision = pstore::head_revision;
     std::string db_path;
 
     bool test (indices idx) const {
-        auto const position = static_cast <std::underlying_type<indices>::type> (idx);
+        auto const position = static_cast<std::underlying_type<indices>::type> (idx);
         assert (idx < indices::last);
         return selected.test (position);
     }
 };
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv []);
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
-#endif //PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
-//eof:tools/index_structure/switches.hpp
+#endif // PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
+// eof:tools/index_structure/switches.hpp
 
 // eof: tools/index_structure/switches.hpp

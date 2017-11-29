@@ -151,10 +151,10 @@ namespace pstore {
         namespace archive {
 
             template <typename T>
-            auto unsigned_cast (T const & t) -> typename std::make_unsigned <T>::type {
-                using unsigned_type = typename std::make_unsigned <T>::type;
+            auto unsigned_cast (T const & t) -> typename std::make_unsigned<T>::type {
+                using unsigned_type = typename std::make_unsigned<T>::type;
                 assert (t >= 0);
-                return static_cast <unsigned_type> (t);
+                return static_cast<unsigned_type> (t);
             }
 
             /// The archiver put() and [optional] putn() methods can optionally return a
@@ -163,8 +163,7 @@ namespace pstore {
             /// make sense. For example, an archiver which writes to stdout can't really say
             /// anything useful. In these cases, we use 'void_type' to be a standin for the
             /// void type.
-            struct void_type {
-            };
+            struct void_type {};
 
 
             // *****************************
@@ -179,12 +178,12 @@ namespace pstore {
                 using result_type = typename policy_type::result_type;
 
                 // No copying or assignment.
-                writer_base (writer_base const & ) = delete;
-                writer_base & operator= (writer_base const & ) = delete;
+                writer_base (writer_base const &) = delete;
+                writer_base & operator= (writer_base const &) = delete;
 
                 // Move is allowed.
-                writer_base (writer_base && ) noexcept = default;
-                writer_base & operator=(writer_base && ) noexcept = default;
+                writer_base (writer_base &&) noexcept = default;
+                writer_base & operator= (writer_base &&) noexcept = default;
 
                 virtual ~writer_base () {
                     this->flush ();
@@ -237,7 +236,8 @@ namespace pstore {
                     return bytes_consumed_;
                 }
 
-                /// \brief Returns the number of bytes that the policy object wrote to its final destination.
+                /// \brief Returns the number of bytes that the policy object wrote to its final
+                /// destination.
                 std::size_t bytes_produced () const {
                     return bytes_produced_helper (*this).get (policy_, nullptr);
                 }
@@ -262,8 +262,7 @@ namespace pstore {
                 class bytes_produced_helper {
                 public:
                     explicit bytes_produced_helper (writer_base const & writer)
-                            : writer_ {writer} {
-                    }
+                            : writer_{writer} {}
                     template <typename Policy>
                     std::size_t get (Policy const & /*policy*/, ...) {
                         return writer_.bytes_consumed ();
@@ -272,6 +271,7 @@ namespace pstore {
                     std::size_t get (Policy const & policy, decltype (&Policy::bytes_produced)) {
                         return policy.bytes_produced ();
                     }
+
                 private:
                     writer_base const & writer_;
                 };
@@ -290,7 +290,7 @@ namespace pstore {
                     // ellipsis parameter has the lowest ranking for overload resolution.
                     template <typename P, typename Span>
                     static auto invoke (P & policy, Span span, ...) -> result_type {
-                        sticky_assign <result_type> r;
+                        sticky_assign<result_type> r;
                         for (auto & v : span) {
                             r = policy.put (v);
                         }
@@ -300,7 +300,8 @@ namespace pstore {
                     // This overload is called if P has a putn<>() method. SFINAE means that we fall
                     // back to the ellipsis overload if it does not.
                     template <typename P, typename Span>
-                    static auto invoke (P & policy, Span span, decltype (&P::template putn<Span>)) -> result_type {
+                    static auto invoke (P & policy, Span span, decltype (&P::template putn<Span>))
+                        -> result_type {
                         return policy.putn (span);
                     }
                 };
@@ -531,7 +532,7 @@ namespace pstore {
                         return {};
                     }
                     template <typename SpanType>
-                    auto putn (SpanType ) -> result_type {
+                    auto putn (SpanType) -> result_type {
                         return {};
                     }
 
@@ -629,8 +630,7 @@ namespace pstore {
                 template <typename SpanType>
                 buffer_reader (SpanType span)
                         : first_ (reinterpret_cast<std::uint8_t const *> (span.data ()))
-                        , last_ (first_ + span.size_bytes ()) {
-                }
+                        , last_ (first_ + span.size_bytes ()) {}
 
                 /// Reads a single instance of a standard-layout type T from the input iterator and
                 /// returns the value extracted.
@@ -640,7 +640,8 @@ namespace pstore {
                     static_assert (std::is_standard_layout<T>::value,
                                    "buffer_reader(T&) can only read standard-layout types");
                     if (first_ + sizeof (T) > last_) {
-                        raise (std::errc::no_buffer_space, "Attempted to read past the end of a buffer.");
+                        raise (std::errc::no_buffer_space,
+                               "Attempted to read past the end of a buffer.");
                     }
                     std::memcpy (&result, first_, sizeof (T));
                     first_ += sizeof (T);

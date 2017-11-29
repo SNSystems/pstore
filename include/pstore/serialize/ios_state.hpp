@@ -50,37 +50,34 @@
 #include <iosfwd>
 
 namespace pstore {
-namespace serialize {
+    namespace serialize {
 
-/// \brief A class used to save an iostream's formatting flags on construction
-/// and restore them on destruction.
-/// Normally used to manage the restoration of the flags on exit from a scope.
-class ios_flags_saver {
-public:
-    explicit ios_flags_saver (std::ios_base & stream)
-        : ios_flags_saver (stream, stream.flags ()) {
-    }
-    ios_flags_saver (std::ios_base & stream,
-                     std::ios_base::fmtflags const & flags)
-        : stream_ (stream)
-        , flags_ (flags) {
-    }
+        /// \brief A class used to save an iostream's formatting flags on construction
+        /// and restore them on destruction.
+        /// Normally used to manage the restoration of the flags on exit from a scope.
+        class ios_flags_saver {
+        public:
+            explicit ios_flags_saver (std::ios_base & stream)
+                    : ios_flags_saver (stream, stream.flags ()) {}
+            ios_flags_saver (std::ios_base & stream, std::ios_base::fmtflags const & flags)
+                    : stream_ (stream)
+                    , flags_ (flags) {}
 
-    // No copying or assignment.
-    ios_flags_saver (ios_flags_saver const &) = delete;
-    ios_flags_saver & operator= (ios_flags_saver const &) = delete;
+            // No copying or assignment.
+            ios_flags_saver (ios_flags_saver const &) = delete;
+            ios_flags_saver & operator= (ios_flags_saver const &) = delete;
 
-    ~ios_flags_saver () {
-        stream_.flags (flags_);
-    }
+            ~ios_flags_saver () {
+                stream_.flags (flags_);
+            }
 
-private:
-    std::ios_base & stream_;
-    std::ios_base::fmtflags const flags_;
-};
+        private:
+            std::ios_base & stream_;
+            std::ios_base::fmtflags const flags_;
+        };
 
-} //namespace serialize
-} //namespace pstore
+    } // namespace serialize
+} // namespace pstore
 
-#endif //SERIALIZE_IOS_FLAGS_SAVER_HPP
+#endif // SERIALIZE_IOS_FLAGS_SAVER_HPP
 // eof: include/pstore/serialize/ios_state.hpp

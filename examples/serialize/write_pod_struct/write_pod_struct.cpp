@@ -48,8 +48,8 @@
 
 int main () {
     using namespace pstore::serialize;
-    std::vector <std::uint8_t> bytes;
-    archive::vector_writer writer {bytes};
+    std::vector<std::uint8_t> bytes;
+    archive::vector_writer writer{bytes};
     struct pod_type {
         int a, b;
     } pt{30, 40};

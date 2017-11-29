@@ -47,35 +47,33 @@
 #include "convert.hpp"
 namespace {
     template <typename CharType>
-        class Array : public ::testing::Test {
-        public:
-            void SetUp () final {
-            }
-            void TearDown () final {
-            }
+    class Array : public ::testing::Test {
+    public:
+        void SetUp () final {}
+        void TearDown () final {}
 
-        protected:
-            std::basic_ostringstream <CharType> out;
-        };
+    protected:
+        std::basic_ostringstream<CharType> out;
+    };
 }
 
-typedef ::testing::Types <char, wchar_t>  CharacterTypes;
+typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Array, CharacterTypes);
 
 
 TYPED_TEST (Array, Empty) {
     value::array arr;
     arr.write (this->out);
-    auto const actual     = this->out.str ();
-    auto const & expected = convert <TypeParam> ("[ ]");
+    auto const actual = this->out.str ();
+    auto const & expected = convert<TypeParam> ("[ ]");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Array, TwoNumbers) {
     value::array arr ({value::make_number (3), value::make_number (5)});
     arr.write (this->out);
-    auto const & actual   = this->out.str ();
-    auto const & expected = convert <TypeParam> ("[ 0x3, 0x5 ]");
+    auto const & actual = this->out.str ();
+    auto const & expected = convert<TypeParam> ("[ 0x3, 0x5 ]");
     EXPECT_EQ (expected, actual);
 }
 
@@ -85,10 +83,9 @@ TYPED_TEST (Array, TwoStrings) {
     });
     arr.write (this->out);
     auto const & actual = this->out.str ();
-    auto const & expected =
-        convert <TypeParam> ("\n"
-                             "- Hello\n"
-                             "- World");
+    auto const & expected = convert<TypeParam> ("\n"
+                                                "- Hello\n"
+                                                "- World");
 
     EXPECT_EQ (expected, actual);
 }

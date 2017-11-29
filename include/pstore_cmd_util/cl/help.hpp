@@ -54,8 +54,9 @@ namespace pstore {
             class help : public option {
             public:
                 template <class... Mods>
-                explicit help (std::string const & program_name, std::string const & program_overview, Mods const &... mods)
-                        : program_name_ {program_name}
+                explicit help (std::string const & program_name,
+                               std::string const & program_overview, Mods const &... mods)
+                        : program_name_{program_name}
                         , overview_{program_overview} {
 
                     static_assert (max_width > overlong_opt_max,

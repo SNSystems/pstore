@@ -61,13 +61,13 @@ using pstore::index::details::depth_is_internal_node;
 using pstore::index::details::index_pointer;
 using pstore::index::details::hash_index_bits;
 
-//FIXME: there are numerous definitions of these macros. Put them in portab.hpp.
+// FIXME: there are numerous definitions of these macros. Put them in portab.hpp.
 #ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY  try
-#define CATCH(ex,proc)  catch (ex) proc
+#define TRY try
+#define CATCH(ex, proc) catch (ex) proc
 #else
 #define TRY
-#define CATCH(ex,proc)
+#define CATCH(ex, proc)
 #endif
 
 
@@ -109,8 +109,9 @@ namespace {
     }
 
     template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-    std::string dump_leaf (pstore::index::hamt_map<KeyType, ValueType, Hash, KeyEqual> const & index,
-                           std::ostream & os, pstore::address addr) {
+    std::string
+    dump_leaf (pstore::index::hamt_map<KeyType, ValueType, Hash, KeyEqual> const & index,
+               std::ostream & os, pstore::address addr) {
         auto const this_id = "leaf" + std::to_string (addr.absolute ());
         auto const kvp = index.load_leaf_node (addr);
 
@@ -146,7 +147,8 @@ namespace {
     std::string dump_intermediate (IndexType const & index, std::ostream & os, index_pointer node,
                                    unsigned shifts) {
         assert (!node.is_heap ());
-        auto const this_id = node_type_name <NodeType>::name + std::to_string (node.addr.absolute ());
+        auto const this_id =
+            node_type_name<NodeType>::name + std::to_string (node.addr.absolute ());
 
         std::shared_ptr<void const> store_ptr;
         NodeType const * ptr = nullptr;
@@ -167,8 +169,9 @@ namespace {
             assert (node.is_address ());
             return dump_leaf (index, os, node.addr);
         }
-        return depth_is_internal_node (shifts) ? dump_intermediate<internal_node> (index, os, node, shifts)
-                                               : dump_intermediate<linear_node> (index, os, node, shifts);
+        return depth_is_internal_node (shifts)
+                   ? dump_intermediate<internal_node> (index, os, node, shifts)
+                   : dump_intermediate<linear_node> (index, os, node, shifts);
     }
 
     template <typename IndexType>
@@ -192,15 +195,16 @@ namespace {
     template <indices Index>
     void dump_if_selected (switches const & opt, pstore::database & db) {
         if (opt.test (Index)) {
-            auto accessor = index_accessor <Index>::get ();
-            char const * name = index_names [static_cast <std::underlying_type <indices>::type> (Index)];
-            dump_index ((db.*accessor) (false/*create*/), name);
+            auto accessor = index_accessor<Index>::get ();
+            char const * name =
+                index_names[static_cast<std::underlying_type<indices>::type> (Index)];
+            dump_index ((db.*accessor) (false /*create*/), name);
         }
     }
 } // anonymous namespace
 
 
-#if defined (_WIN32) && !PSTORE_IS_INSIDE_LLVM
+#if defined(_WIN32) && !PSTORE_IS_INSIDE_LLVM
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
@@ -217,17 +221,19 @@ int main (int argc, char * argv[]) {
         pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
         db.sync (opt.revision);
 
-        dump_if_selected <indices::digest> (opt, db);
-        dump_if_selected <indices::name> (opt, db);
-        dump_if_selected <indices::write> (opt, db);
-    } CATCH (std::exception const & ex, {
-        std::cerr << "Error: " << ex.what () << '\n';
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
+        dump_if_selected<indices::digest> (opt, db);
+        dump_if_selected<indices::name> (opt, db);
+        dump_if_selected<indices::write> (opt, db);
+    }
+    CATCH (std::exception const & ex,
+           {
+               std::cerr << "Error: " << ex.what () << '\n';
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (..., {
         std::cerr << "Unknown exception\n";
         exit_code = EXIT_FAILURE;
-    })
-    return exit_code;
+    }) return exit_code;
 }
 
 // eof: tools/index_structure/index_structure.cpp

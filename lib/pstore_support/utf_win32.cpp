@@ -281,8 +281,9 @@ namespace pstore {
                 auto const input_length =
                     std::min (static_cast<common> (length),
                               static_cast<common> (std::numeric_limits<int>::max ()));
-                int size_needed = ::MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS, mbcs,
-                                                         static_cast<int>(input_length), nullptr, 0);
+                int size_needed =
+                    ::MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS, mbcs,
+                                           static_cast<int> (input_length), nullptr, 0);
                 if (size_needed == 0) {
                     raise (::pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
                 }
@@ -291,7 +292,8 @@ namespace pstore {
                 // string
                 std::wstring wstr_to (size_needed, L'\0');
                 size_needed = ::MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS, mbcs,
-					static_cast<int>(input_length), &wstr_to[0], size_needed);
+                                                     static_cast<int> (input_length), &wstr_to[0],
+                                                     size_needed);
                 if (size_needed == 0) {
                     raise (::pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
                 }

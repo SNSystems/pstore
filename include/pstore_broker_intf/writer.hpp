@@ -73,8 +73,8 @@ namespace pstore {
                     unsigned max_retries, update_callback cb = default_callback);
             writer (fifo_path::client_pipe && pipe, update_callback cb = default_callback);
 
-            writer (fifo_path const & fifo, duration_type retry_timeout,
-                    unsigned max_retries, update_callback cb = default_callback);
+            writer (fifo_path const & fifo, duration_type retry_timeout, unsigned max_retries,
+                    update_callback cb = default_callback);
             writer (fifo_path const & fifo, update_callback cb = default_callback);
             virtual ~writer () = default;
 

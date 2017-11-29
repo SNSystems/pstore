@@ -55,54 +55,45 @@ namespace {
 
     using namespace llvm;
 
-    cl::opt<std::string> PipePath (
-        "pipe-path",
-        cl::desc("Overrides the FIFO path to which messages are written."),
-        cl::init("")
-    );
+    cl::opt<std::string>
+        PipePath ("pipe-path", cl::desc ("Overrides the FIFO path to which messages are written."),
+                  cl::init (""));
 
-    cl::opt<unsigned> Flood(
-        "flood",
-        cl::desc("Flood the broker with a number of ECHO messages."),
-        cl::init(0)
-    );
-    cl::alias Flood2("m", cl::desc("Alias for --flood"), cl::aliasopt (Flood));
+    cl::opt<unsigned> Flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
+                             cl::init (0));
+    cl::alias Flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (Flood));
 
-    cl::opt<unsigned> RetryTimeout(
-        "retry-timeout",
-        cl::desc("The timeout for connection retries to the broker (ms)."),
-        cl::init(switches {}.retry_timeout.count ())
-    );
-    cl::opt<unsigned> MaxRetries(
-        "max-retries",
-        cl::desc("The maximum number of retries that will be attempted."),
-        cl::init(switches {}.max_retries)
-    );
+    cl::opt<unsigned>
+        RetryTimeout ("retry-timeout",
+                      cl::desc ("The timeout for connection retries to the broker (ms)."),
+                      cl::init (switches{}.retry_timeout.count ()));
+    cl::opt<unsigned>
+        MaxRetries ("max-retries",
+                    cl::desc ("The maximum number of retries that will be attempted."),
+                    cl::init (switches{}.max_retries));
 
-    cl::opt<bool> Kill(
-        "kill",
-        cl::desc ("Ask the broker to quit after commands have been processed.")
-    );
+    cl::opt<bool> Kill ("kill",
+                        cl::desc ("Ask the broker to quit after commands have been processed."));
     cl::alias Kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (Kill));
 
-    cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc("<verb>"));
-    cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc("<path>"));
+    cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
+    cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc ("<path>"));
 
-    auto pathOption (std::string const & path) -> pstore::cmd_util::cl::maybe <std::string> {
+    auto pathOption (std::string const & path) -> pstore::cmd_util::cl::maybe<std::string> {
         if (path.length () > 0) {
             return pstore::cmd_util::cl::just (path);
         }
-        return pstore::cmd_util::cl::nothing <std::string> ();
+        return pstore::cmd_util::cl::nothing<std::string> ();
     }
 
 } // anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, char * argv []) {
+std::pair<switches, int> get_switches (int argc, char * argv[]) {
     llvm::cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
     switches Result;
-    Result.verb = pstore::utf::from_native_string(Verb);
-    Result.path = pstore::utf::from_native_string(Path);
+    Result.verb = pstore::utf::from_native_string (Verb);
+    Result.path = pstore::utf::from_native_string (Path);
     Result.retry_timeout = std::chrono::milliseconds (RetryTimeout);
     Result.max_retries = MaxRetries;
     Result.flood = Flood;

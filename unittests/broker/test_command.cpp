@@ -74,7 +74,9 @@ namespace {
 
     class Command : public ::testing::Test {
     public:
-        Command () : cp_ (1U), fifo_{nullptr} {}
+        Command ()
+                : cp_ (1U)
+                , fifo_{nullptr} {}
 
     protected:
         mock_cp cp_;

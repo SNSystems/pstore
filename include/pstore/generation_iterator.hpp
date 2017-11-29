@@ -70,25 +70,25 @@ namespace pstore {
             this->validate ();
         }
         generation_iterator (generation_iterator &&) = default;
-        generation_iterator & operator=(generation_iterator &&) = default;
+        generation_iterator & operator= (generation_iterator &&) = default;
         generation_iterator (generation_iterator const &) = default;
-        generation_iterator & operator=(generation_iterator const &) = default;
+        generation_iterator & operator= (generation_iterator const &) = default;
 
-        bool operator==(generation_iterator const & rhs) const {
+        bool operator== (generation_iterator const & rhs) const {
             database const * const ldb = &db_;
             database const * const rdb = &rhs.db_;
             return std::tie (ldb, pos_) == std::tie (rdb, rhs.pos_);
         }
-        bool operator!=(generation_iterator const & rhs) const {
-            return !operator==(rhs);
+        bool operator!= (generation_iterator const & rhs) const {
+            return !operator== (rhs);
         }
 
-        pstore::address operator*() const {
+        pstore::address operator* () const {
             return pos_;
         }
 
-        generation_iterator & operator++(); // pre-increment
-        generation_iterator operator++(int); // post-increment
+        generation_iterator & operator++ ();  // pre-increment
+        generation_iterator operator++ (int); // post-increment
 
     private:
         bool validate () const;

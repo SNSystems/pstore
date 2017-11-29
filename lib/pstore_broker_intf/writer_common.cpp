@@ -56,7 +56,7 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         writer::writer (fifo_path::client_pipe && pipe, duration_type retry_timeout,
-                    unsigned max_retries, update_callback cb)
+                        unsigned max_retries, update_callback cb)
                 : fd_{std::move (pipe)}
                 , retry_timeout_{retry_timeout}
                 , max_retries_{max_retries}
@@ -65,8 +65,8 @@ namespace pstore {
         writer::writer (fifo_path::client_pipe && pipe, update_callback cb)
                 : writer (std::move (pipe), duration_type{0}, 0U, cb) {}
 
-        writer::writer (fifo_path const & fifo, duration_type retry_timeout,
-                    unsigned max_retries, update_callback cb)
+        writer::writer (fifo_path const & fifo, duration_type retry_timeout, unsigned max_retries,
+                        update_callback cb)
                 : fd_{fifo.open_client_pipe ()}
                 , retry_timeout_{retry_timeout}
                 , max_retries_{max_retries}
@@ -77,8 +77,7 @@ namespace pstore {
 
         // default_callback [static]
         // ~~~~~~~~~~~~~~~~
-        void writer::default_callback () {
-        }
+        void writer::default_callback () {}
 
         // write
         // ~~~~~

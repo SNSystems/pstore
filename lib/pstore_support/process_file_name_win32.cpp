@@ -91,7 +91,7 @@ namespace pstore {
         return {pstore::utf::win32::to8 (file_name.data ())};
     }
 
-} //end namespace pstore
+} // end namespace pstore
 
 #endif // _WIN32
 // eof: lib/pstore_support/process_file_name_win32.cpp

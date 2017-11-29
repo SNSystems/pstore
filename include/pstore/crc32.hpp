@@ -62,7 +62,7 @@ namespace pstore {
         auto crc = std::uint32_t{0};
         auto size = buf.size_bytes ();
         while (size--) {
-            crc = details::crc32_tab [(crc ^ *p++) & 0xFF] ^ (crc >> 8);
+            crc = details::crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
         }
         return crc ^ ~0U;
     }

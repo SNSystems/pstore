@@ -70,7 +70,7 @@ namespace {
     // these test vectors are used as part of the FNV test suite
     struct test_vector {
         void const * buf; // start of test vector buffer
-        std::size_t len;          // length of test vector
+        std::size_t len;  // length of test vector
     };
     struct fnv1a_64_test_vector {
         test_vector const * test; // test vector buffer to hash

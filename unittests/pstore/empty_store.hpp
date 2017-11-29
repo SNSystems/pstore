@@ -56,7 +56,7 @@
 /// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S memory
 /// allocation API directly and bypasses operator new/malloc(). This is to ensure that the library
 /// can safely change the memory permission (with mprotect() or equivalent).
-std::shared_ptr <std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
+std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
 
 
 class EmptyStore : public ::testing::Test {
@@ -67,9 +67,9 @@ public:
     void TearDown () override;
 
 protected:
-    std::shared_ptr <std::uint8_t> buffer_;
-    std::shared_ptr <pstore::file::in_memory> file_;
+    std::shared_ptr<std::uint8_t> buffer_;
+    std::shared_ptr<pstore::file::in_memory> file_;
 };
 
-#endif //EMPTY_STORE_HPP
+#endif // EMPTY_STORE_HPP
 // eof: unittests/pstore/empty_store.hpp

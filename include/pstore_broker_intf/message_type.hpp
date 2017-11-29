@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file message_type.hpp
-/// \brief Declares the pstore::broker::message_type class. Instances of this type are pushed into the named pipe by
-/// clients; the broker then reassembles complete messages from these pieces.
+/// \brief Declares the pstore::broker::message_type class. Instances of this type are pushed into
+/// the named pipe by clients; the broker then reassembles complete messages from these pieces.
 
 #ifndef PSTORE_MESSAGE_TYPE_HPP
 #define PSTORE_MESSAGE_TYPE_HPP
@@ -148,8 +148,9 @@ namespace pstore {
                 using udistance_type = typename std::make_unsigned<distance_type>::type;
                 auto count = static_cast<udistance_type> (std::max (dist, distance_type{0}));
 
-                static_assert (payload_chars < std::numeric_limits<udistance_type>::max (),
-                               "payload chars is too large for static conversion to difference_type");
+                static_assert (
+                    payload_chars < std::numeric_limits<udistance_type>::max (),
+                    "payload chars is too large for static conversion to difference_type");
                 count = std::min (count, static_cast<udistance_type> (payload_chars));
 
                 auto out_first = std::begin (result);

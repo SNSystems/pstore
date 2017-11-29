@@ -211,7 +211,7 @@ namespace pstore {
         }
 
         /// Add the specified range to the end of the small_vector.
-        template<typename InputIt>
+        template <typename InputIt>
         void append (InputIt first, InputIt last);
         void append (std::initializer_list<ElementType> ilist) {
             this->append (std::begin (ilist), std::end (ilist));
@@ -276,7 +276,7 @@ namespace pstore {
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::initializer_list<ElementType> init)
-        : elements_ (init.size ()) {
+            : elements_ (init.size ()) {
 
         this->set_buffer_ptr (elements_);
         std::copy (std::begin (init), std::end (init), this->begin ());
@@ -312,7 +312,8 @@ namespace pstore {
 
             big_buffer_.resize (is_small_after ? 0 : new_elements);
 
-            // Update the buffer pointer and preserve the contents if we've switched from small to larger buffer or vice-versa.
+            // Update the buffer pointer and preserve the contents if we've switched from small to
+            // larger buffer or vice-versa.
             auto old_buffer = buffer_;
             auto new_buffer = this->set_buffer_ptr (new_elements);
 
@@ -341,7 +342,7 @@ namespace pstore {
         bool const is_small_before = is_small (elements_);
         bool const is_small_after = is_small (new_elements);
         if (is_small_after) {
-            small_buffer_ [elements_] = v;
+            small_buffer_[elements_] = v;
         } else {
             if (is_small_before != is_small_after) {
                 big_buffer_.clear ();
@@ -366,7 +367,7 @@ namespace pstore {
     // append
     // ~~~~~~
     template <typename ElementType, std::size_t BodyElements>
-    template<typename Iterator>
+    template <typename Iterator>
     void small_vector<ElementType, BodyElements>::append (Iterator first, Iterator last) {
         for (; first != last; ++first) {
             this->push_back (*first);

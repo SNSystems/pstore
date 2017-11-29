@@ -157,7 +157,7 @@ namespace value {
         // Control characters are U+0000 through U+001F. Allow everything
         // else through as UTF-8.
         auto const uch = static_cast<unsigned char> (ch);
-        if (uch < 128U && std::isprint (static_cast <int> (ch))) {
+        if (uch < 128U && std::isprint (static_cast<int> (ch))) {
             os << ch;
         } else {
             write_codepoint_hex (os, uch);
@@ -525,7 +525,7 @@ namespace {
     template <typename OStream>
     accumulator<OStream>::accumulator (OStream & os, value::indent const & ind)
             : os_{os}
-            , chars_to_reserve_ {(ind.size () + line_width_ + 1U) * num_lines_to_accumulate_}
+            , chars_to_reserve_{(ind.size () + line_width_ + 1U) * num_lines_to_accumulate_}
             , indent_string_{ind.str<char_type> ()} {
         lines_.reserve (chars_to_reserve_);
     }

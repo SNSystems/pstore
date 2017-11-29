@@ -69,7 +69,7 @@ namespace pstore {
                 DWORD const errcode = ::GetLastError ();
                 raise (::pstore::win32_erc (errcode), "WriteFile to pipe failed");
             }
-    	    return true;
+            return true;
         }
 
     } // namespace broker

@@ -50,7 +50,7 @@ namespace pstore {
     constexpr unsigned head_revision = std::numeric_limits<unsigned>::max ();
 } // namespace pstore
 
-#endif //PSTORE_HEAD_REVISION_HPP
-//eof:pstore/head_revision.hpp
+#endif // PSTORE_HEAD_REVISION_HPP
+// eof:pstore/head_revision.hpp
 
 // eof: include/pstore/head_revision.hpp

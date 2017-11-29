@@ -70,7 +70,7 @@ namespace {
 
 namespace {
     option::ArgStatus numeric (option::Option const & option, bool msg) {
-        constexpr auto max = std::numeric_limits <unsigned>::max ();
+        constexpr auto max = std::numeric_limits<unsigned>::max ();
         assert (option.name != nullptr);
         TCHAR * endptr = nullptr;
         unsigned long value = 0UL;
@@ -82,7 +82,7 @@ namespace {
         }
 
         if (msg) {
-            if (value > std::numeric_limits <unsigned>::max ()) {
+            if (value > std::numeric_limits<unsigned>::max ()) {
                 error_stream << NATIVE_TEXT ("Option '") << option.name
                              << NATIVE_TEXT ("': value too large\n");
             } else {
@@ -100,7 +100,7 @@ namespace {
     }
 
     option::ArgStatus path (option::Option const & option, bool msg) {
-        if (option.arg == nullptr || option.arg [0] == '\0') {
+        if (option.arg == nullptr || option.arg[0] == '\0') {
             if (msg) {
                 error_stream << NATIVE_TEXT ("Option '") << option.name
                              << NATIVE_TEXT ("' requires a path\n'");
@@ -138,11 +138,11 @@ namespace {
         {retry_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("retry-timeout"), option::Arg::None,
          NATIVE_TEXT ("  --retry-timeout      \t"
                       "Retry timeout.")},
-        {max_retries_opt, 0, NATIVE_TEXT(""), NATIVE_TEXT ("max-retries"), numeric,
+        {max_retries_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("max-retries"), numeric,
          NATIVE_TEXT ("  --max-retries      \t"
                       "Maximum number of retries that will be attempted.")},
 
-        {pipe_path_opt, 0, NATIVE_TEXT(""), NATIVE_TEXT ("pipe-path"), path,
+        {pipe_path_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("pipe-path"), path,
          NATIVE_TEXT ("  --pipe-path      \t"
                       "Overrides the path of the FIFO from which commands will be read.")},
 
@@ -151,7 +151,7 @@ namespace {
 
 } // (anonymous namespace)
 
-std::pair<switches, int> get_switches (int argc, TCHAR * argv []) {
+std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
     switches result;
 
     // Skip program name argv[0] if present
@@ -177,17 +177,18 @@ std::pair<switches, int> get_switches (int argc, TCHAR * argv []) {
     }
 
     if (auto & flood = options[flood_opt]) {
-        result.flood = static_cast <unsigned> (str_to_ul (flood.arg, nullptr));
-    } 
+        result.flood = static_cast<unsigned> (str_to_ul (flood.arg, nullptr));
+    }
     if (auto & retry = options[retry_opt]) {
         result.retry_timeout = std::chrono::milliseconds (str_to_ul (retry.arg, nullptr));
-    } 
+    }
     if (auto & max_wait = options[max_retries_opt]) {
-        result.max_retries = static_cast <unsigned> (str_to_ul (max_wait.arg, nullptr));
-    } 
+        result.max_retries = static_cast<unsigned> (str_to_ul (max_wait.arg, nullptr));
+    }
 
-    if (auto & pipe_path = options [pipe_path_opt]) {
-        result.pipe_path = pstore::cmd_util::cl::just (pstore::utf::from_native_string (pipe_path.arg));
+    if (auto & pipe_path = options[pipe_path_opt]) {
+        result.pipe_path =
+            pstore::cmd_util::cl::just (pstore::utf::from_native_string (pipe_path.arg));
     }
 
     if (num_non_option_arguments > 0) {

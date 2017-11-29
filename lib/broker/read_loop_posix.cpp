@@ -88,7 +88,7 @@ namespace {
 
         int retval = select (fd + 1, &rfds, nullptr, &efds, &timeout);
         if (retval == -1) {
-            raise (pstore::errno_erc {errno}, "select");
+            raise (pstore::errno_erc{errno}, "select");
         } else if (retval == 0) {
             pstore::logging::log (pstore::logging::priority::notice, "no data within timeout");
         }
@@ -118,7 +118,7 @@ void read_loop (pstore::broker::fifo_path & fifo, std::shared_ptr<recorder> & re
                         // Data ran out so wait for more to arrive.
                         break;
                     } else {
-                        raise (pstore::errno_erc {err}, "read");
+                        raise (pstore::errno_erc{err}, "read");
                     }
                 } else {
                     if (done) {

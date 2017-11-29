@@ -46,7 +46,7 @@
 #include "broker/globals.hpp"
 #include <cstdlib>
 
-std::atomic <bool> done;
-std::atomic <int> exit_code (EXIT_SUCCESS);
+std::atomic<bool> done;
+std::atomic<int> exit_code (EXIT_SUCCESS);
 
 // eof: lib/broker/globals.cpp

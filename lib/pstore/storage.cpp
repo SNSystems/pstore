@@ -47,7 +47,7 @@
 #include "pstore/file_header.hpp"
 
 namespace {
-    
+
     ///@{
     /// Rounds the value 'v' down the next lowest multiple of 'boundary'.
     /// The result is equivalent to a function such as:
@@ -62,7 +62,7 @@ namespace {
         assert (r <= x && r % b == 0);
         return r;
     }
-    
+
     /// \param x  The value to be rounded.
     /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
     /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0

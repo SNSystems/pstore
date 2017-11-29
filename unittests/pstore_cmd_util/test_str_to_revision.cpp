@@ -77,23 +77,19 @@ TEST (StrToRevision, Zero) {
 }
 
 TEST (StrToRevision, HeadLowerCase) {
-    EXPECT_THAT (pstore::str_to_revision ("head"),
-                 ::testing::Pair (pstore::head_revision, true));
+    EXPECT_THAT (pstore::str_to_revision ("head"), ::testing::Pair (pstore::head_revision, true));
 }
 
 TEST (StrToRevision, HeadMixedCase) {
-    EXPECT_THAT (pstore::str_to_revision ("HeAd"),
-                 ::testing::Pair (pstore::head_revision, true));
+    EXPECT_THAT (pstore::str_to_revision ("HeAd"), ::testing::Pair (pstore::head_revision, true));
 }
 
 TEST (StrToRevision, HeadLeadingWhitespace) {
-    EXPECT_THAT (pstore::str_to_revision ("  HEAD"),
-                 ::testing::Pair (pstore::head_revision, true));
+    EXPECT_THAT (pstore::str_to_revision ("  HEAD"), ::testing::Pair (pstore::head_revision, true));
 }
 
 TEST (StrToRevision, HeadTraingWhitespace) {
-    EXPECT_THAT (pstore::str_to_revision ("HEAD  "),
-                 ::testing::Pair (pstore::head_revision, true));
+    EXPECT_THAT (pstore::str_to_revision ("HEAD  "), ::testing::Pair (pstore::head_revision, true));
 }
 
 TEST (StrToRevision, BadString) {

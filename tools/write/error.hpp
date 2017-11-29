@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_WRITE_ERROR_HPP
-#define PSTORE_WRITE_ERROR_HPP  1
+#define PSTORE_WRITE_ERROR_HPP 1
 
 #include <string>
 #include <system_error>
@@ -74,6 +74,6 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_WRITE_ERROR_HPP
-//eof:tools/write/error.hpp
+// eof:tools/write/error.hpp
 
 // eof: tools/write/error.hpp

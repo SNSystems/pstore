@@ -62,27 +62,28 @@
 
 namespace pstore {
 
-#define PSTORE_ERROR_CODES \
-    X(none) \
-    X(unknown_revision) \
-    X(header_corrupt) \
-    X(header_version_mismatch) \
-    X(footer_corrupt) \
-    X(index_corrupt) \
-    X(unknown_process_path) /* could not discover the path of the calling process image*/ \
-    X(store_closed) /*an attempt to read or write from a store which is not open*/ \
-    X(cannot_allocate_after_commit) /*cannot allocate data after a transaction has been committed*/ \
-    X(bad_address) /*an attempt to address an address outside of the allocated storage*/ \
-    X(did_not_read_number_of_bytes_requested) \
-    X(uuid_parse_error) \
-    X(bad_message_part_number) \
-    X(unable_to_open_named_pipe) \
-    X(pipe_write_timeout)
+#define PSTORE_ERROR_CODES                                                                         \
+    X (none)                                                                                       \
+    X (unknown_revision)                                                                           \
+    X (header_corrupt)                                                                             \
+    X (header_version_mismatch)                                                                    \
+    X (footer_corrupt)                                                                             \
+    X (index_corrupt)                                                                              \
+    X (unknown_process_path) /* could not discover the path of the calling process image*/         \
+    X (store_closed)         /*an attempt to read or write from a store which is not open*/        \
+    X (cannot_allocate_after_commit) /*cannot allocate data after a transaction has been           \
+                                        committed*/                                                \
+    X (bad_address) /*an attempt to address an address outside of the allocated storage*/          \
+    X (did_not_read_number_of_bytes_requested)                                                     \
+    X (uuid_parse_error)                                                                           \
+    X (bad_message_part_number)                                                                    \
+    X (unable_to_open_named_pipe)                                                                  \
+    X (pipe_write_timeout)
 // Add more error values here
 
-    // **************
-    // * error code *
-    // **************
+// **************
+// * error code *
+// **************
 #define X(a) a,
     enum class error_code : int { PSTORE_ERROR_CODES };
 #undef X
@@ -102,11 +103,16 @@ namespace pstore {
     // *************
     // * errno_erc *
     // *************
-    /// This class is a tiny wrapper that allows an errno value to be passed to std::make_error_code().
+    /// This class is a tiny wrapper that allows an errno value to be passed to
+    /// std::make_error_code().
     class errno_erc {
     public:
-        explicit errno_erc (int err) : err_ {err} {}
-        int get () const { return err_; }
+        explicit errno_erc (int err)
+                : err_{err} {}
+        int get () const {
+            return err_;
+        }
+
     private:
         int err_;
     };
@@ -114,8 +120,12 @@ namespace pstore {
 #ifdef _WIN32
     class win32_erc {
     public:
-        explicit win32_erc (DWORD err) : err_ {err} {}
-        int get () const { return err_; }
+        explicit win32_erc (DWORD err)
+                : err_{err} {}
+        int get () const {
+            return err_;
+        }
+
     private:
         DWORD err_;
     };
@@ -152,18 +162,18 @@ namespace pstore {
     template <typename ErrorCode>
     PSTORE_NO_RETURN void raise_error_code (ErrorCode e) {
 #if PSTORE_CPP_EXCEPTIONS
-        throw std::system_error {e};
+        throw std::system_error{e};
 #else
-        std::cerr << "Error: " << e.message() << '\n';
+        std::cerr << "Error: " << e.message () << '\n';
         std::exit (EXIT_FAILURE);
 #endif
     }
     template <typename ErrorCode, typename StrType>
     PSTORE_NO_RETURN void raise_error_code (ErrorCode e, StrType const & what) {
 #if PSTORE_CPP_EXCEPTIONS
-        throw std::system_error {e, what};
+        throw std::system_error{e, what};
 #else
-        std::cerr << "Error: " << e.message() << " : " << what << '\n';
+        std::cerr << "Error: " << e.message () << " : " << what << '\n';
         std::exit (EXIT_FAILURE);
 #endif
     }

@@ -51,7 +51,7 @@ namespace {
 
     template <typename T, typename U = T>
     constexpr auto type_max () -> U {
-        return static_cast <U> (std::numeric_limits <T>::max ());
+        return static_cast<U> (std::numeric_limits<T>::max ());
     }
 
 } // end anonymous namespace
@@ -69,7 +69,8 @@ namespace pstore {
         rep const result = ms.count ();
         assert (result >= 0);
 
-        static_assert (type_max <rep> () >= 0 && type_max <rep, urep> () <= type_max <std::uint64_t> (),
+        static_assert (type_max<rep> () >= 0 &&
+                           type_max<rep, urep> () <= type_max<std::uint64_t> (),
                        "millisecond representation is too wide for uint64");
         return static_cast<std::uint64_t> (result);
     }

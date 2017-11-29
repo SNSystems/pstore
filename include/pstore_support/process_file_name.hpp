@@ -104,7 +104,8 @@ namespace pstore {
         ///
         /// \tparam BufferType  Should be a vector-like type which supports size(),capacity(),and
         /// resize() and should be convertable to gsl::span<char>.
-        /// \tparam SysCtlFunction  The sysctl() function or a replacement intended for unit testung.
+        /// \tparam SysCtlFunction  The sysctl() function or a replacement intended for unit
+        /// testung.
         ///
         /// \param mib  A command array which tells the sysctl() function what to do.
         /// \param ctl  The real sysctl() function or mock implementation thereof.
@@ -113,7 +114,7 @@ namespace pstore {
         /// \result The number of valid characters in the 'buffer' container.
         template <typename SpanType, typename SysCtlFunction, typename BufferType>
         std::size_t process_file_name (SpanType mib, SysCtlFunction ctl, BufferType & buffer) {
-            static_assert (std::is_same <typename SpanType::element_type, int>::value,
+            static_assert (std::is_same<typename SpanType::element_type, int>::value,
                            "mib must be a span of integers");
 
             auto read_link = [&](::pstore::gsl::span<char> b) -> std::size_t {
@@ -121,12 +122,12 @@ namespace pstore {
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;
                 errno = 0;
-                if (ctl (mib.data (), static_cast<unsigned int> (mib.size ()), b.data (),
-                         &length, nullptr, 0) == -1) {
+                if (ctl (mib.data (), static_cast<unsigned int> (mib.size ()), b.data (), &length,
+                         nullptr, 0) == -1) {
                     if (errno == ENOMEM) {
                         return buffer_size;
                     }
-                    raise (errno_erc {errno}, "sysctl(CTL_KERN/KERN_PROC/KERN_PROC_PATHNAME)");
+                    raise (errno_erc{errno}, "sysctl(CTL_KERN/KERN_PROC/KERN_PROC_PATHNAME)");
                 }
                 // Subtract 1 to ignore the terminating null character.
                 return std::max (std::size_t{1}, length) - 1U;
