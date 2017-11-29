@@ -362,10 +362,6 @@ namespace value {
     //*******************
     //*   o b j e c t   *
     //*******************
-    // (dtor)
-    // ~~~~~~
-    object::~object () {}
-
     // property
     // ~~~~~~~~
     std::shared_ptr<string> object::property (std::string const & p) {

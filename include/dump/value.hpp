@@ -488,7 +488,7 @@ namespace value {
                 : members_ (m) {}
         object (object && rhs) = default;
         object (object const & rhs) = delete;
-        ~object ();
+
         object & operator= (object const &) = delete;
         object & operator= (object &&) = delete;
 
