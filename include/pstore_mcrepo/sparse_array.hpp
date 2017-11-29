@@ -197,6 +197,8 @@ namespace pstore {
             friend bool operator== (sparse_array<V, B> const & lhs, sparse_array<V, B> const & rhs);
 
         public:
+            using bitmap_type = BitmapType;
+
             using value_type = ValueType;
             using size_type = std::size_t;
             using reference = value_type &;
@@ -649,7 +651,10 @@ namespace pstore {
             auto op = [](BitmapType mm, iter_value_type v) {
                 auto idx = static_cast<unsigned> (v);
                 assert (idx >= 0 && idx < max_size ());
-                return mm | (BitmapType{1} << idx);
+                auto const mask = BitmapType{1} << idx;
+                assert ((mm & mask) == 0 && "The same index must not appear more than once in the "
+                                            "collection of sparse indices");
+                return mm | mask;
             };
             return std::accumulate (first, last, BitmapType{0}, op);
         }

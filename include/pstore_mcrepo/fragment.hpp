@@ -609,7 +609,8 @@ namespace pstore {
             };
 
             /// \tparam Transaction  The type of the database transaction.
-            /// \tparam Iterator  An iterator which will yield values of type `section_content`.
+            /// \tparam Iterator  An iterator which will yield values of type `section_content`. The
+            /// values must be sorted in section_content::type order.
             /// \param transaction  The transaction to which the fragment should be appended.
             /// \param first  The beginning of the range of `section_content` values.
             /// \param last  The end of the range of `section_content` values.
@@ -639,20 +640,23 @@ namespace pstore {
             /// Returns the number of bytes of storage that are required for a fragment containing
             /// the sections defined by [first, last).
             ///
-            /// \tparam Iterator An iterator which will yield values of type `section_content`.
+            /// \tparam Iterator  An iterator which will yield values of type `section_content`. The
+            /// values must be sorted in section_content::type order.
             /// \param first  The beginning of the range of `section_content` values.
             /// \param last  The end of the range of `section_content` values.
             template <typename Iterator>
             static std::size_t size_bytes (Iterator first, Iterator last);
 
-            /// Returns the number of bytes of storage that are required for a fragment containing
-            /// the sections defined by [first, last).
+            /// Returns the number of bytes of storage that are accupied by this fragment.
             std::size_t size_bytes () const;
 
         private:
             template <typename IteratorIdx>
             fragment (IteratorIdx first_index, IteratorIdx last_index)
                     : arr_ (first_index, last_index) {}
+
+            template <typename Iterator>
+            static void check_range_is_sorted (Iterator first, Iterator last);
 
             section const & offset_to_section (std::uint64_t offset) const;
 
@@ -679,9 +683,7 @@ namespace pstore {
         template <typename TransactionType, typename Iterator>
         auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
             -> pstore::record {
-            static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
-                                         section_content>::value),
-                           "Iterator value_type should be section_content");
+            fragment::check_range_is_sorted (first, last);
 
             // Compute the number of bytes of storage that we'll need for this fragment.
             auto size = fragment::size_bytes (first, last);
@@ -716,10 +718,27 @@ namespace pstore {
             return {storage.second, size};
         }
 
+        // check_range_is_sorted
+        // ~~~~~~~~~~~~~~~~~~~~~
+        template <typename Iterator>
+        void fragment::check_range_is_sorted (Iterator first, Iterator last) {
+            (void) first;
+            (void) last;
+            static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
+                                         section_content>::value),
+                           "Iterator value_type should be section_content");
+            assert (std::is_sorted (
+                first, last, [](section_content const & a, section_content const & b) {
+                    return static_cast<unsigned> (a.type) < static_cast<unsigned> (b.type);
+                }));
+        }
+
         // size_bytes
         // ~~~~~~~~~~
         template <typename Iterator>
         std::size_t fragment::size_bytes (Iterator first, Iterator last) {
+            fragment::check_range_is_sorted (first, last);
+
             auto const num_sections = std::distance (first, last);
             assert (num_sections >= 0);
             auto const unum_sections =
