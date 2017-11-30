@@ -63,17 +63,43 @@
 namespace pstore {
     namespace repo {
 
+// FIXME: the members of this collection are drawn from
+// RepoObjectWriter::writeRepoSectionData(). Not sure it's correct.
+#define PSTORE_REPO_SECTION_TYPES                                                                  \
+    X (Text)                                                                                       \
+    X (BSS)                                                                                        \
+    X (Common)                                                                                     \
+    X (Data)                                                                                       \
+    X (RelRo)                                                                                      \
+    X (Mergeable1ByteCString)                                                                      \
+    X (Mergeable2ByteCString)                                                                      \
+    X (Mergeable4ByteCString)                                                                      \
+    X (MergeableConst4)                                                                            \
+    X (MergeableConst8)                                                                            \
+    X (MergeableConst16)                                                                           \
+    X (MergeableConst32)                                                                           \
+    X (ReadOnly)                                                                                   \
+    X (ThreadBSS)                                                                                  \
+    X (ThreadData)                                                                                 \
+    X (Metadata)
+
+#define X(a) a,
+        /// \brief The collection of section types known by the repository.
+        enum class section_type : std::uint8_t { PSTORE_REPO_SECTION_TYPES };
+#undef X
+
+        using relocation_type = std::uint8_t;
+
         //*  _     _                     _    __ _                *
         //* (_)_ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
         //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
         //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                |_|    *
         struct internal_fixup {
-            internal_fixup (std::uint8_t section_, std::uint8_t type_, std::uint32_t offset_,
-                            std::uint32_t addend_) noexcept
+            internal_fixup (section_type section_, relocation_type type_, std::uint64_t offset_,
+                            std::uint64_t addend_) noexcept
                     : section{section_}
                     , type{type_}
-                    , padding{0}
                     , offset{offset_}
                     , addend{addend_} {}
             internal_fixup (internal_fixup const &) noexcept = default;
@@ -89,11 +115,12 @@ namespace pstore {
                 return !operator== (rhs);
             }
 
-            std::uint8_t section;
-            std::uint8_t type;
-            std::uint16_t padding;
-            std::uint32_t offset;
-            std::uint32_t addend;
+            section_type section;
+            relocation_type type;
+            std::uint16_t padding1 = 0;
+            std::uint32_t padding2 = 0;
+            std::uint64_t offset;
+            std::uint64_t addend;
         };
 
 
@@ -104,13 +131,15 @@ namespace pstore {
                        "section offset differs from expected value");
         static_assert (offsetof (internal_fixup, type) == 1,
                        "type offset differs from expected value");
-        static_assert (offsetof (internal_fixup, padding) == 2,
-                       "padding offset differs from expected value");
-        static_assert (offsetof (internal_fixup, offset) == 4,
+        static_assert (offsetof (internal_fixup, padding1) == 2,
+                       "padding1 offset differs from expected value");
+        static_assert (offsetof (internal_fixup, padding2) == 4,
+                       "padding2 offset differs from expected value");
+        static_assert (offsetof (internal_fixup, offset) == 8,
                        "offset offset differs from expected value");
-        static_assert (offsetof (internal_fixup, addend) == 8,
+        static_assert (offsetof (internal_fixup, addend) == 16,
                        "addend offset differs from expected value");
-        static_assert (sizeof (internal_fixup) == 12,
+        static_assert (sizeof (internal_fixup) == 24,
                        "internal_fixup size does not match expected");
 
         //*          _                     _    __ _                *
@@ -120,7 +149,7 @@ namespace pstore {
         //*                                                  |_|    *
         struct external_fixup {
             pstore::address name;
-            std::uint8_t type;
+            relocation_type type;
             // FIXME: much padding here.
             std::uint64_t offset;
             std::uint64_t addend;
@@ -419,32 +448,6 @@ namespace pstore {
             three_byte_integer::set (out, size);
         }
 
-
-// FIXME: the members of this collection are drawn from
-// RepoObjectWriter::writeRepoSectionData(). Not sure it's correct.
-#define PSTORE_REPO_SECTION_TYPES                                                                  \
-    X (BSS)                                                                                        \
-    X (Common)                                                                                     \
-    X (Data)                                                                                       \
-    X (RelRo)                                                                                      \
-    X (Text)                                                                                       \
-    X (Mergeable1ByteCString)                                                                      \
-    X (Mergeable2ByteCString)                                                                      \
-    X (Mergeable4ByteCString)                                                                      \
-    X (MergeableConst4)                                                                            \
-    X (MergeableConst8)                                                                            \
-    X (MergeableConst16)                                                                           \
-    X (MergeableConst32)                                                                           \
-    X (MergeableConst)                                                                             \
-    X (ReadOnly)                                                                                   \
-    X (ThreadBSS)                                                                                  \
-    X (ThreadData)                                                                                 \
-    X (ThreadLocal)                                                                                \
-    X (Metadata)
-
-#define X(a) a,
-        enum class section_type : std::uint8_t { PSTORE_REPO_SECTION_TYPES };
-#undef X
 
         struct section_content {
             section_content (section_type st, std::uint8_t align_)

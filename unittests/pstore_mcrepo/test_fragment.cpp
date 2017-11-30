@@ -101,6 +101,7 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
 TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     using ::testing::ElementsAreArray;
     using ::testing::ElementsAre;
+    using section_type = pstore::repo::section_type;
 
     std::vector<std::uint8_t> const original{'t', 'e', 'x', 't'};
 
@@ -110,8 +111,8 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         // Build the text section's contents and fixups.
         section_content & text = c.back ();
         text.data.assign (std::begin (original), std::end (original));
-        text.ifixups.emplace_back (internal_fixup{1, 1, 1, 1});
-        text.ifixups.emplace_back (internal_fixup{2, 2, 2, 2});
+        text.ifixups.emplace_back (internal_fixup{section_type::Text, 1, 1, 1});
+        text.ifixups.emplace_back (internal_fixup{section_type::Data, 2, 2, 2});
         text.xfixups.emplace_back (external_fixup{pstore::address{3}, 3, 3, 3});
         text.xfixups.emplace_back (external_fixup{pstore::address{4}, 4, 4, 4});
         text.xfixups.emplace_back (external_fixup{pstore::address{5}, 5, 5, 5});
@@ -136,8 +137,8 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_EQ (3U, s.xfixups ().size ());
 
     EXPECT_THAT (s.data (), ElementsAreArray (original));
-    EXPECT_THAT (s.ifixups (),
-                 ElementsAre (internal_fixup{1, 1, 1, 1}, internal_fixup{2, 2, 2, 2}));
+    EXPECT_THAT (s.ifixups (), ElementsAre (internal_fixup{section_type::Text, 1, 1, 1},
+                                            internal_fixup{section_type::Data, 2, 2, 2}));
     EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{pstore::address{3}, 3, 3, 3},
                                             external_fixup{pstore::address{4}, 4, 4, 4},
                                             external_fixup{pstore::address{5}, 5, 5, 5}));
@@ -159,7 +160,7 @@ TEST_F (FragmentTest, TwoSections) {
     {
         std::vector<section_content> c;
         c.emplace_back (section_type::ReadOnly, std::uint8_t{1} /*alignment*/);
-        c.emplace_back (section_type::ThreadLocal, std::uint8_t{2} /*alignment*/);
+        c.emplace_back (section_type::ThreadData, std::uint8_t{2} /*alignment*/);
         ASSERT_LT (static_cast<int> (c.at (0).type), static_cast<int> (c.at (1).type));
 
         section_content & rodata = c.at (0);
@@ -167,7 +168,7 @@ TEST_F (FragmentTest, TwoSections) {
         rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
 
         section_content & tls = c.at (1);
-        EXPECT_EQ (tls.type, section_type::ThreadLocal);
+        EXPECT_EQ (tls.type, section_type::ThreadData);
         tls.data.assign ({'t', 'l', 's'});
 
         auto const record = fragment::alloc (transaction_, std::begin (c), std::end (c));
@@ -178,13 +179,13 @@ TEST_F (FragmentTest, TwoSections) {
         auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
         std::vector<std::size_t> const expected{
             static_cast<std::size_t> (section_type::ReadOnly),
-            static_cast<std::size_t> (section_type::ThreadLocal)};
+            static_cast<std::size_t> (section_type::ThreadData)};
         auto indices = f->sections ().get_indices ();
         std::vector<std::size_t> Actual (std::begin (indices), std::end (indices));
         EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
 
         section const & rodata = (*f)[section_type::ReadOnly];
-        section const & tls = (*f)[section_type::ThreadLocal];
+        section const & tls = (*f)[section_type::ThreadData];
         EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
     }
 }
