@@ -103,6 +103,7 @@ set (PSTORE_SUPPORT_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/crc32.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/fnv.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/make_unique.hpp"
+    "${PSTORE_PUBLIC_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/time.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uuid.hpp"

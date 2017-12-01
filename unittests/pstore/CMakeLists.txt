@@ -69,6 +69,7 @@ add_pstore_unit_test (pstore-unit-tests
     test_region.cpp
     test_rotating_log.cpp
     test_shared_memory.cpp
+    test_sstring_view.cpp
     test_sync.cpp
     test_transaction.cpp
     test_two_connections.cpp
