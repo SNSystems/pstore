@@ -445,7 +445,7 @@ namespace pstore {
             auto const size = std::distance (first, last);
             // FIXME: this should be a real runtime check even in a release build.
             assert (size >= 0 && size < (1U << (out_bytes * 8)));
-            three_byte_integer::set (out, size);
+            three_byte_integer::set (out, static_cast<std::uint32_t> (size));
         }
 
 
