@@ -664,6 +664,18 @@ namespace pstore {
 
             section const & offset_to_section (std::uint64_t offset) const;
 
+            /// Constructs a fragment into the uninitialized memory referred to by ptr and copy the
+            /// section contents [first,last) into it.
+            ///
+            /// \tparam Iterator  An iterator which will yield values of type `section_content`. The
+            /// values must be sorted in section_content::type order.
+            /// \param ptr  A pointer to an uninitialized block of memory of at least the size
+            /// returned by size_bytes(first, last).
+            /// \param first  The beginning of the range of `section_content` values.
+            /// \param last  The end of the range of `section_content` values.
+            template <typename Iterator>
+            static void populate (void * ptr, Iterator first, Iterator last);
+
             /// A sparse array of offsets to each of the contained sections.
             member_array arr_;
         };
@@ -682,25 +694,13 @@ namespace pstore {
 #undef X
         }
 
-        // alloc
-        // ~~~~~
-        template <typename TransactionType, typename Iterator>
-        auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
-            -> pstore::record {
-            fragment::check_range_is_sorted (first, last);
-
-            // Compute the number of bytes of storage that we'll need for this fragment.
-            auto size = fragment::size_bytes (first, last);
-
-            // Allocate storage for the fragment including its three arrays.
-            std::pair<std::shared_ptr<void>, pstore::address> storage =
-                transaction.alloc_rw (size, alignof (fragment));
-            auto ptr = storage.first;
-
+        // populate
+        // ~~~~~~~~
+        template <typename Iterator>
+        void fragment::populate (void * ptr, Iterator first, Iterator last) {
             // Construct the basic fragment structure into this memory.
-            auto fragment_ptr =
-                new (ptr.get ()) fragment (details::make_content_type_iterator (first),
-                                           details::make_content_type_iterator (last));
+            auto fragment_ptr = new (ptr) fragment (details::make_content_type_iterator (first),
+                                                    details::make_content_type_iterator (last));
             // Point past the end of the sparse array.
             auto out =
                 reinterpret_cast<std::uint8_t *> (fragment_ptr) + fragment_ptr->arr_.size_bytes ();
@@ -714,11 +714,29 @@ namespace pstore {
                 fragment_ptr->arr_[static_cast<unsigned> (c.type)] = offset;
                 out += scn->size_bytes ();
             });
+#ifndef NDEBUG
+            {
+                auto const size = fragment::size_bytes (first, last);
+                assert (out >= ptr && static_cast<std::size_t> (
+                                          out - reinterpret_cast<std::uint8_t *> (ptr)) == size);
+                assert (size == fragment_ptr->size_bytes ());
+            }
+#endif
+        }
 
-            assert (out >= ptr.get () &&
-                    static_cast<std::size_t> (
-                        out - reinterpret_cast<std::uint8_t *> (ptr.get ())) == size);
-            assert (size == fragment_ptr->size_bytes ());
+        // alloc
+        // ~~~~~
+        template <typename TransactionType, typename Iterator>
+        auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
+            -> pstore::record {
+            fragment::check_range_is_sorted (first, last);
+            // Compute the number of bytes of storage that we'll need for this fragment.
+            auto const size = fragment::size_bytes (first, last);
+
+            // Allocate storage for the fragment including its three arrays.
+            std::pair<std::shared_ptr<void>, pstore::address> storage =
+                transaction.alloc_rw (size, alignof (fragment));
+            fragment::populate (storage.first.get (), first, last);
             return {storage.second, size};
         }
 
