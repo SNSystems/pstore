@@ -57,12 +57,13 @@ template <typename StringType>
 std::vector<StringType> split_lines (StringType const & s) {
     std::vector<StringType> result;
     typename StringType::size_type pos = 0;
-    bool done = false;
-    while (!done) {
+    for (;;) {
         auto const cr_pos = s.find_first_of ('\n', pos);
-        done = (cr_pos == StringType::npos);
-        auto count = done ? StringType::npos : cr_pos - pos;
+        auto count = (cr_pos == StringType::npos) ? StringType::npos : cr_pos - pos;
         result.emplace_back (s, pos, count);
+        if (count == StringType::npos) {
+            break;
+        }
         pos = cr_pos + 1;
     }
     return result;
