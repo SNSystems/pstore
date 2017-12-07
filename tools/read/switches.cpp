@@ -87,7 +87,7 @@ namespace {
     }
 
 
-#define USAGE "Usage: read [options] data-file key"
+#define USAGE "Usage: pstore-read [options] data-file key"
 
     option::Descriptor const usage[] = {
         {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
