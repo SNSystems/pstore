@@ -134,12 +134,13 @@ namespace pstore {
         // 7.3, sstring_view constructors and assignment operators
         sstring_view () noexcept
                 : size_{0U} {}
-        explicit sstring_view (char const * str) noexcept
+        explicit sstring_view (char const * str, size_type size) noexcept
                 : data_{str}
-                , size_{std::strlen (str)} {}
+                , size_{size} {}
+        explicit sstring_view (char const * str) noexcept
+                : sstring_view (str, std::strlen (str)) {}
         explicit sstring_view (std::string const & str) noexcept
-                : data_{str.data ()}
-                , size_{str.length ()} {}
+                : sstring_view (str.data (), str.length ()) {}
         sstring_view (std::shared_ptr<value_type> str, size_type size) noexcept
                 : ptr_{std::move (str)}
                 , data_{ptr_.get ()}
