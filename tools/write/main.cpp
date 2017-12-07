@@ -60,9 +60,12 @@ using TCHAR = char;
 #endif
 
 // pstore includes.
-#include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
+#include "pstore/hamt_map.hpp"
+#include "pstore/hamt_set.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/sstring_view_archive.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
@@ -154,7 +157,6 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     using pstore::utf::to_native_string;
-    using pstore::utf::from_native_string;
 
     TRY {
         switches opt;
@@ -171,8 +173,8 @@ int main (int argc, char * argv[]) {
             auto transaction = pstore::begin (database);
 
             // Read the write and name indexes.
-            pstore::index::name_index * const name = database.get_name_index ();
-            pstore::index::write_index * const write = database.get_write_index ();
+            pstore::index::name_index * const name = pstore::index::get_name_index (database);
+            pstore::index::write_index * const write = pstore::index::get_write_index (database);
 
             // Scan through the string value arguments from the command line. These are of
             // the form key,value where value is a string which is stored directly.
@@ -192,7 +194,7 @@ int main (int argc, char * argv[]) {
 
             // Scan through the string arguments from the command line.
             for (std::string const & v : opt.strings) {
-                name->insert (transaction, v);
+                name->insert (transaction, pstore::sstring_view{v});
             }
 
             transaction.commit ();

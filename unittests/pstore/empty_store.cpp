@@ -93,20 +93,13 @@ std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) 
 
 
 
-std::size_t constexpr EmptyStore::file_size;
+constexpr std::size_t EmptyStore::file_size;
+constexpr std::size_t EmptyStore::page_size_;
 
-void EmptyStore::SetUp () {
-    // Build an empty, in-memory database.
-
-    constexpr std::size_t page_size = 4096;
-    buffer_ = aligned_valloc (file_size, page_size);
-    file_ = std::make_shared<pstore::file::in_memory> (buffer_, file_size);
+EmptyStore::EmptyStore ()
+        : buffer_{aligned_valloc (file_size, page_size_)}
+        , file_{std::make_shared<pstore::file::in_memory> (buffer_, file_size)} {
     pstore::database::build_new_store (*file_);
-}
-
-void EmptyStore::TearDown () {
-    file_.reset ();
-    buffer_.reset ();
 }
 
 // eof: unittests/pstore/empty_store.cpp

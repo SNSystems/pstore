@@ -49,6 +49,8 @@
 #include <vector>
 
 #include "pstore/database.hpp"
+#include "pstore/index_types.hpp"
+#include "pstore/hamt_map.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_cmd_util/parallel_for_each.hpp"
@@ -242,7 +244,7 @@ int main (int argc, char * argv[]) {
         pstore::database database (std::string{data_file}, pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-        auto index = database.get_digest_index ();
+        auto index = pstore::index::get_digest_index (database);
 
         // In random number generator, the number is repeated after 300,000. The number of 2 ^ 18 is
         // closest to 300,000. Therefore, the num_keys is 2 ^ 18.

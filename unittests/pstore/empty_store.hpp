@@ -63,12 +63,15 @@ class EmptyStore : public ::testing::Test {
 public:
     static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
 
-    void SetUp () override;
-    void TearDown () override;
+    // Build an empty, in-memory database.
+    EmptyStore ();
 
 protected:
     std::shared_ptr<std::uint8_t> buffer_;
     std::shared_ptr<pstore::file::in_memory> file_;
+
+private:
+    static constexpr std::size_t page_size_ = 4096;
 };
 
 #endif // EMPTY_STORE_HPP

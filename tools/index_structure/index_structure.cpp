@@ -49,6 +49,7 @@
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_map_types.hpp"
 #include "pstore/hamt_set.hpp"
+#include "pstore/sstring_view_archive.hpp"
 #include "pstore_support/portab.hpp"
 
 #include "switches.hpp"
@@ -198,7 +199,7 @@ namespace {
             auto accessor = index_accessor<Index>::get ();
             char const * name =
                 index_names[static_cast<std::underlying_type<indices>::type> (Index)];
-            dump_index ((db.*accessor) (false /*create*/), name);
+            dump_index (accessor (db, false /*create*/), name);
         }
     }
 } // anonymous namespace

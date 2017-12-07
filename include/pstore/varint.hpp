@@ -80,6 +80,9 @@
 /// value   | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
 ///         +-----------------------+-------+ +-------------------------------+
 
+#ifndef PSTORE_VARINT_HPP
+#define PSTORE_VARINT_HPP
+
 #include <utility>
 
 #include "pstore/bit_count.hpp"
@@ -202,4 +205,6 @@ namespace pstore {
 
     } // namespace varint
 } // namespace pstore
+
+#endif // PSTORE_VARINT_HPP
 // eof: include/pstore/varint.hpp

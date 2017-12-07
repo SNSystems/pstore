@@ -44,6 +44,7 @@
 
 #ifndef PSTORE_SERIALIZE_COMMON_HPP
 #define PSTORE_SERIALIZE_COMMON_HPP
+
 namespace pstore {
     namespace serialize {
 

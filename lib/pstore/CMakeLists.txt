@@ -74,6 +74,7 @@ set (PSTORE_CORE_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/db_archive.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/file_header.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/generation_iterator.hpp"
+    "${PSTORE_PUBLIC_INCLUDE_DIR}/index_types.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/region.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/start_vacuum.hpp"
@@ -86,6 +87,7 @@ set (PSTORE_CORE_SRC
     generation_iterator.cpp
     heartbeat.cpp
     heartbeat.hpp
+    index_types.cpp
     region.cpp
     start_vacuum.cpp
     storage.cpp
@@ -104,6 +106,7 @@ set (PSTORE_SUPPORT_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/fnv.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/sstring_view.hpp"
+    "${PSTORE_PUBLIC_INCLUDE_DIR}/sstring_view_archive.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/time.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uuid.hpp"
@@ -112,6 +115,8 @@ set (PSTORE_SUPPORT_SRC
     base32.hpp
     crc32.cpp
     fnv.cpp
+    sstring_view.cpp
+    sstring_view_archive.cpp
     time.cpp
     uint128.cpp
     uuid.cpp

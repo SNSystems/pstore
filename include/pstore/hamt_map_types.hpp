@@ -428,8 +428,8 @@ namespace pstore {
                 ///
                 /// \param transaction The transaction to which the linear node will be appended.
                 /// \result The address at which the node was written.
-                template <typename LockType>
-                address flush (transaction<LockType> & transaction) const;
+                template <typename Transaction>
+                address flush (Transaction & transaction) const;
 
                 /// Search the linear node and return the child slot if the key exists.
                 /// Otherwise, return the {nullptr, not_found} pair.
@@ -479,8 +479,8 @@ namespace pstore {
 
             // flush
             // ~~~~~
-            template <typename LockType>
-            address linear_node::flush (transaction<LockType> & transaction) const {
+            template <typename Transaction>
+            address linear_node::flush (Transaction & transaction) const {
                 std::size_t const num_bytes = this->size_bytes ();
 
                 std::shared_ptr<void> ptr;
@@ -596,8 +596,8 @@ namespace pstore {
                                    not_null<parent_stack *> parents);
 
                 /// Write an internal node and its children into a store.
-                template <typename LockType>
-                address flush (transaction<LockType> & transaction, unsigned shifts);
+                template <typename Transaction>
+                address flush (Transaction & transaction, unsigned shifts);
 
 
                 index_pointer const & operator[] (std::size_t i) const {
@@ -651,8 +651,8 @@ namespace pstore {
 
                 /// Appends the internal node (which refers to a node in heap memory) to the
                 /// store. Returns a new (in-store) internal store address.
-                template <typename LockType>
-                address store_node (transaction<LockType> & transaction) const;
+                template <typename Transaction>
+                address store_node (Transaction & transaction) const;
 
                 using signature_type = std::array<std::uint8_t, 8>;
                 static signature_type const signature;
@@ -676,8 +676,8 @@ namespace pstore {
 
             // store_node
             // ~~~~~~~~~~
-            template <typename LockType>
-            address internal_node::store_node (transaction<LockType> & transaction) const {
+            template <typename Transaction>
+            address internal_node::store_node (Transaction & transaction) const {
                 std::size_t const num_bytes = this->size_bytes (this->size ());
 
                 std::shared_ptr<void> ptr;
@@ -689,8 +689,8 @@ namespace pstore {
 
             // flush
             // ~~~~~
-            template <typename LockType>
-            address internal_node::flush (transaction<LockType> & transaction, unsigned shifts) {
+            template <typename Transaction>
+            address internal_node::flush (Transaction & transaction, unsigned shifts) {
                 auto const child_shifts = shifts + hash_index_bits;
                 for (auto & p : *this) {
                     // If it is a heap node, flush its children first (depth-first search).

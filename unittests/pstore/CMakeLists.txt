@@ -63,6 +63,7 @@ add_pstore_unit_test (pstore-unit-tests
     test_heartbeat.cpp
     test_hamt_map.cpp
     test_hamt_set.cpp
+    test_make_unique.cpp
     test_memory_mapper.cpp
     test_path.cpp
     test_process_file_name.cpp
@@ -70,6 +71,7 @@ add_pstore_unit_test (pstore-unit-tests
     test_rotating_log.cpp
     test_shared_memory.cpp
     test_sstring_view.cpp
+    test_sstring_view_archive.cpp
     test_sync.cpp
     test_transaction.cpp
     test_two_connections.cpp

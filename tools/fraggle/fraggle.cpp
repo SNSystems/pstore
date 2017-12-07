@@ -47,11 +47,15 @@
 #include <string>
 #include <vector>
 
-#include "pstore_cmd_util/cl/command_line.hpp"
-#include "pstore_support/path.hpp"
+#include "pstore/hamt_map.hpp"
+#include "pstore/hamt_set.hpp"
+#include "pstore/index_types.hpp"
+#include "pstore/sstring_view_archive.hpp"
 #include "pstore/transaction.hpp"
+#include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_mcrepo/fragment.hpp"
 #include "pstore_mcrepo/ticket.hpp"
+#include "pstore_support/path.hpp"
 
 #include "fibonacci_generator.hpp"
 
@@ -113,11 +117,12 @@ int main (int argc, char * argv[]) {
         std::vector<pstore::repo::ticket_member> ticket_members;
         ticket_members.reserve (num_fragments_per_ticket);
 
-        for (unsigned ticket_ctr = 0; ticket_ctr < num_tickets; ++ticket_ctr) {
+        for (auto ticket_ctr = 0U; ticket_ctr < num_tickets; ++ticket_ctr) {
             auto transaction = pstore::begin (db);
-            pstore::index::name_index * const names = db.get_name_index ();
-            pstore::index::digest_index * const fragment_index = db.get_digest_index ();
-            pstore::index::ticket_index * const ticket_index = db.get_ticket_index ();
+            pstore::index::name_index * const names = pstore::index::get_name_index (db);
+            pstore::index::digest_index * const fragment_index =
+                pstore::index::get_digest_index (db);
+            pstore::index::ticket_index * const ticket_index = pstore::index::get_ticket_index (db);
 
             ticket_members.clear ();
             for (unsigned fragment_ctr = 0; fragment_ctr < num_fragments_per_ticket;
@@ -126,7 +131,7 @@ int main (int argc, char * argv[]) {
                 auto const name = std::string{"func_"} + std::to_string (ticket_ctr) + "_" +
                                   std::to_string (fragment_ctr);
                 pstore::address const name_addr =
-                    names->insert (transaction, name).first.get_address ();
+                    names->insert (transaction, pstore::sstring_view{name}).first.get_address ();
 
                 pstore::repo::section_content data_section (pstore::repo::section_type::ReadOnly,
                                                             std::uint8_t{1} /*alignment*/);
@@ -156,7 +161,8 @@ int main (int argc, char * argv[]) {
             pstore::uuid ticket_uuid;
             {
                 pstore::address const ticket_path_addr =
-                    names->insert (transaction, ticket_path).first.get_address ();
+                    names->insert (transaction, pstore::sstring_view{ticket_path})
+                        .first.get_address ();
                 pstore::record ticket_pos =
                     pstore::repo::ticket::alloc (transaction, ticket_path_addr, ticket_members);
                 ticket_index->insert (transaction, std::make_pair (ticket_uuid, ticket_pos));

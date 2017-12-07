@@ -128,7 +128,7 @@ namespace pstore {
                 serialize::read_uninit (archive,
                                         ::pstore::gsl::make_span (encoded_length.data (), 2));
 
-                auto varint_length = varint::decode_size (std::begin (encoded_length));
+                auto const varint_length = varint::decode_size (std::begin (encoded_length));
                 assert (varint_length > 0);
                 // Was that initial read of 2 bytes enough? If not get the rest of the
                 // length value.

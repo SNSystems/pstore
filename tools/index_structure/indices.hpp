@@ -48,6 +48,7 @@
 #include <type_traits>
 #include <vector>
 #include "pstore/database.hpp"
+#include "pstore/index_types.hpp"
 
 #define INDICES                                                                                    \
     X (digest)                                                                                     \
@@ -64,29 +65,29 @@ struct index_accessor {};
 
 template <>
 struct index_accessor<indices::digest> {
-    static decltype (&pstore::database::get_digest_index) get () {
-        return &pstore::database::get_digest_index;
+    static decltype (&pstore::index::get_digest_index) get () {
+        return &pstore::index::get_digest_index;
     }
 };
 
 template <>
 struct index_accessor<indices::ticket> {
-    static decltype (&pstore::database::get_ticket_index) get () {
-        return &pstore::database::get_ticket_index;
+    static decltype (&pstore::index::get_ticket_index) get () {
+        return &pstore::index::get_ticket_index;
     }
 };
 
 template <>
 struct index_accessor<indices::name> {
-    static decltype (&pstore::database::get_name_index) get () {
-        return &pstore::database::get_name_index;
+    static decltype (&pstore::index::get_name_index) get () {
+        return &pstore::index::get_name_index;
     }
 };
 
 template <>
 struct index_accessor<indices::write> {
-    static decltype (&pstore::database::get_write_index) get () {
-        return &pstore::database::get_write_index;
+    static decltype (&pstore::index::get_write_index) get () {
+        return &pstore::index::get_write_index;
     }
 };
 

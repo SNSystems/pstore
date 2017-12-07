@@ -58,7 +58,9 @@
 #include "pstore/generation_iterator.hpp"
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_set.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/shared_memory.hpp"
+#include "pstore/sstring_view_archive.hpp"
 #include "pstore/vacuum_intf.hpp"
 #include "pstore_cmd_util/str_to_revision.hpp"
 #include "pstore_support/error.hpp"
@@ -106,10 +108,12 @@ namespace {
 
     value::value_ptr make_indices (pstore::database & db) {
         value::array::container result;
-        if (pstore::index::write_index * const write = db.get_write_index (false /* create*/)) {
+        if (pstore::index::write_index * const write =
+                pstore::index::get_write_index (db, false /* create*/)) {
             result.push_back (make_index ("write", *write));
         }
-        if (pstore::index::name_index * const name = db.get_name_index (false /* create */)) {
+        if (pstore::index::name_index * const name =
+                pstore::index::get_name_index (db, false /* create */)) {
             result.push_back (value::make_value (value::object::container{
                 {"name", value::make_value ("name")},
                 {"members", value::make_value (std::begin (*name), std::end (*name))},

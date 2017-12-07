@@ -73,6 +73,7 @@ using TCHAR = char;
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/hamt_map.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
@@ -235,7 +236,7 @@ int main (int argc, char * argv[]) {
 
         pstore::database database (std::string{data_file}, pstore::database::access_mode::writable);
 
-        auto index = database.get_digest_index ();
+        auto index = pstore::index::get_digest_index (database);
 
         // generate a large number of unique digests.
         // create a 1k value block (a simulated fragment)

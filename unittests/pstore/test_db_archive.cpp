@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/database.hpp"
+#include "pstore/db_archive.hpp"
 
 // Stadard includes
 #include <array>

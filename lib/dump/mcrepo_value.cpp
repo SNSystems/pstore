@@ -42,9 +42,12 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "dump/mcrepo_value.hpp"
+
 #include "dump/value.hpp"
 #include "dump/db_value.hpp"
 #include "pstore/db_archive.hpp"
+#include "pstore/hamt_map.hpp"
+#include "pstore/hamt_set.hpp"
 
 namespace value {
 
@@ -112,7 +115,7 @@ namespace value {
     value_ptr make_fragments (pstore::database & db) {
         array::container result;
         if (pstore::index::digest_index * const digests =
-                db.get_digest_index (false /* create */)) {
+                pstore::index::get_digest_index (db, false /* create */)) {
 
             array::container members;
             for (auto const & kvp : *digests) {
@@ -166,7 +169,7 @@ namespace value {
     value_ptr make_tickets (pstore::database & db) {
         array::container result;
         if (pstore::index::ticket_index * const tickets =
-                db.get_ticket_index (false /* create */)) {
+                pstore::index::get_ticket_index (db, false /* create */)) {
 
             for (auto const & kvp : *tickets) {
                 auto const ticket = pstore::repo::ticket::load (db, kvp.second);

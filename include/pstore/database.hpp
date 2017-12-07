@@ -59,24 +59,20 @@
 #include <type_traits>
 #include <vector>
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/file.hpp" // for file_handle
-
-#include "pstore/file_header.hpp" // for address
+#include "pstore/file_header.hpp"
 #include "pstore/fnv.hpp"
 #include "pstore/hamt_map_fwd.hpp"
 #include "pstore/head_revision.hpp"
 #include "pstore/make_unique.hpp"
-#include "pstore/memory_mapper.hpp" // for memory_mapper
+#include "pstore/memory_mapper.hpp"
 #include "pstore/region.hpp"
 #include "pstore/shared_memory.hpp"
+#include "pstore/sstring_view.hpp"
 #include "pstore/storage.hpp"
 #include "pstore/uint128.hpp"
 #include "pstore/vacuum_intf.hpp"
-
-#include "serialize/archive.hpp"
-#include "serialize/standard_types.hpp"
-#include "serialize/types.hpp"
+#include "pstore_support/error.hpp"
+#include "pstore_support/file.hpp"
 
 namespace pstore {
     /// Calculate the value that must be added to 'v' in order that it has the alignment
@@ -102,121 +98,7 @@ namespace pstore {
         return calc_alignment (v, alignof (Ty));
     }
 
-
-    template <typename LockGuard>
-    class transaction;
-
-    namespace index {
-        using write_index = hamt_map<std::string, record>;
-
-        using uint128 = ::pstore::uint128;
-        using digest = uint128;
-        struct u128_hash {
-            std::uint64_t operator() (digest const & v) const {
-                return v.high ();
-            }
-        };
-        using digest_index = hamt_map<digest, record, u128_hash>;
-
-        // Note: Since uuid byte 6 represents version and byte 8 represents variant, we don't want
-        // to use these two bytes. Therefore, we use the array[0-3,12-15] to construct the uint64_t.
-        struct uuid_hash {
-            std::uint64_t operator() (pstore::uuid const & v) const {
-                auto & uuid_bytes = v.array ();
-                return static_cast<std::uint64_t> (uuid_bytes[0]) << (8 * 7) |
-                       static_cast<std::uint64_t> (uuid_bytes[1]) << (8 * 6) |
-                       static_cast<std::uint64_t> (uuid_bytes[2]) << (8 * 5) |
-                       static_cast<std::uint64_t> (uuid_bytes[3]) << (8 * 4) |
-                       static_cast<std::uint64_t> (uuid_bytes[12]) << (8 * 3) |
-                       static_cast<std::uint64_t> (uuid_bytes[13]) << (8 * 2) |
-                       static_cast<std::uint64_t> (uuid_bytes[14]) << (8 * 1) |
-                       static_cast<std::uint64_t> (uuid_bytes[15]);
-            }
-        };
-        using ticket_index = hamt_map<pstore::uuid, record, uuid_hash>;
-
-        using name_index = hamt_set<std::string, fnv_64a_hash>;
-    } // namespace index
-
-
-    namespace serialize {
-        /// \brief A serializer for uint128
-        template <>
-        struct serializer<uint128> {
-
-            /// \brief Writes an individual uint128 instance to an archive.
-            ///
-            /// \param archive  The archive to which the span will be written.
-            /// \param v        The object value which is to be written.
-            template <typename Archive>
-            static auto write (Archive & archive, uint128 const & v) ->
-                typename Archive::result_type {
-                return archive.put (v);
-            }
-
-            /// \brief Writes a span of uint128 instances to an archive.
-            ///
-            /// \param archive  The archive to which the span will be written.
-            /// \param span     The span which is to be written.
-            template <typename Archive, typename SpanType>
-            static auto writen (Archive & archive, SpanType span) -> typename Archive::result_type {
-                static_assert (std::is_same<typename SpanType::element_type, uint128>::value,
-                               "span type does not match the serializer type");
-                return archive.putn (span);
-            }
-
-            /// \brief Reads a uint128 value from an archive.
-            ///
-            /// \param archive  The archive from which the value will be read.
-            /// \param out      A reference to uninitialized memory into which a uint128 will be
-            /// read.
-            template <typename Archive>
-            static void read (Archive & archive, uint128 & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
-                archive.get (out);
-            }
-
-            /// \brief Reads a span of uint128 values from an archive.
-            ///
-            /// \param archive  The archive from which the value will be read.
-            /// \param span     A span pointing to uninitialized memory
-            template <typename Archive, typename Span>
-            static void readn (Archive & archive, Span span) {
-                static_assert (std::is_same<typename Span::element_type, uint128>::value,
-                               "span type does not match the serializer type");
-                details::getn_helper::getn (archive, span);
-            }
-        };
-
-        /// \brief A serializer for uuid
-        template <>
-        struct serializer<pstore::uuid> {
-
-            /// \brief Writes an individual uuid instance to an archive.
-            ///
-            /// \param archive  The archive to which the span will be written.
-            /// \param v        The object value which is to be written.
-            template <typename Archive>
-            static auto write (Archive & archive, pstore::uuid const & v) ->
-                typename Archive::result_type {
-                return archive.put (v);
-            }
-
-            /// \brief Reads a uuid value from an archive.
-            ///
-            /// \param archive  The archive from which the value will be read.
-            /// \param out      A reference to uninitialized memory into which a uuid will be
-            /// read.
-            template <typename Archive>
-            static void read (Archive & archive, pstore::uuid & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (pstore::uuid) == 0);
-                archive.get (out);
-            }
-        };
-
-    } // namespace serialize
-} // namespace pstore
-
+} // naemsapce pstore
 
 //*       _       _        _                      *
 //*    __| | __ _| |_ __ _| |__   __ _ ___  ___   *
@@ -374,33 +256,19 @@ namespace pstore {
             return this->get_sync_name () + ".pst";
         }
 
-        /// Returns a pointer to the write index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        pstore::index::write_index * get_write_index (bool create = true);
-
-        /// Returns a pointer to the digest index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        pstore::index::digest_index * get_digest_index (bool create = true);
-
-        /// Returns a pointer to the ticket index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        pstore::index::ticket_index * get_ticket_index (bool create = true);
-
-        /// Returns a pointer to the name index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        pstore::index::name_index * get_name_index (bool create = true);
-
-
-
-        /// Updates logical_size_ and potentially, the regions_ and sat_ arrays.
+        /// Appends an amount of storage to the database.
+        /// As an append-only system, this function provides the means by which data is recorded in
+        /// the underlying storage; it is responsible for increasing the amount of available storage
+        /// when necessary.
         ///
-        /// \param lock   A reference to a write lock held on this database. This parameter is here
-        ///               simply to ensure that we really do have a write lock when messing with
-        ///               the database file.
+        /// \note Before calling this function it is important that the global write-lock is held
+        /// (usually through use of transaction<>). Failure to do so will cause race conditions
+        /// between processes accessing the store.
+        ///
         /// \param bytes  The number of bytes to be allocated.
         /// \param align  The alignment of the allocated storage. Must be a power of 2.
-        template <typename LockGuard>
-        auto allocate (LockGuard & lock, std::uint64_t bytes, unsigned align) -> address;
+        /// \returns The address of the newly allocated storage.
+        virtual address allocate (std::uint64_t bytes, unsigned align);
 
         /// Call as part of completing a transaction. We update the database records to that
         /// the new footer is recorded.
@@ -409,7 +277,6 @@ namespace pstore {
         void protect (address first, address last) {
             storage_.protect (first, last);
         }
-
 
         /// \brief Returns true if CRC checks are enabled.
         ///
@@ -422,8 +289,12 @@ namespace pstore {
         shared const * get_shared () const;
         shared * get_shared ();
 
-    protected:
-        virtual address allocate (std::uint64_t bytes, unsigned align);
+        std::unique_ptr<index::index_base> & get_index (enum pstore::trailer::indices which) {
+            return indices_[static_cast<std::underlying_type<decltype (which)>::type> (which)];
+        }
+        std::shared_ptr<trailer const> get_footer () const {
+            return this->getro<trailer> (this->footer_pos ());
+        }
 
     private:
         class storage storage_;
@@ -493,8 +364,6 @@ namespace pstore {
         /// the disk. Used after a sync() operation has changed the current database view.
         void clear_index_cache ();
 
-        template <typename IndexType>
-        auto get_index (enum trailer::indices which, bool create) -> IndexType *;
 
         /// Returns a block of data from the store which spans more than one region. A fresh block
         /// of memory is allocated to which blocks of data from the store are copied. If a writable
@@ -507,10 +376,6 @@ namespace pstore {
 
         template <typename File>
         static address get_footer_pos (File & file);
-
-        std::shared_ptr<trailer const> get_footer () const {
-            return this->getro<trailer> (this->footer_pos ());
-        }
 
         static std::string build_sync_name (header const & header);
 
@@ -591,16 +456,6 @@ namespace pstore {
         return footer_pos;
     }
 
-
-
-    // allocate
-    // ~~~~~~~~
-    template <typename LockGuard>
-    auto database::allocate (LockGuard &, std::uint64_t bytes, unsigned align) -> address {
-        return this->allocate (bytes, align);
-    }
-
-
     // getrw
     // ~~~~~
     template <typename Ty>
@@ -624,7 +479,6 @@ namespace pstore {
         return std::const_pointer_cast<void> (
             this->get (addr, size, true /*initialized*/, true /*writable*/));
     }
-
 
     // getro
     // ~~~~~

@@ -250,17 +250,14 @@ TEST_F (EmptyStore, Allocate16Bytes) {
     pstore::database db{file_};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-    mock_mutex mutex;
-    std::lock_guard<mock_mutex> lock (mutex);
-
     // Initial allocation.
     constexpr auto size = 16U;
     constexpr auto align = 1U;
-    pstore::address addr = db.allocate (lock, size, align);
+    pstore::address addr = db.allocate (size, align);
     EXPECT_EQ (sizeof (pstore::header) + sizeof (pstore::trailer), addr.absolute ());
 
     // Subsequent allocation.
-    pstore::address addr2 = db.allocate (lock, size, align);
+    pstore::address addr2 = db.allocate (size, align);
     EXPECT_EQ (addr.absolute () + 16, addr2.absolute ());
 }
 
@@ -268,17 +265,14 @@ TEST_F (EmptyStore, Allocate16BytesAligned1024) {
     pstore::database db{file_};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-    mock_mutex mutex;
-    std::lock_guard<mock_mutex> lock (mutex);
-
     constexpr unsigned size = 16;
     constexpr unsigned align = 1024;
     PSTORE_STATIC_ASSERT (align > sizeof (pstore::header) + sizeof (pstore::trailer));
 
-    pstore::address addr = db.allocate (lock, size, align);
+    pstore::address addr = db.allocate (size, align);
     EXPECT_EQ (0U, addr.absolute () % align);
 
-    pstore::address addr2 = db.allocate (lock, size, align);
+    pstore::address addr2 = db.allocate (size, align);
     EXPECT_EQ (addr.absolute () + align, addr2.absolute ());
 }
 

@@ -49,6 +49,8 @@
 #define PSTORE_DB_ARCHIVE_HPP
 
 #include "pstore/address.hpp"
+#include "pstore/database.hpp"
+#include "pstore/serialize/archive.hpp"
 #include "pstore_support/error.hpp"
 
 namespace pstore {
@@ -61,14 +63,12 @@ namespace pstore {
             // *************************************
             namespace details {
 
-                template <typename LockGuard>
+                template <typename Transaction>
                 class database_writer_policy {
                 public:
                     using result_type = pstore::address;
 
-                    using transaction_type = pstore::transaction<LockGuard>;
-
-                    database_writer_policy (transaction_type & trans)
+                    database_writer_policy (Transaction & trans)
                             : transaction_ (trans) {}
 
                     /// Writes an instance of a standard-layout type T to the database.
@@ -99,32 +99,28 @@ namespace pstore {
 
                 private:
                     /// The transaction to which data is written.
-                    transaction_type & transaction_;
+                    Transaction & transaction_;
                 };
 
             } // namespace details
 
-            template <typename LockGuard>
+            template <typename Transaction>
             class database_writer final
-                : public writer_base<details::database_writer_policy<LockGuard>> {
-
+                : public writer_base<details::database_writer_policy<Transaction>> {
             public:
-                using inherited = writer_base<typename details::database_writer_policy<LockGuard>>;
-                using transaction_type = typename inherited::policy_type::transaction_type;
-
                 /// \brief Constructs the writer using the transaction.
                 /// \param transaction The active transaction to the store to which the
                 ///                    database_writer will write.
-                database_writer (transaction_type & transaction)
-                        : inherited (transaction) {}
+                database_writer (Transaction & transaction)
+                        : writer_base<typename details::database_writer_policy<Transaction>> (
+                              transaction) {}
             };
 
             /// A convenience function which simplifies the construction of a database_writer
             /// instance if the caller has an existing transaction object.
             /// \param transaction The transaction to which the database_writer will append.
             template <typename Transaction>
-            inline auto make_writer (Transaction & transaction)
-                -> database_writer<typename Transaction::lock_type> {
+            inline auto make_writer (Transaction & transaction) -> database_writer<Transaction> {
                 return {transaction};
             }
 
@@ -140,6 +136,16 @@ namespace pstore {
                 database_reader (pstore::database const & db, pstore::address const addr)
                         : db_ (db)
                         , addr_ (addr) {}
+
+                pstore::database const & get_db () const {
+                    return db_;
+                }
+                pstore::address get_address () const {
+                    return addr_;
+                }
+                void skip (std::size_t distance) {
+                    addr_ += distance;
+                }
 
                 /// Reads a single instance of a standard-layout type Ty from the current store
                 /// address.

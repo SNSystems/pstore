@@ -52,6 +52,7 @@
 
 #include "pstore/database.hpp"
 #include "pstore/hamt_map.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/make_unique.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore_support/logging.hpp"
@@ -140,7 +141,8 @@ namespace vacuum {
                 // We don't want our pristine new store to be vacuumed; it doesn't need it.
                 destination->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-                pstore::index::write_index * const source_names = source->get_write_index ();
+                pstore::index::write_index * const source_names =
+                    pstore::index::get_write_index (*source);
                 if (source_names == nullptr) {
                     pstore::logging::log (pstore::logging::priority::error,
                                           "Names index was not found in source store");
@@ -149,7 +151,7 @@ namespace vacuum {
                 }
 
                 pstore::index::write_index * const destination_names =
-                    destination->get_write_index ();
+                    pstore::index::get_write_index (*destination);
 
                 if (!st->done) {
                     auto transaction = pstore::begin (*destination);

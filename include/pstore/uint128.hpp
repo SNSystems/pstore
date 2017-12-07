@@ -63,15 +63,11 @@ namespace pstore {
                 : high_{high}
                 , low_{low} {}
 
-        template <typename IntType>
+        /// Construct from an unsigned integer that's 64-bits wide or fewer.
+        template <typename IntType,
+                  typename = typename std::enable_if<std::is_unsigned<IntType>::value>::type>
         constexpr uint128 (IntType v) noexcept
-                : low_ (v) {
-            static_assert (std::is_integral<IntType>::value, "IntType must be integral");
-            static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
-            static_assert (std::numeric_limits<IntType>::max () <=
-                               std::numeric_limits<std::uint64_t>::max (),
-                           "IntType must have a range <= uint64_t");
-        }
+                : low_{v} {}
 
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
         /// value.

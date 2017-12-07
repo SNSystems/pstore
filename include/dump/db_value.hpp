@@ -46,6 +46,7 @@
 #define DB_VALUE_HPP
 
 #include "pstore/database.hpp"
+#include "pstore/index_types.hpp"
 #include "value.hpp"
 
 namespace value {
@@ -86,6 +87,10 @@ namespace value {
 
     inline value_ptr make_value (pstore::uuid const & u) {
         return make_value (u.str ());
+    }
+
+    inline value_ptr make_value (pstore::sstring_view const & str) {
+        return make_value (str.to_string ());
     }
 
     value_ptr make_value (pstore::record r);

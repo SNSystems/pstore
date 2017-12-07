@@ -50,9 +50,7 @@
 #include <iterator>
 
 // pstore includes
-#include "pstore/database.hpp"
-#include "pstore/hamt_map_fwd.hpp"
-#include "pstore/hamt_map_types.hpp"
+#include "pstore/hamt_map.hpp"
 
 namespace pstore {
     namespace index {
@@ -184,9 +182,8 @@ namespace pstore {
             /// \returns A pair consisting of an iterator to the inserted element (or to the element
             /// that prevented the insertion) and a bool value set to true if the insertion took
             /// place.
-            template <typename LockType>
-            std::pair<iterator, bool> insert (transaction<LockType> & transaction,
-                                              value_type const & key) {
+            template <typename Transaction>
+            std::pair<iterator, bool> insert (Transaction & transaction, value_type const & key) {
                 auto it = map_.insert (transaction, {key, empty_class ()});
                 return {{it.first}, it.second};
             }
@@ -200,8 +197,8 @@ namespace pstore {
                 return {map_.find (key)};
             }
 
-            template <typename LockType>
-            address flush (transaction<LockType> & transaction) {
+            template <typename Transaction>
+            address flush (Transaction & transaction) {
                 return map_.flush (transaction);
             }
 

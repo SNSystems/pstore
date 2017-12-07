@@ -44,6 +44,7 @@
 #ifndef PSTORE_MCREPO_TICKET_HPP
 #define PSTORE_MCREPO_TICKET_HPP
 
+#include "pstore/index_types.hpp"
 #include "pstore/transaction.hpp"
 
 namespace pstore {

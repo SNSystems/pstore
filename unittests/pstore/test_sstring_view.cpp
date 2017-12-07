@@ -43,17 +43,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/sstring_view.hpp"
+#include <cstring>
 #include <gmock/gmock.h>
+#include "pstore/make_unique.hpp"
 
 namespace {
-    pstore::sstring_view new_sstring_view (char const * s) {
-        auto const length = pstore::sstring_view_details::length (s);
-        auto const data = pstore::sstring_view_details::data (s);
-        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
-        std::copy (data, data + length, ptr.get ());
-        return {ptr, length};
-    }
-
     class SStringView : public ::testing::Test {
     protected:
         std::shared_ptr<char> new_shared (std::string const & s) {
@@ -62,19 +56,20 @@ namespace {
             return result;
         }
     };
-}
+} // anonymous namespace
+
 TEST_F (SStringView, Init) {
     pstore::sstring_view sv;
     EXPECT_EQ (sv.size (), 0U);
     EXPECT_EQ (sv.length (), 0U);
-    EXPECT_EQ (sv.max_size (), 0U);
+    EXPECT_EQ (sv.max_size (), std::numeric_limits<std::size_t>::max ());
     EXPECT_TRUE (sv.empty ());
     EXPECT_EQ (std::distance (std::begin (sv), std::end (sv)), 0);
 }
 
 TEST_F (SStringView, At) {
     std::string const src{"ABCDE"};
-    pstore::sstring_view const sv = new_sstring_view (src.c_str ());
+    auto const sv = pstore::sstring_view::make (src);
     ASSERT_EQ (sv.length (), src.length ());
     EXPECT_FALSE (sv.empty ());
     EXPECT_EQ (sv[0], sv.at (0));
@@ -89,7 +84,7 @@ TEST_F (SStringView, Back) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view sv (ptr, length);
+    pstore::sstring_view sv{ptr, length};
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.back (), src[length - 1]);
@@ -100,7 +95,7 @@ TEST_F (SStringView, Data) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view sv (ptr, length);
+    pstore::sstring_view sv{ptr, length};
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.data (), ptr.get ());
@@ -110,7 +105,7 @@ TEST_F (SStringView, Front) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view sv (ptr, length);
+    pstore::sstring_view sv{ptr, length};
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.front (), src[0]);
@@ -121,7 +116,7 @@ TEST_F (SStringView, Index) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view sv (ptr, length);
+    pstore::sstring_view sv{ptr, length};
 
     EXPECT_EQ (sv[0], src[0]);
     EXPECT_EQ (&sv[0], ptr.get () + 0);
@@ -131,6 +126,95 @@ TEST_F (SStringView, Index) {
     EXPECT_EQ (&sv[4], ptr.get () + 4);
 }
 
+TEST_F (SStringView, RBeginEmpty) {
+    pstore::sstring_view sv = pstore::sstring_view::make ("");
+    pstore::sstring_view const & csv = sv;
+
+    pstore::sstring_view::reverse_iterator rbegin = sv.rbegin ();
+    pstore::sstring_view::const_reverse_iterator const_rbegin1 = csv.rbegin ();
+    pstore::sstring_view::const_reverse_iterator const_rbegin2 = sv.crbegin ();
+    EXPECT_EQ (rbegin, const_rbegin1);
+    EXPECT_EQ (rbegin, const_rbegin2);
+    EXPECT_EQ (const_rbegin1, const_rbegin2);
+}
+
+TEST_F (SStringView, RBegin) {
+    pstore::sstring_view sv = pstore::sstring_view::make ("abc");
+    pstore::sstring_view const & csv = sv;
+
+    pstore::sstring_view::reverse_iterator rbegin = sv.rbegin ();
+    pstore::sstring_view::const_reverse_iterator const_begin1 = csv.rbegin ();
+    pstore::sstring_view::const_reverse_iterator const_begin2 = sv.crbegin ();
+
+    std::size_t const last = sv.size () - 1;
+    EXPECT_EQ (*rbegin, sv[last]);
+    EXPECT_EQ (&*rbegin, &sv[last]);
+    EXPECT_EQ (*const_begin1, sv[last]);
+    EXPECT_EQ (&*const_begin1, &sv[last]);
+    EXPECT_EQ (*const_begin2, sv[last]);
+    EXPECT_EQ (&*const_begin2, &sv[last]);
+
+    EXPECT_EQ (rbegin, const_begin1);
+    EXPECT_EQ (rbegin, const_begin2);
+    EXPECT_EQ (const_begin1, const_begin2);
+}
+
+TEST_F (SStringView, REndEmpty) {
+    pstore::sstring_view sv = pstore::sstring_view::make ("");
+    pstore::sstring_view const & csv = sv;
+    pstore::sstring_view::reverse_iterator rend = sv.rend ();
+    pstore::sstring_view::const_reverse_iterator const_rend1 = csv.rend ();
+    pstore::sstring_view::const_reverse_iterator const_rend2 = sv.crend ();
+
+    EXPECT_EQ (rend, sv.rbegin ());
+    EXPECT_EQ (const_rend1, csv.rbegin ());
+    EXPECT_EQ (const_rend2, sv.rbegin ());
+
+    EXPECT_EQ (rend - sv.rbegin (), 0);
+    EXPECT_EQ (const_rend1 - csv.rbegin (), 0);
+    EXPECT_EQ (const_rend2 - sv.crbegin (), 0);
+
+    EXPECT_EQ (rend, const_rend1);
+    EXPECT_EQ (rend, const_rend2);
+    EXPECT_EQ (const_rend1, const_rend2);
+}
+
+TEST_F (SStringView, REnd) {
+    pstore::sstring_view sv = pstore::sstring_view::make ("abc");
+    pstore::sstring_view const & csv = sv;
+    pstore::sstring_view::reverse_iterator rend = sv.rend ();
+    pstore::sstring_view::const_reverse_iterator const_rend1 = csv.rend ();
+    pstore::sstring_view::const_reverse_iterator const_rend2 = sv.crend ();
+
+    EXPECT_NE (rend, sv.rbegin ());
+    EXPECT_NE (const_rend1, csv.rbegin ());
+    EXPECT_NE (const_rend2, sv.rbegin ());
+
+    EXPECT_EQ (rend - sv.rbegin (), 3);
+    EXPECT_EQ (const_rend1 - csv.rbegin (), 3);
+    EXPECT_EQ (const_rend2 - sv.crbegin (), 3);
+
+    EXPECT_EQ (rend, const_rend1);
+    EXPECT_EQ (rend, const_rend2);
+    EXPECT_EQ (const_rend1, const_rend2);
+}
+
+TEST_F (SStringView, Clear) {
+    pstore::sstring_view empty = pstore::sstring_view::make ("");
+    {
+        pstore::sstring_view sv1 = pstore::sstring_view::make ("abc");
+        sv1.clear ();
+        EXPECT_EQ (sv1.size (), 0U);
+        EXPECT_EQ (sv1, empty);
+    }
+    {
+        pstore::sstring_view sv2 = pstore::sstring_view::make ("");
+        sv2.clear ();
+        EXPECT_EQ (sv2.size (), 0U);
+        EXPECT_EQ (sv2, empty);
+    }
+}
+
 namespace {
     template <typename StringType>
     class SStringViewRelational : public SStringView {};
@@ -138,24 +222,36 @@ namespace {
     class sstringview_maker {
     public:
         sstringview_maker (char const * s)
-                : view_ (new_sstring_view (s)) {}
-        operator pstore::sstring_view () const {
+                : view_ (pstore::sstring_view::make (s)) {}
+        operator pstore::sstring_view () const noexcept {
             return view_;
         }
-
     private:
         pstore::sstring_view view_;
     };
 
-    using StringTypes = ::testing::Types<sstringview_maker, char const *, std::string>;
-}
+    using StringTypes = ::testing::Types<sstringview_maker, sstringview_maker const, char const *,
+                                         std::string, std::string const>;
+} // anonymous namespace
+
+namespace pstore {
+    template <>
+    struct string_traits<sstringview_maker> {
+        static std::size_t length (sstring_view const & s) noexcept {
+            return string_traits<sstring_view>::length (s);
+        }
+        static char const * data (sstring_view const & s) noexcept {
+            return string_traits<sstring_view>::data (s);
+        }
+    };
+} // anonymous namespace
 
 TYPED_TEST_CASE (SStringViewRelational, StringTypes);
 
 TYPED_TEST (SStringViewRelational, Eq) {
 #define EQ(lhs, rhs, x)                                                                            \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view (lhs);                                    \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make (lhs);                          \
         EXPECT_EQ (lhs_view == (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) == lhs_view, (x));                                                        \
     }
@@ -181,7 +277,7 @@ TYPED_TEST (SStringViewRelational, Eq) {
 TYPED_TEST (SStringViewRelational, Ne) {
 #define NE(lhs, rhs, x)                                                                            \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view (lhs);                                    \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make (lhs);                          \
         EXPECT_EQ (lhs_view != (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) != lhs_view, (x));                                                        \
     }
@@ -206,7 +302,7 @@ TYPED_TEST (SStringViewRelational, Ne) {
 TYPED_TEST (SStringViewRelational, Ge) {
 #define GE(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view (lhs);                                    \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make (lhs);                          \
         EXPECT_EQ (lhs_view >= (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) >= lhs_view, (y));                                                        \
     }
@@ -232,7 +328,7 @@ TYPED_TEST (SStringViewRelational, Ge) {
 TYPED_TEST (SStringViewRelational, Gt) {
 #define GT(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view (lhs);                                    \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make (lhs);                          \
         EXPECT_EQ (lhs_view > (rhs), (x));                                                         \
         EXPECT_EQ ((rhs) > lhs_view, (y));                                                         \
     }
@@ -258,7 +354,7 @@ TYPED_TEST (SStringViewRelational, Gt) {
 TYPED_TEST (SStringViewRelational, Le) {
 #define LE(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view ((lhs));                                  \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make ((lhs));                        \
         EXPECT_EQ (lhs_view <= (rhs), bool{(x)});                                                  \
         EXPECT_EQ ((rhs) <= lhs_view, bool{(y)});                                                  \
     }
@@ -284,7 +380,7 @@ TYPED_TEST (SStringViewRelational, Le) {
 TYPED_TEST (SStringViewRelational, Lt) {
 #define LT(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        pstore::sstring_view lhs_view = new_sstring_view ((lhs));                                  \
+        pstore::sstring_view lhs_view = pstore::sstring_view::make ((lhs));                        \
         EXPECT_EQ ((lhs_view < rhs), bool{(x)});                                                   \
         EXPECT_EQ ((rhs < lhs_view), bool{(y)});                                                   \
     }
@@ -305,5 +401,63 @@ TYPED_TEST (SStringViewRelational, Lt) {
     LT ("abcdefghijklmnopqrst", TypeParam ("abcdefghij"), false, true);
     LT ("abcdefghijklmnopqrst", TypeParam ("abcdefghijklmnopqrst"), false, false);
 #undef LE
+}
+
+namespace {
+
+
+    void test (char const * str, pstore::sstring_view::value_type c,
+               pstore::sstring_view::size_type x) {
+        EXPECT_EQ (pstore::sstring_view::make (str).find (c), x);
+        if (x != pstore::sstring_view::npos) {
+            EXPECT_GE (x, 0U);
+            EXPECT_LE (x + 1, std::strlen (str));
+        }
+    }
+}
+
+TEST_F (SStringView, FindCharAndPos) {
+#define CHECK(str, c, pos, expected)                                                               \
+    assert ((expected) == pstore::sstring_view::npos || (expected) >= (pos));                      \
+    assert ((expected) == pstore::sstring_view::npos || (expected) < std::strlen (str));           \
+    EXPECT_EQ (pstore::sstring_view::make (str).find (c, pos), expected);
+
+
+    CHECK ("", 'c', 0, pstore::sstring_view::npos);
+    CHECK ("", 'c', 1, pstore::sstring_view::npos);
+    CHECK ("abcde", 'c', 0, 2U);
+    CHECK ("abcde", 'c', 1, 2U);
+    CHECK ("abcde", 'c', 2, 2U);
+    CHECK ("abcde", 'c', 4, pstore::sstring_view::npos);
+    CHECK ("abcde", 'c', 5, pstore::sstring_view::npos);
+    CHECK ("abcde", 'c', 6, pstore::sstring_view::npos);
+    CHECK ("abcdeabcde", 'c', 0, 2U);
+    CHECK ("abcdeabcde", 'c', 1, 2U);
+    CHECK ("abcdeabcde", 'c', 5, 7U);
+    CHECK ("abcdeabcde", 'c', 9, pstore::sstring_view::npos);
+    CHECK ("abcdeabcde", 'c', 10, pstore::sstring_view::npos);
+    CHECK ("abcdeabcde", 'c', 11, pstore::sstring_view::npos);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 0, 2U);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 1, 2U);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 10, 12U);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 19, pstore::sstring_view::npos);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 20, pstore::sstring_view::npos);
+    CHECK ("abcdeabcdeabcdeabcde", 'c', 21, pstore::sstring_view::npos);
+#undef CHECK
+}
+TEST_F (SStringView, FindChar) {
+    test ("", 'c', pstore::sstring_view::npos);
+    test ("abcde", 'c', 2);
+    test ("abcdeabcde", 'c', 2);
+    test ("abcdeabcdeabcdeabcde", 'c', 2);
+}
+
+TEST_F (SStringView, OperatorWrite) {
+    std::ostringstream str;
+
+    test ("", 'c', pstore::sstring_view::npos);
+    test ("abcde", 'c', 2);
+    test ("abcdeabcde", 'c', 2);
+    test ("abcdeabcdeabcdeabcde", 'c', 2);
 }
 // eof: unittests/pstore/test_sstring_view.cpp

@@ -54,7 +54,7 @@
 #include <type_traits>
 
 #include "pstore/start_vacuum.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/time.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/path.hpp"
 #include "pstore_support/portab.hpp"
@@ -489,58 +489,7 @@ namespace pstore {
         return address::make (result + extra_for_alignment);
     }
 
-    // get_index
-    // ~~~~~~~~~
-    template <typename IndexType>
-    auto database::get_index (enum trailer::indices which, bool create) -> IndexType * {
-        auto const which_pos = static_cast<std::underlying_type<decltype (which)>::type> (which);
-        auto & dx = indices_[which_pos];
 
-        // Have we already loaded this index?
-        if (dx.get () == nullptr) {
-            std::shared_ptr<pstore::trailer const> footer = this->get_footer ();
-            address const location = footer->a.index_records.at (which_pos);
-            if (location == pstore::address::null ()) {
-                if (create) {
-                    // Create a new (empty) index.
-                    dx = std::make_unique<IndexType> (*this);
-                }
-            } else {
-                // Construct the index from the location.
-                dx = std::make_unique<IndexType> (*this, location);
-            }
-        }
-
-#ifdef PSTORE_CPP_RTTI
-        assert ((!create && dx.get () == nullptr) ||
-                dynamic_cast<IndexType *> (dx.get ()) != nullptr);
-#endif
-        return static_cast<IndexType *> (dx.get ());
-    }
-
-    // get_write_index
-    // ~~~~~~~~~~~~~~~
-    pstore::index::write_index * database::get_write_index (bool create) {
-        return get_index<pstore::index::write_index> (trailer::indices::write, create);
-    }
-
-    // get_digest_index
-    // ~~~~~~~~~~~~~~~~
-    pstore::index::digest_index * database::get_digest_index (bool create) {
-        return get_index<pstore::index::digest_index> (trailer::indices::digest, create);
-    }
-
-    // get_ticket_index
-    // ~~~~~~~~~~~~~~~~
-    pstore::index::ticket_index * database::get_ticket_index (bool create) {
-        return get_index<pstore::index::ticket_index> (trailer::indices::ticket, create);
-    }
-
-    // get_name_index
-    // ~~~~~~~~~~~~~~
-    pstore::index::name_index * database::get_name_index (bool create) {
-        return get_index<pstore::index::name_index> (trailer::indices::name, create);
-    }
 
     // set_new_footer
     // ~~~~~~~~~~~~~~

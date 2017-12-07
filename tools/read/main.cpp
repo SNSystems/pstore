@@ -58,15 +58,15 @@
 using TCHAR = char;
 #endif
 
-
 #include "switches.hpp"
 
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_set.hpp"
+#include "pstore/index_types.hpp"
+#include "pstore/sstring_view_archive.hpp"
 #include "pstore_cmd_util/str_to_revision.hpp"
 #include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp"
-
 
 namespace {
 #if defined(_WIN32) && defined(_UNICODE)
@@ -95,18 +95,18 @@ namespace {
     bool read_strings_index (pstore::database & db, std::string const & key) {
         bool ok = true;
 
-        pstore::index::name_index * const strings = db.get_name_index ();
+        pstore::index::name_index * const strings = pstore::index::get_name_index (db);
         if (strings == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Strings index was not found\n");
             ok = false;
         } else {
-            auto const it = strings->find (key);
+            auto const it = strings->find (pstore::sstring_view{key});
             if (it == strings->cend ()) {
                 error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.
             } else {
-                out_stream << pstore::utf::to_native_string (*it);
+                out_stream << pstore::utf::to_native_string (it->to_string ());
             }
         }
         return ok;
@@ -116,7 +116,7 @@ namespace {
     bool read_names_index (pstore::database & db, std::string const & key) {
         bool ok = true;
 
-        pstore::index::write_index * names = db.get_write_index ();
+        pstore::index::write_index * const names = pstore::index::get_write_index (db);
         if (names == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Names index was not found\n");
             ok = false;

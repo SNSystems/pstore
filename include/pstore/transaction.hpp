@@ -50,10 +50,8 @@
 #include <mutex>
 #include <type_traits>
 
+#include "pstore/address.hpp"
 #include "pstore/database.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/start_vacuum.hpp"
 #include "pstore/time.hpp"
 
 namespace pstore {
@@ -70,24 +68,21 @@ namespace pstore {
     /// destructor (unless an exception is being unwound). A transaction is a scope in which
     /// operations are performed together and committed, or completely reversed.
 
-    template <typename LockGuard>
-    class transaction {
+    class transaction_base {
     public:
-        using lock_type = LockGuard;
+        virtual ~transaction_base () noexcept {}
 
-        transaction (database & db, lock_type && lock);
-        virtual ~transaction () noexcept;
+        transaction_base (transaction_base const &) = delete;
+        transaction_base & operator= (transaction_base const &) = delete;
+        transaction_base (transaction_base && rhs) noexcept;
+        transaction_base & operator= (transaction_base && rhs) noexcept = delete;
 
-        database & db () {
+        database & db () noexcept {
             return db_;
         }
-
-        /// Commits all modifications made to the data store as part of this transaction.
-        /// Modifications are visible to other processes when the commit is complete.
-        transaction & commit ();
-
-        /// Discards all modifications made to the data store as part of this transaction.
-        transaction & rollback () noexcept;
+        database const & db () const noexcept {
+            return db_;
+        }
 
         /// Returns true if data has been added to this transaction, but not yet committed. In
         /// other words, if it returns false, calls to commit() or rollback() are noops.
@@ -95,27 +90,54 @@ namespace pstore {
             return first_ != address::null ();
         }
 
+        /// Commits all modifications made to the data store as part of this transaction.
+        /// Modifications are visible to other processes when the commit is complete.
+        transaction_base & commit ();
+
+        /// Discards all modifications made to the data store as part of this transaction.
+        transaction_base & rollback () noexcept;
+
+
         ///@{
-        auto getro (address const & addr, std::size_t size) -> std::shared_ptr<void const>;
+        auto getro (address addr, std::size_t size) -> std::shared_ptr<void const>;
         auto getro (record const & r) -> std::shared_ptr<void const>;
         template <typename Ty>
-        auto getro (address const & sop) -> std::shared_ptr<Ty const>;
+        auto getro (address addr) -> std::shared_ptr<Ty const>;
         ///@}
 
 
         ///@{
-        auto getrw (address const & addr, std::size_t size) -> std::shared_ptr<void>;
-        auto getrw (record const & r) -> std::shared_ptr<void>;
+        std::shared_ptr<void> getrw (address addr, std::size_t size);
+        std::shared_ptr<void> getrw (record const & r);
 
         template <typename Ty,
                   typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        auto getrw (address const & addr, std::size_t elements) -> std::shared_ptr<Ty>;
+        std::shared_ptr<Ty> getrw (address addr, std::size_t elements);
 
         template <typename Ty,
                   typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        auto getrw (address const & addr) -> std::shared_ptr<Ty>;
+        std::shared_ptr<Ty> getrw (address addr);
         ///@}
 
+        ///@{
+        /// Extend the database store ensuring that there's enough room for the requested number
+        /// of bytes with any additional padding to statify the alignment requirement.
+        ///
+        /// \param size   The number of bytes of storages to be allocated.
+        /// \param align  The alignment of the allocated storage. Must be a power of 2.
+        /// \result       The database address of the new storage.
+        /// \note     The newly allocated space is not initialized.
+        virtual address allocate (std::uint64_t size, unsigned align);
+
+        /// Extend the database store ensuring that there's enough room for an instance of the
+        /// template type.
+        /// \result  The database address of the new storage.
+        /// \note    The newly allocated space is not initialized.
+        template <typename Ty>
+        address allocate () {
+            return this->allocate (sizeof (Ty), alignof (Ty));
+        }
+        ///@}
 
         ///@{
 
@@ -130,17 +152,7 @@ namespace pstore {
         ///           allocated space and the address of that space.
         ///
         /// \note     The newly allocated space is not initialized.
-        auto alloc_rw (std::size_t size, unsigned align)
-            -> std::pair<std::shared_ptr<void>, address> {
-            address const addr = this->allocate (size, align);
-            // We call database::get() with the initialized parameter set to false because this
-            // is new storage: there's no need to copy its existing contents if the block spans
-            // more than one region.
-            auto ptr = std::const_pointer_cast<void> (db_.get (addr, size,
-                                                               false,  // initialized?
-                                                               true)); // writable?
-            return {ptr, addr};
-        }
+        std::pair<std::shared_ptr<void>, address> alloc_rw (std::size_t size, unsigned align);
 
         /// Allocates sufficient space in the transaction for one or more new instances of
         /// type 'Ty' and returns both a writable pointer to the new space and
@@ -159,46 +171,16 @@ namespace pstore {
         }
         ///@}
 
-        ///@{
-        /// Extend the database store ensuring that there's enough room for the requested number
-        /// of bytes with any additional padding to statify the alignment requirement.
-        ///
-        /// \param size   The number of bytes of storages to be allocated.
-        /// \param align  The alignment of the allocated storage. Must be a power of 2.
-        /// \result       The database address of the new storage.
-        /// \note     The newly allocated space is not initialized.
-        virtual auto allocate (std::uint64_t size, unsigned align) -> address;
-
-        /// Extend the database store ensuring that there's enough room for an instance of the
-        /// template type.
-        /// \result  The database address of the new storage.
-        /// \note    The newly allocated space is not initialized.
-        template <typename Ty>
-        auto allocate () -> address;
-        ///@}
-
-        // Move is supported
-        transaction (transaction && rhs) noexcept;
-        transaction & operator= (transaction && rhs) noexcept;
-
-        // No assignment or copying.
-        transaction (transaction const &) = delete;
-        transaction & operator= (transaction const &) = delete;
+    protected:
+        transaction_base (database & db)
+                : db_{db} {
+            // First thing that creating a transaction does is update the view
+            // to that of the head revision.
+            db_.sync ();
+        }
 
     private:
-        /// Write out any indices that have changed. Any that haven't will
-        /// continue to point at their previous incarnation. Update the
-        /// members of the 'locations' array.
-        ///
-        /// This happens early in the process of commiting a transaction; we're
-        /// allocating and writing space in the store here.
-        ///
-        /// \param locations  An array of the index locations. Any modified indices
-        ///                   will be modified to point at the new file address.
-        void flush_indices (trailer::index_records_array * const locations);
-
         database & db_;
-        lock_type lock_;
         /// The number of bytes allocated in this transaction.
         std::uint64_t size_ = 0;
 
@@ -206,11 +188,67 @@ namespace pstore {
         /// has not yet allocated any data.
         address first_ = address::null ();
     };
+
+
+    // getrw
+    // ~~~~~
+    // TODO: raise an exception if addr does not lie within the current transaction.
+    template <typename Ty, typename /*enable_if standard_layout*/>
+    inline std::shared_ptr<Ty> transaction_base::getrw (address addr, std::size_t elements) {
+        return std::static_pointer_cast<Ty> (this->getrw (addr, elements * sizeof (Ty)));
+    }
+    template <typename Ty, typename /*standard_layout*/>
+    inline std::shared_ptr<Ty> transaction_base::getrw (address addr) {
+        return this->getrw<Ty> (addr, std::size_t{1});
+    }
+
+    // getro
+    // ~~~~~
+    template <typename Ty>
+    inline std::shared_ptr<Ty const> transaction_base::getro (address addr) {
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value); // FIXME: enable_if instead
+        return db ().template getro<Ty const> (addr);
+    }
+
+
+    template <typename LockGuard>
+    class transaction : public transaction_base {
+    public:
+        using lock_type = LockGuard;
+
+        transaction (database & db, lock_type && lock);
+        ~transaction () noexcept override;
+
+        transaction (transaction && rhs) noexcept = default;
+        transaction & operator= (transaction && rhs) noexcept = delete;
+        transaction (transaction const &) = delete;
+        transaction & operator= (transaction const &) = delete;
+
+    private:
+        lock_type lock_;
+    };
+
+    // (ctor)
+    // ~~~~~~
+    template <typename LockGuard>
+    transaction<LockGuard>::transaction (database & db, LockGuard && lock)
+            : transaction_base (db)
+            , lock_{std::move (lock)} {
+
+        assert (!this->is_open ());
+    }
+
+    // (dtor)
+    // ~~~~~~
+    template <typename LockGuard>
+    transaction<LockGuard>::~transaction () noexcept {
+        static_assert (noexcept (rollback ()), "rollback must be noexcept");
+        this->rollback ();
+    }
 } // namespace pstore
 
 
 namespace pstore {
-
 
     /// lock_guard fills a similar role as a type such as std::scoped_lock<> in that it provides
     /// convenient RAII-style mechanism for owning a mutex for the duration of a scoped block. The
@@ -268,7 +306,6 @@ namespace pstore {
         // Move.
         transaction_mutex (transaction_mutex &&) noexcept = default;
         transaction_mutex & operator= (transaction_mutex &&) noexcept = default;
-
         // No copying or assignment
         transaction_mutex (transaction_mutex const &) = delete;
         transaction_mutex & operator= (transaction_mutex const &) = delete;
@@ -304,224 +341,5 @@ namespace pstore {
 
 } // namespace pstore
 
-
-namespace pstore {
-
-    // (ctor)
-    // ~~~~~~
-    template <typename LockGuard>
-    transaction<LockGuard>::transaction (database & db, LockGuard && lock)
-            : db_{db}
-            , lock_{std::move (lock)} {
-
-        // First thing that creating a transaction does is update the view
-        // to that of the head revision.
-        db.sync ();
-        assert (!this->is_open ());
-    }
-    template <typename LockGuard>
-    transaction<LockGuard>::transaction (transaction && rhs) noexcept
-            : db_{rhs.db_}
-            , lock_{std::move (rhs.lock_)}
-            , first_{std::move (rhs.first_)} {
-
-        rhs.first_ = address::null ();
-        assert (!rhs.is_open ());
-    }
-
-    // (dtor)
-    // ~~~~~~
-    template <typename LockGuard>
-    transaction<LockGuard>::~transaction () noexcept {
-        static_assert (noexcept (rollback ()), "rollback must be noexcept");
-        this->rollback ();
-    }
-
-    // operator=
-    // ~~~~~~~~~
-    template <typename LockGuard>
-    auto transaction<LockGuard>::operator= (transaction && rhs) noexcept -> transaction & {
-        db_ = std::move (rhs.db_);
-        lock_ = std::move (rhs.lock_);
-        first_ = std::move (rhs.first_);
-
-        rhs.db_ = nullptr;
-        rhs.open_ = address::null ();
-        assert (!rhs.is_open ());
-        return *this;
-    }
-
-    // allocate
-    // ~~~~~~~~
-    template <typename LockGuard>
-    auto transaction<LockGuard>::allocate (std::uint64_t size, unsigned align) -> address {
-        std::uint64_t const old_size = db_.size ();
-        address result = db_.allocate (lock_, size, align);
-        if (first_ == address::null ()) {
-            if (size_ != 0) {
-                // Cannot allocate data after a transaction has been committed
-                raise (error_code::cannot_allocate_after_commit);
-            }
-            first_ = result;
-        }
-        // Increase the transaction size by the actual number of bytes
-        // allocated. This may be greater than the number requested to
-        // allow for alignment.
-        auto const bytes_allocated = db_.size () - old_size;
-        assert (bytes_allocated >= size);
-
-        size_ += bytes_allocated;
-        return result;
-    }
-    template <typename LockGuard>
-    template <typename Ty>
-    auto transaction<LockGuard>::allocate () -> address {
-        return this->allocate (sizeof (Ty), alignof (Ty));
-    }
-
-    // getrw
-    // ~~~~~
-    // TODO: raise an exception if addr does not lie within the current transaction.
-    template <typename LockGuard>
-    auto transaction<LockGuard>::getrw (address const & addr, std::size_t size)
-        -> std::shared_ptr<void> {
-        assert (addr >= first_ && addr + size <= first_ + size_);
-        return db_.getrw (addr, size);
-    }
-
-    template <typename LockGuard>
-    auto transaction<LockGuard>::getrw (record const & r) -> std::shared_ptr<void> {
-        return this->getrw (r.addr, r.size);
-    }
-
-
-    template <typename LockGuard>
-    template <typename Ty, typename /*enable_if standard_layout*/>
-    auto transaction<LockGuard>::getrw (address const & addr, std::size_t elements)
-        -> std::shared_ptr<Ty> {
-        return std::static_pointer_cast<Ty> (this->getrw (addr, elements * sizeof (Ty)));
-    }
-    template <typename LockGuard>
-    template <typename Ty, typename /*standard_layout*/>
-    inline auto transaction<LockGuard>::getrw (address const & addr) -> std::shared_ptr<Ty> {
-        return this->getrw<Ty> (addr, std::size_t{1});
-    }
-
-
-
-    // getro
-    // ~~~~~
-    template <typename LockGuard>
-    auto transaction<LockGuard>::getro (address const & addr, std::size_t size)
-        -> std::shared_ptr<void const> {
-        return db_.getro (addr, size);
-    }
-    template <typename LockGuard>
-    auto transaction<LockGuard>::getro (record const & r) -> std::shared_ptr<void const> {
-        return this->getro (r.addr, r.size);
-    }
-
-    template <typename LockGuard>
-    template <typename Ty>
-    inline auto transaction<LockGuard>::getro (address const & sop) -> std::shared_ptr<Ty const> {
-        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value);
-        return db_.getro<Ty const> (sop);
-    }
-
-
-    // commit
-    // ~~~~~~
-    template <typename LockGuard>
-    auto transaction<LockGuard>::commit () -> transaction & {
-        if (this->is_open ()) {
-
-            // We're going to write to the header, but this must be the very last
-            // step of completing the transaction.
-            auto new_footer_pos = address::null ();
-            {
-                auto head = db_.getrw<header> (address::null ());
-
-                auto prev_footer = db_.getro<trailer const> (head->footer_pos);
-
-                // Make a copy of the index locations; write out any modifications
-                // to the indices. Any updated indices will modify the 'locations'
-                // array.
-                //
-                // This must happen before the transaction is final because we're
-                // allocate and writing data here.
-
-                auto locations = prev_footer->a.index_records;
-                this->flush_indices (&locations);
-
-                // Writing new data is done. Now we begin to build the new file footer.
-                {
-                    std::shared_ptr<trailer> trailer_ptr;
-                    std::tie (trailer_ptr, new_footer_pos) = this->alloc_rw<trailer> ();
-                    auto * const t = new (trailer_ptr.get ()) trailer;
-
-                    t->a.index_records = locations;
-
-                    // Point the new header at the previous version.
-                    t->a.generation = prev_footer->a.generation + 1;
-                    // The size of the transaction doesn't include the size of the footer record.
-                    t->a.size = size_ - sizeof (trailer);
-                    t->a.time = pstore::milliseconds_since_epoch ();
-                    t->a.prev_generation = head->footer_pos;
-                    t->crc = t->get_crc ();
-                }
-
-                db_.set_new_footer (head.get (), new_footer_pos);
-            }
-
-            // Mark both this transaction's contents and its trailer as read-only.
-            db_.protect (first_, new_footer_pos + sizeof (trailer));
-
-            // That's the end of this transaction.
-            first_ = address::null ();
-            assert (!this->is_open ());
-        }
-        return *this;
-    }
-
-    // rollback
-    // ~~~~~~~~
-    template <typename LockGuard>
-    auto transaction<LockGuard>::rollback () noexcept -> transaction & {
-        if (this->is_open ()) {
-            // TODO:
-            // If we extended the file and added new memory regions, then we need to undo that
-            // here. Perhaps a) not bother at all and do nothing or b) delay until the file
-            // itself is closed on the basis that we may need the space for the next transaction.
-            first_ = address::null ();
-            assert (!this->is_open ());
-        }
-        return *this;
-    }
-
-    // flush_indices
-    // ~~~~~~~~~~~~~
-    template <typename LockGuard>
-    void transaction<LockGuard>::flush_indices (trailer::index_records_array * const locations) {
-
-        if (index::write_index * const write = db_.get_write_index (false /*create*/)) {
-            (*locations)[trailer::indices::write] = write->flush (*this);
-        }
-
-        if (index::digest_index * const digest = db_.get_digest_index (false /*create*/)) {
-            (*locations)[trailer::indices::digest] = digest->flush (*this);
-        }
-
-        if (index::ticket_index * const ticket = db_.get_ticket_index (false /*create*/)) {
-            (*locations)[trailer::indices::ticket] = ticket->flush (*this);
-        }
-
-        if (index::name_index * const name = db_.get_name_index (false /*create*/)) {
-            (*locations)[trailer::indices::name] = name->flush (*this);
-        }
-
-        assert (locations->size () == trailer::indices::last);
-    }
-
-} // namespace pstore
 #endif // PSTORE_TRANSACTION_HPP
 // eof: include/pstore/transaction.hpp
