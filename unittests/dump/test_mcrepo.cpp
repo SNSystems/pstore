@@ -43,6 +43,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "dump/mcrepo_value.hpp"
+#include "pstore/db_archive.hpp"
+#include "pstore/serialize/standard_types.hpp"
 #include "pstore/transaction.hpp"
 
 #include "split.hpp"
