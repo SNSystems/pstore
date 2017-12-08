@@ -47,13 +47,17 @@
 #define PSTORE_HAMT_MAP_HPP (1)
 
 #include <iterator>
+#include <type_traits>
 
 #include "pstore/database.hpp"
 #include "pstore/hamt_map_fwd.hpp"
 #include "pstore/hamt_map_types.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/transaction.hpp"
 
 namespace pstore {
+
+    class transaction_base;
 
     namespace index {
         using ::pstore::gsl::not_null;
@@ -70,6 +74,15 @@ namespace pstore {
             using internal_node = pstore::index::details::internal_node;
             using linear_node = pstore::index::details::linear_node;
             using parent_stack = pstore::index::details::parent_stack;
+
+            /// A helper class which provides a member constant `value`` which is equal to true if
+            /// types K and V have a serialized representation which is compatible with KeyType and
+            /// ValueType respectively. Otherwise `value` is false.
+            template <typename K, typename V>
+            struct pair_types_compatible
+                : std::integral_constant<bool, serialize::is_compatible<KeyType, K>::value &&
+                                                   serialize::is_compatible<ValueType, V>::value> {
+            };
 
         public:
             using key_equal = KeyEqual;
@@ -264,44 +277,74 @@ namespace pstore {
 
             /// Inserts an element into the hamt_map if the hamt_map doesn't already contain an
             /// element with an equivalent key. If insertion occurs, all iterators are invalidated.
-            template <typename Transaction>
-            auto insert (Transaction & transaction, value_type const & value)
+            ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
+            /// \tparam OtherValueType  A type whose serialized representation is compatible with
+            /// ValueType.
+            /// \param transaction The transaction to which the new key-value pair will be appended.
+            /// \param value  The key-value pair to be inserted.
+            /// \result The bool component is true if the insertion took place and false if the
+            /// assignment took place. The iterator component points at the exiting or new element.
+            template <typename OtherKeyType, typename OtherValueType,
+                      typename = typename std::enable_if<
+                          pair_types_compatible<OtherKeyType, OtherValueType>::value>::type>
+            auto insert (transaction_base & transaction,
+                         std::pair<OtherKeyType, OtherValueType> const & value)
                 -> std::pair<iterator, bool>;
 
-            /// If a key equivalent to value.first already exists in the container, assigns
-            /// value.second
-            /// to the mapped type. If the key does not exists, inserts the new value as if by
-            /// insert().
+            /// If a key equivalent to \p value first already exists in the container, assigns
+            /// \p value second to the mapped type. If the key does not exist, inserts the new value
+            /// as if by insert(). If insertion occurs, all iterators are invalidated.
             ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
+            /// \tparam OtherValueType  A type whose serialized representation is compatible with
+            /// ValueType.
             /// \param transaction  The transaction to which new data will be appended.
             /// \param value  The key-value pair to be inserted or updated.
             /// \result The bool component is true if the insertion took place and false if the
             /// assignment took place. The iterator component points at the element inserted or
             /// updated.
-            template <typename Transaction>
-            auto insert_or_assign (Transaction & transaction, value_type const & value)
+            template <typename OtherKeyType, typename OtherValueType,
+                      typename = typename std::enable_if<
+                          pair_types_compatible<OtherKeyType, OtherValueType>::value>::type>
+            auto insert_or_assign (transaction_base & transaction,
+                                   std::pair<OtherKeyType, OtherValueType> const & value)
                 -> std::pair<iterator, bool>;
 
-            /// A public function API of inserting a node into a hamt_map. All iterators are
-            /// invalidated.
+            /// If a key equivalent to \p key already exists in the container, assigns
+            /// \p value to the mapped type. If the key does not exist, inserts the new value as
+            /// if by insert(). If insertion occurs, all iterators are invalidated.
             ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
+            /// \tparam OtherValueType  A type whose serialized representation is compatible with
+            /// ValueType.
             /// \param transaction  The transaction to which new data will be appended.
             /// \param key  The key the used both to look up and to insert if not found.
             /// \param value  The value that will be associated with 'key' after the call.
             /// \result The bool component is true if the insertion took place and false if the
             /// assignment took place. The iterator component points at the element inserted or
             /// updated.
-            template <typename Transaction>
-            auto insert_or_assign (Transaction & transaction, KeyType const & key,
-                                   ValueType const & value) -> std::pair<iterator, bool>;
+            template <typename OtherKeyType, typename OtherValueType,
+                      typename = typename std::enable_if<
+                          pair_types_compatible<OtherKeyType, OtherValueType>::value>::type>
+            auto insert_or_assign (transaction_base & transaction, OtherKeyType const & key,
+                                   OtherValueType const & value) -> std::pair<iterator, bool>;
             ///@}
 
             /// Finds an element with key equivalent to \p key.
             ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
             /// \param  key key value of the element to be found.
             /// \return Iterator to an element with key equivalent to key. If not such element is
             ///         found, past-the end iterator it returned.
-            const_iterator find (KeyType const & key) const;
+            template <typename OtherKeyType,
+                      typename = typename std::enable_if<
+                          serialize::is_compatible<OtherKeyType, KeyType>::value>::type>
+            const_iterator find (OtherKeyType const & key) const;
 
             /// Write an hamt_map into a store when transaction::commit is called.
             template <typename Transaction>
@@ -330,8 +373,8 @@ namespace pstore {
 
         private:
             /// Stores a key/value data pair.
-            template <typename Transaction>
-            address store_leaf_node (Transaction & transaction, value_type const & v,
+            template <typename OtherValueType>
+            address store_leaf_node (transaction_base & transaction, OtherValueType const & v,
                                      not_null<parent_stack *> parents);
 
             /// If the \p node is a heap internal node, clear its children and itself.
@@ -348,11 +391,12 @@ namespace pstore {
             /// Read a key from a store.
             key_type get_key (address const addr) const;
 
-            /// Called when the trie's top-level loop has descended down to a leaf node. We need to
-            /// convert that to an internal node.
-            template <typename Transaction>
-            auto insert_into_leaf (Transaction & transaction, index_pointer const & existing_leaf,
-                                   value_type const & new_leaf, hash_type existing_hash,
+            /// Called when the trie's top-level loop has descended as far as a leaf node. We need
+            /// to convert that to an internal node.
+            template <typename OtherValueType>
+            auto insert_into_leaf (transaction_base & transaction,
+                                   index_pointer const & existing_leaf,
+                                   OtherValueType const & new_leaf, hash_type existing_hash,
                                    hash_type hash, unsigned shifts,
                                    not_null<parent_stack *> parents) -> index_pointer;
 
@@ -373,22 +417,22 @@ namespace pstore {
             /// \result  A pair consisting of a reference to the internal node (which will be equal
             /// to \p node if the nothing was modified by the insert operation) and a bool denoting
             /// whether the key was already present.
-            template <typename Transaction>
-            auto insert_into_internal (Transaction & transaction, index_pointer node,
-                                       value_type const & value, hash_type hash, unsigned shifts,
-                                       not_null<parent_stack *> parents, bool is_upsert)
-                -> std::pair<index_pointer, bool>;
+            template <typename OtherValueType>
+            auto insert_into_internal (transaction_base & transaction, index_pointer node,
+                                       OtherValueType const & value, hash_type hash,
+                                       unsigned shifts, not_null<parent_stack *> parents,
+                                       bool is_upsert) -> std::pair<index_pointer, bool>;
 
-            template <typename Transaction>
-            auto insert_into_linear (Transaction & transaction, index_pointer const node,
-                                     value_type const & value, not_null<parent_stack *> parents,
+            template <typename OtherValueType>
+            auto insert_into_linear (transaction_base & transaction, index_pointer const node,
+                                     OtherValueType const & value, not_null<parent_stack *> parents,
                                      bool is_upsert) -> std::pair<index_pointer, bool>;
 
             /// Insert a new key/value pair into a existing node, which could be a leaf node, an
             /// internal store node or an internal heap node.
-            template <typename Transaction>
-            auto insert_node (Transaction & transaction, index_pointer const node,
-                              value_type const & value, hash_type hash, unsigned shifts,
+            template <typename OtherValueType>
+            auto insert_node (transaction_base & transaction, index_pointer const node,
+                              OtherValueType const & value, hash_type hash, unsigned shifts,
                               not_null<parent_stack *> parents, bool is_upsert)
                 -> std::pair<index_pointer, bool>;
 
@@ -396,11 +440,14 @@ namespace pstore {
             IteratorType make_begin_iterator () const;
 
             /// Insert or insert_or_assign a node into a hamt_map.
-            template <typename Transaction>
-            std::pair<iterator, bool> insert_or_upsert (Transaction & transaction,
-                                                        value_type const & value, bool is_upsert);
+            /// \tparam OtherValueType  A type whose serialization is compatible with value_type.
+            template <typename OtherValueType>
+            std::pair<iterator, bool> insert_or_upsert (transaction_base & transaction,
+                                                        OtherValueType const & value,
+                                                        bool is_upsert);
 
             /// Frees memory consumed by a heap-allocated tree node.
+            ///
             /// \param node  The tree node to be deleted.
             /// \param shifts  The number of bits by which the hash value is shifted to reach the
             /// current tree level. This is used to determine whether the reference is to an
@@ -569,9 +616,10 @@ namespace pstore {
         // hamt_map::store_leaf_node
         // ~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         address hamt_map<KeyType, ValueType, Hash, KeyEqual>::store_leaf_node (
-            Transaction & transaction, value_type const & v, not_null<parent_stack *> parents) {
+            transaction_base & transaction, OtherValueType const & v,
+            not_null<parent_stack *> parents) {
 
             assert (&db_ == &transaction.db ());
             auto writer = serialize::archive::make_writer (transaction);
@@ -589,11 +637,11 @@ namespace pstore {
         // hamt_map::insert_into_leaf
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_leaf (
-            Transaction & transaction, index_pointer const & existing_leaf,
-            value_type const & new_leaf, hash_type existing_hash, hash_type hash, unsigned shifts,
-            not_null<parent_stack *> parents) -> index_pointer {
+            transaction_base & transaction, index_pointer const & existing_leaf,
+            OtherValueType const & new_leaf, hash_type existing_hash, hash_type hash,
+            unsigned shifts, not_null<parent_stack *> parents) -> index_pointer {
 
             if (details::depth_is_internal_node (shifts)) {
                 auto new_hash = hash & details::hash_index_mask;
@@ -652,10 +700,10 @@ namespace pstore {
         // hamt_map::insert_into_internal
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_internal (
-            Transaction & transaction, index_pointer node, value_type const & value, hash_type hash,
-            unsigned shifts, not_null<parent_stack *> parents, bool is_upsert)
+            transaction_base & transaction, index_pointer node, OtherValueType const & value,
+            hash_type hash, unsigned shifts, not_null<parent_stack *> parents, bool is_upsert)
             -> std::pair<index_pointer, bool> {
 
             std::shared_ptr<internal_node const> iptr;
@@ -714,9 +762,9 @@ namespace pstore {
         // hamt_map::insert_into_linear
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_linear (
-            Transaction & transaction, index_pointer const node, value_type const & value,
+            transaction_base & transaction, index_pointer const node, OtherValueType const & value,
             not_null<parent_stack *> parents, bool is_upsert) -> std::pair<index_pointer, bool> {
 
             index_pointer result;
@@ -731,7 +779,7 @@ namespace pstore {
             auto index = std::size_t{0};
 
             std::tie (child_slot, index) =
-                orig_node->lookup<KeyType, KeyEqual> (transaction.db (), value.first, equal_);
+                orig_node->lookup<KeyType> (transaction.db (), value.first, equal_);
             if (index == details::not_found) {
                 // The key wasn't present in the node so we simply append it.
                 // TODO: keep these entries sorted?
@@ -775,9 +823,9 @@ namespace pstore {
         // hamt_map::insert_node
         // ~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_node (
-            Transaction & transaction, index_pointer const node, value_type const & value,
+            transaction_base & transaction, index_pointer const node, OtherValueType const & value,
             hash_type hash, unsigned shifts, not_null<parent_stack *> parents, bool is_upsert)
             -> std::pair<index_pointer, bool> {
 
@@ -816,9 +864,9 @@ namespace pstore {
         // hamt_map::insert_or_upsert
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_upsert (
-            Transaction & transaction, value_type const & value, bool is_upsert)
+            transaction_base & transaction, OtherValueType const & value, bool is_upsert)
             -> std::pair<iterator, bool> {
 
             parent_stack parents;
@@ -842,9 +890,9 @@ namespace pstore {
         // hamt_map::insert
         // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
-        auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert (Transaction & transaction,
-                                                                   value_type const & value)
+        template <typename OtherKeyType, typename OtherValueType, typename>
+        auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert (
+            transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
             -> std::pair<iterator, bool> {
             return this->insert_or_upsert (transaction, value, false /*is_upsert*/);
         }
@@ -852,18 +900,19 @@ namespace pstore {
         // hamp_map::insert_or_assign
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherKeyType, typename OtherValueType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
-            Transaction & transaction, value_type const & value) -> std::pair<iterator, bool> {
+            transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
+            -> std::pair<iterator, bool> {
             return this->insert_or_upsert (transaction, value, true /*is_upsert*/);
         }
 
         // hamt_map::insert_or_assign
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
+        template <typename OtherKeyType, typename OtherValueType, typename>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
-            Transaction & transaction, KeyType const & key, ValueType const & value)
+            transaction_base & transaction, OtherKeyType const & key, OtherValueType const & value)
             -> std::pair<iterator, bool> {
             return this->insert_or_assign (transaction, std::make_pair (key, value));
         }
@@ -889,7 +938,8 @@ namespace pstore {
         // hamt_map::find
         // ~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::find (KeyType const & key) const
+        template <typename OtherKeyType, typename>
+        auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::find (OtherKeyType const & key) const
             -> const_iterator {
             if (empty ()) {
                 return this->cend ();
@@ -915,8 +965,7 @@ namespace pstore {
                     // It's a linear node.
                     linear_node const * linear = nullptr;
                     std::tie (store_node, linear) = linear_node::get_node (db_, node);
-                    std::tie (child_node, index) =
-                        linear->lookup<KeyType, KeyEqual> (db_, key, equal_);
+                    std::tie (child_node, index) = linear->lookup<KeyType> (db_, key, equal_);
                 }
 
                 if (index == details::not_found) {

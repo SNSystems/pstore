@@ -100,7 +100,7 @@ namespace {
             error_stream << NATIVE_TEXT ("Error: Strings index was not found\n");
             ok = false;
         } else {
-            auto const it = strings->find (pstore::sstring_view{key});
+            auto const it = strings->find (pstore::make_sstring_view (key.data (), key.length ()));
             if (it == strings->cend ()) {
                 error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
                              << std::endl;

@@ -52,6 +52,8 @@
 #include "empty_store.hpp"
 
 namespace {
+    using shared_sstring_view = pstore::sstring_view<std::shared_ptr<char const>>;
+
     class SStringViewArchive : public EmptyStore {
     public:
         SStringViewArchive ()
@@ -70,7 +72,15 @@ namespace {
 
         pstore::address current_pos (pstore::transaction_base & t) const;
         std::vector<char> as_vector (pstore::address first, pstore::address last) const;
+        static shared_sstring_view make_shared_sstring_view (char const * s);
     };
+
+    shared_sstring_view SStringViewArchive::make_shared_sstring_view (char const * s) {
+        auto const length = std::strlen (s);
+        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
+        std::copy (s, s + length, ptr.get ());
+        return {ptr, length};
+    }
 
     pstore::address SStringViewArchive::current_pos (pstore::transaction_base & t) const {
         return t.allocate (0U, 1U); // allocate 0 bytes to get the current EOF.
@@ -84,14 +94,14 @@ namespace {
         }
         // Get the chars within the specified address range.
         std::size_t const num_chars = last.absolute () - first.absolute ();
-        std::shared_ptr<char const> ptr = db_.getro<char> (first, num_chars);
+        auto ptr = db_.getro<char> (first, num_chars);
         // Convert them to a vector so that they're easy to compare.
         return {ptr.get (), ptr.get () + num_chars};
     }
 } // (anonymous namespace)
 
 TEST_F (SStringViewArchive, Empty) {
-    auto str = pstore::sstring_view::make ("");
+    auto str = make_shared_sstring_view ("");
 
     // Append 'str'' to the store (we don't need to have committed the transaction to be able to
     // access
@@ -109,13 +119,13 @@ TEST_F (SStringViewArchive, Empty) {
     // Now try reading it back and compare to the original string.
     {
         auto reader = pstore::serialize::archive::database_reader{db_, first};
-        pstore::sstring_view const actual = pstore::serialize::read<pstore::sstring_view> (reader);
+        shared_sstring_view const actual = pstore::serialize::read<shared_sstring_view> (reader);
         EXPECT_EQ (actual, "");
     }
 }
 
 TEST_F (SStringViewArchive, WriteHello) {
-    auto str = pstore::sstring_view::make ("hello");
+    auto str = make_shared_sstring_view ("hello");
 
     mock_mutex mutex;
     auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
@@ -130,7 +140,7 @@ TEST_F (SStringViewArchive, WriteHello) {
 
     {
         auto reader = pstore::serialize::archive::database_reader{db_, first};
-        pstore::sstring_view const actual = pstore::serialize::read<pstore::sstring_view> (reader);
+        shared_sstring_view const actual = pstore::serialize::read<shared_sstring_view> (reader);
         EXPECT_EQ (actual, "hello");
     }
 }

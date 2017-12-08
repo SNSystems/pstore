@@ -176,24 +176,35 @@ namespace pstore {
             /// \brief Inserts an element into the container, if the container doesn't already
             /// contain an element with an equivalent key.
             ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
             /// \param transaction  The transaction into which the new value element will be
             /// inserted.
             /// \param key  Element value to insert.
             /// \returns A pair consisting of an iterator to the inserted element (or to the element
             /// that prevented the insertion) and a bool value set to true if the insertion took
             /// place.
-            template <typename Transaction>
-            std::pair<iterator, bool> insert (Transaction & transaction, value_type const & key) {
-                auto it = map_.insert (transaction, {key, empty_class ()});
+            template <typename OtherKeyType,
+                      typename = typename std::enable_if<
+                          serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
+            std::pair<iterator, bool> insert (transaction_base & transaction,
+                                              OtherKeyType const & key) {
+                auto it = map_.insert (transaction, std::make_pair (key, empty_class ()));
                 return {{it.first}, it.second};
             }
 
             /// \brief Find the element with a specific key.
             /// Finds an element with key equivalent to \p key.
+            ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
             /// \param key  The key value of the element to search for.
             /// \return Iterator an an element with key equivalent to \p key. If no such element
             /// is found, the past-the-end iterator is returned.
-            const_iterator find (const key_type & key) const {
+            template <typename OtherKeyType,
+                      typename = typename std::enable_if<
+                          serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
+            const_iterator find (OtherKeyType const & key) const {
                 return {map_.find (key)};
             }
 

@@ -171,7 +171,7 @@ namespace pstore {
 
         using write_index = hamt_map<std::string, record>;
         using ticket_index = hamt_map<uuid, record, uuid_hash>;
-        using name_index = hamt_set<sstring_view, fnv_64a_hash>;
+        using name_index = hamt_set<sstring_view<std::shared_ptr<char const>>, fnv_64a_hash>;
 
 
         /// Returns a pointer to the write index, loading it from the store on first access. If

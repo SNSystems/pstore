@@ -115,11 +115,11 @@ TEST_F (SetFixture, EmptyBeginEqualsEnd) {
 // test insert: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleLeaf) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<iterator, bool> itp = index_->insert (t1, "a");
+    std::pair<iterator, bool> itp = index_->insert (t1, std::string{"a"});
     std::string const & key = (*itp.first);
     EXPECT_EQ ("a", key);
     EXPECT_TRUE (itp.second);
-    itp = index_->insert (t1, "a");
+    itp = index_->insert (t1, std::string{"a"});
     EXPECT_FALSE (itp.second);
     EXPECT_EQ (1U, index_->size ());
 }
@@ -128,21 +128,22 @@ TEST_F (SetFixture, InsertSingleLeaf) {
 TEST_F (SetFixture, FindSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     const_iterator cend = index_->cend ();
-    EXPECT_EQ (index_->find ("a"), cend);
-    index_->insert (t1, "a");
-    auto it = index_->find ("a");
+    std::string const a{"a"};
+    EXPECT_EQ (index_->find (a), cend);
+    index_->insert (t1, a);
+    auto it = index_->find (a);
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, "a");
+    EXPECT_EQ (*it, a);
     index_->flush (t1);
-    it = index_->find ("a");
+    it = index_->find (a);
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, "a");
+    EXPECT_EQ (*it, a);
 }
 
 // test iterator: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, "a");
+    index_->insert (t1, std::string{"a"});
 
     iterator begin = index_->begin ();
     iterator end = index_->end ();
@@ -156,8 +157,8 @@ TEST_F (SetFixture, InsertSingleIterator) {
 // test iterator: index contains an internal heap node.
 TEST_F (SetFixture, InsertHeap) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, "a");
-    index_->insert (t1, "b");
+    index_->insert (t1, std::string{"a"});
+    index_->insert (t1, std::string{"b"});
     EXPECT_EQ (2U, index_->size ());
 
     iterator begin = index_->begin ();
@@ -172,7 +173,7 @@ TEST_F (SetFixture, InsertHeap) {
 // test iterator: index only contains a leaf store node.
 TEST_F (SetFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, "a");
+    index_->insert (t1, std::string{"a"});
     index_->flush (t1);
 
     const_iterator begin = index_->cbegin ();
@@ -187,8 +188,8 @@ TEST_F (SetFixture, InsertLeafStore) {
 // test iterator: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, "a");
-    index_->insert (t1, "b");
+    index_->insert (t1, std::string{"a"});
+    index_->insert (t1, std::string{"b"});
     index_->flush (t1);
 
     const_iterator begin = index_->cbegin ();
@@ -203,8 +204,8 @@ TEST_F (SetFixture, InsertInternalStoreIterator) {
 // test insert: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<iterator, bool> itp1 = index_->insert (t1, "a");
-    std::pair<iterator, bool> itp2 = index_->insert (t1, "b");
+    std::pair<iterator, bool> itp1 = index_->insert (t1, std::string{"a"});
+    std::pair<iterator, bool> itp2 = index_->insert (t1, std::string{"b"});
 
     std::string const & key1 = (*itp1.first);
     EXPECT_EQ ("a", key1);
@@ -214,7 +215,7 @@ TEST_F (SetFixture, InsertInternalStore) {
     EXPECT_TRUE (itp2.second);
     index_->flush (t1);
 
-    std::pair<iterator, bool> itp3 = index_->insert (t1, "a");
+    std::pair<iterator, bool> itp3 = index_->insert (t1, std::string{"a"});
     EXPECT_FALSE (itp3.second);
 }
 
@@ -224,20 +225,20 @@ TEST_F (SetFixture, FindInternal) {
     const_iterator cend = index_->cend ();
     std::string ini ("Initial string");
 
-    index_->insert (t1, "a");
+    index_->insert (t1, std::string{"a"});
     index_->insert (t1, ini);
-    auto it = index_->find ("a");
+    auto it = index_->find (std::string{"a"});
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, "a");
+    EXPECT_EQ (*it, std::string{"a"});
     it = index_->find (ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);
 
     index_->flush (t1);
 
-    it = index_->find ("a");
+    it = index_->find (std::string{"a"});
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, "a");
+    EXPECT_EQ (*it, std::string{"a"});
     it = index_->find (ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);

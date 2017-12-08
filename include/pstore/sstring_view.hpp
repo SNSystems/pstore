@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file sstring_view.hpp
-/// \brief Implements sstring_view, a class which is the same as std::string_view but holds a
-/// std::shared_ptr<char> rather than a raw pointer.
+/// \brief Implements sstring_view, a class which is based on std::string_view but holds a
+/// pointer which may be a std::shared_ptr<char> as well has a raw pointer.
 ///
 /// This class is intended to improve the performance of the string set -- where it avoids the
 /// construction of std::string instances -- and to enable string values from the database and
@@ -55,6 +55,7 @@
 #include <array>
 #include <cassert>
 #include <cstring>
+#include <functional>
 #include <iterator>
 #include <limits>
 #include <memory>
@@ -63,16 +64,21 @@
 #include <type_traits>
 #include <utility>
 
+#include "pstore/make_unique.hpp"
 #include "pstore/varint.hpp"
 #include "pstore_support/gsl.hpp"
 #include "pstore_support/portab.hpp"
 
 namespace pstore {
 
-    class sstring_view;
-
+    //*     _       _             _            _ _       *
+    //*  __| |_ _ _(_)_ _  __ _  | |_ _ _ __ _(_) |_ ___ *
+    //* (_-<  _| '_| | ' \/ _` | |  _| '_/ _` | |  _(_-< *
+    //* /__/\__|_| |_|_||_\__, |  \__|_| \__,_|_|\__/__/ *
+    //*                   |___/                          *
     template <typename StringType>
     struct string_traits {};
+
     template <>
     struct string_traits<std::string> {
         static std::size_t length (std::string const & s) noexcept {
@@ -110,12 +116,62 @@ namespace pstore {
         }
     };
 
+    //*            _     _             _            _ _       *
+    //*  _ __  ___(_)_ _| |_ ___ _ _  | |_ _ _ __ _(_) |_ ___ *
+    //* | '_ \/ _ \ | ' \  _/ -_) '_| |  _| '_/ _` | |  _(_-< *
+    //* | .__/\___/_|_||_\__\___|_|    \__|_| \__,_|_|\__/__/ *
+    //* |_|                                                   *
+    template <typename PointerType>
+    struct pointer_traits {
+        static constexpr bool is_pointer = false;
+    };
+    template <>
+    struct pointer_traits<char const *> {
+        static constexpr bool is_pointer = true;
+        using value_type = char const;
+        static char const * as_raw (char const * p) noexcept {
+            return p;
+        }
+    };
 
-    class database;
-    struct address;
+    namespace details {
+        template <typename T>
+        struct pointer_traits_helper {
+            static constexpr bool is_pointer = true;
+            using value_type = typename T::element_type;
+            static_assert (std::is_same<value_type, char>::value ||
+                               std::is_same<value_type, char const>::value,
+                           "pointer element type must be char or char const");
+            static char const * as_raw (T const & p) noexcept {
+                return p.get ();
+            }
+        };
+    } // namespace details
 
+    template <>
+    struct pointer_traits<std::shared_ptr<char const>>
+        : details::pointer_traits_helper<std::shared_ptr<char const>> {};
+    template <>
+    struct pointer_traits<std::shared_ptr<char>>
+        : details::pointer_traits_helper<std::shared_ptr<char>> {};
+    template <>
+    struct pointer_traits<std::unique_ptr<char const[]>>
+        : details::pointer_traits_helper<std::unique_ptr<char const[]>> {};
+    template <>
+    struct pointer_traits<std::unique_ptr<char[]>>
+        : details::pointer_traits_helper<std::unique_ptr<char[]>> {};
+
+    //*        _       _                 _             *
+    //*  _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
+    //* (_-<_-<  _| '_| | ' \/ _` | \ V / / -_) V  V / *
+    //* /__/__/\__|_| |_|_||_\__, |  \_/|_\___|\_/\_/  *
+    //*                      |___/                     *
+    template <typename PointerType>
     class sstring_view {
     public:
+        static_assert (pointer_traits<PointerType>::is_pointer,
+                       "PointerType is not a known pointer type!");
+
         using value_type = char const;
         using traits = std::char_traits<value_type>;
         using pointer = value_type *;
@@ -133,26 +189,16 @@ namespace pstore {
 
         // 7.3, sstring_view constructors and assignment operators
         sstring_view () noexcept
-                : size_{0U} {}
-        explicit sstring_view (char const * str, size_type size) noexcept
-                : data_{str}
+                : ptr_{nullptr}
+                , size_{0U} {}
+        sstring_view (PointerType ptr, size_type size) noexcept
+                : ptr_{std::move (ptr)}
                 , size_{size} {}
-        explicit sstring_view (char const * str) noexcept
-                : sstring_view (str, std::strlen (str)) {}
-        explicit sstring_view (std::string const & str) noexcept
-                : sstring_view (str.data (), str.length ()) {}
-        sstring_view (std::shared_ptr<value_type> str, size_type size) noexcept
-                : ptr_{std::move (str)}
-                , data_{ptr_.get ()}
-                , size_{size} {}
-        sstring_view (sstring_view const &) noexcept = default;
+        sstring_view (sstring_view const &) = default;
         sstring_view (sstring_view &&) noexcept = default;
         ~sstring_view () = default;
         sstring_view & operator= (sstring_view const &) noexcept = default;
         sstring_view & operator= (sstring_view &&) noexcept = default;
-
-        template <typename StringType>
-        static sstring_view make (StringType const & s);
 
         // 7.4, sstring_view iterator support
         const_iterator begin () const noexcept {
@@ -197,7 +243,7 @@ namespace pstore {
         // 7.6, sstring_view element access
         const_reference operator[] (size_type pos) const {
             assert (pos < size_);
-            return data_[pos];
+            return (this->data ())[pos];
         }
         const_reference at (size_type pos) const {
 #ifdef PSTORE_CPP_EXCEPTIONS
@@ -216,7 +262,7 @@ namespace pstore {
             return (*this)[size_ - 1];
         }
         const_pointer data () const noexcept {
-            return data_;
+            return pointer_traits<PointerType>::as_raw (ptr_);
         }
 
         // 7.7, sstring_view modifiers
@@ -227,7 +273,7 @@ namespace pstore {
         // void remove_prefix (size_type n);
         // void remove_suffix (size_type n);
         void swap (sstring_view & s) noexcept {
-            std::swap (data_, s.data_);
+            std::swap (ptr_, s.ptr_);
             std::swap (size_, s.size_);
         }
 
@@ -257,22 +303,10 @@ namespace pstore {
         // int compare (size_type pos1, size_type n1, char const * s, size_type n2) const;
 
         /// Finds the first occurrence of `v` in this view, starting at position `pos`.
-        size_type find (sstring_view const & v, size_type pos = 0) const {
-            assert (v.size () == 0 || v.data () != nullptr);
-            return str_find (data (), size (), v.data (), pos, v.size ());
-        }
-        size_type find (char ch, size_type pos = 0) const {
-            return str_find (data (), size (), ch, pos);
-        }
-        size_type find (char const * s, size_type pos, size_type n) const {
-            assert (n == 0 || s != nullptr);
-            return str_find (data (), size (), s, pos, n);
-        }
-        size_type find (char const * s, size_type pos = 0) const {
-            assert (s != nullptr);
-            return str_find (data (), size (), s, pos, traits::length (s));
-        }
-
+        // size_type find (sstring_view const & v, size_type pos = 0) const;
+        // size_type find (char ch, size_type pos = 0) const;
+        // size_type find (char const * s, size_type pos, size_type n) const;
+        // size_type find (char const * s, size_type pos = 0) const;
         // size_type rfind(sstring_view s, size_type pos = npos) const noexcept;
         // size_type rfind(char c, size_type pos = npos) const noexcept;
         // size_type rfind(char const * s, size_type pos, size_type n) const;
@@ -295,42 +329,28 @@ namespace pstore {
         // size_type find_last_not_of(char const * s, size_type pos = npos) const;
 
     private:
-        std::shared_ptr<value_type> ptr_;
-        value_type * data_ = nullptr;
+        PointerType ptr_;
         size_type size_ = size_type{0};
-
-        static char const * search_substring (char const * first1, char const * last1,
-                                              char const * first2, char const * last2);
-        static size_type str_find (char const * p, size_type sz, char c, size_type pos);
-        static size_type str_find (char const * p, size_type sz, char const * s, size_type pos,
-                                   size_type n);
     };
 
-    template <>
-    struct string_traits<sstring_view> {
-        static std::size_t length (sstring_view const & s) noexcept {
+    template <typename PointerType>
+    struct string_traits<sstring_view<PointerType>> {
+        static std::size_t length (sstring_view<PointerType> const & s) noexcept {
             return s.length ();
         }
-        static char const * data (sstring_view const & s) noexcept {
+        static char const * data (sstring_view<PointerType> const & s) noexcept {
             return s.data ();
         }
     };
 
-    // make
-    // ~~~~
-    template <typename StringType>
-    sstring_view sstring_view::make (StringType const & s) {
-        auto const length = string_traits<StringType>::length (s);
-        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
-        auto const data = string_traits<StringType>::data (s);
-        std::copy (data, data + length, ptr.get ());
-        return {ptr, length};
-    }
+    template <typename PointerType>
+    constexpr typename sstring_view<PointerType>::size_type sstring_view<PointerType>::npos;
 
     // compare
     // ~~~~~~~
+    template <typename PointerType>
     template <typename StringType>
-    int sstring_view::compare (StringType const & s) const {
+    int sstring_view<PointerType>::compare (StringType const & s) const {
         auto const slen = string_traits<StringType>::length (s);
         size_type const common_len = std::min (size (), slen);
         int result = traits::compare (data (), string_traits<StringType>::data (s), common_len);
@@ -342,22 +362,28 @@ namespace pstore {
 
     // operator==
     // ~~~~~~~~~~
-    inline bool operator== (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator== (sstring_view<PointerType1> const & lhs,
+                            sstring_view<PointerType2> const & rhs) noexcept {
         if (lhs.size () != rhs.size ()) {
             return false;
         }
         return lhs.compare (rhs) == 0;
     }
-    template <typename StringType>
-    inline bool operator== (sstring_view const & lhs, StringType const & rhs) noexcept {
-        if (string_traits<sstring_view>::length (lhs) != string_traits<StringType>::length (rhs)) {
+    template <typename PointerType, typename StringType>
+    inline bool operator== (sstring_view<PointerType> const & lhs,
+                            StringType const & rhs) noexcept {
+        if (string_traits<sstring_view<PointerType>>::length (lhs) !=
+            string_traits<StringType>::length (rhs)) {
             return false;
         }
         return lhs.compare (rhs) == 0;
     }
-    template <typename StringType>
-    inline bool operator== (StringType const & lhs, sstring_view const & rhs) noexcept {
-        if (string_traits<StringType>::length (lhs) != string_traits<sstring_view>::length (rhs)) {
+    template <typename StringType, typename PointerType>
+    inline bool operator== (StringType const & lhs,
+                            sstring_view<PointerType> const & rhs) noexcept {
+        if (string_traits<StringType>::length (lhs) !=
+            string_traits<sstring_view<PointerType>>::length (rhs)) {
             return false;
         }
         return rhs.compare (lhs) == 0;
@@ -365,80 +391,130 @@ namespace pstore {
 
     // operator!=
     // ~~~~~~~~~~
-    inline bool operator!= (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator!= (sstring_view<PointerType1> const & lhs,
+                            sstring_view<PointerType2> const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
-    template <typename StringType>
-    inline bool operator!= (sstring_view const & lhs, StringType const & rhs) noexcept {
+    template <typename PointerType, typename StringType>
+    inline bool operator!= (sstring_view<PointerType> const & lhs,
+                            StringType const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
-    template <typename StringType>
-    inline bool operator!= (StringType const & lhs, sstring_view const & rhs) noexcept {
+    template <typename StringType, typename PointerType>
+    inline bool operator!= (StringType const & lhs,
+                            sstring_view<PointerType> const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
 
     // operator>=
     // ~~~~~~~~~~
-    inline bool operator>= (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator>= (sstring_view<PointerType1> const & lhs,
+                            sstring_view<PointerType2> const & rhs) noexcept {
         return lhs.compare (rhs) >= 0;
     }
-    template <typename StringType>
-    inline bool operator>= (sstring_view const & lhs, StringType const & rhs) noexcept {
+    template <typename PointerType, typename StringType>
+    inline bool operator>= (sstring_view<PointerType> const & lhs,
+                            StringType const & rhs) noexcept {
         return lhs.compare (rhs) >= 0;
     }
-    template <typename StringType>
-    inline bool operator>= (StringType const & lhs, sstring_view const & rhs) noexcept {
+    template <typename StringType, typename PointerType>
+    inline bool operator>= (StringType const & lhs,
+                            sstring_view<PointerType> const & rhs) noexcept {
         return rhs.compare (lhs) <= 0;
     }
 
     // operator>
     // ~~~~~~~~~
-    inline bool operator> (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator> (sstring_view<PointerType1> const & lhs,
+                           sstring_view<PointerType2> const & rhs) noexcept {
         return lhs.compare (rhs) > 0;
     }
-    template <typename StringType>
-    inline bool operator> (sstring_view const & lhs, StringType const & rhs) noexcept {
+    template <typename PointerType, typename StringType>
+    inline bool operator> (sstring_view<PointerType> const & lhs, StringType const & rhs) noexcept {
         return lhs.compare (rhs) > 0;
     }
-    template <typename StringType>
-    inline bool operator> (StringType const & lhs, sstring_view const & rhs) noexcept {
+    template <typename StringType, typename PointerType>
+    inline bool operator> (StringType const & lhs, sstring_view<PointerType> const & rhs) noexcept {
         return rhs.compare (lhs) < 0;
     }
 
     // operator<=
     // ~~~~~~~~~~
-    inline bool operator<= (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator<= (sstring_view<PointerType1> const & lhs,
+                            sstring_view<PointerType2> const & rhs) noexcept {
         return lhs.compare (rhs) <= 0;
     }
-    template <typename StringType>
-    inline bool operator<= (sstring_view const & lhs, StringType const & rhs) noexcept {
+    template <typename PointerType, typename StringType>
+    inline bool operator<= (sstring_view<PointerType> const & lhs,
+                            StringType const & rhs) noexcept {
         return lhs.compare (rhs) <= 0;
     }
-    template <typename StringType>
-    inline bool operator<= (StringType const & lhs, sstring_view const & rhs) noexcept {
+    template <typename StringType, typename PointerType>
+    inline bool operator<= (StringType const & lhs,
+                            sstring_view<PointerType> const & rhs) noexcept {
         return rhs.compare (lhs) >= 0;
     }
 
     // operator<
     // ~~~~~~~~~
-    inline bool operator< (sstring_view const & lhs, sstring_view const & rhs) noexcept {
+    template <typename PointerType1, typename PointerType2>
+    inline bool operator< (sstring_view<PointerType1> const & lhs,
+                           sstring_view<PointerType2> const & rhs) noexcept {
         return lhs.compare (rhs) < 0;
     }
-    template <typename StringType>
-    inline bool operator< (sstring_view const & lhs, StringType const & rhs) noexcept {
+    template <typename PointerType, typename StringType>
+    inline bool operator< (sstring_view<PointerType> const & lhs, StringType const & rhs) noexcept {
         return lhs.compare (rhs) < 0;
     }
-    template <typename StringType>
-    inline bool operator< (StringType const & lhs, sstring_view const & rhs) noexcept {
+    template <typename StringType, typename PointerType>
+    inline bool operator< (StringType const & lhs, sstring_view<PointerType> const & rhs) noexcept {
         return rhs.compare (lhs) > 0;
     }
 
     // operator <<
     // ~~~~~~~~~~~
-    inline std::ostream & operator<< (std::ostream & os, sstring_view const & str) {
+    template <typename PointerType>
+    inline std::ostream & operator<< (std::ostream & os, sstring_view<PointerType> const & str) {
         return os.write (str.data (), str.length ());
     }
+
+
+    //*             _               _       _                 _             *
+    //*  _ __  __ _| |_____   _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
+    //* | '  \/ _` | / / -_) (_-<_-<  _| '_| | ' \/ _` | \ V / / -_) V  V / *
+    //* |_|_|_\__,_|_\_\___| /__/__/\__|_| |_|_||_\__, |  \_/|_\___|\_/\_/  *
+    //*                                           |___/                     *
+    template <typename ValueType>
+    inline sstring_view<std::shared_ptr<ValueType>>
+    make_sstring_view (std::shared_ptr<ValueType> const & ptr, std::size_t length) {
+        return {ptr, length};
+    }
+    template <typename ValueType>
+    inline sstring_view<std::unique_ptr<ValueType>>
+    make_sstring_view (std::unique_ptr<ValueType> ptr, std::size_t length) {
+        return {std::move (ptr), length};
+    }
+    inline sstring_view<char const *> make_sstring_view (char const * ptr, std::size_t length) {
+        return {ptr, length};
+    }
+
 } // namespace pstore
+
+namespace std {
+
+    template <typename StringType>
+    struct equal_to<pstore::sstring_view<StringType>> {
+        template <typename S1, typename S2>
+        bool operator() (S1 const & x, S2 const & y) const {
+            return x == y;
+        }
+    };
+
+} // namespace std
 
 #endif // PSTORE_SSTRING_VIEW_HPP
 // eof: include/pstore/sstring_view.hpp

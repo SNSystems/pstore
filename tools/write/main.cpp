@@ -194,7 +194,7 @@ int main (int argc, char * argv[]) {
 
             // Scan through the string arguments from the command line.
             for (std::string const & v : opt.strings) {
-                name->insert (transaction, pstore::sstring_view{v});
+                name->insert (transaction, pstore::make_sstring_view (v.data (), v.length ()));
             }
 
             transaction.commit ();

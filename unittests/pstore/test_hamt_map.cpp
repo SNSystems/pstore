@@ -1136,13 +1136,14 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionInsert) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, {"f", "value f"});
-    std::pair<test_trie::iterator, bool> itp = index_->insert (t1, {"e", "value e"});
+    index_->insert (t1, std::make_pair (std::string{"f"}, std::string{"value f"}));
+    std::pair<test_trie::iterator, bool> itp =
+        index_->insert (t1, std::make_pair (std::string{"e"}, std::string{"value e"}));
     EXPECT_TRUE (itp.second);
     std::string const & v = (*itp.first).second;
     EXPECT_EQ ("value e", v);
 
-    itp = index_->insert (t1, {"e", "new value e"});
+    itp = index_->insert (t1, std::make_pair (std::string{"e"}, std::string{"new value e"}));
     EXPECT_FALSE (itp.second);
     std::string const & v1 = (*itp.first).second;
     EXPECT_EQ ("value e", v1);
@@ -1317,7 +1318,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
     this->insert_or_assign (t1, "i");
 
     // Check trie iterator in the heap.
-    test_trie::const_iterator first = index_->find ("h");
+    test_trie::const_iterator first = index_->find (std::string{"h"});
     test_trie::const_iterator last = index_->end ();
     EXPECT_NE (first, last);
     std::string const & v1 = (*first).first;
@@ -1353,13 +1354,14 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearInsertIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, {"g", "value g"});
-    index_->insert (t1, {"h", "value h"});
-    std::pair<test_trie::iterator, bool> itp = index_->insert (t1, {"i", "value i"});
+    index_->insert (t1, std::make_pair (std::string{"g"}, std::string{"value g"}));
+    index_->insert (t1, std::make_pair (std::string{"h"}, std::string{"value h"}));
+    std::pair<test_trie::iterator, bool> itp =
+        index_->insert (t1, std::make_pair (std::string{"i"}, std::string{"value i"}));
     EXPECT_TRUE (itp.second);
     index_->flush (t1);
 
-    itp = index_->insert (t1, {"g", "new value g"});
+    itp = index_->insert (t1, std::make_pair (std::string{"g"}, std::string{"new value g"}));
     EXPECT_FALSE (itp.second);
     std::string const & v = (*itp.first).second;
     EXPECT_EQ ("value g", v);

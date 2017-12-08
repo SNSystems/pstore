@@ -41,11 +41,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file sstring_view_archive.hpp
+///
+/// \brief Writes an instance of `sstring_view` to an archive.
+///
+/// Writes a variable length value follow by a sequence of characters. The
+/// length uses the format defined by varint::encode() but we ensure that at
+/// least two bytes are produced. This means that the read() member can rely
+/// on being able to read two bytes and reduce the number of pstore accesses
+/// to two for strings < (2^14 - 1) characters (and three for strings longer
+/// than that.
+///
+/// \param archive  The Archiver to which the value 'str' should be written.
+/// \param str      The string whose content is to be written to the archive.
+/// \returns The value returned by writing the first byte of the string length.
+/// By convention, this is the "address" of the string data (although the precise
+/// meaning is determined by the archive type.
+
 #ifndef PSTORE_SSTRING_VIEW_ARCHIVE_HPP
 #define PSTORE_SSTRING_VIEW_ARCHIVE_HPP
 
+#include "pstore/db_archive.hpp"
 #include "pstore/serialize/types.hpp"
 #include "pstore/sstring_view.hpp"
+#include "pstore/transaction.hpp"
 #include "pstore/varint.hpp"
 
 ///@{
@@ -54,49 +73,11 @@
 /// standard library (string, vector, set, etc.)
 namespace pstore {
     namespace serialize {
-        namespace archive {
-            class database_reader;
-        }
+        std::size_t read_string_length (archive::database_reader & archive);
 
-        /// \brief A serializer for std::string.
-        template <>
-        struct serializer<::pstore::sstring_view> {
-            using value_type = ::pstore::sstring_view;
-
-            /// \brief Writes an instance of `std::string` to an archive.
-            ///
-            /// Writes a variable length value follow by a sequence of characters. The
-            /// length uses the format defined by varint::encode() but we ensure that at
-            /// least two bytes are produced. This means that the read() member can rely
-            /// on being able to read two bytes and reduce the number of pstore accesses
-            /// to two for strings < (2^14 - 1) characters (and three for strings longer
-            /// than that.
-            ///
-            /// \param archive  The Archiver to which the value 'str' should be written.
-            /// \param str      The string whose content is to be written to the archive.
-            /// \returns The value returned by writing the first byte of the string length.
-            /// By convention, this is the "address" of the string data (although the precise
-            /// meaning is determined by the archive type.
-
-            template <typename Archive>
-            static auto write (Archive & archive, value_type const & str) ->
-                typename Archive::result_type;
-
-            /// \brief Reads an instance of `sstring_view` from an archiver.
-            ///
-            /// Reads a string of characters.
-            ///
-            /// \param archive  The Archiver from which a string will be read.
-            /// \param str  A reference to uninitialized memory that is suitable for a new string
-            /// instance.
-            static void read (::pstore::serialize::archive::database_reader & archive,
-                              value_type & str);
-        };
-
-        template <typename Archive>
-        typename Archive::result_type
-        serializer<::pstore::sstring_view>::write (Archive & archive,
-                                                   pstore::sstring_view const & str) {
+        template <typename Archive, typename StringType>
+        auto write_sstring_view (Archive & archive, ::pstore::sstring_view<StringType> const & str)
+            -> typename Archive::result_type {
             auto const length = str.length ();
 
             // Encode the string length as a variable-length integer and emit it.
@@ -117,11 +98,70 @@ namespace pstore {
             return resl;
         }
 
+        template <typename PointerType>
+        void read_sstring_view (archive::database_reader & archive,
+                                ::pstore::sstring_view<PointerType> & str) {
+            std::size_t const length = read_string_length (archive);
+            new (&str)::pstore::sstring_view<PointerType> (
+                archive.get_db ().getro<char> (archive.get_address (), length), length);
+            archive.skip (length);
+        }
+
+
+        /// \brief A serializer for sstring_view<std::shared_ptr<char const>>.
+        template <>
+        struct serializer<::pstore::sstring_view<std::shared_ptr<char const>>> {
+            using value_type = ::pstore::sstring_view<std::shared_ptr<char const>>;
+
+            template <typename Archive>
+            static auto write (Archive & archive, value_type const & str) ->
+                typename Archive::result_type {
+                return write_sstring_view (archive, str);
+            }
+
+            /// \brief Reads an instance of `sstring_view` from an archiver.
+            /// \param archive  The Archiver from which a string will be read.
+            /// \param str  A reference to uninitialized memory that is suitable for a new string
+            /// instance.
+            static void read (::pstore::serialize::archive::database_reader & archive,
+                              value_type & str) {
+                return read_sstring_view (archive, str);
+            }
+        };
+
+        template <>
+        struct serializer<::pstore::sstring_view<char const *>> {
+            using value_type = ::pstore::sstring_view<char const *>;
+
+            template <typename Archive>
+            static auto write (Archive & archive, value_type const & str) ->
+                typename Archive::result_type {
+                return write_sstring_view (archive, str);
+            }
+            // note that there's no read() implementation.
+        };
+
+        /// Any two sstring_view instances have the same serialized representation.
+        template <typename Pointer1, typename Pointer2>
+        struct is_compatible<::pstore::sstring_view<Pointer1>, ::pstore::sstring_view<Pointer2>>
+            : public std::true_type {};
+
+        /// sstring_view instances are serialized using the same format as std::string.
+        template <typename Pointer1>
+        struct is_compatible<::pstore::sstring_view<Pointer1>, std::string>
+            : public std::true_type {};
+
+        /// sstring_view instances are serialized using the same format as std::string.
+        template <typename Pointer1>
+        struct is_compatible<std::string, ::pstore::sstring_view<Pointer1>>
+            : public std::true_type {};
+
+
         /// \brief A serializer for sstring_view const. It delegates both read and write operations
         ///        to the sstring_view serializer.
-        template <>
-        struct serializer<::pstore::sstring_view const> {
-            using value_type = ::pstore::sstring_view;
+        template <typename PointerType>
+        struct serializer<::pstore::sstring_view<PointerType> const> {
+            using value_type = ::pstore::sstring_view<PointerType>;
             template <typename Archive>
             static auto write (Archive & archive, value_type const & str) ->
                 typename Archive::result_type {
@@ -133,7 +173,7 @@ namespace pstore {
             }
         };
 
-    } // namespace serializer
+    } // namespace serialize
 } // namespace pstore
 
 #endif // PSTORE_SSTRING_VIEW_ARCHIVE_HPP

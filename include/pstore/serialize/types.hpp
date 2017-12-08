@@ -118,14 +118,13 @@
 ///     Reading an array of ints produced 30, 40
 ///     Reading a series of ints produced 30, 40
 
-
 #ifndef PSTORE_SERIALIZE_TYPES_HPP
 #define PSTORE_SERIALIZE_TYPES_HPP
 
-#include <algorithm> // for std::for_each
+#include <algorithm>
 #include <cassert>
-#include <cstring>     // for std::memcpy
-#include <type_traits> // for std::is_standard_layout, aligned_storage, etc.
+#include <cstring>
+#include <type_traits>
 
 #include "pstore/serialize/common.hpp"
 #include "pstore_support/gsl.hpp"
@@ -337,6 +336,25 @@ namespace pstore {
             }
         };
 
+
+        /// \brief If the two types T1 and T2 have a compatible representation when serialized,
+        /// provides the member constant value equal to `true`, otherwise `false`.
+        template <typename T1, typename T2>
+        struct is_compatible : std::false_type {};
+        template <typename T>
+        struct is_compatible<T, T> : std::true_type {};
+
+        template <typename T1, typename T2>
+        struct is_compatible<T1 const, T2> : is_compatible<T1, T2> {};
+        template <typename T1, typename T2>
+        struct is_compatible<T1, T2 const> : is_compatible<T1, T2> {};
+        template <typename T1, typename T2>
+        struct is_compatible<T1 const, T2 const> : is_compatible<T1, T2> {};
+
+
+        // TODO: enable when we're able to switch to C++1z.
+        // template <typename T1, typename T2>
+        // inline constexpr bool is_compatible_v = is_compatible<T1, T2>::value;
 
         template <typename Archive, typename ElementType>
         void read_uninit (Archive & archive, ElementType & uninit) {

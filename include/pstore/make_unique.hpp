@@ -60,7 +60,7 @@ namespace pstore {
 
         template <typename T, typename = typename std::enable_if<std::extent<T>::value == 0>::type>
         std::unique_ptr<T> helper (std::true_type, std::size_t size) {
-            using U = typename std::remove_extent<T>::type;
+            using U = typename std::remove_const<typename std::remove_extent<T>::type>::type;
             return std::unique_ptr<T> (new U[size]);
         }
     } // namespace make_unique_helpers
@@ -70,7 +70,6 @@ namespace pstore {
         return make_unique_helpers::helper<T> (std::is_array<T> (), std::forward<Args> (args)...);
     }
 } // namespace pstore
-
 
 // TODO: determine make_unique support at configure time.
 #if __cplusplus <= 201103L && !defined(_WIN32)

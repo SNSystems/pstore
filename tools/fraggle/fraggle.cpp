@@ -131,7 +131,10 @@ int main (int argc, char * argv[]) {
                 auto const name = std::string{"func_"} + std::to_string (ticket_ctr) + "_" +
                                   std::to_string (fragment_ctr);
                 pstore::address const name_addr =
-                    names->insert (transaction, pstore::sstring_view{name}).first.get_address ();
+                    names
+                        ->insert (transaction,
+                                  pstore::make_sstring_view (name.data (), name.length ()))
+                        .first.get_address ();
 
                 pstore::repo::section_content data_section (pstore::repo::section_type::ReadOnly,
                                                             std::uint8_t{1} /*alignment*/);
@@ -161,7 +164,9 @@ int main (int argc, char * argv[]) {
             pstore::uuid ticket_uuid;
             {
                 pstore::address const ticket_path_addr =
-                    names->insert (transaction, pstore::sstring_view{ticket_path})
+                    names
+                        ->insert (transaction, pstore::make_sstring_view (ticket_path.data (),
+                                                                          ticket_path.length ()))
                         .first.get_address ();
                 pstore::record ticket_pos =
                     pstore::repo::ticket::alloc (transaction, ticket_path_addr, ticket_members);

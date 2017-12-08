@@ -89,7 +89,8 @@ namespace value {
         return make_value (u.str ());
     }
 
-    inline value_ptr make_value (pstore::sstring_view const & str) {
+    template <typename PointerType>
+    inline value_ptr make_value (pstore::sstring_view<PointerType> const & str) {
         return make_value (str.to_string ());
     }
 

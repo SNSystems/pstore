@@ -433,6 +433,9 @@ namespace pstore {
 
                 /// Search the linear node and return the child slot if the key exists.
                 /// Otherwise, return the {nullptr, not_found} pair.
+                /// \tparam KeyType The type of the keys stored in the linear node.
+                /// \tparam OtherKeyType  A type whose serialized value is compatible with KeyType
+                /// \tparam KeyEqual  The type of the key-comparison function.
                 /// \param db  The dataase instance from which child nodes should be loaded.
                 /// \param key  The key to be located.
                 /// \param equal  A comparison function which will be called to compare child nodes
@@ -441,8 +444,11 @@ namespace pstore {
                 /// \result If found, returns an `index_pointer` reference to the child node and the
                 /// position within the linear node instance of the child record. If not found,
                 /// returns the pair index_pointer (), details::not_found.
-                template <typename KeyType, typename KeyEqual>
-                auto lookup (database const & db, KeyType const & key, KeyEqual equal) const
+
+                template <typename KeyType, typename OtherKeyType, typename KeyEqual,
+                          typename = typename std::enable_if<
+                              serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
+                auto lookup (database const & db, OtherKeyType const & key, KeyEqual equal) const
                     -> std::pair<index_pointer const, std::size_t>;
 
             private:
@@ -492,8 +498,8 @@ namespace pstore {
 
             // lookup
             // ~~~~~~
-            template <typename KeyType, typename KeyEqual>
-            auto linear_node::lookup (database const & db, KeyType const & key,
+            template <typename KeyType, typename OtherKeyType, typename KeyEqual, typename>
+            auto linear_node::lookup (database const & db, OtherKeyType const & key,
                                       KeyEqual equal) const
                 -> std::pair<index_pointer const, std::size_t> {
                 // Linear search. TODO: perhaps we should sort the nodes and use a binary
