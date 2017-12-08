@@ -171,7 +171,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
     std::array<section_content, 1> c = {
-        section_content (section_type::Text, std::uint8_t{4} /*alignment*/)};
+        {section_content (section_type::Text, std::uint8_t{4} /*alignment*/)}};
     {
         // Build the text section's contents and fixups.
         section_content & text = c.back ();
