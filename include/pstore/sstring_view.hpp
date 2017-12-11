@@ -64,6 +64,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "pstore/fnv.hpp"
 #include "pstore/make_unique.hpp"
 #include "pstore/varint.hpp"
 #include "pstore_support/gsl.hpp"
@@ -507,10 +508,17 @@ namespace pstore {
 namespace std {
 
     template <typename StringType>
-    struct equal_to<pstore::sstring_view<StringType>> {
+    struct equal_to<::pstore::sstring_view<StringType>> {
         template <typename S1, typename S2>
         bool operator() (S1 const & x, S2 const & y) const {
             return x == y;
+        }
+    };
+
+    template <typename StringType>
+    struct hash <::pstore::sstring_view <StringType>> {
+        size_t operator() (::pstore::sstring_view<StringType> const & str) const {
+            return static_cast <size_t> (::pstore::fnv_64a_buf (str.data (), str.length ()));
         }
     };
 
