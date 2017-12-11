@@ -217,7 +217,7 @@ TEST_F (MCRepoFixture, DumpTicket) {
     std::vector<ticket_member> v{{pstore::index::digest{28U}, this->store_str (transaction, "main"),
                                   linkage_type::external}};
     auto ticket = ticket::load (
-        *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/test.o"), v));
+        *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/"), v));
 
     std::ostringstream out;
     value::value_ptr addr = value::make_value (*db_, ticket);
@@ -233,7 +233,7 @@ TEST_F (MCRepoFixture, DumpTicket) {
                  ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/test.o"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));
 }
 
 // eof: unittests/dump/test_mcrepo.cpp
