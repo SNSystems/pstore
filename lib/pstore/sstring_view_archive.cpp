@@ -1,32 +1,45 @@
+//*          _        _                     _                *
+//*  ___ ___| |_ _ __(_)_ __   __ _  __   _(_) _____      __ *
+//* / __/ __| __| '__| | '_ \ / _` | \ \ / / |/ _ \ \ /\ / / *
+//* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
+//* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
+//*                           |___/                          *
+//===- lib/pstore/sstring_view_archive.cpp --------------------------------===//
+// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// All rights reserved.
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
+//   www.snsystems.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal with the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// - Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimers.
+//
+// - Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimers in the
+//   documentation and/or other materials provided with the distribution.
+//
+// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
+//   Inc. nor the names of its contributors may be used to endorse or
+//   promote products derived from this Software without specific prior
+//   written permission.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+//===----------------------------------------------------------------------===//
 #include "pstore/sstring_view_archive.hpp"
-
-
-namespace pstore {
-    namespace serialize {
-
-        std::size_t read_string_length (archive::database_reader & archive) {
-            using namespace pstore;
-
-            std::array<std::uint8_t, varint::max_output_length> encoded_length{{0}};
-            // First read the two initial bytes. These contain the variable length value
-            // but might not be enough for the entire value.
-            static_assert (varint::max_output_length >= 2,
-                           "maximum encoded varint length must be >= 2");
-            serialize::read_uninit (archive, ::pstore::gsl::make_span (encoded_length.data (), 2));
-
-            auto const varint_length = varint::decode_size (std::begin (encoded_length));
-            assert (varint_length > 0);
-            // Was that initial read of 2 bytes enough? If not get the rest of the
-            // length value.
-            if (varint_length > 2) {
-                assert (varint_length <= encoded_length.size ());
-                serialize::read_uninit (
-                    archive,
-                    ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
-            }
-
-            return varint::decode (encoded_length.data (), varint_length);
-        }
-
-    } // namespace serialize
-} // namespace pstore
+// eof: lib/pstore/sstring_view_archive.cpp

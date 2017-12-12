@@ -66,6 +66,56 @@
 namespace pstore {
     namespace serialize {
 
+        struct string_helper {
+            template <typename Archive, typename StringType>
+            static auto write (Archive & archive, StringType const & str) ->
+                typename Archive::result_type {
+                auto const length = str.length ();
+
+                // Encode the string length as a variable-length integer.
+                std::array<std::uint8_t, varint::max_output_length> encoded_length;
+                auto first = std::begin (encoded_length);
+                auto last = varint::encode (length, first);
+                auto length_bytes = std::distance (first, last);
+                assert (length_bytes > 0 &&
+                        static_cast<std::size_t> (length_bytes) <= encoded_length.size ());
+                if (length_bytes == 1) {
+                    *(last++) = 0;
+                }
+                // Emit the string length.
+                auto const resl =
+                    serialize::write (archive, ::pstore::gsl::make_span (&(*first), &(*last)));
+
+                // Emit the string body.
+                serialize::write (archive, ::pstore::gsl::make_span (str));
+                return resl;
+            }
+
+            template <typename Archive>
+            static std::size_t read_length (Archive & archive) {
+                std::array<std::uint8_t, varint::max_output_length> encoded_length{{0}};
+                // First read the two initial bytes. These contain the variable length value
+                // but might not be enough for the entire value.
+                static_assert (varint::max_output_length >= 2,
+                               "maximum encoded varint length must be >= 2");
+                serialize::read_uninit (archive,
+                                        ::pstore::gsl::make_span (encoded_length.data (), 2));
+
+                auto const varint_length = varint::decode_size (std::begin (encoded_length));
+                assert (varint_length > 0);
+                // Was that initial read of 2 bytes enough? If not get the rest of the
+                // length value.
+                if (varint_length > 2) {
+                    assert (varint_length <= encoded_length.size ());
+                    serialize::read_uninit (
+                        archive,
+                        ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
+                }
+
+                return varint::decode (encoded_length.data (), varint_length);
+            }
+        };
+
         /// \brief A serializer for std::string.
         template <>
         struct serializer<std::string> {
@@ -89,24 +139,7 @@ namespace pstore {
             template <typename Archive>
             static auto write (Archive & archive, value_type const & str) ->
                 typename Archive::result_type {
-                auto const length = str.length ();
-
-                // Encode the string length as a variable-length integer and emit it.
-                std::array<std::uint8_t, varint::max_output_length> encoded_length;
-                auto first = std::begin (encoded_length);
-                auto last = varint::encode (length, first);
-                auto length_bytes = std::distance (first, last);
-                assert (length_bytes > 0 &&
-                        static_cast<std::size_t> (length_bytes) <= encoded_length.size ());
-                if (length_bytes == 1) {
-                    *(last++) = 0;
-                }
-                auto const resl =
-                    serialize::write (archive, ::pstore::gsl::make_span (&(*first), &(*last)));
-
-                // Emit the string body.
-                serialize::write (archive, ::pstore::gsl::make_span (str));
-                return resl;
+                return string_helper::write (archive, str);
             }
 
             /// \brief Reads an instance of `std::string` from an archiver.
@@ -119,26 +152,6 @@ namespace pstore {
 
             template <typename Archive>
             static void read (Archive & archive, value_type & str) {
-
-                std::array<std::uint8_t, varint::max_output_length> encoded_length;
-                // First read the two initial bytes. These contain the variable length value
-                // but might not be enough for the entire value.
-                static_assert (varint::max_output_length >= 2,
-                               "maximum encoded varint length must be >= 2");
-                serialize::read_uninit (archive,
-                                        ::pstore::gsl::make_span (encoded_length.data (), 2));
-
-                auto const varint_length = varint::decode_size (std::begin (encoded_length));
-                assert (varint_length > 0);
-                // Was that initial read of 2 bytes enough? If not get the rest of the
-                // length value.
-                if (varint_length > 2) {
-                    assert (varint_length <= encoded_length.size ());
-                    serialize::read_uninit (
-                        archive,
-                        ::pstore::gsl::make_span (encoded_length.data () + 2, varint_length - 2));
-                }
-
                 // Read the body of the string.
                 new (&str) value_type;
 
@@ -150,14 +163,14 @@ namespace pstore {
                 };
                 std::unique_ptr<value_type, decltype (dtor)> deleter (&str, dtor);
 
-                auto const length = varint::decode (std::begin (encoded_length), varint_length);
+                auto const length = string_helper::read_length (archive);
                 str.resize (length);
 
                 // Now read the body of the string.
                 // FIXME: const_cast will not be necessary with the C++17 standard library.
-                auto data = const_cast<char *> (str.data ());
-                auto size = static_cast<std::ptrdiff_t> (length);
-                serialize::read_uninit (archive, ::pstore::gsl::make_span (data, size));
+                serialize::read_uninit (
+                    archive, ::pstore::gsl::make_span (const_cast<char *> (str.data ()),
+                                                       static_cast<std::ptrdiff_t> (length)));
 
                 // Release ownership from the deleter so that the initialized object is returned to
                 // the caller.
