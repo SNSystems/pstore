@@ -114,14 +114,14 @@ namespace {
             }
 
             // Add it to the names index.
-            names.insert_or_assign (transaction, key, pstore::record{addr, size});
+            names.insert_or_assign (transaction, key, pstore::extent{addr, size});
         }
 
         return ok;
     }
 
     template <typename Transaction>
-    auto append_string (Transaction & transaction, std::string const & v) -> pstore::record {
+    auto append_string (Transaction & transaction, std::string const & v) -> pstore::extent {
         // Since the read utility prefers to get raw string value in the system tests, this function
         // is changed to store raw string into the store instead of using serialize write.
 

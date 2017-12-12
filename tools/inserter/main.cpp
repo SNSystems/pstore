@@ -283,7 +283,7 @@ int main (int argc, char * argv[]) {
                 std::copy (std::begin (value), std::end (value), ptr.get ());
 
                 // Add the key/value pair to the index.
-                index->insert_or_assign (transaction, k, pstore::record (addr, value.size ()));
+                index->insert_or_assign (transaction, k, pstore::extent{addr, value.size ()});
             }
 
             transaction.commit ();

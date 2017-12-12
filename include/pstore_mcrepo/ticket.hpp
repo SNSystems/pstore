@@ -121,18 +121,18 @@ namespace pstore {
             /// \param path  A ticket file path address in the store.
             /// \param members  A vector of ticket_member whose contents will be copied into the
             /// newly allocated ticket.
-            /// \result A record to the allocated ticket which is in-store.
+            /// \result An extent which describes the in-store location of the allocated ticket.
             template <typename TransactionType>
-            static pstore::record alloc (TransactionType & transaction, pstore::address path,
+            static pstore::extent alloc (TransactionType & transaction, pstore::address path,
                                          std::vector<ticket_member> const & members);
 
             /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
             /// \param db  The database from which the ticket should be loaded.
-            /// \param record  A record to the ticket location in the store.
+            /// \param extent  An extent describing the ticket location in the store.
             /// \result  A pointer to the ticket in-store memory.
             static std::shared_ptr<ticket const> load (pstore::database const & db,
-                                                       pstore::record const & record);
+                                                       pstore::extent const & extent);
 
             ///@}
 
@@ -224,7 +224,7 @@ namespace pstore {
         // alloc
         // ~~~~~
         template <typename TransactionType>
-        pstore::record ticket::alloc (TransactionType & transaction, pstore::address path,
+        pstore::extent ticket::alloc (TransactionType & transaction, pstore::address path,
                                       std::vector<ticket_member> const & members) {
             // First work out its size.
             std::uint64_t num_members = members.size ();

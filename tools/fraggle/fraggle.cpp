@@ -112,8 +112,7 @@ int main (int argc, char * argv[]) {
 
         fibonacci_generator<> fib;
 
-        // Tuple contains the address of the function name and the fragment record description
-        // its address and size.
+        // Tuple contains the address of the function name and the fragment extent.
         std::vector<pstore::repo::ticket_member> ticket_members;
         ticket_members.reserve (num_fragments_per_ticket);
 
@@ -148,7 +147,7 @@ int main (int argc, char * argv[]) {
                 }
                 assert (data_section.data.size () == section_size.get () * 4);
 
-                pstore::record const fragment_pos =
+                pstore::extent const fragment_pos =
                     pstore::repo::fragment::alloc (transaction, &data_section, &data_section + 1);
 
                 unsigned const digest_half = ticket_ctr * num_fragments_per_ticket + fragment_ctr;
@@ -168,7 +167,7 @@ int main (int argc, char * argv[]) {
                         ->insert (transaction, pstore::make_sstring_view (ticket_path.data (),
                                                                           ticket_path.length ()))
                         .first.get_address ();
-                pstore::record ticket_pos =
+                pstore::extent ticket_pos =
                     pstore::repo::ticket::alloc (transaction, ticket_path_addr, ticket_members);
                 ticket_index->insert (transaction, std::make_pair (ticket_uuid, ticket_pos));
             }

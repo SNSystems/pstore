@@ -158,16 +158,17 @@ namespace vacuum {
 
                     for (auto const & kvp : *source_names) {
                         std::string const & key = kvp.first;
-                        pstore::record const & r = kvp.second;
+                        pstore::extent const & extent = kvp.second;
 
                         // FIXME: need to know the data's original alignment!
-                        pstore::address const addr = transaction.allocate (r.size, 1 /*align*/);
+                        pstore::address const addr =
+                            transaction.allocate (extent.size, 1 /*align*/);
                         // Copy from the source file to the data store.
-                        std::memcpy (transaction.getrw (addr, r.size).get (),
-                                     source->getro (r).get (), r.size);
+                        std::memcpy (transaction.getrw (addr, extent.size).get (),
+                                     source->getro (extent).get (), extent.size);
 
                         destination_names->insert_or_assign (transaction, key,
-                                                             pstore::record (addr, r.size));
+                                                             pstore::extent{addr, extent.size});
 
                         // Has the watch thread asked us to abort the copy?
                         if (st->modified) {

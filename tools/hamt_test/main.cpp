@@ -186,7 +186,7 @@ namespace {
             kv.second = addr;
 
             // Add the key/value pair to the index.
-            index.insert_or_assign (transaction, kv.first, pstore::record (addr, value.size ()));
+            index.insert_or_assign (transaction, kv.first, pstore::extent{addr, value.size ()});
         }
 
         transaction.commit ();

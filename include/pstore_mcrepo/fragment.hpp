@@ -619,7 +619,7 @@ namespace pstore {
             /// \param first  The beginning of the range of `section_content` values.
             /// \param last  The end of the range of `section_content` values.
             template <typename Transaction, typename Iterator>
-            static pstore::record alloc (Transaction & transaction, Iterator first, Iterator last);
+            static pstore::extent alloc (Transaction & transaction, Iterator first, Iterator last);
 
             /// Provides a pointer to an individual fragment instance given a database an a record
             /// describing its address and size.
@@ -628,7 +628,7 @@ namespace pstore {
             /// \param location  The address and size of the fragment data.
             /// \returns  A pointer to the fragment instance.
             static std::shared_ptr<fragment const> load (pstore::database const & db,
-                                                         pstore::record const & location);
+                                                         pstore::extent const & location);
 
             using member_array = sparse_array<std::uint64_t>;
 
@@ -728,7 +728,7 @@ namespace pstore {
         // ~~~~~
         template <typename TransactionType, typename Iterator>
         auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
-            -> pstore::record {
+            -> pstore::extent {
             fragment::check_range_is_sorted (first, last);
             // Compute the number of bytes of storage that we'll need for this fragment.
             auto const size = fragment::size_bytes (first, last);

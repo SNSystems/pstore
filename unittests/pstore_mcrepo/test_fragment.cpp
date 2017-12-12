@@ -61,8 +61,8 @@ namespace {
 
 TEST_F (FragmentTest, Empty) {
     std::vector<section_content> c;
-    pstore::record record = fragment::alloc (transaction_, std::begin (c), std::end (c));
-    auto f = reinterpret_cast<fragment const *> (record.addr.absolute ());
+    pstore::extent extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==
             reinterpret_cast<std::uint8_t const *> (f));
@@ -74,10 +74,10 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     c.emplace_back (section_type::ReadOnly, std::uint8_t{2} /*alignment*/);
     section_content & rodata = c.back ();
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
-    auto record = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
     assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (record.addr.absolute ()));
+            reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
@@ -118,10 +118,10 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         text.xfixups.emplace_back (external_fixup{pstore::address{5}, 5, 5, 5});
     }
 
-    auto record = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
     assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (record.addr.absolute ()));
+            reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
@@ -171,9 +171,9 @@ TEST_F (FragmentTest, TwoSections) {
         EXPECT_EQ (tls.type, section_type::ThreadData);
         tls.data.assign ({'t', 'l', 's'});
 
-        auto const record = fragment::alloc (transaction_, std::begin (c), std::end (c));
+        auto const extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
         ASSERT_EQ (transaction_.get_storage ().begin ()->first,
-                   reinterpret_cast<std::uint8_t const *> (record.addr.absolute ()));
+                   reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     }
     {
         auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);

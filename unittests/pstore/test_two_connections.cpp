@@ -140,7 +140,7 @@ TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {
     std::vector<std::uint8_t> buffer1 (pstore::storage::min_region_size + 1);
     std::iota (std::begin (buffer1), std::end (buffer1), std::uint8_t{0});
 
-    pstore::record t1;
+    pstore::extent t1;
     {
         auto transaction = pstore::begin (first);
         {

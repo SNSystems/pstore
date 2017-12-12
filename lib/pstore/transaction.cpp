@@ -62,8 +62,8 @@ namespace pstore {
     std::shared_ptr<void const> transaction_base::getro (address addr, std::size_t size) {
         return db ().getro (addr, size);
     }
-    std::shared_ptr<void const> transaction_base::getro (record const & r) {
-        return this->getro (r.addr, r.size);
+    std::shared_ptr<void const> transaction_base::getro (extent const & ex) {
+        return this->getro (ex.addr, ex.size);
     }
 
     // getrw
@@ -74,8 +74,8 @@ namespace pstore {
         return db_.getrw (addr, size);
     }
 
-    auto transaction_base::getrw (record const & r) -> std::shared_ptr<void> {
-        return this->getrw (r.addr, r.size);
+    auto transaction_base::getrw (extent const & ex) -> std::shared_ptr<void> {
+        return this->getrw (ex.addr, ex.size);
     }
 
     // allocate

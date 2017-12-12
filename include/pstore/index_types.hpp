@@ -45,12 +45,12 @@
 #ifndef PSTORE_INDEX_TYPES_HPP
 #define PSTORE_INDEX_TYPES_HPP (1)
 
-#include "pstore/hamt_map_fwd.hpp"
-#include "pstore/uuid.hpp"
 #include "pstore/file_header.hpp"
+#include "pstore/fnv.hpp"
+#include "pstore/hamt_map_fwd.hpp"
 #include "pstore/sstring_view.hpp"
 #include "pstore/uint128.hpp"
-#include "pstore/fnv.hpp"
+#include "pstore/uuid.hpp"
 
 namespace pstore {
     namespace index {
@@ -62,7 +62,7 @@ namespace pstore {
                 return v.high ();
             }
         };
-        using digest_index = hamt_map<digest, record, u128_hash>;
+        using digest_index = hamt_map<digest, extent, u128_hash>;
 
         // Note: Since uuid byte 6 represents version and byte 8 represents variant, we don't want
         // to use these two bytes. Therefore, we use the array[0-3,12-15] to construct the uint64_t.
@@ -169,8 +169,8 @@ namespace pstore {
 
     namespace index {
 
-        using write_index = hamt_map<std::string, record>;
-        using ticket_index = hamt_map<uuid, record, uuid_hash>;
+        using write_index = hamt_map<std::string, extent>;
+        using ticket_index = hamt_map<uuid, extent, uuid_hash>;
         using name_index = hamt_set<sstring_view<std::shared_ptr<char const>>, fnv_64a_hash>;
 
 

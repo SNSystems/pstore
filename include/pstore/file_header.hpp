@@ -83,38 +83,40 @@
 
 namespace pstore {
 
-    /// This type is used to represent a BLOB of data: be it either an index
-    /// key or an associated value.
-    struct record {
-        constexpr record () noexcept {}
-        constexpr record (address addr_, std::uint64_t size_) noexcept
+    /// \brief An extent is a contiguous area of storage reserved for a data BLOB, represented as a
+    /// range.
+    /// This type is used to represent a BLOB of data: be it either an index key or an associated
+    /// value.
+    struct extent {
+        constexpr extent () noexcept {}
+        constexpr extent (address addr_, std::uint64_t size_) noexcept
                 : addr (addr_)
                 , size (size_) {}
-        record (record const & rhs) noexcept = default;
-        record (record && rhs) noexcept = default;
-        record & operator= (record const &) noexcept = default;
-        record & operator= (record &&) noexcept = default;
+        extent (extent const & rhs) noexcept = default;
+        extent (extent && rhs) noexcept = default;
+        extent & operator= (extent const &) noexcept = default;
+        extent & operator= (extent &&) noexcept = default;
 
-        /// The address of the data associated with this record.
+        /// The address of the data associated with this extent.
         address addr = address::null ();
-        /// The size of the data associated with this record.
+        /// The size of the data associated with this extent.
         std::uint64_t size = UINT64_C (0);
     };
 
-    PSTORE_STATIC_ASSERT (offsetof (record, addr) == 0);
-    PSTORE_STATIC_ASSERT (offsetof (record, size) == 8);
-    PSTORE_STATIC_ASSERT (sizeof (record) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (extent, addr) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (extent, size) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (extent) == 16);
 
-    inline std::ostream & operator<< (std::ostream & os, record const & r) {
+    inline std::ostream & operator<< (std::ostream & os, extent const & r) {
         return os << "{addr:" << r.addr << ",size:" << r.size << "}";
     }
 
     namespace serialize {
         /// \brief A specialization which teaches the serialization framework how to read and write
-        /// instances of `record`.
+        /// instances of `extent`.
         template <>
-        struct serializer<record> {
-            using value_type = record;
+        struct serializer<extent> {
+            using value_type = extent;
 
             template <typename Archive>
             static auto write (Archive & archive, value_type const & r) ->
@@ -127,7 +129,7 @@ namespace pstore {
             static void read (Archive & archive, value_type & r) {
                 auto addr = address::make (serialize::read<std::uint64_t> (archive));
                 auto size = serialize::read<std::uint64_t> (archive);
-                new (&r) record (addr, size);
+                new (&r) extent (addr, size);
             }
         };
     } // namespace serialize

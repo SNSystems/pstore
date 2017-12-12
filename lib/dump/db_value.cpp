@@ -85,9 +85,9 @@ namespace value {
     // *************
     //* make_value *
     // *************
-    value_ptr make_value (pstore::record r) {
+    value_ptr make_value (pstore::extent ex) {
         auto v = std::make_shared<object> (object::container{
-            {"addr", make_value (r.addr)}, {"size", make_value (r.size)},
+            {"addr", make_value (ex.addr)}, {"size", make_value (ex.size)},
         });
         v->compact ();
         return v;

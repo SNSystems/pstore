@@ -115,7 +115,7 @@ namespace {
         }
 
         auto index = pstore::index::get_write_index (*db_);
-        index->insert_or_assign (transaction, key, pstore::record{where, value.length ()});
+        index->insert_or_assign (transaction, key, pstore::extent{where, value.length ()});
     }
 
     // find
@@ -132,7 +132,7 @@ namespace {
         auto const it = index->find (key);
         ASSERT_NE (it, index->cend ());
 
-        pstore::record const & r = it->second;
+        pstore::extent const & r = it->second;
         auto value = std::static_pointer_cast<char const> (db_->getro (r));
         *value_out = std::string{value.get (), r.size};
     }

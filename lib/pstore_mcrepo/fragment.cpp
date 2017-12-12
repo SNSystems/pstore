@@ -112,7 +112,7 @@ void fragment::deleter::operator() (void * p) {
 // load
 // ~~~~
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
-                                                pstore::record const & location) {
+                                                pstore::extent const & location) {
     auto f = std::static_pointer_cast<fragment const> (db.getro (location.addr, location.size));
     if (f->size_bytes () != location.size) {
         raise_error_code (std::make_error_code (error_code::bad_fragment_record));

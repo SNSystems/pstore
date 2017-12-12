@@ -94,7 +94,7 @@ namespace value {
         return make_value (str.to_string ());
     }
 
-    value_ptr make_value (pstore::record r);
+    value_ptr make_value (pstore::extent ex);
 
 
     template <typename InputIterator>

@@ -66,9 +66,9 @@ void ticket::operator delete (void * p) {
 
 // load
 // ~~~~
-auto ticket::load (pstore::database const & db, pstore::record const & location)
+auto ticket::load (pstore::database const & db, pstore::extent const & location)
     -> std::shared_ptr<ticket const> {
-    auto t = std::static_pointer_cast<ticket const> (db.getro (location.addr, location.size));
+    auto t = std::static_pointer_cast<ticket const> (db.getro (location));
     if (t->size_bytes () != location.size) {
         raise_error_code (std::make_error_code (error_code::bad_ticket_record));
     }

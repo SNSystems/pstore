@@ -100,15 +100,16 @@ namespace pstore {
 
         ///@{
         auto getro (address addr, std::size_t size) -> std::shared_ptr<void const>;
-        auto getro (record const & r) -> std::shared_ptr<void const>;
-        template <typename Ty>
+        auto getro (extent const & ex) -> std::shared_ptr<void const>;
+        template <typename Ty,
+                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
         auto getro (address addr) -> std::shared_ptr<Ty const>;
         ///@}
 
 
         ///@{
         std::shared_ptr<void> getrw (address addr, std::size_t size);
-        std::shared_ptr<void> getrw (record const & r);
+        std::shared_ptr<void> getrw (extent const & ex);
 
         template <typename Ty,
                   typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
@@ -204,7 +205,7 @@ namespace pstore {
 
     // getro
     // ~~~~~
-    template <typename Ty>
+    template <typename Ty, typename /*standard_layout*/>
     inline std::shared_ptr<Ty const> transaction_base::getro (address addr) {
         PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value); // FIXME: enable_if instead
         return db ().template getro<Ty const> (addr);

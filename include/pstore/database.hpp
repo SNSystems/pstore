@@ -193,7 +193,7 @@ namespace pstore {
         }
 
         ///@{
-        std::shared_ptr<void const> getro (record const & r) const;
+        std::shared_ptr<void const> getro (extent const & ex) const;
         std::shared_ptr<void const> getro (address addr, std::size_t size) const;
         template <typename Ty>
         std::shared_ptr<Ty const> getro (address addr) const;
@@ -202,7 +202,7 @@ namespace pstore {
         ///@}
 
         ///@{
-        std::shared_ptr<void> getrw (record const & r);
+        std::shared_ptr<void> getrw (extent const & ex);
         std::shared_ptr<void> getrw (address addr, std::size_t size);
         template <typename T>
         auto getrw (address sop) -> std::shared_ptr<T>;
@@ -472,8 +472,8 @@ namespace pstore {
         std::shared_ptr<void> result = this->getrw (addr, size);
         return std::static_pointer_cast<Ty> (result);
     }
-    inline auto database::getrw (record const & r) -> std::shared_ptr<void> {
-        return this->getrw (r.addr, r.size);
+    inline auto database::getrw (extent const & ex) -> std::shared_ptr<void> {
+        return this->getrw (ex.addr, ex.size);
     }
     inline auto database::getrw (address addr, std::size_t size) -> std::shared_ptr<void> {
         return std::const_pointer_cast<void> (
@@ -482,8 +482,8 @@ namespace pstore {
 
     // getro
     // ~~~~~
-    inline auto database::getro (record const & r) const -> std::shared_ptr<void const> {
-        return this->getro (r.addr, r.size);
+    inline auto database::getro (extent const & ex) const -> std::shared_ptr<void const> {
+        return this->getro (ex.addr, ex.size);
     }
     template <typename Ty>
     inline auto database::getro (address addr) const -> std::shared_ptr<Ty const> {

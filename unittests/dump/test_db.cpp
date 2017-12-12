@@ -96,11 +96,11 @@ TEST_F (Address, SimplifiedNull) {
 }
 
 
-TEST (Database, Record) {
+TEST (Database, Extent) {
     using ::testing::ElementsAre;
     std::ostringstream out;
 
-    value::value_ptr addr = value::make_value (pstore::record{});
+    value::value_ptr addr = value::make_value (pstore::extent{});
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
