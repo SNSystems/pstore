@@ -41,13 +41,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-//*   __ _ _                        _       *
-//*  / _(_) | ___   _ __   ___  ___(_)_  __ *
-//* | |_| | |/ _ \ | '_ \ / _ \/ __| \ \/ / *
-//* |  _| | |  __/ | |_) | (_) \__ \ |>  <  *
-//* |_| |_|_|\___| | .__/ \___/|___/_/_/\_\ *
-//*                |_|                      *
-// Copyright (c) 2015-2017 Sony Interactive Entertainment, Inc.
 /// \file file_posix.cpp
 /// \brief POSIX implementation of the cross-platform file APIs
 

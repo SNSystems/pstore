@@ -4,7 +4,7 @@
 //* | | (_) | || (_| | | (_| |  __/ | | |  __/ | | (_| | || (_) | |    *
 //* |_|\___/ \__\__,_|  \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|    *
 //*                     |___/                                          *
-//===- tools/broker_poker/iota_generator.hpp ------------------------------===//
+//===- include/pstore_cmd_util/iota_generator.hpp -------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -88,4 +88,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_POKER_IOTA_GENERATOR_HPP
-// eof: tools/broker_poker/iota_generator.hpp
+// eof: include/pstore_cmd_util/iota_generator.hpp
