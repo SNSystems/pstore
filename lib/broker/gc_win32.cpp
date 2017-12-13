@@ -76,14 +76,15 @@ namespace {
             raise (::pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
         }
 
-        bool is_normal_termination =
+        pstore::logging::log (pstore::logging::priority::info, "GC process exited pid ", pid);
+        bool const is_normal_termination =
             (child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE);
         if (is_normal_termination) {
-            pstore::logging::log (pstore::logging::priority::info, "GC process ", pid,
-                                  " exited. Normal termination, exit status = ", child_exit_code);
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Normal termination, exit status = ", child_exit_code);
         } else {
-            pstore::logging::log (pstore::logging::priority::error, "GC process ", pid,
-                                  " exited. Abnormal termination, exit status = ", child_exit_code);
+            pstore::logging::log (pstore::logging::priority::error,
+                                  "Abnormal termination, exit status = ", child_exit_code);
         }
     }
 

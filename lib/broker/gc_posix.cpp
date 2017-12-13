@@ -72,24 +72,24 @@ namespace {
     char const * core_dump_string (int status) {
 #ifdef WCOREDUMP
         if (WCOREDUMP (status)) {
-            return " (core file generated)";
+            return "(core file generated)";
         }
 #endif
-        return "";
+        return "(no core file available)";
     }
 
     void pr_exit (pid_t pid, int status) {
+        pstore::logging::log (pstore::logging::priority::info, "GC process exited pid ", pid);
         if (WIFEXITED (status)) {
-            pstore::logging::log (pstore::logging::priority::info, "GC process ", pid,
-                                  " exited. Normal termination, exit status = ",
-                                  WEXITSTATUS (status));
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Normal termination, exit status = ", WEXITSTATUS (status));
         } else if (WIFSIGNALED (status)) {
-            pstore::logging::log (pstore::logging::priority::error, "GC process ", pid,
-                                  " exited. Abormal termination, signal number ", WTERMSIG (status),
-                                  core_dump_string (status));
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Abormal termination, signal number ", WTERMSIG (status));
+            pstore::logging::log (pstore::logging::priority::info, "  ", core_dump_string (status));
         } else if (WIFSTOPPED (status)) {
-            pstore::logging::log (pstore::logging::priority::info, "GC process ", pid,
-                                  " exited. child stopped, signal number = ", WSTOPSIG (status));
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Child stopped, signal number = ", WSTOPSIG (status));
         }
     }
 
@@ -119,11 +119,16 @@ namespace broker {
                     int const err = errno;
                     // If the error was "no child processes", we shouldn't report it.
                     if (err != ECHILD) {
-                        char errbuf[256];
+                        static constexpr std::size_t buffer_size = 256;
+                        char msgbuf[buffer_size];
+                        std::snprintf (msgbuf, buffer_size, "waitpid error %d: ", err);
+                        msgbuf[buffer_size - 1U] = '\0';
+
+                        char errbuf[buffer_size];
                         ::strerror_r (err, errbuf, sizeof (errbuf));
-                        errbuf[255] = '\0';
-                        pstore::logging::log (pstore::logging::priority::error, "waitpid error ",
-                                              err, "(", errbuf, ")");
+                        errbuf[buffer_size - 1U] = '\0';
+
+                        pstore::logging::log (pstore::logging::priority::error, msgbuf, errbuf);
                     }
                     break;
                 } else {

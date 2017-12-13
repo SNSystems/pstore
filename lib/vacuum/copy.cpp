@@ -94,9 +94,8 @@ namespace {
             // FIXME: watch the file for modification. If it is touched, reset wait_until.
             auto remaining = wait_until - now;
             pstore::logging::log (
-                pstore::logging::priority::notice, "pre-copy delay. ",
-                std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count (),
-                "ms remaining");
+                pstore::logging::priority::notice, "Pre-copy delay. Remaining (ms): ",
+                std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count ());
             wst.start_watch_cv.wait_for (mlock, vacuum::watch_interval);
         }
     }
@@ -211,12 +210,15 @@ namespace vacuum {
                 }
             }
         }
+        // clang-format off
         CATCH (std::exception const & ex, {
             pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
                                   ex.what ());
         })
-        CATCH (..., { pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
-        pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
-    }
+        CATCH (..., {
+            pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
+            pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
+        }
+        // clang-format on
 } // end namespace vacuum
 // eof: lib/vacuum/copy.cpp

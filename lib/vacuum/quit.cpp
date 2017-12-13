@@ -96,21 +96,25 @@ namespace {
             // the user typing Control-C.
             quit_info.wait ();
 
-            pstore::logging::log (pstore::logging::priority::info, "got signal ",
-                                  quit_info.signal (),
-                                  ", will terminate after current command ends");
-
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Signal received. Will terminate after current command. Num=",
+                                  quit_info.signal ());
             status.done = true;
+
             // Wake up the watch thread immediately.
             vacuum::wst.start_watch_cv.notify_all ();
             // vacuum::wst.complete_cv.notify_all ();
             pstore::logging::log (pstore::logging::priority::notice,
                                   "Marked job as done. Notified start_watch_cv and complete_cv.");
         }
-        CATCH (std::exception const & ex,
-               { pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ()); })
-        CATCH (...,
-               { pstore::logging::log (pstore::logging::priority::error, "unknown exception"); })
+        // clang-format off
+        CATCH (std::exception const & ex, {
+            pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ());
+        })
+        CATCH (..., {
+            pstore::logging::log (pstore::logging::priority::error, "unknown exception");
+        })
+        // clang-format on
     }
 
 

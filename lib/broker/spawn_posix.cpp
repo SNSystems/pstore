@@ -68,8 +68,8 @@ namespace broker {
         // When fork() returns 0, we are in the child process.
         case 0: {
             try {
-                pstore::logging::log (pstore::logging::priority::info, "starting vacuum (",
-                                      exe_path, ")");
+                pstore::logging::log (pstore::logging::priority::info, "starting vacuum ",
+                                      pstore::logging::quoted (exe_path));
                 // TODO: nice the child process?
                 ::execv (exe_path, const_cast<char **> (argv));
 
@@ -89,8 +89,8 @@ namespace broker {
             // we got here, so record the child PID if we're still in the "starting"
             // state.
 
-            pstore::logging::log (pstore::logging::priority::info, "vacuum is now running (pid ",
-                                  child_pid, ")");
+            pstore::logging::log (pstore::logging::priority::info, "vacuum is now running: pid ",
+                                  child_pid);
             break;
         }
         return child_pid;

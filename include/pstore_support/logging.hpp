@@ -51,7 +51,6 @@
 #include <fstream>
 #include <memory>
 #include <mutex>
-#include <streambuf>
 #include <string>
 
 #include "pstore_support/gsl.hpp"
@@ -72,38 +71,68 @@ namespace pstore {
             debug      ///< debug-level message
         };
 
-
-        //*                  *
-        //* | _  _  _  _ ._  *
-        //* |(_)(_|(_|(/_|   *
-        //*      _| _|       *
-        /// \brief The base class for logging streams.
-        class logger : public std::basic_streambuf<char, std::char_traits<char>> {
+        class quoted {
         public:
-            logger ();
-            virtual ~logger () {}
+            quoted (gsl::czstring str)
+                    : str_{str} {}
+            operator gsl::czstring () const noexcept {
+                return str_;
+            }
 
-            void set_priority (priority p) {
+        private:
+            gsl::czstring str_;
+        };
+
+        //*  _                         *
+        //* | |___  __ _ __ _ ___ _ _  *
+        //* | / _ \/ _` / _` / -_) '_| *
+        //* |_\___/\__, \__, \___|_|   *
+        //*        |___/|___/          *
+        /// \brief The base class for logging streams.
+        class logger {
+        public:
+            logger () = default;
+            virtual ~logger () = default;
+
+            void set_priority (priority p) noexcept {
                 priority_ = p;
             }
-            priority get_priority () {
+            priority get_priority () const noexcept {
                 return priority_;
             }
 
-        protected:
-            int overflow (int c) final;
-            int sync () final;
             virtual void log (priority p, std::string const & message) = 0;
 
+            virtual void log (priority p, gsl::czstring message, int d);
+            virtual void log (priority p, gsl::czstring message, unsigned d);
+            virtual void log (priority p, gsl::czstring message, long d);
+            virtual void log (priority p, gsl::czstring message, unsigned long d);
+            virtual void log (priority p, gsl::czstring message, long long d);
+            virtual void log (priority p, gsl::czstring message, unsigned long long d);
+
+            virtual void log (priority p, gsl::czstring message);
+            virtual void log (priority p, gsl::czstring part1, gsl::czstring part2);
+            virtual void log (priority p, gsl::czstring part1, quoted part2);
+
+            void log (priority p, gsl::czstring message, std::string const & d) {
+                this->log (p, message, d.c_str ());
+            }
+
         private:
+            template <typename T>
+            static std::string to_string (char const * message, T t) {
+                return message + std::to_string (t);
+            }
+
             std::string buffer_;
             priority priority_ = priority::debug;
         };
 
-        //*                              *
-        //* |_  _. _o _ | _  _  _  _ ._  *
-        //* |_)(_|_>|(_ |(_)(_|(_|(/_|   *
-        //*                  _| _|       *
+        //*  _             _      _                         *
+        //* | |__  __ _ __(_)__  | |___  __ _ __ _ ___ _ _  *
+        //* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
+        //* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
+        //*                             |___/|___/          *
         class basic_logger : public logger {
         public:
             basic_logger ();
@@ -115,8 +144,9 @@ namespace pstore {
             static std::size_t time_string (std::time_t t,
                                             gsl::span<char, time_buffer_size> const & buffer);
 
-        private:
             void log (priority p, std::string const & message) final;
+
+        private:
             virtual void log_impl (std::string const & message) = 0;
 
             static struct tm local_time (time_t const & clock);
@@ -207,14 +237,13 @@ namespace pstore {
         public:
             /// \param base_name  The base file name to which an integer is appended for backup
             /// files.
-            /// \param max_bytes  The maximum number of bytes to which an active log file is allowed
-            /// to grow before we perform a rotatation and begin writing that a new file. Set to 0
+            /// \param max_bytes The maximum number of bytes to which an active log file is allowed
+            /// to grow before we perform a rotation and begin writing that a new file. Set to 0
             /// to allow the size to be unlimited (implying that rotation will never occur).
-            /// \param num_backups  The number of backup files to created and rotated. Set to 0 to
+            /// \param num_backups The number of backup files to created and rotated. Set to 0 to
             /// cause no backups to be made.
-            /// \note  Both num_backups_ and max_size_ must be greater than zero before rollover is
+            /// \note  Both num_backups and max_size must be greater than zero before rollover is
             /// enabled.
-
             basic_rotating_log (std::string const & base_name, std::ios_base::streamoff max_bytes,
                                 unsigned num_backups, StreamTraits const & traits = StreamTraits (),
                                 FileSystemTraits const & fs_traits = FileSystemTraits ());
@@ -263,34 +292,23 @@ namespace pstore {
 
         using rotating_log = basic_rotating_log<fstream_traits, file_system_traits>;
 
-
-
-        std::ostream & operator<< (std::ostream & os, priority p);
-
-
-        std::ostream & create_log_stream (std::unique_ptr<logger> && logger);
-        std::ostream & create_log_stream (std::string const & ident);
+        void create_log_stream (std::unique_ptr<logger> && logger);
+        void create_log_stream (std::string const & ident);
 
 
         namespace details {
-            extern THREAD_LOCAL std::ostream * log_stream;
-            extern THREAD_LOCAL std::streambuf * log_streambuf;
-
-            void sub_print (std::ostream &);
-            template <class A0, class... Args>
-            void sub_print (std::ostream & os, A0 const & a0, Args const &... args) {
-                os << a0;
-                sub_print (os, args...);
-            }
+            extern THREAD_LOCAL logger * log_streambuf;
         } // end namespace details
 
-        template <class... Args>
-        void log (priority p, Args const &... args) noexcept {
-            assert (details::log_stream != nullptr);
-            auto & os = *details::log_stream;
-            os << p;
-            details::sub_print (os, args...);
-            os << std::endl;
+
+        inline void log (priority p, gsl::czstring message) {
+            assert (details::log_streambuf != nullptr);
+            details::log_streambuf->log (p, message);
+        }
+        template <typename T>
+        inline void log (priority p, gsl::czstring message, T d) {
+            assert (details::log_streambuf != nullptr);
+            details::log_streambuf->log (p, message, d);
         }
 
     } // end namespace logging

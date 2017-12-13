@@ -219,7 +219,7 @@ namespace {
             if (errcode == ERROR_SUCCESS && bytes_read != 0) {
                 if (bytes_read != pstore::broker::message_size) {
                     pstore::logging::log (pstore::logging::priority::error,
-                                          "partial message received (length=", bytes_read, ")");
+                                          "Partial message received. Length ", bytes_read);
                     r->completed_with_error ();
                 } else {
                     // The read operation has finished successfully, so process the request.
@@ -436,8 +436,8 @@ namespace {
 void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & record_file,
                 std::shared_ptr<command_processor> & cp) {
     try {
-        pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe (",
-                              path.get (), ")");
+        pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
+                              pstore::logging::quoted (path.get ().c_str ()));
         auto const pipe_name = pstore::utf::win32::to16 (path.get ());
 
         // Create one event object for the connect operation.

@@ -129,12 +129,26 @@ void command_processor::unknown (broker::broker_command const & c) const {
     pstore::logging::log (pstore::logging::priority::error, "unknown verb:", c.verb);
 }
 
+namespace {
+    template <typename T, std::size_t N>
+    constexpr std::size_t array_size (T const (&)[N]) {
+        return N;
+    }
+} // anonymous namespace
 
 // log
 // ~~~
 void command_processor::log (broker::broker_command const & c) const {
-    pstore::logging::log (pstore::logging::priority::info, "verb:", c.verb, " path:",
-                          c.path.substr (0, 32));
+    constexpr char const verb[] = "verb:";
+    constexpr auto verb_length = array_size (verb) - 1;
+    constexpr char const path[] = " path:";
+    constexpr auto path_length = array_size (path) - 1;
+    constexpr auto max_path_length = std::size_t{32};
+
+    std::string message;
+    message.reserve (verb_length + c.verb.length () + path_length + max_path_length);
+    message = verb + c.verb + path + c.path.substr (0, max_path_length);
+    pstore::logging::log (pstore::logging::priority::info, message.c_str ());
 }
 
 void command_processor::log (pstore::gsl::czstring str) const {
@@ -183,7 +197,7 @@ auto command_processor::parse (pstore::broker::message_type const & msg)
 // ~~~~~~~~~~~~
 void command_processor::thread_entry (pstore::broker::fifo_path const & fifo) {
     try {
-        pstore::logging::log (pstore::logging::priority::info, "waiting for commands");
+        pstore::logging::log (pstore::logging::priority::info, "Waiting for commands");
         while (!commands_done_) {
             pstore::broker::message_ptr msg = messages_.pop ();
             assert (msg);
@@ -195,7 +209,7 @@ void command_processor::thread_entry (pstore::broker::fifo_path const & fifo) {
     } catch (...) {
         pstore::logging::log (pstore::logging::priority::error, "Unknown error");
     }
-    pstore::logging::log (pstore::logging::priority::info, "exiting command thread");
+    pstore::logging::log (pstore::logging::priority::info, "Exiting command thread");
 }
 
 // push_command
@@ -217,7 +231,7 @@ void command_processor::clear_queue () {
 // scavenge
 // ~~~~~~~~
 void command_processor::scavenge () {
-    pstore::logging::log (pstore::logging::priority::info, "scavenging zombie commands");
+    pstore::logging::log (pstore::logging::priority::info, "Scavenging zombie commands");
 
     // TODO: make this time threshold user configurable
     constexpr auto delete_threshold = std::chrono::seconds (4 * 60 * 60);
@@ -234,9 +248,27 @@ void command_processor::scavenge () {
         auto const arrival_time = it->second.arrive_time_;
         if (arrival_time < earliest_time) {
             auto const t = std::chrono::system_clock::to_time_t (arrival_time);
+
+            static constexpr auto time_size = std::size_t{100};
+            char time_str[time_size];
+            bool got_time = false;
+
+            if (std::tm const * tm = std::gmtime (&t)) {
+                // strftime() returns 0 if the result doesn't fit in the provided buffer;
+                // the contents are undefined.
+                if (std::strftime (time_str, time_size, "%FT%TZ", tm) != 0) {
+                    got_time = true;
+                }
+            }
+            if (!got_time) {
+                std::strncpy (time_str, "(unknown)", time_size);
+            }
+
+            // Guarantee that the string is null terminated.
+            time_str[time_size - 1] = '\0';
+
             pstore::logging::log (pstore::logging::priority::info,
-                                  "deleted old partial message (arrived ",
-                                  std::put_time (std::localtime (&t), "%F %T"), ")");
+                                  "Deleted old partial message. Arrived ", time_str);
             it = cmds_.erase (it);
         } else {
             ++it;

@@ -88,7 +88,8 @@ namespace {
     void push (command_processor & cp, std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
-        pstore::logging::log (pstore::logging::priority::info, "push command \"", message, '\"');
+        pstore::logging::log (pstore::logging::priority::info, "push command ",
+                              pstore::logging::quoted (message.c_str ()));
 
         assert (message.length () <= pstore::broker::message_type::payload_chars);
         auto msg = std::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},
@@ -143,9 +144,9 @@ namespace {
             // the user typing Control-C.
             quit_info.wait ();
 
-            pstore::logging::log (pstore::logging::priority::info, "got signal ",
-                                  quit_info.signal (),
-                                  ", will terminate after current command ends");
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "Signal received. Will terminate after current command. Num=",
+                                  quit_info.signal ());
 
             auto cp_sptr = cp.lock ();
             // If the command processor is alive, clear the queue.

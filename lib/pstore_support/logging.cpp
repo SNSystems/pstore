@@ -48,8 +48,6 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <system_error>
 
@@ -61,6 +59,7 @@
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>
+#include <os/log.h>
 #endif
 #if PSTORE_HAVE_SYS_LOG_H
 #include <syslog.h>
@@ -69,6 +68,50 @@
 namespace pstore {
     namespace logging {
 
+        //*  _                         *
+        //* | |___  __ _ __ _ ___ _ _  *
+        //* | / _ \/ _` / _` / -_) '_| *
+        //* |_\___/\__, \__, \___|_|   *
+        //*        |___/|___/          *
+        // log
+        // ~~~
+        void logger::log (priority p, char const * message, int d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, char const * message, unsigned d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, char const * message, long d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, char const * message, unsigned long d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, char const * message, long long d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, char const * message, unsigned long long d) {
+            this->log (p, to_string (message, d));
+        }
+        void logger::log (priority p, gsl::czstring message) {
+            this->log (p, std::string{message});
+        }
+        void logger::log (priority p, gsl::czstring part1, gsl::czstring part2) {
+            this->log (p, std::string{part1} + part2);
+        }
+        void logger::log (priority p, gsl::czstring part1, quoted part2) {
+            auto message = std::string{part1};
+            message += '"';
+            message += part2;
+            message += '"';
+            this->log (p, message);
+        }
+
+//*  _             _      _                         *
+//* | |__  __ _ __(_)__  | |___  __ _ __ _ ___ _ _  *
+//* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
+//* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
+//*                             |___/|___/          *
 #if PSTORE_HAVE_LOCALTIME_S
         struct tm basic_logger::local_time (time_t const & clock) {
             struct tm result;
@@ -113,14 +156,16 @@ namespace pstore {
 
 namespace {
 
+    using namespace pstore;
+
 #if PSTORE_HAVE_ASL_H
 
     //*                         *
     //*  _. _| | _  _  _  _ ._  *
     //* (_|_>| |(_)(_|(_|(/_|   *
     //*             _| _|       *
-    // Apple System Logging
-    class asl_logger final : public pstore::logging::logger {
+    // Apple OS Log
+    class asl_logger final : public logging::logger {
     public:
         explicit asl_logger (std::string const & ident);
         ~asl_logger () override;
@@ -130,61 +175,91 @@ namespace {
         asl_logger & operator= (asl_logger &&) = delete;
         asl_logger & operator= (asl_logger const &) = delete;
 
-    private:
-        void log (pstore::logging::priority p, std::string const & message) override;
-        static int priority_code (pstore::logging::priority p);
+        void log (logging::priority p, std::string const & message) override;
 
-        aslclient client_;
+        void log (logging::priority p, gsl::czstring message, int d) override;
+        void log (logging::priority p, gsl::czstring message, unsigned d) override;
+        void log (logging::priority p, gsl::czstring message, long d) override;
+        void log (logging::priority p, gsl::czstring message, unsigned long d) override;
+        void log (logging::priority p, gsl::czstring message, long long d) override;
+        void log (logging::priority p, gsl::czstring message, unsigned long long d) override;
+
+        void log (logging::priority p, gsl::czstring message) override;
+        void log (logging::priority p, gsl::czstring part1, gsl::czstring part2) override;
+        void log (logging::priority p, gsl::czstring part1, logging::quoted part2) override;
+
+    private:
+        os_log_t log_;
+        static os_log_type_t priority_code (logging::priority p);
     };
 
     // (ctor)
     // ~~~~~~
-    /// If the 'ident' string is empty, we pass nullptr to asl_open() so it will use the calling
-    /// process name.
     asl_logger::asl_logger (std::string const & ident)
-            : client_ (::asl_open (ident.length () > 0 ? ident.c_str () : nullptr, PSTORE_VENDOR_ID,
-                                   ASL_OPT_STDERR)) {
-
-        if (client_ == nullptr) {
-            pstore::raise (std::errc::invalid_argument, "asl_open");
+            : log_{::os_log_create (PSTORE_VENDOR_ID, ident.c_str ())} {
+        if (log_ == nullptr) {
+            raise (std::errc::invalid_argument, "asl_log_create");
         }
     }
 
     // (dtor)
     // ~~~~~~
     asl_logger::~asl_logger () {
-        ::asl_close (client_);
-        client_ = nullptr;
+        log_ = nullptr;
     }
 
     // log
     // ~~~
-    void asl_logger::log (pstore::logging::priority p, std::string const & message) {
-        ::asl_log (client_, nullptr, priority_code (p), "%s", message.c_str ());
+    void asl_logger::log (logging::priority p, std::string const & message) {
+        os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ());
+    }
+    void asl_logger::log (logging::priority p, char const * message, int d) {
+        os_log_with_type (log_, priority_code (p), "%s%d", message, d);
+    }
+    void asl_logger::log (logging::priority p, char const * message, unsigned d) {
+        os_log_with_type (log_, priority_code (p), "%s%u", message, d);
+    }
+    void asl_logger::log (logging::priority p, char const * message, long d) {
+        os_log_with_type (log_, priority_code (p), "%s%ld", message, d);
+    }
+    void asl_logger::log (logging::priority p, char const * message, unsigned long d) {
+        os_log_with_type (log_, priority_code (p), "%s%lu", message, d);
+    }
+    void asl_logger::log (logging::priority p, char const * message, long long d) {
+        os_log_with_type (log_, priority_code (p), "%s%lld", message, d);
+    }
+    void asl_logger::log (logging::priority p, char const * message, unsigned long long d) {
+        os_log_with_type (log_, priority_code (p), "%s%llu", message, d);
+    }
+    void asl_logger::log (logging::priority p, gsl::czstring message) {
+        os_log_with_type (log_, priority_code (p), "%s", message);
+    }
+    void asl_logger::log (logging::priority p, gsl::czstring part1, gsl::czstring part2) {
+        os_log_with_type (log_, priority_code (p), "%s%s", part1, part2);
+    }
+    void asl_logger::log (logging::priority p, gsl::czstring part1, logging::quoted part2) {
+        os_log_with_type (log_, priority_code (p), "%s\"%s\"", part1,
+                          static_cast<gsl::czstring> (part2));
     }
 
     // priority_code
     // ~~~~~~~~~~~~~
-    int asl_logger::priority_code (pstore::logging::priority p) {
+    os_log_type_t asl_logger::priority_code (logging::priority p) {
+        using logging::priority;
         switch (p) {
-        case pstore::logging::priority::emergency:
-            return ASL_LEVEL_EMERG;
-        case pstore::logging::priority::alert:
-            return ASL_LEVEL_ALERT;
-        case pstore::logging::priority::critical:
-            return ASL_LEVEL_CRIT;
-        case pstore::logging::priority::error:
-            return ASL_LEVEL_ERR;
-        case pstore::logging::priority::warning:
-            return ASL_LEVEL_WARNING;
-        case pstore::logging::priority::notice:
-            return ASL_LEVEL_NOTICE;
-        case pstore::logging::priority::info:
-            return ASL_LEVEL_INFO;
-        case pstore::logging::priority::debug:
-            return ASL_LEVEL_DEBUG;
+        case priority::emergency:
+        case priority::alert:
+        case priority::critical:
+            return OS_LOG_TYPE_FAULT;
+        case priority::error:
+            return OS_LOG_TYPE_ERROR;
+        case priority::warning: // warning conditions
+        case priority::notice:  // normal, but significant, condition
+        case priority::info:    // informational message
+            return OS_LOG_TYPE_INFO;
+        case priority::debug: // debug-level message
+            return OS_LOG_TYPE_DEBUG;
         }
-        return ASL_LEVEL_EMERG;
     }
 
 #elif PSTORE_HAVE_SYS_LOG_H
@@ -193,13 +268,13 @@ namespace {
     //*  _   _| _  _  | _  _  _  _ ._  *
     //* _>\/_>|(_)(_| |(_)(_|(_|(/_|   *
     //*   /        _|      _| _|       *
-    class syslog_logger final : public pstore::logging::logger {
+    class syslog_logger final : public logging::logger {
     public:
         syslog_logger (std::string const & ident, int facility);
 
     private:
-        void log (pstore::logging::priority p, std::string const & message) override;
-        static int priority_code (pstore::logging::priority p);
+        void log (logging::priority p, std::string const & message) override;
+        static int priority_code (logging::priority p);
 
         int facility_;
         char ident_[50];
@@ -218,29 +293,29 @@ namespace {
 
     // log
     // ~~~
-    void syslog_logger::log (pstore::logging::priority p, std::string const & message) {
+    void syslog_logger::log (logging::priority p, std::string const & message) {
         syslog (priority_code (p), "%s", message.c_str ());
     }
 
     // priority_code
     // ~~~~~~~~~~~~~
-    int syslog_logger::priority_code (pstore::logging::priority p) {
+    int syslog_logger::priority_code (logging::priority p) {
         switch (p) {
-        case pstore::logging::priority::emergency:
+        case logging::priority::emergency:
             return LOG_EMERG;
-        case pstore::logging::priority::alert:
+        case logging::priority::alert:
             return LOG_ALERT;
-        case pstore::logging::priority::critical:
+        case logging::priority::critical:
             return LOG_CRIT;
-        case pstore::logging::priority::error:
+        case logging::priority::error:
             return LOG_ERR;
-        case pstore::logging::priority::warning:
+        case logging::priority::warning:
             return LOG_WARNING;
-        case pstore::logging::priority::notice:
+        case logging::priority::notice:
             return LOG_NOTICE;
-        case pstore::logging::priority::info:
+        case logging::priority::info:
             return LOG_INFO;
-        case pstore::logging::priority::debug:
+        case logging::priority::debug:
             return LOG_DEBUG;
         }
         return LOG_EMERG;
@@ -254,26 +329,20 @@ namespace pstore {
     namespace logging {
 
         namespace details {
-            THREAD_LOCAL std::ostream * log_stream = nullptr;
-            THREAD_LOCAL std::streambuf * log_streambuf = nullptr;
-            void sub_print (std::ostream &) {}
+            THREAD_LOCAL logger * log_streambuf = nullptr;
         } // namespace details
 
-        std::ostream & create_log_stream (std::unique_ptr<logging::logger> && logger) {
-            using details::log_stream;
+        void create_log_stream (std::unique_ptr<logging::logger> && logger) {
             using details::log_streambuf;
 
-            delete log_stream;
             delete log_streambuf;
 
             auto l = std::move (logger);
             log_streambuf = l.release ();
-            log_stream = new std::ostream (log_streambuf);
-            return *log_stream;
         }
 
         // TODO: allow user control over where the log ends up.
-        std::ostream & create_log_stream (std::string const & ident) {
+        void create_log_stream (std::string const & ident) {
             std::unique_ptr<logging::logger> logger;
 #if PSTORE_HAVE_ASL_H
             // Redirect clog to apple system log.
@@ -312,34 +381,6 @@ namespace pstore {
         }
 
 
-        //*******************
-        //*   l o g g e r   *
-        //*******************
-        logger::logger () {}
-
-        // overflow
-        // ~~~~~~~~
-        int logger::overflow (int c) {
-            if (c != EOF) {
-                buffer_ += static_cast<char> (c);
-            } else {
-                this->sync ();
-            }
-            return c;
-        }
-
-        // sync
-        // ~~~~
-        int logger::sync () {
-            if (buffer_.length () > 0) {
-                this->log (priority_, buffer_);
-                buffer_.erase ();
-                this->set_priority (priority::debug); // default to debug for each message
-            }
-            return 0;
-        }
-
-
         //*                              *
         //* |_  _. _o _ | _  _  _  _ ._  *
         //* |_)(_|_>|(_ |(_)(_|(_|(/_|   *
@@ -356,13 +397,12 @@ namespace pstore {
         // ~~~
         void basic_logger::log (priority p, std::string const & message) {
             std::array<char, time_buffer_size> time_buffer;
-            std::size_t r =
-                time_string (std::time (nullptr), ::pstore::gsl::make_span (time_buffer));
+            std::size_t r = time_string (std::time (nullptr), ::gsl::make_span (time_buffer));
             assert (r == sizeof (time_buffer) - 1);
             auto time_str = time_buffer.data ();
             std::ostringstream str;
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
-                << message.c_str ();
+                << message;
 
             std::lock_guard<std::mutex> lock (mutex_);
             this->log_impl (str.str ());
@@ -370,14 +410,14 @@ namespace pstore {
 
         // priority_string
         // ~~~~~~~~~~~~~~~
-        ::pstore::gsl::czstring basic_logger::priority_string (priority p) {
+        gsl::czstring basic_logger::priority_string (priority p) {
             switch (p) {
             case priority::emergency:
                 return "emergency";
             case priority::alert:
                 return "alert";
             case priority::critical:
-                return "critial";
+                return "critical";
             case priority::error:
                 return "error";
             case priority::warning:
@@ -396,13 +436,13 @@ namespace pstore {
         // get_current_thread_name
         // ~~~~~~~~~~~~~~~~~~~~~~~
         std::string basic_logger::get_current_thread_name () {
-            std::string name = pstore::threads::get_name ();
+            std::string name = threads::get_name ();
             if (name.size () == 0) {
                 // If a thread name hasn't been explicitly set (or has been explictly set
                 // to an empty string), then construct something that allows us to
                 // identify this thread in the logs.
                 std::ostringstream str;
-                str << '(' << pstore::threads::get_id () << ')';
+                str << '(' << threads::get_id () << ')';
                 return str.str ();
             }
 

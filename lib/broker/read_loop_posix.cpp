@@ -101,10 +101,9 @@ namespace {
 // ~~~~~~~~~
 void read_loop (pstore::broker::fifo_path & fifo, std::shared_ptr<recorder> & record_file,
                 std::shared_ptr<command_processor> & cp) {
-
     try {
-        pstore::logging::log (pstore::logging::priority::notice, "listening to FIFO (", fifo.get (),
-                              ")");
+        pstore::logging::log (pstore::logging::priority::notice, "listening to FIFO ",
+                              pstore::logging::quoted{fifo.get ().c_str ()});
         auto const fd = fifo.open_server_pipe ();
 
         pstore::broker::message_ptr readbuf = pool.get_from_pool ();
@@ -129,7 +128,7 @@ void read_loop (pstore::broker::fifo_path & fifo, std::shared_ptr<recorder> & re
 
                     if (bytes_read != pstore::broker::message_size) {
                         pstore::logging::log (pstore::logging::priority::error,
-                                              "partial message received (length=", bytes_read, ")");
+                                              "Partial message received. Length ", bytes_read);
                     } else {
                         // Push the command buffer on to the queue for processing and pull an new
                         // read buffer from the pool.

@@ -64,11 +64,12 @@ namespace broker {
     void gc_watch_thread::start_vacuum (std::string const & db_path) {
         std::unique_lock<decltype (mut_)> lock (mut_);
         if (processes_.presentl (db_path)) {
-            pstore::logging::log (pstore::logging::priority::info, "GC process for \"", db_path,
-                                  "\" is already running. Ignored.");
+            pstore::logging::log (pstore::logging::priority::info,
+                                  "GC process is already running for ",
+                                  pstore::logging::quoted (db_path.c_str ()));
         } else {
-            pstore::logging::log (pstore::logging::priority::info, "starting GC process for \"",
-                                  db_path, "\"");
+            pstore::logging::log (pstore::logging::priority::info, "Starting GC process for ",
+                                  pstore::logging::quoted{db_path.c_str ()});
             auto const exe_path = vacuumd_path ();
             std::array<char const *, 4> argv = {
                 {exe_path.c_str (), "--daemon", db_path.c_str (), nullptr}};
