@@ -47,6 +47,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include "pstore/db_archive.hpp"
+#include "pstore/hamt_map.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/transaction.hpp"
 
 using namespace pstore;
@@ -63,8 +66,8 @@ int main () {
         pstore::address const addr = serialize::write (archive, value);
         std::uint64_t const size = db.size () - addr.absolute ();
 
-        auto index = db.get_write_index ();
-        index->insert_or_assign (t, key, record{addr, size});
+        auto index = pstore::index::get_write_index (db);
+        index->insert_or_assign (t, key, extent{addr, size});
     }
 
     t.commit (); // Finalize the transaction.

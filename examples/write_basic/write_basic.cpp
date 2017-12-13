@@ -41,6 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include "pstore/hamt_map.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/transaction.hpp"
 
 int main () {
@@ -61,8 +63,8 @@ int main () {
         std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
 
         // Tell the index about this new data.
-        auto index = db.get_write_index ();
-        index->insert_or_assign (t, key, pstore::record{addr, size});
+        auto index = pstore::index::get_write_index(db);
+        index->insert_or_assign (t, key, pstore::extent{addr, size});
     }
 
     t.commit (); // Finalize the transaction.
