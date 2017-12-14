@@ -119,9 +119,16 @@ elseif (FORCE_CLANG)
 endif()
 
 
+# Work out whether the pstore library is being built inside the
+# larger LLVM framework or if it's a standalone build.
+set (PSTORE_IS_INSIDE_LLVM No)
+if (LLVM_MAIN_SRC_DIR)
+    set (PSTORE_IS_INSIDE_LLVM Yes)
+endif ()
+
 # If we are not building as a part of LLVM, build pstore as a
 # standalone project, using LLVM as an external library:
-if (CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+if (NOT PSTORE_IS_INSIDE_LLVM)
     project (pstore)
     set_property (GLOBAL PROPERTY USE_FOLDERS ON)
 endif ()
@@ -176,24 +183,16 @@ if (NOT DEFINED PSTORE_VENDOR_ID)
 endif ()
 
 
-# Try to work out whether the pstore library is being built inside the
-# larger LLVM framework or if it's a standalone build.
-
-set (PSTORE_IS_INSIDE_LLVM No)
-if (LLVM_MAIN_SRC_DIR)
-    set (PSTORE_IS_INSIDE_LLVM Yes)
-endif ()
-
 
 include (TestBigEndian)
 TEST_BIG_ENDIAN (PSTORE_IS_BIG_ENDIAN)
 
 
 # The pstore header and footer structures include crc32 values as an aid to validation:
-# if the CRC value doesn't match then the structure is not valid. However, is the CRC
+# if the CRC value doesn't match then the structure is not valid. However, if the CRC
 # does match then this is not an absolute guarantee that the remaining fields can be
-# trusted. For this reason. it's possible to build with the CRC checks disabled to make
-# finding bugs in the validity checks quicker and easier.
+# trusted. For this reason, it's possible to build with the CRC checks disabled to make
+# it quicker and easiesr for a fuzzer to find bugs in the library.
 option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and footer records. Disable for fuzzing." Yes)
 
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
