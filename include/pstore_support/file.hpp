@@ -75,31 +75,29 @@ namespace pstore {
     /// and classes .
     namespace file {
 
-
         namespace details {
             // name_from_template
             // ~~~~~~~~~~~~~~~~~~
             /// \brief The name_from_template() function takes the given file name template and
-            /// returns a string where a portion of it to create a file name.
+            /// returns a string in which a portion of the template is overwritten to create a file
+            /// name.
             ///
             /// The template may be any file name with some number of `Xs' appended to it, for
             /// example /tmp/temp.XXXXXX. The trailing `Xs' are replaced with a unique alphanumeric
             /// combination. The number of unique file names mktemp() can return depends on the
-            /// number of `Xs'
-            /// provided.
+            /// number of `Xs' provided.
             ///
             /// \tparam RandomGenerator  A Callable object with the signature equivalent to
-            /// std::function<unsigned(unsigned). The function's result must be in the range 0
+            /// std::function<unsigned(unsigned)>. The function's result must be in the range 0
             /// to the value given by the single parameter.
             ///
             /// \param tmpl  A template string which forms the basis for the result string. Any
-            /// trailing X characters are replaced by characters derived from the result of the
-            /// `rng`
-            /// function.
-            /// \param rng  A random number generator function which
-            ///
-            /// \return A string derived from the `tmpl` argument but with trailing 'X's replaced by
-            /// random characters from.
+            /// trailing X characters are replaced by characters derived from the result of the \p
+            /// rng function.
+            /// \param rng  A random number generator function which should return a value in the
+            /// range [0,max).
+            /// \return A string derived from the \p tmpl argument but with trailing 'X's replaced
+            /// by random characters from an internal alphabet.
             ///
             /// \note This function is used on platforms that don't have a native implementation
             /// of the mkstemp() function.
@@ -114,7 +112,7 @@ namespace pstore {
                 path.reserve (tmpl.length ());
                 std::copy (tmpl.begin (), it.base (), std::back_inserter (path));
 
-                /// Replace the sequence of 'X's with random characters.
+                // Replace the sequence of 'X's with random characters.
                 auto num_x = std::distance (it.base (), tmpl.end ());
                 while (num_x--) {
                     static std::string const alphabet{"abcdefghijklmnopqrstuvwxyz0123456789_"};
@@ -139,7 +137,7 @@ namespace pstore {
             /// \tparam PointeeType  The type of the elements of the `buffer` array.
             /// \tparam Function  A callable whose signature whose be equivalent to
             /// std::function<std::size_t(PointeeType*,WidthType)>. It is called for each chunk into
-            /// which `size` is divided. The return value should be the number of bytes processed;
+            /// which \p size is divided. The return value should be the number of bytes processed;
             /// the first argument is the first value to process; the second element is the number
             /// of contiguous elements to be processed.
             ///
@@ -147,8 +145,8 @@ namespace pstore {
             /// callback.
             /// \param size  The total number of bytes to be processed.
             /// \param function  This function is called repeatedly to operate on each portion of
-            /// the with the buffer parameter
-            /// \return The sum of the values returned by `function`.
+            /// the with the buffer parameter.
+            /// \return The sum of the values returned by \p function.
             template <typename WidthType, typename PointeeType, typename Function>
             std::size_t split (PointeeType * buffer, std::size_t size, Function const & function) {
 
@@ -234,7 +232,6 @@ namespace pstore {
 
             virtual std::time_t latest_time () const = 0;
 
-        public:
             ///@{
             /// \brief Reads instances of a standard-layout type from the file.
 
@@ -399,7 +396,7 @@ namespace pstore {
         ///
         /// The behavior of the program is undefined if a range lock is destroyed while still owned.
         /// The range_lock class satisfies all requirements of Lockable and StandardLayoutType; it
-        /// is neither copyable nor movable.
+        /// is not copyable.
         ///
         /// \note range_lock is usually not accessed directly: std::unique_lock and std::lock_guard
         /// are used to manage locking in exception-safe manner. The class is a relatively thin
@@ -820,7 +817,15 @@ namespace pstore {
         /// Renames a file from one UTF-8 encoded path to another.
         void rename (std::string const & from, std::string const & to);
 
+        /// \brief Returns true if the file system contains an object at the location given by \p
+        /// path.
+        /// \param path  A location in the file system to be checked.
+        /// \returns true if the file system contains an object at the location given by \p path.
+        /// False otherwise.
         bool exists (std::string const & path);
+
+        /// \brief Deletes the file system object at the location given by \p path.
+        /// \param path The location in the file system of the object to be deleted.
         void unlink (std::string const & path);
 
     } // namespace file
