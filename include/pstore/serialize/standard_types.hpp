@@ -234,8 +234,9 @@ namespace pstore {
             template <typename Archive>
             static void read (Archive & archive, insert_callback inserter) {
                 Container result;
-                auto num_members = serialize::read<std::size_t> (archive);
-                while (num_members--) {
+                auto const num_members = serialize::read<std::size_t> (archive);
+                auto num_read = std::size_t{0};
+                for (; num_read < num_members; ++num_read) {
                     inserter (serialize::read<typename Container::value_type> (archive));
                 }
             }

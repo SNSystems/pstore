@@ -573,8 +573,8 @@ namespace pstore {
                     static_assert (std::is_standard_layout<Ty>::value,
                                    "range_reader can only read standard-layout types");
                     auto ptr = reinterpret_cast<std::uint8_t *> (&v);
-                    auto size = sizeof (Ty);
-                    while (size-- > 0) {
+                    auto last = ptr + sizeof (Ty);
+                    while (ptr != last) {
                         *(ptr++) = *(first_++);
                     }
                 }
@@ -585,8 +585,8 @@ namespace pstore {
                     static_assert (std::is_standard_layout<element_type>::value,
                                    "range_reader can only read standard-layout types");
                     auto out = reinterpret_cast<std::uint8_t *> (span.data ());
-                    auto size = span.size_bytes ();
-                    while (size-- > 0) {
+                    auto last = out + span.size_bytes ();
+                    while (out != last) {
                         *(out++) = *(first_++);
                     }
                 }
