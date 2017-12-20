@@ -208,8 +208,7 @@ namespace pstore {
                 return {map_.find (key)};
             }
 
-            template <typename Transaction>
-            address flush (Transaction & transaction) {
+            address flush (transaction_base & transaction) {
                 return map_.flush (transaction);
             }
 

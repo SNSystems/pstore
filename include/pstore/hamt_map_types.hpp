@@ -57,6 +57,8 @@
 #include "pstore_support/gsl.hpp"
 
 namespace pstore {
+    class transaction_base;
+
     namespace index {
         namespace details {
             using hash_type = std::uint64_t;
@@ -428,8 +430,7 @@ namespace pstore {
                 ///
                 /// \param transaction The transaction to which the linear node will be appended.
                 /// \result The address at which the node was written.
-                template <typename Transaction>
-                address flush (Transaction & transaction) const;
+                address flush (transaction_base & transaction) const;
 
                 /// Search the linear node and return the child slot if the key exists.
                 /// Otherwise, return the {nullptr, not_found} pair.
@@ -482,19 +483,6 @@ namespace pstore {
                 std::uint64_t size_;
                 address leaves_[1];
             };
-
-            // flush
-            // ~~~~~
-            template <typename Transaction>
-            address linear_node::flush (Transaction & transaction) const {
-                std::size_t const num_bytes = this->size_bytes ();
-
-                std::shared_ptr<void> ptr;
-                address result;
-                std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (linear_node));
-                std::memcpy (ptr.get (), this, num_bytes);
-                return result;
-            }
 
             // lookup
             // ~~~~~~
@@ -602,8 +590,7 @@ namespace pstore {
                                    not_null<parent_stack *> parents);
 
                 /// Write an internal node and its children into a store.
-                template <typename Transaction>
-                address flush (Transaction & transaction, unsigned shifts);
+                address flush (transaction_base & transaction, unsigned shifts);
 
 
                 index_pointer const & operator[] (std::size_t i) const {
@@ -657,8 +644,7 @@ namespace pstore {
 
                 /// Appends the internal node (which refers to a node in heap memory) to the
                 /// store. Returns a new (in-store) internal store address.
-                template <typename Transaction>
-                address store_node (Transaction & transaction) const;
+                address store_node (transaction_base & transaction) const;
 
                 using signature_type = std::array<std::uint8_t, 8>;
                 static signature_type const signature;
@@ -678,45 +664,6 @@ namespace pstore {
                 /// number of elements that are actually in use.
                 children_container children_;
             };
-
-
-            // store_node
-            // ~~~~~~~~~~
-            template <typename Transaction>
-            address internal_node::store_node (Transaction & transaction) const {
-                std::size_t const num_bytes = this->size_bytes (this->size ());
-
-                std::shared_ptr<void> ptr;
-                address result;
-                std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (internal_node));
-                std::memcpy (ptr.get (), this, num_bytes);
-                return result;
-            }
-
-            // flush
-            // ~~~~~
-            template <typename Transaction>
-            address internal_node::flush (Transaction & transaction, unsigned shifts) {
-                auto const child_shifts = shifts + hash_index_bits;
-                for (auto & p : *this) {
-                    // If it is a heap node, flush its children first (depth-first search).
-                    if (p.is_heap ()) {
-                        if (child_shifts < max_hash_bits) { // internal node
-                            auto internal = p.untag_node<internal_node *> ();
-                            p.addr = internal->flush (transaction, child_shifts);
-                            delete internal;
-                        } else { // linear node
-                            auto linear = p.untag_node<linear_node *> ();
-                            p.addr = linear->flush (transaction) | internal_node_bit;
-                            delete linear;
-                        }
-                    }
-                }
-                // Flush itself.
-                auto addr = this->store_node (transaction);
-                addr |= internal_node_bit;
-                return addr;
-            }
 
         } // namespace details
     }     // namespace index

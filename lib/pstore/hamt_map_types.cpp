@@ -43,6 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file hamt_map_types.cpp
 #include "pstore/hamt_map_types.hpp"
+#include "pstore/transaction.hpp"
 
 namespace pstore {
     namespace index {
@@ -165,6 +166,17 @@ namespace pstore {
                 return {ln, ln.get ()};
             }
 
+            // flush
+            // ~~~~~
+            address linear_node::flush (transaction_base & transaction) const {
+                std::size_t const num_bytes = this->size_bytes ();
+
+                std::shared_ptr<void> ptr;
+                address result;
+                std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (linear_node));
+                std::memcpy (ptr.get (), this, num_bytes);
+                return result;
+            }
 
             //*  _     _                     _                _      *
             //* (_)_ _| |_ ___ _ _ _ _  __ _| |  _ _  ___  __| |___  *
@@ -376,6 +388,42 @@ namespace pstore {
                 this->bitmap_ = this->bitmap_ | bit_pos;
                 assert (bit_count::pop_count (this->bitmap_) == old_size + 1);
                 parents->push ({this, index});
+            }
+
+            // store_node
+            // ~~~~~~~~~~
+            address internal_node::store_node (transaction_base & transaction) const {
+                std::size_t const num_bytes = this->size_bytes (this->size ());
+
+                std::shared_ptr<void> ptr;
+                address result;
+                std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (internal_node));
+                std::memcpy (ptr.get (), this, num_bytes);
+                return result;
+            }
+
+            // flush
+            // ~~~~~
+            address internal_node::flush (transaction_base & transaction, unsigned shifts) {
+                auto const child_shifts = shifts + hash_index_bits;
+                for (auto & p : *this) {
+                    // If it is a heap node, flush its children first (depth-first search).
+                    if (p.is_heap ()) {
+                        if (child_shifts < max_hash_bits) { // internal node
+                            auto internal = p.untag_node<internal_node *> ();
+                            p.addr = internal->flush (transaction, child_shifts);
+                            delete internal;
+                        } else { // linear node
+                            auto linear = p.untag_node<linear_node *> ();
+                            p.addr = linear->flush (transaction) | internal_node_bit;
+                            delete linear;
+                        }
+                    }
+                }
+                // Flush itself.
+                auto addr = this->store_node (transaction);
+                addr |= internal_node_bit;
+                return addr;
             }
 
         } // namespace details

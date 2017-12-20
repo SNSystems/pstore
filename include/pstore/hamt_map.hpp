@@ -347,8 +347,7 @@ namespace pstore {
             const_iterator find (OtherKeyType const & key) const;
 
             /// Write an hamt_map into a store when transaction::commit is called.
-            template <typename Transaction>
-            address flush (Transaction & transaction);
+            address flush (transaction_base & transaction);
 
             /// \name Accessors
             /// Provide access to index internals.
@@ -920,10 +919,8 @@ namespace pstore {
         // hamt_map::flush
         // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        template <typename Transaction>
-        address hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (Transaction & transaction) {
-            // If this is a leaf node, there's nothing to do. Just return the leaf node store
-            // address.
+        address hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction) {
+            // If this is a leaf node, there's nothing to do. Just return its store address.
             if (root_.is_address ()) {
                 return root_.addr;
             }
