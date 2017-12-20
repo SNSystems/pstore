@@ -188,7 +188,7 @@ namespace pstore {
         ///@}
 
         ///@{
-        /// Returns a reference to the beingng of the pos'th UTF-8 code-point in a sequence.
+        /// Returns a reference to the beginning of the pos'th UTF-8 code-point in a sequence.
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the buffer at str
@@ -204,8 +204,10 @@ namespace pstore {
         ///           'last' if the end of the range was encountered.
         template <typename InputIterator>
         InputIterator index (InputIterator first, InputIterator last, std::size_t pos) {
-            return std::find_if (first, last,
-                                 [&pos](char c) { return is_utf_char_start (c) && pos-- == 0; });
+            auto start_count = std::size_t{0};
+            return std::find_if (first, last, [&start_count, pos](char c) {
+                return is_utf_char_start (c) ? (start_count++ == pos) : false;
+            });
         }
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
