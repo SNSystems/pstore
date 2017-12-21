@@ -243,8 +243,8 @@ namespace pstore {
         // ~~~~~~~~~~~~
         void in_memory::write_buffer (gsl::not_null<void const *> ptr, std::size_t nbytes) {
             this->check_writable ();
-            // The second half of this check is to catch integer overflows.
-            if (pos_ + nbytes > length_ || pos_ + nbytes < pos_) {
+            assert (length_ > pos_);
+            if (nbytes > length_ - pos_) {
                 raise (std::errc::invalid_argument);
             }
 
