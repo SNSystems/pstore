@@ -113,18 +113,20 @@ void fragment::deleter::operator() (void * p) {
 // ~~~~
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
                                                 pstore::extent const & location) {
-    auto f = std::static_pointer_cast<fragment const> (db.getro (location.addr, location.size));
-    if (f->size_bytes () != location.size) {
-        raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+    if (location.size >= sizeof (fragment)) {
+        auto f = std::static_pointer_cast<fragment const> (db.getro (location));
+        if (f->size_bytes () == location.size) {
+            return f;
+        }
     }
-    return f;
+    raise_error_code (std::make_error_code (error_code::bad_fragment_record));
 }
 
 // operator[]
 // ~~~~~~~~~~
 section const & fragment::operator[] (section_type key) const {
-    auto offset = arr_[static_cast<std::size_t> (key)];
-    auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+    auto const offset = arr_[static_cast<std::size_t> (key)];
+    auto const ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
     assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
     return *reinterpret_cast<section const *> (ptr);
 }
@@ -132,8 +134,10 @@ section const & fragment::operator[] (section_type key) const {
 // offset_to_section
 // ~~~~~~~~~~~~~~~~~
 section const & fragment::offset_to_section (std::uint64_t offset) const {
-    auto ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
-    assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) == 0);
+    auto const ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+    if (reinterpret_cast<std::uintptr_t> (ptr) % alignof (section) != 0) {
+        raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+    }
     return *reinterpret_cast<section const *> (ptr);
 }
 
