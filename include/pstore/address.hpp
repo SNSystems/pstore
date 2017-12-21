@@ -159,7 +159,7 @@ namespace pstore {
         }
 
         address operator+= (std::uint64_t distance) {
-            assert (whole <= max_address - distance);
+            assert (whole <= std::numeric_limits <std::uint64_t>::max () - distance);
             whole += distance;
             return *this;
         }
