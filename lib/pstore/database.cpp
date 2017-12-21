@@ -441,12 +441,8 @@ namespace pstore {
         }
 
         std::uint64_t const start = addr.absolute ();
-        std::uint64_t const end = start + size;
         std::uint64_t const logical_size = size_.logical_size ();
-
-        // The start > end clause is used to catch integer overflow errors from evaluating
-        // start+size.
-        if (start > end || end > logical_size) {
+        if (start > logical_size || size > logical_size - start) {
             raise (error_code::bad_address);
         }
 
