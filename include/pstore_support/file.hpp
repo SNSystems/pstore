@@ -586,11 +586,11 @@ namespace pstore {
                                std::size_t nbytes) override;
 
         private:
-            /// The base address of the buffer used by the in-memory file.
+            /// The buffer used by the in-memory file.
             std::shared_ptr<std::uint8_t> buffer_;
 
             /// The number of bytes in the in-memory buffer.
-            std::uint64_t length_;
+            std::uint64_t const length_;
 
             /// The number of bytes in the core_filer::buffer array that have been written and
             /// provides the simulated file size.. Always less or equal to than length_.
