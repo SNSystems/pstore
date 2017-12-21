@@ -41,83 +41,10 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-##################################
-#  ____  ____  _
-# |  _ \/ ___|| |_ ___  _ __ ___
-# | |_) \___ \| __/ _ \| '__/ _ \
-# |  __/ ___) | || (_) | | |  __/
-# |_|   |____/ \__\___/|_|  \___|
-#
-# Copyright (c) 2015-2016 by Sony Interactive Entertainment, Inc.
 
 cmake_minimum_required (VERSION 3.1)
 
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
-
-# Set to YES (or NO) to enable (or disable) building with clang on Linux.
-# TODO: allow this to be controlled from the outside world.
-if (UNIX AND NOT APPLE)
-  set (FORCE_CLANG NO)
-endif ()
-
-if (FORCE_AFL)
-    message (STATUS "American Fuzzy Lop compilation enabled")
-    if (FORCE_CLANG)
-        set (AFL_C_NAME   afl-clang)
-        set (AFL_CXX_NAME afl-clang++)
-        set (CMAKE_CXX_COMPILER_ID "Clang")
-    else ()
-        set (AFL_C_NAME   afl-gcc)
-        set (AFL_CXX_NAME afl-g++)
-    endif ()
-
-    message (STATUS "AFL_PATH=$ENV{AFL_PATH}")
-    find_program (AFL_C_EXECUTABLE
-                 NAMES ${AFL_C_NAME}
-                 DOC "${AFL_C_NAME} location"
-                 HINTS $ENV{AFL_PATH})
-    find_program (AFL_CXX_EXECUTABLE
-                 NAMES ${AFL_CXX_NAME}
-                 DOC "${AFL_CXX_NAME} location"
-                 HINTS $ENV{AFL_PATH})
-    if (NOT AFL_C_EXECUTABLE)
-       message (SEND_ERROR "** ${AFL_C_NAME} was not found")
-    endif ()
-    if (NOT AFL_CXX_EXECUTABLE)
-        message (SEND_ERROR "** ${AFL_CXX_NAME} was not found")
-    endif ()
-
-    set (CMAKE_C_COMPILER      "${AFL_C_EXECUTABLE}")
-    set (CMAKE_CXX_COMPILER    "${AFL_CXX_EXECUTABLE}")
-    message (STATUS "American Fuzzy Lop: C Compiler is: ${CMAKE_C_COMPILER}")
-    message (STATUS "American Fuzzy Lop: C++ Compiler is: ${CMAKE_CXX_COMPILER}")
-
-elseif (FORCE_CLANG)
-
-    message (STATUS "FORCE_CLANG is enabled")
-
-    # If clang has been requested, then I need to find it and set the
-    # C_COMPILER, CXX_COMPILER, and CXX_COMPILER_ID variables accordingly.
-    # All of this needs to be done _before_ the project declaration.
-
-    find_program (CLANG_EXECUTABLE   NAMES clang   DOC "clang location")
-    find_program (CLANGXX_EXECUTABLE NAMES clang++ DOC "clang++ location")
-
-    if (NOT (CLANG_EXECUTABLE AND CLANGXX_EXECUTABLE))
-        message (SEND_ERROR "** clang was not found.")
-    endif ()
-    if (NOT CLANGXX_EXECUTABLE)
-        message (SEND_ERROR "** clang++ was not found.")
-    endif ()
-
-    if (CLANG_EXECUTABLE AND CLANGXX_EXECUTABLE)
-        message (STATUS "Found clang at: ${CLANG_EXECUTABLE}, clang++ at ${CLANGXX_EXECUTABLE}")
-        set (CMAKE_C_COMPILER      "${CLANG_EXECUTABLE}")
-        set (CMAKE_CXX_COMPILER    "${CLANGXX_EXECUTABLE}")
-        set (CMAKE_CXX_COMPILER_ID "Clang")
-    endif ()
-endif()
-
 
 # Work out whether the pstore library is being built inside the
 # larger LLVM framework or if it's a standalone build.
@@ -135,32 +62,11 @@ endif ()
 set (PSTORE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 
-if (FORCE_CLANG)
-    set (CLANG_SANITIZER_FLAGS  "-fsanitize=undefined,address")
-    #set (CLANG_SANITIZER_FLAGS  "-fsanitize=memory -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins  -I/media/psf/Home/realwork/libcxx_msan/include -I/media/psf/Home/realwork/libcxx_msan/include/c++/v1 -Wno-reserved-id-macro -Wno-deprecated")
-    set (CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CLANG_SANITIZER_FLAGS}")
-    #set (CMAKE_EXE_LINKER_FLAGS_DEBUG  "${CLANG_SANITIZER_FLAGS} -pie -stdlib=libc++ -L/media/psf/Home/realwork/libcxx_msan/lib -lc++abi -Wl,-rpath,/media/psf/Home/realwork/libcxx_msan/lib")
-
-
-    set (CMAKE_C_FLAGS                "-Wall")
-    set (CMAKE_C_FLAGS_DEBUG          "-O0 -g ${CLANG_SANITIZER_FLAGS}")
-    set (CMAKE_C_FLAGS_MINSIZEREL     "-Os -DNDEBUG")
-    set (CMAKE_C_FLAGS_RELEASE        "-O4 -DNDEBUG")
-    set (CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
-
-    set (CMAKE_CXX_FLAGS                "-Wall")
-    set (CMAKE_CXX_FLAGS_DEBUG          "${CMAKE_C_FLAGS_DEBUG}")
-    set (CMAKE_CXX_FLAGS_MINSIZEREL     "${CMAKE_C_FLAGS_MINSIZEREL}")
-    set (CMAKE_CXX_FLAGS_RELEASE        "${CMAKE_C_FLAGS_RELEASE}")
-    set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_C_FLAGS_RELWITHDEBINFO}")
-endif ()
-
 if (MSVC)
     # Microsoft's linker/archiver (not sure which) likes to warn when it sees
     # a library containing an object file with no code or data. I do it on
     # purpose (at the moment) so that the project contains the POSIX versions
     # of code. Disable the warning.
-
     set (CMAKE_STATIC_LINKER_FLAGS  "${CMAKE_STATIC_LINKER_FLAGS} /IGNORE:4221")
 endif ()
 
@@ -171,7 +77,7 @@ set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 include_directories(BEFORE
   ${CMAKE_CURRENT_BINARY_DIR}/include
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  )
+)
 
 
 # The "PSTORE_VENDOR_ID" is used in cases where pstore needs a system wide vendor-unique name
@@ -197,18 +103,6 @@ option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and foote
 
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
-
-
-#
-# If we're using the a fuzzing library (e.g. American Fuzzy Lop)
-# disable the library's CRC validation checks and create the
-# smallest files that we can to reduce the wasted work that the
-# tool will need to perform.
-#
-if (FORCE_AFL)
-    set (PSTORE_CRC_CHECKS_ENABLED NO)
-    set (PSTORE_POSIX_SMALL_FILES  YES)
-endif ()
 
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
