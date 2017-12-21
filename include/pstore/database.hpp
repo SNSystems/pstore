@@ -424,36 +424,34 @@ namespace pstore {
                        "File type must be derived from file::file_base");
         assert (file.is_open ());
 
-        header h;
+        std::aligned_storage<sizeof (header), alignof (header)>::type header_storage;
+        auto h = reinterpret_cast<header *> (&header_storage);
         file.seek (0);
-        file.read (&h);
+        file.read (h);
 
-        if (h.a.signature1 != header::file_signature1 ||
-            h.a.signature2 != header::file_signature2) {
+        auto dtor = [](header * p) { p->~header (); };
+        std::unique_ptr<header, decltype (dtor)> deleter (h, dtor);
 
+        if (h->a.signature1 != header::file_signature1 ||
+            h->a.signature2 != header::file_signature2) {
             raise (error_code::header_corrupt, file.path ());
         }
-
-        if (h.a.header_size != sizeof (class header) || h.a.version[0] != header::major_version ||
-            h.a.version[1] != header::minor_version) {
-
+        if (h->a.header_size != sizeof (class header) || h->a.version[0] != header::major_version ||
+            h->a.version[1] != header::minor_version) {
             raise (error_code::header_version_mismatch, file.path ());
         }
-
-        if (!h.is_valid ()) {
+        if (!h->is_valid ()) {
             raise (pstore::error_code::header_corrupt, file.path ());
         }
 
-        address const footer_pos = h.footer_pos.load ();
-        std::uint64_t const footer_offset = footer_pos.absolute ();
+        address const result = h->footer_pos.load ();
+        std::uint64_t const footer_offset = result.absolute ();
         std::uint64_t const file_size = file.size ();
         if (footer_offset < sizeof (header) || file_size < sizeof (header) + sizeof (trailer) ||
             footer_offset > file_size - sizeof (trailer)) {
-
             raise (error_code::header_corrupt, file.path ());
         }
-
-        return footer_pos;
+        return result;
     }
 
     // getrw
