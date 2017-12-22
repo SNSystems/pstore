@@ -59,14 +59,21 @@ set (PSTORE_BROKER_INTF_SRC
     "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/unique_handle.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/writer.hpp"
     fifo_path_common.cpp
-    fifo_path_posix.cpp
-    fifo_path_win32.cpp
     message_type.cpp
     send_message.cpp
     writer_common.cpp
-    writer_posix.cpp
-    writer_win32.cpp
 )
+if (WIN32)
+    list (APPEND PSTORE_BROKER_INTF_SRC
+        fifo_path_win32.cpp
+        writer_win32.cpp
+    )
+else ()
+    list (APPEND PSTORE_BROKER_INTF_SRC
+        fifo_path_posix.cpp
+        writer_posix.cpp
+    )
+endif ()
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)

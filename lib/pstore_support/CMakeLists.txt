@@ -138,8 +138,6 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/pstore_support/ctype.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/error.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/file.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/file_posix.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/file_win32.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/gsl.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/logging.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_support/path.hpp"
@@ -155,20 +153,29 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/pstore_support/utf.hpp"
     error.cpp
     file.cpp
-    file_posix.cpp
-    file_win32.cpp
     logging.cpp
     path.cpp
-    process_file_name_posix.cpp
-    process_file_name_win32.cpp
-    signal_cv_posix.cpp
-    signal_cv_win32.cpp
     signal_helpers.cpp
     small_vector.cpp
     thread.cpp
     utf.cpp
-    utf_win32.cpp
 )
+if (WIN32)
+    list (APPEND PSTORE_SUPPORT_LIB_SRC
+        "${PSTORE_INCLUDE_DIR}/pstore_support/file_win32.hpp"
+        file_win32.cpp
+        process_file_name_win32.cpp
+        signal_cv_win32.cpp
+        utf_win32.cpp
+    )
+else ()
+    list (APPEND PSTORE_SUPPORT_LIB_SRC
+        "${PSTORE_INCLUDE_DIR}/pstore_support/file_posix.hpp"
+        file_posix.cpp
+        process_file_name_posix.cpp
+        signal_cv_posix.cpp
+    )
+endif ()
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)

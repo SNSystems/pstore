@@ -130,10 +130,13 @@ set (PSTORE_OS_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/shared_memory.hpp"
     errno_exception.cpp
     memory_mapper.cpp
-    memory_mapper_posix.cpp
-    memory_mapper_win32.cpp
     shared_memory.cpp
 )
+if (WIN32)
+    list (APPEND PSTORE_OS_SRC memory_mapper_win32.cpp)
+else ()
+    list (APPEND PSTORE_OS_SRC memory_mapper_posix.cpp)
+endif ()
 list (APPEND PSTORE_SRC ${PSTORE_OS_SRC})
 source_group (os FILES ${PSTORE_OS_SRC})
 
@@ -162,16 +165,12 @@ source_group (serialize FILES ${PSTORE_SERIALIZE_SRC})
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)
-    #set (LLVM_REQUIRES_EH Yes)
-    #set (LLVM_REQUIRES_RTTI Yes)
-
     add_pstore_library (pstore STATIC
         ${PSTORE_SRC}
   
         ADDITIONAL_HEADER_DIRS
         "${PSTORE_PUBLIC_INCLUDE_DIR}"
     )
-    #target_include_directories (pstore PUBLIC "${PSTORE_ROOT_DIR}/include")
     target_include_directories (pstore PUBLIC
         $<BUILD_INTERFACE:${PSTORE_PUBLIC_INCLUDE_DIR}/..>
         $<INSTALL_INTERFACE:include>
@@ -180,7 +179,6 @@ if (PSTORE_IS_INSIDE_LLVM)
 else ()
     add_pstore_library (pstore ${PSTORE_SRC})
     target_include_directories (pstore PUBLIC "${PSTORE_PUBLIC_INCLUDE_DIR}/..")
-
 endif (PSTORE_IS_INSIDE_LLVM)
 
 # Our use of shared memory needs an extra library on a Linux system.
