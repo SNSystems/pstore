@@ -70,26 +70,19 @@ set (PSTORE_BROKER_LIB_SRC
 
     command.cpp
     gc_common.cpp
+    gc_posix.cpp
+    gc_win32.cpp
     globals.cpp
     message_pool.cpp
     parser.cpp
     quit.cpp
+    read_loop_posix.cpp
+    read_loop_win32.cpp
     recorder.cpp
     scavenger.cpp
+    spawn_posix.cpp
+    spawn_win32.cpp
 )
-if (WIN32)
-    list (APPEND PSTORE_BROKER_LIB_SRC
-        gc_win32.cpp
-        read_loop_win32.cpp
-        spawn_win32.cpp
-    )
-else ()
-    list (APPEND PSTORE_BROKER_LIB_SRC
-        gc_posix.cpp
-        read_loop_posix.cpp
-        spawn_posix.cpp
-    )
-endif ()
 
 include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)

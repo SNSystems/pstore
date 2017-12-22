@@ -62,6 +62,14 @@ endif ()
 set (PSTORE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 
+if (MSVC)
+    # Microsoft's linker/archiver (not sure which) likes to warn when it sees
+    # a library containing an object file with no code or data. I do it on
+    # purpose (at the moment) so that the project contains the POSIX versions
+    # of code. Disable the warning.
+    set (CMAKE_STATIC_LINKER_FLAGS  "${CMAKE_STATIC_LINKER_FLAGS} /IGNORE:4221")
+endif ()
+
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
