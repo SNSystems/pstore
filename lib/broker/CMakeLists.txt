@@ -72,7 +72,6 @@ set (PSTORE_BROKER_LIB_SRC
     gc_common.cpp
     globals.cpp
     message_pool.cpp
-    message_queue.cpp
     parser.cpp
     quit.cpp
     recorder.cpp

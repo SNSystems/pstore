@@ -115,8 +115,6 @@ set (PSTORE_SUPPORT_SRC
     base32.hpp
     crc32.cpp
     fnv.cpp
-    sstring_view.cpp
-    sstring_view_archive.cpp
     time.cpp
     uint128.cpp
     uuid.cpp

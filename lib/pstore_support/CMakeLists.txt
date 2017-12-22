@@ -156,7 +156,6 @@ set (PSTORE_SUPPORT_LIB_SRC
     logging.cpp
     path.cpp
     signal_helpers.cpp
-    small_vector.cpp
     thread.cpp
     utf.cpp
 )
