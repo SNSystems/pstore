@@ -367,20 +367,6 @@ namespace pstore {
         }
 
 
-        std::ostream & operator<< (std::ostream & os, priority p) {
-#ifdef PSTORE_CPP_RTTI
-            if (auto * const buf = dynamic_cast<logger *> (os.rdbuf ())) {
-                buf->set_priority (p);
-            }
-#else
-            if (auto * const buf = reinterpret_cast<logger *> (os.rdbuf ())) {
-                buf->set_priority (p);
-            }
-#endif
-            return os;
-        }
-
-
         //*                              *
         //* |_  _. _o _ | _  _  _  _ ._  *
         //* |_)(_|_>|(_ |(_)(_|(_|(/_|   *
