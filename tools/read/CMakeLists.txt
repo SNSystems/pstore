@@ -54,13 +54,10 @@ add_pstore_executable (pstore-read
     main.cpp
     switches.hpp
     switches.cpp
-    llvm_switches.cpp
 )
 target_include_directories (pstore-read PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-read LLVMSupport)
-else ()
-    target_link_libraries (pstore-read optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-read pstore pstore-cmd-util)
 

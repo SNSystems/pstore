@@ -43,127 +43,73 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if !PSTORE_IS_INSIDE_LLVM
-
-#include <cctype>
-#include <iostream>
-
-// 3rd party
-#include "optionparser.h"
-// pstore
-#include "pstore_cmd_util/str_to_revision.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/utf.hpp"
-
-#include "switches.hpp"
-
-namespace {
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-    auto & out_stream = std::wcout;
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/Error.h"
+#include "llvm/Support/raw_ostream.h"
 #else
-    auto & error_stream = std::cerr;
-    auto & out_stream = std::cout;
+#include "pstore_cmd_util/cl/command_line.hpp"
 #endif
 
-    enum option_index {
-        unknown_opt,
-        help_opt,
-        revision_opt,
-        string_opt,
+#include "pstore_cmd_util/str_to_revision.hpp"
+#include "pstore_support/error.hpp"
+#include "pstore_support/utf.hpp"
+
+namespace {
+
+#if PSTORE_IS_INSIDE_LLVM
+    using namespace llvm;
+#else
+    using namespace pstore::cmd_util;
+    void report_fatal_error (char const * message, bool _) {
+        std::cerr << message;
+    }
+#endif
+
+    // FIXME: Need to remove RevisionOpt since the same code is in pstore-dump!
+    // based on DiagnosticInfo.cpp/PassRemarksOpt.
+    struct RevisionOpt {
+        unsigned r = pstore::head_revision;
+
+        RevisionOpt & operator= (std::string const & Val) {
+            if (!Val.empty ()) {
+                auto rp = pstore::str_to_revision (Val);
+                r = rp.first;
+                if (!rp.second) {
+                    report_fatal_error ("error: revision must be a revision number or 'HEAD'\n",
+                                        false);
+                }
+            }
+            return *this;
+        }
     };
 
-    option::ArgStatus revision (option::Option const & option, bool msg) {
-        auto r = pstore::str_to_revision (pstore::utf::from_native_string (option.arg));
-        if (r.second) {
-            return option::ARG_OK;
-        }
-        if (msg) {
-            error_stream << "Option '" << option
-                         << "' requires an argument which may be a revision number or 'HEAD'\n";
-        }
-        return option::ARG_ILLEGAL;
-    }
+    cl::opt<RevisionOpt, false, cl::parser<std::string>>
+        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
+    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
+    cl::opt<std::string> DbPath (cl::Positional,
+                                 cl::desc ("Path of the pstore repository to be read."),
+                                 cl::Required);
+    cl::opt<std::string> Key (cl::Positional,
+                              cl::desc ("Reads the value associated with the key in the index."),
+                              cl::Required);
+    cl::opt<bool>
+        StringMode ("strings", cl::init (false),
+                    cl::desc ("Reads from the 'strings' index rather than the 'names' index."));
+    cl::alias StringMode2 ("s", cl::desc ("Alias for --strings"), cl::aliasopt (StringMode));
 
-#define USAGE "Usage: pstore-read [options] data-file key"
+} // end anonymous namespace
 
-    option::Descriptor const usage[] = {
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT (USAGE "\n\nOptions:")},
-        {help_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("help"), option::Arg::None,
-         NATIVE_TEXT ("  --help \tPrint usage and exit.")},
+std::pair<switches, int> get_switches (int argc, char * argv[]) {
+    cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
 
-        {revision_opt, 0, NATIVE_TEXT ("r"), NATIVE_TEXT ("revision"), revision,
-         NATIVE_TEXT ("  --revision, -r  \tThe pstore revision from which to read (or 'HEAD').")},
-        {string_opt, 0, NATIVE_TEXT ("s"), NATIVE_TEXT ("strings"), option::Arg::None,
-         NATIVE_TEXT (
-             "  --strings, -s  \tReads from the 'strings' index rather than the 'names' index.")},
+    switches result;
+    result.revision = static_cast<RevisionOpt> (Revision).r;
+    result.db_path = pstore::utf::from_native_string (DbPath);
+    result.key = pstore::utf::from_native_string (Key);
+    result.string_mode = StringMode;
 
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("\nExamples:\n"
-                      "  read foo.db key1 \t"
-                      "Reads the value associated with 'key1' at the HEAD revision of pstore "
-                      "foo.db and writes it to stdout\n"
-                      "  read -r 1 foo.db key1 \t"
-                      "Reads the value associated with 'key1' at revision 1 of pstore foo.db and "
-                      "writes it to stdout\n"
-                      "  read --string foo.db str1 \t"
-                      "Reads the value associated with 'str1' in the strings index at the HEAD "
-                      "revision")},
-
-        {0, 0, 0, 0, 0, 0},
-    };
-} // namespace
-
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
-    switches sw;
-
-    // Skip program name argv[0] if present
-    argc -= (argc > 0);
-    argv += (argc > 0);
-
-    option::Stats stats (usage, argc, argv);
-    std::vector<option::Option> options (stats.options_max);
-    std::vector<option::Option> buffer (stats.buffer_max);
-    option::Parser parse (usage, argc, argv, options.data (), buffer.data ());
-    if (parse.error ()) {
-        return {sw, EXIT_FAILURE};
-    }
-    if (options[help_opt]) {
-        option::printUsage (out_stream, usage);
-        return {sw, EXIT_FAILURE};
-    }
-
-    if (option::Option const * unknown = options[unknown_opt]) {
-        for (; unknown != nullptr; unknown = unknown->next ()) {
-            out_stream << NATIVE_TEXT ("Unknown option: ") << unknown->name << NATIVE_TEXT ("\n");
-        }
-        return {sw, EXIT_FAILURE};
-    }
-
-    if (parse.nonOptionsCount () != 2) {
-        error_stream << NATIVE_TEXT (USAGE) << std::endl;
-        return {sw, EXIT_FAILURE};
-    }
-
-    sw.db_path = pstore::utf::from_native_string (parse.nonOption (0));
-    sw.key = pstore::utf::from_native_string (parse.nonOption (1));
-
-    sw.revision = pstore::head_revision;
-    if (auto const & option = options[revision_opt]) {
-        unsigned rev;
-        bool is_valid;
-        std::tie (rev, is_valid) =
-            pstore::str_to_revision (pstore::utf::from_native_string (option.arg));
-        assert (is_valid);
-        sw.revision = rev;
-    }
-
-    sw.string_mode = (static_cast<option::Option const *> (options[string_opt]) != nullptr);
-
-    return {sw, EXIT_SUCCESS};
+    return {result, EXIT_SUCCESS};
 }
-#endif // PSTORE_IS_INSIDE_LLVM
 // eof: tools/read/switches.cpp
