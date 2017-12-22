@@ -47,11 +47,20 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
+            details::values::values (std::initializer_list<option_enum_value> options)
+                            : values_ (options) {}
+
+            name::name (std::string const & name)
+                    : name_ (name) {}
+
             desc::desc (std::string const & str)
                     : desc_ (str) {}
 
             aliasopt::aliasopt (option & o)
                     : original_ (o) {}
+            void aliasopt::apply (alias & o) const {
+                o.set_original (&original_);
+            }
 
             details::positional const Positional;
             details::required const Required;

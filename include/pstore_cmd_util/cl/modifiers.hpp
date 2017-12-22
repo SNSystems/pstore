@@ -76,8 +76,7 @@ namespace pstore {
             namespace details {
                 class values {
                 public:
-                    values (std::initializer_list<option_enum_value> options)
-                            : values_ (options) {}
+                    values (std::initializer_list<option_enum_value> options);
 
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -102,8 +101,8 @@ namespace pstore {
 
             class name {
             public:
-                name (std::string const & name)
-                        : name_ (name) {}
+                name (std::string const & name);
+
                 template <typename Opt>
                 void apply (Opt & o) const {
                     o.set_name (name_);
@@ -145,13 +144,7 @@ namespace pstore {
             class aliasopt {
             public:
                 explicit aliasopt (option & o);
-
-                template <typename Opt>
-                void apply (Opt & o) const {
-                    assert (dynamic_cast<alias *> (&o) != nullptr);
-                    static_cast<alias *> (&o)->set_original (&original_);
-                }
-
+                void apply (alias & o) const;
             private:
                 option & original_;
             };
@@ -171,11 +164,9 @@ namespace pstore {
                     void apply (Opt & o) const {
                         o.set_initial_value (init_);
                     }
-
                 private:
                     T const & init_;
                 };
-
             } // namespace details
 
             template <typename T>
