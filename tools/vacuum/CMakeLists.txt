@@ -55,7 +55,6 @@ configure_file (
 add_pstore_executable (pstore-vacuumd
     "${CMAKE_CURRENT_BINARY_DIR}/vacuum_config.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/vacuum_config.hpp.in"
-    llvm_switches.cpp
     main.cpp
     switches.cpp
     switches.hpp
@@ -65,9 +64,8 @@ target_link_libraries (pstore-vacuumd pstore-vacuum-lib)
 target_include_directories (pstore-vacuumd PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-vacuumd LLVMSupport)
-else ()
-    target_link_libraries (pstore-vacuumd optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
+target_link_libraries (pstore-vacuumd pstore-cmd-util)
 
 add_custom_command (
     TARGET pstore-vacuumd

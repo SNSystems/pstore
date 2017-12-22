@@ -43,84 +43,35 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if !PSTORE_IS_INSIDE_LLVM
-
-#include <cstdlib>
-#include <iostream>
-#include <vector>
-// 3rd party
-#include "optionparser.h"
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Error.h"
+#else
+#include "pstore_cmd_util/cl/command_line.hpp"
+#endif
 
 #include "pstore_support/utf.hpp"
 
-namespace {
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & out_stream = std::wcout;
+#if PSTORE_IS_INSIDE_LLVM
+using namespace llvm;
 #else
-    auto & out_stream = std::cout;
+using namespace pstore::cmd_util;
 #endif
 
+namespace {
 
-    enum option_index {
-        unknown_opt,
-        help_opt,
-        // daemon_opt,
-        // verbose_opt,
-    };
+    cl::opt<std::string> Path (cl::Positional,
+                               cl::desc ("Path of the pstore repository to be vacuumed."));
 
-    option::Descriptor const usage[] = {
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("Usage: vacuumd [options] data-file \n\nOptions:")},
-        {help_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("help"), option::Arg::None,
-         NATIVE_TEXT ("  --help \tPrint usage and exit.")},
-
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("\nExamples:\n"
-                      "  vacuumd foo.db\n"
-                      "Remove old revisions from the given data store.\n")},
-
-        {0, 0, 0, 0, 0, 0},
-    };
 } // end anonymous namespace
 
-std::pair<vacuum::user_options, int> get_switches (int argc, TCHAR * argv[]) {
-    int exit_code = EXIT_SUCCESS;
+std::pair<vacuum::user_options, int> get_switches (int argc, char * argv[]) {
+    cl::ParseCommandLineOptions (argc, argv, "pstore vacuum utility\n");
+
     vacuum::user_options opt;
+    opt.src_path = pstore::utf::from_native_string (Path);
 
-    // Skip program name argv[0] if present
-    argc -= (argc > 0);
-    argv += (argc > 0);
-
-    option::Stats stats (usage, argc, argv);
-    std::vector<option::Option> options (stats.options_max);
-    std::vector<option::Option> buffer (stats.buffer_max);
-    option::Parser parse (usage, argc, argv, options.data (), buffer.data ());
-    if (parse.error ()) {
-        exit_code = EXIT_FAILURE;
-    }
-    if (exit_code == EXIT_SUCCESS) {
-        if (options[help_opt] || parse.nonOptionsCount () != 1) {
-            option::printUsage (out_stream, usage);
-            exit_code = EXIT_FAILURE;
-        }
-    }
-    if (exit_code == EXIT_SUCCESS) {
-        if (option::Option const * unknown = options[unknown_opt]) {
-            for (; unknown != nullptr; unknown = unknown->next ()) {
-                out_stream << NATIVE_TEXT ("Unknown option: ") << unknown->name
-                           << NATIVE_TEXT ("\n");
-            }
-            exit_code = EXIT_FAILURE;
-        }
-    }
-    if (exit_code == EXIT_SUCCESS) {
-        opt.src_path = pstore::utf::from_native_string (parse.nonOption (0));
-    }
-
-    return {opt, exit_code};
+    return {opt, EXIT_SUCCESS};
 }
-
-#endif // PSTORE_IS_INSIDE_LLVM
-// eof:tools/vacuum/switches.cpp
-
 // eof: tools/vacuum/switches.cpp
