@@ -174,11 +174,11 @@ namespace pstore {
                 return {t};
             }
 
-            //*               _ _   _               _  *
-            //*  _ __  ___ __(_) |_(_)___ _ _  __ _| | *
-            //* | '_ \/ _ (_-< |  _| / _ \ ' \/ _` | | *
-            //* | .__/\___/__/_|\__|_\___/_||_\__,_|_| *
-            //* |_|                                    *
+            //*                                              *
+            //*  ___  __ __ _  _ _ _ _ _ ___ _ _  __ ___ ___ *
+            //* / _ \/ _/ _| || | '_| '_/ -_) ' \/ _/ -_|_-< *
+            //* \___/\__\__|\_,_|_| |_| \___|_||_\__\___/__/ *
+            //*                                              *
             namespace details {
                 struct positional {
                     template <typename Opt>
@@ -186,45 +186,21 @@ namespace pstore {
                         o.set_positional ();
                     }
                 };
-            } // namespace details
-            extern details::positional const Positional;
 
-            //*                    _            _  *
-            //*  _ _ ___ __ _ _  _(_)_ _ ___ __| | *
-            //* | '_/ -_) _` | || | | '_/ -_) _` | *
-            //* |_| \___\__, |\_,_|_|_| \___\__,_| *
-            //*            |_|                     *
-            namespace details {
                 struct required {
                     template <typename Opt>
                     void apply (Opt & o) const {
                         o.set_num_occurrences (num_occurrences::required);
                     }
                 };
-            } // namespace details
-            extern details::required const Required;
 
-            //*           _   _               _  *
-            //*  ___ _ __| |_(_)___ _ _  __ _| | *
-            //* / _ \ '_ \  _| / _ \ ' \/ _` | | *
-            //* \___/ .__/\__|_\___/_||_\__,_|_| *
-            //*     |_|                          *
-            namespace details {
                 struct optional {
                     template <typename Opt>
                     void apply (Opt & o) const {
                         o.set_num_occurrences (num_occurrences::optional);
                     }
                 };
-            } // namespace details
-            extern details::required const Optional;
 
-            //*                                              *
-            //*  ___ _ _  ___   ___ _ _   _ __  ___ _ _ ___  *
-            //* / _ \ ' \/ -_) / _ \ '_| | '  \/ _ \ '_/ -_) *
-            //* \___/_||_\___| \___/_|   |_|_|_\___/_| \___| *
-            //*                                              *
-            namespace details {
                 struct one_or_more {
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -234,7 +210,11 @@ namespace pstore {
                     }
                 };
             } // namespace details
-            extern details::required const OneOrMore;
+
+            extern details::one_or_more const OneOrMore;
+            extern details::optional const Optional;
+            extern details::positional const Positional;
+            extern details::required const Required;
 
         } // namespace cl
     }     // namespace cmd_util

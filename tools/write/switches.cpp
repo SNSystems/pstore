@@ -43,63 +43,55 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if !PSTORE_IS_INSIDE_LLVM
-
-#include <cctype>
-#include <iostream>
-
-// 3rd party
-#include "optionparser.h"
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/CommandLine.h"
+#include "llvm/Support/raw_ostream.h"
+#include "llvm/Support/Error.h"
+#else
+#include "pstore_cmd_util/cl/command_line.hpp"
+#endif
 
 #include "pstore_support/error.hpp"
 #include "pstore_support/gsl.hpp"
 #include "pstore_support/utf.hpp"
-#include "pstore/database.hpp"
 
 #include "error.hpp"
 #include "to_value_pair.hpp"
 
-namespace {
-
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-    auto & out_stream = std::wcout;
+#if PSTORE_IS_INSIDE_LLVM
+using namespace llvm;
 #else
-    auto & error_stream = std::cerr;
-    auto & out_stream = std::cout;
+using namespace pstore::cmd_util;
 #endif
 
-    option::ArgStatus add (option::Option const & option, bool msg,
-                           ::pstore::gsl::czstring value_kind) {
-        std::pair<std::string, std::string> resl =
-            to_value_pair (pstore::utf::from_native_string (option.arg).c_str ());
-        if (resl.first.length () == 0 && resl.second.length () == 0) {
-            if (msg) {
-                error_stream << NATIVE_TEXT ("Option '") << option.name
-                             << NATIVE_TEXT ("' requires a command-separated key and " << value_kind
-                                                                                       << '\n');
-            }
-            return option::ARG_ILLEGAL;
-        }
-        return option::ARG_OK;
-    }
-    option::ArgStatus add_value (option::Option const & option, bool msg) {
-        return add (option, msg, "value");
-    }
-    option::ArgStatus add_file (option::Option const & option, bool msg) {
-        return add (option, msg, "file path");
-    }
+namespace {
 
-    option::ArgStatus add_string (option::Option const & option, bool msg) {
-        if (option.arg == nullptr || option.arg[0] == '\0') {
-            if (msg) {
-                error_stream << NATIVE_TEXT ("Option '") << option.name
-                             << NATIVE_TEXT ("' requires a key string\n'");
-            }
-            return option::ARG_ILLEGAL;
-        }
-        return option::ARG_OK;
-    }
+    cl::list<std::string>
+        Add ("add", cl::desc ("Add key with corresponding string value. Specified as 'key,value'."
+                              " May be repeated to add several keys."));
+    cl::alias Add2 ("a", cl::desc ("Alias for --add"), cl::aliasopt (Add));
+
+    cl::list<std::string>
+        AddString ("add-string",
+                   cl::desc ("Add key to string set. May be repeated to add several strings."));
+    cl::alias AddString2 ("s", cl::desc ("Alias for --add-string"), cl::aliasopt (AddString));
+
+    cl::list<std::string>
+        AddFile ("add-file",
+                 cl::desc ("Add key with the named file's contents as the corresponding value. May "
+                           "be repeated to add several files."));
+    cl::alias AddFile2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (AddString));
+
+
+    cl::opt<std::string> DbPath (cl::Positional,
+                                 cl::desc ("Path of the pstore repository to be written."),
+                                 cl::Required);
+    cl::list<std::string> Files (cl::Positional, cl::desc ("<filename>..."));
+
+    cl::opt<std::string> VacuumMode ("compact", cl::Optional,
+                                     cl::desc ("Set the compaction mode. Argument must one of: "
+                                               "'disabled', 'immediate', 'background'."));
+    cl::alias VacuumMode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (VacuumMode));
 
     pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
         if (opt == "disabled") {
@@ -114,102 +106,38 @@ namespace {
             std::make_error_code (write_error_code::unrecognized_compaction_mode));
     }
 
-    option::ArgStatus compact_mode (option::Option const & option, bool msg) {
-        try {
-            to_vacuum_mode (pstore::utf::from_native_string (option.arg).c_str ());
-        } catch (std::exception const & ex) {
-            if (msg) {
-                std::cerr << "Option '" << option.name << "' " << ex.what () << '\n';
-            }
-            return option::ARG_ILLEGAL;
-        }
-        return option::ARG_OK;
-    }
+} // end anonymous namespace
 
+std::pair<switches, int> get_switches (int argc, char * argv[]) {
+    cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
 
-    enum option_index {
-        unknown_opt,
-        help_opt,
-        add_opt,
-        add_string_opt,
-        add_file_opt,
-        compact_opt,
+    auto make_value_pair = [](std::string const & arg) {
+        return to_value_pair (pstore::utf::from_native_string (arg));
     };
 
-    option::Descriptor const usage[] = {
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("Usage: write [options] data-file [files-to-store]\n\nOptions:")},
-        {help_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("help"), option::Arg::None,
-         NATIVE_TEXT ("  --help        \tPrint usage and exit.")},
-        {add_opt, 0, NATIVE_TEXT ("a"), NATIVE_TEXT ("add"), add_value,
-         NATIVE_TEXT ("  -a,--add      \t"
-                      "Add key with corresponding string value. Specified as 'key,value'."
-                      " May be repeated to add several keys.")},
-        {add_string_opt, 0, NATIVE_TEXT ("s"), NATIVE_TEXT ("add-string"), add_string,
-         NATIVE_TEXT ("  -s,--add-string      \t"
-                      "Add key to string set. Specified as 'key'."
-                      " May be repeated to add several keys.")},
-        {add_file_opt, 0, NATIVE_TEXT ("f"), NATIVE_TEXT ("add-file"), add_file,
-         NATIVE_TEXT (
-             "  -f,--add-file \t"
-             "Add key with corresponding value from the given path (specified as 'key,path')."
-             " May be repeated to add several keys.")},
-        {compact_opt, 0, NATIVE_TEXT ("n"), NATIVE_TEXT ("compact"), compact_mode,
-         NATIVE_TEXT ("  -c,--compact  \t"
-                      "Set the compaction mode. Argument must one of: 'disabled', "
-                      "'immediate', 'background'.")},
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT ("\nExamples:\n"
-                      "  write \t Writes some stuff somewhere.\n")},
+    switches result;
 
-        {0, 0, 0, 0, 0, 0},
-    };
-
-} // (anonymous namespace)
-
-
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
-    switches sw;
-
-    argc -= (argc > 0);
-    argv += (argc > 0);
-
-    option::Stats stats (usage, argc, argv);
-    std::vector<option::Option> options (stats.options_max);
-    std::vector<option::Option> buffer (stats.buffer_max);
-    option::Parser parse (usage, argc, argv, options.data (), buffer.data ());
-    if (parse.error ()) {
-        return {sw, EXIT_FAILURE};
+    result.db_path = pstore::utf::from_native_string (DbPath);
+    if (!VacuumMode.empty ()) {
+        result.vmode = to_vacuum_mode (pstore::utf::from_native_string (VacuumMode));
     }
 
-    if (options[help_opt] || parse.nonOptionsCount () < 1) {
-        option::printUsage (out_stream, usage);
-        return {sw, EXIT_FAILURE};
-    }
+    std::transform (std::begin (Add), std::end (Add), std::back_inserter (result.add),
+                    make_value_pair);
 
-    if (option::Option const * const opt = options[compact_opt]) {
-        sw.vmode = to_vacuum_mode (pstore::utf::from_native_string (opt->arg));
-    }
+    std::transform (std::begin (AddString), std::end (AddString),
+                    std::back_inserter (result.strings),
+                    [](std::string const & str) { return pstore::utf::from_native_string (str); });
 
-    for (option::Option const * opt = options[add_opt]; opt != nullptr; opt = opt->next ()) {
-        sw.add.push_back (to_value_pair (pstore::utf::from_native_string (opt->arg)));
-    }
-    for (option::Option const * opt = options[add_string_opt]; opt != nullptr; opt = opt->next ()) {
-        sw.strings.push_back (pstore::utf::from_native_string (opt->arg));
-    }
-    for (option::Option const * opt = options[add_file_opt]; opt != nullptr; opt = opt->next ()) {
-        sw.files.push_back (to_value_pair (pstore::utf::from_native_string (opt->arg)));
-    }
+    std::transform (std::begin (AddFile), std::end (AddFile), std::back_inserter (result.files),
+                    make_value_pair);
 
-    sw.db_path = pstore::utf::from_native_string (parse.nonOption (0));
+    std::transform (std::begin (Files), std::end (Files), std::back_inserter (result.files),
+                    [](std::string const & path) {
+                        return std::make_pair (pstore::utf::from_native_string (path),
+                                               pstore::utf::from_native_string (path));
+                    });
 
-    for (int count = 1, non_options_count = parse.nonOptionsCount (); count < non_options_count;
-         ++count) {
-        std::string const path = pstore::utf::from_native_string (parse.nonOption (count));
-        sw.files.emplace_back (path, path);
-    }
-
-    return {sw, EXIT_SUCCESS};
+    return {result, EXIT_SUCCESS};
 }
-#endif // PSTORE_IS_INSIDE_LLVM
 // eof: tools/write/switches.cpp

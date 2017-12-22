@@ -160,6 +160,9 @@ namespace pstore {
                     return value_;
                 }
 
+                bool empty () const {
+                    return value_.empty ();
+                }
                 bool value (std::string const & v) override;
                 bool takes_argument () const override;
                 parser_base * get_parser () override;

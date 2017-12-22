@@ -62,10 +62,10 @@ namespace pstore {
                 o.set_original (&original_);
             }
 
+            details::one_or_more const OneOrMore;
+            details::optional const Optional;
             details::positional const Positional;
             details::required const Required;
-            details::required const Optional;
-            details::required const OneOrMore;
 
         } // namespace cl
     }     // namespace cmd_util

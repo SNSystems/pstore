@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/cl/parser.hpp"
+#include "pstore_cmd_util/cl/command_line.hpp"
 #include "gtest/gtest.h"
 
 TEST (ClParser, SimpleString) {
@@ -132,6 +132,25 @@ TEST (ClParser, Enum) {
         maybe<color> r5 = p ("");
         EXPECT_FALSE (r5.has_value ());
     }
+}
+
+TEST (ClParser, Modifiers) {
+    using namespace pstore::cmd_util;
+    EXPECT_EQ (cl::opt<int> ().get_num_occurrences (), cl::num_occurrences::optional);
+    EXPECT_EQ (cl::opt<int>{cl::Optional}.get_num_occurrences (), cl::num_occurrences::optional);
+    EXPECT_EQ (cl::opt<int>{cl::Required}.get_num_occurrences (), cl::num_occurrences::required);
+    EXPECT_EQ (cl::opt<int>{cl::OneOrMore}.get_num_occurrences (),
+               cl::num_occurrences::zero_or_more);
+    EXPECT_EQ (cl::opt<int> (cl::Required, cl::OneOrMore).get_num_occurrences (),
+               cl::num_occurrences::one_or_more);
+    EXPECT_EQ (cl::opt<int> (cl::Optional, cl::OneOrMore).get_num_occurrences (),
+               cl::num_occurrences::zero_or_more);
+
+    EXPECT_EQ (cl::opt<int> ().name (), "");
+    EXPECT_EQ (cl::opt<int>{"name"}.name (), "name");
+
+    EXPECT_EQ (cl::opt<int>{}.description (), "");
+    EXPECT_EQ (cl::opt<int>{cl::desc ("description")}.description (), "description");
 }
 
 // eof: unittests/pstore_cmd_util/test_cl_parser.cpp
