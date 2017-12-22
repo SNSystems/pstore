@@ -75,12 +75,12 @@ namespace {
 
     cl::opt<unsigned> num_fragments_per_ticket ("fragments",
                                                 cl::desc ("Number of fragments per ticket"),
-                                                cl::init (1000));
-    cl::opt<unsigned> num_tickets ("tickets", cl::desc ("Number of tickets"), cl::init (100));
+                                                cl::init (1000U));
+    cl::opt<unsigned> num_tickets ("tickets", cl::desc ("Number of tickets"), cl::init (100U));
     cl::opt<std::string> output_dir ("O", cl::desc ("output directory"), cl::init ("./"));
     cl::opt<unsigned> section_size ("section-size",
                                     cl::desc ("Number of 32-bit values in the generated sections"),
-                                    cl::init (16));
+                                    cl::init (16U));
 
 
 
