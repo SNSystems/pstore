@@ -47,6 +47,7 @@ add_pstore_unit_test (pstore-cmd-util-tests
     test_iota_generator.cpp
     test_maybe.cpp
     test_str_to_revision.cpp
+    test_string_distance.cpp
     test_word_wrapper.cpp
 )
 target_link_libraries (pstore-cmd-util-tests pstore-cmd-util)

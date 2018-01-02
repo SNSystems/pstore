@@ -48,6 +48,7 @@
 #include <string>
 #include <tuple>
 
+#include "pstore_cmd_util/cl/category.hpp"
 #include "pstore_cmd_util/cl/help.hpp"
 #include "pstore_cmd_util/cl/modifiers.hpp"
 #include "pstore_support/path.hpp"
@@ -57,6 +58,10 @@ namespace pstore {
         namespace cl {
 
             namespace details {
+
+                std::pair<option *, std::string>
+                lookup_nearest_option (std::string const & arg,
+                                       option::options_container const & all_options);
 
                 bool starts_with (std::string const & s, char const * prefix);
                 option * find_handler (std::string const & name);
@@ -111,6 +116,18 @@ namespace pstore {
                             if (handler == nullptr || handler->is_positional ()) {
                                 errs << program_name << ": Unknown command line argument '"
                                      << *first_arg << "'\n";
+
+                                option * best_option = nullptr;
+                                std::string nearest_string;
+                                std::tie (best_option, nearest_string) =
+                                    lookup_nearest_option (arg_name, option::all ());
+                                if (best_option) {
+                                    if (!value.empty ()) {
+                                        nearest_string += '=';
+                                        nearest_string += value;
+                                    }
+                                    errs << "Did you mean '--" << nearest_string << "'?\n";
+                                }
                                 ok = false;
                             } else {
                                 bool const takes_argument = handler->takes_argument ();
@@ -195,8 +212,7 @@ namespace pstore {
             void ParseCommandLineOptions (InputIterator first_arg, InputIterator last_arg,
                                           std::string const & overview,
                                           std::ostream * errs = nullptr) {
-                bool ok = details::ParseCommandLineOptions (first_arg, last_arg, overview, errs);
-                if (!ok) {
+                if (!details::ParseCommandLineOptions (first_arg, last_arg, overview, errs)) {
                     std::exit (EXIT_FAILURE);
                 }
             }

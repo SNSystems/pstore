@@ -59,6 +59,7 @@ namespace pstore {
                 required,     // One occurrence required
                 one_or_more,  // One or more occurrences required
             };
+            class OptionCategory;
 
             //*           _   _           *
             //*  ___ _ __| |_(_)___ _ _   *
@@ -81,6 +82,10 @@ namespace pstore {
 
                 virtual void set_description (std::string const & d);
                 std::string const & description () const;
+
+                void set_category (OptionCategory const * cat) {
+                    category_ = cat;
+                }
 
                 virtual void set_positional ();
                 virtual bool is_positional () const;
@@ -109,6 +114,7 @@ namespace pstore {
                 num_occurrences num_occurrences_ = num_occurrences::optional;
                 bool positional_ = false;
                 unsigned hits_ = 0U;
+                OptionCategory const * category_ = nullptr;
             };
 
             template <typename Modifier>

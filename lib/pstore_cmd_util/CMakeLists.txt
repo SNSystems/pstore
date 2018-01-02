@@ -46,18 +46,22 @@ set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore_cmd_util")
 include (add_pstore)
 set (PSTORE_CMD_UTIL_SRC )
 set (PSTORE_CMD_UTIL_CL_SRC
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/category.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/maybe.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/modifiers.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/option.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.hpp"
+    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/string_distance.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/word_wrapper.hpp"
+    cl/category.cpp
     cl/command_line.cpp
     cl/help.cpp
     cl/modifiers.cpp
     cl/option.cpp
     cl/parser.cpp
+    cl/string_distance.cpp
     cl/word_wrapper.cpp
 )
 list (APPEND PSTORE_CMD_UTIL_SRC ${PSTORE_CMD_UTIL_CL_SRC})

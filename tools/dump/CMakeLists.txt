@@ -51,7 +51,6 @@ configure_file (
 add_pstore_executable (pstore-dump
     "${CMAKE_CURRENT_BINARY_DIR}/dump_config.hpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/dump_config.hpp.in"
-    llvm_switches.cpp
     main.cpp
     switches.cpp
     switches.hpp

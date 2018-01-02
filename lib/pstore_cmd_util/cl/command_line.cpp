@@ -46,12 +46,40 @@
 #include <iostream>
 
 #include "pstore_cmd_util/cl/option.hpp"
+#include "pstore_cmd_util/cl/string_distance.hpp"
 #include "pstore_support/utf.hpp"
 
 namespace pstore {
     namespace cmd_util {
         namespace cl {
             namespace details {
+
+                // lookup_nearest_option
+                // ~~~~~~~~~~~~~~~~~~~~~
+                std::pair<option *, std::string>
+                lookup_nearest_option (std::string const & arg,
+                                       option::options_container const & all_options) {
+                    if (arg.empty ()) {
+                        return {nullptr, std::string{}};
+                    }
+
+                    // Find the closest match.
+                    option * best_option = nullptr;
+                    std::string nearest_string;
+                    auto best_distance = 0U;
+                    for (auto const & opt : all_options) {
+                        auto name = opt->name ();
+                        unsigned distance = string_distance (name, arg, best_distance);
+                        if (best_option == nullptr || distance < best_distance) {
+                            best_option = opt;
+                            best_distance = distance;
+                            nearest_string = name;
+                        }
+                    }
+
+                    return {best_option, nearest_string};
+                }
+
 
                 bool starts_with (std::string const & s, char const * prefix) {
                     auto it = std::begin (s);

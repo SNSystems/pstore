@@ -51,6 +51,7 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <initializer_list>
 #include <vector>
 
 namespace pstore {

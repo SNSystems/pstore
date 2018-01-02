@@ -48,6 +48,7 @@
 #include <string>
 #include <vector>
 
+#include "pstore_cmd_util/cl/category.hpp"
 #include "pstore_cmd_util/cl/option.hpp"
 #include "pstore_cmd_util/cl/parser.hpp"
 
@@ -215,6 +216,26 @@ namespace pstore {
             extern details::optional const Optional;
             extern details::positional const Positional;
             extern details::required const Required;
+
+            namespace details {
+                class category {
+                public:
+                    category (OptionCategory const & cat)
+                            : cat_{cat} {}
+
+                    template <typename Opt>
+                    void apply (Opt & o) const {
+                        o.set_category (&cat_);
+                    }
+
+                private:
+                    OptionCategory const & cat_;
+                };
+            } // namespace details
+
+            inline details::category cat (OptionCategory const & c) {
+                return {c};
+            }
 
         } // namespace cl
     }     // namespace cmd_util
