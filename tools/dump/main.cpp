@@ -73,6 +73,56 @@
 
 #include "./switches.hpp"
 
+namespace {
+
+    enum class dump_error_code {
+        bad_digest = 1,
+        no_digest_index,
+        fragment_not_found,
+    };
+
+    class dump_error_category : public std::error_category {
+    public:
+        dump_error_category () noexcept = default;
+        char const * name () const noexcept override;
+        std::string message (int error) const override;
+    };
+
+    char const * dump_error_category::name () const noexcept {
+        return "pstore-dump category";
+    }
+
+    std::string dump_error_category::message (int error) const {
+        switch (static_cast<dump_error_code> (error)) {
+        case dump_error_code::bad_digest:
+            return "bad digest";
+        case dump_error_code::no_digest_index:
+            return "no digest index";
+        case dump_error_code::fragment_not_found:
+            return "fragment not found";
+        }
+        return "unknown error";
+    }
+
+    std::error_category const & get_dump_error_category () {
+        static dump_error_category const cat;
+        return cat;
+    }
+
+} // end anonymous namespace
+
+namespace std {
+
+    template <>
+    struct is_error_code_enum<dump_error_code> : public std::true_type {};
+
+    std::error_code make_error_code (dump_error_code e) {
+        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                       "base type of error_code must be int to permit safe static cast");
+        return {static_cast<int> (e), get_dump_error_category ()};
+    }
+
+} // namespace std
 
 namespace {
 
@@ -171,6 +221,35 @@ namespace {
         assert (buf.st_size >= 0);
         return static_cast<std::uint64_t> (buf.st_size);
     }
+
+    unsigned hex_to_digit (char digit) {
+        if (digit >= 'a' && digit <= 'f') {
+            return static_cast<unsigned> (digit) - ('a' - 10);
+        }
+        if (digit >= 'A' && digit <= 'F') {
+            return static_cast<unsigned> (digit) - ('A' - 10);
+        }
+        if (digit >= '0' && digit <= '9') {
+            return static_cast<unsigned> (digit) - '0';
+        }
+        pstore::raise_error_code (std::make_error_code (dump_error_code::bad_digest));
+    }
+
+    pstore::index::digest string_to_digest (std::string const & str) {
+        if (str.length () != 32) {
+            pstore::raise_error_code (std::make_error_code (dump_error_code::bad_digest));
+        }
+        auto get64 = [&str](int index) {
+            assert (index >= 0 && static_cast<unsigned> (index) < str.length ());
+            auto result = std::uint64_t{0};
+            for (auto shift = 60; shift >= 0; shift -= 4, ++index) {
+                result |= (static_cast<std::uint64_t> (hex_to_digit (str[index])) << shift);
+            }
+            assert (index >= 0);
+            return result;
+        };
+        return {get64 (0), get64 (16)};
+    }
 } // namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
@@ -197,14 +276,14 @@ int main (int argc, char * argv[]) {
         }
 
         bool show_contents = opt.show_contents;
-        bool show_fragments = opt.show_fragments;
+        bool show_all_fragments = opt.show_all_fragments;
         bool show_tickets = opt.show_tickets;
         bool show_header = opt.show_header;
         bool show_indices = opt.show_indices;
         bool show_log = opt.show_log;
         bool show_shared = opt.show_shared;
         if (opt.show_all) {
-            show_contents = show_fragments = show_tickets = show_header = show_indices = show_log =
+            show_contents = show_all_fragments = show_tickets = show_header = show_indices = show_log =
                 true;
         }
 
@@ -233,8 +312,34 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("contents",
                                    value::make_contents (db, db.footer_pos (), no_times));
             }
-            if (show_fragments) {
+            if (show_all_fragments) {
                 file.emplace_back ("fragments", value::make_fragments (db));
+            } else {
+                if (opt.fragments.size () > 0) {
+                    if (auto * const digest_index = pstore::index::get_digest_index (db)) {
+                        value::array::container fragments;
+                        fragments.reserve (opt.fragments.size ());
+
+                        auto end = std::end (*digest_index);
+
+                        for (std::string const & f : opt.fragments) {
+                            auto const digest = string_to_digest (f);
+                            auto pos = digest_index->find (digest);
+                            if (pos == end) {
+                                pstore::raise_error_code (std::make_error_code (dump_error_code::fragment_not_found));
+                            } else {
+                                auto fragment = pstore::repo::fragment::load (db, pos->second);
+                                fragments.emplace_back (value::make_value (value::object::container{
+                                    {"digest", value::make_value (digest)},
+                                    {"fragment", value::make_value (db, *fragment)}}));
+                            }
+                        }
+
+                        file.emplace_back ("fragments", value::make_value (fragments));
+                    } else {
+                        pstore::raise_error_code (std::make_error_code (dump_error_code::no_digest_index));
+                    }
+                }
             }
 
             if (show_tickets) {

@@ -62,7 +62,8 @@ typedef char TCHAR;
 struct switches {
     bool show_all = false;
     bool show_contents = false;
-    bool show_fragments = false;
+    std::list<std::string> fragments;
+    bool show_all_fragments = false;
     bool show_tickets = false;
     bool show_header = false;
     bool show_indices = false;

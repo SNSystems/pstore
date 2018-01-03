@@ -69,7 +69,10 @@ namespace {
                             cl::cat (WhatCat));
     cl::alias Contents2 ("c", cl::desc ("Alias for --contents"), cl::aliasopt (Contents));
 
-    cl::opt<bool> Fragments ("fragments", cl::desc ("Dump the contents of the fragments index"),
+    cl::list<std::string> Fragment ("fragment",
+                                    cl::desc ("Dump the contents of a specific fragment"),
+                                    cl::cat (WhatCat));
+    cl::opt<bool> AllFragments ("all-fragments", cl::desc ("Dump the contents of the fragments index"),
                              cl::cat (WhatCat));
     cl::opt<bool> Tickets ("tickets", cl::desc ("Dump the contents of the tickets index"),
                            cl::cat (WhatCat));
@@ -122,7 +125,8 @@ std::pair<switches, int> get_switches (int argc, char * argv[]) {
 
     switches result;
     result.show_contents = Contents;
-    result.show_fragments = Fragments;
+    std::copy (std::begin (Fragment), std::end (Fragment), std::back_inserter (result.fragments));
+    result.show_all_fragments = AllFragments;
     result.show_tickets = Tickets;
     result.show_header = Header;
     result.show_indices = Indices;
