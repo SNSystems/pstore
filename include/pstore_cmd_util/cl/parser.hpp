@@ -50,7 +50,7 @@
 #include <string>
 #include <vector>
 
-#include "pstore_cmd_util/cl/maybe.hpp"
+#include "pstore_support/maybe.hpp"
 
 namespace pstore {
     namespace cmd_util {

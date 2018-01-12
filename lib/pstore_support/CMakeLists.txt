@@ -125,6 +125,8 @@ check_cxx_source_compiles (
 
 
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/pstore_support")
+
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
@@ -135,24 +137,25 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
 
-    "${PSTORE_INCLUDE_DIR}/pstore_support/ctype.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/error.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/file.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/file_posix.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/file_win32.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/gsl.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/logging.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/path.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/portab.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/process_file_name.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/quoted_string.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/random.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/rotating_log.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/signal_cv.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/signal_helpers.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/small_vector.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/thread.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_support/utf.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/error.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/file.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/file_posix.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/file_win32.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/logging.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/process_file_name.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/rotating_log.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_cv.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     error.cpp
     file.cpp
     file_posix.cpp

@@ -49,7 +49,7 @@
 #include <string>
 #include <utility>
 
-#include "pstore_cmd_util/cl/maybe.hpp"
+#include "pstore_support/maybe.hpp"
 
 #ifdef _WIN32
 #include <tchar.h>
@@ -67,7 +67,7 @@ struct switches {
     std::chrono::milliseconds retry_timeout = std::chrono::milliseconds (500);
     unsigned max_retries = 10;
 
-    pstore::cmd_util::cl::maybe<std::string> pipe_path;
+    pstore::maybe<std::string> pipe_path;
 
     unsigned flood = 0;
     bool kill = false;

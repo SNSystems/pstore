@@ -4,7 +4,7 @@
 //* | | | | | | (_| | |_| | |_) |  __/ *
 //* |_| |_| |_|\__,_|\__, |_.__/ \___| *
 //*                  |___/             *
-//===- unittests/pstore_cmd_util/test_maybe.cpp ---------------------------===//
+//===- unittests/pstore_support/test_maybe.cpp ----------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,12 +42,13 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_cmd_util/cl/maybe.hpp"
+#include "pstore_support/maybe.hpp"
 #include <memory>
 #include <gtest/gtest.h>
 #include "pstore/make_unique.hpp"
 
-using namespace pstore::cmd_util::cl;
+using pstore::maybe;
+using pstore::nothing;
 
 namespace {
 
@@ -125,4 +126,4 @@ TEST (Maybe, Assign) {
     EXPECT_FALSE (m.has_value ());
 }
 
-// eof: unittests/pstore_cmd_util/test_maybe.cpp
+// eof: unittests/pstore_support/test_maybe.cpp

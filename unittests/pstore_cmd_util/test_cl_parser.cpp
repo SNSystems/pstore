@@ -45,7 +45,7 @@
 #include "gtest/gtest.h"
 
 TEST (ClParser, SimpleString) {
-    using pstore::cmd_util::cl::maybe;
+    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
 
     maybe<std::string> r = parser<std::string> () ("hello");
@@ -54,7 +54,7 @@ TEST (ClParser, SimpleString) {
 }
 
 TEST (ClParser, StringFromSet) {
-    using pstore::cmd_util::cl::maybe;
+    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
 
     parser<std::string> p;
@@ -78,7 +78,7 @@ TEST (ClParser, StringFromSet) {
 }
 
 TEST (ClParser, Int) {
-    using pstore::cmd_util::cl::maybe;
+    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
     {
         maybe<int> r1 = parser<int> () ("43");
@@ -101,7 +101,7 @@ TEST (ClParser, Int) {
 }
 
 TEST (ClParser, Enum) {
-    using pstore::cmd_util::cl::maybe;
+    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
 
     enum color { red, blue, green };

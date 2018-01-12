@@ -187,8 +187,7 @@ std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
     }
 
     if (auto & pipe_path = options[pipe_path_opt]) {
-        result.pipe_path =
-            pstore::cmd_util::cl::just (pstore::utf::from_native_string (pipe_path.arg));
+        result.pipe_path = pstore::just (pstore::utf::from_native_string (pipe_path.arg));
     }
 
     if (num_non_option_arguments > 0) {

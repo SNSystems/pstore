@@ -49,7 +49,6 @@ set (PSTORE_CMD_UTIL_CL_SRC
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/category.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/maybe.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/modifiers.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/option.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.hpp"
