@@ -80,52 +80,58 @@ TEST_F (BasicUUID, Out) {
 }
 
 TEST (UUID, ParseStringBadLength) {
-    check_for_error ([]() { pstore::uuid _ ("00000000-0000-0000-0000-00000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("00000000-0000-0000-0000-0000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    {
+        std::string const input1 = "00000000-0000-0000-0000-00000000000000";
+        pstore::maybe <pstore::uuid> v1 = pstore::uuid::from_string (input1);
+        EXPECT_FALSE (v1.has_value ());
+
+        check_for_error ([&input1]() { pstore::uuid _ (input1); }, pstore::error_code::uuid_parse_error);
+    }
+    {
+        std::string const input2 = "00000000-0000-0000-0000-0000000000";
+        pstore::maybe <pstore::uuid> v2 = pstore::uuid::from_string (input2);
+        EXPECT_FALSE (v2.has_value ());
+
+        check_for_error ([&input2]() { pstore::uuid _ (input2); }, pstore::error_code::uuid_parse_error);
+    }
 }
 
 TEST (UUID, MissingDash) {
-    check_for_error ([]() { pstore::uuid _ ("0000000000000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("00000000-000000000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("00000000-0000-000000000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("00000000-0000-0000-00000000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string ("0000000000000-0000-0000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("00000000-000000000-0000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("00000000-0000-000000000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("00000000-0000-0000-00000000000000000").has_value ());
 }
 
 TEST (UUID, GoodHex) {
-    pstore::uuid expected{
-        pstore::uuid::container_type{{0x00, 0x99, 0xaa, 0xff, 0xAA, 0xFF, 0x09, 0x90, 0x00, 0x99,
-                                      0xaa, 0xff, 0xAA, 0xFF, 0x09, 0x90}}};
-    EXPECT_EQ (expected, pstore::uuid ("0099aaff-AAFF-0990-0099-aaffAAFF0990"));
+    std::string const input = "0099aaff-AAFF-0990-0099-aaffAAFF0990";
+    pstore::uuid const expected{
+        pstore::uuid::container_type{{0x00, 0x99, 0xAA, 0xFF, 0xAA, 0xFF, 0x09, 0x90, 0x00, 0x99,
+                                      0xAA, 0xFF, 0xAA, 0xFF, 0x09, 0x90}}};
+
+    // first try from_string()...
+    pstore::maybe<pstore::uuid> v = pstore::uuid::from_string (input);
+    ASSERT_TRUE (v.has_value ());
+    EXPECT_EQ (*v, expected);
+
+    // now using the constructor
+    EXPECT_EQ (expected, pstore::uuid (input));
 }
 
 TEST (UUID, BadHex) {
     // '/' is one behind '0' in ASCII
-    check_for_error ([]() { pstore::uuid _ ("/0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string ("/0000000-0000-0000-0000-000000000000").has_value ());
     // ':' is one past '9' in ASCII
-    check_for_error ([]() { pstore::uuid _ (":0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string (":0000000-0000-0000-0000-000000000000").has_value ());
     // '@' is one behind 'A' in ASCII
-    check_for_error ([]() { pstore::uuid _ ("@0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string ("@0000000-0000-0000-0000-000000000000").has_value ());
     // 'G' is one past 'F'. Too obvious?
-    check_for_error ([]() { pstore::uuid _ ("G0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("0G000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string ("G0000000-0000-0000-0000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("0G000000-0000-0000-0000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("g0000000-0000-0000-0000-000000000000").has_value ());
+    EXPECT_FALSE (pstore::uuid::from_string ("0g000000-0000-0000-0000-000000000000").has_value ());
     // '`' is one behind 'a' in ASCII
-    check_for_error ([]() { pstore::uuid _ ("`0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("g0000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
-    check_for_error ([]() { pstore::uuid _ ("0g000000-0000-0000-0000-000000000000"); },
-                     pstore::error_code::uuid_parse_error);
+    EXPECT_FALSE (pstore::uuid::from_string ("`0000000-0000-0000-0000-000000000000").has_value ());
 }
 
 TEST (UUID, MixedCase) {

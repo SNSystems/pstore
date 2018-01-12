@@ -139,8 +139,6 @@ namespace pstore {
         assert (this->version () == uuid::version_type::random_number_based);
     }
 
-
-
 #ifdef _WIN32
     uuid::uuid (UUID const & u) {
         // UUID octets are in network byte order, but the Microsoft API
@@ -175,10 +173,22 @@ namespace pstore {
 
     // Construct from the canonical UUID string representation as defined by RFC4122.
     uuid::uuid (std::string const & str) {
-        if (str.length () != this->string_length) {
+        maybe <uuid> d = uuid::from_string (str);
+        if (!d.has_value()) {
             raise (pstore::error_code::uuid_parse_error);
         }
-        auto out = make_hex_decoder (std::begin (data_));
+        data_ = d->array ();
+    }
+
+    // from_string
+    // ~~~~~~~~~~~
+    maybe<uuid> uuid::from_string (std::string const & str) {
+        if (str.length () != string_length) {
+            return nothing <uuid> ();
+        }
+
+        container_type data;
+        auto out = make_hex_decoder (std::begin (data));
         auto count = 0U;
         for (auto digit : str) {
             switch (count++) {
@@ -187,7 +197,7 @@ namespace pstore {
             case 18:
             case 23:
                 if (digit != '-') {
-                    raise (pstore::error_code::uuid_parse_error);
+                    return nothing <uuid> ();
                 }
                 assert (out.is_high ());
                 break;
@@ -196,6 +206,8 @@ namespace pstore {
                 break;
             }
         }
+
+        return just (uuid {data});
     }
 
     // variant

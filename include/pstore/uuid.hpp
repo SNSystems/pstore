@@ -53,6 +53,7 @@
 #include <cstdlib> // abort
 #include <string>
 
+#include "pstore_support/maybe.hpp"
 #include "pstore_support/portab.hpp"
 
 #if defined(_WIN32)
@@ -93,12 +94,17 @@ namespace pstore {
 
     public:
         uuid ();
-        /// Converts a string following the convention defined by RFC4122 to a UUID.
+        /// Converts a string following the convention defined by RFC4122 to a UUID. If the string is not valid an error is raised.
         explicit uuid (std::string const & s);
 
         /// A constructor used to construct a specific UUID from its binary value.
         uuid (container_type c)
                 : data_ (std::move (c)) {}
+
+        /// Converts a string to a UUID following the convention defined by RFC4122. If the string is not valid, returns nothing<uuid>.
+        /// \param s  A string to be converted to a UUID.
+        /// \returns  just<uuid>() if the string \p s was valid according to the description in RFC4122. If the string was invalid, nothing<uuid>.
+        static maybe<uuid> from_string (std::string const & s);
 
 #if defined(_WIN32)
         /// Convert from the native Win32 UUID type.
@@ -147,7 +153,7 @@ namespace pstore {
         std::string str () const;
 
     private:
-        std::array<std::uint8_t, elements> data_{};
+        container_type data_{};
 
         enum {
             version_octet = 6,
