@@ -79,6 +79,10 @@ namespace {
         bad_digest = 1,
         no_digest_index,
         fragment_not_found,
+        bad_uuid,
+        no_ticket_index,
+        ticket_not_found,
+        bad_ticket_file,
     };
 
     class dump_error_category : public std::error_category {
@@ -100,6 +104,14 @@ namespace {
             return "no digest index";
         case dump_error_code::fragment_not_found:
             return "fragment not found";
+        case dump_error_code::bad_uuid:
+            return "bad UUID";
+        case dump_error_code::no_ticket_index:
+            return "no ticket index";
+        case dump_error_code::ticket_not_found:
+            return "ticket not found";
+        case dump_error_code::bad_ticket_file:
+            return "bad ticket file";
         }
         return "unknown error";
     }
@@ -250,7 +262,63 @@ namespace {
         };
         return {get64 (0), get64 (16)};
     }
-} // namespace
+
+
+
+    // FIXME: this is duplicated in the LLVM code.
+    struct ticket_file_contents {
+        std::array<std::uint8_t, 8> signature;
+        pstore::uuid id;
+    };
+    constexpr std::array<std::uint8_t, 8> ticket_signature{
+        {'R', 'e', 'p', 'o', 'U', 'u', 'i', 'd'}};
+    constexpr std::uint64_t ticket_file_size = 24;
+    static_assert (sizeof (ticket_file_contents) == ticket_file_size,
+                   "ticket_file_contents must match ticket_file_size");
+
+    pstore::uuid string_to_ticket (std::string const & str) {
+        pstore::maybe<pstore::uuid> uuid = pstore::uuid::from_string (str);
+        if (uuid.has_value ()) {
+            return *uuid;
+        }
+
+        pstore::file::file_handle f;
+        f.open (str, pstore::file::file_handle::create_mode::open_existing,
+                pstore::file::file_handle::writable_mode::read_only);
+        if (f.is_open () && f.size () == ticket_file_size) {
+            ticket_file_contents contents;
+            f.read (&contents);
+            if (contents.signature == ticket_signature) {
+                return contents.id;
+            }
+        }
+
+        pstore::raise_error_code (std::make_error_code (dump_error_code::bad_ticket_file), str);
+    }
+
+    template <typename IndexType, typename StringToKeyFunction, typename RecordFunction>
+    value::value_ptr
+    add_specified (IndexType const & index, std::list<std::string> const & items_to_show,
+                   dump_error_code not_found_error, StringToKeyFunction string_to_key,
+                   RecordFunction record_function) {
+        value::array::container container;
+        container.reserve (items_to_show.size ());
+
+        auto end = std::end (index);
+        for (std::string const & t : items_to_show) {
+            auto const key = string_to_key (t);
+            auto pos = index.find (key);
+            if (pos == end) {
+                pstore::raise_error_code (std::make_error_code (not_found_error));
+            } else {
+                container.emplace_back (record_function (*pos));
+            }
+        }
+
+        return value::make_value (container);
+    }
+
+} // end anonymous namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
@@ -277,14 +345,14 @@ int main (int argc, char * argv[]) {
 
         bool show_contents = opt.show_contents;
         bool show_all_fragments = opt.show_all_fragments;
-        bool show_tickets = opt.show_tickets;
+        bool show_all_tickets = opt.show_all_tickets;
         bool show_header = opt.show_header;
         bool show_indices = opt.show_indices;
         bool show_log = opt.show_log;
         bool show_shared = opt.show_shared;
         if (opt.show_all) {
-            show_contents = show_all_fragments = show_tickets = show_header = show_indices = show_log =
-                true;
+            show_contents = show_all_fragments = show_all_tickets = show_header = show_indices =
+                show_log = true;
         }
 
         if (opt.hex) {
@@ -317,33 +385,44 @@ int main (int argc, char * argv[]) {
             } else {
                 if (opt.fragments.size () > 0) {
                     if (auto * const digest_index = pstore::index::get_digest_index (db)) {
-                        value::array::container fragments;
-                        fragments.reserve (opt.fragments.size ());
+                        auto record = [&db](pstore::index::digest_index::value_type const & value) {
+                            auto fragment = pstore::repo::fragment::load (db, value.second);
+                            return value::make_value (value::object::container{
+                                {"digest", value::make_value (value.first)},
+                                {"fragment", value::make_value (db, *fragment)}});
+                        };
 
-                        auto end = std::end (*digest_index);
-
-                        for (std::string const & f : opt.fragments) {
-                            auto const digest = string_to_digest (f);
-                            auto pos = digest_index->find (digest);
-                            if (pos == end) {
-                                pstore::raise_error_code (std::make_error_code (dump_error_code::fragment_not_found));
-                            } else {
-                                auto fragment = pstore::repo::fragment::load (db, pos->second);
-                                fragments.emplace_back (value::make_value (value::object::container{
-                                    {"digest", value::make_value (digest)},
-                                    {"fragment", value::make_value (db, *fragment)}}));
-                            }
-                        }
-
-                        file.emplace_back ("fragments", value::make_value (fragments));
+                        file.emplace_back ("fragments",
+                                           add_specified (*digest_index, opt.fragments,
+                                                          dump_error_code::fragment_not_found,
+                                                          string_to_digest, record));
                     } else {
                         pstore::raise_error_code (std::make_error_code (dump_error_code::no_digest_index));
                     }
                 }
             }
 
-            if (show_tickets) {
+            if (show_all_tickets) {
                 file.emplace_back ("tickets", value::make_tickets (db));
+            } else {
+                if (opt.tickets.size () > 0) {
+                    if (auto * const ticket_index = pstore::index::get_ticket_index (db)) {
+                        auto record = [&db](pstore::index::ticket_index::value_type const & value) {
+                            auto ticket = pstore::repo::ticket::load (db, value.second);
+                            return value::make_value (value::object::container{
+                                {"id", value::make_value (value.first)},
+                                {"ticket", value::make_value (db, ticket)}});
+                        };
+
+                        file.emplace_back ("tickets",
+                                           add_specified (*ticket_index, opt.tickets,
+                                                          dump_error_code::ticket_not_found,
+                                                          string_to_ticket, record));
+                    } else {
+                        pstore::raise_error_code (
+                            std::make_error_code (dump_error_code::no_ticket_index));
+                    }
+                }
             }
 
             if (show_header) {

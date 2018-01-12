@@ -74,8 +74,14 @@ namespace {
                                     cl::cat (WhatCat));
     cl::opt<bool> AllFragments ("all-fragments", cl::desc ("Dump the contents of the fragments index"),
                              cl::cat (WhatCat));
-    cl::opt<bool> Tickets ("tickets", cl::desc ("Dump the contents of the tickets index"),
-                           cl::cat (WhatCat));
+
+    cl::list<std::string>
+        Ticket ("ticket", cl::desc ("Dump the contents of a specific ticket or ticket-file"),
+                cl::cat (WhatCat));
+    cl::opt<bool> AllTickets ("all-tickets", cl::desc ("Dump the contents of the tickets index"),
+                              cl::cat (WhatCat));
+
+
     cl::opt<bool> Header ("header", cl::desc ("Dump the file header"), cl::cat (WhatCat));
     cl::alias Header2 ("h", cl::desc ("Alias for --header"), cl::aliasopt (Header));
 
@@ -127,7 +133,9 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     result.show_contents = Contents;
     std::copy (std::begin (Fragment), std::end (Fragment), std::back_inserter (result.fragments));
     result.show_all_fragments = AllFragments;
-    result.show_tickets = Tickets;
+    std::copy (std::begin (Ticket), std::end (Ticket), std::back_inserter (result.tickets));
+    result.show_all_tickets = AllTickets;
+
     result.show_header = Header;
     result.show_indices = Indices;
     result.show_log = Log;

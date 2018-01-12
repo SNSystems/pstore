@@ -68,9 +68,16 @@ using pstore_tchar = char;
 struct switches {
     bool show_all = false;
     bool show_contents = false;
+
+    /// A list of the individual fragment digests from the command-line.
     std::list<std::string> fragments;
+    /// True if --all-fragments was specified on the command-line.
     bool show_all_fragments = false;
-    bool show_tickets = false;
+    /// A list containing tickets digests or path names from the command-line.
+    std::list<std::string> tickets;
+    /// True is --all-tickets was specified on the command-line.
+    bool show_all_tickets = false;
+
     bool show_header = false;
     bool show_indices = false;
     bool show_log = false;
