@@ -48,7 +48,7 @@
 #include <cstdlib>
 
 #include "llvm/Support/CommandLine.h"
-#include "pstore_cmd_util/cl/maybe.hpp"
+#include "pstore_support/maybe.hpp"
 #include "pstore_support/utf.hpp"
 
 namespace {
@@ -79,11 +79,11 @@ namespace {
     cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
     cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc ("<path>"));
 
-    auto pathOption (std::string const & path) -> pstore::cmd_util::cl::maybe<std::string> {
+    pstore::maybe<std::string> pathOption (std::string const & path) {
         if (path.length () > 0) {
-            return pstore::cmd_util::cl::just (path);
+            return pstore::just (path);
         }
-        return pstore::cmd_util::cl::nothing<std::string> ();
+        return pstore::nothing<std::string> ();
     }
 
 } // anonymous namespace
