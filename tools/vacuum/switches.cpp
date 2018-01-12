@@ -66,7 +66,7 @@ namespace {
 
 } // end anonymous namespace
 
-std::pair<vacuum::user_options, int> get_switches (int argc, char * argv[]) {
+std::pair<vacuum::user_options, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore vacuum utility\n");
 
     vacuum::user_options opt;

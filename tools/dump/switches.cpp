@@ -120,7 +120,7 @@ namespace {
 
 } // anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, char * argv[]) {
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore dump utility\n");
 
     switches result;

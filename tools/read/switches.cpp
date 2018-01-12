@@ -52,6 +52,7 @@
 #endif
 
 #include "pstore_cmd_util/str_to_revision.hpp"
+#include "pstore_cmd_util/revision_opt.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/utf.hpp"
 
@@ -61,32 +62,11 @@ namespace {
     using namespace llvm;
 #else
     using namespace pstore::cmd_util;
-    void report_fatal_error (char const * message, bool _) {
-        std::cerr << message;
-    }
 #endif
 
-    // FIXME: Need to remove RevisionOpt since the same code is in pstore-dump!
-    // based on DiagnosticInfo.cpp/PassRemarksOpt.
-    struct RevisionOpt {
-        unsigned r = pstore::head_revision;
-
-        RevisionOpt & operator= (std::string const & Val) {
-            if (!Val.empty ()) {
-                auto rp = pstore::str_to_revision (Val);
-                r = rp.first;
-                if (!rp.second) {
-                    report_fatal_error ("error: revision must be a revision number or 'HEAD'\n",
-                                        false);
-                }
-            }
-            return *this;
-        }
-    };
-
-    cl::opt<RevisionOpt, false, cl::parser<std::string>>
-        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
-    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
+    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+        Revision("revision", cl::desc("The starting revision number (or 'HEAD')"));
+    cl::alias Revision2("r", cl::desc("Alias for --revision"), cl::aliasopt(Revision));
 
     cl::opt<std::string> DbPath (cl::Positional,
                                  cl::desc ("Path of the pstore repository to be read."),
@@ -101,11 +81,11 @@ namespace {
 
 } // end anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, char * argv[]) {
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
 
     switches result;
-    result.revision = static_cast<RevisionOpt> (Revision).r;
+    result.revision = static_cast<pstore::cmd_util::revision_opt> (Revision).r;
     result.db_path = pstore::utf::from_native_string (DbPath);
     result.key = pstore::utf::from_native_string (Key);
     result.string_mode = StringMode;

@@ -58,10 +58,12 @@ typedef char TCHAR;
 #include "vacuum_config.hpp"
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-std::pair<vacuum::user_options, int> get_switches (int argc, TCHAR * argv[]);
+using pstore_tchar = TCHAR;
 #else
-std::pair<vacuum::user_options, int> get_switches (int argc, char * argv[]);
+using pstore_tchar = char;
 #endif
+
+std::pair<vacuum::user_options, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_VACUUM_SWITCHES_HPP
 // eof: tools/vacuum/switches.hpp

@@ -59,6 +59,12 @@ typedef char TCHAR;
 #include "pstore/database.hpp"
 #include "read_config.hpp"
 
+#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+using pstore_tchar = TCHAR;
+#else
+using pstore_tchar = char;
+#endif
+
 struct switches {
     std::string db_path;
     std::string key;
@@ -66,11 +72,7 @@ struct switches {
     bool string_mode = false;
 };
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
-#else
-std::pair<switches, int> get_switches (int argc, char * argv[]);
-#endif
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_WRITE_SWITCHES_HPP
 // eof: tools/read/switches.hpp

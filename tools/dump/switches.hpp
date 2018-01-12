@@ -59,6 +59,12 @@ typedef char TCHAR;
 #include "pstore/database.hpp"
 #include "dump_config.hpp"
 
+#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+using pstore_tchar = TCHAR;
+#else
+using pstore_tchar = char;
+#endif
+
 struct switches {
     bool show_all = false;
     bool show_contents = false;
@@ -79,11 +85,7 @@ struct switches {
     std::list<std::string> paths;
 };
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
-#else
-std::pair<switches, int> get_switches (int argc, char * argv[]);
-#endif
+std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_DUMP_SWITCHES_HPP
 // eof: tools/dump/switches.hpp
