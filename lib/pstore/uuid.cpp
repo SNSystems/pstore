@@ -64,19 +64,6 @@
 #endif
 
 namespace {
-    unsigned hex_to_digit (char digit) {
-        if (digit >= 'a' && digit <= 'f') {
-            return static_cast<unsigned> (digit) - ('a' - 10);
-        }
-        if (digit >= 'A' && digit <= 'F') {
-            return static_cast<unsigned> (digit) - ('A' - 10);
-        }
-        if (digit >= '0' && digit <= '9') {
-            return static_cast<unsigned> (digit) - '0';
-        }
-        raise (pstore::error_code::uuid_parse_error);
-    }
-
     char digit_to_hex (unsigned v) {
         assert (v < 0x10);
         return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
@@ -202,7 +189,15 @@ namespace pstore {
                 assert (out.is_high ());
                 break;
             default:
-                out.append (hex_to_digit (digit));
+                if (digit >= 'a' && digit <= 'f') {
+                    out.append (static_cast<unsigned> (digit) - ('a' - 10));
+                } else if (digit >= 'A' && digit <= 'F') {
+                    out.append (static_cast<unsigned> (digit) - ('A' - 10));
+                } else if (digit >= '0' && digit <= '9') {
+                    out.append (static_cast<unsigned> (digit) - '0');
+                } else {
+                    return nothing <uuid> ();
+                }
                 break;
             }
         }
