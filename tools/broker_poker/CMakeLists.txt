@@ -53,17 +53,14 @@ add_pstore_executable (pstore-broker-poker
     "${CMAKE_CURRENT_BINARY_DIR}/poke_config.hpp"
     flood_server.cpp
     flood_server.hpp
-    llvm_switches.cpp
     poke.cpp
     switches.cpp
     switches.hpp
 )
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-broker-poker LLVMSupport)
-else ()
-    target_link_libraries (pstore-broker-poker optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-broker-poker pstore-broker-intf)
+target_link_libraries (pstore-broker-poker pstore-broker-intf pstore-cmd-util)
 target_include_directories (pstore-broker-poker PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # eof: tools/broker_poker/CMakeLists.txt

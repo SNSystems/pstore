@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker_poker/switches.cpp ------------------------------------===//
+//*  _ _                                _ _       _                *
+//* | | |_   ___ __ ___    _____      _(_) |_ ___| |__   ___  ___  *
+//* | | \ \ / / '_ ` _ \  / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
+//* | | |\ V /| | | | | | \__ \\ V  V /| | || (__| | | |  __/\__ \ *
+//* |_|_| \_/ |_| |_| |_| |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
+//*                                                                *
+//===- tools/broker_poker/llvm_switches.cpp -------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,166 +41,73 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
 #include "switches.hpp"
 
-#if !PSTORE_IS_INSIDE_LLVM
-#include <iostream>
-#include <vector>
-#include "optionparser.h"
+#include <cstdlib>
+
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/CommandLine.h"
+#else
+#include "pstore_cmd_util/cl/command_line.hpp"
+#endif
+#include "pstore_support/maybe.hpp"
 #include "pstore_support/utf.hpp"
 
-namespace {
-
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-
-    unsigned long str_to_ul (TCHAR const * str, TCHAR ** str_end) {
-        return std::wcstoul (str, str_end, 10);
-    }
+#if PSTORE_IS_INSIDE_LLVM
+    using namespace llvm;
 #else
-    auto & error_stream = std::cerr;
-
-    unsigned long str_to_ul (char const * str, char ** str_end) {
-        return std::strtoul (str, str_end, 10);
-    }
+    using namespace pstore::cmd_util;
 #endif
 
-} // (anonymous namespace)
-
-
 namespace {
-    option::ArgStatus numeric (option::Option const & option, bool msg) {
-        constexpr auto max = std::numeric_limits<unsigned>::max ();
-        assert (option.name != nullptr);
-        TCHAR * endptr = nullptr;
-        unsigned long value = 0UL;
-        if (option.arg != nullptr) {
-            value = str_to_ul (option.arg, &endptr);
+
+
+    cl::opt<std::string>
+        PipePath ("pipe-path", cl::desc ("Overrides the FIFO path to which messages are written."),
+                  cl::init (""));
+
+    cl::opt<unsigned> Flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
+                             cl::init (0));
+    cl::alias Flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (Flood));
+
+    cl::opt<unsigned>
+        RetryTimeout ("retry-timeout",
+                      cl::desc ("The timeout for connection retries to the broker (ms)."),
+                      cl::init (switches{}.retry_timeout.count ()));
+    cl::opt<unsigned>
+        MaxRetries ("max-retries",
+                    cl::desc ("The maximum number of retries that will be attempted."),
+                    cl::init (switches{}.max_retries));
+
+    cl::opt<bool> Kill ("kill",
+                        cl::desc ("Ask the broker to quit after commands have been processed."));
+    cl::alias Kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (Kill));
+
+    cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
+    cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc ("<path>"));
+
+    pstore::maybe<std::string> pathOption (std::string const & path) {
+        if (path.length () > 0) {
+            return pstore::just (path);
         }
-        if (endptr != option.arg && *endptr == '\0' && value <= max) {
-            return option::ARG_OK;
-        }
-
-        if (msg) {
-            if (value > std::numeric_limits<unsigned>::max ()) {
-                error_stream << NATIVE_TEXT ("Option '") << option.name
-                             << NATIVE_TEXT ("': value too large\n");
-            } else {
-                error_stream << NATIVE_TEXT ("Option '") << option.name
-                             << NATIVE_TEXT ("' requires a numeric argument ";
-                if (option.arg != nullptr) {
-                    error_stream << "(got \"") << option.arg;
-                } else {
-                    error_stream << " (but was missing)";
-                }
-                error_stream << NATIVE_TEXT ("\")\n");
-            }
-        }
-        return option::ARG_ILLEGAL;
+        return pstore::nothing<std::string> ();
     }
 
-    option::ArgStatus path (option::Option const & option, bool msg) {
-        if (option.arg == nullptr || option.arg[0] == '\0') {
-            if (msg) {
-                error_stream << NATIVE_TEXT ("Option '") << option.name
-                             << NATIVE_TEXT ("' requires a path\n'");
-            }
-            return option::ARG_ILLEGAL;
-        }
-        return option::ARG_OK;
-    }
+} // anonymous namespace
 
-    enum option_index {
-        flood_opt,
-        help_opt,
-        kill_opt,
-        retry_opt,
-        max_retries_opt,
-        pipe_path_opt,
-        unknown_opt,
-    };
+std::pair<switches, int> get_switches (int argc, char * argv[]) {
+    cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
-#define USAGE "Usage: broker_poker [options] [verb [path]]"
-
-    option::Descriptor const usage[] = {
-        {unknown_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT (""), option::Arg::None,
-         NATIVE_TEXT (USAGE "\n\nOptions:")},
-
-        {help_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("help"), option::Arg::None,
-         NATIVE_TEXT ("  --help        \tPrint usage and exit.")},
-        {flood_opt, 0, NATIVE_TEXT ("f"), NATIVE_TEXT ("flood"), numeric,
-         NATIVE_TEXT ("  -f,--flood num     \t"
-                      "Flood the broker with 'num' ECHO messages.")},
-        {kill_opt, 0, NATIVE_TEXT ("k"), NATIVE_TEXT ("kill"), option::Arg::None,
-         NATIVE_TEXT ("  -k,--kill      \t"
-                      "Ask the broker to quit after commands have been processed.")},
-
-        {retry_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("retry-timeout"), option::Arg::None,
-         NATIVE_TEXT ("  --retry-timeout      \t"
-                      "Retry timeout.")},
-        {max_retries_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("max-retries"), numeric,
-         NATIVE_TEXT ("  --max-retries      \t"
-                      "Maximum number of retries that will be attempted.")},
-
-        {pipe_path_opt, 0, NATIVE_TEXT (""), NATIVE_TEXT ("pipe-path"), path,
-         NATIVE_TEXT ("  --pipe-path      \t"
-                      "Overrides the path of the FIFO from which commands will be read.")},
-
-        {0, 0, 0, 0, 0, 0},
-    };
-
-} // (anonymous namespace)
-
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]) {
-    switches result;
-
-    // Skip program name argv[0] if present
-    argc -= (argc > 0);
-    argv += (argc > 0);
-
-    option::Stats stats (usage, argc, argv);
-    std::vector<option::Option> options (stats.options_max);
-    std::vector<option::Option> buffer (stats.buffer_max);
-    option::Parser parse (usage, argc, argv, options.data (), buffer.data ());
-    if (parse.error ()) {
-        return {result, EXIT_FAILURE};
-    }
-
-    if (options[help_opt]) {
-        option::printUsage (error_stream, usage);
-        return {result, EXIT_FAILURE};
-    }
-    auto const num_non_option_arguments = parse.nonOptionsCount ();
-    if (num_non_option_arguments > 2) {
-        std::cerr << USAGE << '\n';
-        return {result, EXIT_FAILURE};
-    }
-
-    if (auto & flood = options[flood_opt]) {
-        result.flood = static_cast<unsigned> (str_to_ul (flood.arg, nullptr));
-    }
-    if (auto & retry = options[retry_opt]) {
-        result.retry_timeout = std::chrono::milliseconds (str_to_ul (retry.arg, nullptr));
-    }
-    if (auto & max_wait = options[max_retries_opt]) {
-        result.max_retries = static_cast<unsigned> (str_to_ul (max_wait.arg, nullptr));
-    }
-
-    if (auto & pipe_path = options[pipe_path_opt]) {
-        result.pipe_path = pstore::just (pstore::utf::from_native_string (pipe_path.arg));
-    }
-
-    if (num_non_option_arguments > 0) {
-        auto const non_opts = parse.nonOptions ();
-        result.verb = pstore::utf::from_native_string (non_opts[0]);
-        if (num_non_option_arguments == 2) {
-            result.path = pstore::utf::from_native_string (non_opts[1]);
-        }
-    }
-
-    result.kill = options[kill_opt];
-    return {result, EXIT_SUCCESS};
+    switches Result;
+    Result.verb = pstore::utf::from_native_string (Verb);
+    Result.path = pstore::utf::from_native_string (Path);
+    Result.retry_timeout = std::chrono::milliseconds (RetryTimeout);
+    Result.max_retries = MaxRetries;
+    Result.flood = Flood;
+    Result.kill = Kill;
+    Result.pipe_path = pathOption (PipePath);
+    return {Result, EXIT_SUCCESS};
 }
 
-#endif // !PSTORE_IS_INSIDE_LLVM
-// eof: tools/broker_poker/switches.cpp
+// eof: tools/broker_poker/llvm_switches.cpp

@@ -45,8 +45,6 @@
 add_pstore_executable (pstore-mangle mangle.cpp)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-mangle LLVMSupport)
-else ()
-    target_link_libraries (pstore-mangle optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-mangle pstore)
 # eof: tools/mangle/CMakeLists.txt

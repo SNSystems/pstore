@@ -47,7 +47,7 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            details::values::values (std::initializer_list<option_enum_value> options)
+            details::values::values (std::initializer_list<OptionEnumValue> options)
                             : values_ (options) {}
 
             name::name (std::string const & name)

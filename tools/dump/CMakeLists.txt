@@ -60,8 +60,6 @@ target_include_directories (pstore-dump PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries (pstore-dump pstore-dump-lib pstore-cmd-util)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-dump LLVMSupport)
-else ()
-    target_link_libraries (pstore-dump optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 

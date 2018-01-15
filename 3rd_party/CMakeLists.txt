@@ -7,9 +7,6 @@ else ()
     # library" on Windows.
     set (gtest_force_shared_crt ON CACHE BOOL "Always use msvcrt.dll")
     add_subdirectory (googletest)
-
-    # A command-line parser for when we're not inside LLVM.
-    add_subdirectory (optionparser)
  endif ()
 
 

@@ -50,7 +50,6 @@ configure_file (
 add_pstore_executable (pstore-sieve
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    llvm_switches.cpp
     main.cpp
     switches.cpp
     switches.hpp
@@ -59,9 +58,7 @@ add_pstore_executable (pstore-sieve
 target_include_directories (pstore-sieve PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-sieve LLVMSupport)
-else ()
-    target_link_libraries (pstore-sieve optionparser)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-sieve pstore-support-lib)
+target_link_libraries (pstore-sieve pstore-support-lib pstore-cmd-util)
 
 # eof: tools/sieve/CMakeLists.txt

@@ -66,7 +66,7 @@ namespace pstore {
             //
 
             // This represents a single enum value, using "int" as the underlying type.
-            struct option_enum_value {
+            struct OptionEnumValue {
                 std::string name;
                 int value;
                 std::string description;
@@ -77,7 +77,7 @@ namespace pstore {
             namespace details {
                 class values {
                 public:
-                    values (std::initializer_list<option_enum_value> options);
+                    values (std::initializer_list<OptionEnumValue> options);
 
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -89,7 +89,7 @@ namespace pstore {
                     }
 
                 private:
-                    std::vector<option_enum_value> values_;
+                    std::vector<OptionEnumValue> values_;
                 };
             } // namespace details
 
