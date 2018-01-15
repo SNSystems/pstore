@@ -66,10 +66,10 @@ namespace pstore {
                     // Find the closest match.
                     option * best_option = nullptr;
                     std::string nearest_string;
-                    auto best_distance = 0U;
+                    auto best_distance = std::string::size_type{0};
                     for (auto const & opt : all_options) {
-                        auto name = opt->name ();
-                        unsigned distance = string_distance (name, arg, best_distance);
+                        auto const name = opt->name ();
+                        auto const distance = string_distance (name, arg, best_distance);
                         if (best_option == nullptr || distance < best_distance) {
                             best_option = opt;
                             best_distance = distance;

@@ -87,6 +87,13 @@ namespace {
 #define CATCH(ex, handler)
 #endif
 
+#ifdef _WIN32
+#define NATIVE_TEXT(str) _TEXT (str)
+#else
+#define NATIVE_TEXT(str) str
+#endif
+
+
 namespace {
 
 #ifdef PSTORE_CPP_EXCEPTIONS

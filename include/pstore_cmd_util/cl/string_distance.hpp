@@ -68,7 +68,7 @@ namespace pstore {
             /// the given sequences into the other. If zero, the sequences are identical.
             std::string::size_type string_distance (std::string const & from_array,
                                                     std::string const & to_array,
-                                                    unsigned max_edit_distance = 0U);
+                                                    std::string::size_type max_edit_distance = 0);
 
         } // namespace cl
     }     // namespace cmd_util

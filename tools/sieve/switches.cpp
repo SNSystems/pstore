@@ -1,10 +1,10 @@
-//*  _ _                                _ _       _                *
-//* | | |_   ___ __ ___    _____      _(_) |_ ___| |__   ___  ___  *
-//* | | \ \ / / '_ ` _ \  / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* | | |\ V /| | | | | | \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |_|_| \_/ |_| |_| |_| |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                                                *
-//===- tools/sieve/llvm_switches.cpp --------------------------------------===//
+//*               _ _       _                *
+//*  _____      _(_) |_ ___| |__   ___  ___  *
+//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
+//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
+//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
+//*                                          *
+//===- tools/sieve/switches.cpp -------------------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -83,7 +83,7 @@ namespace {
 
 namespace switches {
 
-    user_options user_options::get (int argc, char * argv[]) {
+    user_options user_options::get (int argc, pstore_tchar * argv[]) {
         cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
 
         user_options Result;
@@ -95,4 +95,4 @@ namespace switches {
 
 } // namespace switches
 
-// eof: tools/sieve/llvm_switches.cpp
+// eof: tools/sieve/switches.cpp

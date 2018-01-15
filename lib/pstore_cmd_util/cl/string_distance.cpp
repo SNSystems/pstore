@@ -52,7 +52,7 @@ namespace pstore {
 
             std::string::size_type string_distance (std::string const & from,
                                                     std::string const & to,
-                                                    unsigned max_edit_distance) {
+                                                    std::string::size_type max_edit_distance) {
                 using size_type = std::string::size_type;
                 size_type const m = from.size ();
                 size_type const n = to.size ();

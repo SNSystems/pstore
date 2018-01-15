@@ -1,10 +1,10 @@
-//*  _ _                                _ _       _                *
-//* | | |_   ___ __ ___    _____      _(_) |_ ___| |__   ___  ___  *
-//* | | \ \ / / '_ ` _ \  / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* | | |\ V /| | | | | | \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |_|_| \_/ |_| |_| |_| |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                                                *
-//===- tools/broker_poker/llvm_switches.cpp -------------------------------===//
+//*               _ _       _                *
+//*  _____      _(_) |_ ___| |__   ___  ___  *
+//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
+//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
+//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
+//*                                          *
+//===- tools/broker_poker/switches.cpp ------------------------------------===//
 // Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -71,7 +71,7 @@ namespace {
                              cl::init (0));
     cl::alias Flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (Flood));
 
-    cl::opt<unsigned>
+    cl::opt<std::chrono::milliseconds::rep>
         RetryTimeout ("retry-timeout",
                       cl::desc ("The timeout for connection retries to the broker (ms)."),
                       cl::init (switches{}.retry_timeout.count ()));
@@ -96,7 +96,7 @@ namespace {
 
 } // anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, char * argv[]) {
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
     switches Result;
@@ -110,4 +110,4 @@ std::pair<switches, int> get_switches (int argc, char * argv[]) {
     return {Result, EXIT_SUCCESS};
 }
 
-// eof: tools/broker_poker/llvm_switches.cpp
+// eof: tools/broker_poker/switches.cpp

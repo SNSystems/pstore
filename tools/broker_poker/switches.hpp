@@ -49,16 +49,11 @@
 #include <string>
 #include <utility>
 
-#include "pstore_support/maybe.hpp"
-
 #ifdef _WIN32
 #include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT (str)
-#else
-typedef char TCHAR;
-#define NATIVE_TEXT(str) str
 #endif
 
+#include "pstore_support/maybe.hpp"
 #include "poke_config.hpp"
 
 struct switches {
@@ -74,10 +69,12 @@ struct switches {
 };
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-std::pair<switches, int> get_switches (int argc, TCHAR * argv[]);
+using pstore_tchar = TCHAR;
 #else
-std::pair<switches, int> get_switches (int argc, char * argv[]);
+using pstore_tchar = char;
 #endif
+
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_BROKER_POKER_SWITCHES_HPP
 // eof:tools/broker_poker/switches.hpp

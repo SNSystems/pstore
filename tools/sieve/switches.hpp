@@ -58,6 +58,12 @@ typedef char TCHAR;
 
 namespace switches {
 
+#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+    using pstore_tchar = TCHAR;
+#else
+    using pstore_tchar = char;
+#endif
+
     struct bad_number : public std::runtime_error {
         bad_number ();
     };
@@ -79,11 +85,8 @@ namespace switches {
         std::shared_ptr<std::string> output;
         endian endianness;
         unsigned long maximum;
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-        static user_options get (int argc, TCHAR * argv[]);
-#else
-        static user_options get (int argc, char * argv[]);
-#endif
+
+        static user_options get (int argc, pstore_tchar * argv[]);
     };
 }
 
