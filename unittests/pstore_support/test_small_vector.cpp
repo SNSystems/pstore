@@ -5,7 +5,7 @@
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
 //===- unittests/pstore_support/test_small_vector.cpp ---------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
 //===- include/pstore_support/signal_cv.hpp -------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

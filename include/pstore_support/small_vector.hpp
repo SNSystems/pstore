@@ -5,7 +5,7 @@
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
 //===- include/pstore_support/small_vector.hpp ----------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

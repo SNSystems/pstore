@@ -5,7 +5,7 @@
 //* |___/\__|_|  |_|_| |_|\__, |  \__,_|_|___/\__\__,_|_| |_|\___\___| *
 //*                       |___/                                        *
 //===- include/pstore_cmd_util/cl/string_distance.hpp ---------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

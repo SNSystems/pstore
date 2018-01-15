@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
 //===- unittests/pstore/test_process_file_name.cpp ------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

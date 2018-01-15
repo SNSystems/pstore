@@ -5,7 +5,7 @@
 //*  \___/| .__/ \__|_|\___/|_| |_| *
 //*       |_|                       *
 //===- lib/pstore_cmd_util/cl/option.cpp ----------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

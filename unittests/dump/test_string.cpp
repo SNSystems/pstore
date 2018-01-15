@@ -5,7 +5,7 @@
 //* |___/\__|_|  |_|_| |_|\__, | *
 //*                       |___/  *
 //===- unittests/dump/test_string.cpp -------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

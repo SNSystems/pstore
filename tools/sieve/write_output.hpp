@@ -5,7 +5,7 @@
 //*   \_/\_/ |_|  |_|\__\___|  \___/ \__,_|\__| .__/ \__,_|\__| *
 //*                                           |_|               *
 //===- tools/sieve/write_output.hpp ---------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

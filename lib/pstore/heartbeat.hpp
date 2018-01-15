@@ -5,7 +5,7 @@
 //* |_| |_|\___|\__,_|_|   \__|_.__/ \___|\__,_|\__| *
 //*                                                  *
 //===- lib/pstore/heartbeat.hpp -------------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

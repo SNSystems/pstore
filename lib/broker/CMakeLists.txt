@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/broker/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

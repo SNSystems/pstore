@@ -11,7 +11,7 @@
 //* |___/\___|_|  |_|\__,_|_|_/___\___|_|    *
 //*                                          *
 //===- examples/write_using_serializer/write_using_serializer.cpp ---------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

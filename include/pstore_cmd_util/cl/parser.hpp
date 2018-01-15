@@ -5,7 +5,7 @@
 //* | .__/ \__,_|_|  |___/\___|_|    *
 //* |_|                              *
 //===- include/pstore_cmd_util/cl/parser.hpp ------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

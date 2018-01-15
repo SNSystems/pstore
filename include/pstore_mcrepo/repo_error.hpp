@@ -5,7 +5,7 @@
 //* |_|  \___| .__/ \___/   \___|_|  |_|  \___/|_|    *
 //*          |_|                                      *
 //===- include/pstore_mcrepo/repo_error.hpp -------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

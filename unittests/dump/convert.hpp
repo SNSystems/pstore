@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_|\_/ \___|_|   \__| *
 //*                                     *
 //===- unittests/dump/convert.hpp -----------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //*   \_/\_/ |_|  |_|\__\___|_|     \___\___/|_| |_| |_|_| |_| |_|\___/|_| |_| *
 //*                                                                            *
 //===- lib/pstore_broker_intf/writer_common.cpp ---------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //* |_.__/|_|_| |_|\__,_|_|   \__, | *
 //*                           |___/  *
 //===- unittests/pstore/binary.hpp ----------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

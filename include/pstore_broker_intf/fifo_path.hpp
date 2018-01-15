@@ -5,7 +5,7 @@
 //* |_| |_|_|  \___/  | .__/ \__,_|\__|_| |_| *
 //*                   |_|                     *
 //===- include/pstore_broker_intf/fifo_path.hpp ---------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

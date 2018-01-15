@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___|_|  \___| .__/ \___/  *
 //*                         |_|           *
 //===- unittests/dump/test_mcrepo.cpp -------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

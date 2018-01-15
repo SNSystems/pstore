@@ -5,7 +5,7 @@
 //* |___/\___|_|    \_/ |_|\___\___| |_.__/ \__,_|___/\___| *
 //*                                                         *
 //===- tools/broker/service/service_base.cpp ------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

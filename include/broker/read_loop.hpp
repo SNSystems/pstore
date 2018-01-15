@@ -5,7 +5,7 @@
 //* |_|  \___|\__,_|\__,_| |_|\___/ \___/| .__/  *
 //*                                      |_|     *
 //===- include/broker/read_loop.hpp ---------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

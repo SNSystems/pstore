@@ -4,8 +4,14 @@
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
+//*                 _     _            *
+//*   __ _ _ __ ___| |__ (_)_   _____  *
+//*  / _` | '__/ __| '_ \| \ \ / / _ \ *
+//* | (_| | | | (__| | | | |\ V /  __/ *
+//*  \__,_|_|  \___|_| |_|_| \_/ \___| *
+//*                                    *
 //===- unittests/pstore/test_sstring_view_archive.cpp ---------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

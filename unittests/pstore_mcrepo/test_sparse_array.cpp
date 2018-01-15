@@ -5,7 +5,7 @@
 //* |___/ .__/ \__,_|_|  |___/\___|  \__,_|_|  |_|  \__,_|\__, | *
 //*     |_|                                               |___/  *
 //===- unittests/pstore_mcrepo/test_sparse_array.cpp ----------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

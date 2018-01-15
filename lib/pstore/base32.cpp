@@ -5,7 +5,7 @@
 //* |_.__/ \__,_|___/\___|____/_____| *
 //*                                   *
 //===- lib/pstore/base32.cpp ----------------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

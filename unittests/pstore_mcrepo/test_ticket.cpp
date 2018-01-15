@@ -5,7 +5,7 @@
 //*  \__|_|\___|_|\_\___|\__| *
 //*                           *
 //===- unittests/pstore_mcrepo/test_ticket.cpp ----------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

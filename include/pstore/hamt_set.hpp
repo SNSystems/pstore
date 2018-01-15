@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |___/\___|\__| *
 //*                                            *
 //===- include/pstore/hamt_set.hpp ----------------------------------------===//
-// Copyright (c) 2017 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
