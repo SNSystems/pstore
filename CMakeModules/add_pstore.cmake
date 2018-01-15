@@ -194,6 +194,7 @@ function(add_pstore_unit_test test_dirname)
                 -Wno-inconsistent-missing-override
                 -Wno-missing-variable-declarations
                 -Wno-shift-sign-overflow
+                -Wno-zero-as-null-pointer-constant
             )
         endif ()
     endif(PSTORE_IS_INSIDE_LLVM)
