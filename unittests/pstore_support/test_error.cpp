@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore_support/error.hpp"
-#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 // FIXME: should move the check_for_error header to the shared folder?
 #include "../pstore/check_for_error.hpp"
 

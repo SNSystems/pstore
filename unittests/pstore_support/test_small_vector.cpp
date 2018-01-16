@@ -46,7 +46,6 @@
 #include <numeric>
 
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 TEST (SmallVector, DefaultCtor) {
     pstore::small_vector<int, 8> b;
