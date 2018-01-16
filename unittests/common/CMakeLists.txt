@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/CMakeLists.txt --------------------------------------------===//
+#===- unittests/common/CMakeLists.txt -------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,14 +42,11 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-include (add_pstore)
-add_subdirectory (broker)
-add_subdirectory (common)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
-
-# eof: unittests/CMakeLists.txt
+# The pstore unit test common/shared sources
+add_pstore_test_library (pstore-common
+    check_for_error.hpp
+    empty_store.cpp
+    empty_store.hpp
+)
+target_include_directories (pstore-common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+# eof: unittests/common/CMakeLists.txt

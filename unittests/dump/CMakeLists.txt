@@ -60,6 +60,6 @@ set (PSTORE_DUMP_UNIT_TEST_SRC
     test_string.cpp
 )
 add_pstore_unit_test (pstore-dump-unit-tests ${PSTORE_DUMP_UNIT_TEST_SRC})
-target_link_libraries (pstore-dump-unit-tests pstore-dump-lib pstore pstore-cmd-util)
+target_link_libraries (pstore-dump-unit-tests pstore-dump-lib pstore pstore-cmd-util pstore-common)
 
 # eof: unittests/dump/CMakeLists.txt

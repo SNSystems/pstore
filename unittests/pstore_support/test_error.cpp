@@ -43,8 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "pstore_support/error.hpp"
 #include "gtest/gtest.h"
-// FIXME: should move the check_for_error header to the shared folder?
-#include "../pstore/check_for_error.hpp"
+#include "check_for_error.hpp"
 
 TEST (Error, None) {
     std::error_code const err = std::make_error_code (pstore::error_code::none);

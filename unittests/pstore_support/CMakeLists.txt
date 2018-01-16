@@ -43,7 +43,6 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 set (PSTORE_SUPPORT_UNIT_TEST_SRC
-    check_for_error.hpp
     test_error.cpp
     test_file.cpp
     test_gsl.cpp
@@ -57,7 +56,7 @@ if (PSTORE_IS_INSIDE_LLVM)
 else ()
     add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-support-unit-tests pstore-support-lib)
+target_link_libraries (pstore-support-unit-tests pstore-support-lib pstore-common)
 
 #eof:pstore/unittests/pstore_support/CMakeLists.txt
 

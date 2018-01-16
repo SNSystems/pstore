@@ -4,7 +4,7 @@
 //* |  __/ | | | | | |_) | |_| |_| | \__ \ || (_) | | |  __/ *
 //*  \___|_| |_| |_| .__/ \__|\__, | |___/\__\___/|_|  \___| *
 //*                |_|        |___/                          *
-//===- unittests/pstore/empty_store.hpp -----------------------------------===//
+//===- unittests/common/empty_store.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,38 +41,65 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef EMPTY_STORE_HPP
-#define EMPTY_STORE_HPP
-
-#include <cstdint>
+#include "empty_store.hpp"
 #include <cstdlib>
-#include <memory>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include "pstore_support/error.hpp"
 
-#include "pstore/database.hpp"
+#ifdef _WIN32
+
+std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+    size += align - 1U;
+
+    auto ptr = reinterpret_cast<std::uint8_t *> (
+        ::VirtualAlloc (nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+    if (ptr == nullptr) {
+        DWORD const last_error = ::GetLastError ();
+        raise (pstore::win32_erc (last_error), "VirtualAlloc");
+    }
+
+    auto deleter = [ptr](std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
+    auto const mask = ~(std::uintptr_t{align} - 1);
+    auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+        (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+    return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
+}
+
+#else
+
+#include <sys/mman.h>
+
+// MAP_ANONYMOUS isn't defined by POSIX, but both macOS and Linux support it.
+// Earlier versions of macOS provided the MAP_ANON name for the flag.
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
+
+std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+    size += align - 1U;
+
+    auto ptr = ::mmap (nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+    if (ptr == nullptr) {
+        raise (pstore::errno_erc{errno}, "mmap");
+    }
+
+    auto deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
+    auto const mask = ~(std::uintptr_t{align} - 1);
+    auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+        (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+    return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
+}
+
+#endif // _WIN32
 
 
-/// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S memory
-/// allocation API directly and bypasses operator new/malloc(). This is to ensure that the library
-/// can safely change the memory permission (with mprotect() or equivalent).
-std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
 
+constexpr std::size_t EmptyStore::file_size;
+constexpr std::size_t EmptyStore::page_size_;
 
-class EmptyStore : public ::testing::Test {
-public:
-    static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
+EmptyStore::EmptyStore ()
+        : buffer_{aligned_valloc (file_size, page_size_)}
+        , file_{std::make_shared<pstore::file::in_memory> (buffer_, file_size)} {
+    pstore::database::build_new_store (*file_);
+}
 
-    // Build an empty, in-memory database.
-    EmptyStore ();
-
-protected:
-    std::shared_ptr<std::uint8_t> buffer_;
-    std::shared_ptr<pstore::file::in_memory> file_;
-
-private:
-    static constexpr std::size_t page_size_ = 4096;
-};
-
-#endif // EMPTY_STORE_HPP
-// eof: unittests/pstore/empty_store.hpp
+// eof: unittests/common/empty_store.cpp

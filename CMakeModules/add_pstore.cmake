@@ -48,6 +48,18 @@ macro(add_pstore_subdirectory name)
     endif ()
 endmacro()
 
+function (add_pstore_additional_compiler_flag name)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # Disable warnings from the google test headers.
+        target_compile_options (${name} PRIVATE
+            -Wno-deprecated
+            -Wno-inconsistent-missing-override
+            -Wno-missing-variable-declarations
+            -Wno-shift-sign-overflow
+            -Wno-zero-as-null-pointer-constant
+        )
+    endif ()
+endfunction(add_pstore_additional_compiler_flag)
 
 #############################
 # pstore_set_output_directory
@@ -168,6 +180,29 @@ function (add_pstore_example name)
     target_link_libraries (example-${name} pstore-support-lib pstore)
 endfunction (add_pstore_example)
 
+##########################
+# add_pstore_test_library
+##########################
+
+function (add_pstore_test_library target_name)
+    add_library (${target_name} STATIC ${ARGN})
+    set_target_properties (${target_name} PROPERTIES FOLDER "pstore test libraries")
+    set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
+    set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
+
+    target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+    target_compile_options     (${target_name} PRIVATE ${EXTRA_CXX_FLAGS})
+    target_compile_definitions (${target_name} PRIVATE ${EXTRA_CXX_DEFINITIONS})
+    add_pstore_additional_compiler_flag (${target_name})
+
+    if (PSTORE_IS_INSIDE_LLVM)
+        include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
+        include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
+        target_link_libraries (${target_name} gtest_main gtest)
+    else ()
+        target_link_libraries (${target_name} gmock_main gtest gmock)
+    endif (PSTORE_IS_INSIDE_LLVM)
+endfunction(add_pstore_test_library)
 
 ######################
 # add_pstore_unit_test
@@ -185,18 +220,8 @@ function(add_pstore_unit_test test_dirname)
         target_include_directories (${test_dirname} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
         target_compile_options (${test_dirname} PRIVATE ${EXTRA_CXX_FLAGS})
         target_compile_definitions (${test_dirname} PRIVATE ${EXTRA_CXX_DEFINITIONS})
+        add_pstore_additional_compiler_flag (${test_dirname})
         target_link_libraries (${test_dirname} gmock_main gtest gmock)
-
-        if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            # Disable warnings from the google test headers.
-            target_compile_options (${test_dirname} PRIVATE
-                -Wno-deprecated
-                -Wno-inconsistent-missing-override
-                -Wno-missing-variable-declarations
-                -Wno-shift-sign-overflow
-                -Wno-zero-as-null-pointer-constant
-            )
-        endif ()
     endif(PSTORE_IS_INSIDE_LLVM)
 
 endfunction(add_pstore_unit_test)

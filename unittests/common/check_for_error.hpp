@@ -4,7 +4,7 @@
 //* | (__| | | |  __/ (__|   <  |  _| (_) | |    |  __/ |  | | | (_) | |    *
 //*  \___|_| |_|\___|\___|_|\_\ |_|  \___/|_|     \___|_|  |_|  \___/|_|    *
 //*                                                                         *
-//===- unittests/pstore_support/check_for_error.hpp -----------------------===//
+//===- unittests/common/check_for_error.hpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -90,6 +90,4 @@ void check_for_error (Function fn, pstore::win32_erc err) {
 #endif //_WIN32
 
 #endif // CHECK_FOR_ERROR_HPP
-// eof check_for_error.hpp
-
-// eof: unittests/pstore_support/check_for_error.hpp
+// eof: unittests/common/check_for_error.hpp
