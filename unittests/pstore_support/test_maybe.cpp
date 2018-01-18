@@ -44,6 +44,7 @@
 
 #include "pstore_support/maybe.hpp"
 #include <memory>
+#include <utility>
 #include <gtest/gtest.h>
 #include "pstore/make_unique.hpp"
 
@@ -80,6 +81,7 @@ namespace {
 
 TEST (Maybe, NoValue) {
     maybe<value> m;
+    EXPECT_FALSE (m.operator bool ());
     EXPECT_FALSE (m.has_value ());
     EXPECT_FALSE (m);
 }
@@ -98,6 +100,14 @@ TEST (Maybe, Value) {
     EXPECT_FALSE (m.has_value ());
 }
 
+TEST (Maybe, CtorWithMaybeHoldingAValue) {
+    maybe<value> m1 (42);
+    maybe<value> m2 = m1;
+    EXPECT_TRUE (m2.has_value ());
+    EXPECT_TRUE (m2);
+    EXPECT_EQ (m2.value (), value (42));
+}
+
 TEST (Maybe, ValueOr) {
     maybe<value> m1;
     EXPECT_EQ (m1.value_or (37), 37);
@@ -106,7 +116,7 @@ TEST (Maybe, ValueOr) {
     EXPECT_EQ (m2.value_or (37), 5);
 }
 
-TEST (Maybe, Assign) {
+TEST (Maybe, AssignValue) {
     maybe<value> m;
 
     // First assignment, m has no value
@@ -124,6 +134,61 @@ TEST (Maybe, Assign) {
     // Third assignment, m holds a value, assigning nothing.
     m.operator= (nothing<value> ());
     EXPECT_FALSE (m.has_value ());
+}
+
+TEST (Maybe, AssignZero) {
+    maybe<char> m;
+    m = 0;
+    EXPECT_TRUE (m.operator bool ());
+    EXPECT_TRUE (m.has_value ());
+    EXPECT_EQ (m.value (), 0);
+    EXPECT_EQ (*m, 0);
+
+    maybe<char> m2 = m;
+    EXPECT_TRUE (m2.has_value ());
+    EXPECT_EQ (m2.value (), 0);
+    EXPECT_EQ (*m2, 0);
+}
+
+TEST (Maybe, MoveCtor) {
+    {
+        maybe<std::string> m1 = std::string{"test"};
+        EXPECT_TRUE (m1.has_value ());
+        EXPECT_EQ (m1.value (), "test");
+
+        maybe<std::string> m2 = std::move (m1);
+        EXPECT_TRUE (m2.has_value ());
+        EXPECT_EQ (*m2, "test");
+    }
+    {
+        // Now move to a maybe<> with no initial value.
+        maybe<std::string> m3;
+        maybe<std::string> m4 = std::move (m3);
+        EXPECT_FALSE (m4.has_value ());
+    }
+}
+
+TEST (Maybe, MoveAssign) {
+    // No initial value
+    {
+        maybe<std::string> m1;
+        EXPECT_FALSE (m1);
+        m1 = std::string{"test"};
+        EXPECT_TRUE (m1.has_value ());
+        EXPECT_EQ (m1.value (), std::string{"test"});
+    }
+    // With an initial value
+    {
+        maybe<std::string> m2{"before"};
+        EXPECT_TRUE (m2);
+        maybe<std::string> m3{"after"};
+        EXPECT_TRUE (m2);
+
+        m2 = std::move (m3);
+        EXPECT_TRUE (m2.has_value ());
+        EXPECT_TRUE (m3.has_value ()); // a moved-from maybe still contains a value.
+        EXPECT_EQ (m2.value (), std::string{"after"});
+    }
 }
 
 // eof: unittests/pstore_support/test_maybe.cpp

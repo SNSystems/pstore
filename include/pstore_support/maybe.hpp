@@ -44,8 +44,6 @@
 #ifndef PSTORE_CMD_UTIL_CL_MAYBE_HPP
 #define PSTORE_CMD_UTIL_CL_MAYBE_HPP
 
-#include <iostream>
-
 #include <cassert>
 #include <new>
 #include <stdexcept>
@@ -58,6 +56,8 @@ namespace pstore {
     template <typename T>
     class maybe {
     public:
+        using value_type = T;
+
         static maybe<T> just (T const & value) {
             return maybe (value);
         }
@@ -67,19 +67,24 @@ namespace pstore {
 
         maybe () {}
         maybe (T const & value) {
-            new (&storage_) T (value);
+            ::new (&storage_) T (value);
             valid_ = true;
         }
         maybe (T && value) {
-            new (&storage_) T (std::move (value));
+            ::new (&storage_) T (std::move (value));
             valid_ = true;
         }
-
-        maybe (maybe const & rhs) {
-            if (rhs) {
-                new (&storage_) T (rhs.value ());
+        maybe (maybe const & other) {
+            if (other) {
+                ::new (&storage_) T (*other);
+                valid_ = true;
             }
-            valid_ = rhs.valid_;
+        }
+        maybe (maybe && other) {
+            if (other) {
+                ::new (&storage_) T (std::move (*other));
+                valid_ = true;
+            }
         }
 
         ~maybe () {
@@ -88,30 +93,38 @@ namespace pstore {
 
         void reset () {
             if (valid_) {
-                this->value ().~T ();
+                // Set valid_ to false before calling the dtor in case it throws. We need to avoid
+                // the possibility of calling it a second time from our dtor.
+                valid_ = false;
+                reinterpret_cast<T const *> (&storage_)->~T ();
             }
-            valid_ = false;
         }
-        maybe & operator= (maybe<T> const & rhs);
+        maybe & operator= (maybe const & rhs);
         maybe & operator= (T const & rhs);
+        maybe &
+        operator= (maybe && other) noexcept (std::is_nothrow_move_assignable<T>::value &&
+                                                 std::is_nothrow_move_constructible<T>::value);
+        maybe & operator= (T && other);
 
-        T const & operator* () const {
+        T const & operator* () const noexcept {
             return *(operator-> ());
         }
-        T & operator* () {
+        T & operator* () noexcept {
             return *(operator-> ());
         }
-        T const * operator-> () const {
+        T const * operator-> () const noexcept {
+            assert (valid_);
             return reinterpret_cast<T const *> (&storage_);
         }
-        T * operator-> () {
+        T * operator-> () noexcept {
+            assert (valid_);
             return reinterpret_cast<T *> (&storage_);
         }
 
-        constexpr operator bool () const {
+        constexpr operator bool () const noexcept {
             return valid_;
         }
-        constexpr bool has_value () const {
+        constexpr bool has_value () const noexcept {
             return valid_;
         }
 
@@ -138,28 +151,49 @@ namespace pstore {
             T temp = rhs;
             std::swap (this->value (), temp);
         } else {
-            new (&storage_) T (rhs);
+            ::new (&storage_) T (rhs);
             valid_ = true;
         }
         return *this;
     }
 
     template <typename T>
-    maybe<T> & maybe<T>::operator= (maybe<T> const & rhs) {
-        if (this != &rhs) {
-            if (!rhs.has_value ()) {
-                this->reset ();
-            } else {
-                this->operator= (rhs.value ());
-            }
+    maybe<T> & maybe<T>::operator= (T && other) {
+        if (this->valid_) {
+            *(*this) = std::forward<T> (other);
+        } else {
+            ::new (&storage_) T (std::forward<T> (other));
+            this->valid_ = true;
         }
         return *this;
     }
 
+    template <typename T>
+    maybe<T> & maybe<T>::operator= (maybe<T> const & other) {
+        if (!other.valid_) {
+            this->reset ();
+        } else {
+            this->operator= (*other);
+        }
+        return *this;
+    }
+
+    template <typename T>
+    maybe<T> & maybe<T>::operator= (maybe<T> && rhs) noexcept (
+        std::is_nothrow_move_assignable<T>::value && std::is_nothrow_move_constructible<T>::value) {
+        if (!rhs.valid_) {
+            this->reset ();
+        } else {
+            this->operator= (std::forward<T> (*rhs));
+        }
+        return *this;
+    }
+
+
     // value
     // ~~~~~
     template <typename T>
-    T & maybe<T>::value () {
+    inline T & maybe<T>::value () {
 #if PSTORE_CPP_EXCEPTIONS
         if (!has_value ()) {
             throw std::runtime_error ("no value");
@@ -169,7 +203,6 @@ namespace pstore {
 #endif
         return *(*this);
     }
-
 
     // just
     // ~~~~
