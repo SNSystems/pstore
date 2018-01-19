@@ -119,7 +119,14 @@ namespace pstore {
             // note that there's no read() implementation.
         };
 
-        /// Any two sstring_view instances have the same serialized representation.
+        /// Any two sstring_view instances with the dame Pointer type have the same serialized
+        /// representation.
+        template <typename Pointer>
+        struct is_compatible<::pstore::sstring_view<Pointer>, ::pstore::sstring_view<Pointer>>
+            : public std::true_type {};
+
+        /// Any two sstring_view instances with the different Pointer type have the same serialized
+        /// representation.
         template <typename Pointer1, typename Pointer2>
         struct is_compatible<::pstore::sstring_view<Pointer1>, ::pstore::sstring_view<Pointer2>>
             : public std::true_type {};
