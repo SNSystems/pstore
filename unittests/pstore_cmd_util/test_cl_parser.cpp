@@ -136,15 +136,17 @@ TEST (ClParser, Enum) {
 
 TEST (ClParser, Modifiers) {
     using namespace pstore::cmd_util;
-    EXPECT_EQ (cl::opt<int> ().get_num_occurrences (), cl::num_occurrences::optional);
-    EXPECT_EQ (cl::opt<int>{cl::Optional}.get_num_occurrences (), cl::num_occurrences::optional);
-    EXPECT_EQ (cl::opt<int>{cl::Required}.get_num_occurrences (), cl::num_occurrences::required);
-    EXPECT_EQ (cl::opt<int>{cl::OneOrMore}.get_num_occurrences (),
-               cl::num_occurrences::zero_or_more);
-    EXPECT_EQ (cl::opt<int> (cl::Required, cl::OneOrMore).get_num_occurrences (),
-               cl::num_occurrences::one_or_more);
-    EXPECT_EQ (cl::opt<int> (cl::Optional, cl::OneOrMore).get_num_occurrences (),
-               cl::num_occurrences::zero_or_more);
+    EXPECT_EQ (cl::opt<int> ().get_num_occurrences_flag (), cl::num_occurrences_flag::optional);
+    EXPECT_EQ (cl::opt<int>{cl::Optional}.get_num_occurrences_flag (),
+               cl::num_occurrences_flag::optional);
+    EXPECT_EQ (cl::opt<int>{cl::Required}.get_num_occurrences_flag (),
+               cl::num_occurrences_flag::required);
+    EXPECT_EQ (cl::opt<int>{cl::OneOrMore}.get_num_occurrences_flag (),
+               cl::num_occurrences_flag::zero_or_more);
+    EXPECT_EQ (cl::opt<int> (cl::Required, cl::OneOrMore).get_num_occurrences_flag (),
+               cl::num_occurrences_flag::one_or_more);
+    EXPECT_EQ (cl::opt<int> (cl::Optional, cl::OneOrMore).get_num_occurrences_flag (),
+               cl::num_occurrences_flag::zero_or_more);
 
     EXPECT_EQ (cl::opt<int> ().name (), "");
     EXPECT_EQ (cl::opt<int>{"name"}.name (), "name");

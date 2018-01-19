@@ -104,17 +104,17 @@ namespace pstore {
 
                 // Make sure all of the required args have been specified.
                 bool check_for_missing (std::string const & program_name, std::ostream & errs) {
+                    using pstore::cmd_util::cl::num_occurrences_flag;
                     using pstore::cmd_util::cl::option;
-                    using pstore::cmd_util::cl::num_occurrences;
 
                     bool ok = true;
                     auto positional_missing = 0U;
 
                     for (option const * opt : option::all ()) {
-                        switch (opt->get_num_occurrences ()) {
-                        case num_occurrences::required:
-                        case num_occurrences::one_or_more:
-                            if (opt->hits () == 0U) {
+                        switch (opt->get_num_occurrences_flag ()) {
+                        case num_occurrences_flag::required:
+                        case num_occurrences_flag::one_or_more:
+                            if (opt->getNumOccurrences () == 0U) {
                                 if (opt->is_positional ()) {
                                     ++positional_missing;
                                 } else {
@@ -124,8 +124,8 @@ namespace pstore {
                                 ok = false;
                             }
                             break;
-                        case num_occurrences::optional:
-                        case num_occurrences::zero_or_more:
+                        case num_occurrences_flag::optional:
+                        case num_occurrences_flag::zero_or_more:
                             break;
                         }
                     }

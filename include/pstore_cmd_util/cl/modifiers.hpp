@@ -191,23 +191,25 @@ namespace pstore {
                 struct required {
                     template <typename Opt>
                     void apply (Opt & o) const {
-                        o.set_num_occurrences (num_occurrences::required);
+                        o.set_num_occurrences_flag (num_occurrences_flag::required);
                     }
                 };
 
                 struct optional {
                     template <typename Opt>
                     void apply (Opt & o) const {
-                        o.set_num_occurrences (num_occurrences::optional);
+                        o.set_num_occurrences_flag (num_occurrences_flag::optional);
                     }
                 };
 
                 struct one_or_more {
                     template <typename Opt>
                     void apply (Opt & o) const {
-                        bool is_optional = o.get_num_occurrences () == num_occurrences::optional;
-                        o.set_num_occurrences (is_optional ? num_occurrences::zero_or_more
-                                                           : num_occurrences::one_or_more);
+                        bool is_optional =
+                            o.get_num_occurrences_flag () == num_occurrences_flag::optional;
+                        o.set_num_occurrences_flag (is_optional
+                                                        ? num_occurrences_flag::zero_or_more
+                                                        : num_occurrences_flag::one_or_more);
                     }
                 };
             } // namespace details

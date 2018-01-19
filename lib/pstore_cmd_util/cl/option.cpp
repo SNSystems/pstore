@@ -57,14 +57,14 @@ namespace pstore {
 
             option::~option () {}
 
-            void option::set_num_occurrences (num_occurrences n) {
-                num_occurrences_ = n;
+            void option::set_num_occurrences_flag (num_occurrences_flag n) {
+                occurrences_ = n;
             }
-            num_occurrences option::get_num_occurrences () const {
+            num_occurrences_flag option::get_num_occurrences_flag () const {
+                return occurrences_;
+            }
+            unsigned option::getNumOccurrences () const {
                 return num_occurrences_;
-            }
-            unsigned option::hits () const {
-                return hits_;
             }
 
             void option::set_description (std::string const & d) {
@@ -92,19 +92,19 @@ namespace pstore {
             }
 
             void option::add_occurrence () {
-                ++hits_;
+                ++num_occurrences_;
             }
             bool option::is_satisfied () const {
                 bool result = true;
-                switch (this->get_num_occurrences ()) {
-                case num_occurrences::required:
-                    result = hits_ >= 1U;
+                switch (this->get_num_occurrences_flag ()) {
+                case num_occurrences_flag::required:
+                    result = num_occurrences_ >= 1U;
                     break;
-                case num_occurrences::one_or_more:
-                    result = hits_ > 1U;
+                case num_occurrences_flag::one_or_more:
+                    result = num_occurrences_ > 1U;
                     break;
-                case num_occurrences::optional:
-                case num_occurrences::zero_or_more:
+                case num_occurrences_flag::optional:
+                case num_occurrences_flag::zero_or_more:
                     break;
                     ;
                 }
@@ -113,13 +113,13 @@ namespace pstore {
 
             bool option::can_accept_another_occurrence () const {
                 bool result = true;
-                switch (this->get_num_occurrences ()) {
-                case num_occurrences::optional:
-                case num_occurrences::required:
-                    result = hits_ == 0U;
+                switch (this->get_num_occurrences_flag ()) {
+                case num_occurrences_flag::optional:
+                case num_occurrences_flag::required:
+                    result = num_occurrences_ == 0U;
                     break;
-                case num_occurrences::zero_or_more:
-                case num_occurrences::one_or_more:
+                case num_occurrences_flag::zero_or_more:
+                case num_occurrences_flag::one_or_more:
                     break;
                 }
                 return result;
@@ -146,7 +146,7 @@ namespace pstore {
             }
             void opt<bool>::add_occurrence () {
                 option::add_occurrence ();
-                if (this->hits () == 1U) {
+                if (this->getNumOccurrences () == 1U) {
                     value_ = !value_;
                 }
             }
@@ -163,11 +163,11 @@ namespace pstore {
                 assert (o != nullptr);
                 original_ = o;
             }
-            void alias::set_num_occurrences (num_occurrences n) {
-                original_->set_num_occurrences (n);
+            void alias::set_num_occurrences_flag (num_occurrences_flag n) {
+                original_->set_num_occurrences_flag (n);
             }
-            num_occurrences alias::get_num_occurrences () const {
-                return original_->get_num_occurrences ();
+            num_occurrences_flag alias::get_num_occurrences_flag () const {
+                return original_->get_num_occurrences_flag ();
             }
             void alias::set_positional () {
                 original_->set_positional ();
@@ -178,8 +178,8 @@ namespace pstore {
             bool alias::is_alias () const {
                 return true;
             }
-            unsigned alias::hits () const {
-                return original_->hits ();
+            unsigned alias::getNumOccurrences () const {
+                return original_->getNumOccurrences ();
             }
             parser_base * alias::get_parser () {
                 return original_->get_parser ();

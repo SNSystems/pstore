@@ -53,7 +53,7 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            enum class num_occurrences {
+            enum class num_occurrences_flag {
                 optional,     // Zero or One occurrence
                 zero_or_more, // Zero or more occurrences allowed
                 required,     // One occurrence required
@@ -72,10 +72,10 @@ namespace pstore {
                 option & operator= (option const &) = delete;
                 virtual ~option ();
 
-                virtual void set_num_occurrences (num_occurrences n);
-                virtual num_occurrences get_num_occurrences () const;
+                virtual void set_num_occurrences_flag (num_occurrences_flag n);
+                virtual num_occurrences_flag get_num_occurrences_flag () const;
 
-                virtual unsigned hits () const;
+                virtual unsigned getNumOccurrences () const;
                 bool is_satisfied () const;
                 bool can_accept_another_occurrence () const;
 
@@ -111,9 +111,9 @@ namespace pstore {
             private:
                 std::string name_;
                 std::string description_;
-                num_occurrences num_occurrences_ = num_occurrences::optional;
+                num_occurrences_flag occurrences_ = num_occurrences_flag::optional;
                 bool positional_ = false;
-                unsigned hits_ = 0U;
+                unsigned num_occurrences_ = 0U;
                 OptionCategory const * category_ = nullptr;
             };
 
@@ -244,7 +244,7 @@ namespace pstore {
 
                 template <class... Mods>
                 list (Mods const &... mods) {
-                    set_num_occurrences (num_occurrences::zero_or_more);
+                    set_num_occurrences_flag (num_occurrences_flag::zero_or_more);
                     apply (*this, mods...);
                 }
 
@@ -307,12 +307,12 @@ namespace pstore {
                 alias (alias const &) = delete;
                 alias & operator= (alias const &) = delete;
 
-                void set_num_occurrences (num_occurrences n) override;
-                num_occurrences get_num_occurrences () const override;
+                void set_num_occurrences_flag (num_occurrences_flag n) override;
+                num_occurrences_flag get_num_occurrences_flag () const override;
                 void set_positional () override;
                 bool is_positional () const override;
                 bool is_alias () const override;
-                unsigned hits () const override;
+                unsigned getNumOccurrences () const override;
                 parser_base * get_parser () override;
                 bool takes_argument () const override;
                 bool value (std::string const & v) override;

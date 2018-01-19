@@ -84,7 +84,7 @@ namespace {
         strings_.clear ();
     }
 
-} // (anonymous namespace)
+} // namespace
 
 
 TEST_F (ClCommandLine, StringOption) {
@@ -174,7 +174,7 @@ TEST_F (ClCommandLine, MissingRequired) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (), ::testing::HasSubstr ("must be specified at least once"));
-    EXPECT_EQ (opt.hits (), 0U);
+    EXPECT_EQ (opt.getNumOccurrences (), 0U);
     EXPECT_EQ (std::string{opt}, "");
 }
 
@@ -197,7 +197,7 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
     std::ostringstream errors;
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
-    EXPECT_EQ (opt.hits (), 0U);
+    EXPECT_EQ (opt.getNumOccurrences (), 0U);
     EXPECT_EQ (std::string{opt}, "");
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
