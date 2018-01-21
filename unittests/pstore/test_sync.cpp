@@ -161,22 +161,26 @@ TEST_F (SyncFixture, SyncBetweenVersions) {
     EXPECT_THAT (value, ::testing::StrEq ("doesn't change"));
 
     db_->sync (0);
+    EXPECT_TRUE (db_->get_current_revision () == 0) << "The current revision should be 0";
     EXPECT_FALSE (this->is_found ("key0")) << "key0 should not be present at revision 0";
     EXPECT_FALSE (this->is_found ("key1")) << "key1 should not be present at revision 0";
 
     db_->sync (1);
+    EXPECT_TRUE (db_->get_current_revision () == 1) << "The current revision should be 1";
     this->read ("key1", &value);
     EXPECT_THAT (value, ::testing::StrEq ("first value"));
     this->read ("key0", &value);
     EXPECT_THAT (value, ::testing::StrEq ("doesn't change"));
 
     db_->sync (2);
+    EXPECT_TRUE (db_->get_current_revision () == 2) << "The current revision should be 2";
     this->read ("key1", &value);
     EXPECT_THAT (value, ::testing::StrEq ("second value"));
     this->read ("key0", &value);
     EXPECT_THAT (value, ::testing::StrEq ("doesn't change"));
 
     db_->sync (1);
+    EXPECT_TRUE (db_->get_current_revision () == 1) << "The current revision should be 1";
     this->read ("key1", &value);
     EXPECT_THAT (value, ::testing::StrEq ("first value"));
     this->read ("key0", &value);

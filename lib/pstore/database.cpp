@@ -207,8 +207,7 @@ namespace pstore {
             is_newer = true;
         } else {
             unsigned const current_revision =
-                this->getro<trailer> (footer_pos)
-                    ->a.generation.load (); // TODO: relax memory order?
+                this->get_current_revision (); // TODO: relax memory order?
             // An early out if the user requests the same revision that we already have.
             if (revision == current_revision) {
                 return;
