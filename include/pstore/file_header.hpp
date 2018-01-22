@@ -107,6 +107,28 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (offsetof (extent, size) == 8);
     PSTORE_STATIC_ASSERT (sizeof (extent) == 16);
 
+    // comparison
+    inline bool operator== (extent const & lhs, extent const & rhs) noexcept {
+        return lhs.addr == rhs.addr && lhs.size == rhs.size;
+    }
+    inline bool operator!= (extent const & lhs, extent const & rhs) noexcept {
+        return !(lhs == rhs);
+    }
+
+    // ordering
+    inline bool operator< (extent const & lhs, extent const & rhs) noexcept {
+        return lhs.addr < rhs.addr || (lhs.addr == rhs.addr && lhs.size < rhs.size);
+    }
+    inline bool operator>= (extent const & lhs, extent const & rhs) noexcept {
+        return !(lhs < rhs);
+    }
+    inline bool operator> (extent const & lhs, extent const & rhs) noexcept {
+        return rhs < lhs;
+    }
+    inline bool operator<= (extent const & lhs, extent const & rhs) noexcept {
+        return !(lhs > rhs);
+    }
+
     inline std::ostream & operator<< (std::ostream & os, extent const & r) {
         return os << "{addr:" << r.addr << ",size:" << r.size << "}";
     }
