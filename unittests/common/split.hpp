@@ -4,7 +4,7 @@
 //* \__ \ |_) | | | |_  *
 //* |___/ .__/|_|_|\__| *
 //*     |_|             *
-//===- unittests/dump/split.hpp -------------------------------------------===//
+//===- unittests/common/split.hpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -90,4 +90,4 @@ std::vector<StringType> split_tokens (StringType const & s) {
 }
 
 #endif // SPLIT_HPP
-// eof: unittests/dump/split.hpp
+// eof: unittests/common/split.hpp

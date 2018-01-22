@@ -50,7 +50,6 @@ include (add_pstore)
 set (PSTORE_DUMP_UNIT_TEST_SRC
     convert.hpp
     convert.cpp
-    split.hpp
     test_array.cpp
     test_base64.cpp
     test_db.cpp
