@@ -240,7 +240,7 @@ namespace pstore {
             return size_.footer_pos ();
         }
 
-        std::uint32_t get_current_revision () const {
+        unsigned get_current_revision () const {
             return getro<trailer> (size_.footer_pos ())->a.generation.load ();
         }
 

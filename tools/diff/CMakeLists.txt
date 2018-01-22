@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- tools/diff/CMakeLists.txt -------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,13 +41,36 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (broker)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_broker_intf)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
-# eof: lib/CMakeLists.txt
+
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/diff_config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/diff_config.hpp"
+    ESCAPE_QUOTES
+)
+
+add_pstore_executable (pstore-diff
+    "${CMAKE_CURRENT_BINARY_DIR}/diff_config.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/diff_config.hpp.in"
+    main.cpp
+    switches.cpp
+    switches.hpp
+)
+
+target_include_directories (pstore-diff PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries (pstore-diff pstore-diff-lib pstore-cmd-util)
+if (PSTORE_IS_INSIDE_LLVM)
+    target_link_libraries (pstore-diff LLVMSupport)
+
+endif (PSTORE_IS_INSIDE_LLVM)
+
+
+add_custom_command (TARGET pstore-diff
+    PRE_LINK
+    COMMAND pstore-diff-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/diff.xml"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "Running pstore diff unit tests"
+    VERBATIM
+)
+add_dependencies (pstore-diff pstore-diff-unit-tests)
+
+# eof: tools/diff/CMakeLists.txt

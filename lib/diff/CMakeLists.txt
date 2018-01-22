@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- lib/diff/CMakeLists.txt ---------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,13 +41,21 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (broker)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_broker_intf)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
-# eof: lib/CMakeLists.txt
+
+##########################
+# PStore Dump Core Library
+##########################
+
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_DIFF_LIB_SRC
+    "${PSTORE_INCLUDE_DIR}/diff/revision.hpp"
+    "${PSTORE_INCLUDE_DIR}/diff/diff_value.hpp"
+	revision.cpp
+    diff_value.cpp
+)
+
+include (add_pstore)
+add_pstore_library (pstore-diff-lib ${PSTORE_DIFF_LIB_SRC})
+target_link_libraries (pstore-diff-lib pstore pstore-dump-lib)
+
+# eof: lib/diff/CMakeLists.txt

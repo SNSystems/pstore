@@ -45,6 +45,7 @@
 include (add_pstore)
 add_subdirectory (broker)
 add_subdirectory (common)
+add_subdirectory (diff)
 add_subdirectory (dump)
 add_subdirectory (pstore)
 add_subdirectory (pstore_cmd_util)

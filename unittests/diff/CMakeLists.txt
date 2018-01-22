@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- unittests/diff/CMakeLists.txt ---------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,13 +41,12 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (broker)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_broker_intf)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
-# eof: lib/CMakeLists.txt
+
+include (add_pstore)
+add_pstore_unit_test (pstore-diff-unit-tests
+    test_indices.cpp
+    test_revision.cpp
+)
+target_link_libraries (pstore-diff-unit-tests pstore pstore-diff-lib pstore-common)
+
+# eof: unittests/diff/CMakeLists.txt
