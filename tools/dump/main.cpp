@@ -189,11 +189,13 @@ namespace {
         value::array::container array;
         for (pstore::address footer_pos : pstore::generation_container (db)) {
             auto footer = db.getro<pstore::trailer> (footer_pos);
-            array.emplace_back (value::make_value (value::object::container{
+            auto revision = std::make_shared<value::object> (value::object::container{
                 {"number", value::make_value (footer->a.generation.load ())},
-                {"time", value::make_time (footer->a.time, no_times)},
                 {"size", value::make_number (footer->a.size.load ())},
-            }));
+                {"time", value::make_time (footer->a.time, no_times)},
+            });
+            revision->compact (true);
+            array.emplace_back (revision);
         }
         return value::make_value (array);
     }
