@@ -68,7 +68,6 @@ namespace pstore {
 #define PSTORE_REPO_SECTION_TYPES                                                                  \
     X (Text)                                                                                       \
     X (BSS)                                                                                        \
-    X (Common)                                                                                     \
     X (Data)                                                                                       \
     X (RelRo)                                                                                      \
     X (Mergeable1ByteCString)                                                                      \
@@ -632,7 +631,14 @@ namespace pstore {
 
             using member_array = sparse_array<std::uint64_t>;
 
+
             section const & operator[] (section_type key) const;
+            /// Returns true if this fragment contains a section of the given type.
+            bool has_section (section_type type) const noexcept {
+                return arr_.has_index (
+                    static_cast<pstore::repo::fragment::member_array::bitmap_type> (type));
+            }
+
             std::size_t num_sections () const {
                 return arr_.size ();
             }

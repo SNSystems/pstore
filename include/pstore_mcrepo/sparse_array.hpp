@@ -256,7 +256,7 @@ namespace pstore {
                 return sizeof (BitmapType) * 8;
             }
 
-            /// Returns true if the spare array has an index 'pos'.
+            /// Returns true if the sparse array has an index 'pos'.
             bool has_index (size_type pos) const noexcept {
                 if (pos >= max_size ()) {
                     return false;
