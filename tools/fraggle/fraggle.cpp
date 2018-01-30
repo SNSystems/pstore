@@ -135,7 +135,7 @@ int main (int argc, char * argv[]) {
                                   pstore::make_sstring_view (name.data (), name.length ()))
                         .first.get_address ();
 
-                pstore::repo::section_content data_section (pstore::repo::section_type::ReadOnly,
+                pstore::repo::section_content data_section (pstore::repo::section_type::read_only,
                                                             std::uint8_t{1} /*alignment*/);
                 std::vector<std::uint32_t> values;
                 values.reserve (section_size.get ());

@@ -63,24 +63,24 @@
 namespace pstore {
     namespace repo {
 
-// FIXME: the members of this collection are drawn from
-// RepoObjectWriter::writeRepoSectionData(). Not sure it's correct.
+// TODO: the members of this collection are drawn from
+// RepoObjectWriter::writeRepoSectionData(). It's missing at least the debugging, and EH-related
+// sections and probably others...
 #define PSTORE_REPO_SECTION_TYPES                                                                  \
-    X (Text)                                                                                       \
-    X (BSS)                                                                                        \
-    X (Data)                                                                                       \
-    X (RelRo)                                                                                      \
-    X (Mergeable1ByteCString)                                                                      \
-    X (Mergeable2ByteCString)                                                                      \
-    X (Mergeable4ByteCString)                                                                      \
-    X (MergeableConst4)                                                                            \
-    X (MergeableConst8)                                                                            \
-    X (MergeableConst16)                                                                           \
-    X (MergeableConst32)                                                                           \
-    X (ReadOnly)                                                                                   \
-    X (ThreadBSS)                                                                                  \
-    X (ThreadData)                                                                                 \
-    X (Metadata)
+    X (text)                                                                                       \
+    X (bss)                                                                                        \
+    X (data)                                                                                       \
+    X (rel_ro)                                                                                     \
+    X (mergeable_1_byte_c_string)                                                                  \
+    X (mergeable_2_byte_c_string)                                                                  \
+    X (mergeable_4_byte_c_string)                                                                  \
+    X (mergeable_const_4)                                                                          \
+    X (mergeable_const_8)                                                                          \
+    X (mergeable_const_16)                                                                         \
+    X (mergeable_const_32)                                                                         \
+    X (read_only)                                                                                  \
+    X (thread_bss)                                                                                 \
+    X (thread_data)
 
 #define X(a) a,
         /// \brief The collection of section types known by the repository.
