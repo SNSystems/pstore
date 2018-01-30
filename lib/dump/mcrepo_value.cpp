@@ -89,7 +89,7 @@ namespace value {
         auto const & ifixups = section.ifixups ();
 
         object::container v;
-        v.emplace_back ("align", make_value (1U << section.align ()));
+        v.emplace_back ("align", make_value (section.align ()));
         v.emplace_back ("data", std::make_shared<binary> (std::begin (data), std::end (data)));
         v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
 

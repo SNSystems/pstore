@@ -71,7 +71,7 @@ TEST_F (FragmentTest, Empty) {
 
 TEST_F (FragmentTest, MakeReadOnlySection) {
     std::vector<section_content> c;
-    c.emplace_back (section_type::read_only, std::uint8_t{2} /*alignment*/);
+    c.emplace_back (section_type::read_only, std::uint8_t{4} /*alignment*/);
     section_content & rodata = c.back ();
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
     auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
@@ -93,7 +93,7 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     auto rodata_end = std::end (rodata.data);
     ASSERT_EQ (std::distance (data_begin, data_end), std::distance (rodata_begin, rodata_end));
     EXPECT_TRUE (std::equal (data_begin, data_end, rodata_begin));
-    EXPECT_EQ (2U, s.align ());
+    EXPECT_EQ (4U, s.align ());
     EXPECT_EQ (0U, s.ifixups ().size ());
     EXPECT_EQ (0U, s.xfixups ().size ());
 }
@@ -106,7 +106,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     std::vector<std::uint8_t> const original{'t', 'e', 'x', 't'};
 
     std::vector<section_content> c;
-    c.emplace_back (section_type::text, std::uint8_t{4} /*alignment*/);
+    c.emplace_back (section_type::text, std::uint8_t{16} /*alignment*/);
     {
         // Build the text section's contents and fixups.
         section_content & text = c.back ();
@@ -131,7 +131,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     section const & s = (*f)[section_type::text];
-    EXPECT_EQ (4U, s.align ());
+    EXPECT_EQ (16U, s.align ());
     EXPECT_EQ (4U, s.data ().size ());
     EXPECT_EQ (2U, s.ifixups ().size ());
     EXPECT_EQ (3U, s.xfixups ().size ());

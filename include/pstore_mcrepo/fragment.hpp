@@ -260,7 +260,7 @@ namespace pstore {
             };
 
             std::uint8_t align () const noexcept {
-                return align_;
+                return 1U << align_;
             }
 
             container<std::uint8_t> data () const {
@@ -360,7 +360,7 @@ namespace pstore {
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
         section::section (DataRange const & d, IFixupRange const & i, XFixupRange const & x,
                           std::uint8_t align)
-                : align_{align}
+                : align_{static_cast<std::uint8_t> (bit_count::ctz (align))}
                 , num_ifixups_{0} {
 
             static_assert (std::is_standard_layout<section>::value,
@@ -376,6 +376,7 @@ namespace pstore {
             auto const start = reinterpret_cast<std::uint8_t *> (this);
 #endif
             auto p = reinterpret_cast<std::uint8_t *> (this + 1);
+            assert (bit_count::pop_count (align) == 1);
 
             if (d.first != d.second) {
                 p = std::copy (d.first, d.second, aligned_ptr<std::uint8_t> (p));
