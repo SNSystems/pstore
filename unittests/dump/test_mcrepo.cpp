@@ -120,6 +120,7 @@ namespace {
 
 TEST_F (MCRepoFixture, DumpFragment) {
     using ::testing::ElementsAre;
+    using ::testing::ElementsAreArray;
 
     transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
@@ -141,7 +142,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (16U, lines.size ());
+    ASSERT_EQ (13U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -151,10 +152,10 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("data", ":", "!!binary", "|"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("dGV4dA=="));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("ifixups", ":"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "section", ":", "data"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x2"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x2"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x2"));
+
+    char const * expected_ifixup[] = {"-",       "{",    "section:", "data,", "type:", "0x2,",
+                                      "offset:", "0x2,", "addend:",  "0x2",   "}"};
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAreArray (expected_ifixup));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("xfixups", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "name", ":", "foo"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));

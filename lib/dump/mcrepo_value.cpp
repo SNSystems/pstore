@@ -64,12 +64,14 @@ namespace value {
 #undef X
 
     value_ptr make_value (pstore::repo::internal_fixup const & ifx) {
-        return make_value (object::container{
+        auto v = std::make_shared<object> (object::container{
             {"section", make_value (ifx.section)},
             {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
             {"offset", make_value (ifx.offset)},
             {"addend", make_value (ifx.addend)},
         });
+        v->compact ();
+        return v;
     }
 
     value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx) {
