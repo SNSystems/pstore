@@ -383,16 +383,17 @@ int main (int argc, char * argv[]) {
                                    value::make_contents (db, db.footer_pos (), no_times));
             }
             if (show_all_fragments) {
-                file.emplace_back ("fragments", value::make_fragments (db));
+                file.emplace_back ("fragments", value::make_fragments (db, opt.hex));
             } else {
                 if (opt.fragments.size () > 0) {
                     if (auto * const digest_index = pstore::index::get_digest_index (db)) {
-                        auto record = [&db](pstore::index::digest_index::value_type const & value) {
-                            auto fragment = pstore::repo::fragment::load (db, value.second);
-                            return value::make_value (value::object::container{
-                                {"digest", value::make_value (value.first)},
-                                {"fragment", value::make_value (db, *fragment)}});
-                        };
+                        auto record =
+                            [&db, &opt](pstore::index::digest_index::value_type const & value) {
+                                auto fragment = pstore::repo::fragment::load (db, value.second);
+                                return value::make_value (value::object::container{
+                                    {"digest", value::make_value (value.first)},
+                                    {"fragment", value::make_value (db, *fragment, opt.hex)}});
+                            };
 
                         file.emplace_back ("fragments",
                                            add_specified (*digest_index, opt.fragments,

@@ -384,6 +384,25 @@ namespace value {
     };
 
 
+    //***********************
+    //*   b i n a r y 1 6   *
+    //***********************
+    /// Dumps a block of binary data in hex format (tagged as "!!binary16 in the YAML output).
+    class binary16 final : public value {
+    public:
+        template <typename InputIterator>
+        explicit binary16 (InputIterator begin, InputIterator end)
+                : v_ (begin, end) {}
+
+    private:
+        template <typename OStream>
+        OStream & writer (OStream & os, indent const & ind) const;
+        std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
+        std::wostream & write_impl (std::wostream & os, indent const & indent) const override;
+        std::vector<std::uint8_t> v_;
+    };
+
+
     //****************
     //*   t i m  e   *
     //****************

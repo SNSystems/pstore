@@ -53,11 +53,13 @@ namespace value {
     value_ptr make_value (pstore::repo::section_type t);
     value_ptr make_value (pstore::repo::internal_fixup const & ifx);
     value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx);
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section);
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment);
+    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
+                          bool hex_mode);
+    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
+                          bool hex_mode);
 
 
-    value_ptr make_fragments (pstore::database & db);
+    value_ptr make_fragments (pstore::database & db, bool hex_mode);
 
     value_ptr make_value (pstore::repo::linkage_type t);
     value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member);

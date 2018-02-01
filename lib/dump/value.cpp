@@ -57,6 +57,16 @@
 
 #include "pstore_support/utf.hpp"
 
+namespace {
+
+    template <typename CharType>
+    CharType to_hex (unsigned v) {
+        assert (v < 0x10);
+        return static_cast<CharType> (v + ((v < 10) ? '0' : 'A' - 10));
+    }
+
+} // end anonymous namespace
+
 namespace value {
 
     template <typename OStream>
@@ -143,11 +153,7 @@ namespace value {
     template <typename OStream, typename UCharType>
     OStream & string::write_codepoint_hex (OStream & os, UCharType ch) {
         static_assert (std::is_unsigned<UCharType>::value, "UCharType must be unsigned");
-        auto to_hex = [](unsigned v) -> char {
-            assert (v < 0x10);
-            return static_cast<char> (v + ((v < 10) ? '0' : 'A' - 10));
-        };
-        return os << "\\x" << to_hex ((ch >> 4) & 0x0F) << to_hex (ch & 0x0F);
+        return os << "\\x" << to_hex<UCharType> ((ch >> 4) & 0x0F) << to_hex<UCharType> (ch & 0x0F);
     }
 
     // write_character
@@ -496,7 +502,7 @@ namespace value {
 } // namespace value
 
 namespace {
-    // We accumulate a number of lines out encoded binary in a single string object
+    // We accumulate a number of lines of encoded binary in a single string object
     // rather than writing individual characters to the output stream one at a time.
     template <typename OStream>
     struct accumulator {
@@ -634,4 +640,44 @@ namespace value {
     }
 
 } // namespace value
+
+namespace value {
+    //**********************
+    //*   b i n a r y 1 6  *
+    //**********************
+    // writer
+    // ~~~~~~
+    template <typename OStream>
+    OStream & binary16::writer (OStream & os, indent const & ind) const {
+        os << "!!binary16 |\n" << ind;
+
+        using char_type = typename OStream::char_type;
+        constexpr auto number_of_bytes_per_row = 8U * 2U;
+        auto ctr = 0U;
+        for (std::uint8_t b : v_) {
+            if (ctr >= number_of_bytes_per_row) {
+                os << '\n' << ind;
+                ctr = 0;
+            } else if (ctr > 0 && !(ctr % 2U)) {
+                os << " ";
+            }
+            char_type hex[3] = {to_hex<char_type> (b >> 4 & 0x0f), to_hex<char_type> (b & 0x0f), 0};
+            os << hex;
+            ++ctr;
+        }
+        os << '>';
+        return os;
+    }
+
+    // write_impl
+    // ~~~~~~~~~~
+    std::ostream & binary16::write_impl (std::ostream & os, indent const & ind) const {
+        return this->writer (os, ind);
+    }
+    std::wostream & binary16::write_impl (std::wostream & os, indent const & ind) const {
+        return this->writer (os, ind);
+    }
+
+} // namespace value
+
 // eof: lib/dump/value.cpp

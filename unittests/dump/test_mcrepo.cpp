@@ -138,7 +138,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
         fragment::load (*db_, fragment::alloc (transaction, std::begin (c), std::end (c)));
 
     std::ostringstream out;
-    value::value_ptr addr = value::make_value (*db_, *fragment);
+    value::value_ptr addr = value::make_value (*db_, *fragment, false /*hex mode?*/);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());

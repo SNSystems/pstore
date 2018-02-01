@@ -86,13 +86,22 @@ namespace value {
         });
     }
 
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section) {
+    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
+                          bool hex_mode) {
         auto const & data = section.data ();
         auto const & ifixups = section.ifixups ();
 
         object::container v;
         v.emplace_back ("align", make_value (section.align ()));
-        v.emplace_back ("data", std::make_shared<binary> (std::begin (data), std::end (data)));
+
+        value_ptr data_value;
+        if (hex_mode) {
+            data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
+        } else {
+            data_value = std::make_shared<binary> (std::begin (data), std::end (data));
+        }
+
+        v.emplace_back ("data", data_value);
         v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
 
         array::container xfx_members;
@@ -103,18 +112,20 @@ namespace value {
         return make_value (v);
     }
 
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment) {
+    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
+                          bool hex_mode) {
         array::container array;
 
         for (auto const key : fragment.sections ().get_indices ()) {
             auto const type = static_cast<pstore::repo::section_type> (key);
-            array.emplace_back (make_value (object::container{
-                {"type", make_value (type)}, {"contents", make_value (db, fragment[type])}}));
+            array.emplace_back (make_value (
+                object::container{{"type", make_value (type)},
+                                  {"contents", make_value (db, fragment[type], hex_mode)}}));
         }
         return make_value (std::move (array));
     }
 
-    value_ptr make_fragments (pstore::database & db) {
+    value_ptr make_fragments (pstore::database & db, bool hex_mode) {
         array::container result;
         if (pstore::index::digest_index * const digests =
                 pstore::index::get_digest_index (db, false /* create */)) {
@@ -122,8 +133,9 @@ namespace value {
             array::container members;
             for (auto const & kvp : *digests) {
                 auto fragment = pstore::repo::fragment::load (db, kvp.second);
-                result.emplace_back (make_value (object::container{
-                    {"digest", make_value (kvp.first)}, {"fragment", make_value (db, *fragment)}}));
+                result.emplace_back (make_value (
+                    object::container{{"digest", make_value (kvp.first)},
+                                      {"fragment", make_value (db, *fragment, hex_mode)}}));
             }
         }
         return make_value (result);
