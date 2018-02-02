@@ -649,24 +649,29 @@ namespace value {
     // ~~~~~~
     template <typename OStream>
     OStream & binary16::writer (OStream & os, indent const & ind) const {
-        os << "!!binary16 |\n" << ind;
-
-        using char_type = typename OStream::char_type;
-        constexpr auto number_of_bytes_per_row = 8U * 2U;
-        auto ctr = 0U;
-        for (std::uint8_t b : v_) {
-            if (ctr >= number_of_bytes_per_row) {
-                os << '\n' << ind;
-                ctr = 0;
-            } else if (ctr > 0 && !(ctr % 2U)) {
-                os << " ";
+        os << "!!binary16 |";
+        if (v_.size () == 0) {
+            os << '\n' << ind;
+        } else {
+            using char_type = typename OStream::char_type;
+            constexpr auto number_of_bytes_per_row = 8U * 2U;
+            auto ctr = 0U;
+            for (std::uint8_t b : v_) {
+                if (ctr == 0U || ctr >= number_of_bytes_per_row) {
+                    // Line wrap and indent on the first iteration or when we run out of width.
+                    os << '\n' << ind;
+                    ctr = 0U;
+                } else if (ctr % 2U == 0U) {
+                    // Values grouped into two-byte pairs.
+                    os << ' ';
+                }
+                char_type const hex[3] = {to_hex<char_type> ((b >> 4) & 0x0f),
+                                          to_hex<char_type> (b & 0x0f), '\0'};
+                os << hex;
+                ++ctr;
             }
-            char_type hex[3] = {to_hex<char_type> (b >> 4 & 0x0f), to_hex<char_type> (b & 0x0f), 0};
-            os << hex;
-            ++ctr;
         }
-        os << '>';
-        return os;
+        return os << '>';
     }
 
     // write_impl
