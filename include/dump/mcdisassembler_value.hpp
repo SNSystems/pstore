@@ -1,10 +1,10 @@
-//*                                                   _             *
-//*  _ __ ___   ___ _ __ ___ _ __   ___   __   ____ _| |_   _  ___  *
-//* | '_ ` _ \ / __| '__/ _ \ '_ \ / _ \  \ \ / / _` | | | | |/ _ \ *
-//* | | | | | | (__| | |  __/ |_) | (_) |  \ V / (_| | | |_| |  __/ *
-//* |_| |_| |_|\___|_|  \___| .__/ \___/    \_/ \__,_|_|\__,_|\___| *
-//*                         |_|                                     *
-//===- include/dump/mcrepo_value.hpp --------------------------------------===//
+//*                    _ _                                  _     _            *
+//*  _ __ ___   ___ __| (_)___  __ _ ___ ___  ___ _ __ ___ | |__ | | ___ _ __  *
+//* | '_ ` _ \ / __/ _` | / __|/ _` / __/ __|/ _ \ '_ ` _ \| '_ \| |/ _ \ '__| *
+//* | | | | | | (_| (_| | \__ \ (_| \__ \__ \  __/ | | | | | |_) | |  __/ |    *
+//* |_| |_| |_|\___\__,_|_|___/\__,_|___/___/\___|_| |_| |_|_.__/|_|\___|_|    *
+//*                                                                            *
+//===- include/dump/mcdisassembler_value.hpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,35 +41,18 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef DUMP_MCREPO_VALUE_HPP
-#define DUMP_MCREPO_VALUE_HPP
+#ifndef PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
+#define PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
 
-#include "value.hpp"
-#include "pstore_mcrepo/fragment.hpp"
-#include "pstore_mcrepo/ticket.hpp"
+#include <cstdint>
+#include "dump/value.hpp"
 
 namespace value {
 
-    value_ptr make_value (pstore::repo::section_type t);
-    value_ptr make_value (pstore::repo::internal_fixup const & ifx);
-    value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx);
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
-                          pstore::repo::section_type st, bool hex_mode);
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
-                          bool hex_mode);
-
-
-    value_ptr make_fragments (pstore::database & db, bool hex_mode);
-
-    value_ptr make_value (pstore::repo::linkage_type t);
-    value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member);
-    value_ptr make_value (pstore::database & db,
-                          std::shared_ptr<pstore::repo::ticket const> ticket);
-
-
-    value_ptr make_tickets (pstore::database & db);
+    value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
+                                       bool hex_mode);
 
 } // namespace value
 
-#endif // DUMP_MCREPO_VALUE_HPP
-// eof: include/dump/mcrepo_value.hpp
+#endif // PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
+// eof: include/dump/mcdisassembler_value.hpp

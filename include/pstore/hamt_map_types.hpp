@@ -50,10 +50,10 @@
 #include <vector>
 
 #include "pstore/array_stack.hpp"
-#include "pstore/bit_count.hpp"
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
 #include "pstore/file_header.hpp"
+#include "pstore_support/bit_count.hpp"
 #include "pstore_support/gsl.hpp"
 
 namespace pstore {

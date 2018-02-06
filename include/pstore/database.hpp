@@ -67,12 +67,12 @@
 #include "pstore/memory_mapper.hpp"
 #include "pstore/region.hpp"
 #include "pstore/shared_memory.hpp"
-#include "pstore/sstring_view.hpp"
 #include "pstore/storage.hpp"
 #include "pstore/uint128.hpp"
 #include "pstore/vacuum_intf.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/file.hpp"
+#include "pstore_support/sstring_view.hpp"
 
 namespace pstore {
     /// Calculate the value that must be added to 'v' in order that it has the alignment

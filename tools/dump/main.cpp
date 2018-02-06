@@ -54,6 +54,19 @@
 #include <sstream>
 #include <vector>
 
+#include "dump/db_value.hpp"
+#include "dump/value.hpp"
+#include "dump/mcrepo_value.hpp"
+#include "dump_config.hpp"
+
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/Signals.h"
+#include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/PrettyStackTrace.h"
+#include "llvm/Support/ManagedStatic.h"
+#include "llvm/ADT/StringRef.h"
+#endif
+
 #include "pstore/database.hpp"
 #include "pstore/generation_iterator.hpp"
 #include "pstore/hamt_map.hpp"
@@ -67,11 +80,7 @@
 #include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp"
 
-#include "dump/db_value.hpp"
-#include "dump/value.hpp"
-#include "dump/mcrepo_value.hpp"
-
-#include "./switches.hpp"
+#include "switches.hpp"
 
 namespace {
 
@@ -339,6 +348,17 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     TRY {
+#if PSTORE_IS_INSIDE_LLVM
+        llvm::sys::PrintStackTraceOnErrorSignal (argv[0]);
+        llvm::PrettyStackTraceProgram X (argc, argv);
+        llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
+
+        // Initialize targets and assembly printers/parsers.
+        llvm::InitializeAllTargetInfos ();
+        llvm::InitializeAllTargetMCs ();
+        llvm::InitializeAllDisassemblers ();
+#endif
+
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
         if (exit_code != EXIT_SUCCESS) {

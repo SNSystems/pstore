@@ -68,11 +68,11 @@
 #define PSTORE_SSTRING_VIEW_ARCHIVE_HPP
 
 #include "pstore/db_archive.hpp"
-#include "pstore/serialize/types.hpp"
 #include "pstore/serialize/standard_types.hpp"
-#include "pstore/sstring_view.hpp"
+#include "pstore/serialize/types.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore/varint.hpp"
+#include "pstore_support/sstring_view.hpp"
 
 ///@{
 /// \name Reading and writing standard types

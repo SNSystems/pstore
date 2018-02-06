@@ -117,7 +117,6 @@ namespace {
     }
 } // namespace
 
-
 TEST_F (MCRepoFixture, DumpFragment) {
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
@@ -125,13 +124,13 @@ TEST_F (MCRepoFixture, DumpFragment) {
     transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
     std::array<section_content, 1> c = {
-        {section_content (section_type::text, std::uint8_t{0x10} /*alignment*/)}};
+        {section_content (section_type::data, std::uint8_t{0x10} /*alignment*/)}};
     {
-        // Build the text section's contents and fixups.
-        section_content & text = c.back ();
-        text.data.assign ({'t', 'e', 'x', 't'});
-        text.ifixups.emplace_back (internal_fixup{section_type::data, 2, 2, 2});
-        text.xfixups.emplace_back (external_fixup{this->store_str (transaction, "foo"), 3, 3, 3});
+        // Build the data section's contents and fixups.
+        section_content & data = c.back ();
+        data.data.assign ({'t', 'e', 'x', 't'});
+        data.ifixups.emplace_back (internal_fixup{section_type::data, 2, 2, 2});
+        data.xfixups.emplace_back (external_fixup{this->store_str (transaction, "foo"), 3, 3, 3});
     }
 
     auto fragment =
@@ -146,7 +145,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "text"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "data"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("align", ":", "0x10"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("data", ":", "!!binary", "|"));

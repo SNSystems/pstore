@@ -55,9 +55,9 @@
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_set.hpp"
 #include "pstore/index_types.hpp"
-#include "pstore/sstring_view.hpp"
 #include "pstore/sstring_view_archive.hpp"
 #include "pstore/transaction.hpp"
+#include "pstore_support/sstring_view.hpp"
 
 // local includes
 #include "empty_store.hpp"

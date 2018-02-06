@@ -45,9 +45,12 @@
 
 #include "dump/value.hpp"
 #include "dump/db_value.hpp"
+#include "dump/mcdisassembler_value.hpp"
 #include "pstore/db_archive.hpp"
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_set.hpp"
+
+#include "dump_lib_config.hpp"
 
 namespace value {
 
@@ -87,7 +90,7 @@ namespace value {
     }
 
     value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
-                          bool hex_mode) {
+                          pstore::repo::section_type st, bool hex_mode) {
         auto const & data = section.data ();
         auto const & ifixups = section.ifixups ();
 
@@ -95,12 +98,20 @@ namespace value {
         v.emplace_back ("align", make_value (section.align ()));
 
         value_ptr data_value;
-        if (hex_mode) {
-            data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
-        } else {
-            data_value = std::make_shared<binary> (std::begin (data), std::end (data));
+#if PSTORE_IS_INSIDE_LLVM
+        if (st == pstore::repo::section_type::text) {
+            std::uint8_t const * const first = data.data ();
+            std::uint8_t const * const last = first + data.size ();
+            data_value = make_disassembled_value (first, last, hex_mode);
         }
-
+#endif
+        if (!data_value) {
+            if (hex_mode) {
+                data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
+            } else {
+                data_value = std::make_shared<binary> (std::begin (data), std::end (data));
+            }
+        }
         v.emplace_back ("data", data_value);
         v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
 
@@ -120,7 +131,7 @@ namespace value {
             auto const type = static_cast<pstore::repo::section_type> (key);
             array.emplace_back (make_value (
                 object::container{{"type", make_value (type)},
-                                  {"contents", make_value (db, fragment[type], hex_mode)}}));
+                                  {"contents", make_value (db, fragment[type], type, hex_mode)}}));
         }
         return make_value (std::move (array));
     }

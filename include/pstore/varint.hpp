@@ -85,7 +85,7 @@
 
 #include <utility>
 
-#include "pstore/bit_count.hpp"
+#include "pstore_support/bit_count.hpp"
 
 // TODO: replace this shrapnel with C++17 [[fallthrough]]
 #if defined(__clang__)

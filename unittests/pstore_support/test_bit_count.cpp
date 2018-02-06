@@ -4,7 +4,7 @@
 //* | |_) | | |_  | (_| (_) | |_| | | | | |_  *
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
-//===- unittests/pstore/test_bit_count.cpp --------------------------------===//
+//===- unittests/pstore_support/test_bit_count.cpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/bit_count.hpp"
+#include "pstore_support/bit_count.hpp"
 #include "gmock/gmock.h"
 
 TEST (BitCount, CountLeadingZeros) {
@@ -102,4 +102,4 @@ TEST (BitCount, PopCountULongLong) {
     bitmap = 0xFFFFFFFFFFFFFFFF;
     EXPECT_EQ (64U, pstore::bit_count::pop_count (bitmap));
 }
-// eof: unittests/pstore/test_bit_count.cpp
+// eof: unittests/pstore_support/test_bit_count.cpp

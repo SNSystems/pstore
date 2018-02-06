@@ -137,6 +137,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
     "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
 
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_count.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/error.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file.hpp"
@@ -154,6 +155,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_cv.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     error.cpp

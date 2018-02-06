@@ -43,11 +43,13 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 set (PSTORE_SUPPORT_UNIT_TEST_SRC
+    test_bit_count.cpp
     test_error.cpp
     test_file.cpp
     test_gsl.cpp
     test_maybe.cpp
     test_small_vector.cpp
+    test_sstring_view.cpp
     test_utf.cpp
     test_utf_win32.cpp
 )

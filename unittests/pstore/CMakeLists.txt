@@ -49,7 +49,6 @@ add_pstore_unit_test (pstore-unit-tests
     test_array_stack.cpp
     test_base32.cpp
     test_basic_logger.cpp
-    test_bit_count.cpp
     test_crc32.cpp
     test_database.cpp
     test_db_archive.cpp
@@ -67,7 +66,6 @@ add_pstore_unit_test (pstore-unit-tests
     test_region.cpp
     test_rotating_log.cpp
     test_shared_memory.cpp
-    test_sstring_view.cpp
     test_sstring_view_archive.cpp
     test_sync.cpp
     test_transaction.cpp

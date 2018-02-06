@@ -58,7 +58,7 @@
 #include <intrin.h>
 #endif
 
-#include "pstore/bit_count.hpp"
+#include "pstore_support/bit_count.hpp"
 
 namespace pstore {
     namespace repo {

@@ -4,7 +4,7 @@
 //* | |_) | | |_  | (_| (_) | |_| | | | | |_  *
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
-//===- include/pstore/bit_count.hpp ---------------------------------------===//
+//===- include/pstore_support/bit_count.hpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -144,4 +144,4 @@ namespace pstore {
     } // namespace bit_count
 } // namespace pstore
 #endif // PSTORE_BIT_COUNT_HPP
-// eof: include/pstore/bit_count.hpp
+// eof: include/pstore_support/bit_count.hpp

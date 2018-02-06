@@ -46,18 +46,49 @@
 # PStore Dump Core Library
 ##########################
 
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/dump_lib_config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/dump_lib_config.hpp"
+    ESCAPE_QUOTES
+)
+
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
 set (PSTORE_DUMP_LIB_SRC
+    "${CMAKE_CURRENT_SOURCE_DIR}/dump_lib_config.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/dump_lib_config.hpp"
+
     "${PSTORE_INCLUDE_DIR}/dump/db_value.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/value.hpp"
+    "${PSTORE_INCLUDE_DIR}/dump/error.hpp"
+    "${PSTORE_INCLUDE_DIR}/dump/line_splitter.hpp"
+    "${PSTORE_INCLUDE_DIR}/dump/mcdisassembler_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/mcrepo_value.hpp"
+    "${PSTORE_INCLUDE_DIR}/dump/value.hpp"
+
     db_value.cpp
-    value.cpp
+    error.cpp
+    line_splitter.cpp
+    mcdisassembler_value.cpp
     mcrepo_value.cpp
+    value.cpp
 )
 
 include (add_pstore)
+set(LLVM_LINK_COMPONENTS
+  AllTargetsAsmPrinters
+  AllTargetsDescs
+  AllTargetsDisassemblers
+  AllTargetsInfos
+  CodeGen
+  DebugInfoDWARF
+  DebugInfoPDB
+  Demangle
+  MC
+  MCDisassembler
+  Object
+  Support
+  Symbolize
+  )
 add_pstore_library (pstore-dump-lib ${PSTORE_DUMP_LIB_SRC})
-target_link_libraries (pstore-dump-lib pstore pstore-mcrepo)
+target_link_libraries (pstore-dump-lib PUBLIC pstore pstore-mcrepo)
 
 # eof: lib/dump/CMakeLists.txt

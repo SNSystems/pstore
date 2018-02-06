@@ -4,7 +4,7 @@
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
-//===- include/pstore/sstring_view.hpp ------------------------------------===//
+//===- include/pstore_support/sstring_view.hpp ----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -291,7 +291,14 @@ namespace pstore {
 
         // size_type copy (char * s, size_type n, size_type pos = 0) const;
 
-        // sstring_view substr (size_type pos = 0, size_type n = npos) const;
+        /// Returns a view of the substring [\p pos, \p pos + rcount), where rcount is the smaller
+        /// of \p n and size() - \p pos.
+        /// \param pos position of the first character
+        /// \param n requested length
+        sstring_view<char const *> substr (size_type pos = 0, size_type n = npos) const {
+            pos = std::min (pos, size_);
+            return {data () + pos, std::min (n, size_ - pos)};
+        }
 
         // int compare (size_type pos1, size_type n1, sstring_view s) const;
         // int compare (size_type pos1, size_type n1, sstring_view s, size_type pos2, size_type n2)
@@ -303,9 +310,17 @@ namespace pstore {
         // int compare (size_type pos1, size_type n1, char const * s) const;
         // int compare (size_type pos1, size_type n1, char const * s, size_type n2) const;
 
-        /// Finds the first occurrence of `v` in this view, starting at position `pos`.
         // size_type find (sstring_view const & v, size_type pos = 0) const;
-        // size_type find (char ch, size_type pos = 0) const;
+
+        /// Finds the first occurrence of \p ch in this view, starting at position \p pos.
+        size_type find (value_type ch, size_type pos = 0) const noexcept {
+            for (; pos < size_; ++pos) {
+                if (ptr_[pos] == ch) {
+                    return pos;
+                }
+            }
+            return npos;
+        }
         // size_type find (char const * s, size_type pos, size_type n) const;
         // size_type find (char const * s, size_type pos = 0) const;
         // size_type rfind(sstring_view s, size_type pos = npos) const noexcept;
@@ -516,13 +531,13 @@ namespace std {
     };
 
     template <typename StringType>
-    struct hash <::pstore::sstring_view <StringType>> {
+    struct hash<::pstore::sstring_view<StringType>> {
         size_t operator() (::pstore::sstring_view<StringType> const & str) const {
-            return static_cast <size_t> (::pstore::fnv_64a_buf (str.data (), str.length ()));
+            return static_cast<size_t> (::pstore::fnv_64a_buf (str.data (), str.length ()));
         }
     };
 
 } // namespace std
 
 #endif // PSTORE_SSTRING_VIEW_HPP
-// eof: include/pstore/sstring_view.hpp
+// eof: include/pstore_support/sstring_view.hpp

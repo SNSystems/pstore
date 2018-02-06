@@ -4,7 +4,7 @@
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
-//===- unittests/pstore/test_sstring_view.cpp -----------------------------===//
+//===- unittests/pstore_support/test_sstring_view.cpp ---------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,21 +42,21 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/sstring_view.hpp"
+#include "pstore_support/sstring_view.hpp"
 #include <cstring>
 #include <gmock/gmock.h>
 #include "pstore/make_unique.hpp"
 
 namespace {
-        std::shared_ptr<char> new_shared (std::string const & s) {
-            auto result = std::shared_ptr<char> (new char[s.size ()], [](char * p) { delete[] p; });
-            std::copy (std::begin (s), std::end (s), result.get ());
-            return result;
-        }
+    std::shared_ptr<char> new_shared (std::string const & s) {
+        auto result = std::shared_ptr<char> (new char[s.size ()], [](char * p) { delete[] p; });
+        std::copy (std::begin (s), std::end (s), result.get ());
+        return result;
+    }
 
-        class SStringView : public ::testing::Test {
-        protected:
-        };
+    class SStringView : public ::testing::Test {
+    protected:
+    };
 } // anonymous namespace
 
 namespace {
@@ -300,6 +300,29 @@ TEST_F (SStringView, Clear) {
     }
 }
 
+TEST_F (SStringView, FindChar) {
+    std::string const src{"abc"};
+    using sv_type = pstore::sstring_view<char const *>;
+    sv_type sv = pstore::make_sstring_view (src.data (), src.length ());
+
+    EXPECT_EQ (sv.find ('a'), 0U);
+    EXPECT_EQ (sv.find ('c'), 2U);
+    EXPECT_EQ (sv.find ('d'), sv_type::npos);
+    EXPECT_EQ (sv.find ('c', 1U), 2U);
+    EXPECT_EQ (sv.find ('c', 3U), sv_type::npos);
+}
+
+TEST_F (SStringView, Substr) {
+    std::string const src{"abc"};
+    using sv_type = pstore::sstring_view<char const *>;
+    sv_type sv = pstore::make_sstring_view (src.data (), src.length ());
+
+    EXPECT_EQ (sv.substr (0U, 1U), "a");
+    EXPECT_EQ (sv.substr (0U, 4U), "abc");
+    EXPECT_EQ (sv.substr (1U, 1U), "b");
+    EXPECT_EQ (sv.substr (3U, 1U), "");
+}
+
 namespace {
     template <typename StringType>
     class SStringViewRelational : public SStringView {};
@@ -311,6 +334,7 @@ namespace {
         operator pstore::sstring_view<char const *> () const noexcept {
             return view_;
         }
+
     private:
         pstore::sstring_view<char const *> view_;
     };
@@ -498,4 +522,4 @@ TEST_F (SStringView, OperatorWrite) {
     check ("abcdef");
     check ("hello world");
 }
-// eof: unittests/pstore/test_sstring_view.cpp
+// eof: unittests/pstore_support/test_sstring_view.cpp

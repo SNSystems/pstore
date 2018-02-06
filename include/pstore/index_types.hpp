@@ -48,9 +48,9 @@
 #include "pstore/file_header.hpp"
 #include "pstore/fnv.hpp"
 #include "pstore/hamt_map_fwd.hpp"
-#include "pstore/sstring_view.hpp"
 #include "pstore/uint128.hpp"
 #include "pstore/uuid.hpp"
+#include "pstore_support/sstring_view.hpp"
 
 namespace pstore {
     namespace index {

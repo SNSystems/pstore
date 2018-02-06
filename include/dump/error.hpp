@@ -1,10 +1,10 @@
-//*                                                   _             *
-//*  _ __ ___   ___ _ __ ___ _ __   ___   __   ____ _| |_   _  ___  *
-//* | '_ ` _ \ / __| '__/ _ \ '_ \ / _ \  \ \ / / _` | | | | |/ _ \ *
-//* | | | | | | (__| | |  __/ |_) | (_) |  \ V / (_| | | |_| |  __/ *
-//* |_| |_| |_|\___|_|  \___| .__/ \___/    \_/ \__,_|_|\__,_|\___| *
-//*                         |_|                                     *
-//===- include/dump/mcrepo_value.hpp --------------------------------------===//
+//*                            *
+//*   ___ _ __ _ __ ___  _ __  *
+//*  / _ \ '__| '__/ _ \| '__| *
+//* |  __/ |  | | | (_) | |    *
+//*  \___|_|  |_|  \___/|_|    *
+//*                            *
+//===- include/dump/error.hpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,35 +41,41 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef DUMP_MCREPO_VALUE_HPP
-#define DUMP_MCREPO_VALUE_HPP
 
-#include "value.hpp"
-#include "pstore_mcrepo/fragment.hpp"
-#include "pstore_mcrepo/ticket.hpp"
+#ifndef PSTORE_DUMP_ERROR_HPP
+#define PSTORE_DUMP_ERROR_HPP
+
+#include <string>
+#include <system_error>
 
 namespace value {
 
-    value_ptr make_value (pstore::repo::section_type t);
-    value_ptr make_value (pstore::repo::internal_fixup const & ifx);
-    value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx);
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
-                          pstore::repo::section_type st, bool hex_mode);
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
-                          bool hex_mode);
+    enum class error_code {
+        cant_find_target = 1,
+        no_register_info_for_target,
+        no_assembly_info_for_target,
+        no_subtarget_info_for_target,
+        no_instruction_info_for_target,
+        no_disassembler_for_target,
+    };
 
-
-    value_ptr make_fragments (pstore::database & db, bool hex_mode);
-
-    value_ptr make_value (pstore::repo::linkage_type t);
-    value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member);
-    value_ptr make_value (pstore::database & db,
-                          std::shared_ptr<pstore::repo::ticket const> ticket);
-
-
-    value_ptr make_tickets (pstore::database & db);
+    class error_category : public std::error_category {
+    public:
+        error_category () noexcept = default;
+        char const * name () const noexcept override;
+        std::string message (int error) const override;
+    };
 
 } // namespace value
 
-#endif // DUMP_MCREPO_VALUE_HPP
-// eof: include/dump/mcrepo_value.hpp
+namespace std {
+
+    template <>
+    struct is_error_code_enum<value::error_code> : public std::true_type {};
+
+    std::error_code make_error_code (value::error_code e);
+
+} // namespace std
+
+#endif // PSTORE_DUMP_ERROR_HPP
+// eof: include/dump/error.hpp
