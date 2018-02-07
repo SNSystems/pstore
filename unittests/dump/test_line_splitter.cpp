@@ -42,9 +42,49 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "dump/line_splitter.hpp"
+#include <iterator>
 #include <sstream>
 
 #include "gmock/gmock.h"
+
+TEST (ExpandTabs, Empty) {
+    std::string in;
+    std::string out;
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
+    EXPECT_EQ (out, "");
+}
+
+TEST (ExpandTabs, NoTabs) {
+    std::string in = "a b";
+    std::string out;
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
+    EXPECT_EQ (out, "a b");
+}
+
+TEST (ExpandTabs, SingleTab) {
+    std::string in = "a\tb";
+    std::string out;
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    EXPECT_EQ (out, "a       b");
+
+    in = "12345678\t12345678";
+    out.clear ();
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    EXPECT_EQ (out, "12345678        12345678");
+}
+
+TEST (ExpandTabs, TwoTabs) {
+    std::string in = "a\tb\tc";
+    std::string out;
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    EXPECT_EQ (out, "a       b       c");
+
+    in = "\t1234567\t12345678";
+    out.clear ();
+    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    EXPECT_EQ (out, "        1234567 12345678");
+}
+
 
 TEST (LineSplitter, SingleString) {
     value::array::container container;

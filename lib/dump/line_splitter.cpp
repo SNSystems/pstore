@@ -44,8 +44,8 @@
 #include "dump/line_splitter.hpp"
 
 std::string value::trim_line (std::string const & str) {
-    std::string result = str;
-    std::replace (std::begin (result), std::end (result), '\t', ' ');
+    std::string result;
+    expand_tabs (std::begin (str), std::end (str), std::back_inserter (result), 8);
     return result;
 }
 // eof: lib/dump/line_splitter.cpp

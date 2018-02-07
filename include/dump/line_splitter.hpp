@@ -44,6 +44,7 @@
 #ifndef PSTORE_DUMP_LINE_SPLITTER_HPP
 #define PSTORE_DUMP_LINE_SPLITTER_HPP
 
+#include <algorithm>
 #include <string>
 #include <vector>
 #include "dump/value.hpp"
@@ -53,6 +54,24 @@
 namespace value {
 
     std::string trim_line (std::string const & str);
+
+    template <typename InputIterator, typename OutputIterator>
+    void expand_tabs (InputIterator first, InputIterator last, OutputIterator out,
+                      std::size_t tab_size = 4) {
+        auto position = std::size_t{0};
+        for (; first != last; ++first) {
+            auto const c = *first;
+            if (c != '\t') {
+                *(out++) = c;
+                ++position;
+            } else {
+                auto const spaces = tab_size - (position % tab_size);
+                out = std::fill_n (out, spaces, ' ');
+                position += spaces;
+            }
+        }
+    }
+
 
     class line_splitter {
     public:
