@@ -20,7 +20,7 @@ pstore is built and tested on a variety of platforms:
 ## Prerequisites
 
 - cmake (version 3.1 or later)
-- Doxygen or building the documentation
+- Doxygen for building the documentation
 - GraphViz for doxygen diagrams
 - Python 2.7 or later for running the system tests
 
