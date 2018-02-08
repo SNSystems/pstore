@@ -41,39 +41,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
 #ifndef PSTORE_DUMP_ERROR_HPP
 #define PSTORE_DUMP_ERROR_HPP
 
 #include <string>
 #include <system_error>
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
-    enum class error_code {
-        cant_find_target = 1,
-        no_register_info_for_target,
-        no_assembly_info_for_target,
-        no_subtarget_info_for_target,
-        no_instruction_info_for_target,
-        no_disassembler_for_target,
-    };
+        enum class error_code {
+            cant_find_target = 1,
+            no_register_info_for_target,
+            no_assembly_info_for_target,
+            no_subtarget_info_for_target,
+            no_instruction_info_for_target,
+            no_disassembler_for_target,
+        };
 
-    class error_category : public std::error_category {
-    public:
-        error_category () noexcept = default;
-        char const * name () const noexcept override;
-        std::string message (int error) const override;
-    };
+        class error_category : public std::error_category {
+        public:
+            error_category () noexcept = default;
+            char const * name () const noexcept override;
+            std::string message (int error) const override;
+        };
 
-} // namespace value
+    } // namespace dump
+} // namespace pstore
 
 namespace std {
 
     template <>
-    struct is_error_code_enum<value::error_code> : public std::true_type {};
+    struct is_error_code_enum<pstore::dump::error_code> : public std::true_type {};
 
-    std::error_code make_error_code (value::error_code e);
+    std::error_code make_error_code (pstore::dump::error_code e);
 
 } // namespace std
 

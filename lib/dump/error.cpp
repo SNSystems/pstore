@@ -48,13 +48,13 @@
 // ******************
 // name
 // ~~~~
-char const * value::error_category::name () const noexcept {
+char const * pstore::dump::error_category::name () const noexcept {
     return "pstore dump category";
 }
 
 // message
 // ~~~~~~~
-std::string value::error_category::message (int error) const {
+std::string pstore::dump::error_category::message (int error) const {
     static_assert (std::is_same<std::underlying_type<error_code>::type, decltype (error)>::value,
                    "base type of pstore::error_code must be int to permit safe static cast");
     switch (static_cast<error_code> (error)) {
@@ -80,13 +80,13 @@ namespace {
     // * get_error_category *
     // **********************
     std::error_category const & get_error_category () {
-        static value::error_category const cat;
+        static ::pstore::dump::error_category const cat;
         return cat;
     }
 
 } // anonymous namespace
 
-std::error_code std::make_error_code (value::error_code e) {
+std::error_code std::make_error_code (pstore::dump::error_code e) {
     static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                    "base type of error_code must be int to permit safe static cast");
     return {static_cast<int> (e), get_error_category ()};

@@ -41,21 +41,23 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef DIFF_REVISION_HPP
-#define DIFF_REVISION_HPP
+#ifndef PSTORE_DIFF_REVISION_HPP
+#define PSTORE_DIFF_REVISION_HPP
 
 #include <utility>
 
-#include "pstore/head_revision.hpp"
 #include "pstore_support/maybe.hpp"
 
-namespace diff {
+namespace pstore {
+    namespace diff {
 
-    using revision_number = unsigned;
-    using revisions_type = std::pair<revision_number, pstore::maybe<revision_number>>;
-    revisions_type update_revisions (revisions_type revisions, revision_number const head_revision);
+        using revision_number = unsigned;
+        using revisions_type = std::pair<revision_number, maybe<revision_number>>;
+        revisions_type update_revisions (revisions_type revisions,
+                                         revision_number const actual_head);
 
-} // namespace diff
+    } // namespace diff
+} // namespace pstore
 
 #endif // DUMP_DIFF_VALUE_HPP
 // eof: include/diff/revision.hpp

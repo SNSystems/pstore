@@ -137,7 +137,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
         fragment::load (*db_, fragment::alloc (transaction, std::begin (c), std::end (c)));
 
     std::ostringstream out;
-    value::value_ptr addr = value::make_value (*db_, *fragment, false /*hex mode?*/);
+    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -175,7 +175,7 @@ TEST_F (MCRepoFixture, DumpTicket) {
         *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/"), v));
 
     std::ostringstream out;
-    value::value_ptr addr = value::make_value (*db_, ticket);
+    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, ticket);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());

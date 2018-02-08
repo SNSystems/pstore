@@ -48,110 +48,116 @@
 
 #include "pstore/generation_iterator.hpp"
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
-    bool address::default_expanded_ = false;
+        bool address::default_expanded_ = false;
 
-    // write_impl
-    // ~~~~~~~~~~
-    std::ostream & address::write_impl (std::ostream & os, indent const & indent) const {
-        return this->real_value ()->write_impl (os, indent);
-    }
-    std::wostream & address::write_impl (std::wostream & os, indent const & indent) const {
-        return this->real_value ()->write_impl (os, indent);
-    }
+        // write_impl
+        // ~~~~~~~~~~
+        std::ostream & address::write_impl (std::ostream & os, indent const & indent) const {
+            return this->real_value ()->write_impl (os, indent);
+        }
+        std::wostream & address::write_impl (std::wostream & os, indent const & indent) const {
+            return this->real_value ()->write_impl (os, indent);
+        }
 
-    // real_value
-    // ~~~~~~~~~~
-    value_ptr address::real_value () const {
-        value_ptr v;
-        if (!value_) {
-            if (expanded_) {
-                auto full = std::make_shared<object> (object::container{
-                    {"segment", make_value (addr_.segment ())},
-                    {"offset", make_value (addr_.offset ())},
-                });
-                full->compact ();
-                value_ = full;
-            } else {
-                value_ = make_value (addr_.absolute ());
+        // real_value
+        // ~~~~~~~~~~
+        value_ptr address::real_value () const {
+            value_ptr v;
+            if (!value_) {
+                if (expanded_) {
+                    auto full = std::make_shared<object> (object::container{
+                        {"segment", make_value (addr_.segment ())},
+                        {"offset", make_value (addr_.offset ())},
+                    });
+                    full->compact ();
+                    value_ = full;
+                } else {
+                    value_ = make_value (addr_.absolute ());
+                }
             }
+            assert (value_.get () != nullptr);
+            return value_;
         }
-        assert (value_.get () != nullptr);
-        return value_;
-    }
 
 
-    // *************
-    //* make_value *
-    // *************
-    value_ptr make_value (pstore::extent ex) {
-        auto v = std::make_shared<object> (object::container{
-            {"addr", make_value (ex.addr)}, {"size", make_value (ex.size)},
-        });
-        v->compact ();
-        return v;
-    }
-
-    value_ptr make_value (pstore::header const & header) {
-        return make_value (object::container{
-            {"signature1",
-             make_value (std::begin (header.a.signature1), std::end (header.a.signature1))},
-            {"signature2", make_value (header.a.signature2)},
-            {"version", make_value (std::begin (header.a.version), std::end (header.a.version))},
-            {"uuid", make_value (header.a.uuid.str ())},
-            {"crc", make_value (header.crc)},
-            {"footer_pos", make_value (header.footer_pos.load ())},
-        });
-    }
-
-    value_ptr make_value (pstore::trailer const & trailer, bool no_times) {
-        return make_value (object::container{
-            {"signature1",
-             make_value (std::begin (trailer.a.signature1), std::end (trailer.a.signature1))},
-            {"generation", make_value (trailer.a.generation.load ())},
-            {"size", make_value (trailer.a.size.load ())},
-            {"time", make_time (trailer.a.time, no_times)},
-            {"prev_generation", make_value (trailer.a.prev_generation)},
-            {"indices",
-             make_value (std::begin (trailer.a.index_records), std::end (trailer.a.index_records))},
-            {"crc", make_value (trailer.crc)},
-            {"signature2",
-             make_value (std::begin (trailer.signature2), std::end (trailer.signature2))},
-        });
-    }
-
-    value_ptr make_value (pstore::index::digest const & d) {
-        return make_value (d.to_hex_string ());
-    }
-
-
-    value_ptr make_blob (pstore::database & db, pstore::address begin, std::uint64_t size) {
-        auto bytes = db.getro<std::uint8_t> (begin, size);
-        return make_value (object::container{
-            {"size", make_value (size)},
-            {"bin", std::make_shared<binary> (bytes.get (), bytes.get () + size)},
-        });
-    }
-
-
-    value_ptr make_generation (pstore::database & db, pstore::address footer_pos, bool no_times) {
-        auto trailer = db.getro<pstore::trailer> (footer_pos);
-        return make_value (object::container{
-            {"footer", make_value (*trailer, no_times)},
-            {"content", make_blob (db, footer_pos - trailer->a.size, trailer->a.size)},
-        });
-    }
-
-
-    value_ptr make_contents (pstore::database & db, pstore::address footer_pos, bool no_times) {
-        array::container array;
-        auto it = pstore::generation_iterator (db, footer_pos);
-        auto end = pstore::generation_iterator (db, pstore::address::null ());
-        for (; it != end; ++it) {
-            array.emplace_back (make_generation (db, *it, no_times));
+        // *************
+        //* make_value *
+        // *************
+        value_ptr make_value (extent ex) {
+            auto v = std::make_shared<object> (object::container{
+                {"addr", make_value (ex.addr)}, {"size", make_value (ex.size)},
+            });
+            v->compact ();
+            return v;
         }
-        return make_value (std::move (array));
-    }
-} // end namespace value
+
+        value_ptr make_value (header const & header) {
+            return make_value (object::container{
+                {"signature1",
+                 make_value (std::begin (header.a.signature1), std::end (header.a.signature1))},
+                {"signature2", make_value (header.a.signature2)},
+                {"version",
+                 make_value (std::begin (header.a.version), std::end (header.a.version))},
+                {"uuid", make_value (header.a.uuid.str ())},
+                {"crc", make_value (header.crc)},
+                {"footer_pos", make_value (header.footer_pos.load ())},
+            });
+        }
+
+        value_ptr make_value (trailer const & trailer, bool no_times) {
+            return make_value (object::container{
+                {"signature1",
+                 make_value (std::begin (trailer.a.signature1), std::end (trailer.a.signature1))},
+                {"generation", make_value (trailer.a.generation.load ())},
+                {"size", make_value (trailer.a.size.load ())},
+                {"time", make_time (trailer.a.time, no_times)},
+                {"prev_generation", make_value (trailer.a.prev_generation)},
+                {"indices", make_value (std::begin (trailer.a.index_records),
+                                        std::end (trailer.a.index_records))},
+                {"crc", make_value (trailer.crc)},
+                {"signature2",
+                 make_value (std::begin (trailer.signature2), std::end (trailer.signature2))},
+            });
+        }
+
+        value_ptr make_value (index::digest const & d) {
+            return make_value (d.to_hex_string ());
+        }
+
+
+        value_ptr make_blob (::pstore::database & db, ::pstore::address begin, std::uint64_t size) {
+            auto bytes = db.getro<std::uint8_t> (begin, size);
+            return make_value (object::container{
+                {"size", make_value (size)},
+                {"bin", std::make_shared<binary> (bytes.get (), bytes.get () + size)},
+            });
+        }
+
+
+        value_ptr make_generation (::pstore::database & db, ::pstore::address footer_pos,
+                                   bool no_times) {
+            auto trailer = db.getro<::pstore::trailer> (footer_pos);
+            return make_value (object::container{
+                {"footer", make_value (*trailer, no_times)},
+                {"content", make_blob (db, footer_pos - trailer->a.size, trailer->a.size)},
+            });
+        }
+
+
+        value_ptr make_contents (::pstore::database & db, ::pstore::address footer_pos,
+                                 bool no_times) {
+            array::container array;
+            auto it = generation_iterator (db, footer_pos);
+            auto end = generation_iterator (db, ::pstore::address::null ());
+            for (; it != end; ++it) {
+                array.emplace_back (make_generation (db, *it, no_times));
+            }
+            return make_value (std::move (array));
+        }
+
+    } // end namespace dump
+} // end namespace pstore
 // eof: lib/dump/db_value.cpp

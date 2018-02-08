@@ -74,19 +74,20 @@ namespace {
 
     class array_stream : public llvm::raw_ostream {
     public:
-        array_stream (value::array::container & array)
+        array_stream (pstore::dump::array::container & array)
                 : splitter_ (&array) {}
 
     private:
         void write_impl (char const * ptr, std::size_t size) override {
-            splitter_.append (pstore::gsl::make_span (ptr, size), &value::trim_line);
+            using namespace pstore;
+            splitter_.append (gsl::make_span (ptr, size), &dump::trim_line);
             pos_ += size;
         }
         std::uint64_t current_pos () const override {
             return pos_;
         }
 
-        value::line_splitter splitter_;
+        pstore::dump::line_splitter splitter_;
         std::size_t pos_ = 0;
     };
 
@@ -99,7 +100,7 @@ namespace {
     }
 
     void disasm_block (std::uint8_t const * first, std::uint8_t const * last,
-                       value::array::container & array, bool hex_mode) {
+                       pstore::dump::array::container & array, bool hex_mode) {
         llvm::Triple triple ("x86_64-pc-linux-gnu-repo"); // FIXME: target triple is hardwired!
 
         // Get the target specific parser.
@@ -108,7 +109,7 @@ namespace {
         llvm::Target const * const target =
             llvm::TargetRegistry::lookupTarget (arch_name, triple, error);
         if (target == nullptr) {
-            pstore::raise (value::error_code::cant_find_target, error);
+            pstore::raise (pstore::dump::error_code::cant_find_target, error);
         }
 
         // Update the triple name and return the found target.
@@ -118,25 +119,25 @@ namespace {
         std::unique_ptr<llvm::MCRegisterInfo const> register_info (
             target->createMCRegInfo (triple_name));
         if (!register_info) {
-            pstore::raise (value::error_code::no_register_info_for_target, triple_name);
+            pstore::raise (pstore::dump::error_code::no_register_info_for_target, triple_name);
         }
 
         std::unique_ptr<llvm::MCAsmInfo const> asm_info (
             target->createMCAsmInfo (*register_info, triple_name));
         if (asm_info == nullptr) {
-            pstore::raise (value::error_code::no_assembly_info_for_target, triple_name);
+            pstore::raise (pstore::dump::error_code::no_assembly_info_for_target, triple_name);
         }
 
         std::string cpu; // triple should be enough!
         std::unique_ptr<llvm::MCSubtargetInfo const> subtarget_info (target->createMCSubtargetInfo (
             triple_name, llvm::StringRef (cpu), features.getString ()));
         if (subtarget_info == nullptr) {
-            pstore::raise (value::error_code::no_subtarget_info_for_target, triple_name);
+            pstore::raise (pstore::dump::error_code::no_subtarget_info_for_target, triple_name);
         }
 
         std::unique_ptr<llvm::MCInstrInfo const> instruction_info (target->createMCInstrInfo ());
         if (instruction_info == nullptr) {
-            pstore::raise (value::error_code::no_instruction_info_for_target, triple_name);
+            pstore::raise (pstore::dump::error_code::no_instruction_info_for_target, triple_name);
         }
 
         llvm::MCObjectFileInfo object_file_info;
@@ -146,7 +147,7 @@ namespace {
         std::unique_ptr<llvm::MCDisassembler> disassembler (
             target->createMCDisassembler (*subtarget_info, context));
         if (disassembler == nullptr) {
-            pstore::raise (value::error_code::no_disassembler_for_target, triple_name);
+            pstore::raise (pstore::dump::error_code::no_disassembler_for_target, triple_name);
         }
 
         std::unique_ptr<llvm::MCInstPrinter> instruction_printer (
@@ -206,30 +207,38 @@ namespace {
     }
 } // anonymous namespace
 
-namespace value {
-    value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                       bool hex_mode) {
+namespace pstore {
+    namespace dump {
 
-        array::container arr;
-        disasm_block (first, last, arr, hex_mode);
-        return make_value (arr);
-    }
-}
+        value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
+                                           bool hex_mode) {
+
+            array::container arr;
+            disasm_block (first, last, arr, hex_mode);
+            return make_value (arr);
+        }
+
+    } // namespace dump
+} // namespace pstore
 
 #else // PSTORE_IS_INSIDE_LLVM
 
-namespace value {
-    value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                       bool hex_mode) {
-        value_ptr v;
-        if (hex_mode) {
-            v = std::make_shared<binary16> (first, last);
-        } else {
-            v = std::make_shared<binary> (first, last);
+namespace pstore {
+    namespace dump {
+
+        value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
+                                           bool hex_mode) {
+            value_ptr v;
+            if (hex_mode) {
+                v = std::make_shared<binary16> (first, last);
+            } else {
+                v = std::make_shared<binary> (first, last);
+            }
+            return v;
         }
-        return v;
-    }
-}
+
+    } // namespace dump
+} // namespace pstore
 
 #endif // PSTORE_IS_INSIDE_LLVM
 // eof: lib/dump/mcdisassembler_value.cpp

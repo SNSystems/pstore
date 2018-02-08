@@ -50,100 +50,110 @@
 TEST (ExpandTabs, Empty) {
     std::string in;
     std::string out;
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
     EXPECT_EQ (out, "");
 }
 
 TEST (ExpandTabs, NoTabs) {
     std::string in = "a b";
     std::string out;
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
     EXPECT_EQ (out, "a b");
 }
 
 TEST (ExpandTabs, SingleTab) {
     std::string in = "a\tb";
     std::string out;
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
     EXPECT_EQ (out, "a       b");
 
     in = "12345678\t12345678";
     out.clear ();
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
     EXPECT_EQ (out, "12345678        12345678");
 }
 
 TEST (ExpandTabs, TwoTabs) {
     std::string in = "a\tb\tc";
     std::string out;
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
     EXPECT_EQ (out, "a       b       c");
 
     in = "\t1234567\t12345678";
     out.clear ();
-    value::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
+    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
     EXPECT_EQ (out, "        1234567 12345678");
 }
 
 
 TEST (LineSplitter, SingleString) {
-    value::array::container container;
+    using namespace pstore::dump;
+
+    array::container container;
     std::string str = "hello\n";
 
-    value::line_splitter ls (&container);
+    line_splitter ls (&container);
     ls.append (pstore::gsl::make_span (str.data (), str.size ()));
 
-    value::array arr (std::move (container));
+    array arr (std::move (container));
     std::ostringstream out;
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello");
 }
 
 TEST (LineSplitter, SingleStringFollowedByCr) {
-    value::array::container container;
+    using namespace pstore::dump;
+
+    array::container container;
     std::string str = "hello";
 
-    value::line_splitter ls (&container);
+    line_splitter ls (&container);
     ls.append (pstore::gsl::make_span (str.data (), str.size ()));
     char const cr[1] = {'\n'};
     ls.append (pstore::gsl::span<char const, 1U>{cr});
 
-    value::array arr (std::move (container));
+    array arr (std::move (container));
     std::ostringstream out;
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello");
 }
 
 TEST (LineSplitter, SingleStringInTwoParts) {
-    value::array::container container;
-    value::line_splitter ls (&container);
+    using namespace pstore::dump;
+
+    array::container container;
+    line_splitter ls (&container);
     ls.append ("he");
     ls.append ("llo\n");
 
-    value::array arr (std::move (container));
+    array arr (std::move (container));
     std::ostringstream out;
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello");
 }
 
 TEST (LineSplitter, TwoStringsSingleAppend) {
-    value::array::container container;
-    value::line_splitter ls (&container);
+    using namespace pstore::dump;
+
+    array::container container;
+    line_splitter ls (&container);
     ls.append ("hello\nthere\n");
 
-    value::array arr (std::move (container));
+    array arr (std::move (container));
     std::ostringstream out;
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello\n- there");
 }
 
 TEST (LineSplitter, TwoStringsInTwoParts) {
-    value::array::container container;
-    value::line_splitter ls (&container);
+    using namespace pstore::dump;
+
+    array::container container;
+    line_splitter ls (&container);
     ls.append ("hello\nth");
     ls.append ("ere\n");
 
-    value::array arr (std::move (container));
+    array arr (std::move (container));
     std::ostringstream out;
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello\n- there");

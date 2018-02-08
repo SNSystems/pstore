@@ -93,20 +93,20 @@ int main (int argc, char * argv[]) {
         }
 
         if (opt.hex) {
-            value::number_base::hex ();
+            pstore::dump::number_base::hex ();
         } else {
-            value::number_base::dec ();
+            pstore::dump::number_base::dec ();
         }
 
         pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
-        std::tie (opt.first_revision, opt.second_revision) = diff::update_revisions (
+        std::tie (opt.first_revision, opt.second_revision) = pstore::diff::update_revisions (
             std::make_pair (opt.first_revision, opt.second_revision), db.get_current_revision ());
 
-        value::object::container file;
-        file.emplace_back ("indices",
-                           value::make_indices_diff (db, opt.first_revision, *opt.second_revision));
+        pstore::dump::object::container file;
+        file.emplace_back ("indices", pstore::diff::make_indices_diff (db, opt.first_revision,
+                                                                       *opt.second_revision));
 
-        value::value_ptr output = value::make_value (file);
+        auto output = pstore::dump::make_value (file);
         out_stream << NATIVE_TEXT ("---\n") << *output << NATIVE_TEXT ("\n...\n");
     }
     CATCH (std::exception const & ex, {

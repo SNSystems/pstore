@@ -50,20 +50,22 @@
 #include "pstore/sstring_view_archive.hpp"
 
 
-namespace value {
+namespace pstore {
+    namespace diff {
 
-    value_ptr make_indices_diff (pstore::database & db, diff::revision_number const new_revision,
-                                 diff::revision_number const old_revision) {
-        assert (new_revision >= old_revision);
-        return make_value (
-            {make_index_diff<pstore::index::name_index> ("names", db, new_revision, old_revision,
-                                                         pstore::index::get_name_index),
-             make_index_diff<pstore::index::digest_index> (
-                 "fragments", db, new_revision, old_revision, pstore::index::get_digest_index),
-             make_index_diff<pstore::index::ticket_index> (
-                 "tickets", db, new_revision, old_revision, pstore::index::get_ticket_index)});
-    }
+        dump::value_ptr make_indices_diff (database & db, diff::revision_number const new_revision,
+                                           diff::revision_number const old_revision) {
+            assert (new_revision >= old_revision);
+            return dump::make_value (
+                {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
+                                                     index::get_name_index),
+                 make_index_diff<index::digest_index> ("fragments", db, new_revision, old_revision,
+                                                       index::get_digest_index),
+                 make_index_diff<index::ticket_index> ("tickets", db, new_revision, old_revision,
+                                                       index::get_ticket_index)});
+        }
 
-} // namespace value
+    } // namespace diff
+} // namespace pstore
 
 // eof: lib/diff/diff_value.cpp

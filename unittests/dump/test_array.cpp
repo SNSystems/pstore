@@ -62,7 +62,7 @@ TYPED_TEST_CASE (Array, CharacterTypes);
 
 
 TYPED_TEST (Array, Empty) {
-    value::array arr;
+    pstore::dump::array arr;
     arr.write (this->out);
     auto const actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("[ ]");
@@ -70,7 +70,8 @@ TYPED_TEST (Array, Empty) {
 }
 
 TYPED_TEST (Array, TwoNumbers) {
-    value::array arr ({value::make_number (3), value::make_number (5)});
+    using namespace ::pstore::dump;
+    array arr ({make_number (3), make_number (5)});
     arr.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("[ 0x3, 0x5 ]");
@@ -78,8 +79,9 @@ TYPED_TEST (Array, TwoNumbers) {
 }
 
 TYPED_TEST (Array, TwoStrings) {
-    value::array arr ({
-        value::make_value ("Hello"), value::make_value ("World"),
+    using namespace ::pstore::dump;
+    array arr ({
+        make_value ("Hello"), make_value ("World"),
     });
     arr.write (this->out);
     auto const & actual = this->out.str ();

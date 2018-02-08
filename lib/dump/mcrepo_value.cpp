@@ -52,34 +52,35 @@
 
 #include "dump_lib_config.hpp"
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
 #define X(a)                                                                                       \
-    case (pstore::repo::section_type::a):                                                          \
+    case (repo::section_type::a):                                                                  \
         name = #a;                                                                                 \
         break;
 
-    value_ptr make_value (pstore::repo::section_type t) {
-        char const * name = "*unknown*";
-        switch (t) { PSTORE_REPO_SECTION_TYPES }
-        return make_value (name);
-    }
+        value_ptr make_value (repo::section_type t) {
+            char const * name = "*unknown*";
+            switch (t) { PSTORE_REPO_SECTION_TYPES }
+            return make_value (name);
+        }
 #undef X
 
-    value_ptr make_value (pstore::repo::internal_fixup const & ifx) {
-        auto v = std::make_shared<object> (object::container{
-            {"section", make_value (ifx.section)},
-            {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
-            {"offset", make_value (ifx.offset)},
-            {"addend", make_value (ifx.addend)},
-        });
-        v->compact ();
-        return v;
+        value_ptr make_value (repo::internal_fixup const & ifx) {
+            auto v = std::make_shared<object> (object::container{
+                {"section", make_value (ifx.section)},
+                {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
+                {"offset", make_value (ifx.offset)},
+                {"addend", make_value (ifx.addend)},
+            });
+            v->compact ();
+            return v;
     }
 
-    value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx) {
-        pstore::serialize::archive::database_reader archive (db, xfx.name);
-        std::string const name = pstore::serialize::read<std::string> (archive);
+    value_ptr make_value (database & db, repo::external_fixup const & xfx) {
+        serialize::archive::database_reader archive (db, xfx.name);
+        std::string const name = serialize::read<std::string> (archive);
 
         return make_value (object::container{
             {"name", make_value (name)},
@@ -89,8 +90,8 @@ namespace value {
         });
     }
 
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
-                          pstore::repo::section_type st, bool hex_mode) {
+    value_ptr make_value (database & db, repo::section const & section, repo::section_type st,
+                          bool hex_mode) {
         auto const & data = section.data ();
         auto const & ifixups = section.ifixups ();
 
@@ -99,7 +100,7 @@ namespace value {
 
         value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
-        if (st == pstore::repo::section_type::text) {
+        if (st == repo::section_type::text) {
             std::uint8_t const * const first = data.data ();
             std::uint8_t const * const last = first + data.size ();
             data_value = make_disassembled_value (first, last, hex_mode);
@@ -123,12 +124,11 @@ namespace value {
         return make_value (v);
     }
 
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
-                          bool hex_mode) {
+    value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
         array::container array;
 
         for (auto const key : fragment.sections ().get_indices ()) {
-            auto const type = static_cast<pstore::repo::section_type> (key);
+            auto const type = static_cast<repo::section_type> (key);
             array.emplace_back (make_value (
                 object::container{{"type", make_value (type)},
                                   {"contents", make_value (db, fragment[type], type, hex_mode)}}));
@@ -136,14 +136,14 @@ namespace value {
         return make_value (std::move (array));
     }
 
-    value_ptr make_fragments (pstore::database & db, bool hex_mode) {
+    value_ptr make_fragments (database & db, bool hex_mode) {
         array::container result;
-        if (pstore::index::digest_index * const digests =
-                pstore::index::get_digest_index (db, false /* create */)) {
+        if (index::digest_index * const digests =
+                index::get_digest_index (db, false /* create */)) {
 
             array::container members;
             for (auto const & kvp : *digests) {
-                auto fragment = pstore::repo::fragment::load (db, kvp.second);
+                auto fragment = repo::fragment::load (db, kvp.second);
                 result.emplace_back (make_value (
                     object::container{{"digest", make_value (kvp.first)},
                                       {"fragment", make_value (db, *fragment, hex_mode)}}));
@@ -153,28 +153,27 @@ namespace value {
     }
 
 #define X(a)                                                                                       \
-    case (pstore::repo::linkage_type::a):                                                          \
+    case (repo::linkage_type::a):                                                                  \
         Name = #a;                                                                                 \
         break;
 
-    value_ptr make_value (pstore::repo::linkage_type t) {
+    value_ptr make_value (repo::linkage_type t) {
         char const * Name = "*unknown*";
         switch (t) { PSTORE_REPO_LINKAGE_TYPES }
         return make_value (Name);
     }
 #undef X
 
-    value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member) {
-        pstore::serialize::archive::database_reader archive (db, member.name);
+    value_ptr make_value (database & db, repo::ticket_member const & member) {
+        serialize::archive::database_reader archive (db, member.name);
         return make_value (object::container{
             {"digest", make_value (member.digest)},
-            {"name", make_value (pstore::serialize::read<std::string> (archive))},
+            {"name", make_value (serialize::read<std::string> (archive))},
             {"linkage", make_value (member.linkage)},
         });
     }
 
-    value_ptr make_value (pstore::database & db,
-                          std::shared_ptr<pstore::repo::ticket const> ticket) {
+    value_ptr make_value (database & db, std::shared_ptr<repo::ticket const> ticket) {
         object::container v;
         array::container members;
         for (auto const & member : *ticket) {
@@ -183,21 +182,21 @@ namespace value {
         v.emplace_back ("ticket_member", make_value (members));
 
         // Now try reading the ticket file path using a serializer.
-        pstore::serialize::archive::database_reader archive (db, ticket->path ());
-        auto path = pstore::serialize::read<std::string> (archive);
+        serialize::archive::database_reader archive (db, ticket->path ());
+        auto path = serialize::read<std::string> (archive);
 
         return make_value (object::container{
             {"members", make_value (v)}, {"path", make_value (path)},
         });
     }
 
-    value_ptr make_tickets (pstore::database & db) {
+    value_ptr make_tickets (database & db) {
         array::container result;
-        if (pstore::index::ticket_index * const tickets =
-                pstore::index::get_ticket_index (db, false /* create */)) {
+        if (index::ticket_index * const tickets =
+                index::get_ticket_index (db, false /* create */)) {
 
             for (auto const & kvp : *tickets) {
-                auto const ticket = pstore::repo::ticket::load (db, kvp.second);
+                auto const ticket = repo::ticket::load (db, kvp.second);
                 result.emplace_back (make_value (object::container{
                     {"uuid", make_value (kvp.first)}, {"ticket", make_value (db, ticket)}}));
             }
@@ -205,6 +204,7 @@ namespace value {
         return make_value (result);
     }
 
-} // namespace value
+    } // namespace dump
+} // namespace pstore
 
 // eof: lib/dump/mcrepo_value.cpp

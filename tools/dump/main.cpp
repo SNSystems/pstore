@@ -164,68 +164,73 @@ namespace {
 #endif // PSTORE_CPP_EXCEPTIONS
 
     template <typename Index>
-    auto make_index (char const * name, Index const & index) -> value::value_ptr {
-        value::array::container members;
+    auto make_index (char const * name, Index const & index) -> pstore::dump::value_ptr {
+        using namespace pstore::dump;
+        array::container members;
         for (auto const & kvp : index) {
-            members.push_back (value::make_value (
-                value::object::container{{"key", value::make_value (kvp.first)},
-                                         {"value", value::make_value (kvp.second)}}));
+            members.push_back (make_value (object::container{{"key", make_value (kvp.first)},
+                                                             {"value", make_value (kvp.second)}}));
         }
 
-        return value::make_value (value::object::container{
-            {"name", value::make_value (name)}, {"members", value::make_value (members)},
+        return make_value (object::container{
+            {"name", make_value (name)}, {"members", make_value (members)},
         });
     }
 
-    value::value_ptr make_indices (pstore::database & db) {
-        value::array::container result;
+    pstore::dump::value_ptr make_indices (pstore::database & db) {
+        using namespace pstore::dump;
+
+        array::container result;
         if (pstore::index::write_index * const write =
                 pstore::index::get_write_index (db, false /* create*/)) {
             result.push_back (make_index ("write", *write));
         }
         if (pstore::index::name_index * const name =
                 pstore::index::get_name_index (db, false /* create */)) {
-            result.push_back (value::make_value (value::object::container{
-                {"name", value::make_value ("name")},
-                {"members", value::make_value (std::begin (*name), std::end (*name))},
+            result.push_back (make_value (object::container{
+                {"name", make_value ("name")},
+                {"members", make_value (std::begin (*name), std::end (*name))},
             }));
         }
-        return value::make_value (result);
+        return make_value (result);
     }
 
 
-    value::value_ptr make_log (pstore::database & db, bool no_times) {
-        value::array::container array;
+    pstore::dump::value_ptr make_log (pstore::database & db, bool no_times) {
+        using namespace pstore::dump;
+
+        array::container array;
         for (pstore::address footer_pos : pstore::generation_container (db)) {
             auto footer = db.getro<pstore::trailer> (footer_pos);
-            auto revision = std::make_shared<value::object> (value::object::container{
-                {"number", value::make_value (footer->a.generation.load ())},
-                {"size", value::make_number (footer->a.size.load ())},
-                {"time", value::make_time (footer->a.time, no_times)},
+            auto revision = std::make_shared<object> (object::container{
+                {"number", make_value (footer->a.generation.load ())},
+                {"size", make_number (footer->a.size.load ())},
+                {"time", make_time (footer->a.time, no_times)},
             });
             revision->compact (true);
             array.emplace_back (revision);
         }
-        return value::make_value (array);
+        return make_value (array);
     }
 
-    value::value_ptr make_shared_memory (pstore::database & db, bool no_times) {
+    pstore::dump::value_ptr make_shared_memory (pstore::database & db, bool no_times) {
         (void) no_times;
+        using namespace pstore::dump;
 
         // Shared memory is not used except on Windows.
-        value::object::container result;
-        result.emplace_back ("name", value::make_value (db.shared_memory_name ()));
+        object::container result;
+        result.emplace_back ("name", make_value (db.shared_memory_name ()));
 #ifdef _WIN32
         pstore::shared const * const ptr = db.get_shared ();
-        result.emplace_back ("pid", value::make_number (ptr->pid.load ()));
-        result.emplace_back ("time", value::make_time (ptr->time.load (), no_times));
-        result.emplace_back ("open_tick", value::make_number (ptr->open_tick.load ()));
+        result.emplace_back ("pid", make_number (ptr->pid.load ()));
+        result.emplace_back ("time", make_time (ptr->time.load (), no_times));
+        result.emplace_back ("open_tick", make_number (ptr->open_tick.load ()));
 #endif
-        return value::make_value (result);
+        return make_value (result);
     }
 
 
-    std::uint64_t file_size (::pstore::gsl::czstring path) {
+    std::uint64_t file_size (pstore::gsl::czstring path) {
         errno = 0;
 #ifdef _WIN32
         struct __stat64 buf;
@@ -308,11 +313,11 @@ namespace {
     }
 
     template <typename IndexType, typename StringToKeyFunction, typename RecordFunction>
-    value::value_ptr
+    pstore::dump::value_ptr
     add_specified (IndexType const & index, std::list<std::string> const & items_to_show,
                    dump_error_code not_found_error, StringToKeyFunction string_to_key,
                    RecordFunction record_function) {
-        value::array::container container;
+        pstore::dump::array::container container;
         container.reserve (items_to_show.size ());
 
         auto end = std::end (index);
@@ -326,7 +331,7 @@ namespace {
             }
         }
 
-        return value::make_value (container);
+        return pstore::dump::make_value (container);
     }
 
 } // end anonymous namespace
@@ -378,41 +383,42 @@ int main (int argc, char * argv[]) {
         }
 
         if (opt.hex) {
-            value::number_base::hex ();
+            pstore::dump::number_base::hex ();
         } else {
-            value::number_base::dec ();
+            pstore::dump::number_base::dec ();
         }
-        value::address::set_expanded (opt.expanded_addresses);
+        pstore::dump::address::set_expanded (opt.expanded_addresses);
 
         bool const no_times = opt.no_times;
+        using pstore::dump::make_value;
+        using pstore::dump::object;
 
-        value::array::container output;
+        pstore::dump::array::container output;
         for (std::string const & path : opt.paths) {
             pstore::database db (path, pstore::database::access_mode::read_only);
 
             db.sync (opt.revision);
 
-            value::object::container file;
-            file.emplace_back ("file",
-                               value::make_value (value::object::container{
-                                   {"path", value::make_value (path)},
-                                   {"size", value::make_value (file_size (path.c_str ()))}}));
+            object::container file;
+            file.emplace_back ("file", make_value (object::container{
+                                           {"path", make_value (path)},
+                                           {"size", make_value (file_size (path.c_str ()))}}));
 
             if (show_contents) {
                 file.emplace_back ("contents",
-                                   value::make_contents (db, db.footer_pos (), no_times));
+                                   pstore::dump::make_contents (db, db.footer_pos (), no_times));
             }
             if (show_all_fragments) {
-                file.emplace_back ("fragments", value::make_fragments (db, opt.hex));
+                file.emplace_back ("fragments", pstore::dump::make_fragments (db, opt.hex));
             } else {
                 if (opt.fragments.size () > 0) {
                     if (auto * const digest_index = pstore::index::get_digest_index (db)) {
                         auto record =
                             [&db, &opt](pstore::index::digest_index::value_type const & value) {
                                 auto fragment = pstore::repo::fragment::load (db, value.second);
-                                return value::make_value (value::object::container{
-                                    {"digest", value::make_value (value.first)},
-                                    {"fragment", value::make_value (db, *fragment, opt.hex)}});
+                                return make_value (object::container{
+                                    {"digest", make_value (value.first)},
+                                    {"fragment", make_value (db, *fragment, opt.hex)}});
                             };
 
                         file.emplace_back ("fragments",
@@ -426,15 +432,15 @@ int main (int argc, char * argv[]) {
             }
 
             if (show_all_tickets) {
-                file.emplace_back ("tickets", value::make_tickets (db));
+                file.emplace_back ("tickets", pstore::dump::make_tickets (db));
             } else {
                 if (opt.tickets.size () > 0) {
                     if (auto * const ticket_index = pstore::index::get_ticket_index (db)) {
                         auto record = [&db](pstore::index::ticket_index::value_type const & value) {
                             auto ticket = pstore::repo::ticket::load (db, value.second);
-                            return value::make_value (value::object::container{
-                                {"id", value::make_value (value.first)},
-                                {"ticket", value::make_value (db, ticket)}});
+                            return make_value (
+                                object::container{{"id", make_value (value.first)},
+                                                  {"ticket", make_value (db, ticket)}});
                         };
 
                         file.emplace_back ("tickets",
@@ -450,7 +456,7 @@ int main (int argc, char * argv[]) {
 
             if (show_header) {
                 auto header = db.getro<pstore::header> (pstore::address::null ());
-                file.emplace_back ("header", value::make_value (*header));
+                file.emplace_back ("header", make_value (*header));
             }
             if (show_indices) {
                 file.emplace_back ("indices", make_indices (db));
@@ -462,10 +468,10 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("shared_memory", make_shared_memory (db, no_times));
             }
 
-            output.push_back (value::make_value (file));
+            output.push_back (make_value (file));
         }
 
-        value::value_ptr v = value::make_value (output);
+        pstore::dump::value_ptr v = make_value (output);
         out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
     } CATCH (std::exception const & ex, {
         error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())

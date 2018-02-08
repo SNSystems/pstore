@@ -51,72 +51,74 @@
 #include "pstore_support/gsl.hpp"
 #include "pstore_support/sstring_view.hpp"
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
-    std::string trim_line (std::string const & str);
+        std::string trim_line (std::string const & str);
 
-    template <typename InputIterator, typename OutputIterator>
-    void expand_tabs (InputIterator first, InputIterator last, OutputIterator out,
-                      std::size_t tab_size = 4) {
-        auto position = std::size_t{0};
-        for (; first != last; ++first) {
-            auto const c = *first;
-            if (c != '\t') {
-                *(out++) = c;
-                ++position;
-            } else {
-                auto const spaces = tab_size - (position % tab_size);
-                out = std::fill_n (out, spaces, ' ');
-                position += spaces;
+        template <typename InputIterator, typename OutputIterator>
+        void expand_tabs (InputIterator first, InputIterator last, OutputIterator out,
+                          std::size_t tab_size = 4) {
+            auto position = std::size_t{0};
+            for (; first != last; ++first) {
+                auto const c = *first;
+                if (c != '\t') {
+                    *(out++) = c;
+                    ++position;
+                } else {
+                    auto const spaces = tab_size - (position % tab_size);
+                    out = std::fill_n (out, spaces, ' ');
+                    position += spaces;
+                }
             }
         }
-    }
 
 
-    class line_splitter {
-    public:
-        line_splitter (pstore::gsl::not_null<array::container *> arr)
-                : arr_{arr} {}
+        class line_splitter {
+        public:
+            line_splitter (gsl::not_null<dump::array::container *> arr)
+                    : arr_{arr} {}
 
-        void append (char const * s) {
-            this->append (pstore::gsl::make_span (s, std::strlen (s)));
-        }
-        void append (std::string const & s) {
-            this->append (pstore::gsl::make_span (s.data (), s.size ()));
-        }
+            void append (char const * s) {
+                this->append (gsl::make_span (s, std::strlen (s)));
+            }
+            void append (std::string const & s) {
+                this->append (gsl::make_span (s.data (), s.size ()));
+            }
 
-        void append (pstore::gsl::span<char const> chars) {
-            this->append (chars, [](std::string const & s) { return s; });
-        }
+            void append (gsl::span<char const> chars) {
+                this->append (chars, [](std::string const & s) { return s; });
+            }
+            template <typename OperationFunc>
+            void append (gsl::span<char const> chars, OperationFunc operation);
+
+        private:
+            std::string str_; ///< Used to record text between calls to append()
+            gsl::not_null<dump::array::container *> arr_;
+        };
+
         template <typename OperationFunc>
-        void append (pstore::gsl::span<char const> chars, OperationFunc operation);
+        void line_splitter::append (gsl::span<char const> chars, OperationFunc operation) {
+            sstring_view<char const *> sv (chars.data (), chars.size ());
+            for (;;) {
+                auto cr_pos = sv.find ('\n', 0);
+                if (cr_pos == std::string::npos) {
+                    str_.append (std::begin (sv), std::end (sv));
+                    break;
+                }
 
-    private:
-        std::string str_; ///< Used to record text between calls to append()
-        pstore::gsl::not_null<array::container *> arr_;
-    };
+                auto first = std::begin (sv);
+                str_.append (first, first + cr_pos);
+                arr_->emplace_back (make_value (operation (str_)));
+                // Reset the accumulation buffer.
+                str_.clear ();
 
-    template <typename OperationFunc>
-    void line_splitter::append (pstore::gsl::span<char const> chars, OperationFunc operation) {
-        pstore::sstring_view<char const *> sv (chars.data (), chars.size ());
-        for (;;) {
-            auto cr_pos = sv.find ('\n', 0);
-            if (cr_pos == std::string::npos) {
-                str_.append (std::begin (sv), std::end (sv));
-                break;
+                sv = sv.substr (cr_pos + 1U);
             }
-
-            auto first = std::begin (sv);
-            str_.append (first, first + cr_pos);
-            arr_->emplace_back (make_value (operation (str_)));
-            // Reset the accumulation buffer.
-            str_.clear ();
-
-            sv = sv.substr (cr_pos + 1U);
         }
-    }
 
-} // namespace value
+    } // namespace dump
+} // namespace pstore
 
 #endif // PSTORE_DUMP_LINE_SPLITTER_HPP
 // eof: include/dump/line_splitter.hpp

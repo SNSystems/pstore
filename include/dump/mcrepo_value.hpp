@@ -41,35 +41,34 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef DUMP_MCREPO_VALUE_HPP
-#define DUMP_MCREPO_VALUE_HPP
+#ifndef PSTORE_DUMP_MCREPO_VALUE_HPP
+#define PSTORE_DUMP_MCREPO_VALUE_HPP
 
 #include "value.hpp"
 #include "pstore_mcrepo/fragment.hpp"
 #include "pstore_mcrepo/ticket.hpp"
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
-    value_ptr make_value (pstore::repo::section_type t);
-    value_ptr make_value (pstore::repo::internal_fixup const & ifx);
-    value_ptr make_value (pstore::database & db, pstore::repo::external_fixup const & xfx);
-    value_ptr make_value (pstore::database & db, pstore::repo::section const & section,
-                          pstore::repo::section_type st, bool hex_mode);
-    value_ptr make_value (pstore::database & db, pstore::repo::fragment const & fragment,
-                          bool hex_mode);
-
-
-    value_ptr make_fragments (pstore::database & db, bool hex_mode);
-
-    value_ptr make_value (pstore::repo::linkage_type t);
-    value_ptr make_value (pstore::database & db, pstore::repo::ticket_member const & member);
-    value_ptr make_value (pstore::database & db,
-                          std::shared_ptr<pstore::repo::ticket const> ticket);
+        value_ptr make_value (repo::section_type t);
+        value_ptr make_value (repo::internal_fixup const & ifx);
+        value_ptr make_value (database & db, repo::external_fixup const & xfx);
+        value_ptr make_value (database & db, repo::section const & section, repo::section_type st,
+                              bool hex_mode);
+        value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode);
 
 
-    value_ptr make_tickets (pstore::database & db);
+        value_ptr make_fragments (database & db, bool hex_mode);
 
-} // namespace value
+        value_ptr make_value (repo::linkage_type t);
+        value_ptr make_value (database & db, repo::ticket_member const & member);
+        value_ptr make_value (database & db, std::shared_ptr<repo::ticket const> ticket);
 
-#endif // DUMP_MCREPO_VALUE_HPP
+        value_ptr make_tickets (database & db);
+
+    } // namespace dump
+} // namespace pstore
+
+#endif // PSTORE_DUMP_MCREPO_VALUE_HPP
 // eof: include/dump/mcrepo_value.hpp

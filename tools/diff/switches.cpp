@@ -84,15 +84,15 @@ namespace {
 } // anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
+    using namespace pstore;
     cl::ParseCommandLineOptions (argc, argv, "pstore diff utility\n");
 
     switches result;
-    result.db_path = pstore::utf::from_native_string (DbPath);
-    result.first_revision = static_cast<pstore::cmd_util::revision_opt> (FirstRevision).r;
-    result.second_revision =
-        SecondRevision.getNumOccurrences () > 0
-            ? pstore::just (static_cast<pstore::cmd_util::revision_opt> (SecondRevision).r)
-            : pstore::nothing<diff::revision_number> ();
+    result.db_path = utf::from_native_string (DbPath);
+    result.first_revision = static_cast<cmd_util::revision_opt> (FirstRevision).r;
+    result.second_revision = SecondRevision.getNumOccurrences () > 0
+                                 ? just (static_cast<cmd_util::revision_opt> (SecondRevision).r)
+                                 : nothing<diff::revision_number> ();
 
     result.hex = Hex;
 

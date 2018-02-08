@@ -43,28 +43,31 @@
 //===----------------------------------------------------------------------===//
 
 #include "diff/revision.hpp"
+#include "pstore/head_revision.hpp"
 
-namespace diff {
+namespace pstore {
+    namespace diff {
 
-    revisions_type update_revisions (revisions_type revisions,
-                                     revision_number const head_revision) {
-        revision_number r1 = revisions.first;
-        pstore::maybe<revision_number> r2 = revisions.second;
+        revisions_type update_revisions (revisions_type revisions,
+                                         revision_number const actual_head) {
+            revision_number r1 = revisions.first;
+            maybe<revision_number> r2 = revisions.second;
 
-        if (r1 == pstore::head_revision) {
-            r1 = head_revision;
+            if (r1 == pstore::head_revision) {
+                r1 = actual_head;
+            }
+            if (!r2) {
+                r2 = r1 - 1;
+            } else if (*r2 == pstore::head_revision) {
+                r2 = actual_head;
+            }
+            if (r1 < *r2) {
+                std::swap (r1, *r2);
+            }
+            return std::make_pair (r1, r2);
         }
-        if (!r2) {
-            r2 = r1 - 1;
-        } else if (*r2 == pstore::head_revision) {
-            r2 = head_revision;
-        }
-        if (r1 < *r2) {
-            std::swap (r1, *r2);
-        }
-        return std::make_pair (r1, r2);
-    }
 
-} // namespace diff
+    } // namespace diff
+} // namespace pstore
 
 // eof: lib/diff/revision.cpp

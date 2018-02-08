@@ -47,12 +47,14 @@
 #include <cstdint>
 #include "dump/value.hpp"
 
-namespace value {
+namespace pstore {
+    namespace dump {
 
-    value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                       bool hex_mode);
+        value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
+                                           bool hex_mode);
 
-} // namespace value
+    } // namespace dump
+} // namespace pstore
 
 #endif // PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
 // eof: include/dump/mcdisassembler_value.hpp

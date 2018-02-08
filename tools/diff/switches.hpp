@@ -68,8 +68,8 @@ using pstore_tchar = char;
 
 struct switches {
     std::string db_path;
-    diff::revision_number first_revision = pstore::head_revision;
-    pstore::maybe<diff::revision_number> second_revision;
+    pstore::diff::revision_number first_revision = pstore::head_revision;
+    pstore::maybe<pstore::diff::revision_number> second_revision;
     bool hex = false;
 };
 

@@ -154,14 +154,14 @@ TEST_F (DiffFixture, BuildNameIndexValues) {
     std::set<pstore::sstring_view<std::shared_ptr<char const>>> expected{
         this->make_sstring_view ("key1")};
 
-    auto actual = diff::build_index_values<pstore::index::name_index> (
+    auto actual = pstore::diff::build_index_values<pstore::index::name_index> (
         *db_, 1 /*revision */, pstore::index::get_name_index);
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
 
     expected.emplace (this->make_sstring_view ("key2"));
-    actual = diff::build_index_values<pstore::index::name_index> (*db_, 2 /*revision */,
-                                                                  pstore::index::get_name_index);
+    actual = pstore::diff::build_index_values<pstore::index::name_index> (
+        *db_, 2 /*revision */, pstore::index::get_name_index);
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
 
@@ -184,7 +184,7 @@ TEST_F (DiffFixture, BuildWriteIndexValues) {
     }
     ASSERT_EQ (2U, db_->get_current_revision ());
 
-    auto actual = diff::build_index_values<pstore::index::write_index> (
+    auto actual = pstore::diff::build_index_values<pstore::index::write_index> (
         *db_, 2 /*revision */, pstore::index::get_write_index);
     EXPECT_EQ (actual.size (), expected.size ());
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
@@ -221,14 +221,14 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     constexpr auto new_revision = 2U;
     constexpr auto old_revision = 1U;
 
-    value::value_ptr addr = value::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
-    addr = value::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
     addr->write (out);
     check (out, "write");
@@ -265,14 +265,14 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     constexpr auto new_revision = 2U;
     constexpr auto old_revision = 0U;
 
-    value::value_ptr addr = value::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
-    addr = value::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
     addr->write (out);
     check (out, "write");
@@ -301,28 +301,28 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     constexpr auto new_revision = 1U;
     constexpr auto old_revision = 1U;
 
-    value::value_ptr addr = value::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
-    addr = value::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
     addr->write (out);
     check (out, "write");
 
     out.clear ();
     out.str ("");
-    addr = value::make_index_diff<pstore::index::name_index> (
+    addr = pstore::diff::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
-    addr = value::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
     addr->write (out);
     check (out, "write");

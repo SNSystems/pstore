@@ -59,9 +59,9 @@ namespace {
     class Address : public ::testing::Test {
     public:
         Address ()
-                : old_expanded_{value::address::get_expanded ()} {}
+                : old_expanded_{::pstore::dump::address::get_expanded ()} {}
         ~Address () {
-            value::address::set_expanded (old_expanded_);
+            ::pstore::dump::address::set_expanded (old_expanded_);
         }
 
     private:
@@ -71,9 +71,10 @@ namespace {
 
 TEST_F (Address, ExpandedNull) {
     using ::testing::ElementsAre;
+    using namespace ::pstore::dump;
 
-    value::address::set_expanded (true);
-    value::value_ptr obj = value::make_value (pstore::address::null ());
+    address::set_expanded (true);
+    value_ptr obj = make_value (pstore::address::null ());
 
     std::ostringstream out;
     obj->write (out);
@@ -86,9 +87,10 @@ TEST_F (Address, ExpandedNull) {
 
 TEST_F (Address, SimplifiedNull) {
     using ::testing::ElementsAre;
+    using namespace ::pstore::dump;
 
-    value::address::set_expanded (false);
-    value::value_ptr obj = value::make_value (pstore::address::null ());
+    address::set_expanded (false);
+    value_ptr obj = make_value (pstore::address::null ());
 
     std::ostringstream out;
     obj->write (out);
@@ -100,7 +102,7 @@ TEST (Database, Extent) {
     using ::testing::ElementsAre;
     std::ostringstream out;
 
-    value::value_ptr addr = value::make_value (pstore::extent{});
+    pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::extent{});
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -114,7 +116,7 @@ TEST (Database, Header) {
     using ::testing::_;
 
     std::ostringstream out;
-    value::value_ptr addr = value::make_value (pstore::header{});
+    pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::header{});
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -135,7 +137,7 @@ TEST (Database, Trailer) {
     using ::testing::_;
 
     std::ostringstream out;
-    value::value_ptr addr = value::make_value (pstore::trailer{}, false /*no_times*/);
+    pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::trailer{}, false /*no_times*/);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());

@@ -67,7 +67,7 @@ typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Object, CharacterTypes);
 
 TYPED_TEST (Object, Empty) {
-    value::object v;
+    pstore::dump::object v;
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("{ }");
@@ -75,7 +75,8 @@ TYPED_TEST (Object, Empty) {
 }
 
 TYPED_TEST (Object, SingleNumber) {
-    value::object v{value::object::container{{"key", value::make_number (42)}}};
+    using namespace ::pstore::dump;
+    object v{object::container{{"key", make_number (42)}}};
     v.write (this->out);
     auto const & actual = this->out.str ();
     EXPECT_THAT (split_tokens (actual),
@@ -84,8 +85,9 @@ TYPED_TEST (Object, SingleNumber) {
 }
 
 TYPED_TEST (Object, TwoNumbers) {
-    value::object v{value::object::container{
-        {"k1", value::make_number (42)}, {"k2", value::make_number (43)},
+    using namespace ::pstore::dump;
+    object v{object::container{
+        {"k1", make_number (42)}, {"k2", make_number (43)},
     }};
     v.write (this->out);
 
@@ -100,8 +102,9 @@ TYPED_TEST (Object, TwoNumbers) {
 }
 
 TYPED_TEST (Object, KeyWithColon) {
-    value::object v{value::object::container{
-        {"k1:k2", value::make_number (42)},
+    using namespace ::pstore::dump;
+    object v{object::container{
+        {"k1:k2", make_number (42)},
     }};
     v.write (this->out);
 
@@ -112,8 +115,9 @@ TYPED_TEST (Object, KeyWithColon) {
 }
 
 TYPED_TEST (Object, KeyWithColonSpace) {
-    value::object v{{
-        {"k1: k2", value::make_number (42)},
+    using namespace ::pstore::dump;
+    object v{{
+        {"k1: k2", make_number (42)},
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
@@ -122,8 +126,9 @@ TYPED_TEST (Object, KeyWithColonSpace) {
 }
 
 TYPED_TEST (Object, KeyNeedingQuoting) {
-    value::object v{{
-        {"  k1", value::make_number (42)},
+    using namespace ::pstore::dump;
+    object v{{
+        {"  k1", make_number (42)},
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
@@ -132,8 +137,9 @@ TYPED_TEST (Object, KeyNeedingQuoting) {
 }
 
 TYPED_TEST (Object, ValueAlignment) {
-    value::object v{{
-        {"short", value::make_number (42)}, {"much_longer", value::make_number (43)},
+    using namespace ::pstore::dump;
+    object v{{
+        {"short", make_number (42)}, {"much_longer", make_number (43)},
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
@@ -143,10 +149,11 @@ TYPED_TEST (Object, ValueAlignment) {
 }
 
 TYPED_TEST (Object, Nested) {
-    value::object v{{
-        {"k1", value::make_value (std::string ("value1"))},
-        {"k2", value::make_value (value::object::container{
-                   {"ik1", value::make_value ("iv1")}, {"ik2", value::make_value ("iv2")},
+    using namespace ::pstore::dump;
+    object v{{
+        {"k1", make_value (std::string ("value1"))},
+        {"k2", make_value (object::container{
+                   {"ik1", make_value ("iv1")}, {"ik2", make_value ("iv2")},
                })},
     }};
     v.write (this->out);
@@ -159,19 +166,22 @@ TYPED_TEST (Object, Nested) {
 }
 
 TEST (Object, GetFound) {
-    auto v = value::make_value ("Hello World");
-    value::object object{{{"key", v}}};
+    using namespace ::pstore::dump;
+    auto v = make_value ("Hello World");
+    object object{{{"key", v}}};
     EXPECT_EQ (v, object.get ("key"));
 }
 
 TEST (Object, GetNotFound) {
-    auto v = value::make_value ("Hello World");
-    value::object object{{{"key", v}}};
-    EXPECT_EQ (std::shared_ptr<value::value> (nullptr), object.get ("missing"));
+    using namespace ::pstore::dump;
+    auto v = make_value ("Hello World");
+    object object{{{"key", v}}};
+    EXPECT_EQ (std::shared_ptr<value> (nullptr), object.get ("missing"));
 }
 
 TEST (Object, BackInserter) {
-    value::object object{{{"k1", value::make_value ("v1")}}};
+    using namespace ::pstore::dump;
+    object object{{{"k1", make_value ("v1")}}};
 }
 
 // eof: unittests/dump/test_object.cpp

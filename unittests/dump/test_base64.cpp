@@ -60,7 +60,7 @@ namespace {
 
     template <typename InputIterator>
     std::string Base64Fixture::convert (InputIterator begin, InputIterator end) const {
-        value::binary b (begin, end);
+        pstore::dump::binary b (begin, end);
         std::ostringstream out;
         b.write (out);
         return out.str ();

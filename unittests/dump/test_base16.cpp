@@ -60,7 +60,8 @@ namespace {
 
     template <typename InputIterator>
     std::string Base16Fixture::convert (InputIterator begin, InputIterator end) const {
-        value::binary16 b (begin, end);
+        using namespace ::pstore::dump;
+        binary16 b (begin, end);
         std::ostringstream out;
         b.write (out);
         return out.str ();

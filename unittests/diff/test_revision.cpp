@@ -42,13 +42,16 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "diff/revision.hpp"
+#include "pstore/head_revision.hpp"
 #include "gtest/gtest.h"
+
+using namespace pstore;
 
 namespace {
     struct RevisionsFixture : public ::testing::Test {
         diff::revisions_type expected_revisions (diff::revision_number r1,
                                                  diff::revision_number r2) const {
-            return std::make_pair (r1, pstore::just (r2));
+            return std::make_pair (r1, just (r2));
         }
         static constexpr diff::revision_number db_head_revision = 8;
     };
@@ -61,8 +64,7 @@ TEST_F (RevisionsFixture, InitNothing) {
     diff::revisions_type const expected =
         this->expected_revisions (db_head_revision, db_head_revision - 1);
     diff::revisions_type const actual = diff::update_revisions (
-        std::make_pair (pstore::head_revision, pstore::nothing<diff::revision_number> ()),
-        db_head_revision);
+        std::make_pair (head_revision, nothing<diff::revision_number> ()), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
@@ -72,14 +74,14 @@ TEST_F (RevisionsFixture, InitOneOnly) {
 
     diff::revisions_type const expected = this->expected_revisions (r1, r1 - 1);
     diff::revisions_type const actual = diff::update_revisions (
-        std::make_pair (r1, pstore::nothing<diff::revision_number> ()), db_head_revision);
+        std::make_pair (r1, nothing<diff::revision_number> ()), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitOne5Two3) {
     constexpr auto r1 = diff::revision_number{5};
-    auto r2 = pstore::just (diff::revision_number{3});
+    auto r2 = just (diff::revision_number{3});
 
     diff::revisions_type const expected = this->expected_revisions (r1, r2);
     diff::revisions_type const actual =
@@ -90,7 +92,7 @@ TEST_F (RevisionsFixture, InitOne5Two3) {
 
 TEST_F (RevisionsFixture, InitOne4Two7) {
     constexpr auto r1 = diff::revision_number{4};
-    auto r2 = pstore::just (diff::revision_number{7});
+    auto r2 = just (diff::revision_number{7});
 
     diff::revisions_type const expected = this->expected_revisions (r2.value (), r1);
     diff::revisions_type const actual =
@@ -101,7 +103,7 @@ TEST_F (RevisionsFixture, InitOne4Two7) {
 
 TEST_F (RevisionsFixture, InitOne4Two4) {
     constexpr auto r1 = diff::revision_number{4};
-    auto r2 = pstore::just (diff::revision_number{4});
+    auto r2 = just (diff::revision_number{4});
 
     diff::revisions_type const expected = this->expected_revisions (r1, r2.value ());
     diff::revisions_type const actual =
@@ -111,8 +113,8 @@ TEST_F (RevisionsFixture, InitOne4Two4) {
 }
 
 TEST_F (RevisionsFixture, InitOneHeadTwoHead) {
-    constexpr auto r1 = diff::revision_number{pstore::head_revision};
-    auto r2 = pstore::just (diff::revision_number{pstore::head_revision});
+    constexpr auto r1 = diff::revision_number{head_revision};
+    auto r2 = just (diff::revision_number{head_revision});
 
     diff::revisions_type const expected =
         this->expected_revisions (db_head_revision, db_head_revision);

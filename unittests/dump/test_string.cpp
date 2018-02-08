@@ -55,8 +55,8 @@ namespace {
         template <typename InputIterator>
         std::string convert (InputIterator begin, InputIterator end) const;
 
-        std::string convert (std::string const & source) const;
-        std::string convert (value::string const & s) const;
+        std::string convert (::std::string const & source) const;
+        std::string convert (::pstore::dump::string const & s) const;
     };
 
     template <typename InputIterator>
@@ -65,10 +65,10 @@ namespace {
     }
 
     std::string StringFixture::convert (std::string const & source) const {
-        return this->convert (value::string{source});
+        return this->convert (::pstore::dump::string{source});
     }
 
-    std::string StringFixture::convert (value::string const & s) const {
+    std::string StringFixture::convert (::pstore::dump::string const & s) const {
         std::ostringstream out;
         s.write (out);
         return out.str ();
@@ -81,7 +81,7 @@ TEST_F (StringFixture, Empty) {
 }
 
 TEST_F (StringFixture, EmptyForceQuoted) {
-    value::string s{"", true};
+    pstore::dump::string s{"", true};
     std::string const actual = this->convert (s);
     EXPECT_EQ ("\"\"", actual);
 }
@@ -93,7 +93,7 @@ TEST_F (StringFixture, OneAsciiChar) {
 }
 
 TEST_F (StringFixture, OneAsciiCharForceQuoted) {
-    value::string s{"a", true};
+    pstore::dump::string s{"a", true};
     std::string const actual = this->convert (s);
     EXPECT_EQ ("\"a\"", actual);
 }

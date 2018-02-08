@@ -56,18 +56,20 @@ namespace {
     class Number : public ::testing::Test {
     public:
         void SetUp () final {
-            base_ = value::number_base::default_base ();
+            using namespace ::pstore::dump;
+            base_ = number_base::default_base ();
         }
         void TearDown () final {
+            using namespace ::pstore::dump;
             switch (base_) {
             case 8:
-                value::number_base::oct ();
+                number_base::oct ();
                 break;
             case 10:
-                value::number_base::dec ();
+                number_base::dec ();
                 break;
             case 16:
-                value::number_base::hex ();
+                number_base::hex ();
                 break;
             default:
                 ASSERT_TRUE (false);
@@ -87,7 +89,7 @@ typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Number, CharacterTypes);
 
 TYPED_TEST (Number, N0ExplicitBase8) {
-    value::number<int> v (0, 8);
+    pstore::dump::number<int> v (0, 8);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("0");
@@ -95,7 +97,7 @@ TYPED_TEST (Number, N0ExplicitBase8) {
 }
 
 TYPED_TEST (Number, N0ExplicitBase10) {
-    value::number<int> v (0, 10);
+    pstore::dump::number<int> v (0, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("0");
@@ -103,7 +105,7 @@ TYPED_TEST (Number, N0ExplicitBase10) {
 }
 
 TYPED_TEST (Number, N0ExplicitBase16) {
-    value::number<int> v (0, 16);
+    pstore::dump::number<int> v (0, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("0x0");
@@ -111,7 +113,7 @@ TYPED_TEST (Number, N0ExplicitBase16) {
 }
 
 TYPED_TEST (Number, N10ExplicitBase10) {
-    value::number<int> v (10, 10);
+    pstore::dump::number<int> v (10, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("10");
@@ -119,7 +121,7 @@ TYPED_TEST (Number, N10ExplicitBase10) {
 }
 
 TYPED_TEST (Number, N15ExplicitBase16) {
-    value::number<int> v (15, 16);
+    pstore::dump::number<int> v (15, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("0xf");
@@ -127,8 +129,8 @@ TYPED_TEST (Number, N15ExplicitBase16) {
 }
 
 TYPED_TEST (Number, N10DefaultBase8) {
-    value::number_base::oct ();
-    value::number<int> v (10);
+    pstore::dump::number_base::oct ();
+    pstore::dump::number<int> v (10);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("012");
@@ -136,8 +138,8 @@ TYPED_TEST (Number, N10DefaultBase8) {
 }
 
 TYPED_TEST (Number, N10DefaultBase10) {
-    value::number_base::dec ();
-    value::number<int> v (10, 10);
+    pstore::dump::number_base::dec ();
+    pstore::dump::number<int> v (10, 10);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("10");
@@ -145,8 +147,8 @@ TYPED_TEST (Number, N10DefaultBase10) {
 }
 
 TYPED_TEST (Number, N10DefaultBase16) {
-    value::number_base::hex ();
-    value::number<int> v (10, 16);
+    pstore::dump::number_base::hex ();
+    pstore::dump::number<int> v (10, 16);
     v.write (this->out);
     auto const & actual = this->out.str ();
     auto const & expected = convert<TypeParam> ("0xa");
