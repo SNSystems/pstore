@@ -51,15 +51,16 @@
 namespace pstore {
     namespace broker {
         class fifo_path;
-    } // namespace broker
-} // namespace pstore
 
 
 class command_processor;
 class recorder;
 
-void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & record_file,
+void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
                 std::shared_ptr<command_processor> & cp);
+
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_READ_LOOP_HPP
 // eof: include/broker/read_loop.hpp

@@ -54,20 +54,20 @@ namespace pstore {
     namespace broker {
 
         class fifo_path;
+        class command_processor;
+        class scavenger;
+
+        void shutdown (command_processor * const cp, scavenger * const scav, int signum,
+                       unsigned num_read_thread);
+
+        /// Wakes up the quit thread to start the process of shutting down the server.
+        void notify_quit_thread ();
+
+        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
+                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads);
 
     } // namespace broker
 } // namespace pstore
-
-class command_processor;
-class scavenger;
-void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-               unsigned num_read_thread);
-
-/// Wakes up the quit thread to start the process of shutting down the server.
-void notify_quit_thread ();
-
-std::thread create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
-                                unsigned num_read_threads);
 
 #endif // PSTORE_BROKER_QUIT_HPP
 // eof: include/broker/quit.hpp

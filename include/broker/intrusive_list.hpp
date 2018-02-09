@@ -48,104 +48,107 @@
 #include <iterator>
 #include <memory>
 
-template <typename T>
-struct list_member {
-    T * prev = nullptr;
-    T * next = nullptr;
-};
+namespace pstore {
+    namespace broker {
 
-template <typename T>
-struct intrusive_list {
-    intrusive_list ();
-    ~intrusive_list () noexcept {
-        this->check ();
-    }
+        template <typename T>
+        struct list_member {
+            T * prev = nullptr;
+            T * next = nullptr;
+        };
 
-    /// The list does not own the pointers.
-    class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
-    public:
-        iterator () = default;
-        explicit iterator (T * ptr)
-                : ptr_{ptr} {}
-        iterator & operator= (iterator const & rhs) = default;
+        template <typename T>
+        struct intrusive_list {
+            intrusive_list ();
+            ~intrusive_list () noexcept {
+                this->check ();
+            }
 
-        bool operator== (iterator const & rhs) const noexcept {
-            return ptr_ == rhs.ptr_;
+            /// The list does not own the pointers.
+            class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+            public:
+                iterator () = default;
+                explicit iterator (T * ptr)
+                        : ptr_{ptr} {}
+                iterator & operator= (iterator const & rhs) = default;
+
+                bool operator== (iterator const & rhs) const noexcept {
+                    return ptr_ == rhs.ptr_;
+                }
+                bool operator!= (iterator const & rhs) const noexcept {
+                    return !operator== (rhs);
+                }
+
+                iterator & operator++ () noexcept {
+                    ptr_ = ptr_->get_list_member ().next;
+                    return *this;
+                }
+                iterator operator++ (int) noexcept {
+                    auto t = *this;
+                    ++(*this);
+                    return t;
+                }
+                iterator & operator-- () noexcept {
+                    ptr_ = ptr_->get_list_member ().prev;
+                    return *this;
+                }
+                iterator operator-- (int) noexcept {
+                    auto t = *this;
+                    --(*this);
+                    return t;
+                }
+
+                T & operator* () {
+                    return *ptr_;
+                }
+                T * operator-> () {
+                    return ptr_;
+                }
+
+            private:
+                T * ptr_ = nullptr;
+            };
+
+            iterator begin () const {
+                return iterator (head_->get_list_member ().next);
+            }
+            iterator end () const {
+                return iterator (tail_.get ());
+            }
+
+            void insert_before (T * element, T * before);
+            static void erase (T * element) noexcept;
+            std::size_t size () const;
+
+            void check () noexcept;
+            T * tail () const {
+                return tail_.get ();
+            }
+
+        private:
+            std::unique_ptr<T> head_;
+            std::unique_ptr<T> tail_;
+        };
+
+        // (ctor)
+        // ~~~~~~
+        template <typename T>
+        intrusive_list<T>::intrusive_list ()
+                : head_{std::unique_ptr<T> (new T)}
+                , tail_{std::unique_ptr<T> (new T)} {
+            head_->get_list_member ().next = tail_.get ();
+            tail_->get_list_member ().prev = head_.get ();
         }
-        bool operator!= (iterator const & rhs) const noexcept {
-            return !operator== (rhs);
+
+        template <typename T>
+        std::size_t intrusive_list<T>::size () const {
+            return static_cast<std::size_t> (std::distance (this->begin (), this->end ()));
         }
 
-        iterator & operator++ () noexcept {
-            ptr_ = ptr_->get_list_member ().next;
-            return *this;
-        }
-        iterator operator++ (int) noexcept {
-            auto t = *this;
-            ++(*this);
-            return t;
-        }
-        iterator & operator-- () noexcept {
-            ptr_ = ptr_->get_list_member ().prev;
-            return *this;
-        }
-        iterator operator-- (int) noexcept {
-            auto t = *this;
-            --(*this);
-            return t;
-        }
-
-        T & operator* () {
-            return *ptr_;
-        }
-        T * operator-> () {
-            return ptr_;
-        }
-
-    private:
-        T * ptr_ = nullptr;
-    };
-
-    iterator begin () const {
-        return iterator (head_->get_list_member ().next);
-    }
-    iterator end () const {
-        return iterator (tail_.get ());
-    }
-
-    void insert_before (T * element, T * before);
-    static void erase (T * element) noexcept;
-    std::size_t size () const;
-
-    void check () noexcept;
-    T * tail () const {
-        return tail_.get ();
-    }
-
-private:
-    std::unique_ptr<T> head_;
-    std::unique_ptr<T> tail_;
-};
-
-// (ctor)
-// ~~~~~~
-template <typename T>
-intrusive_list<T>::intrusive_list ()
-        : head_{std::unique_ptr<T> (new T)}
-        , tail_{std::unique_ptr<T> (new T)} {
-    head_->get_list_member ().next = tail_.get ();
-    tail_->get_list_member ().prev = head_.get ();
-}
-
-template <typename T>
-std::size_t intrusive_list<T>::size () const {
-    return static_cast<std::size_t> (std::distance (this->begin (), this->end ()));
-}
-
-// check
-// ~~~~~
-template <typename T>
-void intrusive_list<T>::check () noexcept {
+        // check
+        // ~~~~~
+        template <typename T>
+        void intrusive_list<T>::check () noexcept {
 #ifndef NDEBUG
     assert (!head_->get_list_member ().prev);
     T * prev = nullptr;
@@ -185,6 +188,9 @@ void intrusive_list<T>::erase (T * element) noexcept {
         links.next->get_list_member ().prev = links.prev;
     }
 }
+
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_INTRUSIVE_LIST_HPP
 // eof: include/broker/intrusive_list.hpp

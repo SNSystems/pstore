@@ -79,7 +79,9 @@
 #include "broker/recorder.hpp"
 
 namespace {
+    using namespace pstore::broker;
     using namespace pstore::gsl;
+    using namespace pstore::logging;
 
     //*                  _          *
     //*  _ _ ___ __ _ __| |___ _ _  *
@@ -89,8 +91,7 @@ namespace {
     class reader {
     public:
         reader () = default;
-        reader (pstore::broker::unique_handle && ph, not_null<command_processor *> cp,
-                recorder * record_file);
+        reader (unique_handle && ph, not_null<command_processor *> cp, recorder * record_file);
 
         ~reader () noexcept;
 
@@ -108,8 +109,8 @@ namespace {
 
         list_member<reader> listm_;
 
-        pstore::broker::unique_handle pipe_handle_;
-        pstore::broker::message_ptr request_;
+        unique_handle pipe_handle_;
+        message_ptr request_;
 
         command_processor * command_processor_ = nullptr;
         recorder * record_file_ = nullptr;
@@ -135,8 +136,7 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    reader::reader (pstore::broker::unique_handle && ph, not_null<command_processor *> cp,
-                    recorder * record_file)
+    reader::reader (unique_handle && ph, not_null<command_processor *> cp, recorder * record_file)
             : pipe_handle_{std::move (ph)}
             , command_processor_{cp}
             , record_file_{record_file} {
@@ -217,26 +217,25 @@ namespace {
             r->is_in_flight_ = false;
 
             if (errcode == ERROR_SUCCESS && bytes_read != 0) {
-                if (bytes_read != pstore::broker::message_size) {
-                    pstore::logging::log (pstore::logging::priority::error,
-                                          "Partial message received. Length ", bytes_read);
+                if (bytes_read != message_size) {
+                    log (priority::error, "Partial message received. Length ", bytes_read);
                     r->completed_with_error ();
                 } else {
                     // The read operation has finished successfully, so process the request.
                     r->completed ();
                 }
             } else {
-                pstore::logging::log (pstore::logging::priority::error, "error received ", errcode);
+                log (priority::error, "error received ", errcode);
                 r->completed_with_error ();
             }
 
             // Try reading some more from this pipe client.
             r = r->initiate_read ();
         } catch (std::exception const & ex) {
-            pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
+            log (priority::error, "error: ", ex.what ());
             // This object should now kill itself?
         } catch (...) {
-            pstore::logging::log (pstore::logging::priority::error, "unknown error");
+            log (priority::error, "unknown error");
             // This object should now kill itself?
         }
     }
@@ -263,7 +262,7 @@ namespace {
     public:
         explicit request (not_null<command_processor *> cp, recorder * record_file);
 
-        void attach_pipe (pstore::broker::unique_handle && p);
+        void attach_pipe (unique_handle && p);
         ~request ();
 
         void cancel ();
@@ -431,77 +430,86 @@ namespace {
 } // (anonymous namespace)
 
 
-// read_loop
-// ~~~~~~~~~
-void read_loop (pstore::broker::fifo_path & path, std::shared_ptr<recorder> & record_file,
-                std::shared_ptr<command_processor> & cp) {
-    try {
-        pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
-                              pstore::logging::quoted (path.get ().c_str ()));
-        auto const pipe_name = pstore::utf::win32::to16 (path.get ());
+namespace pstore {
+    namespace broker {
 
-        // Create one event object for the connect operation.
-        pstore::broker::unique_handle connect_event = create_event ();
+        // read_loop
+        // ~~~~~~~~~
+        void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
+                        std::shared_ptr<command_processor> & cp) {
+            try {
+                pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
+                                      pstore::logging::quoted (path.get ().c_str ()));
+                auto const pipe_name = pstore::utf::win32::to16 (path.get ());
 
-        OVERLAPPED connect{0};
-        connect.hEvent = connect_event.get ();
+                // Create one event object for the connect operation.
+                unique_handle connect_event = create_event ();
 
-        // Create a pipe instance and and wait for a the client to connect.
-        bool pending_io;
-        pstore::broker::unique_handle pipe;
-        std::tie (pipe, pending_io) = create_and_connect_instance (pipe_name, connect);
+                OVERLAPPED connect{0};
+                connect.hEvent = connect_event.get ();
 
-        request req (cp.get (), record_file.get ());
+                // Create a pipe instance and and wait for a the client to connect.
+                bool pending_io;
+                unique_handle pipe;
+                std::tie (pipe, pending_io) = create_and_connect_instance (pipe_name, connect);
 
-        while (!done) {
-            constexpr DWORD timeout_ms = 60 * 1000; // 60 seconds // TODO: shared with POSIX
-            // Wait for a client to connect, or for a read or write operation to be completed,
-            // which causes a completion routine to be queued for execution.
-            auto const cause = ::WaitForSingleObjectEx (connect_event.get (), timeout_ms,
-                                                        true /*alertable wait?*/);
-            switch (cause) {
-            case WAIT_OBJECT_0:
-                // A connect operation has been completed. If an operation is pending, get the
-                // result of the connect operation.
-                if (pending_io) {
-                    auto bytes_transferred = DWORD{0};
-                    if (!::GetOverlappedResult (pipe.get (), &connect, &bytes_transferred,
-                                                false /*do not wait*/)) {
-                        raise (::pstore::win32_erc (::GetLastError ()), "ConnectNamedPipe");
+                request req (cp.get (), record_file.get ());
+
+                while (!done) {
+                    constexpr DWORD timeout_ms = 60 * 1000; // 60 seconds // TODO: shared with POSIX
+                    // Wait for a client to connect, or for a read or write operation to be
+                    // completed,
+                    // which causes a completion routine to be queued for execution.
+                    auto const cause = ::WaitForSingleObjectEx (connect_event.get (), timeout_ms,
+                                                                true /*alertable wait?*/);
+                    switch (cause) {
+                    case WAIT_OBJECT_0:
+                        // A connect operation has been completed. If an operation is pending, get
+                        // the
+                        // result of the connect operation.
+                        if (pending_io) {
+                            auto bytes_transferred = DWORD{0};
+                            if (!::GetOverlappedResult (pipe.get (), &connect, &bytes_transferred,
+                                                        false /*do not wait*/)) {
+                                raise (::pstore::win32_erc (::GetLastError ()), "ConnectNamedPipe");
+                            }
+                        }
+
+                        // Start the read operation for this client.
+                        req.attach_pipe (std::move (pipe));
+
+                        // Create new pipe instance for the next client.
+                        std::tie (pipe, pending_io) =
+                            create_and_connect_instance (pipe_name, connect);
+                        break;
+
+                    case WAIT_IO_COMPLETION:
+                        // The wait was satisfied by a completed read operation.
+                        break;
+                    case WAIT_TIMEOUT:
+                        pstore::logging::log (pstore::logging::priority::notice, "wait timeout");
+                        break;
+                    default:
+                        raise (::pstore::win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
                     }
                 }
 
-                // Start the read operation for this client.
-                req.attach_pipe (std::move (pipe));
-
-                // Create new pipe instance for the next client.
-                std::tie (pipe, pending_io) = create_and_connect_instance (pipe_name, connect);
-                break;
-
-            case WAIT_IO_COMPLETION:
-                // The wait was satisfied by a completed read operation.
-                break;
-            case WAIT_TIMEOUT:
-                pstore::logging::log (pstore::logging::priority::notice, "wait timeout");
-                break;
-            default:
-                raise (::pstore::win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
+                // Try to cancel any reads that are still in-flight.
+                req.cancel ();
+            } catch (std::exception const & ex) {
+                pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
+                exit_code = EXIT_FAILURE;
+                notify_quit_thread ();
+            } catch (...) {
+                pstore::logging::log (pstore::logging::priority::error, "unknown error");
+                exit_code = EXIT_FAILURE;
+                notify_quit_thread ();
             }
+            pstore::logging::log (pstore::logging::priority::notice, "exiting read loop");
         }
 
-        // Try to cancel any reads that are still in-flight.
-        req.cancel ();
-    } catch (std::exception const & ex) {
-        pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
-        exit_code = EXIT_FAILURE;
-        notify_quit_thread ();
-    } catch (...) {
-        pstore::logging::log (pstore::logging::priority::error, "unknown error");
-        exit_code = EXIT_FAILURE;
-        notify_quit_thread ();
-    }
-    pstore::logging::log (pstore::logging::priority::notice, "exiting read loop");
-}
+    } // namespace broker
+} // namespace pstore
 
 #endif // _WIN32
 // eof: lib/broker/read_loop_win32.cpp

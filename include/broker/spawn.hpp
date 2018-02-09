@@ -55,7 +55,8 @@
 #include "pstore/vacuum_intf.hpp"
 #include "pstore_broker_intf/unique_handle.hpp"
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
 #ifdef _WIN32
     namespace win32 {
@@ -80,7 +81,7 @@ namespace broker {
         /// Takes an array of command-line argument strings and converts them
         /// to a single string
         /// \note This function is exposed to enable it to be unit tested.
-        std::string build_command_line (::pstore::gsl::czstring * argv);
+        std::string build_command_line (gsl::czstring * argv);
     } // namespace win32
 #endif
 
@@ -92,9 +93,10 @@ namespace broker {
 
     /// Starts the process at the location given by `exe_path` and with the arguments
     /// supplied in a null-terminated array of czstrings.
-    process_identifier spawn (::pstore::gsl::czstring exe_path, ::pstore::gsl::czstring * argv);
+    process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv);
 
 } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_SPAWN_HPP
 // eof: include/broker/spawn.hpp

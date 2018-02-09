@@ -85,7 +85,7 @@ namespace {
     // push
     // ~~~~
     /// Push a simple message onto the command queue.
-    void push (command_processor & cp, std::string const & message) {
+    void push (pstore::broker::command_processor & cp, std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
         pstore::logging::log (pstore::logging::priority::info, "push command ",
@@ -99,32 +99,38 @@ namespace {
 
 } // (anonymous namespace)
 
-// shutdown
-// ~~~~~~~~
-void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-               unsigned num_read_threads) {
-    // Set the global "done" flag unless we're already shutting down. The latter condition happens
-    // if a "SUICIDE" command is received and the quit thread is woken in response.
-    bool expected = false;
-    if (done.compare_exchange_strong (expected, true)) {
-        // Tell the gcwatcher thread to exit.
-        broker::gc_sigint (signum);
+namespace pstore {
+    namespace broker {
 
-        if (scav != nullptr) {
-            scav->shutdown ();
-        }
+        // shutdown
+        // ~~~~~~~~
+        void shutdown (command_processor * const cp, scavenger * const scav, int signum,
+                       unsigned num_read_threads) {
+            // Set the global "done" flag unless we're already shutting down. The latter condition
+            // happens
+            // if a "SUICIDE" command is received and the quit thread is woken in response.
+            bool expected = false;
+            if (done.compare_exchange_strong (expected, true)) {
+                // Tell the gcwatcher thread to exit.
+                broker::gc_sigint (signum);
 
-        if (cp != nullptr) {
-            // Ask the read-loop threads to quit
-            for (auto ctr = 0U; ctr < num_read_threads; ++ctr) {
-                push (*cp, read_loop_quit_command);
+                if (scav != nullptr) {
+                    scav->shutdown ();
+                }
+
+                if (cp != nullptr) {
+                    // Ask the read-loop threads to quit
+                    for (auto ctr = 0U; ctr < num_read_threads; ++ctr) {
+                        push (*cp, read_loop_quit_command);
+                    }
+                    // Finally ask the command loop thread to exit.
+                    push (*cp, command_loop_quit_command);
+                }
             }
-            // Finally ask the command loop thread to exit.
-            push (*cp, command_loop_quit_command);
         }
-    }
-}
 
+    } // namespace broker
+} // namespace pstore
 
 namespace {
 
@@ -133,20 +139,22 @@ namespace {
     //***************
     //* quit thread *
     //***************
-    void quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
-                      unsigned num_read_threads) {
+    void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
+                      std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads) {
+        using namespace pstore;
+
         try {
-            pstore::threads::set_name ("quit");
-            pstore::logging::create_log_stream ("broker.quit");
+            threads::set_name ("quit");
+            logging::create_log_stream ("broker.quit");
 
             // Wait for to be told that we are in the process of shutting down. This
             // call will block until signal_handler() [below] is called by, for example,
             // the user typing Control-C.
             quit_info.wait ();
 
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Signal received. Will terminate after current command. Num=",
-                                  quit_info.signal ());
+            logging::log (logging::priority::info,
+                          "Signal received. Will terminate after current command. Num=",
+                          quit_info.signal ());
 
             auto cp_sptr = cp.lock ();
             // If the command processor is alive, clear the queue.
@@ -159,9 +167,9 @@ namespace {
             auto scav_sptr = scav.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads);
         } catch (std::exception const & ex) {
-            pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ());
+            logging::log (logging::priority::error, "error:", ex.what ());
         } catch (...) {
-            pstore::logging::log (pstore::logging::priority::error, "unknown exception");
+            logging::log (logging::priority::error, "unknown exception");
         }
     }
 
@@ -170,7 +178,7 @@ namespace {
     // ~~~~~~~~~~~~~~
     /// A signal handler entry point.
     void signal_handler (int sig) {
-        exit_code = sig;
+        pstore::broker::exit_code = sig;
         pstore::errno_saver saver;
         quit_info.notify (sig);
     }
@@ -178,24 +186,30 @@ namespace {
 } // (anonymous namespace)
 
 
-// notify_quit_thread
-// ~~~~~~~~~~~~~~~~~~
-void notify_quit_thread () {
-    quit_info.notify (-1);
-}
+namespace pstore {
+    namespace broker {
 
-// create_quit_thread
-// ~~~~~~~~~~~~~~~~~~
-std::thread create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
-                                unsigned num_read_threads) {
-    std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads);
+        // notify_quit_thread
+        // ~~~~~~~~~~~~~~~~~~
+        void notify_quit_thread () {
+            quit_info.notify (-1);
+        }
 
-    pstore::register_signal_handler (SIGINT, signal_handler);
-    pstore::register_signal_handler (SIGTERM, signal_handler);
+        // create_quit_thread
+        // ~~~~~~~~~~~~~~~~~~
+        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
+                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads) {
+            std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads);
+
+            register_signal_handler (SIGINT, signal_handler);
+            register_signal_handler (SIGTERM, signal_handler);
 #ifdef _WIN32
-    pstore::register_signal_handler (SIGBREAK, signal_handler); // Ctrl-Break sequence
+            register_signal_handler (SIGBREAK, signal_handler); // Ctrl-Break sequence
 #endif
-    return quit;
-}
+            return quit;
+        }
+
+    } // namespace broker
+} // namespace pstore
 
 // eof: lib/broker/quit.cpp

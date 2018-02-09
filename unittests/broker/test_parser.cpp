@@ -50,14 +50,15 @@
 namespace {
     class MessageParse : public ::testing::Test {
     protected:
-        broker::partial_cmds cmds_;
+        pstore::broker::partial_cmds cmds_;
         static constexpr std::uint32_t message_id_ = 1234;
     };
 }
 
 TEST_F (MessageParse, SinglePartCommand) {
-    std::unique_ptr<broker::broker_command> command = broker::parse (
-        pstore::broker::message_type (message_id_, 0, 1, std::string{"HELO hello world"}), cmds_);
+    using namespace pstore::broker;
+    std::unique_ptr<broker_command> command =
+        parse (message_type (message_id_, 0, 1, std::string{"HELO hello world"}), cmds_);
     ASSERT_NE (command.get (), nullptr);
     EXPECT_EQ (command->verb, "HELO");
     EXPECT_EQ (command->path, "hello world");
@@ -65,12 +66,13 @@ TEST_F (MessageParse, SinglePartCommand) {
 }
 
 TEST_F (MessageParse, TwoPartCommandInOrder) {
-    std::unique_ptr<broker::broker_command> c1 = broker::parse (
-        pstore::broker::message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
+    using namespace pstore::broker;
+    std::unique_ptr<broker_command> c1 =
+        parse (message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
     EXPECT_EQ (cmds_.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
-    std::unique_ptr<broker::broker_command> c2 = broker::parse (
-        pstore::broker::message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
+    std::unique_ptr<broker_command> c2 =
+        parse (message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");
@@ -78,12 +80,13 @@ TEST_F (MessageParse, TwoPartCommandInOrder) {
 }
 
 TEST_F (MessageParse, TwoPartCommandOutOfOrder) {
-    std::unique_ptr<broker::broker_command> c1 = broker::parse (
-        pstore::broker::message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
+    using namespace pstore::broker;
+    std::unique_ptr<broker_command> c1 =
+        parse (message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
     EXPECT_EQ (cmds_.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
-    std::unique_ptr<broker::broker_command> c2 = broker::parse (
-        pstore::broker::message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
+    std::unique_ptr<broker_command> c2 =
+        parse (message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");

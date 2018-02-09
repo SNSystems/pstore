@@ -54,17 +54,18 @@
 #include "./pointer_compare.hpp"
 #include "./spawn.hpp"
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    class gc_watch_thread {
-    public:
-        void watcher ();
+        class gc_watch_thread {
+        public:
+            void watcher ();
 
-        void start_vacuum (std::string const & db_path);
+            void start_vacuum (std::string const & db_path);
 
-        /// Called when a shutdown request is received. This method wakes the watcher
-        /// thread and asks all child processes to exit.
-        void stop (int signum = -1);
+            /// Called when a shutdown request is received. This method wakes the watcher
+            /// thread and asks all child processes to exit.
+            void stop (int signum = -1);
 
 #ifndef _WIN32
         /// POSIX signal handler.
@@ -85,7 +86,7 @@ namespace broker {
 #endif
 
         std::mutex mut_;
-        pstore::signal_cv cv_;
+        signal_cv cv_;
         process_bimap processes_;
     };
 
@@ -95,6 +96,7 @@ namespace broker {
     void gc_process_watch_thread ();
 
 } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_GC_HPP
 // eof: include/broker/gc.hpp

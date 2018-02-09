@@ -46,7 +46,13 @@
 #include "broker/globals.hpp"
 #include <cstdlib>
 
-std::atomic<bool> done;
-std::atomic<int> exit_code (EXIT_SUCCESS);
+namespace pstore {
+    namespace broker {
+
+        std::atomic<bool> done;
+        std::atomic<int> exit_code (EXIT_SUCCESS);
+
+    } // namespace broker
+} // namespace pstore
 
 // eof: lib/broker/globals.cpp

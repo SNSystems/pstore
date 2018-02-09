@@ -57,10 +57,6 @@
 namespace pstore {
     namespace broker {
         struct message_type;
-    } // namespace broker
-} // namespace pstore
-
-namespace broker {
 
     struct broker_command {
         broker_command (std::string const & v, std::string const & p)
@@ -85,25 +81,27 @@ namespace broker {
     using size_pair = std::pair<std::size_t, std::size_t>;
 
 } // namespace broker
+} // namespace pstore
 
 namespace std {
     template <>
-    struct hash<broker::size_pair> {
-        std::size_t operator() (broker::size_pair const & p) const {
+    struct hash<pstore::broker::size_pair> {
+        std::size_t operator() (pstore::broker::size_pair const & p) const {
             auto h = std::hash<std::size_t>{};
             return h (p.first) ^ h (p.second);
         }
     };
 } // namespace std
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    using partial_cmds = std::unordered_map<size_pair, pieces>;
+        using partial_cmds = std::unordered_map<size_pair, pieces>;
 
-    std::unique_ptr<broker_command> parse (pstore::broker::message_type const & msg,
-                                           partial_cmds & cmds);
+        std::unique_ptr<broker_command> parse (message_type const & msg, partial_cmds & cmds);
 
-} // namespace broker
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_PARSER_HPP
 // eof: include/broker/parser.hpp

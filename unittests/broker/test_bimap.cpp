@@ -49,7 +49,7 @@
 #include "gmock/gmock.h"
 
 TEST (BiMap, Size) {
-    bimap<int, char> bm;
+    pstore::broker::bimap<int, char> bm;
     EXPECT_EQ (0U, bm.size ());
     bm.set (1, 'a');
     EXPECT_EQ (1U, bm.size ());
@@ -62,7 +62,7 @@ TEST (BiMap, Size) {
 }
 
 TEST (BiMap, SetGet) {
-    bimap<std::string, int> bm;
+    pstore::broker::bimap<std::string, int> bm;
     bm.set ("a", 42);
     bm.set ("b", 37);
     EXPECT_EQ (2U, bm.size ());
@@ -73,7 +73,7 @@ TEST (BiMap, SetGet) {
 }
 
 TEST (BiMap, Present) {
-    bimap<std::string, int> bm;
+    pstore::broker::bimap<std::string, int> bm;
     bm.set ("a", 42);
     bm.set ("b", 37);
     EXPECT_FALSE (bm.presentl ("false"));

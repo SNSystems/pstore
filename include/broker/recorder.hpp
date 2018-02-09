@@ -55,35 +55,41 @@
 #include "pstore_support/file.hpp"
 #include "pstore_broker_intf/message_type.hpp"
 
-class recorder {
-public:
-    explicit recorder (std::string const & path);
-    ~recorder ();
+namespace pstore {
+    namespace broker {
 
-    recorder (recorder const &) = delete;
-    recorder & operator== (recorder const &) = delete;
+        class recorder {
+        public:
+            explicit recorder (std::string const & path);
+            ~recorder ();
 
-    void record (pstore::broker::message_type const & cmd);
+            recorder (recorder const &) = delete;
+            recorder & operator== (recorder const &) = delete;
 
-private:
-    std::mutex mut_;
-    pstore::file::file_handle file_;
-};
+            void record (message_type const & cmd);
 
-class player {
-public:
-    explicit player (std::string const & path);
-    ~player ();
+        private:
+            std::mutex mut_;
+            file::file_handle file_;
+        };
 
-    player (player const &) = delete;
-    player & operator== (player const &) = delete;
+        class player {
+        public:
+            explicit player (std::string const & path);
+            ~player ();
 
-    pstore::broker::message_ptr read ();
+            player (player const &) = delete;
+            player & operator== (player const &) = delete;
 
-private:
-    std::mutex mut_;
-    pstore::file::file_handle file_;
-};
+            message_ptr read ();
+
+        private:
+            std::mutex mut_;
+            file::file_handle file_;
+        };
+
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_RECORDER_HPP
 // eof: include/broker/recorder.hpp

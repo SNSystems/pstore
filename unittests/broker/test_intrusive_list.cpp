@@ -50,24 +50,24 @@ namespace {
                 : v{0} {}
         explicit value (int v_)
                 : v{v_} {}
-        list_member<value> & get_list_member () {
+        pstore::broker::list_member<value> & get_list_member () {
             return list_memb;
         }
 
         int const v;
-        list_member<value> list_memb;
+        pstore::broker::list_member<value> list_memb;
     };
 }
 
 TEST (IntrusiveList, Empty) {
-    intrusive_list<value> v;
+    pstore::broker::intrusive_list<value> v;
     EXPECT_EQ (0, std::distance (v.begin (), v.end ()));
 }
 
 TEST (IntrusiveList, OneElement) {
     value member{47};
 
-    intrusive_list<value> v;
+    pstore::broker::intrusive_list<value> v;
     v.insert_before (&member, v.tail ());
 
     ASSERT_EQ (1, std::distance (v.begin (), v.end ()));
@@ -80,13 +80,13 @@ TEST (IntrusiveList, OneElement) {
 
 TEST (IntrusiveList, IteratorIncrement) {
     value member{7};
-    intrusive_list<value> v;
+    pstore::broker::intrusive_list<value> v;
     v.insert_before (&member, v.tail ());
 
-    intrusive_list<value>::iterator begin = v.begin ();
-    intrusive_list<value>::iterator it = begin;
+    pstore::broker::intrusive_list<value>::iterator begin = v.begin ();
+    pstore::broker::intrusive_list<value>::iterator it = begin;
     ++it;
-    intrusive_list<value>::iterator it2 = begin;
+    pstore::broker::intrusive_list<value>::iterator it2 = begin;
     it2++;
     EXPECT_EQ (it, it2);
 

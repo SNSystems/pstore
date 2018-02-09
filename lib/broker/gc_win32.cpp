@@ -115,74 +115,72 @@ namespace {
         v->clear ();
         v->reserve (roundup (processes.size () + 1U, round_to));
         v->push_back (cv.get ());
-        std::transform (processes.right_begin (), processes.right_end (), std::back_inserter (*v),
-                        [](broker::process_identifier const & process) { return process.get (); });
+        std::transform (
+            processes.right_begin (), processes.right_end (), std::back_inserter (*v),
+            [](pstore::broker::process_identifier const & process) { return process.get (); });
     }
 
 } // (anonymous namespace)
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    // watcher
-    // ~~~~~~~
-    void gc_watch_thread::watcher () {
-        pstore::logging::log (pstore::logging::priority::info, "starting gc process watch thread");
+        // watcher
+        // ~~~~~~~
+        void gc_watch_thread::watcher () {
+            logging::log (logging::priority::info, "starting gc process watch thread");
 
-        std::vector<HANDLE> object_vector;
-        std::unique_lock<decltype (mut_)> lock (mut_);
+            std::vector<HANDLE> object_vector;
+            std::unique_lock<decltype (mut_)> lock (mut_);
 
-        while (!done) {
-            try {
-                pstore::logging::log (pstore::logging::priority::info,
-                                      "waiting for a GC process to complete");
+            while (!done) {
+                try {
+                    logging::log (logging::priority::info, "waiting for a GC process to complete");
 
-                build_object_vector (processes_, cv_, &object_vector);
-                // FIXME: handle the (highly unlikely) case where this assertion would fire.
-                assert (object_vector.size () < MAXIMUM_WAIT_OBJECTS);
+                    build_object_vector (processes_, cv_, &object_vector);
+                    // FIXME: handle the (highly unlikely) case where this assertion would fire.
+                    assert (object_vector.size () < MAXIMUM_WAIT_OBJECTS);
 
-                lock.unlock ();
-                DWORD const wmo_timeout = 60 * 1000; // 60 second timeout.
-                DWORD wmo_res = ::WaitForMultipleObjects (
-                    static_cast<DWORD> (object_vector.size ()), object_vector.data (),
-                    FALSE /*wait all*/, wmo_timeout);
-                lock.lock ();
+                    lock.unlock ();
+                    DWORD const wmo_timeout = 60 * 1000; // 60 second timeout.
+                    DWORD wmo_res = ::WaitForMultipleObjects (
+                        static_cast<DWORD> (object_vector.size ()), object_vector.data (),
+                        FALSE /*wait all*/, wmo_timeout);
+                    lock.lock ();
 
-                // We may have been woken up because the program is exiting.
-                if (done) {
-                    continue;
-                }
-
-                if (wmo_res == WAIT_FAILED) {
-                    auto errcode = ::GetLastError ();
-                    pstore::logging::log (pstore::logging::priority::error,
-                                          "WaitForMultipleObjects error ",
-                                          errcode); // FIXME: exception
-                } else if (wmo_res == WAIT_TIMEOUT) {
-                    pstore::logging::log (pstore::logging::priority::info,
-                                          "WaitForMultipleObjects timeout");
-                } else if (wmo_res >= WAIT_OBJECT_0) {
-                    // Extract the handle that caused us to wake.
-                    HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
-                    // We may have been woken by the notify condition variable rather than as a
-                    // result of a process exiting.
-                    if (h != cv_.get ()) {
-                        // A GC process exited so let the user know and remove it from the
-                        // collection of child processes.
-                        pr_exit (h);
-                        processes_.eraser (h);
+                    // We may have been woken up because the program is exiting.
+                    if (done) {
+                        continue;
                     }
-                } else {
-                    // TODO: more conditions here?
+
+                    if (wmo_res == WAIT_FAILED) {
+                        auto errcode = ::GetLastError ();
+                        logging::log (logging::priority::error, "WaitForMultipleObjects error ",
+                                      errcode); // FIXME: exception
+                    } else if (wmo_res == WAIT_TIMEOUT) {
+                        logging::log (logging::priority::info, "WaitForMultipleObjects timeout");
+                    } else if (wmo_res >= WAIT_OBJECT_0) {
+                        // Extract the handle that caused us to wake.
+                        HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
+                        // We may have been woken by the notify condition variable rather than as a
+                        // result of a process exiting.
+                        if (h != cv_.get ()) {
+                            // A GC process exited so let the user know and remove it from the
+                            // collection of child processes.
+                            pr_exit (h);
+                            processes_.eraser (h);
+                        }
+                    } else {
+                        // TODO: more conditions here?
+                    }
+                } catch (std::exception const & ex) {
+                    logging::log (logging::priority::error, "An error occurred: ", ex.what ());
+                    // TODO: delay before restarting. Don't restart after e.g. bad_alloc?
+                } catch (...) {
+                    logging::log (logging::priority::error, "Unknown error");
+                    // TODO: delay before restarting
                 }
-            } catch (std::exception const & ex) {
-                pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
-                                      ex.what ());
-                // TODO: delay before restarting. Don't restart after e.g. bad_alloc?
-            } catch (...) {
-                pstore::logging::log (pstore::logging::priority::error, "Unknown error");
-                // TODO: delay before restarting
             }
-        }
 
 #if 0 // FIXME: no idea how to do this on Windows yet.
     // Tell any child GC processes to quit.
@@ -196,6 +194,7 @@ namespace broker {
     }
 
 } // namespace broker
+} // namespace pstore
 
 #endif // _WIN32
 // eof: lib/broker/gc_win32.cpp

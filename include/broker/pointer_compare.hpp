@@ -50,49 +50,52 @@
 #include <memory>
 #include <type_traits>
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    /// A type which can used by the ordered containers (set<>, map<>, and the local bimap<>) to
-    /// perform key comparison where the keys are one of the various types of smart or raw pointer.
-    /// shared_ptr<> and unique_ptr<> instances are converted to the underlying raw type before
-    /// comparison.
-    template <typename Ptr>
-    struct pointer_compare {
-        static_assert (std::is_pointer<Ptr>::value, "Ptr must be a pointer type");
-        using is_transparent = std::true_type;
+        /// A type which can used by the ordered containers (set<>, map<>, and the local bimap<>) to
+        /// perform key comparison where the keys are one of the various types of smart or raw
+        /// pointer.
+        /// shared_ptr<> and unique_ptr<> instances are converted to the underlying raw type before
+        /// comparison.
+        template <typename Ptr>
+        struct pointer_compare {
+            static_assert (std::is_pointer<Ptr>::value, "Ptr must be a pointer type");
+            using is_transparent = std::true_type;
 
-        // This helper class turns the various smart and raw pointers into raw pointers and then
-        // uses std::less<Ptr> to compare them.
-        class helper {
-        public:
-            helper ()
-                    : ptr_ (nullptr) {}
-            helper (helper const &) = default;
-            helper (Ptr p)
-                    : ptr_ (p) {}
+            // This helper class turns the various smart and raw pointers into raw pointers and then
+            // uses std::less<Ptr> to compare them.
+            class helper {
+            public:
+                helper ()
+                        : ptr_ (nullptr) {}
+                helper (helper const &) = default;
+                helper (Ptr p)
+                        : ptr_ (p) {}
 
-            template <typename U>
-            helper (std::shared_ptr<U> const & sp)
-                    : ptr_{sp.get ()} {}
+                template <typename U>
+                helper (std::shared_ptr<U> const & sp)
+                        : ptr_{sp.get ()} {}
 
-            template <typename U, typename Deleter = std::default_delete<U>>
-            helper (std::unique_ptr<U, Deleter> const & up)
-                    : ptr_{up.get ()} {}
+                template <typename U, typename Deleter = std::default_delete<U>>
+                helper (std::unique_ptr<U, Deleter> const & up)
+                        : ptr_{up.get ()} {}
 
-            bool operator< (helper other) const {
-                return std::less<Ptr> () (ptr_, other.ptr_);
+                bool operator< (helper other) const {
+                    return std::less<Ptr> () (ptr_, other.ptr_);
+                }
+
+            private:
+                Ptr ptr_;
+            };
+
+            bool operator() (helper const & lhs, helper const & rhs) const {
+                return lhs < rhs;
             }
-
-        private:
-            Ptr ptr_;
         };
 
-        bool operator() (helper const & lhs, helper const & rhs) const {
-            return lhs < rhs;
-        }
-    };
-
-} // namespace broker
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_POINTER_COMPARE_HPP
 

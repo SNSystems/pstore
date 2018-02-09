@@ -69,35 +69,41 @@
 #include "pstore_broker_intf/message_type.hpp"
 #include "pstore/make_unique.hpp"
 
-class message_pool {
-public:
-    void return_to_pool (pstore::broker::message_ptr && ptr);
-    pstore::broker::message_ptr get_from_pool ();
+namespace pstore {
+    namespace broker {
 
-private:
-    std::mutex mut_;
-    std::queue<pstore::broker::message_ptr> queue_;
-};
+        class message_pool {
+        public:
+            void return_to_pool (message_ptr && ptr);
+            message_ptr get_from_pool ();
 
-inline void message_pool::return_to_pool (pstore::broker::message_ptr && ptr) {
-    std::unique_lock<std::mutex> lock (mut_);
-    assert (ptr.get () != nullptr);
-    queue_.push (std::move (ptr));
-}
+        private:
+            std::mutex mut_;
+            std::queue<message_ptr> queue_;
+        };
 
-inline pstore::broker::message_ptr message_pool::get_from_pool () {
-    std::unique_lock<std::mutex> lock (mut_);
-    if (queue_.size () == 0) {
-        lock.unlock ();
-        return std::make_unique<pstore::broker::message_type> ();
-    }
+        inline void message_pool::return_to_pool (message_ptr && ptr) {
+            std::unique_lock<std::mutex> lock (mut_);
+            assert (ptr.get () != nullptr);
+            queue_.push (std::move (ptr));
+        }
 
-    auto res = std::move (queue_.front ());
-    queue_.pop ();
-    return res;
-}
+        inline message_ptr message_pool::get_from_pool () {
+            std::unique_lock<std::mutex> lock (mut_);
+            if (queue_.size () == 0) {
+                lock.unlock ();
+                return std::make_unique<message_type> ();
+            }
 
-extern message_pool pool;
+            auto res = std::move (queue_.front ());
+            queue_.pop ();
+            return res;
+        }
+
+        extern message_pool pool;
+
+    } // namespace broker
+} // namespace pstore
 
 #endif // PSTORE_BROKER_MESSAGE_POOL_HPP
 // eof: include/broker/message_pool.hpp

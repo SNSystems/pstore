@@ -51,26 +51,31 @@
 #include <mutex>
 #include <thread>
 
-class command_processor;
+namespace pstore {
+    namespace broker {
 
-class scavenger {
-public:
-    explicit scavenger (std::weak_ptr<command_processor> cp)
-            : cp_{cp} {}
+        class command_processor;
 
-    // no copying or deletion.
-    scavenger (scavenger const &) = delete;
-    scavenger & operator= (scavenger const &) = delete;
+        class scavenger {
+        public:
+            explicit scavenger (std::weak_ptr<command_processor> cp)
+                    : cp_{cp} {}
 
-    void thread_entry ();
+            // no copying or deletion.
+            scavenger (scavenger const &) = delete;
+            scavenger & operator= (scavenger const &) = delete;
 
-    void shutdown ();
+            void thread_entry ();
 
-private:
-    std::mutex mut_;
-    std::condition_variable cv_;
-    std::weak_ptr<command_processor> cp_;
-};
+            void shutdown ();
 
+        private:
+            std::mutex mut_;
+            std::condition_variable cv_;
+            std::weak_ptr<command_processor> cp_;
+        };
+
+    } // namespace broker
+} // namespace pstore
 #endif // PSTORE_BROKER_SCAVENGER_HPP
 // eof: include/broker/scavenger.hpp

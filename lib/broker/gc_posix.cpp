@@ -79,84 +79,87 @@ namespace {
     }
 
     void pr_exit (pid_t pid, int status) {
-        pstore::logging::log (pstore::logging::priority::info, "GC process exited pid ", pid);
+        using namespace pstore::logging;
+
+        log (priority::info, "GC process exited pid ", pid);
         if (WIFEXITED (status)) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Normal termination, exit status = ", WEXITSTATUS (status));
+            log (priority::info, "Normal termination, exit status = ", WEXITSTATUS (status));
         } else if (WIFSIGNALED (status)) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Abormal termination, signal number ", WTERMSIG (status));
-            pstore::logging::log (pstore::logging::priority::info, "  ", core_dump_string (status));
+            log (priority::info, "Abormal termination, signal number ", WTERMSIG (status));
+            log (priority::info, "  ", core_dump_string (status));
         } else if (WIFSTOPPED (status)) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Child stopped, signal number = ", WSTOPSIG (status));
+            log (priority::info, "Child stopped, signal number = ", WSTOPSIG (status));
         }
     }
 
 } // (anonymous namespace)
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    // watcher
-    // ~~~~~~~
-    void gc_watch_thread::watcher () {
-        pstore::logging::log (pstore::logging::priority::info, "starting gc process watch thread");
+        // watcher
+        // ~~~~~~~
+        void gc_watch_thread::watcher () {
+            logging::log (logging::priority::info, "starting gc process watch thread");
 
-        std::unique_lock<decltype (mut_)> lock (mut_);
-        while (!done) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "waiting for a GC process to complete");
-            cv_.wait (lock);
-            // We may have been woken up because the program is exiting.
-            if (done) {
-                continue;
-            }
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            while (!done) {
+                logging::log (logging::priority::info, "waiting for a GC process to complete");
+                cv_.wait (lock);
+                // We may have been woken up because the program is exiting.
+                if (done) {
+                    continue;
+                }
 
-            // Loop to ensure that we query all processes that exited whilst we were waiting.
-            auto status = 0;
-            while (auto const pid = ::waitpid (-1, &status, WUNTRACED | WNOHANG)) {
-                if (pid == -1) {
-                    int const err = errno;
-                    // If the error was "no child processes", we shouldn't report it.
-                    if (err != ECHILD) {
-                        static constexpr std::size_t buffer_size = 256;
-                        char msgbuf[buffer_size];
-                        std::snprintf (msgbuf, buffer_size, "waitpid error %d: ", err);
-                        msgbuf[buffer_size - 1U] = '\0';
+                // Loop to ensure that we query all processes that exited whilst we were waiting.
+                auto status = 0;
+                while (auto const pid = ::waitpid (-1, &status, WUNTRACED | WNOHANG)) {
+                    if (pid == -1) {
+                        int const err = errno;
+                        // If the error was "no child processes", we shouldn't report it.
+                        if (err != ECHILD) {
+                            static constexpr std::size_t buffer_size = 256;
+                            char msgbuf[buffer_size];
+                            std::snprintf (msgbuf, buffer_size, "waitpid error %d: ", err);
+                            msgbuf[buffer_size - 1U] = '\0';
 
-                        char errbuf[buffer_size];
-                        ::strerror_r (err, errbuf, sizeof (errbuf));
-                        errbuf[buffer_size - 1U] = '\0';
+                            char errbuf[buffer_size];
+                            ::strerror_r (err, errbuf, sizeof (errbuf));
+                            errbuf[buffer_size - 1U] = '\0';
 
-                        pstore::logging::log (pstore::logging::priority::error, msgbuf, errbuf);
+                            logging::log (logging::priority::error, msgbuf, errbuf);
+                        }
+                        break;
+                    } else {
+                        pr_exit (pid, status);
+                        processes_.eraser (pid);
                     }
-                    break;
-                } else {
-                    pr_exit (pid, status);
-                    processes_.eraser (pid);
                 }
             }
+
+            // FIXME: if an exception is thrown we should probably still clean up proceses.
+
+            // Ask any child GC processes to quit.
+            logging::log (logging::priority::info, "cleaning up");
+            for (auto it = processes_.right_begin (), end = processes_.right_end (); it != end;
+                 ++it) {
+                auto pid = *it;
+                logging::log (logging::priority::info, "sending SIGINT to ", pid);
+                ::kill (pid, SIGINT);
+            }
         }
 
-        // FIXME: if an exception is thrown we should probably still clean up proceses.
-
-        // Ask any child GC processes to quit.
-        pstore::logging::log (pstore::logging::priority::info, "cleaning up");
-        for (auto it = processes_.right_begin (), end = processes_.right_end (); it != end; ++it) {
-            auto pid = *it;
-            pstore::logging::log (pstore::logging::priority::info, "sending SIGINT to ", pid);
-            ::kill (pid, SIGINT);
+        // child_signal
+        // ~~~~~~~~~~~~
+        /// \note This function is called from a signal handler so muyst restrict itself to
+        /// signal-safe
+        /// functions.
+        void gc_watch_thread::child_signal (int sig) noexcept {
+            cv_.notify (sig);
         }
-    }
 
-    // child_signal
-    // ~~~~~~~~~~~~
-    /// \note This function is called from a signal handler so muyst restrict itself to signal-safe
-    /// functions.
-    void gc_watch_thread::child_signal (int sig) noexcept {
-        cv_.notify (sig);
-    }
+    } // namespace broker
+} // namespace pstore
 
-} // namespace broker
 #endif // _!WIN32
 // eof: lib/broker/gc_posix.cpp

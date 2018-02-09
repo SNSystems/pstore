@@ -49,26 +49,28 @@
 
 namespace {
 
-    class mock_cp : public command_processor {
+    class mock_cp : public pstore::broker::command_processor {
     public:
         explicit mock_cp (unsigned const num_read_threads)
                 : command_processor (num_read_threads) {}
 
-        MOCK_METHOD2 (suicide,
-                      void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_METHOD2 (quit,
-                      void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_METHOD2 (cquit,
-                      void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_METHOD2 (gc, void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_METHOD2 (echo,
-                      void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_METHOD2 (nop, void(pstore::broker::fifo_path const &, broker::broker_command const &));
-        MOCK_CONST_METHOD1 (unknown, void(broker::broker_command const &));
+        MOCK_METHOD2 (suicide, void(pstore::broker::fifo_path const &,
+                                    pstore::broker::broker_command const &));
+        MOCK_METHOD2 (quit, void(pstore::broker::fifo_path const &,
+                                 pstore::broker::broker_command const &));
+        MOCK_METHOD2 (cquit, void(pstore::broker::fifo_path const &,
+                                  pstore::broker::broker_command const &));
+        MOCK_METHOD2 (gc, void(pstore::broker::fifo_path const &,
+                               pstore::broker::broker_command const &));
+        MOCK_METHOD2 (echo, void(pstore::broker::fifo_path const &,
+                                 pstore::broker::broker_command const &));
+        MOCK_METHOD2 (nop, void(pstore::broker::fifo_path const &,
+                                pstore::broker::broker_command const &));
+        MOCK_CONST_METHOD1 (unknown, void(pstore::broker::broker_command const &));
 
         // Replace the log message with an implementation that does nothing at all. We don't really
         // want to be writing logs from the unit tests.
-        virtual void log (broker::broker_command const &) const {}
+        virtual void log (pstore::broker::broker_command const &) const {}
         virtual void log (pstore::gsl::czstring) const {}
     };
 
@@ -109,7 +111,7 @@ TEST_F (Command, Nop) {
 }
 
 TEST_F (Command, Bad) {
-    EXPECT_CALL (cp_, unknown (broker::broker_command{"bad", "command"})).Times (1);
+    EXPECT_CALL (cp_, unknown (pstore::broker::broker_command{"bad", "command"})).Times (1);
 
     pstore::broker::message_type msg{message_id, part_no, num_parts, "bad command"};
     cp_.process_command (fifo_, msg);

@@ -57,56 +57,58 @@
 #include "broker/globals.hpp"
 #include "broker/spawn.hpp"
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    // start_vacuum
-    // ~~~~~~~~~~~~
-    void gc_watch_thread::start_vacuum (std::string const & db_path) {
-        std::unique_lock<decltype (mut_)> lock (mut_);
-        if (processes_.presentl (db_path)) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "GC process is already running for ",
-                                  pstore::logging::quoted (db_path.c_str ()));
-        } else {
-            pstore::logging::log (pstore::logging::priority::info, "Starting GC process for ",
-                                  pstore::logging::quoted{db_path.c_str ()});
-            auto const exe_path = vacuumd_path ();
-            std::array<char const *, 4> argv = {
-                {exe_path.c_str (), "--daemon", db_path.c_str (), nullptr}};
-            auto child_identifier = spawn (exe_path.c_str (), argv.data ());
-            processes_.set (db_path, child_identifier);
+        // start_vacuum
+        // ~~~~~~~~~~~~
+        void gc_watch_thread::start_vacuum (std::string const & db_path) {
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            if (processes_.presentl (db_path)) {
+                logging::log (logging::priority::info,
+                                      "GC process is already running for ",
+                                      logging::quoted (db_path.c_str ()));
+            } else {
+                logging::log (logging::priority::info, "Starting GC process for ",
+                                      logging::quoted{db_path.c_str ()});
+                auto const exe_path = vacuumd_path ();
+                std::array<char const *, 4> argv = {
+                    {exe_path.c_str (), "--daemon", db_path.c_str (), nullptr}};
+                auto child_identifier = spawn (exe_path.c_str (), argv.data ());
+                processes_.set (db_path, child_identifier);
 
-            // An initial wakeup of the GC-watcher thread in case the child process exited before we
-            // had time to install the SIGCHLD signal handler.
-            cv_.notify (-1);
+                // An initial wakeup of the GC-watcher thread in case the child process exited
+                // before we
+                // had time to install the SIGCHLD signal handler.
+                cv_.notify (-1);
+            }
         }
-    }
 
-    // stop
-    // ~~~~
-    void gc_watch_thread::stop (int signum) {
-        assert (done);
-        pstore::logging::log (pstore::logging::priority::info,
-                              "asking gc process watch thread to exit");
-        cv_.notify (signum);
-    }
+        // stop
+        // ~~~~
+        void gc_watch_thread::stop (int signum) {
+            assert (done);
+            logging::log (logging::priority::info,
+                                  "asking gc process watch thread to exit");
+            cv_.notify (signum);
+        }
 
-    // vacuumd_path
-    // ~~~~~~~~~~~~
-    std::string gc_watch_thread::vacuumd_path () {
-        using pstore::path::join;
-        using pstore::path::dir_name;
-        return join (dir_name (pstore::process_file_name ()), vacuumd_name);
-    }
+        // vacuumd_path
+        // ~~~~~~~~~~~~
+        std::string gc_watch_thread::vacuumd_path () {
+            using path::join;
+            using path::dir_name;
+            return join (dir_name (process_file_name ()), vacuumd_name);
+        }
 
-} // end namespace broker
-
+    } // end namespace broker
+} // end namespace pstore
 
 namespace {
 
     /// Manages the sole local gc_watch_thread
-    broker::gc_watch_thread & getgc () {
-        static broker::gc_watch_thread gc;
+    pstore::broker::gc_watch_thread & getgc () {
+        static pstore::broker::gc_watch_thread gc;
         return gc;
     }
 
@@ -124,11 +126,12 @@ namespace {
 } // end anonymous namespace
 
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    void gc_process_watch_thread () {
+        void gc_process_watch_thread () {
 #ifndef _WIN32
-        pstore::register_signal_handler (SIGCHLD, child_signal);
+            register_signal_handler (SIGCHLD, child_signal);
 #endif
         getgc ().watcher ();
     }
@@ -145,4 +148,6 @@ namespace broker {
     }
 
 } // end namespace broker
+} // end namespace pstore
+
 // eof: lib/broker/gc_common.cpp

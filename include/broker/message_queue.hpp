@@ -51,41 +51,48 @@
 #include <queue>
 #include <utility>
 
-template <typename T>
-class message_queue {
-public:
-    void push (T && message);
-    T pop ();
-    void clear ();
+namespace pstore {
+    namespace broker {
 
-private:
-    std::mutex mut_;
-    std::condition_variable cv;
-    std::queue<T> queue_;
-};
+        template <typename T>
+        class message_queue {
+        public:
+            void push (T && message);
+            T pop ();
+            void clear ();
 
-template <typename T>
-void message_queue<T>::push (T && message) {
-    std::unique_lock<decltype (mut_)> lock (mut_);
-    queue_.push (std::move (message));
-    cv.notify_one ();
-}
+        private:
+            std::mutex mut_;
+            std::condition_variable cv;
+            std::queue<T> queue_;
+        };
 
-template <typename T>
-T message_queue<T>::pop () {
-    std::unique_lock<decltype (mut_)> lock (mut_);
-    cv.wait (lock, [this]() { return queue_.size () > 0; });
-    T res = std::move (queue_.front ());
-    queue_.pop ();
-    return res;
-}
+        template <typename T>
+        void message_queue<T>::push (T && message) {
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            queue_.push (std::move (message));
+            cv.notify_one ();
+        }
 
-template <typename T>
-void message_queue<T>::clear () {
-    std::unique_lock<decltype (mut_)> lock (mut_);
-    while (!queue_.empty ()) {
-        queue_.pop ();
-    }
-}
+        template <typename T>
+        T message_queue<T>::pop () {
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            cv.wait (lock, [this]() { return queue_.size () > 0; });
+            T res = std::move (queue_.front ());
+            queue_.pop ();
+            return res;
+        }
+
+        template <typename T>
+        void message_queue<T>::clear () {
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            while (!queue_.empty ()) {
+                queue_.pop ();
+            }
+        }
+
+    } // namespace broker
+} // namespace pstore
+
 #endif // PSTORE_BROKER_MESSAGE_QUEUE_HPP
 // eof: include/broker/message_queue.hpp

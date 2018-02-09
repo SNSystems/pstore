@@ -50,52 +50,58 @@
 
 #include "pstore_support/utf.hpp"
 
-//*                        _          *
-//*  _ _ ___ __ ___ _ _ __| |___ _ _  *
-//* | '_/ -_) _/ _ \ '_/ _` / -_) '_| *
-//* |_| \___\__\___/_| \__,_\___|_|   *
-//*                                   *
-// (ctor)
-// ~~~~~~
-recorder::recorder (std::string const & path) {
-    file_.open (path, pstore::file::file_handle::create_mode::create_new,
-                pstore::file::file_handle::writable_mode::read_write);
-}
+namespace pstore {
+    namespace broker {
 
-// (dtor)
-// ~~~~~~
-recorder::~recorder () {}
+        //*                        _          *
+        //*  _ _ ___ __ ___ _ _ __| |___ _ _  *
+        //* | '_/ -_) _/ _ \ '_/ _` / -_) '_| *
+        //* |_| \___\__\___/_| \__,_\___|_|   *
+        //*                                   *
+        // (ctor)
+        // ~~~~~~
+        recorder::recorder (std::string const & path) {
+            file_.open (path, file::file_handle::create_mode::create_new,
+                        file::file_handle::writable_mode::read_write);
+        }
 
-// record
-// ~~~~~~
-void recorder::record (pstore::broker::message_type const & cmd) {
-    std::unique_lock<decltype (mut_)> lock (mut_);
-    file_.write (cmd);
-}
+        // (dtor)
+        // ~~~~~~
+        recorder::~recorder () {}
+
+        // record
+        // ~~~~~~
+        void recorder::record (message_type const & cmd) {
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            file_.write (cmd);
+        }
 
 
-//*       _                    *
-//*  _ __| |__ _ _  _ ___ _ _  *
-//* | '_ \ / _` | || / -_) '_| *
-//* | .__/_\__,_|\_, \___|_|   *
-//* |_|          |__/          *
-// (ctor)
-// ~~~~~~
-player::player (std::string const & path) {
-    file_.open (path, pstore::file::file_handle::create_mode::open_existing,
-                pstore::file::file_handle::writable_mode::read_only);
-}
+        //*       _                    *
+        //*  _ __| |__ _ _  _ ___ _ _  *
+        //* | '_ \ / _` | || / -_) '_| *
+        //* | .__/_\__,_|\_, \___|_|   *
+        //* |_|          |__/          *
+        // (ctor)
+        // ~~~~~~
+        player::player (std::string const & path) {
+            file_.open (path, file::file_handle::create_mode::open_existing,
+                        file::file_handle::writable_mode::read_only);
+        }
 
-// (dtor)
-// ~~~~~~
-player::~player () {}
+        // (dtor)
+        // ~~~~~~
+        player::~player () {}
 
-// read
-// ~~~~
-pstore::broker::message_ptr player::read () {
-    pstore::broker::message_ptr msg = pool.get_from_pool ();
-    std::unique_lock<decltype (mut_)> lock (mut_);
-    file_.read (msg.get ());
-    return msg;
-}
+        // read
+        // ~~~~
+        message_ptr player::read () {
+            message_ptr msg = pool.get_from_pool ();
+            std::unique_lock<decltype (mut_)> lock (mut_);
+            file_.read (msg.get ());
+            return msg;
+        }
+
+    } // namespace broker
+} // namespace pstore
 // eof: lib/broker/recorder.cpp

@@ -111,36 +111,38 @@ int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif
+    using namespace pstore;
+
     try {
-        pstore::threads::set_name ("main");
-        pstore::logging::create_log_stream ("broker.main");
-        pstore::logging::log (pstore::logging::priority::notice, "broker starting");
+        threads::set_name ("main");
+        logging::create_log_stream ("broker.main");
+        logging::log (logging::priority::notice, "broker starting");
 
         switches opt;
-        std::tie (opt, exit_code) = get_switches (argc, argv);
-        if (exit_code != EXIT_SUCCESS) {
-            return exit_code;
+        std::tie (opt, broker::exit_code) = get_switches (argc, argv);
+        if (broker::exit_code != EXIT_SUCCESS) {
+            return broker::exit_code;
         }
 
         // If we're recording the messages we receive, then create the file in which they will be
         // stored.
-        std::shared_ptr<recorder> record_file;
+        std::shared_ptr<broker::recorder> record_file;
         if (opt.record_path) {
-            record_file = std::make_shared<recorder> (*opt.record_path);
+            record_file = std::make_shared<broker::recorder> (*opt.record_path);
         }
 
         // TODO: ensure that this is a singleton process?
         // auto const path = std::make_unique<fifo_path> ();
-        pstore::logging::log (pstore::logging::priority::notice, "opening pipe");
+        logging::log (logging::priority::notice, "opening pipe");
 
-        pstore::broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
+        broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
-        auto commands = std::make_shared<command_processor> (opt.num_read_threads);
-        auto scav = std::make_shared<scavenger> (commands);
+        auto commands = std::make_shared<broker::command_processor> (opt.num_read_threads);
+        auto scav = std::make_shared<broker::scavenger> (commands);
         commands->attach_scavenger (scav);
 
-        pstore::logging::log (pstore::logging::priority::notice, "starting threads");
+        logging::log (logging::priority::notice, "starting threads");
         std::thread quit =
             create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads);
 
@@ -160,7 +162,7 @@ int main (int argc, char * argv[]) {
         }));
 
         if (opt.playback_path) {
-            player playback_file (*opt.playback_path);
+            broker::player playback_file (*opt.playback_path);
             while (auto msg = playback_file.read ()) {
                 commands->push_command (std::move (msg), record_file.get ());
             }
@@ -168,28 +170,28 @@ int main (int argc, char * argv[]) {
         } else {
             for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                 futures.push_back (create_thread ([&fifo, &record_file, &commands]() {
-                    pstore::threads::set_name ("read");
-                    pstore::logging::create_log_stream ("broker.read");
+                    threads::set_name ("read");
+                    logging::create_log_stream ("broker.read");
                     read_loop (fifo, record_file, commands);
                 }));
             }
         }
 
-        pstore::logging::log (pstore::logging::priority::notice, "waiting");
+        logging::log (logging::priority::notice, "waiting");
         for (auto & f : futures) {
             assert (f.valid ());
             f.get ();
         }
-        notify_quit_thread ();
+        broker::notify_quit_thread ();
         quit.join ();
-        pstore::logging::log (pstore::logging::priority::notice, "exiting");
+        logging::log (logging::priority::notice, "exiting");
     } catch (std::exception const & ex) {
-        pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
-        exit_code = EXIT_FAILURE;
+        logging::log (logging::priority::error, "error: ", ex.what ());
+        broker::exit_code = EXIT_FAILURE;
     } catch (...) {
-        pstore::logging::log (pstore::logging::priority::error, "unknown error");
-        exit_code = EXIT_FAILURE;
+        logging::log (logging::priority::error, "unknown error");
+        broker::exit_code = EXIT_FAILURE;
     }
-    return exit_code;
+    return broker::exit_code;
 }
 // eof: tools/broker/main.cpp

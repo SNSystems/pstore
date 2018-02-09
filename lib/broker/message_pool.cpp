@@ -45,6 +45,12 @@
 
 #include "broker/message_pool.hpp"
 
-message_pool pool;
+namespace pstore {
+    namespace broker {
+
+        message_pool pool;
+
+    } // namespace broker
+} // namespace pstore
 
 // eof: lib/broker/message_pool.cpp

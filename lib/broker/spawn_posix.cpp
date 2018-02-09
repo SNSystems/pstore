@@ -56,46 +56,48 @@
 #include "pstore_support/error.hpp"
 #include "pstore_support/logging.hpp"
 
-namespace broker {
+namespace pstore {
+    namespace broker {
 
-    pid_t spawn (::pstore::gsl::czstring exe_path, ::pstore::gsl::czstring * argv) {
+        pid_t spawn (gsl::czstring exe_path, gsl::czstring * argv) {
 
-        auto const child_pid = ::fork ();
-        switch (child_pid) {
-        // When fork() returns -1, an error happened.
-        case -1:
-            raise (pstore::errno_erc{errno}, "fork");
-        // When fork() returns 0, we are in the child process.
-        case 0: {
-            try {
-                pstore::logging::log (pstore::logging::priority::info, "starting vacuum ",
-                                      pstore::logging::quoted (exe_path));
-                // TODO: nice the child process?
-                ::execv (exe_path, const_cast<char **> (argv));
+            auto const child_pid = ::fork ();
+            switch (child_pid) {
+            // When fork() returns -1, an error happened.
+            case -1:
+                raise (errno_erc{errno}, "fork");
+            // When fork() returns 0, we are in the child process.
+            case 0: {
+                try {
+                    logging::log (logging::priority::info, "starting vacuum ",
+                                  logging::quoted (exe_path));
+                    // TODO: nice the child process?
+                    ::execv (exe_path, const_cast<char **> (argv));
 
-                // If execv returns, it must have failed.
-                raise (pstore::errno_erc{errno}, "execv");
-            } catch (std::exception const & ex) {
-                pstore::logging::log (pstore::logging::priority::error, "fork error: ", ex.what ());
-            } catch (...) {
-                pstore::logging::log (pstore::logging::priority::error, "fork unknown error");
+                    // If execv returns, it must have failed.
+                    raise (pstore::errno_erc{errno}, "execv");
+                } catch (std::exception const & ex) {
+                    logging::log (logging::priority::error, "fork error: ", ex.what ());
+                } catch (...) {
+                    logging::log (logging::priority::error, "fork unknown error");
+                }
+                std::exit (EXIT_FAILURE);
             }
-            std::exit (EXIT_FAILURE);
-        }
-        default:
-            // When fork() returns a positive number, we are in the parent process
-            // and the return value is the PID of the newly created child process.
-            // There's a remote chance that the process came and went by the time that
-            // we got here, so record the child PID if we're still in the "starting"
-            // state.
+            default:
+                // When fork() returns a positive number, we are in the parent process
+                // and the return value is the PID of the newly created child process.
+                // There's a remote chance that the process came and went by the time that
+                // we got here, so record the child PID if we're still in the "starting"
+                // state.
 
-            pstore::logging::log (pstore::logging::priority::info, "vacuum is now running: pid ",
-                                  child_pid);
-            break;
+                logging::log (logging::priority::info, "vacuum is now running: pid ", child_pid);
+                break;
+            }
+            return child_pid;
         }
-        return child_pid;
-    }
 
-} // namespace broker
+    } // namespace broker
+} // namespace pstore
+
 #endif //!_WIN32
 // eof: lib/broker/spawn_posix.cpp
