@@ -55,35 +55,15 @@
 namespace pstore {
     namespace index {
 
-        using uint128 = ::pstore::uint128;
         using digest = uint128;
         struct u128_hash {
             std::uint64_t operator() (digest const & v) const {
                 return v.high ();
             }
         };
-        using digest_index = hamt_map<digest, extent, u128_hash>;
-
-        // Note: Since uuid byte 6 represents version and byte 8 represents variant, we don't want
-        // to use these two bytes. Therefore, we use the array[0-3,12-15] to construct the uint64_t.
-        struct uuid_hash {
-            std::uint64_t operator() (pstore::uuid const & v) const {
-                auto & uuid_bytes = v.array ();
-                return static_cast<std::uint64_t> (uuid_bytes[0]) << (8 * 7) |
-                       static_cast<std::uint64_t> (uuid_bytes[1]) << (8 * 6) |
-                       static_cast<std::uint64_t> (uuid_bytes[2]) << (8 * 5) |
-                       static_cast<std::uint64_t> (uuid_bytes[3]) << (8 * 4) |
-                       static_cast<std::uint64_t> (uuid_bytes[12]) << (8 * 3) |
-                       static_cast<std::uint64_t> (uuid_bytes[13]) << (8 * 2) |
-                       static_cast<std::uint64_t> (uuid_bytes[14]) << (8 * 1) |
-                       static_cast<std::uint64_t> (uuid_bytes[15]);
-            }
-        };
 
     } // namespace index
-} // namespace pstore
 
-namespace pstore {
     namespace serialize {
         /// \brief A serializer for uint128
         template <>
@@ -133,36 +113,7 @@ namespace pstore {
             }
         };
 
-        /// \brief A serializer for uuid
-        template <>
-        struct serializer<pstore::uuid> {
-
-            /// \brief Writes an individual uuid instance to an archive.
-            ///
-            /// \param archive  The archive to which the span will be written.
-            /// \param v        The object value which is to be written.
-            template <typename Archive>
-            static auto write (Archive & archive, pstore::uuid const & v) ->
-                typename Archive::result_type {
-                return archive.put (v);
-            }
-
-            /// \brief Reads a uuid value from an archive.
-            ///
-            /// \param archive  The archive from which the value will be read.
-            /// \param out      A reference to uninitialized memory into which a uuid will be
-            /// read.
-            template <typename Archive>
-            static void read (Archive & archive, pstore::uuid & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (pstore::uuid) == 0);
-                archive.get (out);
-            }
-        };
-
     } // namespace serialize
-} // namespace pstore
-
-namespace pstore {
 
     class database;
     class transaction_base;
@@ -170,7 +121,8 @@ namespace pstore {
     namespace index {
 
         using write_index = hamt_map<std::string, extent>;
-        using ticket_index = hamt_map<uuid, extent, uuid_hash>;
+        using digest_index = hamt_map<digest, extent, u128_hash>;
+        using ticket_index = hamt_map<digest, extent, u128_hash>;
         using name_index = hamt_set<sstring_view<std::shared_ptr<char const>>, fnv_64a_hash>;
 
 
@@ -200,7 +152,6 @@ namespace pstore {
         /// \param transaction An open transaction to which the index data will be added.
         /// \param locations  An array of the index locations. Any modified indices
         ///                   will be modified to point at the new file address.
-
         void flush_indices (::pstore::transaction_base & transaction,
                             trailer::index_records_array * const locations);
 

@@ -55,13 +55,14 @@
 
 namespace pstore {
 
+    // TODO: this uint128 class doesn't make use of the __uint128 type supplied by some compilers.
     class uint128 {
     public:
         constexpr uint128 () noexcept = default;
 
         constexpr uint128 (std::uint64_t high, std::uint64_t low) noexcept
-                : high_{high}
-                , low_{low} {}
+                : low_{low}
+                , high_{high} {}
 
         /// Construct from an unsigned integer that's 64-bits wide or fewer.
         template <typename IntType,
@@ -72,8 +73,8 @@ namespace pstore {
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
         /// value.
         explicit uint128 (std::uint8_t const * bytes) noexcept
-                : high_{bytes_to_uint64 (&bytes[0])}
-                , low_{bytes_to_uint64 (&bytes[8])} {}
+                : low_{bytes_to_uint64 (&bytes[8])}
+                , high_{bytes_to_uint64 (&bytes[0])} {}
 
         uint128 (std::array<std::uint8_t, 16> const & bytes) noexcept
                 : uint128 (bytes.data ()) {}
@@ -94,8 +95,8 @@ namespace pstore {
         std::string to_hex_string () const;
 
     private:
-        std::uint64_t high_ = 0U;
         std::uint64_t low_ = 0U;
+        std::uint64_t high_ = 0U;
 
         static std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept {
             return std::uint64_t{bytes[7]} << 56 | std::uint64_t{bytes[6]} << 48 |

@@ -45,7 +45,6 @@ add_subdirectory (broker)
 add_subdirectory (broker_poker) # A utility for exercising the broker agent.
 add_subdirectory (diff)         # Dumps diff between two pstore revisions as YAML.
 add_subdirectory (dump)         # Dumps pstore contents as YAML.
-add_subdirectory (fraggle)      # Generates dummy tickets and fragments for testing.
 add_subdirectory (hamt_test)    # A utility to check the HAMT index
 add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz DOT graphs.
 add_subdirectory (inserter)     # A utility to exercise the digest index

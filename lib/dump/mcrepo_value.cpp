@@ -198,7 +198,7 @@ namespace pstore {
             for (auto const & kvp : *tickets) {
                 auto const ticket = repo::ticket::load (db, kvp.second);
                 result.emplace_back (make_value (object::container{
-                    {"uuid", make_value (kvp.first)}, {"ticket", make_value (db, ticket)}}));
+                    {"digest", make_value (kvp.first)}, {"ticket", make_value (db, ticket)}}));
             }
         }
         return make_value (result);

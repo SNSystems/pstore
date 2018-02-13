@@ -280,38 +280,6 @@ namespace {
     }
 
 
-
-    // FIXME: this is duplicated in the LLVM code.
-    struct ticket_file_contents {
-        std::array<std::uint8_t, 8> signature;
-        pstore::uuid id;
-    };
-    constexpr std::array<std::uint8_t, 8> ticket_signature{
-        {'R', 'e', 'p', 'o', 'U', 'u', 'i', 'd'}};
-    constexpr std::uint64_t ticket_file_size = 24;
-    static_assert (sizeof (ticket_file_contents) == ticket_file_size,
-                   "ticket_file_contents must match ticket_file_size");
-
-    pstore::uuid string_to_ticket (std::string const & str) {
-        pstore::maybe<pstore::uuid> uuid = pstore::uuid::from_string (str);
-        if (uuid.has_value ()) {
-            return *uuid;
-        }
-
-        pstore::file::file_handle f;
-        f.open (str, pstore::file::file_handle::create_mode::open_existing,
-                pstore::file::file_handle::writable_mode::read_only);
-        if (f.is_open () && f.size () == ticket_file_size) {
-            ticket_file_contents contents;
-            f.read (&contents);
-            if (contents.signature == ticket_signature) {
-                return contents.id;
-            }
-        }
-
-        pstore::raise_error_code (std::make_error_code (dump_error_code::bad_ticket_file), str);
-    }
-
     template <typename IndexType, typename StringToKeyFunction, typename RecordFunction>
     pstore::dump::value_ptr
     add_specified (IndexType const & index, std::list<std::string> const & items_to_show,
@@ -446,7 +414,7 @@ int main (int argc, char * argv[]) {
                         file.emplace_back ("tickets",
                                            add_specified (*ticket_index, opt.tickets,
                                                           dump_error_code::ticket_not_found,
-                                                          string_to_ticket, record));
+                                                          string_to_digest, record));
                     } else {
                         pstore::raise_error_code (
                             std::make_error_code (dump_error_code::no_ticket_index));
