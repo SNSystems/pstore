@@ -174,19 +174,17 @@ namespace pstore {
     }
 
     value_ptr make_value (database & db, std::shared_ptr<repo::ticket const> ticket) {
-        object::container v;
         array::container members;
         for (auto const & member : *ticket) {
             members.emplace_back (make_value (db, member));
         }
-        v.emplace_back ("ticket_member", make_value (members));
 
         // Now try reading the ticket file path using a serializer.
         serialize::archive::database_reader archive (db, ticket->path ());
         auto path = serialize::read<std::string> (archive);
 
         return make_value (object::container{
-            {"members", make_value (v)}, {"path", make_value (path)},
+            {"members", make_value (members)}, {"path", make_value (path)},
         });
     }
 

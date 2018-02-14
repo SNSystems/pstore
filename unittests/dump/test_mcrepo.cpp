@@ -179,11 +179,10 @@ TEST_F (MCRepoFixture, DumpTicket) {
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (6U, lines.size ());
+    ASSERT_EQ (5U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("members", ":"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("ticket_member", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
