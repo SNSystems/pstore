@@ -79,9 +79,7 @@ namespace {
     protected:
         static std::size_t page_size ();
 
-        pstore::file::file_handle & file () {
-            return *file_;
-        }
+        pstore::file::file_handle & file () { return *file_; }
 
     private:
         std::unique_ptr<pstore::file::file_handle> file_;
@@ -101,7 +99,7 @@ namespace {
         return static_cast<unsigned long> (result);
 #endif
     }
-}
+} // namespace
 
 TEST_F (MemoryMapperFixture, MemoryMapThenCheckFileContents) {
 

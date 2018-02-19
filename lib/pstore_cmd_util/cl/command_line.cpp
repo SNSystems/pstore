@@ -125,8 +125,7 @@ namespace pstore {
                             }
                             break;
                         case num_occurrences_flag::optional:
-                        case num_occurrences_flag::zero_or_more:
-                            break;
+                        case num_occurrences_flag::zero_or_more: break;
                         }
                     }
 

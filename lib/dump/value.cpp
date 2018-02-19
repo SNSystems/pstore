@@ -180,39 +180,17 @@ namespace pstore {
             os << "\"";
             for (char const ch : v) {
                 switch (ch) {
-                case '\0':
-                    os << "\\0";
-                    break;
-                case '\x7':
-                    os << "\\a";
-                    break;
-                case '\x8':
-                    os << "\\b";
-                    break;
-                case '\x9':
-                    os << "\\t";
-                    break;
-                case '\xa':
-                    os << "\\n";
-                    break;
-                case '\xb':
-                    os << "\\v";
-                    break;
-                case '\xc':
-                    os << "\\f";
-                    break;
-                case '\xd':
-                    os << "\\r";
-                    break;
-                case '\x1b':
-                    os << "\\e";
-                    break;
-                case '"':
-                    os << "\\\"";
-                    break;
-                default:
-                    write_character (os, ch);
-                    break;
+                case '\0': os << "\\0"; break;
+                case '\x7': os << "\\a"; break;
+                case '\x8': os << "\\b"; break;
+                case '\x9': os << "\\t"; break;
+                case '\xa': os << "\\n"; break;
+                case '\xb': os << "\\v"; break;
+                case '\xc': os << "\\f"; break;
+                case '\xd': os << "\\r"; break;
+                case '\x1b': os << "\\e"; break;
+                case '"': os << "\\\""; break;
+                default: write_character (os, ch); break;
                 }
             }
             os << "\"";
@@ -570,7 +548,7 @@ namespace {
         line_count_ = 0U;
         lines_.clear ();
     }
-} // (anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace dump {
@@ -609,8 +587,7 @@ namespace pstore {
             }
 
             switch (size % 3) {
-            case 0:
-                break;
+            case 0: break;
 
             case 1:
                 temp = static_cast<std::uint32_t> ((*it++) << 16);
@@ -630,9 +607,7 @@ namespace pstore {
                 acc.write ('=');
                 break;
 
-            default:
-                assert (false);
-                break;
+            default: assert (false); break;
             }
             acc.flush ();
             assert (it == std::end (v_));

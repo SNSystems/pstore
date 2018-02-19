@@ -46,16 +46,12 @@
 namespace pstore {
     namespace repo {
 
-        char const * error_category::name () const noexcept {
-            return "pstore_mcrepo category";
-        }
+        char const * error_category::name () const noexcept { return "pstore_mcrepo category"; }
 
         std::string error_category::message (int error) const {
             switch (static_cast<error_code> (error)) {
-            case error_code::bad_fragment_record:
-                return "bad fragment record";
-            case error_code::bad_ticket_record:
-                return "bad ticket record";
+            case error_code::bad_fragment_record: return "bad fragment record";
+            case error_code::bad_ticket_record: return "bad ticket record";
             }
             return "unknown error";
         }
@@ -70,7 +66,7 @@ namespace {
         return cat;
     }
 
-} // (anonymous namespace)
+} // namespace
 
 namespace std {
 

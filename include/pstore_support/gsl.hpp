@@ -165,9 +165,7 @@ namespace pstore {
                     return ret -= n;
                 }
 
-                span_iterator & operator-= (difference_type n) noexcept {
-                    return *this += -n;
-                }
+                span_iterator & operator-= (difference_type n) noexcept { return *this += -n; }
 
                 difference_type operator- (span_iterator const & rhs) const {
                     assert (span_ == rhs.span_);
@@ -255,9 +253,7 @@ namespace pstore {
                     assert (size == Extent);
                 }
 
-                index_type size () const noexcept {
-                    return Extent;
-                }
+                index_type size () const noexcept { return Extent; }
             };
 
             template <>
@@ -272,9 +268,7 @@ namespace pstore {
                         : size_ (size) {
                     assert (size >= 0);
                 }
-                index_type size () const noexcept {
-                    return size_;
-                }
+                index_type size () const noexcept { return size_; }
 
             private:
                 index_type size_;
@@ -392,21 +386,13 @@ namespace pstore {
             }
 
             // [span.obs], span observers
-            constexpr index_type length () const noexcept {
-                return size ();
-            }
-            constexpr index_type size () const noexcept {
-                return storage_.size ();
-            }
-            constexpr index_type length_bytes () const noexcept {
-                return size_bytes ();
-            }
+            constexpr index_type length () const noexcept { return size (); }
+            constexpr index_type size () const noexcept { return storage_.size (); }
+            constexpr index_type length_bytes () const noexcept { return size_bytes (); }
             constexpr index_type size_bytes () const noexcept {
                 return size () * static_cast<index_type> (sizeof (element_type));
             }
-            constexpr bool empty () const noexcept {
-                return size () == 0;
-            }
+            constexpr bool empty () const noexcept { return size () == 0; }
 
             // [span.elem], span element access
             reference operator[] (index_type idx) const {
@@ -414,37 +400,19 @@ namespace pstore {
                 return data ()[idx];
             }
 
-            constexpr reference at (index_type idx) const {
-                return this->operator[] (idx);
-            }
-            constexpr reference operator() (index_type idx) const {
-                return this->operator[] (idx);
-            }
-            constexpr pointer data () const noexcept {
-                return storage_.data ();
-            }
+            constexpr reference at (index_type idx) const { return this->operator[] (idx); }
+            constexpr reference operator() (index_type idx) const { return this->operator[] (idx); }
+            constexpr pointer data () const noexcept { return storage_.data (); }
 
             // [span.iter], span iterator support
-            iterator begin () const noexcept {
-                return {this, 0};
-            }
-            iterator end () const noexcept {
-                return {this, length ()};
-            }
+            iterator begin () const noexcept { return {this, 0}; }
+            iterator end () const noexcept { return {this, length ()}; }
 
-            const_iterator cbegin () const noexcept {
-                return {this, 0};
-            }
-            const_iterator cend () const noexcept {
-                return {this, length ()};
-            }
+            const_iterator cbegin () const noexcept { return {this, 0}; }
+            const_iterator cend () const noexcept { return {this, length ()}; }
 
-            reverse_iterator rbegin () const noexcept {
-                return reverse_iterator{end ()};
-            }
-            reverse_iterator rend () const noexcept {
-                return reverse_iterator{begin ()};
-            }
+            reverse_iterator rbegin () const noexcept { return reverse_iterator{end ()}; }
+            reverse_iterator rend () const noexcept { return reverse_iterator{begin ()}; }
 
             const_reverse_iterator crbegin () const noexcept {
                 return const_reverse_iterator{cend ()};
@@ -468,9 +436,7 @@ namespace pstore {
                             (data && ExtentType::size () >= 0));
                 }
 
-                constexpr pointer data () const noexcept {
-                    return data_;
-                }
+                constexpr pointer data () const noexcept { return data_; }
 
             private:
                 pointer data_;
@@ -528,13 +494,14 @@ namespace pstore {
             // constexpr and so will fail compilation of the template
             template <typename ElementType, std::ptrdiff_t Extent>
             struct calculate_byte_size
-                : std::integral_constant<std::ptrdiff_t, static_cast<std::ptrdiff_t> (
-                                                             sizeof (ElementType) *
-                                                             static_cast<std::size_t> (Extent))> {};
+                    : std::integral_constant<std::ptrdiff_t,
+                                             static_cast<std::ptrdiff_t> (
+                                                 sizeof (ElementType) *
+                                                 static_cast<std::size_t> (Extent))> {};
 
             template <typename ElementType>
             struct calculate_byte_size<ElementType, dynamic_extent>
-                : std::integral_constant<std::ptrdiff_t, dynamic_extent> {};
+                    : std::integral_constant<std::ptrdiff_t, dynamic_extent> {};
         } // namespace details
 
         // [span.objectrep], views of object representation
@@ -645,32 +612,20 @@ namespace pstore {
             not_null<T> & operator= (std::nullptr_t) = delete;
             not_null<T> & operator= (int) = delete;
 
-            T get () const {
-                return ptr_;
-            }
+            T get () const { return ptr_; }
 
-            operator T () const {
-                return get ();
-            }
-            T operator-> () const {
-                return get ();
-            }
+            operator T () const { return get (); }
+            T operator-> () const { return get (); }
 
-            bool operator== (T const & rhs) const {
-                return ptr_ == rhs;
-            }
-            bool operator!= (T const & rhs) const {
-                return !(*this == rhs);
-            }
+            bool operator== (T const & rhs) const { return ptr_ == rhs; }
+            bool operator!= (T const & rhs) const { return !(*this == rhs); }
 
         private:
             T ptr_;
 
             // we assume that the compiler can hoist/prove away most of the checks inlined from this
             // function if not, we could make them optional via conditional compilation
-            void ensure_invariant () const {
-                assert (ptr_ != nullptr);
-            }
+            void ensure_invariant () const { assert (ptr_ != nullptr); }
 
             // unwanted operators...pointers only point to single objects!
             // TODO ensure all arithmetic ops on this type are unavailable

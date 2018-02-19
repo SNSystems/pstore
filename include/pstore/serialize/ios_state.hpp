@@ -67,9 +67,7 @@ namespace pstore {
             ios_flags_saver (ios_flags_saver const &) = delete;
             ios_flags_saver & operator= (ios_flags_saver const &) = delete;
 
-            ~ios_flags_saver () {
-                stream_.flags (flags_);
-            }
+            ~ios_flags_saver () { stream_.flags (flags_); }
 
         private:
             std::ios_base & stream_;

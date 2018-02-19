@@ -100,7 +100,7 @@ namespace {
         db_.reset ();
         EmptyStore::TearDown ();
     }
-}
+} // namespace
 
 // Test initial address index pointer.
 TEST_F (IndexFixture, InitAddress) {
@@ -307,7 +307,7 @@ namespace {
     typedef pstore::index::hamt_map<std::string, std::string, hash_function,
                                     std::equal_to<std::string>>
         test_trie;
-}
+} // namespace
 
 // *******************************************
 // *                                         *
@@ -320,13 +320,9 @@ namespace {
     class GenericIndexFixture : public IndexFixture {
 
     protected:
-        void SetUp () override {
-            IndexFixture::SetUp ();
-        }
+        void SetUp () override { IndexFixture::SetUp (); }
 
-        void TearDown () override {
-            IndexFixture::TearDown ();
-        }
+        void TearDown () override { IndexFixture::TearDown (); }
 
         std::unique_ptr<test_trie> index_;
 
@@ -395,7 +391,7 @@ namespace {
         EXPECT_TRUE (node.is_address ());
         EXPECT_TRUE (node.is_internal ());
     }
-}
+} // namespace
 
 // ****************
 // *              *
@@ -450,7 +446,7 @@ namespace {
         {"c", binary<std::uint64_t, 0, 0, 0, 1, 1, 1>::value},
         {"d", binary<std::uint64_t, 0, 0, 1, 1, 1, 1>::value},
     };
-}
+} // namespace
 
 // insert_or_assign a single node ("a") into the database.
 TEST_F (OneLevel, InsertFirstNode) {
@@ -737,7 +733,7 @@ namespace {
         auto const shifted_mask = (UINT64_C (1) << 6) - 1U;
         EXPECT_NE (shifted_first_hash & shifted_mask, shifted_second_hash & shifted_mask);
     }
-}
+} // namespace
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
@@ -1417,7 +1413,7 @@ namespace {
                      1>::value}, // ... as do "c" and "d".
         {"d", binary<std::uint64_t, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1>::value},
     };
-}
+} // namespace
 
 TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
 
@@ -1563,7 +1559,7 @@ namespace {
         {"c", binary<std::uint64_t, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1>::value},
         {"d", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0>::value},
     };
-}
+} // namespace
 
 
 TEST_F (LeavesAtDifferentLevels, ForwardIteration) {

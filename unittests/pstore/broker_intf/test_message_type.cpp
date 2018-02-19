@@ -118,7 +118,7 @@ namespace {
         auto ctr = 0U;
         std::generate_n (out, num, [&ctr]() -> char { return ctr++ % 26 + 'A'; });
     }
-}
+} // namespace
 
 TEST (BrokerMessageType, MaxLengthIteratorRange) {
     std::string long_payload;

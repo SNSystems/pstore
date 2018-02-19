@@ -61,9 +61,7 @@ namespace pstore {
             errno = 0;
         }
         errno_saver (errno_saver const &) = delete;
-        ~errno_saver () noexcept {
-            errno = old_;
-        }
+        ~errno_saver () noexcept { errno = old_; }
         errno_saver & operator= (errno_saver const &) = delete;
 
     private:

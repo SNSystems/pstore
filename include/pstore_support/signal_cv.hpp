@@ -80,9 +80,7 @@ namespace pstore {
         /// signal-safe functions.
         void notify (int signal) noexcept;
 
-        int signal () const {
-            return signal_.load ();
-        }
+        int signal () const { return signal_.load (); }
 
 #ifdef _WIN32
         HANDLE get () const;

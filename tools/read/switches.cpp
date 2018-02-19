@@ -65,8 +65,8 @@ namespace {
 #endif
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        Revision("revision", cl::desc("The starting revision number (or 'HEAD')"));
-    cl::alias Revision2("r", cl::desc("Alias for --revision"), cl::aliasopt(Revision));
+        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
+    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
     cl::opt<std::string> DbPath (cl::Positional,
                                  cl::desc ("Path of the pstore repository to be read."),

@@ -77,7 +77,7 @@ namespace {
         }
         return result;
     }
-}
+} // namespace
 
 
 namespace {
@@ -101,7 +101,7 @@ namespace {
                 static_cast<int> (length), // number of UTF-8 code units (bytes) in the input string
                 nullptr,                   // no output buffer
                 0)                         // no output buffer
-            );
+        );
     }
 
     void from_8_to_16_traits::convert (input_char_type const * wstr, std::size_t wstr_length,
@@ -120,11 +120,11 @@ namespace {
                 static_cast<int> (wstr_size),   // length (in bytes) of wstr
                 output->data (),                // output buffer
                 static_cast<int> (output_size)) // size (in code units) of the output buffer
-            );
+        );
         assert (wchars_written <= output->size_bytes ());
         assert (wchars_written == from_8_to_16_traits::output_size (wstr, wstr_length));
     }
-}
+} // namespace
 
 namespace {
     struct from_16_to_8_traits {
@@ -150,7 +150,7 @@ namespace {
                                    0,                         // output buffer length
                                    nullptr, // missing character (must be NULL for UTF8)
                                    nullptr) // missing character was used? (must be NULL for UTF8)
-            );
+        );
     }
 
     void from_16_to_8_traits::convert (input_char_type const * wstr, std::size_t wstr_length,
@@ -169,11 +169,11 @@ namespace {
                 static_cast<int> (output_size), // output buffer length (in bytes)
                 nullptr,                        // missing character (must be NULL for UTF8)
                 nullptr) // missing character was used? (must be NULL for UTF8)
-            );
+        );
         assert (bytes_written <= output->size_bytes ());
         assert (bytes_written == from_16_to_8_traits::output_size (wstr, wstr_length));
     }
-}
+} // namespace
 
 namespace {
 
@@ -211,7 +211,7 @@ namespace {
 
         return converted;
     }
-}
+} // namespace
 
 namespace pstore {
     namespace utf {

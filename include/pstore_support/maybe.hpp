@@ -58,12 +58,8 @@ namespace pstore {
     public:
         using value_type = T;
 
-        static maybe<T> just (T const & value) {
-            return maybe (value);
-        }
-        static maybe<T> nothing () {
-            return maybe ();
-        }
+        static maybe<T> just (T const & value) { return maybe (value); }
+        static maybe<T> nothing () { return maybe (); }
 
         maybe () {}
         maybe (T const & value) {
@@ -87,9 +83,7 @@ namespace pstore {
             }
         }
 
-        ~maybe () {
-            this->reset ();
-        }
+        ~maybe () { this->reset (); }
 
         void reset () {
             if (valid_) {
@@ -106,12 +100,8 @@ namespace pstore {
                                                  std::is_nothrow_move_constructible<T>::value);
         maybe & operator= (T && other);
 
-        T const & operator* () const noexcept {
-            return *(operator-> ());
-        }
-        T & operator* () noexcept {
-            return *(operator-> ());
-        }
+        T const & operator* () const noexcept { return *(operator-> ()); }
+        T & operator* () noexcept { return *(operator-> ()); }
         T const * operator-> () const noexcept {
             assert (valid_);
             return reinterpret_cast<T const *> (&storage_);
@@ -121,16 +111,10 @@ namespace pstore {
             return reinterpret_cast<T *> (&storage_);
         }
 
-        constexpr operator bool () const noexcept {
-            return valid_;
-        }
-        constexpr bool has_value () const noexcept {
-            return valid_;
-        }
+        constexpr operator bool () const noexcept { return valid_; }
+        constexpr bool has_value () const noexcept { return valid_; }
 
-        T const & value () const {
-            return const_cast<maybe<T> *> (this)->value ();
-        }
+        T const & value () const { return const_cast<maybe<T> *> (this)->value (); }
         T & value ();
 
         template <typename U>

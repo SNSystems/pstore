@@ -75,9 +75,7 @@ namespace pstore {
         public:
             quoted (gsl::czstring str)
                     : str_{str} {}
-            operator gsl::czstring () const noexcept {
-                return str_;
-            }
+            operator gsl::czstring () const noexcept { return str_; }
 
         private:
             gsl::czstring str_;
@@ -94,12 +92,8 @@ namespace pstore {
             logger () = default;
             virtual ~logger () = default;
 
-            void set_priority (priority p) noexcept {
-                priority_ = p;
-            }
-            priority get_priority () const noexcept {
-                return priority_;
-            }
+            void set_priority (priority p) noexcept { priority_ = p; }
+            priority get_priority () const noexcept { return priority_; }
 
             virtual void log (priority p, std::string const & message) = 0;
 
@@ -192,15 +186,11 @@ namespace pstore {
 
 
         struct file_system_traits {
-            bool exists (std::string const & path) {
-                return pstore::file::exists (path);
-            }
+            bool exists (std::string const & path) { return pstore::file::exists (path); }
             void rename (std::string const & from, std::string const & to) {
                 pstore::file::rename (from.c_str (), to.c_str ());
             }
-            void unlink (std::string const & path) {
-                pstore::file::unlink (path.c_str ());
-            }
+            void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
         };
         struct fstream_traits {
             using stream_type = std::ofstream;
@@ -208,9 +198,7 @@ namespace pstore {
             void open (stream_type & s, std::string const & name, std::ios_base::openmode mode) {
                 s.open (name, mode);
             }
-            void close (stream_type & s) {
-                s.close ();
-            }
+            void close (stream_type & s) { s.close (); }
             void clear (stream_type &) {}
         };
 
@@ -255,18 +243,10 @@ namespace pstore {
             void log_impl (std::string const & message) override;
 
             /// (for testing)
-            bool is_open () const {
-                return is_open_;
-            }
-            StreamTraits & stream_traits () {
-                return stream_traits_;
-            }
-            FileSystemTraits & file_system_traits () {
-                return file_system_traits_;
-            }
-            typename StreamTraits::stream_type & stream () {
-                return stream_;
-            }
+            bool is_open () const { return is_open_; }
+            StreamTraits & stream_traits () { return stream_traits_; }
+            FileSystemTraits & file_system_traits () { return file_system_traits_; }
+            typename StreamTraits::stream_type & stream () { return stream_; }
 
         private:
             std::string make_file_name (unsigned index) const;

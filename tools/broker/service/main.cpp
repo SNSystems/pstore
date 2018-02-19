@@ -61,7 +61,7 @@ namespace {
         TEXT (""); // List of service dependencies - "dep1\0dep2\0\0"
     constexpr auto account = TEXT ("NT AUTHORITY\\LocalService");
     constexpr auto account_password = nullptr;
-} // (anonymous namespace)
+} // namespace
 
 
 namespace {
@@ -93,7 +93,7 @@ namespace {
         {0, 0, 0, 0, 0, 0},
     };
 #endif
-}
+} // namespace
 
 
 int _tmain (int argc, TCHAR * argv[]) {

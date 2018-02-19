@@ -204,9 +204,7 @@ namespace {
 
     // (dtor)
     // ~~~~~~
-    asl_logger::~asl_logger () {
-        log_ = nullptr;
-    }
+    asl_logger::~asl_logger () { log_ = nullptr; }
 
     // log
     // ~~~
@@ -249,10 +247,8 @@ namespace {
         switch (p) {
         case priority::emergency:
         case priority::alert:
-        case priority::critical:
-            return OS_LOG_TYPE_FAULT;
-        case priority::error:
-            return OS_LOG_TYPE_ERROR;
+        case priority::critical: return OS_LOG_TYPE_FAULT;
+        case priority::error: return OS_LOG_TYPE_ERROR;
         case priority::warning: // warning conditions
         case priority::notice:  // normal, but significant, condition
         case priority::info:    // informational message
@@ -301,29 +297,21 @@ namespace {
     // ~~~~~~~~~~~~~
     int syslog_logger::priority_code (logging::priority p) {
         switch (p) {
-        case logging::priority::emergency:
-            return LOG_EMERG;
-        case logging::priority::alert:
-            return LOG_ALERT;
-        case logging::priority::critical:
-            return LOG_CRIT;
-        case logging::priority::error:
-            return LOG_ERR;
-        case logging::priority::warning:
-            return LOG_WARNING;
-        case logging::priority::notice:
-            return LOG_NOTICE;
-        case logging::priority::info:
-            return LOG_INFO;
-        case logging::priority::debug:
-            return LOG_DEBUG;
+        case logging::priority::emergency: return LOG_EMERG;
+        case logging::priority::alert: return LOG_ALERT;
+        case logging::priority::critical: return LOG_CRIT;
+        case logging::priority::error: return LOG_ERR;
+        case logging::priority::warning: return LOG_WARNING;
+        case logging::priority::notice: return LOG_NOTICE;
+        case logging::priority::info: return LOG_INFO;
+        case logging::priority::debug: return LOG_DEBUG;
         }
         return LOG_EMERG;
     }
 
 #endif // PSTORE_HAVE_SYS_LOG_H
 
-} //(anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace logging {
@@ -398,22 +386,14 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~
         gsl::czstring basic_logger::priority_string (priority p) {
             switch (p) {
-            case priority::emergency:
-                return "emergency";
-            case priority::alert:
-                return "alert";
-            case priority::critical:
-                return "critical";
-            case priority::error:
-                return "error";
-            case priority::warning:
-                return "warning";
-            case priority::notice:
-                return "notice";
-            case priority::info:
-                return "info";
-            case priority::debug:
-                return "debug";
+            case priority::emergency: return "emergency";
+            case priority::alert: return "alert";
+            case priority::critical: return "critical";
+            case priority::error: return "error";
+            case priority::warning: return "warning";
+            case priority::notice: return "notice";
+            case priority::info: return "info";
+            case priority::debug: return "debug";
             }
             assert (0);
             return "emergency";

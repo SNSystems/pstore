@@ -54,9 +54,7 @@
 
 namespace {
 
-    auto make_pipe () -> pstore::broker::fifo_path::client_pipe {
-        return {};
-    }
+    auto make_pipe () -> pstore::broker::fifo_path::client_pipe { return {}; }
 
     class mock_writer : public pstore::broker::writer {
     public:
@@ -74,7 +72,7 @@ namespace {
         std::uint32_t const message_id_;
     };
 
-} // (anonymous namespace)
+} // namespace
 
 
 TEST_F (BrokerSendMessage, SinglePart) {

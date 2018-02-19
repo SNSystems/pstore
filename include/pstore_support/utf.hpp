@@ -182,9 +182,7 @@ namespace pstore {
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
         std::size_t length (::pstore::gsl::czstring str);
 
-        inline std::size_t length (std::nullptr_t) {
-            return 0;
-        }
+        inline std::size_t length (std::nullptr_t) { return 0; }
         ///@}
 
         ///@{
@@ -243,9 +241,7 @@ namespace pstore {
         inline std::wstring to_native_string (std::string const & str) {
             return utf::win32::to16 (str);
         }
-        inline std::wstring to_native_string (char const * str) {
-            return utf::win32::to16 (str);
-        }
+        inline std::wstring to_native_string (char const * str) { return utf::win32::to16 (str); }
         inline std::string from_native_string (std::wstring const & str) {
             return utf::win32::to8 (str);
         }
@@ -257,29 +253,17 @@ namespace pstore {
         inline std::string to_native_string (std::string const & str) {
             return win32::to_mbcs (str);
         }
-        inline std::string to_native_string (char const * str) {
-            return win32::to_mbcs (str);
-        }
+        inline std::string to_native_string (char const * str) { return win32::to_mbcs (str); }
 #endif
         inline std::string from_native_string (std::string const & str) {
             return win32::mbcs_to8 (str);
         }
-        inline std::string from_native_string (char const * str) {
-            return win32::mbcs_to8 (str);
-        }
+        inline std::string from_native_string (char const * str) { return win32::mbcs_to8 (str); }
 #else
-        inline std::string to_native_string (std::string const & str) {
-            return str;
-        }
-        inline std::string to_native_string (char const * str) {
-            return str;
-        }
-        inline std::string from_native_string (std::string const & str) {
-            return str;
-        }
-        inline std::string from_native_string (char const * str) {
-            return str;
-        }
+        inline std::string to_native_string (std::string const & str) { return str; }
+        inline std::string to_native_string (char const * str) { return str; }
+        inline std::string from_native_string (std::string const & str) { return str; }
+        inline std::string from_native_string (char const * str) { return str; }
 #endif
     } // namespace utf
 } // namespace pstore

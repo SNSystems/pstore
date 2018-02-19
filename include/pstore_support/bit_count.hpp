@@ -110,9 +110,7 @@ namespace pstore {
                            "unsigned short != unsigned __int16");
             return __popcnt16 (x);
         }
-        inline unsigned pop_count (unsigned x) {
-            return __popcnt (x);
-        }
+        inline unsigned pop_count (unsigned x) { return __popcnt (x); }
         inline unsigned pop_count (unsigned long x) {
             static_assert (sizeof (unsigned long) == sizeof (unsigned int),
                            "unsigned long != unsigned int");

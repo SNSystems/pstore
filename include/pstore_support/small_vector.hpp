@@ -97,12 +97,8 @@ namespace pstore {
 
         /// \name Element access
         ///@{
-        ElementType const * data () const {
-            return buffer_;
-        }
-        ElementType * data () {
-            return buffer_;
-        }
+        ElementType const * data () const { return buffer_; }
+        ElementType * data () { return buffer_; }
 
         ElementType const & operator[] (std::size_t index) const {
             assert (index < elements_);
@@ -117,17 +113,11 @@ namespace pstore {
         /// \name Capacity
         ///@{
         /// Returns the number of elements.
-        std::size_t size () const {
-            return elements_;
-        }
-        std::size_t size_bytes () const {
-            return elements_ * sizeof (ElementType);
-        }
+        std::size_t size () const { return elements_; }
+        std::size_t size_bytes () const { return elements_ * sizeof (ElementType); }
 
         /// Checks whether the container is empty.
-        bool empty () const {
-            return elements_ == 0;
-        }
+        bool empty () const { return elements_ == 0; }
 
         /// Returns the number of elements that can be held in currently allocated
         /// storage.
@@ -149,47 +139,27 @@ namespace pstore {
         /// \name Iterators
         ///@{
         /// Returns an iterator to the beginning of the container.
-        const_iterator begin () const noexcept {
-            return buffer_;
-        }
-        iterator begin () noexcept {
-            return buffer_;
-        }
-        const_iterator cbegin () noexcept {
-            return buffer_;
-        }
+        const_iterator begin () const noexcept { return buffer_; }
+        iterator begin () noexcept { return buffer_; }
+        const_iterator cbegin () noexcept { return buffer_; }
         /// Returns a reverse iterator to the first element of the reversed
         /// container. It corresponds to the last element of the non-reversed
         /// container.
-        reverse_iterator rbegin () noexcept {
-            return reverse_iterator{this->end ()};
-        }
+        reverse_iterator rbegin () noexcept { return reverse_iterator{this->end ()}; }
         const_reverse_iterator rbegin () const noexcept {
             return const_reverse_iterator{this->end ()};
         }
-        const_reverse_iterator rcbegin () noexcept {
-            return const_reverse_iterator{this->end ()};
-        }
+        const_reverse_iterator rcbegin () noexcept { return const_reverse_iterator{this->end ()}; }
 
         /// Returns an iterator to the end of the container.
-        const_iterator end () const noexcept {
-            return buffer_ + elements_;
-        }
-        iterator end () noexcept {
-            return buffer_ + elements_;
-        }
-        const_iterator cend () noexcept {
-            return buffer_ + elements_;
-        }
-        reverse_iterator rend () noexcept {
-            return reverse_iterator{this->begin ()};
-        }
+        const_iterator end () const noexcept { return buffer_ + elements_; }
+        iterator end () noexcept { return buffer_ + elements_; }
+        const_iterator cend () noexcept { return buffer_ + elements_; }
+        reverse_iterator rend () noexcept { return reverse_iterator{this->begin ()}; }
         const_reverse_iterator rend () const noexcept {
             return const_reverse_iterator{this->begin ()};
         }
-        const_reverse_iterator rcend () noexcept {
-            return const_reverse_iterator{this->begin ()};
-        }
+        const_reverse_iterator rcend () noexcept { return const_reverse_iterator{this->begin ()}; }
         ///@}
 
         /// \name Modifiers
@@ -238,9 +208,7 @@ namespace pstore {
 
         /// Returns true if the given number of elements will fit in the space
         /// allocated for the "small" in-object buffer.
-        static constexpr bool is_small (std::size_t elements) {
-            return elements <= BodyElements;
-        }
+        static constexpr bool is_small (std::size_t elements) { return elements <= BodyElements; }
 
         ElementType * set_buffer_ptr (std::size_t required_elements) {
             buffer_ = is_small (required_elements) ? small_buffer_.data () : big_buffer_.data ();

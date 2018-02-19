@@ -88,7 +88,8 @@ namespace pstore {
         // *************
         value_ptr make_value (extent ex) {
             auto v = std::make_shared<object> (object::container{
-                {"addr", make_value (ex.addr)}, {"size", make_value (ex.size)},
+                {"addr", make_value (ex.addr)},
+                {"size", make_value (ex.size)},
             });
             v->compact ();
             return v;
@@ -123,9 +124,7 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (index::digest const & d) {
-            return make_value (d.to_hex_string ());
-        }
+        value_ptr make_value (index::digest const & d) { return make_value (d.to_hex_string ()); }
 
 
         value_ptr make_blob (::pstore::database & db, ::pstore::address begin, std::uint64_t size) {

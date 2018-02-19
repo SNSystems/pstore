@@ -85,9 +85,7 @@ namespace {
     };
     template <>
     struct string_maker<char const *> {
-        char const * operator() (std::string const & str) const {
-            return str.data ();
-        }
+        char const * operator() (std::string const & str) const { return str.data (); }
     };
 
     template <typename StringType>
@@ -331,9 +329,7 @@ namespace {
     public:
         sstringview_maker (char const * s)
                 : view_ (pstore::make_sstring_view (s, std::strlen (s))) {}
-        operator pstore::sstring_view<char const *> () const noexcept {
-            return view_;
-        }
+        operator pstore::sstring_view<char const *> () const noexcept { return view_; }
 
     private:
         pstore::sstring_view<char const *> view_;

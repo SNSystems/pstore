@@ -113,9 +113,7 @@ namespace pstore {
                 std::string const name_;
             };
 
-            inline name make_modifier (char const * n) {
-                return name (n);
-            }
+            inline name make_modifier (char const * n) { return name (n); }
 
 
             //*     _             *
@@ -146,6 +144,7 @@ namespace pstore {
             public:
                 explicit aliasopt (option & o);
                 void apply (alias & o) const;
+
             private:
                 option & original_;
             };
@@ -165,6 +164,7 @@ namespace pstore {
                     void apply (Opt & o) const {
                         o.set_initial_value (init_);
                     }
+
                 private:
                     T const & init_;
                 };
@@ -235,9 +235,7 @@ namespace pstore {
                 };
             } // namespace details
 
-            inline details::category cat (OptionCategory const & c) {
-                return {c};
-            }
+            inline details::category cat (OptionCategory const & c) { return {c}; }
 
         } // namespace cl
     }     // namespace cmd_util

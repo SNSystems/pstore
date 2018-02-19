@@ -67,13 +67,10 @@ namespace pstore {
     void signal_cv::wait () {
         switch (::WaitForSingleObject (get (), INFINITE)) {
         case WAIT_ABANDONED:
-        case WAIT_OBJECT_0:
-            return;
-        case WAIT_TIMEOUT:
-            assert (0);
+        case WAIT_OBJECT_0: return;
+        case WAIT_TIMEOUT: assert (0);
         // fallthrough
-        case WAIT_FAILED:
-            raise (win32_erc (::GetLastError ()), "WaitForSingleObject");
+        case WAIT_FAILED: raise (win32_erc (::GetLastError ()), "WaitForSingleObject");
         }
     }
 
@@ -86,9 +83,7 @@ namespace pstore {
 
     // get
     // ~~~
-    HANDLE signal_cv::get () const {
-        return event_.get ();
-    }
+    HANDLE signal_cv::get () const { return event_.get (); }
 
 } // namespace pstore
 

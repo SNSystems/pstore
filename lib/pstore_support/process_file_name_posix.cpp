@@ -112,7 +112,7 @@ namespace {
         link_stream << "/proc/" << ::getpid () << "/exe";
         return link_stream.str ();
     }
-}
+} // namespace
 
 
 namespace pstore {

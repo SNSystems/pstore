@@ -71,9 +71,7 @@ namespace details {
         std::ostream & print_flush (Args const &... args);
 
     private:
-        std::ostream & print_one () {
-            return os_;
-        }
+        std::ostream & print_one () { return os_; }
 
         template <class A0, class... Args>
         std::ostream & print_one (A0 const & a0, Args const &... args);
@@ -107,7 +105,7 @@ namespace details {
 
     extern ios_printer cout;
     extern ios_printer cerr;
-}
+} // namespace details
 
 
 // print_cout/flush

@@ -80,9 +80,7 @@ namespace pstore {
 
             void thread_entry (fifo_path const & fifo);
 
-            void attach_scavenger (std::shared_ptr<scavenger> & scav) {
-                scavenger_.set (scav);
-            }
+            void attach_scavenger (std::shared_ptr<scavenger> & scav) { scavenger_.set (scav); }
 
             /// Pushes a command onto the end of the command queue. The command is recorded if
             /// `record_file`

@@ -411,8 +411,10 @@ namespace pstore {
                 // modified)
                 // contents back to the data store.
                 storage_.copy<copy_to_store_traits> (
-                    addr, size, p, [](std::uint8_t * dest, std::uint8_t const * src,
-                                      std::size_t n) { std::memcpy (dest, src, n); });
+                    addr, size, p,
+                    [](std::uint8_t * dest, std::uint8_t const * src, std::size_t n) {
+                        std::memcpy (dest, src, n);
+                    });
             }
             delete[](p);
         };
@@ -425,8 +427,10 @@ namespace pstore {
         if (initialized) {
             // Copy from the data store's regions to the newly allocated memory block.
             storage_.copy<copy_from_store_traits> (
-                addr, size, result.get (), [](std::uint8_t const * src, std::uint8_t * dest,
-                                              std::size_t n) { std::memcpy (dest, src, n); });
+                addr, size, result.get (),
+                [](std::uint8_t const * src, std::uint8_t * dest, std::size_t n) {
+                    std::memcpy (dest, src, n);
+                });
         }
         return std::static_pointer_cast<void const> (result);
     }

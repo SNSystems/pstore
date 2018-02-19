@@ -184,9 +184,7 @@ namespace pstore {
             system_error (std::error_code code, ::pstore::gsl::czstring user_message,
                           std::string const & path);
 
-            std::string path () const {
-                return path_;
-            }
+            std::string path () const { return path_; }
 
         private:
             std::string path_;
@@ -452,28 +450,16 @@ namespace pstore {
 
             /// \name Observers
             ///@{
-            file_base * file () {
-                return file_;
-            }
-            file_base const * file () const {
-                return file_;
-            }
+            file_base * file () { return file_; }
+            file_base const * file () const { return file_; }
 
             /// \returns The offset of the first locked byte of the file to be locked.
-            std::uint64_t offset () const {
-                return offset_;
-            }
+            std::uint64_t offset () const { return offset_; }
             /// \returns The number bytes to be locked.
-            std::size_t size () const {
-                return size_;
-            }
+            std::size_t size () const { return size_; }
             /// \returns The type of lock to be obtained when lock() is called.
-            file_base::lock_kind kind () const {
-                return kind_;
-            }
-            bool is_locked () const {
-                return locked_;
-            }
+            file_base::lock_kind kind () const { return kind_; }
+            bool is_locked () const { return locked_; }
             ///@}
 
         private:
@@ -532,12 +518,8 @@ namespace pstore {
             }
 
             void close () override {}
-            bool is_open () const override {
-                return true;
-            }
-            bool is_writable () const override {
-                return writable_;
-            }
+            bool is_open () const override { return true; }
+            bool is_writable () const override { return writable_; }
             std::string path () const override {
                 // In-memory files obviously don't have a path, so it's hard to know quite what to
                 // return!
@@ -546,13 +528,9 @@ namespace pstore {
             }
 
             void seek (std::uint64_t position) override;
-            std::uint64_t tell () override {
-                return pos_;
-            }
+            std::uint64_t tell () override { return pos_; }
 
-            std::uint64_t size () override {
-                return eof_;
-            }
+            std::uint64_t size () override { return eof_; }
             void truncate (std::uint64_t size) override;
             std::time_t latest_time () const override;
 
@@ -564,9 +542,7 @@ namespace pstore {
             void unlock (std::uint64_t /*offset*/, std::size_t /*size*/) override {}
 
             /// Returns the underlying memory managed by the file object.
-            std::shared_ptr<void> data () {
-                return buffer_;
-            }
+            std::shared_ptr<void> data () { return buffer_; }
 
             /// Reads nbytes from the file, storing them at the location given by buffer. Returns
             /// the number of bytes read. The file position indicator for the file is incremented by
@@ -661,9 +637,7 @@ namespace pstore {
             /// file.
             struct temporary {};
             /// Creates a temporary file in the system temporary directory
-            void open (temporary t) {
-                return open (t, file_handle::get_temporary_directory ());
-            }
+            void open (temporary t) { return open (t, file_handle::get_temporary_directory ()); }
 
             /// Creates a temporary file in the specified directory.
             void open (temporary, std::string const & directory);
@@ -687,15 +661,9 @@ namespace pstore {
             /// directory to fail.
             static std::string get_temporary_directory ();
 
-            bool is_open () const override {
-                return file_ != invalid_oshandle;
-            }
-            bool is_writable () const override {
-                return is_writable_;
-            }
-            std::string path () const override {
-                return path_;
-            }
+            bool is_open () const override { return file_ != invalid_oshandle; }
+            bool is_writable () const override { return is_writable_; }
+            std::string path () const override { return path_; }
 
             void close () override;
 
@@ -726,9 +694,7 @@ namespace pstore {
             oshandle const invalid_oshandle = -1;
 #endif
 
-            oshandle raw_handle () {
-                return file_;
-            }
+            oshandle raw_handle () { return file_; }
 
         private:
             void ensure_open ();
@@ -791,9 +757,7 @@ namespace pstore {
 
             /// Releases the file path given to the constructor so that it will _not_
             /// be deleted when the instance is destroyed.
-            void release () noexcept {
-                released_ = true;
-            }
+            void release () noexcept { released_ = true; }
 
         protected:
             explicit deleter_base (std::string path, unlink_proc unlinker);

@@ -62,18 +62,10 @@ namespace {
         void TearDown () final {
             using namespace ::pstore::dump;
             switch (base_) {
-            case 8:
-                number_base::oct ();
-                break;
-            case 10:
-                number_base::dec ();
-                break;
-            case 16:
-                number_base::hex ();
-                break;
-            default:
-                ASSERT_TRUE (false);
-                break;
+            case 8: number_base::oct (); break;
+            case 10: number_base::dec (); break;
+            case 16: number_base::hex (); break;
+            default: ASSERT_TRUE (false); break;
             }
         }
 
@@ -83,7 +75,7 @@ namespace {
     private:
         unsigned base_ = 0;
     };
-}
+} // namespace
 
 typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Number, CharacterTypes);

@@ -94,7 +94,7 @@ namespace {
         db_.reset ();
         EmptyStore::TearDown ();
     }
-}
+} // namespace
 
 // test default constructor.
 TEST_F (SetFixture, DefaultConstructor) {

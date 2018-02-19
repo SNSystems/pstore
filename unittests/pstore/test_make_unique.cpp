@@ -47,12 +47,8 @@
 
 namespace {
     struct xtor_counter {
-        xtor_counter () {
-            ++ctor_calls;
-        }
-        ~xtor_counter () {
-            ++dtor_calls;
-        }
+        xtor_counter () { ++ctor_calls; }
+        ~xtor_counter () { ++dtor_calls; }
 
         static int ctor_calls;
         static int dtor_calls;

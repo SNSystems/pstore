@@ -59,9 +59,7 @@ namespace {
         service_handle (service_handle const &) = delete;
         service_handle & operator= (service_handle const &) = delete;
 
-        SC_HANDLE get () const noexcept {
-            return h_;
-        }
+        SC_HANDLE get () const noexcept { return h_; }
 
     private:
         SC_HANDLE h_;
@@ -77,7 +75,7 @@ namespace {
         }
     }
 
-} // (anonymous namespace)
+} // namespace
 
 // install_service
 // ~~~~~~~~~~~~~~~

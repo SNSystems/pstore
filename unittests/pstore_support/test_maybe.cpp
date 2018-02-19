@@ -65,19 +65,15 @@ namespace {
             return *this;
         }
 
-        bool operator== (value const & rhs) const {
-            return this->get () == rhs.get ();
-        }
+        bool operator== (value const & rhs) const { return this->get () == rhs.get (); }
 
-        int get () const {
-            return *v_;
-        }
+        int get () const { return *v_; }
 
     private:
         std::unique_ptr<int> v_;
     };
 
-} // (anonymous namespace)
+} // namespace
 
 TEST (Maybe, NoValue) {
     maybe<value> m;

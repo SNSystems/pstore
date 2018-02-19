@@ -75,7 +75,7 @@ namespace {
     };
 
     std::string const SimpleAsciiFixture::str{"hello mum"};
-}
+} // namespace
 TEST_F (SimpleAsciiFixture, LengthWithExplicitSize) {
     ASSERT_EQ (9U, pstore::utf::length (str.c_str (), 9));
 }
@@ -142,7 +142,7 @@ namespace {
         0x00,             // NULL
     };
     std::string const ShortJapaneseStringFixture::str{reinterpret_cast<char const *> (bytes)};
-}
+} // namespace
 
 TEST_F (ShortJapaneseStringFixture, LengthWithExplicitSize) {
     ASSERT_EQ (9U, pstore::utf::length (str.c_str (), sizeof (bytes) - 1));
@@ -205,7 +205,7 @@ namespace {
         0x00,                   // NULL
     };
     std::string const FourByteUtf8ChineseCharacters::str{reinterpret_cast<char const *> (bytes)};
-}
+} // namespace
 
 TEST_F (FourByteUtf8ChineseCharacters, LengthWithExplicitSize) {
     ASSERT_EQ (4U, pstore::utf::length (str.c_str (), sizeof (bytes) - 1));
@@ -261,7 +261,7 @@ namespace {
     };
 
     char const * MaxLengthUTFSequence::str = reinterpret_cast<char const *> (bytes);
-}
+} // namespace
 
 TEST_F (MaxLengthUTFSequence, LengthWithExplicitSize) {
     ASSERT_EQ (4U, pstore::utf::length (str, sizeof (bytes) - 1));

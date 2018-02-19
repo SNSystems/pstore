@@ -53,7 +53,7 @@ namespace {
         pstore::broker::partial_cmds cmds_;
         static constexpr std::uint32_t message_id_ = 1234;
     };
-}
+} // namespace
 
 TEST_F (MessageParse, SinglePartCommand) {
     using namespace pstore::broker;

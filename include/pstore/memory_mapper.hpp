@@ -83,9 +83,7 @@ namespace pstore {
         system_page_size ()
                 : size_{sysconf ()} {}
 
-        unsigned get () const override {
-            return size_;
-        }
+        unsigned get () const override { return size_; }
 
     private:
         unsigned size_;
@@ -105,36 +103,24 @@ namespace pstore {
         //@{
         /// Returns the base address of this memory-mapped region. Returns nullptr if unmap() has
         /// been called.
-        std::shared_ptr<void> data () {
-            return ptr_;
-        }
-        std::shared_ptr<void const> data () const {
-            return ptr_;
-        }
+        std::shared_ptr<void> data () { return ptr_; }
+        std::shared_ptr<void const> data () const { return ptr_; }
         //@}
 
         /// \brief Returns true if the memory is to be writable.
         /// \note The operating system may separately protect memory pages, so it's perfectly likely
         /// that a memory page may be read-only even if this method returns true.
-        bool is_writable () const {
-            return is_writable_;
-        }
+        bool is_writable () const { return is_writable_; }
 
         /// Returns the file offset of the start of the memory represented by this object.
-        std::uint64_t offset () const {
-            return offset_;
-        }
+        std::uint64_t offset () const { return offset_; }
 
         /// Returns the size of the memory region owned by this object.
-        std::uint64_t size () const {
-            return size_;
-        }
+        std::uint64_t size () const { return size_; }
 
         /// A convenience method which returns the file offset of the end of the memory represented
         /// by this object.
-        std::uint64_t end () const {
-            return offset () + size ();
-        }
+        std::uint64_t end () const { return offset () + size (); }
 
         static unsigned long page_size (system_page_size_interface const & intf);
 

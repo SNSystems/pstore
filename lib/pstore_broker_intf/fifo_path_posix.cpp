@@ -70,15 +70,13 @@ namespace {
         umask_raii (umask_raii const &) = delete;
         umask_raii & operator= (umask_raii const &) = delete;
         umask_raii & operator= (umask_raii &&) = delete;
-        ~umask_raii () {
-            ::umask (old_);
-        }
+        ~umask_raii () { ::umask (old_); }
 
     private:
         mode_t const old_;
     };
 
-} // (anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace broker {

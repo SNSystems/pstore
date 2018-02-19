@@ -244,7 +244,7 @@ namespace {
         void lock () {}
         void unlock () {}
     };
-}
+} // namespace
 
 TEST_F (EmptyStore, Allocate16Bytes) {
     pstore::database db{file_};
@@ -317,14 +317,12 @@ namespace {
                                                                 new_size);
         }
 
-        std::shared_ptr<pstore::file::file_base> file () override {
-            return file_;
-        }
+        std::shared_ptr<pstore::file::file_base> file () override { return file_; }
 
     private:
         std::shared_ptr<pstore::file::in_memory> file_;
     };
-}
+} // namespace
 
 
 namespace {
@@ -340,18 +338,19 @@ namespace {
 
 
 TEST_F (EmptyStore, ProtectAllOfOneRegion) {
-    using ::testing::Return;
-    using ::testing::Ref;
     using ::testing::_;
+    using ::testing::Ref;
+    using ::testing::Return;
 
     auto const fixed_page_size_bytes = 4096U;
     auto page_size = std::make_unique<fixed_page_size> ();
     EXPECT_CALL (*page_size, get ()).WillRepeatedly (Return (fixed_page_size_bytes));
 
     // Create the data store instance. It will use 4K pages mapped using mock_mapper instances.
-    pstore::database db{file_, std::move (page_size), std::make_unique<mock_region_factory> (
-                                                          file_, pstore::storage::min_region_size,
-                                                          pstore::storage::min_region_size)};
+    pstore::database db{file_, std::move (page_size),
+                        std::make_unique<mock_region_factory> (file_,
+                                                               pstore::storage::min_region_size,
+                                                               pstore::storage::min_region_size)};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
 
@@ -382,8 +381,8 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
 #include "pstore/transaction.hpp"
 
 TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
-    using ::testing::Return;
     using ::testing::Ref;
+    using ::testing::Return;
 
     auto const fixed_page_size_bytes = 4096U;
     auto page_size = std::make_unique<fixed_page_size> ();

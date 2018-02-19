@@ -61,9 +61,7 @@ namespace {
     public:
         static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
         db_file ();
-        std::shared_ptr<pstore::file::in_memory> file () {
-            return file_;
-        }
+        std::shared_ptr<pstore::file::in_memory> file () { return file_; }
 
     private:
         std::shared_ptr<std::uint8_t> buffer_;
@@ -102,8 +100,8 @@ namespace {
         void append_int (Transaction & transaction, int v) {
             *(transaction.template alloc_rw<int> ().first) = v;
         }
-    }
-}
+    } // namespace
+} // namespace
 
 TEST_F (TwoConnections, CommitToFirstConnectionDoesNotAffectFooterPosForSecond) {
     ASSERT_EQ (sizeof (pstore::header), second.footer_pos ().absolute ());

@@ -56,11 +56,11 @@
 #include "index_structure_config.hpp"
 
 using pstore::database;
+using pstore::index::details::depth_is_internal_node;
+using pstore::index::details::hash_index_bits;
+using pstore::index::details::index_pointer;
 using pstore::index::details::internal_node;
 using pstore::index::details::linear_node;
-using pstore::index::details::depth_is_internal_node;
-using pstore::index::details::index_pointer;
-using pstore::index::details::hash_index_bits;
 
 // FIXME: there are numerous definitions of these macros. Put them in portab.hpp.
 #ifdef PSTORE_CPP_EXCEPTIONS
@@ -98,12 +98,8 @@ namespace {
             case '{':
             case '}':
             case '|':
-            case '"':
-                result += '\\';
-                PSTORE_FALLTHROUGH;
-            default:
-                result += c;
-                break;
+            case '"': result += '\\'; PSTORE_FALLTHROUGH;
+            default: result += c; break;
             }
         }
         return result;
@@ -226,15 +222,16 @@ int main (int argc, char * argv[]) {
         dump_if_selected<indices::name> (opt, db);
         dump_if_selected<indices::write> (opt, db);
     }
-    CATCH (std::exception const & ex,
+    CATCH (std::exception const & ex, {
+        std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
+    })
+    CATCH (...,
            {
-               std::cerr << "Error: " << ex.what () << '\n';
+               std::cerr << "Unknown exception\n";
                exit_code = EXIT_FAILURE;
            })
-    CATCH (..., {
-        std::cerr << "Unknown exception\n";
-        exit_code = EXIT_FAILURE;
-    }) return exit_code;
+    return exit_code;
 }
 
 // eof: tools/index_structure/index_structure.cpp

@@ -62,13 +62,9 @@ namespace pstore {
                 return !expanded_;
             }
 
-            static bool get_expanded () {
-                return default_expanded_;
-            }
+            static bool get_expanded () { return default_expanded_; }
 
-            static void set_expanded (bool t) {
-                default_expanded_ = t;
-            }
+            static void set_expanded (bool t) { default_expanded_ = t; }
 
         private:
             std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
@@ -86,9 +82,7 @@ namespace pstore {
             return std::static_pointer_cast<value> (std::make_shared<address> (addr));
         }
 
-        inline value_ptr make_value (uuid const & u) {
-            return make_value (u.str ());
-        }
+        inline value_ptr make_value (uuid const & u) { return make_value (u.str ()); }
 
         template <typename PointerType>
         inline value_ptr make_value (sstring_view<PointerType> const & str) {

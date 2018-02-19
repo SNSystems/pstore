@@ -77,7 +77,7 @@ namespace {
         auto out = std::copy_n (result, num_to_copy, begin);
         return as_unsigned (std::distance (begin, out));
     }
-}
+} // namespace
 
 TEST_F (ProcessFileName, BufferContents) {
     std::vector<char> buffer;
@@ -139,7 +139,7 @@ namespace {
             return std::bind (&sysctl_mock2::sysctl, cb, _1, _2, _3, _4, _5, _6);
         }
     };
-}
+} // namespace
 
 TEST_F (ProcessFileNameFreeBSD, CommandContents) {
     sysctl_mock2 callback;

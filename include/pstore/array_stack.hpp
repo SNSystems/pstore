@@ -86,36 +86,24 @@ namespace pstore {
         }
 
         /// Returns an iterator pointing to the first element in the stack.
-        typename container_type::const_iterator begin () const {
-            return std::begin (c_);
-        }
+        typename container_type::const_iterator begin () const { return std::begin (c_); }
 
-        typename container_type::const_iterator end () const {
-            return std::begin (c_) + elements_;
-        }
+        typename container_type::const_iterator end () const { return std::begin (c_) + elements_; }
 
-        bool operator!= (array_stack const & other) const {
-            return !operator== (other);
-        }
+        bool operator!= (array_stack const & other) const { return !operator== (other); }
 
         /// \name Capacity
         ///@{
 
         /// Checks whether the stack is empty.
-        bool empty () const {
-            return elements_ == 0;
-        }
+        bool empty () const { return elements_ == 0; }
 
         /// Returns the number of elements stored on the stack.
-        size_type size () const {
-            return elements_;
-        }
+        size_type size () const { return elements_; }
 
         /// Returns the maximum number of elements that the stack is able to
         /// hold.
-        constexpr size_t max_size () const {
-            return Size;
-        }
+        constexpr size_t max_size () const { return Size; }
         ///@}
 
 

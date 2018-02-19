@@ -98,9 +98,7 @@ namespace pstore {
             }
         }
 
-        std::uint32_t next_message_id () {
-            return message_id.load ();
-        }
+        std::uint32_t next_message_id () { return message_id.load (); }
 
     } // namespace broker
 } // namespace pstore

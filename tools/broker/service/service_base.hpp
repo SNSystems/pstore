@@ -70,9 +70,7 @@ public:
     /// Stops the service.
     void stop ();
 
-    std::wstring const & name () const {
-        return name_;
-    }
+    std::wstring const & name () const { return name_; }
 
 protected:
     /// Called when a start command is sent to the service by the SCM or when the operating system

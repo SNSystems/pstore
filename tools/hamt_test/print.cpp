@@ -46,5 +46,5 @@
 namespace details {
     ios_printer cout{std::cout};
     ios_printer cerr{std::cerr};
-}
+} // namespace details
 // eof: tools/hamt_test/print.cpp

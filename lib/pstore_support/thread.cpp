@@ -71,9 +71,7 @@ namespace pstore {
 
 #ifdef _WIN32
 
-        thread_id_type get_id () {
-            return ::GetCurrentThreadId ();
-        }
+        thread_id_type get_id () { return ::GetCurrentThreadId (); }
 
 
         static THREAD_LOCAL char thread_name[name_size];
@@ -208,6 +206,6 @@ namespace pstore {
             std::array<char, name_size> buffer;
             return {get_name (::pstore::gsl::make_span (buffer))};
         }
-    } // namespace thread
+    } // namespace threads
 } // namespace pstore
 // eof: lib/pstore_support/thread.cpp

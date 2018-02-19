@@ -59,7 +59,7 @@ namespace pstore {
     /// The boolean value in the pair result is true for valid input, false otherwise.
 
     std::pair<unsigned, bool> str_to_revision (std::string const & str);
-}
+} // namespace pstore
 
 #endif // PSTORE_STR_TO_REVISION_HPP
 // eof: include/pstore_cmd_util/str_to_revision.hpp

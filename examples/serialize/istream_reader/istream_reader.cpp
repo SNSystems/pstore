@@ -67,7 +67,7 @@ namespace {
     private:
         std::istream & os_;
     };
-}
+} // namespace
 
 int main () {
     std::istringstream iss{"3 73 127 179"};

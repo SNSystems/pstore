@@ -118,12 +118,8 @@ namespace pstore {
                       min_region_size)}
                 , regions_{region_factory_->init ()} {}
 
-        file::file_base * file () {
-            return file_.get ();
-        }
-        file::file_base const * file () const {
-            return file_.get ();
-        }
+        file::file_base * file () { return file_.get (); }
+        file::file_base const * file () const { return file_.get (); }
 
         void map_bytes (std::uint64_t new_size);
 
@@ -178,9 +174,7 @@ namespace pstore {
         std::shared_ptr<void const> address_to_pointer (address const & sop) const;
 
         // For unit testing only.
-        region_container const & regions () const {
-            return regions_;
-        }
+        region_container const & regions () const { return regions_; }
 
     private:
         static sat_iterator slice_region_into_segments (std::shared_ptr<memory_mapper_base> region,

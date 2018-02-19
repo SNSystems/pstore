@@ -99,9 +99,7 @@ namespace pstore {
                 return *this;
             }
 
-            T const & get () const {
-                return t_;
-            }
+            T const & get () const { return t_; }
 
         private:
             T t_;

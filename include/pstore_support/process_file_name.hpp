@@ -60,7 +60,7 @@
 namespace pstore {
     /// Returns the path of the current process image.
     std::string process_file_name ();
-}
+} // namespace pstore
 
 
 namespace pstore {

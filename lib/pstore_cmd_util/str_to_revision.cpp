@@ -76,7 +76,7 @@ namespace {
                         [](char c) { return static_cast<char> (std::tolower (c)); });
         return result;
     }
-}
+} // namespace
 
 namespace pstore {
     std::pair<unsigned, bool> str_to_revision (std::string const & str_) {

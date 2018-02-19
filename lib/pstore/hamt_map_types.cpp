@@ -72,9 +72,7 @@ namespace pstore {
             void linear_node::operator delete (void * p, nchildren /*size*/) {
                 ::operator delete (p);
             }
-            void linear_node::operator delete (void * p) {
-                ::operator delete (p);
-            }
+            void linear_node::operator delete (void * p) { ::operator delete (p); }
 
             // (ctor)
             // ~~~~~~

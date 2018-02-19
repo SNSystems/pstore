@@ -138,7 +138,7 @@ namespace {
 
         return {addr, size};
     }
-}
+} // namespace
 
 
 #if PSTORE_CPP_EXCEPTIONS
@@ -201,15 +201,20 @@ int main (int argc, char * argv[]) {
         }
 
         database.close ();
-    } CATCH (std::exception const & ex, {
-        auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what) << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
-        exit_code = EXIT_FAILURE;
-    })
+    }
+    CATCH (std::exception const & ex,
+           {
+               auto what = ex.what ();
+               error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
+                            << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (...,
+           {
+               std::cerr << "An unknown error occurred." << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
 
-    return exit_code;
+        return exit_code;
 }
 // eof: tools/write/main.cpp

@@ -77,7 +77,7 @@ namespace {
     class DbArchive : public EmptyStore {
     protected:
     };
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (DbArchive, ReadASingleUint64) {
     pstore::database db{file_};
@@ -104,7 +104,8 @@ TEST_F (DbArchive, ReadAUint64Span) {
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
-        UINT64_C (0xF0F0F0F0F0F0F0F0), UINT64_C (0xFEEDFACECAFEBEEF),
+        UINT64_C (0xF0F0F0F0F0F0F0F0),
+        UINT64_C (0xFEEDFACECAFEBEEF),
     }};
 
     // Append 'original' to the store.
@@ -146,7 +147,8 @@ TEST_F (DbArchive, WriteAUint64Span) {
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
-        UINT64_C (0xF0F0F0F0F0F0F0F0), UINT64_C (0xFEEDFACECAFEBEEF),
+        UINT64_C (0xF0F0F0F0F0F0F0F0),
+        UINT64_C (0xFEEDFACECAFEBEEF),
     }};
 
     // Write the 'original' array span to the store using a serializer.
@@ -182,7 +184,7 @@ namespace {
         };
     };
 
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     using ::testing::_;
@@ -192,7 +194,8 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> original{{
-        UINT64_C (0x0011223344556677), UINT64_C (0x8899AABBCCDDEEFF),
+        UINT64_C (0x0011223344556677),
+        UINT64_C (0x8899AABBCCDDEEFF),
     }};
     auto const span = ::pstore::gsl::make_span (original);
 
@@ -234,7 +237,7 @@ namespace {
             }
         };
     };
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     using ::testing::_;
@@ -248,7 +251,8 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
 
     // Append 'original' to the store.
     std::array<std::uint64_t, 2> const original{{
-        UINT64_C (0xF0F0F0F0F0F0F0F0), UINT64_C (0xFEEDFACECAFEBEEF),
+        UINT64_C (0xF0F0F0F0F0F0F0F0),
+        UINT64_C (0xFEEDFACECAFEBEEF),
     }};
 
     mock_mutex mutex;

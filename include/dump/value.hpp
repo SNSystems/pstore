@@ -66,9 +66,7 @@ namespace pstore {
         class indent {
         public:
             indent () = default;
-            indent next (unsigned distance) const {
-                return indent{count_ + distance};
-            }
+            indent next (unsigned distance) const { return indent{count_ + distance}; }
 
             template <typename OStream>
             OStream & write (OStream & os, typename OStream::char_type c) const;
@@ -76,9 +74,7 @@ namespace pstore {
             template <typename CharType>
             std::basic_string<CharType> str () const;
 
-            unsigned size () const {
-                return count_;
-            }
+            unsigned size () const { return count_; }
 
         private:
             explicit indent (unsigned count)
@@ -103,22 +99,12 @@ namespace pstore {
             value (value const &) = default;
             value & operator= (value const &) = default;
 
-            virtual object * dynamic_cast_object () {
-                return nullptr;
-            }
-            virtual object const * dynamic_cast_object () const {
-                return nullptr;
-            }
-            virtual number_base * dynamic_cast_number () {
-                return nullptr;
-            }
-            virtual number_base const * dynamic_cast_number () const {
-                return nullptr;
-            }
+            virtual object * dynamic_cast_object () { return nullptr; }
+            virtual object const * dynamic_cast_object () const { return nullptr; }
+            virtual number_base * dynamic_cast_number () { return nullptr; }
+            virtual number_base const * dynamic_cast_number () const { return nullptr; }
 
-            virtual bool is_number_like () const {
-                return false;
-            }
+            virtual bool is_number_like () const { return false; }
 
             virtual std::ostream & write (std::ostream & os) const;
             virtual std::wostream & write (std::wostream & os) const;
@@ -142,30 +128,16 @@ namespace pstore {
         public:
             ~number_base () override;
 
-            number_base * dynamic_cast_number () override {
-                return this;
-            }
-            number_base const * dynamic_cast_number () const override {
-                return this;
-            }
+            number_base * dynamic_cast_number () override { return this; }
+            number_base const * dynamic_cast_number () const override { return this; }
 
-            bool is_number_like () const override {
-                return true;
-            }
+            bool is_number_like () const override { return true; }
 
-            static void hex () {
-                default_base_ = 16U;
-            }
-            static void dec () {
-                default_base_ = 10U;
-            }
-            static void oct () {
-                default_base_ = 8U;
-            }
+            static void hex () { default_base_ = 16U; }
+            static void dec () { default_base_ = 10U; }
+            static void oct () { default_base_ = 8U; }
 
-            static unsigned default_base () {
-                return default_base_;
-            }
+            static unsigned default_base () { return default_base_; }
 
         protected:
             number_base ()
@@ -211,21 +183,15 @@ namespace pstore {
         OStream & number<T>::write_decimal (OStream & os, indent const &) const {
             serialize::ios_flags_saver old_flags (os);
             switch (base_) {
-            case 16:
-                os << "0x" << std::hex;
-                break;
+            case 16: os << "0x" << std::hex; break;
             case 8:
                 if (v_ != 0) {
                     os << "0";
                 }
                 os << std::oct;
                 break;
-            case 10:
-                os << std::dec;
-                break;
-            default:
-                assert (0);
-                break;
+            case 10: os << std::dec; break;
+            default: assert (0); break;
             }
             os << v_;
             return os;
@@ -448,9 +414,7 @@ namespace pstore {
             array & operator= (array const &) = delete;
             array & operator= (array &&) = delete;
 
-            void push_back (value_ptr v) {
-                values_.push_back (v);
-            }
+            void push_back (value_ptr v) { values_.push_back (v); }
 
         private:
             template <typename OStream>
@@ -515,21 +479,13 @@ namespace pstore {
             object & operator= (object const &) = delete;
             object & operator= (object &&) = delete;
 
-            object * dynamic_cast_object () override {
-                return this;
-            }
-            object const * dynamic_cast_object () const override {
-                return this;
-            }
+            object * dynamic_cast_object () override { return this; }
+            object const * dynamic_cast_object () const override { return this; }
 
             value_ptr get (std::string const & name);
 
-            void compact (bool enabled = true) {
-                compact_ = enabled;
-            }
-            bool is_compact () const {
-                return compact_;
-            }
+            void compact (bool enabled = true) { compact_ = enabled; }
+            bool is_compact () const { return compact_; }
 
         private:
             template <typename OStream, typename ObjectCharacterTraits>

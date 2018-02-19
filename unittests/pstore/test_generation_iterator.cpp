@@ -81,7 +81,7 @@ namespace {
 
         std::unique_ptr<pstore::database> db_;
     };
-}
+} // namespace
 
 TEST_F (GenerationIterator, GenerationContainerBegin) {
     this->add_transaction ();

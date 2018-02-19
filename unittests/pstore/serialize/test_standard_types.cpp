@@ -70,7 +70,7 @@ namespace {
 
         static constexpr auto const three_byte_varint = std::string::size_type{1} << 14;
     };
-}
+} // namespace
 
 TEST_F (StringWriter, WriteCharString) {
     std::string const str{"hello"};
@@ -185,9 +185,7 @@ namespace {
         SetWriter ()
                 : writer_{bytes_} {}
 
-        virtual void SetUp () final {
-            pstore::serialize::write (writer_, set_);
-        }
+        virtual void SetUp () final { pstore::serialize::write (writer_, set_); }
 
     protected:
         static std::set<int> const set_;
@@ -196,7 +194,7 @@ namespace {
     };
 
     std::set<int> const SetWriter::set_{5, 3, 2};
-}
+} // namespace
 
 // Teach the serializer how to read and write std::set<int>
 namespace pstore {
@@ -254,9 +252,7 @@ namespace {
         MapWriter ()
                 : writer_ (bytes_) {}
 
-        virtual void SetUp () final {
-            pstore::serialize::write (writer_, map_);
-        }
+        virtual void SetUp () final { pstore::serialize::write (writer_, map_); }
 
     protected:
         static map_type const map_;
@@ -265,9 +261,10 @@ namespace {
     };
 
     MapWriter::map_type const MapWriter::map_{
-        {"k1", "First key"}, {"k2", "Second key"},
+        {"k1", "First key"},
+        {"k2", "Second key"},
     };
-}
+} // namespace
 
 namespace pstore {
     namespace serialize {

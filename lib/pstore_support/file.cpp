@@ -137,9 +137,7 @@ namespace pstore {
 
         // (dtor)
         // ~~~~~~
-        range_lock::~range_lock () noexcept {
-            assert (!locked_);
-        }
+        range_lock::~range_lock () noexcept { assert (!locked_); }
 
         // operator=
         // ~~~~~~~~~
@@ -331,9 +329,7 @@ namespace pstore {
 
         // ~file_handle
         // ~~~~~~~~~~~~
-        file_handle::~file_handle () noexcept {
-            PSTORE_NO_EX_ESCAPE (this->close ());
-        }
+        file_handle::~file_handle () noexcept { PSTORE_NO_EX_ESCAPE (this->close ()); }
 
         // operator= (rvalue assignment)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -365,9 +361,7 @@ namespace pstore {
                 : path_{std::move (path)}
                 , unlinker_{std::move (unlinker)} {}
 
-        deleter_base::~deleter_base () {
-            this->unlink ();
-        }
+        deleter_base::~deleter_base () { this->unlink (); }
 
         void deleter_base::unlink () {
             if (!released_) {

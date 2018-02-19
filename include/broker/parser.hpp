@@ -58,29 +58,27 @@ namespace pstore {
     namespace broker {
         struct message_type;
 
-    struct broker_command {
-        broker_command (std::string const & v, std::string const & p)
-                : verb{v}
-                , path{p} {}
+        struct broker_command {
+            broker_command (std::string const & v, std::string const & p)
+                    : verb{v}
+                    , path{p} {}
 
-        bool operator== (broker_command const & rhs) const {
-            return verb == rhs.verb && path == rhs.path;
-        }
-        bool operator!= (broker_command const & rhs) const {
-            return !operator== (rhs);
-        }
-        std::string verb;
-        std::string path;
-    };
+            bool operator== (broker_command const & rhs) const {
+                return verb == rhs.verb && path == rhs.path;
+            }
+            bool operator!= (broker_command const & rhs) const { return !operator== (rhs); }
+            std::string verb;
+            std::string path;
+        };
 
-    struct pieces {
-        std::chrono::system_clock::time_point arrive_time_;
-        std::vector<std::unique_ptr<std::string>> s_;
-    };
+        struct pieces {
+            std::chrono::system_clock::time_point arrive_time_;
+            std::vector<std::unique_ptr<std::string>> s_;
+        };
 
-    using size_pair = std::pair<std::size_t, std::size_t>;
+        using size_pair = std::pair<std::size_t, std::size_t>;
 
-} // namespace broker
+    } // namespace broker
 } // namespace pstore
 
 namespace std {

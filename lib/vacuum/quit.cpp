@@ -96,9 +96,9 @@ namespace {
             // the user typing Control-C.
             quit_info.wait ();
 
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Signal received. Will terminate after current command. Num=",
-                                  quit_info.signal ());
+            pstore::logging::log (
+                pstore::logging::priority::info,
+                "Signal received. Will terminate after current command. Num=", quit_info.signal ());
             status.done = true;
 
             // Wake up the watch thread immediately.
@@ -126,7 +126,7 @@ namespace {
         quit_info.notify (sig);
     }
 
-} // (anonymous namespace)
+} // namespace
 
 
 // notify_quit_thread

@@ -77,18 +77,12 @@ namespace pstore {
         transaction_base (transaction_base && rhs) noexcept;
         transaction_base & operator= (transaction_base && rhs) noexcept = delete;
 
-        database & db () noexcept {
-            return db_;
-        }
-        database const & db () const noexcept {
-            return db_;
-        }
+        database & db () noexcept { return db_; }
+        database const & db () const noexcept { return db_; }
 
         /// Returns true if data has been added to this transaction, but not yet committed. In
         /// other words, if it returns false, calls to commit() or rollback() are noops.
-        bool is_open () const noexcept {
-            return first_ != address::null ();
-        }
+        bool is_open () const noexcept { return first_ != address::null (); }
 
         /// Commits all modifications made to the data store as part of this transaction.
         /// Modifications are visible to other processes when the commit is complete.
@@ -311,12 +305,8 @@ namespace pstore {
         transaction_mutex (transaction_mutex const &) = delete;
         transaction_mutex & operator= (transaction_mutex const &) = delete;
 
-        void lock () {
-            rl_.lock ();
-        }
-        void unlock () {
-            rl_.unlock ();
-        }
+        void lock () { rl_.lock (); }
+        void unlock () { rl_.unlock (); }
 
     private:
         file::range_lock rl_;

@@ -92,7 +92,7 @@ struct switches {
     std::list<std::string> paths;
 };
 
-std::pair<switches, int> get_switches(int argc, pstore_tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_DUMP_SWITCHES_HPP
 // eof: tools/dump/switches.hpp

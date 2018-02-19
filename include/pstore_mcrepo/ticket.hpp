@@ -147,38 +147,22 @@ namespace pstore {
             /// \name Iterators
             ///@{
 
-            iterator begin () {
-                return members_;
-            }
-            const_iterator begin () const {
-                return members_;
-            }
-            const_iterator cbegin () const {
-                return this->begin ();
-            }
+            iterator begin () { return members_; }
+            const_iterator begin () const { return members_; }
+            const_iterator cbegin () const { return this->begin (); }
 
-            iterator end () {
-                return members_ + size_;
-            }
-            const_iterator end () const {
-                return members_ + size_;
-            }
-            const_iterator cend () const {
-                return this->end ();
-            }
+            iterator end () { return members_ + size_; }
+            const_iterator end () const { return members_ + size_; }
+            const_iterator cend () const { return this->end (); }
             ///@}
 
             /// \name Capacity
             ///@{
 
             /// Checks whether the container is empty.
-            bool empty () const {
-                return size_ == 0;
-            }
+            bool empty () const { return size_ == 0; }
             /// Returns the number of elements.
-            std::size_t size () const {
-                return size_;
-            }
+            std::size_t size () const { return size_; }
             ///@}
 
             /// \name Storage
@@ -192,15 +176,11 @@ namespace pstore {
             }
 
             /// \returns The number of bytes needed to accommodate this ticket.
-            std::size_t size_bytes () const {
-                return ticket::size_bytes (this->size ());
-            }
+            std::size_t size_bytes () const { return ticket::size_bytes (this->size ()); }
             ///@}
 
             /// Returns the ticket file path.
-            pstore::address path () const {
-                return path_addr_;
-            }
+            pstore::address path () const { return path_addr_; }
 
         private:
             ticket () = default;

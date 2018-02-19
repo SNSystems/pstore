@@ -79,24 +79,16 @@ namespace pstore {
                 set_iterator (MapIterator const & it)
                         : it_ (it) {}
 
-                bool operator== (set_iterator const & other) const {
-                    return it_ == other.it_;
-                }
+                bool operator== (set_iterator const & other) const { return it_ == other.it_; }
 
-                bool operator!= (set_iterator const & other) const {
-                    return it_ != other.it_;
-                }
+                bool operator!= (set_iterator const & other) const { return it_ != other.it_; }
 
                 /// Dereference operator
                 /// @return the value of the element to which this set_iterator is currently
                 /// pointing
-                reference operator* () const {
-                    return it_->first;
-                }
+                reference operator* () const { return it_->first; }
 
-                pointer operator-> () const {
-                    return &it_->first;
-                }
+                pointer operator-> () const { return &it_->first; }
 
                 /// Prefix increment
                 set_iterator & operator++ () {
@@ -110,9 +102,7 @@ namespace pstore {
                     return old;
                 }
 
-                pstore::address get_address () const {
-                    return it_.get_address ();
-                }
+                pstore::address get_address () const { return it_.get_address (); }
 
             private:
                 MapIterator it_;
@@ -137,40 +127,24 @@ namespace pstore {
             /// \name Iterators
             ///@{
 
-            iterator begin () {
-                return {map_.cbegin ()};
-            }
-            iterator end () {
-                return {map_.cend ()};
-            }
+            iterator begin () { return {map_.cbegin ()}; }
+            iterator end () { return {map_.cend ()}; }
 
-            const_iterator begin () const {
-                return {map_.cbegin ()};
-            }
-            const_iterator end () const {
-                return {map_.cend ()};
-            }
+            const_iterator begin () const { return {map_.cbegin ()}; }
+            const_iterator end () const { return {map_.cend ()}; }
 
-            const_iterator cbegin () const {
-                return {map_.cbegin ()};
-            }
-            const_iterator cend () const {
-                return {map_.cend ()};
-            }
+            const_iterator cbegin () const { return {map_.cbegin ()}; }
+            const_iterator cend () const { return {map_.cend ()}; }
             ///@}
 
             /// \name Capacity
             ///@{
 
             /// \brief Checks whether the container is empty.
-            bool empty () const {
-                return map_.empty ();
-            }
+            bool empty () const { return map_.empty (); }
 
             /// \brief Returns the number of elements in the container.
-            std::size_t size () const {
-                return map_.size ();
-            }
+            std::size_t size () const { return map_.size (); }
             ///@}
 
             /// \brief Inserts an element into the container, if the container doesn't already
@@ -208,9 +182,7 @@ namespace pstore {
                 return {map_.find (key)};
             }
 
-            address flush (transaction_base & transaction) {
-                return map_.flush (transaction);
-            }
+            address flush (transaction_base & transaction) { return map_.flush (transaction); }
 
             /// \name Accessors
             /// Provide access to index internals.
@@ -221,16 +193,10 @@ namespace pstore {
                 return map_.load_leaf_node (addr).first;
             }
 
-            database & db () {
-                return map_.db ();
-            }
-            database const & db () const {
-                return map_.db ();
-            }
+            database & db () { return map_.db (); }
+            database const & db () const { return map_.db (); }
 
-            index_pointer root () const {
-                return map_.root ();
-            }
+            index_pointer root () const { return map_.root (); }
             ///@}
 
         private:

@@ -59,14 +59,10 @@ namespace {
         int a_;
     };
 
-    std::ostream & foo::write (std::ostream & os) const {
-        return os << "foo(" << a_ << ')';
-    }
+    std::ostream & foo::write (std::ostream & os) const { return os << "foo(" << a_ << ')'; }
 
-    std::ostream & operator<< (std::ostream & os, foo const & f) {
-        return f.write (os);
-    }
-}
+    std::ostream & operator<< (std::ostream & os, foo const & f) { return f.write (os); }
+} // namespace
 
 namespace pstore {
     namespace serialize {

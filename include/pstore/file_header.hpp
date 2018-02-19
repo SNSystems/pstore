@@ -122,9 +122,7 @@ namespace pstore {
     inline bool operator>= (extent const & lhs, extent const & rhs) noexcept {
         return !(lhs < rhs);
     }
-    inline bool operator> (extent const & lhs, extent const & rhs) noexcept {
-        return rhs < lhs;
-    }
+    inline bool operator> (extent const & lhs, extent const & rhs) noexcept { return rhs < lhs; }
     inline bool operator<= (extent const & lhs, extent const & rhs) noexcept {
         return !(lhs > rhs);
     }

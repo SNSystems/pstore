@@ -58,9 +58,7 @@ namespace pstore {
             iota_generator (iota_generator const & rhs) = default;
             iota_generator & operator= (iota_generator const & rhs) = default;
 
-            bool operator== (iota_generator const & rhs) const noexcept {
-                return v_ == rhs.v_;
-            }
+            bool operator== (iota_generator const & rhs) const noexcept { return v_ == rhs.v_; }
             bool operator!= (iota_generator const & rhs) const noexcept {
                 return !operator== (rhs);
             }
@@ -75,9 +73,7 @@ namespace pstore {
                 return t;
             }
 
-            value_type operator* () const noexcept {
-                return v_;
-            }
+            value_type operator* () const noexcept { return v_; }
             // pointer operator->() const noexcept { return &v_; }
 
         private:

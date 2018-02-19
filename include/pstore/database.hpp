@@ -98,7 +98,7 @@ namespace pstore {
         return calc_alignment (v, alignof (Ty));
     }
 
-} // naemsapce pstore
+} // namespace pstore
 
 //*       _       _        _                      *
 //*    __| | __ _| |_ __ _| |__   __ _ ___  ___   *
@@ -152,23 +152,15 @@ namespace pstore {
         /// \brief Returns the logical size of the data store.
         /// The local size of the data store is the number of bytes used, including both the data
         /// and meta-data. This may be less than the size of the physical disk file.
-        std::uint64_t size () const {
-            return size_.logical_size ();
-        }
+        std::uint64_t size () const { return size_.logical_size (); }
 
         /// \brief Returns the path of the file in which this database is contained.
-        std::string path () const {
-            return storage_.file ()->path ();
-        }
+        std::string path () const { return storage_.file ()->path (); }
 
         ///@{
         /// \brief Returns the file in which this database is contained.
-        file::file_base const * file () const {
-            return storage_.file ();
-        }
-        file::file_base * file () {
-            return storage_.file ();
-        }
+        file::file_base const * file () const { return storage_.file (); }
+        file::file_base * file () { return storage_.file (); }
         ///@}
 
         /// \brief Constructs the basic data store structures in an empty file.
@@ -179,9 +171,7 @@ namespace pstore {
         void sync (unsigned revision = head_revision);
         bool is_synced_to_head () const;
 
-        static bool small_files_enabled () {
-            return region::small_files_enabled ();
-        }
+        static bool small_files_enabled () { return region::small_files_enabled (); }
 
         std::unique_lock<file::range_lock> * upgrade_to_write_lock ();
         std::time_t latest_time () const {
@@ -220,12 +210,8 @@ namespace pstore {
             immediate,
             background,
         };
-        void set_vacuum_mode (vacuum_mode mode) {
-            vacuum_mode_ = mode;
-        }
-        vacuum_mode get_vacuum_mode () const {
-            return vacuum_mode_;
-        }
+        void set_vacuum_mode (vacuum_mode mode) { vacuum_mode_ = mode; }
+        vacuum_mode get_vacuum_mode () const { return vacuum_mode_; }
         ///@}
 
 
@@ -236,9 +222,7 @@ namespace pstore {
 
         void close ();
 
-        address footer_pos () const {
-            return size_.footer_pos ();
-        }
+        address footer_pos () const { return size_.footer_pos (); }
 
         unsigned get_current_revision () const {
             return getro<trailer> (size_.footer_pos ())->a.generation.load ();
@@ -255,9 +239,7 @@ namespace pstore {
             return sync_name_;
         }
 
-        std::string shared_memory_name () const {
-            return this->get_sync_name () + ".pst";
-        }
+        std::string shared_memory_name () const { return this->get_sync_name () + ".pst"; }
 
         /// Appends an amount of storage to the database.
         /// As an append-only system, this function provides the means by which data is recorded in
@@ -277,9 +259,7 @@ namespace pstore {
         /// the new footer is recorded.
         void set_new_footer (header * const head, address new_footer_pos);
 
-        void protect (address first, address last) {
-            storage_.protect (first, last);
-        }
+        void protect (address first, address last) { storage_.protect (first, last); }
 
         /// \brief Returns true if CRC checks are enabled.
         ///
@@ -327,12 +307,8 @@ namespace pstore {
                     : footer_pos_{footer_pos}
                     , logical_{footer_pos_.absolute () + sizeof (trailer)} {}
 
-            address footer_pos () const {
-                return footer_pos_;
-            }
-            std::uint64_t logical_size () const {
-                return logical_;
-            }
+            address footer_pos () const { return footer_pos_; }
+            std::uint64_t logical_size () const { return logical_; }
 
             void update_footer_pos (address new_footer_pos) {
                 assert (new_footer_pos.absolute () >= sizeof (header));

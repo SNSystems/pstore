@@ -76,20 +76,14 @@ namespace pstore {
 
     // validate
     // ~~~~~~~~
-    bool generation_iterator::validate () const {
-        return trailer::validate (db_, pos_);
-    }
+    bool generation_iterator::validate () const { return trailer::validate (db_, pos_); }
 
 
     // ************************
     // * generation container *
     // ************************
-    generation_iterator generation_container::begin () {
-        return {db_, db_.footer_pos ()};
-    }
-    generation_iterator generation_container::end () {
-        return {db_, pstore::address::null ()};
-    }
+    generation_iterator generation_container::begin () { return {db_, db_.footer_pos ()}; }
+    generation_iterator generation_container::end () { return {db_, pstore::address::null ()}; }
 
 } // namespace pstore
 // eof: lib/pstore/generation_iterator.cpp

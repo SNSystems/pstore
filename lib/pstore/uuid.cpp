@@ -87,9 +87,7 @@ namespace {
             return out_;
         }
 
-        bool is_high () const {
-            return is_high_;
-        }
+        bool is_high () const { return is_high_; }
 
     private:
         OutputIterator out_;
@@ -160,8 +158,8 @@ namespace pstore {
 
     // Construct from the canonical UUID string representation as defined by RFC4122.
     uuid::uuid (std::string const & str) {
-        maybe <uuid> d = uuid::from_string (str);
-        if (!d.has_value()) {
+        maybe<uuid> d = uuid::from_string (str);
+        if (!d.has_value ()) {
             raise (pstore::error_code::uuid_parse_error);
         }
         data_ = d->array ();
@@ -171,7 +169,7 @@ namespace pstore {
     // ~~~~~~~~~~~
     maybe<uuid> uuid::from_string (std::string const & str) {
         if (str.length () != string_length) {
-            return nothing <uuid> ();
+            return nothing<uuid> ();
         }
 
         container_type data;
@@ -184,7 +182,7 @@ namespace pstore {
             case 18:
             case 23:
                 if (digit != '-') {
-                    return nothing <uuid> ();
+                    return nothing<uuid> ();
                 }
                 assert (out.is_high ());
                 break;
@@ -196,13 +194,13 @@ namespace pstore {
                 } else if (digit >= '0' && digit <= '9') {
                     out.append (static_cast<unsigned> (digit) - '0');
                 } else {
-                    return nothing <uuid> ();
+                    return nothing<uuid> ();
                 }
                 break;
             }
         }
 
-        return just (uuid {data});
+        return just (uuid{data});
     }
 
     // variant
@@ -226,18 +224,12 @@ namespace pstore {
     // ~~~~~~~
     auto uuid::version () const noexcept -> version_type {
         switch (data_[version_octet] & 0xF0) {
-        case 0x10:
-            return version_type::time_based;
-        case 0x20:
-            return version_type::dce_security;
-        case 0x30:
-            return version_type::name_based_md5;
-        case 0x40:
-            return version_type::random_number_based;
-        case 0x50:
-            return version_type::name_based_sha1;
-        default:
-            return version_type::unknown;
+        case 0x10: return version_type::time_based;
+        case 0x20: return version_type::dce_security;
+        case 0x30: return version_type::name_based_md5;
+        case 0x40: return version_type::random_number_based;
+        case 0x50: return version_type::name_based_sha1;
+        default: return version_type::unknown;
         }
     }
 
@@ -263,12 +255,8 @@ namespace pstore {
             case 4:
             case 6:
             case 8:
-            case 10:
-                resl += '-';
-                PSTORE_FALLTHROUGH;
-            default:
-                resl += digit_to_hex ((c >> 4) & 0x0F);
-                resl += digit_to_hex (c & 0x0F);
+            case 10: resl += '-'; PSTORE_FALLTHROUGH;
+            default: resl += digit_to_hex ((c >> 4) & 0x0F); resl += digit_to_hex (c & 0x0F);
             }
         });
         return resl;
@@ -279,24 +267,12 @@ namespace pstore {
     std::ostream & operator<< (std::ostream & stream, uuid::version_type version) {
         char const * str = "";
         switch (version) {
-        case uuid::version_type::time_based:
-            str = "time_based";
-            break;
-        case uuid::version_type::dce_security:
-            str = "dce_security";
-            break;
-        case uuid::version_type::name_based_md5:
-            str = "name_based_md5";
-            break;
-        case uuid::version_type::random_number_based:
-            str = "random_number_based";
-            break;
-        case uuid::version_type::name_based_sha1:
-            str = "name_based_sha1";
-            break;
-        case uuid::version_type::unknown:
-            str = "unknown";
-            break;
+        case uuid::version_type::time_based: str = "time_based"; break;
+        case uuid::version_type::dce_security: str = "dce_security"; break;
+        case uuid::version_type::name_based_md5: str = "name_based_md5"; break;
+        case uuid::version_type::random_number_based: str = "random_number_based"; break;
+        case uuid::version_type::name_based_sha1: str = "name_based_sha1"; break;
+        case uuid::version_type::unknown: str = "unknown"; break;
         };
         return stream << str;
     }
@@ -304,24 +280,14 @@ namespace pstore {
     std::ostream & operator<< (std::ostream & stream, uuid::variant_type variant) {
         char const * str = "";
         switch (variant) {
-        case uuid::variant_type::ncs:
-            str = "ncs";
-            break;
-        case uuid::variant_type::rfc_4122:
-            str = "rfc_4122";
-            break;
-        case uuid::variant_type::microsoft:
-            str = "microsoft";
-            break;
-        case uuid::variant_type::future:
-            str = "future";
-            break; // future definition
+        case uuid::variant_type::ncs: str = "ncs"; break;
+        case uuid::variant_type::rfc_4122: str = "rfc_4122"; break;
+        case uuid::variant_type::microsoft: str = "microsoft"; break;
+        case uuid::variant_type::future: str = "future"; break; // future definition
         };
         return stream << str;
     }
 
-    std::ostream & operator<< (std::ostream & stream, uuid const & m) {
-        return stream << m.str ();
-    }
+    std::ostream & operator<< (std::ostream & stream, uuid const & m) { return stream << m.str (); }
 } // namespace pstore
 // eof: lib/pstore/uuid.cpp

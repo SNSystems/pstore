@@ -192,16 +192,20 @@ int main (int argc, char * argv[]) {
         if (!ok) {
             exit_code = EXIT_FAILURE;
         }
-    } CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
-         error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
-         exit_code = EXIT_FAILURE;
-    })
+    }
+    CATCH (std::exception const & ex,
+           {
+               error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                            << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (...,
+           {
+               error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
 
-    return exit_code;
+        return exit_code;
 }
 
 // eof: tools/read/main.cpp

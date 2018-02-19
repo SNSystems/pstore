@@ -80,9 +80,9 @@ namespace pstore {
             /// ValueType respectively. Otherwise `value` is false.
             template <typename K, typename V>
             struct pair_types_compatible
-                : std::integral_constant<bool, serialize::is_compatible<KeyType, K>::value &&
-                                                   serialize::is_compatible<ValueType, V>::value> {
-            };
+                    : std::integral_constant<bool,
+                                             serialize::is_compatible<KeyType, K>::value &&
+                                                 serialize::is_compatible<ValueType, V>::value> {};
 
         public:
             using key_equal = KeyEqual;
@@ -152,9 +152,7 @@ namespace pstore {
                     return index_ == other.index_ && visited_parents_ == other.visited_parents_;
                 }
 
-                bool operator!= (iterator_base const & other) const {
-                    return !operator== (other);
-                }
+                bool operator!= (iterator_base const & other) const { return !operator== (other); }
 
                 /// Dereference operator
                 /// \return The value of the element to which this iterator is currently pointing.
@@ -166,9 +164,7 @@ namespace pstore {
                     return *pos_;
                 }
 
-                value_pointer_type operator-> () const {
-                    return &operator* ();
-                }
+                value_pointer_type operator-> () const { return &operator* (); }
 
                 /// Prefix increment
                 iterator_base & operator++ ();
@@ -226,43 +222,27 @@ namespace pstore {
                 }
             }
 
-            ~hamt_map () {
-                this->clear ();
-            }
+            ~hamt_map () { this->clear (); }
 
             /// \name Iterators
             ///@{
 
             /// Returns an iterator to the beginning of the container
-            iterator begin () {
-                return make_begin_iterator<iterator> ();
-            }
-            const_iterator begin () const {
-                return make_begin_iterator<const_iterator> ();
-            }
-            const_iterator cbegin () const {
-                return make_begin_iterator<const_iterator> ();
-            }
+            iterator begin () { return make_begin_iterator<iterator> (); }
+            const_iterator begin () const { return make_begin_iterator<const_iterator> (); }
+            const_iterator cbegin () const { return make_begin_iterator<const_iterator> (); }
 
             /// Returns an iterator to the end of the container
-            iterator end () {
-                return iterator (parent_stack (), this);
-            }
-            const_iterator end () const {
-                return const_iterator (parent_stack (), this);
-            }
-            const_iterator cend () const {
-                return const_iterator (parent_stack (), this);
-            }
+            iterator end () { return iterator (parent_stack (), this); }
+            const_iterator end () const { return const_iterator (parent_stack (), this); }
+            const_iterator cend () const { return const_iterator (parent_stack (), this); }
             ///@}
 
             /// \name Capacity
             ///@{
 
             /// Checks whether the container is empty
-            bool empty () const {
-                return root_.is_empty ();
-            }
+            bool empty () const { return root_.is_empty (); }
 
             /// Returns the number of elements
             std::size_t size () const {
@@ -357,17 +337,11 @@ namespace pstore {
             value_type load_leaf_node (address const addr) const;
 
             /// Returns the database instance to which the index belongs.
-            database & db () {
-                return db_;
-            }
-            database const & db () const {
-                return db_;
-            }
+            database & db () { return db_; }
+            database const & db () const { return db_; }
 
             /// Returns the index root pointer.
-            index_pointer root () const {
-                return root_;
-            }
+            index_pointer root () const { return root_; }
             ///@}
 
         private:
@@ -919,7 +893,8 @@ namespace pstore {
         // hamt_map::flush
         // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        address hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction) {
+        address
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction) {
             // If this is a leaf node, there's nothing to do. Just return its store address.
             if (root_.is_address ()) {
                 return root_.addr;

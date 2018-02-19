@@ -83,9 +83,7 @@ namespace pstore {
                 virtual void set_description (std::string const & d);
                 std::string const & description () const;
 
-                void set_category (OptionCategory const * cat) {
-                    category_ = cat;
-                }
+                void set_category (OptionCategory const * cat) { category_ = cat; }
 
                 virtual void set_positional ();
                 virtual bool is_positional () const;
@@ -159,16 +157,10 @@ namespace pstore {
                     value_ = u;
                 }
 
-                operator T () const {
-                    return get ();
-                }
-                T get () const {
-                    return value_;
-                }
+                operator T () const { return get (); }
+                T get () const { return value_; }
 
-                bool empty () const {
-                    return value_.empty ();
-                }
+                bool empty () const { return value_.empty (); }
                 bool value (std::string const & v) override;
                 bool takes_argument () const override;
                 parser_base * get_parser () override;
@@ -211,12 +203,8 @@ namespace pstore {
                 opt (opt const &) = delete;
                 opt & operator= (opt const &) = delete;
 
-                operator bool () const {
-                    return value_;
-                }
-                bool takes_argument () const override {
-                    return false;
-                }
+                operator bool () const { return value_; }
+                bool takes_argument () const override { return false; }
                 bool value (std::string const & v) override;
                 void add_occurrence () override;
                 parser_base * get_parser () override;
@@ -251,27 +239,17 @@ namespace pstore {
                 list (list const &) = delete;
                 list & operator= (list const &) = delete;
 
-                bool takes_argument () const override {
-                    return true;
-                }
+                bool takes_argument () const override { return true; }
                 bool value (std::string const & v) override;
                 parser_base * get_parser () override;
 
                 using iterator = typename container::const_iterator;
                 using const_iterator = iterator;
 
-                const_iterator begin () const {
-                    return std::begin (values_);
-                }
-                const_iterator end () const {
-                    return std::end (values_);
-                }
-                std::size_t size () const {
-                    return values_.size ();
-                }
-                bool empty () const {
-                    return values_.empty ();
-                }
+                const_iterator begin () const { return std::begin (values_); }
+                const_iterator end () const { return std::end (values_); }
+                std::size_t size () const { return values_.size (); }
+                bool empty () const { return values_.empty (); }
 
             private:
                 Parser parser_;

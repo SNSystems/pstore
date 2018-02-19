@@ -71,7 +71,7 @@ namespace {
     }
 
     std::string const Base64Fixture::prefix = "!!binary |\n";
-}
+} // namespace
 
 // Test vectors from RFC 4648:
 //
@@ -122,7 +122,7 @@ namespace {
     void iota_n (OutputIterator first, Size n, Assignable value) {
         std::generate_n (first, n, [&value]() { return value++; });
     }
-}
+} // namespace
 
 TEST_F (Base64Fixture, LongInput) {
     std::vector<std::uint8_t> input;

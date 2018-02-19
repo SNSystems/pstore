@@ -66,9 +66,7 @@ namespace {
     class FileNameTemplate : public ::testing::Test {
     protected:
         struct generator {
-            unsigned operator() (unsigned max) {
-                return value++ % max;
-            }
+            unsigned operator() (unsigned max) { return value++ % max; }
             unsigned value = 0;
         };
         generator rng_;
@@ -116,7 +114,7 @@ namespace {
         MOCK_METHOD4 (lock, bool(std::uint64_t, std::size_t, lock_kind, blocking_mode));
         MOCK_METHOD2 (unlock, void(std::uint64_t, std::size_t));
     };
-}
+} // namespace
 
 TEST (RangeLock, InitialState) {
     pstore::file::range_lock lock;
@@ -190,8 +188,8 @@ TEST (RangeLock, MoveAssign) {
     mock_file file2;
 
     using ::testing::_;
-    using ::testing::Return;
     using ::testing::Expectation;
+    using ::testing::Return;
 
     Expectation file1_lock = EXPECT_CALL (file1, lock (UINT64_C (13),   // offset
                                                        std::size_t{17}, // size
@@ -254,8 +252,8 @@ TEST (RangeLock, LockUnlock) {
 
     // Set up the test expectations.
     using ::testing::_;
-    using ::testing::Return;
     using ::testing::Expectation;
+    using ::testing::Return;
 
     Expectation file_lock = EXPECT_CALL (file, lock (UINT64_C (5), std::size_t{7},
                                                      mock_file::lock_kind::exclusive_write,
@@ -329,9 +327,7 @@ namespace {
         path_list unlinked_files_;
     };
 
-    void DeleterFixture::unlink (std::string const & name) {
-        unlinked_files_.push_back (name);
-    }
+    void DeleterFixture::unlink (std::string const & name) { unlinked_files_.push_back (name); }
 
 
     class test_file_deleter final : public pstore::file::deleter_base {
@@ -345,7 +341,7 @@ namespace {
             return [=](std::string const & name) -> void { fixture->unlink (name); };
         }
     };
-}
+} // namespace
 
 
 TEST_F (DeleterFixture, UnlinkCallsPlatformUnlinkWithOriginalPath) {
@@ -390,7 +386,7 @@ namespace {
     protected:
         std::shared_ptr<pstore::file::file_handle> deleter_;
     };
-}
+} // namespace
 
 TEST_F (TemporaryFileFixture, CheckTemporaryFileIsDeleted) {
     std::string path = deleter_->path ();
@@ -416,7 +412,7 @@ namespace {
             return result;
         }
     };
-}
+} // namespace
 
 TEST_F (MemoryFile, FileIsInitiallyEmpty) {
     constexpr std::size_t elements = 13;
@@ -428,8 +424,8 @@ TEST_F (MemoryFile, FileIsInitiallyEmpty) {
 TEST_F (MemoryFile, ReadFileWithInitialContents) {
     constexpr std::size_t elements = 11;
     char const source_string[elements + 1]{"Hello World"};
-    ASSERT_EQ (elements, std::strlen (source_string)) << "Expected buffer length to be "
-                                                      << elements;
+    ASSERT_EQ (elements, std::strlen (source_string))
+        << "Expected buffer length to be " << elements;
     pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
 
     EXPECT_EQ (0U, mf.tell ()) << "Expected the initial file offset to be 0";
@@ -445,8 +441,8 @@ TEST_F (MemoryFile, ReadFileWithInitialContents) {
 TEST_F (MemoryFile, ReadPastEndOfFileWithInitialContents) {
     constexpr std::size_t elements = 5;
     char const source_string[elements + 1]{"Hello"};
-    ASSERT_EQ (elements, std::strlen (source_string)) << "Expected source length to be "
-                                                      << elements;
+    ASSERT_EQ (elements, std::strlen (source_string))
+        << "Expected source length to be " << elements;
     pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
 
     constexpr auto out_elements = std::size_t{7};
@@ -488,8 +484,8 @@ TEST_F (MemoryFile, CrazyWriteSize) {
 TEST_F (MemoryFile, Seek) {
     constexpr std::size_t elements = 5;
     char const source_string[elements + 1]{"abcde"};
-    ASSERT_EQ (elements, std::strlen (source_string)) << "Expected source length to be "
-                                                      << elements;
+    ASSERT_EQ (elements, std::strlen (source_string))
+        << "Expected source length to be " << elements;
     pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
 
     // Seek to position 1. Check tell() and read ().
@@ -523,8 +519,8 @@ TEST_F (MemoryFile, Seek) {
 TEST_F (MemoryFile, Truncate) {
     constexpr std::size_t elements = 5;
     char const source_string[elements + 1]{"abcde"};
-    ASSERT_EQ (elements, std::strlen (source_string)) << "Expected source length to be "
-                                                      << elements;
+    ASSERT_EQ (elements, std::strlen (source_string))
+        << "Expected source length to be " << elements;
     pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
 
     mf.truncate (0);
@@ -566,9 +562,7 @@ namespace {
             using namespace pstore::file;
             file_.open (file_handle::temporary{}, file_handle::get_temporary_directory ());
         }
-        ~NativeFile () {
-            file_.close ();
-        }
+        ~NativeFile () { file_.close (); }
 
     protected:
         pstore::file::file_handle file_;
@@ -686,7 +680,7 @@ namespace {
         assert (buffer.data ()[sz] == L'\0');
         return {buffer.data (), sz};
     }
-}
+} // namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 
@@ -722,8 +716,8 @@ TEST_F (EnvironmentSaveFixture, TaintedEnvironmentInvalidPath) {
     std::wstring path = this->getenv (L"SystemDrive") + L"\\aaa\\aaa\\aaa\\aaa\\";
 
     std::string const path_utf8 = pstore::utf::win32::to8 (path);
-    ASSERT_FALSE (pstore::file::exists (path_utf8)) << "I really didn't expect the path \""
-                                                    << path_utf8 << "\" to exist!";
+    ASSERT_FALSE (pstore::file::exists (path_utf8))
+        << "I really didn't expect the path \"" << path_utf8 << "\" to exist!";
     this->set_temp_path (path);
 
     // Now check that the exception message contains the file path. We've had

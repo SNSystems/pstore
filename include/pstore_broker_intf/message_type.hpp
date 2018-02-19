@@ -105,9 +105,7 @@ namespace pstore {
 
 
             bool operator== (message_type const & rhs) const;
-            bool operator!= (message_type const & rhs) const {
-                return !operator== (rhs);
-            }
+            bool operator!= (message_type const & rhs) const { return !operator== (rhs); }
 
             /// The maximum number of characters that can be send in a single message packet.
             static constexpr std::size_t payload_chars =

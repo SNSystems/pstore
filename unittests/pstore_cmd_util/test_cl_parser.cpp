@@ -45,8 +45,8 @@
 #include "gtest/gtest.h"
 
 TEST (ClParser, SimpleString) {
-    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
+    using pstore::maybe;
 
     maybe<std::string> r = parser<std::string> () ("hello");
     EXPECT_TRUE (r.has_value ());
@@ -54,8 +54,8 @@ TEST (ClParser, SimpleString) {
 }
 
 TEST (ClParser, StringFromSet) {
-    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
+    using pstore::maybe;
 
     parser<std::string> p;
     p.add_literal_option ("a", 31, "description a");
@@ -78,8 +78,8 @@ TEST (ClParser, StringFromSet) {
 }
 
 TEST (ClParser, Int) {
-    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
+    using pstore::maybe;
     {
         maybe<int> r1 = parser<int> () ("43");
         EXPECT_TRUE (r1.has_value ());
@@ -101,8 +101,8 @@ TEST (ClParser, Int) {
 }
 
 TEST (ClParser, Enum) {
-    using pstore::maybe;
     using pstore::cmd_util::cl::parser;
+    using pstore::maybe;
 
     enum color { red, blue, green };
     parser<color> p;

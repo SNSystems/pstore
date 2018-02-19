@@ -61,7 +61,7 @@ namespace {
     protected:
         std::basic_ostringstream<CharType> out;
     };
-}
+} // namespace
 
 typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Object, CharacterTypes);
@@ -87,7 +87,8 @@ TYPED_TEST (Object, SingleNumber) {
 TYPED_TEST (Object, TwoNumbers) {
     using namespace ::pstore::dump;
     object v{object::container{
-        {"k1", make_number (42)}, {"k2", make_number (43)},
+        {"k1", make_number (42)},
+        {"k2", make_number (43)},
     }};
     v.write (this->out);
 
@@ -139,7 +140,8 @@ TYPED_TEST (Object, KeyNeedingQuoting) {
 TYPED_TEST (Object, ValueAlignment) {
     using namespace ::pstore::dump;
     object v{{
-        {"short", make_number (42)}, {"much_longer", make_number (43)},
+        {"short", make_number (42)},
+        {"much_longer", make_number (43)},
     }};
     v.write (this->out);
     auto const actual = this->out.str ();
@@ -153,7 +155,8 @@ TYPED_TEST (Object, Nested) {
     object v{{
         {"k1", make_value (std::string ("value1"))},
         {"k2", make_value (object::container{
-                   {"ik1", make_value ("iv1")}, {"ik2", make_value ("iv2")},
+                   {"ik1", make_value ("iv1")},
+                   {"ik2", make_value ("iv2")},
                })},
     }};
     v.write (this->out);

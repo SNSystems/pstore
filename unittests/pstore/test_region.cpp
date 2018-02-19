@@ -56,7 +56,7 @@ namespace {
                                                  [](std::uint8_t * p) { delete[] p; }};
         }
     };
-}
+} // namespace
 
 TEST_F (Region, Single) {
     constexpr std::size_t size = 32;

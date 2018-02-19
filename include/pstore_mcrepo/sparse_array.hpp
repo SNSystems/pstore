@@ -126,9 +126,7 @@ namespace pstore {
                     ++(*this);
                     return ret_val;
                 }
-                bool operator< (pair_field_iterator const & other) const {
-                    return it_ < other.it_;
-                }
+                bool operator< (pair_field_iterator const & other) const { return it_ < other.it_; }
                 bool operator== (pair_field_iterator const & other) const {
                     return it_ == other.it_ && acc_ == other.acc_;
                 }
@@ -243,18 +241,12 @@ namespace pstore {
 
             /// \name Capacity
             ///@{
-            constexpr bool empty () const noexcept {
-                return bitmap_ == 0;
-            }
-            constexpr size_type size () const noexcept {
-                return bit_count::pop_count (bitmap_);
-            }
+            constexpr bool empty () const noexcept { return bitmap_ == 0; }
+            constexpr size_type size () const noexcept { return bit_count::pop_count (bitmap_); }
 
             /// Returns the maximum number of indices that could be contained by an instance of this
             /// sparse_array type.
-            static constexpr size_type max_size () noexcept {
-                return sizeof (BitmapType) * 8;
-            }
+            static constexpr size_type max_size () noexcept { return sizeof (BitmapType) * 8; }
 
             /// Returns true if the sparse array has an index 'pos'.
             bool has_index (size_type pos) const noexcept {
@@ -269,45 +261,21 @@ namespace pstore {
             /// \name Iterators
             ///@{
             /// Returns an iterator to the beginning of the container.
-            iterator begin () {
-                return data ();
-            }
-            const_iterator begin () const {
-                return data ();
-            }
-            const_iterator cbegin () const {
-                return begin ();
-            }
+            iterator begin () { return data (); }
+            const_iterator begin () const { return data (); }
+            const_iterator cbegin () const { return begin (); }
 
-            iterator end () {
-                return begin () + size ();
-            }
-            const_iterator end () const {
-                return begin () + size ();
-            }
-            const_iterator cend () const {
-                return end ();
-            }
+            iterator end () { return begin () + size (); }
+            const_iterator end () const { return begin () + size (); }
+            const_iterator cend () const { return end (); }
 
-            reverse_iterator rbegin () {
-                return reverse_iterator{end ()};
-            }
-            const_reverse_iterator rbegin () const {
-                return const_reverse_iterator{end ()};
-            }
-            const_reverse_iterator crbegin () const {
-                return rbegin ();
-            }
+            reverse_iterator rbegin () { return reverse_iterator{end ()}; }
+            const_reverse_iterator rbegin () const { return const_reverse_iterator{end ()}; }
+            const_reverse_iterator crbegin () const { return rbegin (); }
 
-            reverse_iterator rend () {
-                return reverse_iterator{begin ()};
-            }
-            const_reverse_iterator rend () const {
-                return const_reverse_iterator{begin ()};
-            }
-            const_reverse_iterator crend () const {
-                return rend ();
-            }
+            reverse_iterator rend () { return reverse_iterator{begin ()}; }
+            const_reverse_iterator rend () const { return const_reverse_iterator{begin ()}; }
+            const_reverse_iterator crend () const { return rend (); }
 
             class indices {
             public:
@@ -328,16 +296,10 @@ namespace pstore {
                     bool operator== (const_iterator const & rhs) const {
                         return bitmap_ == rhs.bitmap_;
                     }
-                    bool operator!= (const_iterator const & rhs) const {
-                        return !operator== (rhs);
-                    }
+                    bool operator!= (const_iterator const & rhs) const { return !operator== (rhs); }
 
-                    reference operator* () const {
-                        return pos_;
-                    }
-                    pointer operator-> () const {
-                        return pos_;
-                    }
+                    reference operator* () const { return pos_; }
+                    pointer operator-> () const { return pos_; }
 
                     const_iterator & operator++ () {
                         bitmap_ >>= 1;
@@ -362,32 +324,22 @@ namespace pstore {
                 };
                 explicit indices (sparse_array const & arr)
                         : bitmap_{arr.bitmap_} {}
-                const_iterator begin () const {
-                    return {bitmap_};
-                }
-                const_iterator end () const {
-                    return {0};
-                }
+                const_iterator begin () const { return {bitmap_}; }
+                const_iterator end () const { return {0}; }
 
             private:
                 BitmapType const bitmap_;
             };
 
-            indices get_indices () const {
-                return indices{*this};
-            }
+            indices get_indices () const { return indices{*this}; }
 
             ///@}
 
             /// \name Element access
             ///@{
 
-            ValueType * data () {
-                return &elements_[0];
-            }
-            const ValueType * data () const {
-                return &elements_[0];
-            }
+            ValueType * data () { return &elements_[0]; }
+            const ValueType * data () const { return &elements_[0]; }
 
             reference operator[] (size_type pos) {
                 sparse_array const * cthis = this;
@@ -445,9 +397,7 @@ namespace pstore {
 
             ///@}
 
-            void fill (ValueType const & value) {
-                std::fill_n (begin (), size (), value);
-            }
+            void fill (ValueType const & value) { std::fill_n (begin (), size (), value); }
 
             constexpr std::size_t size_bytes () const {
                 return sparse_array::size_bytes (this->size ());
@@ -470,13 +420,9 @@ namespace pstore {
                 return count - sizeof (elements_) + elements * sizeof (ValueType);
             }
 
-            static void * operator new (std::size_t /*count*/, void * ptr) {
-                return ptr;
-            }
+            static void * operator new (std::size_t /*count*/, void * ptr) { return ptr; }
             static void operator delete (void * /*ptr*/, void * /*place*/) {}
-            static void operator delete (void * p) {
-                ::operator delete (p);
-            }
+            static void operator delete (void * p) { ::operator delete (p); }
 
             /// Constructs a sparse array whose available indices are defined by the
             /// iterator range from [first_index,last_index) and the values assigned to

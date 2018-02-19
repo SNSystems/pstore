@@ -88,7 +88,7 @@ namespace {
         static constexpr std::uint16_t part_no = 0;
         static constexpr std::uint16_t num_parts = 1;
     };
-} // (anonymous namespace)
+} // namespace
 
 // Not a particularly useful test as such, but suppresses warnings from clang about unused member
 // functions in mock_cp.

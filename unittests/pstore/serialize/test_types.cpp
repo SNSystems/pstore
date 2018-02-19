@@ -60,9 +60,7 @@ namespace {
             non_standard_layout_type (non_standard_layout_type const &) = default;
             virtual ~non_standard_layout_type () {}
 
-            bool operator== (non_standard_layout_type const & rhs) const {
-                return a == rhs.a;
-            }
+            bool operator== (non_standard_layout_type const & rhs) const { return a == rhs.a; }
 
             int a;
         };
@@ -71,7 +69,7 @@ namespace {
                        "expected non_standard_layout_type to be, well..., non-standard-layout");
     };
 
-} // (anonymous namespace)
+} // namespace
 // A non-intrusive serializer for non_standard_layout_type
 namespace pstore {
     namespace serialize {
@@ -125,7 +123,7 @@ namespace {
             MOCK_METHOD1 (read, void(simple_struct &));
         };
     };
-} // (anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace serialize {
@@ -187,7 +185,7 @@ namespace {
             MOCK_METHOD1 (readn, void(::pstore::gsl::span<simple_struct>));
         };
     };
-} // (anonymous namespace)
+} // namespace
 namespace pstore {
     namespace serialize {
         // (note that read() and write() are not implemented ensuring that if the
@@ -259,7 +257,7 @@ namespace {
             MOCK_METHOD1 (get, void(int &));
         };
     };
-} // (anonymous namespace)
+} // namespace
 TEST_F (ArchiveSpanFallback, Write) {
     using ::testing::_;
     using ::testing::Return;
@@ -322,7 +320,7 @@ namespace {
             }
         };
     };
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (ArchiveSpan, WriteSpan) {
     using ::testing::_;

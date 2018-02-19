@@ -79,9 +79,7 @@ namespace pstore {
             line_splitter (gsl::not_null<dump::array::container *> arr)
                     : arr_{arr} {}
 
-            void append (char const * s) {
-                this->append (gsl::make_span (s, std::strlen (s)));
-            }
+            void append (char const * s) { this->append (gsl::make_span (s, std::strlen (s))); }
             void append (std::string const & s) {
                 this->append (gsl::make_span (s.data (), s.size ()));
             }

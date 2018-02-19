@@ -95,9 +95,7 @@ namespace pstore {
             ///@}
 
             /// Returns the number of elements in the container.
-            std::size_t size () const {
-                return left_.size ();
-            }
+            std::size_t size () const { return left_.size (); }
 
             template <typename MapIterator>
             class iterator : public std::iterator<std::forward_iterator_tag,
@@ -110,21 +108,13 @@ namespace pstore {
                 iterator (MapIterator it)
                         : it_ (it) {}
 
-                bool operator== (iterator const & other) const {
-                    return it_ == other.it_;
-                }
-                bool operator!= (iterator const & other) const {
-                    return it_ != other.it_;
-                }
+                bool operator== (iterator const & other) const { return it_ == other.it_; }
+                bool operator!= (iterator const & other) const { return it_ != other.it_; }
 
                 /// Dereference operator
                 /// @return the value of the element to which this iterator is currently pointing
-                value_reference_type operator* () const {
-                    return it_->first;
-                }
-                value_pointer_type operator-> () const {
-                    return &it_->first;
-                }
+                value_reference_type operator* () const { return it_->first; }
+                value_pointer_type operator-> () const { return &it_->first; }
                 /// Prefix increment
                 iterator & operator++ () {
                     ++it_;
@@ -142,20 +132,12 @@ namespace pstore {
             };
 
             using right_iterator = iterator<typename right_container::const_iterator>;
-            right_iterator right_begin () const {
-                return std::begin (right_);
-            }
-            right_iterator right_end () const {
-                return std::end (right_);
-            }
+            right_iterator right_begin () const { return std::begin (right_); }
+            right_iterator right_end () const { return std::end (right_); }
 
             using left_iterator = iterator<typename left_container::const_iterator>;
-            left_iterator left_begin () const {
-                return std::begin (left_);
-            }
-            left_iterator left_end () const {
-                return std::end (left_);
-            }
+            left_iterator left_begin () const { return std::begin (left_); }
+            left_iterator left_end () const { return std::end (left_); }
 
         private:
             left_container left_;

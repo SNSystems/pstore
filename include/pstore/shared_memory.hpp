@@ -140,18 +140,10 @@ namespace pstore {
         shared_memory & operator= (shared_memory const &) = delete;
         shared_memory & operator= (shared_memory && rhs) noexcept;
 
-        Ty & operator* () {
-            return *get ();
-        }
-        Ty const & operator* () const {
-            return *get ();
-        }
-        Ty * operator-> () {
-            return get ();
-        }
-        Ty const * operator-> () const {
-            return get ();
-        }
+        Ty & operator* () { return *get (); }
+        Ty const & operator* () const { return *get (); }
+        Ty * operator-> () { return get (); }
+        Ty const * operator-> () const { return get (); }
 
         Ty * get () {
             auto p = ptr_.get ();
@@ -232,9 +224,7 @@ namespace pstore {
                     : descriptor_ (open (name)) {}
             ~file_mapping () noexcept;
             void set_size ();
-            os_file_handle get () {
-                return descriptor_;
-            }
+            os_file_handle get () { return descriptor_; }
 
         private:
             static os_file_handle open (char const * name);
@@ -419,9 +409,9 @@ namespace pstore {
 #endif //!_WIN32
 
 
-//***********************************
-//* shared_memory<Ty>::file_mapping *
-//***********************************
+    //***********************************
+    //* shared_memory<Ty>::file_mapping *
+    //***********************************
 
 #ifdef _WIN32
 

@@ -72,7 +72,7 @@ namespace {
     }
 
     std::string const Base16Fixture::prefix = "!!binary16 |\n";
-}
+} // namespace
 
 TEST_F (Base16Fixture, RFC4648Empty) {
     std::string const & actual = convert ("");
@@ -114,7 +114,7 @@ namespace {
     void iota_n (OutputIterator first, Size n, Assignable value) {
         std::generate_n (first, n, [&value]() { return value++; });
     }
-}
+} // namespace
 
 TEST_F (Base16Fixture, LongInput) {
     std::vector<std::uint8_t> input;

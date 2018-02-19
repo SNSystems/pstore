@@ -72,9 +72,7 @@ namespace {
             return pstore::serialize::write (archive, a_);
         }
 
-        virtual int get () const {
-            return a_;
-        }
+        virtual int get () const { return a_; }
 
     private:
         int a_;
@@ -83,7 +81,7 @@ namespace {
     std::ostream & operator<< (std::ostream & os, foo const & f) {
         return os << "foo(" << f.get () << ')';
     }
-}
+} // namespace
 
 int main () {
     std::vector<std::uint8_t> bytes;

@@ -94,16 +94,18 @@ namespace pstore {
 
     public:
         uuid ();
-        /// Converts a string following the convention defined by RFC4122 to a UUID. If the string is not valid an error is raised.
+        /// Converts a string following the convention defined by RFC4122 to a UUID. If the string
+        /// is not valid an error is raised.
         explicit uuid (std::string const & s);
 
         /// A constructor used to construct a specific UUID from its binary value.
         uuid (container_type c)
                 : data_ (std::move (c)) {}
 
-        /// Converts a string to a UUID following the convention defined by RFC4122. If the string is not valid, returns nothing<uuid>.
-        /// \param s  A string to be converted to a UUID.
-        /// \returns  just<uuid>() if the string \p s was valid according to the description in RFC4122. If the string was invalid, nothing<uuid>.
+        /// Converts a string to a UUID following the convention defined by RFC4122. If the string
+        /// is not valid, returns nothing<uuid>. \param s  A string to be converted to a UUID.
+        /// \returns  just<uuid>() if the string \p s was valid according to the description in
+        /// RFC4122. If the string was invalid, nothing<uuid>.
         static maybe<uuid> from_string (std::string const & s);
 
 #if defined(_WIN32)
@@ -113,22 +115,12 @@ namespace pstore {
         uuid (uuid_t const & bytes);
 #endif
 
-        iterator begin () noexcept {
-            return std::begin (data_);
-        }
-        const_iterator begin () const noexcept {
-            return std::begin (data_);
-        }
-        iterator end () noexcept {
-            return std::end (data_);
-        }
-        const_iterator end () const noexcept {
-            return std::end (data_);
-        }
+        iterator begin () noexcept { return std::begin (data_); }
+        const_iterator begin () const noexcept { return std::begin (data_); }
+        iterator end () noexcept { return std::end (data_); }
+        const_iterator end () const noexcept { return std::end (data_); }
 
-        container_type const & array () const noexcept {
-            return data_;
-        }
+        container_type const & array () const noexcept { return data_; }
 
         enum class variant_type {
             ncs,       // NCS backward compatibility
@@ -176,24 +168,12 @@ namespace pstore {
     std::ostream & operator<< (std::ostream & os, uuid::variant_type v);
     std::ostream & operator<< (std::ostream & os, uuid const & m);
 
-    inline bool operator== (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ == rhs.data_;
-    }
-    inline bool operator< (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ < rhs.data_;
-    }
-    inline bool operator!= (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ != rhs.data_;
-    }
-    inline bool operator> (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ > rhs.data_;
-    }
-    inline bool operator<= (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ <= rhs.data_;
-    }
-    inline bool operator>= (uuid const & lhs, uuid const & rhs) {
-        return lhs.data_ >= rhs.data_;
-    }
+    inline bool operator== (uuid const & lhs, uuid const & rhs) { return lhs.data_ == rhs.data_; }
+    inline bool operator< (uuid const & lhs, uuid const & rhs) { return lhs.data_ < rhs.data_; }
+    inline bool operator!= (uuid const & lhs, uuid const & rhs) { return lhs.data_ != rhs.data_; }
+    inline bool operator> (uuid const & lhs, uuid const & rhs) { return lhs.data_ > rhs.data_; }
+    inline bool operator<= (uuid const & lhs, uuid const & rhs) { return lhs.data_ <= rhs.data_; }
+    inline bool operator>= (uuid const & lhs, uuid const & rhs) { return lhs.data_ >= rhs.data_; }
 
 } // namespace pstore
 

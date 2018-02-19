@@ -54,7 +54,7 @@ namespace {
             pstore::uuid::container_type{{0x84, 0x94, 0x9c, 0xc5, 0x47, 0x01, 0x4a, 0x84, 0x89,
                                           0x5b, 0x35, 0x4c, 0x58, 0x4a, 0x98, 0x1b}}};
     };
-}
+} // namespace
 
 TEST_F (BasicUUID, Parse) {
     pstore::uuid const t1 ("84949cc5-4701-4a84-895b-354c584a981b");
@@ -82,17 +82,19 @@ TEST_F (BasicUUID, Out) {
 TEST (UUID, ParseStringBadLength) {
     {
         std::string const input1 = "00000000-0000-0000-0000-00000000000000";
-        pstore::maybe <pstore::uuid> v1 = pstore::uuid::from_string (input1);
+        pstore::maybe<pstore::uuid> v1 = pstore::uuid::from_string (input1);
         EXPECT_FALSE (v1.has_value ());
 
-        check_for_error ([&input1]() { pstore::uuid _ (input1); }, pstore::error_code::uuid_parse_error);
+        check_for_error ([&input1]() { pstore::uuid _ (input1); },
+                         pstore::error_code::uuid_parse_error);
     }
     {
         std::string const input2 = "00000000-0000-0000-0000-0000000000";
-        pstore::maybe <pstore::uuid> v2 = pstore::uuid::from_string (input2);
+        pstore::maybe<pstore::uuid> v2 = pstore::uuid::from_string (input2);
         EXPECT_FALSE (v2.has_value ());
 
-        check_for_error ([&input2]() { pstore::uuid _ (input2); }, pstore::error_code::uuid_parse_error);
+        check_for_error ([&input2]() { pstore::uuid _ (input2); },
+                         pstore::error_code::uuid_parse_error);
     }
 }
 
@@ -240,7 +242,7 @@ namespace {
         pstore::uuid t2_{"00000000-0000-4a00-8900-000000000000"};
         pstore::uuid t3_{"00000000-0000-4a00-8900-000000000001"};
     };
-}
+} // namespace
 
 TEST_F (CompareUUID, Eq) {
     EXPECT_TRUE (t1_ == t2_);

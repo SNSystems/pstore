@@ -61,9 +61,7 @@ public:
     auto alloc_rw (std::size_t size, unsigned align)
         -> std::pair<std::shared_ptr<void>, pstore::address>;
 
-    storage_tpye const & get_storage () const {
-        return storage_;
-    }
+    storage_tpye const & get_storage () const { return storage_; }
 
 private:
     storage_tpye storage_;

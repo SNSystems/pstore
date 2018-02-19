@@ -77,9 +77,7 @@ namespace {
                       std::size_t mapping_size);
         ~file_mapping () noexcept;
 
-        HANDLE handle () {
-            return mapping_;
-        }
+        HANDLE handle () { return mapping_; }
 
         // No copying, no assignment.
         file_mapping (file_mapping const &) = delete;
@@ -108,7 +106,7 @@ namespace {
         assert (mapping_ != nullptr);
         ::CloseHandle (mapping_);
     }
-} // (anonymous namespace)
+} // namespace
 
 
 namespace pstore {

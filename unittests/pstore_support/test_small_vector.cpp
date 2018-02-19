@@ -102,8 +102,8 @@ TEST (SmallVector, SizeAfterResizeLarger) {
     std::size_t const size{10};
     b.resize (size);
     EXPECT_EQ (size, b.size ());
-    EXPECT_GE (size, b.capacity ()) << "expected capacity to be at least " << size
-                                    << " (the container size)";
+    EXPECT_GE (size, b.capacity ())
+        << "expected capacity to be at least " << size << " (the container size)";
 }
 
 TEST (SmallVector, ContentsAfterResizeLarger) {

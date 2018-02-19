@@ -63,16 +63,10 @@ namespace pstore {
                                          std::size_t max_width = default_width);
 
                 bool operator== (word_wrapper const & rhs) const;
-                bool operator!= (word_wrapper const & rhs) const {
-                    return !operator== (rhs);
-                }
+                bool operator!= (word_wrapper const & rhs) const { return !operator== (rhs); }
 
-                reference operator* () const {
-                    return substr_;
-                }
-                pointer operator-> () const {
-                    return &substr_;
-                }
+                reference operator* () const { return substr_; }
+                pointer operator-> () const { return &substr_; }
 
                 word_wrapper & operator++ ();
                 word_wrapper operator++ (int);

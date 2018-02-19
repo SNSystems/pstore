@@ -48,7 +48,7 @@ namespace pstore {
         namespace cl {
 
             details::values::values (std::initializer_list<OptionEnumValue> options)
-                            : values_ (options) {}
+                    : values_ (options) {}
 
             name::name (std::string const & name)
                     : name_ (name) {}
@@ -58,9 +58,7 @@ namespace pstore {
 
             aliasopt::aliasopt (option & o)
                     : original_ (o) {}
-            void aliasopt::apply (alias & o) const {
-                o.set_original (&original_);
-            }
+            void aliasopt::apply (alias & o) const { o.set_original (&original_); }
 
             details::one_or_more const OneOrMore;
             details::optional const Optional;

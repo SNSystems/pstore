@@ -147,7 +147,7 @@ namespace {
             buffer_[sign_index_] = '-';
         }
     }
-}
+} // namespace
 
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
     time_zone_setter tzs ("UTC0");
@@ -240,8 +240,8 @@ TEST_F (BasicLoggerThreadNameFixture, ThreadNameEmpty) {
     ASSERT_THAT (length, Ge (std::size_t{3}));
     EXPECT_EQ ('(', name[0]);
     for (unsigned index = 1; index < length - 2; ++index) {
-        EXPECT_THAT (name[index], AllOf (Ge ('0'), Le ('9'))) << "Character at index " << index
-                                                              << " was not a digit";
+        EXPECT_THAT (name[index], AllOf (Ge ('0'), Le ('9')))
+            << "Character at index " << index << " was not a digit";
     }
     EXPECT_EQ (')', name[length - 1]);
 }

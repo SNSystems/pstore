@@ -150,23 +150,12 @@ void WINAPI service_base::control_handler (DWORD control_code) {
     assert (s_service != nullptr);
     if (auto * const service = s_service) {
         switch (control_code) {
-        case SERVICE_CONTROL_STOP:
-            service->stop ();
-            break;
-        case SERVICE_CONTROL_PAUSE:
-            service->pause ();
-            break;
-        case SERVICE_CONTROL_CONTINUE:
-            service->resume ();
-            break;
-        case SERVICE_CONTROL_SHUTDOWN:
-            service->shutdown ();
-            break;
-        case SERVICE_CONTROL_INTERROGATE:
-            break;
-        default:
-            assert (false);
-            break;
+        case SERVICE_CONTROL_STOP: service->stop (); break;
+        case SERVICE_CONTROL_PAUSE: service->pause (); break;
+        case SERVICE_CONTROL_CONTINUE: service->resume (); break;
+        case SERVICE_CONTROL_SHUTDOWN: service->shutdown (); break;
+        case SERVICE_CONTROL_INTERROGATE: break;
+        default: assert (false); break;
         }
     }
 }
@@ -339,24 +328,12 @@ void service_base::write_event_log_entry (char const * message, event_type type)
     if (HANDLE event_source = ::RegisterEventSource (NULL, name_.c_str ())) {
         auto t = WORD{0};
         switch (type) {
-        case event_type::success:
-            t = EVENTLOG_SUCCESS;
-            break;
-        case event_type::audit_failure:
-            t = EVENTLOG_AUDIT_FAILURE;
-            break;
-        case event_type::audit_success:
-            t = EVENTLOG_AUDIT_SUCCESS;
-            break;
-        case event_type::error:
-            t = EVENTLOG_ERROR_TYPE;
-            break;
-        case event_type::information:
-            t = EVENTLOG_INFORMATION_TYPE;
-            break;
-        case event_type::warning:
-            t = EVENTLOG_WARNING_TYPE;
-            break;
+        case event_type::success: t = EVENTLOG_SUCCESS; break;
+        case event_type::audit_failure: t = EVENTLOG_AUDIT_FAILURE; break;
+        case event_type::audit_success: t = EVENTLOG_AUDIT_SUCCESS; break;
+        case event_type::error: t = EVENTLOG_ERROR_TYPE; break;
+        case event_type::information: t = EVENTLOG_INFORMATION_TYPE; break;
+        case event_type::warning: t = EVENTLOG_WARNING_TYPE; break;
         }
 
         lpszStrings[0] = name_.c_str ();
@@ -370,7 +347,7 @@ void service_base::write_event_log_entry (char const * message, event_type type)
                        0,                                       // No binary data
                        lpszStrings.data (),
                        NULL // No binary data
-                       );
+        );
         ::DeregisterEventSource (event_source);
     }
 }

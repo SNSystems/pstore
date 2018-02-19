@@ -101,26 +101,17 @@ namespace {
         std::string message (int error) const override;
     };
 
-    char const * dump_error_category::name () const noexcept {
-        return "pstore-dump category";
-    }
+    char const * dump_error_category::name () const noexcept { return "pstore-dump category"; }
 
     std::string dump_error_category::message (int error) const {
         switch (static_cast<dump_error_code> (error)) {
-        case dump_error_code::bad_digest:
-            return "bad digest";
-        case dump_error_code::no_digest_index:
-            return "no digest index";
-        case dump_error_code::fragment_not_found:
-            return "fragment not found";
-        case dump_error_code::bad_uuid:
-            return "bad UUID";
-        case dump_error_code::no_ticket_index:
-            return "no ticket index";
-        case dump_error_code::ticket_not_found:
-            return "ticket not found";
-        case dump_error_code::bad_ticket_file:
-            return "bad ticket file";
+        case dump_error_code::bad_digest: return "bad digest";
+        case dump_error_code::no_digest_index: return "no digest index";
+        case dump_error_code::fragment_not_found: return "fragment not found";
+        case dump_error_code::bad_uuid: return "bad UUID";
+        case dump_error_code::no_ticket_index: return "no ticket index";
+        case dump_error_code::ticket_not_found: return "ticket not found";
+        case dump_error_code::bad_ticket_file: return "bad ticket file";
         }
         return "unknown error";
     }
@@ -173,7 +164,8 @@ namespace {
         }
 
         return make_value (object::container{
-            {"name", make_value (name)}, {"members", make_value (members)},
+            {"name", make_value (name)},
+            {"members", make_value (members)},
         });
     }
 
@@ -394,7 +386,8 @@ int main (int argc, char * argv[]) {
                                                           dump_error_code::fragment_not_found,
                                                           string_to_digest, record));
                     } else {
-                        pstore::raise_error_code (std::make_error_code (dump_error_code::no_digest_index));
+                        pstore::raise_error_code (
+                            std::make_error_code (dump_error_code::no_digest_index));
                     }
                 }
             }
@@ -441,15 +434,17 @@ int main (int argc, char * argv[]) {
 
         pstore::dump::value_ptr v = make_value (output);
         out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
-    } CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
+    }
+    CATCH (std::exception const & ex,
+           {
+               error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                            << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (..., {
         error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
-    }) 
-	return exit_code;
+    }) return exit_code;
 }
 
 // eof: tools/dump/main.cpp

@@ -104,7 +104,7 @@ namespace {
 #endif
 #endif // PSTORE_CPP_EXCEPTIONS
 
-} // (anonymous namespace)
+} // namespace
 
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -185,20 +185,24 @@ int main (int argc, char * argv[]) {
         // On macOS we can do better than rename() [see man 2 exchangedata].
         // Similar elsewhere?
 
-        pstore::logging::log (pstore::logging::priority::notice, "main () exiting: ",
-                              pstore::quoted (src_path));
-   } CATCH (std::exception const & ex, {
-        char const * what = ex.what ();
-        error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
-                     << pstore::utf::to_native_string (what) << std::endl;
-        pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
-        std::cerr << "vacuumd: An unknown error occurred." << std::endl;
-        pstore::logging::log (pstore::logging::priority::error, "Unknown error");
-        exit_code = EXIT_FAILURE;
-    })
+        pstore::logging::log (pstore::logging::priority::notice,
+                              "main () exiting: ", pstore::quoted (src_path));
+    }
+    CATCH (std::exception const & ex,
+           {
+               char const * what = ex.what ();
+               error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
+                            << pstore::utf::to_native_string (what) << std::endl;
+               pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (...,
+           {
+               std::cerr << "vacuumd: An unknown error occurred." << std::endl;
+               pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+               exit_code = EXIT_FAILURE;
+           })
 
-    return exit_code;
+        return exit_code;
 }
 // eof: tools/vacuum/main.cpp

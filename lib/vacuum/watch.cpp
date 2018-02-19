@@ -130,14 +130,15 @@ namespace vacuum {
                     wst.start_watch_cv.wait_for (mlock, watch_interval);
                 }
             }
-        } CATCH (std::exception const & ex, {
-            pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
-                                  ex.what ());
-        }) CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
-        })
+        }
+        CATCH (std::exception const & ex,
+               {
+                   pstore::logging::log (pstore::logging::priority::error,
+                                         "An error occurred: ", ex.what ());
+               })
+        CATCH (..., { pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
 
-        from.reset ();
+            from.reset ();
         pstore::logging::log (pstore::logging::priority::notice, "Watch thread exiting");
         st->watch_running = false;
     }

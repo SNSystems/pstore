@@ -120,7 +120,7 @@ namespace {
             [](pstore::broker::process_identifier const & process) { return process.get (); });
     }
 
-} // (anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace broker {
@@ -191,9 +191,9 @@ namespace pstore {
         ::kill (pid, SIGINT);
     }
 #endif
-    }
+        }
 
-} // namespace broker
+    } // namespace broker
 } // namespace pstore
 
 #endif // _WIN32

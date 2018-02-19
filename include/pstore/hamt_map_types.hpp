@@ -160,16 +160,10 @@ namespace pstore {
                 }
 
 
-                bool operator== (index_pointer const & other) const {
-                    return addr == other.addr;
-                }
-                bool operator!= (index_pointer const & other) const {
-                    return !operator== (other);
-                }
+                bool operator== (index_pointer const & other) const { return addr == other.addr; }
+                bool operator!= (index_pointer const & other) const { return !operator== (other); }
 
-                operator bool () const {
-                    return !this->is_empty ();
-                }
+                operator bool () const { return !this->is_empty (); }
 
                 /// Returns true if the index_pointer is pointing to an internal node, false
                 /// otherwise.
@@ -180,16 +174,12 @@ namespace pstore {
 
                 /// Returns true if the index_pointer is pointing to a linear node, false otherwise.
                 /// \sa is_leaf
-                bool is_linear () const {
-                    return is_internal ();
-                }
+                bool is_linear () const { return is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a value address in the store,
                 /// false otherwise.
                 /// \sa is_internal
-                bool is_leaf () const {
-                    return !is_internal ();
-                }
+                bool is_leaf () const { return !is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a heap node, false otherwise.
                 /// \sa is_addr
@@ -199,13 +189,9 @@ namespace pstore {
 
                 /// Returns true if the index_pointer is pointing to a store node, false otherwise.
                 /// \sa is_heap
-                bool is_address () const {
-                    return !is_heap ();
-                }
+                bool is_address () const { return !is_heap (); }
 
-                bool is_empty () const {
-                    return internal == nullptr;
-                }
+                bool is_empty () const { return internal == nullptr; }
                 template <typename T>
                 T tag_node () const {
                     return reinterpret_cast<T> (tag ());
@@ -235,9 +221,7 @@ namespace pstore {
                     return reinterpret_cast<linear_node *> (tag (p));
                 }
 
-                std::uintptr_t tag () const {
-                    return tag (internal);
-                }
+                std::uintptr_t tag () const { return tag (internal); }
 
                 std::uintptr_t untag () const {
                     return reinterpret_cast<std::uintptr_t> (internal) & ~internal_node_bit &
@@ -274,9 +258,7 @@ namespace pstore {
                 bool operator== (parent_type const & other) const {
                     return position == other.position && node == other.node;
                 }
-                bool operator!= (parent_type const & other) const {
-                    return !operator== (other);
-                }
+                bool operator!= (parent_type const & other) const { return !operator== (other); }
 
                 index_pointer node;
                 std::size_t position = 0;
@@ -375,25 +357,13 @@ namespace pstore {
                 /// \name Iterators
                 ///@{
 
-                iterator begin () {
-                    return leaves_;
-                }
-                const_iterator begin () const {
-                    return leaves_;
-                }
-                const_iterator cbegin () const {
-                    return this->begin ();
-                }
+                iterator begin () { return leaves_; }
+                const_iterator begin () const { return leaves_; }
+                const_iterator cbegin () const { return this->begin (); }
 
-                iterator end () {
-                    return leaves_ + size_;
-                }
-                const_iterator end () const {
-                    return leaves_ + size_;
-                }
-                const_iterator cend () const {
-                    return this->end ();
-                }
+                iterator end () { return leaves_ + size_; }
+                const_iterator end () const { return leaves_ + size_; }
+                const_iterator cend () const { return this->end (); }
                 ///@}
 
 
@@ -401,22 +371,16 @@ namespace pstore {
                 ///@{
 
                 /// Checks whether the container is empty.
-                bool empty () const {
-                    return size_ == 0;
-                }
+                bool empty () const { return size_ == 0; }
                 /// Returns the number of elements.
-                std::size_t size () const {
-                    return size_;
-                }
+                std::size_t size () const { return size_; }
                 ///@}
 
                 /// \name Storage
                 ///@{
 
                 /// Returns the number of bytes of storage required for the node.
-                std::size_t size_bytes () const {
-                    return linear_node::size_bytes (this->size ());
-                }
+                std::size_t size_bytes () const { return linear_node::size_bytes (this->size ()); }
 
                 /// Returns the number of bytes of storage required for a linear node with 'size'
                 /// children.
@@ -603,14 +567,10 @@ namespace pstore {
                     return children_[i];
                 }
 
-                hash_type get_bitmap () const {
-                    return bitmap_;
-                }
+                hash_type get_bitmap () const { return bitmap_; }
                 /// A function for deliberately creating illegal internal nodes in the unit test. DO
                 /// NOT USE except for that purpose!
-                void set_bitmap (hash_type bm) {
-                    bitmap_ = bm;
-                }
+                void set_bitmap (hash_type bm) { bitmap_ = bm; }
 
                 using iterator = children_container::iterator;
                 using const_iterator = children_container::const_iterator;
@@ -618,24 +578,12 @@ namespace pstore {
                 /// \name Iterators
                 ///@{
 
-                iterator begin () {
-                    return std::begin (children_);
-                }
-                iterator end () {
-                    return this->begin () + this->size ();
-                }
-                const_iterator begin () const {
-                    return std::begin (children_);
-                }
-                const_iterator end () const {
-                    return this->begin () + this->size ();
-                }
-                const_iterator cbegin () const {
-                    return std::begin (children_);
-                }
-                const_iterator cend () const {
-                    return this->cbegin () + this->size ();
-                }
+                iterator begin () { return std::begin (children_); }
+                iterator end () { return this->begin () + this->size (); }
+                const_iterator begin () const { return std::begin (children_); }
+                const_iterator end () const { return this->begin () + this->size (); }
+                const_iterator cbegin () const { return std::begin (children_); }
+                const_iterator cend () const { return this->cbegin () + this->size (); }
                 ///@}
 
             private:

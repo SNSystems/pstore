@@ -49,8 +49,7 @@ char const * write_error_category::name () const noexcept {
 
 std::string write_error_category::message (int error) const {
     switch (static_cast<write_error_code> (error)) {
-    case write_error_code::unrecognized_compaction_mode:
-        return "unrecognized compaction mode";
+    case write_error_code::unrecognized_compaction_mode: return "unrecognized compaction mode";
     }
     return "unknown error";
 }
@@ -63,7 +62,7 @@ namespace {
         return cat;
     }
 
-} // (anonymous namespace)
+} // namespace
 
 namespace std {
 

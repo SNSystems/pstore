@@ -64,8 +64,7 @@ namespace pstore {
             auto const child_pid = ::fork ();
             switch (child_pid) {
             // When fork() returns -1, an error happened.
-            case -1:
-                raise (errno_erc{errno}, "fork");
+            case -1: raise (errno_erc{errno}, "fork");
             // When fork() returns 0, we are in the child process.
             case 0: {
                 try {

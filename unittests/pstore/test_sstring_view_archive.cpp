@@ -104,7 +104,7 @@ namespace {
         // Convert them to a vector so that they're easy to compare.
         return {ptr.get (), ptr.get () + num_chars};
     }
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (SStringViewArchive, Empty) {
     auto str = make_shared_sstring_view ("");

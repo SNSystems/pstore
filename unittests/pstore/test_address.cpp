@@ -60,7 +60,7 @@ namespace {
 
     constexpr pstore::address::offset_type AddressFixture::max_offset;
     constexpr pstore::address::segment_type AddressFixture::max_segment;
-}
+} // namespace
 
 
 TEST_F (AddressFixture, InitNull) {

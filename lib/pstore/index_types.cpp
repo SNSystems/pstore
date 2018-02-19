@@ -79,7 +79,7 @@ namespace {
 #endif
         return static_cast<IndexType *> (dx.get ());
     }
-}
+} // namespace
 
 namespace pstore {
     namespace index {

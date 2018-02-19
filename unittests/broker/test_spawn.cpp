@@ -102,7 +102,7 @@ namespace {
         return win32::build_command_line (v.data ());
     }
 
-} // (anonymous namespace)
+} // namespace
 
 TEST_F (Win32CommandLine, Simple) {
     EXPECT_EQ ("abc d e", build ({"abc", "d", "e"}));

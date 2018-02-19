@@ -76,7 +76,7 @@
 
 namespace {
     constexpr bool error_on_timeout = true;
-} // (anonymous namespace)
+} // namespace
 
 
 #ifdef PSTORE_CPP_EXCEPTIONS
@@ -105,7 +105,7 @@ namespace {
 #endif
 #endif // PSTORE_CPP_EXCEPTIONS
 
-} // (anonymous namespace)
+} // namespace
 
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -141,16 +141,17 @@ int main (int argc, char * argv[]) {
         if (opt.kill) {
             pstore::broker::send_message (wr, error_on_timeout, "SUICIDE", nullptr);
         }
-
-    } CATCH (std::exception const & ex, {
-        auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (what)
-                     << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
+    }
+    CATCH (std::exception const & ex,
+           {
+               auto what = ex.what ();
+               error_stream << NATIVE_TEXT ("An error occurred: ")
+                            << pstore::utf::to_native_string (what) << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (..., {
         std::cerr << "An unknown error occurred." << std::endl;
         exit_code = EXIT_FAILURE;
-    })
-    return exit_code;
+    }) return exit_code;
 }
 // eof: tools/broker_poker/poke.cpp

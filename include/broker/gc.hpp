@@ -68,34 +68,34 @@ namespace pstore {
             void stop (int signum = -1);
 
 #ifndef _WIN32
-        /// POSIX signal handler.
-        void child_signal (int sig) noexcept;
+            /// POSIX signal handler.
+            void child_signal (int sig) noexcept;
 #endif
 
-    private:
-        std::string vacuumd_path ();
+        private:
+            std::string vacuumd_path ();
 
 // FIXME: get this name from the cmake script. Don't hard-wire it here.
 #ifdef _WIN32
-        static constexpr auto vacuumd_name = "vacuumd.exe";
-        using process_bimap = bimap<std::string, broker::process_identifier, std::less<std::string>,
-                                    broker::pointer_compare<HANDLE>>;
+            static constexpr auto vacuumd_name = "vacuumd.exe";
+            using process_bimap = bimap<std::string, broker::process_identifier,
+                                        std::less<std::string>, broker::pointer_compare<HANDLE>>;
 #else
-        static constexpr auto vacuumd_name = "vacuumd";
-        using process_bimap = bimap<std::string, pid_t>;
+            static constexpr auto vacuumd_name = "vacuumd";
+            using process_bimap = bimap<std::string, pid_t>;
 #endif
 
-        std::mutex mut_;
-        signal_cv cv_;
-        process_bimap processes_;
-    };
+            std::mutex mut_;
+            signal_cv cv_;
+            process_bimap processes_;
+        };
 
-    void start_vacuum (std::string const & path);
-    void gc_sigint (int sig);
+        void start_vacuum (std::string const & path);
+        void gc_sigint (int sig);
 
-    void gc_process_watch_thread ();
+        void gc_process_watch_thread ();
 
-} // namespace broker
+    } // namespace broker
 } // namespace pstore
 
 #endif // PSTORE_BROKER_GC_HPP

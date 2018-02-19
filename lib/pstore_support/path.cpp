@@ -55,10 +55,8 @@ namespace {
     inline bool starts_with (std::string const & s, char c) {
         return !s.empty () && s.front () == c;
     }
-    inline bool ends_with (std::string const & s, char c) {
-        return !s.empty () && s.back () == c;
-    }
-}
+    inline bool ends_with (std::string const & s, char c) { return !s.empty () && s.back () == c; }
+} // namespace
 
 namespace pstore {
     namespace path {
@@ -83,7 +81,7 @@ namespace pstore {
                 }
                 return path;
             }
-        }
+        } // namespace posix
 
 
 
@@ -192,7 +190,7 @@ namespace pstore {
 
                 return result_drive + result_path;
             }
-        }
+        } // namespace win32
 
 
         namespace posix {
@@ -205,7 +203,7 @@ namespace pstore {
                 std::string::size_type pos = path.find_last_of ('/');
                 return path.substr ((pos == std::string::npos) ? 0 : pos + 1);
             }
-        }
+        } // namespace posix
 
         namespace win32 {
             std::string dir_name (std::string const & src_path) {
@@ -226,7 +224,7 @@ namespace pstore {
                 std::string::size_type pos = p.find_last_of (R"(/\)");
                 return p.substr ((pos == std::string::npos) ? 0 : pos + 1);
             }
-        }
-    } // namespace path
+        } // namespace win32
+    }     // namespace path
 } // namespace pstore
 // eof: lib/pstore_support/path.cpp

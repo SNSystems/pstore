@@ -53,9 +53,7 @@ namespace {
     struct mock_file_system_traits {
         mock_file_system_traits () {}
         mock_file_system_traits (mock_file_system_traits const &) {}
-        mock_file_system_traits & operator= (mock_file_system_traits const &) {
-            return *this;
-        }
+        mock_file_system_traits & operator= (mock_file_system_traits const &) { return *this; }
 
         MOCK_METHOD1 (exists, bool(std::string const &));
         MOCK_METHOD1 (unlink, void(std::string const &));
@@ -68,15 +66,13 @@ namespace {
 
         mock_string_stream_traits () {}
         mock_string_stream_traits (mock_string_stream_traits const &) {}
-        mock_string_stream_traits & operator= (mock_string_stream_traits const &) {
-            return *this;
-        }
+        mock_string_stream_traits & operator= (mock_string_stream_traits const &) { return *this; }
 
         MOCK_METHOD3 (open, void(stream_type &, std::string const &, std::ios_base::openmode));
         MOCK_METHOD1 (close, void(stream_type &));
         MOCK_METHOD1 (clear, void(stream_type &));
     };
-}
+} // namespace
 
 TEST (RotatingLog, NothingIsLogged) {
     using log_type =
@@ -89,9 +85,9 @@ TEST (RotatingLog, NothingIsLogged) {
 
 TEST (RotatingLog, OneFile) {
     using ::testing::_;
+    using ::testing::Expectation;
     using ::testing::Invoke;
     using ::testing::StrEq;
-    using ::testing::Expectation;
 
     using log_type =
         pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
@@ -116,10 +112,10 @@ TEST (RotatingLog, OneFile) {
 
 TEST (RotatingLog, TwoRotations) {
     using ::testing::_;
-    using ::testing::Invoke;
-    using ::testing::StrEq;
-    using ::testing::Return;
     using ::testing::AnyNumber;
+    using ::testing::Invoke;
+    using ::testing::Return;
+    using ::testing::StrEq;
 
     using log_type =
         pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;

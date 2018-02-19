@@ -87,7 +87,7 @@ namespace {
         auto v1 = serialize::read<int> (reader);
         std::cout << "Reading a series of ints produced " << v0 << ", " << v1 << '\n';
     }
-}
+} // namespace
 
 int main () {
     container_type const data{0x1e, 0x00, 0x00, 0x00, 0x28, 0x00, 0x00, 0x00};

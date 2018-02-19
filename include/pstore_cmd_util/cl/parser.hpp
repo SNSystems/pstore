@@ -83,12 +83,8 @@ namespace pstore {
                 using iterator = container::iterator;
                 using const_iterator = container::const_iterator;
 
-                const_iterator begin () const {
-                    return std::begin (literals_);
-                }
-                const_iterator end () const {
-                    return std::end (literals_);
-                }
+                const_iterator begin () const { return std::begin (literals_); }
+                const_iterator end () const { return std::end (literals_); }
 
             private:
                 std::vector<literal> literals_;

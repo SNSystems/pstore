@@ -67,7 +67,10 @@ namespace pstore {
     std::uint16_t const header::major_version;
     std::uint16_t const header::minor_version;
     std::array<std::uint8_t, 4> const header::file_signature1{{
-        std::uint8_t ('p'), std::uint8_t ('S'), std::uint8_t ('t'), std::uint8_t ('r'),
+        std::uint8_t ('p'),
+        std::uint8_t ('S'),
+        std::uint8_t ('t'),
+        std::uint8_t ('r'),
     }};
     std::uint32_t const header::file_signature2;
 

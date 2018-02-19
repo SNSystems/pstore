@@ -71,18 +71,14 @@ namespace pstore {
             unique_value (unique_value && rhs) noexcept
                     : value_{rhs.release ()}
                     , delete_{std::move (rhs.delete_)} {}
-            ~unique_value () noexcept {
-                reset ();
-            }
+            ~unique_value () noexcept { reset (); }
             unique_value & operator= (unique_value const &) = delete;
             unique_value & operator= (unique_value && rhs) noexcept {
                 reset (rhs.release ());
                 delete_ = std::move (rhs.delete_);
                 return *this;
             }
-            T get () const noexcept {
-                return value_;
-            }
+            T get () const noexcept { return value_; }
             void reset (T d = bad_value) noexcept {
                 if (value_ != bad_value) {
                     delete_ (value_);
@@ -94,9 +90,7 @@ namespace pstore {
                 value_ = bad_value;
                 return res;
             }
-            bool valid () const noexcept {
-                return value_ != bad_value;
-            }
+            bool valid () const noexcept { return value_ != bad_value; }
 
         private:
             T value_ = bad_value;
@@ -105,25 +99,17 @@ namespace pstore {
 
 #ifdef _WIN32
         struct handle_deleter {
-            void operator() (HANDLE h) {
-                ::CloseHandle (h);
-            }
+            void operator() (HANDLE h) { ::CloseHandle (h); }
         };
 
         using unique_handle = unique_value<HANDLE, INVALID_HANDLE_VALUE, handle_deleter>;
-        inline unique_handle make_handle (HANDLE fd) {
-            return {fd};
-        }
+        inline unique_handle make_handle (HANDLE fd) { return {fd}; }
 #else
         struct fd_deleter {
-            void operator() (int fd) {
-                ::close (fd);
-            }
+            void operator() (int fd) { ::close (fd); }
         };
         using unique_fd = unique_value<int, -1, fd_deleter>;
-        inline unique_fd make_fd (int fd) {
-            return {fd};
-        }
+        inline unique_fd make_fd (int fd) { return {fd}; }
 #endif //_WIN32
 
     } // namespace broker

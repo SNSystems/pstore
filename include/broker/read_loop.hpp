@@ -53,11 +53,11 @@ namespace pstore {
         class fifo_path;
 
 
-class command_processor;
-class recorder;
+        class command_processor;
+        class recorder;
 
-void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
-                std::shared_ptr<command_processor> & cp);
+        void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
+                        std::shared_ptr<command_processor> & cp);
 
     } // namespace broker
 } // namespace pstore

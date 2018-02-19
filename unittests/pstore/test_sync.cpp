@@ -136,7 +136,7 @@ namespace {
         auto value = std::static_pointer_cast<char const> (db_->getro (r));
         *value_out = std::string{value.get (), r.size};
     }
-} // (anonymous namespace)
+} // namespace
 
 
 TEST_F (SyncFixture, SyncBetweenVersions) {

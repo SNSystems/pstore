@@ -111,9 +111,7 @@ namespace {
                 , generator_ (device_ ())
                 , distribution_ () {}
 
-        Ty get (Ty max) {
-            return distribution_ (generator_) % max;
-        }
+        Ty get (Ty max) { return distribution_ (generator_) % max; }
         Ty get () {
             auto const max = std::numeric_limits<Ty>::max ();
             static_assert (max > Ty (0), "max must be > 0");
@@ -125,7 +123,7 @@ namespace {
         std::mt19937_64 generator_;
         std::uniform_int_distribution<Ty> distribution_;
     };
-}
+} // namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
@@ -172,14 +170,18 @@ int main (int argc, char ** argv) {
 
             ptr[offset] = new_value;
         }
-    } CATCH (std::exception const & ex,  {
-        std::cerr << "Error: " << ex.what () << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
-        std::cerr << "Unknown error" << std::endl;
-        exit_code = EXIT_FAILURE;
-    })
-    std::cerr << "Mangle returning " << exit_code << '\n';
+    }
+    CATCH (std::exception const & ex,
+           {
+               std::cerr << "Error: " << ex.what () << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+        CATCH (...,
+               {
+                   std::cerr << "Unknown error" << std::endl;
+                   exit_code = EXIT_FAILURE;
+               }) std::cerr
+        << "Mangle returning " << exit_code << '\n';
     return exit_code;
 }
 // eof: tools/mangle/mangle.cpp

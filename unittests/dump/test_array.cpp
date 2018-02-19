@@ -55,7 +55,7 @@ namespace {
     protected:
         std::basic_ostringstream<CharType> out;
     };
-}
+} // namespace
 
 typedef ::testing::Types<char, wchar_t> CharacterTypes;
 TYPED_TEST_CASE (Array, CharacterTypes);
@@ -81,7 +81,8 @@ TYPED_TEST (Array, TwoNumbers) {
 TYPED_TEST (Array, TwoStrings) {
     using namespace ::pstore::dump;
     array arr ({
-        make_value ("Hello"), make_value ("World"),
+        make_value ("Hello"),
+        make_value ("World"),
     });
     arr.write (this->out);
     auto const & actual = this->out.str ();

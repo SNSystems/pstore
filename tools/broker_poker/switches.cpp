@@ -55,9 +55,9 @@
 #include "pstore_support/utf.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
-    using namespace llvm;
+using namespace llvm;
 #else
-    using namespace pstore::cmd_util;
+using namespace pstore::cmd_util;
 #endif
 
 namespace {

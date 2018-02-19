@@ -50,14 +50,12 @@ namespace {
                 : v{0} {}
         explicit value (int v_)
                 : v{v_} {}
-        pstore::broker::list_member<value> & get_list_member () {
-            return list_memb;
-        }
+        pstore::broker::list_member<value> & get_list_member () { return list_memb; }
 
         int const v;
         pstore::broker::list_member<value> list_memb;
     };
-}
+} // namespace
 
 TEST (IntrusiveList, Empty) {
     pstore::broker::intrusive_list<value> v;

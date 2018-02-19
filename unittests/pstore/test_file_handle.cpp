@@ -62,7 +62,7 @@ namespace {
         };
         mock_callback callback;
     };
-}
+} // namespace
 
 TYPED_TEST_CASE_P (SplitFixture);
 

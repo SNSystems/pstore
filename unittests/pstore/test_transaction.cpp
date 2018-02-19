@@ -116,7 +116,7 @@ namespace {
 
         std::unique_ptr<mock_database> db_;
     };
-}
+} // namespace
 
 #if 0
 TEST_F (EmptyStore, Allocate16Bytes) {
@@ -191,8 +191,8 @@ TEST_F (Transaction, CommitInt) {
     new_header_offset += pstore::calc_alignment (new_header_offset, alignof (pstore::trailer));
 
     std::uint64_t const g1footer_offset = header->footer_pos.load ().absolute ();
-    ASSERT_EQ (new_header_offset, g1footer_offset) << "Expected offset of r1 footer to be "
-                                                   << new_header_offset;
+    ASSERT_EQ (new_header_offset, g1footer_offset)
+        << "Expected offset of r1 footer to be " << new_header_offset;
 
 
     // Header checks.
@@ -372,7 +372,7 @@ namespace {
     void append_int (pstore::transaction<mock_lock> & transaction, int v) {
         *(transaction.alloc_rw<int> ().first) = v;
     }
-}
+} // namespace
 
 TEST_F (Transaction, CommitTwoSeparateTransactions) {
     // Append to individual transactions, each containing a single int.
@@ -417,8 +417,8 @@ TEST_F (Transaction, GetRwInt) {
     // First setup the mock expectations.
     {
         using ::testing::Expectation;
-        using ::testing::Invoke;
         using ::testing::Ge;
+        using ::testing::Invoke;
 
         Expectation allocate_int =
             EXPECT_CALL (*db_.get (), allocate (sizeof (int), alignof (int)))

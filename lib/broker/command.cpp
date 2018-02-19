@@ -225,9 +225,7 @@ namespace pstore {
 
         // clear_queue
         // ~~~~~~~~~~~
-        void command_processor::clear_queue () {
-            messages_.clear ();
-        }
+        void command_processor::clear_queue () { messages_.clear (); }
 
         // scavenge
         // ~~~~~~~~

@@ -232,22 +232,12 @@ namespace pstore {
                         , end_{end} {
                     assert (end >= begin);
                 }
-                iterator begin () const {
-                    return begin_;
-                }
-                iterator end () const {
-                    return end_;
-                }
-                const_iterator cbegin () const {
-                    return begin ();
-                }
-                const_iterator cend () const {
-                    return end ();
-                }
+                iterator begin () const { return begin_; }
+                iterator end () const { return end_; }
+                const_iterator cbegin () const { return begin (); }
+                const_iterator cend () const { return end (); }
 
-                const_pointer data () const {
-                    return begin_;
-                }
+                const_pointer data () const { return begin_; }
 
                 size_type size () const {
                     assert (end_ >= begin_);
@@ -259,9 +249,7 @@ namespace pstore {
                 const_pointer end_;
             };
 
-            std::uint8_t align () const noexcept {
-                return 1U << align_;
-            }
+            std::uint8_t align () const noexcept { return 1U << align_; }
 
             container<std::uint8_t> data () const {
                 auto begin = aligned_ptr<std::uint8_t> (this + 1);
@@ -507,9 +495,7 @@ namespace pstore {
                     it_ = rhs.it_;
                     return *this;
                 }
-                bool operator== (content_type_iterator const & rhs) const {
-                    return it_ == rhs.it_;
-                }
+                bool operator== (content_type_iterator const & rhs) const { return it_ == rhs.it_; }
                 bool operator!= (content_type_iterator const & rhs) const {
                     return !(operator== (rhs));
                 }
@@ -523,15 +509,9 @@ namespace pstore {
                     return old;
                 }
 
-                reference operator* () const {
-                    return (*it_).type;
-                }
-                pointer operator-> () const {
-                    return &(*it_).type;
-                }
-                reference operator[] (difference_type n) const {
-                    return it_[n].type;
-                }
+                reference operator* () const { return (*it_).type; }
+                pointer operator-> () const { return &(*it_).type; }
+                reference operator[] (difference_type n) const { return it_[n].type; }
 
             private:
                 Iterator it_;
@@ -580,15 +560,9 @@ namespace pstore {
                     return old;
                 }
 
-                reference operator* () const {
-                    return **it_;
-                }
-                pointer operator-> () const {
-                    return &(**it_);
-                }
-                reference operator[] (difference_type n) const {
-                    return *(it_[n]);
-                }
+                reference operator* () const { return **it_; }
+                pointer operator-> () const { return &(**it_); }
+                reference operator[] (difference_type n) const { return *(it_[n]); }
 
             private:
                 Iterator it_;
@@ -640,13 +614,9 @@ namespace pstore {
                     static_cast<pstore::repo::fragment::member_array::bitmap_type> (type));
             }
 
-            std::size_t num_sections () const {
-                return arr_.size ();
-            }
+            std::size_t num_sections () const { return arr_.size (); }
             /// Returns the array of section offsets.
-            member_array const & sections () const {
-                return arr_;
-            }
+            member_array const & sections () const { return arr_; }
 
             /// Returns the number of bytes of storage that are required for a fragment containing
             /// the sections defined by [first, last).
@@ -692,9 +662,7 @@ namespace pstore {
         template <typename OStream>
         OStream & operator<< (OStream & os, section_type st) {
 #define X(a)                                                                                       \
-    case (section_type::a):                                                                        \
-        name = #a;                                                                                 \
-        break;
+    case (section_type::a): name = #a; break;
             char const * name = "*unknown*";
             switch (st) { PSTORE_REPO_SECTION_TYPES }
             return os << name;

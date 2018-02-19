@@ -100,16 +100,11 @@ namespace pstore {
             int oflag = is_writable_ ? O_RDWR : O_RDONLY;
             switch (create) {
             // Creates a new file, only if it does not already exist
-            case create_mode::create_new:
-                oflag |= O_CREAT | O_EXCL;
-                break;
+            case create_mode::create_new: oflag |= O_CREAT | O_EXCL; break;
             // Opens a file only if it already exists
-            case create_mode::open_existing:
-                break;
+            case create_mode::open_existing: break;
             // Opens an existing file if present, and creates a new file otherwise.
-            case create_mode::open_always:
-                oflag |= O_CREAT;
-                break;
+            case create_mode::open_always: oflag |= O_CREAT; break;
             }
 
             // user, group, and others have read permission.
@@ -298,22 +293,14 @@ namespace pstore {
 
             int cmd = 0;
             switch (block) {
-            case blocking_mode::non_blocking:
-                cmd = F_SETLK;
-                break;
-            case blocking_mode::blocking:
-                cmd = F_SETLKW;
-                break;
+            case blocking_mode::non_blocking: cmd = F_SETLK; break;
+            case blocking_mode::blocking: cmd = F_SETLKW; break;
             }
 
             short type = 0;
             switch (kind) {
-            case lock_kind::shared_read:
-                type = F_RDLCK;
-                break;
-            case lock_kind::exclusive_write:
-                type = F_WRLCK;
-                break;
+            case lock_kind::shared_read: type = F_RDLCK; break;
+            case lock_kind::exclusive_write: type = F_WRLCK; break;
             };
 
             bool got_lock = true;
@@ -381,7 +368,10 @@ namespace pstore {
             // Following boost filesystem, we check some select environment variables
             // for user temporary directories before resorting to /tmp.
             static constexpr std::array<char const *, 4> env_var_names{{
-                "TMPDIR", "TMP", "TEMP", "TEMPDIR",
+                "TMPDIR",
+                "TMP",
+                "TEMP",
+                "TEMPDIR",
             }};
             for (auto name : env_var_names) {
                 if (char const * val = std::getenv (name)) {
@@ -405,9 +395,7 @@ namespace pstore {
         } // namespace posix
 
 
-        bool exists (std::string const & path) {
-            return ::access (path.c_str (), F_OK) != -1;
-        }
+        bool exists (std::string const & path) { return ::access (path.c_str (), F_OK) != -1; }
 
         void rename (std::string const & from, std::string const & to) {
             int erc = ::rename (from.c_str (), to.c_str ());

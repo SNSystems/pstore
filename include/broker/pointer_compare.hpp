@@ -81,17 +81,13 @@ namespace pstore {
                 helper (std::unique_ptr<U, Deleter> const & up)
                         : ptr_{up.get ()} {}
 
-                bool operator< (helper other) const {
-                    return std::less<Ptr> () (ptr_, other.ptr_);
-                }
+                bool operator< (helper other) const { return std::less<Ptr> () (ptr_, other.ptr_); }
 
             private:
                 Ptr ptr_;
             };
 
-            bool operator() (helper const & lhs, helper const & rhs) const {
-                return lhs < rhs;
-            }
+            bool operator() (helper const & lhs, helper const & rhs) const { return lhs < rhs; }
         };
 
     } // namespace broker

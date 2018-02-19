@@ -83,9 +83,7 @@ namespace {
             splitter_.append (gsl::make_span (ptr, size), &dump::trim_line);
             pos_ += size;
         }
-        std::uint64_t current_pos () const override {
-            return pos_;
-        }
+        std::uint64_t current_pos () const override { return pos_; }
 
         pstore::dump::line_splitter splitter_;
         std::size_t pos_ = 0;

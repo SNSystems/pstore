@@ -86,7 +86,7 @@ namespace {
         0x3059, // HIRAGANA LETTER SU
         0x0000, // NULL
     };
-}
+} // namespace
 
 TEST_F (UtfStringsFixture, Utf8To16Empty) {
     std::wstring const reply = pstore::utf::win32::to16 ("");

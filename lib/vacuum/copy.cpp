@@ -219,6 +219,6 @@ namespace vacuum {
             pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
             pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
         }
-        // clang-format on
+    // clang-format on
 } // end namespace vacuum
 // eof: lib/vacuum/copy.cpp

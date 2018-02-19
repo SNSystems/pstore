@@ -57,11 +57,9 @@
 
 namespace {
 #ifdef _WIN32
-    inline DWORD getpid () {
-        return ::GetCurrentProcessId ();
-    }
+    inline DWORD getpid () { return ::GetCurrentProcessId (); }
 #endif
-}
+} // namespace
 
 namespace pstore {
     namespace broker {

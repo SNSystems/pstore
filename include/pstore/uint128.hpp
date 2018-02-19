@@ -85,12 +85,8 @@ namespace pstore {
         uint128 & operator= (uint128 const &) = default;
         uint128 & operator= (uint128 &&) noexcept = default;
 
-        constexpr std::uint64_t high () const noexcept {
-            return high_;
-        }
-        constexpr std::uint64_t low () const noexcept {
-            return low_;
-        }
+        constexpr std::uint64_t high () const noexcept { return high_; }
+        constexpr std::uint64_t low () const noexcept { return low_; }
 
         std::string to_hex_string () const;
 

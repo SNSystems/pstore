@@ -57,9 +57,7 @@ namespace pstore {
 
         using digest = uint128;
         struct u128_hash {
-            std::uint64_t operator() (digest const & v) const {
-                return v.high ();
-            }
+            std::uint64_t operator() (digest const & v) const { return v.high (); }
         };
 
     } // namespace index
@@ -156,6 +154,6 @@ namespace pstore {
                             trailer::index_records_array * const locations);
 
     } // namespace index
-} // namesapce pstore
+} // namespace pstore
 #endif // PSTORE_INDEX_TYPES_HPP
 // eof: include/pstore/index_types.hpp

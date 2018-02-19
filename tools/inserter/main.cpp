@@ -98,9 +98,7 @@ namespace {
 
             kdebug_signpost_start (code_, args_[0], args_[1], args_[2], args_[3]);
         }
-        ~profile_marker () {
-            kdebug_signpost_end (code_, args_[0], args_[1], args_[2], args_[3]);
-        }
+        ~profile_marker () { kdebug_signpost_end (code_, args_[0], args_[1], args_[2], args_[3]); }
 
     private:
         std::uint32_t code_;
@@ -128,7 +126,7 @@ namespace {
 #endif
 #endif // PSTORE_CPP_EXCEPTIONS
 
-} // (anonymous namespace)
+} // namespace
 
 
 namespace {
@@ -152,7 +150,7 @@ namespace {
         unsigned seed_;
     };
 
-} // (anonymous namespace)
+} // namespace
 
 namespace {
 
@@ -199,7 +197,7 @@ namespace {
                            [&index](pstore::index::digest key) { index.find (key); });
     }
 
-} // (anonymous namespace)
+} // namespace
 
 
 namespace {
@@ -210,7 +208,7 @@ namespace {
         data_file (cl::Positional,
                    cl::desc ("Path of the pstore repository to use for index exercise."),
                    cl::Required);
-} // (anonymous namespace)
+} // namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
@@ -228,8 +226,8 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    using pstore::utf::to_native_string;
     using pstore::utf::from_native_string;
+    using pstore::utf::to_native_string;
 
     TRY {
         cl::ParseCommandLineOptions (argc, argv, "Exerices the pstore index code");
@@ -290,15 +288,20 @@ int main (int argc, char * argv[]) {
         }
 
         database.close ();
-    } CATCH (std::exception const & ex, {
-        auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what) << std::endl;
-        exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
-        exit_code = EXIT_FAILURE;
-    })
+    }
+    CATCH (std::exception const & ex,
+           {
+               auto what = ex.what ();
+               error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
+                            << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
+    CATCH (...,
+           {
+               std::cerr << "An unknown error occurred." << std::endl;
+               exit_code = EXIT_FAILURE;
+           })
 
-    return exit_code;
+        return exit_code;
 }
 // eof: tools/inserter/main.cpp

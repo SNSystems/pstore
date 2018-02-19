@@ -73,7 +73,7 @@ namespace {
         s.write (out);
         return out.str ();
     }
-}
+} // namespace
 
 TEST_F (StringFixture, Empty) {
     std::string const actual = this->convert ("");

@@ -79,13 +79,9 @@ namespace pstore {
             database const * const rdb = &rhs.db_;
             return std::tie (ldb, pos_) == std::tie (rdb, rhs.pos_);
         }
-        bool operator!= (generation_iterator const & rhs) const {
-            return !operator== (rhs);
-        }
+        bool operator!= (generation_iterator const & rhs) const { return !operator== (rhs); }
 
-        pstore::address operator* () const {
-            return pos_;
-        }
+        pstore::address operator* () const { return pos_; }
 
         generation_iterator & operator++ ();  // pre-increment
         generation_iterator operator++ (int); // post-increment

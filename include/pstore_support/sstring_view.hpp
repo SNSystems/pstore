@@ -82,39 +82,23 @@ namespace pstore {
 
     template <>
     struct string_traits<std::string> {
-        static std::size_t length (std::string const & s) noexcept {
-            return s.length ();
-        }
-        static char const * data (std::string const & s) noexcept {
-            return s.data ();
-        }
+        static std::size_t length (std::string const & s) noexcept { return s.length (); }
+        static char const * data (std::string const & s) noexcept { return s.data (); }
     };
     template <>
     struct string_traits<char const *> {
-        static std::size_t length (char const * s) noexcept {
-            return std::strlen (s);
-        }
-        static char const * data (char const * s) noexcept {
-            return s;
-        }
+        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
+        static char const * data (char const * s) noexcept { return s; }
     };
     template <std::size_t Size>
     struct string_traits<char const[Size]> {
-        static std::size_t length (char const * s) noexcept {
-            return std::strlen (s);
-        }
-        static char const * data (char const * s) noexcept {
-            return s;
-        }
+        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
+        static char const * data (char const * s) noexcept { return s; }
     };
     template <std::size_t Size>
     struct string_traits<char[Size]> {
-        static std::size_t length (char const * s) noexcept {
-            return std::strlen (s);
-        }
-        static char const * data (char const * s) noexcept {
-            return s;
-        }
+        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
+        static char const * data (char const * s) noexcept { return s; }
     };
 
     //*            _     _             _            _ _       *
@@ -130,9 +114,7 @@ namespace pstore {
     struct pointer_traits<char const *> {
         static constexpr bool is_pointer = true;
         using value_type = char const;
-        static char const * as_raw (char const * p) noexcept {
-            return p;
-        }
+        static char const * as_raw (char const * p) noexcept { return p; }
     };
 
     namespace details {
@@ -143,24 +125,22 @@ namespace pstore {
             static_assert (std::is_same<value_type, char>::value ||
                                std::is_same<value_type, char const>::value,
                            "pointer element type must be char or char const");
-            static char const * as_raw (T const & p) noexcept {
-                return p.get ();
-            }
+            static char const * as_raw (T const & p) noexcept { return p.get (); }
         };
     } // namespace details
 
     template <>
     struct pointer_traits<std::shared_ptr<char const>>
-        : details::pointer_traits_helper<std::shared_ptr<char const>> {};
+            : details::pointer_traits_helper<std::shared_ptr<char const>> {};
     template <>
     struct pointer_traits<std::shared_ptr<char>>
-        : details::pointer_traits_helper<std::shared_ptr<char>> {};
+            : details::pointer_traits_helper<std::shared_ptr<char>> {};
     template <>
     struct pointer_traits<std::unique_ptr<char const[]>>
-        : details::pointer_traits_helper<std::unique_ptr<char const[]>> {};
+            : details::pointer_traits_helper<std::unique_ptr<char const[]>> {};
     template <>
     struct pointer_traits<std::unique_ptr<char[]>>
-        : details::pointer_traits_helper<std::unique_ptr<char[]>> {};
+            : details::pointer_traits_helper<std::unique_ptr<char[]>> {};
 
     //*        _       _                 _             *
     //*  _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
@@ -202,44 +182,20 @@ namespace pstore {
         sstring_view & operator= (sstring_view &&) noexcept = default;
 
         // 7.4, sstring_view iterator support
-        const_iterator begin () const noexcept {
-            return data ();
-        }
-        const_iterator end () const noexcept {
-            return begin () + size_;
-        }
-        const_iterator cbegin () const noexcept {
-            return begin ();
-        }
-        const_iterator cend () const noexcept {
-            return end ();
-        }
-        const_reverse_iterator rbegin () const noexcept {
-            return const_reverse_iterator (end ());
-        }
-        const_reverse_iterator rend () const noexcept {
-            return const_reverse_iterator (begin ());
-        }
-        const_reverse_iterator crbegin () const noexcept {
-            return const_reverse_iterator (end ());
-        }
-        const_reverse_iterator crend () const noexcept {
-            return const_reverse_iterator (begin ());
-        }
+        const_iterator begin () const noexcept { return data (); }
+        const_iterator end () const noexcept { return begin () + size_; }
+        const_iterator cbegin () const noexcept { return begin (); }
+        const_iterator cend () const noexcept { return end (); }
+        const_reverse_iterator rbegin () const noexcept { return const_reverse_iterator (end ()); }
+        const_reverse_iterator rend () const noexcept { return const_reverse_iterator (begin ()); }
+        const_reverse_iterator crbegin () const noexcept { return const_reverse_iterator (end ()); }
+        const_reverse_iterator crend () const noexcept { return const_reverse_iterator (begin ()); }
 
         // 7.5, sstring_view capacity
-        size_type size () const noexcept {
-            return size_;
-        }
-        size_type length () const noexcept {
-            return size_;
-        }
-        size_type max_size () const noexcept {
-            return std::numeric_limits<size_t>::max ();
-        }
-        bool empty () const noexcept {
-            return size_ == 0;
-        }
+        size_type size () const noexcept { return size_; }
+        size_type length () const noexcept { return size_; }
+        size_type max_size () const noexcept { return std::numeric_limits<size_t>::max (); }
+        bool empty () const noexcept { return size_ == 0; }
 
         // 7.6, sstring_view element access
         const_reference operator[] (size_type pos) const {
@@ -262,14 +218,10 @@ namespace pstore {
             assert (size_ > 0);
             return (*this)[size_ - 1];
         }
-        const_pointer data () const noexcept {
-            return pointer_traits<PointerType>::as_raw (ptr_);
-        }
+        const_pointer data () const noexcept { return pointer_traits<PointerType>::as_raw (ptr_); }
 
         // 7.7, sstring_view modifiers
-        void clear () noexcept {
-            size_ = 0;
-        }
+        void clear () noexcept { size_ = 0; }
 
         // void remove_prefix (size_type n);
         // void remove_suffix (size_type n);
@@ -279,9 +231,7 @@ namespace pstore {
         }
 
         // 7.8, sstring_view string operations
-        explicit operator std::string () const {
-            return this->to_string ();
-        }
+        explicit operator std::string () const { return this->to_string (); }
 
         template <class Allocator = std::allocator<char>>
         std::basic_string<char, std::char_traits<char>, Allocator>

@@ -99,8 +99,8 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
 }
 
 TEST_F (FragmentTest, MakeTextSectionWithFixups) {
-    using ::testing::ElementsAreArray;
     using ::testing::ElementsAre;
+    using ::testing::ElementsAreArray;
     using section_type = pstore::repo::section_type;
 
     std::vector<std::uint8_t> const original{'t', 'e', 'x', 't'};
@@ -149,9 +149,7 @@ namespace pstore {
 
         // An implementation of the gtest PrintTo function to avoid ambiguity between the test
         // harness's function and our template implementation of operator<<.
-        void PrintTo (section_type st, ::std::ostream * os) {
-            *os << st;
-        }
+        void PrintTo (section_type st, ::std::ostream * os) { *os << st; }
 
     } // namespace repo
 } // namespace pstore

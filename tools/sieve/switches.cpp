@@ -52,18 +52,20 @@
 #include "pstore_support/utf.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
-    using namespace llvm;
+using namespace llvm;
 #else
-    using namespace pstore::cmd_util;
+using namespace pstore::cmd_util;
 #endif
 
 namespace {
 
     cl::opt<switches::endian> Endian (
         "endian", cl::desc ("The endian-ness of the output data"),
-        cl::values (cl::OptionEnumValue{"big", static_cast <int> (switches::endian::big), "Big-endian"},
-                    cl::OptionEnumValue{"little", static_cast <int> (switches::endian::little), "Little-endian"},
-                    cl::OptionEnumValue{"native", static_cast <int> (switches::endian::native),
+        cl::values (cl::OptionEnumValue{"big", static_cast<int> (switches::endian::big),
+                                        "Big-endian"},
+                    cl::OptionEnumValue{"little", static_cast<int> (switches::endian::little),
+                                        "Little-endian"},
+                    cl::OptionEnumValue{"native", static_cast<int> (switches::endian::native),
                                         "The endian-ness of the host machine"}),
         cl::init (switches::endian::native));
     cl::alias Endian2 ("e", cl::desc ("Alias for --endian"), cl::aliasopt (Endian));
@@ -71,7 +73,7 @@ namespace {
 
     cl::opt<unsigned> Maximum ("maximum", cl::desc ("The maximum prime value"),
                                cl::init (100) // FIXME: duplicated in switches.cpp
-                               );
+    );
     cl::alias Maximum2 ("m", cl::desc ("Alias for --maximum"), cl::aliasopt (Maximum));
 
 

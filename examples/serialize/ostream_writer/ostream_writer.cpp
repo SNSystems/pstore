@@ -70,9 +70,7 @@ namespace {
         }
 
         // Flushes the output stream.
-        void flush () {
-            os_ << std::flush;
-        }
+        void flush () { os_ << std::flush; }
 
     private:
         std::ostream & os_;
@@ -83,7 +81,7 @@ namespace {
         explicit ostream_writer (std::ostream & os)
                 : writer_base<osw_policy> (os) {}
     };
-}
+} // namespace
 
 int main () {
     // A simple function which will write a series of integer values to an instance ostream_writer.

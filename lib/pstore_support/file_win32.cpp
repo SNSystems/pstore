@@ -169,7 +169,7 @@ namespace {
         return file_time_to_epoch ((static_cast<std::uint64_t> (file_time.dwHighDateTime) << 32) |
                                    file_time.dwLowDateTime);
     }
-} // (anonymous namespace)
+} // namespace
 
 
 namespace pstore {
@@ -190,17 +190,11 @@ namespace pstore {
             DWORD creation_disposition = 0;
             switch (create) {
             // Creates a new file, only if it does not already exist
-            case create_mode::create_new:
-                creation_disposition = CREATE_NEW;
-                break;
+            case create_mode::create_new: creation_disposition = CREATE_NEW; break;
             // Opens a file only if it already exists
-            case create_mode::open_existing:
-                creation_disposition = OPEN_EXISTING;
-                break;
+            case create_mode::open_existing: creation_disposition = OPEN_EXISTING; break;
             // Opens an existing file if present, and creates a new file otherwise.
-            case create_mode::open_always:
-                creation_disposition = OPEN_ALWAYS;
-                break;
+            case create_mode::open_always: creation_disposition = OPEN_ALWAYS; break;
             }
 
             file_ = ::CreateFileW (pstore::utf::win32::to16 (path).c_str (), // "file name"
@@ -406,18 +400,12 @@ namespace pstore {
 
             DWORD flags = 0;
             switch (block) {
-            case blocking_mode::non_blocking:
-                flags |= LOCKFILE_FAIL_IMMEDIATELY;
-                break;
-            case blocking_mode::blocking:
-                break;
+            case blocking_mode::non_blocking: flags |= LOCKFILE_FAIL_IMMEDIATELY; break;
+            case blocking_mode::blocking: break;
             }
             switch (kind) {
-            case lock_kind::exclusive_write:
-                flags |= LOCKFILE_EXCLUSIVE_LOCK;
-                break;
-            case lock_kind::shared_read:
-                break;
+            case lock_kind::exclusive_write: flags |= LOCKFILE_EXCLUSIVE_LOCK; break;
+            case lock_kind::shared_read: break;
             }
             bool got_lock = true;
             BOOL ok = ::LockFileEx (file_, flags,

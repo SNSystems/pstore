@@ -50,9 +50,7 @@
 
 namespace pstore {
 
-    inline std::string quoted (std::string const & s) {
-        return R"(")" + s + R"(")";
-    }
+    inline std::string quoted (std::string const & s) { return R"(")" + s + R"(")"; }
 
 } // namespace pstore
 

@@ -78,7 +78,7 @@ namespace {
         auto const key = pstore::heartbeat::to_key_type (v);
         worker_.detach (key);
     }
-}
+} // namespace
 
 TEST_F (HeartbeatAttachDetach, SingleAttach) {
     int dummy = 42;

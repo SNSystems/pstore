@@ -59,43 +59,43 @@ namespace pstore {
     namespace broker {
 
 #ifdef _WIN32
-    namespace win32 {
-        /// This routine appends the given argument to a command line such
-        /// that CommandLineToArgvW will return the argument string unchanged.
-        /// Arguments in a command line should be separated by spaces; this
-        /// function does not add these spaces.
-        ///
-        /// Based on code published in an MSDN blog article titled "Everyone
-        /// quotes command line arguments the wrong way" (Daniel Colascione,
-        /// April 23 2011).
-        ///
-        /// \note This function is exposed to enable it to be unit tested.
-        ///
-        /// \param arg  The argument to encode.
-        /// \param force  Supplies an indication of whether we should quote the argument even if it
-        /// does not contain any characters that would ordinarily require quoting.
-        /// \return The quoted argument string.
+        namespace win32 {
+            /// This routine appends the given argument to a command line such
+            /// that CommandLineToArgvW will return the argument string unchanged.
+            /// Arguments in a command line should be separated by spaces; this
+            /// function does not add these spaces.
+            ///
+            /// Based on code published in an MSDN blog article titled "Everyone
+            /// quotes command line arguments the wrong way" (Daniel Colascione,
+            /// April 23 2011).
+            ///
+            /// \note This function is exposed to enable it to be unit tested.
+            ///
+            /// \param arg  The argument to encode.
+            /// \param force  Supplies an indication of whether we should quote the argument even if
+            /// it does not contain any characters that would ordinarily require quoting. \return
+            /// The quoted argument string.
 
-        std::string argv_quote (std::string const & arg, bool force = false);
+            std::string argv_quote (std::string const & arg, bool force = false);
 
-        /// Takes an array of command-line argument strings and converts them
-        /// to a single string
-        /// \note This function is exposed to enable it to be unit tested.
-        std::string build_command_line (gsl::czstring * argv);
-    } // namespace win32
+            /// Takes an array of command-line argument strings and converts them
+            /// to a single string
+            /// \note This function is exposed to enable it to be unit tested.
+            std::string build_command_line (gsl::czstring * argv);
+        } // namespace win32
 #endif
 
 #ifdef _WIN32
-    using process_identifier = std::shared_ptr<std::remove_pointer<HANDLE>::type>;
+        using process_identifier = std::shared_ptr<std::remove_pointer<HANDLE>::type>;
 #else
-    using process_identifier = pid_t;
+        using process_identifier = pid_t;
 #endif
 
-    /// Starts the process at the location given by `exe_path` and with the arguments
-    /// supplied in a null-terminated array of czstrings.
-    process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv);
+        /// Starts the process at the location given by `exe_path` and with the arguments
+        /// supplied in a null-terminated array of czstrings.
+        process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv);
 
-} // namespace broker
+    } // namespace broker
 } // namespace pstore
 
 #endif // PSTORE_BROKER_SPAWN_HPP

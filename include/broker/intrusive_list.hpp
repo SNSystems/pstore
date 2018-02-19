@@ -60,9 +60,7 @@ namespace pstore {
         template <typename T>
         struct intrusive_list {
             intrusive_list ();
-            ~intrusive_list () noexcept {
-                this->check ();
-            }
+            ~intrusive_list () noexcept { this->check (); }
 
             /// The list does not own the pointers.
             class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
@@ -72,12 +70,8 @@ namespace pstore {
                         : ptr_{ptr} {}
                 iterator & operator= (iterator const & rhs) = default;
 
-                bool operator== (iterator const & rhs) const noexcept {
-                    return ptr_ == rhs.ptr_;
-                }
-                bool operator!= (iterator const & rhs) const noexcept {
-                    return !operator== (rhs);
-                }
+                bool operator== (iterator const & rhs) const noexcept { return ptr_ == rhs.ptr_; }
+                bool operator!= (iterator const & rhs) const noexcept { return !operator== (rhs); }
 
                 iterator & operator++ () noexcept {
                     ptr_ = ptr_->get_list_member ().next;
@@ -98,32 +92,22 @@ namespace pstore {
                     return t;
                 }
 
-                T & operator* () {
-                    return *ptr_;
-                }
-                T * operator-> () {
-                    return ptr_;
-                }
+                T & operator* () { return *ptr_; }
+                T * operator-> () { return ptr_; }
 
             private:
                 T * ptr_ = nullptr;
             };
 
-            iterator begin () const {
-                return iterator (head_->get_list_member ().next);
-            }
-            iterator end () const {
-                return iterator (tail_.get ());
-            }
+            iterator begin () const { return iterator (head_->get_list_member ().next); }
+            iterator end () const { return iterator (tail_.get ()); }
 
             void insert_before (T * element, T * before);
             static void erase (T * element) noexcept;
             std::size_t size () const;
 
             void check () noexcept;
-            T * tail () const {
-                return tail_.get ();
-            }
+            T * tail () const { return tail_.get (); }
 
         private:
             std::unique_ptr<T> head_;
@@ -150,44 +134,44 @@ namespace pstore {
         template <typename T>
         void intrusive_list<T>::check () noexcept {
 #ifndef NDEBUG
-    assert (!head_->get_list_member ().prev);
-    T * prev = nullptr;
-    for (auto p = head_.get (); p; prev = p, p = p->get_list_member ().next) {
-        assert (p->get_list_member ().prev == prev);
-    }
-    assert (prev == tail_.get ());
+            assert (!head_->get_list_member ().prev);
+            T * prev = nullptr;
+            for (auto p = head_.get (); p; prev = p, p = p->get_list_member ().next) {
+                assert (p->get_list_member ().prev == prev);
+            }
+            assert (prev == tail_.get ());
 #endif
-}
+        }
 
-// insert_before
-// ~~~~~~~~~~~~~
-template <typename T>
-void intrusive_list<T>::insert_before (T * element, T * before) {
-    auto & element_member = element->get_list_member ();
-    auto & before_member = before->get_list_member ();
+        // insert_before
+        // ~~~~~~~~~~~~~
+        template <typename T>
+        void intrusive_list<T>::insert_before (T * element, T * before) {
+            auto & element_member = element->get_list_member ();
+            auto & before_member = before->get_list_member ();
 
-    element_member.prev = before_member.prev;
-    before_member.prev->get_list_member ().next = element;
-    before_member.prev = element;
-    element_member.next = before;
+            element_member.prev = before_member.prev;
+            before_member.prev->get_list_member ().next = element;
+            before_member.prev = element;
+            element_member.next = before;
 
-    assert (element_member.next->get_list_member ().prev == element);
-    assert (element_member.prev->get_list_member ().next == element);
-    this->check ();
-}
+            assert (element_member.next->get_list_member ().prev == element);
+            assert (element_member.prev->get_list_member ().next == element);
+            this->check ();
+        }
 
-// erase
-// ~~~~~
-template <typename T>
-void intrusive_list<T>::erase (T * element) noexcept {
-    auto & links = element->get_list_member ();
-    if (links.prev) {
-        links.prev->get_list_member ().next = links.next;
-    }
-    if (links.next) {
-        links.next->get_list_member ().prev = links.prev;
-    }
-}
+        // erase
+        // ~~~~~
+        template <typename T>
+        void intrusive_list<T>::erase (T * element) noexcept {
+            auto & links = element->get_list_member ();
+            if (links.prev) {
+                links.prev->get_list_member ().next = links.next;
+            }
+            if (links.next) {
+                links.next->get_list_member ().prev = links.prev;
+            }
+        }
 
     } // namespace broker
 } // namespace pstore

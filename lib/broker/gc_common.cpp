@@ -65,12 +65,11 @@ namespace pstore {
         void gc_watch_thread::start_vacuum (std::string const & db_path) {
             std::unique_lock<decltype (mut_)> lock (mut_);
             if (processes_.presentl (db_path)) {
-                logging::log (logging::priority::info,
-                                      "GC process is already running for ",
-                                      logging::quoted (db_path.c_str ()));
+                logging::log (logging::priority::info, "GC process is already running for ",
+                              logging::quoted (db_path.c_str ()));
             } else {
                 logging::log (logging::priority::info, "Starting GC process for ",
-                                      logging::quoted{db_path.c_str ()});
+                              logging::quoted{db_path.c_str ()});
                 auto const exe_path = vacuumd_path ();
                 std::array<char const *, 4> argv = {
                     {exe_path.c_str (), "--daemon", db_path.c_str (), nullptr}};
@@ -88,16 +87,15 @@ namespace pstore {
         // ~~~~
         void gc_watch_thread::stop (int signum) {
             assert (done);
-            logging::log (logging::priority::info,
-                                  "asking gc process watch thread to exit");
+            logging::log (logging::priority::info, "asking gc process watch thread to exit");
             cv_.notify (signum);
         }
 
         // vacuumd_path
         // ~~~~~~~~~~~~
         std::string gc_watch_thread::vacuumd_path () {
-            using path::join;
             using path::dir_name;
+            using path::join;
             return join (dir_name (process_file_name ()), vacuumd_name);
         }
 
@@ -133,21 +131,17 @@ namespace pstore {
 #ifndef _WIN32
             register_signal_handler (SIGCHLD, child_signal);
 #endif
-        getgc ().watcher ();
-    }
+            getgc ().watcher ();
+        }
 
-    void start_vacuum (std::string const & db_path) {
-        getgc ().start_vacuum (db_path);
-    }
+        void start_vacuum (std::string const & db_path) { getgc ().start_vacuum (db_path); }
 
-    /// Called when a signal has been recieved which should result in the process shutting.
-    /// \note This function is called from the quit-thread rather than directly from a signal
-    /// handler so it doesn't need to restrict itself to signal-safe functions.
-    void gc_sigint (int sig) {
-        getgc ().stop (sig);
-    }
+        /// Called when a signal has been recieved which should result in the process shutting.
+        /// \note This function is called from the quit-thread rather than directly from a signal
+        /// handler so it doesn't need to restrict itself to signal-safe functions.
+        void gc_sigint (int sig) { getgc ().stop (sig); }
 
-} // end namespace broker
+    } // end namespace broker
 } // end namespace pstore
 
 // eof: lib/broker/gc_common.cpp

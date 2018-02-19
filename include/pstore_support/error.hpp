@@ -109,9 +109,7 @@ namespace pstore {
     public:
         explicit errno_erc (int err)
                 : err_{err} {}
-        int get () const {
-            return err_;
-        }
+        int get () const { return err_; }
 
     private:
         int err_;
@@ -122,9 +120,7 @@ namespace pstore {
     public:
         explicit win32_erc (DWORD err)
                 : err_{err} {}
-        int get () const {
-            return err_;
-        }
+        int get () const { return err_; }
 
     private:
         DWORD err_;

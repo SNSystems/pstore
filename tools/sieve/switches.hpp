@@ -88,7 +88,7 @@ namespace switches {
 
         static user_options get (int argc, pstore_tchar * argv[]);
     };
-}
+} // namespace switches
 
 #endif // SIEVE_SWITCHES_HPP
 // eof: tools/sieve/switches.hpp

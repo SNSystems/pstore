@@ -96,7 +96,7 @@ namespace {
         auto v1 = serialize::read<std::string> (reader);
         std::cout << "Reading a series of strings produced \"" << v0 << "\" and \"" << v1 << "\"\n";
     }
-}
+} // namespace
 
 int main () {
     container_type data{'H', 'e', 'l', 'l', 'o', '\0', 'T', 'h', 'e', 'r', 'e', '\0'};

@@ -58,7 +58,7 @@ namespace vacuum {
     struct user_options;
     void copy (std::shared_ptr<pstore::database> source, status * const st,
                user_options const & opt);
-}
+} // namespace vacuum
 
 #endif // VACUUM_COPY_HPP
 // eof: include/vacuum/copy.hpp

@@ -75,7 +75,7 @@ using namespace ::pstore::gsl;
 namespace {
     struct BaseClass {};
     struct DerivedClass : BaseClass {};
-}
+} // namespace
 
 TEST (GslSpan, DefaultCtor) {
     {
@@ -778,36 +778,34 @@ TEST (GslSpan, FromContainerConstructor) {
     }
 }
 
-TEST (GslSpan, FromConvertibleSpanConstructor) {
-    {
-        span<DerivedClass> avd;
-        span<DerivedClass const> avcd = avd;
-        static_cast<void> (avcd);
-    }
-    {
+TEST (GslSpan, FromConvertibleSpanConstructor){{span<DerivedClass> avd;
+span<DerivedClass const> avcd = avd;
+static_cast<void> (avcd);
+}
+{
 #ifdef CONFIRM_COMPILATION_ERRORS
-        span<DerivedClass> avd;
-        span<BaseClass> avb = avd;
-        static_cast<void> (avb);
+    span<DerivedClass> avd;
+    span<BaseClass> avb = avd;
+    static_cast<void> (avb);
 #endif
-    }
+}
 
 #ifdef CONFIRM_COMPILATION_ERRORS
-    {
-        span<int> s;
-        span<unsigned int> s2 = s;
-        static_cast<void> (s2);
-    }
-    {
-        span<int> s;
-        span<const unsigned int> s2 = s;
-        static_cast<void> (s2);
-    }
-    {
-        span<int> s;
-        span<short> s2 = s;
-        static_cast<void> (s2);
-    }
+{
+    span<int> s;
+    span<unsigned int> s2 = s;
+    static_cast<void> (s2);
+}
+{
+    span<int> s;
+    span<const unsigned int> s2 = s;
+    static_cast<void> (s2);
+}
+{
+    span<int> s;
+    span<short> s2 = s;
+    static_cast<void> (s2);
+}
 #endif
 }
 

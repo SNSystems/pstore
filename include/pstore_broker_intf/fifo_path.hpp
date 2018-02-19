@@ -82,18 +82,12 @@ namespace pstore {
                 server_pipe (server_pipe const &) = delete;
                 server_pipe & operator= (server_pipe const &) = delete;
 
-                value_type get () const noexcept {
-                    return read_pipe ().get ();
-                }
-                bool valid () const noexcept {
-                    return read_pipe ().valid ();
-                }
+                value_type get () const noexcept { return read_pipe ().get (); }
+                bool valid () const noexcept { return read_pipe ().valid (); }
 
             private:
                 std::tuple<unique_fd, unique_fd> fd_;
-                unique_fd const & read_pipe () const {
-                    return std::get<0> (fd_);
-                }
+                unique_fd const & read_pipe () const { return std::get<0> (fd_); }
             };
 #endif
             enum class operation { open, wait };
@@ -123,9 +117,7 @@ namespace pstore {
             /// Open the pipe for writing. (Used by clients to write commands to the pipe.)
             client_pipe open_client_pipe () const;
 
-            std::string const & get () const {
-                return path_;
-            }
+            std::string const & get () const { return path_; }
 
         private:
             static char const * const default_pipe_name;

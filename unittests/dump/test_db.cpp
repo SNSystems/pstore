@@ -60,9 +60,7 @@ namespace {
     public:
         Address ()
                 : old_expanded_{::pstore::dump::address::get_expanded ()} {}
-        ~Address () {
-            ::pstore::dump::address::set_expanded (old_expanded_);
-        }
+        ~Address () { ::pstore::dump::address::set_expanded (old_expanded_); }
 
     private:
         bool old_expanded_;
@@ -112,8 +110,8 @@ TEST (Database, Extent) {
 }
 
 TEST (Database, Header) {
-    using ::testing::ElementsAre;
     using ::testing::_;
+    using ::testing::ElementsAre;
 
     std::ostringstream out;
     pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::header{});
@@ -132,9 +130,9 @@ TEST (Database, Header) {
 }
 
 TEST (Database, Trailer) {
+    using ::testing::_;
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
-    using ::testing::_;
 
     std::ostringstream out;
     pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::trailer{}, false /*no_times*/);

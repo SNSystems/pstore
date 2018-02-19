@@ -140,26 +140,18 @@ namespace pstore {
         static constexpr std::uint64_t const segment_size =
             std::uint64_t{max_offset} + UINT64_C (1);
 
-        static constexpr address make (std::uint64_t absolute) noexcept {
-            return {absolute};
-        }
+        static constexpr address make (std::uint64_t absolute) noexcept { return {absolute}; }
         static constexpr address make (segment_type segment, offset_type offset) noexcept {
             return {as_absolute (segment, offset)};
         }
-        static constexpr address null () {
-            return {0};
-        }
-        static constexpr address max () {
-            return {max_address};
-        }
+        static constexpr address null () { return {0}; }
+        static constexpr address max () { return {max_address}; }
 
 
-        constexpr std::uint64_t absolute () const {
-            return whole;
-        }
+        constexpr std::uint64_t absolute () const { return whole; }
 
         address operator+= (std::uint64_t distance) {
-            assert (whole <= std::numeric_limits <std::uint64_t>::max () - distance);
+            assert (whole <= std::numeric_limits<std::uint64_t>::max () - distance);
             whole += distance;
             return *this;
         }
@@ -185,9 +177,7 @@ namespace pstore {
             return static_cast<segment_type> ((whole & segment_mask) >> offset_number_bits);
         }
 
-        offset_type offset () const {
-            return static_cast<offset_type> (whole & max_offset);
-        }
+        offset_type offset () const { return static_cast<offset_type> (whole & max_offset); }
 
         std::uint64_t whole;
     };
@@ -266,15 +256,9 @@ namespace std {
 
     public:
         static constexpr const bool is_specialized = base::is_specialized;
-        static constexpr type min () noexcept {
-            return pstore::address::null ();
-        }
-        static constexpr type max () noexcept {
-            return pstore::address::max ();
-        }
-        static constexpr type lowest () noexcept {
-            return pstore::address::make (base::lowest ());
-        }
+        static constexpr type min () noexcept { return pstore::address::null (); }
+        static constexpr type max () noexcept { return pstore::address::max (); }
+        static constexpr type lowest () noexcept { return pstore::address::make (base::lowest ()); }
 
         static constexpr const int digits = base::digits;
         static constexpr const int digits10 = base::digits10;

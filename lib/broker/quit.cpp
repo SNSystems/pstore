@@ -97,7 +97,7 @@ namespace {
         cp.push_command (std::move (msg), nullptr);
     }
 
-} // (anonymous namespace)
+} // namespace
 
 namespace pstore {
     namespace broker {
@@ -152,9 +152,9 @@ namespace {
             // the user typing Control-C.
             quit_info.wait ();
 
-            logging::log (logging::priority::info,
-                          "Signal received. Will terminate after current command. Num=",
-                          quit_info.signal ());
+            logging::log (
+                logging::priority::info,
+                "Signal received. Will terminate after current command. Num=", quit_info.signal ());
 
             auto cp_sptr = cp.lock ();
             // If the command processor is alive, clear the queue.
@@ -183,7 +183,7 @@ namespace {
         quit_info.notify (sig);
     }
 
-} // (anonymous namespace)
+} // namespace
 
 
 namespace pstore {
@@ -191,9 +191,7 @@ namespace pstore {
 
         // notify_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        void notify_quit_thread () {
-            quit_info.notify (-1);
-        }
+        void notify_quit_thread () { quit_info.notify (-1); }
 
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~

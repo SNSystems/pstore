@@ -185,9 +185,7 @@ namespace pstore {
                 writer_base (writer_base &&) noexcept = default;
                 writer_base & operator= (writer_base &&) noexcept = default;
 
-                virtual ~writer_base () {
-                    this->flush ();
-                }
+                virtual ~writer_base () { this->flush (); }
 
                 ///@{
                 /// \brief Writes one or more instances of a standard-layout type Ty to the output.
@@ -232,9 +230,7 @@ namespace pstore {
                 }
 
                 /// \brief Returns the number of bytes that have been written via this archive.
-                std::size_t bytes_consumed () const {
-                    return bytes_consumed_;
-                }
+                std::size_t bytes_consumed () const { return bytes_consumed_; }
 
                 /// \brief Returns the number of bytes that the policy object wrote to its final
                 /// destination.
@@ -244,12 +240,8 @@ namespace pstore {
 
                 ///@{
                 /// Returns the writer_base output policy object.
-                WriterPolicy & writer_policy () {
-                    return policy_;
-                }
-                WriterPolicy const & writer_policy () const {
-                    return policy_;
-                }
+                WriterPolicy & writer_policy () { return policy_; }
+                WriterPolicy const & writer_policy () const { return policy_; }
                 ///@}
 
             protected:
@@ -341,22 +333,16 @@ namespace pstore {
                     }
 
                     /// Returns the size of the byte vector managed by the object.
-                    std::size_t size () const {
-                        return bytes_.size ();
-                    }
+                    std::size_t size () const { return bytes_.size (); }
 
                     void flush () {}
 
                     /// Returns a const_iterator for the beginning of the byte vector managed by the
                     /// object.
-                    container::const_iterator begin () const {
-                        return std::begin (bytes_);
-                    }
+                    container::const_iterator begin () const { return std::begin (bytes_); }
                     /// Returns a const_iterator for the end of the byte vector managed by the
                     /// object.
-                    container::const_iterator end () const {
-                        return std::end (bytes_);
-                    }
+                    container::const_iterator end () const { return std::end (bytes_); }
 
                 private:
                     container & bytes_; ///< The container into which written data is accumulated.
@@ -380,13 +366,9 @@ namespace pstore {
 
                 /// Returns a const_iterator for the beginning of the byte vector managed by the
                 /// object.
-                const_iterator begin () const {
-                    return writer_policy ().begin ();
-                }
+                const_iterator begin () const { return writer_policy ().begin (); }
                 /// Returns a const_iterator for the end of the byte vector managed by the object.
-                const_iterator end () const {
-                    return writer_policy ().end ();
-                }
+                const_iterator end () const { return writer_policy ().end (); }
             };
 
 
@@ -445,13 +427,9 @@ namespace pstore {
                     using const_iterator = std::uint8_t const *;
 
                     /// Returns a const_iterator for the beginning of the byte range.
-                    const_iterator begin () const {
-                        return begin_;
-                    }
+                    const_iterator begin () const { return begin_; }
                     /// Returns a const_iterator for the end of byte range written to the buffer.
-                    const_iterator end () const {
-                        return first_;
-                    }
+                    const_iterator end () const { return first_; }
 
                 private:
                     /// The start of the input buffer.
@@ -497,13 +475,9 @@ namespace pstore {
 
                 /// Returns a const_iterator for the beginning of the byte vector managed by the
                 /// object.
-                const_iterator begin () const {
-                    return writer_policy ().begin ();
-                }
+                const_iterator begin () const { return writer_policy ().begin (); }
                 /// Returns a const_iterator for the end of the byte vector managed by the object.
-                const_iterator end () const {
-                    return writer_policy ().end ();
-                }
+                const_iterator end () const { return writer_policy ().end (); }
             };
 
 
@@ -562,9 +536,7 @@ namespace pstore {
                 range_reader (InputIterator first)
                         : first_ (first) {}
 
-                InputIterator iterator () {
-                    return first_;
-                }
+                InputIterator iterator () { return first_; }
 
                 /// Reads a single instance of a standard-layout type Ty from the input iterator and
                 /// returns the value extracted.

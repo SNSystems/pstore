@@ -89,7 +89,7 @@ namespace {
         return usage.str ();
     }
 
-} // (anonymous namespace)
+} // namespace
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, usage_help ());

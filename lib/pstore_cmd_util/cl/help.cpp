@@ -74,21 +74,15 @@ namespace pstore {
 
             // takes_argument
             // ~~~~~~~~~~~~~~
-            bool help::takes_argument () const {
-                return false;
-            }
+            bool help::takes_argument () const { return false; }
 
             // get_parser
             // ~~~~~~~~~~
-            parser_base * help::get_parser () {
-                return nullptr;
-            }
+            parser_base * help::get_parser () { return nullptr; }
 
             // value
             // ~~~~~
-            bool help::value (std::string const &) {
-                return false;
-            }
+            bool help::value (std::string const &) { return false; }
 
             // max_option_length
             // ~~~~~~~~~~~~~~~~~

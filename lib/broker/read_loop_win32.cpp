@@ -98,9 +98,7 @@ namespace {
         reader * initiate_read ();
         void cancel ();
 
-        list_member<reader> & get_list_member () {
-            return listm_;
-        }
+        list_member<reader> & get_list_member () { return listm_; }
 
     private:
         /// Must be the first object in the structure. The address of this member is passed to the
@@ -176,9 +174,7 @@ namespace {
 
     // cancel
     // ~~~~~~
-    void reader::cancel () {
-        ::CancelIoEx (pipe_handle_.get (), &overlap_);
-    }
+    void reader::cancel () { ::CancelIoEx (pipe_handle_.get (), &overlap_); }
 
     // read
     // ~~~~
@@ -247,9 +243,7 @@ namespace {
         command_processor_->push_command (std::move (request_), record_file_);
     }
 
-    void reader::completed_with_error () {
-        request_.reset ();
-    }
+    void reader::completed_with_error () { request_.reset (); }
 
 
     //*                           _    *
@@ -339,7 +333,7 @@ namespace {
         return result;
     }
 
-} // (anonymous namespace)
+} // namespace
 
 namespace {
 
@@ -427,7 +421,7 @@ namespace {
         }
     }
 
-} // (anonymous namespace)
+} // namespace
 
 
 namespace pstore {

@@ -72,8 +72,9 @@ namespace {
     cl::list<std::string> Fragment ("fragment",
                                     cl::desc ("Dump the contents of a specific fragment"),
                                     cl::cat (WhatCat));
-    cl::opt<bool> AllFragments ("all-fragments", cl::desc ("Dump the contents of the fragments index"),
-                             cl::cat (WhatCat));
+    cl::opt<bool> AllFragments ("all-fragments",
+                                cl::desc ("Dump the contents of the fragments index"),
+                                cl::cat (WhatCat));
 
     cl::list<std::string>
         Ticket ("ticket", cl::desc ("Dump the contents of a specific ticket or ticket-file"),

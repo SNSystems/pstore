@@ -106,7 +106,7 @@ namespace pstore {
 
             template <typename Transaction>
             class database_writer final
-                : public writer_base<details::database_writer_policy<Transaction>> {
+                    : public writer_base<details::database_writer_policy<Transaction>> {
             public:
                 /// \brief Constructs the writer using the transaction.
                 /// \param transaction The active transaction to the store to which the
@@ -137,15 +137,9 @@ namespace pstore {
                         : db_ (db)
                         , addr_ (addr) {}
 
-                pstore::database const & get_db () const {
-                    return db_;
-                }
-                pstore::address get_address () const {
-                    return addr_;
-                }
-                void skip (std::size_t distance) {
-                    addr_ += distance;
-                }
+                pstore::database const & get_db () const { return db_; }
+                pstore::address get_address () const { return addr_; }
+                void skip (std::size_t distance) { addr_ += distance; }
 
                 /// Reads a single instance of a standard-layout type Ty from the current store
                 /// address.

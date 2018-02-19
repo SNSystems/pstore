@@ -76,9 +76,7 @@ namespace {
         std::list<std::string> strings_;
     };
 
-    ClCommandLine::ClCommandLine () {
-        cl::option::reset_container ();
-    }
+    ClCommandLine::ClCommandLine () { cl::option::reset_container (); }
     ClCommandLine::~ClCommandLine () {
         cl::option::reset_container ();
         strings_.clear ();

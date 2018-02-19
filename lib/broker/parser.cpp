@@ -83,9 +83,7 @@ namespace {
         return extract_word_no_ws (skip_ws (first, last), last);
     }
 
-    auto substr (range const & range) -> std::string {
-        return {range.first, range.second};
-    }
+    auto substr (range const & range) -> std::string { return {range.first, range.second}; }
 
 
     auto extract_payload (pstore::broker::message_type const & msg)

@@ -82,7 +82,7 @@ namespace {
         data_file (cl::Positional,
                    cl::desc ("Path of the pstore repository to use for index test."), cl::Required);
 
-} // (anonymous namespace)
+} // namespace
 
 namespace {
 
@@ -108,7 +108,7 @@ namespace {
         unsigned seed_;
     };
 
-} // (anonymous namespace)
+} // namespace
 
 namespace {
     using random_list = std::vector<std::pair<pstore::index::digest, pstore::address>>;
@@ -220,7 +220,7 @@ namespace {
                                              std::end (expected_results), check_key);
         return is_found.load ();
     }
-} // (anonymous namespace)
+} // namespace
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try
