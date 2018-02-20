@@ -96,10 +96,10 @@
 #include <exception>
 #include <iostream>
 
-#include "pstore_support/file.hpp"
-#include "pstore_support/portab.hpp"
 #include "pstore/file_header.hpp"
 #include "pstore/memory_mapper.hpp"
+#include "pstore_support/file.hpp"
+#include "pstore_support/portab.hpp"
 
 namespace {
 
@@ -125,14 +125,6 @@ namespace {
     };
 } // namespace
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, proc) catch (ex) proc
-#else
-#define TRY
-#define CATCH(ex, proc)
-#endif
-
 int main (int argc, char ** argv) {
     int exit_code = EXIT_SUCCESS;
 
@@ -143,7 +135,7 @@ int main (int argc, char ** argv) {
         return EXIT_FAILURE;
     }
 
-    TRY {
+    PSTORE_TRY {
         random_generator<std::size_t> rand;
 
         auto const header_size = sizeof (pstore::header) + sizeof (pstore::trailer);
@@ -171,17 +163,18 @@ int main (int argc, char ** argv) {
             ptr[offset] = new_value;
         }
     }
-    CATCH (std::exception const & ex,
-           {
-               std::cerr << "Error: " << ex.what () << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-        CATCH (...,
-               {
-                   std::cerr << "Unknown error" << std::endl;
-                   exit_code = EXIT_FAILURE;
-               }) std::cerr
-        << "Mangle returning " << exit_code << '\n';
+    // clang-format on
+    PSTORE_CATCH (std::exception const & ex, {
+        std::cerr << "Error: " << ex.what () << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        std::cerr << "Unknown error" << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format off
+
+    std::cerr << "Mangle returning " << exit_code << '\n';
     return exit_code;
 }
 // eof: tools/mangle/mangle.cpp

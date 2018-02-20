@@ -62,16 +62,6 @@ using pstore::index::details::index_pointer;
 using pstore::index::details::internal_node;
 using pstore::index::details::linear_node;
 
-// FIXME: there are numerous definitions of these macros. Put them in portab.hpp.
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, proc) catch (ex) proc
-#else
-#define TRY
-#define CATCH(ex, proc)
-#endif
-
-
 namespace {
     template <typename NodeType>
     struct node_type_name {};
@@ -208,7 +198,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    TRY {
+    PSTORE_TRY {
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
         if (exit_code != EXIT_SUCCESS) {
@@ -222,15 +212,16 @@ int main (int argc, char * argv[]) {
         dump_if_selected<indices::name> (opt, db);
         dump_if_selected<indices::write> (opt, db);
     }
-    CATCH (std::exception const & ex, {
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';
         exit_code = EXIT_FAILURE;
     })
-    CATCH (...,
-           {
-               std::cerr << "Unknown exception\n";
-               exit_code = EXIT_FAILURE;
-           })
+    PSTORE_CATCH (..., {
+       std::cerr << "Unknown exception\n";
+       exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
     return exit_code;
 }
 

@@ -107,7 +107,7 @@ namespace vacuum {
         pstore::threads::set_name ("copy");
         pstore::logging::create_log_stream ("vacuumd");
 
-        TRY {
+        PSTORE_TRY {
             pstore::logging::log (pstore::logging::priority::notice, "Copy thread started");
             while (!st->done) {
                 pstore::logging::log (pstore::logging::priority::notice,
@@ -211,14 +211,16 @@ namespace vacuum {
             }
         }
         // clang-format off
-        CATCH (std::exception const & ex, {
+        PSTORE_CATCH (std::exception const & ex, {
             pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
                                   ex.what ());
         })
-        CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
-            pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
-        }
-    // clang-format on
+        PSTORE_CATCH (..., {
+            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+        })
+        // clang-format on
+        pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
+    }
+
 } // end namespace vacuum
 // eof: lib/vacuum/copy.cpp

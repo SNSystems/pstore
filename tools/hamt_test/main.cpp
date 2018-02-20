@@ -54,6 +54,7 @@
 #include "pstore/transaction.hpp"
 #include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_cmd_util/parallel_for_each.hpp"
+#include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
@@ -222,14 +223,6 @@ namespace {
     }
 } // namespace
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 #ifdef _WIN32
 int _tmain (int argc, TCHAR * argv[]) {
 #else
@@ -237,7 +230,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    TRY {
+    PSTORE_TRY {
         cl::ParseCommandLineOptions (argc, argv, "Tests the pstore index code");
 
 
@@ -283,16 +276,18 @@ int main (int argc, char * argv[]) {
 
         database.close ();
     }
-    CATCH (std::exception const & ex, {
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
         error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (what)
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
-    CATCH (..., {
+    PSTORE_CATCH (..., {
         std::cerr << "An unknown error occurred." << std::endl;
         exit_code = EXIT_FAILURE;
     })
+    // clang-format on
 
     return exit_code;
 }

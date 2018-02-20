@@ -68,14 +68,6 @@
 
 #include "vacuum/status.hpp"
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 namespace {
     template <typename Lock>
     bool can_lock (Lock & lock) {
@@ -98,7 +90,7 @@ namespace vacuum {
         pstore::logging::create_log_stream ("vacuumd");
 
         st->watch_running = true;
-        TRY {
+        PSTORE_TRY {
             std::unique_lock<std::mutex> mlock (wst.start_watch_mutex);
             while (!st->done) {
                 // Block until the start_watch condition variable is signaled.
@@ -131,14 +123,17 @@ namespace vacuum {
                 }
             }
         }
-        CATCH (std::exception const & ex,
-               {
-                   pstore::logging::log (pstore::logging::priority::error,
-                                         "An error occurred: ", ex.what ());
-               })
-        CATCH (..., { pstore::logging::log (pstore::logging::priority::error, "Unknown error"); })
+        // clang-format off
+        PSTORE_CATCH (std::exception const & ex, {
+            pstore::logging::log (pstore::logging::priority::error,
+                                  "An error occurred: ", ex.what ());
+        })
+        PSTORE_CATCH (..., {
+            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+        })
+        // clang-format on
 
-            from.reset ();
+        from.reset ();
         pstore::logging::log (pstore::logging::priority::notice, "Watch thread exiting");
         st->watch_running = false;
     }

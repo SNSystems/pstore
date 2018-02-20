@@ -86,20 +86,7 @@
 #include <utility>
 
 #include "pstore_support/bit_count.hpp"
-
-// TODO: replace this shrapnel with C++17 [[fallthrough]]
-#if defined(__clang__)
-#define PSTORE_FALLTHROUGH [[clang::fallthrough]]
-#elif defined(__GNUC__)
-#define PSTORE_FALLTHROUGH //__attribute__ ((fallthrough)) GCC 7 required?
-#elif defined(_MSC_VER)
-// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
-// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
-#include <sal.h>
-#define PSTORE_FALLTHROUGH __fallthrough
-#else
-#define PSTORE_FALLTHROUGH
-#endif
+#include "pstore_support/portab.hpp"
 
 namespace pstore {
     namespace varint {

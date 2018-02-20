@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/CMakeLists.txt --------------------------------------------===//
+#===- unittests/pstore_json/CMakeLists.txt --------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,17 +41,12 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-
 include (add_pstore)
-add_subdirectory (broker)
-add_subdirectory (common)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_json)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
+add_pstore_unit_test (pstore-json-unit-tests
+    test_json.cpp
+    test_utf.cpp
+    test_number.cpp
+)
+target_link_libraries (pstore-json-unit-tests pstore-json-lib)
 
-# eof: unittests/CMakeLists.txt
+# eof: unittests/pstore_json/CMakeLists.txt

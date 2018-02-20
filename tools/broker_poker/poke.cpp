@@ -63,12 +63,12 @@
 #include <unistd.h>
 #endif
 
-#include "pstore_support/portab.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/utf.hpp"
 #include "pstore_broker_intf/fifo_path.hpp"
 #include "pstore_broker_intf/send_message.hpp"
 #include "pstore_broker_intf/writer.hpp"
+#include "pstore_support/gsl.hpp"
+#include "pstore_support/portab.hpp"
+#include "pstore_support/utf.hpp"
 
 #include "flood_server.hpp"
 #include "switches.hpp"
@@ -78,14 +78,6 @@ namespace {
     constexpr bool error_on_timeout = true;
 } // namespace
 
-
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, handler) catch (ex) handler
-#else
-#define TRY
-#define CATCH(ex, handler)
-#endif
 
 #ifdef _WIN32
 #define NATIVE_TEXT(str) _TEXT (str)
@@ -116,7 +108,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     // TODO:Make sure that the broker is running?
-    TRY {
+    PSTORE_TRY {
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
         if (exit_code == EXIT_FAILURE) {
@@ -142,16 +134,18 @@ int main (int argc, char * argv[]) {
             pstore::broker::send_message (wr, error_on_timeout, "SUICIDE", nullptr);
         }
     }
-    CATCH (std::exception const & ex,
-           {
-               auto what = ex.what ();
-               error_stream << NATIVE_TEXT ("An error occurred: ")
-                            << pstore::utf::to_native_string (what) << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        auto what = ex.what ();
+        error_stream << NATIVE_TEXT ("An error occurred: ")
+                    << pstore::utf::to_native_string (what) << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
         std::cerr << "An unknown error occurred." << std::endl;
         exit_code = EXIT_FAILURE;
-    }) return exit_code;
+    })
+    // clang-format on
+    return exit_code;
 }
 // eof: tools/broker_poker/poke.cpp

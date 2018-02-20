@@ -69,14 +69,15 @@ using TCHAR = char;
 #endif
 
 // pstore includes.
-#include "pstore_cmd_util/cl/command_line.hpp"
-#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
-#include "pstore/index_types.hpp"
 #include "pstore/hamt_map.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/index_types.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/transaction.hpp"
+#include "pstore_cmd_util/cl/command_line.hpp"
+#include "pstore_support/portab.hpp"
+#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
 #include "config.hpp"
@@ -210,14 +211,6 @@ namespace {
                    cl::Required);
 } // namespace
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(x, code) catch (x) code
-#else
-#define TRY
-#define CATCH(x, code)
-#endif
-
 
 #ifdef _WIN32
 int _tmain (int argc, TCHAR * argv[]) {
@@ -229,7 +222,7 @@ int main (int argc, char * argv[]) {
     using pstore::utf::from_native_string;
     using pstore::utf::to_native_string;
 
-    TRY {
+    PSTORE_TRY {
         cl::ParseCommandLineOptions (argc, argv, "Exerices the pstore index code");
 
         pstore::database database (std::string{data_file}, pstore::database::access_mode::writable);
@@ -289,19 +282,19 @@ int main (int argc, char * argv[]) {
 
         database.close ();
     }
-    CATCH (std::exception const & ex,
-           {
-               auto what = ex.what ();
-               error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
-                            << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (...,
-           {
-               std::cerr << "An unknown error occurred." << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        auto what = ex.what ();
+        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
+                    << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        std::cerr << "An unknown error occurred." << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
 
-        return exit_code;
+    return exit_code;
 }
 // eof: tools/inserter/main.cpp

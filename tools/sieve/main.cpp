@@ -129,17 +129,19 @@ int main (int argc, char * argv[]) {
             write_output (sieve<std::uint64_t> (opt.maximum), opt.endianness, out);
         }
     }
-    CATCH (switches::parse_failure const &, { exit_code = EXIT_FAILURE; })
-    CATCH (std::exception const & ex,
-           {
-               std::cerr << "An error occurred: " << ex.what () << std::endl;
-               exit_code = EXIT_FAILURE;
-           }) CATCH (...,
-                     {
-                         std::cerr << "Unknown exception" << std::endl;
-                         exit_code = EXIT_FAILURE;
-                     })
+    // clang-format off
+    CATCH (switches::parse_failure const &, {
+        exit_code = EXIT_FAILURE;
+    })
+    CATCH (std::exception const & ex, {
+        std::cerr << "An error occurred: " << ex.what () << std::endl;
+        exit_code = EXIT_FAILURE;
+    }) CATCH (..., {
+        std::cerr << "Unknown exception" << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
 
-        return exit_code;
+    return exit_code;
 }
 // eof: tools/sieve/main.cpp

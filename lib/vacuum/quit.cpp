@@ -70,15 +70,6 @@
 #include "vacuum/status.hpp"
 #include "vacuum/watch.hpp"
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, handler) catch (ex) handler
-#else
-#define TRY
-#define CATCH(ex, handler)
-#endif
-
-
 namespace {
 
     pstore::signal_cv quit_info;
@@ -87,7 +78,7 @@ namespace {
     //* quit thread *
     //***************
     void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> /*src_db*/) {
-        TRY {
+        PSTORE_TRY {
             pstore::threads::set_name ("quit");
             pstore::logging::create_log_stream ("vacuum.quit");
 
@@ -108,10 +99,10 @@ namespace {
                                   "Marked job as done. Notified start_watch_cv and complete_cv.");
         }
         // clang-format off
-        CATCH (std::exception const & ex, {
+        PSTORE_CATCH (std::exception const & ex, {
             pstore::logging::log (pstore::logging::priority::error, "error:", ex.what ());
         })
-        CATCH (..., {
+        PSTORE_CATCH (..., {
             pstore::logging::log (pstore::logging::priority::error, "unknown exception");
         })
         // clang-format on

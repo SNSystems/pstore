@@ -41,6 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
+
 add_subdirectory (broker)
 add_subdirectory (broker_poker) # A utility for exercising the broker agent.
 add_subdirectory (diff)         # Dumps diff between two pstore revisions as YAML.
@@ -48,9 +49,11 @@ add_subdirectory (dump)         # Dumps pstore contents as YAML.
 add_subdirectory (hamt_test)    # A utility to check the HAMT index
 add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz DOT graphs.
 add_subdirectory (inserter)     # A utility to exercise the digest index
+add_subdirectory (json)         # A small wrapper for the JSON parser library.
 add_subdirectory (mangle)       # A simple file fuzzing utility
 add_subdirectory (read)         # A utility for reading the write or strings index. 
 add_subdirectory (sieve)        # A utility to generate data for the system tests
 add_subdirectory (vacuum)       # Data store garbage collector utility
 add_subdirectory (write)
+
 # eof: tools/CMakeLists.txt

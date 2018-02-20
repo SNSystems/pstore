@@ -1,10 +1,10 @@
-//*                  _        *
-//*  _ __ ___   __ _(_)_ __   *
-//* | '_ ` _ \ / _` | | '_ \  *
-//* | | | | | | (_| | | | | | *
-//* |_| |_| |_|\__,_|_|_| |_| *
-//*                           *
-//===- tools/diff/main.cpp ------------------------------------------------===//
+//*    _                  *
+//*   (_)___  ___  _ __   *
+//*   | / __|/ _ \| '_ \  *
+//*   | \__ \ (_) | | | | *
+//*  _/ |___/\___/|_| |_| *
+//* |__/                  *
+//===- tools/json/json.cpp ------------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,79 +41,71 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file main.cpp
-
+#include <array>
+#include <fstream>
 #include <iostream>
 
+#include "pstore_json/dom_types.hpp"
+#include "pstore_json/json.hpp"
+#include "pstore_json/utf.hpp"
 #include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp"
-
-#include "./switches.hpp"
 
 namespace {
 
-    auto & out_stream =
-#if defined(_WIN32) && defined(_UNICODE)
-        std::wcout;
-#else
-        std::cout;
-#endif
+    template <typename IStream>
+    int slurp (IStream & in) {
+        using ustreamsize = std::make_unsigned<std::streamsize>::type;
+        std::array<char, 256> buffer{{0}};
+        pstore::json::parser<pstore::json::yaml_output> p;
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-    auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
-        std::wcerr;
-#else
-        std::cerr;
-#endif
-#endif // PSTORE_CPP_EXCEPTIONS
+        while ((in.rdstate () &
+                (std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit)) == 0 &&
+               !p.has_error ()) {
+            in.read (&buffer[0], buffer.size ());
+            p.parse (&buffer[0],
+                     static_cast<ustreamsize> (std::max (in.gcount (), std::streamsize{0})));
+        }
 
-} // namespace
+        p.eof ();
 
+        if (in.bad ()) {
+            std::cerr << "There was an I/O error while reading.\n";
+            return EXIT_FAILURE;
+        }
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-int _tmain (int argc, TCHAR * argv[]) {
-#else
-int main (int argc, char * argv[]) {
-#endif
+        auto err = p.last_error ();
+        if (err) {
+            std::cerr << "Parse error: " << p.last_error ().message () << '\n';
+            return EXIT_FAILURE;
+        }
+
+        auto obj = p.callbacks ().result ();
+        std::cout << "\n----\n" << *obj << '\n';
+        return EXIT_SUCCESS;
+    }
+
+} // end anonymous namespace
+
+int main (int argc, const char * argv[]) {
     int exit_code = EXIT_SUCCESS;
-
     PSTORE_TRY {
-        switches opt;
-        std::tie (opt, exit_code) = get_switches (argc, argv);
-        if (exit_code != EXIT_SUCCESS) {
-            return exit_code;
-        }
-
-        if (opt.hex) {
-            pstore::dump::number_base::hex ();
+        if (argc < 2) {
+            exit_code = slurp (std::cin);
         } else {
-            pstore::dump::number_base::dec ();
+            std::ifstream input (argv[1]);
+            exit_code = slurp (input);
         }
-
-        pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
-        std::tie (opt.first_revision, opt.second_revision) = pstore::diff::update_revisions (
-            std::make_pair (opt.first_revision, opt.second_revision), db.get_current_revision ());
-
-        pstore::dump::object::container file;
-        file.emplace_back ("indices", pstore::diff::make_indices_diff (db, opt.first_revision,
-                                                                       *opt.second_revision));
-
-        auto output = pstore::dump::make_value (file);
-        out_stream << NATIVE_TEXT ("---\n") << *output << NATIVE_TEXT ("\n...\n");
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << std::endl;
+        std::cerr << "Error: " << ex.what () << '\n';
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        std::cerr << "Unknown exception.\n";
         exit_code = EXIT_FAILURE;
     })
     // clang-format on
     return exit_code;
 }
-
-// eof: tools/diff/main.cpp
+// eof: tools/json/json.cpp

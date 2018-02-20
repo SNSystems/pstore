@@ -84,15 +84,6 @@
 
 #include "./switches.hpp"
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
-
 namespace {
 
 #ifdef PSTORE_CPP_EXCEPTIONS
@@ -113,7 +104,7 @@ int _tmain (int argc, TCHAR * argv[]) {
 int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
-    TRY {
+    PSTORE_TRY {
         pstore::threads::set_name ("main");
         pstore::logging::create_log_stream ("vacuumd");
 
@@ -188,21 +179,21 @@ int main (int argc, char * argv[]) {
         pstore::logging::log (pstore::logging::priority::notice,
                               "main () exiting: ", pstore::quoted (src_path));
     }
-    CATCH (std::exception const & ex,
-           {
-               char const * what = ex.what ();
-               error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
-                            << pstore::utf::to_native_string (what) << std::endl;
-               pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (...,
-           {
-               std::cerr << "vacuumd: An unknown error occurred." << std::endl;
-               pstore::logging::log (pstore::logging::priority::error, "Unknown error");
-               exit_code = EXIT_FAILURE;
-           })
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        char const * what = ex.what ();
+        error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
+                    << pstore::utf::to_native_string (what) << std::endl;
+        pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        std::cerr << "vacuumd: An unknown error occurred." << std::endl;
+        pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
 
-        return exit_code;
+    return exit_code;
 }
 // eof: tools/vacuum/main.cpp

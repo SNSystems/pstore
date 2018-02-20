@@ -55,13 +55,8 @@
 #include <ostream>
 
 #include "pstore_support/error.hpp"
+#include "pstore_support/portab.hpp"
 #include "pstore_support/random.hpp"
-
-#ifdef __clang__
-#define PSTORE_FALLTHROUGH [[clang::fallthrough]]
-#else
-#define PSTORE_FALLTHROUGH
-#endif
 
 namespace {
     char digit_to_hex (unsigned v) {

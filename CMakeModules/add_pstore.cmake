@@ -61,6 +61,7 @@ function (add_pstore_additional_compiler_flag name)
     endif ()
 endfunction(add_pstore_additional_compiler_flag)
 
+
 #############################
 # pstore_set_output_directory
 #############################
@@ -135,7 +136,12 @@ function (add_pstore_library target_name)
         # for config.hpp
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
     endif (PSTORE_IS_INSIDE_LLVM)
+
     set_target_properties (${target_name} PROPERTIES FOLDER "pstore libraries")
+    target_include_directories (${target_name} PUBLIC
+        $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
+	$<INSTALL_INTERFACE:include>
+    )
 endfunction(add_pstore_library)
 
 
@@ -180,6 +186,7 @@ function (add_pstore_example name)
     target_link_libraries (example-${name} pstore-support-lib pstore)
 endfunction (add_pstore_example)
 
+
 ##########################
 # add_pstore_test_library
 ##########################
@@ -203,6 +210,7 @@ function (add_pstore_test_library target_name)
         target_link_libraries (${target_name} gmock_main gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
 endfunction(add_pstore_test_library)
+
 
 ######################
 # add_pstore_unit_test

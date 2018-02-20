@@ -49,14 +49,6 @@
 #include "pstore_support/portab.hpp"
 #include "pstore_support/thread.hpp"
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 namespace pstore {
 
     // ******************************
@@ -99,16 +91,18 @@ namespace pstore {
     }
 
     void heartbeat::worker_thread::run () noexcept {
-        TRY {
+        PSTORE_TRY {
             std::unique_lock<std::mutex> lock (mut_);
             while (!done_) {
                 this->step ();
                 cv_.wait_for (lock, *sleep_time_);
             }
         }
-        CATCH (..., {
-                        // Something bad happened. What's a girl to do?
-                    })
+        // clang-format off
+        PSTORE_CATCH (..., {
+            // Something bad happened. What's a girl to do?
+        })
+        // clang-format on
     }
 
     void heartbeat::worker_thread::stop () noexcept {

@@ -68,6 +68,7 @@ using TCHAR = char;
 #include "pstore/sstring_view_archive.hpp"
 #include "pstore/transaction.hpp"
 #include "pstore_support/error.hpp"
+#include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
@@ -141,14 +142,6 @@ namespace {
 } // namespace
 
 
-#if PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
@@ -158,7 +151,7 @@ int main (int argc, char * argv[]) {
 
     using pstore::utf::to_native_string;
 
-    TRY {
+    PSTORE_TRY {
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
         if (exit_code != EXIT_SUCCESS) {
@@ -202,19 +195,19 @@ int main (int argc, char * argv[]) {
 
         database.close ();
     }
-    CATCH (std::exception const & ex,
-           {
-               auto what = ex.what ();
-               error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
-                            << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (...,
-           {
-               std::cerr << "An unknown error occurred." << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        auto what = ex.what ();
+        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
+                    << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        std::cerr << "An unknown error occurred." << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
 
-        return exit_code;
+    return exit_code;
 }
 // eof: tools/write/main.cpp

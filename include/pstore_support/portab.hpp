@@ -52,6 +52,15 @@
 #undef PSTORE_CPP_EXCEPTIONS
 #endif
 
+#ifdef PSTORE_CPP_EXCEPTIONS
+#define PSTORE_TRY try
+#define PSTORE_CATCH(x, code) catch (x) code
+#else
+#define PSTORE_TRY
+#define PSTORE_CATCH(x, code)
+#endif
+
+
 
 #ifdef __cpp_rtti
 #define PSTORE_CPP_RTTI __cpp_rtti
@@ -91,6 +100,20 @@
 #ifndef PSTORE_STATIC_ASSERT
 /// A single-argument version of static_assert. Remove once we can run the compiler in C++14 mode.
 #define PSTORE_STATIC_ASSERT(x) static_assert (x, #x)
+#endif
+
+// TODO: replace this shrapnel with C++17 [[fallthrough]]
+#if defined(__clang__)
+#define PSTORE_FALLTHROUGH [[clang::fallthrough]]
+#elif defined(__GNUC__)
+#define PSTORE_FALLTHROUGH //__attribute__ ((fallthrough)) GCC 7 required?
+#elif defined(_MSC_VER)
+// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
+// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
+#include <sal.h>
+#define PSTORE_FALLTHROUGH __fallthrough
+#else
+#define PSTORE_FALLTHROUGH
 #endif
 
 #endif // PSTORE_SUPPORT_PORTAB_HPP

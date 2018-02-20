@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/CMakeLists.txt --------------------------------------------===//
+#===- tools/json/CMakeLists.txt -------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,16 +42,15 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-include (add_pstore)
-add_subdirectory (broker)
-add_subdirectory (common)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_json)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
-add_subdirectory (vacuum)
+add_pstore_executable (pstore-json json.cpp)
+target_link_libraries (pstore-json pstore-json-lib)
 
-# eof: unittests/CMakeLists.txt
+add_custom_command (TARGET pstore-json
+    PRE_LINK
+    COMMAND pstore-json-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/output.xml"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "Running JSON unit tests"
+    VERBATIM
+)
+
+# eof: tools/json/CMakeLists.txt

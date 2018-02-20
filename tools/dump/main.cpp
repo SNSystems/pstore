@@ -296,15 +296,6 @@ namespace {
 
 } // end anonymous namespace
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, proc) catch (ex) proc
-#else
-#define TRY
-#define CATCH(ex, proc)
-#endif
-
-
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
@@ -312,7 +303,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    TRY {
+    PSTORE_TRY {
 #if PSTORE_IS_INSIDE_LLVM
         llvm::sys::PrintStackTraceOnErrorSignal (argv[0]);
         llvm::PrettyStackTraceProgram X (argc, argv);
@@ -435,16 +426,18 @@ int main (int argc, char * argv[]) {
         pstore::dump::value_ptr v = make_value (output);
         out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
     }
-    CATCH (std::exception const & ex,
-           {
-               error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                            << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                     << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
         error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
-    }) return exit_code;
+    })
+    // clang-format on
+    return exit_code;
 }
 
 // eof: tools/dump/main.cpp

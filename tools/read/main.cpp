@@ -154,14 +154,6 @@ namespace {
     }
 } // namespace
 
-#if PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
@@ -171,7 +163,7 @@ int main (int argc, char * argv[]) {
     using pstore::utf::from_native_string;
     using pstore::utf::to_native_string;
 
-    TRY {
+    PSTORE_TRY {
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
         if (exit_code != EXIT_SUCCESS) {
@@ -193,19 +185,19 @@ int main (int argc, char * argv[]) {
             exit_code = EXIT_FAILURE;
         }
     }
-    CATCH (std::exception const & ex,
-           {
-               error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                            << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
-    CATCH (...,
-           {
-               error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
-               exit_code = EXIT_FAILURE;
-           })
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                    << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format on
 
-        return exit_code;
+    return exit_code;
 }
 
 // eof: tools/read/main.cpp
