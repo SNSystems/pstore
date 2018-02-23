@@ -52,6 +52,7 @@
 #include <iterator>
 #include <memory>
 #include <sstream>
+#include <system_error>
 #include <vector>
 
 #include "dump/db_value.hpp"
@@ -130,6 +131,7 @@ namespace std {
     template <>
     struct is_error_code_enum<dump_error_code> : public std::true_type {};
 
+    std::error_code make_error_code (dump_error_code e);
     std::error_code make_error_code (dump_error_code e) {
         static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                        "base type of error_code must be int to permit safe static cast");
@@ -261,16 +263,15 @@ namespace {
         if (str.length () != 32) {
             pstore::raise_error_code (std::make_error_code (dump_error_code::bad_digest));
         }
-        auto get64 = [&str](int index) {
-            assert (index >= 0 && static_cast<unsigned> (index) < str.length ());
+        auto get64 = [&str](unsigned index) {
+            assert (index < str.length ());
             auto result = std::uint64_t{0};
             for (auto shift = 60; shift >= 0; shift -= 4, ++index) {
                 result |= (static_cast<std::uint64_t> (hex_to_digit (str[index])) << shift);
             }
-            assert (index >= 0);
             return result;
         };
-        return {get64 (0), get64 (16)};
+        return {get64 (0U), get64 (16U)};
     }
 
 
