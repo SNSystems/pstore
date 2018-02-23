@@ -72,7 +72,7 @@ std::string pstore::error_category::message (int error) const {
 // * get_error_category *
 // **********************
 std::error_category const & pstore::get_error_category () {
-    static error_category const cat;
+    static pstore::error_category const cat;
     return cat;
 }
 
