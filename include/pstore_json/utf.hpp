@@ -83,10 +83,8 @@ namespace pstore {
 
         template <typename CharType = char, typename OutputIt>
         OutputIt replacement_char (OutputIt out) {
-            *(out++) = static_cast<CharType> (0xEF);
-            *(out++) = static_cast<CharType> (0xBF);
-            *(out++) = static_cast<CharType> (0xBD);
-            return out;
+            char32_t const replacement_character = 0xFFFD; // Unicode REPLACEMENT CHARACTER (U+FFFD)
+            return code_point_to_utf8 (replacement_character, out);
         }
 
         template <typename ResultType>
