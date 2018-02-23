@@ -60,7 +60,7 @@ namespace pstore {
         return std::isspace (static_cast<int> (uc)) != 0;
     }
 
-    inline bool isspace (wchar_t c) { return std::iswspace (c) != 0; }
+    inline bool isspace (wchar_t c) { return std::iswspace (static_cast<wint_t> (c)) != 0; }
 
 } // namespace pstore
 
