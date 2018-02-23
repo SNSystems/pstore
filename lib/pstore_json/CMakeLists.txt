@@ -54,6 +54,6 @@ add_pstore_library (pstore-json-lib STATIC
     json_error.cpp
     utf.cpp
 )
-target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib)
+target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib pstore-dump-lib)
 
 # eof: lib/pstore_json/CMakeLists.txt

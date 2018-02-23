@@ -50,27 +50,27 @@ using namespace pstore;
 TEST (Number, Zero) {
     json::parser<json::yaml_output> p;
     p.parse ("0");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
+    pstore::dump::number_long * n = v->dynamic_cast_number_long ();
     ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->as_long (), nullptr);
-    EXPECT_EQ (v->as_long ()->get (), 0L);
+    EXPECT_EQ (n->get (), 0L);
 }
 
 TEST (Number, MinusOne) {
     json::parser<json::yaml_output> p;
     p.parse ("-1");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->as_long (), nullptr);
-    EXPECT_EQ (v->as_long ()->get (), -1L);
+    ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
+    EXPECT_EQ (v->dynamic_cast_number_long ()->get (), -1L);
 }
 
 TEST (Number, MinusMinus) {
     json::parser<json::yaml_output> p;
     p.parse ("--");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
@@ -79,31 +79,31 @@ TEST (Number, MinusMinus) {
 TEST (Number, OneTwoThree) {
     json::parser<json::yaml_output> p;
     p.parse ("123");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->as_long (), nullptr);
-    EXPECT_EQ (v->as_long ()->get (), 123L);
+    ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
+    EXPECT_EQ (v->dynamic_cast_number_long ()->get (), 123L);
 }
 
 TEST (Number, Pi) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("3.1415");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 3.1415);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 3.1415);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("-3.1415");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), -3.1415);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), -3.1415);
     }
 }
 
@@ -111,51 +111,51 @@ TEST (Number, Point45) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("0.45");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.45);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.45);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("-0.45");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), -0.45);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), -0.45);
     }
 }
 
 TEST (Number, ZeroExp2) {
     json::parser<json::yaml_output> p;
     p.parse ("0e2");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->as_double (), nullptr);
-    ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.0);
+    ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+    ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.0);
 }
 
 TEST (Number, OneExp2) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("1e2");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 100.0);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 100.0);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("1e+2");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 100.0);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 100.0);
     }
 }
 
@@ -163,38 +163,38 @@ TEST (Number, OneExpMinus2) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("0.01");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.01);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("1e-2");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.01);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("1E-2");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.01);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("1E-02");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->as_double ()->get (), 0.01);
+        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
+        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
     }
 }
 
@@ -205,11 +205,11 @@ TEST (Number, IntegerMaxAndMin) {
 
         json::parser<json::yaml_output> p;
         p.parse (str_max);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_long (), nullptr);
-        EXPECT_EQ (v->as_long ()->get (), long_max);
+        ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
+        EXPECT_EQ (v->dynamic_cast_number_long ()->get (), long_max);
     }
     {
         auto const long_min = std::numeric_limits<long>::min ();
@@ -217,11 +217,11 @@ TEST (Number, IntegerMaxAndMin) {
 
         json::parser<json::yaml_output> p;
         p.parse (str_min);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->as_long (), nullptr);
-        EXPECT_EQ (v->as_long ()->get (), long_min);
+        ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
+        EXPECT_EQ (v->dynamic_cast_number_long ()->get (), long_min);
     }
 }
 
@@ -231,7 +231,7 @@ TEST (Number, IntegerPositiveOverflow) {
 
     json::parser<json::yaml_output> p;
     p.parse (str);
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
@@ -241,7 +241,7 @@ TEST (Number, IntegerNegativeOverflow) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("-123123123123123123123123123123");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
@@ -252,7 +252,7 @@ TEST (Number, IntegerNegativeOverflow) {
 
         json::parser<json::yaml_output> p;
         p.parse (str);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
@@ -263,7 +263,7 @@ TEST (Number, RealPositiveOverflow) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("123123e100000");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
@@ -271,7 +271,7 @@ TEST (Number, RealPositiveOverflow) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("9999E999");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
@@ -281,7 +281,7 @@ TEST (Number, RealPositiveOverflow) {
 TEST (Number, BadExponentDigit) {
     json::parser<json::yaml_output> p;
     p.parse ("1Ex");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
@@ -291,7 +291,7 @@ TEST (Number, BadFractionDigit) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("1..");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
@@ -299,7 +299,7 @@ TEST (Number, BadFractionDigit) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("1.E");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));

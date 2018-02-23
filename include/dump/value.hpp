@@ -85,10 +85,14 @@ namespace pstore {
         std::ostream & operator<< (std::ostream & os, indent const & ind);
         std::wostream & operator<< (std::wostream & os, indent const & ind);
 
-
-
+        class array;
+        class boolean;
         class object;
-        class number_base;
+        class null;
+        class number_long;
+        class number_ulong;
+        class number_double;
+        class string;
 
         /// \brief The abstract base class for heterogeneous values.
         class value {
@@ -99,10 +103,33 @@ namespace pstore {
             value (value const &) = default;
             value & operator= (value const &) = default;
 
-            virtual object * dynamic_cast_object () { return nullptr; }
-            virtual object const * dynamic_cast_object () const { return nullptr; }
-            virtual number_base * dynamic_cast_number () { return nullptr; }
-            virtual number_base const * dynamic_cast_number () const { return nullptr; }
+            ///@{
+            virtual object * dynamic_cast_object () noexcept { return nullptr; }
+            virtual object const * dynamic_cast_object () const noexcept { return nullptr; }
+            virtual array * dynamic_cast_array () noexcept { return nullptr; }
+            virtual array const * dynamic_cast_array () const noexcept { return nullptr; }
+
+            virtual number_long * dynamic_cast_number_long () noexcept { return nullptr; }
+            virtual number_long const * dynamic_cast_number_long () const noexcept {
+                return nullptr;
+            }
+            virtual number_ulong * dynamic_cast_number_ulong () noexcept { return nullptr; }
+            virtual number_ulong const * dynamic_cast_number_ulong () const noexcept {
+                return nullptr;
+            }
+            virtual number_double * dynamic_cast_number_double () noexcept { return nullptr; }
+            virtual number_double const * dynamic_cast_number_double () const noexcept {
+                return nullptr;
+            }
+
+            virtual boolean * dynamic_cast_boolean () noexcept { return nullptr; }
+            virtual boolean const * dynamic_cast_boolean () const noexcept { return nullptr; }
+            virtual null * dynamic_cast_null () noexcept { return nullptr; }
+            virtual null const * dynamic_cast_null () const noexcept { return nullptr; }
+            virtual string * dynamic_cast_string () noexcept { return nullptr; }
+            virtual string const * dynamic_cast_string () const noexcept { return nullptr; }
+            ///@}
+
 
             virtual bool is_number_like () const { return false; }
 
@@ -128,9 +155,6 @@ namespace pstore {
         public:
             ~number_base () override;
 
-            number_base * dynamic_cast_number () override { return this; }
-            number_base const * dynamic_cast_number () const override { return this; }
-
             bool is_number_like () const override { return true; }
 
             static void hex () { default_base_ = 16U; }
@@ -147,125 +171,96 @@ namespace pstore {
 
             static unsigned default_base_;
             unsigned const base_;
+
+            // write_decimal
+            // ~~~~~~~~~~~~~
+            template <typename T, typename OStream>
+            OStream & write_decimal (T value, OStream & os) const {
+                serialize::ios_flags_saver old_flags (os);
+                switch (base_) {
+                case 16: os << "0x" << std::hex; break;
+                case 8:
+                    if (value != 0) {
+                        os << "0";
+                    }
+                    os << std::oct;
+                    break;
+                case 10: os << std::dec; break;
+                default: assert (0); break;
+                }
+                return os << value;
+            }
         };
 
-
-        //*******************
-        //*   n u m b e r   *
-        //*******************
-        /// \brief  The class used to write numbers to an ostream.
-        template <typename Ty>
-        class number final : public number_base {
+        //*********************************
+        //*   n u m b e r _ d o u b l e   *
+        //*********************************
+        class number_double final : public number_base {
         public:
-            explicit number (Ty v)
+            number_double (double v) noexcept
                     : number_base ()
-                    , v_ (v) {}
-            number (Ty v, unsigned base)
-                    : number_base (base)
-                    , v_ (v) {}
+                    , v_{v} {}
+            double get () const noexcept { return v_; }
 
-            template <typename OStream>
-            OStream & write_fp (OStream & os, indent const & indent) const;
-            template <typename OStream>
-            OStream & write_decimal (OStream & os, indent const & indent) const;
+            number_double * dynamic_cast_number_double () noexcept override { return this; }
+            number_double const * dynamic_cast_number_double () const noexcept override {
+                return this;
+            }
 
         private:
-            std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
-            std::wostream & write_impl (std::wostream & os, indent const & indent) const override;
+            std::ostream & write_impl (std::ostream & os, indent const &) const override;
+            std::wostream & write_impl (std::wostream & os, indent const &) const override;
 
-            Ty v_;
+            double v_;
         };
 
-        // write_decimal
-        // ~~~~~~~~~~~~~
-        template <typename T>
-        template <typename OStream>
-        OStream & number<T>::write_decimal (OStream & os, indent const &) const {
-            serialize::ios_flags_saver old_flags (os);
-            switch (base_) {
-            case 16: os << "0x" << std::hex; break;
-            case 8:
-                if (v_ != 0) {
-                    os << "0";
-                }
-                os << std::oct;
-                break;
-            case 10: os << std::dec; break;
-            default: assert (0); break;
+        //*****************************
+        //*   n u m b e r _ l o n g   *
+        //*****************************
+        class number_long final : public number_base {
+        public:
+            number_long (long long v) noexcept
+                    : number_base ()
+                    , v_{v} {}
+            number_long (long long v, unsigned base)
+                    : number_base (base)
+                    , v_ (v) {}
+            long long get () const noexcept { return v_; }
+
+            number_long * dynamic_cast_number_long () noexcept override { return this; }
+            number_long const * dynamic_cast_number_long () const noexcept override { return this; }
+
+        private:
+            std::ostream & write_impl (std::ostream & os, indent const &) const override;
+            std::wostream & write_impl (std::wostream & os, indent const &) const override;
+
+            long long v_;
+        };
+
+        //*******************************
+        //*   n u m b e r _ u l o n g   *
+        //*******************************
+        class number_ulong final : public number_base {
+        public:
+            number_ulong (unsigned long long v) noexcept
+                    : number_base ()
+                    , v_{v} {}
+            number_ulong (unsigned long long v, unsigned base)
+                    : number_base (base)
+                    , v_ (v) {}
+            unsigned long long get () const noexcept { return v_; }
+
+            number_ulong * dynamic_cast_number_ulong () noexcept override { return this; }
+            number_ulong const * dynamic_cast_number_ulong () const noexcept override {
+                return this;
             }
-            os << v_;
-            return os;
-        }
 
-        // write_fp
-        // ~~~~~~~~
-        template <typename T>
-        template <typename OStream>
-        inline OStream & number<T>::write_fp (OStream & os, indent const &) const {
-            return os << v_;
-        }
+        private:
+            std::ostream & write_impl (std::ostream & os, indent const &) const override;
+            std::wostream & write_impl (std::wostream & os, indent const &) const override;
 
-        // write_impl
-        // ~~~~~~~~~~
-        template <typename Ty>
-        std::ostream & number<Ty>::write_impl (std::ostream & os, indent const & indent) const {
-            return this->write_decimal (os, indent);
-        }
-        template <typename Ty>
-        std::wostream & number<Ty>::write_impl (std::wostream & os, indent const & indent) const {
-            return this->write_decimal (os, indent);
-        }
-
-        template <>
-        inline std::ostream & number<std::uint8_t>::write_impl (std::ostream & os,
-                                                                indent const & indent) const {
-            return number<std::uint16_t> (v_).write_decimal (os, indent);
-        }
-        template <>
-        inline std::wostream & number<std::uint8_t>::write_impl (std::wostream & os,
-                                                                 indent const & indent) const {
-            return number<std::uint16_t> (v_).write_decimal (os, indent);
-        }
-        template <>
-        inline std::ostream & number<int>::write_impl (std::ostream & os,
-                                                       indent const & indent) const {
-            return this->write_decimal (os, indent);
-        }
-        template <>
-        inline std::wostream & number<int>::write_impl (std::wostream & os,
-                                                        indent const & indent) const {
-            return this->write_decimal (os, indent);
-        }
-        template <>
-        inline std::ostream & number<float>::write_impl (std::ostream & os,
-                                                         indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
-        template <>
-        inline std::wostream & number<float>::write_impl (std::wostream & os,
-                                                          indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
-        template <>
-        inline std::ostream & number<double>::write_impl (std::ostream & os,
-                                                          indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
-        template <>
-        inline std::wostream & number<double>::write_impl (std::wostream & os,
-                                                           indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
-        template <>
-        inline std::ostream & number<long double>::write_impl (std::ostream & os,
-                                                               indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
-        template <>
-        inline std::wostream & number<long double>::write_impl (std::wostream & os,
-                                                                indent const & indent) const {
-            return this->write_fp (os, indent);
-        }
+            unsigned long long v_;
+        };
 
 
         //*********************
@@ -277,10 +272,31 @@ namespace pstore {
             explicit boolean (bool v)
                     : v_ (v) {}
 
+            boolean * dynamic_cast_boolean () noexcept override { return this; }
+            boolean const * dynamic_cast_boolean () const noexcept override { return this; }
+
+            bool get () const noexcept { return v_; }
+
         private:
             std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
             std::wostream & write_impl (std::wostream & os, indent const & indent) const override;
             bool v_;
+        };
+
+        //***************
+        //*   n u l l   *
+        //***************
+        /// \brief A class used to denote a null value.
+        class null final : public value {
+        public:
+            null () = default;
+
+            null * dynamic_cast_null () noexcept override { return this; }
+            null const * dynamic_cast_null () const noexcept override { return this; }
+
+        private:
+            std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
+            std::wostream & write_impl (std::wostream & os, indent const & indent) const override;
         };
 
 
@@ -293,9 +309,14 @@ namespace pstore {
             /// Constructs a value string object.
             /// \param v The string represented by this value object.
             /// \param force_quoted  If true, forces the output string to be quoted.
-            explicit string (std::string v, bool force_quoted = false)
+            explicit string (std::string v, bool force_quoted = false) noexcept
                     : v_ (std::move (v))
                     , force_quoted_ (force_quoted) {}
+
+            string * dynamic_cast_string () noexcept override { return this; }
+            string const * dynamic_cast_string () const noexcept override { return this; }
+
+            std::string const & get () const noexcept { return v_; }
 
         private:
             template <typename OStream>
@@ -318,8 +339,7 @@ namespace pstore {
 
             /// Writes a non-trivial string which contains non-printable characters. Simple escape
             /// characters are used where possible but Unicode code-points are converted to hex
-            /// where
-            /// necessary.
+            /// where necessary.
             ///
             /// \param os The stream to which output will be written.
             /// \param v The string to be written.
@@ -414,7 +434,13 @@ namespace pstore {
             array & operator= (array const &) = delete;
             array & operator= (array &&) = delete;
 
+            array * dynamic_cast_array () noexcept override { return this; }
+            array const * dynamic_cast_array () const noexcept override { return this; }
+
             void push_back (value_ptr v) { values_.push_back (v); }
+
+            std::size_t size () const noexcept { return values_.size (); }
+            value_ptr operator[] (std::size_t index) noexcept { return values_[index]; }
 
         private:
             template <typename OStream>
@@ -479,10 +505,15 @@ namespace pstore {
             object & operator= (object const &) = delete;
             object & operator= (object &&) = delete;
 
-            object * dynamic_cast_object () override { return this; }
-            object const * dynamic_cast_object () const override { return this; }
+            object * dynamic_cast_object () noexcept override { return this; }
+            object const * dynamic_cast_object () const noexcept override { return this; }
 
             value_ptr get (std::string const & name);
+            std::size_t size () const noexcept { return members_.size (); }
+
+            void insert (std::string name, value_ptr value) {
+                members_.emplace_back (std::move (name), std::move (value));
+            }
 
             void compact (bool enabled = true) { compact_ = enabled; }
             bool is_compact () const { return compact_; }
@@ -537,10 +568,45 @@ namespace pstore {
         };
 
 
-        template <typename T>
-        inline std::shared_ptr<number<T>> make_number (T const & t) {
-            return std::make_shared<number<T>> (t);
+        inline std::shared_ptr<number_long> make_number (long long v) {
+            return std::make_shared<number_long> (v);
         }
+        inline std::shared_ptr<number_long> make_number (long v) {
+            return std::make_shared<number_long> (v);
+        }
+        inline std::shared_ptr<number_long> make_number (int v) {
+            return std::make_shared<number_long> (v);
+        }
+        inline std::shared_ptr<number_long> make_number (short v) {
+            return std::make_shared<number_long> (v);
+        }
+        inline std::shared_ptr<number_long> make_number (char v) {
+            return std::make_shared<number_long> (v);
+        }
+
+        inline std::shared_ptr<number_ulong> make_number (unsigned long long v) {
+            return std::make_shared<number_ulong> (v);
+        }
+        inline std::shared_ptr<number_ulong> make_number (unsigned long v) {
+            return std::make_shared<number_ulong> (v);
+        }
+        inline std::shared_ptr<number_ulong> make_number (unsigned int v) {
+            return std::make_shared<number_ulong> (v);
+        }
+        inline std::shared_ptr<number_ulong> make_number (unsigned short v) {
+            return std::make_shared<number_ulong> (v);
+        }
+        inline std::shared_ptr<number_ulong> make_number (unsigned char v) {
+            return std::make_shared<number_ulong> (v);
+        }
+
+        inline std::shared_ptr<number_double> make_number (float v) {
+            return std::make_shared<number_double> (v);
+        }
+        inline std::shared_ptr<number_double> make_number (double v) {
+            return std::make_shared<number_double> (v);
+        }
+
 
         inline value_ptr make_time (std::uint64_t ms, bool no_times) {
             if (no_times) {
@@ -555,22 +621,22 @@ namespace pstore {
         }
 
         inline value_ptr make_value (std::uint8_t const & v) {
-            return std::static_pointer_cast<value, number<std::uint8_t>> (make_number (v));
+            return std::static_pointer_cast<value, number_ulong> (make_number (v));
         }
         inline value_ptr make_value (std::uint16_t const & v) {
-            return std::static_pointer_cast<value, number<std::uint16_t>> (make_number (v));
+            return std::static_pointer_cast<value, number_ulong> (make_number (v));
         }
         inline value_ptr make_value (std::uint32_t const & v) {
-            return std::static_pointer_cast<value, number<std::uint32_t>> (make_number (v));
+            return std::static_pointer_cast<value, number_ulong> (make_number (v));
         }
         inline value_ptr make_value (std::uint64_t const & v) {
-            return std::static_pointer_cast<value, number<std::uint64_t>> (make_number (v));
+            return std::static_pointer_cast<value, number_ulong> (make_number (v));
         }
         inline value_ptr make_value (float const & v) {
-            return std::static_pointer_cast<value, number<float>> (make_number (v));
+            return std::static_pointer_cast<value, number_double> (make_number (v));
         }
         inline value_ptr make_value (double const & v) {
-            return std::static_pointer_cast<value, number<double>> (make_number (v));
+            return std::static_pointer_cast<value, number_double> (make_number (v));
         }
 
         /// \brief  Makes a value object which represents a null-terminated character array.

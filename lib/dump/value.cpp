@@ -227,6 +227,36 @@ namespace pstore {
         number_base::~number_base () {}
 
 
+        //*********************************
+        //*   n u m b e r _ d o u b l e   *
+        //*********************************
+        std::ostream & number_double::write_impl (std::ostream & os, indent const &) const {
+            return os << v_;
+        }
+        std::wostream & number_double::write_impl (std::wostream & os, indent const &) const {
+            return os << v_;
+        }
+
+        //*****************************
+        //*   n u m b e r _ l o n g   *
+        //*****************************
+        std::ostream & number_long::write_impl (std::ostream & os, indent const &) const {
+            return this->write_decimal (v_, os);
+        }
+        std::wostream & number_long::write_impl (std::wostream & os, indent const &) const {
+            return this->write_decimal (v_, os);
+        }
+
+        //*******************************
+        //*   n u m b e r _ u l o n g   *
+        //*******************************
+        std::ostream & number_ulong::write_impl (std::ostream & os, indent const &) const {
+            return this->write_decimal (v_, os);
+        }
+        std::wostream & number_ulong::write_impl (std::wostream & os, indent const &) const {
+            return this->write_decimal (v_, os);
+        }
+
         //*********************
         //*   b o o l e a n   *
         //*********************
@@ -235,6 +265,16 @@ namespace pstore {
         }
         std::wostream & boolean::write_impl (std::wostream & os, indent const & /*indent*/) const {
             return os << (v_ ? L"true" : L"false");
+        }
+
+        //***************
+        //*   n u l l   *
+        //***************
+        std::ostream & null::write_impl (std::ostream & os, indent const & /*indent*/) const {
+            return os << "null";
+        }
+        std::wostream & null::write_impl (std::wostream & os, indent const & /*indent*/) const {
+            return os << L"null";
         }
 
 

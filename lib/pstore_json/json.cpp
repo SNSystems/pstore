@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "pstore_json/json.hpp"
 
-pstore::maybe<char> pstore::json::source::pull () {
+pstore::maybe<char> pstore::json::details::source::pull () {
     if (lookahead_.has_value ()) {
         auto result = *lookahead_;
         lookahead_.reset ();

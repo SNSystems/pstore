@@ -54,15 +54,15 @@ namespace {
     public:
         virtual ~json_callbacks_base () {}
 
-        virtual void string_value (std::string const &) {}
-        virtual void integer_value (long) {}
-        virtual void float_value (double) {}
-        virtual void boolean_value (bool) {}
-        virtual void null_value () {}
-        virtual void begin_array () {}
-        virtual void end_array () {}
-        virtual void begin_object () {}
-        virtual void end_object () {}
+        virtual void string_value (std::string const &) = 0;
+        virtual void integer_value (long) = 0;
+        virtual void float_value (double) = 0;
+        virtual void boolean_value (bool) = 0;
+        virtual void null_value () = 0;
+        virtual void begin_array () = 0;
+        virtual void end_array () = 0;
+        virtual void begin_object () = 0;
+        virtual void end_object () = 0;
     };
 
     class mock_json_callbacks : public json_callbacks_base {
@@ -108,7 +108,7 @@ namespace {
             ASSERT_NE (err, json::error_code::none);
             json::parser<json::yaml_output> p;
             p.parse (src);
-            std::shared_ptr<json::value::dom_element> v = p.eof ();
+            std::shared_ptr<dump::value> v = p.eof ();
             EXPECT_EQ (v, nullptr);
             EXPECT_NE (p.last_error (), std::make_error_code (json::error_code::none));
         }
@@ -136,7 +136,7 @@ TEST_F (Json, Null) {
 TEST_F (Json, TwoKeywords) {
     json::parser<json::yaml_output> p;
     p.parse (" true false ");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unexpected_extra_input));
@@ -236,10 +236,10 @@ TEST_F (JsonBoolean, True) {
         p2.parse (input);
         p2.eof ();
 
-        std::shared_ptr<json::value::dom_element> resl = p2.callbacks ().result ();
+        std::shared_ptr<dump::value> resl = p2.callbacks ().result ();
         ASSERT_NE (resl, nullptr);
 
-        auto b = resl->as_boolean ();
+        auto b = resl->dynamic_cast_boolean ();
         ASSERT_NE (b, nullptr);
         EXPECT_TRUE (b->get ());
     }
@@ -386,15 +386,15 @@ TEST (JsonArray, SingleElement) {
     {
         json::parser<json::yaml_output> p;
         p.parse (input);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
 
         ASSERT_NE (v, nullptr);
 
-        auto arr = v->as_array ();
+        auto arr = v->dynamic_cast_array ();
         ASSERT_NE (arr, nullptr);
         ASSERT_EQ (arr->size (), 1U);
-        auto element = ((*arr)[0])->as_long ();
+        auto element = ((*arr)[0])->dynamic_cast_number_long ();
         ASSERT_NE (element, nullptr);
         EXPECT_EQ (element->get (), 1);
     }
@@ -419,13 +419,13 @@ TEST (JsonArray, SingleStringElement) {
         p.parse (input);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
 
-        std::shared_ptr<json::value::dom_element> v = p.callbacks ().result ();
+        std::shared_ptr<dump::value> v = p.callbacks ().result ();
         ASSERT_NE (v, nullptr);
 
-        auto arr = v->as_array ();
+        auto arr = v->dynamic_cast_array ();
         ASSERT_NE (arr, nullptr);
         ASSERT_EQ (arr->size (), 1U);
-        auto element = ((*arr)[0])->as_string ();
+        auto element = ((*arr)[0])->dynamic_cast_string ();
         ASSERT_NE (element, nullptr);
         EXPECT_EQ (element->get (), "a");
     }
@@ -449,32 +449,32 @@ TEST (JsonArray, ZeroExpPlus1) {
     {
         json::parser<json::yaml_output> p;
         p.parse (input);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
         ASSERT_NE (v, nullptr);
 
-        auto arr = v->as_array ();
+        auto arr = v->dynamic_cast_array ();
         ASSERT_NE (arr, nullptr);
         ASSERT_EQ (arr->size (), 1U);
-        auto element = ((*arr)[0])->as_double ();
+        auto element = ((*arr)[0])->dynamic_cast_number_double ();
         ASSERT_NE (element, nullptr);
-        EXPECT_EQ (element->get (), 0);
+        EXPECT_EQ (element->get (), 0.0);
     }
 }
 
 TEST (JsonArray, MinusZero) {
     json::parser<json::yaml_output> p;
     p.parse ("[-0]");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
     ASSERT_NE (v, nullptr);
 
-    auto arr = v->as_array ();
+    auto arr = v->dynamic_cast_array ();
     ASSERT_NE (arr, nullptr);
     ASSERT_EQ (arr->size (), 1U);
-    auto element = ((*arr)[0])->as_long ();
+    auto element = ((*arr)[0])->dynamic_cast_number_long ();
     ASSERT_NE (element, nullptr);
     EXPECT_EQ (element->get (), 0);
 }
@@ -483,20 +483,20 @@ TEST (JsonArray, MinusZero) {
 TEST (JsonArray, TwoElements) {
     json::parser<json::yaml_output> p;
     p.parse ("[ 1 , \"hello\" ]");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
     ASSERT_NE (v, nullptr);
 
-    auto arr = v->as_array ();
+    auto arr = v->dynamic_cast_array ();
     ASSERT_NE (arr, nullptr);
     ASSERT_EQ (arr->size (), 2U);
 
-    auto element0 = ((*arr)[0])->as_long ();
+    auto element0 = ((*arr)[0])->dynamic_cast_number_long ();
     ASSERT_NE (element0, nullptr);
     EXPECT_EQ (element0->get (), 1);
 
-    auto element1 = ((*arr)[1])->as_string ();
+    auto element1 = ((*arr)[1])->dynamic_cast_string ();
     ASSERT_NE (element1, nullptr);
     EXPECT_EQ (element1->get (), "hello");
 }
@@ -505,21 +505,21 @@ TEST (JsonArray, TrailingComma) {
     {
         json::parser<json::yaml_output> p;
         p.parse ("[,");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("[,]");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json::yaml_output> p;
         p.parse ("[\"\",]");
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
         EXPECT_EQ (v, nullptr);
         EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
     }
@@ -527,7 +527,7 @@ TEST (JsonArray, TrailingComma) {
 TEST (JsonArray, TrailingCommaWithExtraText) {
     json::parser<json::yaml_output> p;
     p.parse ("[,1");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
@@ -535,7 +535,7 @@ TEST (JsonArray, TrailingCommaWithExtraText) {
 TEST (JsonArray, ArraySingleElementComma) {
     json::parser<json::yaml_output> p;
     p.parse ("[1,");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
@@ -543,7 +543,7 @@ TEST (JsonArray, ArraySingleElementComma) {
 TEST (JsonArray, Nested) {
     json::parser<json::yaml_output> p;
     p.parse ("[[no");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
@@ -551,7 +551,7 @@ TEST (JsonArray, Nested) {
 TEST (JsonArray, MissingComma) {
     json::parser<json::yaml_output> p;
     p.parse ("[1 true]");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
@@ -559,7 +559,7 @@ TEST (JsonArray, MissingComma) {
 TEST (JsonArray, ExtraComma) {
     json::parser<json::yaml_output> p;
     p.parse ("[1,,2]");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
@@ -567,14 +567,14 @@ TEST (JsonArray, ExtraComma) {
 TEST (JsonArray, SimpleFloat) {
     json::parser<json::yaml_output> p;
     p.parse ("[1.234]");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_NE (v, nullptr);
-    auto arr = v->as_array ();
+    auto arr = v->dynamic_cast_array ();
     ASSERT_NE (arr, nullptr);
     ASSERT_EQ (arr->size (), 1U);
 
-    auto element0 = ((*arr)[0])->as_double ();
+    auto element0 = ((*arr)[0])->dynamic_cast_number_double ();
     ASSERT_NE (element0, nullptr);
     EXPECT_DOUBLE_EQ (element0->get (), 1.234);
 }
@@ -582,9 +582,9 @@ TEST (JsonArray, SimpleFloat) {
 TEST (JsonObject, Empty) {
     json::parser<json::yaml_output> p;
     p.parse ("{}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
-    auto obj = v->as_object ();
+    auto obj = v->dynamic_cast_object ();
     ASSERT_NE (obj, nullptr);
     EXPECT_EQ (obj->size (), 0U);
 }
@@ -592,20 +592,17 @@ TEST (JsonObject, Empty) {
 TEST (JsonObject, SingleKvp) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\":1}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     ASSERT_NE (v, nullptr);
-    auto obj = v->as_object ();
+    auto obj = v->dynamic_cast_object ();
     ASSERT_NE (obj, nullptr);
     EXPECT_EQ (obj->size (), 1U);
 
-    auto pos = obj->find ("a");
-    ASSERT_NE (pos, obj->end ());
-    EXPECT_EQ (pos->first, "a");
-
-    auto value = pos->second->as_long ();
+    auto value = obj->get ("a");
     ASSERT_NE (value, nullptr);
-    EXPECT_EQ (value->get (), 1);
+    ASSERT_NE (value->dynamic_cast_number_long (), nullptr);
+    EXPECT_EQ (value->dynamic_cast_number_long ()->get (), 1);
 }
 
 TEST (JsonObject, TwoKvps) {
@@ -629,29 +626,23 @@ TEST (JsonObject, TwoKvps) {
     {
         json::parser<json::yaml_output> p;
         p.parse (input);
-        std::shared_ptr<json::value::dom_element> v = p.eof ();
+        std::shared_ptr<dump::value> v = p.eof ();
 
         ASSERT_NE (v, nullptr);
-        auto obj = v->as_object ();
+        auto obj = v->dynamic_cast_object ();
         ASSERT_NE (obj, nullptr);
         EXPECT_EQ (obj->size (), 2U);
         {
-            auto pos_a = obj->find ("a");
-            ASSERT_NE (pos_a, obj->end ());
-
-            EXPECT_EQ (pos_a->first, "a");
-            auto value = pos_a->second->as_long ();
-            ASSERT_NE (value, nullptr);
-            EXPECT_EQ (value->get (), 1);
+            auto pos_a = obj->get ("a");
+            ASSERT_NE (pos_a, nullptr);
+            ASSERT_NE (pos_a->dynamic_cast_number_long (), nullptr);
+            EXPECT_EQ (pos_a->dynamic_cast_number_long ()->get (), 1);
         }
         {
-            auto pos_b = obj->find ("b");
-            ASSERT_NE (pos_b, obj->end ());
-
-            EXPECT_EQ (pos_b->first, "b");
-            auto value = pos_b->second->as_boolean ();
-            ASSERT_NE (value, nullptr);
-            EXPECT_EQ (value->get (), true);
+            auto pos_b = obj->get ("b");
+            ASSERT_NE (pos_b, nullptr);
+            ASSERT_NE (pos_b->dynamic_cast_boolean (), nullptr);
+            EXPECT_EQ (pos_b->dynamic_cast_boolean ()->get (), true);
         }
     }
 }
@@ -659,25 +650,25 @@ TEST (JsonObject, TwoKvps) {
 TEST (JsonObject, ArrayValue) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\": [1,2]}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
     ASSERT_NE (v, nullptr);
-    auto obj = v->as_object ();
+    auto obj = v->dynamic_cast_object ();
     ASSERT_NE (obj, nullptr);
     EXPECT_EQ (obj->size (), 1U);
 
-    auto pos = obj->find ("a");
-    ASSERT_NE (pos, obj->end ());
+    auto pos = obj->get ("a");
+    ASSERT_NE (pos, nullptr);
 
-    auto value = pos->second->as_array ();
+    auto value = pos->dynamic_cast_array ();
     ASSERT_NE (value, nullptr);
     EXPECT_EQ (value->size (), 2U);
     {
-        auto v0 = ((*value)[0])->as_long ();
+        auto v0 = ((*value)[0])->dynamic_cast_number_long ();
         ASSERT_NE (v0, nullptr);
         ASSERT_EQ (v0->get (), 1);
     }
     {
-        auto v1 = ((*value)[1])->as_long ();
+        auto v1 = ((*value)[1])->dynamic_cast_number_long ();
         ASSERT_NE (v1, nullptr);
         ASSERT_EQ (v1->get (), 2);
     }
@@ -686,7 +677,7 @@ TEST (JsonObject, ArrayValue) {
 TEST (JsonObject, TrailingComma) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\":1,}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
@@ -695,7 +686,7 @@ TEST (JsonObject, TrailingComma) {
 TEST (JsonObject, MissingComma) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\":1 \"b\":1}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_object_member));
@@ -704,7 +695,7 @@ TEST (JsonObject, MissingComma) {
 TEST (JsonObject, ExtraComma) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\":1,,\"b\":1}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
@@ -721,7 +712,7 @@ TEST (JsonObject, KeyIsNotString) {
 TEST (JsonObject, BadNestedObject) {
     json::parser<json::yaml_output> p;
     p.parse ("{\"a\":nu}");
-    std::shared_ptr<json::value::dom_element> v = p.eof ();
+    std::shared_ptr<dump::value> v = p.eof ();
 
     EXPECT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
