@@ -249,7 +249,7 @@ namespace pstore {
                 const_pointer end_;
             };
 
-            std::uint8_t align () const noexcept { return 1U << align_; }
+            unsigned align () const noexcept { return 1U << align_; }
 
             container<std::uint8_t> data () const {
                 auto begin = aligned_ptr<std::uint8_t> (this + 1);
