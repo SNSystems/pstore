@@ -82,9 +82,12 @@ namespace pstore {
         extern char32_t const replacement_char_code_point;
 
         template <typename CharType = char, typename OutputIt>
+        OutputIt code_point_to_utf8 (char32_t c, OutputIt out);
+
+
+        template <typename CharType = char, typename OutputIt>
         OutputIt replacement_char (OutputIt out) {
-            char32_t const replacement_character = 0xFFFD; // Unicode REPLACEMENT CHARACTER (U+FFFD)
-            return code_point_to_utf8 (replacement_character, out);
+            return code_point_to_utf8 (replacement_char_code_point, out);
         }
 
         template <typename ResultType>
@@ -95,7 +98,7 @@ namespace pstore {
         }
 
 
-        template <typename CharType = char, typename OutputIt>
+        template <typename CharType, typename OutputIt>
         OutputIt code_point_to_utf8 (char32_t c, OutputIt out) {
             if (c < 0x80) {
                 *(out++) = static_cast<CharType> (c);
