@@ -394,10 +394,12 @@ namespace pstore {
 
                     buffer_writer_policy (void * first, void * last)
                             : begin_ (static_cast<std::uint8_t *> (first))
-                            , first_ (static_cast<std::uint8_t *> (first))
-                            , last_ (static_cast<std::uint8_t *> (last)) {
+#ifndef NDEBUG
+                            , end_ (static_cast<std::uint8_t *> (last))
+#endif
+                            , it_ (static_cast<std::uint8_t *> (first)) {
 
-                        assert (last_ >= first_);
+                        assert (end_ >= it_);
                     }
 
                     /// Writes an object to the output buffer.
@@ -405,21 +407,21 @@ namespace pstore {
                     template <typename Ty>
                     auto put (Ty const & v) -> result_type {
                         auto const size = sizeof (v);
-                        assert (first_ + size <= last_);
-                        auto result = first_;
-                        std::memcpy (first_, &v, size);
-                        first_ += size;
-                        assert (first_ <= last_);
+                        assert (it_ + size <= end_);
+                        auto result = it_;
+                        std::memcpy (it_, &v, size);
+                        it_ += size;
+                        assert (it_ <= end_);
                         return result;
                     }
 
 
                     /// Returns the number of bytes written to the buffer.
                     std::size_t size () const {
-                        assert (first_ >= begin_);
+                        assert (it_ >= begin_);
                         static_assert (sizeof (std::size_t) >= sizeof (std::ptrdiff_t),
                                        "sizeof size_t should be at least sizeof ptrdiff_t");
-                        return static_cast<std::size_t> (first_ - begin_);
+                        return static_cast<std::size_t> (it_ - begin_);
                     }
 
                     void flush () {}
@@ -429,19 +431,19 @@ namespace pstore {
                     /// Returns a const_iterator for the beginning of the byte range.
                     const_iterator begin () const { return begin_; }
                     /// Returns a const_iterator for the end of byte range written to the buffer.
-                    const_iterator end () const { return first_; }
+                    const_iterator end () const { return it_; }
 
                 private:
                     /// The start of the input buffer.
                     std::uint8_t * begin_;
-
+#ifndef NDEBUG
+                    /// The end of the input buffer range.
+                    std::uint8_t * end_;
+#endif
                     /// Initially equal to begin_, but incremented as data is written to the
-                    /// archive. Always <= last_;
-                    std::uint8_t * first_;
+                    /// archive. Always <= end_;
+                    std::uint8_t * it_;
 
-                    /// Equal the value passed to the object's construct as the end of the input
-                    /// buffer range.
-                    std::uint8_t * last_;
                 };
             } // namespace details
 
