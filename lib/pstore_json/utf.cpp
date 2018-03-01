@@ -78,7 +78,7 @@ std::uint8_t const pstore::json::utf8_decoder::utf8d_[] = {
 std::uint8_t pstore::json::utf8_decoder::decode (std::uint8_t * const state, char32_t * const codep,
                                                  std::uint32_t const byte) {
     auto const type = utf8d_[byte];
-    *codep = (*state != state::accept) ? (byte & 0x3F) | (*codep << 6) : (0xFF >> type) & byte;
+    *codep = (*state != accept) ? (byte & 0x3F) | (*codep << 6) : (0xFF >> type) & byte;
     *state = utf8d_[256 + *state * 16 + type];
     return *state;
 }
