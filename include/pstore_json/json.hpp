@@ -141,7 +141,9 @@ namespace pstore {
             ///@}
 
             /// Informs the parser that the complete input stream has been passed by calls to
-            /// parser<>::parse(). \returns If the parse completes successfully, Callbacks::result()
+            /// parser<>::parse().
+            ///
+            /// \returns If the parse completes successfully, Callbacks::result()
             /// is called and its result returned. If the parse failed, then a default-constructed
             /// instance of result_type is returned.
             result_type eof ();
