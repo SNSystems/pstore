@@ -5,14 +5,14 @@
 ### Header
 Field    | Size (bytes) | Description
 -------- | ------------ | -----------
-signature1 | 4 |  The file signature is split into two pieces of four bytes each. The first of these (signature1) is an array of bytes so that the signature is easily recongisable in a hex dump, the second is a 32-bit value so that we can easily verify the machine endianness (a BOM in effect).
+signature1 | 4 |  The file signature is split into two pieces of four bytes each. The first of these (signature1) is an array of bytes so that the signature is easily recongisable in a hex dump, the second is a 32-bit value so that we can easily verify the machine endianness. In effect, it acts as a byte-order-mark (BOM).
 signature2 | 4 | The second half of the file signature. This value is used to determine the endian-ness of the file. |
-version | 2 | 
-header_size | 4 |
-uuid | 16 | 
+version | 4 | A pair of 16-bit unsigned integers containing the major and minor version of the file format respectively.
+header_size | 4 | A unsigned value containing the size of this header structure. Currently always 52.
+uuid | 16 | An RFC4122-compliant universally unique identifier (UUID) which enables this file to be identified.
 crc | 4 | The fields of the header, up to and including this one, are not modified as the code interacts with the data store; they're effectively read-only. This crc is used to ensure that the fields from #signature1 to #sync_name are not modified.
 unused2 | 8 | Always zero.
-footer_pos | 8 | The file offset of most recent file footer. This calue is modifies as the very last step of commiting a transaction.
+footer_pos | 8 | The file offset of most recent file footer. This value is modified as the very last step of commiting a transaction.
 
 
 ### Transaction Footer
@@ -25,7 +25,7 @@ unused1 | 4 | Unused. Always 0.
 size | 8 | The number of bytes contained by this transaction. The value does not include the size of the footer record.
 time | 8 | The time at which the transaction was committed, in milliseconds since the epoch.
 prev_generation | 8 | A pointer to the previous generation. This field forms a reverse linked list which allows a consumer to enumerate the generations contained within the store and to "sync" to a specific generation number.
-index_records_array index_records; | | 
+index_records | n*8 | 
 unused2 | 4 | Unused. Always 0.
 unused3 | 4 | Unused. Always 0.
 crc | 4 | A simple crc32 of the transaction footer preceeding this one (i.e. from the start of the `signature1` field through to the end of `unused3` field. The fields of a transaction footer are not modified as the code interacts with the data store: the memory that is occupies as marked as read-only as soon as the host OS and hardware permits. Despite this guarantee it's useful to be able to ensure that the reverse-order linked list of transactions -- whose head is given by header::footer_pos is intact and that we don't have a stray pointer.
@@ -48,25 +48,24 @@ Field | Size (bytes) | Description
 ----- | ------------ | -----------
 signature | 8 | A magic number. Acts as a quick integrity test for the index structures.
 size | 8 | The number of members of the `leaves` array.
-leaves | n | Each entry is an 8 byte pstore address, the number of entries is given by the `size` field.
+leaves | 8*n | Each entry is an 8 byte pstore address, the number of entries is given by the `size` field.
 
 ### Strings
 
 ## Program Repository Structures
 ## Fragments
 
-Fragments are stored as a compressed sparse array of offsets where each offset is a reference to the corresponding section's contents. The sparse array uses the same scheme as described in "Fast and Space Effcient Trie Searches", Bagwell [2000]. In brief, each bit of a 64-bit integer represents the presense of absence of the corresponding array index; the population count of the value enables the absolute index of any available element to be easily calculated. 
+Fragments are stored as a compressed sparse array of offsets where each offset is a reference to the corresponding section's contents. The sparse array uses the same scheme as described in "Fast and Space Efficient Trie Searches", Bagwell [2000]. In brief, each bit of a 64-bit integer represents the presense of absence of the corresponding array index; the population count of the value enables the absolute index of any available element to be easily calculated. 
 
 ![Fragment Structure](./fragment.svg)
 
 ### Section array
 The section array header is a variable-length structure which consists of a sparse array of offsets for the section data. The offsets are a positive number of bytes from the start of the section array structure. The number of elements in the array is equal to the population counts of the `bitmap` field. 
-relative to to the single fixed-size integer value which describes the number and interpretation of each of a array of fields w
 
 Field    | Size (bytes) | Description
 -------- | ------------ | -----------
 bitmap   | 8 | The population count of this field gives the number of members in the `offset` array. Array indices that are present have a 1 in the corresponding bit position.
-offset<sub>n</sub> | 8 | 
+offset<sub>n</sub> | 8*n | 
 
 ### Sections
 Each "section" within a fragment is given a constant index in this array. This obviously imposes a hard limit on the maximum number of sections within a fragment.
@@ -102,6 +101,10 @@ Field    | Size (bytes) | Description
 
 
 ## Ticket
+
+Field    | Size (bytes) | Description
+-------- | ------------ | -----------
+| | 
 
 
 References
