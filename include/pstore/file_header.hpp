@@ -183,8 +183,7 @@ namespace pstore {
             std::array<std::uint8_t, 4> signature1;
 
             /// The second half of the file signature. This value is used to determine the
-            /// endian-ness
-            /// of the file.
+            /// endian-ness of the file.
             std::uint32_t signature2;
             std::array<std::uint16_t, 2> version;
             std::uint32_t header_size = sizeof (header);
