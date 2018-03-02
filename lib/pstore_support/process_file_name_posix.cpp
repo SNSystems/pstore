@@ -89,7 +89,8 @@ namespace pstore {
     std::string process_file_name () {
         std::array<int, 4> mib{{CTL_KERN, KERN_PROC, KERN_PROC_PATHNAME, -1}};
         small_vector<char> buffer;
-        std::size_t const length = freebsd::process_file_name (mib, &::sysctl, buffer);
+        std::size_t const length =
+            freebsd::process_file_name (gsl::make_span (mib), &::sysctl, buffer);
         return {buffer.data (), length};
     }
 
