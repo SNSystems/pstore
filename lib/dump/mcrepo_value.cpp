@@ -90,6 +90,7 @@ namespace pstore {
 
         value_ptr make_value (database & db, repo::section const & section, repo::section_type st,
                               bool hex_mode) {
+            (void) st;
             auto const & data = section.data ();
             auto const & ifixups = section.ifixups ();
 
