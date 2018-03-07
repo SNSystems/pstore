@@ -63,9 +63,10 @@
 #include "broker/read_loop.hpp"
 #include "broker/recorder.hpp"
 #include "broker/scavenger.hpp"
+#include "broker/status_server.hpp"
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_broker_intf/fifo_path.hpp"
 #include "pstore_broker_intf/message_type.hpp"
-#include "pstore_broker_intf/unique_handle.hpp"
 #include "pstore_support/logging.hpp"
 #include "pstore_support/thread.hpp"
 #include "pstore_support/utf.hpp"
@@ -160,6 +161,12 @@ int main (int argc, char * argv[]) {
             thread_init ("gcwatch");
             broker::gc_process_watch_thread ();
         }));
+
+        futures.push_back (create_thread ([]() {
+            thread_init ("status");
+            broker::status_server ();
+        }));
+
 
         if (opt.playback_path) {
             broker::player playback_file (*opt.playback_path);

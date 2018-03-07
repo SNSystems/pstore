@@ -49,7 +49,7 @@
 
 #include <atomic>
 #include <mutex>
-#include "pstore_broker_intf/unique_handle.hpp"
+#include "pstore_broker_intf/descriptor.hpp"
 
 namespace pstore {
 
@@ -88,10 +88,10 @@ namespace pstore {
 
     private:
 #ifdef _WIN32
-        pstore::broker::unique_handle event_;
+        pstore::broker::pipe_descriptor event_;
 #else
-        pstore::broker::unique_fd read_fd_;
-        pstore::broker::unique_fd write_fd_;
+        pstore::broker::pipe_descriptor read_fd_;
+        pstore::broker::pipe_descriptor write_fd_;
         static void make_non_blocking (int fd);
 #endif
         std::atomic<int> signal_{-1};

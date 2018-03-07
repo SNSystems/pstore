@@ -67,6 +67,7 @@ set (PSTORE_BROKER_LIB_SRC
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/recorder.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/scavenger.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/spawn.hpp"
+    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/status_server.hpp"
 
     command.cpp
     gc_common.cpp
@@ -82,6 +83,7 @@ set (PSTORE_BROKER_LIB_SRC
     scavenger.cpp
     spawn_posix.cpp
     spawn_win32.cpp
+    status_server.cpp
 )
 
 include (add_pstore)

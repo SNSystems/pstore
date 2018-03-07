@@ -63,9 +63,9 @@
 #include <Windows.h>
 
 // pstore includes
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_broker_intf/fifo_path.hpp"
 #include "pstore_broker_intf/message_type.hpp"
-#include "pstore_broker_intf/unique_handle.hpp"
 #include "pstore_support/gsl.hpp"
 #include "pstore_support/logging.hpp"
 #include "pstore_support/utf.hpp"
@@ -389,7 +389,7 @@ namespace {
         static constexpr auto default_pipe_timeout =
             DWORD{5 * 1000}; // TODO: make this user-configurable.
 
-        pstore::broker::unique_handle pipe =
+        auto pipe = pstore::broker::unique_handle{
             ::CreateNamedPipeW (pipe_name.c_str (),
                                 PIPE_ACCESS_INBOUND |             // read/write access
                                     FILE_FLAG_OVERLAPPED,         // overlapped mode
@@ -400,7 +400,7 @@ namespace {
                                 0,                                // output buffer size
                                 pstore::broker::message_size * 4, // input buffer size
                                 default_pipe_timeout,             // client time-out
-                                nullptr);                         // default security attributes
+                                nullptr)};                        // default security attributes
         if (pipe.get () == INVALID_HANDLE_VALUE) {
             raise (::pstore::win32_erc (::GetLastError ()), "CreateNamedPipeW");
         }
@@ -415,10 +415,9 @@ namespace {
     /// Creates a manual-reset event which is initially signaled.
     pstore::broker::unique_handle create_event () {
         if (HANDLE h = ::CreateEvent (nullptr, true, true, nullptr)) {
-            return {h};
-        } else {
-            raise (::pstore::win32_erc (::GetLastError ()), "CreateEvent");
+            return pstore::broker::unique_handle{h};
         }
+        raise (::pstore::win32_erc (::GetLastError ()), "CreateEvent");
     }
 
 } // namespace

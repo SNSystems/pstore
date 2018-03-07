@@ -51,7 +51,7 @@
 #include <cstdint>
 #include <string>
 
-#include "pstore_broker_intf/unique_handle.hpp"
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_support/gsl.hpp"
 
 namespace pstore {

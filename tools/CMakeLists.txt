@@ -44,6 +44,7 @@
 
 add_subdirectory (broker)
 add_subdirectory (broker_poker) # A utility for exercising the broker agent.
+add_subdirectory (broker_status) # A utility to query the garbage collection status.
 add_subdirectory (diff)         # Dumps diff between two pstore revisions as YAML.
 add_subdirectory (dump)         # Dumps pstore contents as YAML.
 add_subdirectory (hamt_test)    # A utility to check the HAMT index

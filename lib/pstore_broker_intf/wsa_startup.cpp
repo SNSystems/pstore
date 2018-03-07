@@ -1,10 +1,10 @@
-//*                                          _       _    __  *
-//* __   ____ _  ___ _   _ _   _ _ __ ___   (_)_ __ | |_ / _| *
-//* \ \ / / _` |/ __| | | | | | | '_ ` _ \  | | '_ \| __| |_  *
-//*  \ V / (_| | (__| |_| | |_| | | | | | | | | | | | |_|  _| *
-//*   \_/ \__,_|\___|\__,_|\__,_|_| |_| |_| |_|_| |_|\__|_|   *
-//*                                                           *
-//===- include/pstore/vacuum_intf.hpp -------------------------------------===//
+//*                           _             _                *
+//* __      _____  __ _   ___| |_ __ _ _ __| |_ _   _ _ __   *
+//* \ \ /\ / / __|/ _` | / __| __/ _` | '__| __| | | | '_ \  *
+//*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
+//*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
+//*                                                  |_|     *
+//===- lib/pstore_broker_intf/wsa_startup.cpp -----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,52 +41,22 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file vacuum_intf.hpp
+#include "pstore_broker_intf/wsa_startup.hpp"
 
-#ifndef PSTORE_VACUUM_INTF_HPP
-#define PSTORE_VACUUM_INTF_HPP (1)
-
-#include <atomic>
-#include <cstdint>
-
-#include <ctime>
-
-#if defined(_WIN32)
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#else
-#include <pthread.h>
-#include <unistd.h>
-#endif
+#ifdef _WIN32
+#include <Winsock2.h>
 
 namespace pstore {
+    wsa_startup::~wsa_startup () {
+        if (started_) {
+            WSACleanup ();
+        }
+    }
 
-#if defined(_WIN32)
-    typedef DWORD pid_t;
-#else
-    typedef ::pid_t pid_t;
-#endif // !defined (_WIN32)
-
-
-
-    struct shared {
-        static constexpr auto not_running = pid_t{0};
-        static constexpr auto starting = static_cast<pid_t> (-1);
-
-        shared ();
-
-        std::atomic<pid_t> pid{0};
-        /// The time at which the process was started, in milliseconds since the epoch.
-        std::atomic<std::uint64_t> start_time{0};
-        std::atomic<std::time_t> time{0};
-
-        /// A value which is periodically incremented whilst a pstore instance is open on the
-        /// system.
-        /// This can be used to detect that the pstore is in use by another process.
-        std::atomic<std::uint64_t> open_tick;
-    };
-
+    bool wsa_startup::start () noexcept {
+        WSAData wsa_data;
+        return WSAStartup (MAKEWORD (2, 2), &wsa_data) == 0;
+    }
 } // namespace pstore
-#endif // PSTORE_VACUUM_INTF_HPP
-// eof: include/pstore/vacuum_intf.hpp
+#endif // _WIN32
+// eof: lib/pstore_broker_intf/wsa_startup.cpp

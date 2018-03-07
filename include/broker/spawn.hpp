@@ -51,9 +51,9 @@
 #include <string>
 #include <type_traits>
 
-#include "pstore_support/gsl.hpp"
 #include "pstore/vacuum_intf.hpp"
-#include "pstore_broker_intf/unique_handle.hpp"
+#include "pstore_broker_intf/descriptor.hpp"
+#include "pstore_support/gsl.hpp"
 
 namespace pstore {
     namespace broker {

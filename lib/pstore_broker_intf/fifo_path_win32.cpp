@@ -78,13 +78,13 @@ namespace pstore {
         auto fifo_path::open_impl () const -> client_pipe {
             auto const path = this->get ();
             auto const path16 = pstore::utf::win32::to16 (path);
-            client_pipe fd = ::CreateFileW (path16.c_str (), // pipe name
-                                            GENERIC_WRITE,   // write access
-                                            0,               // no sharing
-                                            nullptr,         // default security attributes
-                                            OPEN_EXISTING,   // opens existing pipe
-                                            0,               // default attributes
-                                            nullptr);        // no template file
+            auto fd = client_pipe{::CreateFileW (path16.c_str (), // pipe name
+                                                 GENERIC_WRITE,   // write access
+                                                 0,               // no sharing
+                                                 nullptr,         // default security attributes
+                                                 OPEN_EXISTING,   // opens existing pipe
+                                                 0,               // default attributes
+                                                 nullptr)};       // no template file
             if (!fd.valid ()) {
                 // Throw if an error other than ERROR_PIPE_BUSY occurs.
                 DWORD const errcode = ::GetLastError ();

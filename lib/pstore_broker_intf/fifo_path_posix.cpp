@@ -128,7 +128,7 @@ namespace pstore {
             // most UNIX systems allow this, we use two open() calls instead.
 
             int errcode = 0;
-            unique_fd fdread = ::open (path, O_RDONLY | O_NONBLOCK); // NOLINT
+            unique_fd fdread{::open (path, O_RDONLY | O_NONBLOCK)}; // NOLINT
             unique_fd fdwrite{};
             if (fdread.get () < 0) {
                 errcode = errno;
@@ -159,7 +159,7 @@ namespace pstore {
             // thus there won't be an EOF and as a result select() won't return unless someone
             // writes to the FIFO.
 
-            client_pipe fdwrite = ::open (path.c_str (), O_WRONLY | O_NONBLOCK); // NOLINT
+            client_pipe fdwrite{::open (path.c_str (), O_WRONLY | O_NONBLOCK)}; // NOLINT
             if (fdwrite.get () < 0) {
                 int const err = errno;
 

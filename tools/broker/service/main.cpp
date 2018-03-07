@@ -44,6 +44,8 @@
 #include <cstdio>
 #include <iostream>
 #include <vector>
+
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 #include "pstore_cmd_util/cl/command_line.hpp"

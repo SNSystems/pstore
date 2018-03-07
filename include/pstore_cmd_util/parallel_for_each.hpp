@@ -50,6 +50,8 @@
 #include <iterator>
 #include <vector>
 
+#include "pstore_support/portab.hpp"
+
 namespace pstore {
     namespace cmd_util {
 

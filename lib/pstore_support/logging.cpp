@@ -376,7 +376,7 @@ namespace pstore {
             auto time_str = time_buffer.data ();
             std::ostringstream str;
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
-                << message;
+                << message << '\n';
 
             std::lock_guard<std::mutex> lock (mutex_);
             this->log_impl (str.str ());

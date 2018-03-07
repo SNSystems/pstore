@@ -52,9 +52,8 @@
 #include <string>
 #include <tuple>
 
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_support/gsl.hpp"
-
-#include "./unique_handle.hpp"
 
 namespace pstore {
     namespace broker {

@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_broker_intf/CMakeLists.txt -------------------------------===//
+#===- tools/broker_status/CMakeLists.txt ----------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,60 +42,19 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+#configure_file (
+#    "${CMAKE_CURRENT_SOURCE_DIR}/poke_config.hpp.in"
+#    "${CMAKE_CURRENT_BINARY_DIR}/poke_config.hpp"
+#    ESCAPE_QUOTES
+#)
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/broker_intf_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/broker_intf_config.hpp"
-    ESCAPE_QUOTES
+add_pstore_executable (pstore-broker-status
+    broker_status.cpp
 )
-
-set (PSTORE_BROKER_INTF_SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/broker_intf_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/broker_intf_config.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/descriptor.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/fifo_path.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/message_type.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/send_message.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/server_path.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/writer.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/wsa_startup.hpp"
-
-    descriptor.cpp
-    fifo_path_common.cpp
-    fifo_path_posix.cpp
-    fifo_path_win32.cpp
-    message_type.cpp
-    send_message.cpp
-    writer_common.cpp
-    writer_posix.cpp
-    writer_win32.cpp
-    wsa_startup.cpp
-)
-
-include (add_pstore)
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_library (pstore-broker-intf STATIC ${PSTORE_BROKER_INTF_SRC})
-    target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
-
-    set (LLVM_REQUIRES_EH Yes)
-    set (LLVM_REQUIRES_RTTI Yes)
-
-    add_pstore_library (pstore-broker-intf-ex STATIC ${PSTORE_BROKER_INTF_SRC})
-    target_link_libraries (pstore-broker-intf-ex PUBLIC pstore-support-lib-ex)
-
-    set (LLVM_REQUIRES_EH No)
-    set (LLVM_REQUIRES_RTTI No)
-
-    include_directories (BEFORE "${PSTORE_INCLUDE_DIR}")
-
-else ()
-    add_pstore_library (pstore-broker-intf ${PSTORE_BROKER_INTF_SRC})
-    target_include_directories (pstore-broker-intf PUBLIC "${PSTORE_INCLUDE_DIR}")
-    target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
-endif (PSTORE_IS_INSIDE_LLVM)
-
+target_link_libraries (pstore-broker-status pstore-broker-intf pstore-cmd-util)
+#target_include_directories (pstore-broker-status PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (WIN32)
-target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
+target_link_libraries (pstore-broker-status Ws2_32.dll)
 endif ()
-# eof: lib/pstore_broker_intf/CMakeLists.txt
+
+# eof: tools/broker_status/CMakeLists.txt

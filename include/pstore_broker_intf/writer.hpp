@@ -52,8 +52,8 @@
 #include <functional>
 
 // pstore broker-interface
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/unique_handle.hpp"
 
 namespace pstore {
     namespace broker {

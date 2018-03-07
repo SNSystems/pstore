@@ -48,8 +48,8 @@
 #include "pstore_support/portab.hpp"
 #include "gmock/gmock.h"
 
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_broker_intf/message_type.hpp"
-#include "pstore_broker_intf/unique_handle.hpp"
 #include "pstore_broker_intf/writer.hpp"
 
 namespace {

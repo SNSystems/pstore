@@ -55,7 +55,7 @@
 #include <Windows.h>
 
 // pstore includes
-#include "pstore_broker_intf/unique_handle.hpp"
+#include "pstore_broker_intf/descriptor.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/utf.hpp"
 

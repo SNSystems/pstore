@@ -48,6 +48,7 @@
 #define BROKER_SERVICE_BASE_HPP
 
 #include <string>
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
 class service_base {
