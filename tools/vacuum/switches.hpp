@@ -54,8 +54,8 @@ typedef char TCHAR;
 #define NATIVE_TEXT(str) str
 #endif
 
+#include "pstore/config/config.hpp"
 #include "vacuum/user_options.hpp"
-#include "vacuum_config.hpp"
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 using pstore_tchar = TCHAR;

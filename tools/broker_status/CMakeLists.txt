@@ -42,17 +42,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-#configure_file (
-#    "${CMAKE_CURRENT_SOURCE_DIR}/poke_config.hpp.in"
-#    "${CMAKE_CURRENT_BINARY_DIR}/poke_config.hpp"
-#    ESCAPE_QUOTES
-#)
-
-add_pstore_executable (pstore-broker-status
-    broker_status.cpp
-)
+add_pstore_executable (pstore-broker-status broker_status.cpp)
 target_link_libraries (pstore-broker-status pstore-broker-intf pstore-cmd-util)
-#target_include_directories (pstore-broker-status PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (WIN32)
 target_link_libraries (pstore-broker-status Ws2_32.dll)
 endif ()

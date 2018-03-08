@@ -58,7 +58,8 @@
 #include "dump/db_value.hpp"
 #include "dump/value.hpp"
 #include "dump/mcrepo_value.hpp"
-#include "dump_config.hpp"
+
+#include "pstore/config/config.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 #include "llvm/Support/Signals.h"

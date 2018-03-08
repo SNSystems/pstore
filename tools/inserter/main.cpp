@@ -69,6 +69,7 @@ using TCHAR = char;
 #endif
 
 // pstore includes.
+#include "pstore/config/config.hpp"
 #include "pstore/database.hpp"
 #include "pstore/db_archive.hpp"
 #include "pstore/hamt_map.hpp"
@@ -78,9 +79,6 @@ using TCHAR = char;
 #include "pstore_cmd_util/cl/command_line.hpp"
 #include "pstore_support/portab.hpp"
 #include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
-
-// Local includes
-#include "config.hpp"
 
 #if PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
 #include <sys/kdebug_signpost.h>

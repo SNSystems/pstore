@@ -45,6 +45,7 @@
 #include <functional>
 #include <iostream>
 
+#include "pstore/config/config.hpp"
 #include "pstore/database.hpp"
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_map_types.hpp"
@@ -53,7 +54,6 @@
 #include "pstore_support/portab.hpp"
 
 #include "switches.hpp"
-#include "index_structure_config.hpp"
 
 using pstore::database;
 using pstore::index::details::depth_is_internal_node;

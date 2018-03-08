@@ -53,8 +53,8 @@
 #include <tchar.h>
 #endif
 
+#include "pstore/config/config.hpp"
 #include "pstore_support/maybe.hpp"
-#include "poke_config.hpp"
 
 struct switches {
     std::string verb;

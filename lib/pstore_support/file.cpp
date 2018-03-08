@@ -53,8 +53,8 @@
 #include <stdexcept>
 #include <sstream>
 
+#include "pstore/config/config.hpp"
 #include "pstore_support/portab.hpp"
-#include "support_config.hpp"
 
 namespace pstore {
     namespace file {

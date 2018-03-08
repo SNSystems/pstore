@@ -42,25 +42,14 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/diff_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/diff_config.hpp"
-    ESCAPE_QUOTES
-)
-
 add_pstore_executable (pstore-diff
-    "${CMAKE_CURRENT_BINARY_DIR}/diff_config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/diff_config.hpp.in"
     main.cpp
     switches.cpp
     switches.hpp
 )
-
-target_include_directories (pstore-diff PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries (pstore-diff pstore-diff-lib pstore-cmd-util)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-diff LLVMSupport)
-
 endif (PSTORE_IS_INSIDE_LLVM)
 
 

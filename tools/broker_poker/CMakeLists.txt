@@ -42,15 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/poke_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/poke_config.hpp"
-    ESCAPE_QUOTES
-)
-
 add_pstore_executable (pstore-broker-poker
-    "${CMAKE_CURRENT_SOURCE_DIR}/poke_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/poke_config.hpp"
     flood_server.cpp
     flood_server.hpp
     poke.cpp
@@ -61,6 +53,5 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-broker-poker LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-broker-poker pstore-broker-intf pstore-cmd-util)
-target_include_directories (pstore-broker-poker PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 
 # eof: tools/broker_poker/CMakeLists.txt

@@ -48,8 +48,8 @@
 #include <string>
 
 #include "pstore/database.hpp"
+#include "pstore/config/config.hpp"
 
-#include "index_structure_config.hpp"
 #include "indices.hpp"
 
 #ifdef _WIN32

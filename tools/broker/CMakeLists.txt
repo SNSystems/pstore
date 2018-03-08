@@ -48,19 +48,11 @@ include (add_pstore)
 # pstore-brokerd Executable
 ###########################
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
-)
-
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
 endif ()
 add_pstore_executable (pstore-brokerd
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     main.cpp
     switches.hpp
     switches.cpp
@@ -70,7 +62,6 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI No)
 endif ()
 
-target_include_directories (pstore-brokerd PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-brokerd pstore-cmd-util-ex pstore-broker-lib)
 else ()

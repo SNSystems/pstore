@@ -43,14 +43,13 @@
 //===----------------------------------------------------------------------===//
 #include "dump/mcrepo_value.hpp"
 
-#include "dump/value.hpp"
 #include "dump/db_value.hpp"
 #include "dump/mcdisassembler_value.hpp"
+#include "dump/value.hpp"
+#include "pstore/config/config.hpp"
 #include "pstore/db_archive.hpp"
 #include "pstore/hamt_map.hpp"
 #include "pstore/hamt_set.hpp"
-
-#include "dump_lib_config.hpp"
 
 namespace pstore {
     namespace dump {

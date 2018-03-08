@@ -90,8 +90,6 @@ endif ()
 
 
 
-include (TestBigEndian)
-TEST_BIG_ENDIAN (PSTORE_IS_BIG_ENDIAN)
 
 
 # The pstore header and footer structures include crc32 values as an aid to validation:

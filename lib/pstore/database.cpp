@@ -53,6 +53,7 @@
 #include <system_error>
 #include <type_traits>
 
+#include "pstore/config/config.hpp"
 #include "pstore/start_vacuum.hpp"
 #include "pstore/time.hpp"
 #include "pstore_support/error.hpp"
@@ -61,7 +62,6 @@
 #include "pstore_support/utf.hpp"
 
 #include "base32.hpp"
-#include "config.hpp"
 #include "heartbeat.hpp"
 
 namespace pstore {

@@ -44,7 +44,7 @@
 #include "pstore_mcrepo/fragment.hpp"
 #include "pstore_mcrepo/repo_error.hpp"
 
-#include "mcrepo_config.hpp"
+#include "pstore/config/config.hpp"
 
 using namespace pstore::repo;
 

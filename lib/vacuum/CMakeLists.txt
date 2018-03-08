@@ -49,8 +49,6 @@
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
 
 set (PSTORE_VACUUM_LIB_SRC
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${PSTORE_INCLUDE_DIR}/vacuum/copy.hpp"
     "${PSTORE_INCLUDE_DIR}/vacuum/quit.hpp"
     "${PSTORE_INCLUDE_DIR}/vacuum/status.hpp"
@@ -59,12 +57,6 @@ set (PSTORE_VACUUM_LIB_SRC
     copy.cpp
     quit.cpp
     watch.cpp
-)
-
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
 )
 
 include (add_pstore)
@@ -77,8 +69,6 @@ if (PSTORE_IS_INSIDE_LLVM)
     )
 else ()
     add_pstore_library (pstore-vacuum-lib ${PSTORE_VACUUM_LIB_SRC})
-    target_include_directories (pstore-vacuum-lib PUBLIC "${PSTORE_INCLUDE_DIR}")
-    target_include_directories (pstore-vacuum-lib PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-vacuum-lib PUBLIC pstore)
 

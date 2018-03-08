@@ -42,20 +42,12 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
-)
 add_pstore_executable (pstore-sieve
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
     main.cpp
     switches.cpp
     switches.hpp
     write_output.hpp
 )
-target_include_directories (pstore-sieve PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-sieve LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)

@@ -53,7 +53,7 @@
 #include <tchar.h>
 #endif
 
-#include "config.hpp"
+#include "pstore/config/config.hpp"
 
 #if defined(_WIN32)
 using pstore_tchar = TCHAR;

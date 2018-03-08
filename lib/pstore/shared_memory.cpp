@@ -44,7 +44,7 @@
 /// \file shared_memory.cpp
 
 #include "pstore/shared_memory.hpp"
-#include "config.hpp"
+#include "pstore/config/config.hpp"
 
 #if PSTORE_HAVE_SYS_POSIX_SHM_H
 #include <sys/time.h>

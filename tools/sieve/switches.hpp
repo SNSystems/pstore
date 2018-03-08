@@ -54,7 +54,7 @@
 typedef char TCHAR;
 #endif
 
-#include "config.hpp"
+#include "pstore/config/config.hpp"
 
 namespace switches {
 

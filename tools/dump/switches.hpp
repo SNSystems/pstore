@@ -57,7 +57,7 @@ typedef char TCHAR;
 #endif
 
 #include "pstore/database.hpp"
-#include "dump_config.hpp"
+#include "pstore/config/config.hpp"
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 using pstore_tchar = TCHAR;

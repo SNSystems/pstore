@@ -42,15 +42,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/write_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/write_config.hpp"
-    ESCAPE_QUOTES
-)
 include (add_pstore)
 add_pstore_executable (pstore-write
-    "${CMAKE_CURRENT_SOURCE_DIR}/write_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/write_config.hpp"
     main.cpp
     error.cpp
     error.hpp
@@ -59,7 +52,6 @@ add_pstore_executable (pstore-write
     switches.hpp
     switches.cpp
 )
-target_include_directories (pstore-write PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-write LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)

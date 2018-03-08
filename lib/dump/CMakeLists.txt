@@ -46,17 +46,8 @@
 # PStore Dump Core Library
 ##########################
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/dump_lib_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/dump_lib_config.hpp"
-    ESCAPE_QUOTES
-)
-
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
 set (PSTORE_DUMP_LIB_SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/dump_lib_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/dump_lib_config.hpp"
-
     "${PSTORE_INCLUDE_DIR}/dump/db_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/error.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/line_splitter.hpp"

@@ -52,10 +52,10 @@
 #include <system_error>
 
 // pstore includes
+#include "pstore/config/config.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/portab.hpp"
 #include "pstore_support/rotating_log.hpp"
-#include "support_config.hpp"
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>

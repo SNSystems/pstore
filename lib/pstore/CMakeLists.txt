@@ -44,28 +44,6 @@
 
 cmake_minimum_required (VERSION 3.7)
 
-include (CheckCXXSourceCompiles)
-include (CheckIncludeFiles)
-check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
-check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
-
-check_cxx_source_compiles (
-    "#include <iomanip>
-    #include <sstream>
-    int main () {
-        std::stringstream ss;
-        ss << std::quoted (\"Hello World\");
-    }"
-    PSTORE_HAVE_STD_QUOTED)
-
-
-
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
-)
-
 set (PSTORE_PUBLIC_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../../include/pstore")
 set (PSTORE_SRC )
 set (PSTORE_CORE_SRC
@@ -98,8 +76,6 @@ list (APPEND PSTORE_SRC ${PSTORE_CORE_SRC})
 source_group ("core" FILES ${PSTORE_CORE_SRC})
 
 set (PSTORE_SUPPORT_SRC
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/array_stack.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/crc32.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/fnv.hpp"

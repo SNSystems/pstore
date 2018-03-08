@@ -46,26 +46,16 @@
 # vacuumd Executable
 ################
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/vacuum_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/vacuum_config.hpp"
-    ESCAPE_QUOTES
-)
-
 add_pstore_executable (pstore-vacuumd
-    "${CMAKE_CURRENT_BINARY_DIR}/vacuum_config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/vacuum_config.hpp.in"
     main.cpp
     switches.cpp
     switches.hpp
 )
 
-target_link_libraries (pstore-vacuumd pstore-vacuum-lib)
-target_include_directories (pstore-vacuumd PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_link_libraries (pstore-vacuumd pstore-vacuum-lib pstore-cmd-util)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-vacuumd LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-vacuumd pstore-cmd-util)
 
 add_custom_command (
     TARGET pstore-vacuumd

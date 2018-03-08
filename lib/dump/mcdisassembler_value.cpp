@@ -4,6 +4,12 @@
 //* | | | | | | (_| (_| | \__ \ (_| \__ \__ \  __/ | | | | | |_) | |  __/ |    *
 //* |_| |_| |_|\___\__,_|_|___/\__,_|___/___/\___|_| |_| |_|_.__/|_|\___|_|    *
 //*                                                                            *
+//*             _             *
+//* __   ____ _| |_   _  ___  *
+//* \ \ / / _` | | | | |/ _ \ *
+//*  \ V / (_| | | |_| |  __/ *
+//*   \_/ \__,_|_|\__,_|\___| *
+//*                           *
 //===- lib/dump/mcdisassembler_value.cpp ----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
@@ -43,7 +49,7 @@
 //===----------------------------------------------------------------------===//
 #include "dump/mcdisassembler_value.hpp"
 
-#include "dump_lib_config.hpp" // for PSTORE_IS_INSIDE_LLVM
+#include "pstore/config/config.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 

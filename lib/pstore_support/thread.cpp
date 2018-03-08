@@ -63,8 +63,8 @@
 #include <pthread_np.h>
 #endif
 
+#include "pstore/config/config.hpp"
 #include "pstore_support/error.hpp"
-#include "support_config.hpp"
 
 namespace pstore {
     namespace threads {

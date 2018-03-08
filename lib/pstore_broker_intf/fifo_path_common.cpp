@@ -57,8 +57,8 @@
 #include <sstream>
 #include <thread>
 
+#include "pstore/config/config.hpp"
 #include "pstore_support/error.hpp"
-#include "broker_intf_config.hpp"
 
 namespace pstore {
     namespace broker {

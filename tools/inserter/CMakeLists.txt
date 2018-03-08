@@ -42,20 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-include (CheckIncludeFileCXX)
-check_include_file_cxx (sys/kdebug_signpost.h PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H)
-
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
-)
-add_pstore_executable (pstore-inserter
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    main.cpp
-)
-target_include_directories (pstore-inserter PRIVATE "${CMAKE_CURRENT_BINARY_DIR}") # for config.hpp
+add_pstore_executable (pstore-inserter main.cpp)
 target_link_libraries (pstore-inserter pstore pstore-cmd-util)
 
 # eof: tools/inserter/CMakeLists.txt

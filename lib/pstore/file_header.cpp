@@ -55,11 +55,9 @@
 #include <utility>
 
 // pstore includes
+#include "pstore/config/config.hpp"
 #include "pstore/crc32.hpp"
 #include "pstore/database.hpp"
-
-// Local includes
-#include "config.hpp"
 
 
 namespace pstore {

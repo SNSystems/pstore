@@ -44,13 +44,31 @@
 
 include (CheckCXXSourceCompiles)
 include (CheckIncludeFiles)
+include (CheckIncludeFileCXX)
+
+include (TestBigEndian)
+test_big_endian (PSTORE_IS_BIG_ENDIAN)
 
 if (APPLE)
     check_include_files ("asl.h" PSTORE_HAVE_ASL_H)
+    check_include_file_cxx (sys/kdebug_signpost.h PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H)
 endif ()
+check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
+check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
 check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
 
+
 set (CMAKE_REQUIRED_LIBRARIES )
+
+check_cxx_source_compiles (
+    "#include <iomanip>
+    #include <sstream>
+    int main () {
+        std::stringstream ss;
+        ss << std::quoted (\"Hello World\");
+    }"
+    PSTORE_HAVE_STD_QUOTED)
+
 check_cxx_source_compiles (
     "#define __STDC_WANT_LIB_EXT1__  1
     #include <time.h>
@@ -126,16 +144,17 @@ check_cxx_source_compiles (
 
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
 set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/pstore_support")
+set (PSTORE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/include/")
 
 configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+    "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
     ESCAPE_QUOTES
 )
 
 set (PSTORE_SUPPORT_LIB_SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/support_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/support_config.hpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+    "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
     "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_count.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
@@ -158,6 +177,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
+
     error.cpp
     file.cpp
     file_posix.cpp
@@ -175,22 +195,27 @@ set (PSTORE_SUPPORT_LIB_SRC
 )
 
 include (add_pstore)
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_library (pstore-support-lib STATIC ${PSTORE_SUPPORT_LIB_SRC})
 
+# pstore-support-lib
+add_pstore_library (pstore-support-lib STATIC ${PSTORE_SUPPORT_LIB_SRC})
+target_include_directories (pstore-support-lib PUBLIC
+    $<BUILD_INTERFACE:${PSTORE_CONFIG_DIR}>
+    $<INSTALL_INTERFACE:include> # prefix/include
+)  
+target_link_libraries (pstore-support-lib PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+
+# Add the exception-handling-enabled pstore-support-lib-ex if we're building inside LLVM
+if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
-
     add_pstore_library (pstore-support-lib-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
-    include_directories (BEFORE "${PSTORE_INCLUDE_DIR}")
-
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-else ()
-    add_pstore_library (pstore-support-lib ${PSTORE_SUPPORT_LIB_SRC})
-    target_include_directories (pstore-support-lib PUBLIC "${PSTORE_INCLUDE_DIR}")
+    target_include_directories (pstore-support-lib-ex PUBLIC
+        $<BUILD_INTERFACE:${PSTORE_CONFIG_DIR}>
+        $<INSTALL_INTERFACE:include> # prefix/include
+    )  
+    target_link_libraries (pstore-support-lib-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_IS_INSIDE_LLVM)
-
-target_link_libraries (pstore-support-lib PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 # eof: lib/pstore_support/CMakeLists.txt

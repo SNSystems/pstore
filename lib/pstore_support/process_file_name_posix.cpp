@@ -47,10 +47,10 @@
 
 #if !defined(_WIN32)
 
+#include "pstore/config/config.hpp"
 #include "pstore_support/error.hpp"
 #include "pstore_support/portab.hpp"
 #include "pstore_support/small_vector.hpp"
-#include "support_config.hpp"
 
 #if PSTORE_HAVE_NSGETEXECUTABLEPATH
 

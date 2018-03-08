@@ -44,15 +44,7 @@
 
 set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include")
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    ESCAPE_QUOTES
-)
 set (PSTORE_BROKER_LIB_SRC
-    "${CMAKE_CURRENT_BINARY_DIR}/config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
-
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/command.hpp"
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/gc.hpp"
@@ -90,21 +82,15 @@ include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
-
     add_pstore_library (pstore-broker-lib STATIC
         ${PSTORE_BROKER_LIB_SRC}
         DEPENDS
         pstore
     )
-    include_directories(BEFORE
-        ${BROKER_PUBLIC_INCLUDES_DIR}
-        ${CMAKE_CURRENT_BINARY_DIR})
-
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 else ()
     add_pstore_library (pstore-broker-lib ${PSTORE_BROKER_LIB_SRC})
-    target_include_directories (pstore-broker-lib PUBLIC ${BROKER_PUBLIC_INCLUDES_DIR})
 endif (PSTORE_IS_INSIDE_LLVM)
 
 target_link_libraries (pstore-broker-lib PUBLIC pstore-broker-intf pstore-support-lib)

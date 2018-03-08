@@ -44,15 +44,7 @@
 
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/broker_intf_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/broker_intf_config.hpp"
-    ESCAPE_QUOTES
-)
-
 set (PSTORE_BROKER_INTF_SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/broker_intf_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/broker_intf_config.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/descriptor.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/fifo_path.hpp"
     "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/message_type.hpp"
@@ -87,11 +79,8 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 
-    include_directories (BEFORE "${PSTORE_INCLUDE_DIR}")
-
 else ()
     add_pstore_library (pstore-broker-intf ${PSTORE_BROKER_INTF_SRC})
-    target_include_directories (pstore-broker-intf PUBLIC "${PSTORE_INCLUDE_DIR}")
     target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
 endif (PSTORE_IS_INSIDE_LLVM)
 

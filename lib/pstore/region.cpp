@@ -48,7 +48,7 @@
 /// factory is used for unit testing.
 
 #include "pstore/region.hpp"
-#include "config.hpp"
+#include "pstore/config/config.hpp"
 #include "pstore/make_unique.hpp"
 
 namespace pstore {

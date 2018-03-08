@@ -42,23 +42,13 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-configure_file (
-    "${CMAKE_CURRENT_SOURCE_DIR}/index_structure_config.hpp.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/index_structure_config.hpp"
-    ESCAPE_QUOTES
-)
-
 add_pstore_executable (pstore-index-structure
-    "${CMAKE_CURRENT_BINARY_DIR}/index_structure_config.hpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/index_structure_config.hpp.in"
     index_structure.cpp
     indices.hpp
     indices.cpp
     switches.cpp
     switches.hpp
 )
-
-target_include_directories (pstore-index-structure PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-index-structure LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
