@@ -43,19 +43,18 @@
 //===----------------------------------------------------------------------===//
 /// \file gc_common.cpp
 
-#include "broker/gc.hpp"
+#include "pstore/broker/gc.hpp"
 
 #ifndef _WIN32
 #include <signal.h>
 #endif
 
-#include "pstore_support/logging.hpp"
-#include "pstore_support/path.hpp"
-#include "pstore_support/process_file_name.hpp"
-#include "pstore_support/signal_helpers.hpp"
-
-#include "broker/globals.hpp"
-#include "broker/spawn.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker/spawn.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/path.hpp"
+#include "pstore/support/process_file_name.hpp"
+#include "pstore/support/signal_helpers.hpp"
 
 namespace pstore {
     namespace broker {

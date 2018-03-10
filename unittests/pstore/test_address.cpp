@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file test_address.cpp
 
-#include "pstore/address.hpp"
+#include "pstore/core/address.hpp"
 
 #include "gtest/gtest.h"
 

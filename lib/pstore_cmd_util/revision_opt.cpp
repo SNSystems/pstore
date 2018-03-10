@@ -41,10 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/revision_opt.hpp"
+#include "pstore/cmd_util/revision_opt.hpp"
 #include <cstdlib>
 #include <iostream>
-#include "pstore_cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
 
 namespace pstore {
     namespace cmd_util {

@@ -41,12 +41,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "dump/db_value.hpp"
+#include "pstore/dump/db_value.hpp"
 
 #include <chrono>
 #include <ctime>
 
-#include "pstore/generation_iterator.hpp"
+#include "pstore/core/generation_iterator.hpp"
 
 namespace pstore {
     namespace dump {

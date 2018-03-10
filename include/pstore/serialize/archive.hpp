@@ -143,7 +143,7 @@
 #include <vector>
 
 #include "pstore/serialize/common.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace serialize {

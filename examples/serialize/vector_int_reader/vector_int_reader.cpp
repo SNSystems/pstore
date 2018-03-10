@@ -44,11 +44,11 @@
 #include <iostream>
 #include <iomanip>
 
-#include "pstore_support/gsl.hpp"
-#include "pstore/serialize/ios_state.hpp"
 #include "pstore/serialize/archive.hpp"
-#include "pstore/serialize/types.hpp"
+#include "pstore/serialize/ios_state.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/serialize/types.hpp"
+#include "pstore/support/gsl.hpp"
 
 using namespace pstore;
 

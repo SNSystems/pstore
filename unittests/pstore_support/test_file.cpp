@@ -44,7 +44,7 @@
 /// \file test_file.cpp
 /// \brief Unit tests for the file.hpp (file management) interfaces.
 
-#include "pstore_support/file.hpp"
+#include "pstore/support/file.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -58,7 +58,7 @@
 #include "check_for_error.hpp"
 
 #ifdef _WIN32
-#include "pstore_support/small_vector.hpp"
+#include "pstore/support/small_vector.hpp"
 #endif
 
 namespace {

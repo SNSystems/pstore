@@ -57,7 +57,7 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#include "pstore_support/gsl.hpp"
+#include "pstore/support/gsl.hpp"
 #include "gtest/gtest.h"
 
 #include <iostream>
@@ -68,7 +68,7 @@
 #include <vector>
 #include <regex>
 
-#include "pstore/make_unique.hpp"
+#include "pstore/core/make_unique.hpp"
 
 using namespace ::pstore::gsl;
 

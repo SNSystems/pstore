@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file quit.cpp
 
-#include "broker/quit.hpp"
+#include "pstore/broker/quit.hpp"
 
 // Standard includes
 #include <atomic>
@@ -62,19 +62,17 @@
 #include <signal.h>
 
 // pstore includes
-#include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore_support/logging.hpp"
-#include "pstore_support/signal_cv.hpp"
-#include "pstore_support/signal_helpers.hpp"
-#include "pstore_support/thread.hpp"
-#include "pstore/make_unique.hpp"
-
-// Local includes
-#include "broker/command.hpp"
-#include "broker/gc.hpp"
-#include "broker/globals.hpp"
-#include "broker/scavenger.hpp"
+#include "pstore/broker/command.hpp"
+#include "pstore/broker/gc.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker/scavenger.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/core/make_unique.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/signal_cv.hpp"
+#include "pstore/support/signal_helpers.hpp"
+#include "pstore/support/thread.hpp"
 
 namespace {
 

@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file dom_types.cpp
 
-#include "pstore_json/dom_types.hpp"
+#include "pstore/json/dom_types.hpp"
 #include <algorithm>
 
 namespace pstore {

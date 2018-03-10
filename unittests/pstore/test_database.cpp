@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file test_database.cpp
 
-#include "pstore/database.hpp"
+#include "pstore/core/database.hpp"
 
 #include <limits>
 #include <memory>
@@ -53,7 +53,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "pstore_support/portab.hpp"
+#include "pstore/support/portab.hpp"
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 
@@ -378,7 +378,7 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
 
 
 // FIXME: this include is in the wrong place. Is the test in the wrong place?
-#include "pstore/transaction.hpp"
+#include "pstore/core/transaction.hpp"
 
 TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
     using ::testing::Ref;

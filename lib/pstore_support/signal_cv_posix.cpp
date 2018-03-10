@@ -44,7 +44,7 @@
 
 /// \file signal_cv_posix.cpp
 
-#include "pstore_support/signal_cv.hpp"
+#include "pstore/support/signal_cv.hpp"
 
 #ifndef _WIN32
 
@@ -52,7 +52,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
 

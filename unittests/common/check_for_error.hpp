@@ -47,8 +47,8 @@
 
 #include <system_error>
 #include "gtest/gtest.h"
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
 
 template <typename Function>
 void check_for_error (Function fn, int err, std::error_category const & category) {

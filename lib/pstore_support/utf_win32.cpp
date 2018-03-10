@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file utf_win32.cpp
 
-#include "pstore_support/utf.hpp"
+#include "pstore/support/utf.hpp"
 
 #ifdef _WIN32
 
@@ -56,9 +56,9 @@
 #include <Windows.h>
 
 // Local includes
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/small_vector.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/small_vector.hpp"
 
 namespace {
     int conversion_result (char const * api, int result) {

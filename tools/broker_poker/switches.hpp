@@ -54,7 +54,7 @@
 #endif
 
 #include "pstore/config/config.hpp"
-#include "pstore_support/maybe.hpp"
+#include "pstore/support/maybe.hpp"
 
 struct switches {
     std::string verb;

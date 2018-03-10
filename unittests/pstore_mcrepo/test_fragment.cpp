@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_mcrepo/fragment.hpp"
+#include "pstore/mcrepo/fragment.hpp"
 #include "gmock/gmock.h"
 #include <memory>
 #include <vector>

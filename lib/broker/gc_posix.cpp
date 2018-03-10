@@ -45,7 +45,7 @@
 /// \brief Waits for garbage-collection processes to exit. On exit, a process is removed from the
 /// gc_watch_thread::processes_ collection.
 
-#include "broker/gc.hpp"
+#include "pstore/broker/gc.hpp"
 
 #ifndef _WIN32
 
@@ -62,10 +62,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include "pstore_support/logging.hpp"
-#include "pstore_support/signal_cv.hpp"
-
-#include "broker/globals.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/signal_cv.hpp"
 
 namespace {
 

@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_mcrepo/sparse_array.hpp"
+#include "pstore/mcrepo/sparse_array.hpp"
 #include <array>
 #include <set>
 #include <vector>

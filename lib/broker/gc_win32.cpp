@@ -45,7 +45,7 @@
 /// \brief Waits for garbage-collection processes to exit. On exit, a process is removed from the
 /// gc_watch_thread::processes_ collection.
 
-#include "broker/gc.hpp"
+#include "pstore/broker/gc.hpp"
 
 #ifdef _WIN32
 
@@ -56,14 +56,13 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "pstore_support/logging.hpp"
-#include "pstore_support/signal_cv.hpp"
-#include "pstore_support/thread.hpp"
-
-#include "broker/bimap.hpp"
-#include "broker/globals.hpp"
-#include "broker/pointer_compare.hpp"
-#include "broker/spawn.hpp"
+#include "pstore/broker/bimap.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker/pointer_compare.hpp"
+#include "pstore/broker/spawn.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/signal_cv.hpp"
+#include "pstore/support/thread.hpp"
 
 
 namespace {

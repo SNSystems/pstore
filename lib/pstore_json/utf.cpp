@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_json/utf.hpp"
+#include "pstore/json/utf.hpp"
 #include <cctype>
 
 char32_t const pstore::json::replacement_char_code_point = 0xFFFD;

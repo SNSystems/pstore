@@ -127,7 +127,7 @@
 #include <type_traits>
 
 #include "pstore/serialize/common.hpp"
-#include "pstore_support/gsl.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace serialize {

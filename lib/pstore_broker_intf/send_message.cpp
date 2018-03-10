@@ -43,13 +43,13 @@
 //===----------------------------------------------------------------------===//
 /// \file send_message.cpp
 
-#include "pstore_broker_intf/send_message.hpp"
+#include "pstore/broker_intf/send_message.hpp"
 
 #include <iterator>
 #include <string>
 
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore_broker_intf/writer.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/writer.hpp"
 
 namespace {
     static std::atomic<std::uint32_t> message_id{0};

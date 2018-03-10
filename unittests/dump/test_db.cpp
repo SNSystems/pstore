@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "dump/db_value.hpp"
+#include "pstore/dump/db_value.hpp"
 
 #include <cctype>
 #include <initializer_list>

@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "dump/line_splitter.hpp"
+#include "pstore/dump/line_splitter.hpp"
 
 std::string pstore::dump::trim_line (std::string const & str) {
     std::string result;

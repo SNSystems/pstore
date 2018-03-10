@@ -47,8 +47,8 @@
 #include <bitset>
 #include <type_traits>
 #include <vector>
-#include "pstore/database.hpp"
-#include "pstore/index_types.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/index_types.hpp"
 
 #define INDICES                                                                                    \
     X (digest)                                                                                     \

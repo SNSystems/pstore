@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "dump/value.hpp"
+#include "pstore/dump/value.hpp"
 #include <memory>
 #include "gtest/gtest.h"
 #include "convert.hpp"

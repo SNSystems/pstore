@@ -44,7 +44,7 @@
 #ifndef MCREPO_TRANSACTION_HPP
 #define MCREPO_TRANSACTION_HPP
 
-#include "pstore_mcrepo/ticket.hpp"
+#include "pstore/mcrepo/ticket.hpp"
 #include "gmock/gmock.h"
 #include <memory>
 #include <vector>

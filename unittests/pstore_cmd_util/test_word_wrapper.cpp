@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/cl/word_wrapper.hpp"
+#include "pstore/cmd_util/cl/word_wrapper.hpp"
 #include <vector>
 #include "gmock/gmock.h"
 

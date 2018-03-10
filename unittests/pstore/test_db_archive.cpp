@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/db_archive.hpp"
+#include "pstore/core/db_archive.hpp"
 
 // Stadard includes
 #include <array>
@@ -52,8 +52,8 @@
 #include <gmock/gmock.h>
 
 // pstore public includes
-#include "pstore_support/gsl.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/core/transaction.hpp"
 
 // Local test includes
 #include "empty_store.hpp"

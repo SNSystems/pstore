@@ -41,13 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "broker/spawn.hpp"
+#include "pstore/broker/spawn.hpp"
 
 #include <initializer_list>
 #include <iterator>
 #include <vector>
 
-#include "pstore_support/portab.hpp"
+#include "pstore/support/portab.hpp"
 #include "gmock/gmock.h"
 
 using namespace pstore::broker;

@@ -46,7 +46,7 @@
 # PStore Dump Core Library
 ##########################
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 set (PSTORE_DUMP_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/dump/db_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/error.hpp"
@@ -80,6 +80,6 @@ set(LLVM_LINK_COMPONENTS
   Symbolize
   )
 add_pstore_library (pstore-dump-lib ${PSTORE_DUMP_LIB_SRC})
-target_link_libraries (pstore-dump-lib PUBLIC pstore pstore-mcrepo)
+target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)
 
 # eof: lib/dump/CMakeLists.txt

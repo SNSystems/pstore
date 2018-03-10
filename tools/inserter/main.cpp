@@ -68,17 +68,16 @@ using TCHAR = char;
 #define NATIVE_TEXT(x) x
 #endif
 
-// pstore includes.
+#include "pstore/cmd_util/cl/command_line.hpp"
 #include "pstore/config/config.hpp"
-#include "pstore/database.hpp"
-#include "pstore/db_archive.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/index_types.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/db_archive.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
-#include "pstore/transaction.hpp"
-#include "pstore_cmd_util/cl/command_line.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 #if PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
 #include <sys/kdebug_signpost.h>

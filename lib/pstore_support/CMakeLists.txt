@@ -142,8 +142,8 @@ check_cxx_source_compiles (
     PSTORE_HAVE_NSGETEXECUTABLEPATH)
 
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
-set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/pstore_support")
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
+set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/support")
 set (PSTORE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/include/")
 
 configure_file (

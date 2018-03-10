@@ -44,7 +44,7 @@
 
 /// \file signal_helpers.cpp
 
-#include "pstore_support/signal_helpers.hpp"
+#include "pstore/support/signal_helpers.hpp"
 
 #ifdef _WIN32
 

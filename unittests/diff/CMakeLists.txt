@@ -47,6 +47,6 @@ add_pstore_unit_test (pstore-diff-unit-tests
     test_indices.cpp
     test_revision.cpp
 )
-target_link_libraries (pstore-diff-unit-tests pstore pstore-diff-lib pstore-common)
+target_link_libraries (pstore-diff-unit-tests pstore-diff-lib pstore-common)
 
 # eof: unittests/diff/CMakeLists.txt

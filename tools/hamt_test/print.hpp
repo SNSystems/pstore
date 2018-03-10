@@ -51,7 +51,7 @@
 #include <iostream>
 #include <mutex>
 
-#include "pstore/database.hpp"
+#include "pstore/core/database.hpp"
 
 namespace details {
     class ios_printer {

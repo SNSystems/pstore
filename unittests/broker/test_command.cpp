@@ -42,10 +42,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "broker/command.hpp"
+#include "pstore/broker/command.hpp"
 #include <functional>
 #include "gmock/gmock.h"
-#include "pstore_broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
 
 namespace {
 

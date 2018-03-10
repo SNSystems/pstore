@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/uint128.hpp"
+#include "pstore/core/uint128.hpp"
 #include <gtest/gtest.h>
 
 TEST (UInt128, DefaultCtor) {

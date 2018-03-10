@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "empty_store.hpp"
 #include <cstdlib>
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 #ifdef _WIN32
 

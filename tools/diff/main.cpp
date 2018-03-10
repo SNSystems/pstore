@@ -45,8 +45,8 @@
 
 #include <iostream>
 
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 #include "./switches.hpp"
 

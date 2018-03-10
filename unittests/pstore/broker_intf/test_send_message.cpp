@@ -43,14 +43,14 @@
 //===----------------------------------------------------------------------===//
 /// \file test_send_message.cpp
 
-#include "pstore_broker_intf/send_message.hpp"
+#include "pstore/broker_intf/send_message.hpp"
 
-#include "pstore_support/portab.hpp"
+#include "pstore/support/portab.hpp"
 #include "gmock/gmock.h"
 
-#include "pstore_broker_intf/descriptor.hpp"
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore_broker_intf/writer.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/writer.hpp"
 
 namespace {
 

@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_support/bit_count.hpp"
+#include "pstore/support/bit_count.hpp"
 #include "gmock/gmock.h"
 
 TEST (BitCount, CountLeadingZeros) {

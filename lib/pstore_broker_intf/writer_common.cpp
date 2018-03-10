@@ -45,10 +45,10 @@
 /// \brief Implements the parts of the class which enables a client to send messages to the broker
 /// which are common to all target operating systems.
 
-#include "pstore_broker_intf/writer.hpp"
+#include "pstore/broker_intf/writer.hpp"
 #include <thread>
 #include <utility>
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace broker {

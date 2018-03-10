@@ -47,14 +47,14 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "dump/mcdisassembler_value.hpp"
+#include "pstore/dump/mcdisassembler_value.hpp"
 
 #include "pstore/config/config.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 
-#include "dump/error.hpp"
-#include "dump/line_splitter.hpp"
+#include "pstore/dump/error.hpp"
+#include "pstore/dump/line_splitter.hpp"
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Triple.h"
@@ -73,8 +73,8 @@
 #include "llvm/Support/TargetRegistry.h"
 #include "llvm/MC/MCInstrInfo.h"
 
-#include "pstore_support/bit_count.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/support/bit_count.hpp"
+#include "pstore/support/error.hpp"
 
 namespace {
 

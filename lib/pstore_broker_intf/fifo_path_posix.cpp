@@ -44,7 +44,7 @@
 /// \file fifo_path_posix.cpp
 /// \brief Portions of the implementation of the broker::fifo_path class that are POSIX-specific.
 
-#include "pstore_broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
 
 #include <sstream>
 #include <thread>
@@ -58,7 +58,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace {
 

@@ -42,12 +42,12 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "diff/diff_value.hpp"
+#include "pstore/diff/diff_value.hpp"
 
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/index_types.hpp"
-#include "pstore/sstring_view_archive.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/sstring_view_archive.hpp"
 
 
 namespace pstore {

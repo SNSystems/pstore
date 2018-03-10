@@ -47,7 +47,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/memory_mapper.hpp"
+#include "pstore/core/memory_mapper.hpp"
 
 #include <cstring>
 #include <memory>
@@ -56,10 +56,10 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/file.hpp"
-#include "pstore/make_unique.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/file.hpp"
+#include "pstore/core/make_unique.hpp"
 
 #ifndef _WIN32
 #include <errno.h>

@@ -47,9 +47,9 @@
 #include <set>
 
 // The serialization library
-#include "pstore_support/gsl.hpp"
 #include "pstore/serialize/archive.hpp"
 #include "pstore/serialize/types.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace {
     class osw_policy {

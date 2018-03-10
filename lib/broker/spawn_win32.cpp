@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file spawn_win32.cpp
 
-#include "broker/spawn.hpp"
+#include "pstore/broker/spawn.hpp"
 
 #ifdef _WIN32
 
@@ -55,9 +55,9 @@
 #include <Windows.h>
 
 // pstore includes
-#include "pstore_broker_intf/descriptor.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/utf.hpp"
 
 
 namespace pstore {

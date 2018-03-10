@@ -43,14 +43,14 @@
 //===----------------------------------------------------------------------===//
 /// \file process_file_name_posix.cpp
 
-#include "pstore_support/process_file_name.hpp"
+#include "pstore/support/process_file_name.hpp"
 
 #if !defined(_WIN32)
 
 #include "pstore/config/config.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/small_vector.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/small_vector.hpp"
 
 #if PSTORE_HAVE_NSGETEXECUTABLEPATH
 

@@ -43,13 +43,13 @@
 //===----------------------------------------------------------------------===//
 /// \file scavenger.cpp
 
-#include "broker/scavenger.hpp"
+#include "pstore/broker/scavenger.hpp"
 
 #include <chrono>
 
-#include "pstore_support/logging.hpp"
-#include "broker/command.hpp"
-#include "broker/globals.hpp"
+#include "pstore/broker/command.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/support/logging.hpp"
 
 namespace pstore {
     namespace broker {

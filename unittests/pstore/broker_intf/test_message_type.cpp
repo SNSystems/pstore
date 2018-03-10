@@ -44,11 +44,11 @@
 
 /// \file test_message_type.cpp
 
-#include "pstore_broker_intf/message_type.hpp"
+#include "pstore/broker_intf/message_type.hpp"
 #include <list>
 #include "gmock/gmock.h"
 
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 #include "check_for_error.hpp"
 
 TEST (BrokerMessageType, BadPartNo) {

@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file parser.cpp
 
-#include "broker/parser.hpp"
+#include "pstore/broker/parser.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -51,10 +51,9 @@
 #include <mutex>
 #include <stdexcept>
 
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore/make_unique.hpp"
-
-#include "broker/globals.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/core/make_unique.hpp"
 
 namespace {
 

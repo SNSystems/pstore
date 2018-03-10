@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include")
+set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 
 set (PSTORE_BROKER_LIB_SRC
     "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
@@ -82,11 +82,7 @@ include (add_pstore)
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
-    add_pstore_library (pstore-broker-lib STATIC
-        ${PSTORE_BROKER_LIB_SRC}
-        DEPENDS
-        pstore
-    )
+    add_pstore_library (pstore-broker-lib STATIC ${PSTORE_BROKER_LIB_SRC})
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 else ()

@@ -45,10 +45,10 @@
 /// \brief Implements record and playback of messages. The recorded messages can be used
 /// for later analysis and testing.
 
-#include "broker/recorder.hpp"
-#include "broker/message_pool.hpp"
+#include "pstore/broker/recorder.hpp"
 
-#include "pstore_support/utf.hpp"
+#include "pstore/broker/message_pool.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace broker {

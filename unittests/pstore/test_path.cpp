@@ -44,7 +44,7 @@
 /// \file test_path.cpp
 /// \brief Unit tests for the path.hpp (path management) interfaces.
 
-#include "pstore_support/path.hpp"
+#include "pstore/support/path.hpp"
 #include "gtest/gtest.h"
 
 TEST (Path, PosixDirName) {

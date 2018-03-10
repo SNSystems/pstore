@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file globals.cpp
 
-#include "broker/globals.hpp"
+#include "pstore/broker/globals.hpp"
 #include <cstdlib>
 
 namespace pstore {

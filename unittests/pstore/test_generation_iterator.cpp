@@ -47,9 +47,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/crc32.hpp"
-#include "pstore/generation_iterator.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/core/crc32.hpp"
+#include "pstore/core/generation_iterator.hpp"
+#include "pstore/core/transaction.hpp"
 
 #include <iterator>
 

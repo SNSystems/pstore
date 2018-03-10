@@ -45,10 +45,10 @@
 #include <fstream>
 #include <iostream>
 
-#include "pstore_json/dom_types.hpp"
-#include "pstore_json/json.hpp"
-#include "pstore_json/utf.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/json/dom_types.hpp"
+#include "pstore/json/json.hpp"
+#include "pstore/json/utf.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace {
 

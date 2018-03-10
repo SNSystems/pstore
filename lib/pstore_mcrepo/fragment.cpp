@@ -41,10 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_mcrepo/fragment.hpp"
-#include "pstore_mcrepo/repo_error.hpp"
+#include "pstore/mcrepo/fragment.hpp"
 
 #include "pstore/config/config.hpp"
+#include "pstore/mcrepo/repo_error.hpp"
 
 using namespace pstore::repo;
 

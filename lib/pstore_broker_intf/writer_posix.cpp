@@ -45,13 +45,13 @@
 /// \brief Implements the parts of the class which enables a client to send messages to the broker
 /// which are POSIX-specific.
 
-#include "pstore_broker_intf/writer.hpp"
+#include "pstore/broker_intf/writer.hpp"
 
 #ifndef _WIN32
 
 #include <unistd.h>
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace broker {

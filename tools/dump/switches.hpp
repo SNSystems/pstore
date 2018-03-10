@@ -56,7 +56,7 @@ typedef char TCHAR;
 #define NATIVE_TEXT(str) str
 #endif
 
-#include "pstore/database.hpp"
+#include "pstore/core/database.hpp"
 #include "pstore/config/config.hpp"
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)

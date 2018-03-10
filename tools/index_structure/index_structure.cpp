@@ -46,12 +46,12 @@
 #include <iostream>
 
 #include "pstore/config/config.hpp"
-#include "pstore/database.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_map_types.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/sstring_view_archive.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_map_types.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/support/portab.hpp"
 
 #include "switches.hpp"
 

@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file command.cpp
 
-#include "broker/command.hpp"
+#include "pstore/broker/command.hpp"
 
 #include <algorithm>
 #include <condition_variable>
@@ -57,14 +57,14 @@
 #include <unistd.h>
 #endif
 
-#include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/writer.hpp"
-#include "pstore_support/logging.hpp"
-#include "broker/gc.hpp"
-#include "broker/globals.hpp"
-#include "broker/message_pool.hpp"
-#include "broker/quit.hpp"
-#include "broker/recorder.hpp"
+#include "pstore/broker/gc.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker/message_pool.hpp"
+#include "pstore/broker/quit.hpp"
+#include "pstore/broker/recorder.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/writer.hpp"
+#include "pstore/support/logging.hpp"
 
 namespace {
     template <typename T, std::size_t N>

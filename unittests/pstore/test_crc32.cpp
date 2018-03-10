@@ -41,10 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/crc32.hpp"
+#include "pstore/core/crc32.hpp"
 #include <cstring>
 #include "gtest/gtest.h"
-#include "pstore_support/gsl.hpp"
+#include "pstore/support/gsl.hpp"
 
 TEST (Crc32, Empty) {
     char empty;

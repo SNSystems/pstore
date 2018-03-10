@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "broker/intrusive_list.hpp"
+#include "pstore/broker/intrusive_list.hpp"
 #include <gtest/gtest.h>
 
 namespace {

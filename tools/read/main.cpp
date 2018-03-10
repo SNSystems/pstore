@@ -60,13 +60,13 @@ using TCHAR = char;
 
 #include "switches.hpp"
 
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/index_types.hpp"
-#include "pstore/sstring_view_archive.hpp"
-#include "pstore_cmd_util/str_to_revision.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace {
 #if defined(_WIN32) && defined(_UNICODE)

@@ -43,25 +43,24 @@
 //===----------------------------------------------------------------------===//
 /// \file copy.cpp
 
-#include "vacuum/copy.hpp"
+#include "pstore/vacuum/copy.hpp"
 
 #include <cstdio>
 #include <memory>
 #include <sstream>
 #include <thread>
 
-#include "pstore/database.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/index_types.hpp"
-#include "pstore/make_unique.hpp"
-#include "pstore/transaction.hpp"
-#include "pstore_support/logging.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/thread.hpp"
-
-#include "vacuum/status.hpp"
-#include "vacuum/user_options.hpp"
-#include "vacuum/watch.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/make_unique.hpp"
+#include "pstore/core/transaction.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/thread.hpp"
+#include "pstore/vacuum/status.hpp"
+#include "pstore/vacuum/user_options.hpp"
+#include "pstore/vacuum/watch.hpp"
 
 #ifdef PSTORE_CPP_EXCEPTIONS
 #define TRY try

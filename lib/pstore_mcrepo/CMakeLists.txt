@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore_mcrepo")
+set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (pstore-mcrepo
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/aligned.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
@@ -53,6 +53,6 @@ add_pstore_library (pstore-mcrepo
     repo_error.cpp
     ticket.cpp
 )
-target_link_libraries (pstore-mcrepo pstore)
+target_link_libraries (pstore-mcrepo pstore-core)
 
 # eof: lib/pstore_mcrepo/CMakeLists.txt

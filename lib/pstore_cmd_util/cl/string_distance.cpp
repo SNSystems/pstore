@@ -41,10 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_cmd_util/cl/string_distance.hpp"
+#include "pstore/cmd_util/cl/string_distance.hpp"
 #include <algorithm>
 #include <numeric>
-#include "pstore_support/small_vector.hpp"
+#include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     namespace cmd_util {

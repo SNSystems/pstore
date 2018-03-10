@@ -52,6 +52,7 @@ add_subdirectory (pstore_cmd_util)
 add_subdirectory (pstore_json)
 add_subdirectory (pstore_mcrepo)
 add_subdirectory (pstore_support)
+add_subdirectory (serialize)
 add_subdirectory (vacuum)
 
 # eof: unittests/CMakeLists.txt

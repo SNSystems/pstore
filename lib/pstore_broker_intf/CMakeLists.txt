@@ -42,16 +42,16 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 
 set (PSTORE_BROKER_INTF_SRC
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/descriptor.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/fifo_path.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/message_type.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/send_message.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/server_path.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/writer.hpp"
-    "${PSTORE_INCLUDE_DIR}/pstore_broker_intf/wsa_startup.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/descriptor.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/fifo_path.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/message_type.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/send_message.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/server_path.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/writer.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/wsa_startup.hpp"
 
     descriptor.cpp
     fifo_path_common.cpp

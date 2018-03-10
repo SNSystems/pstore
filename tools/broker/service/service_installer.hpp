@@ -49,7 +49,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#include "pstore_support/gsl.hpp"
+#include "pstore/support/gsl.hpp"
 
 using tzstring = ::pstore::gsl::basic_zstring<TCHAR>;
 using ctzstring = ::pstore::gsl::basic_zstring<TCHAR const>;

@@ -52,6 +52,6 @@ add_pstore_executable (pstore-index-structure
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-index-structure LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-index-structure pstore pstore-cmd-util)
+target_link_libraries (pstore-index-structure pstore-core pstore-cmd-util)
 
 # eof: tools/index_structure/CMakeLists.txt

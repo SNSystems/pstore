@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_broker_intf/wsa_startup.hpp"
+#include "pstore/broker_intf/wsa_startup.hpp"
 
 #ifdef _WIN32
 #include <Winsock2.h>

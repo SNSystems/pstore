@@ -43,12 +43,12 @@
 //===----------------------------------------------------------------------===//
 /// \file signal_cv_win32.cpp
 
-#include "pstore_support/signal_cv.hpp"
+#include "pstore/support/signal_cv.hpp"
 
 #ifdef _WIN32
 
 #include <cassert>
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
 

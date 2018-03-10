@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_mcrepo/ticket.hpp"
+#include "pstore/mcrepo/ticket.hpp"
 #include "transaction.hpp"
 
 using namespace pstore::repo;

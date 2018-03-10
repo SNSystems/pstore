@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file value.cpp
 
-#include "dump/value.hpp"
+#include "pstore/dump/value.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -55,7 +55,7 @@
 #include <sstream>
 #include <tuple>
 
-#include "pstore_support/utf.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace {
 

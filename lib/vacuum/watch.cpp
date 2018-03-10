@@ -57,16 +57,15 @@
 ///   and modified and closed in between our probes.
 /// - The user renames or delete the file.
 
-#include "vacuum/watch.hpp"
+#include "pstore/vacuum/watch.hpp"
 
-#include "pstore/database.hpp"
-#include "pstore/file_header.hpp"
-#include "pstore/time.hpp"
-#include "pstore_support/logging.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/thread.hpp"
-
-#include "vacuum/status.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/file_header.hpp"
+#include "pstore/core/time.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/thread.hpp"
+#include "pstore/vacuum/status.hpp"
 
 namespace {
     template <typename Lock>

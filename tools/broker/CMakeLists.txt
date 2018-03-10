@@ -104,12 +104,11 @@ if (CLANG_TIDY_FOUND)
     endforeach (P)
 
     # Add in the pstore public includes
-    get_target_property (PSTORE_LIB_INCLUDES pstore INTERFACE_INCLUDE_DIRECTORIES)#INCLUDE_DIRECTORIES)
+    get_target_property (PSTORE_LIB_INCLUDES pstore-core INTERFACE_INCLUDE_DIRECTORIES)
     foreach (P ${PSTORE_LIB_INCLUDES})
         list (APPEND TARGET_INCLUDE "-I" "${P}")
     endforeach (P)
 
-#        -header-filter="${CMAKE_CURRENT_SOURCE_DIR}/../include/*\\.hpp"
     add_custom_target(
         "clang-tidy-broker"
         COMMAND "${CLANG_TIDY}"

@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file path.cpp
-#include "pstore_support/path.hpp"
+#include "pstore/support/path.hpp"
 
 #include <algorithm>
 #include <cassert>

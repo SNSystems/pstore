@@ -44,9 +44,9 @@
 #include <iostream>
 #include <new>
 
-#include "pstore_support/gsl.hpp"
 #include "pstore/serialize/archive.hpp"
 #include "pstore/serialize/types.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace {
     class foo {

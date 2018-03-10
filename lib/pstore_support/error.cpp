@@ -44,7 +44,7 @@
 /// \file error.cpp
 /// \brief Provides an pstore-specific error codes and a suitable error category for them.
 
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 // ******************
 // * error category *

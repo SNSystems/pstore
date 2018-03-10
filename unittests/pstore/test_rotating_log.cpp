@@ -41,13 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_support/rotating_log.hpp"
+#include "pstore/support/rotating_log.hpp"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "pstore_support/file.hpp"
-#include "pstore_support/path.hpp"
+#include "pstore/support/file.hpp"
+#include "pstore/support/path.hpp"
 
 namespace {
     struct mock_file_system_traits {

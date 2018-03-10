@@ -63,12 +63,12 @@
 #include <unistd.h>
 #endif
 
-#include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/send_message.hpp"
-#include "pstore_broker_intf/writer.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/send_message.hpp"
+#include "pstore/broker_intf/writer.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 #include "flood_server.hpp"
 #include "switches.hpp"

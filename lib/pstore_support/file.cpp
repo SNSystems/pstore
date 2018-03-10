@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file file.cpp
 /// \brief Definitions of the cross platform file management functions and classes.
-#include "pstore_support/file.hpp"
+#include "pstore/support/file.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -54,7 +54,7 @@
 #include <sstream>
 
 #include "pstore/config/config.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace file {

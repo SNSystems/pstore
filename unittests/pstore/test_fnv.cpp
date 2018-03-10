@@ -50,7 +50,7 @@
  * Share and Enjoy!	:-)
  */
 
-#include "pstore/fnv.hpp"
+#include "pstore/core/fnv.hpp"
 #include <gtest/gtest.h>
 
 // FNVTEST macro does not include trailing NUL byte in the test vector

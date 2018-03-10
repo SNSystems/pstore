@@ -45,7 +45,7 @@
 /// \file test_process_file_name.cpp
 
 
-#include "pstore_support/process_file_name.hpp"
+#include "pstore/support/process_file_name.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -53,8 +53,8 @@
 // 3rd party
 #include "gmock/gmock.h"
 
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/small_vector.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/small_vector.hpp"
 #include "check_for_error.hpp"
 
 namespace {

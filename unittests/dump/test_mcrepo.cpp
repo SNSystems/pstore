@@ -42,10 +42,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "dump/mcrepo_value.hpp"
-#include "pstore/db_archive.hpp"
+#include "pstore/dump/mcrepo_value.hpp"
+#include "pstore/core/db_archive.hpp"
 #include "pstore/serialize/standard_types.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/core/transaction.hpp"
 
 #include "empty_store.hpp"
 #include "split.hpp"

@@ -55,7 +55,7 @@ add_pstore_executable (pstore-write
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-write LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-write pstore pstore-cmd-util)
+target_link_libraries (pstore-write pstore-core pstore-cmd-util)
 
 
 
@@ -68,9 +68,16 @@ add_custom_command (TARGET pstore-write
 )
 add_custom_command (TARGET pstore-write
     PRE_LINK
-    COMMAND pstore-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/pstore.xml"
+    COMMAND pstore-core-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/core.xml"
     WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
     COMMENT "Running pstore core unit tests"
+    VERBATIM
+)
+add_custom_command (TARGET pstore-write
+    PRE_LINK
+    COMMAND pstore-serialize-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/serialize.xml"
+    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+    COMMENT "Running pstore serialize unit tests"
     VERBATIM
 )
 add_custom_command (TARGET pstore-write

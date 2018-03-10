@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/varint.hpp"
+#include "pstore/core/varint.hpp"
 #include <cstdint>
 #include <vector>
 #include "gmock/gmock.h"

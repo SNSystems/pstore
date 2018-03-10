@@ -60,16 +60,16 @@ using TCHAR = char;
 #endif
 
 // pstore includes.
-#include "pstore/db_archive.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/index_types.hpp"
+#include "pstore/core/db_archive.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
 #include "pstore/serialize/standard_types.hpp"
-#include "pstore/sstring_view_archive.hpp"
-#include "pstore/transaction.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
+#include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/core/transaction.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 // Local includes
 #include "switches.hpp"

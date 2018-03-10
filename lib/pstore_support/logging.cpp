@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file logging.cpp
 
-#include "pstore_support/logging.hpp"
+#include "pstore/support/logging.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -53,9 +53,9 @@
 
 // pstore includes
 #include "pstore/config/config.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/rotating_log.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/rotating_log.hpp"
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>

@@ -45,7 +45,7 @@
 /// \brief Provides str_to_revision() which is used by the utility applications to decode the user's
 /// choice of store revision number.
 
-#include "pstore_cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -54,8 +54,8 @@
 #include <cstdlib>
 #include <type_traits>
 
-#include "pstore/head_revision.hpp"
-#include "pstore_support/ctype.hpp"
+#include "pstore/core/head_revision.hpp"
+#include "pstore/support/ctype.hpp"
 
 namespace {
     /// Returns a copy of the input string with any leading or trailing whitespace removed and all

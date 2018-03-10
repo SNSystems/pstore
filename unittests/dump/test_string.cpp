@@ -45,7 +45,7 @@
 /// \file string.cpp
 /// \brief Unit tests for the YAML string output implementation.
 
-#include "dump/value.hpp"
+#include "pstore/dump/value.hpp"
 #include <numeric>
 #include "gtest/gtest.h"
 

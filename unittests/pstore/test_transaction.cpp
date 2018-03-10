@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/database.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/transaction.hpp"
 
 #include <mutex>
 #include <numeric>

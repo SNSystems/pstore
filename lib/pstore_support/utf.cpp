@@ -44,7 +44,7 @@
 /// \file utf.cpp
 /// \brief Implementation of functions for processing UTF-8 strings.
 
-#include "pstore_support/utf.hpp"
+#include "pstore/support/utf.hpp"
 
 #include <algorithm>
 #include <cassert>

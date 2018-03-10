@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "diff/revision.hpp"
-#include "pstore/head_revision.hpp"
+#include "pstore/diff/revision.hpp"
+#include "pstore/core/head_revision.hpp"
 
 namespace pstore {
     namespace diff {

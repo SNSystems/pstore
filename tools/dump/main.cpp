@@ -55,11 +55,10 @@
 #include <system_error>
 #include <vector>
 
-#include "dump/db_value.hpp"
-#include "dump/value.hpp"
-#include "dump/mcrepo_value.hpp"
-
 #include "pstore/config/config.hpp"
+#include "pstore/dump/db_value.hpp"
+#include "pstore/dump/value.hpp"
+#include "pstore/dump/mcrepo_value.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 #include "llvm/Support/Signals.h"
@@ -69,18 +68,18 @@
 #include "llvm/ADT/StringRef.h"
 #endif
 
-#include "pstore/database.hpp"
-#include "pstore/generation_iterator.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
-#include "pstore/index_types.hpp"
-#include "pstore/shared_memory.hpp"
-#include "pstore/sstring_view_archive.hpp"
-#include "pstore/vacuum_intf.hpp"
-#include "pstore_cmd_util/str_to_revision.hpp"
-#include "pstore_support/error.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/generation_iterator.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/shared_memory.hpp"
+#include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/core/vacuum_intf.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 #include "switches.hpp"
 

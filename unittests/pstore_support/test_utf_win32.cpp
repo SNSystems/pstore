@@ -50,7 +50,7 @@
 #include "gtest/gtest.h"
 
 // PStore includes
-#include "pstore_support/utf.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace {
     struct UtfStringsFixture : public testing::Test {

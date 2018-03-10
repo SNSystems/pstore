@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file spawn_posix.cpp
 
-#include "broker/spawn.hpp"
+#include "pstore/broker/spawn.hpp"
 
 #ifndef _WIN32
 
@@ -53,8 +53,8 @@
 // platform includes
 #include <unistd.h>
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/logging.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/logging.hpp"
 
 namespace pstore {
     namespace broker {

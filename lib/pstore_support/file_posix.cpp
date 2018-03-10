@@ -46,7 +46,7 @@
 
 #ifndef _WIN32
 
-#include "pstore_support/file.hpp"
+#include "pstore/support/file.hpp"
 
 // standard includes
 #include <array>
@@ -63,9 +63,9 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "pstore_support/small_vector.hpp"
-#include "pstore_support/path.hpp"
-#include "pstore_support/quoted_string.hpp"
+#include "pstore/support/small_vector.hpp"
+#include "pstore/support/path.hpp"
+#include "pstore/support/quoted_string.hpp"
 
 
 namespace {

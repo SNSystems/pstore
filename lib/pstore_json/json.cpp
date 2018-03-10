@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_json/json.hpp"
+#include "pstore/json/json.hpp"
 
 pstore::maybe<char> pstore::json::details::source::pull () {
     if (lookahead_.has_value ()) {

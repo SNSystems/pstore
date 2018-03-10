@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file message_pool.cpp
 
-#include "broker/message_pool.hpp"
+#include "pstore/broker/message_pool.hpp"
 
 namespace pstore {
     namespace broker {

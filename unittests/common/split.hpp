@@ -51,7 +51,7 @@
 #include <string>
 #include <vector>
 
-#include "pstore_support/ctype.hpp"
+#include "pstore/support/ctype.hpp"
 
 template <typename StringType>
 std::vector<StringType> split_lines (StringType const & s) {

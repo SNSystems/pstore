@@ -42,13 +42,14 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_subdirectory (broker)
+add_subdirectory (core)
 add_subdirectory (diff)
 add_subdirectory (dump)
-add_subdirectory (pstore)
 add_subdirectory (pstore_broker_intf)
 add_subdirectory (pstore_cmd_util)
 add_subdirectory (pstore_json)
 add_subdirectory (pstore_mcrepo)
 add_subdirectory (pstore_support)
+add_subdirectory (serialize)
 add_subdirectory (vacuum)
 # eof: lib/CMakeLists.txt

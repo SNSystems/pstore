@@ -43,13 +43,13 @@
 //===----------------------------------------------------------------------===//
 /// \file test_shared_memory.cpp
 
-#include "pstore/shared_memory.hpp"
+#include "pstore/core/shared_memory.hpp"
 
 #include <algorithm>
 #include <array>
 #include <limits>
 #include "gmock/gmock.h"
-#include "pstore_support/gsl.hpp"
+#include "pstore/support/gsl.hpp"
 
 TEST (PosixMutexName, LargeOutputBuffer) {
     std::array<char, 256> arr;

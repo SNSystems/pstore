@@ -44,7 +44,7 @@
 /// \file read_loop_win32.cpp
 /// \brief The read loop thread entry point for Windows.
 
-#include "broker/read_loop.hpp"
+#include "pstore/broker/read_loop.hpp"
 
 #ifdef _WIN32
 
@@ -63,20 +63,18 @@
 #include <Windows.h>
 
 // pstore includes
-#include "pstore_broker_intf/descriptor.hpp"
-#include "pstore_broker_intf/fifo_path.hpp"
-#include "pstore_broker_intf/message_type.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/logging.hpp"
-#include "pstore_support/utf.hpp"
-
-// Local includes
-#include "broker/command.hpp"
-#include "broker/globals.hpp"
-#include "broker/intrusive_list.hpp"
-#include "broker/message_pool.hpp"
-#include "broker/quit.hpp"
-#include "broker/recorder.hpp"
+#include "pstore/broker/command.hpp"
+#include "pstore/broker/globals.hpp"
+#include "pstore/broker/intrusive_list.hpp"
+#include "pstore/broker/message_pool.hpp"
+#include "pstore/broker/quit.hpp"
+#include "pstore/broker/recorder.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace {
     using namespace pstore::broker;

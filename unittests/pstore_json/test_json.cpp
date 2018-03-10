@@ -41,9 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore_json/json.hpp"
+#include "pstore/json/json.hpp"
 #include <stack>
-#include "pstore_json/dom_types.hpp"
+#include "pstore/json/dom_types.hpp"
 #include "gmock/gmock.h"
 
 using namespace pstore;

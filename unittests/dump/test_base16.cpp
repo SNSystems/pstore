@@ -44,7 +44,7 @@
 
 /// \file test_base16.cpp
 
-#include "dump/value.hpp"
+#include "pstore/dump/value.hpp"
 #include <cstdint>
 #include <vector>
 #include "gtest/gtest.h"

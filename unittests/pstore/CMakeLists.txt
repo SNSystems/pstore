@@ -43,8 +43,7 @@
 #===----------------------------------------------------------------------===//
 
 # The pstore unit test sources
-add_pstore_unit_test (pstore-unit-tests
-    binary.hpp
+add_pstore_unit_test (pstore-core-unit-tests
     test_address.cpp
     test_array_stack.cpp
     test_base32.cpp
@@ -74,12 +73,11 @@ add_pstore_unit_test (pstore-unit-tests
     test_uuid.cpp
     test_varint.cpp
 )
-target_link_libraries (pstore-unit-tests pstore pstore-common)
+target_link_libraries (pstore-core-unit-tests pstore-core pstore-common)
 
 # Access the library's private include directory.
-target_include_directories (pstore-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/pstore")
+target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")
 
-add_subdirectory (serialize)
 add_subdirectory (broker_intf)
 
 #eof:pstore/unittests/pstore/CMakeLists.txt

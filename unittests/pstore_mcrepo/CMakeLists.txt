@@ -50,6 +50,6 @@ add_pstore_unit_test (pstore-mcrepo-unit-tests
 )
 target_link_libraries (pstore-mcrepo-unit-tests pstore-mcrepo)
 
-#eof pstore/unit_tests/pstore_mcrepo/CMakeLists.txt
+#eof pstore/unit_tests/mcrepo/CMakeLists.txt
 
 # eof: unittests/pstore_mcrepo/CMakeLists.txt

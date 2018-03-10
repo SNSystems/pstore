@@ -42,11 +42,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_support/maybe.hpp"
+#include "pstore/support/maybe.hpp"
 #include <memory>
 #include <utility>
 #include <gtest/gtest.h>
-#include "pstore/make_unique.hpp"
+#include "pstore/core/make_unique.hpp"
 
 using pstore::maybe;
 using pstore::nothing;

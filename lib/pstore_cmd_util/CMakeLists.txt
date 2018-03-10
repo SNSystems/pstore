@@ -41,7 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore_cmd_util")
+set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
 
 include (add_pstore)
 set (PSTORE_CMD_UTIL_SRC )

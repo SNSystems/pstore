@@ -41,13 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/hamt_map.hpp"
+#include "pstore/core/hamt_map.hpp"
 
 #include <random>
 #include <list>
 #include "gtest/gtest.h"
 
-#include "pstore/transaction.hpp"
+#include "pstore/core/transaction.hpp"
 
 #include "binary.hpp"
 #include "check_for_error.hpp"

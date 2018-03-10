@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_support/utf.hpp"
+#include "pstore/support/utf.hpp"
 
 #include "gmock/gmock.h"
 #include <cstddef>

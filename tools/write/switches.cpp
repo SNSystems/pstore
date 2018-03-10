@@ -48,12 +48,12 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Error.h"
 #else
-#include "pstore_cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/cl/command_line.hpp"
 #endif
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/gsl.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/utf.hpp"
 
 #include "error.hpp"
 #include "to_value_pair.hpp"

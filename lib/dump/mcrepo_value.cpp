@@ -41,15 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "dump/mcrepo_value.hpp"
+#include "pstore/dump/mcrepo_value.hpp"
 
-#include "dump/db_value.hpp"
-#include "dump/mcdisassembler_value.hpp"
-#include "dump/value.hpp"
 #include "pstore/config/config.hpp"
-#include "pstore/db_archive.hpp"
-#include "pstore/hamt_map.hpp"
-#include "pstore/hamt_set.hpp"
+#include "pstore/dump/db_value.hpp"
+#include "pstore/dump/mcdisassembler_value.hpp"
+#include "pstore/dump/value.hpp"
+#include "pstore/core/db_archive.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/hamt_set.hpp"
 
 namespace pstore {
     namespace dump {

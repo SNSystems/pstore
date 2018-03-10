@@ -41,12 +41,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/region.hpp"
+#include "pstore/core/region.hpp"
 #include <vector>
 
 #include "gmock/gmock.h"
 
-#include "pstore_support/file.hpp"
+#include "pstore/support/file.hpp"
 
 namespace {
     struct Region : public ::testing::Test {

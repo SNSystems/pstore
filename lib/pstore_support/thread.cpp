@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file thread.cpp
 
-#include "pstore_support/thread.hpp"
+#include "pstore/support/thread.hpp"
 
 #include <array>
 #include <cerrno>
@@ -64,7 +64,7 @@
 #endif
 
 #include "pstore/config/config.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace threads {

@@ -46,7 +46,7 @@
 # Vacuum Core Library
 ################
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 
 set (PSTORE_VACUUM_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/vacuum/copy.hpp"
@@ -60,16 +60,7 @@ set (PSTORE_VACUUM_LIB_SRC
 )
 
 include (add_pstore)
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_library (pstore-vacuum-lib
-        ${PSTORE_VACUUM_LIB_SRC}
-
-        DEPENDS
-        pstore
-    )
-else ()
-    add_pstore_library (pstore-vacuum-lib ${PSTORE_VACUUM_LIB_SRC})
-endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-vacuum-lib PUBLIC pstore)
+add_pstore_library (pstore-vacuum-lib ${PSTORE_VACUUM_LIB_SRC})
+target_link_libraries (pstore-vacuum-lib pstore-core)
 
 # eof: lib/vacuum/CMakeLists.txt

@@ -47,7 +47,7 @@
 #include <bitset>
 #include <string>
 
-#include "pstore/database.hpp"
+#include "pstore/core/database.hpp"
 #include "pstore/config/config.hpp"
 
 #include "indices.hpp"

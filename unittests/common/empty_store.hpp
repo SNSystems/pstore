@@ -50,7 +50,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "pstore/database.hpp"
+#include "pstore/core/database.hpp"
 
 
 /// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S memory

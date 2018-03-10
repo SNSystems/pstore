@@ -44,7 +44,7 @@
 
 /// \file bimap.hpp
 
-#include "broker/bimap.hpp"
+#include "pstore/broker/bimap.hpp"
 #include <string>
 #include "gmock/gmock.h"
 

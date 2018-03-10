@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_cmd_util/iota_generator.hpp"
+#include "pstore/cmd_util/iota_generator.hpp"
 #include <gtest/gtest.h>
 
 TEST (IotaGenerator, InitialValue) {

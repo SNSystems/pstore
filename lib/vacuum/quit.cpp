@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file quit.cpp
 
-#include "vacuum/quit.hpp"
+#include "pstore/vacuum/quit.hpp"
 
 // Standard includes
 #include <atomic>
@@ -61,14 +61,13 @@
 #endif
 #include <signal.h>
 
-#include "pstore/database.hpp"
-#include "pstore_support/logging.hpp"
-#include "pstore_support/portab.hpp"
-#include "pstore_support/signal_cv.hpp"
-#include "pstore_support/signal_helpers.hpp"
-
-#include "vacuum/status.hpp"
-#include "vacuum/watch.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/signal_cv.hpp"
+#include "pstore/support/signal_helpers.hpp"
+#include "pstore/vacuum/status.hpp"
+#include "pstore/vacuum/watch.hpp"
 
 namespace {
 

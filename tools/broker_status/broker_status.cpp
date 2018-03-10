@@ -56,11 +56,11 @@
 #include <ws2tcpip.h>
 #endif
 
-#include "pstore_broker_intf/descriptor.hpp"
-#include "pstore_broker_intf/server_path.hpp"
-#include "pstore_broker_intf/wsa_startup.hpp"
-#include "pstore_broker_intf/server_path.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/server_path.hpp"
+#include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/broker_intf/server_path.hpp"
+#include "pstore/support/error.hpp"
 
 
 namespace {

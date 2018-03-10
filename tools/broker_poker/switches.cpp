@@ -49,10 +49,10 @@
 #if PSTORE_IS_INSIDE_LLVM
 #include "llvm/Support/CommandLine.h"
 #else
-#include "pstore_cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/cl/command_line.hpp"
 #endif
-#include "pstore_support/maybe.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/support/maybe.hpp"
+#include "pstore/support/utf.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 using namespace llvm;

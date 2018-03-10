@@ -42,10 +42,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_support/sstring_view.hpp"
+#include "pstore/support/sstring_view.hpp"
 #include <cstring>
 #include <gmock/gmock.h>
-#include "pstore/make_unique.hpp"
+#include "pstore/core/make_unique.hpp"
 
 namespace {
     std::shared_ptr<char> new_shared (std::string const & s) {

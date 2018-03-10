@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 include (add_pstore)
-set (PSTORE_JSON_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore_json")
+set (PSTORE_JSON_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore/json")
 add_pstore_library (pstore-json-lib STATIC
     "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/dom_types.hpp"
     "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/json.hpp"

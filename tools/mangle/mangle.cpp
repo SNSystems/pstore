@@ -96,10 +96,10 @@
 #include <exception>
 #include <iostream>
 
-#include "pstore/file_header.hpp"
-#include "pstore/memory_mapper.hpp"
-#include "pstore_support/file.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/core/file_header.hpp"
+#include "pstore/core/memory_mapper.hpp"
+#include "pstore/support/file.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace {
 

@@ -46,7 +46,7 @@
 # PStore Dump Core Library
 ##########################
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include")
+set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 set (PSTORE_DIFF_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/diff/revision.hpp"
     "${PSTORE_INCLUDE_DIR}/diff/diff_value.hpp"
@@ -56,6 +56,6 @@ set (PSTORE_DIFF_LIB_SRC
 
 include (add_pstore)
 add_pstore_library (pstore-diff-lib ${PSTORE_DIFF_LIB_SRC})
-target_link_libraries (pstore-diff-lib pstore pstore-dump-lib)
+target_link_libraries (pstore-diff-lib pstore-core pstore-dump-lib)
 
 # eof: lib/diff/CMakeLists.txt

@@ -44,7 +44,7 @@
 /// \file message_type.cpp
 /// \brief Contains the definition of the broker::message_type class.
 
-#include "pstore_broker_intf/message_type.hpp"
+#include "pstore/broker_intf/message_type.hpp"
 
 #include <iterator>
 

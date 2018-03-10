@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore_broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
 
 #if defined(_WIN32) && defined(_MSC_VER)
 
@@ -61,4 +61,3 @@ namespace pstore {
 
 #endif
 // eof: lib/pstore_broker_intf/descriptor.cpp
-

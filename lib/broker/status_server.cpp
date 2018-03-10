@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "broker/status_server.hpp"
+#include "pstore/broker/status_server.hpp"
 
 #include <array>
 #include <algorithm>
@@ -68,10 +68,10 @@
 #endif
 
 
-#include "pstore_broker_intf/descriptor.hpp"
-#include "pstore_broker_intf/server_path.hpp"
-#include "pstore_broker_intf/wsa_startup.hpp"
-#include "pstore_support/logging.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/server_path.hpp"
+#include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/support/logging.hpp"
 
 constexpr char EOT = 4; // ASCII "end of transmission"
 

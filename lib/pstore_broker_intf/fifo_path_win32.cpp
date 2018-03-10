@@ -44,15 +44,15 @@
 /// \file fifo_path_win32.cpp
 /// \brief Portions of the implementation of the broker::fifo_path class that are Windows-specific.
 
-#include "pstore_broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
 
 #ifdef _WIN32
 
 #include <sstream>
 #include <thread>
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace broker {
@@ -120,6 +120,6 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif //_WIN32
-// eof:lib/pstore_broker_intf/fifo_path_win32.cpp
+// eof:lib/broker_intf/fifo_path_win32.cpp
 
 // eof: lib/pstore_broker_intf/fifo_path_win32.cpp

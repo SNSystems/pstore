@@ -49,7 +49,7 @@
 #include "gtest/gtest.h"
 
 // Data store includes
-#include "pstore/transaction.hpp"
+#include "pstore/core/transaction.hpp"
 
 // Local private includes
 #include "empty_store.hpp"

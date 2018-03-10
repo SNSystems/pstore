@@ -41,11 +41,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "broker/parser.hpp"
+#include "pstore/broker/parser.hpp"
 
 #include <gmock/gmock.h>
 
-#include "pstore_broker_intf/message_type.hpp"
+#include "pstore/broker_intf/message_type.hpp"
 
 namespace {
     class MessageParse : public ::testing::Test {

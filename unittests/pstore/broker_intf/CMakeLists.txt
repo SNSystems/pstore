@@ -45,5 +45,5 @@ set (BROKER_INTF_UNIT_TEST_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/test_message_type.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/test_send_message.cpp"
 )
-target_sources (pstore-unit-tests PUBLIC ${BROKER_INTF_UNIT_TEST_SRC})
+target_sources (pstore-core-unit-tests PUBLIC ${BROKER_INTF_UNIT_TEST_SRC})
 # eof: unittests/pstore/broker_intf/CMakeLists.txt

@@ -44,6 +44,7 @@
 
 # The pstore unit test common/shared sources
 add_pstore_test_library (pstore-common
+    binary.hpp
     check_for_error.hpp
     empty_store.cpp
     empty_store.hpp

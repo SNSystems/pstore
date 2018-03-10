@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/make_unique.hpp"
+#include "pstore/core/make_unique.hpp"
 #include <gtest/gtest.h>
 
 namespace {

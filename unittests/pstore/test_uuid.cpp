@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/uuid.hpp"
-#include "pstore_support/portab.hpp"
+#include "pstore/core/uuid.hpp"
+#include "pstore/support/portab.hpp"
 #include <gmock/gmock.h>
 #include "check_for_error.hpp"
 

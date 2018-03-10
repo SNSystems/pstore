@@ -48,14 +48,14 @@
 #include "llvm/Support/CommandLine.h"
 using namespace llvm;
 #else
-#include "pstore_cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/cl/command_line.hpp"
 using namespace pstore::cmd_util;
 #endif
 
 // pstore
-#include "pstore_cmd_util/str_to_revision.hpp"
-#include "pstore_cmd_util/revision_opt.hpp"
-#include "pstore_support/utf.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/revision_opt.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace {
 

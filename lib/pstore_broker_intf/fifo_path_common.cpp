@@ -52,13 +52,13 @@
 /// target
 /// platforms.
 
-#include "pstore_broker_intf/fifo_path.hpp"
+#include "pstore/broker_intf/fifo_path.hpp"
 
 #include <sstream>
 #include <thread>
 
 #include "pstore/config/config.hpp"
-#include "pstore_support/error.hpp"
+#include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace broker {

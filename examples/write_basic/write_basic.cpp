@@ -41,9 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/hamt_map.hpp"
-#include "pstore/index_types.hpp"
-#include "pstore/transaction.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/transaction.hpp"
 
 int main () {
     auto const key = std::string{"key"};

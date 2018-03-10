@@ -46,7 +46,7 @@
 
 #ifdef _WIN32
 
-#include "pstore_support/file.hpp"
+#include "pstore/support/file.hpp"
 
 // standard includes
 #include <algorithm>
@@ -60,12 +60,12 @@
 #include <stdexcept>
 #include <system_error>
 
-#include "pstore_support/error.hpp"
-#include "pstore_support/random.hpp"
-#include "pstore_support/small_vector.hpp"
-#include "pstore_support/utf.hpp"
-#include "pstore_support/path.hpp"
-#include "pstore_support/quoted_string.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/random.hpp"
+#include "pstore/support/small_vector.hpp"
+#include "pstore/support/utf.hpp"
+#include "pstore/support/path.hpp"
+#include "pstore/support/quoted_string.hpp"
 
 namespace pstore {
     namespace file {

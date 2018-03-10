@@ -57,8 +57,8 @@ typedef char TCHAR;
 
 #include "pstore/config/config.hpp"
 
-#include "diff/diff_value.hpp"
-#include "diff/revision.hpp"
+#include "pstore/diff/diff_value.hpp"
+#include "pstore/diff/revision.hpp"
 
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
