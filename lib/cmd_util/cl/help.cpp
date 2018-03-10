@@ -4,7 +4,7 @@
 //* | | | |  __/ | |_) | *
 //* |_| |_|\___|_| .__/  *
 //*              |_|     *
-//===- lib/pstore_cmd_util/cl/help.cpp ------------------------------------===//
+//===- lib/cmd_util/cl/help.cpp -------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -168,4 +168,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/help.cpp
+// eof: lib/cmd_util/cl/help.cpp

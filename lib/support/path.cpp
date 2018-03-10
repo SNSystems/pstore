@@ -4,7 +4,7 @@
 //* | |_) | (_| | |_| | | | *
 //* | .__/ \__,_|\__|_| |_| *
 //* |_|                     *
-//===- lib/pstore_support/path.cpp ----------------------------------------===//
+//===- lib/support/path.cpp -----------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -227,4 +227,4 @@ namespace pstore {
         } // namespace win32
     }     // namespace path
 } // namespace pstore
-// eof: lib/pstore_support/path.cpp
+// eof: lib/support/path.cpp

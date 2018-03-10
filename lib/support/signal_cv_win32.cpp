@@ -4,7 +4,7 @@
 //* \__ \ | (_| | | | | (_| | | | (__ \ V /  *
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
-//===- lib/pstore_support/signal_cv_win32.cpp -----------------------------===//
+//===- lib/support/signal_cv_win32.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -89,4 +89,4 @@ namespace pstore {
 
 #endif //_WIN32
 
-// eof: lib/pstore_support/signal_cv_win32.cpp
+// eof: lib/support/signal_cv_win32.cpp

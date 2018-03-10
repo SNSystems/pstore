@@ -4,7 +4,7 @@
 //* | (_| (_) | | | |  _| | (_| | *
 //*  \___\___/|_| |_|_| |_|\__, | *
 //*                        |___/  *
-//===- lib/pstore_support/config.hpp --------------------------------------===//
+//===- lib/support/config.hpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -132,4 +132,4 @@
 #cmakedefine PSTORE_ALWAYS_SPANNING (1)
 
 #endif // PSTORE_CONFIG_HPP
-// eof: lib/pstore_support/config.hpp
+// eof: lib/support/config.hpp

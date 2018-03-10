@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_support/CMakeLists.txt -----------------------------------===//
+#===- lib/support/CMakeLists.txt ------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -218,4 +218,4 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-support-lib-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_IS_INSIDE_LLVM)
 
-# eof: lib/pstore_support/CMakeLists.txt
+# eof: lib/support/CMakeLists.txt

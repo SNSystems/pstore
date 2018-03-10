@@ -4,7 +4,7 @@
 //* \__ \ |_| |  | | | | | (_| | | (_| | \__ \ || (_| | | | | (_|  __/ *
 //* |___/\__|_|  |_|_| |_|\__, |  \__,_|_|___/\__\__,_|_| |_|\___\___| *
 //*                       |___/                                        *
-//===- lib/pstore_cmd_util/cl/string_distance.cpp -------------------------===//
+//===- lib/cmd_util/cl/string_distance.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -83,4 +83,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/string_distance.cpp
+// eof: lib/cmd_util/cl/string_distance.cpp

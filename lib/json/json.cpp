@@ -4,7 +4,7 @@
 //*   | \__ \ (_) | | | | *
 //*  _/ |___/\___/|_| |_| *
 //* |__/                  *
-//===- lib/pstore_json/json.cpp -------------------------------------------===//
+//===- lib/json/json.cpp --------------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -55,4 +55,4 @@ pstore::maybe<char> pstore::json::details::source::pull () {
     return just (*(first_++));
 }
 
-// eof: lib/pstore_json/json.cpp
+// eof: lib/json/json.cpp

@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- lib/pstore_json/utf.cpp --------------------------------------------===//
+//===- lib/json/utf.cpp ---------------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -93,4 +93,4 @@ std::tuple<char32_t, bool> pstore::json::utf8_decoder::get (std::uint8_t byte) {
     codepoint_ = 0;
     return std::make_tuple (res, true);
 }
-// eof: lib/pstore_json/utf.cpp
+// eof: lib/json/utf.cpp

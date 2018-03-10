@@ -4,7 +4,7 @@
 //* \__ \ |_| |    | || (_) | | | |  __/\ V /| \__ \ | (_) | | | | *
 //* |___/\__|_|     \__\___/  |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                                                *
-//===- lib/pstore_cmd_util/str_to_revision.cpp ----------------------------===//
+//===- lib/cmd_util/str_to_revision.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -104,4 +104,4 @@ namespace pstore {
         return {0U, false};
     }
 } // namespace pstore
-// eof: lib/pstore_cmd_util/str_to_revision.cpp
+// eof: lib/cmd_util/str_to_revision.cpp

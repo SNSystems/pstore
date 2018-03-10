@@ -4,7 +4,7 @@
 //* | | | | | | (_) | (_| | |  _| |  __/ |  \__ \ *
 //* |_| |_| |_|\___/ \__,_|_|_| |_|\___|_|  |___/ *
 //*                                               *
-//===- lib/pstore_cmd_util/cl/modifiers.cpp -------------------------------===//
+//===- lib/cmd_util/cl/modifiers.cpp --------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -68,4 +68,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/modifiers.cpp
+// eof: lib/cmd_util/cl/modifiers.cpp

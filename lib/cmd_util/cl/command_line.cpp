@@ -4,7 +4,7 @@
 //* | (_| (_) | | | | | | | | | | | (_| | | | | (_| | | | | | | |  __/ *
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
-//===- lib/pstore_cmd_util/cl/command_line.cpp ----------------------------===//
+//===- lib/cmd_util/cl/command_line.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -160,4 +160,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/command_line.cpp
+// eof: lib/cmd_util/cl/command_line.cpp

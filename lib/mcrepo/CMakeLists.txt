@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_mcrepo/CMakeLists.txt ------------------------------------===//
+#===- lib/mcrepo/CMakeLists.txt -------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -55,4 +55,4 @@ add_pstore_library (pstore-mcrepo
 )
 target_link_libraries (pstore-mcrepo pstore-core)
 
-# eof: lib/pstore_mcrepo/CMakeLists.txt
+# eof: lib/mcrepo/CMakeLists.txt

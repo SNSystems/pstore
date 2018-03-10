@@ -4,7 +4,7 @@
 //* | |_) | | | (_) | (_|  __/\__ \__ \ |  _| | |  __/ | | | | (_| | | | | | |  __/ *
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
-//===- lib/pstore_support/process_file_name_win32.cpp ---------------------===//
+//===- lib/support/process_file_name_win32.cpp ----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -94,4 +94,4 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // _WIN32
-// eof: lib/pstore_support/process_file_name_win32.cpp
+// eof: lib/support/process_file_name_win32.cpp

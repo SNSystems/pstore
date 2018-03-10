@@ -4,7 +4,7 @@
 //*  \ V  V / (_) | | | (_| |  \ V  V /| | | (_| | |_) | |_) |  __/ |    *
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
-//===- lib/pstore_cmd_util/cl/word_wrapper.cpp ----------------------------===//
+//===- lib/cmd_util/cl/word_wrapper.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -119,4 +119,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/word_wrapper.cpp
+// eof: lib/cmd_util/cl/word_wrapper.cpp

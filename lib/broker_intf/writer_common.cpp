@@ -4,7 +4,7 @@
 //*  \ V  V /| |  | | ||  __/ |    | (_| (_) | | | | | | | | | | | (_) | | | | *
 //*   \_/\_/ |_|  |_|\__\___|_|     \___\___/|_| |_| |_|_| |_| |_|\___/|_| |_| *
 //*                                                                            *
-//===- lib/pstore_broker_intf/writer_common.cpp ---------------------------===//
+//===- lib/broker_intf/writer_common.cpp ----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -98,4 +98,4 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-// eof: lib/pstore_broker_intf/writer_common.cpp
+// eof: lib/broker_intf/writer_common.cpp

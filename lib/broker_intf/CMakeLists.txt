@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_broker_intf/CMakeLists.txt -------------------------------===//
+#===- lib/broker_intf/CMakeLists.txt --------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -87,4 +87,4 @@ endif (PSTORE_IS_INSIDE_LLVM)
 if (WIN32)
 target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
 endif ()
-# eof: lib/pstore_broker_intf/CMakeLists.txt
+# eof: lib/broker_intf/CMakeLists.txt

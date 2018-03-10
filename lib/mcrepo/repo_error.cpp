@@ -4,7 +4,7 @@
 //* | | |  __/ |_) | (_) | |  __/ |  | | | (_) | |    *
 //* |_|  \___| .__/ \___/   \___|_|  |_|  \___/|_|    *
 //*          |_|                                      *
-//===- lib/pstore_mcrepo/repo_error.cpp -----------------------------------===//
+//===- lib/mcrepo/repo_error.cpp ------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -78,4 +78,4 @@ namespace std {
 
 } // namespace std
 
-// eof: lib/pstore_mcrepo/repo_error.cpp
+// eof: lib/mcrepo/repo_error.cpp

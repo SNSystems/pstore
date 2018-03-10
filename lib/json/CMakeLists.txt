@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_json/CMakeLists.txt --------------------------------------===//
+#===- lib/json/CMakeLists.txt ---------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -56,4 +56,4 @@ add_pstore_library (pstore-json-lib STATIC
 )
 target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib pstore-dump-lib)
 
-# eof: lib/pstore_json/CMakeLists.txt
+# eof: lib/json/CMakeLists.txt

@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- lib/pstore_support/utf.cpp -----------------------------------------===//
+//===- lib/support/utf.cpp ------------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -101,4 +101,4 @@ namespace pstore {
         }
     } // namespace utf
 } // namespace pstore
-// eof: lib/pstore_support/utf.cpp
+// eof: lib/support/utf.cpp

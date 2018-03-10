@@ -4,7 +4,7 @@
 //* | (_| | (_) | | | | | | | |_| |_| | |_) |  __/\__ \ *
 //*  \__,_|\___/|_| |_| |_|  \__|\__, | .__/ \___||___/ *
 //*                              |___/|_|               *
-//===- lib/pstore_json/dom_types.cpp --------------------------------------===//
+//===- lib/json/dom_types.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -85,4 +85,4 @@ namespace pstore {
         }
     } // namespace json
 } // namespace pstore
-// eof: lib/pstore_json/dom_types.cpp
+// eof: lib/json/dom_types.cpp

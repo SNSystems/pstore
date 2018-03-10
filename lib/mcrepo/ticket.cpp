@@ -4,7 +4,7 @@
 //* | |_| | (__|   <  __/ |_  *
 //*  \__|_|\___|_|\_\___|\__| *
 //*                           *
-//===- lib/pstore_mcrepo/ticket.cpp ---------------------------------------===//
+//===- lib/mcrepo/ticket.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -76,4 +76,4 @@ auto ticket::load (pstore::database const & db, pstore::extent const & location)
     return t;
 }
 
-// eof: lib/pstore_mcrepo/ticket.cpp
+// eof: lib/mcrepo/ticket.cpp

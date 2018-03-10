@@ -4,7 +4,7 @@
 //*   | \__ \ (_) | | | | |  __/ |  | | | (_) | |    *
 //*  _/ |___/\___/|_| |_|  \___|_|  |_|  \___/|_|    *
 //* |__/                                             *
-//===- lib/pstore_json/json_error.cpp -------------------------------------===//
+//===- lib/json/json_error.cpp --------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -76,4 +76,4 @@ std::error_category const & pstore::json::get_error_category () noexcept {
     return cat;
 }
 
-// eof: lib/pstore_json/json_error.cpp
+// eof: lib/json/json_error.cpp

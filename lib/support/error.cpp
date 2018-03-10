@@ -4,7 +4,7 @@
 //* |  __/ |  | | | (_) | |    *
 //*  \___|_|  |_|  \___/|_|    *
 //*                            *
-//===- lib/pstore_support/error.cpp ---------------------------------------===//
+//===- lib/support/error.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -76,4 +76,4 @@ std::error_category const & pstore::get_error_category () {
     return cat;
 }
 
-// eof: lib/pstore_support/error.cpp
+// eof: lib/support/error.cpp

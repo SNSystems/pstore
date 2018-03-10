@@ -4,7 +4,7 @@
 //* | | (_) | (_| | (_| | | | | | (_| | *
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
-//===- lib/pstore_support/logging.cpp -------------------------------------===//
+//===- lib/support/logging.cpp --------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -427,4 +427,4 @@ namespace pstore {
 
     } // end namespace logging
 } // end namespace pstore
-// eof: lib/pstore_support/logging.cpp
+// eof: lib/support/logging.cpp

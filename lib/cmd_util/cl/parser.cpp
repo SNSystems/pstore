@@ -4,7 +4,7 @@
 //* | |_) | (_| | |  \__ \  __/ |    *
 //* | .__/ \__,_|_|  |___/\___|_|    *
 //* |_|                              *
-//===- lib/pstore_cmd_util/cl/parser.cpp ----------------------------------===//
+//===- lib/cmd_util/cl/parser.cpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -83,4 +83,4 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-// eof: lib/pstore_cmd_util/cl/parser.cpp
+// eof: lib/cmd_util/cl/parser.cpp

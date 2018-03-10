@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/pstore_cmd_util/CMakeLists.txt ----------------------------------===//
+#===- lib/cmd_util/CMakeLists.txt -----------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -94,4 +94,4 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI No)
 endif (PSTORE_IS_INSIDE_LLVM)
 
-# eof: lib/pstore_cmd_util/CMakeLists.txt
+# eof: lib/cmd_util/CMakeLists.txt

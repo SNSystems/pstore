@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- lib/pstore_support/utf_win32.cpp -----------------------------------===//
+//===- lib/support/utf_win32.cpp ------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -307,4 +307,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/pstore_support/utf_win32.cpp
+// eof: lib/support/utf_win32.cpp

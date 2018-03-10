@@ -4,7 +4,7 @@
 //* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
 //* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*                |___/                           *
-//===- lib/pstore_mcrepo/fragment.cpp -------------------------------------===//
+//===- lib/mcrepo/fragment.cpp --------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -152,4 +152,4 @@ std::size_t fragment::size_bytes () const {
     return last_section_offset + section.size_bytes ();
 }
 
-// eof: lib/pstore_mcrepo/fragment.cpp
+// eof: lib/mcrepo/fragment.cpp

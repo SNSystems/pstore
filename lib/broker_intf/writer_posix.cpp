@@ -4,7 +4,7 @@
 //*  \ V  V /| |  | | ||  __/ |    *
 //*   \_/\_/ |_|  |_|\__\___|_|    *
 //*                                *
-//===- lib/pstore_broker_intf/writer_posix.cpp ----------------------------===//
+//===- lib/broker_intf/writer_posix.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -71,4 +71,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/pstore_broker_intf/writer_posix.cpp
+// eof: lib/broker_intf/writer_posix.cpp

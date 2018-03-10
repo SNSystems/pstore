@@ -4,7 +4,7 @@
 //* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
 //*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
 //*                             |_|                   *
-//===- lib/pstore_broker_intf/descriptor.cpp ------------------------------===//
+//===- lib/broker_intf/descriptor.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -60,4 +60,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif
-// eof: lib/pstore_broker_intf/descriptor.cpp
+// eof: lib/broker_intf/descriptor.cpp

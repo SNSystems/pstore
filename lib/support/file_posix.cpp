@@ -4,7 +4,7 @@
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- lib/pstore_support/file_posix.cpp ----------------------------------===//
+//===- lib/support/file_posix.cpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -417,4 +417,4 @@ namespace pstore {
     } // namespace file
 } // namespace pstore
 #endif //_WIN32
-// eof: lib/pstore_support/file_posix.cpp
+// eof: lib/support/file_posix.cpp

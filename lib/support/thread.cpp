@@ -4,7 +4,7 @@
 //* | |_| | | | | |  __/ (_| | (_| | *
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
-//===- lib/pstore_support/thread.cpp --------------------------------------===//
+//===- lib/support/thread.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -208,4 +208,4 @@ namespace pstore {
         }
     } // namespace threads
 } // namespace pstore
-// eof: lib/pstore_support/thread.cpp
+// eof: lib/support/thread.cpp

@@ -4,7 +4,7 @@
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- lib/pstore_support/file.cpp ----------------------------------------===//
+//===- lib/support/file.cpp -----------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -371,4 +371,4 @@ namespace pstore {
         }
     } // end of namespace file
 } // end of namespace pstore
-// eof: lib/pstore_support/file.cpp
+// eof: lib/support/file.cpp
