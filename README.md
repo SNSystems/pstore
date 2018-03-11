@@ -1,4 +1,4 @@
-# pstore
+<img alt="pstore" src="doc_sources/logo.svg" height="" height="80" width="150" />
 
 pstore is a lightweight persistent append-only key/value store intended for use as a back-end for the LLVM Program Repository ([llvm-prepo](https://github.com/SNSystems/llvm-prepo)).
 
