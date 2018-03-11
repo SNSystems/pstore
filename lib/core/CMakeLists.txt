@@ -42,8 +42,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-cmake_minimum_required (VERSION 3.7)
-
 set (PSTORE_PUBLIC_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/core")
 set (PSTORE_SRC )
 set (PSTORE_CORE_SRC
