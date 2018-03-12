@@ -69,7 +69,7 @@
 
 
 #include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/server_path.hpp"
+#include "pstore/broker_intf/status_path.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/support/logging.hpp"
 
@@ -118,7 +118,7 @@ namespace {
     pstore::broker::socket_descriptor create_socket (int domain, int type, int protocol) {
         pstore::broker::socket_descriptor fd{::socket (domain, type, protocol)};
         if (!fd.valid ()) {
-            raise (platform_erc (pstore::get_last_error ()), "socket creation failed");
+            raise (platform_erc (pstore::broker::get_last_error ()), "socket creation failed");
         }
         return fd;
     }
@@ -126,20 +126,23 @@ namespace {
     void bind (pstore::broker::socket_descriptor const & socket, sockaddr const * address,
                socklen_t address_len) {
         if (::bind (socket.get (), address, address_len) != 0) {
-            raise (platform_erc (pstore::get_last_error ()), "socket bind failed");
+            raise (platform_erc (pstore::broker::get_last_error ()), "socket bind failed");
         }
     }
 
 #if PSTORE_UNIX_DOMAIN_SOCKETS
+
     void bind (pstore::broker::socket_descriptor const & socket, sockaddr_un const & address) {
         bind (socket, reinterpret_cast<sockaddr const *> (&address), SUN_LEN (&address));
     }
-#endif
+
+#else
 
     void bind (pstore::broker::socket_descriptor const & socket, sockaddr_in6 const & address) {
         bind (socket.get (), reinterpret_cast<sockaddr const *> (&address), sizeof (address));
     }
 
+#endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
 
     template <typename T>
@@ -148,7 +151,7 @@ namespace {
         auto client_fd = socket_descriptor{::accept (
             listenfd.get (), reinterpret_cast<struct sockaddr *> (their_addr), &addr_size)};
         if (!client_fd.valid ()) {
-            raise (platform_erc (pstore::get_last_error ()), "accept failed");
+            raise (platform_erc (pstore::broker::get_last_error ()), "accept failed");
         }
         return client_fd;
     }
@@ -198,7 +201,7 @@ namespace {
                 is_v4_mapped_localhost (v6s->sin6_addr);
         }
 
-        ipstr[pstore::array_elements (ipstr) - 1] = '\0'; // ensure nul termination.
+        ipstr[pstore::broker::array_elements (ipstr) - 1] = '\0'; // ensure nul termination.
 
         if (!localhost_only || is_localhost) {
             log (pstore::logging::priority::notice, "Accepted connection from host: ", ipstr);
@@ -207,7 +210,7 @@ namespace {
                  "Refused connection from non-localhost host: ", ipstr);
             client_fd.reset ();
         }
-#endif
+#endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
         return client_fd;
     }
@@ -216,7 +219,7 @@ namespace {
 
     socket_descriptor server_listen_unix_domain (char const * name) {
         sockaddr_un un;
-        constexpr std::size_t max_name_len = pstore::array_elements (un.sun_path);
+        constexpr std::size_t max_name_len = pstore::broker::array_elements (un.sun_path);
         std::memset (&un, 0, sizeof un);
         un.sun_family = AF_UNIX;
         std::strncpy (un.sun_path, name, max_name_len);
@@ -232,7 +235,7 @@ namespace {
         return fd;
     }
 
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
+#else // PSTORE_UNIX_DOMAIN_SOCKETS
 
     socket_descriptor server_listen_inet (int port) {
         // The socket() function returns a socket descriptor, which represents an endpoint. Get a
@@ -244,7 +247,8 @@ namespace {
         reuseaddr_opt_type reuse = 1;
         if (::setsockopt (fd.get (), SOL_SOCKET, SO_REUSEADDR,
                           reinterpret_cast<char const *> (&reuse), sizeof reuse) != 0) {
-            raise (platform_erc (pstore::get_last_error ()), "setsockopt(SO_REUSEADDR) failed");
+            pstore::raise (platform_erc (pstore::broker::get_last_error ()),
+                           "setsockopt(SO_REUSEADDR) failed");
         }
 
         // After the socket descriptor is created, a bind() function gets a unique name for the
@@ -260,6 +264,8 @@ namespace {
         bind (fd, serveraddr);
         return fd;
     }
+
+#endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
     bool is_recv_error (ssize_t nread) {
 #ifdef _WIN32
@@ -293,9 +299,8 @@ void pstore::broker::status_server () {
 
         // obtain a file descriptior which we can use to listen for client requests.
 #if PSTORE_UNIX_DOMAIN_SOCKETS
-        char const * listen_address =
-            CS_OPEN; // FIXME: derive the path from the PSTORE_VENDOR_ID name.
-        auto listen_fd = server_listen_unix_domain (listen_address);
+        std::string const listen_address = get_status_path ();
+        auto listen_fd = server_listen_unix_domain (listen_address.c_str ());
 #else  // PSTORE_UNIX_DOMAIN_SOCKETS
         int listen_address = MYPORT; // FIXME: don't hardwire the port number.
         auto listen_fd = server_listen_inet (listen_address);
@@ -304,7 +309,7 @@ void pstore::broker::status_server () {
         // tell the kernel we're a server
         constexpr int qlen = 10;
         if (listen (listen_fd.get (), qlen) != 0) {
-            raise (platform_erc (pstore::get_last_error ()), "listen failed");
+            raise (platform_erc (get_last_error ()), "listen failed");
         }
 
         FD_SET (listen_fd.get (), &all_set);
@@ -324,7 +329,8 @@ void pstore::broker::status_server () {
                 socket_descriptor client_fd = server_accept_new_connection (listen_fd, true /*localhost only*/);
                 if (!client_fd.valid ()) {
                     // FIXME: error handling wrong on Windows (at least0
-                    log (logging::priority::error, "server_accept_new_connection error", client_fd.get ());
+                    log (logging::priority::error, "server_accept_new_connection error ",
+                         client_fd.get ());
                     continue;
                 }
 

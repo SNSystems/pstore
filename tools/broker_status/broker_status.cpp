@@ -57,11 +57,9 @@
 #endif
 
 #include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/server_path.hpp"
+#include "pstore/broker_intf/status_path.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
-#include "pstore/broker_intf/server_path.hpp"
 #include "pstore/support/error.hpp"
-
 
 namespace {
 
@@ -98,10 +96,7 @@ namespace {
 
 #endif
 
-}
-
-
-
+} // end anonymous namespace
 
 
 
@@ -136,28 +131,26 @@ namespace {
      */
 #if PSTORE_UNIX_DOMAIN_SOCKETS
 
-    socket_descriptor cli_conn (char const * name) {
-        using namespace pstore;
+    socket_descriptor cli_conn (std::string const & name) {
+        using namespace pstore::broker;
 
         // fill the socket address structure with the server′s "well-known" address.
         struct sockaddr_un un;
         std::memset (&un, 0, sizeof (un));
         un.sun_family = AF_UNIX;
         constexpr std::size_t sun_path_length = array_elements (un.sun_path);
-        std::strncpy (un.sun_path, name, sun_path_length);
+        name.copy (un.sun_path, sun_path_length);
         if (un.sun_path[sun_path_length - 1U] != '\0') {
             raise (pstore::errno_erc {ENAMETOOLONG}, "unix domain socket name too long");
         }
 
         // create a UNIX domain stream socket.
-        pstore::broker::socket_descriptor fd {::socket (AF_UNIX, SOCK_STREAM, 0)};
+        socket_descriptor fd{::socket (AF_UNIX, SOCK_STREAM, 0)};
         if (!fd.valid ()) {
-            raise (platform_erc (pstore::get_last_error ()), "socket creation failed");
+            raise (platform_erc (get_last_error ()), "socket creation failed");
         }
 
-        //auto len = static_cast<socklen_t> (offsetof (sockaddr_un, sun_path) + std::strlen (un.sun_path));
-        //assert (SUN_LEN (&un) == len);
-        if (connect (fd.get (), reinterpret_cast<struct sockaddr *> (&un), SUN_LEN (&un)) != 0) {
+        if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&un), SUN_LEN (&un)) != 0) {
             raise (platform_erc {get_last_error ()}, "connect() failed");
         }
         return fd;
@@ -233,9 +226,9 @@ int main () {
 #endif
 
 #if PSTORE_UNIX_DOMAIN_SOCKETS
-    socket_descriptor csfd = cli_conn (CS_OPEN);
+    socket_descriptor csfd = cli_conn (pstore::broker::get_status_path ());
 #else
-    socket_descriptor csfd = cli_conn ("localhost", MYPORT);
+    socket_descriptor csfd = cli_conn ("localhost", pstore::broker::MYPORT);
 #endif
     if (!csfd.valid ()) {
         std::cerr << "cli_conn error (" << strerror (errno) << ")\n";

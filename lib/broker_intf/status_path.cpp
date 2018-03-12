@@ -1,10 +1,10 @@
-//*                                             _   _      *
-//*  ___  ___ _ ____   _____ _ __   _ __   __ _| |_| |__   *
-//* / __|/ _ \ '__\ \ / / _ \ '__| | '_ \ / _` | __| '_ \  *
-//* \__ \  __/ |   \ V /  __/ |    | |_) | (_| | |_| | | | *
-//* |___/\___|_|    \_/ \___|_|    | .__/ \__,_|\__|_| |_| *
-//*                                |_|                     *
-//===- include/pstore/broker_intf/server_path.hpp -------------------------===//
+//*      _        _                           _   _      *
+//*  ___| |_ __ _| |_ _   _ ___   _ __   __ _| |_| |__   *
+//* / __| __/ _` | __| | | / __| | '_ \ / _` | __| '_ \  *
+//* \__ \ || (_| | |_| |_| \__ \ | |_) | (_| | |_| | | | *
+//* |___/\__\__,_|\__|\__,_|___/ | .__/ \__,_|\__|_| |_| *
+//*                              |_|                     *
+//===- lib/broker_intf/status_path.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,44 +41,23 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include "pstore/broker_intf/status_path.hpp"
 
-#ifndef PSTORE_BROKER_SERVER_PATH_HPP
-#define PSTORE_BROKER_SERVER_PATH_HPP
+#include "pstore/config/config.hpp"
+#include "pstore/support/file.hpp"
+#include "pstore/support/path.hpp"
 
-#ifndef _WIN32
-#include <cerrno>
-#else
-#include <Winsock2.h>
-#endif
-
-#ifndef _WIN32
-#define PSTORE_UNIX_DOMAIN_SOCKETS 1
-#else
-// TODO: according to this article:
-// https://blogs.msdn.microsoft.com/commandline/2017/12/19/af_unix-comes-to-windows/
-// AF_UNIX support is available from "Insider Build 17063"
-#define PSTORE_UNIX_DOMAIN_SOCKETS 0
-#endif
-
-#define CS_OPEN "/tmp/foo"    // FIXME: don't hardwire the domain path
-constexpr int MYPORT = 56000; // FIXME: don't hardwire the port number.
+namespace {
+    char const * default_status_name = PSTORE_VENDOR_ID ".pstore_broker.status";
+} // end anonymous namespace
 
 namespace pstore {
+    namespace broker {
 
-    inline int get_last_error () noexcept {
-#ifndef _WIN32
-        return errno;
-#else
-        return WSAGetLastError ();
-#endif
-    }
+        std::string get_status_path () {
+            return path::join (file::file_handle::get_temporary_directory (), default_status_name);
+        }
 
-    template <typename T, std::size_t Size>
-    constexpr std::size_t array_elements (T (&)[Size]) noexcept {
-        return Size;
-    }
-
+    } // namespace broker
 } // namespace pstore
-
-#endif // PSTORE_BROKER_SERVER_PATH_HPP
-// eof: include/pstore/broker_intf/server_path.hpp
+// eof: lib/broker_intf/status_path.cpp
