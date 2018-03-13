@@ -163,7 +163,7 @@ if (CLANG_TIDY_FOUND)
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     )
 else()
-    message (WARNING "clang-tidy executable was not found.")
+    message (STATUS "clang-tidy executable was not found.")
 endif()
 
 

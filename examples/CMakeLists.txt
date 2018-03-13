@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 if (NOT PSTORE_EXAMPLES)
-    message (WARNING "pstore examples are excluded (PSTORE_EXAMPLES)")
+    message (STATUS "pstore examples are excluded (PSTORE_EXAMPLES)")
 else ()
     add_subdirectory (serialize)
 

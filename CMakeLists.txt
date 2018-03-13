@@ -85,7 +85,7 @@ include_directories(BEFORE
 
 if (NOT DEFINED PSTORE_VENDOR_ID)
     set (PSTORE_VENDOR_ID  "com.mycompany")
-    message (WARNING  "PSTORE_VENDOR_ID not set: defaulting to \"${PSTORE_VENDOR_ID}\"")
+    message (STATUS  "PSTORE_VENDOR_ID not set: defaulting to \"${PSTORE_VENDOR_ID}\"")
 endif ()
 
 
