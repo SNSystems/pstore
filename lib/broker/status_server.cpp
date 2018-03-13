@@ -237,32 +237,52 @@ namespace {
 
 #else // PSTORE_UNIX_DOMAIN_SOCKETS
 
-    socket_descriptor server_listen_inet (int port) {
+    std::uint16_t network_to_host (std::uint16_t v) { return ntohs (v); }
+    std::uint32_t network_to_host (std::uint32_t v) { return ntohl (v); }
+
+    std::uint16_t host_to_network (std::uint16_t v) { return htons (v); }
+    std::uint32_t host_to_network (std::uint32_t v) { return htonl (v); }
+
+
+    socket_descriptor server_listen_inet () {
         // The socket() function returns a socket descriptor, which represents an endpoint. Get a
         // socket for address family AF_INET6 to prepare to accept incoming connections on.
         socket_descriptor fd = create_socket (AF_INET6, SOCK_STREAM, 0);
 
-        // The setsockopt() function is used to allow the local address to be reused when the server
-        // is restarted before the required wait time expires.
-        reuseaddr_opt_type reuse = 1;
-        if (::setsockopt (fd.get (), SOL_SOCKET, SO_REUSEADDR,
-                          reinterpret_cast<char const *> (&reuse), sizeof reuse) != 0) {
-            pstore::raise (platform_erc (pstore::broker::get_last_error ()),
-                           "setsockopt(SO_REUSEADDR) failed");
-        }
-
         // After the socket descriptor is created, a bind() function gets a unique name for the
-        // socket. In this example, the user sets the address to in6addr_any, which (by default)
-        // allows connections to be established from any IPv4 or IPv6 client that specifies our port
-        // number (that is, the bind is done to both the IPv4 and IPv6 TCP/IP stacks). This behavior
-        // can be modified using the IPPROTO_IPV6 level socket option IPV6_V6ONLY if required.
-        struct sockaddr_in6 serveraddr;
+        // socket. We accept connections from the loopback address and let the system pick the port
+        // number on which we will listen.
+        sockaddr_in6 serveraddr;
         std::memset (&serveraddr, 0, sizeof serveraddr);
         serveraddr.sin6_family = AF_INET6;
-        serveraddr.sin6_port = htons (port);
-        serveraddr.sin6_addr = in6addr_any;
+        serveraddr.sin6_port = host_to_network (in_port_t{0});
+        serveraddr.sin6_addr = in6addr_loopback; // in6addr_any;
         bind (fd, serveraddr);
         return fd;
+    }
+
+    in_port_t get_listen_port (socket_descriptor const & fd) {
+        sockaddr_storage address;
+        std::memset (&address, 0, sizeof address);
+        socklen_t sock_addr_len = sizeof (address);
+        if (getsockname (fd.get (), reinterpret_cast<sockaddr *> (&address), &sock_addr_len) != 0) {
+            pstore::raise (platform_erc (pstore::broker::get_last_error ()), "getsockname failed");
+        }
+
+        auto listen_port = in_port_t{0};
+        switch (address.ss_family) {
+        case AF_INET:
+            listen_port = (reinterpret_cast<sockaddr_in const *> (&address))->sin_port;
+            break;
+        case AF_INET6:
+            listen_port = (reinterpret_cast<sockaddr_in6 *> (&address))->sin6_port;
+            break;
+        default:
+            raise (pstore::errno_erc{EINVAL}, "unexpectedprotocol type returned by getsockname");
+            break;
+        }
+
+        return network_to_host (listen_port);
     }
 
 #endif // PSTORE_UNIX_DOMAIN_SOCKETS
@@ -274,8 +294,6 @@ namespace {
         return nread < 0;
 #endif
     }
-
-
 
 } // end anonymous namespace
 
@@ -297,13 +315,12 @@ void pstore::broker::status_server () {
         fd_set all_set;
         FD_ZERO (&all_set);
 
-        // obtain a file descriptior which we can use to listen for client requests.
+        // obtain a file descriptor which we can use to listen for client requests.
+        std::string const listen_path = get_status_path ();
 #if PSTORE_UNIX_DOMAIN_SOCKETS
-        std::string const listen_address = get_status_path ();
-        auto listen_fd = server_listen_unix_domain (listen_address.c_str ());
+        auto listen_fd = server_listen_unix_domain (listen_path.c_str ());
 #else  // PSTORE_UNIX_DOMAIN_SOCKETS
-        int listen_address = MYPORT; // FIXME: don't hardwire the port number.
-        auto listen_fd = server_listen_inet (listen_address);
+        auto listen_fd = server_listen_inet ();
 #endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
         // tell the kernel we're a server
@@ -315,7 +332,15 @@ void pstore::broker::status_server () {
         FD_SET (listen_fd.get (), &all_set);
         auto max_fd = listen_fd.get ();
 
-        log (logging::priority::info, "Waiting for connections on ", listen_address);
+#if PSTORE_UNIX_DOMAIN_SOCKETS
+        log (logging::priority::info, "Waiting for connections on ", listen_path);
+#else
+        {
+            auto const listen_port = get_listen_port (listen_fd);
+            write_port_number_file (listen_path, listen_port);
+            log (logging::priority::info, "Waiting for connections on port ", listen_port);
+        }
+#endif
         // FIXME: need a way to shut this thread down cleanly.
         for (;;) {
             fd_set rset = all_set; // rset is modified each time round the loop.
@@ -383,6 +408,8 @@ void pstore::broker::status_server () {
                 it = next;
             }
         }
+
+        pstore::file::unlink (listen_path);
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());
     } catch (...) {

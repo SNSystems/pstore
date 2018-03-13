@@ -225,10 +225,13 @@ int main () {
     }
 #endif
 
+    auto const status_file_path = pstore::broker::get_status_path ();
 #if PSTORE_UNIX_DOMAIN_SOCKETS
-    socket_descriptor csfd = cli_conn (pstore::broker::get_status_path ());
+    socket_descriptor csfd = cli_conn (status_file_path);
 #else
-    socket_descriptor csfd = cli_conn ("localhost", pstore::broker::MYPORT);
+    in_port_t const port = pstore::broker::read_port_number_file (status_file_path);
+    //TODO: if port is 0 file read failed.
+    socket_descriptor csfd = cli_conn ("localhost", port);
 #endif
     if (!csfd.valid ()) {
         std::cerr << "cli_conn error (" << strerror (errno) << ")\n";

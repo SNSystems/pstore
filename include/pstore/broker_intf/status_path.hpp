@@ -42,13 +42,14 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef PSTORE_BROKER_INTF_UD_PATH_HPP
-#define PSTORE_BROKER_INTF_UD_PATH_HPP (1)
+#ifndef PSTORE_BROKER_INTF_STATUS_PATH_HPP
+#define PSTORE_BROKER_INTF_STATUS_PATH_HPP (1)
 
 #include <string>
 
 #ifndef _WIN32
 #include <cerrno>
+#include <netinet/in.h>
 #else
 #include <Winsock2.h>
 #endif
@@ -63,10 +64,13 @@
 #define PSTORE_UNIX_DOMAIN_SOCKETS 0
 #endif
 
+#ifdef _WIN32
+using in_port_t = unsigned short;
+#endif //_WIN32
+
 namespace pstore {
     namespace broker {
 
-        constexpr int MYPORT = 56000; // FIXME: don't hardwire the port number.
         std::string get_status_path ();
 
         inline int get_last_error () noexcept {
@@ -82,8 +86,11 @@ namespace pstore {
             return Size;
         }
 
+        void write_port_number_file (std::string const & path, in_port_t port);
+        in_port_t read_port_number_file (std::string const & path);
+
     } // namespace broker
 } // namespace pstore
 
-#endif // PSTORE_BROKER_INTF_UD_PATH_HPP
+#endif // PSTORE_BROKER_INTF_STATUS_PATH_HPP
 // eof: include/pstore/broker_intf/status_path.hpp

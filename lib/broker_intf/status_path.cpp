@@ -43,11 +43,14 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/broker_intf/status_path.hpp"
 
+#include <cassert>
+#include <cstring>
 #include "pstore/config/config.hpp"
 #include "pstore/support/file.hpp"
 #include "pstore/support/path.hpp"
 
 namespace {
+    constexpr std::size_t port_file_size = 8;
     char const * default_status_name = PSTORE_VENDOR_ID ".pstore_broker.status";
 } // end anonymous namespace
 
@@ -56,6 +59,39 @@ namespace pstore {
 
         std::string get_status_path () {
             return path::join (file::file_handle::get_temporary_directory (), default_status_name);
+        }
+
+        void write_port_number_file (std::string const & path, in_port_t port) {
+            pstore::file::file_handle port_file;
+            port_file.open (path, pstore::file::file_handle::create_mode::open_always,
+                            pstore::file::file_handle::writable_mode::read_write);
+            port_file.seek (0);
+            char str[port_file_size + 1];
+            std::snprintf (str, port_file_size + 1, "port%04x", port);
+            assert (str[port_file_size] == '\0' && std::strlen (str) == port_file_size);
+            port_file.write_span (gsl::make_span (str, port_file_size));
+            port_file.truncate (port_file_size);
+            port_file.close ();
+        }
+
+        in_port_t read_port_number_file (std::string const & path) {
+            auto result = static_cast<in_port_t> (0);
+
+            pstore::file::file_handle port_file;
+            port_file.open (path, pstore::file::file_handle::create_mode::open_existing,
+                            pstore::file::file_handle::writable_mode::read_only);
+            if (port_file.size () == port_file_size) {
+                char str[port_file_size + 1] = {0};
+                port_file.seek (0);
+                port_file.read_span (gsl::make_span (str, port_file_size));
+
+                unsigned i = 0;
+                assert (str[port_file_size] == '\0');
+                if (std::sscanf (str, "port%x", &i) == 1) {
+                    result = static_cast<in_port_t> (i);
+                }
+            }
+            return result;
         }
 
     } // namespace broker
