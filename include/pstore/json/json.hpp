@@ -47,7 +47,6 @@
 #include <cctype>
 #include <cstdint>
 #include <cmath>
-#include <functional>
 #include <limits>
 #include <memory>
 #include <stack>
@@ -119,7 +118,7 @@ namespace pstore {
         public:
             using result_type = typename Callbacks::result_type;
 
-            parser (Callbacks const & callbacks = Callbacks ());
+            parser (Callbacks callbacks = Callbacks ());
 
             ///@{
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
@@ -155,6 +154,15 @@ namespace pstore {
             /// \returns The error code held by the parser.
             std::error_code last_error () const noexcept { return std::make_error_code (error_); }
 
+            ///@{
+            Callbacks & callbacks () noexcept { return callbacks_; }
+            Callbacks const & callbacks () const noexcept { return callbacks_; }
+            ///@}
+
+        private:
+            using matcher = details::matcher<Callbacks>;
+            using pointer = std::unique_ptr<matcher, details::deleter<matcher>>;
+
             /// Records an error for this parse. The parse will stop as soon as a non-zero error
             /// code is recorded. An error may be reported at any time during the parse; all
             /// subsequent text is ignored.
@@ -166,26 +174,18 @@ namespace pstore {
             }
             ///@}
 
-            ///@{
-            Callbacks & callbacks () noexcept { return callbacks_; }
-            Callbacks const & callbacks () const noexcept { return callbacks_; }
-            ///@}
-
-        private:
             bool parse_impl (maybe<char> c, details::source & s);
-
-            std::unique_ptr<details::singleton_storage<Callbacks>> singletons_;
-
-            using matcher = details::matcher<Callbacks>;
-            using pointer = std::unique_ptr<matcher, details::deleter<matcher>>;
 
             pointer make_root_matcher (bool only_string = false);
 
             template <typename Matcher, typename... Args>
             pointer make_terminal_matcher (Args &&... args);
 
+            /// Preallocated storage for "singleton" matcher. These are the matchers, such as
+            /// numbers of strings, which are "terminal" and can't have child objects.
+            std::unique_ptr<details::singleton_storage<Callbacks>> singletons_;
+            /// The parse stack.
             std::stack<pointer> stack_;
-
             error_code error_ = error_code::none;
             Callbacks callbacks_;
         };
@@ -237,20 +237,20 @@ namespace pstore {
 
                 /// Called for each character as it is consumed from the input.
                 ///
-                /// \returns A matcher instance to be pushed onto the parse stack or nullptr if the
-                /// same matcher object should be used to process the next character.
-                virtual pointer consume (maybe<char> ch, source & s) = 0;
+                /// \param parser The owning parser instance.
+                /// \param ch If true, the character to be consumed. A value of nothing indicates
+                /// end-of-file. \returns A matcher instance to be pushed onto the parse stack or
+                /// nullptr if the same matcher object should be used to process the next character.
+                virtual pointer consume (parser<Callbacks> & parser, maybe<char> ch,
+                                         source & s) = 0;
 
                 /// \returns True if this matcher has completed (and reached it's "done" state). The
                 /// parser should pop this instance from the parse stack before continuing.
                 bool is_done () const noexcept { return state_ == done; }
 
             protected:
-                matcher (parser<Callbacks> & parser, int initial_state) noexcept
-                        : parser_{parser}
-                        , state_{initial_state} {}
-
-                parser<Callbacks> & get_parser () const noexcept { return parser_; }
+                explicit matcher (int initial_state) noexcept
+                        : state_{initial_state} {}
 
                 int get_state () const noexcept { return state_; }
                 void set_state (int s) noexcept { state_ = s; }
@@ -258,32 +258,27 @@ namespace pstore {
                 ///@{
                 /// \brief Errors
 
-                void set_error (error_code err) noexcept {
-                    parser_.set_error (err);
+                void set_error (parser<Callbacks> & parser, error_code err) noexcept {
+                    parser.set_error (err);
                     set_state (done);
                 }
-                bool has_error () const noexcept { return parser_.has_error (); }
-                std::error_code last_error () const noexcept { return parser_.last_error (); }
                 ///@}
 
-
-                pointer make_root_matcher (bool only_string = false) {
-                    return parser_.make_root_matcher (only_string);
+                pointer make_root_matcher (parser<Callbacks> & parser, bool only_string = false) {
+                    return parser.make_root_matcher (only_string);
                 }
 
                 template <typename Matcher, typename... Args>
-                pointer make_terminal_matcher (Args &&... args) {
-                    return parser_.template make_terminal_matcher<Matcher, Args...> (
+                pointer make_terminal_matcher (parser<Callbacks> & parser, Args &&... args) {
+                    return parser.template make_terminal_matcher<Matcher, Args...> (
                         std::forward<Args> (args)...);
                 }
 
-                Callbacks & callbacks () noexcept { return parser_.callbacks (); }
-                Callbacks const & callbacks () const noexcept { return parser_.callbacks (); }
-
+                /// The value to be used for the "done" state in the each of the matcher state
+                /// machines.
                 static constexpr std::uint8_t done = 0xFFU;
 
             private:
-                parser<Callbacks> & parser_;
                 int state_;
             };
 
@@ -293,16 +288,20 @@ namespace pstore {
             //*  \__\___/_\_\___|_||_| *
             //*                        *
             /// A matcher which checks for a specific keyword such as "true", "false", or "null".
-            template <typename Callbacks, typename ValueFunction = std::function<void()>>
+            /// \tparam Callbacks  The parser callback structure.
+            /// \tparam DoneFunction  A function matching the signature void(parser<Callbacks>&)
+            /// that will be called when the token is successfully matcher.
+            template <typename Callbacks, typename DoneFunction>
             class token_matcher : public matcher<Callbacks> {
             public:
-                token_matcher (parser<Callbacks> & parser, char const * text,
-                               ValueFunction value_function) noexcept
-                        : matcher<Callbacks> (parser, start_state)
+                explicit token_matcher (char const * text,
+                                        DoneFunction done_fn = DoneFunction ()) noexcept
+                        : matcher<Callbacks> (start_state)
                         , text_{text}
-                        , value_function_{value_function} {}
+                        , done_fn_{std::move (done_fn)} {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -312,21 +311,25 @@ namespace pstore {
                 };
 
                 /// The keyword to be matched. The input sequence must exactly match this string or
-                /// an unrecognized token error is raised. Once all of the characters are match,
-                /// value_function_ is called.
+                /// an unrecognized token error is raised. Once all of the characters are matched,
+                /// complete() is called.
                 char const * text_;
-                ValueFunction value_function_;
+
+                /// This function is called once the complete token text has been matched.
+                DoneFunction done_fn_;
             };
+
 
             // consume
             // ~~~~~~~
-            template <typename Callbacks, typename ValueFunction>
+            template <typename Callbacks, typename DoneFunction>
             typename matcher<Callbacks>::pointer
-            token_matcher<Callbacks, ValueFunction>::consume (maybe<char> ch, source & s) {
+            token_matcher<Callbacks, DoneFunction>::consume (parser<Callbacks> & parser,
+                                                             maybe<char> ch, source & s) {
                 switch (this->get_state ()) {
                 case start_state:
                     if (!ch || *ch != *text_) {
-                        this->set_error (error_code::unrecognized_token);
+                        this->set_error (parser, error_code::unrecognized_token);
                     } else {
                         ++text_;
                         if (*text_ == '\0') {
@@ -339,12 +342,12 @@ namespace pstore {
                 case last_state:
                     if (ch) {
                         if (std::isalnum (*ch)) {
-                            this->set_error (error_code::unrecognized_token);
+                            this->set_error (parser, error_code::unrecognized_token);
                             return nullptr;
                         }
                         s.push (*ch);
                     }
-                    value_function_ ();
+                    done_fn_ (parser);
                     this->set_state (done_state);
                     break;
                 case done_state: assert (false); break;
@@ -358,42 +361,48 @@ namespace pstore {
             //* |  _/ _` | (_-</ -_) |  _/ _ \ / / -_) ' \  *
             //* |_| \__,_|_/__/\___|  \__\___/_\_\___|_||_| *
             //*                                             *
-            template <typename Callbacks>
-            class false_token_matcher final : public token_matcher<Callbacks> {
-            public:
-                false_token_matcher (parser<Callbacks> & parser)
-                        : token_matcher<Callbacks> (
-                              parser, "false",
-                              std::bind (&Callbacks::boolean_value, &parser.callbacks (), false)) {}
+
+            struct false_complete {
+                template <typename Callbacks>
+                void operator() (parser<Callbacks> & parser) const {
+                    parser.callbacks ().boolean_value (false);
+                }
             };
+
+            template <typename Callbacks>
+            using false_token_matcher = token_matcher<Callbacks, false_complete>;
 
             //*  _                  _       _             *
             //* | |_ _ _ _  _ ___  | |_ ___| |_____ _ _   *
             //* |  _| '_| || / -_) |  _/ _ \ / / -_) ' \  *
             //*  \__|_|  \_,_\___|  \__\___/_\_\___|_||_| *
             //*                                           *
-            template <typename Callbacks>
-            class true_token_matcher final : public token_matcher<Callbacks> {
-            public:
-                true_token_matcher (parser<Callbacks> & parser)
-                        : token_matcher<Callbacks> (
-                              parser, "true",
-                              std::bind (&Callbacks::boolean_value, &parser.callbacks (), true)) {}
+
+            struct true_complete {
+                template <typename Callbacks>
+                void operator() (parser<Callbacks> & parser) const {
+                    parser.callbacks ().boolean_value (true);
+                }
             };
+
+            template <typename Callbacks>
+            using true_token_matcher = token_matcher<Callbacks, true_complete>;
 
             //*           _ _   _       _             *
             //*  _ _ _  _| | | | |_ ___| |_____ _ _   *
             //* | ' \ || | | | |  _/ _ \ / / -_) ' \  *
             //* |_||_\_,_|_|_|  \__\___/_\_\___|_||_| *
             //*                                       *
-            template <typename Callbacks>
-            class null_token_matcher final : public token_matcher<Callbacks> {
-            public:
-                null_token_matcher (parser<Callbacks> & parser)
-                        : token_matcher<Callbacks> (
-                              parser, "null",
-                              std::bind (&Callbacks::null_value, &parser.callbacks ())) {}
+
+            struct null_complete {
+                template <typename Callbacks>
+                void operator() (parser<Callbacks> & parser) const {
+                    parser.callbacks ().null_value ();
+                }
             };
+
+            template <typename Callbacks>
+            using null_token_matcher = token_matcher<Callbacks, null_complete>;
 
             //*                 _              *
             //*  _ _ _  _ _ __ | |__  ___ _ _  *
@@ -414,26 +423,27 @@ namespace pstore {
             template <typename Callbacks>
             class number_matcher final : public matcher<Callbacks> {
             public:
-                number_matcher (parser<Callbacks> & parser) noexcept
-                        : matcher<Callbacks> (parser, leading_minus_state) {}
+                number_matcher () noexcept
+                        : matcher<Callbacks> (leading_minus_state) {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 bool in_terminal_state () const;
 
-                void do_leading_minus_state (char c);
-                void do_integer_initial_digit_state (char c);
-                void do_integer_digit_state (source & s, char c);
-                void do_frac_state (char c, source & s);
-                void do_frac_digit_state (char c, source & s);
-                void do_exponent_sign_state (char c, source & s);
-                void do_exponent_digit_state (char c, source & s);
+                void do_leading_minus_state (parser<Callbacks> & parser, char c);
+                void do_integer_initial_digit_state (parser<Callbacks> & parser, char c);
+                void do_integer_digit_state (parser<Callbacks> & parser, source & s, char c);
+                void do_frac_state (parser<Callbacks> & parser, char c, source & s);
+                void do_frac_digit_state (parser<Callbacks> & parser, char c, source & s);
+                void do_exponent_sign_state (parser<Callbacks> & parser, char c, source & s);
+                void do_exponent_digit_state (parser<Callbacks> & parser, char c, source & s);
 
-                void complete ();
+                void complete (parser<Callbacks> & parser);
                 void number_is_float ();
 
-                void make_result ();
+                void make_result (parser<Callbacks> & parser);
 
                 enum state {
                     leading_minus_state,
@@ -489,23 +499,25 @@ namespace pstore {
             // leading_minus_state
             // ~~~~~~~~~~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_leading_minus_state (char c) {
+            void number_matcher<Callbacks>::do_leading_minus_state (parser<Callbacks> & parser,
+                                                                    char c) {
                 if (c == '-') {
                     this->set_state (integer_initial_digit_state);
                     is_neg_ = true;
                 } else if (c >= '0' && c <= '9') {
                     this->set_state (integer_initial_digit_state);
-                    do_integer_initial_digit_state (c);
+                    do_integer_initial_digit_state (parser, c);
                 } else {
                     // minus MUST be followed by the 'int' production.
-                    this->set_error (error_code::number_out_of_range);
+                    this->set_error (parser, error_code::number_out_of_range);
                 }
             }
 
             // frac_state
             // ~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_frac_state (char c, source & s) {
+            void number_matcher<Callbacks>::do_frac_state (parser<Callbacks> & parser, char c,
+                                                           source & s) {
                 if (c == '.') {
                     this->set_state (frac_initial_digit_state);
                 } else if (c == 'e' || c == 'E') {
@@ -513,24 +525,25 @@ namespace pstore {
                 } else if (c >= '0' && c <= '9') {
                     // digits are definitely not part of the next token so we can issue an error
                     // right here.
-                    this->set_error (error_code::number_out_of_range);
+                    this->set_error (parser, error_code::number_out_of_range);
                 } else {
                     // the 'frac' production is optional.
                     s.push (c);
-                    this->complete ();
+                    this->complete (parser);
                 }
             }
 
             // frac_digit
             // ~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_frac_digit_state (char c, source & s) {
+            void number_matcher<Callbacks>::do_frac_digit_state (parser<Callbacks> & parser, char c,
+                                                                 source & s) {
                 assert (this->get_state () == frac_initial_digit_state ||
                         this->get_state () == frac_digit_state);
                 if (c == 'e' || c == 'E') {
                     this->number_is_float ();
                     if (this->get_state () == frac_initial_digit_state) {
-                        this->set_error (error_code::unrecognized_token);
+                        this->set_error (parser, error_code::unrecognized_token);
                     } else {
                         this->set_state (exponent_sign_state);
                     }
@@ -542,10 +555,10 @@ namespace pstore {
                     this->set_state (frac_digit_state);
                 } else {
                     if (this->get_state () == frac_initial_digit_state) {
-                        this->set_error (error_code::unrecognized_token);
+                        this->set_error (parser, error_code::unrecognized_token);
                     } else {
                         s.push (c);
-                        this->complete ();
+                        this->complete (parser);
                     }
                 }
             }
@@ -553,28 +566,30 @@ namespace pstore {
             // exponent_sign_state
             // ~~~~~~~~~~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_exponent_sign_state (char c, source & s) {
+            void number_matcher<Callbacks>::do_exponent_sign_state (parser<Callbacks> & parser,
+                                                                    char c, source & s) {
                 this->number_is_float ();
                 this->set_state (exponent_initial_digit_state);
                 switch (c) {
                 case '+': fp_acc_.exp_is_negative = false; break;
                 case '-': fp_acc_.exp_is_negative = true; break;
-                default: this->do_exponent_digit_state (c, s); break;
+                default: this->do_exponent_digit_state (parser, c, s); break;
                 }
             }
 
             // complete
             // ~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::complete () {
+            void number_matcher<Callbacks>::complete (parser<Callbacks> & parser) {
                 this->set_state (done_state);
-                this->make_result ();
+                this->make_result (parser);
             }
 
             // exponent_digit
             // ~~~~~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_exponent_digit_state (char c, source & s) {
+            void number_matcher<Callbacks>::do_exponent_digit_state (parser<Callbacks> & parser,
+                                                                     char c, source & s) {
                 assert (this->get_state () == exponent_digit_state ||
                         this->get_state () == exponent_initial_digit_state);
                 assert (!is_integer_);
@@ -583,10 +598,10 @@ namespace pstore {
                     this->set_state (exponent_digit_state);
                 } else {
                     if (this->get_state () == exponent_initial_digit_state) {
-                        this->set_error (error_code::unrecognized_token);
+                        this->set_error (parser, error_code::unrecognized_token);
                     } else {
                         s.push (c);
-                        this->complete ();
+                        this->complete (parser);
                     }
                 }
             }
@@ -595,7 +610,9 @@ namespace pstore {
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // implements the first character of the 'int' production.
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_integer_initial_digit_state (char c) {
+            void
+            number_matcher<Callbacks>::do_integer_initial_digit_state (parser<Callbacks> & parser,
+                                                                       char c) {
                 assert (this->get_state () == integer_initial_digit_state);
                 assert (is_integer_);
                 if (c == '0') {
@@ -605,14 +622,15 @@ namespace pstore {
                     int_acc_ = static_cast<unsigned> (c - '0');
                     this->set_state (integer_digit_state);
                 } else {
-                    this->set_error (error_code::unrecognized_token);
+                    this->set_error (parser, error_code::unrecognized_token);
                 }
             }
 
             // integer_digit
             // ~~~~~~~~~~~~~
             template <typename Callbacks>
-            void number_matcher<Callbacks>::do_integer_digit_state (source & s, char c) {
+            void number_matcher<Callbacks>::do_integer_digit_state (parser<Callbacks> & parser,
+                                                                    source & s, char c) {
                 assert (this->get_state () == integer_digit_state);
                 assert (is_integer_);
                 if (c == '.') {
@@ -623,50 +641,51 @@ namespace pstore {
                     number_is_float ();
                 } else if (c >= '0' && c <= '9') {
                     if (int_acc_ > std::numeric_limits<decltype (int_acc_)>::max () / 10U + 10U) {
-                        this->set_error (error_code::number_out_of_range);
+                        this->set_error (parser, error_code::number_out_of_range);
                     } else {
                         int_acc_ = int_acc_ * 10U + static_cast<unsigned> (c - '0');
                     }
                 } else {
                     s.push (c);
-                    this->complete ();
+                    this->complete (parser);
                 }
             }
 
             // consume
             // ~~~~~~~
             template <typename Callbacks>
-            typename matcher<Callbacks>::pointer number_matcher<Callbacks>::consume (maybe<char> ch,
-                                                                                     source & s) {
+            typename matcher<Callbacks>::pointer
+            number_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                                source & s) {
                 if (ch) {
                     char const c = *ch;
                     switch (this->get_state ()) {
-                    case leading_minus_state: this->do_leading_minus_state (c); break;
+                    case leading_minus_state: this->do_leading_minus_state (parser, c); break;
                     case integer_initial_digit_state:
-                        this->do_integer_initial_digit_state (c);
+                        this->do_integer_initial_digit_state (parser, c);
                         break;
-                    case integer_digit_state: this->do_integer_digit_state (s, c); break;
-                    case frac_state: this->do_frac_state (c, s); break;
+                    case integer_digit_state: this->do_integer_digit_state (parser, s, c); break;
+                    case frac_state: this->do_frac_state (parser, c, s); break;
                     case frac_initial_digit_state:
-                    case frac_digit_state: this->do_frac_digit_state (c, s); break;
-                    case exponent_sign_state: this->do_exponent_sign_state (c, s); break;
+                    case frac_digit_state: this->do_frac_digit_state (parser, c, s); break;
+                    case exponent_sign_state: this->do_exponent_sign_state (parser, c, s); break;
                     case exponent_initial_digit_state:
-                    case exponent_digit_state: this->do_exponent_digit_state (c, s); break;
+                    case exponent_digit_state: this->do_exponent_digit_state (parser, c, s); break;
                     case done_state: assert (false); break;
                     }
                 } else {
-                    assert (!this->has_error ());
+                    assert (!parser.has_error ());
                     if (!this->in_terminal_state ()) {
-                        this->set_error (error_code::expected_digits);
+                        this->set_error (parser, error_code::expected_digits);
                     }
-                    this->complete ();
+                    this->complete (parser);
                 }
                 return nullptr;
             }
 
             template <typename Callbacks>
-            void number_matcher<Callbacks>::make_result () {
-                if (this->has_error ()) {
+            void number_matcher<Callbacks>::make_result (parser<Callbacks> & parser) {
+                if (parser.has_error ()) {
                     return;
                 }
                 assert (this->in_terminal_state ());
@@ -679,7 +698,7 @@ namespace pstore {
                     constexpr auto umin = static_cast<uacc_type> (min);
 
                     if (is_neg_ ? int_acc_ > umin : int_acc_ > max) {
-                        this->set_error (error_code::number_out_of_range);
+                        this->set_error (parser, error_code::number_out_of_range);
                         return;
                     }
 
@@ -689,14 +708,14 @@ namespace pstore {
                     } else {
                         lv = static_cast<long> (int_acc_);
                     }
-                    this->callbacks ().integer_value (lv);
+                    parser.callbacks ().integer_value (lv);
                     return;
                 }
 
                 auto xf = (fp_acc_.whole_part + fp_acc_.frac_part / fp_acc_.frac_scale);
                 auto exp = std::pow (10, fp_acc_.exponent);
                 if (std::isinf (exp)) {
-                    this->set_error (error_code::number_out_of_range);
+                    this->set_error (parser, error_code::number_out_of_range);
                     return;
                 }
                 if (fp_acc_.exp_is_negative) {
@@ -709,10 +728,10 @@ namespace pstore {
                 }
 
                 if (std::isinf (xf) || std::isnan (xf)) {
-                    this->set_error (error_code::number_out_of_range);
+                    this->set_error (parser, error_code::number_out_of_range);
                     return;
                 }
-                this->callbacks ().float_value (xf);
+                parser.callbacks ().float_value (xf);
             }
 
 
@@ -724,10 +743,11 @@ namespace pstore {
             template <typename Callbacks>
             class string_matcher final : public matcher<Callbacks> {
             public:
-                string_matcher (parser<Callbacks> & parser) noexcept
-                        : matcher<Callbacks> (parser, start_state) {}
+                string_matcher () noexcept
+                        : matcher<Callbacks> (start_state) {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -824,10 +844,11 @@ namespace pstore {
             }
 
             template <typename Callbacks>
-            typename matcher<Callbacks>::pointer string_matcher<Callbacks>::consume (maybe<char> ch,
-                                                                                     source &) {
+            typename matcher<Callbacks>::pointer
+            string_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                                source &) {
                 if (!ch) {
-                    this->set_error (error_code::expected_close_quote);
+                    this->set_error (parser, error_code::expected_close_quote);
                     return nullptr;
                 }
                 char32_t code_point;
@@ -841,26 +862,26 @@ namespace pstore {
                             assert (!app_.has_high_surrogate ());
                             this->set_state (normal_char_state);
                         } else {
-                            this->set_error (error_code::expected_token);
+                            this->set_error (parser, error_code::expected_token);
                         }
                         break;
                     case normal_char_state:
                         if (code_point == '"') {
                             if (app_.has_high_surrogate ()) {
-                                this->set_error (error_code::bad_unicode_code_point);
+                                this->set_error (parser, error_code::bad_unicode_code_point);
                             } else {
                                 // Consume the closing quote character.
-                                this->callbacks ().string_value (app_.result ());
+                                parser.callbacks ().string_value (app_.result ());
                             }
                             this->set_state (done_state);
                         } else if (code_point == '\\') {
                             this->set_state (escape_state);
                         } else if (code_point <= 0x1F) {
                             // Control characters U+0000 through U+001F MUST be escaped.
-                            this->set_error (error_code::bad_unicode_code_point);
+                            this->set_error (parser, error_code::bad_unicode_code_point);
                         } else {
                             if (!app_.append32 (code_point)) {
-                                this->set_error (error_code::bad_unicode_code_point);
+                                this->set_error (parser, error_code::bad_unicode_code_point);
                             }
                         }
                         break;
@@ -876,12 +897,12 @@ namespace pstore {
                         case 'r': code_point = '\r'; break;
                         case 't': code_point = '\t'; break;
                         case 'u': this->set_state (hex1_state); break;
-                        default: this->set_error (error_code::invalid_escape_char); break;
+                        default: this->set_error (parser, error_code::invalid_escape_char); break;
                         }
                         if (this->get_state () == normal_char_state) {
                             assert (code_point < 0x80);
                             if (!app_.append32 (code_point)) {
-                                this->set_error (error_code::invalid_escape_char);
+                                this->set_error (parser, error_code::invalid_escape_char);
                             }
                         }
                         break;
@@ -901,7 +922,7 @@ namespace pstore {
                             }
                             hex_ = *j;
                         } else {
-                            this->set_error (error_code::invalid_escape_char);
+                            this->set_error (parser, error_code::invalid_escape_char);
                         }
                         break;
                     case hex4_state:
@@ -910,10 +931,10 @@ namespace pstore {
                             hex_ = *j;
                             assert (hex_ <= std::numeric_limits<std::uint16_t>::max ());
                             if (!app_.append16 (static_cast<char16_t> (hex_))) {
-                                this->set_error (error_code::bad_unicode_code_point);
+                                this->set_error (parser, error_code::bad_unicode_code_point);
                             }
                         } else {
-                            this->set_error (error_code::bad_unicode_code_point);
+                            this->set_error (parser, error_code::bad_unicode_code_point);
                         }
                         break;
                     case done_state: assert (false); break;
@@ -934,10 +955,11 @@ namespace pstore {
             template <typename Callbacks>
             class array_matcher final : public matcher<Callbacks> {
             public:
-                array_matcher (parser<Callbacks> & parser) noexcept
-                        : matcher<Callbacks> (parser, start_state) {}
+                array_matcher () noexcept
+                        : matcher<Callbacks> (start_state) {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -952,30 +974,31 @@ namespace pstore {
             // consume
             // ~~~~~~~
             template <typename Callbacks>
-            typename matcher<Callbacks>::pointer array_matcher<Callbacks>::consume (maybe<char> ch,
-                                                                                    source & s) {
+            typename matcher<Callbacks>::pointer
+            array_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                               source & s) {
                 if (!ch) {
-                    this->set_error (error_code::expected_array_member);
+                    this->set_error (parser, error_code::expected_array_member);
                     return nullptr;
                 }
                 char c = *ch;
                 switch (this->get_state ()) {
                 case start_state:
                     assert (c == '[');
-                    this->callbacks ().begin_array ();
+                    parser.callbacks ().begin_array ();
                     this->set_state (object_state);
                     break;
                 case object_state:
                     if (source::isspace (c)) {
                         // just consume whitespace before an object (or close bracket)
                     } else if (c == ']' && is_first_) {
-                        this->callbacks ().end_array ();
+                        parser.callbacks ().end_array ();
                         this->set_state (done_state);
                     } else {
                         is_first_ = false;
                         s.push (c);
                         this->set_state (comma_state);
-                        return this->make_root_matcher ();
+                        return this->make_root_matcher (parser);
                     }
                     break;
                 case comma_state:
@@ -984,10 +1007,10 @@ namespace pstore {
                     } else if (c == ',') {
                         this->set_state (object_state);
                     } else if (c == ']') {
-                        this->callbacks ().end_array ();
+                        parser.callbacks ().end_array ();
                         this->set_state (done_state);
                     } else {
-                        this->set_error (error_code::expected_array_member);
+                        this->set_error (parser, error_code::expected_array_member);
                     }
                     break;
                 case done_state: assert (false); break;
@@ -1003,10 +1026,11 @@ namespace pstore {
             template <typename Callbacks>
             class object_matcher final : public matcher<Callbacks> {
             public:
-                object_matcher (parser<Callbacks> & parser) noexcept
-                        : matcher<Callbacks> (parser, start_state) {}
+                object_matcher () noexcept
+                        : matcher<Callbacks> (start_state) {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -1023,14 +1047,15 @@ namespace pstore {
             // consume
             // ~~~~~~~
             template <typename Callbacks>
-            typename matcher<Callbacks>::pointer object_matcher<Callbacks>::consume (maybe<char> ch,
-                                                                                     source & s) {
+            typename matcher<Callbacks>::pointer
+            object_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                                source & s) {
                 if (this->get_state () == done_state) {
-                    assert (this->last_error () != std::make_error_code (error_code::none));
+                    assert (parser.last_error () != std::make_error_code (error_code::none));
                     return nullptr;
                 }
                 if (!ch) {
-                    this->set_error (error_code::expected_object_member);
+                    this->set_error (parser, error_code::expected_object_member);
                     return nullptr;
                 }
                 char c = *ch;
@@ -1038,11 +1063,11 @@ namespace pstore {
                 case start_state:
                     assert (c == '{');
                     this->set_state (first_key_state);
-                    this->callbacks ().begin_object ();
+                    parser.callbacks ().begin_object ();
                     break;
                 case first_key_state:
                     if (c == '}') {
-                        this->callbacks ().end_object ();
+                        parser.callbacks ().end_object ();
                         this->set_state (done_state);
                         break;
                     }
@@ -1050,30 +1075,30 @@ namespace pstore {
                 case key_state:
                     s.push (c);
                     this->set_state (colon_state);
-                    return this->make_root_matcher (true /*only string allowed*/);
+                    return this->make_root_matcher (parser, true /*only string allowed*/);
                 case colon_state:
                     if (source::isspace (c)) {
                         // just consume whitespace before the colon.
                     } else if (c == ':') {
                         this->set_state (value_state);
                     } else {
-                        this->set_error (error_code::expected_colon);
+                        this->set_error (parser, error_code::expected_colon);
                     }
                     break;
                 case value_state:
                     s.push (c);
                     this->set_state (comma_state);
-                    return this->make_root_matcher ();
+                    return this->make_root_matcher (parser);
                 case comma_state:
                     if (source::isspace (c)) {
                         // just consume whitespace before the comma.
                     } else if (c == ',') {
                         this->set_state (key_state);
                     } else if (c == '}') {
-                        this->callbacks ().end_object ();
+                        parser.callbacks ().end_object ();
                         this->set_state (done_state);
                     } else {
-                        this->set_error (error_code::expected_object_member);
+                        this->set_error (parser, error_code::expected_object_member);
                     }
                     break;
                 case done_state: assert (false); break;
@@ -1084,11 +1109,12 @@ namespace pstore {
             template <typename Callbacks>
             class root_matcher final : public matcher<Callbacks> {
             public:
-                root_matcher (parser<Callbacks> & parser, bool only_string = false) noexcept
-                        : matcher<Callbacks> (parser, start_state)
+                root_matcher (bool only_string = false) noexcept
+                        : matcher<Callbacks> (start_state)
                         , only_string_{only_string} {}
 
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -1100,13 +1126,14 @@ namespace pstore {
             };
 
             template <typename Callbacks>
-            typename matcher<Callbacks>::pointer root_matcher<Callbacks>::consume (maybe<char> ch,
-                                                                                   source & s) {
+            typename matcher<Callbacks>::pointer
+            root_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                              source & s) {
                 using pointer = typename matcher<Callbacks>::pointer;
                 switch (this->get_state ()) {
                 case start_state:
                     if (!ch) {
-                        this->set_error (error_code::expected_token);
+                        this->set_error (parser, error_code::expected_token);
                         return nullptr;
                     }
                     if (source::isspace (*ch)) {
@@ -1118,7 +1145,7 @@ namespace pstore {
                 case new_token_state: {
                     s.push (*ch);
                     if (only_string_ && *ch != '"') {
-                        this->set_error (error_code::expected_string);
+                        this->set_error (parser, error_code::expected_string);
                         // Don't return here in order to allow the switch default to produce a
                         // different error code for a bad token.
                     }
@@ -1136,26 +1163,26 @@ namespace pstore {
                     case '8':
                     case '9':
                         return this->template make_terminal_matcher<number_matcher<Callbacks>> (
-                            this->get_parser ());
+                            parser);
                     case '"':
                         return this->template make_terminal_matcher<string_matcher<Callbacks>> (
-                            this->get_parser ());
+                            parser);
                     case 't':
                         return this->template make_terminal_matcher<true_token_matcher<Callbacks>> (
-                            this->get_parser ());
+                            parser, "true");
                     case 'f':
                         return this
                             ->template make_terminal_matcher<false_token_matcher<Callbacks>> (
-                                this->get_parser ());
+                                parser, "false");
                     case 'n':
                         return this->template make_terminal_matcher<null_token_matcher<Callbacks>> (
-                            this->get_parser ());
+                            parser, "null");
 
                         // TODO: limit the maximum nesting to some large number of objects (avoids a
                         // DOS attack on the listening socket).
-                    case '[': return pointer (new array_matcher<Callbacks> (this->get_parser ()));
-                    case '{': return pointer (new object_matcher<Callbacks> (this->get_parser ()));
-                    default: this->set_error (error_code::expected_token); break;
+                    case '[': return pointer (new array_matcher<Callbacks> ());
+                    case '{': return pointer (new object_matcher<Callbacks> ());
+                    default: this->set_error (parser, error_code::expected_token); break;
                     }
                 } break;
                 case done_state: assert (false); break;
@@ -1175,10 +1202,10 @@ namespace pstore {
             template <typename Callbacks>
             class trailing_ws_matcher final : public matcher<Callbacks> {
             public:
-                explicit trailing_ws_matcher (parser<Callbacks> & parser) noexcept
-                        : matcher<Callbacks> (parser, start_state) {}
-
-                typename matcher<Callbacks>::pointer consume (maybe<char> ch, source & s) override;
+                trailing_ws_matcher () noexcept
+                        : matcher<Callbacks> (start_state) {}
+                typename matcher<Callbacks>::pointer consume (parser<Callbacks> & parser,
+                                                              maybe<char> ch, source & s) override;
 
             private:
                 enum state {
@@ -1189,14 +1216,15 @@ namespace pstore {
 
             template <typename Callbacks>
             typename matcher<Callbacks>::pointer
-            trailing_ws_matcher<Callbacks>::consume (maybe<char> ch, source &) {
+            trailing_ws_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch,
+                                                     source &) {
                 switch (this->get_state ()) {
                 case start_state:
                     if (!ch) {
                         this->set_state (done_state);
                     } else {
                         if (!source::isspace (*ch)) {
-                            this->set_error (error_code::unexpected_extra_input);
+                            this->set_error (parser, error_code::unexpected_extra_input);
                         }
                     }
                     break;
@@ -1286,15 +1314,13 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename Callbacks>
-        parser<Callbacks>::parser (Callbacks const & callbacks)
+        parser<Callbacks>::parser (Callbacks callbacks)
                 : singletons_{new details::singleton_storage<Callbacks>}
-                , callbacks_{callbacks} {
+                , callbacks_{std::move (callbacks)} {
             using pointer = typename matcher::pointer;
-            using details::root_matcher;
-            using details::trailing_ws_matcher;
+            using trailing_ws_matcher = details::trailing_ws_matcher<Callbacks>;
 
-            stack_.push (pointer (
-                new (&singletons_->trailing_ws) trailing_ws_matcher<Callbacks> (*this), false));
+            stack_.push (pointer (new (&singletons_->trailing_ws) trailing_ws_matcher (), false));
             stack_.push (this->make_root_matcher ());
         }
 
@@ -1302,9 +1328,8 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~
         template <typename Callbacks>
         auto parser<Callbacks>::make_root_matcher (bool only_string_allowed) -> pointer {
-            return pointer (new (&singletons_->root)
-                                details::root_matcher<Callbacks> (*this, only_string_allowed),
-                            false);
+            using root_matcher = details::root_matcher<Callbacks>;
+            return pointer (new (&singletons_->root) root_matcher (only_string_allowed), false);
         }
 
         // make_terminal_matcher
@@ -1326,7 +1351,7 @@ namespace pstore {
         template <typename Callbacks>
         bool parser<Callbacks>::parse_impl (maybe<char> c, details::source & s) {
             auto & handler = stack_.top ();
-            auto child = handler->consume (c, s);
+            auto child = handler->consume (*this, c, s);
             if (handler->is_done ()) {
                 if (error_ != error_code::none) {
                     return false;

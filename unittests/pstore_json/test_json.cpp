@@ -133,6 +133,18 @@ TEST_F (Json, Null) {
     p.eof ();
 }
 
+TEST_F (Json, Move) {
+    StrictMock<mock_json_callbacks> callbacks;
+    callbacks_proxy<mock_json_callbacks> proxy (callbacks);
+    EXPECT_CALL (callbacks, null_value ()).Times (1);
+
+    json::parser<decltype (proxy)> p (proxy);
+    // Move to a new parser instance ('p2') from 'p' and make sure that 'p2' is usuable.
+    auto p2 = std::move (p);
+    p2.parse (" null ");
+    p2.eof ();
+}
+
 TEST_F (Json, TwoKeywords) {
     json::parser<json::yaml_output> p;
     p.parse (" true false ");
