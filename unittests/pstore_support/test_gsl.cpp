@@ -180,7 +180,6 @@ TEST (GslSpan, FromNullptrLengthConstructor) {
         EXPECT_EQ (cs.length (), 0);
         EXPECT_EQ (cs.data (), nullptr);
     }
-
     {
         span<int, 0> s{nullptr, static_cast<span<int>::index_type> (0)};
         EXPECT_EQ (s.length (), 0);
@@ -190,29 +189,6 @@ TEST (GslSpan, FromNullptrLengthConstructor) {
         EXPECT_EQ (cs.length (), 0);
         EXPECT_EQ (cs.data (), nullptr);
     }
-
-#if 0
-    {
-        auto workaround_macro = []() { span<int, 1> s{ nullptr, static_cast<span<int>::index_type>(0) }; };
-        CHECK_THROW(workaround_macro(), fail_fast); 
-    }
-
-    {
-        auto workaround_macro = []() { span<int> s{nullptr, 1}; };
-        CHECK_THROW(workaround_macro(), fail_fast);
-
-        auto const_workaround_macro = []() { span<const int> cs{nullptr, 1}; };
-        CHECK_THROW(const_workaround_macro(), fail_fast);
-    }
-
-    {
-        auto workaround_macro = []() { span<int, 0> s{nullptr, 1}; };
-        CHECK_THROW(workaround_macro(), fail_fast);
-
-        auto const_workaround_macro = []() { span<const int, 0> s{nullptr, 1}; };
-        CHECK_THROW(const_workaround_macro(), fail_fast);
-    }
-#endif
     {
         span<int *> s{nullptr, static_cast<span<int>::index_type> (0)};
         EXPECT_EQ (s.length (), 0);
@@ -247,13 +223,6 @@ TEST (GslSpan, FromPointerLengthConstructor) {
         EXPECT_EQ (s.length (), 0);
         EXPECT_EQ (s.data (), nullptr);
     }
-#if 0
-    {
-        int* p = nullptr;
-        auto workaround_macro = [=]() { span<int> s{p, 2}; };
-        CHECK_THROW(workaround_macro(), fail_fast);
-    }
-#endif
     {
         auto s = make_span (&arr[0], 2);
         EXPECT_EQ (s.length (), 2);
@@ -267,14 +236,6 @@ TEST (GslSpan, FromPointerLengthConstructor) {
         EXPECT_EQ (s.length (), 0);
         EXPECT_EQ (s.data (), nullptr);
     }
-
-#if 0
-    {
-        int* p = nullptr;
-        auto workaround_macro = [=]() { make_span(p, 2); };
-        CHECK_THROW(workaround_macro(), fail_fast);
-    }
-#endif
 }
 
 TEST (GslSpan, FromPointerPointerConstructor) {
@@ -305,19 +266,6 @@ TEST (GslSpan, FromPointerPointerConstructor) {
         EXPECT_EQ (s.data (), &arr[0]);
     }
 
-    // this will fail the std::distance() precondition, which asserts on MSVC debug builds
-    //{
-    //    auto workaround_macro = [&]() { span<int> s{&arr[1], &arr[0]}; };
-    //    CHECK_THROW(workaround_macro(), fail_fast);
-    //}
-
-    // this will fail the std::distance() precondition, which asserts on MSVC debug builds
-    //{
-    //    int* p = nullptr;
-    //    auto workaround_macro = [&]() { span<int> s{&arr[0], p}; };
-    //    CHECK_THROW(workaround_macro(), fail_fast);
-    //}
-
     {
         int * p = nullptr;
         span<int> s{p, p};
@@ -330,13 +278,6 @@ TEST (GslSpan, FromPointerPointerConstructor) {
         EXPECT_EQ (s.length (), 0);
         EXPECT_EQ (s.data (), nullptr);
     }
-
-    // this will fail the std::distance() precondition, which asserts on MSVC debug builds
-    //{
-    //    int* p = nullptr;
-    //    auto workaround_macro = [&]() { span<int> s{&arr[0], p}; };
-    //    CHECK_THROW(workaround_macro(), fail_fast);
-    //}
 
     {
         auto s = make_span (&arr[0], &arr[2]);
@@ -425,16 +366,19 @@ TEST (GslSpan, FromArrayConstructor) {
     }
     {
         auto s = make_span (arr);
+        EXPECT_EQ (decltype (s)::extent, 5);
         EXPECT_EQ (s.length (), 5);
         EXPECT_EQ (s.data (), &arr[0]);
     }
     {
         auto s = make_span (&(arr2d[0]), 1);
+        EXPECT_EQ (decltype (s)::extent, dynamic_extent);
         EXPECT_EQ (s.length (), 1);
         EXPECT_EQ (s.data (), &arr2d[0]);
     }
     {
         auto s = make_span (&arr3d[0], 1);
+        EXPECT_EQ (decltype (s)::extent, dynamic_extent);
         EXPECT_EQ (s.length (), 1);
         EXPECT_EQ (s.data (), &arr3d[0]);
     }

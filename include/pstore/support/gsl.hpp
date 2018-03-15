@@ -445,6 +445,10 @@ namespace pstore {
             storage_type<details::extent_type<Extent>> storage_;
         };
 
+        template <typename ElementType, std::ptrdiff_t Extent>
+        typename span<ElementType, Extent>::index_type const span<ElementType, Extent>::extent;
+
+
         // [span.comparison], span comparison operators
         template <typename ElementType, std::ptrdiff_t FirstExtent, std::ptrdiff_t SecondExtent>
         constexpr bool operator== (span<ElementType, FirstExtent> const & lhs,
@@ -533,9 +537,9 @@ namespace pstore {
             return span<ElementType> (firstElem, lastElem);
         }
 
-        template <typename ElementType, size_t N>
-        span<ElementType> make_span (ElementType (&arr)[N]) {
-            return span<ElementType> (arr);
+        template <typename ElementType, std::size_t N>
+        span<ElementType, N> make_span (ElementType (&arr)[N]) {
+            return {arr};
         }
 
 
