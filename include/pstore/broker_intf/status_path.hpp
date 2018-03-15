@@ -52,21 +52,8 @@
 #include <netinet/in.h>
 #else
 #include <Winsock2.h>
-#endif
-
-
-#ifndef _WIN32
-#define PSTORE_UNIX_DOMAIN_SOCKETS 1
-#else
-// TODO: according to this article:
-// https://blogs.msdn.microsoft.com/commandline/2017/12/19/af_unix-comes-to-windows/
-// AF_UNIX support is available from "Insider Build 17063"
-#define PSTORE_UNIX_DOMAIN_SOCKETS 0
-#endif
-
-#ifdef _WIN32
 using in_port_t = unsigned short;
-#endif //_WIN32
+#endif
 
 namespace pstore {
     namespace broker {

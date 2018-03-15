@@ -62,6 +62,8 @@ namespace pstore {
         }
 
         void write_port_number_file (std::string const & path, in_port_t port) {
+            pstore::file::unlink (path, true /*allow noent*/);
+
             pstore::file::file_handle port_file;
             port_file.open (path, pstore::file::file_handle::create_mode::open_always,
                             pstore::file::file_handle::writable_mode::read_write);

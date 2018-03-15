@@ -59,19 +59,45 @@
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/status_path.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/config/config.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
+
+#if PSTORE_IS_INSIDE_LLVM
+#include "llvm/Support/CommandLine.h"
+#else
+#include "pstore/cmd_util/cl/command_line.hpp"
+#endif
+
+namespace {
+
+#if PSTORE_IS_INSIDE_LLVM
+    using namespace llvm;
+#else
+    using namespace pstore::cmd_util;
+#endif
+
+#define INET_BASE_HELP "Use internet rather than Unix domain sockets"
+#if PSTORE_UNIX_DOMAIN_SOCKETS
+#define INET_HELP INET_BASE_HELP
+#else
+#define INET_HELP INET_BASE_HELP " (ignored)"
+#endif
+
+    cl::opt<bool> use_inet_socket ("inet", cl::desc (INET_HELP), cl::init (false));
+
+} // namespace
+
 
 namespace {
 
 #if defined(_WIN32)
-
     using platform_erc = pstore::win32_erc;
-
 #else // defined (_WIN32)
-
     using platform_erc = pstore::errno_erc;
+#endif
 
-#if !PSTORE_UNIX_DOMAIN_SOCKETS
     class gai_error_category : public std::error_category {
     public:
         // The need for this constructor was removed by CWG defect 253 but Clang (prior to 3.9.0)
@@ -85,16 +111,17 @@ namespace {
         return "gai error category";
     }
     std::string gai_error_category::message (int error) const {
+#if defined(_WIN32) && defined(_UNICODE)
+        return pstore::utf::from_native_string (gai_strerror (error));
+#else
         return gai_strerror (error);
+#endif
     }
 
     std::error_category const & get_gai_error_category () {
         static gai_error_category const category;
         return category;
     }
-#endif //!PSTORE_UNIX_DOMAIN_SOCKETS
-
-#endif
 
 } // end anonymous namespace
 
@@ -125,10 +152,7 @@ namespace {
 
     using socket_descriptor = pstore::broker::socket_descriptor;
 
-    /*
-     * Create a client endpoint and connect to a server.
-     * Returns fd if all OK, <0 on error.
-     */
+    // Create a client endpoint and connect to a server.
 #if PSTORE_UNIX_DOMAIN_SOCKETS
 
     socket_descriptor cli_conn (std::string const & name) {
@@ -156,7 +180,7 @@ namespace {
         return fd;
     }
 
-#else // PSTORE_UNIX_DOMAIN_SOCKETS
+#endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
     socket_descriptor cli_conn (char const * node, int port) {
         //using namespace pstore;
@@ -205,7 +229,6 @@ namespace {
         return socket_descriptor{};
     }
 
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
 
 } // end anonymous namespace
 
@@ -215,52 +238,82 @@ int getpid () {
 }
 #endif
 
-int main () {
-    int exit_code = EXIT_SUCCESS;
-#ifdef _WIN32
-    pstore::wsa_startup startup;
-    if (!startup.started ()) {
-        std::cerr << "WSAStartup failed.\n";
-        return EXIT_FAILURE;
-    }
-#endif
-
-    auto const status_file_path = pstore::broker::get_status_path ();
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-    socket_descriptor csfd = cli_conn (status_file_path);
+#if defined(_WIN32) && defined(_UNICODE)
+using pstore_tchar = wchar_t;
 #else
-    in_port_t const port = pstore::broker::read_port_number_file (status_file_path);
-    //TODO: if port is 0 file read failed.
-    socket_descriptor csfd = cli_conn ("localhost", port);
+using pstore_tchar = char;
 #endif
-    if (!csfd.valid ()) {
-        std::cerr << "cli_conn error (" << strerror (errno) << ")\n";
-        return EXIT_FAILURE;
-    }
 
-    {
-        char buffer[256];
-        std::snprintf (buffer, 256, "hello %d\n\04", static_cast<int> (getpid ()));
-        send (csfd.get (), buffer, static_cast <int> (std::strlen (buffer)), 0 /*flags*/);
-    }
-
-    // now read the server's reply.
-    for (;;) {
-        char buf[12];
-        auto const received = recv (csfd.get (), buf, sizeof (buf), 0 /*flags*/);
-        // std::cout << "received=" << received << '\n';
-        if (received < 0) {
-            std::cerr << "read error (" << strerror (errno) << ")\n";
+int main (int argc, pstore_tchar * argv[]) {
+    int exit_code = EXIT_SUCCESS;
+    PSTORE_TRY {
+#ifdef _WIN32
+        pstore::wsa_startup startup;
+        if (!startup.started ()) {
+            std::cerr << "WSAStartup failed.\n";
             return EXIT_FAILURE;
         }
-        if (received == 0) {
-            // all done
-            break;
+#endif
+
+        using namespace pstore;
+        cl::ParseCommandLineOptions (argc, argv, "pstore broker status utility\n");
+
+        bool use_inet = use_inet_socket;
+#if !PSTORE_UNIX_DOMAIN_SOCKETS
+        use_inet = true; // Force enable inet sockets if we can't use Unix domain sockets.
+#endif
+
+        socket_descriptor csfd;
+        auto const status_file_path = pstore::broker::get_status_path ();
+        if (use_inet) {
+            in_port_t const port = pstore::broker::read_port_number_file (status_file_path);
+            // TODO: if port is 0 file read failed.
+            csfd = cli_conn ("localhost", port);
+        } else {
+#if PSTORE_UNIX_DOMAIN_SOCKETS
+            csfd = cli_conn (status_file_path);
+#else
+            assert (false);
+#endif // PSTORE_UNIX_DOMAIN_SOCKETS
         }
 
-        assert (received > 0);
-        fwrite (buf, 1U, static_cast<std::size_t> (received), stdout);
+        if (!csfd.valid ()) {
+            std::cerr << "cli_conn error (" << strerror (errno) << ")\n";
+            return EXIT_FAILURE;
+        }
+
+        {
+            char buffer[256];
+            std::snprintf (buffer, 256, "{ \"pid\": %d }\n\04", static_cast<int> (getpid ()));
+            send (csfd.get (), buffer, static_cast<int> (std::strlen (buffer)), 0 /*flags*/);
+        }
+
+        // now read the server's reply.
+        for (;;) {
+            char buf[12];
+            auto const received = recv (csfd.get (), buf, sizeof (buf), 0 /*flags*/);
+            // std::cout << "received=" << received << '\n';
+            if (received < 0) {
+                std::cerr << "read error (" << strerror (errno) << ")\n";
+                return EXIT_FAILURE;
+            }
+            if (received == 0) {
+                // all done
+                break;
+            }
+
+            assert (received > 0);
+            fwrite (buf, 1U, static_cast<std::size_t> (received), stdout);
+        }
     }
+    PSTORE_CATCH (std::exception & ex, {
+        std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
+    })
+    PSTORE_CATCH (..., {
+        std::cerr << "An unknown error occurred.\n";
+        exit_code = EXIT_FAILURE;
+    })
     return exit_code;
 }
 // eof: tools/broker_status/broker_status.cpp

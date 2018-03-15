@@ -790,7 +790,8 @@ namespace pstore {
 
         /// \brief Deletes the file system object at the location given by \p path.
         /// \param path The location in the file system of the object to be deleted.
-        void unlink (std::string const & path);
+        /// \param allow_noent  If true, do not raise an error if the file did not exist.
+        void unlink (std::string const & path, bool allow_noent = false);
 
     } // namespace file
 } // namespace pstore

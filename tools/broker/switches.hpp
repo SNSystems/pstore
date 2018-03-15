@@ -66,6 +66,7 @@ struct switches {
     std::unique_ptr<std::string> record_path;
     std::unique_ptr<std::string> pipe_path;
     unsigned num_read_threads = 2U;
+    bool use_inet_socket = false;
 };
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);

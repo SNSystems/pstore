@@ -386,10 +386,7 @@ namespace pstore {
         namespace posix {
 
             void deleter::platform_unlink (std::string const & path) {
-                if (::unlink (path.c_str ()) == -1) {
-                    int const err = errno;
-                    raise_file_error (err, "unlink failed", path);
-                }
+                pstore::file::unlink (path);
             }
 
         } // namespace posix
@@ -408,10 +405,12 @@ namespace pstore {
             }
         }
 
-        void unlink (std::string const & path) {
+        void unlink (std::string const & path, bool allow_noent) {
             if (::unlink (path.c_str ()) == -1) {
                 int const err = errno;
-                raise_file_error (err, "unlink failed", path);
+                if (!allow_noent || err != ENOENT) {
+                    raise_file_error (err, "unlink failed", path);
+                }
             }
         }
     } // namespace file

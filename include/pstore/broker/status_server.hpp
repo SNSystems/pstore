@@ -47,7 +47,7 @@
 namespace pstore {
     namespace broker {
 
-        void status_server ();
+        void status_server (bool use_inet_socket);
 
     } // namespace broker
 } // namespace pstore

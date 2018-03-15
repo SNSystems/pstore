@@ -141,6 +141,18 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_NSGETEXECUTABLEPATH)
 
+check_cxx_source_compiles (
+    "#ifdef _WIN32
+    #include <Winsock2.h>
+    #else
+    #include <sys/socket.h>
+    #include <sys/un.h>
+    #endif
+    int main () {
+       socket(AF_UNIX, SOCK_STREAM, 0);
+    }"
+    PSTORE_UNIX_DOMAIN_SOCKETS)
+
 
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/support")

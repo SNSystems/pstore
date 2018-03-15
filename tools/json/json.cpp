@@ -54,16 +54,15 @@ namespace {
 
     template <typename IStream>
     int slurp (IStream & in) {
-        using ustreamsize = std::make_unsigned<std::streamsize>::type;
         std::array<char, 256> buffer{{0}};
         pstore::json::parser<pstore::json::yaml_output> p;
 
         while ((in.rdstate () &
                 (std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit)) == 0 &&
                !p.has_error ()) {
-            in.read (&buffer[0], buffer.size ());
-            p.parse (&buffer[0],
-                     static_cast<ustreamsize> (std::max (in.gcount (), std::streamsize{0})));
+            in.read (buffer.data (), buffer.size ());
+            p.parse (pstore::gsl::make_span (buffer.data (),
+                                             std::max (in.gcount (), std::streamsize{0})));
         }
 
         p.eof ();

@@ -89,6 +89,6 @@ else ()
     add_pstore_library (pstore-broker-lib ${PSTORE_BROKER_LIB_SRC})
 endif (PSTORE_IS_INSIDE_LLVM)
 
-target_link_libraries (pstore-broker-lib PUBLIC pstore-broker-intf pstore-support-lib)
+target_link_libraries (pstore-broker-lib PUBLIC pstore-broker-intf pstore-json-lib pstore-support-lib)
 
 # eof: lib/broker/CMakeLists.txt

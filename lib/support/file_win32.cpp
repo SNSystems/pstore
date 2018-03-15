@@ -514,24 +514,20 @@ namespace pstore {
         namespace win32 {
 
             void deleter::platform_unlink (std::string const & path) {
-                // Delete the file at the path given by the (UTF-8-encoded) parameter string.
-                if (::DeleteFileW (pstore::utf::win32::to16 (path).c_str ()) == 0) {
-                    DWORD const last_error = ::GetLastError ();
-                    std::ostringstream str;
-                    str << "Unable to delete file " << pstore::quoted (path);
-                    raise (win32_erc (last_error), str.str ());
-                }
+                pstore::file::unlink (path);
             }
 
         } // namespace win32
 
-        void unlink (std::string const & path) {
+        void unlink (std::string const & path, bool allow_noent) {
             // Delete the file at the path given by the (UTF-8-encoded) parameter string.
             if (::DeleteFileW (pstore::utf::win32::to16 (path).c_str ()) == 0) {
                 DWORD const last_error = ::GetLastError ();
-                std::ostringstream str;
-                str << "Unable to delete file " << pstore::quoted (path);
-                raise (win32_erc (last_error), str.str ());
+                if (!allow_noent || last_error != ERROR_FILE_NOT_FOUND) {
+                    std::ostringstream str;
+                    str << "Unable to delete file " << pstore::quoted (path);
+                    raise (win32_erc{last_error}, str.str ());
+                }
             }
         }
 
@@ -548,7 +544,7 @@ namespace pstore {
                 std::ostringstream message;
                 message << "Unable to rename " << pstore::quoted (from) << " to "
                         << pstore::quoted (to);
-                raise (win32_erc (last_error), message.str ());
+                raise (win32_erc{last_error}, message.str ());
             }
         }
 

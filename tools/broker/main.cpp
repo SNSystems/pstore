@@ -67,6 +67,7 @@
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/config/config.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/thread.hpp"
 #include "pstore/support/utf.hpp"
@@ -162,9 +163,15 @@ int main (int argc, char * argv[]) {
             broker::gc_process_watch_thread ();
         }));
 
-        futures.push_back (create_thread ([]() {
+        bool const use_inet_socket =
+#if PSTORE_UNIX_DOMAIN_SOCKETS
+            opt.use_inet_socket;
+#else
+            true;
+#endif
+        futures.push_back (create_thread ([use_inet_socket]() {
             thread_init ("status");
-            broker::status_server ();
+            broker::status_server (use_inet_socket);
         }));
 
 

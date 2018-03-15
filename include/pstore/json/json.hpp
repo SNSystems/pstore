@@ -47,13 +47,16 @@
 #include <cctype>
 #include <cstdint>
 #include <cmath>
+#include <cstring>
 #include <limits>
 #include <memory>
 #include <stack>
 #include <system_error>
+#include <type_traits>
 
 #include "pstore/json/json_error.hpp"
 #include "pstore/json/utf.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 
@@ -128,15 +131,20 @@ namespace pstore {
             /// A convenience function which is equivalent to calling:
             ///     parse (src.data(), src.length())
             /// \param src The data to be parsed.
-            void parse (std::string const & src);
+            void parse (std::string const & src) { this->parse (gsl::make_span (src)); }
+
+            /// \param src The data to be parsed.
+            void parse (char const * src) {
+                parse (gsl::span<char const> (src, std::strlen (src)));
+            }
 
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
             /// of the source data (for example, as the data is received from an external source).
             /// Once all of the data has been received, call the parser::eof() method.
             ///
-            /// \param ptr A pointer to the start of the data to be parsed.
-            /// \param size The number of bytes of data to be parsed.
-            void parse (void const * ptr, std::size_t size);
+            /// \param span The span of bytes to be parsed.
+            template <typename SpanType>
+            void parse (SpanType const & span);
             ///@}
 
             /// Informs the parser that the complete input stream has been passed by calls to
@@ -1368,17 +1376,17 @@ namespace pstore {
         // parse
         // ~~~~~
         template <typename Callbacks>
-        void parser<Callbacks>::parse (std::string const & str) {
-            this->parse (str.data (), str.length ());
-        }
-
-        template <typename Callbacks>
-        void parser<Callbacks>::parse (void const * ptr, std::size_t size) {
+        template <typename SpanType>
+        void parser<Callbacks>::parse (SpanType const & span) {
+            static_assert (
+                std::is_same<typename std::remove_cv<typename SpanType::element_type>::type,
+                             char>::value,
+                "span element type must be char");
             if (error_ != error_code::none) {
                 return;
             }
-            auto orig_src = reinterpret_cast<char const *> (ptr);
-            auto s = details::make_source (orig_src, orig_src + size);
+            auto orig_src = span.data ();
+            auto s = details::make_source (orig_src, orig_src + span.size ());
             while (!stack_.empty () && s.available ()) {
                 if (!this->parse_impl (s.pull (), s)) {
                     break;
