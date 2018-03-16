@@ -89,7 +89,7 @@ namespace {
     class reader {
     public:
         reader () = default;
-        reader (unique_handle && ph, not_null<command_processor *> cp, recorder * record_file);
+        reader (pipe_descriptor && ph, not_null<command_processor *> cp, recorder * record_file);
 
         ~reader () noexcept;
 
@@ -105,7 +105,7 @@ namespace {
 
         list_member<reader> listm_;
 
-        unique_handle pipe_handle_;
+        pipe_descriptor pipe_handle_;
         message_ptr request_;
 
         command_processor * command_processor_ = nullptr;
@@ -132,7 +132,7 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    reader::reader (unique_handle && ph, not_null<command_processor *> cp, recorder * record_file)
+    reader::reader (pipe_descriptor && ph, not_null<command_processor *> cp, recorder * record_file)
             : pipe_handle_{std::move (ph)}
             , command_processor_{cp}
             , record_file_{record_file} {
@@ -254,7 +254,7 @@ namespace {
     public:
         explicit request (not_null<command_processor *> cp, recorder * record_file);
 
-        void attach_pipe (unique_handle && p);
+        void attach_pipe (pipe_descriptor && p);
         ~request ();
 
         void cancel ();
@@ -292,7 +292,7 @@ namespace {
     // attach_pipe
     // ~~~~~~~~~~~
     /// Associates the given pipe handle with this request object and starts a read operation.
-    void request::attach_pipe (pstore::broker::unique_handle && pipe) {
+    void request::attach_pipe (pstore::broker::pipe_descriptor && pipe) {
         auto r = std::make_unique<reader> (std::move (pipe), command_processor_, record_file_);
 
         // Insert this new object into the list of active reads. We now have two pointers to it:
@@ -381,13 +381,13 @@ namespace {
     /// pipe creation.
     /// \return  A pair containing both the pipe handle and a boolean which will be true if the
     /// connect operation is pending, and false if the connection has been completed.
-    std::pair<pstore::broker::unique_handle, bool>
+    std::pair<pstore::broker::pipe_descriptor, bool>
     create_and_connect_instance (std::wstring const & pipe_name, OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
         static constexpr auto default_pipe_timeout =
             DWORD{5 * 1000}; // TODO: make this user-configurable.
 
-        auto pipe = pstore::broker::unique_handle{
+        auto pipe = pstore::broker::pipe_descriptor{
             ::CreateNamedPipeW (pipe_name.c_str (),
                                 PIPE_ACCESS_INBOUND |             // read/write access
                                     FILE_FLAG_OVERLAPPED,         // overlapped mode
@@ -411,9 +411,9 @@ namespace {
     // create_event
     // ~~~~~~~~~~~~
     /// Creates a manual-reset event which is initially signaled.
-    pstore::broker::unique_handle create_event () {
+    pstore::broker::pipe_descriptor create_event () {
         if (HANDLE h = ::CreateEvent (nullptr, true, true, nullptr)) {
-            return pstore::broker::unique_handle{h};
+            return pstore::broker::pipe_descriptor{h};
         }
         raise (::pstore::win32_erc (::GetLastError ()), "CreateEvent");
     }
@@ -441,7 +441,7 @@ namespace pstore {
 
                 // Create a pipe instance and and wait for a the client to connect.
                 bool pending_io;
-                unique_handle pipe;
+                pipe_descriptor pipe;
                 std::tie (pipe, pending_io) = create_and_connect_instance (pipe_name, connect);
 
                 request req (cp.get (), record_file.get ());

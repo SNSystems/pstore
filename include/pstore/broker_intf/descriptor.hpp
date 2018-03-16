@@ -223,13 +223,8 @@ namespace pstore {
 
         using socket_descriptor = details::socket_descriptor;
         using pipe_descriptor = details::pipe_descriptor;
-
 #ifdef _WIN32
         using unique_handle = pipe_descriptor;
-        inline unique_handle make_handle (HANDLE fd) { return unique_handle{fd}; }
-#else
-        using unique_fd = pipe_descriptor;
-        inline unique_fd make_fd (int fd) { return unique_fd{fd}; }
 #endif
 
     } // namespace broker

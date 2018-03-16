@@ -128,8 +128,8 @@ namespace pstore {
             // most UNIX systems allow this, we use two open() calls instead.
 
             int errcode = 0;
-            unique_fd fdread{::open (path, O_RDONLY | O_NONBLOCK)}; // NOLINT
-            unique_fd fdwrite{};
+            pipe_descriptor fdread{::open (path, O_RDONLY | O_NONBLOCK)}; // NOLINT
+            pipe_descriptor fdwrite{};
             if (fdread.get () < 0) {
                 errcode = errno;
             } else {

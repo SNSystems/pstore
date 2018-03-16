@@ -61,17 +61,15 @@ namespace pstore {
         class fifo_path {
         public:
             using duration_type = std::chrono::milliseconds;
+            using client_pipe = pipe_descriptor;
 #ifdef _WIN32
-            using client_pipe = unique_handle;
-            using server_pipe = unique_handle;
+            using server_pipe = pipe_descriptor;
 #else
-            using client_pipe = unique_fd;
-
             class server_pipe {
             public:
-                using value_type = unique_fd::value_type;
+                using value_type = pipe_descriptor::value_type;
 
-                server_pipe (unique_fd && read, unique_fd && write)
+                server_pipe (pipe_descriptor && read, pipe_descriptor && write)
                         : fd_{std::move (read), std::move (write)} {}
                 ~server_pipe () = default;
                 server_pipe (server_pipe &&) noexcept = default;
@@ -85,8 +83,8 @@ namespace pstore {
                 bool valid () const noexcept { return read_pipe ().valid (); }
 
             private:
-                std::tuple<unique_fd, unique_fd> fd_;
-                unique_fd const & read_pipe () const { return std::get<0> (fd_); }
+                std::tuple<pipe_descriptor, pipe_descriptor> fd_;
+                pipe_descriptor const & read_pipe () const { return std::get<0> (fd_); }
             };
 #endif
             enum class operation { open, wait };
