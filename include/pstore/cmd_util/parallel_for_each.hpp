@@ -46,11 +46,10 @@
 #define PSTORE_CMD_UTIL_PARALLEL_FOR_EACH_HPP
 
 #include <algorithm>
+#include <cassert>
 #include <future>
 #include <iterator>
 #include <vector>
-
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -72,9 +71,12 @@ namespace pstore {
             auto const num_threads = std::min (
                 static_cast<wide_type> (std::max (std::thread::hardware_concurrency (), 1U)),
                 num_elements);
+
+            // The number of work items to be processed by each worker thread.
             auto const partition_size = (num_elements + num_threads - 1) / num_threads;
             assert (partition_size * num_threads >= num_elements);
 
+            // TODO: use small_vector<>.
             std::vector<std::future<void>> futures;
             futures.reserve (num_threads);
 
@@ -93,14 +95,13 @@ namespace pstore {
                 auto per_thread_fn = [&fn](InputIt fst, InputIt lst) {
                     std::for_each (fst, lst, [&fn](value_type const & v) { fn (v); });
                 };
-                futures.push_back (std::async (std::launch::async, per_thread_fn, first, next));
+                futures.emplace_back (std::async (std::launch::async, per_thread_fn, first, next));
 
                 first = next;
                 assert (num_elements >= distance);
                 num_elements -= distance;
             }
-            assert (num_elements == 0);
-            assert (futures.size () == num_threads);
+            assert (num_elements == 0 && futures.size () <= num_threads);
 
             // Join
             for (auto & f : futures) {
