@@ -61,6 +61,6 @@ set (PSTORE_VACUUM_LIB_SRC
 
 include (add_pstore)
 add_pstore_library (pstore-vacuum-lib ${PSTORE_VACUUM_LIB_SRC})
-target_link_libraries (pstore-vacuum-lib pstore-core)
+target_link_libraries (pstore-vacuum-lib pstore-broker-intf pstore-core)
 
 # eof: lib/vacuum/CMakeLists.txt

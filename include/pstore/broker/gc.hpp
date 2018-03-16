@@ -51,7 +51,7 @@
 #include "pstore/broker/bimap.hpp"
 #include "pstore/broker/pointer_compare.hpp"
 #include "pstore/broker/spawn.hpp"
-#include "pstore/support/signal_cv.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 
 namespace pstore {
     namespace broker {

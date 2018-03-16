@@ -184,7 +184,6 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/rotating_log.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_cv.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
@@ -199,8 +198,6 @@ set (PSTORE_SUPPORT_LIB_SRC
     path.cpp
     process_file_name_posix.cpp
     process_file_name_win32.cpp
-    signal_cv_posix.cpp
-    signal_cv_win32.cpp
     signal_helpers.cpp
     thread.cpp
     utf.cpp

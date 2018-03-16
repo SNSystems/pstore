@@ -44,7 +44,7 @@
 
 /// \file signal_cv_posix.cpp
 
-#include "pstore/support/signal_cv.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 
 #ifndef _WIN32
 

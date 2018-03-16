@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file signal_cv_win32.cpp
 
-#include "pstore/support/signal_cv.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 
 #ifdef _WIN32
 

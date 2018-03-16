@@ -63,8 +63,8 @@
 #include <unistd.h>
 
 #include "pstore/broker/globals.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/support/logging.hpp"
-#include "pstore/support/signal_cv.hpp"
 
 namespace {
 

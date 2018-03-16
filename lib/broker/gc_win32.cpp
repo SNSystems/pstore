@@ -61,8 +61,8 @@
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker/pointer_compare.hpp"
 #include "pstore/broker/spawn.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/support/logging.hpp"
-#include "pstore/support/signal_cv.hpp"
 #include "pstore/support/thread.hpp"
 
 

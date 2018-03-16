@@ -71,11 +71,11 @@
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/broker_intf/status_client.hpp"
 #include "pstore/core/make_unique.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
-#include "pstore/support/signal_cv.hpp"
 #include "pstore/support/signal_helpers.hpp"
 #include "pstore/support/thread.hpp"
 
