@@ -51,24 +51,29 @@
 #include <cerrno>
 #include <condition_variable>
 #include <cstring>
+#include <iostream>
 #include <memory>
 #include <mutex>
 
 // Platform includes
 #include <fcntl.h>
-#ifndef _WIN32
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <sys/socket.h>
 #include <unistd.h>
 #endif
 #include <signal.h>
 
-// pstore includes
 #include "pstore/broker/command.hpp"
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/status_client.hpp"
 #include "pstore/core/make_unique.hpp"
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/signal_cv.hpp"
 #include "pstore/support/signal_helpers.hpp"
@@ -103,12 +108,13 @@ namespace pstore {
         // shutdown
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_threads) {
+                       unsigned num_read_threads, bool status_useinet) {
             // Set the global "done" flag unless we're already shutting down. The latter condition
-            // happens
-            // if a "SUICIDE" command is received and the quit thread is woken in response.
+            // happens if a "SUICIDE" command is received and the quit thread is woken in response.
             bool expected = false;
             if (done.compare_exchange_strong (expected, true)) {
+                std::cerr << "pstore broker is exiting.\n";
+
                 // Tell the gcwatcher thread to exit.
                 broker::gc_sigint (signum);
 
@@ -124,6 +130,11 @@ namespace pstore {
                     // Finally ask the command loop thread to exit.
                     push (*cp, command_loop_quit_command);
                 }
+
+                auto socket = connect_to_status_server (status_useinet);
+                char const json[] = "{\"quit\":true}\04";
+                ::send (socket.get (), json, static_cast<int> (array_elements (json) - 1),
+                        0 /*flags*/);
             }
         }
 
@@ -138,7 +149,8 @@ namespace {
     //* quit thread *
     //***************
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
-                      std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads) {
+                      std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads,
+                      bool status_useinet) {
         using namespace pstore;
 
         try {
@@ -163,7 +175,8 @@ namespace {
             }
 
             auto scav_sptr = scav.lock ();
-            shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads);
+            shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
+                      status_useinet);
         } catch (std::exception const & ex) {
             logging::log (logging::priority::error, "error:", ex.what ());
         } catch (...) {
@@ -181,7 +194,7 @@ namespace {
         quit_info.notify (sig);
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 namespace pstore {
@@ -194,8 +207,10 @@ namespace pstore {
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
-                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads) {
-            std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads);
+                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads,
+                                        bool status_useinet) {
+            std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
+                              status_useinet);
 
             register_signal_handler (SIGINT, signal_handler);
             register_signal_handler (SIGTERM, signal_handler);

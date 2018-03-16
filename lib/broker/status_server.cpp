@@ -53,6 +53,7 @@
 #include <limits>
 #include <map>
 #include <sstream>
+#include <tuple>
 #include <vector>
 
 #ifndef _WIN32
@@ -74,6 +75,7 @@
 #include "pstore/config/config.hpp"
 #include "pstore/json/dom_types.hpp"
 #include "pstore/json/json.hpp"
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 
 
@@ -103,8 +105,9 @@ namespace {
     using json_parser = pstore::json::parser<pstore::json::yaml_output>;
     using socket_descriptor = pstore::broker::socket_descriptor;
 
-    bool handle_request (pstore::gsl::span<char const> buf, socket_descriptor::value_type clifd,
-                         json_parser & parser) {
+    std::tuple<bool, bool> handle_request (pstore::gsl::span<char const> buf,
+                                           socket_descriptor::value_type clifd,
+                                           json_parser & parser) {
         auto report_error = [](std::error_code err) {
             assert (err);
             std::ostringstream message;
@@ -122,15 +125,25 @@ namespace {
 
         parser.parse (pstore::gsl::make_span (buf.data (), size));
         if (auto const err = parser.last_error ()) {
-            return report_error (err);
+            return std::make_tuple (report_error (err), false);
         }
         if (!is_eof) {
-            return true; // more please!
+            return std::make_tuple (true, false); // more please!
         }
 
         pstore::dump::value_ptr dom = parser.eof ();
         if (auto const err = parser.last_error ()) {
-            return report_error (err);
+            return std::make_tuple (report_error (err), false);
+        }
+
+        bool done = false;
+        if (auto obj = dom->dynamic_cast_object ()) {
+            if (auto quit = obj->get ("quit")) {
+                if (auto v = quit->dynamic_cast_boolean ()) {
+                    log (pstore::logging::priority::info, "Received valid 'quit' message");
+                    done = v->get ();
+                }
+            }
         }
 
         // Just send back the YAML equivalent of the result of the JSON parse.
@@ -140,10 +153,10 @@ namespace {
         std::string const & str = out.str ();
         send (clifd, str.data (), str.length (), 0 /*flags*/);
 
-        return false;
+        return std::make_tuple (false, done);
     }
 
-} // namespace
+} // end anonymous namespace
 
 namespace {
 
@@ -248,7 +261,7 @@ namespace {
                 is_v4_mapped_localhost (v6s->sin6_addr);
         }
 
-        ipstr[pstore::broker::array_elements (ipstr) - 1] = '\0'; // ensure nul termination.
+        ipstr[pstore::array_elements (ipstr) - 1] = '\0'; // ensure nul termination.
 
         if (!localhost_only || is_localhost) {
             log (pstore::logging::priority::notice, "Accepted connection from host: ", ipstr);
@@ -266,7 +279,7 @@ namespace {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     socket_descriptor server_listen_unix_domain (char const * name) {
         sockaddr_un un;
-        constexpr std::size_t max_name_len = pstore::broker::array_elements (un.sun_path);
+        constexpr std::size_t max_name_len = pstore::array_elements (un.sun_path);
         std::memset (&un, 0, sizeof un);
         un.sun_family = AF_UNIX;
         std::strncpy (un.sun_path, name, max_name_len);
@@ -378,8 +391,8 @@ void pstore::broker::status_server (bool use_inet_socket) {
             log (logging::priority::info, "Waiting for connections on UD path ", listen_path);
         }
 
-        // FIXME: need a way to shut this thread down cleanly.
-        for (;;) {
+        bool done = false;
+        while (!done) {
             fd_set rset = all_set; // rset is modified each time round the loop.
 
             if (select (static_cast<int> (max_fd) + 1, &rset, nullptr, nullptr, nullptr) < 0) {
@@ -397,7 +410,7 @@ void pstore::broker::status_server (bool use_inet_socket) {
                         server_accept_new_inet_connection (listen_fd, true /*localhost only*/);
 
                 if (!client_fd.valid ()) {
-                    // FIXME: error handling wrong on Windows (at least0
+                    // FIXME: error handling wrong on Windows (at least)
                     log (logging::priority::error, "server_accept_new_connection error ",
                          client_fd.get ());
                     continue;
@@ -437,8 +450,10 @@ void pstore::broker::status_server (bool use_inet_socket) {
                                       client_fd.get ());
                     } else {
                         // process the client's request.
-                        more = handle_request (pstore::gsl::make_span (read_buffer.data (), nread),
-                                               client_fd.get (), it->second);
+                        std::tie (more, done) =
+                            handle_request (pstore::gsl::make_span (read_buffer.data (), nread),
+                                            client_fd.get (), it->second);
+                        assert (!done || (done && !more));
                     }
 
                     // If we're done with the client, close the file descriptor.
@@ -454,6 +469,7 @@ void pstore::broker::status_server (bool use_inet_socket) {
             }
         }
 
+        log (pstore::logging::priority::info, "Status server exiting");
         pstore::file::unlink (listen_path);
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());

@@ -51,6 +51,9 @@
 #include <iterator>
 #include <vector>
 
+// To ensure that min and max are not macros on Windows.
+#include "pstore/support/portab.hpp"
+
 namespace pstore {
     namespace cmd_util {
 

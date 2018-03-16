@@ -68,11 +68,6 @@ namespace pstore {
 #endif
         }
 
-        template <typename T, std::size_t Size>
-        constexpr std::size_t array_elements (T (&)[Size]) noexcept {
-            return Size;
-        }
-
         void write_port_number_file (std::string const & path, in_port_t port);
         in_port_t read_port_number_file (std::string const & path);
 

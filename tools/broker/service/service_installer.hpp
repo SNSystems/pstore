@@ -47,6 +47,7 @@
 #ifndef SERVICE_INSTALLER_HPP
 #define SERVICE_INSTALLER_HPP
 
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include "pstore/support/gsl.hpp"

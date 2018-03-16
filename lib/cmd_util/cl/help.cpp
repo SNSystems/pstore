@@ -49,15 +49,7 @@
 #include <string>
 
 #include "pstore/cmd_util/cl/word_wrapper.hpp"
-
-namespace {
-
-    template <typename T, std::size_t Size>
-    constexpr std::size_t array_elements (T (&)[Size]) {
-        return Size;
-    }
-
-} // anonymous namespace
+#include "pstore/support/array_elements.hpp"
 
 namespace pstore {
     namespace cmd_util {

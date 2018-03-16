@@ -126,6 +126,13 @@ int main (int argc, char * argv[]) {
             return broker::exit_code;
         }
 
+        bool const use_inet_socket =
+#if PSTORE_UNIX_DOMAIN_SOCKETS
+            opt.use_inet_socket;
+#else
+            true;
+#endif
+
         // If we're recording the messages we receive, then create the file in which they will be
         // stored.
         std::shared_ptr<broker::recorder> record_file;
@@ -140,13 +147,14 @@ int main (int argc, char * argv[]) {
         broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
-        auto commands = std::make_shared<broker::command_processor> (opt.num_read_threads);
+        auto commands =
+            std::make_shared<broker::command_processor> (opt.num_read_threads, use_inet_socket);
         auto scav = std::make_shared<broker::scavenger> (commands);
         commands->attach_scavenger (scav);
 
         logging::log (logging::priority::notice, "starting threads");
-        std::thread quit =
-            create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads);
+        std::thread quit = create_quit_thread (make_weak (commands), make_weak (scav),
+                                               opt.num_read_threads, use_inet_socket);
 
         futures.push_back (create_thread ([&fifo, &commands]() {
             thread_init ("command");
@@ -163,12 +171,6 @@ int main (int argc, char * argv[]) {
             broker::gc_process_watch_thread ();
         }));
 
-        bool const use_inet_socket =
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-            opt.use_inet_socket;
-#else
-            true;
-#endif
         futures.push_back (create_thread ([use_inet_socket]() {
             thread_init ("status");
             broker::status_server (use_inet_socket);
@@ -180,7 +182,8 @@ int main (int argc, char * argv[]) {
             while (auto msg = playback_file.read ()) {
                 commands->push_command (std::move (msg), record_file.get ());
             }
-            shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/);
+            shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/,
+                      use_inet_socket);
         } else {
             for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                 futures.push_back (create_thread ([&fifo, &record_file, &commands]() {

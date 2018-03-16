@@ -69,7 +69,7 @@ namespace pstore {
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
-            explicit command_processor (unsigned const num_read_threads);
+            command_processor (unsigned const num_read_threads, bool status_useinet);
             virtual ~command_processor () = default;
 
             // No copying or assignment.
@@ -130,6 +130,9 @@ namespace pstore {
             /// The number of read threads running. At shutdown time this is used to instruct each
             /// of them to exit safely.
             unsigned const num_read_threads_;
+            /// Is the status server listening on an inet socket (as opposed to a Unix domain socket
+            /// [where available])?
+            bool status_useinet_;
 
             auto parse (message_type const & msg) -> std::unique_ptr<broker_command>;
 

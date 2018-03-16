@@ -78,8 +78,9 @@ namespace pstore {
 
         // ctor
         // ~~~~
-        command_processor::command_processor (unsigned const num_read_threads)
-                : num_read_threads_{num_read_threads} {
+        command_processor::command_processor (unsigned const num_read_threads, bool status_useinet)
+                : num_read_threads_{num_read_threads}
+                , status_useinet_{status_useinet} {
 
             assert (std::is_sorted (std::begin (commands_), std::end (commands_),
                                     command_entry_compare));
@@ -89,7 +90,7 @@ namespace pstore {
         // ~~~~~~~
         void command_processor::suicide (fifo_path const &, broker_command const &) {
             std::shared_ptr<scavenger> scav = scavenger_.get ();
-            shutdown (this, scav.get (), -1, num_read_threads_);
+            shutdown (this, scav.get (), -1, num_read_threads_, status_useinet_);
         }
 
         // quit

@@ -49,6 +49,7 @@ set (PSTORE_BROKER_INTF_SRC
     "${PSTORE_INCLUDE_DIR}/broker_intf/fifo_path.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/message_type.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/send_message.hpp"
+    "${PSTORE_INCLUDE_DIR}/broker_intf/status_client.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/status_path.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/writer.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/wsa_startup.hpp"
@@ -59,6 +60,7 @@ set (PSTORE_BROKER_INTF_SRC
     fifo_path_win32.cpp
     message_type.cpp
     send_message.cpp
+    status_client.cpp
     status_path.cpp
     writer_common.cpp
     writer_posix.cpp
