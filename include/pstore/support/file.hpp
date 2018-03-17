@@ -65,6 +65,7 @@
 #include <Windows.h>
 #endif
 
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -116,10 +117,10 @@ namespace pstore {
                 // Replace the sequence of 'X's with random characters.
                 auto num_x = std::distance (it.base (), tmpl.end ());
                 while (num_x--) {
-                    static std::string const alphabet{"abcdefghijklmnopqrstuvwxyz0123456789_"};
-
-                    auto const index = rng (static_cast<unsigned> (alphabet.length ()));
-                    assert (index >= 0 && index < alphabet.length ());
+                    static char const alphabet [] = "abcdefghijklmnopqrstuvwxyz0123456789_";
+                    static constexpr auto length = static_cast <unsigned> (array_elements (alphabet)) - 1U;
+                    auto const index = rng (length);
+                    assert (index >= 0 && index < length);
                     path.push_back (alphabet[index]);
                 }
                 assert (path.length () == tmpl.length ());
@@ -198,11 +199,11 @@ namespace pstore {
         /// \brief An abstract file class. Provides the interface for file access.
         class file_base {
         public:
-            file_base (file_base &&) = default;
+            file_base (file_base &&) noexcept = default;
             file_base (file_base const &) = default;
             virtual ~file_base () noexcept = default;
 
-            file_base & operator= (file_base &&) = default;
+            file_base & operator= (file_base &&) noexcept = default;
             file_base & operator= (file_base const &) = default;
 
             virtual bool is_open () const = 0;
