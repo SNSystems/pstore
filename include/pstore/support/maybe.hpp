@@ -61,7 +61,7 @@ namespace pstore {
         static maybe<T> just (T const & value) { return maybe (value); }
         static maybe<T> nothing () { return maybe (); }
 
-        maybe () {}
+        maybe () noexcept = default;
         maybe (T const & value) {
             ::new (&storage_) T (value);
             valid_ = true;
