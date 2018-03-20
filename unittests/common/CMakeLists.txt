@@ -51,4 +51,5 @@ add_pstore_test_library (pstore-common
     split.hpp
 )
 target_include_directories (pstore-common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries (pstore-common pstore-core)
 # eof: unittests/common/CMakeLists.txt

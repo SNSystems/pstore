@@ -41,6 +41,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
+add_subdirectory (support)
+
 add_subdirectory (broker)
 add_subdirectory (broker_intf)
 add_subdirectory (cmd_util)
@@ -50,6 +52,5 @@ add_subdirectory (dump)
 add_subdirectory (json)
 add_subdirectory (mcrepo)
 add_subdirectory (serialize)
-add_subdirectory (support)
 add_subdirectory (vacuum)
 # eof: lib/CMakeLists.txt

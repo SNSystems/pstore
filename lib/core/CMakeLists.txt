@@ -57,6 +57,7 @@ set (PSTORE_CORE_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/storage.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/transaction.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/vacuum_intf.hpp"
+    
     address.cpp
     database.cpp
     file_header.cpp
@@ -83,6 +84,7 @@ set (PSTORE_SUPPORT_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uuid.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/varint.hpp"
+    
     base32.cpp
     base32.hpp
     crc32.cpp
@@ -98,6 +100,7 @@ set (PSTORE_OS_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/errno_exception.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/memory_mapper.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/shared_memory.hpp"
+    
     errno_exception.cpp
     memory_mapper.cpp
     memory_mapper_posix.cpp
@@ -112,6 +115,7 @@ set (PSTORE_INDEX_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_map_fwd.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_map_types.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_set.hpp"
+    
     hamt_map_types.cpp
 )
 list (APPEND PSTORE_SRC ${PSTORE_INDEX_SRC})
@@ -125,7 +129,7 @@ add_pstore_library (pstore-core ${PSTORE_SRC})
 # Our use of shared memory needs an extra library on a Linux system.
 if (UNIX AND NOT APPLE)
     include (CheckLibraryExists)
-   	check_library_exists (rt shm_open "" NEED_LIBRT)
+    check_library_exists (rt shm_open "" NEED_LIBRT)
     if (NEED_LIBRT)
         target_link_libraries (pstore-core PRIVATE rt)
     endif ()
@@ -136,31 +140,26 @@ target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize ps
 
 include (clang-tidy)
 if (CLANG_TIDY_FOUND)
-    set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,cppcoreguidelines-*,modernize-*,-cppcoreguidelines-pro-type-union-access,clang-analyzer-nullability*)
+    #set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,cppcoreguidelines-*,modernize-*,-cppcoreguidelines-pro-type-union-access,clang-analyzer-nullability*)
+    set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,modernize-*,clang-analyzer-nullability*,hicpp-*,performance-*,portability-*)
 
     # Collect the *.cpp files: clang-tidy will scan these.
     get_target_property (SOURCE_FILES pstore-core SOURCES)
     list (FILTER SOURCE_FILES INCLUDE REGEX "cpp")
 
-    # Tell clang-tidy about the target's include directories.
-    get_target_property (PSTORE_INCLUDES pstore-core INCLUDE_DIRECTORIES)
-    set (TARGET_INCLUDE "")
-    foreach (P ${PSTORE_INCLUDES})
-        list (APPEND TARGET_INCLUDE "-I" "${P}")
-    endforeach (P)
-
-    add_custom_target(
-        pstore-clang-tidy
+    add_custom_target (pstore-clang-tidy
         COMMAND "${CLANG_TIDY}"
-        ${CLANG_TIDY_CHECKS}
-        -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
-        ${SOURCE_FILES}
-        --
-        -std=c++14
-        -D NDEBUG
-        ${TARGET_INCLUDE}
-        ${CLANG_TIDY_SYS_INCLUDE}
+                ${CLANG_TIDY_CHECKS}
+                -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
+                ${SOURCE_FILES}
+                --
+                -std=c++11
+                -D NDEBUG
+                "-I$<JOIN:$<TARGET_PROPERTY:pstore-core,INCLUDE_DIRECTORIES>,;-I>"
+                ${CLANG_TIDY_SYS_INCLUDE}
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+	    COMMENT "Running clang-tidy"
+        COMMAND_EXPAND_LISTS
     )
 else()
     message (STATUS "clang-tidy executable was not found.")

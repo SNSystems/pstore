@@ -65,21 +65,26 @@ if (CLANG_TIDY)
         # "End of search list.". I also remove any macOS framework directories.
         execute_process (
             COMMAND echo "${INCLUDE_PATHS}"
-            COMMAND sed "1,/<\\.\\.\\.>/d;/End of search list/,$d;/(framework directory)/d;"
-            OUTPUT_VARIABLE  INCLUDE_PATHS
+            COMMAND sed -e "1,/> search starts here:/d"
+                        -e "s/ \\(.*\\)/\\1/"
+                        -e "/of search list/,$d"
+                        -e "/\\(framework directory\\)/d"
+            OUTPUT_VARIABLE INCLUDE_PATHS
         )
-        #message (STATUS "After sed, the include paths are:\n${INCLUDE_PATHS}")
     endif (MSVC)
 
     # Now turn this string into a Cmake list.
-    string (REPLACE "\n" ";" INCLUDE_PATHS "${INCLUDE_PATHS}")
+    string (REPLACE "\n" ";" INCLUDE_PATHS ${INCLUDE_PATHS})
 
     # Finally we get to build the system include directory
     # switches. Each path has leading and trailing whitespace stripped
     # and an -isystem switch preceeding it.
     foreach (P ${INCLUDE_PATHS})
         string (STRIP "${P}" P)
-        list (APPEND CLANG_TIDY_SYS_INCLUDE "-isystem" "${P}")
+        string (LENGTH "${P}" PLENGTH)
+        if (PLENGTH GREATER 0)
+            list (APPEND CLANG_TIDY_SYS_INCLUDE "-isystem" "${P}")
+	endif ()
     endforeach (P)
 else ()
     set (CLANG_TIDY_FOUND No)

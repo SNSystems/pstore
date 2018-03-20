@@ -154,16 +154,13 @@ check_cxx_source_compiles (
     PSTORE_UNIX_DOMAIN_SOCKETS)
 
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
-set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_INCLUDE_DIR}/support")
-set (PSTORE_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/include/")
-
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
     ESCAPE_QUOTES
 )
 
+set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/support")
 set (PSTORE_SUPPORT_LIB_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
@@ -208,10 +205,6 @@ include (add_pstore)
 
 # pstore-support-lib
 add_pstore_library (pstore-support-lib STATIC ${PSTORE_SUPPORT_LIB_SRC})
-target_include_directories (pstore-support-lib PUBLIC
-    $<BUILD_INTERFACE:${PSTORE_CONFIG_DIR}>
-    $<INSTALL_INTERFACE:include> # prefix/include
-)  
 target_link_libraries (pstore-support-lib PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
 # Add the exception-handling-enabled pstore-support-lib-ex if we're building inside LLVM
@@ -219,13 +212,9 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     add_pstore_library (pstore-support-lib-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
+    target_link_libraries (pstore-support-lib-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-    target_include_directories (pstore-support-lib-ex PUBLIC
-        $<BUILD_INTERFACE:${PSTORE_CONFIG_DIR}>
-        $<INSTALL_INTERFACE:include> # prefix/include
-    )  
-    target_link_libraries (pstore-support-lib-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_IS_INSIDE_LLVM)
 
 # eof: lib/support/CMakeLists.txt

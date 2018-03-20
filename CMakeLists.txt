@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-cmake_minimum_required (VERSION 3.1)
+cmake_minimum_required (VERSION 3.6)
 
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
@@ -73,11 +73,8 @@ endif ()
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 
-
-include_directories(BEFORE
-  ${CMAKE_CURRENT_BINARY_DIR}/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
-)
+set (PSTORE_CONFIG_DIR "${CMAKE_BINARY_DIR}/include")
+include_directories(BEFORE "${PSTORE_CONFIG_DIR}")
 
 
 # The "PSTORE_VENDOR_ID" is used in cases where pstore needs a system wide vendor-unique name
@@ -278,7 +275,7 @@ if (DOXYGEN_FOUND)
                                 DIRECTORY)
         message (STATUS "Dot path is: ${DOXYGEN_DOT_DIRECTORY}")
     else ()
-        message (WARNING "dot was not found.")
+        message (STATUS "dot was not found.")
     endif (DOXYGEN_DOT_FOUND)
 
     if (WIN32)

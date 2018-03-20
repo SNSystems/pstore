@@ -58,17 +58,17 @@ function (add_pstore_additional_compiler_flag name)
             -Wno-shift-sign-overflow
         )
 
-	# The "zero-as-null-pointer-constant" warning was added to Clang at some point.
-	# Disable it if we can.
+        # The "zero-as-null-pointer-constant" warning was added to Clang at some point.
+        # Disable it if we can.
         include (CheckCSourceCompiles)
-	set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
         set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-zero-as-null-pointer-constant")
         check_c_source_compiles ("void foo (void) {}" PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
-	set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
+        set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
 
         if (PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
             target_compile_options (${name} PRIVATE -Wno-zero-as-null-pointer-constant)
-	endif ()
+        endif ()
     endif ()
 endfunction(add_pstore_additional_compiler_flag)
 
@@ -143,15 +143,12 @@ function (add_pstore_library target_name)
         if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
             target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
         endif ()
-
-        # for config.hpp
-        target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
     endif (PSTORE_IS_INSIDE_LLVM)
 
     set_target_properties (${target_name} PROPERTIES FOLDER "pstore libraries")
     target_include_directories (${target_name} PUBLIC
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
-	$<INSTALL_INTERFACE:include>
+        $<INSTALL_INTERFACE:include>
     )
 endfunction(add_pstore_library)
 
