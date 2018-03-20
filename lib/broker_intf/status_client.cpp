@@ -43,6 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/broker_intf/status_client.hpp"
 
+#include <cstring>
 #include <string>
 
 #ifdef _WIN32
