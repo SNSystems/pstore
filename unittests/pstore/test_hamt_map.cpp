@@ -77,12 +77,10 @@ namespace {
 
         using lock_guard = std::unique_lock<mock_mutex>;
         using transaction_type = pstore::transaction<lock_guard>;
-        using default_index = pstore::index::hamt_map<std::string, std::string>;
 
     protected:
         mock_mutex mutex_;
         std::unique_ptr<pstore::database> db_;
-        std::unique_ptr<default_index> index_;
     };
 
     // SetUp
@@ -91,7 +89,6 @@ namespace {
         EmptyStore::SetUp ();
         db_.reset (new pstore::database (file_));
         db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-        index_.reset (new default_index{*db_});
     }
 
     // TearDown
@@ -100,7 +97,8 @@ namespace {
         db_.reset ();
         EmptyStore::TearDown ();
     }
-} // namespace
+
+} // end anonymous namespace
 
 // Test initial address index pointer.
 TEST_F (IndexFixture, InitAddress) {
@@ -126,8 +124,23 @@ TEST_F (IndexFixture, InternalSizeBytes) {
     EXPECT_EQ (528U, pstore::index::details::internal_node::size_bytes (64));
 }
 
+namespace {
+    class DefaultIndexFixture : public IndexFixture {
+    public:
+        void SetUp () override;
+    protected:
+        using default_index = pstore::index::hamt_map<std::string, std::string>;
+        std::unique_ptr<default_index> index_;
+    };
+
+    void DefaultIndexFixture::SetUp () {
+        IndexFixture::SetUp ();
+        index_.reset (new default_index{*db_});
+    }
+} // end anonymous namespace
+
 // Test default constructor.
-TEST_F (IndexFixture, DefaultConstructor) {
+TEST_F (DefaultIndexFixture, DefaultConstructor) {
     EXPECT_EQ (0U, index_->size ());
     EXPECT_TRUE (index_->empty ());
     EXPECT_EQ (0U, index_->root ().addr.absolute ());
@@ -136,14 +149,14 @@ TEST_F (IndexFixture, DefaultConstructor) {
 }
 
 // test iterator: empty index.
-TEST_F (IndexFixture, EmptyBeginEqualsEnd) {
+TEST_F (DefaultIndexFixture, EmptyBeginEqualsEnd) {
     default_index::const_iterator begin = index_->cbegin ();
     default_index::const_iterator end = index_->cend ();
     EXPECT_EQ (begin, end);
 }
 
 // test insert: index only contains a single leaf node.
-TEST_F (IndexFixture, InsertSingle) {
+TEST_F (DefaultIndexFixture, InsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("a", "c");
     std::pair<default_index::iterator, bool> itp = index_->insert (t1, first);
@@ -157,7 +170,7 @@ TEST_F (IndexFixture, InsertSingle) {
 }
 
 // test insert_or_assign: index only contains a single leaf node.
-TEST_F (IndexFixture, UpsertSingle) {
+TEST_F (DefaultIndexFixture, UpsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("a", "c");
     std::pair<default_index::iterator, bool> itp = index_->insert_or_assign (t1, first);
@@ -171,7 +184,7 @@ TEST_F (IndexFixture, UpsertSingle) {
 }
 
 // test iterator: index only contains a single leaf node.
-TEST_F (IndexFixture, InsertSingleIterator) {
+TEST_F (DefaultIndexFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b");
     index_->insert_or_assign (t1, first);
@@ -186,7 +199,7 @@ TEST_F (IndexFixture, InsertSingleIterator) {
 }
 
 // test iterator: index contains an internal heap node.
-TEST_F (IndexFixture, InsertHeap) {
+TEST_F (DefaultIndexFixture, InsertHeap) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
     index_->insert_or_assign (t1, first);
@@ -202,7 +215,7 @@ TEST_F (IndexFixture, InsertHeap) {
 }
 
 // test iterator: index only contains a leaf store node.
-TEST_F (IndexFixture, InsertLeafStore) {
+TEST_F (DefaultIndexFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b");
     index_->insert_or_assign (t1, first);
@@ -218,7 +231,7 @@ TEST_F (IndexFixture, InsertLeafStore) {
 }
 
 // test iterator: index contains an internal store node.
-TEST_F (IndexFixture, InsertInternalStoreIterator) {
+TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
     index_->insert_or_assign (t1, first);
@@ -235,7 +248,7 @@ TEST_F (IndexFixture, InsertInternalStoreIterator) {
 }
 
 // test insert: index contains an internal store node.
-TEST_F (IndexFixture, InsertInternalStore) {
+TEST_F (DefaultIndexFixture, InsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
     std::pair<default_index::iterator, bool> itp1 = index_->insert (t1, first);
@@ -258,7 +271,7 @@ TEST_F (IndexFixture, InsertInternalStore) {
 }
 
 // test insert_or_assign: index contains an internal store node.
-TEST_F (IndexFixture, UpsertInternalStore) {
+TEST_F (DefaultIndexFixture, UpsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
     std::pair<default_index::iterator, bool> itp1 = index_->insert_or_assign (t1, first);
@@ -307,7 +320,7 @@ namespace {
     typedef pstore::index::hamt_map<std::string, std::string, hash_function,
                                     std::equal_to<std::string>>
         test_trie;
-} // namespace
+} // end anonymous namespace
 
 // *******************************************
 // *                                         *
@@ -318,10 +331,8 @@ namespace {
 namespace {
 
     class GenericIndexFixture : public IndexFixture {
-
     protected:
         void SetUp () override { IndexFixture::SetUp (); }
-
         void TearDown () override { IndexFixture::TearDown (); }
 
         std::unique_ptr<test_trie> index_;
@@ -391,7 +402,7 @@ namespace {
         EXPECT_TRUE (node.is_address ());
         EXPECT_TRUE (node.is_internal ());
     }
-} // namespace
+} // end anonymous namespace
 
 // ****************
 // *              *
@@ -446,7 +457,7 @@ namespace {
         {"c", binary<std::uint64_t, 0, 0, 0, 1, 1, 1>::value},
         {"d", binary<std::uint64_t, 0, 0, 1, 1, 1, 1>::value},
     };
-} // namespace
+} // end anonymous namespace
 
 // insert_or_assign a single node ("a") into the database.
 TEST_F (OneLevel, InsertFirstNode) {
