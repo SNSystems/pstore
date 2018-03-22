@@ -152,7 +152,8 @@ namespace {
             raise (platform_erc (get_last_error ()), "socket creation failed");
         }
 
-        if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&un), SUN_LEN (&un)) != 0) {
+        if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&un),
+                       static_cast<socklen_t> (SUN_LEN (&un))) != 0) {
             raise (platform_erc{get_last_error ()}, "connect() failed");
         }
         return fd;
