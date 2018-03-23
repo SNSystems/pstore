@@ -50,6 +50,8 @@
 #include <functional>
 #include <map>
 
+#include "pstore/config/config.hpp"
+
 namespace pstore {
     namespace broker {
 
@@ -148,8 +150,7 @@ namespace pstore {
         // ~~~
         template <typename L, typename R, typename Lcmp, typename Rcmp>
         void bimap<L, R, Lcmp, Rcmp>::set (L const & left, R const & right) {
-// FIXME: set this in configure
-#if PSTORE_BROKER_MAP_HAS_INSERT_OR_ASSIGN
+#if PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN
             auto emplace_res = left_.insert_or_assign (left, right);
 #else
             auto emplace_res = left_.emplace (left, right);
@@ -162,7 +163,7 @@ namespace pstore {
             }
             assert (left_.size () == right_.size ());
 
-#if !PSTORE_BROKER_MAP_HAS_INSERT_OR_ASSIGN
+#if !PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN
             it->second = right;
 #endif
         }

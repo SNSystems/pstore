@@ -70,6 +70,14 @@ check_cxx_source_compiles (
     PSTORE_HAVE_STD_QUOTED)
 
 check_cxx_source_compiles (
+    "#include <map>
+    int main () {
+        std::map<int,int> m;
+        m.insert_or_assign (1,1);
+    }"
+    PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN)
+
+check_cxx_source_compiles (
     "#define __STDC_WANT_LIB_EXT1__  1
     #include <time.h>
     int main () {
