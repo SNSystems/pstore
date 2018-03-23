@@ -59,14 +59,14 @@ namespace pstore {
         using value_type = T;
 
         static maybe<T> just (T const & value) { return maybe (value); }
-        static maybe<T> nothing () { return maybe (); }
+        static maybe<T> nothing () noexcept { return maybe (); }
 
         maybe () noexcept = default;
         maybe (T const & value) {
             ::new (&storage_) T (value);
             valid_ = true;
         }
-        maybe (T && value) {
+        maybe (T && value) noexcept {
             ::new (&storage_) T (std::move (value));
             valid_ = true;
         }
@@ -76,7 +76,7 @@ namespace pstore {
                 valid_ = true;
             }
         }
-        maybe (maybe && other) {
+        maybe (maybe && other) noexcept {
             if (other) {
                 ::new (&storage_) T (std::move (*other));
                 valid_ = true;
@@ -87,18 +87,18 @@ namespace pstore {
 
         void reset () {
             if (valid_) {
-                // Set valid_ to false before calling the dtor in case it throws. We need to avoid
-                // the possibility of calling it a second time from our dtor.
+                // Set valid_ to false before calling the dtor.
                 valid_ = false;
                 reinterpret_cast<T const *> (&storage_)->~T ();
             }
         }
+
         maybe & operator= (maybe const & rhs);
         maybe & operator= (T const & rhs);
         maybe &
         operator= (maybe && other) noexcept (std::is_nothrow_move_assignable<T>::value &&
                                                  std::is_nothrow_move_constructible<T>::value);
-        maybe & operator= (T && other);
+        maybe & operator= (T && other) noexcept;
 
         T const & operator* () const noexcept { return *(operator-> ()); }
         T & operator* () noexcept { return *(operator-> ()); }
@@ -142,7 +142,7 @@ namespace pstore {
     }
 
     template <typename T>
-    maybe<T> & maybe<T>::operator= (T && other) {
+    maybe<T> & maybe<T>::operator= (T && other) noexcept {
         if (this->valid_) {
             *(*this) = std::forward<T> (other);
         } else {
@@ -198,7 +198,7 @@ namespace pstore {
     // nothing
     // ~~~~~~~
     template <typename T>
-    inline maybe<T> nothing () {
+    inline maybe<T> nothing () noexcept {
         return maybe<T>::nothing ();
     }
 
