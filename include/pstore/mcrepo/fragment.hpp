@@ -475,7 +475,7 @@ namespace pstore {
         namespace details {
 
             /// An iterator adaptor which produces a value_type of 'section_type const' from
-            /// values deferences from the supplied underlying iterator.
+            /// values deferenced from the supplied underlying iterator.
             template <typename Iterator>
             class content_type_iterator {
             public:
@@ -504,7 +504,7 @@ namespace pstore {
                     return *this;
                 }
                 content_type_iterator operator++ (int) {
-                    content_type_iterator old{*this};
+                    auto const old = *this;
                     it_++;
                     return old;
                 }
@@ -582,10 +582,6 @@ namespace pstore {
         //*              |___/                    *
         class fragment {
         public:
-            struct deleter {
-                void operator() (void * p);
-            };
-
             /// \tparam Transaction  The type of the database transaction.
             /// \tparam Iterator  An iterator which will yield values of type `section_content`. The
             /// values must be sorted in section_content::type order.
@@ -617,6 +613,43 @@ namespace pstore {
             std::size_t num_sections () const { return arr_.size (); }
             /// Returns the array of section offsets.
             member_array const & sections () const { return arr_; }
+
+            /// An InputIterator which makes the process of iterating over the sections within
+            /// a loaded fragment quite straightforward.
+            class const_iterator {
+                using wrapped_iterator = member_array::indices::const_iterator;
+
+            public:
+                using iterator_category = std::input_iterator_tag;
+                using value_type = section_type;
+                using difference_type = wrapped_iterator::difference_type;
+                using pointer = value_type const *;
+                using reference = value_type const &;
+
+                explicit const_iterator (wrapped_iterator it) noexcept;
+                bool operator== (const_iterator const & rhs) const noexcept {
+                    return it_ == rhs.it_;
+                }
+                bool operator!= (const_iterator const & rhs) const noexcept {
+                    return !operator== (rhs);
+                }
+
+                reference operator* () noexcept;
+                pointer operator-> () noexcept;
+
+                const_iterator & operator++ () noexcept;
+                const_iterator operator++ (int) noexcept;
+
+            private:
+                section_type section_;
+                wrapped_iterator it_;
+            };
+            const_iterator begin () const noexcept {
+                return const_iterator{arr_.get_indices ().begin ()};
+            }
+            const_iterator end () const noexcept {
+                return const_iterator{arr_.get_indices ().end ()};
+            }
 
             /// Returns the number of bytes of storage that are required for a fragment containing
             /// the sections defined by [first, last).
@@ -750,6 +783,31 @@ namespace pstore {
                 size_bytes += section::size_bytes (c.make_sources ());
             });
             return size_bytes;
+        }
+
+
+        // fragment::iterator
+        // ~~~~~~~~~~~~~~~~~~
+        inline fragment::const_iterator::const_iterator (wrapped_iterator it) noexcept
+                : section_{section_type::text}
+                , it_{it} {}
+
+        inline auto fragment::const_iterator::operator* () noexcept -> reference {
+            return section_ = static_cast<section_type> (*it_);
+        }
+        inline auto fragment::const_iterator::operator-> () noexcept -> pointer {
+            section_ = static_cast<section_type> (*it_);
+            return &section_;
+        }
+
+        inline fragment::const_iterator & fragment::const_iterator::operator++ () noexcept {
+            ++it_;
+            return *this;
+        }
+        inline fragment::const_iterator fragment::const_iterator::operator++ (int) noexcept {
+            auto const prev = *this;
+            ++it_;
+            return prev;
         }
 
     } // end namespace repo

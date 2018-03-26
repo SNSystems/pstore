@@ -287,35 +287,37 @@ namespace pstore {
                     using pointer = value_type const *;
                     using reference = value_type const &;
 
-                    const_iterator (BitmapType bitmap)
+                    const_iterator (BitmapType bitmap) noexcept
                             : bitmap_{bitmap}
                             , pos_{0} {
                         next ();
                     }
 
-                    bool operator== (const_iterator const & rhs) const {
+                    bool operator== (const_iterator const & rhs) const noexcept {
                         return bitmap_ == rhs.bitmap_;
                     }
-                    bool operator!= (const_iterator const & rhs) const { return !operator== (rhs); }
+                    bool operator!= (const_iterator const & rhs) const noexcept {
+                        return !operator== (rhs);
+                    }
 
-                    reference operator* () const { return pos_; }
-                    pointer operator-> () const { return pos_; }
+                    reference operator* () const noexcept { return pos_; }
+                    pointer operator-> () const noexcept { return pos_; }
 
-                    const_iterator & operator++ () {
+                    const_iterator & operator++ () noexcept {
                         bitmap_ >>= 1;
                         ++pos_;
                         next ();
                         return *this;
                     }
 
-                    const_iterator & operator++ (int) {
-                        const_iterator prev = *this;
+                    const_iterator operator++ (int) noexcept {
+                        auto prev = *this;
                         next ();
                         return prev;
                     }
 
                 private:
-                    void next () {
+                    void next () noexcept {
                         for (; bitmap_ != 0 && (bitmap_ & 1U) == 0U; ++pos_, bitmap_ >>= 1) {
                         }
                     }
@@ -331,7 +333,7 @@ namespace pstore {
                 BitmapType const bitmap_;
             };
 
-            indices get_indices () const { return indices{*this}; }
+            indices get_indices () const noexcept { return indices{*this}; }
 
             ///@}
 

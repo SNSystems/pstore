@@ -124,9 +124,7 @@ namespace pstore {
 
         value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
             array::container array;
-
-            for (auto const key : fragment.sections ().get_indices ()) {
-                auto const type = static_cast<repo::section_type> (key);
+            for (repo::section_type type : fragment) {
                 array.emplace_back (make_value (object::container{
                     {"type", make_value (type)},
                     {"contents", make_value (db, fragment[type], type, hex_mode)}}));

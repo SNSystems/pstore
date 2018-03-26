@@ -102,13 +102,6 @@ void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noex
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| *
 //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| *
 //*              |___/                    *
-// deleter::operator()
-// ~~~~~~~~~~~~~~~~~~~
-void fragment::deleter::operator() (void * p) {
-    auto bytes = reinterpret_cast<std::uint8_t *> (p);
-    delete[] bytes;
-}
-
 // load
 // ~~~~
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,

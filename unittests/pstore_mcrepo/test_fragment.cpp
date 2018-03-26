@@ -154,12 +154,15 @@ namespace pstore {
     } // namespace repo
 } // namespace pstore
 
-TEST_F (FragmentTest, TwoSections) {
-    {
-        std::vector<section_content> c;
-        c.emplace_back (section_type::read_only, std::uint8_t{1} /*alignment*/);
-        c.emplace_back (section_type::thread_data, std::uint8_t{2} /*alignment*/);
-        ASSERT_LT (static_cast<int> (c.at (0).type), static_cast<int> (c.at (1).type));
+namespace {
+
+    void build_two_sections (transaction & transaction_) {
+        std::array<section_content, 2> c{{
+            {section_type::read_only, std::uint8_t{1}}, // section_type, alignment
+            {section_type::thread_data, std::uint8_t{2}},
+        }};
+        using base_type = std::underlying_type<section_type>::type;
+        ASSERT_LT (static_cast<base_type> (c.at (0).type), static_cast<base_type> (c.at (1).type));
 
         section_content & rodata = c.at (0);
         ASSERT_EQ (rodata.type, section_type::read_only);
@@ -173,19 +176,32 @@ TEST_F (FragmentTest, TwoSections) {
         ASSERT_EQ (transaction_.get_storage ().begin ()->first,
                    reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     }
-    {
-        auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
-        std::vector<std::size_t> const expected{
-            static_cast<std::size_t> (section_type::read_only),
-            static_cast<std::size_t> (section_type::thread_data)};
-        auto indices = f->sections ().get_indices ();
-        std::vector<std::size_t> Actual (std::begin (indices), std::end (indices));
-        EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
 
-        section const & rodata = (*f)[section_type::read_only];
-        section const & tls = (*f)[section_type::thread_data];
-        EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
-    }
+} // end anonymous namespace
+
+TEST_F (FragmentTest, TwoSections) {
+    build_two_sections (transaction_);
+
+    auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
+    std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::read_only),
+                                            static_cast<std::size_t> (section_type::thread_data)};
+    auto indices = f->sections ().get_indices ();
+    std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
+    EXPECT_THAT (actual, ::testing::ContainerEq (expected));
+
+    section const & rodata = (*f)[section_type::read_only];
+    section const & tls = (*f)[section_type::thread_data];
+    EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
+}
+
+TEST_F (FragmentTest, Iterator) {
+    build_two_sections (transaction_);
+    auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
+    fragment::const_iterator begin = f->begin ();
+    fragment::const_iterator end = f->end ();
+    std::vector<section_type> contents{begin, end};
+    EXPECT_THAT (contents,
+                 ::testing::ElementsAre (section_type::read_only, section_type::thread_data));
 }
 
 // eof: unittests/pstore_mcrepo/test_fragment.cpp
