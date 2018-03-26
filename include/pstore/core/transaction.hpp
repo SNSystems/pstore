@@ -93,25 +93,24 @@ namespace pstore {
 
 
         ///@{
-        auto getro (address addr, std::size_t size) -> std::shared_ptr<void const>;
-        auto getro (extent const & ex) -> std::shared_ptr<void const>;
-        template <typename Ty,
-                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        auto getro (address addr) -> std::shared_ptr<Ty const>;
+        std::shared_ptr<void const> getro (address addr, std::size_t size);
+        std::shared_ptr<void const> getro (extent const & ex) { return this->getro (ex.addr, ex.size); }
+
+        template <typename Ty, typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
+        std::shared_ptr<Ty const> getro (address addr, std::size_t elements = 1) {
+            return std::static_pointer_cast<Ty const> (this->getro (addr, elements * sizeof (Ty)));
+        }
         ///@}
 
 
         ///@{
         std::shared_ptr<void> getrw (address addr, std::size_t size);
-        std::shared_ptr<void> getrw (extent const & ex);
+        std::shared_ptr<void> getrw (extent const & ex) { return this->getrw (ex.addr, ex.size); }
 
-        template <typename Ty,
-                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty> getrw (address addr, std::size_t elements);
-
-        template <typename Ty,
-                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty> getrw (address addr);
+        template <typename Ty, typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
+        std::shared_ptr<Ty> getrw (address addr, std::size_t elements = 1) {
+            return std::static_pointer_cast<Ty> (this->getrw (addr, elements * sizeof (Ty)));
+        }
         ///@}
 
         ///@{
@@ -183,27 +182,6 @@ namespace pstore {
         /// has not yet allocated any data.
         address first_ = address::null ();
     };
-
-
-    // getrw
-    // ~~~~~
-    // TODO: raise an exception if addr does not lie within the current transaction.
-    template <typename Ty, typename /*enable_if standard_layout*/>
-    inline std::shared_ptr<Ty> transaction_base::getrw (address addr, std::size_t elements) {
-        return std::static_pointer_cast<Ty> (this->getrw (addr, elements * sizeof (Ty)));
-    }
-    template <typename Ty, typename /*standard_layout*/>
-    inline std::shared_ptr<Ty> transaction_base::getrw (address addr) {
-        return this->getrw<Ty> (addr, std::size_t{1});
-    }
-
-    // getro
-    // ~~~~~
-    template <typename Ty, typename /*standard_layout*/>
-    inline std::shared_ptr<Ty const> transaction_base::getro (address addr) {
-        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value); // FIXME: enable_if instead
-        return db ().template getro<Ty const> (addr);
-    }
 
 
     template <typename LockGuard>
