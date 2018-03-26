@@ -572,8 +572,8 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::load_leaf_node (address const addr) const
             -> value_type {
 
-            serialize::archive::database_reader archive (db_, addr);
-            return serialize::read<std::pair<KeyType, ValueType>> (archive);
+            return serialize::read<std::pair<KeyType, ValueType>> (
+                serialize::archive::database_reader{db_, addr});
         }
 
         // hamt_map::get_key
@@ -582,8 +582,7 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::get_key (address const addr) const
             -> key_type {
 
-            serialize::archive::database_reader archive (db_, addr);
-            return serialize::read<KeyType> (archive);
+            return serialize::read<KeyType> (serialize::archive::database_reader{db_, addr});
         }
 
         // hamt_map::store_leaf_node
