@@ -391,7 +391,7 @@ namespace pstore {
         ///@{
         /// \brief Read a single value from an archive
         template <typename Ty, typename Archive>
-        Ty read (Archive & archive) {
+        Ty read (Archive && archive) {
             using T2 = typename std::remove_const<Ty>::type;
             typename std::aligned_storage<sizeof (T2), alignof (T2)>::type uninit_buffer;
             flood (&uninit_buffer);
@@ -409,13 +409,13 @@ namespace pstore {
         /// \brief Read a span containing a single value from an archive.
         /// This is optimized as a read of a single value.
         template <typename Archive, typename Ty>
-        void read (Archive & archive, ::pstore::gsl::span<Ty, 1> span) {
+        void read (Archive && archive, ::pstore::gsl::span<Ty, 1> span) {
             assert (span.size () == 1U);
             span[0] = read<Ty> (archive);
         }
 
         template <typename Archive, typename ElementType, std::ptrdiff_t Extent>
-        void read (Archive & archive, ::pstore::gsl::span<ElementType, Extent> span) {
+        void read (Archive && archive, ::pstore::gsl::span<ElementType, Extent> span) {
             for (auto & element : span) {
                 element.~ElementType ();
             }
