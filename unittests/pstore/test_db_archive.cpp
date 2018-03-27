@@ -57,14 +57,9 @@
 
 // Local test includes
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 namespace {
-    class mock_mutex {
-    public:
-        void lock () {}
-        void unlock () {}
-    };
-
     template <typename Transaction>
     pstore::address append_uint64 (Transaction & transaction, std::uint64_t v) {
         auto addr = pstore::address::null ();

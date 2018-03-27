@@ -48,10 +48,8 @@
 #include <memory>
 #include <mutex>
 
-// 3rd party includes
 #include "gmock/gmock.h"
 
-// pstore
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
@@ -59,16 +57,11 @@
 #include "pstore/core/transaction.hpp"
 #include "pstore/support/sstring_view.hpp"
 
-// local includes
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 #include "split.hpp"
 
 namespace {
-    class mock_mutex {
-    public:
-        void lock () {}
-        void unlock () {}
-    };
 
     class DiffFixture : public EmptyStore {
     public:

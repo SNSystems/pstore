@@ -48,6 +48,7 @@ add_pstore_test_library (pstore-common
     check_for_error.hpp
     empty_store.cpp
     empty_store.hpp
+    mock_mutex.hpp
     split.hpp
 )
 target_include_directories (pstore-common PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

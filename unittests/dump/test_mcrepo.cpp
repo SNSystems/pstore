@@ -43,17 +43,19 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/dump/mcrepo_value.hpp"
-#include "pstore/core/db_archive.hpp"
-#include "pstore/serialize/standard_types.hpp"
-#include "pstore/core/transaction.hpp"
-
-#include "empty_store.hpp"
-#include "split.hpp"
 
 #include <memory>
 #include <vector>
 
 #include "gmock/gmock.h"
+
+#include "pstore/core/db_archive.hpp"
+#include "pstore/serialize/standard_types.hpp"
+#include "pstore/core/transaction.hpp"
+
+#include "empty_store.hpp"
+#include "mock_mutex.hpp"
+#include "split.hpp"
 
 using namespace pstore::repo;
 
@@ -65,12 +67,6 @@ using namespace pstore::repo;
 
 namespace {
     class MCRepoFixture : public ::testing::Test {
-        struct mock_mutex {
-        public:
-            void lock () {}
-            void unlock () {}
-        };
-
     public:
         void SetUp () override;
         void TearDown () override;

@@ -4,7 +4,7 @@
 //* \__ \ | (_| | | | | (_| | | | (__ \ V /  *
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
-//===- lib/support/signal_cv_posix.cpp ------------------------------------===//
+//===- lib/broker_intf/signal_cv_posix.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -132,4 +132,4 @@ namespace pstore {
 
 } // namespace pstore
 #endif //!_WIN32
-// eof: lib/support/signal_cv_posix.cpp
+// eof: lib/broker_intf/signal_cv_posix.cpp

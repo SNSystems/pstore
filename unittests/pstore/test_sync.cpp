@@ -59,15 +59,9 @@
 // local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 namespace {
-    class mock_mutex {
-    public:
-        void lock () {}
-        void unlock () {}
-    };
-
-
     class SyncFixture : public EmptyStore {
     public:
         void SetUp () override;

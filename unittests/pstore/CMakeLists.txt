@@ -44,6 +44,7 @@
 
 # The pstore unit test sources
 add_pstore_unit_test (pstore-core-unit-tests
+    leak_check_fixture.hpp
     test_address.cpp
     test_array_stack.cpp
     test_base32.cpp
@@ -62,6 +63,7 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_memory_mapper.cpp
     test_path.cpp
     test_process_file_name.cpp
+    test_protect.cpp
     test_region.cpp
     test_rotating_log.cpp
     test_shared_memory.cpp

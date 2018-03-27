@@ -52,10 +52,12 @@
 #include <cassert>
 #include <vector>
 #include <gmock/gmock.h>
+
 #include "pstore/core/transaction.hpp"
 #include "pstore/core/db_archive.hpp"
 
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 namespace {
     using shared_sstring_view = pstore::sstring_view<std::shared_ptr<char const>>;
@@ -69,12 +71,6 @@ namespace {
 
     protected:
         pstore::database db_;
-
-        class mock_mutex {
-        public:
-            void lock () {}
-            void unlock () {}
-        };
 
         pstore::address current_pos (pstore::transaction_base & t) const;
         std::vector<char> as_vector (pstore::address first, pstore::address last) const;
@@ -110,8 +106,7 @@ TEST_F (SStringViewArchive, Empty) {
     auto str = make_shared_sstring_view ("");
 
     // Append 'str'' to the store (we don't need to have committed the transaction to be able to
-    // access
-    // its contents).
+    // access its contents).
     mock_mutex mutex;
     auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
     auto const first = this->current_pos (transaction);
@@ -143,7 +138,6 @@ TEST_F (SStringViewArchive, WriteHello) {
     auto const last = this->current_pos (transaction);
     EXPECT_THAT (as_vector (first, last),
                  ::testing::ElementsAre ('\xb', '\x0', 'h', 'e', 'l', 'l', 'o'));
-
     {
         auto reader = pstore::serialize::archive::database_reader{db_, first};
         shared_sstring_view const actual = pstore::serialize::read<shared_sstring_view> (reader);

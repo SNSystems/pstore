@@ -52,6 +52,7 @@
 #include "binary.hpp"
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 // *******************************************
 // *                                         *
@@ -65,12 +66,6 @@ namespace {
     using linear_node = pstore::index::details::linear_node;
 
     class IndexFixture : public EmptyStore {
-        struct mock_mutex {
-        public:
-            void lock () {}
-            void unlock () {}
-        };
-
     public:
         void SetUp () override;
         void TearDown () override;

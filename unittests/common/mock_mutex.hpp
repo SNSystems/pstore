@@ -1,10 +1,10 @@
-//*      _                   _               *
-//*  ___(_) __ _ _ __   __ _| |   _____   __ *
-//* / __| |/ _` | '_ \ / _` | |  / __\ \ / / *
-//* \__ \ | (_| | | | | (_| | | | (__ \ V /  *
-//* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
-//*        |___/                             *
-//===- lib/broker_intf/signal_cv_win32.cpp --------------------------------===//
+//*                       _                      _             *
+//*  _ __ ___   ___   ___| | __  _ __ ___  _   _| |_ _____  __ *
+//* | '_ ` _ \ / _ \ / __| |/ / | '_ ` _ \| | | | __/ _ \ \/ / *
+//* | | | | | | (_) | (__|   <  | | | | | | |_| | ||  __/>  <  *
+//* |_| |_| |_|\___/ \___|_|\_\ |_| |_| |_|\__,_|\__\___/_/\_\ *
+//*                                                            *
+//===- unittests/common/mock_mutex.hpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,52 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file signal_cv_win32.cpp
+#ifndef MOCK_MUTEX_HPP
+#define MOCK_MUTEX_HPP
 
-#include "pstore/broker_intf/signal_cv.hpp"
+struct mock_mutex {
+    void lock () {}
+    void unlock () {}
+};
 
-#ifdef _WIN32
-
-#include <cassert>
-#include "pstore/support/error.hpp"
-
-namespace pstore {
-
-    // (ctor)
-    // ~~~~~~
-    signal_cv::signal_cv ()
-            : event_{::CreateEvent (nullptr /*security attributes*/, FALSE /*manual reset?*/,
-                                    FALSE /*initially signalled?*/, nullptr /*name*/)} {
-        if (event_.get () == nullptr) {
-            raise (win32_erc (::GetLastError ()), "CreateEvent");
-        }
-    }
-
-    // wait
-    // ~~~~
-    void signal_cv::wait () {
-        switch (::WaitForSingleObject (get (), INFINITE)) {
-        case WAIT_ABANDONED:
-        case WAIT_OBJECT_0: return;
-        case WAIT_TIMEOUT: assert (0);
-        // fallthrough
-        case WAIT_FAILED: raise (win32_erc (::GetLastError ()), "WaitForSingleObject");
-        }
-    }
-
-    // notify
-    // ~~~~~~
-    void signal_cv::notify (int sig) noexcept {
-        signal_ = sig;
-        ::SetEvent (get ());
-    }
-
-    // get
-    // ~~~
-    HANDLE signal_cv::get () const { return event_.get (); }
-
-} // namespace pstore
-
-#endif //_WIN32
-
-// eof: lib/broker_intf/signal_cv_win32.cpp
+#endif // MOCK_MUTEX_HPP
+// eof: unittests/common/mock_mutex.hpp

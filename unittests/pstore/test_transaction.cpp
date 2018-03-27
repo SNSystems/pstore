@@ -41,16 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
 
 #include <mutex>
 #include <numeric>
 
 #include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 #include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 namespace {
 
@@ -76,12 +75,6 @@ namespace {
                        bool is_writable) const -> std::shared_ptr<void const> {
             return pstore::database::get (addr, size, is_initialized, is_writable);
         }
-    };
-
-    class mock_mutex {
-    public:
-        void lock () {}
-        void unlock () {}
     };
 
     class Transaction : public EmptyStore {
@@ -117,24 +110,6 @@ namespace {
         std::unique_ptr<mock_database> db_;
     };
 } // namespace
-
-#if 0
-TEST_F (EmptyStore, Allocate16Bytes) {
-
-    pstore::database db {file_};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    // Initial allocation.
-    constexpr unsigned size = 16;
-    constexpr unsigned align = 1;
-    pstore::address addr = db.allocate (lock, size, align);
-    EXPECT_EQ (sizeof (pstore::header) + sizeof (pstore::trailer), pstore::address_to_offset (addr));
-
-    // Subsequent allocation.
-    pstore::address addr2 = db.allocate (lock, size, align);
-    EXPECT_EQ (pstore::address_to_offset (addr) + 16, pstore::address_to_offset (addr2));
-}
-#endif
 
 TEST_F (Transaction, CommitEmptyDoesNothing) {
 

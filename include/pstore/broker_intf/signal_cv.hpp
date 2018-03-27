@@ -4,7 +4,7 @@
 //* \__ \ | (_| | | | | (_| | | | (__ \ V /  *
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
-//===- include/pstore/support/signal_cv.hpp -------------------------------===//
+//===- include/pstore/broker_intf/signal_cv.hpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -108,4 +108,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SIGNAL_CV_HPP
-// eof: include/pstore/support/signal_cv.hpp
+// eof: include/pstore/broker_intf/signal_cv.hpp

@@ -46,7 +46,9 @@
 #include <random>
 #include "gtest/gtest.h"
 #include "pstore/core/transaction.hpp"
-#include "./empty_store.hpp"
+
+#include "empty_store.hpp"
+#include "mock_mutex.hpp"
 
 //*  ___      _   ___ _     _                 *
 //* / __| ___| |_| __(_)_ _| |_ _  _ _ _ ___  *
@@ -57,12 +59,6 @@
 namespace {
 
     class SetFixture : public EmptyStore {
-        struct mock_mutex {
-        public:
-            void lock () {}
-            void unlock () {}
-        };
-
     public:
         void SetUp () override;
         void TearDown () override;
