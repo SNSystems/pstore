@@ -94,10 +94,16 @@ def main (argv):
 
     paths = get_tool_paths (args.exe_path)
 
-    broker_command = [paths.broker, '--pipe-path', os.path.join (pipe_root_dir (), 'pstore_broker_kill')]
+    pipe_path = os.path.join (pipe_root_dir (), 'pstore_broker_kill')
+    broker_command = [paths.broker, '--pipe-path', pipe_path]
+    print ("Popen: ", ' '.join (broker_command))
     broker_process = subprocess.Popen (args=broker_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1,
                                        creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if is_windows else 0)
-    poker_process = subprocess.Popen (args=[paths.poker, "ECHO", "ready"])
+
+    poker_command = [paths.poker, '--pipe-path', pipe_path, "ECHO", "ready"]
+    print ("Popen: ", ' '.join (poker_command))
+    poker_process = subprocess.Popen (args=poker_command)
+
     poker_process.wait ()
     print ("done initial wait: broker is up")
 
