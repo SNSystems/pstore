@@ -136,12 +136,13 @@ namespace {
             return std::make_tuple (report_error (err), false);
         }
 
-        bool done = false;
         if (auto obj = dom->dynamic_cast_object ()) {
             if (auto quit = obj->get ("quit")) {
                 if (auto v = quit->dynamic_cast_boolean ()) {
-                    log (pstore::logging::priority::info, "Received valid 'quit' message");
-                    done = v->get ();
+                    bool const exit = v->get ();
+                    log (pstore::logging::priority::info,
+                         "Received valid 'quit' message. Exit=", exit ? "true" : "false");
+                    return std::make_tuple (false /*more?*/, exit);
                 }
             }
         }
@@ -153,7 +154,7 @@ namespace {
         std::string const & str = out.str ();
         send (clifd, str.data (), str.length (), 0 /*flags*/);
 
-        return std::make_tuple (false, done);
+        return std::make_tuple (false /*more?*/, false /*exit?*/);
     }
 
 } // end anonymous namespace
@@ -343,7 +344,7 @@ namespace {
         return nread == SOCKET_ERROR;
 #else
         return nread < 0;
-#endif
+#endif // !_WIN32
     }
 
 } // end anonymous namespace
@@ -355,7 +356,7 @@ void pstore::broker::status_server (bool use_inet_socket) {
         log (logging::priority::error, "WSAStartup() failed");
         //            return EXIT_FAILURE; // FIXME: need a way to bail out.
     }
-#endif
+#endif // _WIN32
 
     try {
         std::map<socket_descriptor, json_parser> clients;
@@ -438,16 +439,16 @@ void pstore::broker::status_server (bool use_inet_socket) {
                     assert (is_recv_error (nread) ||
                             static_cast<std::size_t> (nread) <= read_buffer.size ());
                     if (is_recv_error (nread)) {
-                        logging::log (logging::priority::error, "recv() error ", get_last_error ());
+                        log (logging::priority::error, "recv() error ", get_last_error ());
                         continue;
                     }
 
                     bool more = false;
                     if (nread == 0) {
                         // client has closed the connection.
-                        logging::log (logging::priority::error,
-                                      "client closed the connection before ^D was received. fd=",
-                                      client_fd.get ());
+                        log (logging::priority::error,
+                             "client closed the connection before ^D was received. fd=",
+                             client_fd.get ());
                     } else {
                         // process the client's request.
                         std::tie (more, done) =
@@ -458,8 +459,7 @@ void pstore::broker::status_server (bool use_inet_socket) {
 
                     // If we're done with the client, close the file descriptor.
                     if (!more) {
-                        logging::log (logging::priority::notice, "Closing connection ",
-                                      client_fd.get ());
+                        log (logging::priority::notice, "Closing connection ", client_fd.get ());
                         FD_CLR (client_fd.get (), &all_set);
                         clients.erase (it);
                     }
