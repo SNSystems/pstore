@@ -253,7 +253,7 @@ namespace pstore {
                     assert (size == Extent);
                 }
 
-                index_type size () const noexcept { return Extent; }
+                constexpr index_type size () const noexcept { return Extent; }
             };
 
             template <>
