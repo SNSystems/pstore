@@ -60,7 +60,7 @@ namespace pstore {
 
         class recorder {
         public:
-            explicit recorder (std::string const & path);
+            explicit recorder (std::string path);
             ~recorder ();
 
             recorder (recorder const &) = delete;
@@ -75,7 +75,7 @@ namespace pstore {
 
         class player {
         public:
-            explicit player (std::string const & path);
+            explicit player (std::string path);
             ~player ();
 
             player (player const &) = delete;

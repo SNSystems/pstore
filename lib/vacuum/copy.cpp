@@ -197,7 +197,7 @@ namespace vacuum {
 
                     // FIXME: take the source global store mutex.
                     // FIXME: take the exclusive write lock.
-                    std::string const destination_path = destination->path ();
+                    pstore::file::file_handle destination_file {destination->path ()};
                     std::string const source_path = source->path ();
                     destination.reset (); // Close the target data store
                     // assert that there's a single reference to the source pointer.
@@ -205,7 +205,7 @@ namespace vacuum {
 
                     // TODO: need to have some sort of lock on the stores here.
                     // FIXME: use file.h/rename()!
-                    pstore::file::rename (destination_path, source_path);
+                    destination_file.rename (source_path);
                 }
             }
         }

@@ -330,8 +330,8 @@ namespace pstore {
                                     ? file::file_handle::writable_mode::read_write
                                     : file::file_handle::writable_mode::read_only;
 
-        auto file = std::make_shared<file::file_handle> ();
-        file->open (path, create_mode, write_mode, present_mode::allow_not_found);
+        auto file = std::make_shared<file::file_handle> (path);
+        file->open (create_mode, write_mode, present_mode::allow_not_found);
         if (file->is_open ()) {
             return file;
         }
@@ -372,14 +372,12 @@ namespace pstore {
         file->close ();
 
         // TODO: Assert that path and file->path() are on the same drive?
-        // FIXME: this will mean that the file object's idea of the path will now be wrong. There
-        // needs to be a member function to carry out this work.
-        file::rename (file->path (), path);
+        file->rename (path);
 
         // The temporary file will no longer be found anyway (we just renamed it).
         temp_file_deleter.release ();
 
-        file->open (path, create_mode, write_mode, file::file_handle::present_mode::must_exist);
+        file->open (create_mode, write_mode, file::file_handle::present_mode::must_exist);
         assert (file->is_open ());
         return file;
     }

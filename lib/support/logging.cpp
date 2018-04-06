@@ -46,6 +46,7 @@
 #include "pstore/support/logging.hpp"
 
 #include <algorithm>
+#include <bitset>
 #include <cstdio>
 #include <cstring>
 #include <stdexcept>
@@ -56,6 +57,7 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/rotating_log.hpp"
+#include "pstore/core/make_unique.hpp" // FIXME: move make_unique to support-lib.
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>
@@ -258,7 +260,9 @@ namespace {
         }
     }
 
-#elif PSTORE_HAVE_SYS_LOG_H
+#endif // PSTORE_HAVE_ASL_H
+
+#if PSTORE_HAVE_SYS_LOG_H
 
     //*                                *
     //*  _   _| _  _  | _  _  _  _ ._  *
@@ -311,47 +315,68 @@ namespace {
 
 #endif // PSTORE_HAVE_SYS_LOG_H
 
+    enum handlers : unsigned {
+        asl,
+        rotating_file,
+        standard_error,
+        syslog,
+
+        last
+    };
+
 } // namespace
 
 namespace pstore {
     namespace logging {
 
         namespace details {
-            THREAD_LOCAL logger * log_streambuf = nullptr;
+            THREAD_LOCAL logger_collection * log_destinations = nullptr;
         } // namespace details
 
-        void create_log_stream (std::unique_ptr<logging::logger> && logger) {
-            using details::log_streambuf;
 
-            delete log_streambuf;
-
-            auto l = std::move (logger);
-            log_streambuf = l.release ();
-        }
 
         // TODO: allow user control over where the log ends up.
         void create_log_stream (std::string const & ident) {
-            std::unique_ptr<logging::logger> logger;
+            std::bitset<handlers::last> enabled;
+
 #if PSTORE_HAVE_ASL_H
-            // Redirect clog to apple system log.
-            logger.reset (new asl_logger (ident));
+            enabled.set (handlers::asl);
 #elif PSTORE_HAVE_SYS_LOG_H
-            // Redirect clog to syslog.
-            logger.reset (new syslog_logger (ident, LOG_USER));
+            enabled.set (handlers::syslog);
 #else
+            // FIXME: temporarily disable the file-based logging. stderr makes life less bad on Windows.
+            enabled.set (handlers::standard_error);
+#endif
+            // TODO: always enabled for the moment.
+            enabled.set (handlers::standard_error);
 
-#if 0 // FIXME: temporarily disable the file-based logging. stderr makes life less bad on Windows.
-            auto base_name = ident + ".log";
-            constexpr auto max_size = std::ios_base::streamoff {1024 * 1024};
-            constexpr auto num_backups = 10U;
-            logger.reset (new logging::rotating_log (base_name, max_size, num_backups));
-#else
-            (void) ident;
-            logger.reset (new stderr_logger);
+            auto loggers = std::make_unique<details::logger_collection> ();
+            loggers->reserve (enabled.count ());
+
+#if PSTORE_HAVE_ASL_H
+            if (enabled.test (handlers::asl)) {
+                loggers->emplace_back (new asl_logger (ident));
+            }
+#endif
+#if PSTORE_HAVE_SYS_LOG_H
+            if (enabled.test (handlers::syslog)) {
+                loggers->emplace_back (new syslog_logger (ident, LOG_USER));
+            }
 #endif
 
-#endif
-            return create_log_stream (std::move (logger));
+            if (enabled.test (handlers::rotating_file)) {
+                constexpr auto max_size = std::ios_base::streamoff{1024 * 1024};
+                constexpr auto num_backups = 10U;
+                loggers->emplace_back (new logging::rotating_log (ident + ".log", max_size, num_backups));
+            }
+
+            if (enabled.test (handlers::standard_error)) {
+                loggers->emplace_back (new stderr_logger);
+            }
+
+            using details::log_destinations;
+            delete log_destinations;
+            log_destinations = loggers.release ();
         }
 
 

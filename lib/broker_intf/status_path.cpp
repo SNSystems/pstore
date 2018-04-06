@@ -47,6 +47,7 @@
 #include <cstring>
 #include "pstore/config/config.hpp"
 #include "pstore/support/file.hpp"
+#include "pstore/support/logging.hpp"
 #include "pstore/support/path.hpp"
 
 namespace {
@@ -62,11 +63,12 @@ namespace pstore {
         }
 
         void write_port_number_file (std::string const & path, in_port_t port) {
-            pstore::file::unlink (path, true /*allow noent*/);
+            file::unlink (path, true /*allow noent*/);
+            log (logging::priority::info, "writing port number to path:", path);
 
-            pstore::file::file_handle port_file;
-            port_file.open (path, pstore::file::file_handle::create_mode::open_always,
-                            pstore::file::file_handle::writable_mode::read_write);
+            file::file_handle port_file {path};
+            port_file.open (file::file_handle::create_mode::open_always,
+                            file::file_handle::writable_mode::read_write);
             port_file.seek (0);
             char str[port_file_size + 1];
             std::snprintf (str, port_file_size + 1, "port%04x", port);
@@ -79,9 +81,9 @@ namespace pstore {
         in_port_t read_port_number_file (std::string const & path) {
             auto result = static_cast<in_port_t> (0);
 
-            pstore::file::file_handle port_file;
-            port_file.open (path, pstore::file::file_handle::create_mode::open_existing,
-                            pstore::file::file_handle::writable_mode::read_only);
+            file::file_handle port_file {path};
+            port_file.open (file::file_handle::create_mode::open_existing,
+                            file::file_handle::writable_mode::read_only);
             if (port_file.size () == port_file_size) {
                 char str[port_file_size + 1] = {0};
                 port_file.seek (0);

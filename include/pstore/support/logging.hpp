@@ -188,7 +188,8 @@ namespace pstore {
         struct file_system_traits {
             bool exists (std::string const & path) { return pstore::file::exists (path); }
             void rename (std::string const & from, std::string const & to) {
-                pstore::file::rename (from.c_str (), to.c_str ());
+                pstore::file::file_handle f {from};
+                f.rename (to);
             }
             void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
         };
@@ -272,23 +273,27 @@ namespace pstore {
 
         using rotating_log = basic_rotating_log<fstream_traits, file_system_traits>;
 
-        void create_log_stream (std::unique_ptr<logger> && logger);
         void create_log_stream (std::string const & ident);
 
 
         namespace details {
-            extern THREAD_LOCAL logger * log_streambuf;
+            using logger_collection = std::vector<std::unique_ptr<logging::logger>>;
+            extern THREAD_LOCAL logger_collection * log_destinations;
         } // end namespace details
 
 
         inline void log (priority p, gsl::czstring message) {
-            assert (details::log_streambuf != nullptr);
-            details::log_streambuf->log (p, message);
+            assert (details::log_destinations != nullptr);
+            for (std::unique_ptr <logger> & destination : *details::log_destinations) {
+                destination->log (p, message);
+            }
         }
         template <typename T>
         inline void log (priority p, gsl::czstring message, T d) {
-            assert (details::log_streambuf != nullptr);
-            details::log_streambuf->log (p, message, d);
+            assert (details::log_destinations != nullptr);
+            for (std::unique_ptr <logger> & destination : *details::log_destinations) {
+                destination->log (p, message, d);
+            }
         }
 
     } // end namespace logging

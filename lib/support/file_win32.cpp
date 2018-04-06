@@ -176,10 +176,9 @@ namespace pstore {
     namespace file {
         // open
         // ~~~~
-        void file_handle::open (std::string const & path, create_mode create,
+        void file_handle::open (create_mode create,
                                 writable_mode writable, present_mode present) {
             this->close ();
-            path_ = path;
             is_writable_ = writable == writable_mode::read_write;
 
             DWORD desired_access = GENERIC_READ;
@@ -197,7 +196,7 @@ namespace pstore {
             case create_mode::open_always: creation_disposition = OPEN_ALWAYS; break;
             }
 
-            file_ = ::CreateFileW (pstore::utf::win32::to16 (path).c_str (), // "file name"
+            file_ = ::CreateFileW (pstore::utf::win32::to16 (path_).c_str (), // "file name"
                                    desired_access,
                                    FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
                                    nullptr, // "security attributes"
@@ -385,6 +384,26 @@ namespace pstore {
             }
         }
 
+		// rename
+        // ~~~~~~
+        void file_handle::rename (std::string const & new_name) {
+            std::wstring const pathw = pstore::utf::win32::to16 (path_);
+            std::wstring const new_namew = pstore::utf::win32::to16 (new_name);
+
+            // Deliberately do not pass the MOVEFILE_COPY_ALLOWED to MoveFileExW() because this
+            // could mean that the copy is anything but atomic. Do pass MOVEILE_REPLACE_EXISTING
+            // to slightly more closely mirror the POSIX rename() behavior.
+            BOOL ok = ::MoveFileExW (pathw.c_str (), new_namew.c_str (), MOVEFILE_REPLACE_EXISTING);
+            if (!ok) {
+                DWORD const last_error = ::GetLastError ();
+                std::ostringstream message;
+                message << "Unable to rename " << pstore::quoted (path_) << " to "
+                        << pstore::quoted (new_name);
+                raise (win32_erc{last_error}, message.str ());
+            }
+            path_ = new_name;
+        }
+
         // lock
         // ~~~~
         bool file_handle::lock (std::uint64_t offset, std::size_t size, lock_kind kind,
@@ -456,10 +475,10 @@ namespace pstore {
         // latest_time
         // ~~~~~~~~~~~
         time_t file_handle::latest_time () const {
-            file_handle local_file;
+			file_handle local_file{path_};
             HANDLE h = file_;
             if (!this->is_open ()) {
-                local_file.open (path_, create_mode::open_existing, writable_mode::read_only,
+                local_file.open (create_mode::open_existing, writable_mode::read_only,
                                  present_mode::must_exist);
                 h = local_file.file_;
             }
@@ -514,7 +533,7 @@ namespace pstore {
         namespace win32 {
 
             void deleter::platform_unlink (std::string const & path) {
-                pstore::file::unlink (path);
+                pstore::file::unlink (path, true);
             }
 
         } // namespace win32
@@ -528,23 +547,6 @@ namespace pstore {
                     str << "Unable to delete file " << pstore::quoted (path);
                     raise (win32_erc{last_error}, str.str ());
                 }
-            }
-        }
-
-        void rename (std::string const & from, std::string const & to) {
-            std::wstring const fromw = pstore::utf::win32::to16 (from);
-            std::wstring const tow = pstore::utf::win32::to16 (to);
-
-            // Deliberately do not pass the MOVEFILE_COPY_ALLOWED to MoveFileExW() because this
-            // could mean that the copy is anything but atomic. Do pass MOVEILE_REPLACE_EXISTING
-            // to slightly more closely mirror the POSIX rename() behavior.
-            BOOL ok = ::MoveFileExW (fromw.c_str (), tow.c_str (), MOVEFILE_REPLACE_EXISTING);
-            if (!ok) {
-                DWORD const last_error = ::GetLastError ();
-                std::ostringstream message;
-                message << "Unable to rename " << pstore::quoted (from) << " to "
-                        << pstore::quoted (to);
-                raise (win32_erc{last_error}, message.str ());
             }
         }
 

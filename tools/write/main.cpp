@@ -88,8 +88,8 @@ namespace {
 
         using namespace pstore::file;
         bool ok = true;
-        pstore::file::file_handle file;
-        file.open (path, pstore::file::file_handle::create_mode::open_existing,
+        pstore::file::file_handle file {path};
+        file.open (pstore::file::file_handle::create_mode::open_existing,
                    pstore::file::file_handle::writable_mode::read_only);
         if (!file.is_open ()) {
             ok = false;
@@ -103,7 +103,7 @@ namespace {
 
             // Copy from the source file to the data store. The destination for the read_span() is
             // the memory that we just allocated in the data store.
-            auto span = ::pstore::gsl::make_span (ptr.get (), static_cast<std::ptrdiff_t> (size));
+            auto span = pstore::gsl::make_span (ptr.get (), static_cast<std::ptrdiff_t> (size));
             std::size_t bytes_read = file.read_span (span);
 
             auto const expected_size = span.size_bytes ();

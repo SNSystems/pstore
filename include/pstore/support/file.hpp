@@ -627,7 +627,8 @@ namespace pstore {
                 read_write,
             };
             file_handle () = default;
-            void open (std::string const & path, create_mode create, writable_mode writable,
+            explicit file_handle (std::string const & path) : path_ {path} {}
+            void open (create_mode create, writable_mode writable,
                        present_mode present = present_mode::allow_not_found);
 
             /// unique is an empty class type used to disambiguate the overloads of creating a file.
@@ -681,6 +682,8 @@ namespace pstore {
         public:
             std::uint64_t size () override;
             void truncate (std::uint64_t size) override;
+            /// Renames a file from one UTF-8 encoded path to another.
+            void rename (std::string const & new_name);
 
             std::time_t latest_time () const override;
 
@@ -779,9 +782,6 @@ namespace pstore {
             bool released_ = false;
         };
 
-
-        /// Renames a file from one UTF-8 encoded path to another.
-        void rename (std::string const & from, std::string const & to);
 
         /// \brief Returns true if the file system contains an object at the location given by \p
         /// path.

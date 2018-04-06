@@ -90,11 +90,10 @@ namespace pstore {
         //*                                           *
         // open
         // ~~~~
-        void file_handle::open (std::string const & path, create_mode create,
+        void file_handle::open (create_mode create,
                                 writable_mode writable, present_mode present) {
             this->close ();
 
-            path_ = path;
             is_writable_ = writable == writable_mode::read_write;
 
             int oflag = is_writable_ ? O_RDWR : O_RDONLY;
@@ -114,13 +113,13 @@ namespace pstore {
                 pmode |= S_IWUSR | S_IWGRP | S_IWOTH;
             }
 
-            file_ = ::open (path.c_str (), oflag, pmode); // NOLINT
+            file_ = ::open (path_.c_str (), oflag, pmode); // NOLINT
             if (file_ == -1) {
                 int const err = errno;
                 if (present == present_mode::allow_not_found && err == ENOENT) {
                     file_ = -1;
                 } else {
-                    raise_file_error (err, "Unable to open", path);
+                    raise_file_error (err, "Unable to open", path_);
                 }
             }
         }
@@ -266,6 +265,20 @@ namespace pstore {
             }
         }
 
+        // rename
+        // ~~~~~~
+        void file_handle::rename (std::string const & new_name) {
+            int erc = ::rename (path_.c_str (), new_name.c_str ());
+            if (erc == -1) {
+                int const last_error = errno;
+
+                std::ostringstream message;
+                message << "Unable to rename " << quoted (path_) << " to " << quoted (new_name);
+                raise (errno_erc{last_error}, message.str ());
+            }
+            path_ = new_name;
+        }
+
         // lock_reg
         // ~~~~~~~~
         /// A helper function for the lock() and unlock() methods. It is a simple wrapper for the
@@ -386,24 +399,13 @@ namespace pstore {
         namespace posix {
 
             void deleter::platform_unlink (std::string const & path) {
-                pstore::file::unlink (path);
+                pstore::file::unlink (path, true);
             }
 
         } // namespace posix
 
 
         bool exists (std::string const & path) { return ::access (path.c_str (), F_OK) != -1; }
-
-        void rename (std::string const & from, std::string const & to) {
-            int erc = ::rename (from.c_str (), to.c_str ());
-            if (erc == -1) {
-                int const last_error = errno;
-
-                std::ostringstream message;
-                message << "Unable to rename " << quoted (from) << " to " << quoted (to);
-                raise (errno_erc{last_error}, message.str ());
-            }
-        }
 
         void unlink (std::string const & path, bool allow_noent) {
             if (::unlink (path.c_str ()) == -1) {
