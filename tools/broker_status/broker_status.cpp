@@ -78,15 +78,6 @@ namespace {
     using namespace pstore::cmd_util;
 #endif
 
-#define INET_BASE_HELP "Use internet rather than Unix domain sockets"
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-#define INET_HELP INET_BASE_HELP
-#else
-#define INET_HELP INET_BASE_HELP " (ignored)"
-#endif
-
-    cl::opt<bool> use_inet_socket ("inet", cl::desc (INET_HELP), cl::init (false));
-
 #ifdef _WIN32
     int getpid () { return static_cast<int> (GetCurrentProcessId ()); }
 #endif
@@ -113,8 +104,7 @@ int main (int argc, pstore_tchar * argv[]) {
         using namespace pstore;
         cl::ParseCommandLineOptions (argc, argv, "pstore broker status utility\n");
 
-        pstore::broker::socket_descriptor csfd =
-            pstore::broker::connect_to_status_server (use_inet_socket);
+        pstore::broker::socket_descriptor csfd = pstore::broker::connect_to_status_server ();
         if (!csfd.valid ()) {
             std::cerr << "cli_conn error (" << strerror (errno) << ")\n";
             return EXIT_FAILURE;

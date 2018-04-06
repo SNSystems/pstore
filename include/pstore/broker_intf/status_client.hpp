@@ -44,13 +44,19 @@
 #ifndef PSTORE_BROKER_INTF_STATUS_CLIENT_HPP
 #define PSTORE_BROKER_INTF_STATUS_CLIENT_HPP (1)
 
+#ifdef _WIN32
+using in_port_t = unsigned short;
+#else
+#include <netinet/in.h>
+#endif
+
 #include "pstore/broker_intf/descriptor.hpp"
 
 namespace pstore {
     namespace broker {
 
-        /// \param use_inet Force enable inet sockets if we can't use Unix domain sockets.
-        socket_descriptor connect_to_status_server (bool use_inet);
+        socket_descriptor connect_to_status_server ();
+        socket_descriptor connect_to_status_server (in_port_t port);
 
     } // namespace broker
 } // namespace pstore

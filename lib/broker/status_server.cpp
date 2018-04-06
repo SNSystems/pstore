@@ -43,17 +43,17 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/broker/status_server.hpp"
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstring>
 #include <ctime>
 #include <limits>
-#include <map>
 #include <sstream>
 #include <tuple>
+#include <unordered_map>
 #include <vector>
 
 #ifndef _WIN32
@@ -69,7 +69,9 @@
 #include <ws2tcpip.h>
 #endif
 
+#include "pstore/broker/globals.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/status_client.hpp"
 #include "pstore/broker_intf/status_path.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/config/config.hpp"
@@ -78,8 +80,9 @@
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 
+namespace {
 
-constexpr char EOT = 4; // ASCII "end of transmission"
+    constexpr char EOT = 4; // ASCII "end of transmission"
 
 #ifdef _WIN32
 using ssize_t = SSIZE_T;
@@ -88,9 +91,7 @@ using ssize_t = SSIZE_T;
 std::uint16_t network_to_host (std::uint16_t v) {
     return ntohs (v);
 }
-std::uint32_t network_to_host (std::uint32_t v) {
-    return ntohl (v);
-}
+// std::uint32_t network_to_host (std::uint32_t v) { return ntohl (v); }
 
 std::uint16_t host_to_network (std::uint16_t v) {
     return htons (v);
@@ -99,6 +100,7 @@ std::uint32_t host_to_network (std::uint32_t v) {
     return htonl (v);
 }
 
+} // end of anonymous namespace
 
 namespace {
 
@@ -175,19 +177,6 @@ namespace {
         return fd;
     }
 
-    void bind (pstore::broker::socket_descriptor const & socket, sockaddr const * address,
-               socklen_t address_len) {
-        if (::bind (socket.get (), address, address_len) != 0) {
-            raise (platform_erc (pstore::broker::get_last_error ()), "socket bind failed");
-        }
-    }
-
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-    void bind (pstore::broker::socket_descriptor const & socket, sockaddr_un const & address) {
-        bind (socket, reinterpret_cast<sockaddr const *> (&address), SUN_LEN (&address));
-    }
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-
     void bind (pstore::broker::socket_descriptor const & socket, sockaddr_in6 const & address) {
         bind (socket.get (), reinterpret_cast<sockaddr const *> (&address), sizeof (address));
     }
@@ -213,23 +202,11 @@ namespace {
         return false;
     }
 
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-    socket_descriptor server_accept_new_ud_connection (socket_descriptor const & listenfd) {
-        sockaddr_storage their_addr;
-        std::memset (&their_addr, 0, sizeof their_addr);
-        auto client = accept (listenfd, &their_addr);
-        log (pstore::logging::priority::notice, "Accepted connection ",
-             client.get ()); // TODO: address?
-        return client;
-    }
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-
-
     // server_accept_new_connection
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Wait for a client connection to arrive, and accept it.
-    socket_descriptor server_accept_new_inet_connection (socket_descriptor const & listenfd,
-                                                         bool localhost_only) {
+    socket_descriptor server_accept_connection (socket_descriptor const & listenfd,
+                                                bool localhost_only) {
         sockaddr_storage their_addr;
         std::memset (&their_addr, 0, sizeof their_addr);
 
@@ -275,33 +252,11 @@ namespace {
         return client_fd;
     }
 
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-    // server_listen_unix_domain
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    socket_descriptor server_listen_unix_domain (char const * name) {
-        sockaddr_un un;
-        constexpr std::size_t max_name_len = pstore::array_elements (un.sun_path);
-        std::memset (&un, 0, sizeof un);
-        un.sun_family = AF_UNIX;
-        std::strncpy (un.sun_path, name, max_name_len);
-        if (un.sun_path[max_name_len - 1U] != '\0') {
-            raise (pstore::errno_erc{ENAMETOOLONG}, "socket name was too long");
-        }
-
-        socket_descriptor fd = create_socket (AF_UNIX, SOCK_STREAM, 0);
-        ::unlink (name); // in case it already exists
-
-        // bind the name to the descriptor
-        bind (fd, un);
-        return fd;
-    }
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-
-
-    socket_descriptor server_listen_inet () {
-        // The socket() function returns a socket descriptor, which represents an endpoint. Get a
-        // socket for address family AF_INET6 to prepare to accept incoming connections on.
-        socket_descriptor fd = create_socket (AF_INET6, SOCK_STREAM, 0);
+    // create_server_listen_socket
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    socket_descriptor create_server_listen_socket () {
+        // Get a socket for address family AF_INET6 to prepare to accept incoming connections.
+        socket_descriptor inet_fd = create_socket (AF_INET6, SOCK_STREAM, 0);
 
         // After the socket descriptor is created, a bind() function gets a unique name for the
         // socket. We accept connections from the loopback address and let the system pick the port
@@ -310,10 +265,11 @@ namespace {
         std::memset (&serveraddr, 0, sizeof serveraddr);
         serveraddr.sin6_family = AF_INET6;
         serveraddr.sin6_port = host_to_network (in_port_t{0});
-        serveraddr.sin6_addr = in6addr_loopback; // in6addr_any;
-        bind (fd, serveraddr);
-        return fd;
+        serveraddr.sin6_addr = in6addr_any;
+        bind (inet_fd, serveraddr);
+        return inet_fd;
     }
+
 
     in_port_t get_listen_port (socket_descriptor const & fd) {
         sockaddr_storage address;
@@ -349,7 +305,26 @@ namespace {
 
 } // end anonymous namespace
 
-void pstore::broker::status_server (bool use_inet_socket) {
+
+in_port_t pstore::broker::self_client_connection::get_port () const {
+    std::unique_lock<decltype (mut_)> lock{mut_};
+    if (!port_) {
+        cv_.wait (lock, [this]() -> bool { return port_.has_value (); });
+    }
+    return *port_;
+}
+
+void pstore::broker::self_client_connection::set_port (in_port_t port) {
+    {
+        std::lock_guard<decltype (mut_)> lock{mut_};
+        assert (!port_);
+        port_ = port;
+    }
+    cv_.notify_one ();
+}
+
+
+void pstore::broker::status_server (std::shared_ptr<self_client_connection> client_ptr) {
 #ifdef _WIN32
     pstore::wsa_startup startup;
     if (!startup.started ()) {
@@ -359,60 +334,44 @@ void pstore::broker::status_server (bool use_inet_socket) {
 #endif // _WIN32
 
     try {
-        std::map<socket_descriptor, json_parser> clients;
 
-        constexpr auto read_buffer_size = std::size_t{4}; // FIXME: stupidly small at the moment.
-        std::vector<char> read_buffer (read_buffer_size, char{});
+        // Now create a socket that the server will use to listen for incoming connections.
+        socket_descriptor listen_fd = create_server_listen_socket ();
 
-        fd_set all_set;
-        FD_ZERO (&all_set);
-
-        // obtain a file descriptor which we can use to listen for client requests.
-        std::string const listen_path = get_status_path ();
-        auto listen_fd =
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-            !use_inet_socket ? server_listen_unix_domain (listen_path.c_str ()) :
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-                             server_listen_inet ();
-
-        // tell the kernel we're a server
+        // Tell the kernel we're a server
         constexpr int qlen = 10;
         if (listen (listen_fd.get (), qlen) != 0) {
             raise (platform_erc (get_last_error ()), "listen failed");
         }
 
+        in_port_t const listen_port = get_listen_port (listen_fd);
+        std::string const listen_path = get_status_path ();
+        write_port_number_file (listen_path, listen_port);
+        file::deleter pfdeleter (listen_path); // delete the file on destruction
+
+        std::unordered_map<socket_descriptor, json_parser> clients;
+
+        fd_set all_set;
+        FD_ZERO (&all_set);
         FD_SET (listen_fd.get (), &all_set);
         auto max_fd = listen_fd.get ();
 
-        if (use_inet_socket) {
-            auto const listen_port = get_listen_port (listen_fd);
-            write_port_number_file (listen_path, listen_port);
-            log (logging::priority::info, "Waiting for connections on inet port ", listen_port);
-        } else {
-            log (logging::priority::info, "Waiting for connections on UD path ", listen_path);
-        }
+        log (logging::priority::info, "Waiting for connections on inet port ", listen_port);
+        // Notify anyone interested that the server now has a port number.
+        client_ptr->set_port (listen_port);
 
-        bool done = false;
         while (!done) {
             fd_set rset = all_set; // rset is modified each time round the loop.
 
-            if (select (static_cast<int> (max_fd) + 1, &rset, nullptr, nullptr, nullptr) < 0) {
+            if (::select (static_cast<int> (max_fd) + 1, &rset, nullptr, nullptr, nullptr) < 0) {
                 log (logging::priority::error, "select error ", get_last_error ());
             }
 
             if (FD_ISSET (listen_fd.get (), &rset)) {
-                // accept a new client request
                 socket_descriptor client_fd =
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-                    !use_inet_socket
-                        ? server_accept_new_ud_connection (listen_fd)
-                        :
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-                        server_accept_new_inet_connection (listen_fd, true /*localhost only*/);
-
+                    server_accept_connection (listen_fd, true /*localhost only?*/);
                 if (!client_fd.valid ()) {
-                    // FIXME: error handling wrong on Windows (at least)
-                    log (logging::priority::error, "server_accept_new_connection error ",
+                    log (logging::priority::error, "server_accept_connection error ",
                          client_fd.get ());
                     continue;
                 }
@@ -432,6 +391,8 @@ void pstore::broker::status_server (bool use_inet_socket) {
                 socket_descriptor const & client_fd = it->first;
 
                 if (FD_ISSET (client_fd.get (), &rset)) {
+                    std::array<char, 4> read_buffer; // FIXME: stupidly small at the moment.
+
                     // read data from the client
                     ssize_t const nread =
                         recv (client_fd.get (), read_buffer.data (),
@@ -470,7 +431,6 @@ void pstore::broker::status_server (bool use_inet_socket) {
         }
 
         log (pstore::logging::priority::info, "Status server exiting");
-        pstore::file::unlink (listen_path);
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());
     } catch (...) {

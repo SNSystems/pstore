@@ -73,11 +73,16 @@
 #include "pstore/broker_intf/message_type.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/broker_intf/status_client.hpp"
+#include "pstore/broker_intf/status_path.hpp"
 #include "pstore/core/make_unique.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/signal_helpers.hpp"
 #include "pstore/support/thread.hpp"
+
+#ifdef _WIN32
+using ssize_t = SSIZE_T;
+#endif
 
 namespace {
 
@@ -108,12 +113,15 @@ namespace pstore {
         // shutdown
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_threads, bool status_useinet) {
+                       unsigned num_read_threads,
+                       pstore::broker::self_client_connection const * const status_client) {
+
             // Set the global "done" flag unless we're already shutting down. The latter condition
             // happens if a "SUICIDE" command is received and the quit thread is woken in response.
             bool expected = false;
             if (done.compare_exchange_strong (expected, true)) {
                 std::cerr << "pstore broker is exiting.\n";
+                log (logging::priority::info, "performing shutdown");
 
                 // Tell the gcwatcher thread to exit.
                 broker::gc_sigint (signum);
@@ -131,10 +139,26 @@ namespace pstore {
                     push (*cp, command_loop_quit_command);
                 }
 
-                auto socket = connect_to_status_server (status_useinet);
-                char const json[] = "{\"quit\":true}\04";
-                ::send (socket.get (), json, static_cast<int> (array_elements (json) - 1),
-                        0 /*flags*/);
+                // FIXME: using the availability of status_client to detect that the status server
+                // is running isn't quite safe. There's a window of time in which the server's port
+                // has been closed but the status_client shared_ptr is still "alive".
+
+                if (status_client == nullptr) {
+                    log (logging::priority::info, "status server has already exited");
+                } else {
+                    log (logging::priority::info, "shutting down status server");
+                    socket_descriptor status_fd =
+                        connect_to_status_server (status_client->get_port ());
+                    char const json[] = "{\"quit\":true}\04";
+                    log (logging::priority::info, "sending message:", json);
+                    if (::send (status_fd.get (), json,
+                                static_cast<int> (array_elements (json) - 1),
+                                0 /*flags*/) == socket_descriptor::error) {
+                        log (logging::priority::error, "send failed ", get_last_error ());
+                    }
+                }
+
+                log (logging::priority::info, "shutdown requests complete");
             }
         }
 
@@ -143,6 +167,55 @@ namespace pstore {
 
 namespace {
 
+    using pstore::broker::sig_self_quit;
+#define COMMON_SIGNALS                                                                             \
+    X (SIGABRT)                                                                                    \
+    X (SIGFPE)                                                                                     \
+    X (SIGILL)                                                                                     \
+    X (SIGINT)                                                                                     \
+    X (SIGSEGV)                                                                                    \
+    X (SIGTERM)                                                                                    \
+    X (sig_self_quit)
+#ifdef _WIN32
+#define SIGNALS COMMON_SIGNALS X (SIGBREAK)
+#else
+#define SIGNALS                                                                                    \
+    COMMON_SIGNALS                                                                                 \
+    X (SIGALRM)                                                                                    \
+    X (SIGBUS)                                                                                     \
+    X (SIGCHLD)                                                                                    \
+    X (SIGCONT)                                                                                    \
+    X (SIGHUP)                                                                                     \
+    X (SIGPIPE)                                                                                    \
+    X (SIGQUIT)                                                                                    \
+    X (SIGSTOP)                                                                                    \
+    X (SIGTSTP)                                                                                    \
+    X (SIGTTIN)                                                                                    \
+    X (SIGTTOU)                                                                                    \
+    X (SIGUSR1)                                                                                    \
+    X (SIGUSR2)                                                                                    \
+    X (SIGSYS)                                                                                     \
+    X (SIGTRAP)                                                                                    \
+    X (SIGURG)                                                                                     \
+    X (SIGVTALRM)                                                                                  \
+    X (SIGXCPU)                                                                                    \
+    X (SIGXFSZ)
+#endif
+    template <ssize_t Size>
+    char const * signal_name (int signo, pstore::gsl::span<char, Size> buffer) {
+        static_assert (Size > 0, "signal name needs a buffer of size > 0");
+#define X(sig)                                                                                     \
+    case sig: return #sig;
+        switch (signo) { SIGNALS }
+#undef X
+        constexpr auto size = buffer.size ();
+        std::snprintf (buffer.data (), size, "#%d", signo);
+        buffer[size - 1] = '\0';
+        return buffer.data ();
+    }
+#undef SIGNALS
+
+
     pstore::signal_cv quit_info;
 
     //***************
@@ -150,7 +223,7 @@ namespace {
     //***************
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
                       std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads,
-                      bool status_useinet) {
+                      std::weak_ptr<pstore::broker::self_client_connection> status_client) {
         using namespace pstore;
 
         try {
@@ -162,9 +235,9 @@ namespace {
             // the user typing Control-C.
             quit_info.wait ();
 
-            logging::log (
-                logging::priority::info,
-                "Signal received. Will terminate after current command. Num=", quit_info.signal ());
+            std::array<char, 16> buffer;
+            log (logging::priority::info, "Signal received: shutting down. Signal: ",
+                 signal_name (quit_info.signal (), pstore::gsl::make_span (buffer)));
 
             auto cp_sptr = cp.lock ();
             // If the command processor is alive, clear the queue.
@@ -175,13 +248,16 @@ namespace {
             }
 
             auto scav_sptr = scav.lock ();
+            auto status_ptr = status_client.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
-                      status_useinet);
+                      status_ptr.get ());
         } catch (std::exception const & ex) {
-            logging::log (logging::priority::error, "error:", ex.what ());
+            log (logging::priority::error, "error:", ex.what ());
         } catch (...) {
-            logging::log (logging::priority::error, "unknown exception");
+            log (logging::priority::error, "unknown exception");
         }
+
+        log (logging::priority::info, "quit thread exiting");
     }
 
 
@@ -202,20 +278,23 @@ namespace pstore {
 
         // notify_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        void notify_quit_thread () { quit_info.notify (-1); }
+        void notify_quit_thread () { quit_info.notify (sig_self_quit); }
 
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
-                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        bool status_useinet) {
+        std::thread
+        create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
+                            unsigned num_read_threads,
+                            std::weak_ptr<pstore::broker::self_client_connection> status_client) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
-                              status_useinet);
+                              status_client);
 
             register_signal_handler (SIGINT, signal_handler);
             register_signal_handler (SIGTERM, signal_handler);
 #ifdef _WIN32
             register_signal_handler (SIGBREAK, signal_handler); // Ctrl-Break sequence
+#else
+            signal (SIGPIPE, SIG_IGN);
 #endif
             return quit;
         }

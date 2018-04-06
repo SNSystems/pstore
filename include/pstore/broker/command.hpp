@@ -64,12 +64,14 @@ namespace pstore {
         class fifo_path;
         class recorder;
         class scavenger;
+        class self_client_connection;
 
         /// A class which is responsible for managing the command queue and which provides the
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
-            command_processor (unsigned const num_read_threads, bool status_useinet);
+            command_processor (unsigned const num_read_threads,
+                               std::weak_ptr<self_client_connection> status_client);
             virtual ~command_processor () = default;
 
             // No copying or assignment.
@@ -81,11 +83,9 @@ namespace pstore {
             void attach_scavenger (std::shared_ptr<scavenger> & scav) { scavenger_.set (scav); }
 
             /// Pushes a command onto the end of the command queue. The command is recorded if
-            /// `record_file`
-            /// is not null.
+            /// `record_file` is not null.
             /// \param cmd  The message to which this parameter points is moved to the end of the
-            /// command
-            /// queue.
+            /// command queue.
             /// \param record_file  If not null, this object is used to record the command.
             void push_command (message_ptr && cmd, recorder * const record_file);
             void clear_queue ();
@@ -96,7 +96,6 @@ namespace pstore {
             void process_command (fifo_path const & fifo, message_type const & msg);
 
         private:
-            std::atomic<bool> commands_done_{false};
 
             template <typename T>
             class atomic_weak_ptr {
@@ -120,6 +119,8 @@ namespace pstore {
                 std::weak_ptr<T> ptr_;
             };
 
+            std::atomic<bool> commands_done_{false};
+            std::weak_ptr<self_client_connection> status_client_;
             atomic_weak_ptr<scavenger> scavenger_;
 
             message_queue<message_ptr> messages_;
@@ -130,9 +131,6 @@ namespace pstore {
             /// The number of read threads running. At shutdown time this is used to instruct each
             /// of them to exit safely.
             unsigned const num_read_threads_;
-            /// Is the status server listening on an inet socket (as opposed to a Unix domain socket
-            /// [where available])?
-            bool status_useinet_;
 
             auto parse (message_type const & msg) -> std::unique_ptr<broker_command>;
 
@@ -148,8 +146,7 @@ namespace pstore {
 
             ///@{
             /// Functions responsible for processing each of the commands to which the broker will
-            /// respond
-            /// in some way.
+            /// respond in some way.
             /// \note Virtual to enable unit testing.
 
             /// Initiates the shut-down of the broker process.
@@ -163,8 +160,7 @@ namespace pstore {
             virtual void cquit (fifo_path const & fifo, broker_command const & c);
 
             /// Starts the garbage collection for a path (specified in the command path) if not
-            /// already
-            /// running.
+            /// already running.
             virtual void gc (fifo_path const & fifo, broker_command const & c);
 
             /// Echoes the command path text to stdout.

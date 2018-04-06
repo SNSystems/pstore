@@ -230,5 +230,19 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 
+namespace std {
+
+    template <typename DescriptorTraits>
+    struct hash<pstore::broker::details::descriptor<DescriptorTraits>> {
+        using argument_type = pstore::broker::details::descriptor<DescriptorTraits>;
+        using result_type = std::size_t;
+
+        result_type operator() (argument_type const & s) const noexcept {
+            return std::hash<typename argument_type::value_type> () (s.get ());
+        }
+    };
+
+} // end namespace std
+
 #endif // PSTORE_BROKER_DESCRIPTOR_HPP
 // eof: include/pstore/broker_intf/descriptor.hpp

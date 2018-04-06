@@ -78,9 +78,10 @@ namespace pstore {
 
         // ctor
         // ~~~~
-        command_processor::command_processor (unsigned const num_read_threads, bool status_useinet)
-                : num_read_threads_{num_read_threads}
-                , status_useinet_{status_useinet} {
+        command_processor::command_processor (unsigned const num_read_threads,
+                                              std::weak_ptr<self_client_connection> status_client)
+                : status_client_{std::move (status_client)}
+                , num_read_threads_{num_read_threads} {
 
             assert (std::is_sorted (std::begin (commands_), std::end (commands_),
                                     command_entry_compare));
@@ -90,7 +91,8 @@ namespace pstore {
         // ~~~~~~~
         void command_processor::suicide (fifo_path const &, broker_command const &) {
             std::shared_ptr<scavenger> scav = scavenger_.get ();
-            shutdown (this, scav.get (), -1, num_read_threads_, status_useinet_);
+            std::shared_ptr<self_client_connection> conn = status_client_.lock ();
+            shutdown (this, scav.get (), sig_self_quit, num_read_threads_, conn.get ());
         }
 
         // quit
@@ -237,15 +239,13 @@ namespace pstore {
             constexpr auto delete_threshold = std::chrono::seconds (4 * 60 * 60);
 
             // After this function is complete, no partial messages older than 'earliest time' will
-            // be in
-            // the partial command map (cmds_).
+            // be in the partial command map (cmds_).
             auto const earliest_time = std::chrono::system_clock::now () - delete_threshold;
 
             // Remove all partial messages where the last piece of the message arrived before
             // earliest_time.
             // It's most likely that the sending process gave up/crashed/lost interest before
-            // sending the
-            // complete message.
+            // sending the complete message.
             std::lock_guard<decltype (cmds_mut_)> lock{cmds_mut_};
             for (auto it = std::begin (cmds_); it != std::end (cmds_);) {
                 auto const arrival_time = it->second.arrive_time_;

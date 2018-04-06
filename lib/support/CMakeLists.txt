@@ -149,18 +149,6 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_NSGETEXECUTABLEPATH)
 
-check_cxx_source_compiles (
-    "#ifdef _WIN32
-    #include <Winsock2.h>
-    #else
-    #include <sys/socket.h>
-    #include <sys/un.h>
-    #endif
-    int main () {
-       socket(AF_UNIX, SOCK_STREAM, 0);
-    }"
-    PSTORE_UNIX_DOMAIN_SOCKETS)
-
 
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"

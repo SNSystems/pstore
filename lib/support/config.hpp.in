@@ -136,8 +136,5 @@
 /// in persistent file-backed virtual memory.
 #cmakedefine PSTORE_ALWAYS_SPANNING 1
 
-/// \brief Does the system support Unix domain sockets?
-#cmakedefine PSTORE_UNIX_DOMAIN_SOCKETS 1
-
 #endif // PSTORE_CONFIG_HPP
 // eof: lib/support/config.hpp

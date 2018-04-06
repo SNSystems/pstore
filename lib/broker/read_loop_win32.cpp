@@ -427,7 +427,7 @@ namespace pstore {
         // read_loop
         // ~~~~~~~~~
         void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
-                        std::shared_ptr<command_processor> & cp) {
+                        std::shared_ptr<command_processor> cp) {
             try {
                 pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
                                       pstore::logging::quoted (path.get ().c_str ()));

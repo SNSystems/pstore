@@ -100,7 +100,7 @@ namespace pstore {
         // read_loop
         // ~~~~~~~~~
         void read_loop (fifo_path & fifo, std::shared_ptr<recorder> & record_file,
-                        std::shared_ptr<command_processor> & cp) {
+                        std::shared_ptr<command_processor> cp) {
             try {
                 logging::log (logging::priority::notice, "listening to FIFO ",
                               logging::quoted{fifo.get ().c_str ()});
@@ -130,8 +130,7 @@ namespace pstore {
                                               "Partial message received. Length ", bytes_read);
                             } else {
                                 // Push the command buffer on to the queue for processing and pull
-                                // an new
-                                // read buffer from the pool.
+                                // an new read buffer from the pool.
                                 assert (static_cast<std::size_t> (bytes_read) <= sizeof (*readbuf));
                                 cp->push_command (std::move (readbuf), record_file.get ());
 
@@ -141,11 +140,9 @@ namespace pstore {
                     }
 
                     // This function will return when data is available on the pipe. Be aware that
-                    // another
-                    // thread may also wake in response to its presence. Bear in mind that that
-                    // other thread
-                    // may read the data before this one attempts to do so (resulting in
-                    // EWOULDBLOCK).
+                    // another thread may also wake in response to its presence. Bear in mind that
+                    // that other thread may read the data before this one attempts to do so
+                    // (resulting in EWOULDBLOCK).
                     block_for_input (fd.get ());
                 }
             } catch (std::exception const & ex) {

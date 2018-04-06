@@ -50,6 +50,8 @@
 #include <memory>
 #include <thread>
 
+#include "pstore/broker/status_server.hpp"
+
 namespace pstore {
     namespace broker {
 
@@ -57,15 +59,20 @@ namespace pstore {
         class command_processor;
         class scavenger;
 
+        /// The pretend signal number that's raised when a remote shutdown request is received.
+        constexpr int sig_self_quit = -1;
+
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_thread, bool status_useinet);
+                       unsigned num_read_thread,
+                       pstore::broker::self_client_connection const * const status_client);
 
         /// Wakes up the quit thread to start the process of shutting down the server.
         void notify_quit_thread ();
 
-        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
-                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        bool status_useinet);
+        std::thread
+        create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
+                            unsigned num_read_threads,
+                            std::weak_ptr<pstore::broker::self_client_connection> status_client);
 
     } // namespace broker
 } // namespace pstore

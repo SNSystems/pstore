@@ -50,8 +50,6 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
-#include <sys/socket.h>
-#include <sys/un.h>
 #include <netdb.h>
 #endif
 
@@ -59,11 +57,8 @@
 #include "pstore/config/config.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/logging.hpp"
 #include "pstore/support/utf.hpp"
-
-#ifndef PSTORE_UNIX_DOMAIN_SOCKETS
-#define PSTORE_UNIX_DOMAIN_SOCKETS (0)
-#endif
 
 namespace {
     class gai_error_category : public std::error_category {
@@ -130,37 +125,7 @@ namespace {
 
     using socket_descriptor = pstore::broker::socket_descriptor;
 
-    // Create a client endpoint and connect to a server.
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-
-    socket_descriptor cli_conn (std::string const & name) {
-        using namespace pstore::broker;
-
-        // fill the socket address structure with the server′s "well-known" address.
-        struct sockaddr_un un;
-        std::memset (&un, 0, sizeof (un));
-        un.sun_family = AF_UNIX;
-        constexpr std::size_t sun_path_length = pstore::array_elements (un.sun_path);
-        name.copy (un.sun_path, sun_path_length);
-        if (un.sun_path[sun_path_length - 1U] != '\0') {
-            raise (pstore::errno_erc{ENAMETOOLONG}, "unix domain socket name too long");
-        }
-
-        // create a UNIX domain stream socket.
-        socket_descriptor fd{::socket (AF_UNIX, SOCK_STREAM, 0)};
-        if (!fd.valid ()) {
-            raise (platform_erc (get_last_error ()), "socket creation failed");
-        }
-
-        if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&un),
-                       static_cast<socklen_t> (SUN_LEN (&un))) != 0) {
-            raise (platform_erc{get_last_error ()}, "connect() failed");
-        }
-        return fd;
-    }
-
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-
+    /// Create a client endpoint and connect to a server.
     socket_descriptor cli_conn (char const * node, int port) {
         auto servinfo = get_address_info (node, port);
 
@@ -173,16 +138,16 @@ namespace {
                 continue;
             }
 
-            socket_descriptor fd{sock_fd};
-
-            if (connect (fd.get (), p->ai_addr, static_cast<socklen_t> (p->ai_addrlen)) ==
+            if (connect (sock_fd, p->ai_addr, static_cast<socklen_t> (p->ai_addrlen)) ==
                 socket_descriptor::error) {
                 // log_error (std::cerr, pstore::get_last_error (), "connect() returned");
                 continue;
             }
 
-            return fd;
+            return socket_descriptor{sock_fd};
         }
+
+        log (pstore::logging::priority::error, "unable to connect");
         return socket_descriptor{};
     }
 } // end anonymous namespace
@@ -190,22 +155,18 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        socket_descriptor connect_to_status_server (bool use_inet) {
+        socket_descriptor connect_to_status_server (in_port_t port) {
+            log (logging::priority::info, "connecting to status server at port ", port);
+            return cli_conn ("localhost", port);
+        }
+
+        socket_descriptor connect_to_status_server () {
             pstore::broker::socket_descriptor csfd;
             auto const status_file_path = pstore::broker::get_status_path ();
-            if (use_inet || !PSTORE_UNIX_DOMAIN_SOCKETS) {
-                in_port_t const port = pstore::broker::read_port_number_file (status_file_path);
-                // TODO: if port is 0 file read failed.
-                csfd = cli_conn ("localhost", port);
-            } else {
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-                csfd = cli_conn (status_file_path);
-#else
-                assert (false);
-#endif // PSTORE_UNIX_DOMAIN_SOCKETS
-            }
-
-            return csfd;
+            in_port_t const port = pstore::broker::read_port_number_file (status_file_path);
+            log (logging::priority::info, "connecting to status server at port ", port);
+            // FIXME: if port is 0 file read failed.
+            return connect_to_status_server (port);
         }
 
     } // namespace broker

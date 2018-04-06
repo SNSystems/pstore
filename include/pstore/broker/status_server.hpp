@@ -44,10 +44,38 @@
 #ifndef PSTORE_BROKER_STATUS_SERVER_HPP
 #define PSTORE_BROKER_STATUS_SERVER_HPP
 
+#include <condition_variable>
+#include <memory>
+#include <mutex>
+#ifdef _WIN32
+using in_port_t = unsigned short; // FIXME: multiple definitions of this type.
+#else
+#include <netinet/in.h>
+#endif
+
+#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/support/maybe.hpp"
+
 namespace pstore {
     namespace broker {
 
-        void status_server (bool use_inet_socket);
+        class self_client_connection {
+        public:
+            self_client_connection () = default;
+            self_client_connection (self_client_connection const &) = delete;
+            self_client_connection & operator= (self_client_connection const &) = delete;
+            self_client_connection & operator= (self_client_connection &&) = delete;
+
+            in_port_t get_port () const;
+            void set_port (in_port_t port);
+
+        private:
+            mutable std::mutex mut_;
+            mutable std::condition_variable cv_;
+            maybe<in_port_t> port_;
+        };
+
+        void status_server (std::shared_ptr<self_client_connection> client_ptr);
 
     } // namespace broker
 } // namespace pstore

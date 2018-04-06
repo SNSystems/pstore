@@ -51,8 +51,9 @@ namespace {
 
     class mock_cp : public pstore::broker::command_processor {
     public:
-        explicit mock_cp (unsigned const num_read_threads, bool use_inet_socket)
-                : command_processor (num_read_threads, use_inet_socket) {}
+        explicit mock_cp (unsigned const num_read_threads)
+                : command_processor (num_read_threads,
+                                     std::weak_ptr<pstore::broker::self_client_connection>{}) {}
 
         MOCK_METHOD2 (suicide, void(pstore::broker::fifo_path const &,
                                     pstore::broker::broker_command const &));
@@ -77,7 +78,7 @@ namespace {
     class Command : public ::testing::Test {
     public:
         Command ()
-                : cp_ (1U, true)
+                : cp_{1U}
                 , fifo_{nullptr} {}
 
     protected:

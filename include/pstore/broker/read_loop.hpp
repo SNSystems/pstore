@@ -57,7 +57,7 @@ namespace pstore {
         class recorder;
 
         void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
-                        std::shared_ptr<command_processor> & cp);
+                        std::shared_ptr<command_processor> cp);
 
     } // namespace broker
 } // namespace pstore

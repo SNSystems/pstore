@@ -71,14 +71,6 @@ namespace {
                                         cl::desc ("The number of pipe reading threads"),
                                         cl::init (2U));
 
-#define INET_BASE_HELP "Use internet rather than Unix domain sockets"
-#if PSTORE_UNIX_DOMAIN_SOCKETS
-#define INET_HELP INET_BASE_HELP
-#else
-#define INET_HELP INET_BASE_HELP " (ignored)"
-#endif
-    cl::opt<bool> use_inet_socket ("inet", cl::desc (INET_HELP), cl::init (false));
-
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
         if (path.length () > 0) {
@@ -98,7 +90,6 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     result.record_path = path_option (record_path);
     result.pipe_path = path_option (pipe_path);
     result.num_read_threads = num_read_threads;
-    result.use_inet_socket = use_inet_socket;
     return {std::move (result), EXIT_SUCCESS};
 }
 
