@@ -429,11 +429,9 @@ namespace pstore {
             class storage_type : public ExtentType {
             public:
                 template <typename OtherExtentType>
-                storage_type (pointer data, OtherExtentType ext)
+                constexpr storage_type (pointer data, OtherExtentType ext)
                         : ExtentType (ext)
                         , data_ (data) {
-                    assert ((!data && ExtentType::size () == 0) ||
-                            (data && ExtentType::size () >= 0));
                 }
 
                 constexpr pointer data () const noexcept { return data_; }
