@@ -105,6 +105,37 @@ namespace {
         pstore::logging::create_log_stream ("broker." + name);
     }
 
+
+    std::vector<std::future<void>> create_worker_threads (
+        std::shared_ptr<pstore::broker::command_processor> const & commands,
+        pstore::broker::fifo_path & fifo, std::shared_ptr<pstore::broker::scavenger> const & scav,
+        std::shared_ptr<pstore::broker::self_client_connection> const & status_client) {
+
+        using namespace pstore;
+        std::vector<std::future<void>> futures;
+
+        futures.push_back (create_thread ([&fifo, commands]() {
+            thread_init ("command");
+            commands->thread_entry (fifo);
+        }));
+
+        futures.push_back (create_thread ([scav]() {
+            thread_init ("scavenger");
+            scav->thread_entry ();
+        }));
+
+        futures.push_back (create_thread ([]() {
+            thread_init ("gcwatch");
+            broker::gc_process_watch_thread ();
+        }));
+
+        futures.push_back (create_thread ([status_client]() {
+            thread_init ("status");
+            broker::status_server (status_client);
+        }));
+        return futures;
+    }
+
 } // end anonymous namespace
 
 #if defined(_WIN32)
@@ -152,25 +183,7 @@ int main (int argc, char * argv[]) {
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
                                        make_weak (status_client));
 
-            futures.push_back (create_thread ([&fifo, commands]() {
-                thread_init ("command");
-                commands->thread_entry (fifo);
-            }));
-
-            futures.push_back (create_thread ([scav]() {
-                thread_init ("scavenger");
-                scav->thread_entry ();
-            }));
-
-            futures.push_back (create_thread ([]() {
-                thread_init ("gcwatch");
-                broker::gc_process_watch_thread ();
-            }));
-
-            futures.push_back (create_thread ([status_client]() {
-                thread_init ("status");
-                broker::status_server (status_client);
-            }));
+            futures = create_worker_threads (commands, fifo, scav, status_client);
 
             if (opt.playback_path) {
                 broker::player playback_file (*opt.playback_path);
