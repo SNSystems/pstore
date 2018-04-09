@@ -50,7 +50,6 @@ add_pstore_library (pstore-json-lib STATIC
     "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/utf.hpp"
 
     dom_types.cpp
-    json.cpp
     json_error.cpp
     utf.cpp
 )

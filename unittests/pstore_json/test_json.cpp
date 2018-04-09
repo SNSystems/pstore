@@ -560,6 +560,14 @@ TEST (JsonArray, Nested) {
     ASSERT_EQ (v, nullptr);
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
 }
+TEST (JsonArray, Nested2) {
+    json::parser<json::yaml_output> p;
+    p.parse ("[[null");
+    std::shared_ptr<dump::value> v = p.eof ();
+
+    ASSERT_EQ (v, nullptr);
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
+}
 TEST (JsonArray, MissingComma) {
     json::parser<json::yaml_output> p;
     p.parse ("[1 true]");
