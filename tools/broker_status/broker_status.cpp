@@ -84,7 +84,7 @@ namespace {
 
 } // namespace
 
-#if defined(_WIN32) && defined(_UNICODE)
+#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 using pstore_tchar = wchar_t;
 #else
 using pstore_tchar = char;

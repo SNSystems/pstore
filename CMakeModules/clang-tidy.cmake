@@ -71,10 +71,12 @@ if (CLANG_TIDY)
                         -e "/\\(framework directory\\)/d"
             OUTPUT_VARIABLE INCLUDE_PATHS
         )
+
+        # Now turn this string into a Cmake list.
+        string (REPLACE "\n" ";" INCLUDE_PATHS ${INCLUDE_PATHS})
     endif (MSVC)
 
-    # Now turn this string into a Cmake list.
-    string (REPLACE "\n" ";" INCLUDE_PATHS ${INCLUDE_PATHS})
+
 
     # Finally we get to build the system include directory
     # switches. Each path has leading and trailing whitespace stripped
