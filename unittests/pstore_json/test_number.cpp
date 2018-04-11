@@ -42,267 +42,272 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/json/json.hpp"
+#include <gtest/gtest.h>
 #include "pstore/json/dom_types.hpp"
-#include "gtest/gtest.h"
+#include "callbacks.hpp"
 
 using namespace pstore;
+using testing::StrictMock;
+using testing::DoubleEq;
 
-TEST (Number, Zero) {
-    json::parser<json::yaml_output> p;
+namespace {
+
+class JsonNumber : public ::testing::Test {
+public:
+    JsonNumber () : proxy_{callbacks_} {}
+protected:
+    StrictMock<mock_json_callbacks> callbacks_;
+    callbacks_proxy<mock_json_callbacks> proxy_;
+};
+
+}  //end of anonymous namespace
+
+TEST_F (JsonNumber, Zero) {
+    EXPECT_CALL (callbacks_, integer_value (0L)).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
     p.parse ("0");
-    std::shared_ptr<dump::value> v = p.eof ();
-
-    pstore::dump::number_long * n = v->dynamic_cast_number_long ();
-    ASSERT_NE (v, nullptr);
-    EXPECT_EQ (n->get (), 0L);
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
 }
 
-TEST (Number, MinusOne) {
-    json::parser<json::yaml_output> p;
-    p.parse ("-1");
-    std::shared_ptr<dump::value> v = p.eof ();
+TEST_F (JsonNumber, NegativeZero) {
+    EXPECT_CALL (callbacks_, integer_value (0L)).Times (1);
 
-    ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
-    EXPECT_EQ (v->dynamic_cast_number_long ()->get (), -1L);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-0");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
 }
 
-TEST (Number, MinusMinus) {
-    json::parser<json::yaml_output> p;
-    p.parse ("--");
-    std::shared_ptr<dump::value> v = p.eof ();
+TEST_F (JsonNumber, One) {
+    EXPECT_CALL (callbacks_, integer_value (1L)).Times (1);
 
-    ASSERT_EQ (v, nullptr);
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse (" 1 ");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
 }
 
-TEST (Number, OneTwoThree) {
-    json::parser<json::yaml_output> p;
-    p.parse ("123");
-    std::shared_ptr<dump::value> v = p.eof ();
-
-    ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
-    EXPECT_EQ (v->dynamic_cast_number_long ()->get (), 123L);
-}
-
-TEST (Number, Pi) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("3.1415");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 3.1415);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("-3.1415");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), -3.1415);
-    }
-}
-
-TEST (Number, Point45) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("0.45");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.45);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("-0.45");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), -0.45);
-    }
-}
-
-TEST (Number, ZeroExp2) {
-    json::parser<json::yaml_output> p;
-    p.parse ("0e2");
-    std::shared_ptr<dump::value> v = p.eof ();
-
-    ASSERT_NE (v, nullptr);
-    ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-    ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.0);
-}
-
-TEST (Number, OneExp2) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1e2");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 100.0);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1e+2");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 100.0);
-    }
-}
-
-TEST (Number, OneExpMinus2) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("0.01");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1e-2");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1E-2");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1E-02");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_double (), nullptr);
-        ASSERT_DOUBLE_EQ (v->dynamic_cast_number_double ()->get (), 0.01);
-    }
-}
-
-TEST (Number, IntegerMaxAndMin) {
-    {
-        auto const long_max = std::numeric_limits<long>::max ();
-        auto const str_max = std::to_string (long_max);
-
-        json::parser<json::yaml_output> p;
-        p.parse (str_max);
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
-        EXPECT_EQ (v->dynamic_cast_number_long ()->get (), long_max);
-    }
-    {
-        auto const long_min = std::numeric_limits<long>::min ();
-        auto const str_min = std::to_string (long_min);
-
-        json::parser<json::yaml_output> p;
-        p.parse (str_min);
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        ASSERT_NE (v, nullptr);
-        ASSERT_NE (v->dynamic_cast_number_long (), nullptr);
-        EXPECT_EQ (v->dynamic_cast_number_long ()->get (), long_min);
-    }
-}
-
-TEST (Number, IntegerPositiveOverflow) {
-    auto const str =
-        std::to_string (static_cast<unsigned long> (std::numeric_limits<long>::max ()) + 1L);
-
-    json::parser<json::yaml_output> p;
-    p.parse (str);
-    std::shared_ptr<dump::value> v = p.eof ();
-
-    EXPECT_EQ (v, nullptr);
+TEST_F (JsonNumber, LeadingZero) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("01");
+    p.eof ();
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
 }
 
-TEST (Number, IntegerNegativeOverflow) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("-123123123123123123123123123123");
-        std::shared_ptr<dump::value> v = p.eof ();
+TEST_F (JsonNumber, MinusOne) {
+    EXPECT_CALL (callbacks_, integer_value (-1)).Times (1);
 
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
-    }
-    {
-        constexpr auto min = std::numeric_limits<long>::min ();
-        auto const str = std::to_string (static_cast<unsigned long long> (min) + 1L);
-
-        json::parser<json::yaml_output> p;
-        p.parse (str);
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
-    }
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-1");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
 }
 
-TEST (Number, RealPositiveOverflow) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("123123e100000");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("9999E999");
-        std::shared_ptr<dump::value> v = p.eof ();
-
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
-    }
+TEST_F (JsonNumber, MinusOneLeadingZero) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-01");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
 }
 
-TEST (Number, BadExponentDigit) {
-    json::parser<json::yaml_output> p;
-    p.parse ("1Ex");
-    std::shared_ptr<dump::value> v = p.eof ();
-
-    EXPECT_EQ (v, nullptr);
+TEST_F (JsonNumber, MinusOnly) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_digits));
+}
+TEST_F (JsonNumber, MinusMinus) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("--");
+    p.eof ();
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
 }
 
-TEST (Number, BadFractionDigit) {
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1..");
-        std::shared_ptr<dump::value> v = p.eof ();
+TEST_F (JsonNumber, AllDigits) {
+    EXPECT_CALL (callbacks_, integer_value (1234567890L)).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1234567890");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
 
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
-    }
-    {
-        json::parser<json::yaml_output> p;
-        p.parse ("1.E");
-        std::shared_ptr<dump::value> v = p.eof ();
+TEST_F (JsonNumber, PositivePi) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (3.1415))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("3.1415");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
 
-        EXPECT_EQ (v, nullptr);
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
-    }
+TEST_F (JsonNumber, NegativePi) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (-3.1415))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-3.1415");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, PositiveZeroPoint45) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0.45))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("0.45");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, NegativeZeroPoint45) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (-0.45))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-0.45");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, ZeroExp2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("0e2");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, OneExp2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (100.0))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1e2");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, OneExpPlus2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (100.0))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1e+2");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, ZeroPointZeroOne) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("0.01");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, OneExpMinus2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1e-2");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, OneCapitalExpMinus2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1E-2");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, OneExpMinusZero2) {
+    EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1E-02");
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, IntegerMax) {
+    auto const long_max = std::numeric_limits<long>::max ();
+    auto const str_max = std::to_string (long_max);
+
+    EXPECT_CALL (callbacks_, integer_value (long_max)).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse (str_max);
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, IntegerMin) {
+    auto const long_min = std::numeric_limits<long>::min ();
+    auto const str_min = std::to_string (long_min);
+
+    EXPECT_CALL (callbacks_, integer_value (long_min)).Times (1);
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse (str_min);
+    p.eof ();
+    EXPECT_FALSE (p.has_error ());
+}
+
+TEST_F (JsonNumber, IntegerPositiveOverflow) {
+    auto const str =
+        std::to_string (static_cast<unsigned long> (std::numeric_limits<long>::max ()) + 1L);
+
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse (str);
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+TEST_F (JsonNumber, IntegerNegativeOverflow) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("-123123123123123123123123123123");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+// FIXME: is this test testing what it claims to?
+TEST_F (JsonNumber, IntegerNegativeOverflow2) {
+    constexpr auto min = std::numeric_limits<long>::min ();
+    auto const str = std::to_string (static_cast<unsigned long long> (min) + 1L);
+
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse (str);
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+TEST_F (JsonNumber, RealPositiveOverflow) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("123123e100000");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+TEST_F (JsonNumber, RealPositiveOverflow2) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("9999E999");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+TEST_F (JsonNumber, RealUnderflow) {
+    json::parser<decltype (proxy_)> p = json::make_parser (proxy_);
+    p.parse ("123e-10000000");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+}
+
+TEST_F (JsonNumber, BadExponentDigit) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1Ex");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+}
+
+TEST_F (JsonNumber, BadFractionDigit) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1..");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+}
+TEST_F (JsonNumber, BadExponentAfterPoint) {
+    json::parser<decltype (proxy_)> p (proxy_);
+    p.parse ("1.E");
+    p.eof ();
+    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
 }
 // eof: unittests/pstore_json/test_number.cpp

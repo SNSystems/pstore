@@ -52,37 +52,27 @@
 #include <memory>
 #include <ostream>
 #include <stack>
+#include <utility>
 #include <vector>
-
-#include "pstore/dump/value.hpp"
 
 namespace pstore {
     namespace json {
 
-        // FIXME: call this "dom" or somesuch.
-        class yaml_output {
+        class null_output {
         public:
-            using result_type = std::shared_ptr<::pstore::dump::value>;
+            using result_type = void;
 
-            void string_value (std::string const & s) { out_.emplace (new class dump::string (s)); }
-            void integer_value (long v) { out_.emplace (dump::make_number (v)); }
-            void float_value (double v) { out_.emplace (dump::make_number (v)); }
-            void boolean_value (bool v) { out_.emplace (new dump::boolean (v)); }
-            void null_value () { out_.emplace (new dump::null ()); }
+            void string_value (std::string const &) const noexcept {}
+            void integer_value (long ) const noexcept {}
+            void float_value (double ) const noexcept {}
+            void boolean_value (bool) const noexcept {}
+            void null_value () const noexcept {}
 
-            void begin_array ();
-            void end_array ();
+            void begin_array () const noexcept {}
+            void end_array () const noexcept {}
 
-            void begin_object ();
-            void end_object ();
-
-            result_type result () const {
-                assert (out_.size () == 1U);
-                return out_.top ();
-            }
-
-        private:
-            std::stack<result_type> out_;
+            void begin_object () const noexcept {}
+            void end_object () const noexcept {}
         };
 
     } // namespace json

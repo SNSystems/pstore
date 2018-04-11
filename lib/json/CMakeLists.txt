@@ -41,18 +41,30 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-include (add_pstore)
-set (PSTORE_JSON_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore/json")
-add_pstore_library (pstore-json-lib STATIC
-    "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/dom_types.hpp"
-    "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/json.hpp"
-    "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/json_error.hpp"
-    "${PSTORE_JSON_PUBLIC_INCLUDES_DIR}/utf.hpp"
 
-    dom_types.cpp
+include (add_pstore)
+set (PSTORE_JSON_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore/json")
+set (PSTORE_JSON_SOURCES
+    "${PSTORE_JSON_INCLUDES_DIR}/dom_types.hpp"
+    "${PSTORE_JSON_INCLUDES_DIR}/json.hpp"
+    "${PSTORE_JSON_INCLUDES_DIR}/json_error.hpp"
+    "${PSTORE_JSON_INCLUDES_DIR}/utf.hpp"
+
     json_error.cpp
     utf.cpp
 )
-target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib pstore-dump-lib)
+add_pstore_library (pstore-json-lib STATIC ${PSTORE_JSON_SOURCES})
+target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib)
+
+if (PSTORE_IS_INSIDE_LLVM)
+    set (LLVM_REQUIRES_EH Yes)
+    set (LLVM_REQUIRES_RTTI Yes)
+
+    add_pstore_library (pstore-json-lib-ex STATIC ${PSTORE_JSON_SOURCES})
+    target_link_libraries (pstore-json-lib-ex PUBLIC pstore-support-lib-ex)
+
+    set (LLVM_REQUIRES_EH No)
+    set (LLVM_REQUIRES_RTTI No)
+endif ()
 
 # eof: lib/json/CMakeLists.txt

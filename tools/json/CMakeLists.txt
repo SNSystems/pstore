@@ -43,7 +43,7 @@
 #===----------------------------------------------------------------------===//
 
 add_pstore_executable (pstore-json json.cpp)
-target_link_libraries (pstore-json pstore-json-lib)
+target_link_libraries (pstore-json pstore-json-lib pstore-dump-lib)
 
 add_custom_command (TARGET pstore-json
     PRE_LINK

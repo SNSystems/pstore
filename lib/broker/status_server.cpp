@@ -104,7 +104,9 @@ std::uint32_t host_to_network (std::uint32_t v) {
 
 namespace {
 
-    using json_parser = pstore::json::parser<pstore::json::yaml_output>;
+
+
+    using json_parser = pstore::json::parser<pstore::json::null_output>;
     using socket_descriptor = pstore::broker::socket_descriptor;
 
     std::tuple<bool, bool> handle_request (pstore::gsl::span<char const> buf,
@@ -133,7 +135,8 @@ namespace {
             return std::make_tuple (true, false); // more please!
         }
 
-        pstore::dump::value_ptr dom = parser.eof ();
+#if 0
+        pstore::json::dom::value_ptr dom = parser.eof ();
         if (auto const err = parser.last_error ()) {
             return std::make_tuple (report_error (err), false);
         }
@@ -151,12 +154,17 @@ namespace {
 
         // Just send back the YAML equivalent of the result of the JSON parse.
         std::ostringstream out;
-        dom->write (out);
+        //dom->write (out); // FIXME: produce something!!!
         out << '\n';
         std::string const & str = out.str ();
         send (clifd, str.data (), str.length (), 0 /*flags*/);
 
         return std::make_tuple (false /*more?*/, false /*exit?*/);
+#else
+        // FIXME: just exit if there's a request of any kind!
+        return std::make_tuple (false /*more?*/, exit);
+#endif
+
     }
 
 } // end anonymous namespace
