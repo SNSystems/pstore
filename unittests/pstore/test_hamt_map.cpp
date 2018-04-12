@@ -399,6 +399,53 @@ namespace {
     }
 } // end anonymous namespace
 
+
+namespace {
+
+    class HamtRoundTrip : public EmptyStore {
+    public:
+        HamtRoundTrip ()
+                : db_{new pstore::database (file_)} {}
+
+    protected:
+        using lock_guard = std::unique_lock<mock_mutex>;
+        using transaction_type = pstore::transaction<lock_guard>;
+        using index_type = pstore::index::hamt_map<std::string, std::string>;
+
+        mock_mutex mutex_;
+        std::unique_ptr<pstore::database> db_;
+    };
+
+} // end anonymous namespace
+
+TEST_F (HamtRoundTrip, Empty) {
+    pstore::address addr;
+    index_type index1{*db_, pstore::address::null ()};
+    {
+        auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
+        addr = index1.flush (t1);
+    }
+
+    index_type index2{*db_, addr};
+    EXPECT_EQ (index2.size (), 0U);
+}
+
+TEST_F (HamtRoundTrip, LeafMember) {
+    pstore::address addr;
+    index_type index1{*db_, pstore::address::null ()};
+    {
+        auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
+        index1.insert_or_assign (t1, index_type::value_type{"a", "a"});
+        addr = index1.flush (t1);
+    }
+
+    index_type index2{*db_, addr};
+    ASSERT_EQ (index2.size (), 1U);
+    auto const actual = *index2.begin ();
+    auto const expected = index_type::value_type{"a", "a"};
+    EXPECT_EQ (actual, expected);
+}
+
 // ****************
 // *              *
 // *   OneLevel   *
@@ -464,14 +511,6 @@ TEST_F (OneLevel, InsertFirstNode) {
     EXPECT_TRUE (itp.second);
     EXPECT_EQ (1U, index_->size ());
     EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
-
-    // Check index root and save the index root into store.
-    {
-        index_pointer root = index_->root ();
-        this->check_is_leaf_node (root);
-        pstore::address new_root_record = index_->flush (t1);
-        EXPECT_EQ (index_->root ().addr, new_root_record);
-    }
 }
 
 // insert_or_assign the second node ("b") into the existing leaf node ("a").

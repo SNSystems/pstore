@@ -210,17 +210,9 @@ namespace pstore {
             /// An associative container that contains key-value pairs with unique keys.
             ///
             /// \param db A database which will contain the result of the hamt_map.
-            /// \param ip An index root address.
+            /// \param ip The index root address.
             /// \param hash A hash function that generates the hash value from the key value.
-            hamt_map (database & db, address ip = address::null (), Hash const & hash = Hash ())
-                    : db_ (db)
-                    , root_ (ip)
-                    , hash_ (hash)
-                    , equal_ (KeyEqual ()) {
-                if (root_.is_heap ()) {
-                    raise (pstore::error_code::index_corrupt);
-                }
-            }
+            hamt_map (database & db, address ip = address::null (), Hash const & hash = Hash ());
 
             ~hamt_map () { this->clear (); }
 
@@ -242,13 +234,18 @@ namespace pstore {
             ///@{
 
             /// Checks whether the container is empty
-            bool empty () const { return root_.is_empty (); }
+            bool empty () const noexcept {
+                assert (root_.is_empty () == (size_ == 0));
+                return size_ == 0;
+            }
 
             /// Returns the number of elements
-            std::size_t size () const {
-                auto s = std::distance (cbegin (), cend ());
-                assert (s >= 0);
-                return static_cast<std::size_t> (s);
+            std::size_t size () const noexcept {
+#ifndef NDEBUG
+                auto const s = std::distance (cbegin (), cend ());
+                assert (s >= 0 && static_cast<std::size_t> (s) == size_);
+#endif
+                return size_;
             }
             ///@}
 
@@ -345,6 +342,9 @@ namespace pstore {
             ///@}
 
         private:
+            static constexpr std::array<std::uint8_t, 8> index_signature{
+                {'I', 'n', 'd', 'x', 'H', 'e', 'd', 'r'}};
+
             /// Stores a key/value data pair.
             template <typename OtherValueType>
             address store_leaf_node (transaction_base & transaction, OtherValueType const & v,
@@ -429,6 +429,7 @@ namespace pstore {
 
             database & db_;
             index_pointer root_;
+            std::size_t size_ = 0;
             Hash hash_;
             KeyEqual equal_;
         };
@@ -547,6 +548,31 @@ namespace pstore {
         //* | ' \/ _` | '  \  _| | '  \/ _` | '_ \ *
         //* |_||_\__,_|_|_|_\__| |_|_|_\__,_| .__/ *
         //*                                 |_|    *
+        template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
+        constexpr std::array<std::uint8_t, 8>
+            hamt_map<KeyType, ValueType, Hash, KeyEqual>::index_signature;
+
+        template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database & db, address pos,
+                                                                Hash const & hash)
+                : db_{db}
+                , hash_{hash}
+                , equal_{KeyEqual ()} {
+
+            if (index_pointer{pos}.is_heap ()) {
+                raise (pstore::error_code::index_corrupt);
+            }
+            if (pos != address::null ()) {
+                // 'pos' must point to the index header block which gives us the tree root and size.
+                auto hb = db.getro<details::header_block> (pos);
+                if (hb->signature != index_signature) {
+                    raise (pstore::error_code::index_corrupt);
+                }
+                size_ = hb->size;
+                root_ = hb->root;
+            }
+        }
+
         // hamt_map::clear
         // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
@@ -844,6 +870,7 @@ namespace pstore {
             parent_stack parents;
             if (this->empty ()) {
                 root_ = this->store_leaf_node (transaction, value, &parents);
+                size_ = 1;
                 return std::make_pair (iterator (std::move (parents), this), true);
             } else {
                 parent_stack reverse_parents;
@@ -854,6 +881,9 @@ namespace pstore {
                 while (!reverse_parents.empty ()) {
                     parents.push (reverse_parents.top ());
                     reverse_parents.pop ();
+                }
+                if (!key_exists) {
+                    ++size_;
                 }
                 return std::make_pair (iterator (std::move (parents), this), !key_exists);
             }
@@ -894,16 +924,22 @@ namespace pstore {
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         address
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction) {
-            // If this is a leaf node, there's nothing to do. Just return its store address.
-            if (root_.is_address ()) {
-                return root_.addr;
+            // If the root is a leaf node, there's nothing to do. If not, we start to recursively
+            // flush the tree.
+            if (!root_.is_address ()) {
+                assert (root_.is_internal ());
+                auto internal = root_.untag_node<internal_node *> ();
+                root_ = internal->flush (transaction, 0 /* shifts */);
+                delete internal;
             }
 
-            assert (root_.is_internal ());
-            auto internal = root_.untag_node<internal_node *> ();
-            root_ = internal->flush (transaction, 0 /* shifts */);
-            delete internal;
-            return root_.addr;
+            // Write the index header. This simply holds a check signature, the tree root, and
+            // remembers the tree size for us on restore.
+            auto pos = transaction.alloc_rw<details::header_block> ();
+            pos.first->signature = index_signature;
+            pos.first->size = this->size ();
+            pos.first->root = root_.addr;
+            return pos.second;
         }
 
         // hamt_map::find
