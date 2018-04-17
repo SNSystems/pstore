@@ -51,6 +51,7 @@
 #include "gtest/gtest.h"
 
 #include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 #include "pstore/support/thread.hpp"
 
@@ -214,7 +215,10 @@ namespace {
     // (dtor)
     // ~~~~~~
     BasicLoggerThreadNameFixture::~BasicLoggerThreadNameFixture () {
-        ::pstore::threads::set_name (old_name_.c_str ());
+        PSTORE_TRY {
+            ::pstore::threads::set_name (old_name_.c_str ());
+        } PSTORE_CATCH (..., {
+        })
     }
 } // end anonymous namespace
 
