@@ -56,8 +56,8 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
-#include "pstore/mcrepo/aligned.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"
+#include "pstore/support/aligned.hpp"
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {

@@ -44,7 +44,6 @@
 
 set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (pstore-mcrepo
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/aligned.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/repo_error.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/sparse_array.hpp"

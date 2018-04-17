@@ -49,15 +49,10 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/make_unique.hpp"
 #include "pstore/core/region.hpp"
+#include "pstore/support/aligned.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    template <typename Ty, typename = typename std::enable_if<std::is_unsigned<Ty>::value>>
-    inline bool is_power_of_two (Ty n) {
-        //  if a number n is a power of 2 then bitwise & of n and n-1 will be zero.
-        return n && !(n & (n - 1U));
-    }
-
 
     /// An entry in the segment address table.
     struct sat_entry {

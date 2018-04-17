@@ -161,6 +161,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/aligned.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/array_elements.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_count.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
