@@ -768,7 +768,7 @@ namespace {
     void TwoValuesWithHashCollision::check_collision (std::uint64_t const first_hash,
                                                       std::uint64_t const second_hash,
                                                       unsigned collision_level) {
-        EXPECT_TRUE (collision_level <= 11);
+        EXPECT_TRUE (collision_level < 11);
         auto const shift = 6U * collision_level;
         auto const mask = (UINT64_C (1) << shift) - 1U;
         EXPECT_EQ (first_hash & mask, second_hash & mask);
