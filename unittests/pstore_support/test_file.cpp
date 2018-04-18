@@ -57,9 +57,8 @@
 
 #include "check_for_error.hpp"
 
-#ifdef _WIN32
+#include "pstore/support/portab.hpp"
 #include "pstore/support/small_vector.hpp"
-#endif
 
 namespace {
 
@@ -562,7 +561,10 @@ namespace {
             using namespace pstore::file;
             file_.open (file_handle::temporary{}, file_handle::get_temporary_directory ());
         }
-        ~NativeFile () { file_.close (); }
+        ~NativeFile () {
+            PSTORE_TRY { file_.close (); }
+            PSTORE_CATCH (..., {})
+        }
 
     protected:
         pstore::file::file_handle file_;
