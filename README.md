@@ -1,3 +1,8 @@
+<a href="https://scan.coverity.com/projects/snsystems-pstore">
+  <img alt="Coverity Scan Build Status"
+       src="https://img.shields.io/coverity/scan/15170.svg"/>
+</a>
+<div></div>
 <img alt="pstore" src="doc_sources/logo.svg" height="" height="80" width="150" />
 
 pstore is a lightweight persistent append-only key/value store intended for use as a back-end for the [LLVM Program Repository](https://github.com/SNSystems/llvm-prepo).
@@ -31,7 +36,7 @@ Optionally:
 
 ## Building
 
-The pstore build system uses cmake. If you're not very familiar with cmake, there's a small utility (found in `utils/make_build.py`) which will create an out-of-tree directory in which to build the project and run cmake with the correct arguments for your platform.
+The pstore build system uses cmake. If you’re not very familiar with cmake, there’s a small utility (found in `utils/make_build.py`) which will create an out-of-tree directory in which to build the project and run cmake with the correct arguments for your platform.
 
     $ python ./utils/make_build.py
     $ cmake ‑‑build build_linux
@@ -39,7 +44,6 @@ The pstore build system uses cmake. If you're not very familiar with cmake, ther
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
 
 # Getting started
-
 ## Using the read and write utilities
 
 The [pstore-read](tools/read/) and [pstore-write](tools/write/) tools provide a simple way to experiment with the capabilities of the pstore library. Consider the following exchange (which assumes a bash shell):
@@ -72,30 +76,30 @@ Let’s pick this apart one step at a time…
     $ echo foo > foo.txt
     $ echo bar > bar.txt
 
-Create two files which contain short text strings that we'll shortly record in a pstore file.
+Create two files which contain short text strings that we’ll shortly record in a pstore file.
 
     $ pstore-write --add-file mykey,foo.txt pstore.db
 
-This command creates a new pstore file named `pstore.db` (or appends to that file if it already exists). The choice of file name is entirely arbitrary. The tool creates an entry in one of the pstore indexes with the key “mykey” which has a corresponding value string “foo” as read from the `foo.txt` file we created earlier.
+This command creates a new pstore file named `pstore.db` (or appends to that file if it already exists). The choice of file name is entirely arbitrary. The tool creates an entry in one of the pstore indexes with the key “mykey” which has a corresponding value string “foo\n” as read from the `foo.txt` file we created earlier.
 
     $ pstore-read pstore.db mykey
     foo
 
-Next we use the `pstore-read` utility to search the `pstore.db` file for key named “mykey” and print its value. Happily it prints "foo\n": the same string that we passed to `pstore-write` above.
+Next we use the `pstore-read` utility to search the `pstore.db` file for key named “mykey” and print its value. Happily it prints “foo\n”: the same string that we passed to `pstore-write` above.
 
     $ pstore-write --add-file mykey,bar.txt pstore.db
 
-Now we run `pstore-write` again but this time associating the value “bar” (plus the inevitable line feed) with the key ”mykey”.
+Now we run `pstore-write` again but this time associating the value “bar” (plus the inevitable newline) with the key “mykey”.
 
     $ pstore-read pstore.db mykey
     bar
 
-Running `pstore-read` a second time prints ”bar” showing that the key ”mykey” has been updated.
+Running `pstore-read` a second time prints “bar” showing that the key “mykey” has been updated.
 
     $ pstore-read -r 1 pstore.db mykey
     foo
 
-This command is a little more interesting. Here we’ve retrieved the original value that was linked to “mykey”. Each time that `pstore-write` stores data in a pstore file, it does so in a self-contained transaction. Each transaction is appended to the file, preserving the previous contents. The first transaction in a pstore file is number 0 (which is always empty). The first time data is added, transaction 1 is created; the second time, we build transaction 2, and so on. Any redundant data stays in the file &mdash; and is immutable &mdash; until the garbage collector (`pstore-vacuumd`) runs.
+This command is a little more interesting. Here we’ve retrieved the original value that was linked to “mykey”. Each time that `pstore-write` stores data in a pstore file, it does so in a self-contained transaction. Each transaction is appended to the file, preserving the previous contents. The first transaction in a pstore file is number 0 (which is always empty). The first time data is added, transaction 1 is created; the second time, we build transaction 2, and so on. Any redundant data stays in the file &mdash; and is immutable &mdash; until the garbage collector (`pstore-vacuumd`) runs. This property enables a store to be read without any need for locks.
 
     $ pstore-dump --log pstore.db
 
