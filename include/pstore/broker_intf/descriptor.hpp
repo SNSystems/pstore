@@ -171,6 +171,7 @@ namespace pstore {
             struct posix_descriptor_traits {
                 using type = int;
                 using error_type = type;
+                posix_descriptor_traits () = default;
 
                 struct {
                     bool operator() (int fd) const noexcept { return fd >= 0; }

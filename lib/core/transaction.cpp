@@ -52,7 +52,7 @@ namespace pstore {
     transaction_base::transaction_base (transaction_base && rhs) noexcept
             : db_{rhs.db_}
             , size_{rhs.size_}
-            , first_{rhs.first_} {
+            , first_ (rhs.first_) {
         rhs.first_ = address::null ();
         assert (!rhs.is_open ());
     }
