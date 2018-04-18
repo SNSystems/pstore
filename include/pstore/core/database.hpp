@@ -142,7 +142,7 @@ namespace pstore {
 
         // Standard move behaviour.
         database (database &&) noexcept = default;
-        database & operator= (database &&) noexcept = default;
+        database & operator= (database &&) = default;
 
         // No assignment or copying.
         database (database const &) = delete;
@@ -300,12 +300,10 @@ namespace pstore {
         // TODO: should this be a member of 'transaction'?
         class sizes {
         public:
-            sizes () noexcept
-                    : footer_pos_{address::null ()}
-                    , logical_{0} {}
+            sizes () noexcept = default;
             explicit sizes (address footer_pos) noexcept
-                    : footer_pos_{footer_pos}
-                    , logical_{footer_pos_.absolute () + sizeof (trailer)} {}
+		: footer_pos_(footer_pos)
+		, logical_(footer_pos_.absolute () + sizeof (trailer)) {}
 
             address footer_pos () const { return footer_pos_; }
             std::uint64_t logical_size () const { return logical_; }
@@ -325,7 +323,7 @@ namespace pstore {
             address footer_pos_;
 
             /// This value tracks space as it's appended to the file.
-            std::uint64_t logical_;
+            std::uint64_t logical_ = 0;
         };
         sizes size_;
 

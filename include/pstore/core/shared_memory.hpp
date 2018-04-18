@@ -245,7 +245,7 @@ namespace pstore {
             shm_name (shm_name const & rhs) = delete;
 
             shm_name & operator= (shm_name const & rhs) = delete;
-            shm_name & operator= (shm_name && rhs) noexcept = default;
+            shm_name & operator= (shm_name && rhs) = default;
 
             char const * c_str () const;
             bool empty () const;
