@@ -77,8 +77,8 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             linear_node::linear_node (std::size_t size)
-                    : signature_{signature}
-                    , size_{size} {
+                    : signature_ (signature)
+                    , size_ (size) {
 
                 static_assert (std::is_standard_layout<linear_node>::value,
                                "linear_node must be standard-layout");
@@ -186,7 +186,7 @@ namespace pstore {
                 {'I', 'n', 't', 'e', 'r', 'n', 'a', 'l'}};
 
             internal_node::internal_node ()
-                    : signature_{signature}
+                    : signature_ (signature)
                     , bitmap_{0} {
 
                 static_assert (std::is_standard_layout<internal_node>::value,
@@ -206,7 +206,7 @@ namespace pstore {
             // ctor (one child)
             // ~~~~~~~~~~~~~~~~
             internal_node::internal_node (index_pointer const & leaf, hash_type hash)
-                    : signature_{signature}
+                    : signature_ (signature)
                     , bitmap_{hash_type{1} << hash}
                     , children_{{leaf}} {}
 
@@ -215,7 +215,7 @@ namespace pstore {
             internal_node::internal_node (index_pointer const & existing_leaf,
                                           index_pointer const & new_leaf, hash_type existing_hash,
                                           hash_type new_hash)
-                    : signature_{signature}
+                    : signature_ (signature)
                     , bitmap_ (hash_type{1} << existing_hash | hash_type{1} << new_hash) {
 
                 auto const index_a = get_new_index (new_hash, existing_hash);
@@ -232,7 +232,7 @@ namespace pstore {
             // copy ctor
             // ~~~~~~~~~
             internal_node::internal_node (internal_node const & rhs)
-                    : signature_{signature}
+                    : signature_ (signature)
                     , bitmap_{rhs.bitmap_} {
 
                 auto first = std::begin (rhs.children_);
