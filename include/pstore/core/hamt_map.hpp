@@ -555,9 +555,9 @@ namespace pstore {
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database & db, address pos,
                                                                 Hash const & hash)
-                : db_{db}
-                , hash_{hash}
-                , equal_{KeyEqual ()} {
+                : db_ (db)
+                , hash_ (hash)
+                , equal_ (KeyEqual ()) {
 
             if (index_pointer{pos}.is_heap ()) {
                 raise (pstore::error_code::index_corrupt);
