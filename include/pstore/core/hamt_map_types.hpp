@@ -136,7 +136,7 @@ namespace pstore {
                 index_pointer ()
                         : internal{nullptr} {}
                 index_pointer (address const a)
-                        : addr{a} {}
+                        : addr (a) {}
                 index_pointer (internal_node * p)
                         : internal{tag_node (p)} {}
                 index_pointer (linear_node * p)
