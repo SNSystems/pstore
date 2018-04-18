@@ -132,7 +132,11 @@ namespace {
 
         auto err = p.last_error ();
         if (err) {
-            std::cerr << "Parse error: " << p.last_error ().message () << '\n';
+            std::tuple <unsigned, unsigned> const position = p.coordinate ();
+            std::cerr << "Parse error: " << p.last_error ().message ()
+                      << " (Line " << std::get<1> (position)
+                      << ", column " << std::get<0> (position)
+                      << ")\n";
             return EXIT_FAILURE;
         }
 
