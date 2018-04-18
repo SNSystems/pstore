@@ -52,7 +52,7 @@ namespace pstore {
 
     /// \returns True if the input value is a power of 2.
     template <typename Ty, typename = typename std::enable_if<std::is_unsigned<Ty>::value>>
-    inline bool is_power_of_two (Ty n) {
+    inline constexpr bool is_power_of_two (Ty n) noexcept {
         //  if a number n is a power of 2 then bitwise & of n and n-1 will be zero.
         return n && !(n & (n - 1U));
     }
@@ -62,7 +62,7 @@ namespace pstore {
     /// \returns  The value closest to but greater than or equal to 'V' for which
     /// v modulo align is zero.
     template <typename IntType>
-    inline IntType aligned (IntType v, std::size_t align) {
+    inline IntType aligned (IntType v, std::size_t align) noexcept {
         assert (is_power_of_two (align));
         return (v + align - 1U) & ~(align - 1U);
     }
@@ -72,27 +72,26 @@ namespace pstore {
     /// V modulo alignof(decltype(v)) is zero.
     template <typename AlignType, typename IntType,
               typename = std::enable_if<std::is_integral<IntType>::value>>
-    inline IntType aligned (IntType v) {
+    inline IntType aligned (IntType v) noexcept {
         return aligned (v, alignof (AlignType));
     }
 
     template <typename PointeeType>
-    inline PointeeType * aligned (void * v) {
-        auto p = reinterpret_cast<std::uintptr_t> (v);
-        p = aligned (p, alignof (PointeeType));
+    inline PointeeType * aligned (void * v) noexcept {
+        auto p = aligned (reinterpret_cast<std::uintptr_t> (v), alignof (PointeeType));
         return reinterpret_cast<PointeeType *> (p);
     }
     template <typename PointeeType>
-    inline PointeeType const * aligned (void const * v) {
+    inline PointeeType const * aligned (void const * v) noexcept {
         return aligned<PointeeType> (const_cast<void *> (v));
     }
 
     template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-    inline DestPointeeType * aligned_ptr (SrcPointeeType * v) {
+    inline DestPointeeType * aligned_ptr (SrcPointeeType * v) noexcept {
         return aligned<DestPointeeType> (reinterpret_cast<void *> (v));
     }
     template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-    inline DestPointeeType const * aligned_ptr (SrcPointeeType const * p) {
+    inline DestPointeeType const * aligned_ptr (SrcPointeeType const * p) noexcept {
         auto v = reinterpret_cast<void const *> (p);
         return aligned<DestPointeeType> (const_cast<void *> (v));
     }
