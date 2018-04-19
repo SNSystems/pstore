@@ -84,13 +84,15 @@ if (PSTORE_IS_INSIDE_LLVM)
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-
 else ()
     add_pstore_library (pstore-broker-intf ${PSTORE_BROKER_INTF_SRC})
     target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 if (WIN32)
-target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
+    target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
+    if (PSTORE_IS_INSIDE_LLVM)
+        target_link_libraries (pstore-broker-intf-ex PUBLIC Ws2_32.dll)
+    endif ()
 endif ()
 # eof: lib/broker_intf/CMakeLists.txt
