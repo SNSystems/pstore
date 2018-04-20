@@ -93,7 +93,7 @@ namespace pstore {
                 static_assert (offsetof (linear_node, leaves_) == 16,
                                "offset of the first child must be 16");
 
-                std::fill_n (std::begin (leaves_), size, address::null ());
+                std::fill_n (&leaves_[0], size, address::null ());
             }
 
 
