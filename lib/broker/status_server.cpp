@@ -104,8 +104,6 @@ std::uint32_t host_to_network (std::uint32_t v) {
 
 namespace {
 
-
-
     using json_parser = pstore::json::parser<pstore::json::null_output>;
     using socket_descriptor = pstore::broker::socket_descriptor;
 
@@ -162,7 +160,7 @@ namespace {
         return std::make_tuple (false /*more?*/, false /*exit?*/);
 #else
         // FIXME: just exit if there's a request of any kind!
-        return std::make_tuple (false /*more?*/, exit);
+        return std::make_tuple (false /*more?*/, true);
 #endif
 
     }
