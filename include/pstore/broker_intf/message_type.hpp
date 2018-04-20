@@ -150,9 +150,10 @@ namespace pstore {
                     payload_chars < std::numeric_limits<udistance_type>::max (),
                     "payload chars is too large for static conversion to difference_type");
                 count = std::min (count, static_cast<udistance_type> (payload_chars));
-
                 auto out_first = std::begin (result);
-                out_first = std::copy_n (first, count, out_first);
+                if (count > 0) {
+                    out_first = std::copy_n (first, count, out_first);
+                }
                 std::fill (out_first, std::end (result), '\0');
                 return result;
             }
