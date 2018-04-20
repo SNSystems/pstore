@@ -93,7 +93,7 @@ TEST_F (ClCommandLine, StringOption) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string{option}, "hello");
+    EXPECT_EQ (option.get (), "hello");
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
@@ -103,19 +103,19 @@ TEST_F (ClCommandLine, StringOptionEquals) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string{option}, "hello");
+    EXPECT_EQ (option.get (), "hello");
 }
 
 TEST_F (ClCommandLine, StringPositional) {
     cl::opt<std::string> option ("arg", cl::Positional);
-    EXPECT_EQ (std::string{option}, "") << "Expected inital string value to be empty";
+    EXPECT_EQ (option.get (), "") << "Expected inital string value to be empty";
 
     this->add ("progname", "hello");
     std::ostringstream errors;
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string{option}, "hello");
+    EXPECT_EQ (option.get (), "hello");
 }
 
 TEST_F (ClCommandLine, RequiredStringPositional) {
@@ -126,7 +126,7 @@ TEST_F (ClCommandLine, RequiredStringPositional) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (), ::testing::HasSubstr ("a positional argument was missing"));
-    EXPECT_EQ (std::string{option}, "");
+    EXPECT_EQ (option.get (), "");
 }
 
 TEST_F (ClCommandLine, TwoPositionals) {
@@ -138,8 +138,8 @@ TEST_F (ClCommandLine, TwoPositionals) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str (), "");
-    EXPECT_EQ (std::string{opt1}, "arg1");
-    EXPECT_EQ (std::string{opt2}, "arg2");
+    EXPECT_EQ (opt1.get (), "arg1");
+    EXPECT_EQ (opt2.get (), "arg2");
 }
 
 TEST_F (ClCommandLine, List) {
@@ -173,7 +173,7 @@ TEST_F (ClCommandLine, MissingRequired) {
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (), ::testing::HasSubstr ("must be specified at least once"));
     EXPECT_EQ (opt.getNumOccurrences (), 0U);
-    EXPECT_EQ (std::string{opt}, "");
+    EXPECT_EQ (opt.get (), "");
 }
 
 TEST_F (ClCommandLine, MissingValue) {
@@ -184,7 +184,7 @@ TEST_F (ClCommandLine, MissingValue) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (), ::testing::HasSubstr ("requires a value"));
-    EXPECT_EQ (std::string{opt}, "");
+    EXPECT_EQ (opt.get (), "");
 }
 
 TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
@@ -196,7 +196,7 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (opt.getNumOccurrences (), 0U);
-    EXPECT_EQ (std::string{opt}, "");
+    EXPECT_EQ (opt.get (), "");
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
 
