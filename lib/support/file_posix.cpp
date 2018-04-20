@@ -357,7 +357,10 @@ namespace pstore {
         // ~~~~~~~~~~~
         std::time_t file_handle::latest_time () const {
             struct stat buf {};
-            ::stat (path_.c_str (), &buf);
+            if (::stat (path_.c_str (), &buf) != 0) {
+                int const err = errno;
+                raise_file_error (err, "stat failed", path_);
+            }
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec) or
 /// st_Xtime (and be of type time_t). This macro is defined in the former situation.
 #ifdef PSTORE_STAT_TIMESPEC
