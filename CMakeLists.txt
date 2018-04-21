@@ -293,8 +293,6 @@ if (DOXYGEN_FOUND)
                        ${DOXYGEN_EXECUTABLE} "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile"
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        COMMENT "Generating API documentation with Doxygen" VERBATIM)
-else ()
-    message (WARNING "Doxygen was not found.")
 endif (DOXYGEN_FOUND)
 
 # eof: CMakeLists.txt
