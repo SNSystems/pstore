@@ -87,8 +87,6 @@ endif ()
 
 
 
-
-
 # The pstore header and footer structures include crc32 values as an aid to validation:
 # if the CRC value doesn't match then the structure is not valid. However, if the CRC
 # does match then this is not an absolute guarantee that the remaining fields can be
