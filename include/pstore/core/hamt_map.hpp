@@ -49,11 +49,13 @@
 #include <iterator>
 #include <type_traits>
 
+
 #include "pstore/core/database.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/hamt_map_types.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
 
@@ -242,8 +244,11 @@ namespace pstore {
             /// Returns the number of elements
             std::size_t size () const noexcept {
 #ifndef NDEBUG
-                auto const s = std::distance (cbegin (), cend ());
-                assert (s >= 0 && static_cast<std::size_t> (s) == size_);
+                PSTORE_TRY {
+                    auto const s = std::distance (cbegin (), cend ());
+                    assert (s >= 0 && static_cast<std::size_t> (s) == size_);
+                }
+                PSTORE_CATCH (..., { assert (false); })
 #endif
                 return size_;
             }
