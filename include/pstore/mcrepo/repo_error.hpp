@@ -52,7 +52,7 @@
 namespace pstore {
     namespace repo {
 
-        enum class error_code {
+        enum class error_code : int {
             bad_fragment_record = 1,
             bad_ticket_record,
         };

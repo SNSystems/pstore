@@ -50,7 +50,7 @@
 namespace pstore {
     namespace dump {
 
-        enum class error_code {
+        enum class error_code : int {
             cant_find_target = 1,
             no_register_info_for_target,
             no_assembly_info_for_target,
