@@ -130,21 +130,21 @@ namespace {
         auto servinfo = get_address_info (node, port);
 
         // servinfo now points to a linked list of 1 or more addrinfo instances.
+        socket_descriptor sock_fd;
         for (auto p = servinfo.get (); p != nullptr; p = p->ai_next) {
-            socket_descriptor::value_type sock_fd =
-                socket (p->ai_family, p->ai_socktype, p->ai_protocol);
-            if (sock_fd == socket_descriptor::invalid) {
+            sock_fd.reset (::socket (p->ai_family, p->ai_socktype, p->ai_protocol));
+            if (!sock_fd.valid ()) {
                 // log_error (std::cerr, pstore::get_last_error (), "socket() returned");
                 continue;
             }
 
-            if (connect (sock_fd, p->ai_addr, static_cast<socklen_t> (p->ai_addrlen)) ==
+            if (::connect (sock_fd.get (), p->ai_addr, static_cast<socklen_t> (p->ai_addrlen)) ==
                 socket_descriptor::error) {
                 // log_error (std::cerr, pstore::get_last_error (), "connect() returned");
                 continue;
             }
 
-            return socket_descriptor{sock_fd};
+            return sock_fd;
         }
 
         log (pstore::logging::priority::error, "unable to connect");
