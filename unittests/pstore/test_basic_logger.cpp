@@ -81,15 +81,18 @@ namespace {
     // (dtor)
     // ~~~~~~
     time_zone_setter::~time_zone_setter () noexcept {
-        if (std::string const * const s = old_.get ()) {
-            time_zone_setter::setenv ("TZ", s->c_str ());
-        } else {
+        PSTORE_TRY {
+            if (std::string const * const s = old_.get ()) {
+                time_zone_setter::setenv ("TZ", s->c_str ());
+            } else {
 #ifdef _WIN32
-            ::_putenv ("TZ=");
+                ::_putenv ("TZ=");
 #else
-            ::unsetenv ("TZ");
+                ::unsetenv ("TZ");
 #endif
-        }
+            }
+        } PSTORE_CATCH (..., {
+        })
     }
 
     // tz_value
