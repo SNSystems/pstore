@@ -146,7 +146,8 @@ namespace pstore {
             public:
                 template <class... Mods>
                 explicit opt (Mods const &... mods)
-                        : option () {
+                        : option ()
+                        , value_{} {
                     apply (*this, mods...);
                 }
                 opt (opt const &) = delete;
