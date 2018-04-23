@@ -183,12 +183,6 @@ namespace {
         return fd;
     }
 
-    void bind (pstore::broker::socket_descriptor const & socket, sockaddr_in6 const & address) {
-        bind (socket.get (), reinterpret_cast<sockaddr const *> (&address), sizeof (address));
-    }
-
-
-
     template <typename T>
     socket_descriptor accept (socket_descriptor const & listenfd, T * const their_addr) {
         auto addr_size = static_cast<socklen_t> (sizeof (T));
@@ -262,21 +256,25 @@ namespace {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     socket_descriptor create_server_listen_socket () {
         // Get a socket for address family AF_INET6 to prepare to accept incoming connections.
-        socket_descriptor inet_fd = create_socket (AF_INET6, SOCK_STREAM, 0);
+        socket_descriptor sock = create_socket (AF_INET6, SOCK_STREAM, 0);
 
-        // After the socket descriptor is created, a bind() function gets a unique name for the
-        // socket. We accept connections from the loopback address and let the system pick the port
-        // number on which we will listen.
-        sockaddr_in6 serveraddr;
-        std::memset (&serveraddr, 0, sizeof serveraddr);
-        serveraddr.sin6_family = AF_INET6;
-        serveraddr.sin6_port = host_to_network (in_port_t{0});
-        serveraddr.sin6_addr = in6addr_any;
-        bind (inet_fd, serveraddr);
-        return inet_fd;
+        // After the socket descriptor is created, bind() gets a unique name for the socket. We
+        // accept connections from the loopback address and let the system pick the port number on
+        // which we will listen.
+        sockaddr_in6 address;
+        std::memset (&address, 0, sizeof address);
+        address.sin6_family = AF_INET6;
+        address.sin6_port = host_to_network (in_port_t{0});
+        address.sin6_addr = in6addr_any;
+        if (::bind (sock.get (), reinterpret_cast<sockaddr const *> (&address), sizeof (address)) !=
+            0) {
+            raise (platform_erc (pstore::broker::get_last_error ()), "socket bind failed");
+        }
+        return sock;
     }
 
-
+    // get_listen_port
+    // ~~~~~~~~~~~~~~~
     in_port_t get_listen_port (socket_descriptor const & fd) {
         sockaddr_storage address;
         std::memset (&address, 0, sizeof address);
