@@ -5,7 +5,7 @@
 | Name | Description |
 | --- | --- |
 | [pstore-brokerd](broker/) | The pstore message broker. The broker is a service which is used to manage the garbage collection processes. |
-| [pstore-vacuumd](vacum/) | Data store garbage collector. |
+| [pstore-vacuumd](vacuum/) | Data store garbage collector. |
 
 ### Exploring
 
