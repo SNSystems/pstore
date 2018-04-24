@@ -221,22 +221,26 @@ namespace {
         bool is_localhost = false;
 
         // deal with both IPv4 and IPv6:
-        if (their_addr.ss_family == AF_INET) {
-            auto v4s = reinterpret_cast<sockaddr_in *> (&their_addr);
+        switch (their_addr.ss_family) {
+        case AF_INET: {
+            auto v4s = reinterpret_cast<sockaddr_in const *> (&their_addr);
             // port = ntohs(v4s->sin_port);
             inet_ntop (AF_INET, &v4s->sin_addr, ipstr, sizeof ipstr);
             static_assert (INADDR_LOOPBACK <= std::numeric_limits<std::uint32_t>::max (),
                            "INADDR_LOOPBACK is too large to be a uint32_t");
             is_localhost = (v4s->sin_addr.s_addr ==
                             host_to_network (static_cast<std::uint32_t> (INADDR_LOOPBACK)));
-        } else if (their_addr.ss_family == AF_INET6) {
-            auto v6s = reinterpret_cast<sockaddr_in6 *> (&their_addr);
-            // port = ntohs(s->sin6_port);
+        } break;
+
+        case AF_INET6: {
+            auto v6s = reinterpret_cast<sockaddr_in6 const *> (&their_addr);
+            // port = ntohs(v6s->sin6_port);
             in6_addr const & addr6 = v6s->sin6_addr;
             inet_ntop (AF_INET6, &addr6, ipstr, sizeof ipstr);
             is_localhost =
                 std::memcmp (&v6s->sin6_addr, &in6addr_loopback, sizeof (v6s->sin6_addr)) == 0 ||
                 is_v4_mapped_localhost (v6s->sin6_addr);
+        } break;
         }
 
         ipstr[pstore::array_elements (ipstr) - 1] = '\0'; // ensure nul termination.
@@ -298,8 +302,9 @@ namespace {
         return network_to_host (listen_port);
     }
 
-
-    bool is_recv_error (ssize_t nread) {
+    // is_recv_error
+    // ~~~~~~~~~~~~~
+    constexpr bool is_recv_error (ssize_t nread) {
 #ifdef _WIN32
         return nread == SOCKET_ERROR;
 #else
