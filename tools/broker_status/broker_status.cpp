@@ -113,7 +113,13 @@ int main (int argc, pstore_tchar * argv[]) {
         {
             char buffer[256];
             std::snprintf (buffer, 256, "{ \"pid\": %d }\n\04", static_cast<int> (getpid ()));
-            send (csfd.get (), buffer, static_cast<int> (std::strlen (buffer)), 0 /*flags*/);
+            if (::send (csfd.get (), buffer, static_cast<int> (std::strlen (buffer)), 0 /*flags*/) != 0) {
+#ifdef _WIN32
+                raise (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())}, "send failed");
+#else
+                raise (pstore::errno_erc{errno}, "send failed");
+#endif
+            }
         }
 
         // now read the server's reply.
@@ -134,7 +140,7 @@ int main (int argc, pstore_tchar * argv[]) {
             fwrite (buf, 1U, static_cast<std::size_t> (received), stdout);
         }
     }
-    PSTORE_CATCH (std::exception & ex, {
+    PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';
         exit_code = EXIT_FAILURE;
     })
