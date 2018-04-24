@@ -118,7 +118,8 @@ namespace {
         auto ctr = 0U;
         std::generate_n (out, num, [&ctr]() -> char { return ctr++ % 26 + 'A'; });
     }
-} // namespace
+
+} // end anonymous namespace
 
 TEST (BrokerMessageType, MaxLengthIteratorRange) {
     std::string long_payload;
@@ -151,8 +152,10 @@ TEST (BrokerMessageType, TooLongIteratorRangeIsTruncated) {
 
 TEST (BrokerMessageType, NegativeDistanceBetweenIterators) {
     char const payload[] = "payload";
-    auto last = payload;
-    auto first = payload + sizeof (payload) / sizeof (payload[0]);
+    // Note that first and last are reversed.
+    auto last = std::begin (payload);
+    auto first = std::end (payload);
+    ASSERT_LT (std::distance (first, last), 0);
 
     pstore::broker::message_type const actual (0, 0, 1, first, last);
 
