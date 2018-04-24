@@ -85,7 +85,7 @@
 
 namespace {
 
-    enum class dump_error_code {
+    enum class dump_error_code : int {
         bad_digest = 1,
         no_digest_index,
         fragment_not_found,

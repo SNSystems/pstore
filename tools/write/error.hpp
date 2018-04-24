@@ -51,7 +51,7 @@
 // ********************
 // * write error code *
 // ********************
-enum class write_error_code { unrecognized_compaction_mode = 1 };
+enum class write_error_code : int { unrecognized_compaction_mode = 1 };
 
 
 // ************************
