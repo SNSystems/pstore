@@ -132,14 +132,14 @@ namespace pstore {
             /// Once all of the data has been received, call the parser::eof() method.
 
             /// A convenience function which is equivalent to calling:
-            ///     parse (src.data(), src.length())
+            ///     input (gsl::make_span (src))
             /// \param src The data to be parsed.
-            parser & parse (std::string const & src) { return this->parse (gsl::make_span (src)); }
+            parser & input (std::string const & src) { return this->input (gsl::make_span (src)); }
 
+            /// A convenience function which is equivalent to calling:
+            ///     input (gsl::span<char const> (src, std::strlen (src)))
             /// \param src The data to be parsed.
-            parser & parse (char const * src) {
-                return parse (gsl::span<char const> (src, std::strlen (src)));
-            }
+            parser & input (char const * src);
 
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
             /// of the source data (for example, as the data is received from an external source).
@@ -147,11 +147,11 @@ namespace pstore {
             ///
             /// \param span The span of bytes to be parsed.
             template <typename SpanType>
-            parser & parse (SpanType const & span);
+            parser & input (SpanType const & span);
             ///@}
 
             /// Informs the parser that the complete input stream has been passed by calls to
-            /// parser<>::parse().
+            /// parser<>::input().
             ///
             /// \returns If the parse completes successfully, Callbacks::result()
             /// is called and its result returned. If the parse failed, then a default-constructed
@@ -1476,11 +1476,11 @@ namespace pstore {
                             false);
         }
 
-        // parse
+        // input
         // ~~~~~
         template <typename Callbacks>
         template <typename SpanType>
-        auto parser<Callbacks>::parse (SpanType const & span) -> parser & {
+        auto parser<Callbacks>::input (SpanType const & span) -> parser & {
             static_assert (
                 std::is_same<typename std::remove_cv<typename SpanType::element_type>::type,
                              char>::value,
@@ -1513,6 +1513,14 @@ namespace pstore {
                     }
                     ++pos;
                 }
+            }
+            return *this;
+        }
+
+        template <typename Callbacks>
+        auto parser<Callbacks>::input (char const * src) -> parser & {
+            if (src != nullptr) {
+                input (gsl::span<char const> (src, std::strlen (src)));
             }
             return *this;
         }

@@ -119,7 +119,7 @@ namespace {
                 (std::ios_base::badbit | std::ios_base::failbit | std::ios_base::eofbit)) == 0 &&
                !p.has_error ()) {
             in.read (buffer.data (), buffer.size ());
-            p.parse (pstore::gsl::make_span (buffer.data (),
+            p.input (pstore::gsl::make_span (buffer.data (),
                                              std::max (in.gcount (), std::streamsize{0})));
         }
 

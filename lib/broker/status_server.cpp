@@ -125,7 +125,7 @@ namespace {
             --size;
         }
 
-        parser.parse (pstore::gsl::make_span (buf.data (), size));
+        parser.input (pstore::gsl::make_span (buf.data (), size));
         if (auto const err = parser.last_error ()) {
             return std::make_tuple (report_error (err), false);
         }
