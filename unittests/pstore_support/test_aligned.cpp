@@ -71,19 +71,20 @@ TEST (Aligned, Aligned2) {
 
 TEST (Aligned, AlignedInt) {
     EXPECT_EQ (pstore::aligned<int> (0), 0);
-    if (alignof (int) >= 2) {
-        EXPECT_EQ (pstore::aligned<int> (1), alignof (int));
-        EXPECT_EQ (pstore::aligned<int> (2), alignof (int));
+    constexpr auto int_align = static_cast <int> (alignof (int));
+    if (int_align >= 2) {
+        EXPECT_EQ (pstore::aligned<int> (1), int_align);
+        EXPECT_EQ (pstore::aligned<int> (2), int_align);
     }
-    if (alignof (int) >= 4) {
-        EXPECT_EQ (pstore::aligned<int> (3), alignof (int));
-        EXPECT_EQ (pstore::aligned<int> (4), alignof (int));
+    if (int_align >= 4) {
+        EXPECT_EQ (pstore::aligned<int> (3), int_align);
+        EXPECT_EQ (pstore::aligned<int> (4), int_align);
     }
-    if (alignof (int) >= 8) {
-        EXPECT_EQ (pstore::aligned<int> (5), alignof (int));
-        EXPECT_EQ (pstore::aligned<int> (6), alignof (int));
-        EXPECT_EQ (pstore::aligned<int> (7), alignof (int));
-        EXPECT_EQ (pstore::aligned<int> (8), alignof (int));
+    if (int_align >= 8) {
+        EXPECT_EQ (pstore::aligned<int> (5), int_align);
+        EXPECT_EQ (pstore::aligned<int> (6), int_align);
+        EXPECT_EQ (pstore::aligned<int> (7), int_align);
+        EXPECT_EQ (pstore::aligned<int> (8), int_align);
     }
 }
 // eof: unittests/pstore_support/test_aligned.cpp
