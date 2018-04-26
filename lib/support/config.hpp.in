@@ -83,6 +83,10 @@
 /// introduced until C++17 but is available even when compiling for C++11 on some platforms.
 #cmakedefine PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN 1
 
+/// Defined if calling data() on a non-const std::string returns a non-const char type. (This was
+/// introduced with C++17.)
+#cmakedefine PSTORE_HAVE_NON_CONST_STD_STRING_DATA 1
+
 #cmakedefine PSTORE_HAVE_SYS_POSIX_SHM_H 1
 #cmakedefine PSTORE_HAVE_LINUX_LIMITS_H 1
 

@@ -48,21 +48,6 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file sstring_view_archive.hpp
-///
-/// \brief Writes an instance of `sstring_view` to an archive.
-///
-/// Writes a variable length value follow by a sequence of characters. The
-/// length uses the format defined by varint::encode() but we ensure that at
-/// least two bytes are produced. This means that the read() member can rely
-/// on being able to read two bytes and reduce the number of pstore accesses
-/// to two for strings < (2^14 - 1) characters (and three for strings longer
-/// than that.
-///
-/// \param archive  The Archiver to which the value 'str' should be written.
-/// \param str      The string whose content is to be written to the archive.
-/// \returns The value returned by writing the first byte of the string length.
-/// By convention, this is the "address" of the string data (although the precise
-/// meaning is determined by the archive type.
 
 #ifndef PSTORE_SSTRING_VIEW_ARCHIVE_HPP
 #define PSTORE_SSTRING_VIEW_ARCHIVE_HPP
@@ -74,10 +59,6 @@
 #include "pstore/serialize/types.hpp"
 #include "pstore/support/sstring_view.hpp"
 
-///@{
-/// \name Reading and writing standard types
-/// A collection of convenience methods which each know how to serialize the types defined by the
-/// standard library (string, vector, set, etc.)
 namespace pstore {
     namespace serialize {
 
@@ -119,7 +100,7 @@ namespace pstore {
             // note that there's no read() implementation.
         };
 
-        /// Any two sstring_view instances with the dame Pointer type have the same serialized
+        /// Any two sstring_view instances with the same Pointer type have the same serialized
         /// representation.
         template <typename Pointer>
         struct is_compatible<::pstore::sstring_view<Pointer>, ::pstore::sstring_view<Pointer>>

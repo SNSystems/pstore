@@ -55,6 +55,7 @@
 #include <string>
 #include <type_traits>
 
+#include "pstore/config/config.hpp"
 #include "pstore/core/varint.hpp"
 #include "pstore/serialize/common.hpp"
 #include "pstore/serialize/types.hpp"
@@ -67,6 +68,20 @@ namespace pstore {
     namespace serialize {
 
         struct string_helper {
+            /// \brief Writes an instance of a string type (e.g. `sstring_view`) to an archive.
+            ///
+            /// Writes a variable length value followed by a sequence of characters. The
+            /// length uses the format defined by varint::encode() but we ensure that at
+            /// least two bytes are produced. This means that the read() member can rely
+            /// on being able to read two bytes and reduce the number of pstore accesses
+            /// to two for strings < (2^14 - 1) characters (and three for strings longer
+            /// than that.
+            ///
+            /// \param archive  The Archiver to which the value 'str' should be written.
+            /// \param str      The string whose content is to be written to the archive.
+            /// \returns The value returned by writing the first byte of the string length.
+            /// By convention, this is the "address" of the string data (although the precise
+            /// meaning is determined by the archive type).
             template <typename Archive, typename StringType>
             static auto write (Archive & archive, StringType const & str) ->
                 typename Archive::result_type {
@@ -122,20 +137,6 @@ namespace pstore {
             using value_type = std::string;
 
             /// \brief Writes an instance of `std::string` to an archive.
-            ///
-            /// Writes a variable length value follow by a sequence of characters. The
-            /// length uses the format defined by varint::encode() but we ensure that at
-            /// least two bytes are produced. This means that the read() member can rely
-            /// on being able to read two bytes and reduce the number of pstore accesses
-            /// to two for strings < (2^14 - 1) characters (and three for strings longer
-            /// than that.
-            ///
-            /// \param archive  The Archiver to which the value 'str' should be written.
-            /// \param str      The string whose content is to be written to the archive.
-            /// \returns The value returned by writing the first byte of the string length.
-            /// By convention, this is the "address" of the string data (although the precise
-            /// meaning is determined by the archive type.
-
             template <typename Archive>
             static auto write (Archive & archive, value_type const & str) ->
                 typename Archive::result_type {
@@ -144,12 +145,9 @@ namespace pstore {
 
             /// \brief Reads an instance of `std::string` from an archiver.
             ///
-            /// Reads an string of characters.
-            ///
             /// \param archive  The Archiver from which a string will be read.
             /// \param str      A reference to uninitialized memory that is suitable for a new
             /// string instance.
-
             template <typename Archive>
             static void read (Archive & archive, value_type & str) {
                 // Read the body of the string.
@@ -166,11 +164,16 @@ namespace pstore {
                 auto const length = string_helper::read_length (archive);
                 str.resize (length);
 
+#if PSTORE_HAVE_NON_CONST_STD_STRING_DATA
+                char * data = str.data ();
+#else
+                // TODO: this is technically undefined behaviour. Remove once we've got access to
+                // the C++17 library on our platforms.
+                auto data = const_cast<char *> (str.data ());
+#endif
                 // Now read the body of the string.
-                // FIXME: const_cast will not be necessary with the C++17 standard library.
                 serialize::read_uninit (
-                    archive, ::pstore::gsl::make_span (const_cast<char *> (str.data ()),
-                                                       static_cast<std::ptrdiff_t> (length)));
+                    archive, gsl::make_span (data, static_cast<std::ptrdiff_t> (length)));
 
                 // Release ownership from the deleter so that the initialized object is returned to
                 // the caller.

@@ -60,6 +60,15 @@ check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
 
 set (CMAKE_REQUIRED_LIBRARIES )
 
+
+check_cxx_source_compiles (
+    "#include <string>
+    int main () {
+        std::string s;
+        char * c = s.data ();
+    }"
+    PSTORE_HAVE_NON_CONST_STD_STRING_DATA)
+
 check_cxx_source_compiles (
     "#include <iomanip>
     #include <sstream>
