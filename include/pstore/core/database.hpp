@@ -75,38 +75,13 @@
 #include "pstore/support/sstring_view.hpp"
 
 namespace pstore {
-    /// Calculate the value that must be added to 'v' in order that it has the alignment
-    /// given by 'align'.
-    ///
-    /// \param v      The value to be aligned.
-    /// \param align  The alignment required for 'v'.
-    /// \returns  The value that must be added to 'v' in order that it has the alignment given by
-    /// 'align'.
-    template <typename Ty>
-    inline Ty calc_alignment (Ty v, std::size_t align) {
-        return (align == 0U) ? 0U : ((v + align - 1U) & ~(align - 1U)) - v;
-    }
 
-    /// Calculate the value that must be added to 'v' in order for it to have the alignment required
-    /// by type Ty.
-    ///
-    /// \param v  The value to be aligned.
-    /// \returns  The value that must be added to 'v' in order that it has the alignment required by
-    /// type Ty.
-    template <typename Ty>
-    inline Ty calc_alignment (Ty v) {
-        return calc_alignment (v, alignof (Ty));
-    }
-
-} // namespace pstore
-
-//*       _       _        _                      *
-//*    __| | __ _| |_ __ _| |__   __ _ ___  ___   *
-//*   / _` |/ _` | __/ _` | '_ \ / _` / __|/ _ \  *
-//*  | (_| | (_| | || (_| | |_) | (_| \__ \  __/  *
-//*   \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___|  *
-//*                                               *
-namespace pstore {
+    //*       _       _        _                      *
+    //*    __| | __ _| |_ __ _| |__   __ _ ___  ___   *
+    //*   / _` |/ _` | __/ _` | '_ \ / _` / __|/ _ \  *
+    //*  | (_| | (_| | || (_| | |_) | (_| \__ \  __/  *
+    //*   \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___|  *
+    //*                                               *
 
     class heartbeat;
 
@@ -152,7 +127,7 @@ namespace pstore {
         /// \brief Returns the logical size of the data store.
         /// The local size of the data store is the number of bytes used, including both the data
         /// and meta-data. This may be less than the size of the physical disk file.
-        std::uint64_t size () const { return size_.logical_size (); }
+        std::uint64_t size () const noexcept { return size_.logical_size (); }
 
         /// \brief Returns the path of the file in which this database is contained.
         std::string path () const { return storage_.file ()->path (); }
@@ -222,7 +197,7 @@ namespace pstore {
 
         void close ();
 
-        address footer_pos () const { return size_.footer_pos (); }
+        address footer_pos () const noexcept { return size_.footer_pos (); }
 
         unsigned get_current_revision () const {
             return getro<trailer> (size_.footer_pos ())->a.generation.load ();
@@ -302,19 +277,19 @@ namespace pstore {
         public:
             sizes () noexcept = default;
             explicit sizes (address footer_pos) noexcept
-		: footer_pos_(footer_pos)
-		, logical_(footer_pos_.absolute () + sizeof (trailer)) {}
+                    : footer_pos_ (footer_pos)
+                    , logical_ (footer_pos_.absolute () + sizeof (trailer)) {}
 
-            address footer_pos () const { return footer_pos_; }
-            std::uint64_t logical_size () const { return logical_; }
+            address footer_pos () const noexcept { return footer_pos_; }
+            std::uint64_t logical_size () const noexcept { return logical_; }
 
-            void update_footer_pos (address new_footer_pos) {
+            void update_footer_pos (address new_footer_pos) noexcept {
                 assert (new_footer_pos.absolute () >= sizeof (header));
                 footer_pos_ = new_footer_pos;
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
             }
 
-            void update_logical_size (std::uint64_t new_logical_size) {
+            void update_logical_size (std::uint64_t new_logical_size) noexcept {
                 assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = std::max (logical_, new_logical_size);
             }

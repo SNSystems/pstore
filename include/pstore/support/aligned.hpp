@@ -96,6 +96,30 @@ namespace pstore {
         return aligned<DestPointeeType> (const_cast<void *> (v));
     }
 
+    /// Calculate the value that must be added to 'v' in order that it has the alignment
+    /// given by 'align'.
+    ///
+    /// \param v      The value to be aligned.
+    /// \param align  The alignment required for 'v'.
+    /// \returns  The value that must be added to 'v' in order that it has the alignment given by
+    /// 'align'.
+    template <typename Ty>
+    inline Ty calc_alignment (Ty v, std::size_t align) {
+        assert (is_power_of_two (align));
+        return (align == 0U) ? 0U : ((v + align - 1U) & ~(align - 1U)) - v;
+    }
+
+    /// Calculate the value that must be added to 'v' in order for it to have the alignment required
+    /// by type Ty.
+    ///
+    /// \param v  The value to be aligned.
+    /// \returns  The value that must be added to 'v' in order that it has the alignment required by
+    /// type Ty.
+    template <typename Ty>
+    inline Ty calc_alignment (Ty v) {
+        return calc_alignment (v, alignof (Ty));
+    }
+
 } // end namespace pstore
 
 #endif // PSTORE_SUPPORT_ALIGNED_HPP
