@@ -73,6 +73,7 @@ namespace pstore {
 
                     /// Writes an instance of a standard-layout type T to the database.
                     /// \param value  The value to be written to the output container.
+                    /// \returns The pstore address at which the value was written.
                     template <typename Ty>
                     auto put (Ty const & value) -> result_type {
                         std::shared_ptr<Ty> ptr;

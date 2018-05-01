@@ -626,16 +626,17 @@ namespace pstore {
 
             assert (&db_ == &transaction.db ());
             auto writer = serialize::archive::make_writer (transaction);
-            // make sure the alignment of leaf node is 4.
-            transaction.alloc_rw (0, 4);
+            // Make sure the alignment of leaf node is 4 to ensure that the two LSB are guaranteed
+            // 0. If 'v' has greater alignment, serialize::write() will add additional padding.
+            constexpr auto aligned_to = std::size_t{4};
+            transaction.alloc_rw (0, aligned_to);
             // Now write the node and return where it went.
             address result = serialize::write (writer, v);
+            assert ((result.absolute () & (aligned_to - 1U)) == 0U);
             parents->push ({result});
 
             return result;
         }
-
-
 
         // hamt_map::insert_into_leaf
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~
