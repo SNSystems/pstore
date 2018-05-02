@@ -41,8 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_MAYBE_HPP
-#define PSTORE_CMD_UTIL_CL_MAYBE_HPP
+/// \file maybe.hpp
+/// \brief An implementation of the Haskell Maybe type.
+/// In Haskell, this simply looks like:
+///    data Maybe a = Just a | Nothing
+/// This is pretty much std::optional<> and this definition deliberately implements some of the
+/// methods of that type, so we should switch to the standard type once we're able to migrate to
+/// C++17.
+
+#ifndef PSTORE_SUPPORT_MAYBE_HPP
+#define PSTORE_SUPPORT_MAYBE_HPP
 
 #include <cassert>
 #include <new>
@@ -204,5 +212,5 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_CMD_UTIL_CL_MAYBE_HPP
+#endif // PSTORE_SUPPORT_MAYBE_HPP
 // eof: include/pstore/support/maybe.hpp
