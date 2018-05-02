@@ -330,7 +330,7 @@ namespace pstore {
     namespace logging {
 
         namespace details {
-            THREAD_LOCAL logger_collection * log_destinations = nullptr;
+            PSTORE_THREAD_LOCAL logger_collection * log_destinations = nullptr;
         } // namespace details
 
 

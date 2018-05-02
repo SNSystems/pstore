@@ -278,7 +278,7 @@ namespace pstore {
 
         namespace details {
             using logger_collection = std::vector<std::unique_ptr<logging::logger>>;
-            extern THREAD_LOCAL logger_collection * log_destinations;
+            extern PSTORE_THREAD_LOCAL logger_collection * log_destinations;
         } // end namespace details
 
 

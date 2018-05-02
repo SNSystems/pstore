@@ -54,9 +54,9 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
-#define THREAD_LOCAL __declspec(thread)
+#define PSTORE_THREAD_LOCAL __declspec(thread)
 #else
-#define THREAD_LOCAL __thread
+#define PSTORE_THREAD_LOCAL __thread
 #endif
 
 #include "pstore/support/gsl.hpp"
