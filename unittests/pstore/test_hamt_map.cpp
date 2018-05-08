@@ -1865,59 +1865,25 @@ TEST_F (CorruptInternalNodes, MatchingChildPointers) {
 namespace {
 
     class InvalidIndex : public IndexFixture {
-    public:
-        pstore::extent add (transaction_type & transaction, std::string const & key,
-                            std::string const & value);
     };
 
-    // add
-    // ~~~
-    pstore::extent InvalidIndex::add (transaction_type & transaction, std::string const & key,
-                                      std::string const & value) {
-
-        auto where = pstore::address::null ();
-        {
-            // Allocate storage for string 'value' and copy the data into it.
-            std::shared_ptr<char> ptr;
-            std::tie (ptr, where) = transaction.alloc_rw<char> (value.length ());
-            std::copy (std::begin (value), std::end (value), ptr.get ());
-        }
-
-        auto index = pstore::index::get_write_index (*db_);
-        auto const value_extent = pstore::extent{where, value.length ()};
-        index->insert_or_assign (transaction, key, value_extent);
-        return value_extent;
-    }
 } // end anonymous namespace
 
-TEST_F (InvalidIndex, OldRevision) {
+TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        auto value = this->add (t1, "key1", "first value");
+        auto r1index = pstore::index::get_write_index (*db_);
+        r1index->insert_or_assign (t1, std::string{"key1"}, pstore::extent());
         t1.commit ();
     }
     db_->sync (0);
-    auto idx = pstore::index::write_index (*db_);
+    auto r0index = pstore::index::get_write_index (*db_);
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        std::string const k2 = "key2";
-        check_for_error ([&]() { idx.insert_or_assign (t2, k2, pstore::extent ()); },
-                         pstore::error_code::index_not_latest_revision);
-    }
-}
 
-TEST_F (InvalidIndex, ClearIndexCache) {
-    {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        auto value = this->add (t1, "key1", "first value");
-        t1.commit ();
-    }
-    db_->sync (0);
-    auto idx = pstore::index::get_write_index (*db_);
-    {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        std::string const k2 = "key2";
-        check_for_error ([&]() { idx->insert_or_assign (t2, k2, pstore::extent ()); },
+        // We're now synced to revision 1. Trying to insert into the index loaded from
+        // r0 should raise an error.
+        check_for_error ([&]() { r0index->insert_or_assign (t2, std::string{"key2"}, pstore::extent ()); },
                          pstore::error_code::index_not_latest_revision);
     }
 }
