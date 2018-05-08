@@ -247,7 +247,7 @@ namespace pstore {
         shared const * get_shared () const;
         shared * get_shared ();
 
-        std::unique_ptr<index::index_base> & get_index (enum pstore::trailer::indices which) {
+        std::shared_ptr<index::index_base> & get_index (enum pstore::trailer::indices which) {
             return indices_[static_cast<std::underlying_type<decltype (which)>::type> (which)];
         }
         std::shared_ptr<trailer const> get_footer () const {
@@ -302,7 +302,7 @@ namespace pstore {
         };
         sizes size_;
 
-        std::array<std::unique_ptr<index::index_base>,
+        std::array<std::shared_ptr<index::index_base>,
                    static_cast<unsigned> (trailer::indices::last)>
             indices_;
         std::string sync_name_;

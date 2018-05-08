@@ -134,7 +134,7 @@ namespace pstore {
 
         value_ptr make_fragments (database & db, bool hex_mode) {
             array::container result;
-            if (index::digest_index * const digests =
+            if (std::shared_ptr<index::digest_index> const digests =
                     index::get_digest_index (db, false /* create */)) {
 
                 array::container members;
@@ -185,7 +185,7 @@ namespace pstore {
 
         value_ptr make_tickets (database & db) {
             array::container result;
-            if (index::ticket_index * const tickets =
+            if (std::shared_ptr<index::ticket_index> const tickets =
                     index::get_ticket_index (db, false /* create */)) {
 
                 for (auto const & kvp : *tickets) {

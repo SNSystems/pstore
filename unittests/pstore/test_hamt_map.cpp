@@ -1906,4 +1906,20 @@ TEST_F (InvalidIndex, OldRevision) {
     }
 }
 
+TEST_F (InvalidIndex, ClearIndexCache) {
+    {
+        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        auto value = this->add (t1, "key1", "first value");
+        t1.commit ();
+    }
+    db_->sync (0);
+    auto idx = pstore::index::get_write_index (*db_);
+    {
+        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        std::string const k2 = "key2";
+        check_for_error ([&]() { idx->insert_or_assign (t2, k2, pstore::extent ()); },
+                         pstore::error_code::index_not_latest_revision);
+    }
+}
+
 // eof: unittests/pstore/test_hamt_map.cpp

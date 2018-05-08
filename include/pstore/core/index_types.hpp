@@ -126,19 +126,19 @@ namespace pstore {
 
         /// Returns a pointer to the write index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
-        write_index * get_write_index (database & db, bool create = true);
+        std::shared_ptr<write_index> get_write_index (database & db, bool create = true);
 
         /// Returns a pointer to the digest index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
-        digest_index * get_digest_index (database & db, bool create = true);
+        std::shared_ptr<digest_index> get_digest_index (database & db, bool create = true);
 
         /// Returns a pointer to the ticket index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
-        ticket_index * get_ticket_index (database & db, bool create = true);
+        std::shared_ptr<ticket_index> get_ticket_index (database & db, bool create = true);
 
         /// Returns a pointer to the name index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
-        name_index * get_name_index (database & db, bool create = true);
+        std::shared_ptr<name_index> get_name_index (database & db, bool create = true);
 
         /// Write out any indices that have changed. Any that haven't will
         /// continue to point at their previous incarnation. Update the

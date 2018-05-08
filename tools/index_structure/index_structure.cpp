@@ -185,7 +185,7 @@ namespace {
             auto accessor = index_accessor<Index>::get ();
             char const * name =
                 index_names[static_cast<std::underlying_type<indices>::type> (Index)];
-            dump_index (accessor (db, false /*create*/), name);
+            dump_index (accessor (db, false /*create*/).get (), name);
         }
     }
 } // anonymous namespace

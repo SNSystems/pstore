@@ -90,7 +90,7 @@ namespace pstore {
                             GetIndexFunction get_index) {
             std::set<typename Index::value_type> result;
             db.sync (new_revision);
-            if (Index const * const index = get_index (db, false /* create */)) {
+            if (std::shared_ptr<Index const> const index = get_index (db, false /* create */)) {
                 for (auto const & value : *index) {
                     result.insert (value);
                 }
@@ -119,7 +119,7 @@ namespace pstore {
                                    GetIndexFunction get_index) {
             db.sync (old_revision);
             dump::array::container members;
-            Index const * const index = get_index (db, true /* create */);
+            std::shared_ptr<Index const> const index = get_index (db, true /* create */);
             auto const end = index->end ();
             for (auto const & member : new_contents) {
                 auto const it = index->find (diff::get_key (member));

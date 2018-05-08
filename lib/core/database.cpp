@@ -187,7 +187,7 @@ namespace pstore {
     // clear_index_cache
     // ~~~~~~~~~~~~~~~~~
     void database::clear_index_cache () {
-        for (std::unique_ptr<index::index_base> & index : indices_) {
+        for (std::shared_ptr<index::index_base> & index : indices_) {
             index.reset ();
         }
     }
