@@ -72,8 +72,8 @@ namespace pstore {
             /// \param archive  The archive to which the span will be written.
             /// \param v        The object value which is to be written.
             template <typename Archive>
-            static auto write (Archive & archive, uint128 const & v) ->
-                typename Archive::result_type {
+            static auto write (Archive && archive, uint128 const & v)
+                -> archive_result_type<Archive> {
                 return archive.put (v);
             }
 
@@ -82,7 +82,7 @@ namespace pstore {
             /// \param archive  The archive to which the span will be written.
             /// \param span     The span which is to be written.
             template <typename Archive, typename SpanType>
-            static auto writen (Archive & archive, SpanType span) -> typename Archive::result_type {
+            static auto writen (Archive && archive, SpanType span) -> archive_result_type<Archive> {
                 static_assert (std::is_same<typename SpanType::element_type, uint128>::value,
                                "span type does not match the serializer type");
                 return archive.putn (span);
@@ -94,7 +94,7 @@ namespace pstore {
             /// \param out      A reference to uninitialized memory into which a uint128 will be
             /// read.
             template <typename Archive>
-            static void read (Archive & archive, uint128 & out) {
+            static void read (Archive && archive, uint128 & out) {
                 assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
                 archive.get (out);
             }
@@ -104,10 +104,10 @@ namespace pstore {
             /// \param archive  The archive from which the value will be read.
             /// \param span     A span pointing to uninitialized memory
             template <typename Archive, typename Span>
-            static void readn (Archive & archive, Span span) {
+            static void readn (Archive && archive, Span span) {
                 static_assert (std::is_same<typename Span::element_type, uint128>::value,
                                "span type does not match the serializer type");
-                details::getn_helper::getn (archive, span);
+                details::getn_helper::getn (std::forward<Archive> (archive), span);
             }
         };
 

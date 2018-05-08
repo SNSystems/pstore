@@ -204,16 +204,18 @@ namespace pstore {
             using value_type = std::set<int>;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & ty) ->
-                typename Archive::result_type {
-                return container_archive_helper<value_type>::write (archive, ty);
+            static auto write (Archive && archive, value_type const & ty)
+                -> archive_result_type<Archive> {
+                return container_archive_helper<value_type>::write (std::forward<Archive> (archive),
+                                                                    ty);
             }
 
             template <typename Archive>
-            static void read (Archive & archive, value_type & out) {
+            static void read (Archive && archive, value_type & out) {
                 new (&out) value_type;
                 auto inserter = [&out](int v) { out.insert (v); };
-                container_archive_helper<value_type>::read (archive, inserter);
+                container_archive_helper<value_type>::read (std::forward<Archive> (archive),
+                                                            inserter);
             }
         };
     } // namespace serialize
@@ -273,17 +275,19 @@ namespace pstore {
             using value_type = MapWriter::map_type::value_type;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & ty) ->
-                typename Archive::result_type {
-                auto result = serialize::write (archive, ty.first);
-                serialize::write (archive, ty.second);
+            static auto write (Archive && archive, value_type const & ty)
+                -> archive_result_type<Archive> {
+                auto result = serialize::write (std::forward<Archive> (archive), ty.first);
+                serialize::write (std::forward<Archive> (archive), ty.second);
                 return result;
             }
 
             template <typename Archive>
-            static void read (Archive & archive, value_type & out) {
-                auto const first = serialize::read<decltype (value_type::first)> (archive);
-                auto const second = serialize::read<decltype (value_type::second)> (archive);
+            static void read (Archive && archive, value_type & out) {
+                auto const first =
+                    serialize::read<decltype (value_type::first)> (std::forward<Archive> (archive));
+                auto const second = serialize::read<decltype (value_type::second)> (
+                    std::forward<Archive> (archive));
                 new (&out) value_type (first, second);
             }
         };
@@ -294,18 +298,20 @@ namespace pstore {
             using value_type = MapWriter::map_type;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & ty) ->
-                typename Archive::result_type {
-                return container_archive_helper<value_type>::write (archive, ty);
+            static auto write (Archive && archive, value_type const & ty)
+                -> archive_result_type<Archive> {
+                return container_archive_helper<value_type>::write (std::forward<Archive> (archive),
+                                                                    ty);
             }
 
             template <typename Archive>
-            static void read (Archive & archive, value_type & out) {
+            static void read (Archive && archive, value_type & out) {
                 new (&out) value_type;
                 auto inserter = [&out](MapWriter::map_type::value_type const & v) {
                     out.insert (v);
                 };
-                return container_archive_helper<value_type>::read (archive, inserter);
+                return container_archive_helper<value_type>::read (std::forward<Archive> (archive),
+                                                                   inserter);
             }
         };
     } // namespace serialize

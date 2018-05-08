@@ -139,16 +139,18 @@ namespace pstore {
             using value_type = extent;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & r) ->
-                typename Archive::result_type {
-                auto resl = serialize::write (archive, r.addr.absolute ());
-                serialize::write (archive, r.size);
+            static auto write (Archive && archive, value_type const & r)
+                -> archive_result_type<Archive> {
+                auto const resl =
+                    serialize::write (std::forward<Archive> (archive), r.addr.absolute ());
+                serialize::write (std::forward<Archive> (archive), r.size);
                 return resl;
             }
             template <typename Archive>
-            static void read (Archive & archive, value_type & r) {
-                auto addr = address::make (serialize::read<std::uint64_t> (archive));
-                auto size = serialize::read<std::uint64_t> (archive);
+            static void read (Archive && archive, value_type & r) {
+                auto const addr = address::make (
+                    serialize::read<std::uint64_t> (std::forward<Archive> (archive)));
+                auto const size = serialize::read<std::uint64_t> (std::forward<Archive> (archive));
                 new (&r) extent (addr, size);
             }
         };

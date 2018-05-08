@@ -51,6 +51,7 @@
 
 
 #include "pstore/core/database.hpp"
+#include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/hamt_map_types.hpp"
 #include "pstore/core/transaction.hpp"
@@ -69,6 +70,16 @@ namespace pstore {
 #pragma warning(push)
 #pragma warning(disable : 4521)
 #endif
+        /// \brief A Hash array mapped trie index type for the pstore.
+        ///
+        /// \tparam KeyType  The map key type.
+        /// \tparam ValueType  The map value type.
+        /// \tparam Hash  A function which produces the hash of a supplied key. The signature must
+        /// be compatible with:
+        ///     index::details::hash_type(KeyType)
+        /// \tparam KeyEqual  A function used to compare keys for equality. The signature must be
+        /// compatible with:
+        ///     bool(KeyType, KeyType)
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         class hamt_map final : public index_base {
             using hash_type = pstore::index::details::hash_type;
@@ -328,7 +339,10 @@ namespace pstore {
                           serialize::is_compatible<OtherKeyType, KeyType>::value>::type>
             const_iterator find (OtherKeyType const & key) const;
 
-            /// Write an hamt_map into a store when transaction::commit is called.
+            /// Flush any modified tree nodes to the store.
+            /// \param transaction  The transaction to which the map will be written.
+            /// \param generation The generation number to which the map will be written.
+            /// \returns The address of the tree root node.
             address flush (transaction_base & transaction, unsigned generation);
 
             /// \name Accessors
@@ -339,11 +353,11 @@ namespace pstore {
             value_type load_leaf_node (address const addr) const;
 
             /// Returns the database instance to which the index belongs.
-            database & db () { return db_; }
-            database const & db () const { return db_; }
+            database & db () noexcept { return db_; }
+            database const & db () const noexcept { return db_; }
 
             /// Returns the index root pointer.
-            index_pointer root () const { return root_; }
+            index_pointer root () const noexcept { return root_; }
             ///@}
 
         private:
@@ -436,8 +450,10 @@ namespace pstore {
             unsigned revision_;
             index_pointer root_;
             std::size_t size_ = 0;
+            /// The function called to produce a hash for a given key.
             Hash hash_;
-            KeyEqual equal_;
+            /// The function used to compare keys for equality.
+            key_equal equal_;
         };
 #ifdef _WIN32
 #pragma warning(pop)
@@ -627,13 +643,14 @@ namespace pstore {
             not_null<parent_stack *> parents) {
 
             assert (&db_ == &transaction.db ());
-            auto writer = serialize::archive::make_writer (transaction);
             // Make sure the alignment of leaf node is 4 to ensure that the two LSB are guaranteed
             // 0. If 'v' has greater alignment, serialize::write() will add additional padding.
             constexpr auto aligned_to = std::size_t{4};
             transaction.alloc_rw (0, aligned_to);
+
             // Now write the node and return where it went.
-            address result = serialize::write (writer, v);
+            address const result =
+                serialize::write (serialize::archive::make_writer (transaction), v);
             assert ((result.absolute () & (aligned_to - 1U)) == 0U);
             parents->push ({result});
 

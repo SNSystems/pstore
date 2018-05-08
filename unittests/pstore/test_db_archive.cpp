@@ -60,6 +60,7 @@
 #include "mock_mutex.hpp"
 
 namespace {
+
     template <typename Transaction>
     pstore::address append_uint64 (Transaction & transaction, std::uint64_t v) {
         auto addr = pstore::address::null ();
@@ -72,7 +73,8 @@ namespace {
     class DbArchive : public EmptyStore {
     protected:
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (DbArchive, ReadASingleUint64) {
     pstore::database db{file_};
@@ -149,9 +151,9 @@ TEST_F (DbArchive, WriteAUint64Span) {
     // Write the 'original' array span to the store using a serializer.
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
-    auto archive = pstore::serialize::archive::make_writer (transaction);
     auto where = pstore::address::make (db.size ());
-    pstore::serialize::write (archive, ::pstore::gsl::make_span (original));
+    pstore::serialize::write (pstore::serialize::archive::make_writer (transaction),
+                              pstore::gsl::make_span (original));
 
     // Now read that value back again using the raw pstore API and check that the round-trip was
     // successful.
@@ -179,7 +181,7 @@ namespace {
         };
     };
 
-} // namespace
+} // end anonymous namespace
 
 TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     using ::testing::_;
@@ -206,8 +208,8 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
         .WillOnce (invoke_base_allocate);
 
     // Write the span.
-    auto archive = pstore::serialize::archive::make_writer (transaction);
-    pstore::serialize::write (archive, span);
+    using namespace pstore::serialize;
+    write (archive::make_writer (transaction), span);
 }
 
 namespace {
@@ -232,7 +234,8 @@ namespace {
             }
         };
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     using ::testing::_;
@@ -262,8 +265,8 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
         .Times (1)
         .WillOnce (invoke_base_get);
 
-    pstore::serialize::archive::database_reader archive (db, addr);
-    pstore::serialize::read (archive, ::pstore::gsl::span<std::uint64_t>{actual});
+    using namespace pstore::serialize;
+    read (archive::database_reader (db, addr), pstore::gsl::span<std::uint64_t>{actual});
 }
 
 // eof: unittests/pstore/test_db_archive.cpp

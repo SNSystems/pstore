@@ -478,8 +478,8 @@ namespace pstore {
                 // search? This would require a template compare method.
                 std::size_t cnum = 0;
                 for (auto const & child : *this) {
-                    serialize::archive::database_reader archive (db, child);
-                    KeyType const existing_key = serialize::read<KeyType> (archive);
+                    KeyType const existing_key =
+                        serialize::read<KeyType> (serialize::archive::database_reader{db, child});
                     if (equal (existing_key, key)) {
                         return {index_pointer{child}, cnum};
                     }

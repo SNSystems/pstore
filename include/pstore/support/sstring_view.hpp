@@ -169,9 +169,8 @@ namespace pstore {
         static constexpr size_type const npos = size_type (-1);
 
         // 7.3, sstring_view constructors and assignment operators
-        sstring_view () noexcept
-                : ptr_{nullptr}
-                , size_{0U} {}
+        constexpr sstring_view () noexcept
+                : ptr_{nullptr} {}
         sstring_view (PointerType ptr, size_type size) noexcept
                 : ptr_{std::move (ptr)}
                 , size_{size} {}

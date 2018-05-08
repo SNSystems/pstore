@@ -78,14 +78,14 @@ namespace pstore {
             using value_type = NonIntrusiveSerializer::non_standard_layout_type;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & p) ->
-                typename Archive::result_type {
-                return serialize::write (archive, p.a);
+            static auto write (Archive && archive, value_type const & p)
+                -> archive_result_type<Archive> {
+                return serialize::write (std::forward<Archive> (archive), p.a);
             }
 
             template <typename Archive>
-            static void read (Archive & archive, value_type & out) {
-                new (&out) value_type (serialize::read<int> (archive));
+            static void read (Archive && archive, value_type & out) {
+                new (&out) value_type (serialize::read<int> (std::forward<Archive> (archive)));
             }
         };
     } // namespace serialize
@@ -132,13 +132,13 @@ namespace pstore {
             using value_type = SerializeSpanFallback::simple_struct;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & p) ->
-                typename Archive::result_type {
+            static auto write (Archive && archive, value_type const & p)
+                -> archive_result_type<Archive> {
                 return archive.write (p);
             }
 
             template <typename Archive>
-            static void read (Archive & archive, value_type & out) {
+            static void read (Archive && archive, value_type & out) {
                 archive.read (out);
             }
         };
@@ -154,7 +154,7 @@ TEST_F (SerializeSpanFallback, Write) {
     auto const ret = pstore::serialize::archive::void_type{};
     EXPECT_CALL (arch, write (_)).Times (2).WillRepeatedly (Return (ret));
     EXPECT_CALL (arch, read (_)).Times (0);
-    pstore::serialize::write (arch, ::pstore::gsl::span<simple_struct>{my});
+    pstore::serialize::write (arch, pstore::gsl::span<simple_struct>{my});
 }
 TEST_F (SerializeSpanFallback, Read) {
     using ::testing::_;
@@ -163,7 +163,7 @@ TEST_F (SerializeSpanFallback, Read) {
     std::array<simple_struct, 2> arr;
     EXPECT_CALL (arch, write (_)).Times (0);
     EXPECT_CALL (arch, read (_)).Times (2);
-    pstore::serialize::read (arch, ::pstore::gsl::span<simple_struct>{arr});
+    pstore::serialize::read (arch, pstore::gsl::span<simple_struct>{arr});
 }
 
 
@@ -181,25 +181,25 @@ namespace {
         class mock_span_archive {
         public:
             using result_type = pstore::serialize::archive::void_type;
-            MOCK_METHOD1 (writen, result_type (::pstore::gsl::span<simple_struct>));
-            MOCK_METHOD1 (readn, void(::pstore::gsl::span<simple_struct>));
+            MOCK_METHOD1 (writen, result_type (pstore::gsl::span<simple_struct>));
+            MOCK_METHOD1 (readn, void(pstore::gsl::span<simple_struct>));
         };
     };
 } // namespace
 namespace pstore {
     namespace serialize {
-        // (note that read() and write() are not implemented ensuring that if the
+        // Note that read() and write() are not implemented ensuring that if the
         // code wants to call it, then we'll get a compilation failure.
         template <>
         struct serializer<SerializeSpan::simple_struct> {
             using value_type = SerializeSpan::simple_struct;
 
             template <typename Archive, typename SpanType>
-            static auto writen (Archive & mock, SpanType sp) -> typename Archive::result_type {
+            static auto writen (Archive && mock, SpanType sp) -> archive_result_type<Archive> {
                 return mock.writen (sp);
             }
             template <typename Archive, typename SpanType>
-            static void readn (Archive & mock, SpanType sp) {
+            static void readn (Archive && mock, SpanType sp) {
                 mock.readn (sp);
             }
         };
@@ -367,8 +367,7 @@ TEST_F (ArchiveSpan, ReadSpan) {
     }));
 
     std::array<int, 3> arr;
-    auto span = ::pstore::gsl::make_span (arr);
-    pstore::serialize::read (archive, span);
+    pstore::serialize::read (archive, pstore::gsl::make_span (arr));
     EXPECT_THAT (arr, ContainerEq (expected));
 }
 TEST_F (ArchiveSpan, ReadSingleElementSpan) {

@@ -110,17 +110,16 @@ TEST_F (SStringViewArchive, Empty) {
     mock_mutex mutex;
     auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
     auto const first = this->current_pos (transaction);
-    {
-        auto writer = pstore::serialize::archive::make_writer (transaction);
-        pstore::serialize::write (writer, str);
-    }
+    pstore::serialize::write (pstore::serialize::archive::make_writer (transaction), str);
+
     auto const last = this->current_pos (transaction);
     EXPECT_THAT (as_vector (first, last), ::testing::ElementsAre ('\x1', '\x0'));
 
     // Now try reading it back and compare to the original string.
     {
-        auto reader = pstore::serialize::archive::database_reader{db_, first};
-        shared_sstring_view const actual = pstore::serialize::read<shared_sstring_view> (reader);
+        using namespace pstore::serialize;
+        shared_sstring_view const actual =
+            read<shared_sstring_view> (archive::database_reader{db_, first});
         EXPECT_EQ (actual, "");
     }
 }

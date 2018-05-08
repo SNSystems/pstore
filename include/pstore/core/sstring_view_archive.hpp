@@ -68,9 +68,9 @@ namespace pstore {
             using value_type = ::pstore::sstring_view<std::shared_ptr<char const>>;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & str) ->
-                typename Archive::result_type {
-                return string_helper::write (archive, str);
+            static auto write (Archive && archive, value_type const & str)
+                -> archive_result_type<Archive> {
+                return string_helper::write (std::forward<Archive> (archive), str);
             }
 
             /// \brief Reads an instance of `sstring_view` from an archiver.
@@ -78,12 +78,21 @@ namespace pstore {
             /// \param str  A reference to uninitialized memory that is suitable for a new string
             /// instance.
             /// \note This function only reads from the database.
-            static void read (::pstore::serialize::archive::database_reader & archive,
-                              value_type & str) {
+            static void read (archive::database_reader && archive, value_type & str) {
+                readsv (archive, str);
+            }
+            static void read (archive::database_reader & archive, value_type & str) {
+                readsv (archive, str);
+            }
 
-                std::size_t const length = string_helper::read_length (archive);
+        private:
+            template <typename DBReader>
+            static void readsv (DBReader && archive, value_type & str) {
+                std::size_t const length =
+                    string_helper::read_length (std::forward<DBReader> (archive));
                 new (&str) value_type (
-                    archive.get_db ().getro<char> (archive.get_address (), length), length);
+                    archive.get_db ().template getro<char> (archive.get_address (), length),
+                    length);
                 archive.skip (length);
             }
         };
@@ -93,8 +102,8 @@ namespace pstore {
             using value_type = ::pstore::sstring_view<char const *>;
 
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & str) ->
-                typename Archive::result_type {
+            static auto write (Archive && archive, value_type const & str)
+                -> archive_result_type<Archive> {
                 return string_helper::write (archive, str);
             }
             // note that there's no read() implementation.
@@ -129,13 +138,13 @@ namespace pstore {
         struct serializer<::pstore::sstring_view<PointerType> const> {
             using value_type = ::pstore::sstring_view<PointerType>;
             template <typename Archive>
-            static auto write (Archive & archive, value_type const & str) ->
-                typename Archive::result_type {
-                return serializer::write (archive, str);
+            static auto write (Archive && archive, value_type const & str)
+                -> archive_result_type<Archive> {
+                return serializer::write (std::forward<Archive> (archive), str);
             }
             template <typename Archive>
-            static void read (Archive & archive, value_type & str) {
-                serialize::read_uninit (archive, str);
+            static void read (Archive && archive, value_type & str) {
+                serialize::read_uninit (std::forward<Archive> (archive), str);
             }
         };
 
