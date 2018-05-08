@@ -123,6 +123,8 @@ namespace pstore {
 
                 auto prev_footer = db.getro<trailer const> (head->footer_pos);
 
+                unsigned generation = prev_footer->a.generation + 1;
+
                 // Make a copy of the index locations; write out any modifications
                 // to the indices. Any updated indices will modify the 'locations'
                 // array.
@@ -131,7 +133,7 @@ namespace pstore {
                 // allocate and writing data here.
 
                 auto locations = prev_footer->a.index_records;
-                index::flush_indices (*this, &locations);
+                index::flush_indices (*this, &locations, generation);
 
                 // Writing new data is done. Now we begin to build the new file footer.
                 {
@@ -142,7 +144,7 @@ namespace pstore {
                     t->a.index_records = locations;
 
                     // Point the new header at the previous version.
-                    t->a.generation = prev_footer->a.generation + 1;
+                    t->a.generation = generation;
                     // The size of the transaction doesn't include the size of the footer record.
                     t->a.size = size_ - sizeof (trailer);
                     t->a.time = pstore::milliseconds_since_epoch ();

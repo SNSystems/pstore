@@ -182,7 +182,9 @@ namespace pstore {
                 return {map_.find (key)};
             }
 
-            address flush (transaction_base & transaction) { return map_.flush (transaction); }
+            address flush (transaction_base & transaction, unsigned generation) {
+                return map_.flush (transaction, generation);
+            }
 
             /// \name Accessors
             /// Provide access to index internals.

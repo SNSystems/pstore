@@ -71,6 +71,7 @@ namespace pstore {
     X (header_version_mismatch)                                                                    \
     X (footer_corrupt)                                                                             \
     X (index_corrupt)                                                                              \
+    X (index_not_latest_revision)                                                                  \
     X (unknown_process_path) /* could not discover the path of the calling process image*/         \
     X (store_closed)         /*an attempt to read or write from a store which is not open*/        \
     X (cannot_allocate_after_commit) /*cannot allocate data after a transaction has been           \

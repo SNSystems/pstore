@@ -111,22 +111,23 @@ namespace pstore {
         // flush_indices
         // ~~~~~~~~~~~~~
         void flush_indices (::pstore::transaction_base & transaction,
-                            trailer::index_records_array * const locations) {
+                            trailer::index_records_array * const locations,
+                            unsigned generation) {
             pstore::database & db = transaction.db ();
             if (index::write_index * const write = get_write_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::write] = write->flush (transaction);
+                (*locations)[trailer::indices::write] = write->flush (transaction, generation);
             }
 
             if (index::digest_index * const digest = get_digest_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::digest] = digest->flush (transaction);
+                (*locations)[trailer::indices::digest] = digest->flush (transaction, generation);
             }
 
             if (index::ticket_index * const ticket = get_ticket_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::ticket] = ticket->flush (transaction);
+                (*locations)[trailer::indices::ticket] = ticket->flush (transaction, generation);
             }
 
             if (index::name_index * const name = get_name_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::name] = name->flush (transaction);
+                (*locations)[trailer::indices::name] = name->flush (transaction, generation);
             }
 
             assert (locations->size () == trailer::indices::last);

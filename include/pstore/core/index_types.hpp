@@ -150,8 +150,10 @@ namespace pstore {
         /// \param transaction An open transaction to which the index data will be added.
         /// \param locations  An array of the index locations. Any modified indices
         ///                   will be modified to point at the new file address.
+        /// \param generation  A revision number into which the index will be flushed.
         void flush_indices (::pstore::transaction_base & transaction,
-                            trailer::index_records_array * const locations);
+                            trailer::index_records_array * const locations,
+                            unsigned generation);
 
     } // namespace index
 } // namespace pstore

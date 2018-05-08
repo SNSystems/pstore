@@ -130,7 +130,7 @@ TEST_F (SetFixture, FindSingle) {
     auto it = index_->find (a);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, a);
-    index_->flush (t1);
+    index_->flush (t1, db_->get_current_revision());
     it = index_->find (a);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, a);
@@ -170,7 +170,7 @@ TEST_F (SetFixture, InsertHeap) {
 TEST_F (SetFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     index_->insert (t1, std::string{"a"});
-    index_->flush (t1);
+    index_->flush (t1, db_->get_current_revision());
 
     const_iterator begin = index_->cbegin ();
     const_iterator end = index_->cend ();
@@ -186,7 +186,7 @@ TEST_F (SetFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     index_->insert (t1, std::string{"a"});
     index_->insert (t1, std::string{"b"});
-    index_->flush (t1);
+    index_->flush (t1, db_->get_current_revision());
 
     const_iterator begin = index_->cbegin ();
     const_iterator end = index_->cend ();
@@ -209,7 +209,7 @@ TEST_F (SetFixture, InsertInternalStore) {
     std::string const & key2 = (*itp2.first);
     EXPECT_EQ ("b", key2);
     EXPECT_TRUE (itp2.second);
-    index_->flush (t1);
+    index_->flush (t1, db_->get_current_revision());
 
     std::pair<iterator, bool> itp3 = index_->insert (t1, std::string{"a"});
     EXPECT_FALSE (itp3.second);
@@ -230,7 +230,7 @@ TEST_F (SetFixture, FindInternal) {
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);
 
-    index_->flush (t1);
+    index_->flush (t1, db_->get_current_revision ());
 
     it = index_->find (std::string{"a"});
     EXPECT_NE (it, cend);

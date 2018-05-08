@@ -329,7 +329,7 @@ namespace pstore {
             const_iterator find (OtherKeyType const & key) const;
 
             /// Write an hamt_map into a store when transaction::commit is called.
-            address flush (transaction_base & transaction);
+            address flush (transaction_base & transaction, unsigned generation);
 
             /// \name Accessors
             /// Provide access to index internals.
@@ -433,6 +433,7 @@ namespace pstore {
             void delete_node (index_pointer node, unsigned shifts);
 
             database & db_;
+            unsigned revision_;
             index_pointer root_;
             std::size_t size_ = 0;
             Hash hash_;
@@ -561,6 +562,7 @@ namespace pstore {
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database & db, address pos,
                                                                 Hash const & hash)
                 : db_ (db)
+                , revision_ (db.get_current_revision ())
                 , hash_ (hash)
                 , equal_ (KeyEqual ()) {
 
@@ -902,6 +904,9 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert (
             transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
             -> std::pair<iterator, bool> {
+            if (revision_ != db_.get_current_revision ()) {
+                raise (error_code::index_not_latest_revision);
+            }
             return this->insert_or_upsert (transaction, value, false /*is_upsert*/);
         }
 
@@ -912,6 +917,9 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
             transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
             -> std::pair<iterator, bool> {
+            if (revision_ != db_.get_current_revision ()) {
+                raise (error_code::index_not_latest_revision);
+            }
             return this->insert_or_upsert (transaction, value, true /*is_upsert*/);
         }
 
@@ -922,14 +930,21 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
             transaction_base & transaction, OtherKeyType const & key, OtherValueType const & value)
             -> std::pair<iterator, bool> {
+            if (revision_ != db_.get_current_revision ()) {
+                raise (error_code::index_not_latest_revision);
+            }
             return this->insert_or_assign (transaction, std::make_pair (key, value));
         }
 
         // hamt_map::flush
         // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        address
-        hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction) {
+        address hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction,
+                                                                     unsigned generation) {
+            if (revision_ != db_.get_current_revision ()) {
+                raise (error_code::index_not_latest_revision);
+            }
+
             // If the root is a leaf node, there's nothing to do. If not, we start to recursively
             // flush the tree.
             if (!root_.is_address ()) {
@@ -945,6 +960,9 @@ namespace pstore {
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
             pos.first->root = root_.addr;
+
+            // Update the revision number into which the index will be flushed.
+            revision_ = generation;
             return pos.second;
         }
 
