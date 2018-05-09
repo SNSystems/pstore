@@ -187,9 +187,40 @@ int main (int argc, char * argv[]) {
                 }
             }
 
+
+
             // Scan through the string arguments from the command line.
-            for (std::string const & v : opt.strings) {
-                name->insert (transaction, pstore::make_sstring_view (v.data (), v.length ()));
+            std::vector<std::pair<pstore::shared_sstring_view, pstore::address>> views;
+            views.reserve (opt.strings.size ());
+            for (std::string const & str : opt.strings) {
+                views.emplace_back (pstore::make_sstring_view (str), pstore::address::null ());
+            }
+
+            for (auto & v : views) {
+                auto res = name->insert (transaction, pstore::indirect_string (database, &v.first));
+                if (res.second) {
+                    pstore::index::name_index::iterator & pos = res.first;
+                    // Now the in-store addresses are pointing at the sstring_view instances on the
+                    // heap.
+                    v.second = pos.get_address ();
+                }
+            }
+
+            for (auto & v : views) {
+                if (v.second != pstore::address::null ()) {
+                    // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
+                    constexpr auto aligned_to = std::size_t{2};
+                    transaction.allocate (0, aligned_to);
+
+                    // Write the string body.
+                    auto const pos = pstore::serialize::write (
+                        pstore::serialize::archive::make_writer (transaction), v.first);
+
+                    // Modify the address field so that it points to the string body.
+                    std::shared_ptr<pstore::address> addr =
+                        transaction.getrw<pstore::address> (v.second);
+                    *addr = pos;
+                }
             }
 
             transaction.commit ();

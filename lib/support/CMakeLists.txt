@@ -202,6 +202,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     process_file_name_posix.cpp
     process_file_name_win32.cpp
     signal_helpers.cpp
+    sstring_view.cpp
     thread.cpp
     utf.cpp
     utf_win32.cpp

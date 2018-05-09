@@ -433,7 +433,7 @@ namespace pstore {
                 template <typename KeyType, typename OtherKeyType, typename KeyEqual,
                           typename = typename std::enable_if<
                               serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
-                auto lookup (database const & db, OtherKeyType const & key, KeyEqual equal) const
+                auto lookup (database & db, OtherKeyType const & key, KeyEqual equal) const
                     -> std::pair<index_pointer const, std::size_t>;
 
             private:
@@ -471,8 +471,7 @@ namespace pstore {
             // lookup
             // ~~~~~~
             template <typename KeyType, typename OtherKeyType, typename KeyEqual, typename>
-            auto linear_node::lookup (database const & db, OtherKeyType const & key,
-                                      KeyEqual equal) const
+            auto linear_node::lookup (database & db, OtherKeyType const & key, KeyEqual equal) const
                 -> std::pair<index_pointer const, std::size_t> {
                 // Linear search. TODO: perhaps we should sort the nodes and use a binary
                 // search? This would require a template compare method.

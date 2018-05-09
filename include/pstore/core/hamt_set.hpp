@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file hamt_set.hpp
 
-#ifndef PSTORE_HAMT_SET_HPP
-#define PSTORE_HAMT_SET_HPP
+#ifndef PSTORE_CORE_HAMT_SET_HPP
+#define PSTORE_CORE_HAMT_SET_HPP (1)
 
 // standard library
 #include <iterator>
@@ -55,12 +55,15 @@
 namespace pstore {
     namespace index {
 
+        namespace details {
+            class empty_class {};
+        } // namespace details
+
         template <typename KeyType, typename Hash, typename KeyEqual>
         class hamt_set final : public index_base {
             using index_pointer = pstore::index::details::index_pointer;
 
         private:
-            class empty_class {};
 
             template <typename MapIterator>
             class set_iterator : public std::iterator<std::forward_iterator_tag,
@@ -117,8 +120,9 @@ namespace pstore {
             using reference = value_type &;
             using const_reference = value_type const &;
 
-            using const_iterator = set_iterator<
-                typename hamt_map<value_type, empty_class, hasher, key_equal>::const_iterator>;
+            using const_iterator =
+                set_iterator<typename hamt_map<value_type, details::empty_class, hasher,
+                                               key_equal>::const_iterator>;
             using iterator = const_iterator;
 
             hamt_set (database & db, address ip = address::null (), hasher const & hash = hasher ())
@@ -163,7 +167,7 @@ namespace pstore {
                           serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
             std::pair<iterator, bool> insert (transaction_base & transaction,
                                               OtherKeyType const & key) {
-                auto it = map_.insert (transaction, std::make_pair (key, empty_class ()));
+                auto it = map_.insert (transaction, std::make_pair (key, details::empty_class ()));
                 return {{it.first}, it.second};
             }
 
@@ -202,10 +206,36 @@ namespace pstore {
             ///@}
 
         private:
-            hamt_map<value_type, empty_class, hasher, key_equal> map_;
+            hamt_map<value_type, details::empty_class, hasher, key_equal> map_;
         };
 
     } // namespace index
+
+    namespace serialize {
+
+        template <>
+        struct serializer<index::details::empty_class> {
+            using value_type = index::details::empty_class;
+
+            template <typename Archive>
+            static auto write (Archive && archive, value_type const & value)
+                -> archive_result_type<Archive> {
+                // Tell the archiver to write an array of 0 elements. This should (probably) write
+                // nothing at all but yield the location at which it would have gone (with the
+                // correct type).
+                auto const dummy = std::uint8_t{0};
+                return serialize::write (std::forward<Archive> (archive),
+                                         gsl::make_span (&dummy, &dummy));
+            }
+
+            template <typename Archive>
+            static void read (Archive && archive, value_type & value) {
+                new (&value) value_type;
+            }
+        };
+
+    } // namespace serialize
+
 } // namespace pstore
-#endif // PSTORE_HAMT_SET_HPP
+#endif // PSTORE_CORE_HAMT_SET_HPP
 // eof: include/pstore/core/hamt_set.hpp

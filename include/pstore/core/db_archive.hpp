@@ -45,8 +45,8 @@
 /// \brief Provides the database_reader and database_writer class which enable
 /// the serializer to read and write types in a pstore instance.
 
-#ifndef PSTORE_DB_ARCHIVE_HPP
-#define PSTORE_DB_ARCHIVE_HPP
+#ifndef PSTORE_CORE_DB_ARCHIVE_HPP
+#define PSTORE_CORE_DB_ARCHIVE_HPP (1)
 
 #include "pstore/core/address.hpp"
 #include "pstore/core/database.hpp"
@@ -133,12 +133,12 @@ namespace pstore {
             /// \brief An archive-reader which reads data from a database.
             class database_reader {
             public:
-                /// Constructs the reader using an input databasE and an address.
-                database_reader (pstore::database const & db, pstore::address const addr)
+                /// Constructs the reader using an input database and an address.
+                database_reader (pstore::database & db, pstore::address const addr)
                         : db_ (db)
                         , addr_ (addr) {}
 
-                pstore::database const & get_db () const { return db_; }
+                pstore::database & get_db () const { return db_; }
                 pstore::address get_address () const { return addr_; }
                 void skip (std::size_t distance) { addr_ += distance; }
 
@@ -164,7 +164,7 @@ namespace pstore {
                 void getn (SpanType span);
 
             private:
-                database const & db_; ///< The database from which data is read.
+                database & db_; ///< The database from which data is read.
                 address addr_; ///< The start address of the database from which data is read.
             };
 
@@ -205,8 +205,18 @@ namespace pstore {
                 std::copy (first, first + size, reinterpret_cast<std::uint8_t *> (span.data ()));
             }
 
+            /// A convenience function which provides symmetry with the make_writer() function.
+            /// Constructs a database reader using an input database and an address.
+            ///
+            /// \param db  The database from which data will be read.
+            /// \param addr  The address at which to start reading.
+            /// \result A database reader instance which will read the given database at the
+            /// specified address.
+            inline database_reader make_reader (pstore::database & db, pstore::address const addr) {
+                return {db, addr};
+            }
         } // namespace archive
     }     // namespace serialize
 } // namespace pstore
-#endif // PSTORE_DB_ARCHIVE_HPP
+#endif // PSTORE_CORE_DB_ARCHIVE_HPP
 // eof: include/pstore/core/db_archive.hpp

@@ -51,6 +51,7 @@ set (PSTORE_CORE_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/file_header.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/generation_iterator.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/index_types.hpp"
+    "${PSTORE_PUBLIC_INCLUDE_DIR}/indirect_string.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/region.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/start_vacuum.hpp"
@@ -65,6 +66,7 @@ set (PSTORE_CORE_SRC
     heartbeat.cpp
     heartbeat.hpp
     index_types.cpp
+    indirect_string.cpp
     region.cpp
     start_vacuum.cpp
     storage.cpp

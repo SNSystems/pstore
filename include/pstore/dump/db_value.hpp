@@ -62,9 +62,8 @@ namespace pstore {
                 return !expanded_;
             }
 
-            static bool get_expanded () { return default_expanded_; }
-
-            static void set_expanded (bool t) { default_expanded_ = t; }
+            static bool get_expanded () noexcept { return default_expanded_; }
+            static void set_expanded (bool t) noexcept { default_expanded_ = t; }
 
         private:
             std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
@@ -82,15 +81,17 @@ namespace pstore {
             return std::static_pointer_cast<value> (std::make_shared<address> (addr));
         }
 
-        inline value_ptr make_value (uuid const & u) { return make_value (u.str ()); }
-
         template <typename PointerType>
         inline value_ptr make_value (sstring_view<PointerType> const & str) {
             return make_value (str.to_string ());
         }
 
+        value_ptr make_value (pstore::header const & header);
+        value_ptr make_value (pstore::trailer const & trailer, bool no_times);
+        value_ptr make_value (uuid const & u);
+        value_ptr make_value (index::digest const & d);
+        value_ptr make_value (indirect_string const & str);
         value_ptr make_value (extent ex);
-
 
         template <typename InputIterator>
         value_ptr make_value (InputIterator first, InputIterator last) {
@@ -101,15 +102,10 @@ namespace pstore {
             return make_value (std::move (members));
         }
 
-        value_ptr make_value (pstore::header const & header);
-        value_ptr make_value (pstore::trailer const & trailer, bool no_times);
-
-        value_ptr make_value (index::digest const & d);
-
-
         value_ptr make_blob (database & db, pstore::address begin, std::uint64_t size);
         value_ptr make_generation (database & db, pstore::address footer_pos, bool no_times);
         value_ptr make_contents (database & db, pstore::address footer_pos, bool no_times);
+
     } // namespace dump
 } // namespace pstore
 

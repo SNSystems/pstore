@@ -56,9 +56,10 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_file_header.cpp
     test_fnv.cpp
     test_generation_iterator.cpp
-    test_heartbeat.cpp
     test_hamt_map.cpp
     test_hamt_set.cpp
+    test_heartbeat.cpp
+    test_indirect_string.cpp
     test_make_unique.cpp
     test_memory_mapper.cpp
     test_path.cpp

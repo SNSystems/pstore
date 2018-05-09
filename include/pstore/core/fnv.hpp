@@ -51,8 +51,8 @@
  ***************************************************************************
  */
 
-#ifndef PSTORE_FNV_HPP
-#define PSTORE_FNV_HPP
+#ifndef PSTORE_CORE_FNV_HPP
+#define PSTORE_CORE_FNV_HPP
 
 #include <cstdint>
 #include <cstdlib>
@@ -76,7 +76,7 @@ namespace pstore {
     /// \note  To use the recommended 64 bit FNV-1a hash, use fnv1a_64_init as the hval arg on the
     /// first call to either fnv_64a_buf() or fnv_64a_str().
     std::uint64_t fnv_64a_buf (void const * buf, std::size_t len,
-                               std::uint64_t hval = fnv1a_64_init);
+                               std::uint64_t hval = fnv1a_64_init) noexcept;
 
     /// \brief perform a 64 bit Fowler/Noll/Vo FNV-1a hash on a buffer
     /// \param str  Start of the NUL-terminated string to hash
@@ -84,7 +84,7 @@ namespace pstore {
     /// \returns 64 bit hash.
     /// \note  To use the recommended 64 bit FNV-1a hash, use fnv1a_64_init as the hval arg on the
     /// first call to either fnv_64a_buf() or fnv_64a_str().
-    std::uint64_t fnv_64a_str (char const * str, std::uint64_t hval = fnv1a_64_init);
+    std::uint64_t fnv_64a_str (char const * str, std::uint64_t hval = fnv1a_64_init) noexcept;
 
 
     /// A simple function object wrapper for the fnv_64a_buf() function which is intended to
@@ -93,10 +93,10 @@ namespace pstore {
     struct fnv_64a_hash {
         template <typename Container>
         std::uint64_t operator() (Container const & c) const {
-            return ::pstore::fnv_64a_buf (c.data (), c.size ());
+            return fnv_64a_buf (c.data (), c.size ());
         }
     };
 
 } // namespace pstore
-#endif // PSTORE_FNV_HPP
+#endif // PSTORE_CORE_FNV_HPP
 // eof: include/pstore/fnv.hpp

@@ -64,7 +64,7 @@ namespace {
     constexpr auto fnv_64_prime = UINT64_C (0x100000001b3);
 #endif
 
-    inline std::uint64_t append (std::uint8_t v, std::uint64_t hval) {
+    inline std::uint64_t append (std::uint8_t v, std::uint64_t hval) noexcept {
         // xor the bottom with the current octet
         hval ^= static_cast<std::uint64_t> (v);
 
@@ -81,7 +81,7 @@ namespace {
 
 namespace pstore {
 
-    std::uint64_t fnv_64a_buf (void const * buf, std::size_t len, std::uint64_t hval) {
+    std::uint64_t fnv_64a_buf (void const * buf, std::size_t len, std::uint64_t hval) noexcept {
         // FNV-1a hash each octet of the buffer
         for (auto it = static_cast<uint8_t const *> (buf), end = it + len; it < end; ++it) {
             hval = append (*it, hval);
@@ -90,7 +90,7 @@ namespace pstore {
     }
 
 
-    std::uint64_t fnv_64a_str (char const * str, std::uint64_t hval) {
+    std::uint64_t fnv_64a_str (char const * str, std::uint64_t hval) noexcept {
         // FNV-1a hash each octet of the string
         for (auto s = reinterpret_cast<uint8_t const *> (str); *s != '\0'; ++s) {
             hval = append (*s, hval);

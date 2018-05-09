@@ -49,8 +49,8 @@
 /// construction of std::string instances -- and to enable string values from the database and
 /// in-memory string values to be used interchangably.
 
-#ifndef PSTORE_SSTRING_VIEW_HPP
-#define PSTORE_SSTRING_VIEW_HPP
+#ifndef PSTORE_SUPPORT_SSTRING_VIEW_HPP
+#define PSTORE_SUPPORT_SSTRING_VIEW_HPP (1)
 
 #include <array>
 #include <cassert>
@@ -462,6 +462,9 @@ namespace pstore {
     make_sstring_view (std::shared_ptr<ValueType> const & ptr, std::size_t length) {
         return {ptr, length};
     }
+
+    sstring_view<std::shared_ptr<char const>> make_sstring_view (std::string const & str);
+
     template <typename ValueType>
     inline sstring_view<std::unique_ptr<ValueType>>
     make_sstring_view (std::unique_ptr<ValueType> ptr, std::size_t length) {
@@ -492,5 +495,5 @@ namespace std {
 
 } // namespace std
 
-#endif // PSTORE_SSTRING_VIEW_HPP
+#endif // PSTORE_SUPPORT_SSTRING_VIEW_HPP
 // eof: include/pstore/support/sstring_view.hpp

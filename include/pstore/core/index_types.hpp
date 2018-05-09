@@ -42,12 +42,13 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef PSTORE_INDEX_TYPES_HPP
-#define PSTORE_INDEX_TYPES_HPP (1)
+#ifndef PSTORE_CORE_INDEX_TYPES_HPP
+#define PSTORE_CORE_INDEX_TYPES_HPP (1)
 
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/fnv.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
+#include "pstore/core/indirect_string.hpp"
 #include "pstore/core/uint128.hpp"
 #include "pstore/core/uuid.hpp"
 #include "pstore/support/sstring_view.hpp"
@@ -121,7 +122,14 @@ namespace pstore {
         using write_index = hamt_map<std::string, extent>;
         using digest_index = hamt_map<digest, extent, u128_hash>;
         using ticket_index = hamt_map<digest, extent, u128_hash>;
-        using name_index = hamt_set<sstring_view<std::shared_ptr<char const>>, fnv_64a_hash>;
+
+        struct fnv_64a_hash_indirect_string {
+            std::uint64_t operator() (indirect_string const & indir) const {
+                return fnv_64a_hash () (indir.as_string_view ());
+            }
+        };
+
+        using name_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
 
 
         /// Returns a pointer to the write index, loading it from the store on first access. If
@@ -157,5 +165,5 @@ namespace pstore {
 
     } // namespace index
 } // namespace pstore
-#endif // PSTORE_INDEX_TYPES_HPP
+#endif // PSTORE_CORE_INDEX_TYPES_HPP
 // eof: include/pstore/core/index_types.hpp
