@@ -646,7 +646,9 @@ namespace pstore {
             // Make sure the alignment of leaf node is 4 to ensure that the two LSB are guaranteed
             // 0. If 'v' has greater alignment, serialize::write() will add additional padding.
             constexpr auto aligned_to = std::size_t{4};
-            transaction.alloc_rw (0, aligned_to);
+            static_assert ((details::internal_node_bit | details::heap_node_bit) == aligned_to - 1,
+                           "expected required alignment to be 4");
+            transaction.allocate (0, aligned_to);
 
             // Now write the node and return where it went.
             address const result =
@@ -892,6 +894,10 @@ namespace pstore {
             transaction_base & transaction, OtherValueType const & value, bool is_upsert)
             -> std::pair<iterator, bool> {
 
+            if (revision_ != db_.get_current_revision ()) {
+                raise (error_code::index_not_latest_revision);
+            }
+
             parent_stack parents;
             if (this->empty ()) {
                 root_ = this->store_leaf_node (transaction, value, &parents);
@@ -921,9 +927,7 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert (
             transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
             -> std::pair<iterator, bool> {
-            if (revision_ != db_.get_current_revision ()) {
-                raise (error_code::index_not_latest_revision);
-            }
+
             return this->insert_or_upsert (transaction, value, false /*is_upsert*/);
         }
 
@@ -934,9 +938,7 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
             transaction_base & transaction, std::pair<OtherKeyType, OtherValueType> const & value)
             -> std::pair<iterator, bool> {
-            if (revision_ != db_.get_current_revision ()) {
-                raise (error_code::index_not_latest_revision);
-            }
+
             return this->insert_or_upsert (transaction, value, true /*is_upsert*/);
         }
 
@@ -947,9 +949,7 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_or_assign (
             transaction_base & transaction, OtherKeyType const & key, OtherValueType const & value)
             -> std::pair<iterator, bool> {
-            if (revision_ != db_.get_current_revision ()) {
-                raise (error_code::index_not_latest_revision);
-            }
+
             return this->insert_or_assign (transaction, std::make_pair (key, value));
         }
 
