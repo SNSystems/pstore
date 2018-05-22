@@ -218,9 +218,9 @@ namespace pstore {
             using value_type = index::details::empty_class;
 
             template <typename Archive>
-            static auto write (Archive && archive, value_type const & value)
+            static auto write (Archive && archive, value_type const &)
                 -> archive_result_type<Archive> {
-                // Tell the archiver to write an array of 0 elements. This should (probably) write
+                // Tell the archiver to write an array of 0 elements. This should write
                 // nothing at all but yield the location at which it would have gone (with the
                 // correct type).
                 auto const dummy = std::uint8_t{0};
@@ -229,7 +229,7 @@ namespace pstore {
             }
 
             template <typename Archive>
-            static void read (Archive && archive, value_type & value) {
+            static void read (Archive &&, value_type & value) {
                 new (&value) value_type;
             }
         };

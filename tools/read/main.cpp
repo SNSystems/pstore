@@ -102,13 +102,14 @@ namespace {
             error_stream << NATIVE_TEXT ("Error: Strings index was not found\n");
             ok = false;
         } else {
-            auto const it = strings->find (pstore::make_sstring_view (key.data (), key.length ()));
+            auto str = pstore::make_sstring_view (key);
+            auto const it = strings->find (pstore::indirect_string{db, &str});
             if (it == strings->cend ()) {
                 error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.
             } else {
-                out_stream << pstore::utf::to_native_string (it->to_string ());
+                out_stream << pstore::utf::to_native_string (it->as_string_view ().to_string ());
             }
         }
         return ok;

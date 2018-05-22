@@ -165,6 +165,9 @@ namespace pstore {
         }
         ///@}
 
+        /// Returns the number of bytes allocated in this transaction.
+        std::uint64_t size () const noexcept { return size_; }
+
     protected:
         transaction_base (database & db)
                 : db_{db} {

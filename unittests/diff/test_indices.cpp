@@ -53,6 +53,7 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
+#include "pstore/core/indirect_string.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/support/sstring_view.hpp"
@@ -73,8 +74,6 @@ namespace {
 
         pstore::extent add (transaction_type & transaction, std::string const & key,
                             std::string const & value);
-
-        void add (transaction_type & transaction, std::string const & key);
 
         static pstore::sstring_view<std::shared_ptr<char const>>
         make_sstring_view (std::string const & name) {
@@ -106,11 +105,6 @@ namespace {
 
     // add
     // ~~~
-    void DiffFixture::add (transaction_type & transaction, std::string const & key) {
-        auto index = pstore::index::get_name_index (*db_);
-        index->insert (transaction, pstore::make_sstring_view (key.data (), key.length ()));
-    }
-
     pstore::extent DiffFixture::add (transaction_type & transaction, std::string const & key,
                                      std::string const & value) {
 
@@ -134,28 +128,40 @@ namespace {
 TEST_F (DiffFixture, BuildNameIndexValues) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t1, "key1");
+
+        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
+        auto str1 = pstore::make_sstring_view (std::string{"key1"});
+        adder1.add (&str1);
+        adder1.flush ();
+
         t1.commit ();
     }
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t2, "key2");
+
+        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
+        auto str2 = pstore::make_sstring_view (std::string{"key2"});
+        adder2.add (&str2);
+        adder2.flush ();
+
         t2.commit ();
     }
     ASSERT_EQ (2U, db_->get_current_revision ());
 
-    std::set<pstore::sstring_view<std::shared_ptr<char const>>> expected{
-        this->make_sstring_view ("key1")};
+    auto key1 = this->make_sstring_view ("key1");
+    auto key2 = this->make_sstring_view ("key2");
 
-    auto actual = pstore::diff::build_index_values<pstore::index::name_index> (
-        *db_, 1 /*revision */, pstore::index::get_name_index);
-    EXPECT_THAT (actual, ::testing::ContainerEq (expected));
-
-
-    expected.emplace (this->make_sstring_view ("key2"));
-    actual = pstore::diff::build_index_values<pstore::index::name_index> (
-        *db_, 2 /*revision */, pstore::index::get_name_index);
-    EXPECT_THAT (actual, ::testing::ContainerEq (expected));
+    {
+        auto actual1 = pstore::diff::build_index_values<pstore::index::name_index> (
+            *db_, 1 /*revision*/, pstore::index::get_name_index);
+        EXPECT_THAT (actual1, ::testing::ElementsAre (pstore::indirect_string{*db_, &key1}));
+    }
+    {
+        auto actual2 = pstore::diff::build_index_values<pstore::index::name_index> (
+            *db_, 2 /*revision*/, pstore::index::get_name_index);
+        EXPECT_THAT (actual2, ::testing::ElementsAre (pstore::indirect_string{*db_, &key1},
+                                                      pstore::indirect_string{*db_, &key2}));
+    }
 }
 
 
@@ -178,7 +184,7 @@ TEST_F (DiffFixture, BuildWriteIndexValues) {
     ASSERT_EQ (2U, db_->get_current_revision ());
 
     auto actual = pstore::diff::build_index_values<pstore::index::write_index> (
-        *db_, 2 /*revision */, pstore::index::get_write_index);
+        *db_, 2 /*revision*/, pstore::index::get_write_index);
     EXPECT_EQ (actual.size (), expected.size ());
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 }
@@ -189,13 +195,23 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t1, "key1");
+
+        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
+        auto str1 = pstore::make_sstring_view (std::string{"key1"});
+        adder1.add (&str1);
+        adder1.flush ();
+
         this->add (t1, "key1", "first value");
         t1.commit ();
     }
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t2, "key2");
+
+        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
+        auto str2 = pstore::make_sstring_view (std::string{"key2"});
+        adder2.add (&str2);
+        adder2.flush ();
+
         this->add (t2, "key2", "first value");
         t2.commit ();
     }
@@ -232,13 +248,23 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t1, "key1");
+
+        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
+        auto str1 = pstore::make_sstring_view (std::string{"key1"});
+        adder1.add (&str1);
+        adder1.flush ();
+
         this->add (t1, "key1", "first value");
         t1.commit ();
     }
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t2, "key2");
+
+        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
+        auto str2 = pstore::make_sstring_view (std::string{"key2"});
+        adder2.add (&str2);
+        adder2.flush ();
+
         this->add (t2, "key2", "first value");
         t2.commit ();
     }
@@ -276,7 +302,12 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        this->add (t1, "key1");
+
+        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
+        auto str1 = pstore::make_sstring_view (std::string{"key1"});
+        adder1.add (&str1);
+        adder1.flush ();
+
         this->add (t1, "key1", "first value");
         t1.commit ();
     }
@@ -320,6 +351,5 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     addr->write (out);
     check (out, "write");
 }
-
 
 // eof: unittests/diff/test_indices.cpp

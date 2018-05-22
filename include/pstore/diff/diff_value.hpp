@@ -77,8 +77,7 @@ namespace pstore {
         }
 
         /// Build up a set of the index values by syncing the database to the given revision and
-        /// getting
-        /// the specific index using get_index().
+        /// getting the specific index using get_index().
         ///
         /// \param db The database from which the index is to be read.
         /// \param new_revision  A specified revision of the data to be updated.
@@ -143,8 +142,7 @@ namespace pstore {
         /// \param get_index A function which is responsible for getting a specific index from the
         ///                  database. It should have the signature: Index * (database &, bool).
         /// \returns  A value pointer which contains a given index name and all different keys
-        /// between
-        ///           two revisions.
+        ///           between two revisions.
         template <typename Index, typename GetIndexFunction>
         dump::value_ptr
         make_index_diff (char const * name, database & db, revision_number const new_revision,

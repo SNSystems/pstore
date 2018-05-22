@@ -41,12 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
 #include "pstore/core/indirect_string.hpp"
 #include <gtest/gtest.h>
 
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/serialize/types.hpp"
+
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
-#include "pstore/serialize/types.hpp"
 
 namespace {
 
@@ -72,103 +76,129 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (IndirectString, InMemoryEquality) {
-    auto const view = make_shared_sstring_view ("hello");
+    auto const view = make_shared_sstring_view ("body");
     pstore::indirect_string const x (db_, &view);
     pstore::indirect_string const y (db_, &view);
-    EXPECT_TRUE (operator== (x, y));
-    EXPECT_FALSE (operator!= (x, y));
+    EXPECT_EQ (x.as_string_view (), "body");
+    EXPECT_TRUE (x == y);
+    EXPECT_FALSE (x != y);
 }
 
 
-namespace {
+TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
+    constexpr auto str = "string";
+    auto const sstring = make_shared_sstring_view (str);
 
-    pstore::address write_indirect_string (pstore::database & db,
-                                           pstore::indirect_string const & sa) {
-        using namespace pstore;
-
+    auto const pointer_addr = [this, &sstring]() -> pstore::address {
+        // Create a transaction
         mock_mutex mutex;
-        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
-        auto const result = serialize::write (serialize::archive::make_writer (transaction), sa);
+        auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+
+        // Construct the indirect string and write it to the store.
+        pstore::indirect_string indirect{db_, &sstring};
+        auto const pointer_addr = pstore::serialize::write (
+            pstore::serialize::archive::make_writer (transaction), indirect);
+        EXPECT_EQ (transaction.size (), sizeof (pstore::address));
+
         transaction.commit ();
-        return result;
-    }
+        return pointer_addr;
+    }();
 
-} // end anonymous namespace
+    auto const ind2 = pstore::serialize::read<pstore::indirect_string> (
+        pstore::serialize::archive::make_reader (db_, pointer_addr));
+    EXPECT_EQ (ind2.as_string_view (), make_shared_sstring_view (str));
+}
 
-TEST_F (IndirectString, WriteStoreRefToMemory) {
-    auto str = make_shared_sstring_view ("hello");
-    auto position = write_indirect_string (db_, pstore::indirect_string (db_, &str));
+TEST_F (IndirectString, StoreRoundTrip) {
+    constexpr auto str = "string";
 
-    auto const actual = db_.getro<pstore::address> (position);
-    EXPECT_EQ (actual->absolute (), reinterpret_cast<std::uintptr_t> (&str) | 0x01);
+    auto const pointer_addr = [this, str]() -> pstore::address {
+        // Create a transaction.
+        mock_mutex mutex;
+        auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+
+        // Construct the string and the indirect string. Write the indirect pointer to the store.
+        pstore::shared_sstring_view const sstring = make_shared_sstring_view (str);
+        pstore::indirect_string indirect{db_, &sstring};
+        auto const pointer_addr = pstore::serialize::write (
+            pstore::serialize::archive::make_writer (transaction), indirect);
+        EXPECT_EQ (transaction.size (), sizeof (pstore::address));
+
+        // Now the body of the string (and patch the pointer).
+        pstore::indirect_string::write_body_and_patch_address (transaction, sstring, pointer_addr);
+
+        // Commit the transaction.
+        transaction.commit ();
+        return pointer_addr;
+    }();
+
+    auto const ind2 = pstore::serialize::read<pstore::indirect_string> (
+        pstore::serialize::archive::make_reader (db_, pointer_addr));
+    EXPECT_EQ (ind2.as_string_view (), make_shared_sstring_view (str));
 }
 
 
 namespace {
 
-    struct string_address_pair {
-        string_address_pair (pstore::address b, pstore::address i)
-                : body{b}
-                , indirect{i} {}
-        pstore::address const body;
-        pstore::address const indirect;
+    class IndirectStringAdder : public EmptyStore {
+    public:
+        IndirectStringAdder ()
+                : db_{file_} {
+            db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        }
+
+    protected:
+        pstore::database db_;
     };
 
-    // Writes a string view followed by the address of the string view.
-    string_address_pair write_indirect_string_view (pstore::database & db,
-                                                    pstore::shared_sstring_view const & str) {
-        using namespace pstore;
-
-        mock_mutex mutex;
-        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
-        auto writer = serialize::archive::make_writer (transaction);
-        address const string_body_pos = serialize::write (writer, str);
-        address const string_address_pos = serialize::write (writer, string_body_pos);
-        transaction.commit ();
-        return {string_body_pos, string_address_pos};
-    }
-
 } // end anonymous namespace
 
-TEST_F (IndirectString, ReadFromStore) {
-    string_address_pair const sa =
-        write_indirect_string_view (db_, make_shared_sstring_view ("hello"));
+TEST_F (IndirectStringAdder, NothingAdded) {
+    mock_mutex mutex;
+    auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+    auto const name_index = pstore::index::get_name_index (db_);
 
-    using namespace pstore::serialize;
-    auto const result = read<pstore::indirect_string> (archive::make_reader (db_, sa.indirect));
-    EXPECT_FALSE (result.is_pointer_);
-    EXPECT_EQ (result.address_, sa.body.absolute ());
+    auto adder = pstore::make_indirect_string_adder (transaction, name_index);
+    adder.flush ();
+    EXPECT_EQ (transaction.size (), 0U);
+    transaction.commit ();
 }
 
-// FIXME. FIXME.
-#if 0
-TEST_F (NewName, EqualityBetweenInMemoryAndInStore) {
-    auto const view = make_shared_sstring_view ("string");
-    string_address_pair const sa = write_indirect_string_view(db_, view);
-    pstore::indirect_string const x (db_, &view);
-    pstore::indirect_string const y (db_, sa.indirect);
-    EXPECT_TRUE (operator== (x, y));
-    EXPECT_FALSE (operator!= (x, y));
+TEST_F (IndirectStringAdder, NewString) {
+    constexpr auto str = "string";
+    {
+        mock_mutex mutex;
+        auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+        {
+            auto const name_index = pstore::index::get_name_index (db_);
+
+            // Use the string adder to insert a string into the index and flush it to the store.
+            auto adder = pstore::make_indirect_string_adder (transaction, name_index);
+            pstore::shared_sstring_view const sstring1 = make_shared_sstring_view (str);
+            pstore::shared_sstring_view const sstring2 = make_shared_sstring_view (str);
+            {
+                std::pair<pstore::index::name_index::iterator, bool> res1 = adder.add (&sstring1);
+                EXPECT_EQ (res1.first->as_string_view (), sstring1);
+                EXPECT_TRUE (res1.second);
+            }
+            {
+                // adding the same string again should result in nothing being written.
+                std::pair<pstore::index::name_index::iterator, bool> res2 = adder.add (&sstring2);
+                EXPECT_EQ (res2.first->as_string_view (), sstring1);
+                EXPECT_FALSE (res2.second);
+            }
+            EXPECT_EQ (transaction.size (), sizeof (pstore::address));
+            adder.flush ();
+        }
+        transaction.commit ();
+    }
+    {
+        auto const name_index = pstore::index::get_name_index (db_);
+        pstore::shared_sstring_view const sstring = make_shared_sstring_view (str);
+        auto pos = name_index->find (pstore::indirect_string{db_, &sstring});
+        ASSERT_NE (pos, name_index->cend ());
+        EXPECT_EQ (pos->as_string_view (), make_shared_sstring_view (str));
+    }
 }
 
-TEST_F (NewName, EqualityBetweenInStoreAndInStore) {
-    auto const view = make_shared_sstring_view ("string");
-    string_address_pair const s1 = write_indirect_string_view (db_, view);
-    string_address_pair const s2 = write_indirect_string_view (db_, view);
-    pstore::indirect_string const x (db_, s1.indirect);
-    pstore::indirect_string const y (db_, s2.indirect);
-    EXPECT_TRUE (operator== (x, y));
-    EXPECT_FALSE (operator!= (x, y));
-}
-#endif
-
-TEST_F (IndirectString, EqualityBetweenInMemoryAndInMemory) {
-    auto src = "string";
-    auto const view1 = make_shared_sstring_view (src);
-    auto const view2 = make_shared_sstring_view (src);
-    pstore::indirect_string const x (db_, &view1);
-    pstore::indirect_string const y (db_, &view2);
-    EXPECT_TRUE (operator== (x, y));
-    EXPECT_FALSE (operator!= (x, y));
-}
 // eof: unittests/pstore/test_indirect_string.cpp

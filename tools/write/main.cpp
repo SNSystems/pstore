@@ -64,9 +64,9 @@ using TCHAR = char;
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
-#include "pstore/serialize/standard_types.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/serialize/standard_types.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
@@ -139,6 +139,7 @@ namespace {
 
         return {addr, size};
     }
+
 } // namespace
 
 
@@ -187,41 +188,16 @@ int main (int argc, char * argv[]) {
                 }
             }
 
-
-
             // Scan through the string arguments from the command line.
-            std::vector<std::pair<pstore::shared_sstring_view, pstore::address>> views;
-            views.reserve (opt.strings.size ());
+            std::vector<pstore::shared_sstring_view> strings;
+            strings.reserve (opt.strings.size ());
+            auto adder = pstore::make_indirect_string_adder (transaction, name);
             for (std::string const & str : opt.strings) {
-                views.emplace_back (pstore::make_sstring_view (str), pstore::address::null ());
+                strings.emplace_back (pstore::make_sstring_view (str));
+                auto & s = strings.back ();
+                adder.add (&s);
             }
-
-            for (auto & v : views) {
-                auto res = name->insert (transaction, pstore::indirect_string (database, &v.first));
-                if (res.second) {
-                    pstore::index::name_index::iterator & pos = res.first;
-                    // Now the in-store addresses are pointing at the sstring_view instances on the
-                    // heap.
-                    v.second = pos.get_address ();
-                }
-            }
-
-            for (auto & v : views) {
-                if (v.second != pstore::address::null ()) {
-                    // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
-                    constexpr auto aligned_to = std::size_t{2};
-                    transaction.allocate (0, aligned_to);
-
-                    // Write the string body.
-                    auto const pos = pstore::serialize::write (
-                        pstore::serialize::archive::make_writer (transaction), v.first);
-
-                    // Modify the address field so that it points to the string body.
-                    std::shared_ptr<pstore::address> addr =
-                        transaction.getrw<pstore::address> (v.second);
-                    *addr = pos;
-                }
-            }
+            adder.flush ();
 
             transaction.commit ();
         }
