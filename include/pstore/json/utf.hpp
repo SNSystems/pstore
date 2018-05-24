@@ -87,16 +87,8 @@ namespace pstore {
 
         template <typename CharType = char, typename OutputIt>
         OutputIt replacement_char (OutputIt out) {
-            return code_point_to_utf8 (replacement_char_code_point, out);
+            return code_point_to_utf8<CharType> (replacement_char_code_point, out);
         }
-
-        template <typename ResultType>
-        ResultType replacement_char () {
-            ResultType result;
-            replacement_char (std::back_inserter (result));
-            return result;
-        }
-
 
         template <typename CharType, typename OutputIt>
         OutputIt code_point_to_utf8 (char32_t c, OutputIt out) {
