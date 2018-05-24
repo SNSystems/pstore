@@ -127,11 +127,12 @@ namespace pstore {
         value_ptr make_value (uuid const & u) { return make_value (u.str ()); }
         value_ptr make_value (index::digest const & d) { return make_value (d.to_hex_string ()); }
         value_ptr make_value (indirect_string const & str) {
-            return make_value (str.as_string_view ());
+            pstore::shared_sstring_view owner;
+            return make_value (str.as_string_view (&owner));
         }
 
 
-        value_ptr make_blob (::pstore::database & db, ::pstore::address begin, std::uint64_t size) {
+        value_ptr make_blob (database const & db, ::pstore::address begin, std::uint64_t size) {
             auto bytes = db.getro<std::uint8_t> (begin, size);
             return make_value (object::container{
                 {"size", make_value (size)},
@@ -140,7 +141,7 @@ namespace pstore {
         }
 
 
-        value_ptr make_generation (::pstore::database & db, ::pstore::address footer_pos,
+        value_ptr make_generation (database const & db, ::pstore::address footer_pos,
                                    bool no_times) {
             auto trailer = db.getro<::pstore::trailer> (footer_pos);
             return make_value (object::container{
@@ -150,8 +151,7 @@ namespace pstore {
         }
 
 
-        value_ptr make_contents (::pstore::database & db, ::pstore::address footer_pos,
-                                 bool no_times) {
+        value_ptr make_contents (database const & db, ::pstore::address footer_pos, bool no_times) {
             array::container array;
             auto it = generation_iterator (db, footer_pos);
             auto end = generation_iterator (db, ::pstore::address::null ());

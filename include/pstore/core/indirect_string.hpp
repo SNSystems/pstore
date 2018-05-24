@@ -49,16 +49,16 @@
 
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
-
-    using shared_sstring_view = sstring_view<std::shared_ptr<char const>>;
 
     //*  _         _ _            _        _       _            *
     //* (_)_ _  __| (_)_ _ ___ __| |_   __| |_ _ _(_)_ _  __ _  *
     //* | | ' \/ _` | | '_/ -_) _|  _| (_-<  _| '_| | ' \/ _` | *
     //* |_|_||_\__,_|_|_| \___\__|\__| /__/\__|_| |_|_||_\__, | *
     //*                                                  |___/  *
+
     /// The string address can come in three forms:
     /// 1. An shared_sstring_view string that hasn't been added to the index yet. This is indicated
     /// when is_pointer_ is true.
@@ -74,22 +74,22 @@ namespace pstore {
         friend struct serialize::serializer<indirect_string>;
 
     public:
-        indirect_string (database & db, address addr)
+        indirect_string (database const & db, address addr)
                 : db_{db}
                 , is_pointer_{false}
                 , address_{addr.absolute ()} {}
-        indirect_string (database & db, shared_sstring_view const * str)
+        indirect_string (database const & db, gsl::not_null<raw_sstring_view const *> str)
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
-            assert ((reinterpret_cast<std::uintptr_t> (str) & in_heap_mask) == 0);
+            assert ((reinterpret_cast<std::uintptr_t> (str.get ()) & in_heap_mask) == 0);
         }
 
         bool operator== (indirect_string const & rhs) const;
         bool operator!= (indirect_string const & rhs) const { return !operator== (rhs); }
         bool operator< (indirect_string const & rhs) const;
 
-        shared_sstring_view as_string_view () const;
+        raw_sstring_view as_string_view (gsl::not_null<shared_sstring_view *> owner) const;
 
         /// Write the body of a string and updates the indirect pointer so that it points to that
         /// body.
@@ -100,22 +100,22 @@ namespace pstore {
         /// point to the string.
         /// \returns  The address at which the string body was written.
         template <typename Transaction>
-        static pstore::address write_body_and_patch_address (Transaction & transaction,
-                                                             shared_sstring_view const & str,
-                                                             address address_to_patch);
+        static address write_body_and_patch_address (Transaction & transaction,
+                                                     raw_sstring_view const & str,
+                                                     address address_to_patch);
 
     private:
         static constexpr std::uint64_t in_heap_mask = 0x01;
 
-        database & db_;
+        database const & db_;
         // TODO: replace with std::variant<>...?
         /// True if the string address is in-heap and found in the str_ member. If false, the
         /// address_ field points to the string body in the store unless (address_ & in_heap_mask)
         /// in which case it is the heap address of the string.
         bool is_pointer_;
         union {
-            std::uint64_t address_;           ///< The in-store/in-heap string address.
-            shared_sstring_view const * str_; ///< The address of the in-heap string.
+            std::uint64_t address_;        ///< The in-store/in-heap string address.
+            raw_sstring_view const * str_; ///< The address of the in-heap string.
         };
     };
 
@@ -125,7 +125,7 @@ namespace pstore {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     template <typename Transaction>
     address indirect_string::write_body_and_patch_address (Transaction & transaction,
-                                                           shared_sstring_view const & str,
+                                                           raw_sstring_view const & str,
                                                            address address_to_patch) {
         assert (address_to_patch != address::null ());
 
@@ -154,10 +154,25 @@ namespace pstore {
         struct serializer<indirect_string> {
             using value_type = indirect_string;
 
+            /// \brief Writes an instance of `indirect_string` to an archiver.
+            ///
+            /// \param archive  The Archiver to which the string will be written.
+            /// \result  The address at which the data was written.
+            /// \note This function only writes to a database.
             template <typename Transaction>
             static auto write (archive::database_writer<Transaction> && archive,
                                value_type const & value)
-                -> archive_result_type<archive::database_writer<Transaction>>;
+                -> archive_result_type<archive::database_writer<Transaction>> {
+
+                return write_string_address (std::forward<decltype (archive)> (archive), value);
+            }
+            template <typename Transaction>
+            static auto write (archive::database_writer<Transaction> & archive,
+                               value_type const & value)
+                -> archive_result_type<archive::database_writer<Transaction>> {
+
+                return write_string_address (archive, value);
+            }
 
             /// \brief Reads an instance of `indirect_string` from an archiver.
             ///
@@ -170,22 +185,27 @@ namespace pstore {
 
         private:
             template <typename DBArchive>
+            static auto write_string_address (DBArchive && archive, value_type const & value)
+                -> archive_result_type<DBArchive>;
+
+            template <typename DBArchive>
             static void read_string_address (DBArchive && archive, value_type & value);
         };
 
-        // write
-        // ~~~~~
-        template <typename Transaction>
-        auto serializer<indirect_string>::write (archive::database_writer<Transaction> && archive,
-                                                 value_type const & value)
-            -> archive_result_type<archive::database_writer<Transaction>> {
+        // write_string_address
+        // ~~~~~~~~~~~~~~~~~~~~
+        template <typename DBArchive>
+        auto serializer<indirect_string>::write_string_address (DBArchive && archive,
+                                                                value_type const & value)
+            -> archive_result_type<DBArchive> {
 
             // The body of an indirect string must be written separately by the caller.
             assert (value.is_pointer_);
-            assert (
-                !(reinterpret_cast<std::uintptr_t> (value.str_) & indirect_string::in_heap_mask));
-            return archive.put (address::make (reinterpret_cast<std::uintptr_t> (value.str_) |
-                                               indirect_string::in_heap_mask));
+            constexpr auto mask = indirect_string::in_heap_mask;
+            assert (!(reinterpret_cast<std::uintptr_t> (value.str_) & mask));
+
+            return archive.put (
+                address::make (reinterpret_cast<std::uintptr_t> (value.str_) | mask));
         }
 
     } // end namespace serialize
@@ -196,49 +216,44 @@ namespace pstore {
     //* | | ' \/ _` | | '_/ -_) _|  _| (_-<  _| '_| | ' \/ _` | / _` / _` / _` / -_) '_| *
     //* |_|_||_\__,_|_|_| \___\__|\__| /__/\__|_| |_|_||_\__, | \__,_\__,_\__,_\___|_|   *
     //*                                                  |___/                           *
-    template <typename Transaction, typename Index,
-              typename Container =
-                  std::vector<std::pair<pstore::shared_sstring_view const *, pstore::address>>>
+
+    /// indirect_string_adder is a helper class which handles the details of adding strings to the
+    /// "indirect" index. To ensure that the string addresses cluster tightly, we must write in two
+    /// phases. The first phase adds the entries to the index. A consequence of adding a string that
+    /// is not already present in the index is that its indirect_string record is written
+    /// immediately to the store. Once all of the strings have been added, we must then write their
+    /// bodies (the string's actual character array, in other words). The bodies must be aligned
+    /// according to indirect_string's requirements.
     class indirect_string_adder {
     public:
-        indirect_string_adder (Transaction & transaction, std::shared_ptr<Index> const & name);
-        indirect_string_adder (Transaction & transaction, std::shared_ptr<Index> const & name,
-                               std::size_t expected_size);
+        indirect_string_adder () = default;
+        /// \param expected_size  The anticipated number of strings being added to the index. The
+        /// class records each of the added indirect strings in order that these addresses can be
+        /// patched once the string bodies have been written.
+        explicit indirect_string_adder (std::size_t expected_size);
 
-        std::pair<typename Index::iterator, bool> add (pstore::shared_sstring_view const * str);
-        void flush ();
+        template <typename Transaction, typename Index>
+        std::pair<typename Index::iterator, bool> add (Transaction & transaction,
+                                                       std::shared_ptr<Index> const & index,
+                                                       gsl::not_null<raw_sstring_view const *> str);
+
+        template <typename Transaction>
+        void flush (Transaction & transaction);
 
     private:
-        Transaction & transaction_;
-        std::shared_ptr<Index> index_;
-        Container views_;
+        std::vector<std::pair<raw_sstring_view const *, address>> views_;
     };
-
-    // ctor
-    // ~~~~
-    template <typename Transaction, typename Index, typename Container>
-    indirect_string_adder<Transaction, Index, Container>::indirect_string_adder (
-        Transaction & transaction, std::shared_ptr<Index> const & name)
-            : transaction_{transaction}
-            , index_{name} {}
-
-    template <typename Transaction, typename Index, typename Container>
-    indirect_string_adder<Transaction, Index, Container>::indirect_string_adder (
-        Transaction & transaction, std::shared_ptr<Index> const & name, std::size_t expected_size)
-            : indirect_string_adder (transaction, name) {
-        views_.reserve (expected_size);
-    }
 
     // add
     // ~~~
-    template <typename Transaction, typename Index, typename Container>
+    template <typename Transaction, typename Index>
     std::pair<typename Index::iterator, bool>
-    indirect_string_adder<Transaction, Index, Container>::add (
-        pstore::shared_sstring_view const * str) {
+    indirect_string_adder::add (Transaction & transaction, std::shared_ptr<Index> const & index,
+                                gsl::not_null<raw_sstring_view const *> str) {
 
         // Inserting into the index immediately writes the indirect_string instance to the store if
         // the string isn't already in the set.
-        auto res = index_->insert (transaction_, pstore::indirect_string{transaction_.db (), str});
+        auto res = index->insert (transaction, pstore::indirect_string{transaction.db (), str});
         if (res.second) {
             // Now the in-store addresses are pointing at the sstring_view instances on the heap.
             // If the string was written, we remember where it went.
@@ -250,28 +265,16 @@ namespace pstore {
 
     // flush
     // ~~~~~
-    template <typename Transaction, typename Index, typename Container>
-    void indirect_string_adder<Transaction, Index, Container>::flush () {
+    template <typename Transaction>
+    void indirect_string_adder::flush (Transaction & transaction) {
         for (auto const & v : views_) {
             assert (v.second != pstore::address::null ());
-            indirect_string::write_body_and_patch_address (transaction_,
+            indirect_string::write_body_and_patch_address (transaction,
                                                            *std::get<0> (v), // string body
                                                            std::get<1> (v)   // address to patch
             );
         }
         views_.clear ();
-    }
-
-    // make_indirect_string_adder
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    template <typename Transaction, typename Index,
-              typename Container =
-                  std::vector<std::pair<pstore::shared_sstring_view const *, pstore::address>>>
-    auto make_indirect_string_adder (Transaction & transaction,
-                                     std::shared_ptr<Index> const & index)
-        -> indirect_string_adder<Transaction, Index, Container> {
-
-        return {transaction, index};
     }
 
 } // end namespace pstore

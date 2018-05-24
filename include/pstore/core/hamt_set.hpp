@@ -75,10 +75,11 @@ namespace pstore {
 
                 using base = std::iterator<std::forward_iterator_tag,
                                            typename std::add_const<KeyType>::type>;
+
+            public:
                 using typename base::pointer;
                 using typename base::reference;
 
-            public:
                 set_iterator (MapIterator const & it)
                         : it_ (it) {}
 
@@ -199,8 +200,8 @@ namespace pstore {
                 return map_.load_leaf_node (addr).first;
             }
 
-            database & db () { return map_.db (); }
-            database const & db () const { return map_.db (); }
+            database & db () noexcept { return map_.db (); }
+            database const & db () const noexcept { return map_.db (); }
 
             index_pointer root () const { return map_.root (); }
             ///@}

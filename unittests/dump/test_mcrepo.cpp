@@ -50,8 +50,9 @@
 #include "gmock/gmock.h"
 
 #include "pstore/core/db_archive.hpp"
-#include "pstore/serialize/standard_types.hpp"
+#include "pstore/core/hamt_set.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/serialize/standard_types.hpp"
 
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
@@ -59,17 +60,16 @@
 
 using namespace pstore::repo;
 
-// *******************************************
-// *                                         *
-// *              MCRepoFixture              *
-// *                                         *
-// *******************************************
-
+//*  __  __  ___ ___               ___ _     _                 *
+//* |  \/  |/ __| _ \___ _ __  ___| __(_)_ _| |_ _  _ _ _ ___  *
+//* | |\/| | (__|   / -_) '_ \/ _ \ _|| \ \ /  _| || | '_/ -_) *
+//* |_|  |_|\___|_|_\___| .__/\___/_| |_/_\_\\__|\_,_|_| \___| *
+//*                     |_|                                    *
 namespace {
+
     class MCRepoFixture : public ::testing::Test {
     public:
-        void SetUp () override;
-        void TearDown () override;
+        MCRepoFixture ();
 
         using lock_guard = std::unique_lock<mock_mutex>;
         using transaction_type = pstore::transaction<lock_guard>;
@@ -77,41 +77,41 @@ namespace {
     protected:
         pstore::address store_str (transaction_type & transaction, std::string const & str);
 
+        static constexpr std::size_t page_size_ = 4096;
+        static constexpr std::size_t file_size_ = pstore::storage::min_region_size * 2;
+
         mock_mutex mutex_;
-        std::size_t const file_size_ = pstore::storage::min_region_size * 2;
         std::shared_ptr<std::uint8_t> buffer_;
         std::shared_ptr<pstore::file::in_memory> file_;
         std::unique_ptr<pstore::database> db_;
     };
 
-    // SetUp
-    // ~~~~~
-    pstore::address MCRepoFixture::store_str (transaction_type & transaction,
-                                              std::string const & str) {
-        auto archive = pstore::serialize::archive::make_writer (transaction);
-        return pstore::serialize::write (archive, str);
-    }
+    constexpr std::size_t MCRepoFixture::page_size_;
+    constexpr std::size_t MCRepoFixture::file_size_;
 
-    // SetUp
-    // ~~~~~
-    void MCRepoFixture::SetUp () {
-        // Build an empty, in-memory database.
-        constexpr std::size_t page_size = 4096;
-        buffer_ = aligned_valloc (file_size_, page_size);
-        file_ = std::make_shared<pstore::file::in_memory> (buffer_, file_size_);
+    // ctor
+    // ~~~~
+    MCRepoFixture::MCRepoFixture ()
+            : buffer_ (aligned_valloc (file_size_, page_size_))
+            , file_ (std::make_shared<pstore::file::in_memory> (buffer_, file_size_)) {
         pstore::database::build_new_store (*file_);
         db_.reset (new pstore::database (file_));
-        db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
     }
 
-    // TearDown
-    // ~~~~~~~~
-    void MCRepoFixture::TearDown () {
-        buffer_.reset ();
-        file_.reset ();
-        db_.reset ();
+    // store_str
+    // ~~~~~~~~~
+    pstore::address MCRepoFixture::store_str (transaction_type & transaction,
+                                              std::string const & str) {
+        assert (db_.get () == &transaction.db ());
+        pstore::raw_sstring_view const sstring = pstore::make_sstring_view (str);
+        pstore::indirect_string_adder adder;
+        auto const pos =
+            adder.add (transaction, pstore::index::get_name_index (*db_), &sstring).first;
+        adder.flush (transaction);
+        return pos.get_address ();
     }
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (MCRepoFixture, DumpFragment) {
     using ::testing::ElementsAre;

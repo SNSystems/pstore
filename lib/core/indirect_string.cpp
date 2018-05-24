@@ -45,29 +45,36 @@
 
 namespace pstore {
 
-    shared_sstring_view indirect_string::as_string_view () const {
+    raw_sstring_view
+    indirect_string::as_string_view (gsl::not_null<shared_sstring_view *> owner) const {
         if (is_pointer_) {
             return *str_;
         }
         if (address_ & in_heap_mask) {
-            return *reinterpret_cast<shared_sstring_view const *> (address_ & ~in_heap_mask);
+            return *reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask);
         }
         using namespace serialize;
-        return read<shared_sstring_view> (archive::make_reader (db_, address{address_}));
+        *owner = read<shared_sstring_view> (archive::make_reader (db_, address{address_}));
+        return {owner->data (), owner->length ()};
     }
 
     bool indirect_string::operator== (indirect_string const & rhs) const {
         assert (&db_ == &rhs.db_);
-        return this->as_string_view () == rhs.as_string_view ();
+        shared_sstring_view lhs_owner;
+        shared_sstring_view rhs_owner;
+        return this->as_string_view (&lhs_owner) == rhs.as_string_view (&rhs_owner);
     }
 
     bool indirect_string::operator< (indirect_string const & rhs) const {
         assert (&db_ == &rhs.db_);
-        return this->as_string_view () < rhs.as_string_view ();
+        shared_sstring_view lhs_owner;
+        shared_sstring_view rhs_owner;
+        return this->as_string_view (&lhs_owner) < rhs.as_string_view (&rhs_owner);
     }
 
     std::ostream & operator<< (std::ostream & os, indirect_string const & ind_str) {
-        return os << ind_str.as_string_view ();
+        shared_sstring_view owner;
+        return os << ind_str.as_string_view (&owner);
     }
 
     namespace serialize {
@@ -75,7 +82,7 @@ namespace pstore {
         template <typename DBArchive>
         void serializer<indirect_string>::read_string_address (DBArchive && archive,
                                                                value_type & value) {
-            database & db = archive.get_db ();
+            database const & db = archive.get_db ();
             auto const addr = *db.getro<address> (archive.get_address ());
             new (&value) value_type (db, addr);
         }
@@ -91,6 +98,18 @@ namespace pstore {
         }
 
     } // namespace serialize
+
+
+    //*  _         _ _            _        _       _                     _    _          *
+    //* (_)_ _  __| (_)_ _ ___ __| |_   __| |_ _ _(_)_ _  __ _   __ _ __| |__| |___ _ _  *
+    //* | | ' \/ _` | | '_/ -_) _|  _| (_-<  _| '_| | ' \/ _` | / _` / _` / _` / -_) '_| *
+    //* |_|_||_\__,_|_|_| \___\__|\__| /__/\__|_| |_|_||_\__, | \__,_\__,_\__,_\___|_|   *
+    //*                                                  |___/                           *
+    // ctor
+    // ~~~~
+    indirect_string_adder::indirect_string_adder (std::size_t expected_size) {
+        views_.reserve (expected_size);
+    }
 
 } // namespace pstore
 

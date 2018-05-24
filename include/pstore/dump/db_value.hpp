@@ -96,15 +96,17 @@ namespace pstore {
         template <typename InputIterator>
         value_ptr make_value (InputIterator first, InputIterator last) {
             array::container members;
-            for (; first != last; ++first) {
-                members.emplace_back (make_value (*first));
-            }
+            std::for_each (
+                first, last,
+                [&members](typename std::iterator_traits<InputIterator>::value_type const & v) {
+                    members.emplace_back (make_value (v));
+                });
             return make_value (std::move (members));
         }
 
-        value_ptr make_blob (database & db, pstore::address begin, std::uint64_t size);
-        value_ptr make_generation (database & db, pstore::address footer_pos, bool no_times);
-        value_ptr make_contents (database & db, pstore::address footer_pos, bool no_times);
+        value_ptr make_blob (database const & db, pstore::address begin, std::uint64_t size);
+        value_ptr make_generation (database const & db, pstore::address footer_pos, bool no_times);
+        value_ptr make_contents (database const & db, pstore::address footer_pos, bool no_times);
 
     } // namespace dump
 } // namespace pstore

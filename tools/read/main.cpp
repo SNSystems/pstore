@@ -109,7 +109,9 @@ namespace {
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.
             } else {
-                out_stream << pstore::utf::to_native_string (it->as_string_view ().to_string ());
+                pstore::shared_sstring_view owner;
+                out_stream << pstore::utf::to_native_string (
+                    it->as_string_view (&owner).to_string ());
             }
         }
         return ok;

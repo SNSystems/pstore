@@ -68,7 +68,7 @@ namespace pstore {
                 public:
                     using result_type = pstore::address;
 
-                    database_writer_policy (Transaction & trans)
+                    database_writer_policy (Transaction & trans) noexcept
                             : transaction_ (trans) {}
 
                     /// Writes an instance of a standard-layout type T to the database.
@@ -96,7 +96,7 @@ namespace pstore {
                         return addr;
                     }
 
-                    void flush () {}
+                    void flush () noexcept {}
 
                 private:
                     /// The transaction to which data is written.
@@ -121,7 +121,8 @@ namespace pstore {
             /// instance if the caller has an existing transaction object.
             /// \param transaction The transaction to which the database_writer will append.
             template <typename Transaction>
-            inline auto make_writer (Transaction & transaction) -> database_writer<Transaction> {
+            inline auto make_writer (Transaction & transaction) noexcept
+                -> database_writer<Transaction> {
                 return {transaction};
             }
 
@@ -134,13 +135,16 @@ namespace pstore {
             class database_reader {
             public:
                 /// Constructs the reader using an input database and an address.
-                database_reader (pstore::database & db, pstore::address const addr)
+                ///
+                /// \param db The database from which data is read.
+                /// \param addr The start address from which data is read.
+                database_reader (pstore::database const & db, pstore::address const addr) noexcept
                         : db_ (db)
                         , addr_ (addr) {}
 
-                pstore::database & get_db () const { return db_; }
-                pstore::address get_address () const { return addr_; }
-                void skip (std::size_t distance) { addr_ += distance; }
+                pstore::database const & get_db () const noexcept { return db_; }
+                pstore::address get_address () const noexcept { return addr_; }
+                void skip (std::size_t distance) noexcept { addr_ += distance; }
 
                 /// Reads a single instance of a standard-layout type Ty from the current store
                 /// address.
@@ -164,8 +168,8 @@ namespace pstore {
                 void getn (SpanType span);
 
             private:
-                database & db_; ///< The database from which data is read.
-                address addr_; ///< The start address of the database from which data is read.
+                database const & db_; ///< The database from which data is read.
+                address addr_;        ///< The address from which data is read.
             };
 
             // get
@@ -212,7 +216,8 @@ namespace pstore {
             /// \param addr  The address at which to start reading.
             /// \result A database reader instance which will read the given database at the
             /// specified address.
-            inline database_reader make_reader (pstore::database & db, pstore::address const addr) {
+            inline database_reader make_reader (pstore::database const & db,
+                                                pstore::address const addr) noexcept {
                 return {db, addr};
             }
         } // namespace archive

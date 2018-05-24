@@ -62,8 +62,8 @@ namespace pstore {
         value_ptr make_fragments (database & db, bool hex_mode);
 
         value_ptr make_value (repo::linkage_type t);
-        value_ptr make_value (database & db, repo::ticket_member const & member);
-        value_ptr make_value (database & db, std::shared_ptr<repo::ticket const> ticket);
+        value_ptr make_value (database const & db, repo::ticket_member const & member);
+        value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket);
 
         value_ptr make_tickets (database & db);
 

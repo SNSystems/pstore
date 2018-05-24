@@ -189,15 +189,15 @@ int main (int argc, char * argv[]) {
             }
 
             // Scan through the string arguments from the command line.
-            std::vector<pstore::shared_sstring_view> strings;
+            std::vector<pstore::raw_sstring_view> strings;
             strings.reserve (opt.strings.size ());
-            auto adder = pstore::make_indirect_string_adder (transaction, name);
+            pstore::indirect_string_adder adder;
             for (std::string const & str : opt.strings) {
                 strings.emplace_back (pstore::make_sstring_view (str));
                 auto & s = strings.back ();
-                adder.add (&s);
+                adder.add (transaction, name, &s);
             }
-            adder.flush ();
+            adder.flush (transaction);
 
             transaction.commit ();
         }

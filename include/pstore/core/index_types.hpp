@@ -125,7 +125,8 @@ namespace pstore {
 
         struct fnv_64a_hash_indirect_string {
             std::uint64_t operator() (indirect_string const & indir) const {
-                return fnv_64a_hash () (indir.as_string_view ());
+                shared_sstring_view owner;
+                return fnv_64a_hash () (indir.as_string_view (&owner));
             }
         };
 

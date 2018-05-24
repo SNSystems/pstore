@@ -85,7 +85,7 @@ namespace {
     };
     template <>
     struct string_maker<char const *> {
-        char const * operator() (std::string const & str) const { return str.data (); }
+        char const * operator() (std::string const & str) const noexcept { return str.data (); }
     };
 
     template <typename StringType>
@@ -95,15 +95,33 @@ namespace {
                          string_maker<std::shared_ptr<char const>>,
                          string_maker<std::unique_ptr<char[]>>,
                          string_maker<std::unique_ptr<char const[]>>, string_maker<char const *>>;
+
+    // The pstore APIs that return shared_ptr<> and unique_ptr<> sstring_views is named
+    // make_shared_sstring_view() and make_unique_sstring_view() respectively to try to avoid
+    // confusion about the ownership of the memory. However, here, I'd like all of the functions to
+    // have the same name.
+    template <typename ValueType>
+    inline pstore::sstring_view<std::shared_ptr<ValueType>>
+    make_sstring_view (std::shared_ptr<ValueType> const & ptr, std::size_t length) {
+        return pstore::make_shared_sstring_view (ptr, length);
+    }
+
+    template <typename ValueType>
+    inline pstore::sstring_view<std::unique_ptr<ValueType>>
+    make_sstring_view (std::unique_ptr<ValueType> ptr, std::size_t length) {
+        return pstore::make_unique_sstring_view (std::move (ptr), length);
+    }
+
 } // anonymous namespace
 
 TYPED_TEST_CASE (SStringViewInit, SStringViewInitTypes);
 
 TYPED_TEST (SStringViewInit, Empty) {
+    using namespace pstore;
     TypeParam t;
-    std::string const src{""};
+    std::string const src;
     auto ptr = t (src);
-    auto sv = pstore::make_sstring_view (std::move (ptr), src.length ());
+    auto sv = make_sstring_view (std::move (ptr), src.length ());
     EXPECT_EQ (sv.size (), 0U);
     EXPECT_EQ (sv.length (), 0U);
     EXPECT_EQ (sv.max_size (), std::numeric_limits<std::size_t>::max ());
@@ -112,10 +130,11 @@ TYPED_TEST (SStringViewInit, Empty) {
 }
 
 TYPED_TEST (SStringViewInit, Short) {
+    using namespace pstore;
     TypeParam t;
     std::string const src{"hello"};
     auto ptr = t (src);
-    auto sv = pstore::make_sstring_view (std::move (ptr), src.length ());
+    auto sv = make_sstring_view (std::move (ptr), src.length ());
     EXPECT_EQ (sv.size (), 5U);
     EXPECT_EQ (sv.length (), 5U);
     EXPECT_EQ (sv.max_size (), std::numeric_limits<std::size_t>::max ());
@@ -151,7 +170,7 @@ TEST_F (SStringView, Back) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_sstring_view (ptr, length);
+    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_shared_sstring_view (ptr, length);
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.back (), src[length - 1]);
@@ -162,7 +181,7 @@ TEST_F (SStringView, Data) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_sstring_view (ptr, length);
+    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_shared_sstring_view (ptr, length);
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.data (), ptr.get ());
@@ -172,7 +191,7 @@ TEST_F (SStringView, Front) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_sstring_view (ptr, length);
+    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_shared_sstring_view (ptr, length);
 
     ASSERT_EQ (sv.length (), length);
     EXPECT_EQ (sv.front (), src[0]);
@@ -183,7 +202,7 @@ TEST_F (SStringView, Index) {
     std::string const src{"ABCDE"};
     auto const length = src.length ();
     std::shared_ptr<char> ptr = new_shared (src);
-    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_sstring_view (ptr, length);
+    pstore::sstring_view<std::shared_ptr<char>> sv = pstore::make_shared_sstring_view (ptr, length);
 
     EXPECT_EQ (sv[0], src[0]);
     EXPECT_EQ (&sv[0], ptr.get () + 0);

@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file sstring_view.hpp
 /// \brief Implements sstring_view, a class which is based on std::string_view but holds a
-/// pointer which may be a std::shared_ptr<char> as well has a raw pointer.
+/// pointer which may be a std::shared_ptr<char> or std::unique_ptr<char> as well has a raw pointer.
 ///
 /// This class is intended to improve the performance of the string set -- where it avoids the
 /// construction of std::string instances -- and to enable string values from the database and
@@ -452,6 +452,10 @@ namespace pstore {
     }
 
 
+    using shared_sstring_view = sstring_view<std::shared_ptr<char const>>;
+    using unique_sstring_view = sstring_view<std::unique_ptr<char const>>;
+    using raw_sstring_view = sstring_view<char const *>;
+
     //*             _               _       _                 _             *
     //*  _ __  __ _| |_____   _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
     //* | '  \/ _` | / / -_) (_-<_-<  _| '_| | ' \/ _` | \ V / / -_) V  V / *
@@ -459,19 +463,25 @@ namespace pstore {
     //*                                           |___/                     *
     template <typename ValueType>
     inline sstring_view<std::shared_ptr<ValueType>>
-    make_sstring_view (std::shared_ptr<ValueType> const & ptr, std::size_t length) {
+    make_shared_sstring_view (std::shared_ptr<ValueType> const & ptr, std::size_t length) {
         return {ptr, length};
     }
 
-    sstring_view<std::shared_ptr<char const>> make_sstring_view (std::string const & str);
+    shared_sstring_view make_shared_sstring_view (std::string const & str);
+    shared_sstring_view make_shared_sstring_view (gsl::czstring str);
 
     template <typename ValueType>
     inline sstring_view<std::unique_ptr<ValueType>>
-    make_sstring_view (std::unique_ptr<ValueType> ptr, std::size_t length) {
+    make_unique_sstring_view (std::unique_ptr<ValueType> ptr, std::size_t length) {
         return {std::move (ptr), length};
     }
-    inline sstring_view<char const *> make_sstring_view (char const * ptr, std::size_t length) {
+
+    inline raw_sstring_view make_sstring_view (char const * ptr, std::size_t length) {
         return {ptr, length};
+    }
+    raw_sstring_view make_sstring_view (gsl::czstring str);
+    inline raw_sstring_view make_sstring_view (std::string const & str) {
+        return {str.data (), str.length ()};
     }
 
 } // namespace pstore

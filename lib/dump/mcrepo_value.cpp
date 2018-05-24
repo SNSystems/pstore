@@ -76,11 +76,11 @@ namespace pstore {
         }
 
         value_ptr make_value (database & db, repo::external_fixup const & xfx) {
-            serialize::archive::database_reader archive (db, xfx.name);
-            std::string const name = serialize::read<std::string> (archive);
+            using serialize::read;
+            using serialize::archive::make_reader;
 
             return make_value (object::container{
-                {"name", make_value (name)},
+                {"name", make_value (read<indirect_string> (make_reader (db, xfx.name)))},
                 {"type", make_value (static_cast<std::uint64_t> (xfx.type))},
                 {"offset", make_value (xfx.offset)},
                 {"addend", make_value (xfx.addend)},
@@ -158,28 +158,28 @@ namespace pstore {
         }
 #undef X
 
-        value_ptr make_value (database & db, repo::ticket_member const & member) {
-            serialize::archive::database_reader archive (db, member.name);
+        value_ptr make_value (database const & db, repo::ticket_member const & member) {
+            using namespace serialize;
+            using archive::make_reader;
             return make_value (object::container{
                 {"digest", make_value (member.digest)},
-                {"name", make_value (serialize::read<std::string> (archive))},
+                {"name", make_value (read<indirect_string> (make_reader (db, member.name)))},
                 {"linkage", make_value (member.linkage)},
             });
         }
 
-        value_ptr make_value (database & db, std::shared_ptr<repo::ticket const> ticket) {
+        value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket) {
             array::container members;
+            members.reserve (ticket->size ());
             for (auto const & member : *ticket) {
                 members.emplace_back (make_value (db, member));
             }
 
-            // Now try reading the ticket file path using a serializer.
-            serialize::archive::database_reader archive (db, ticket->path ());
-            auto path = serialize::read<std::string> (archive);
-
+            using namespace serialize;
+            using archive::make_reader;
             return make_value (object::container{
                 {"members", make_value (members)},
-                {"path", make_value (path)},
+                {"path", make_value (read<indirect_string> (make_reader (db, ticket->path ())))},
             });
         }
 

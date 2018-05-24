@@ -75,14 +75,6 @@ namespace {
         pstore::extent add (transaction_type & transaction, std::string const & key,
                             std::string const & value);
 
-        static pstore::sstring_view<std::shared_ptr<char const>>
-        make_sstring_view (std::string const & name) {
-            auto const length = name.length ();
-            auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
-            std::copy (std::begin (name), std::end (name), ptr.get ());
-            return pstore::make_sstring_view (std::static_pointer_cast<char const> (ptr), length);
-        }
-
     protected:
         mock_mutex mutex_;
         std::unique_ptr<pstore::database> db_;
@@ -129,27 +121,27 @@ TEST_F (DiffFixture, BuildNameIndexValues) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
-        auto str1 = pstore::make_sstring_view (std::string{"key1"});
-        adder1.add (&str1);
-        adder1.flush ();
+        pstore::indirect_string_adder adder1;
+        auto str1 = pstore::make_sstring_view ("key1");
+        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.flush (t1);
 
         t1.commit ();
     }
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
-        auto str2 = pstore::make_sstring_view (std::string{"key2"});
-        adder2.add (&str2);
-        adder2.flush ();
+        pstore::indirect_string_adder adder2;
+        auto str2 = pstore::make_sstring_view ("key2");
+        adder2.add (t2, pstore::index::get_name_index (*db_), &str2);
+        adder2.flush (t2);
 
         t2.commit ();
     }
     ASSERT_EQ (2U, db_->get_current_revision ());
 
-    auto key1 = this->make_sstring_view ("key1");
-    auto key2 = this->make_sstring_view ("key2");
+    auto key1 = pstore::make_sstring_view ("key1");
+    auto key2 = pstore::make_sstring_view ("key2");
 
     {
         auto actual1 = pstore::diff::build_index_values<pstore::index::name_index> (
@@ -196,10 +188,10 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
-        auto str1 = pstore::make_sstring_view (std::string{"key1"});
-        adder1.add (&str1);
-        adder1.flush ();
+        pstore::indirect_string_adder adder1;
+        auto str1 = pstore::make_sstring_view ("key1");
+        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
         t1.commit ();
@@ -207,10 +199,10 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
-        auto str2 = pstore::make_sstring_view (std::string{"key2"});
-        adder2.add (&str2);
-        adder2.flush ();
+        pstore::indirect_string_adder adder2;
+        auto str2 = pstore::make_sstring_view ("key2");
+        adder2.add (t2, pstore::index::get_name_index (*db_), &str2);
+        adder2.flush (t2);
 
         this->add (t2, "key2", "first value");
         t2.commit ();
@@ -249,10 +241,10 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
-        auto str1 = pstore::make_sstring_view (std::string{"key1"});
-        adder1.add (&str1);
-        adder1.flush ();
+        pstore::indirect_string_adder adder1;
+        auto str1 = pstore::make_sstring_view ("key1");
+        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
         t1.commit ();
@@ -260,10 +252,10 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder2 = pstore::make_indirect_string_adder (t2, pstore::index::get_name_index (*db_));
-        auto str2 = pstore::make_sstring_view (std::string{"key2"});
-        adder2.add (&str2);
-        adder2.flush ();
+        pstore::indirect_string_adder adder2;
+        auto str2 = pstore::make_sstring_view ("key2");
+        adder2.add (t2, pstore::index::get_name_index (*db_), &str2);
+        adder2.flush (t2);
 
         this->add (t2, "key2", "first value");
         t2.commit ();
@@ -303,10 +295,10 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
 
-        auto adder1 = pstore::make_indirect_string_adder (t1, pstore::index::get_name_index (*db_));
-        auto str1 = pstore::make_sstring_view (std::string{"key1"});
-        adder1.add (&str1);
-        adder1.flush ();
+        pstore::indirect_string_adder adder1;
+        auto str1 = pstore::make_sstring_view ("key1");
+        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
         t1.commit ();
