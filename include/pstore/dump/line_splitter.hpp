@@ -79,10 +79,7 @@ namespace pstore {
             line_splitter (gsl::not_null<dump::array::container *> arr)
                     : arr_{arr} {}
 
-            void append (char const * s) { this->append (gsl::make_span (s, std::strlen (s))); }
-            void append (std::string const & s) {
-                this->append (gsl::make_span (s.data (), s.size ()));
-            }
+            void append (std::string const & s) { this->append (gsl::make_span (s)); }
 
             void append (gsl::span<char const> chars) {
                 this->append (chars, [](std::string const & s) { return s; });
@@ -97,7 +94,9 @@ namespace pstore {
 
         template <typename OperationFunc>
         void line_splitter::append (gsl::span<char const> chars, OperationFunc operation) {
-            sstring_view<char const *> sv (chars.data (), chars.size ());
+            assert (chars.size () >= 0);
+            sstring_view<char const *> sv (
+                chars.data (), static_cast<sstring_view<char const *>::size_type> (chars.size ()));
             for (;;) {
                 auto cr_pos = sv.find ('\n', 0);
                 if (cr_pos == std::string::npos) {

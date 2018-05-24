@@ -90,10 +90,10 @@ TEST (LineSplitter, SingleString) {
     using namespace pstore::dump;
 
     array::container container;
-    std::string str = "hello\n";
+    std::string const str = "hello\n";
 
     line_splitter ls (&container);
-    ls.append (pstore::gsl::make_span (str.data (), str.size ()));
+    ls.append (pstore::gsl::make_span (str));
 
     array arr (std::move (container));
     std::ostringstream out;
@@ -105,10 +105,10 @@ TEST (LineSplitter, SingleStringFollowedByCr) {
     using namespace pstore::dump;
 
     array::container container;
-    std::string str = "hello";
+    std::string const str = "hello";
 
     line_splitter ls (&container);
-    ls.append (pstore::gsl::make_span (str.data (), str.size ()));
+    ls.append (pstore::gsl::make_span (str));
     char const cr[1] = {'\n'};
     ls.append (pstore::gsl::span<char const, 1U>{cr});
 
@@ -123,8 +123,8 @@ TEST (LineSplitter, SingleStringInTwoParts) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append ("he");
-    ls.append ("llo\n");
+    ls.append (std::string{"he"});
+    ls.append (std::string{"llo\n"});
 
     array arr (std::move (container));
     std::ostringstream out;
@@ -137,7 +137,7 @@ TEST (LineSplitter, TwoStringsSingleAppend) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append ("hello\nthere\n");
+    ls.append (std::string{"hello\nthere\n"});
 
     array arr (std::move (container));
     std::ostringstream out;
@@ -150,8 +150,8 @@ TEST (LineSplitter, TwoStringsInTwoParts) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append ("hello\nth");
-    ls.append ("ere\n");
+    ls.append (std::string{"hello\nth"});
+    ls.append (std::string{"ere\n"});
 
     array arr (std::move (container));
     std::ostringstream out;
