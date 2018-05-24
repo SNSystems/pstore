@@ -69,7 +69,7 @@ namespace {
     cl::alias endian2_opt ("e", cl::desc ("Alias for --endian"), cl::aliasopt (endian_opt));
 
 
-    cl::opt<unsigned> maximum_opt ("maximum", cl::desc ("The maximum prime value"), cl::init (100));
+    cl::opt<unsigned> maximum_opt ("maximum", cl::desc ("The maximum prime value"), cl::init (100U));
     cl::alias maximum2_opt ("m", cl::desc ("Alias for --maximum"), cl::aliasopt (maximum_opt));
 
 
