@@ -149,6 +149,7 @@ namespace pstore {
 
         // An implementation of the gtest PrintTo function to avoid ambiguity between the test
         // harness's function and our template implementation of operator<<.
+        void PrintTo (section_type st, ::std::ostream * os);
         void PrintTo (section_type st, ::std::ostream * os) { *os << st; }
 
     } // namespace repo
