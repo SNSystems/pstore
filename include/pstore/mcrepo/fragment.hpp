@@ -456,7 +456,7 @@ namespace pstore {
 
             section_type type;
             std::uint8_t align;
-            small_vector<char, 128> data;
+            small_vector<std::uint8_t, 128> data;
             std::vector<internal_fixup> ifixups;
             std::vector<external_fixup> xfixups;
 
