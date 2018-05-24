@@ -68,7 +68,7 @@ namespace {
                   cl::init (""));
 
     cl::opt<unsigned> Flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
-                             cl::init (0));
+                             cl::init (0U));
     cl::alias Flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (Flood));
 
     cl::opt<std::chrono::milliseconds::rep>
