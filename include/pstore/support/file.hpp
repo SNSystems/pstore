@@ -265,7 +265,11 @@ namespace pstore {
             template <typename SpanType, typename = typename std::enable_if<std::is_standard_layout<
                                              typename SpanType::element_type>::value>::type>
             void write_span (SpanType const & s) {
-                this->write_buffer (s.data (), s.size_bytes ());
+                auto const bytes = s.size_bytes ();
+                assert (bytes >= 0);
+                auto const ubytes =
+                    static_cast<typename std::make_unsigned<decltype (bytes)>::type> (bytes);
+                this->write_buffer (s.data (), ubytes);
             }
 
             /// \brief Writes 't' as a series of raw bytes to the file.
