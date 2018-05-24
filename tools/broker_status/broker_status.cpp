@@ -80,6 +80,9 @@ namespace {
 
 #ifdef _WIN32
     int getpid () { return static_cast<int> (GetCurrentProcessId ()); }
+    using send_size_type = int;
+#else
+    using send_size_type = std::size_t;
 #endif
 
 } // namespace
@@ -113,7 +116,8 @@ int main (int argc, pstore_tchar * argv[]) {
         {
             char buffer[256];
             std::snprintf (buffer, 256, "{ \"pid\": %d }\n\04", static_cast<int> (getpid ()));
-            if (::send (csfd.get (), buffer, static_cast<int> (std::strlen (buffer)), 0 /*flags*/) != 0) {
+            if (::send (csfd.get (), buffer, static_cast<send_size_type> (std::strlen (buffer)),
+                        0 /*flags*/) != 0) {
 #ifdef _WIN32
                 raise (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())}, "send failed");
 #else
