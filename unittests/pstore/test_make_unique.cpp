@@ -77,7 +77,7 @@ TEST_F (MakeUnique, Simple) {
 
 TEST_F (MakeUnique, Array) {
     {
-        auto ptr = pstore::make_unique<xtor_counter[]> (5);
+        auto ptr = pstore::make_unique<xtor_counter[]> (5U);
         EXPECT_NE (ptr.get (), nullptr);
     }
     EXPECT_EQ (xtor_counter::ctor_calls, 5);
