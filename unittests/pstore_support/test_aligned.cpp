@@ -55,36 +55,36 @@ TEST (Aligned, IsPowerOfTwo) {
 }
 
 TEST (Aligned, Aligned1) {
-    EXPECT_EQ (pstore::aligned (0, std::size_t{1}), 0);
-    EXPECT_EQ (pstore::aligned (1, std::size_t{1}), 1);
-    EXPECT_EQ (pstore::aligned (2, std::size_t{1}), 2);
-    EXPECT_EQ (pstore::aligned (3, std::size_t{1}), 3);
+    EXPECT_EQ (pstore::aligned (0U, 1U), 0U);
+    EXPECT_EQ (pstore::aligned (1U, 1U), 1U);
+    EXPECT_EQ (pstore::aligned (2U, 1U), 2U);
+    EXPECT_EQ (pstore::aligned (3U, 1U), 3U);
 }
 
 TEST (Aligned, Aligned2) {
-    EXPECT_EQ (pstore::aligned (0, std::size_t{2}), 0);
-    EXPECT_EQ (pstore::aligned (1, std::size_t{2}), 2);
-    EXPECT_EQ (pstore::aligned (2, std::size_t{2}), 2);
-    EXPECT_EQ (pstore::aligned (3, std::size_t{2}), 4);
-    EXPECT_EQ (pstore::aligned (4, std::size_t{2}), 4);
+    EXPECT_EQ (pstore::aligned (0U, 2U), 0U);
+    EXPECT_EQ (pstore::aligned (1U, 2U), 2U);
+    EXPECT_EQ (pstore::aligned (2U, 2U), 2U);
+    EXPECT_EQ (pstore::aligned (3U, 2U), 4U);
+    EXPECT_EQ (pstore::aligned (4U, 2U), 4U);
 }
 
-TEST (Aligned, AlignedInt) {
-    EXPECT_EQ (pstore::aligned<int> (0), 0);
-    constexpr auto int_align = static_cast <int> (alignof (int));
-    if (int_align >= 2) {
-        EXPECT_EQ (pstore::aligned<int> (1), int_align);
-        EXPECT_EQ (pstore::aligned<int> (2), int_align);
+TEST (Aligned, AlignedUnsigned) {
+    EXPECT_EQ (pstore::aligned<unsigned> (0U), 0U);
+    constexpr auto unsigned_align = static_cast<unsigned> (alignof (unsigned));
+    if (unsigned_align >= 2) {
+        EXPECT_EQ (pstore::aligned<unsigned> (1U), unsigned_align);
+        EXPECT_EQ (pstore::aligned<unsigned> (2U), unsigned_align);
     }
-    if (int_align >= 4) {
-        EXPECT_EQ (pstore::aligned<int> (3), int_align);
-        EXPECT_EQ (pstore::aligned<int> (4), int_align);
+    if (unsigned_align >= 4) {
+        EXPECT_EQ (pstore::aligned<unsigned> (3U), unsigned_align);
+        EXPECT_EQ (pstore::aligned<unsigned> (4U), unsigned_align);
     }
-    if (int_align >= 8) {
-        EXPECT_EQ (pstore::aligned<int> (5), int_align);
-        EXPECT_EQ (pstore::aligned<int> (6), int_align);
-        EXPECT_EQ (pstore::aligned<int> (7), int_align);
-        EXPECT_EQ (pstore::aligned<int> (8), int_align);
+    if (unsigned_align >= 8) {
+        EXPECT_EQ (pstore::aligned<unsigned> (5U), unsigned_align);
+        EXPECT_EQ (pstore::aligned<unsigned> (6U), unsigned_align);
+        EXPECT_EQ (pstore::aligned<unsigned> (7U), unsigned_align);
+        EXPECT_EQ (pstore::aligned<unsigned> (8U), unsigned_align);
     }
 }
 // eof: unittests/pstore_support/test_aligned.cpp

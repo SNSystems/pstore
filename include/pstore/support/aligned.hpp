@@ -53,6 +53,7 @@ namespace pstore {
     /// \returns True if the input value is a power of 2.
     template <typename Ty, typename = typename std::enable_if<std::is_unsigned<Ty>::value>>
     inline constexpr bool is_power_of_two (Ty n) noexcept {
+        static_assert (std::is_unsigned<Ty>::value, "is_power_of_two() type must be unsigned");
         //  if a number n is a power of 2 then bitwise & of n and n-1 will be zero.
         return n && !(n & (n - 1U));
     }
@@ -61,10 +62,12 @@ namespace pstore {
     /// \param align  The alignment required for 'v'.
     /// \returns  The value closest to but greater than or equal to 'V' for which
     /// v modulo align is zero.
-    template <typename IntType>
-    inline IntType aligned (IntType v, std::size_t align) noexcept {
+    template <typename IntType, typename AlignType>
+    inline IntType aligned (IntType v, AlignType align) noexcept {
+        static_assert (std::is_unsigned<IntType>::value, "aligned() IntType must be unsigned");
+        static_assert (std::is_unsigned<AlignType>::value, "aligned() AlignType must be unsigned");
         assert (is_power_of_two (align));
-        return (v + align - 1U) & ~(align - 1U);
+        return (v + align - 1U) & static_cast<IntType> (~(align - 1U));
     }
 
     /// \param v  The value to be aligned.
