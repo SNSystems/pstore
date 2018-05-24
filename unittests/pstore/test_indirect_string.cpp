@@ -90,12 +90,12 @@ TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
 
         // Construct the indirect string and write it to the store.
         pstore::indirect_string indirect{db_, &sstring};
-        auto const pointer_addr = pstore::serialize::write (
+        auto const indirect_addr = pstore::serialize::write (
             pstore::serialize::archive::make_writer (transaction), indirect);
         EXPECT_EQ (transaction.size (), sizeof (pstore::address));
 
         transaction.commit ();
-        return pointer_addr;
+        return indirect_addr;
     }();
 
     auto const ind2 = pstore::serialize::read<pstore::indirect_string> (
@@ -116,16 +116,16 @@ TEST_F (IndirectString, StoreRoundTrip) {
         // Construct the string and the indirect string. Write the indirect pointer to the store.
         pstore::raw_sstring_view const sstring = pstore::make_sstring_view (str);
         pstore::indirect_string indirect{db_, &sstring};
-        auto const pointer_addr = pstore::serialize::write (
+        auto const indirect_addr = pstore::serialize::write (
             pstore::serialize::archive::make_writer (transaction), indirect);
         EXPECT_EQ (transaction.size (), sizeof (pstore::address));
 
         // Now the body of the string (and patch the pointer).
-        pstore::indirect_string::write_body_and_patch_address (transaction, sstring, pointer_addr);
+        pstore::indirect_string::write_body_and_patch_address (transaction, sstring, indirect_addr);
 
         // Commit the transaction.
         transaction.commit ();
-        return pointer_addr;
+        return indirect_addr;
     }();
 
     auto const ind2 = pstore::serialize::read<pstore::indirect_string> (
