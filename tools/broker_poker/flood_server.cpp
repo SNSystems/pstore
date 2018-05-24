@@ -54,9 +54,6 @@
 
 void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds retry_timeout,
                    unsigned max_retries, unsigned long num) {
-    std::string path;
-    path.reserve (num);
-
     auto begin = pstore::cmd_util::iota_generator ();
     auto end = pstore::cmd_util::iota_generator (num);
     pstore::cmd_util::parallel_for_each (
