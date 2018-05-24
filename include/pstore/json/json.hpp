@@ -44,6 +44,7 @@
 #ifndef PSTORE_JSON_HPP
 #define PSTORE_JSON_HPP
 
+#include <cassert>
 #include <cctype>
 #include <cstdint>
 #include <cmath>
@@ -136,18 +137,15 @@ namespace pstore {
             /// \param src The data to be parsed.
             parser & input (std::string const & src) { return this->input (gsl::make_span (src)); }
 
-            /// A convenience function which is equivalent to calling:
-            ///     input (gsl::span<char const> (src, std::strlen (src)))
-            /// \param src The data to be parsed.
-            parser & input (char const * src);
-
-            /// Parses a chunk of JSON input. This function may be called repeatedly with portions
-            /// of the source data (for example, as the data is received from an external source).
-            /// Once all of the data has been received, call the parser::eof() method.
-            ///
-            /// \param span The span of bytes to be parsed.
+            /// \param span The span of UTF-8 code units to be parsed.
             template <typename SpanType>
             parser & input (SpanType const & span);
+
+            /// \param first The element in the half-open range of UTF-8 code-units to be parsed.
+            /// \param last The end of the range of UTF-8 code-units to be parsed.
+            template <typename InputIterator>
+            parser & input (InputIterator first, InputIterator last);
+
             ///@}
 
             /// Informs the parser that the complete input stream has been passed by calls to
@@ -1428,13 +1426,13 @@ namespace pstore {
                 , callbacks_ (std::move (callbacks))
                 , coordinate_ (std::make_tuple (1U, 1U)) {
 
-            using pointer = typename matcher::pointer;
+            using mpointer = typename matcher::pointer;
             // The EOF matcher is placed at the bottom of the stack to ensure that the input JSON
             // ends after a single top-level object.
             stack_.push (
-                pointer (new (&singletons_->eof) details::eof_matcher<Callbacks>{}, false));
+                mpointer (new (&singletons_->eof) details::eof_matcher<Callbacks>{}, false));
             // We permit whitespace after the top-level object.
-            stack_.push (pointer (
+            stack_.push (mpointer (
                 new (&singletons_->trailing_ws) details::whitespace_matcher<Callbacks>{}, false));
             stack_.push (this->make_root_matcher ());
         }
@@ -1485,15 +1483,24 @@ namespace pstore {
                 std::is_same<typename std::remove_cv<typename SpanType::element_type>::type,
                              char>::value,
                 "span element type must be char");
+            return this->input (std::begin (span), std::end (span));
+        }
+
+        template <typename Callbacks>
+        template <typename InputIterator>
+        auto parser<Callbacks>::input (InputIterator first, InputIterator last) -> parser & {
+            static_assert (
+                std::is_same<typename std::remove_cv<
+                                 typename std::iterator_traits<InputIterator>::value_type>::type,
+                             char>::value,
+                "iterator value_type must be char");
             if (error_ != error_code::none) {
                 return *this;
             }
-            auto pos = std::begin (span);
-            auto end = std::end (span);
-            while (pos != end) {
+            while (first != last) {
                 assert (!stack_.empty ());
                 auto & handler = stack_.top ();
-                auto res = handler->consume (*this, *pos);
+                auto res = handler->consume (*this, *first);
                 if (handler->is_done ()) {
                     if (error_ != error_code::none) {
                         break;
@@ -1508,19 +1515,11 @@ namespace pstore {
                 // iterator.
                 if (res.second) {
                     // Increment the column number if this is _not_ a UTF-8 continuation character.
-                    if (utf::is_utf_char_start (*pos)) {
+                    if (utf::is_utf_char_start (*first)) {
                         this->advance_column ();
                     }
-                    ++pos;
+                    ++first;
                 }
-            }
-            return *this;
-        }
-
-        template <typename Callbacks>
-        auto parser<Callbacks>::input (char const * src) -> parser & {
-            if (src != nullptr) {
-                input (gsl::span<char const> (src, std::strlen (src)));
             }
             return *this;
         }
