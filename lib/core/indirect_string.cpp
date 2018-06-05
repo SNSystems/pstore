@@ -53,6 +53,7 @@ namespace pstore {
         if (address_ & in_heap_mask) {
             return *reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask);
         }
+        assert (this->is_in_store ());
         using namespace serialize;
         *owner = read<shared_sstring_view> (archive::make_reader (db_, address{address_}));
         return {owner->data (), owner->length ()};

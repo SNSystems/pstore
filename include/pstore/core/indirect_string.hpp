@@ -61,7 +61,7 @@ namespace pstore {
 
     /// The string address can come in three forms:
     /// 1. An shared_sstring_view string that hasn't been added to the index yet. This is indicated
-    /// when is_pointer_ is true.
+    /// when is_pointer_ is true. The str_ member points to the string view.
     /// 2. A database address which points to an in-memory shared_sstring_view. This happens when
     /// the string has been inserted, but the index has not yet been flushed. In this case,
     /// is_pointer_ is false and the LBS of address_ is set.
@@ -90,6 +90,11 @@ namespace pstore {
         bool operator< (indirect_string const & rhs) const;
 
         raw_sstring_view as_string_view (gsl::not_null<shared_sstring_view *> owner) const;
+        std::string to_string () const {
+            shared_sstring_view owner;
+            return this->as_string_view (&owner).to_string ();
+        }
+        bool is_in_store () const noexcept { return !is_pointer_ && !(address_ & in_heap_mask); }
 
         /// Write the body of a string and updates the indirect pointer so that it points to that
         /// body.
@@ -209,7 +214,21 @@ namespace pstore {
         }
 
     } // end namespace serialize
+} // end namespace pstore
 
+namespace std {
+
+    template <>
+    struct hash<::pstore::indirect_string> {
+        size_t operator() (::pstore::indirect_string const & str) const {
+            ::pstore::shared_sstring_view owner;
+            return std::hash<pstore::raw_sstring_view>{}(str.as_string_view (&owner));
+        }
+    };
+
+} // namespace std
+
+namespace pstore {
 
     //*  _         _ _            _        _       _                     _    _          *
     //* (_)_ _  __| (_)_ _ ___ __| |_   __| |_ _ _(_)_ _  __ _   __ _ __| |__| |___ _ _  *
