@@ -52,6 +52,7 @@
 #include <cctype>
 #include <climits>
 #include <cstdlib>
+#include <iterator>
 #include <type_traits>
 
 #include "pstore/core/head_revision.hpp"
