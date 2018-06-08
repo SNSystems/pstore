@@ -164,13 +164,6 @@ namespace pstore {
         }
     }
 
-    // is_synced_to_head
-    // ~~~~~~~~~~~~~~~~~
-    bool database::is_synced_to_head () const {
-        auto const head = this->getro<header> (address::null ());
-        return size_.footer_pos () == head->footer_pos;
-    }
-
     // upgrade_to_write_lock
     // ~~~~~~~~~~~~~~~~~~~~~
     std::unique_lock<file::range_lock> * database::upgrade_to_write_lock () {
@@ -192,6 +185,35 @@ namespace pstore {
         }
     }
 
+    // older_revision_footer_pos
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    address database::older_revision_footer_pos (unsigned revision) const {
+        if (revision == pstore::head_revision || revision > this->get_current_revision ()) {
+            raise (pstore::error_code::unknown_revision);
+        }
+
+        // Walk backwards down the linked list of revisions to find it.
+        address footer_pos = size_.footer_pos ();
+        for (;;) {
+            auto tail = this->getro<trailer> (footer_pos);
+            unsigned int const tail_revision = tail->a.generation;
+            if (revision > tail_revision) {
+                raise (pstore::error_code::unknown_revision);
+            }
+            if (tail_revision == revision) {
+                break;
+            }
+
+            // TODO: check that footer_pos and generation number are be getting smaller; time must
+            // not be getting larger.
+            // TODO: prev_generation should probably be atomic
+            footer_pos = tail->a.prev_generation;
+            trailer::validate (*this, footer_pos);
+        }
+
+        return footer_pos;
+    }
+
     // sync
     // ~~~~
     void database::sync (unsigned revision) {
@@ -206,8 +228,7 @@ namespace pstore {
             // a newer revision.
             is_newer = true;
         } else {
-            unsigned const current_revision =
-                this->get_current_revision (); // TODO: relax memory order?
+            unsigned const current_revision = this->get_current_revision ();
             // An early out if the user requests the same revision that we already have.
             if (revision == current_revision) {
                 return;
@@ -223,9 +244,11 @@ namespace pstore {
         // we can work back from the current revision.
         assert (is_newer || footer_pos != address::null ());
         if (is_newer) {
-            // TODO: relax memory order? I won't write.
+            // This atomic read of footer_pos fixes our view of the head-revision. Any transactions
+            // after this point won't be seen by this process.
             address const new_footer_pos =
                 this->getro<header> (address::null ())->footer_pos.load ();
+
             if (revision == head_revision && new_footer_pos == footer_pos) {
                 // We were asked for the head revision but the head turns out to the same
                 // as the one to which we're currently synced. The previous early out code didn't
@@ -252,27 +275,10 @@ namespace pstore {
             }
         }
 
-        // The code above moves to the most recent revision. If the head revision was requested,
-        // then we're done. For an earlier version, we need to walk back down the transaction list.
+        // The code above moves to the head revision. If that's what was requested, then we're done.
+        // If a specific numbered revision is needed, then we need to search for it.
         if (revision != head_revision) {
-            // If some revision prior to the head was requested, then we need to walk backwards
-            // down the linked list of revisions to find it.
-            for (;;) {
-                auto tail = this->getro<trailer> (footer_pos);
-                unsigned int const tail_revision = tail->a.generation;
-                if (revision > tail_revision) {
-                    raise (pstore::error_code::unknown_revision);
-                }
-                if (tail_revision == revision) {
-                    break;
-                }
-
-                // FIXME: footer_pos and generation number must be getting smaller; time must not be
-                // getting larger.
-                // TODO: prev_generation should probably be atomic
-                footer_pos = tail->a.prev_generation;
-                trailer::validate (*this, footer_pos);
-            }
+            footer_pos = this->older_revision_footer_pos (revision);
         }
 
         // We must clear the index cache because the current revision has changed.
@@ -462,7 +468,7 @@ namespace pstore {
         }
         modified_ = true;
 
-        std::uint64_t result = size_.logical_size ();
+        std::uint64_t const result = size_.logical_size ();
         assert (result >= size_.footer_pos ().absolute () + sizeof (trailer));
 
         std::uint64_t const extra_for_alignment = calc_alignment (result, std::uint64_t{align});

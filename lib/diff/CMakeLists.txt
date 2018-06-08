@@ -49,6 +49,7 @@
 set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
 set (PSTORE_DIFF_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/diff/revision.hpp"
+    "${PSTORE_INCLUDE_DIR}/diff/diff.hpp"
     "${PSTORE_INCLUDE_DIR}/diff/diff_value.hpp"
 	revision.cpp
     diff_value.cpp

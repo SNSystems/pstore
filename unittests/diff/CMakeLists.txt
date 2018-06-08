@@ -44,6 +44,7 @@
 
 include (add_pstore)
 add_pstore_unit_test (pstore-diff-unit-tests
+    test_diff.cpp
     test_indices.cpp
     test_revision.cpp
 )

@@ -47,6 +47,7 @@
 #include <set>
 
 #include "pstore/core/database.hpp"
+#include "pstore/diff/diff.hpp"
 #include "pstore/diff/revision.hpp"
 #include "pstore/dump/db_value.hpp"
 
@@ -76,56 +77,55 @@ namespace pstore {
             return kvp.second;
         }
 
-        /// Build up a set of the index values by syncing the database to the given revision and
-        /// getting the specific index using get_index().
-        ///
-        /// \param db The database from which the index is to be read.
-        /// \param new_revision  A specified revision of the data to be updated.
-        /// \param get_index A function pointer which could get specific index from the database.
-        /// \returns  A set of index values which exist in the database at the given revision.
-        template <typename Index, typename GetIndexFunction>
-        std::set<typename Index::value_type>
-        build_index_values (database & db, diff::revision_number const new_revision,
-                            GetIndexFunction get_index) {
-            std::set<typename Index::value_type> result;
-            db.sync (new_revision);
-            if (std::shared_ptr<Index const> const index = get_index (db, false /* create */)) {
-                for (auto const & value : *index) {
-                    result.insert (value);
-                }
-            }
-            return result;
-        }
-
     } // namespace diff
 } // namespace pstore
 
 namespace pstore {
     namespace diff {
 
+        namespace details {
+            /// A simple RAII helper class which saves and restores the current db revision number.
+            class revision_restorer {
+            public:
+                explicit revision_restorer (database & db)
+                        : db_{db}
+                        , old_revision_{db.get_current_revision ()} {
+                }
+                revision_restorer (revision_restorer const & ) = delete;
+                revision_restorer & operator= (revision_restorer const & ) = delete;
+                ~revision_restorer () {
+                    try {
+                        db_.sync (old_revision_);
+                    } catch (...) {
+                    }
+                }
+
+            private:
+                database & db_;
+                unsigned old_revision_;
+            };
+
+        } // namespace details
+
         /// Make a value pointer which contains the keys that are different between two database
         /// revisions.
         ///
-        /// \param new_contents  A set of index values when database at the new revision.
         /// \param db The database from which the index is to be read.
         /// \param old_revision  A old database revision number to be compared to new_contents.
         /// \param get_index A function which is responsible for getting a specific index from the
         ///                  database. It should have the signature: Index * (database &, bool).
         /// \returns  A value pointer which contains all different keys between two revisions.
         template <typename Index, typename GetIndexFunction>
-        dump::value_ptr make_diff (std::set<typename Index::value_type> const & new_contents,
-                                   database & db, diff::revision_number const old_revision,
+        dump::value_ptr make_diff (database & db, diff::revision_number const old_revision,
                                    GetIndexFunction get_index) {
-            db.sync (old_revision);
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
-            auto const end = index->end ();
-            for (auto const & member : new_contents) {
-                auto const it = index->find (diff::get_key (member));
-                if (it == end || get_value (*it) != get_value (member)) {
-                    members.emplace_back (dump::make_value (get_key (member)));
-                }
-            }
+
+            auto const differences = diff (*index, old_revision);
+            std::transform (std::begin (differences), std::end (differences),
+                            std::back_inserter (members), [&index](pstore::address addr) {
+                                return dump::make_value (get_key (index->load_leaf_node (addr)));
+                            });
             return dump::make_value (members);
         }
 
@@ -148,13 +148,14 @@ namespace pstore {
         make_index_diff (char const * name, database & db, revision_number const new_revision,
                          revision_number const old_revision, GetIndexFunction get_index) {
             assert (new_revision >= old_revision);
-            std::set<typename Index::value_type> values =
-                build_index_values<Index> (db, new_revision, get_index);
+
+            details::revision_restorer _(db);
+            db.sync (new_revision);
 
             using dump::make_value;
             return dump::make_value (dump::object::container{
                 {"name", make_value (name)},
-                {"members", make_diff<Index> (values, db, old_revision, get_index)},
+                {"members", make_diff<Index> (db, old_revision, get_index)},
             });
         }
 

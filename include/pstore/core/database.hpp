@@ -144,7 +144,16 @@ namespace pstore {
 
         /// \brief Update to a specified revision of the data.
         void sync (unsigned revision = head_revision);
-        bool is_synced_to_head () const;
+
+        /// \brief Returns the address of the footer of a specified revision.
+        ///
+        /// \param revision  The revision number. Should not be pstore::head_revision and should be
+        /// less than or equal to the current revision number (as returned by
+        /// database::get_current_revision(). In this event, an unknown_revision error is raised.
+        ///
+        /// \note This is a const member function and therefore cannot "see" revisions later than
+        /// the old currently synced because to do so may require additional space to be mapped.
+        address older_revision_footer_pos (unsigned revision) const;
 
         static bool small_files_enabled () { return region::small_files_enabled (); }
 
@@ -199,8 +208,10 @@ namespace pstore {
 
         address footer_pos () const noexcept { return size_.footer_pos (); }
 
-        unsigned get_current_revision () const {
-            return getro<trailer> (size_.footer_pos ())->a.generation.load ();
+        /// Returns the generation number to which the database is synced.
+        /// \note This generation number doesn't count an open transaction.
+        unsigned get_current_revision () const noexcept {
+            return get_footer ()->a.generation.load ();
         }
 
         /// \brief Returns the name of the store's synchronisation object.

@@ -236,7 +236,9 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
 }
 
 TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
+    using ::testing::Each;
     using ::testing::ElementsAre;
+    using ::testing::UnorderedElementsAre;
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
@@ -268,8 +270,16 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
         auto line = 0U;
         EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", name));
         EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("members", ":"));
-        EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "key1"));
-        EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "key2"));
+
+        auto line3 = split_tokens (lines.at (line++));
+        ASSERT_EQ (line3.size (), 2U);
+        auto line4 = split_tokens (lines.at (line++));
+        ASSERT_EQ (line4.size (), 2U);
+
+        std::array <std::string, 2> const actual_prefix{{line3[0], line4[0]}};
+        EXPECT_THAT (actual_prefix, Each ("-"));
+        std::array<std::string, 2> const actual_keys{{line3[1], line4[1]}};
+        EXPECT_THAT (actual_keys, UnorderedElementsAre ("key1", "key2"));
     };
 
     std::ostringstream out;
