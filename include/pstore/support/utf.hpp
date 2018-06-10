@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file utf.hpp
+/// \file support/utf.hpp
 /// \brief Functionality for processing UTF-8 strings. On Windows, provides an
 /// additional set of functions to convert UTF-8 strings to and from UTF-16.
 

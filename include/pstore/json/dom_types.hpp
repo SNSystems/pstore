@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file dom_types.cpp
+/// \file dom_types.hpp
 
 #ifndef PSTORE_JSON_DOM_TYPES_HPP
 #define PSTORE_JSON_DOM_TYPES_HPP

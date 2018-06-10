@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file utf.cpp
+/// \file support/utf.cpp
 /// \brief Implementation of functions for processing UTF-8 strings.
 
 #include "pstore/support/utf.hpp"

@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file error.cpp
+/// \file support/error.cpp
 /// \brief Provides an pstore-specific error codes and a suitable error category for them.
 
 #include "pstore/support/error.hpp"

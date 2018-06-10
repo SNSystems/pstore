@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-/// \file quit.hpp
+/// \file vacuum/quit.hpp
 
 #ifndef VACUUM_QUIT_HPP
 #define VACUUM_QUIT_HPP (1)

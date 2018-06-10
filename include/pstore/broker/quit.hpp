@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file quit.hpp
+/// \file broker/quit.hpp
 
 #ifndef PSTORE_BROKER_QUIT_HPP
 #define PSTORE_BROKER_QUIT_HPP

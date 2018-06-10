@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file str_to_revision.h
+/// \file cmd_util/str_to_revision.hpp
 /// \brief Converts a string to a pair containing a revision number and boolean indicating whether
 /// the conversion was successful.
 
