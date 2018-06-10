@@ -44,12 +44,11 @@
 #ifndef PSTORE_DIFF_VALUE_HPP
 #define PSTORE_DIFF_VALUE_HPP
 
-#include <set>
-
 #include "pstore/core/database.hpp"
 #include "pstore/diff/diff.hpp"
 #include "pstore/diff/revision.hpp"
 #include "pstore/dump/db_value.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace diff {
@@ -93,11 +92,15 @@ namespace pstore {
                 }
                 revision_restorer (revision_restorer const & ) = delete;
                 revision_restorer & operator= (revision_restorer const & ) = delete;
-                ~revision_restorer () {
+                ~revision_restorer () noexcept {
+#if PSTORE_CPP_EXCEPTIONS
                     try {
-                        db_.sync (old_revision_);
+#endif
+		      db_.sync (old_revision_);
+#if PSTORE_CPP_EXCEPTIONS
                     } catch (...) {
                     }
+#endif
                 }
 
             private:
