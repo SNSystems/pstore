@@ -151,7 +151,8 @@ namespace pstore {
 
                 // Read an existing node. First work out its size.
                 address const addr = node.untag_internal_address ();
-                std::shared_ptr<linear_node const> ln = db.template getro<linear_node> (addr);
+                std::shared_ptr<linear_node const> ln =
+                    db.getro (typed_address<linear_node> (addr));
                 std::size_t const orig_size = ln->size ();
 
                 std::size_t const in_store_size = linear_node::size_bytes (orig_size);

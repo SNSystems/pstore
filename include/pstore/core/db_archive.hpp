@@ -77,10 +77,10 @@ namespace pstore {
                     template <typename Ty>
                     auto put (Ty const & value) -> result_type {
                         std::shared_ptr<Ty> ptr;
-                        auto addr = address::null ();
+                        auto addr = typed_address<Ty>::null ();
                         std::tie (ptr, addr) = transaction_.template alloc_rw<Ty> ();
                         *ptr = value;
-                        return addr;
+                        return addr.to_address ();
                     }
 
                     template <typename Span>
@@ -89,11 +89,11 @@ namespace pstore {
                             typename std::remove_const<typename Span::element_type>::type;
 
                         std::shared_ptr<element_type> ptr;
-                        auto addr = address::null ();
+                        auto addr = typed_address<element_type>::null ();
                         std::tie (ptr, addr) = transaction_.template alloc_rw<element_type> (
                             unsigned_cast (sp.size ()));
                         std::copy (std::begin (sp), std::end (sp), ptr.get ());
-                        return addr;
+                        return addr.to_address ();
                     }
 
                     void flush () noexcept {}
@@ -134,6 +134,7 @@ namespace pstore {
             /// \brief An archive-reader which reads data from a database.
             class database_reader {
             public:
+                // FIXME: construct with typed_address?
                 /// Constructs the reader using an input database and an address.
                 ///
                 /// \param db The database from which data is read.
@@ -181,7 +182,7 @@ namespace pstore {
                 assert (extra_for_alignment < sizeof (Ty));
                 addr_ += extra_for_alignment;
                 // Load the data.
-                auto result = db_.getro<Ty const> (addr_);
+                auto result = db_.getro (typed_address<Ty> (addr_));
                 addr_ += sizeof (Ty);
                 // Copy to the destination.
                 new (&v) Ty (*result);
@@ -201,7 +202,7 @@ namespace pstore {
 
                 // Load the data.
                 auto const size = unsigned_cast (span.size_bytes ());
-                auto src = db_.getro<std::uint8_t> (addr_, size);
+                auto src = db_.getro (typed_address<std::uint8_t> (addr_), size);
                 addr_ += size;
 
                 // Copy to the destination span.

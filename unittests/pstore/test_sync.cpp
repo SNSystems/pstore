@@ -100,7 +100,7 @@ namespace {
     void SyncFixture::add (transaction_type & transaction, std::string const & key,
                            std::string const & value) {
 
-        auto where = pstore::address::null ();
+        auto where = pstore::typed_address<char>::null ();
         {
             // Allocate storage for string 'value' and copy the data into it.
             std::shared_ptr<char> ptr;
@@ -109,7 +109,8 @@ namespace {
         }
 
         auto index = pstore::index::get_write_index (*db_);
-        index->insert_or_assign (transaction, key, pstore::extent{where, value.length ()});
+        index->insert_or_assign (transaction, key,
+                                 pstore::extent{where.to_address (), value.length ()});
     }
 
     // find

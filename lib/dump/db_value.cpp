@@ -132,8 +132,8 @@ namespace pstore {
         }
 
 
-        value_ptr make_blob (database const & db, ::pstore::address begin, std::uint64_t size) {
-            auto bytes = db.getro<std::uint8_t> (begin, size);
+        value_ptr make_blob (database const & db, pstore::address begin, std::uint64_t size) {
+            auto bytes = db.getro (pstore::typed_address<std::uint8_t> (begin), size);
             return make_value (object::container{
                 {"size", make_value (size)},
                 {"bin", std::make_shared<binary> (bytes.get (), bytes.get () + size)},
@@ -141,20 +141,22 @@ namespace pstore {
         }
 
 
-        value_ptr make_generation (database const & db, ::pstore::address footer_pos,
+        value_ptr make_generation (database const & db, typed_address<trailer> footer_pos,
                                    bool no_times) {
-            auto trailer = db.getro<::pstore::trailer> (footer_pos);
+            auto trailer = db.getro (footer_pos);
             return make_value (object::container{
                 {"footer", make_value (*trailer, no_times)},
-                {"content", make_blob (db, footer_pos - trailer->a.size, trailer->a.size)},
+                {"content",
+                 make_blob (db, footer_pos.to_address () - trailer->a.size, trailer->a.size)},
             });
         }
 
 
-        value_ptr make_contents (database const & db, ::pstore::address footer_pos, bool no_times) {
+        value_ptr make_contents (database const & db, typed_address<trailer> footer_pos,
+                                 bool no_times) {
             array::container array;
             auto it = generation_iterator (db, footer_pos);
-            auto end = generation_iterator (db, ::pstore::address::null ());
+            auto end = generation_iterator (db, typed_address<trailer>::null ());
             for (; it != end; ++it) {
                 array.emplace_back (make_generation (db, *it, no_times));
             }

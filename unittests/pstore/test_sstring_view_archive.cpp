@@ -73,7 +73,8 @@ namespace {
         pstore::database db_;
 
         pstore::address current_pos (pstore::transaction_base & t) const;
-        std::vector<char> as_vector (pstore::address first, pstore::address last) const;
+        std::vector<char> as_vector (pstore::typed_address<char> first,
+                                     pstore::typed_address<char> last) const;
         static shared_sstring_view make_shared_sstring_view (char const * s);
     };
 
@@ -88,15 +89,15 @@ namespace {
         return t.allocate (0U, 1U); // allocate 0 bytes to get the current EOF.
     }
 
-    std::vector<char> SStringViewArchive::as_vector (pstore::address first,
-                                                     pstore::address last) const {
+    std::vector<char> SStringViewArchive::as_vector (pstore::typed_address<char> first,
+                                                     pstore::typed_address<char> last) const {
         assert (last >= first);
         if (last < first) {
             return {};
         }
         // Get the chars within the specified address range.
         std::size_t const num_chars = last.absolute () - first.absolute ();
-        auto ptr = db_.getro<char> (first, num_chars);
+        auto ptr = db_.getro (first, num_chars);
         // Convert them to a vector so that they're easy to compare.
         return {ptr.get (), ptr.get () + num_chars};
     }
@@ -109,17 +110,17 @@ TEST_F (SStringViewArchive, Empty) {
     // access its contents).
     mock_mutex mutex;
     auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
-    auto const first = this->current_pos (transaction);
+    auto const first = pstore::typed_address<char> (this->current_pos (transaction));
     pstore::serialize::write (pstore::serialize::archive::make_writer (transaction), str);
 
-    auto const last = this->current_pos (transaction);
+    auto const last = pstore::typed_address<char> (this->current_pos (transaction));
     EXPECT_THAT (as_vector (first, last), ::testing::ElementsAre ('\x1', '\x0'));
 
     // Now try reading it back and compare to the original string.
     {
         using namespace pstore::serialize;
         shared_sstring_view const actual =
-            read<shared_sstring_view> (archive::database_reader{db_, first});
+            read<shared_sstring_view> (archive::database_reader{db_, first.to_address ()});
         EXPECT_EQ (actual, "");
     }
 }
@@ -129,16 +130,16 @@ TEST_F (SStringViewArchive, WriteHello) {
 
     mock_mutex mutex;
     auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
-    auto const first = this->current_pos (transaction);
+    auto const first = pstore::typed_address<char> (this->current_pos (transaction));
     {
         auto writer = pstore::serialize::archive::make_writer (transaction);
         pstore::serialize::write (writer, str);
     }
-    auto const last = this->current_pos (transaction);
+    auto const last = pstore::typed_address<char> (this->current_pos (transaction));
     EXPECT_THAT (as_vector (first, last),
                  ::testing::ElementsAre ('\xb', '\x0', 'h', 'e', 'l', 'l', 'o'));
     {
-        auto reader = pstore::serialize::archive::database_reader{db_, first};
+        auto reader = pstore::serialize::archive::database_reader{db_, first.to_address ()};
         shared_sstring_view const actual = pstore::serialize::read<shared_sstring_view> (reader);
         EXPECT_EQ (actual, "hello");
     }

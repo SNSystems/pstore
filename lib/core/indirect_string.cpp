@@ -84,7 +84,7 @@ namespace pstore {
         void serializer<indirect_string>::read_string_address (DBArchive && archive,
                                                                value_type & value) {
             database const & db = archive.get_db ();
-            auto const addr = *db.getro<address> (archive.get_address ());
+            auto const addr = *db.getro (typed_address<address>::make (archive.get_address ()));
             new (&value) value_type (db, addr);
         }
 

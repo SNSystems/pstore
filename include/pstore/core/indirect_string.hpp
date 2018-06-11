@@ -107,7 +107,7 @@ namespace pstore {
         template <typename Transaction>
         static address write_body_and_patch_address (Transaction & transaction,
                                                      raw_sstring_view const & str,
-                                                     address address_to_patch);
+                                                     typed_address<address> address_to_patch);
 
     private:
         static constexpr std::uint64_t in_heap_mask = 0x01;
@@ -129,10 +129,11 @@ namespace pstore {
     // write_string_and_patch_address
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     template <typename Transaction>
-    address indirect_string::write_body_and_patch_address (Transaction & transaction,
-                                                           raw_sstring_view const & str,
-                                                           address address_to_patch) {
-        assert (address_to_patch != address::null ());
+    address
+    indirect_string::write_body_and_patch_address (Transaction & transaction,
+                                                   raw_sstring_view const & str,
+                                                   typed_address<address> address_to_patch) {
+        assert (address_to_patch != typed_address<address>::null ());
 
         // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
         constexpr auto aligned_to = std::size_t{1U << in_heap_mask};
@@ -143,7 +144,7 @@ namespace pstore {
             serialize::write (serialize::archive::make_writer (transaction), str);
 
         // Modify the in-store address field so that it points to the string body.
-        auto addr = transaction.template getrw<address> (address_to_patch);
+        auto addr = transaction.getrw (address_to_patch);
         *addr = body_address;
         return body_address;
     }
@@ -260,7 +261,7 @@ namespace pstore {
         void flush (Transaction & transaction);
 
     private:
-        std::vector<std::pair<raw_sstring_view const *, address>> views_;
+        std::vector<std::pair<raw_sstring_view const *, typed_address<address>>> views_;
     };
 
     // add
@@ -277,7 +278,7 @@ namespace pstore {
             // Now the in-store addresses are pointing at the sstring_view instances on the heap.
             // If the string was written, we remember where it went.
             typename Index::iterator const & pos = res.first;
-            views_.emplace_back (str, pos.get_address ());
+            views_.emplace_back (str, typed_address<address>::make (pos.get_address ()));
         }
         return res;
     }
@@ -287,7 +288,7 @@ namespace pstore {
     template <typename Transaction>
     void indirect_string_adder::flush (Transaction & transaction) {
         for (auto const & v : views_) {
-            assert (v.second != pstore::address::null ());
+            assert (v.second != typed_address<address>::null ());
             indirect_string::write_body_and_patch_address (transaction,
                                                            *std::get<0> (v), // string body
                                                            std::get<1> (v)   // address to patch

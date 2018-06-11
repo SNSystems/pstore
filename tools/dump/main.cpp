@@ -196,8 +196,9 @@ namespace {
         using namespace pstore::dump;
 
         array::container array;
-        for (pstore::address footer_pos : pstore::generation_container (db)) {
-            auto footer = db.getro<pstore::trailer> (footer_pos);
+        for (pstore::typed_address<pstore::trailer> footer_pos :
+             pstore::generation_container (db)) {
+            auto footer = db.getro (footer_pos);
             auto revision = std::make_shared<object> (object::container{
                 {"number", make_value (footer->a.generation.load ())},
                 {"size", make_number (footer->a.size.load ())},
@@ -410,7 +411,7 @@ int main (int argc, char * argv[]) {
             }
 
             if (show_header) {
-                auto header = db.getro<pstore::header> (pstore::address::null ());
+                auto header = db.getro (pstore::typed_address<pstore::header>::null ());
                 file.emplace_back ("header", make_value (*header));
             }
             if (show_indices) {

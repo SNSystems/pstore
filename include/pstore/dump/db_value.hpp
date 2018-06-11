@@ -80,6 +80,10 @@ namespace pstore {
         inline value_ptr make_value (pstore::address addr) {
             return std::static_pointer_cast<value> (std::make_shared<address> (addr));
         }
+        template <typename T>
+        inline value_ptr make_value (pstore::typed_address<T> addr) {
+            return make_value (addr.to_address ());
+        }
 
         template <typename PointerType>
         inline value_ptr make_value (sstring_view<PointerType> const & str) {
@@ -106,7 +110,8 @@ namespace pstore {
 
         value_ptr make_blob (database const & db, pstore::address begin, std::uint64_t size);
         value_ptr make_generation (database const & db, pstore::address footer_pos, bool no_times);
-        value_ptr make_contents (database const & db, pstore::address footer_pos, bool no_times);
+        value_ptr make_contents (database const & db,
+                                 pstore::typed_address<pstore::trailer> footer_pos, bool no_times);
 
     } // namespace dump
 } // namespace pstore

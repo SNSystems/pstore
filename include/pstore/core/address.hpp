@@ -239,6 +239,73 @@ namespace pstore {
     std::ostream & operator<< (std::ostream & os, address const & addr);
 } // end namespace pstore
 
+
+namespace pstore {
+
+    template <typename T>
+    class typed_address {
+    public:
+        typed_address () = default;
+        explicit constexpr typed_address (address a) noexcept
+                : a_{a} {}
+        typed_address (typed_address const & addr) noexcept = default;
+
+        static constexpr typed_address null () noexcept { return make (address::null ()); }
+        static constexpr typed_address make (address a) noexcept { return typed_address (a); }
+        static constexpr typed_address make (std::uint64_t absolute) noexcept {
+            return typed_address (address::make (absolute));
+        }
+
+        typed_address & operator= (typed_address const & rhs) noexcept = default;
+        constexpr bool operator== (typed_address const & rhs) const noexcept {
+            return a_ == rhs.a_;
+        }
+        constexpr bool operator!= (typed_address const & rhs) const noexcept {
+            return !operator== (rhs);
+        }
+
+        constexpr address to_address () const noexcept { return a_; }
+        constexpr std::uint64_t absolute () const noexcept { return a_.absolute (); }
+
+    private:
+        address a_;
+    };
+    // ordering
+
+    template <typename T>
+    inline bool operator> (typed_address<T> lhs, typed_address<T> rhs) {
+        return lhs.to_address () > rhs.to_address ();
+    }
+    template <typename T>
+    inline bool operator>= (typed_address<T> lhs, typed_address<T> rhs) {
+        return lhs.to_address () >= rhs.to_address ();
+    }
+    template <typename T>
+    inline bool operator< (typed_address<T> lhs, typed_address<T> rhs) {
+        return lhs.to_address () < rhs.to_address ();
+    }
+    template <typename T>
+    inline bool operator<= (typed_address<T> lhs, typed_address<T> rhs) {
+        return lhs.to_address () <= rhs.to_address ();
+    }
+
+    // arithmetic
+
+    template <typename T>
+    inline typed_address<T> operator- (typed_address<T> const lhs, std::uint64_t rhs) {
+        auto const delta = rhs * sizeof (T);
+        assert (lhs.absolute () >= delta);
+        return typed_address<T> (lhs.to_address () - delta);
+    }
+
+    template <typename T>
+    inline typed_address<T> operator+ (typed_address<T> const lhs, std::uint64_t rhs) {
+        return typed_address<T> (address::make (lhs.absolute () + rhs * sizeof (T)));
+    }
+
+} // end namespace pstore
+
+
 namespace std {
     //*                                  _        _ _           _ _        *
     //*  _ __  _   _ _ __ ___   ___ _ __(_) ___  | (_)_ __ ___ (_) |_ ___  *

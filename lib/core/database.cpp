@@ -120,7 +120,7 @@ namespace pstore {
         trailer::validate (*this, size_.footer_pos ());
         this->protect (address::make (sizeof (header)), address::make (size_.logical_size ()));
 
-        sync_name_ = this->build_sync_name (*this->getro<pstore::header> (address::null ()));
+        sync_name_ = this->build_sync_name (*this->getro (typed_address<header>::null ()));
 #ifdef _WIN32
         shared_ = pstore::shared_memory<pstore::shared> (this->shared_memory_name ());
 #endif
@@ -180,15 +180,15 @@ namespace pstore {
 
     // older_revision_footer_pos
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    address database::older_revision_footer_pos (unsigned revision) const {
+    typed_address<trailer> database::older_revision_footer_pos (unsigned revision) const {
         if (revision == pstore::head_revision || revision > this->get_current_revision ()) {
             raise (pstore::error_code::unknown_revision);
         }
 
         // Walk backwards down the linked list of revisions to find it.
-        address footer_pos = size_.footer_pos ();
+        typed_address<trailer> footer_pos = size_.footer_pos ();
         for (;;) {
-            auto tail = this->getro<trailer> (footer_pos);
+            auto tail = this->getro (footer_pos);
             unsigned int const tail_revision = tail->a.generation;
             if (revision > tail_revision) {
                 raise (pstore::error_code::unknown_revision);
@@ -214,7 +214,7 @@ namespace pstore {
         // revision is later than the current region (that's what is_newer is about with footer_pos
         // tracking the current footer as it moves backwards).
         bool is_newer = false;
-        address footer_pos = size_.footer_pos ();
+        typed_address<trailer> footer_pos = size_.footer_pos ();
 
         if (revision == head_revision) {
             // If we're asked for the head, then we always need a full check to see if there's
@@ -235,12 +235,12 @@ namespace pstore {
         // If we're asked for a revision _newer_ that the currently synced number then we need
         // to hunt backwards starting at the head. Syncing to an older revision is simpler because
         // we can work back from the current revision.
-        assert (is_newer || footer_pos != address::null ());
+        assert (is_newer || footer_pos != typed_address<trailer>::null ());
         if (is_newer) {
             // This atomic read of footer_pos fixes our view of the head-revision. Any transactions
             // after this point won't be seen by this process.
-            address const new_footer_pos =
-                this->getro<header> (address::null ())->footer_pos.load ();
+            auto const new_footer_pos =
+                this->getro (typed_address<header>::null ())->footer_pos.load ();
 
             if (revision == head_revision && new_footer_pos == footer_pos) {
                 // We were asked for the head revision but the head turns out to the same
@@ -287,14 +287,14 @@ namespace pstore {
             file.seek (0);
 
             header header;
-            header.footer_pos = address::make (sizeof (header));
+            header.footer_pos = typed_address<trailer>::make (sizeof (header));
             file.write (header);
 
-            assert (header.footer_pos == address::make (file.tell ()));
+            assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
 
             trailer t{};
             std::fill (std::begin (t.a.index_records), std::end (t.a.index_records),
-                       address::null ());
+                       typed_address<index::header_block>::null ());
             t.a.time = milliseconds_since_epoch ();
             t.crc = t.get_crc ();
             file.write (t);
@@ -489,7 +489,7 @@ namespace pstore {
 
     // set_new_footer
     // ~~~~~~~~~~~~~~
-    void database::set_new_footer (header * const head, address new_footer_pos) {
+    void database::set_new_footer (header * const head, typed_address<trailer> new_footer_pos) {
         size_.update_footer_pos (new_footer_pos);
 
         // Finally (this should be the last thing we do), point the file header at the new

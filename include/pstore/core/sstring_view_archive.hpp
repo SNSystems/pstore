@@ -91,7 +91,7 @@ namespace pstore {
                 std::size_t const length =
                     string_helper::read_length (std::forward<DBReader> (archive));
                 new (&str) value_type (
-                    archive.get_db ().template getro<char> (archive.get_address (), length),
+                    archive.get_db ().getro (typed_address<char> (archive.get_address ()), length),
                     length);
                 archive.skip (length);
             }

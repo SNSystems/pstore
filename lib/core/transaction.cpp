@@ -57,21 +57,6 @@ namespace pstore {
         assert (!rhs.is_open ());
     }
 
-    // getro
-    // ~~~~~
-    std::shared_ptr<void const> transaction_base::getro (address addr, std::size_t size) {
-        return db ().getro (addr, size);
-    }
-
-    // getrw
-    // ~~~~~
-    // TODO: raise an exception if addr does not lie within the current transaction.
-    auto transaction_base::getrw (address addr, std::size_t size) -> std::shared_ptr<void> {
-        assert (addr >= first_ && addr + size <= first_ + size_);
-        return db_.getrw (addr, size);
-    }
-
-
     // allocate
     // ~~~~~~~~
     address transaction_base::allocate (std::uint64_t size, unsigned align) {
@@ -117,11 +102,11 @@ namespace pstore {
 
             // We're going to write to the header, but this must be the very last
             // step of completing the transaction.
-            auto new_footer_pos = address::null ();
+            auto new_footer_pos = typed_address<trailer>::null ();
             {
-                auto head = db.getrw<header> (address::null ());
+                auto head = db.getrw (typed_address<header>::null ());
 
-                auto prev_footer = db.getro<trailer const> (head->footer_pos);
+                auto prev_footer = db.getro (head->footer_pos.load ());
 
                 unsigned generation = prev_footer->a.generation + 1;
 
@@ -156,7 +141,7 @@ namespace pstore {
             }
 
             // Mark both this transaction's contents and its trailer as read-only.
-            db.protect (first_, new_footer_pos + sizeof (trailer));
+            db.protect (first_, (new_footer_pos + 1).to_address ());
 
             // That's the end of this transaction.
             first_ = address::null ();

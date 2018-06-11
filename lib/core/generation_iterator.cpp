@@ -83,7 +83,9 @@ namespace pstore {
     // * generation container *
     // ************************
     generation_iterator generation_container::begin () { return {db_, db_.footer_pos ()}; }
-    generation_iterator generation_container::end () { return {db_, pstore::address::null ()}; }
+    generation_iterator generation_container::end () {
+        return {db_, pstore::typed_address<pstore::trailer>::null ()};
+    }
 
 } // namespace pstore
 // eof: lib/core/generation_iterator.cpp

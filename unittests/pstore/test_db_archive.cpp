@@ -62,8 +62,9 @@
 namespace {
 
     template <typename Transaction>
-    pstore::address append_uint64 (Transaction & transaction, std::uint64_t v) {
-        auto addr = pstore::address::null ();
+    pstore::typed_address<std::uint64_t> append_uint64 (Transaction & transaction,
+                                                        std::uint64_t v) {
+        auto addr = pstore::typed_address<std::uint64_t>::null ();
         std::shared_ptr<std::uint64_t> ptr;
         std::tie (ptr, addr) = transaction.template alloc_rw<std::uint64_t> ();
         *ptr = v;
@@ -86,10 +87,10 @@ TEST_F (DbArchive, ReadASingleUint64) {
     // its contents).
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
-    pstore::address addr = append_uint64 (transaction, v1);
+    pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, v1);
 
     // Now try reading it back again using a serializer.
-    pstore::serialize::archive::database_reader archive (db, addr);
+    pstore::serialize::archive::database_reader archive (db, addr.to_address ());
     std::uint64_t const v2 = pstore::serialize::read<std::uint64_t> (archive);
     EXPECT_EQ (v1, v2);
 }
@@ -108,11 +109,11 @@ TEST_F (DbArchive, ReadAUint64Span) {
     // Append 'original' to the store.
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
-    pstore::address addr = append_uint64 (transaction, original[0]);
+    pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, original[0]);
     append_uint64 (transaction, original[1]);
 
     // Now the read the array back again.
-    pstore::serialize::archive::database_reader archive (db, addr);
+    pstore::serialize::archive::database_reader archive (db, addr.to_address ());
     std::array<std::uint64_t, 2> actual;
     pstore::serialize::read (archive, ::pstore::gsl::span<std::uint64_t>{actual});
 
@@ -129,13 +130,14 @@ TEST_F (DbArchive, WriteASingleUint64) {
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
     auto archive = pstore::serialize::archive::make_writer (transaction);
-    auto where = pstore::address::make (db.size ());
+    auto where = pstore::typed_address<std::uint64_t>::make (db.size ());
     pstore::serialize::write (archive, original);
 
     // Now read that value back again using the raw pstore API and check that the round-trip was
     // successful.
-    where += pstore::calc_alignment (where.absolute (), alignof (std::uint64_t));
-    auto actual = db.getro<std::uint64_t> (where);
+    auto where2 = pstore::typed_address<std::uint64_t>::make (
+        where.absolute () + pstore::calc_alignment (where.absolute (), alignof (std::uint64_t)));
+    auto actual = db.getro (where2);
     EXPECT_EQ (original, *actual);
 }
 
@@ -157,8 +159,9 @@ TEST_F (DbArchive, WriteAUint64Span) {
 
     // Now read that value back again using the raw pstore API and check that the round-trip was
     // successful.
-    where += pstore::calc_alignment (where.absolute (), alignof (decltype (original)));
-    std::shared_ptr<std::uint64_t const> actual = db.getro<std::uint64_t> (where, 2);
+    auto where2 = pstore::typed_address<std::uint64_t>::make (
+        where.absolute () + pstore::calc_alignment (where.absolute (), alignof (std::uint64_t)));
+    std::shared_ptr<std::uint64_t const> actual = db.getro (where2, 2);
     EXPECT_EQ (original[0], (actual.get ())[0]);
     EXPECT_EQ (original[1], (actual.get ())[1]);
 }
@@ -255,18 +258,20 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
 
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
-    pstore::address addr = append_uint64 (transaction, original[0]);
+    pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, original[0]);
     append_uint64 (transaction, original[1]);
 
     // Now use the serializer to read a span of two uint64_ts. We expect the database.get()
     // method to be called exactly once for this operation.
     std::array<std::uint64_t, 2> actual;
-    EXPECT_CALL (db, get (addr, sizeof (actual), true /*initialized*/, false /*writable*/))
+    EXPECT_CALL (
+        db, get (addr.to_address (), sizeof (actual), true /*initialized*/, false /*writable*/))
         .Times (1)
         .WillOnce (invoke_base_get);
 
     using namespace pstore::serialize;
-    read (archive::database_reader (db, addr), pstore::gsl::span<std::uint64_t>{actual});
+    read (archive::database_reader (db, addr.to_address ()),
+          pstore::gsl::span<std::uint64_t>{actual});
 }
 
 // eof: unittests/pstore/test_db_archive.cpp

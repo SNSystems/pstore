@@ -83,6 +83,7 @@
 
 namespace pstore {
 
+    // FIXME: add typed_extent.
     /// \brief An extent is a contiguous area of storage reserved for a data BLOB, represented as a
     /// range.
     /// This type is used to represent a BLOB of data: be it either an index key or an associated
@@ -156,6 +157,7 @@ namespace pstore {
         };
     } // namespace serialize
 
+    struct trailer;
 
     /// \brief The data store file header.
     class header {
@@ -206,7 +208,7 @@ namespace pstore {
 
         /// The file offset of the current (most recent) file footer. This value is modified as the
         /// the very last step of commiting a transaction.
-        std::atomic<address> footer_pos;
+        std::atomic<typed_address<trailer>> footer_pos;
     };
 
     PSTORE_STATIC_ASSERT (offsetof (header::body, signature1) == 0);
@@ -226,6 +228,10 @@ namespace pstore {
 
     class database;
 
+    namespace index {
+        struct header_block;
+    } // namespace index
+
     /// \brief The transaction footer structure.
     /// An copy of this structure is written to the data store at the end of each transaction block.
     /// pstore::header::footer_pos holds the address of the latest _complete_ instance and is
@@ -239,7 +245,7 @@ namespace pstore {
 
         /// Checks that the address given by 'pos' appears to point to a valid transaction trailer.
         /// Raises exception::footer_corrupt if not.
-        static bool validate (database const & db, address pos);
+        static bool validate (database const & db, typed_address<trailer> pos);
 
         /// Computes the trailer's CRC value.
         std::uint32_t get_crc () const noexcept;
@@ -252,7 +258,7 @@ namespace pstore {
             last,
         };
 
-        using index_records_array = std::array<address, indices::last>;
+        using index_records_array = std::array<typed_address<index::header_block>, indices::last>;
 
         /// Represents the portion of the trailer structure which is covered by the computed CRC
         /// value.
@@ -271,7 +277,7 @@ namespace pstore {
             /// A pointer to the previous generation. This field forms a reverse linked list which
             /// allows a consumer to enumerate the generations contained within the store and to
             /// "sync" to a specific number.
-            address prev_generation = address::null ();
+            typed_address<trailer> prev_generation = typed_address<trailer>::null ();
 
             index_records_array index_records;
             std::uint32_t unused2{0};

@@ -55,14 +55,15 @@ namespace {
     template <typename IndexType>
     std::shared_ptr<IndexType> get_index (pstore::database & db,
                                           enum pstore::trailer::indices which, bool create) {
+        using namespace pstore;
         auto & dx = db.get_index (which);
 
         // Have we already loaded this index?
         if (dx.get () == nullptr) {
-            std::shared_ptr<pstore::trailer const> footer = db.get_footer ();
-            pstore::address const location = footer->a.index_records.at (
+            std::shared_ptr<trailer const> footer = db.get_footer ();
+            typed_address<index::header_block> const location = footer->a.index_records.at (
                 static_cast<std::underlying_type<decltype (which)>::type> (which));
-            if (location == pstore::address::null ()) {
+            if (location == decltype (location)::null ()) {
                 if (create) {
                     // Create a new (empty) index.
                     dx = std::make_shared<IndexType> (db);

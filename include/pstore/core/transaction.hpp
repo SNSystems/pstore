@@ -93,23 +93,39 @@ namespace pstore {
 
 
         ///@{
-        std::shared_ptr<void const> getro (address addr, std::size_t size);
+        std::shared_ptr<void const> getro (address addr, std::size_t size) {
+            // TODO: perhaps raise an exception if addr does not lie within the current transaction.
+            assert (addr >= first_ && addr + size <= first_ + size_);
+            return db ().getro (addr, size);
+        }
+
         std::shared_ptr<void const> getro (extent const & ex) { return this->getro (ex.addr, ex.size); }
 
-        template <typename Ty, typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty const> getro (address addr, std::size_t elements = 1) {
-            return std::static_pointer_cast<Ty const> (this->getro (addr, elements * sizeof (Ty)));
+        template <typename Ty,
+                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
+        std::shared_ptr<Ty const> getro (typed_address<Ty> addr, std::size_t elements = 1) {
+            assert (addr.to_address () >= first_ &&
+                    (addr.to_address () + elements * sizeof (Ty)) <= first_ + size_);
+            return db_.getro (addr, elements);
         }
         ///@}
 
 
         ///@{
-        std::shared_ptr<void> getrw (address addr, std::size_t size);
+        std::shared_ptr<void> getrw (address addr, std::size_t size) {
+            // TODO: raise an exception if addr does not lie within the current transaction.
+            assert (addr >= first_ && addr + size <= first_ + size_);
+            return db_.getrw (addr, size);
+        }
+
         std::shared_ptr<void> getrw (extent const & ex) { return this->getrw (ex.addr, ex.size); }
 
-        template <typename Ty, typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty> getrw (address addr, std::size_t elements = 1) {
-            return std::static_pointer_cast<Ty> (this->getrw (addr, elements * sizeof (Ty)));
+        template <typename Ty,
+                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
+        std::shared_ptr<Ty> getrw (typed_address<Ty> addr, std::size_t elements = 1) {
+            assert (addr.to_address () >= first_ &&
+                    (addr.to_address () + elements * sizeof (Ty)) <= first_ + size_);
+            return db_.getrw (addr, elements);
         }
         ///@}
 
@@ -159,9 +175,9 @@ namespace pstore {
         /// \note     The newly allocated space it not initialized.
         template <typename Ty,
                   typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        auto alloc_rw (std::size_t num = 1) -> std::pair<std::shared_ptr<Ty>, address> {
+        auto alloc_rw (std::size_t num = 1) -> std::pair<std::shared_ptr<Ty>, typed_address<Ty>> {
             auto result = this->alloc_rw (sizeof (Ty) * num, alignof (Ty));
-            return {std::static_pointer_cast<Ty> (result.first), result.second};
+            return {std::static_pointer_cast<Ty> (result.first), typed_address<Ty> (result.second)};
         }
         ///@}
 

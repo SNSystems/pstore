@@ -121,7 +121,8 @@ TEST_F (IndirectString, StoreRoundTrip) {
         EXPECT_EQ (transaction.size (), sizeof (pstore::address));
 
         // Now the body of the string (and patch the pointer).
-        pstore::indirect_string::write_body_and_patch_address (transaction, sstring, indirect_addr);
+        pstore::indirect_string::write_body_and_patch_address (
+            transaction, sstring, pstore::typed_address<pstore::address> (indirect_addr));
 
         // Commit the transaction.
         transaction.commit ();

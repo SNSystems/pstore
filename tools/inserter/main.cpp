@@ -263,7 +263,7 @@ int main (int argc, char * argv[]) {
 
             for (auto & k : keys) {
                 // Allocate space in the transaction for the value block
-                auto addr = pstore::address::null ();
+                auto addr = pstore::typed_address<std::uint8_t>::null ();
                 std::shared_ptr<std::uint8_t> ptr;
                 std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (value.size ());
 
@@ -271,7 +271,8 @@ int main (int argc, char * argv[]) {
                 std::copy (std::begin (value), std::end (value), ptr.get ());
 
                 // Add the key/value pair to the index.
-                index->insert_or_assign (transaction, k, pstore::extent{addr, value.size ()});
+                index->insert_or_assign (transaction, k,
+                                         pstore::extent{addr.to_address (), value.size ()});
             }
 
             transaction.commit ();

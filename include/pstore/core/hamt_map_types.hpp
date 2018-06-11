@@ -113,6 +113,27 @@ namespace pstore {
 
         using ::pstore::gsl::not_null;
 
+        //*  _                _           _    _         _    *
+        //* | |_  ___ __ _ __| |___ _ _  | |__| |___  __| |__ *
+        //* | ' \/ -_) _` / _` / -_) '_| | '_ \ / _ \/ _| / / *
+        //* |_||_\___\__,_\__,_\___|_|   |_.__/_\___/\__|_\_\ *
+        //*                                                   *
+        /// The address of an instance of this type is passed to the hamt_map ctor to load an
+        /// existing index, and it is returned by a call to hamt_map::flush().
+        struct header_block {
+            std::array<std::uint8_t, 8> signature;
+            /// The number of keys stored in the tree.
+            std::uint64_t size;
+            /// The store address of the tree's root node.
+            address root;
+        };
+
+        PSTORE_STATIC_ASSERT (sizeof (header_block) == 24);
+        PSTORE_STATIC_ASSERT (offsetof (header_block, signature) == 0);
+        PSTORE_STATIC_ASSERT (offsetof (header_block, size) == 8);
+        PSTORE_STATIC_ASSERT (offsetof (header_block, root) == 16);
+
+
         namespace details {
 
             std::size_t const not_found = std::numeric_limits<std::size_t>::max ();
@@ -266,26 +287,6 @@ namespace pstore {
 
             using parent_stack = array_stack<parent_type, max_tree_depth>;
 
-
-            //*  _                _           _    _         _    *
-            //* | |_  ___ __ _ __| |___ _ _  | |__| |___  __| |__ *
-            //* | ' \/ -_) _` / _` / -_) '_| | '_ \ / _ \/ _| / / *
-            //* |_||_\___\__,_\__,_\___|_|   |_.__/_\___/\__|_\_\ *
-            //*                                                   *
-            /// The address of an instance of this type is passed to the hamt_map ctor to load an
-            /// existing index, and it is returned by a call to hamt_map::flush().
-            struct header_block {
-                std::array<std::uint8_t, 8> signature;
-                /// The number of keys stored in the tree.
-                std::uint64_t size;
-                /// The store address of the tree's root node.
-                address root;
-            };
-
-            PSTORE_STATIC_ASSERT (sizeof (header_block) == 24);
-            PSTORE_STATIC_ASSERT (offsetof (header_block, signature) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (header_block, size) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (header_block, root) == 16);
 
             //*  _ _                                  _      *
             //* | (_)_ _  ___ __ _ _ _   _ _  ___  __| |___  *

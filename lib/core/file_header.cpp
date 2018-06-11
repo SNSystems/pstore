@@ -130,26 +130,28 @@ namespace pstore {
 
     // validate [static]
     // ~~~~~~~~
-    bool trailer::validate (database const & db, address pos) {
-        if (pos == address::null ()) {
+    bool trailer::validate (database const & db, typed_address<trailer> pos) {
+        if (pos == typed_address<trailer>::null ()) {
             return true;
         }
         bool ok = true;
+
         // A basic validity check of footer_pos and prev before we go and
         // access them.
-        if (pos < address::make (sizeof (header)) || pos.absolute () % alignof (trailer) != 0) {
+        if (pos < typed_address<trailer>::make (sizeof (header)) ||
+            pos.absolute () % alignof (trailer) != 0) {
             ok = false;
         } else {
             auto const footer = db.getro<trailer> (pos);
             // Get the address of the previous generation.
-            address prev_pos = footer->a.prev_generation;
+            typed_address<trailer> prev_pos = footer->a.prev_generation;
 
             if (!footer->crc_is_valid () || footer->a.signature1 != trailer::default_signature1 ||
                 footer->signature2 != trailer::default_signature2) {
 
                 ok = false;
-            } else if (pos >= address::make (sizeof (trailer)) &&
-                       prev_pos > pos - sizeof (trailer)) {
+            } else if (pos >= typed_address<trailer>::make (sizeof (trailer)) &&
+                       prev_pos > pos - 1U) {
                 // The previous trailer must lie before the current one in the file,
                 // be separated by at least the size of the trailer and agree with the location
                 // given by the current trailer's 'size' field.
@@ -157,10 +159,11 @@ namespace pstore {
             } else if (pos.absolute () < footer->a.size) {
                 ok = false;
             } else {
-                auto const transaction_first_byte = prev_pos == address::null ()
-                                                        ? address::make (sizeof (header))
-                                                        : prev_pos + sizeof (trailer);
-                if (pos - footer->a.size != transaction_first_byte) {
+                address const transaction_first_byte = prev_pos == typed_address<trailer>::null ()
+                                                           ? address::make (sizeof (header))
+                                                           : (prev_pos + 1U).to_address ();
+
+                if (pos.to_address () - footer->a.size != transaction_first_byte) {
                     ok = false;
                 }
             }

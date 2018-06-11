@@ -158,8 +158,8 @@ namespace pstore {
                 return {};
             }
             // addresses less than the threshold value are "old".
-            address const threshold = db.older_revision_footer_pos (old) + sizeof (trailer);
-            details::traverser<Index> t{index, threshold};
+            details::traverser<Index> t{index,
+                                        (db.older_revision_footer_pos (old) + 1).to_address ()};
             return t ();
         }
 

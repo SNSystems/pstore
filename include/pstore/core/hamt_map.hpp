@@ -225,7 +225,9 @@ namespace pstore {
             /// \param db A database which will contain the result of the hamt_map.
             /// \param ip The index root address.
             /// \param hash A hash function that generates the hash value from the key value.
-            hamt_map (database & db, address ip = address::null (), Hash const & hash = Hash ());
+            hamt_map (database & db,
+                      typed_address<header_block> ip = typed_address<header_block>::null (),
+                      Hash const & hash = Hash ());
 
             ~hamt_map () { this->clear (); }
 
@@ -343,7 +345,7 @@ namespace pstore {
             /// \param transaction  The transaction to which the map will be written.
             /// \param generation The generation number to which the map will be written.
             /// \returns The address of the tree root node.
-            address flush (transaction_base & transaction, unsigned generation);
+            typed_address<header_block> flush (transaction_base & transaction, unsigned generation);
 
             /// \name Accessors
             /// Provide access to index internals.
@@ -575,19 +577,20 @@ namespace pstore {
             hamt_map<KeyType, ValueType, Hash, KeyEqual>::index_signature;
 
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database & db, address pos,
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database & db,
+                                                                typed_address<header_block> pos,
                                                                 Hash const & hash)
                 : db_ (db)
                 , revision_ (db.get_current_revision ())
                 , hash_ (hash)
                 , equal_ (KeyEqual ()) {
 
-            if (index_pointer{pos}.is_heap ()) {
+            if (index_pointer{pos.to_address ()}.is_heap ()) {
                 raise (pstore::error_code::index_corrupt);
             }
-            if (pos != address::null ()) {
+            if (pos != typed_address<header_block>::null ()) {
                 // 'pos' must point to the index header block which gives us the tree root and size.
-                auto hb = db.getro<details::header_block> (pos);
+                auto hb = db.getro (pos);
                 if (hb->signature != index_signature) {
                     raise (pstore::error_code::index_corrupt);
                 }
@@ -956,8 +959,9 @@ namespace pstore {
         // hamt_map::flush
         // ~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        address hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction,
-                                                                     unsigned generation) {
+        typed_address<header_block>
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction,
+                                                             unsigned generation) {
             if (revision_ != db_.get_current_revision ()) {
                 raise (error_code::index_not_latest_revision);
             }
@@ -973,7 +977,7 @@ namespace pstore {
 
             // Write the index header. This simply holds a check signature, the tree root, and
             // remembers the tree size for us on restore.
-            auto pos = transaction.alloc_rw<details::header_block> ();
+            auto pos = transaction.alloc_rw<header_block> ();
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
             pos.first->root = root_.addr;

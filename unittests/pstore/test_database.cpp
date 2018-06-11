@@ -87,7 +87,7 @@ TEST_F (Database, CheckInitialState) {
                      ::testing::ContainerEq (footer->a.signature1));
         EXPECT_EQ (0U, footer->a.generation);
         EXPECT_EQ (0U, footer->a.size);
-        EXPECT_EQ (pstore::address::null (), footer->a.prev_generation);
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), footer->a.prev_generation);
         // std::atomic<std::uint64_t> time{0};
         // index_records_array index_records;
         EXPECT_THAT (pstore::trailer::default_signature2,
@@ -166,15 +166,15 @@ TEST_F (OpenCorruptStore, HeaderUUID) {
 TEST_F (OpenCorruptStore, HeaderFooterTooSmall) {
     // Footer_pos must be at least the size for of the file header...
     auto h = this->get_header ();
-    h->footer_pos = pstore::address::null ();
+    h->footer_pos = pstore::typed_address<pstore::trailer>::null ();
     this->check_database_open (pstore::error_code::header_corrupt);
 }
 
 TEST_F (OpenCorruptStore, HeaderFooterTooLarge) {
-    auto too_large =
-        pstore::address::make ((UINT64_C (1) << (pstore::address::offset_number_bits +
-                                                 pstore::address::segment_number_bits)) -
-                               1U);
+    auto too_large = pstore::typed_address<pstore::trailer>::make (
+        (UINT64_C (1) << (pstore::address::offset_number_bits +
+                          pstore::address::segment_number_bits)) -
+        1U);
     this->get_header ()->footer_pos = too_large;
     this->check_database_open (pstore::error_code::header_corrupt);
 }

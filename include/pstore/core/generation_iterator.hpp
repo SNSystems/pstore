@@ -55,15 +55,16 @@
 #include <iterator>
 #include <tuple>
 
-#include "pstore/core/address.hpp"
+#include "pstore/core/file_header.hpp"
 
 namespace pstore {
     class database;
+    struct trailer;
 
     class generation_iterator : public std::iterator<std::input_iterator_tag, // category
-                                                     pstore::address> {
+                                                     typed_address<trailer>> {
     public:
-        generation_iterator (database const & db, address pos)
+        generation_iterator (database const & db, typed_address<trailer> pos)
                 : db_ (db)
                 , pos_ (pos) {
 
@@ -81,7 +82,7 @@ namespace pstore {
         }
         bool operator!= (generation_iterator const & rhs) const { return !operator== (rhs); }
 
-        pstore::address operator* () const { return pos_; }
+        typed_address<trailer> operator* () const { return pos_; }
 
         generation_iterator & operator++ ();  // pre-increment
         generation_iterator operator++ (int); // post-increment
@@ -90,7 +91,7 @@ namespace pstore {
         bool validate () const;
 
         database const & db_;
-        address pos_;
+        typed_address<trailer> pos_;
     };
 
 

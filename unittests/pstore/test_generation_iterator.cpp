@@ -93,7 +93,7 @@ TEST_F (GenerationIterator, GenerationContainerEnd) {
     this->add_transaction ();
     pstore::generation_iterator actual = pstore::generation_container (*db_).end ();
     pstore::generation_iterator expected =
-        pstore::generation_iterator (*db_, pstore::address::null ());
+        pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (expected, actual);
 }
 
@@ -101,15 +101,15 @@ TEST_F (GenerationIterator, GenerationContainerEnd) {
 
 TEST_F (GenerationIterator, InitialStoreIterationHasDistance1) {
     auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
-    auto end = pstore::generation_iterator (*db_, pstore::address::null ());
+    auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (1U, std::distance (begin, end));
-    EXPECT_EQ (pstore::address::make (sizeof (pstore::header)), *begin);
+    EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (sizeof (pstore::header)), *begin);
 }
 
 TEST_F (GenerationIterator, AddTransactionoreIterationHasDistance2) {
     this->add_transaction ();
     auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
-    auto end = pstore::generation_iterator (*db_, pstore::address::null ());
+    auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (2U, std::distance (begin, end));
 }
 
@@ -117,8 +117,9 @@ TEST_F (GenerationIterator, ZeroTransactionPrevPointerIsBeyondTheFileEnd) {
     {
         // Note that the 'footer' variable is scoped to guarantee that any "spanning" memory is
         // flush before we try to exercise the generation_iterator.
-        auto footer = db_->getrw<pstore::trailer> (db_->footer_pos ());
-        footer->a.prev_generation = pstore::address::make (file_->size ());
+        std::shared_ptr<pstore::trailer> footer = db_->getrw (db_->footer_pos ());
+        footer->a.prev_generation =
+            pstore::typed_address<pstore::trailer> (pstore::address::make (file_->size ()));
         footer->crc =
             pstore::crc32 (::pstore::gsl::span<pstore::trailer::body> (&(footer.get ())->a, 1));
         ASSERT_TRUE (footer->crc_is_valid ());
@@ -151,9 +152,10 @@ TEST_F (GenerationIterator, FooterPosWithinHeader) {
     this->add_transaction ();
 
     {
-        auto footer0 = db_->getrw<pstore::trailer> (db_->footer_pos ());
-        auto footer1 = db_->getrw<pstore::trailer> (footer0->a.prev_generation);
-        footer1->a.prev_generation = pstore::address::make (sizeof (pstore::header) / 2);
+        std::shared_ptr<pstore::trailer> footer0 = db_->getrw (db_->footer_pos ());
+        std::shared_ptr<pstore::trailer> footer1 = db_->getrw (footer0->a.prev_generation);
+        footer1->a.prev_generation = pstore::typed_address<pstore::trailer> (
+            pstore::address::make (sizeof (pstore::header) / 2));
         footer1->crc = footer1->get_crc ();
         ASSERT_TRUE (footer1->crc_is_valid ());
     }

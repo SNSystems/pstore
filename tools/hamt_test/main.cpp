@@ -176,7 +176,7 @@ namespace {
 
         for (auto & kv : maps) {
             // Allocate space in the transaction for the value block
-            auto addr = pstore::address::null ();
+            auto addr = pstore::typed_address<std::uint8_t>::null ();
             std::shared_ptr<std::uint8_t> ptr;
             std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (value.size ());
 
@@ -184,10 +184,11 @@ namespace {
             std::copy (std::begin (value), std::end (value), ptr.get ());
 
             // Update the mapped value.
-            kv.second = addr;
+            kv.second = addr.to_address ();
 
             // Add the key/value pair to the index.
-            index.insert_or_assign (transaction, kv.first, pstore::extent{addr, value.size ()});
+            index.insert_or_assign (transaction, kv.first,
+                                    pstore::extent{addr.to_address (), value.size ()});
         }
 
         transaction.commit ();
@@ -198,7 +199,7 @@ namespace {
     ///
     /// \param index  A database index.
     /// \param expected_results  A expected index which is saved in the database.
-    /// \param test_name  A test name which is used to provide the useful error information.
+    /// \param test_name  A test name which is used to provide useful error information.
     /// \returns True if the test was successful, false otherwise.
     template <typename Map>
     bool find (pstore::index::digest_index const & index, Map const & expected_results,

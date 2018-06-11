@@ -420,8 +420,8 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (HamtRoundTrip, Empty) {
-    pstore::address addr;
-    index_type index1{*db_, pstore::address::null ()};
+    pstore::typed_address<pstore::index::header_block> addr;
+    index_type index1{*db_, pstore::typed_address<pstore::index::header_block>::null ()};
     {
         auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         addr = index1.flush (t1, db_->get_current_revision());
@@ -432,8 +432,8 @@ TEST_F (HamtRoundTrip, Empty) {
 }
 
 TEST_F (HamtRoundTrip, LeafMember) {
-    pstore::address addr;
-    index_type index1{*db_, pstore::address::null ()};
+    pstore::typed_address<pstore::index::header_block> addr;
+    index_type index1{*db_, pstore::typed_address<pstore::index::header_block>::null ()};
     {
         auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         index1.insert_or_assign (t1, index_type::value_type{"a", "a"});
@@ -461,8 +461,8 @@ namespace {
 
         void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (
-                new test_trie (*db_, pstore::address::null (), hash_));
+            GenericIndexFixture::index_.reset (new test_trie (
+                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
 
             // With a known hash function (see map_) and the insertion order below, we should end
             // up with a trie which looks like:
@@ -730,8 +730,8 @@ namespace {
 
         virtual void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (
-                new test_trie (*db_, pstore::address::null (), hash_));
+            GenericIndexFixture::index_.reset (new test_trie (
+                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
             this->check_collision (hash_ ("a"), hash_ ("b"), 1);
             this->check_collision (hash_ ("a"), hash_ ("c"), 1);
             this->check_collision (hash_ ("e"), hash_ ("f"), 10);
@@ -1423,8 +1423,8 @@ namespace {
 
         virtual void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (
-                new test_trie (*db_, pstore::address::null (), hash_));
+            GenericIndexFixture::index_.reset (new test_trie (
+                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
             // With a known hash function (see map_) and the insertion order a to d, we should end
             // up with a trie which looks like:
             //
@@ -1572,8 +1572,8 @@ namespace {
 
         virtual void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (
-                new test_trie (*db_, pstore::address::null (), hash_));
+            GenericIndexFixture::index_.reset (new test_trie (
+                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
             // With a known hash function and the insertion order below, we should end up with a
             // trie which
             // looks like:
@@ -1733,7 +1733,8 @@ namespace {
     // ~~~~~
     void CorruptInternalNodes::SetUp () {
         GenericIndexFixture::SetUp ();
-        index_.reset (new test_trie (*db_, pstore::address::null (), hash_));
+        index_.reset (new test_trie (
+            *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
     }
 
     // build

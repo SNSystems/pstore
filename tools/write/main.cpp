@@ -97,7 +97,7 @@ namespace {
             auto const size = file.size ();
 
             // Allocate space in the transaction for 'size' bytes.
-            auto addr = pstore::address::null ();
+            auto addr = pstore::typed_address<std::uint8_t>::null ();
             std::shared_ptr<std::uint8_t> ptr;
             std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (size);
 
@@ -115,7 +115,7 @@ namespace {
             }
 
             // Add it to the names index.
-            names.insert_or_assign (transaction, key, pstore::extent{addr, size});
+            names.insert_or_assign (transaction, key, pstore::extent{addr.to_address (), size});
         }
 
         return ok;
@@ -130,14 +130,14 @@ namespace {
         using element_type = typename std::string::value_type;
 
         // Allocate space in the transaction for the value block
-        auto addr = pstore::address::null ();
+        auto addr = pstore::typed_address<element_type>::null ();
         std::shared_ptr<element_type> ptr;
         std::tie (ptr, addr) = transaction.template alloc_rw<element_type> (size);
 
         // Copy the string to the store.
         std::copy (std::begin (v), std::end (v), ptr.get ());
 
-        return {addr, size};
+        return {addr.to_address (), size};
     }
 
 } // namespace

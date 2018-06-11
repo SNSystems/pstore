@@ -92,7 +92,7 @@ namespace {
     // ~~~
     pstore::extent Diff::add (transaction_type & transaction, std::string const & key,
                               std::string const & value) {
-        auto where = pstore::address::null ();
+        auto where = pstore::typed_address<char>::null ();
         {
             // Allocate storage for string 'value' and copy the data into it.
             std::shared_ptr<char> ptr;
@@ -101,7 +101,7 @@ namespace {
         }
 
         auto index = pstore::index::get_write_index (*db_);
-        auto const value_extent = pstore::extent{where, value.length ()};
+        auto const value_extent = pstore::extent{where.to_address (), value.length ()};
         index->insert_or_assign (transaction, key, value_extent);
         return value_extent;
     }

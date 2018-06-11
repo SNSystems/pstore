@@ -153,7 +153,7 @@ namespace pstore {
         ///
         /// \note This is a const member function and therefore cannot "see" revisions later than
         /// the old currently synced because to do so may require additional space to be mapped.
-        address older_revision_footer_pos (unsigned revision) const;
+        typed_address<trailer> older_revision_footer_pos (unsigned revision) const;
 
         static bool small_files_enabled () { return region::small_files_enabled (); }
 
@@ -167,21 +167,92 @@ namespace pstore {
         }
 
         ///@{
-        std::shared_ptr<void const> getro (extent const & ex) const;
-        std::shared_ptr<void const> getro (address addr, std::size_t size) const;
-        template <typename Ty>
-        std::shared_ptr<Ty const> getro (address addr) const;
-        template <typename Ty>
-        std::shared_ptr<Ty const> getro (address addr, std::size_t size) const;
+        /// Load a block of data starting at address \p addr and of \p size bytes.
+        ///
+        /// \param addr The starting address of the data block to be loaded.
+        /// \param size The size of the data block to be loaded.
+        /// \return A read-only pointer to the loaded data.
+        std::shared_ptr<void const> getro (address addr, std::size_t size) const {
+            return this->get (addr, size, true /*initialized*/, false /*writable*/);
+        }
+
+        /// Load a block of data starting at the address and size specified by \p ex.
+        ///
+        /// \param ex The extent of of the data to be loaded.
+        /// \return A read-only pointer to the loaded data.
+        std::shared_ptr<void const> getro (extent const & ex) const {
+            return this->getro (ex.addr, ex.size);
+        }
+
+        /// Returns a pointer to a mutable instance of type T.
+        ///
+        /// \param addr The address at which the data begins.
+        /// \return A read-only pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T const> getro (typed_address<T> addr) const {
+            return this->getro (addr, std::size_t{1});
+        }
+
+        /// Returns a pointer to a read-only array of instances of type T.
+        ///
+        /// \param addr The address at which the data begins.
+        /// \param elements The number of elements in the T[] array.
+        /// \return A read-only pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T const> getro (typed_address<T> addr, std::size_t elements) const {
+            assert (addr.to_address ().absolute () % alignof (T) == 0);
+            return std::static_pointer_cast<T const> (
+                this->getro (addr.to_address (), sizeof (T) * elements));
+        }
         ///@}
 
         ///@{
-        std::shared_ptr<void> getrw (extent const & ex);
-        std::shared_ptr<void> getrw (address addr, std::size_t size);
-        template <typename T>
-        auto getrw (address sop) -> std::shared_ptr<T>;
-        template <typename T>
-        auto getrw (address sop, std::size_t elements) -> std::shared_ptr<T>;
+        /// A collection of functions which obtain a non-const pointer to database storage.
+        /// These functions should only be called by the transaction code. Data outside of
+        /// an open transaction is always read-only and the underlying memory is marked
+        /// read-only. Writing through the pointer returned by these functions may cause client code
+        /// to crash if the address lies outside the range of the expected range.
+
+        /// Load a block of data starting at address \p addr and of \p size bytes.
+        ///
+        /// \param addr The starting address of the data block to be loaded.
+        /// \param size The size of the data block to be loaded.
+        /// \return A mutable pointer to the loaded data.
+        std::shared_ptr<void> getrw (address addr, std::size_t size) {
+            return std::const_pointer_cast<void> (
+                this->get (addr, size, true /*initialized*/, true /*writable*/));
+        }
+
+        /// Loads a block of storage at the address and size given by \p ex.
+        ///
+        /// \param ex The extent of the data.
+        /// \return A mutable pointer to the loaded data.
+        std::shared_ptr<void> getrw (extent const & ex) { return this->getrw (ex.addr, ex.size); }
+
+        /// Returns a pointer to a mutable instance of type T.
+        ///
+        /// \param addr The address at which the data begins.
+        /// \return A mutable pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T> getrw (typed_address<T> addr) {
+            return this->getrw<T> (addr, std::size_t{1});
+        }
+
+        /// Returns a pointer to a mutable array of instances of type T.
+        ///
+        /// \param addr The address at which the data begins.
+        /// \param elements The number of elements in the T[] array.
+        /// \return A mutable pointer to the loaded data.
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T> getrw (typed_address<T> addr, std::size_t elements) {
+            assert (addr.absolute () % alignof (T) == 0);
+            return std::static_pointer_cast<T> (
+                this->getrw (addr.to_address (), sizeof (T) * elements));
+        }
         ///@}
 
         // (Virtual for mocking.)
@@ -206,7 +277,7 @@ namespace pstore {
 
         void close ();
 
-        address footer_pos () const noexcept { return size_.footer_pos (); }
+        typed_address<trailer> footer_pos () const noexcept { return size_.footer_pos (); }
 
         /// Returns the generation number to which the database is synced.
         /// \note This generation number doesn't count an open transaction.
@@ -243,7 +314,7 @@ namespace pstore {
 
         /// Call as part of completing a transaction. We update the database records to that
         /// the new footer is recorded.
-        void set_new_footer (header * const head, address new_footer_pos);
+        void set_new_footer (header * const head, typed_address<trailer> new_footer_pos);
 
         void protect (address first, address last) { storage_.protect (first, last); }
 
@@ -262,7 +333,7 @@ namespace pstore {
             return indices_[static_cast<std::underlying_type<decltype (which)>::type> (which)];
         }
         std::shared_ptr<trailer const> get_footer () const {
-            return this->getro<trailer> (this->footer_pos ());
+            return this->getro (this->footer_pos ());
         }
 
     private:
@@ -287,14 +358,14 @@ namespace pstore {
         class sizes {
         public:
             sizes () noexcept = default;
-            explicit sizes (address footer_pos) noexcept
+            explicit sizes (typed_address<trailer> footer_pos) noexcept
                     : footer_pos_ (footer_pos)
                     , logical_ (footer_pos_.absolute () + sizeof (trailer)) {}
 
-            address footer_pos () const noexcept { return footer_pos_; }
+            typed_address<trailer> footer_pos () const noexcept { return footer_pos_; }
             std::uint64_t logical_size () const noexcept { return logical_; }
 
-            void update_footer_pos (address new_footer_pos) noexcept {
+            void update_footer_pos (typed_address<trailer> new_footer_pos) noexcept {
                 assert (new_footer_pos.absolute () >= sizeof (header));
                 footer_pos_ = new_footer_pos;
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
@@ -306,7 +377,7 @@ namespace pstore {
             }
 
         private:
-            address footer_pos_;
+            typed_address<trailer> footer_pos_;
 
             /// This value tracks space as it's appended to the file.
             std::uint64_t logical_ = 0;
@@ -338,7 +409,7 @@ namespace pstore {
 
 
         template <typename File>
-        static address get_footer_pos (File & file);
+        static typed_address<trailer> get_footer_pos (File & file);
 
         static std::string build_sync_name (header const & header);
 
@@ -382,7 +453,7 @@ namespace pstore {
     // get_footer_pos [static]
     // ~~~~~~~~~~~~~~
     template <typename File>
-    auto database::get_footer_pos (File & file) -> address {
+    auto database::get_footer_pos (File & file) -> typed_address<trailer> {
         static_assert (std::is_base_of<file::file_base, File>::value,
                        "File type must be derived from file::file_base");
         assert (file.is_open ());
@@ -407,7 +478,7 @@ namespace pstore {
             raise (pstore::error_code::header_corrupt, file.path ());
         }
 
-        address const result = h->footer_pos.load ();
+        typed_address<trailer> const result = h->footer_pos.load ();
         std::uint64_t const footer_offset = result.absolute ();
         std::uint64_t const file_size = file.size ();
         if (footer_offset < sizeof (header) || file_size < sizeof (header) + sizeof (trailer) ||
@@ -415,52 +486,6 @@ namespace pstore {
             raise (error_code::header_corrupt, file.path ());
         }
         return result;
-    }
-
-    // getrw
-    // ~~~~~
-    template <typename Ty>
-    auto database::getrw (address addr) -> std::shared_ptr<Ty> {
-        assert (addr.absolute () % alignof (Ty) == 0);
-        auto ptr = this->getrw (addr, sizeof (Ty));
-        return std::static_pointer_cast<Ty> (ptr);
-    }
-    template <typename Ty>
-    auto database::getrw (address addr, std::size_t elements) -> std::shared_ptr<Ty> {
-        assert (addr.absolute () % alignof (Ty) == 0);
-        PSTORE_STATIC_ASSERT (std::is_standard_layout<Ty>::value);
-        auto const size = sizeof (Ty) * elements;
-        std::shared_ptr<void> result = this->getrw (addr, size);
-        return std::static_pointer_cast<Ty> (result);
-    }
-    inline auto database::getrw (extent const & ex) -> std::shared_ptr<void> {
-        return this->getrw (ex.addr, ex.size);
-    }
-    inline auto database::getrw (address addr, std::size_t size) -> std::shared_ptr<void> {
-        return std::const_pointer_cast<void> (
-            this->get (addr, size, true /*initialized*/, true /*writable*/));
-    }
-
-    // getro
-    // ~~~~~
-    inline auto database::getro (extent const & ex) const -> std::shared_ptr<void const> {
-        return this->getro (ex.addr, ex.size);
-    }
-    template <typename Ty>
-    inline auto database::getro (address addr) const -> std::shared_ptr<Ty const> {
-        assert (addr.absolute () % alignof (Ty) == 0);
-        return std::static_pointer_cast<Ty const> (this->getro (addr, sizeof (Ty)));
-    }
-    template <typename Ty>
-    inline auto database::getro (address addr, std::size_t elements) const
-        -> std::shared_ptr<Ty const> {
-        assert (addr.absolute () % alignof (Ty) == 0);
-        auto const size = sizeof (Ty) * elements;
-        return std::static_pointer_cast<Ty const> (this->getro (addr, size));
-    }
-    inline auto database::getro (address addr, std::size_t size) const
-        -> std::shared_ptr<void const> {
-        return this->get (addr, size, true /*initialized*/, false /*writable*/);
     }
 
 } // namespace pstore

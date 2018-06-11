@@ -149,7 +149,8 @@ TEST_F (Transaction, CommitInt) {
             // If rw is a spanning pointer, it will only be saved to the store when it is deleted.
             // TODO: write a large vector (>4K) so the 'protect' function, which is called by the
             // transaction commit function, has an effect.
-            std::pair<std::shared_ptr<int>, pstore::address> rw = transaction.alloc_rw<int> ();
+            std::pair<std::shared_ptr<int>, pstore::typed_address<int>> rw =
+                transaction.alloc_rw<int> ();
             ASSERT_EQ (0U, rw.second.absolute () % alignof (int))
                 << "The address must be suitably aligned for int";
             *(rw.first) = data_value;
@@ -184,7 +185,7 @@ TEST_F (Transaction, CommitInt) {
             << "Did not find the r0 footer signature1";
         EXPECT_EQ (0U, r0footer->a.generation) << "r0 footer generation number must be 0";
         EXPECT_EQ (0U, r0footer->a.size) << "expected the r0 footer size value to be 0";
-        EXPECT_EQ (pstore::address::null (), r0footer->a.prev_generation)
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), r0footer->a.prev_generation)
             << "The r0 footer should not point to a previous generation";
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (r0footer->signature2))
@@ -197,7 +198,8 @@ TEST_F (Transaction, CommitInt) {
             << "Did not find the r1 footer signature1";
         EXPECT_EQ (1U, r1footer->a.generation) << "r1 footer generation number must be 1";
         EXPECT_GE (r1footer->a.size, sizeof (int)) << "r1 footer size must be at least sizeof (int";
-        EXPECT_EQ (pstore::address::make (sizeof (pstore::header)), r1footer->a.prev_generation)
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (sizeof (pstore::header)),
+                   r1footer->a.prev_generation)
             << "r1 previous pointer must point to r0 footer";
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (r1footer->signature2))
@@ -249,7 +251,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
             << "Did not find r0 footer signature1";
         EXPECT_EQ (0U, r0footer->a.generation) << "r0 footer generation number must be 0";
         EXPECT_EQ (0U, r0footer->a.size);
-        EXPECT_EQ (pstore::address::null (), r0footer->a.prev_generation);
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), r0footer->a.prev_generation);
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (r0footer->signature2))
             << "Did not find r0 footer signature2";
@@ -272,7 +274,7 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
     // Check the two footers.
     {
         pstore::header const * const header = this->get_header ();
-        pstore::address const r1_footer_offset = header->footer_pos;
+        pstore::typed_address<pstore::trailer> const r1_footer_offset = header->footer_pos;
 
         auto r1_footer = reinterpret_cast<pstore::trailer const *> (buffer_.get () +
                                                                     r1_footer_offset.absolute ());
@@ -287,7 +289,8 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
                      ::testing::ContainerEq (r1_footer->signature2))
             << "Did not find r1 footer signature2";
 
-        pstore::address const r0_footer_offset = r1_footer->a.prev_generation;
+        pstore::typed_address<pstore::trailer> const r0_footer_offset =
+            r1_footer->a.prev_generation;
 
         auto r0_footer = reinterpret_cast<pstore::trailer const *> (buffer_.get () +
                                                                     r0_footer_offset.absolute ());
@@ -296,7 +299,7 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
             << "Did not find r0 footer signature1";
         EXPECT_EQ (0U, r0_footer->a.generation) << "r0 footer generation number must be 0";
         EXPECT_EQ (0U, r0_footer->a.size) << "expected the r0 footer size value to be 0";
-        EXPECT_EQ (pstore::address::null (), r0_footer->a.prev_generation)
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), r0_footer->a.prev_generation)
             << "The r0 footer should not point to a previous generation";
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (r0_footer->signature2))
@@ -318,20 +321,21 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
     pstore::database db{file_};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-    auto addr = pstore::address::null ();
+    auto addr = pstore::typed_address<int>::null ();
     {
         mock_mutex mutex;
         auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
         {
             transaction.allocate (initial_elements * sizeof (int), alignof (int));
-            addr = transaction.allocate (elements * sizeof (int), alignof (int));
-            std::shared_ptr<int> ptr = transaction.getrw<int> (addr, elements);
+            addr = pstore::typed_address<int>::make (
+                transaction.allocate (elements * sizeof (int), alignof (int)));
+            std::shared_ptr<int> ptr = transaction.getrw (addr, elements);
             std::iota (ptr.get (), ptr.get () + elements, 0);
         }
         transaction.commit ();
     }
     {
-        std::shared_ptr<int const> v = db.getro<int> (addr, elements);
+        std::shared_ptr<int const> v = db.getro (addr, elements);
         std::vector<int> expected (elements);
         std::iota (std::begin (expected), std::end (expected), 0);
         std::vector<int> actual (v.get (), v.get () + elements);
@@ -381,7 +385,7 @@ TEST_F (Transaction, CommitTwoSeparateTransactions) {
     footer2 += pstore::calc_alignment (footer2, alignof (pstore::trailer));
 
     pstore::header const * const header = this->get_header ();
-    EXPECT_EQ (pstore::address::make (footer2), header->footer_pos.load ());
+    EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (footer2), header->footer_pos.load ());
 }
 
 TEST_F (Transaction, GetRwInt) {
@@ -428,7 +432,7 @@ TEST_F (Transaction, GetRoInt) {
     {
         mock_mutex mutex;
         auto transaction = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex});
-        db_->getro<int> (pstore::address::null (), 1);
+        db_->getro (pstore::typed_address<int>::null (), 1);
         transaction.commit ();
     }
 }

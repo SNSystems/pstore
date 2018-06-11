@@ -126,7 +126,9 @@ namespace pstore {
                                                key_equal>::const_iterator>;
             using iterator = const_iterator;
 
-            hamt_set (database & db, address ip = address::null (), hasher const & hash = hasher ())
+            hamt_set (database & db,
+                      typed_address<header_block> ip = typed_address<header_block>::null (),
+                      hasher const & hash = hasher ())
                     : map_ (db, ip, hash) {}
 
             /// \name Iterators
@@ -187,7 +189,8 @@ namespace pstore {
                 return {map_.find (key)};
             }
 
-            address flush (transaction_base & transaction, unsigned generation) {
+            typed_address<header_block> flush (transaction_base & transaction,
+                                               unsigned generation) {
                 return map_.flush (transaction, generation);
             }
 
