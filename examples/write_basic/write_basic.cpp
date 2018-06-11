@@ -56,15 +56,15 @@ int main () {
         auto const size = value.length ();
 
         // Allocate space for the value.
-        pstore::address addr;
+        pstore::typed_address<char> addr;
         std::shared_ptr<char> ptr;
-        std::tie (ptr, addr) = t.template alloc_rw<char> (size);
+        std::tie (ptr, addr) = t.alloc_rw<char> (size);
 
         std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
 
         // Tell the index about this new data.
         auto index = pstore::index::get_write_index (db);
-        index->insert_or_assign (t, key, pstore::extent{addr, size});
+        index->insert_or_assign (t, key, pstore::extent{addr.to_address (), size});
     }
 
     t.commit (); // Finalize the transaction.
