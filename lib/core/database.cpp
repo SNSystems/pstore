@@ -104,14 +104,7 @@ namespace pstore {
     // ~database
     // ~~~~~~~~~
     database::~database () noexcept {
-#ifdef PSTORE_CPP_EXCEPTIONS
-        try {
-            this->close ();
-        } catch (...) {
-        }
-#else
-        this->close ();
-#endif
+        PSTORE_NO_EX_ESCAPE (this->close ());
     }
 
     // finish_init
