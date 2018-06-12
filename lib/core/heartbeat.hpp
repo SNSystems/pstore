@@ -110,7 +110,7 @@ namespace pstore {
 
             /// Executes a single invocation of each of the attached callbacks. This is exposed for
             /// unit testing.
-            /// \note Except for during unit tests, the #mut_ mutex must be held on entry to this
+            /// \note Except for during unit tests, the mutex must be held on entry to this
             /// function.
             void step () const;
 
