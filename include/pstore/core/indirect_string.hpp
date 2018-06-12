@@ -163,6 +163,7 @@ namespace pstore {
             /// \brief Writes an instance of `indirect_string` to an archiver.
             ///
             /// \param archive  The Archiver to which the string will be written.
+            /// \param value  The indirect_string instance to be serialized.
             /// \result  The address at which the data was written.
             /// \note This function only writes to a database.
             template <typename Transaction>
@@ -172,6 +173,13 @@ namespace pstore {
 
                 return write_string_address (std::forward<decltype (archive)> (archive), value);
             }
+
+            /// \brief Writes an instance of `indirect_string` to an archiver.
+            ///
+            /// \param archive  The Archiver to which the string will be written.
+            /// \param value  The indirect_string instance to be serialized.
+            /// \result  The address at which the data was written.
+            /// \note This function only writes to a database.
             template <typename Transaction>
             static auto write (archive::database_writer<Transaction> & archive,
                                value_type const & value)
@@ -180,6 +188,7 @@ namespace pstore {
                 return write_string_address (archive, value);
             }
 
+
             /// \brief Reads an instance of `indirect_string` from an archiver.
             ///
             /// \param archive  The Archiver from which a string will be read.
@@ -187,6 +196,13 @@ namespace pstore {
             /// instance.
             /// \note This function only reads from the database.
             static void read (archive::database_reader & archive, value_type & value);
+
+            /// \brief Reads an instance of `indirect_string` from an archiver.
+            ///
+            /// \param archive  The Archiver from which a string will be read.
+            /// \param value  A reference to uninitialized memory that is suitable for a new string
+            /// instance.
+            /// \note This function only reads from the database.
             static void read (archive::database_reader && archive, value_type & value);
 
         private:
