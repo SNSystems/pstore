@@ -118,7 +118,6 @@ namespace pstore {
         }
 
         value_ptr make_blob (database const & db, pstore::address begin, std::uint64_t size);
-        value_ptr make_generation (database const & db, pstore::address footer_pos, bool no_times);
         value_ptr make_contents (database const & db,
                                  pstore::typed_address<pstore::trailer> footer_pos, bool no_times);
 
