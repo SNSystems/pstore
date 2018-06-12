@@ -61,7 +61,7 @@ namespace {
 
 TEST_F (FragmentTest, Empty) {
     std::vector<section_content> c;
-    pstore::extent extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    pstore::extent<fragment> extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
     auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==

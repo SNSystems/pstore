@@ -180,8 +180,14 @@ namespace pstore {
         ///
         /// \param ex The extent of of the data to be loaded.
         /// \return A read-only pointer to the loaded data.
-        std::shared_ptr<void const> getro (extent const & ex) const {
-            return this->getro (ex.addr, ex.size);
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T const> getro (extent<T> const & ex) const {
+            assert (ex.addr.absolute () % alignof (T) == 0);
+            // Note that ex.size specifies the size in bytes of the data to be loaded, not the
+            // number of elements of type T. For this reason we call the plain address version of
+            // getro().
+            return std::static_pointer_cast<T const> (this->getro (ex.addr.to_address (), ex.size));
         }
 
         /// Returns a pointer to a mutable instance of type T.
@@ -229,7 +235,14 @@ namespace pstore {
         ///
         /// \param ex The extent of the data.
         /// \return A mutable pointer to the loaded data.
-        std::shared_ptr<void> getrw (extent const & ex) { return this->getrw (ex.addr, ex.size); }
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T> getrw (extent<T> const & ex) const {
+            // Note that ex.size specifies the size in bytes of the data to be loaded, not the
+            // number of elements of type T. For this reason we call the plain address version of
+            // getro().
+            return std::static_pointer_cast<T> (this->getrw (ex.addr.to_address (), ex.size));
+        }
 
         /// Returns a pointer to a mutable instance of type T.
         ///

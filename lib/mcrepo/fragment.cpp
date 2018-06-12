@@ -105,9 +105,9 @@ void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noex
 // load
 // ~~~~
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
-                                                pstore::extent const & location) {
+                                                pstore::extent<fragment> const & location) {
     if (location.size >= sizeof (fragment)) {
-        auto f = std::static_pointer_cast<fragment const> (db.getro (location));
+        std::shared_ptr<fragment const> f = db.getro (location);
         if (f->size_bytes () == location.size) {
             return f;
         }

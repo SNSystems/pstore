@@ -86,15 +86,6 @@ namespace pstore {
         // *************
         //* make_value *
         // *************
-        value_ptr make_value (extent ex) {
-            auto v = std::make_shared<object> (object::container{
-                {"addr", make_value (ex.addr)},
-                {"size", make_value (ex.size)},
-            });
-            v->compact ();
-            return v;
-        }
-
         value_ptr make_value (header const & header) {
             return make_value (object::container{
                 {"signature1",

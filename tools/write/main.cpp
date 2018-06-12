@@ -97,9 +97,9 @@ namespace {
             auto const size = file.size ();
 
             // Allocate space in the transaction for 'size' bytes.
-            auto addr = pstore::typed_address<std::uint8_t>::null ();
-            std::shared_ptr<std::uint8_t> ptr;
-            std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (size);
+            auto addr = pstore::typed_address<char>::null ();
+            std::shared_ptr<char> ptr;
+            std::tie (ptr, addr) = transaction.alloc_rw<char> (size);
 
             // Copy from the source file to the data store. The destination for the read_span() is
             // the memory that we just allocated in the data store.
@@ -115,14 +115,15 @@ namespace {
             }
 
             // Add it to the names index.
-            names.insert_or_assign (transaction, key, pstore::extent{addr.to_address (), size});
+            names.insert_or_assign (transaction, key, make_extent (addr, size));
         }
 
         return ok;
     }
 
     template <typename Transaction>
-    auto append_string (Transaction & transaction, std::string const & v) -> pstore::extent {
+    auto append_string (Transaction & transaction, std::string const & v)
+        -> pstore::extent<std::string::value_type> {
         // Since the read utility prefers to get raw string value in the system tests, this function
         // is changed to store raw string into the store instead of using serialize write.
 
@@ -137,7 +138,7 @@ namespace {
         // Copy the string to the store.
         std::copy (std::begin (v), std::end (v), ptr.get ());
 
-        return {addr.to_address (), size};
+        return {addr, size};
     }
 
 } // namespace

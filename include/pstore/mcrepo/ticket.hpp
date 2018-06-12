@@ -123,8 +123,9 @@ namespace pstore {
             /// newly allocated ticket.
             /// \result An extent which describes the in-store location of the allocated ticket.
             template <typename TransactionType>
-            static pstore::extent alloc (TransactionType & transaction, pstore::address path,
-                                         std::vector<ticket_member> const & members);
+            static pstore::extent<ticket> alloc (TransactionType & transaction,
+                                                 pstore::address path,
+                                                 std::vector<ticket_member> const & members);
 
             /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
@@ -132,7 +133,7 @@ namespace pstore {
             /// \param extent  An extent describing the ticket location in the store.
             /// \result  A pointer to the ticket in-store memory.
             static std::shared_ptr<ticket const> load (pstore::database const & db,
-                                                       pstore::extent const & extent);
+                                                       pstore::extent<ticket> const & extent);
 
             ///@}
 
@@ -204,21 +205,21 @@ namespace pstore {
         // alloc
         // ~~~~~
         template <typename TransactionType>
-        pstore::extent ticket::alloc (TransactionType & transaction, pstore::address path,
-                                      std::vector<ticket_member> const & members) {
+        pstore::extent<ticket> ticket::alloc (TransactionType & transaction, pstore::address path,
+                                              std::vector<ticket_member> const & members) {
             // First work out its size.
-            std::uint64_t num_members = members.size ();
-            auto size = size_bytes (num_members);
+            std::uint64_t const num_members = members.size ();
+            auto const size = size_bytes (num_members);
 
             // Allocate the storage.
-            auto addr = transaction.allocate (size, alignof (ticket));
+            auto const addr = transaction.allocate (size, alignof (ticket));
             auto ptr = std::static_pointer_cast<ticket> (transaction.getrw (addr, size));
 
             // Write the data to the store.
             ptr->path_addr_ = path;
             ptr->size_ = num_members;
             std::copy (members.begin (), members.end (), ptr->begin ());
-            return {addr, size};
+            return {typed_address<ticket> (addr), size};
         }
 
     } // end namespace repo

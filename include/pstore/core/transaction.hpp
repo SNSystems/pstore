@@ -99,13 +99,17 @@ namespace pstore {
             return db ().getro (addr, size);
         }
 
-        std::shared_ptr<void const> getro (extent const & ex) { return this->getro (ex.addr, ex.size); }
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T const> getro (extent<T> const & ex) {
+            return this->getro (ex.addr, ex.size);
+        }
 
-        template <typename Ty,
-                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty const> getro (typed_address<Ty> addr, std::size_t elements = 1) {
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T const> getro (typed_address<T> addr, std::size_t elements = 1) {
             assert (addr.to_address () >= first_ &&
-                    (addr.to_address () + elements * sizeof (Ty)) <= first_ + size_);
+                    (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getro (addr, elements);
         }
         ///@}
@@ -118,13 +122,17 @@ namespace pstore {
             return db_.getrw (addr, size);
         }
 
-        std::shared_ptr<void> getrw (extent const & ex) { return this->getrw (ex.addr, ex.size); }
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T> getrw (extent<T> const & ex) {
+            return this->getrw (ex.addr, ex.size);
+        }
 
-        template <typename Ty,
-                  typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        std::shared_ptr<Ty> getrw (typed_address<Ty> addr, std::size_t elements = 1) {
+        template <typename T,
+                  typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
+        std::shared_ptr<T> getrw (typed_address<T> addr, std::size_t elements = 1) {
             assert (addr.to_address () >= first_ &&
-                    (addr.to_address () + elements * sizeof (Ty)) <= first_ + size_);
+                    (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getrw (addr, elements);
         }
         ///@}

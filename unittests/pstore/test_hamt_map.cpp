@@ -1874,7 +1874,7 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
         auto r1index = pstore::index::get_write_index (*db_);
-        r1index->insert_or_assign (t1, std::string{"key1"}, pstore::extent());
+        r1index->insert_or_assign (t1, std::string{"key1"}, pstore::extent<char> ());
         t1.commit ();
     }
     db_->sync (0);
@@ -1884,8 +1884,9 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
 
         // We're now synced to revision 1. Trying to insert into the index loaded from
         // r0 should raise an error.
-        check_for_error ([&]() { r0index->insert_or_assign (t2, std::string{"key2"}, pstore::extent ()); },
-                         pstore::error_code::index_not_latest_revision);
+        check_for_error (
+            [&]() { r0index->insert_or_assign (t2, std::string{"key2"}, pstore::extent<char> ()); },
+            pstore::error_code::index_not_latest_revision);
     }
 }
 

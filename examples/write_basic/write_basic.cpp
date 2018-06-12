@@ -64,7 +64,7 @@ int main () {
 
         // Tell the index about this new data.
         auto index = pstore::index::get_write_index (db);
-        index->insert_or_assign (t, key, pstore::extent{addr.to_address (), size});
+        index->insert_or_assign (t, key, make_extent (addr, size));
     }
 
     t.commit (); // Finalize the transaction.

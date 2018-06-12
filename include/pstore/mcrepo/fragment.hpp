@@ -589,7 +589,8 @@ namespace pstore {
             /// \param first  The beginning of the range of `section_content` values.
             /// \param last  The end of the range of `section_content` values.
             template <typename Transaction, typename Iterator>
-            static pstore::extent alloc (Transaction & transaction, Iterator first, Iterator last);
+            static pstore::extent<fragment> alloc (Transaction & transaction, Iterator first,
+                                                   Iterator last);
 
             /// Provides a pointer to an individual fragment instance given a database an a record
             /// describing its address and size.
@@ -598,7 +599,7 @@ namespace pstore {
             /// \param location  The address and size of the fragment data.
             /// \returns  A pointer to the fragment instance.
             static std::shared_ptr<fragment const> load (pstore::database const & db,
-                                                         pstore::extent const & location);
+                                                         pstore::extent<fragment> const & location);
 
             using member_array = sparse_array<std::uint64_t>;
 
@@ -736,7 +737,7 @@ namespace pstore {
         // ~~~~~
         template <typename TransactionType, typename Iterator>
         auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
-            -> pstore::extent {
+            -> pstore::extent<fragment> {
             fragment::check_range_is_sorted (first, last);
             // Compute the number of bytes of storage that we'll need for this fragment.
             auto const size = fragment::size_bytes (first, last);
@@ -745,7 +746,7 @@ namespace pstore {
             std::pair<std::shared_ptr<void>, pstore::address> storage =
                 transaction.alloc_rw (size, alignof (fragment));
             fragment::populate (storage.first.get (), first, last);
-            return {storage.second, size};
+            return {typed_address<fragment> (storage.second), size};
         }
 
         // check_range_is_sorted

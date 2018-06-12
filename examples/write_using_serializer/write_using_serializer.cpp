@@ -63,11 +63,11 @@ int main () {
 
     {
         auto archive = serialize::archive::make_writer (t);
-        pstore::address const addr = serialize::write (archive, value);
+        auto const addr = typed_address<char> (serialize::write (archive, value));
         std::uint64_t const size = db.size () - addr.absolute ();
 
         auto index = pstore::index::get_write_index (db);
-        index->insert_or_assign (t, key, extent{addr, size});
+        index->insert_or_assign (t, key, make_extent (addr, size));
     }
 
     t.commit (); // Finalize the transaction.

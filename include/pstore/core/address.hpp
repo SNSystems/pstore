@@ -121,7 +121,8 @@ namespace pstore {
         using offset_type = std::uint_least32_t;
         using segment_type = std::uint_least16_t;
 
-        static constexpr std::uint64_t as_absolute (segment_type segment, offset_type offset) {
+        static constexpr std::uint64_t as_absolute (segment_type segment,
+                                                    offset_type offset) noexcept {
             PSTORE_CONST_EXPR_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
             PSTORE_CONST_EXPR_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
             return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
@@ -144,40 +145,42 @@ namespace pstore {
         static constexpr address make (segment_type segment, offset_type offset) noexcept {
             return {as_absolute (segment, offset)};
         }
-        static constexpr address null () { return {0}; }
-        static constexpr address max () { return {max_address}; }
+        static constexpr address null () noexcept { return {0}; }
+        static constexpr address max () noexcept { return {max_address}; }
 
 
-        constexpr std::uint64_t absolute () const { return whole; }
+        constexpr std::uint64_t absolute () const noexcept { return whole; }
 
-        address operator+= (std::uint64_t distance) {
+        address operator+= (std::uint64_t distance) noexcept {
             assert (whole <= std::numeric_limits<std::uint64_t>::max () - distance);
             whole += distance;
             return *this;
         }
 
-        address operator-= (std::uint64_t distance) {
+        address operator-= (std::uint64_t distance) noexcept {
             assert (whole >= distance);
             whole -= distance;
             return *this;
         }
 
-        address operator|= (std::uint64_t mask) {
+        address operator|= (std::uint64_t mask) noexcept {
             whole |= mask;
             return *this;
         }
 
-        address operator&= (std::uint64_t mask) {
+        address operator&= (std::uint64_t mask) noexcept {
             whole &= mask;
             return *this;
         }
 
-        segment_type segment () const {
+        segment_type segment () const noexcept {
             constexpr auto const segment_mask = std::uint64_t{max_segment} << offset_number_bits;
             return static_cast<segment_type> ((whole & segment_mask) >> offset_number_bits);
         }
 
-        offset_type offset () const { return static_cast<offset_type> (whole & max_offset); }
+        offset_type offset () const noexcept {
+            return static_cast<offset_type> (whole & max_offset);
+        }
 
         std::uint64_t whole;
     };
@@ -187,52 +190,52 @@ namespace pstore {
 
     // comparison
 
-    inline bool operator== (address const & lhs, address const & rhs) {
+    inline bool operator== (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () == rhs.absolute ();
     }
-    inline bool operator!= (address const & lhs, address const & rhs) {
+    inline bool operator!= (address const & lhs, address const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
 
 
     // ordering
 
-    inline bool operator> (address const & lhs, address const & rhs) {
+    inline bool operator> (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () > rhs.absolute ();
     }
-    inline bool operator>= (address const & lhs, address const & rhs) {
+    inline bool operator>= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () >= rhs.absolute ();
     }
-    inline bool operator< (address const & lhs, address const & rhs) {
+    inline bool operator< (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () < rhs.absolute ();
     }
-    inline bool operator<= (address const & lhs, address const & rhs) {
+    inline bool operator<= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () <= rhs.absolute ();
     }
 
 
     // arithmetic
 
-    inline address operator- (address const lhs, std::uint64_t rhs) {
+    inline address operator- (address const lhs, std::uint64_t rhs) noexcept {
         assert (lhs.absolute () >= rhs);
         return address::make (lhs.absolute () - rhs);
     }
-    inline address operator- (address const lhs, address const rhs) {
+    inline address operator- (address const lhs, address const rhs) noexcept {
         assert (lhs.absolute () >= rhs.absolute ());
         return address::make (lhs.absolute () - rhs.absolute ());
     }
 
-    inline address operator+ (address const lhs, std::uint64_t rhs) {
+    inline address operator+ (address const lhs, std::uint64_t rhs) noexcept {
         return address::make (lhs.absolute () + rhs);
     }
-    inline address operator+ (address const lhs, address rhs) {
+    inline address operator+ (address const lhs, address rhs) noexcept {
         return address::make (lhs.absolute () + rhs.absolute ());
     }
 
 
     // bitwise
 
-    inline address operator| (address const lhs, std::uint64_t rhs) {
+    inline address operator| (address const lhs, std::uint64_t rhs) noexcept {
         return address::make (lhs.absolute () | rhs);
     }
 
@@ -245,6 +248,8 @@ namespace pstore {
     template <typename T>
     class typed_address {
     public:
+        using type = T;
+
         typed_address () = default;
         explicit constexpr typed_address (address a) noexcept
                 : a_{a} {}
@@ -273,34 +278,39 @@ namespace pstore {
     // ordering
 
     template <typename T>
-    inline bool operator> (typed_address<T> lhs, typed_address<T> rhs) {
+    inline bool operator> (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () > rhs.to_address ();
     }
     template <typename T>
-    inline bool operator>= (typed_address<T> lhs, typed_address<T> rhs) {
+    inline bool operator>= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () >= rhs.to_address ();
     }
     template <typename T>
-    inline bool operator< (typed_address<T> lhs, typed_address<T> rhs) {
+    inline bool operator< (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () < rhs.to_address ();
     }
     template <typename T>
-    inline bool operator<= (typed_address<T> lhs, typed_address<T> rhs) {
+    inline bool operator<= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () <= rhs.to_address ();
     }
 
     // arithmetic
 
     template <typename T>
-    inline typed_address<T> operator- (typed_address<T> const lhs, std::uint64_t rhs) {
+    inline typed_address<T> operator- (typed_address<T> const lhs, std::uint64_t rhs) noexcept {
         auto const delta = rhs * sizeof (T);
         assert (lhs.absolute () >= delta);
         return typed_address<T> (lhs.to_address () - delta);
     }
 
     template <typename T>
-    inline typed_address<T> operator+ (typed_address<T> const lhs, std::uint64_t rhs) {
+    inline typed_address<T> operator+ (typed_address<T> const lhs, std::uint64_t rhs) noexcept {
         return typed_address<T> (address::make (lhs.absolute () + rhs * sizeof (T)));
+    }
+
+    template <typename T>
+    std::ostream & operator<< (std::ostream & os, typed_address<T> const & addr) {
+        return os << addr.to_address ();
     }
 
 } // end namespace pstore

@@ -65,8 +65,8 @@ namespace {
         using lock_guard = std::unique_lock<mock_mutex>;
         using transaction_type = pstore::transaction<lock_guard>;
 
-        pstore::extent add (transaction_type & transaction, std::string const & key,
-                            std::string const & value);
+        pstore::extent<char> add (transaction_type & transaction, std::string const & key,
+                                  std::string const & value);
 
     protected:
         mock_mutex mutex_;
@@ -90,8 +90,8 @@ namespace {
 
     // add
     // ~~~
-    pstore::extent Diff::add (transaction_type & transaction, std::string const & key,
-                              std::string const & value) {
+    pstore::extent<char> Diff::add (transaction_type & transaction, std::string const & key,
+                                    std::string const & value) {
         auto where = pstore::typed_address<char>::null ();
         {
             // Allocate storage for string 'value' and copy the data into it.
@@ -101,7 +101,7 @@ namespace {
         }
 
         auto index = pstore::index::get_write_index (*db_);
-        auto const value_extent = pstore::extent{where.to_address (), value.length ()};
+        auto const value_extent = make_extent (where, value.length ());
         index->insert_or_assign (transaction, key, value_extent);
         return value_extent;
     }
@@ -125,7 +125,7 @@ TEST_F (Diff, BuildWriteIndexValues) {
     using ::testing::ContainerEq;
     using ::testing::WhenSortedBy;
 
-    using value_type = std::pair<std::string, pstore::extent>;
+    using value_type = std::pair<std::string, pstore::extent<char>>;
     value_type v1, v2;
 
     {
@@ -175,7 +175,7 @@ TEST_F (Diff, BuildWriteIndexValues) {
 TEST_F (Diff, UncomittedTransaction) {
     using ::testing::UnorderedElementsAre;
 
-    using value_type = std::pair<std::string, pstore::extent>;
+    using value_type = std::pair<std::string, pstore::extent<char>>;
     value_type v1;
 
     {

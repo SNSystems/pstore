@@ -271,8 +271,10 @@ int main (int argc, char * argv[]) {
                 std::copy (std::begin (value), std::end (value), ptr.get ());
 
                 // Add the key/value pair to the index.
-                index->insert_or_assign (transaction, k,
-                                         pstore::extent{addr.to_address (), value.size ()});
+                index->insert_or_assign (
+                    transaction, k,
+                    make_extent (pstore::typed_address<pstore::repo::fragment> (addr.to_address ()),
+                                 value.size ()));
             }
 
             transaction.commit ();

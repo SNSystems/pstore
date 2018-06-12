@@ -117,11 +117,16 @@ namespace pstore {
     class database;
     class transaction_base;
 
+    namespace repo {
+        class fragment;
+        class ticket;
+    } // end namespace repo
+
     namespace index {
 
-        using write_index = hamt_map<std::string, extent>;
-        using digest_index = hamt_map<digest, extent, u128_hash>;
-        using ticket_index = hamt_map<digest, extent, u128_hash>;
+        using write_index = hamt_map<std::string, extent<char>>;
+        using digest_index = hamt_map<digest, extent<repo::fragment>, u128_hash>;
+        using ticket_index = hamt_map<digest, extent<repo::ticket>, u128_hash>;
 
         struct fnv_64a_hash_indirect_string {
             std::uint64_t operator() (indirect_string const & indir) const {

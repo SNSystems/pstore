@@ -133,8 +133,8 @@ namespace {
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.
             } else {
-                pstore::extent const & r = it->second;
-                std::shared_ptr<void const> ptr = db.getro (r);
+                pstore::extent<char> const & r = it->second;
+                std::shared_ptr<char const> ptr = db.getro (r);
 
                 std::ostream & out = std::cout;
                 out.exceptions (std::ofstream::failbit | std::ofstream::badbit);

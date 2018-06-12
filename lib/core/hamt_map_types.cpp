@@ -150,15 +150,17 @@ namespace pstore {
                 }
 
                 // Read an existing node. First work out its size.
-                address const addr = node.untag_internal_address ();
-                std::shared_ptr<linear_node const> ln =
-                    db.getro (typed_address<linear_node> (addr));
+                auto const addr = typed_address<linear_node> (node.untag_internal_address ());
+                std::shared_ptr<linear_node const> ln = db.getro (addr);
                 std::size_t const orig_size = ln->size ();
 
                 std::size_t const in_store_size = linear_node::size_bytes (orig_size);
 
-                // Now access the data block for this linear node.
-                ln = std::static_pointer_cast<linear_node const> (db.getro (addr, in_store_size));
+                // Now access the data block for this linear node. We need to use the "raw address"
+                // version of getro() because in_store_size is a number of bytes, not a number of
+                // instances of linear_node.
+                ln = std::static_pointer_cast<linear_node const> (
+                    db.getro (addr.to_address (), in_store_size));
                 if (ln->signature_ != signature) {
                     raise (pstore::error_code::index_corrupt);
                 }

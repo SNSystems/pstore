@@ -156,7 +156,7 @@ namespace vacuum {
 
                     for (auto const & kvp : *source_names) {
                         std::string const & key = kvp.first;
-                        pstore::extent const & extent = kvp.second;
+                        pstore::extent<char> const & extent = kvp.second;
 
                         // FIXME: need to know the data's original alignment!
                         pstore::address const addr =
@@ -165,8 +165,9 @@ namespace vacuum {
                         std::memcpy (transaction.getrw (addr, extent.size).get (),
                                      source->getro (extent).get (), extent.size);
 
-                        destination_names->insert_or_assign (transaction, key,
-                                                             pstore::extent{addr, extent.size});
+                        destination_names->insert_or_assign (
+                            transaction, key,
+                            make_extent (pstore::typed_address<char> (addr), extent.size));
 
                         // Has the watch thread asked us to abort the copy?
                         if (st->modified) {

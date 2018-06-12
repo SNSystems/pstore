@@ -170,7 +170,7 @@ namespace {
         // Start a transaction...
         auto transaction = pstore::begin (db);
 
-        // Give the fixed size mapped value, since the tests are mainly focus on
+        // Give the fixed size mapped value, since the tests are mainly focussed on
         // inserting/finding a key.
         std::array<std::uint8_t, 2> const value{{0, 1}};
 
@@ -187,8 +187,10 @@ namespace {
             kv.second = addr.to_address ();
 
             // Add the key/value pair to the index.
-            index.insert_or_assign (transaction, kv.first,
-                                    pstore::extent{addr.to_address (), value.size ()});
+            index.insert_or_assign (
+                transaction, kv.first,
+                make_extent (pstore::typed_address<pstore::repo::fragment> (addr.to_address ()),
+                             value.size ()));
         }
 
         transaction.commit ();
@@ -210,7 +212,7 @@ namespace {
             if (it == index.cend ()) {
                 print_cerr ("Test name:", test_name, " Error: ", value.first, ": not found");
                 is_found = false;
-            } else if (it->second.addr != value.second) {
+            } else if (it->second.addr.to_address () != value.second) {
                 print_cerr ("Test name:", test_name, " Error: The address of ", value.first,
                             " is not correct, the expected address: ", value.second);
                 is_found = false;

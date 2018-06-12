@@ -95,7 +95,16 @@ namespace pstore {
         value_ptr make_value (uuid const & u);
         value_ptr make_value (index::digest const & d);
         value_ptr make_value (indirect_string const & str);
-        value_ptr make_value (extent ex);
+
+        template <typename T>
+        value_ptr make_value (extent<T> ex) {
+            auto v = std::make_shared<object> (object::container{
+                {"addr", make_value (ex.addr)},
+                {"size", make_value (ex.size)},
+            });
+            v->compact ();
+            return v;
+        }
 
         template <typename InputIterator>
         value_ptr make_value (InputIterator first, InputIterator last) {

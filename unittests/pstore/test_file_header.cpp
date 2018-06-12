@@ -48,8 +48,10 @@
 
 TEST (PstoreExtent, ComparisonOperators) {
     {
-        auto const extent1 = pstore::extent (pstore::address::make (2), UINT64_C (4));
-        auto const extent2 = pstore::extent (pstore::address::make (2), UINT64_C (4));
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
 
         EXPECT_TRUE (extent1 == extent2);
         EXPECT_TRUE (!(extent1 != extent2));
@@ -65,8 +67,10 @@ TEST (PstoreExtent, ComparisonOperators) {
         EXPECT_TRUE (extent2 >= extent1);
     }
     {
-        auto const extent1 = pstore::extent (pstore::address::make (2), UINT64_C (4));
-        auto const extent2 = pstore::extent (pstore::address::make (5), UINT64_C (4)); // bigger
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (5), UINT64_C (4)); // bigger
 
         EXPECT_TRUE (extent1 != extent2);
         EXPECT_TRUE (extent2 != extent1);
@@ -82,8 +86,10 @@ TEST (PstoreExtent, ComparisonOperators) {
         EXPECT_TRUE (!(extent1 >= extent2));
     }
     {
-        auto const extent1 = pstore::extent (pstore::address::make (2), UINT64_C (4));
-        auto const extent2 = pstore::extent (pstore::address::make (2), UINT64_C (5)); // bigger
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (5)); // bigger
 
         EXPECT_TRUE (extent1 != extent2);
         EXPECT_TRUE (extent2 != extent1);

@@ -109,8 +109,7 @@ namespace {
         }
 
         auto index = pstore::index::get_write_index (*db_);
-        index->insert_or_assign (transaction, key,
-                                 pstore::extent{where.to_address (), value.length ()});
+        index->insert_or_assign (transaction, key, make_extent (where, value.length ()));
     }
 
     // find
@@ -127,8 +126,8 @@ namespace {
         auto const it = index->find (key);
         ASSERT_NE (it, index->cend ());
 
-        pstore::extent const & r = it->second;
-        auto value = std::static_pointer_cast<char const> (db_->getro (r));
+        pstore::extent<char> const & r = it->second;
+        std::shared_ptr<char const> value = db_->getro (r);
         *value_out = std::string{value.get (), r.size};
     }
 } // namespace

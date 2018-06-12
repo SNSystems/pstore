@@ -57,7 +57,7 @@ namespace {
 
 TEST_F (TicketTest, Empty) {
     std::vector<ticket_member> m;
-    pstore::extent extent = ticket::alloc (transaction_, pstore::address{}, m);
+    pstore::extent<ticket> extent = ticket::alloc (transaction_, pstore::address{}, m);
     auto t = reinterpret_cast<ticket const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==

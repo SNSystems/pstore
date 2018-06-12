@@ -95,12 +95,23 @@ TEST_F (Address, SimplifiedNull) {
     EXPECT_EQ (out.str (), "0x0");
 }
 
+TEST_F (Address, Typed) {
+    using ::testing::ElementsAre;
+    using namespace ::pstore::dump;
+
+    address::set_expanded (false);
+    value_ptr obj = make_value (pstore::typed_address<char>::null ());
+
+    std::ostringstream out;
+    obj->write (out);
+    EXPECT_EQ (out.str (), "0x0");
+}
 
 TEST (Database, Extent) {
     using ::testing::ElementsAre;
     std::ostringstream out;
 
-    pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::extent{});
+    pstore::dump::value_ptr addr = pstore::dump::make_value (pstore::extent<char>{});
     addr->write (out);
 
     auto const lines = split_lines (out.str ());

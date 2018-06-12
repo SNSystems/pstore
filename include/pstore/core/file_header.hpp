@@ -83,14 +83,14 @@
 
 namespace pstore {
 
-    // FIXME: add typed_extent.
     /// \brief An extent is a contiguous area of storage reserved for a data BLOB, represented as a
     /// range.
     /// This type is used to represent a BLOB of data: be it either an index key or an associated
     /// value.
+    template <typename T>
     struct extent {
-        constexpr extent () noexcept {}
-        constexpr extent (address addr_, std::uint64_t size_) noexcept
+        constexpr extent () noexcept;
+        constexpr extent (typed_address<T> addr_, std::uint64_t size_) noexcept
                 : addr (addr_)
                 , size (size_) {}
         extent (extent const & rhs) noexcept = default;
@@ -99,45 +99,65 @@ namespace pstore {
         extent & operator= (extent &&) noexcept = default;
 
         /// The address of the data associated with this extent.
-        address addr = address::null ();
+        typed_address<T> addr = typed_address<T>::null ();
         /// The size of the data associated with this extent.
+        /// \note This value gives a number of bytes, *not* a number of instances of type T. This is
+        /// because extents are often used to represent variable-length data structures where the
+        /// actual size can't be statically determined from the size of T.
         std::uint64_t size = UINT64_C (0);
     };
 
-    PSTORE_STATIC_ASSERT (offsetof (extent, addr) == 0);
-    PSTORE_STATIC_ASSERT (offsetof (extent, size) == 8);
-    PSTORE_STATIC_ASSERT (sizeof (extent) == 16);
+    template <typename T>
+    static inline extent<T> make_extent (typed_address<T> a, std::uint64_t s) noexcept {
+        return {a, s};
+    }
+
+    template <typename T>
+    constexpr extent<T>::extent () noexcept {
+        PSTORE_STATIC_ASSERT (offsetof (extent, addr) == 0);
+        PSTORE_STATIC_ASSERT (offsetof (extent, size) == 8);
+        PSTORE_STATIC_ASSERT (sizeof (extent) == 16);
+    }
 
     // comparison
-    inline bool operator== (extent const & lhs, extent const & rhs) noexcept {
+    template <typename T>
+    inline bool operator== (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return lhs.addr == rhs.addr && lhs.size == rhs.size;
     }
-    inline bool operator!= (extent const & lhs, extent const & rhs) noexcept {
+    template <typename T>
+    inline bool operator!= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs == rhs);
     }
 
     // ordering
-    inline bool operator< (extent const & lhs, extent const & rhs) noexcept {
+    template <typename T>
+    inline bool operator< (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return lhs.addr < rhs.addr || (lhs.addr == rhs.addr && lhs.size < rhs.size);
     }
-    inline bool operator>= (extent const & lhs, extent const & rhs) noexcept {
+    template <typename T>
+    inline bool operator>= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs < rhs);
     }
-    inline bool operator> (extent const & lhs, extent const & rhs) noexcept { return rhs < lhs; }
-    inline bool operator<= (extent const & lhs, extent const & rhs) noexcept {
+    template <typename T>
+    inline bool operator> (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return rhs < lhs;
+    }
+    template <typename T>
+    inline bool operator<= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs > rhs);
     }
 
-    inline std::ostream & operator<< (std::ostream & os, extent const & r) {
+    template <typename T>
+    inline std::ostream & operator<< (std::ostream & os, extent<T> const & r) {
         return os << "{addr:" << r.addr << ",size:" << r.size << "}";
     }
 
     namespace serialize {
         /// \brief A specialization which teaches the serialization framework how to read and write
         /// instances of `extent`.
-        template <>
-        struct serializer<extent> {
-            using value_type = extent;
+        template <typename T>
+        struct serializer<extent<T>> {
+            using value_type = extent<T>;
 
             template <typename Archive>
             static auto write (Archive && archive, value_type const & r)
@@ -149,10 +169,10 @@ namespace pstore {
             }
             template <typename Archive>
             static void read (Archive && archive, value_type & r) {
-                auto const addr = address::make (
+                auto const addr = typed_address<T>::make (
                     serialize::read<std::uint64_t> (std::forward<Archive> (archive)));
                 auto const size = serialize::read<std::uint64_t> (std::forward<Archive> (archive));
-                new (&r) extent (addr, size);
+                new (&r) extent<T> (addr, size);
             }
         };
     } // namespace serialize

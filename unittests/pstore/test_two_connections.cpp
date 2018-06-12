@@ -138,13 +138,13 @@ TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {
     std::vector<std::uint8_t> buffer1 (pstore::storage::min_region_size + 1);
     std::iota (std::begin (buffer1), std::end (buffer1), std::uint8_t{0});
 
-    pstore::extent t1;
+    pstore::extent<std::uint8_t> t1;
     {
         auto transaction = pstore::begin (first);
         {
             t1.size = buffer1.size ();
-            t1.addr = transaction.allocate (t1.size, alignof (decltype (buffer1)::value_type));
-            std::shared_ptr<void> ptr = transaction.getrw (t1);
+            std::shared_ptr<std::uint8_t> ptr;
+            std::tie (ptr, t1.addr) = transaction.alloc_rw<std::uint8_t> (t1.size);
             std::memcpy (ptr.get (), buffer1.data (), buffer1.size ());
         }
 
@@ -152,7 +152,7 @@ TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {
     }
 
     second.sync ();
-    auto r = std::static_pointer_cast<std::uint8_t const> (second.getro (t1));
+    auto r = second.getro (t1);
     std::vector<std::uint8_t> buffer2 (r.get (), r.get () + t1.size);
     EXPECT_THAT (buffer2, ContainerEq (buffer1));
 }
