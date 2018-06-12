@@ -183,7 +183,7 @@ namespace pstore {
         public:
             system_error (std::error_code code, std::string const & user_message,
                           std::string const & path);
-            system_error (std::error_code code, ::pstore::gsl::czstring user_message,
+            system_error (std::error_code code, gsl::czstring user_message,
                           std::string const & path);
 
             std::string path () const { return path_; }

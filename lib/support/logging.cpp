@@ -77,22 +77,22 @@ namespace pstore {
         //*        |___/|___/          *
         // log
         // ~~~
-        void logger::log (priority p, char const * message, int d) {
+        void logger::log (priority p, gsl::czstring message, int d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, char const * message, unsigned d) {
+        void logger::log (priority p, gsl::czstring message, unsigned d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, char const * message, long d) {
+        void logger::log (priority p, gsl::czstring message, long d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, char const * message, unsigned long d) {
+        void logger::log (priority p, gsl::czstring message, unsigned long d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, char const * message, long long d) {
+        void logger::log (priority p, gsl::czstring message, long long d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, char const * message, unsigned long long d) {
+        void logger::log (priority p, gsl::czstring message, unsigned long long d) {
             this->log (p, to_string (message, d));
         }
         void logger::log (priority p, gsl::czstring message) {

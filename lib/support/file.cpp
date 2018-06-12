@@ -71,7 +71,7 @@ namespace pstore {
                 : std::system_error (code, message (user_message, path))
                 , path_ (path) {}
 
-        system_error::system_error (std::error_code code, char const * user_message,
+        system_error::system_error (std::error_code code, gsl::czstring user_message,
                                     std::string const & path)
                 : std::system_error (
                       code, message (user_message != nullptr ? user_message : "File", path))
