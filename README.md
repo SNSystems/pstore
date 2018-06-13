@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/SNSystems/pstore.svg?branch=master)](https://travis-ci.org/SNSystems/pstore)
 <a href="https://scan.coverity.com/projects/snsystems-pstore">
   <img alt="Coverity Scan Build Status"
        src="https://img.shields.io/coverity/scan/15170.svg"/>
