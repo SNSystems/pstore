@@ -65,6 +65,7 @@
 #include <Windows.h>
 #endif
 
+#include "pstore/config/config.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
@@ -480,6 +481,7 @@ namespace pstore {
             /// True if the file range has been locked
             bool locked_;
 
+#if PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
             static_assert (
                 std::is_trivially_copyable<decltype (file_)>::value,
                 "file_ is not trivially copyable: use std::move() in move ctor and assign");
@@ -495,6 +497,7 @@ namespace pstore {
             static_assert (
                 std::is_trivially_copyable<decltype (locked_)>::value,
                 "locked_ is not trivially copyable: use std::move() in move ctor and assign");
+#endif // PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
         };
 
 
@@ -717,12 +720,15 @@ namespace pstore {
             oshandle file_ = invalid_oshandle;
             bool is_writable_ = false;
 
+#if PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
             static_assert (
                 std::is_trivially_copyable<decltype (file_)>::value,
                 "file_ is not trivially copyable: use std::move() in rvalue ref ctor and assign");
             static_assert (std::is_trivially_copyable<decltype (is_writable_)>::value,
                            "is_writable_ is not trivially copyable: use std::move() in rvalue ref "
                            "ctor and assign");
+#endif // PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
+            
         };
 
         // ensure_open

@@ -87,6 +87,13 @@ check_cxx_source_compiles (
     PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN)
 
 check_cxx_source_compiles (
+    "#include <type_traits>
+    int main () {
+        return std::is_trivially_copyable<int>::value;
+    }"
+    PSTORE_HAVE_IS_TRIVIALLY_COPYABLE)
+
+check_cxx_source_compiles (
     "#define __STDC_WANT_LIB_EXT1__  1
     #include <time.h>
     int main () {

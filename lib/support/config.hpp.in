@@ -87,6 +87,9 @@
 /// introduced with C++17.)
 #cmakedefine PSTORE_HAVE_NON_CONST_STD_STRING_DATA 1
 
+/// Defined is std::is_trivially_copyable<> is available in the standard library.
+#cmakedefine PSTORE_HAVE_IS_TRIVIALLY_COPYABLE 1
+
 #cmakedefine PSTORE_HAVE_SYS_POSIX_SHM_H 1
 #cmakedefine PSTORE_HAVE_LINUX_LIMITS_H 1
 
