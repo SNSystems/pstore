@@ -1464,34 +1464,4 @@ TEST (GslSpan, FixedSizeConversions) {
 #endif
 }
 
-TEST (GslSpan, interop_with_std_regex) {
-    char lat[] = {'1', '2', '3', '4', '5', '6', 'E', 'F', 'G'};
-    span<char> s = lat;
-    auto f_it = s.begin () + 7;
-
-    std::match_results<span<char>::iterator> match;
-
-    std::regex_match (s.begin (), s.end (), match, std::regex (".*"));
-    EXPECT_TRUE (match.ready ());
-    EXPECT_FALSE (match.empty ());
-    EXPECT_TRUE (match[0].matched);
-    EXPECT_EQ (match[0].first, s.begin ());
-    EXPECT_EQ (match[0].second, s.end ());
-
-    std::regex_search (s.begin (), s.end (), match, std::regex ("F"));
-    EXPECT_TRUE (match.ready ());
-    EXPECT_FALSE (match.empty ());
-    EXPECT_TRUE (match[0].matched);
-    EXPECT_EQ (match[0].first, f_it);
-    EXPECT_EQ (match[0].second, (f_it + 1));
-}
-
-#if 0
-TEST (GslSpan, InteropWithGslAt) {
-    int arr[5] = {1, 2, 3, 4, 5};
-    span<int> s{arr};
-    EXPECT_EQ (at(s, 0), 1);
-    EXPECT_EQ (at(s, 1), 2);
-}
-#endif
 // eof: unittests/pstore_support/test_gsl.cpp

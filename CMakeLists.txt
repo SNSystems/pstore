@@ -130,6 +130,7 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
             -Weverything
             -Wno-undef
             -Wno-padded
+	    -Wno-disabled-macro-expansion
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
             -Wno-c99-extensions
