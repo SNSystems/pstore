@@ -54,13 +54,11 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_db_archive.cpp
     test_file_handle.cpp
     test_file_header.cpp
-    test_fnv.cpp
     test_generation_iterator.cpp
     test_hamt_map.cpp
     test_hamt_set.cpp
     test_heartbeat.cpp
     test_indirect_string.cpp
-    test_make_unique.cpp
     test_memory_mapper.cpp
     test_path.cpp
     test_process_file_name.cpp
@@ -74,7 +72,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_two_connections.cpp
     test_uint128.cpp
     test_uuid.cpp
-    test_varint.cpp
 )
 target_link_libraries (pstore-core-unit-tests pstore-core pstore-common)
 

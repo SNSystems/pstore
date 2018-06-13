@@ -79,18 +79,14 @@ source_group ("core" FILES ${PSTORE_CORE_SRC})
 set (PSTORE_SUPPORT_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/array_stack.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/crc32.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/fnv.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/sstring_view_archive.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/time.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/uuid.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/varint.hpp"
     
     base32.cpp
     base32.hpp
     crc32.cpp
-    fnv.cpp
     time.cpp
     uint128.cpp
     uuid.cpp

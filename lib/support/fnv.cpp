@@ -55,7 +55,7 @@
  * Share and Enjoy!	:-)
  */
 
-#include "pstore/core/fnv.hpp"
+#include "pstore/support/fnv.hpp"
 
 namespace {
 

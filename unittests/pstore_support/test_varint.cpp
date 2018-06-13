@@ -4,7 +4,7 @@
 //*  \ V / (_| | |  | | | | | |_  *
 //*   \_/ \__,_|_|  |_|_| |_|\__| *
 //*                               *
-//===- unittests/pstore/test_varint.cpp -----------------------------------===//
+//===- unittests/pstore_support/test_varint.cpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/core/varint.hpp"
+#include "pstore/support/varint.hpp"
 #include <cstdint>
 #include <vector>
 #include "gmock/gmock.h"
@@ -208,4 +208,4 @@ TEST_F (VarInt, 2pow63) {
 TEST_F (VarInt, 64Bits) {
     check (~UINT64_C (0), {0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});
 }
-// eof: unittests/pstore/test_varint.cpp
+// eof: unittests/pstore_support/test_varint.cpp

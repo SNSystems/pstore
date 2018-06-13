@@ -56,10 +56,11 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+/// pstore
 #include "pstore/support/error.hpp"
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/file.hpp"
-#include "pstore/core/make_unique.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/make_unique.hpp"
 
 #ifndef _WIN32
 #include <errno.h>

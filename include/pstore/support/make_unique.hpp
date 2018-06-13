@@ -4,7 +4,7 @@
 //* | | | | | | (_| |   <  __/ | |_| | | | | | (_| | |_| |  __/ *
 //* |_| |_| |_|\__,_|_|\_\___|  \__,_|_| |_|_|\__, |\__,_|\___| *
 //*                                              |_|            *
-//===- unittests/pstore/test_make_unique.cpp ------------------------------===//
+//===- include/pstore/support/make_unique.hpp -----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,46 +41,47 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file make_unique.hpp
+/// \brief An implementation of std::make_unique<>() for platforms that do not provide it natively.
 
-#include "pstore/core/make_unique.hpp"
-#include <gtest/gtest.h>
+#ifndef PSTORE_MAKE_UNIQUE_HPP
+#define PSTORE_MAKE_UNIQUE_HPP (1)
 
-namespace {
-    struct xtor_counter {
-        xtor_counter () { ++ctor_calls; }
-        ~xtor_counter () { ++dtor_calls; }
+#include <memory>
+#include <type_traits>
+#include <utility>
 
-        static int ctor_calls;
-        static int dtor_calls;
-    };
-
-    int xtor_counter::ctor_calls = 0;
-    int xtor_counter::dtor_calls = 0;
-
-    class MakeUnique : public ::testing::Test {
-    public:
-        MakeUnique () {
-            xtor_counter::ctor_calls = 0;
-            xtor_counter::dtor_calls = 0;
+namespace pstore {
+    namespace make_unique_helpers {
+        template <typename T, typename... Args>
+        std::unique_ptr<T> helper (std::false_type, Args &&... args) {
+            return std::unique_ptr<T> (new T (std::forward<Args> (args)...));
         }
-    };
-} // anonymous namespace
 
-TEST_F (MakeUnique, Simple) {
-    {
-        auto ptr = pstore::make_unique<xtor_counter> ();
-        EXPECT_NE (ptr.get (), nullptr);
-    }
-    EXPECT_EQ (xtor_counter::ctor_calls, 1);
-    EXPECT_EQ (xtor_counter::dtor_calls, 1);
-}
+        template <typename T, typename = typename std::enable_if<std::extent<T>::value == 0>::type>
+        std::unique_ptr<T> helper (std::true_type, std::size_t size) {
+            using U = typename std::remove_const<typename std::remove_extent<T>::type>::type;
+            return std::unique_ptr<T> (new U[size]);
+        }
+    } // namespace make_unique_helpers
 
-TEST_F (MakeUnique, Array) {
-    {
-        auto ptr = pstore::make_unique<xtor_counter[]> (5U);
-        EXPECT_NE (ptr.get (), nullptr);
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique (Args &&... args) {
+        return make_unique_helpers::helper<T> (std::is_array<T> (), std::forward<Args> (args)...);
     }
-    EXPECT_EQ (xtor_counter::ctor_calls, 5);
-    EXPECT_EQ (xtor_counter::dtor_calls, 5);
-}
-// eof: unittests/pstore/test_make_unique.cpp
+} // namespace pstore
+
+// TODO: determine make_unique support at configure time.
+#if __cplusplus <= 201103L && !defined(_WIN32)
+
+namespace std {
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique (Args &&... args) {
+        return pstore::make_unique<T> (std::forward<Args> (args)...);
+    }
+} // namespace std
+
+#endif
+
+#endif // PSTORE_MAKE_UNIQUE_HPP
+// eof: include/pstore/support/make_unique.hpp

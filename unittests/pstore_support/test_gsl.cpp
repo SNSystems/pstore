@@ -68,7 +68,7 @@
 #include <vector>
 #include <regex>
 
-#include "pstore/core/make_unique.hpp"
+#include "pstore/support/make_unique.hpp"
 
 using namespace ::pstore::gsl;
 

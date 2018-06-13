@@ -46,11 +46,11 @@
 #define PSTORE_CORE_INDEX_TYPES_HPP (1)
 
 #include "pstore/core/file_header.hpp"
-#include "pstore/core/fnv.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/core/uint128.hpp"
 #include "pstore/core/uuid.hpp"
+#include "pstore/support/fnv.hpp"
 #include "pstore/support/sstring_view.hpp"
 
 namespace pstore {

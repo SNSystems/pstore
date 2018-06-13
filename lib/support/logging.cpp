@@ -55,9 +55,9 @@
 // pstore includes
 #include "pstore/config/config.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/rotating_log.hpp"
-#include "pstore/core/make_unique.hpp" // FIXME: move make_unique to support-lib.
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>

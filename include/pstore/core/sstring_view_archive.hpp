@@ -54,10 +54,10 @@
 
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/transaction.hpp"
-#include "pstore/core/varint.hpp"
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/serialize/types.hpp"
 #include "pstore/support/sstring_view.hpp"
+#include "pstore/support/varint.hpp"
 
 namespace pstore {
     namespace serialize {

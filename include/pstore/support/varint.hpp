@@ -4,7 +4,7 @@
 //*  \ V / (_| | |  | | | | | |_  *
 //*   \_/ \__,_|_|  |_|_| |_|\__| *
 //*                               *
-//===- include/pstore/core/varint.hpp -------------------------------------===//
+//===- include/pstore/support/varint.hpp ----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -194,4 +194,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_VARINT_HPP
-// eof: include/pstore/core/varint.hpp
+// eof: include/pstore/support/varint.hpp

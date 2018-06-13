@@ -74,9 +74,9 @@
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/broker_intf/status_client.hpp"
 #include "pstore/broker_intf/status_path.hpp"
-#include "pstore/core/make_unique.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/make_unique.hpp"
 #include "pstore/support/signal_helpers.hpp"
 #include "pstore/support/thread.hpp"
 

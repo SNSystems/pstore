@@ -67,7 +67,7 @@
 #include <utility>
 
 #include "pstore/broker_intf/message_type.hpp"
-#include "pstore/core/make_unique.hpp"
+#include "pstore/support/make_unique.hpp"
 
 namespace pstore {
     namespace broker {

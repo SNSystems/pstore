@@ -56,9 +56,9 @@
 #include <type_traits>
 
 #include "pstore/config/config.hpp"
-#include "pstore/core/varint.hpp"
 #include "pstore/serialize/common.hpp"
 #include "pstore/serialize/types.hpp"
+#include "pstore/support/varint.hpp"
 
 ///@{
 /// \name Reading and writing standard types

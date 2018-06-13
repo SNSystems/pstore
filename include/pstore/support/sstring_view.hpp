@@ -64,11 +64,11 @@
 #include <type_traits>
 #include <utility>
 
-#include "pstore/core/fnv.hpp"
-#include "pstore/core/make_unique.hpp"
-#include "pstore/core/varint.hpp"
+#include "pstore/support/fnv.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
+#include "pstore/support/varint.hpp"
 
 namespace pstore {
 

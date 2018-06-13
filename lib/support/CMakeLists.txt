@@ -178,8 +178,10 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file_posix.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file_win32.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/fnv.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/logging.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
@@ -192,11 +194,13 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
 
     error.cpp
     file.cpp
     file_posix.cpp
     file_win32.cpp
+    fnv.cpp
     logging.cpp
     path.cpp
     process_file_name_posix.cpp

@@ -46,7 +46,7 @@
 #include <memory>
 #include <utility>
 #include <gtest/gtest.h>
-#include "pstore/core/make_unique.hpp"
+#include "pstore/support/make_unique.hpp"
 
 using pstore::maybe;
 using pstore::nothing;

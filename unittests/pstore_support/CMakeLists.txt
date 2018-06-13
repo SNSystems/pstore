@@ -47,12 +47,15 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_bit_count.cpp
     test_error.cpp
     test_file.cpp
+    test_fnv.cpp
     test_gsl.cpp
+    test_make_unique.cpp
     test_maybe.cpp
     test_small_vector.cpp
     test_sstring_view.cpp
     test_utf.cpp
     test_utf_win32.cpp
+    test_varint.cpp
 )
 if (PSTORE_IS_INSIDE_LLVM)
     add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC} DEPENDS pstore-support-lib)

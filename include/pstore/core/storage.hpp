@@ -47,9 +47,9 @@
 #include <memory>
 
 #include "pstore/core/address.hpp"
-#include "pstore/core/make_unique.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/support/aligned.hpp"
+#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
