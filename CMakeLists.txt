@@ -207,21 +207,15 @@ else ()
     write_lit_config ("${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif ()
 
-# On Windows hosts, provide an option to specify the path to the GnuWin32 tools.
-if (WIN32 AND NOT CYGWIN)
-    set (LIT_TOOLS_DIR "" CACHE PATH "Path to GnuWin32 tools")
-endif ()
-
-
 ##############
 # Add a custom target for running the system tests.
 
 if (PSTORE_IS_INSIDE_LLVM)
-    set (LIT_EXECUTABLE "${LLVM_MAIN_SRC_DIR}")
+    set (LIT_EXECUTABLE "${LLVM_MAIN_SRC_DIR}/utils/lit/lit.py")
 else ()
-    set (LIT_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}")
+    set (LIT_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/3rd_party/lit/lit.py")
 endif (PSTORE_IS_INSIDE_LLVM)
-set (LIT_EXECUTABLE "${LIT_EXECUTABLE}/utils/lit/lit.py")
+
 
 # On Windows, I have to explicitly run python to ensure that lit.py is treated as
 # a python program rather than something to be opened with a random text editor.

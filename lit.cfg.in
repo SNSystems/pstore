@@ -44,14 +44,6 @@ def data_store_path ():
 # name: The name of this test suite.
 config.name = 'PStore'
 
-if platform.system () == 'Windows':
-    # We've got a "known" copy the core tools stashed locally, so let's put that 
-    # path on the head of the PATH environment variable.
-    path = os.path.join ('@CMAKE_CURRENT_SOURCE_DIR@', 'system_tests', 'gnuwin32')
-    path = os.path.pathsep.join ((path, config.environment ['PATH']))
-    config.environment ['PATH'] = path
-
-        
 # suffixes: A list of file extensions to treat as test files.
 config.suffixes = [
     '.cpp',
