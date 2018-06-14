@@ -41,32 +41,47 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
+#include <cstdlib>
+#include <exception>
+#include <iostream>
+
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
 
 int main () {
-    auto const key = std::string{"key"};
-    auto const value = std::string{"hello world\n"};
+    int exit_code = EXIT_SUCCESS;
+    try {
+        auto const key = std::string{"key"};
+        auto const value = std::string{"hello world\n"};
 
-    pstore::database db ("./write_example.db", pstore::database::access_mode::writable);
-    auto t = pstore::begin (db); // Start a transaction
+        pstore::database db ("./write_example.db", pstore::database::access_mode::writable);
+        auto t = pstore::begin (db); // Start a transaction
 
-    {
-        auto const size = value.length ();
+        {
+            auto const size = value.length ();
 
-        // Allocate space for the value.
-        pstore::typed_address<char> addr;
-        std::shared_ptr<char> ptr;
-        std::tie (ptr, addr) = t.alloc_rw<char> (size);
+            // Allocate space for the value.
+            pstore::typed_address<char> addr;
+            std::shared_ptr<char> ptr;
+            std::tie (ptr, addr) = t.alloc_rw<char> (size);
 
-        std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
+            std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
 
-        // Tell the index about this new data.
-        auto index = pstore::index::get_write_index (db);
-        index->insert_or_assign (t, key, make_extent (addr, size));
+            // Tell the index about this new data.
+            auto index = pstore::index::get_write_index (db);
+            index->insert_or_assign (t, key, make_extent (addr, size));
+        }
+
+        t.commit (); // Finalize the transaction.
+    } catch (std::exception const & ex) {
+        std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
+    } catch (...) {
+        std::cerr << "An unknown error occurred\n";
+        exit_code = EXIT_FAILURE;
     }
-
-    t.commit (); // Finalize the transaction.
+    return exit_code;
 }
 // eof: examples/write_basic/write_basic.cpp

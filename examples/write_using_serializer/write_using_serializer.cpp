@@ -47,6 +47,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
+#include <cstdlib>
+#include <exception>
+#include <iostream>
+
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
@@ -55,21 +60,33 @@
 using namespace pstore;
 
 int main () {
-    auto const key = std::string{"key"};
-    auto const value = std::string{"hello world\n"};
+    int exit_code = EXIT_SUCCESS;
 
-    database db ("./write_using_serializer.db", pstore::database::access_mode::writable);
-    auto t = begin (db); // Start a transaction
+    try {
+        auto const key = std::string{"key"};
+        auto const value = std::string{"hello world\n"};
 
-    {
-        auto archive = serialize::archive::make_writer (t);
-        auto const addr = typed_address<char> (serialize::write (archive, value));
-        std::uint64_t const size = db.size () - addr.absolute ();
+        database db ("./write_using_serializer.db", pstore::database::access_mode::writable);
+        auto t = begin (db); // Start a transaction
 
-        auto index = pstore::index::get_write_index (db);
-        index->insert_or_assign (t, key, make_extent (addr, size));
+        {
+            auto archive = serialize::archive::make_writer (t);
+            auto const addr = typed_address<char> (serialize::write (archive, value));
+            std::uint64_t const size = db.size () - addr.absolute ();
+
+            auto index = pstore::index::get_write_index (db);
+            index->insert_or_assign (t, key, make_extent (addr, size));
+        }
+
+        t.commit (); // Finalize the transaction.
+    } catch (std::exception const & ex) {
+        std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
+    } catch (...) {
+        std::cerr << "An unknown error occurred\n";
+        exit_code = EXIT_FAILURE;
     }
-
-    t.commit (); // Finalize the transaction.
+    return exit_code;
 }
+
 // eof: examples/write_using_serializer/write_using_serializer.cpp
