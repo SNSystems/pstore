@@ -1,10 +1,10 @@
-language: C++
+language: cpp
 sudo: false
-dist: trusty
 
 matrix:
   include:
     - os: linux
+      dist: trusty
       addons:
         apt:
           sources:
@@ -16,9 +16,25 @@ matrix:
         - CMAKE_BUILD_TYPE=DEBUG
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
 
+#    - os: linux
+#      dist: trusty
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - [ 'g++-5', 'ninja-build' ]
+#      env:
+#        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+
+    - os: osx
+      osx_image: xcode9.3
+
+
 before_install:
   - eval "${MATRIX_EVAL}"
 
 script:
-  - python ./utils/make_build.py -D PSTORE_EXAMPLES=Yes
-  - ninja -C build_linux all pstore-system-tests
+  - ./utils/make_build.py -o build -D PSTORE_EXAMPLES=Yes
+  - cmake --build build
+  - cmake --build build --target pstore-system-tests
