@@ -55,7 +55,7 @@
 #include <iterator>
 #include <type_traits>
 
-#include "pstore/core/head_revision.hpp"
+#include "pstore/support/head_revision.hpp"
 #include "pstore/support/ctype.hpp"
 
 namespace {

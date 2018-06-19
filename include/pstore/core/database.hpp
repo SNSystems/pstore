@@ -61,7 +61,6 @@
 
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
-#include "pstore/core/head_revision.hpp"
 #include "pstore/core/memory_mapper.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/core/shared_memory.hpp"
@@ -71,6 +70,7 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/file.hpp"
 #include "pstore/support/fnv.hpp"
+#include "pstore/support/head_revision.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/sstring_view.hpp"
 

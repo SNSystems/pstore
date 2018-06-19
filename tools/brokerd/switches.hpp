@@ -1,10 +1,10 @@
-//*  _               _                                   _           *
-//* | |__  _ __ ___ | | _____ _ __   ___  ___ _ ____   _(_) ___ ___  *
-//* | '_ \| '__/ _ \| |/ / _ \ '__| / __|/ _ \ '__\ \ / / |/ __/ _ \ *
-//* | |_) | | | (_) |   <  __/ |    \__ \  __/ |   \ V /| | (_|  __/ *
-//* |_.__/|_|  \___/|_|\_\___|_|    |___/\___|_|    \_/ |_|\___\___| *
-//*                                                                  *
-//===- tools/broker/service/broker_service.hpp ----------------------------===//
+//*               _ _       _                *
+//*  _____      _(_) |_ ___| |__   ___  ___  *
+//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
+//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
+//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
+//*                                          *
+//===- tools/brokerd/switches.hpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,32 +42,33 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-/// \file service_installer.hpp
+#ifndef SWITCHES_HPP
+#define SWITCHES_HPP
 
-#ifndef BROKER_SAMPLE_SERVICE_HPP
-#define BROKER_SAMPLE_SERVICE_HPP
+#include <memory>
+#include <string>
+#include <tuple>
 
-#include <atomic>
-#include <thread>
+#ifdef _WIN32
+#include <tchar.h>
+#endif
 
-#include "service_base.hpp"
+#include "pstore/config/config.hpp"
 
-class sample_service final : public service_base {
-public:
-    sample_service (TCHAR const * service_name, bool can_stop = true, bool can_shutdown = true,
-                    bool can_pause_continue = false);
-    ~sample_service () override;
+#if defined(_WIN32)
+using pstore_tchar = TCHAR;
+#else
+using pstore_tchar = char;
+#endif
 
-protected:
-    void start_handler (DWORD argc, TCHAR * argv[]) override;
-    void stop_handler () override;
-
-    void worker ();
-
-private:
-    std::atomic<bool> is_stopping_{false};
-    std::thread thread_;
+struct switches {
+    std::unique_ptr<std::string> playback_path;
+    std::unique_ptr<std::string> record_path;
+    std::unique_ptr<std::string> pipe_path;
+    unsigned num_read_threads = 2U;
 };
 
-#endif // BROKER_SAMPLE_SERVICE_HPP
-// eof: tools/broker/service/broker_service.hpp
+std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
+
+#endif // SWITCHES_HPP
+// eof: tools/brokerd/switches.hpp

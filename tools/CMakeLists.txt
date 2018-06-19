@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_subdirectory (broker)
+add_subdirectory (brokerd)
 add_subdirectory (broker_poker) # A utility for exercising the broker agent.
 add_subdirectory (broker_status) # A utility to query the garbage collection status.
 add_subdirectory (diff)         # Dumps diff between two pstore revisions as YAML.

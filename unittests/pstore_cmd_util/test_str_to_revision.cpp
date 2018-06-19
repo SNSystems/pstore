@@ -46,7 +46,7 @@
 
 #include <utility>
 #include "gmock/gmock.h"
-#include "pstore/core/head_revision.hpp"
+#include "pstore/support/head_revision.hpp"
 
 TEST (StrToRevision, SingleCharacterNumber) {
     EXPECT_THAT (pstore::str_to_revision ("1"), ::testing::Pair (1U, true));

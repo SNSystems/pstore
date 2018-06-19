@@ -45,7 +45,7 @@
 #define PSTORE_CMD_UTIL_REVISION_OPT_HPP
 
 #include <string>
-#include "pstore/core/head_revision.hpp"
+#include "pstore/support/head_revision.hpp"
 
 namespace pstore {
     namespace cmd_util {

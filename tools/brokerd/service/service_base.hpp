@@ -4,7 +4,7 @@
 //* \__ \  __/ |   \ V /| | (_|  __/ | |_) | (_| \__ \  __/ *
 //* |___/\___|_|    \_/ |_|\___\___| |_.__/ \__,_|___/\___| *
 //*                                                         *
-//===- tools/broker/service/service_base.hpp ------------------------------===//
+//===- tools/brokerd/service/service_base.hpp -----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -128,4 +128,4 @@ private:
     SERVICE_STATUS_HANDLE status_handle_ = nullptr; ///< The service status handle.
 };
 #endif // BROKER_SERVICE_BASE_HPP
-// eof: tools/broker/service/service_base.hpp
+// eof: tools/brokerd/service/service_base.hpp

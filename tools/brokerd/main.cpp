@@ -4,7 +4,7 @@
 //* | | | | | | (_| | | | | | *
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
-//===- tools/broker/main.cpp ----------------------------------------------===//
+//===- tools/brokerd/main.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -220,4 +220,4 @@ int main (int argc, char * argv[]) {
     }
     return broker::exit_code;
 }
-// eof: tools/broker/main.cpp
+// eof: tools/brokerd/main.cpp

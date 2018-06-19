@@ -4,7 +4,7 @@
 //* \__ \  __/ |   \ V /| | (_|  __/ | | | | \__ \ || (_| | | |  __/ |    *
 //* |___/\___|_|    \_/ |_|\___\___| |_|_| |_|___/\__\__,_|_|_|\___|_|    *
 //*                                                                       *
-//===- tools/broker/service/service_installer.cpp -------------------------===//
+//===- tools/brokerd/service/service_installer.cpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -170,4 +170,4 @@ void uninstall_service (TCHAR const * service_name) {
         throw "FIXME";
     }
 }
-// eof: tools/broker/service/service_installer.cpp
+// eof: tools/brokerd/service/service_installer.cpp

@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/broker/switches.hpp ------------------------------------------===//
+//*  _                    _                  _     _              *
+//* | |__   ___  __ _  __| |  _ __ _____   _(_)___(_) ___  _ __   *
+//* | '_ \ / _ \/ _` |/ _` | | '__/ _ \ \ / / / __| |/ _ \| '_ \  *
+//* | | | |  __/ (_| | (_| | | | |  __/\ V /| \__ \ | (_) | | | | *
+//* |_| |_|\___|\__,_|\__,_| |_|  \___| \_/ |_|___/_|\___/|_| |_| *
+//*                                                               *
+//===- include/pstore/support/head_revision.hpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,34 +41,14 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#ifndef PSTORE_HEAD_REVISION_HPP
+#define PSTORE_HEAD_REVISION_HPP
 
-#ifndef SWITCHES_HPP
-#define SWITCHES_HPP
+#include <limits>
 
-#include <memory>
-#include <string>
-#include <tuple>
+namespace pstore {
+    constexpr unsigned head_revision = std::numeric_limits<unsigned>::max ();
+} // namespace pstore
 
-#ifdef _WIN32
-#include <tchar.h>
-#endif
-
-#include "pstore/config/config.hpp"
-
-#if defined(_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
-
-struct switches {
-    std::unique_ptr<std::string> playback_path;
-    std::unique_ptr<std::string> record_path;
-    std::unique_ptr<std::string> pipe_path;
-    unsigned num_read_threads = 2U;
-};
-
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
-
-#endif // SWITCHES_HPP
-// eof: tools/broker/switches.hpp
+#endif // PSTORE_HEAD_REVISION_HPP
+// eof: include/pstore/support/head_revision.hpp

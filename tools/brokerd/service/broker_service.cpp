@@ -4,7 +4,7 @@
 //* | |_) | | | (_) |   <  __/ |    \__ \  __/ |   \ V /| | (_|  __/ *
 //* |_.__/|_|  \___/|_|\_\___|_|    |___/\___|_|    \_/ |_|\___\___| *
 //*                                                                  *
-//===- tools/broker/service/broker_service.cpp ----------------------------===//
+//===- tools/brokerd/service/broker_service.cpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -101,4 +101,4 @@ void sample_service::stop_handler () {
     is_stopping_ = true;
     thread_.join ();
 }
-// eof: tools/broker/service/broker_service.cpp
+// eof: tools/brokerd/service/broker_service.cpp

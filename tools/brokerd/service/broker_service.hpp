@@ -1,10 +1,10 @@
-//*  _                    _                  _     _              *
-//* | |__   ___  __ _  __| |  _ __ _____   _(_)___(_) ___  _ __   *
-//* | '_ \ / _ \/ _` |/ _` | | '__/ _ \ \ / / / __| |/ _ \| '_ \  *
-//* | | | |  __/ (_| | (_| | | | |  __/\ V /| \__ \ | (_) | | | | *
-//* |_| |_|\___|\__,_|\__,_| |_|  \___| \_/ |_|___/_|\___/|_| |_| *
-//*                                                               *
-//===- include/pstore/core/head_revision.hpp ------------------------------===//
+//*  _               _                                   _           *
+//* | |__  _ __ ___ | | _____ _ __   ___  ___ _ ____   _(_) ___ ___  *
+//* | '_ \| '__/ _ \| |/ / _ \ '__| / __|/ _ \ '__\ \ / / |/ __/ _ \ *
+//* | |_) | | | (_) |   <  __/ |    \__ \  __/ |   \ V /| | (_|  __/ *
+//* |_.__/|_|  \___/|_|\_\___|_|    |___/\___|_|    \_/ |_|\___\___| *
+//*                                                                  *
+//===- tools/brokerd/service/broker_service.hpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,14 +41,33 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_HEAD_REVISION_HPP
-#define PSTORE_HEAD_REVISION_HPP
 
-#include <limits>
+/// \file service_installer.hpp
 
-namespace pstore {
-    constexpr unsigned head_revision = std::numeric_limits<unsigned>::max ();
-} // namespace pstore
+#ifndef BROKER_SAMPLE_SERVICE_HPP
+#define BROKER_SAMPLE_SERVICE_HPP
 
-#endif // PSTORE_HEAD_REVISION_HPP
-// eof: include/pstore/core/head_revision.hpp
+#include <atomic>
+#include <thread>
+
+#include "service_base.hpp"
+
+class sample_service final : public service_base {
+public:
+    sample_service (TCHAR const * service_name, bool can_stop = true, bool can_shutdown = true,
+                    bool can_pause_continue = false);
+    ~sample_service () override;
+
+protected:
+    void start_handler (DWORD argc, TCHAR * argv[]) override;
+    void stop_handler () override;
+
+    void worker ();
+
+private:
+    std::atomic<bool> is_stopping_{false};
+    std::thread thread_;
+};
+
+#endif // BROKER_SAMPLE_SERVICE_HPP
+// eof: tools/brokerd/service/broker_service.hpp

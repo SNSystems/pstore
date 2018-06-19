@@ -52,7 +52,6 @@ set (PSTORE_CORE_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/generation_iterator.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/index_types.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/indirect_string.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/region.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/start_vacuum.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/storage.hpp"

@@ -52,7 +52,6 @@
 #include <type_traits>
 
 #include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/core/vacuum_intf.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/diff/revision.hpp"
-#include "pstore/core/head_revision.hpp"
+#include "pstore/support/head_revision.hpp"
 #include "gtest/gtest.h"
 
 using namespace pstore;

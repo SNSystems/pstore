@@ -4,7 +4,7 @@
 //* \__ \  __/ |   \ V /| | (_|  __/ | | | | \__ \ || (_| | | |  __/ |    *
 //* |___/\___|_|    \_/ |_|\___\___| |_|_| |_|___/\__\__,_|_|_|\___|_|    *
 //*                                                                       *
-//===- tools/broker/service/service_installer.hpp -------------------------===//
+//===- tools/brokerd/service/service_installer.hpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -79,4 +79,4 @@ void install_service (ctzstring service_name, ctzstring display_name, DWORD star
 void uninstall_service (ctzstring service_name);
 
 #endif // SERVICE_INSTALLER_HPP
-// eof: tools/broker/service/service_installer.hpp
+// eof: tools/brokerd/service/service_installer.hpp

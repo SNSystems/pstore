@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- tools/broker/CMakeLists.txt -----------------------------------------===//
+#===- tools/brokerd/service/CMakeLists.txt --------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -44,84 +44,27 @@
 
 include (add_pstore)
 
-###########################
-# pstore-brokerd Executable
-###########################
-
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
 endif ()
-add_pstore_executable (pstore-brokerd
+
+add_pstore_executable (pstore-broker-service 
     main.cpp
-    switches.hpp
-    switches.cpp
+    broker_service.cpp
+    broker_service.hpp
+    service_base.cpp
+    service_base.hpp
+    service_installer.cpp
+    service_installer.hpp
 )
+
 if (PSTORE_IS_INSIDE_LLVM)
+    target_link_libraries (pstore-broker-service PRIVATE pstore-cmd-util-ex)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-endif ()
-
-if (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-brokerd pstore-cmd-util-ex pstore-broker-lib)
 else ()
-target_link_libraries (pstore-brokerd pstore-cmd-util pstore-broker-lib)
+    target_link_libraries (pstore-broker-service PRIVATE pstore-cmd-util)
 endif ()
 
-add_custom_command (TARGET pstore-brokerd
-    PRE_LINK
-    COMMAND pstore-broker-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/broker.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running broker unit tests"
-    VERBATIM
-)
-
-
-#######################
-# pstore_broker_service
-#######################
-if (WIN32)
-    add_subdirectory (service)
-endif ()
-
-
-###################
-# clang-tidy-broker
-###################
-include (clang-tidy)
-if (CLANG_TIDY_FOUND)
-    set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,modernize-*,--cppcoreguidelines-*,clang-analyzer-nullability*)
-
-    # Collect the *.cpp files: clang-tidy will scan these.
-    get_target_property (SOURCE_FILES pstore-broker-lib SOURCES)
-    list (FILTER SOURCE_FILES INCLUDE REGEX "cpp")
-
-    # Tell clang-tidy about the target's include directories.
-    set (TARGET_INCLUDE "")
-    get_target_property (BRROKER_LIB_INCLUDES pstore-broker-lib INCLUDE_DIRECTORIES)
-    foreach (P ${BROKER_LIB_INCLUDES})
-        list (APPEND TARGET_INCLUDE "-I" "${P}")
-    endforeach (P)
-
-    # Add in the pstore public includes
-    get_target_property (PSTORE_LIB_INCLUDES pstore-core INTERFACE_INCLUDE_DIRECTORIES)
-    foreach (P ${PSTORE_LIB_INCLUDES})
-        list (APPEND TARGET_INCLUDE "-I" "${P}")
-    endforeach (P)
-
-    add_custom_target(
-        "clang-tidy-broker"
-        COMMAND "${CLANG_TIDY}"
-        ${CLANG_TIDY_CHECKS}
-        ${SOURCE_FILES}
-        --
-        -std=c++14
-        ${TARGET_INCLUDE}
-        ${CLANG_TIDY_SYS_INCLUDE}
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-else()
-
-endif()
-
-# eof: tools/broker/CMakeLists.txt
+# eof: tools/brokerd/service/CMakeLists.txt

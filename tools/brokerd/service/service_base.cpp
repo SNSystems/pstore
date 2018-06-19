@@ -4,7 +4,7 @@
 //* \__ \  __/ |   \ V /| | (_|  __/ | |_) | (_| \__ \  __/ *
 //* |___/\___|_|    \_/ |_|\___\___| |_.__/ \__,_|___/\___| *
 //*                                                         *
-//===- tools/broker/service/service_base.cpp ------------------------------===//
+//===- tools/brokerd/service/service_base.cpp -----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -363,4 +363,4 @@ void service_base::write_error_log_entry (char const * func, DWORD errcode) {
     message[sizeof (message) - 1] = '\0';
     this->write_event_log_entry (message, event_type::error);
 }
-// eof: tools/broker/service/service_base.cpp
+// eof: tools/brokerd/service/service_base.cpp

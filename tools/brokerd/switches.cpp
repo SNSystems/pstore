@@ -4,7 +4,7 @@
 //* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
-//===- tools/broker/switches.cpp ------------------------------------------===//
+//===- tools/brokerd/switches.cpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -93,4 +93,4 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     return {std::move (result), EXIT_SUCCESS};
 }
 
-// eof: tools/broker/switches.cpp
+// eof: tools/brokerd/switches.cpp
