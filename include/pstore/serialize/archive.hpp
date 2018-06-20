@@ -399,6 +399,7 @@ namespace pstore {
 #endif
                             , it_ (static_cast<std::uint8_t *> (first)) {
 
+                        (void) last;
                         assert (end_ >= it_);
                     }
 
@@ -414,7 +415,6 @@ namespace pstore {
                         assert (it_ <= end_);
                         return result;
                     }
-
 
                     /// Returns the number of bytes written to the buffer.
                     std::size_t size () const {
