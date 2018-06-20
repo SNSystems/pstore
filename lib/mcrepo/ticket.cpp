@@ -50,6 +50,7 @@ using namespace pstore::repo;
 // operator new
 // ~~~~~~~~~~~~
 void * ticket::operator new (std::size_t s, nMembers size) {
+    (void) s;
     std::size_t const actual_bytes = ticket::size_bytes (size.n);
     assert (actual_bytes >= s);
     return ::operator new (actual_bytes);
