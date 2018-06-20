@@ -66,6 +66,19 @@ def main():
             ]
         },
         {
+            'os': 'linux',
+            'dist': 'trusty',
+            'addons': {
+                'apt': {
+                    'sources': [ 'ubuntu-toolchain-r-test' ],
+                    'packages': [ 'g++-7', 'ninja-build' ],
+                },
+            },
+            'env':[
+                'MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"'
+            ]
+        },
+        {
             'os': 'osx',
             'osx_image': 'xcode9.3',
         }
