@@ -76,8 +76,8 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
     auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
-    assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+    ASSERT_EQ (transaction_.get_storage ().begin ()->first,
+	       reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
@@ -120,8 +120,8 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
 
     auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
 
-    assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+    ASSERT_EQ (transaction_.get_storage ().begin ()->first,
+	       reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
