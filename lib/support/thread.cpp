@@ -138,7 +138,7 @@ namespace pstore {
             }
             return id;
 #elif defined(__linux__)
-            return syscall (__NR_gettid);
+            return static_cast <thread_id_type> (syscall (__NR_gettid));
 #elif defined(__FreeBSD__)
             return pthread_getthreadid_np ();
 #else
