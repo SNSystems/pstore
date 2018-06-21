@@ -30,6 +30,30 @@ matrix:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
         - CMAKE_BUILD_TYPE=Release
         os: linux
+    -   addons:
+            apt:
+                packages:
+                - g++-7
+                - ninja-build
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - CMAKE_BUILD_TYPE=Debug
+        os: linux
+    -   addons:
+            apt:
+                packages:
+                - g++-7
+                - ninja-build
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - CMAKE_BUILD_TYPE=Release
+        os: linux
     -   env:
         - CMAKE_BUILD_TYPE=Debug
         os: osx
