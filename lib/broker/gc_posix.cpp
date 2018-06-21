@@ -91,7 +91,37 @@ namespace {
         }
     }
 
-} // namespace
+    std::string string_error (int errnum) {
+        static constexpr std::size_t buffer_size = 256U;
+        char errbuf[buffer_size];
+        errbuf[0] = '\0';
+
+        char * pbuf = errbuf;
+        errno = 0;
+
+        // There are two variants of strerror_r(). The POSIX version returns an int and the GNU
+        // version returns 'char *'. When _GNU_SOURCE is defined, glibc provides the char * version.
+        // The GNU function doesn't usually modify the provided buffer-- it only modifies it
+        // sometimes. If you end up with the GNU version, you must use the return value of the
+        // function as the string to print.
+#    if defined(_GNU_SOURCE)
+        pbuf = ::strerror_r (errnum, pbuf, buffer_size);
+#    else
+        int const r = ::strerror_r (errnum, pbuf, buffer_size);
+        (void) r;
+        // r is assigned to ensure that we are getting the strerror_r() that returns int
+#    endif
+        if (errno != 0) {
+            return "[unable to get message]";
+        }
+        if (pbuf[0] == '\0') {
+            return "[empty string returned]";
+        }
+        return pbuf;
+    }
+
+} // end anonymous namespace
+
 
 namespace pstore {
     namespace broker {
@@ -122,11 +152,7 @@ namespace pstore {
                             std::snprintf (msgbuf, buffer_size, "waitpid error %d: ", err);
                             msgbuf[buffer_size - 1U] = '\0';
 
-                            char errbuf[buffer_size];
-                            ::strerror_r (err, errbuf, sizeof (errbuf));
-                            errbuf[buffer_size - 1U] = '\0';
-
-                            logging::log (logging::priority::error, msgbuf, errbuf);
+                            logging::log (logging::priority::error, msgbuf, string_error (err));
                         }
                         break;
                     } else {
@@ -151,8 +177,7 @@ namespace pstore {
         // child_signal
         // ~~~~~~~~~~~~
         /// \note This function is called from a signal handler so muyst restrict itself to
-        /// signal-safe
-        /// functions.
+        /// signal-safe functions.
         void gc_watch_thread::child_signal (int sig) noexcept { cv_.notify (sig); }
 
     } // namespace broker
