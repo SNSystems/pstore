@@ -41,23 +41,24 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
 #ifndef PSTORE_SUPPORT_PORTAB_HPP
 #define PSTORE_SUPPORT_PORTAB_HPP
 
 #ifdef __cpp_exceptions
-#define PSTORE_CPP_EXCEPTIONS __cpp_exceptions
+#    define PSTORE_CPP_EXCEPTIONS __cpp_exceptions
 #elif defined(_MSC_VER) && defined(_CPPUNWIND)
-#define PSTORE_CPP_EXCEPTIONS 199711
+#    define PSTORE_CPP_EXCEPTIONS 199711
 #else
-#undef PSTORE_CPP_EXCEPTIONS
+#    undef PSTORE_CPP_EXCEPTIONS
 #endif
 
 #ifdef PSTORE_CPP_EXCEPTIONS
-#define PSTORE_TRY try
-#define PSTORE_CATCH(x, code) catch (x) code
+#    define PSTORE_TRY try
+#    define PSTORE_CATCH(x, code) catch (x) code
 #else
-#define PSTORE_TRY
-#define PSTORE_CATCH(x, code)
+#    define PSTORE_TRY
+#    define PSTORE_CATCH(x, code)
 #endif
 
 #define PSTORE_NO_EX_ESCAPE(x)                                                                     \
@@ -67,63 +68,62 @@
     } while (0)
 
 
-
-
+/// PSTORE_CPP_RTTI: Defined if RTTI is enabled.
 #ifdef __cpp_rtti
-#define PSTORE_CPP_RTTI __cpp_rtti
+#    define PSTORE_CPP_RTTI __cpp_rtti
 #elif defined(_MSC_VER) && defined(_CPPRTTI)
-#define PSTORE_CPP_RTTI 199711
+#    define PSTORE_CPP_RTTI 199711
 #else
-#undef PSTORE_CPP_RTTI
+#    undef PSTORE_CPP_RTTI
 #endif
 
-
-#ifdef __has_cpp_attribute
-#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE __has_cpp_attribute (noreturn)
-#else
-#define PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE 0
+#ifndef __has_cpp_attribute
+#    define __has_cpp_attribute(x) 0
 #endif
 
-#if PSTORE_HAS_STANDARD_NORETURN_ATTRIBUTE
-#define PSTORE_NO_RETURN [[noreturn]]
+#if __has_cpp_attribute(noreturn)
+#    define PSTORE_NO_RETURN [[noreturn]]
 #elif defined(_MSC_VER)
-#define PSTORE_NO_RETURN __declspec(noreturn)
+#    define PSTORE_NO_RETURN __declspec(noreturn)
 #else
-#define PSTORE_NO_RETURN __attribute__ (noreturn)
+#    define PSTORE_NO_RETURN __attribute__ (noreturn)
 #endif
 
 #ifdef _WIN32
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
+#    ifdef min
+#        undef min
+#    endif
+#    ifdef max
+#        undef max
+#    endif
+#    ifndef NOMINMAX
+#        define NOMINMAX
+#    endif
 #endif
 
 #ifndef PSTORE_STATIC_ASSERT
-/// A single-argument version of static_assert. Remove once we can run the compiler in C++14 mode.
-#define PSTORE_STATIC_ASSERT(x) static_assert (x, #x)
+    /// A single-argument version of static_assert. Remove once we can run the compiler in C++14
+    /// mode.
+#    define PSTORE_STATIC_ASSERT(x) static_assert (x, #    x)
 #endif
 
-// TODO: replace this shrapnel with C++17 [[fallthrough]]
-#if defined(__clang__)
-#define PSTORE_FALLTHROUGH [[clang::fallthrough]]
-#elif defined(__GNUC__)
-#define PSTORE_FALLTHROUGH //__attribute__ ((fallthrough)) GCC 7 required?
+/// PSTORE_FALLTHROUGH - Mark fallthrough cases in switch statements.
+#if __cplusplus > 201402L && __has_cpp_attribute(fallthrough)
+#    define PSTORE_FALLTHROUGH [[fallthrough]]
+#elif __has_cpp_attribute(gnu::fallthrough)
+#    define PSTORE_FALLTHROUGH [[gnu::fallthrough]]
+#elif !__cplusplus
+    // Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
+    // error when __has_cpp_attribute is given a scoped attribute in C mode.
+#    define PSTORE_FALLTHROUGH
+#elif __has_cpp_attribute(clang::fallthrough)
+#    define PSTORE_FALLTHROUGH [[clang::fallthrough]]
 #elif defined(_MSC_VER)
-// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
-// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
-#include <sal.h>
-#define PSTORE_FALLTHROUGH __fallthrough
+    // MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
+    // https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
+#    include <sal.h>
+#    define PSTORE_FALLTHROUGH __fallthrough
 #else
-#define PSTORE_FALLTHROUGH
+#    define PSTORE_FALLTHROUGH
 #endif
-
 #endif // PSTORE_SUPPORT_PORTAB_HPP
-// eof:include/pstore_support/portab.hpp
-
-// eof: include/pstore/support/portab.hpp

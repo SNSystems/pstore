@@ -26,6 +26,7 @@ ConstructorInitializerIndentWidth: 8
 DerivePointerAlignment: false
 ExperimentalAutoDetectBinPacking: false
 IndentCaseLabels: false
+IndentPPDirectives: AfterHash
 IndentWrappedFunctionNames: false
 IndentFunctionDeclarationAfterType: false
 MaxEmptyLinesToKeep: 3
