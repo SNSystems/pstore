@@ -1,10 +1,8 @@
-[![Build Status](https://travis-ci.org/SNSystems/pstore.svg?branch=master)](https://travis-ci.org/SNSystems/pstore)
-<a href="https://scan.coverity.com/projects/snsystems-pstore">
-  <img alt="Coverity Scan Build Status"
-       src="https://img.shields.io/coverity/scan/15170.svg"/>
-</a>
-<div></div>
-<img alt="pstore" src="doc_sources/logo.svg" height="" height="80" width="150" />
+<img alt="pstore logo" src="doc_sources/logo.svg" height="" height="80" width="150" />
+
+[![Linux and macOS Build Status](https://travis-ci.org/SNSystems/pstore.svg?branch=master)](https://travis-ci.org/SNSystems/pstore)
+[![Windows Build status](https://ci.appveyor.com/api/projects/status/ckl6dh2i3eb2u33e?svg=true)](https://ci.appveyor.com/project/paulhuggett/pstore)
+[![Coverity Scan Build Status](https://scan.coverity.com/projects/15170/badge.svg)](https://scan.coverity.com/projects/snsystems-pstore)
 
 pstore is a lightweight persistent append-only key/value store intended for use as a back-end for the [LLVM Program Repository](https://github.com/SNSystems/llvm-prepo).
 
