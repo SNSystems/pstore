@@ -183,7 +183,8 @@ int main (int argc, char * argv[]) {
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
                                        make_weak (status_client));
 
-            futures = create_worker_threads (commands, fifo, scav, status_client);
+            futures = create_worker_threads (commands, fifo, scav, std::move (status_client));
+            status_client.reset ();
 
             if (opt.playback_path) {
                 broker::player playback_file (*opt.playback_path);

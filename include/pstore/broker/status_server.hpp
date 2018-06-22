@@ -61,17 +61,28 @@ namespace pstore {
 
         class self_client_connection {
         public:
+            /// Allowed state transitions are:
+            /// - initilizing -> closed
+            /// - initializing -> listening -> closed
+            /// The first of these will happen if the initialization fails for some reason.
+            enum class state { initializing, listening, closed };
+
             self_client_connection () = default;
             self_client_connection (self_client_connection const &) = delete;
             self_client_connection & operator= (self_client_connection const &) = delete;
             self_client_connection & operator= (self_client_connection &&) = delete;
 
-            in_port_t get_port () const;
-            void set_port (in_port_t port);
+            using get_port_result_type = std::pair<in_port_t, std::unique_lock<std::mutex>>;
+            maybe<get_port_result_type> get_port () const;
+
+            void listening (in_port_t port);
+            void closed ();
 
         private:
             mutable std::mutex mut_;
             mutable std::condition_variable cv_;
+
+            state state_ = state::initializing;
             maybe<in_port_t> port_;
         };
 
@@ -81,4 +92,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_STATUS_SERVER_HPP
-// eof: include/pstore/broker/status_server.hpp

@@ -57,16 +57,16 @@
 #include <vector>
 
 #ifndef _WIN32
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
+#    include <arpa/inet.h>
+#    include <netdb.h>
+#    include <netinet/in.h>
+#    include <sys/socket.h>
+#    include <sys/types.h>
+#    include <sys/un.h>
 #else
-#include <io.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
+#    include <io.h>
+#    include <winsock2.h>
+#    include <ws2tcpip.h>
 #endif
 
 #include "pstore/broker/globals.hpp"
@@ -80,29 +80,60 @@
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 
+//*          _  __      _ _         _                             _   _           *
+//*  ___ ___| |/ _|  __| (_)___ _ _| |_   __ ___ _ _  _ _  ___ __| |_(_)___ _ _   *
+//* (_-</ -_) |  _| / _| | / -_) ' \  _| / _/ _ \ ' \| ' \/ -_) _|  _| / _ \ ' \  *
+//* /__/\___|_|_|   \__|_|_\___|_||_\__| \__\___/_||_|_||_\___\__|\__|_\___/_||_| *
+//*                                                                               *
+// get_port
+// ~~~~~~~~
+auto pstore::broker::self_client_connection::get_port () const -> maybe<get_port_result_type> {
+    std::unique_lock<std::mutex> lock{mut_};
+
+    // Wait until the server is either in the 'closed' state or we have a port number we can use to
+    // talk to it.
+    auto predicate = [this]() { return state_ == state::closed || port_; };
+    if (!predicate ()) {
+        cv_.wait (lock, predicate);
+    }
+    return port_ ? get_port_result_type{*port_, std::move (lock)}
+                 : nothing<get_port_result_type> ();
+}
+
+// listening
+// ~~~~~~~~~
+void pstore::broker::self_client_connection::listening (in_port_t port) {
+    std::lock_guard<decltype (mut_)> lock{mut_};
+    assert (!port_ && state_ == state::initializing);
+    port_ = port;
+    state_ = state::listening;
+    cv_.notify_one ();
+}
+
+// closed
+// ~~~~~~
+void pstore::broker::self_client_connection::closed () {
+    std::lock_guard<decltype (mut_)> lock{mut_};
+    port_.reset ();
+    state_ = state::closed;
+    cv_.notify_one ();
+}
+
+
 namespace {
 
     constexpr char EOT = 4; // ASCII "end of transmission"
 
 #ifdef _WIN32
-using ssize_t = SSIZE_T;
+    using ssize_t = SSIZE_T;
 #endif
 
-std::uint16_t network_to_host (std::uint16_t v) {
-    return ntohs (v);
-}
-// std::uint32_t network_to_host (std::uint32_t v) { return ntohl (v); }
+    std::uint16_t network_to_host (std::uint16_t v) { return ntohs (v); }
+    // std::uint32_t network_to_host (std::uint32_t v) { return ntohl (v); }
 
-std::uint16_t host_to_network (std::uint16_t v) {
-    return htons (v);
-}
-std::uint32_t host_to_network (std::uint32_t v) {
-    return htonl (v);
-}
+    std::uint16_t host_to_network (std::uint16_t v) { return htons (v); }
+    std::uint32_t host_to_network (std::uint32_t v) { return htonl (v); }
 
-} // end of anonymous namespace
-
-namespace {
 
     using json_parser = pstore::json::parser<pstore::json::null_output>;
     using socket_descriptor = pstore::broker::socket_descriptor;
@@ -162,7 +193,6 @@ namespace {
         // FIXME: just exit if there's a request of any kind!
         return std::make_tuple (false /*more?*/, true);
 #endif
-
     }
 
 } // end anonymous namespace
@@ -296,7 +326,7 @@ namespace {
             listen_port = (reinterpret_cast<sockaddr_in6 *> (&address))->sin6_port;
             break;
         default:
-            raise (pstore::errno_erc{EINVAL}, "unexpectedprotocol type returned by getsockname");
+            raise (pstore::errno_erc{EINVAL}, "unexpected protocol type returned by getsockname");
         }
 
         return network_to_host (listen_port);
@@ -315,65 +345,24 @@ namespace {
 } // end anonymous namespace
 
 
-in_port_t pstore::broker::self_client_connection::get_port () const {
-    std::unique_lock<decltype (mut_)> lock{mut_};
-    if (!port_) {
-        cv_.wait (lock, [this]() -> bool { return port_.has_value (); });
-    }
-    return *port_;
-}
+namespace {
 
-void pstore::broker::self_client_connection::set_port (in_port_t port) {
-    {
-        std::lock_guard<decltype (mut_)> lock{mut_};
-        assert (!port_);
-        port_ = port;
-    }
-    cv_.notify_one ();
-}
-
-
-void pstore::broker::status_server (std::shared_ptr<self_client_connection> client_ptr) {
-#ifdef _WIN32
-    pstore::wsa_startup startup;
-    if (!startup.started ()) {
-        log (logging::priority::error, "WSAStartup() failed");
-        //            return EXIT_FAILURE; // FIXME: need a way to bail out.
-    }
-#endif // _WIN32
-
-    try {
-
-        // Now create a socket that the server will use to listen for incoming connections.
-        socket_descriptor listen_fd = create_server_listen_socket ();
-
-        // Tell the kernel we're a server
-        constexpr int qlen = 10;
-        if (listen (listen_fd.get (), qlen) != 0) {
-            raise (platform_erc (get_last_error ()), "listen failed");
-        }
-
-        in_port_t const listen_port = get_listen_port (listen_fd);
-        std::string const listen_path = get_status_path ();
-        write_port_number_file (listen_path, listen_port);
-        file::deleter pfdeleter (listen_path); // delete the file on destruction
-
-        std::unordered_map<socket_descriptor, json_parser> clients;
+    void server_loop (socket_descriptor const & listen_fd) {
+        using namespace pstore;
 
         fd_set all_set;
         FD_ZERO (&all_set);
         FD_SET (listen_fd.get (), &all_set);
         auto max_fd = listen_fd.get ();
 
-        log (logging::priority::info, "Waiting for connections on inet port ", listen_port);
-        // Notify anyone interested that the server now has a port number.
-        client_ptr->set_port (listen_port);
+        std::unordered_map<socket_descriptor, json_parser> clients;
 
+        bool done = false;
         while (!done) {
             fd_set rset = all_set; // rset is modified each time round the loop.
 
             if (::select (static_cast<int> (max_fd) + 1, &rset, nullptr, nullptr, nullptr) < 0) {
-                log (logging::priority::error, "select error ", get_last_error ());
+                log (logging::priority::error, "select error ", broker::get_last_error ());
             }
 
             if (FD_ISSET (listen_fd.get (), &rset)) {
@@ -400,7 +389,8 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
                 socket_descriptor const & client_fd = it->first;
 
                 if (FD_ISSET (client_fd.get (), &rset)) {
-                    std::array<char, 4> read_buffer; // FIXME: stupidly small at the moment.
+                    // FIXME: stupidly small at the moment to work the server loop harder.
+                    std::array<char, 4> read_buffer;
 
                     // read data from the client
                     ssize_t const nread =
@@ -409,7 +399,7 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
                     assert (is_recv_error (nread) ||
                             static_cast<std::size_t> (nread) <= read_buffer.size ());
                     if (is_recv_error (nread)) {
-                        log (logging::priority::error, "recv() error ", get_last_error ());
+                        log (logging::priority::error, "recv() error ", broker::get_last_error ());
                         continue;
                     }
 
@@ -438,12 +428,67 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
                 it = next;
             }
         }
+    }
 
-        log (pstore::logging::priority::info, "Status server exiting");
+    class port_setter {
+    public:
+        port_setter (pstore::broker::self_client_connection * const client, in_port_t p)
+                : client_{client} {
+            client_->listening (p);
+        }
+
+        ~port_setter () noexcept {
+            try {
+                client_->closed ();
+            } catch (...) {
+            }
+        }
+
+        // No copying or assignment.
+        port_setter (port_setter const &) = delete;
+        port_setter & operator= (port_setter const &) = delete;
+
+    private:
+        pstore::broker::self_client_connection * const client_;
+    };
+
+} // end anonymous namespace
+
+
+void pstore::broker::status_server (std::shared_ptr<self_client_connection> client_ptr) {
+#ifdef _WIN32
+    pstore::wsa_startup startup;
+    if (!startup.started ()) {
+        log (logging::priority::error, "WSAStartup() failed");
+        client_ptr->closed ();
+        log (pstore::logging::priority::info, "Status server exited");
+        return;
+    }
+#endif // _WIN32
+
+    try {
+        // Now create a socket that the server will use to listen for incoming connections.
+        socket_descriptor listen_fd = create_server_listen_socket ();
+
+        // Tell the kernel we're a server
+        constexpr int qlen = 10;
+        if (listen (listen_fd.get (), qlen) != 0) {
+            raise (platform_erc (get_last_error ()), "listen failed");
+        }
+
+        in_port_t const listen_port = get_listen_port (listen_fd);
+        std::string const listen_path = get_status_path ();
+        write_port_number_file (listen_path, listen_port);
+        file::deleter pfdeleter (listen_path); // delete the file on destruction
+
+        log (logging::priority::info, "Waiting for connections on inet port ", listen_port);
+
+        port_setter _{client_ptr.get (), listen_port};
+        server_loop (listen_fd);
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());
     } catch (...) {
         log (pstore::logging::priority::error, "An unknown error was detected");
     }
+    log (pstore::logging::priority::info, "Status server exited");
 }
-// eof: lib/broker/status_server.cpp

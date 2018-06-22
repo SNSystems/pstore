@@ -53,19 +53,21 @@ import signal
 import subprocess
 import sys
 
-is_windows = platform.system () == 'Windows'
+PLATFORM_NAME = platform.system ()
+IS_WINDOWS = PLATFORM_NAME == 'Windows'
+IS_CYGWIN = PLATFORM_NAME.startswith ('CYGWIN_NT-')
 
 
 # TODO: shared with broker1.py
 def executable (path):
-    if is_windows:
+    if IS_WINDOWS or IS_CYGWIN:
         path += '.exe'
     return path
 
 
 # TODO: shared with broker1.py
 def pipe_root_dir ():
-    return r"\\.\pipe" if is_windows else '/tmp'
+    return r'\\.\pipe' if IS_WINDOWS or IS_CYGWIN else '/tmp'
 
 
 ToolPaths = collections.namedtuple ('ToolPaths', ['broker', 'poker'])
@@ -98,7 +100,7 @@ def main (argv):
     broker_command = [paths.broker, '--pipe-path', pipe_path]
     print ("Popen: ", ' '.join (broker_command))
     broker_process = subprocess.Popen (args=broker_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1,
-                                       creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if is_windows else 0)
+                                       creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if IS_WINDOWS else 0)
 
     poker_command = [paths.poker, '--pipe-path', pipe_path, "ECHO", "ready"]
     print ("Popen: ", ' '.join (poker_command))
@@ -107,7 +109,7 @@ def main (argv):
     poker_process.wait ()
     print ("done initial wait: broker is up")
 
-    broker_process.send_signal (signal.CTRL_BREAK_EVENT if is_windows else signal.SIGTERM)
+    broker_process.send_signal (signal.CTRL_BREAK_EVENT if IS_WINDOWS else signal.SIGTERM)
     print ("Sent SIGTERM. Waiting for broker to exit.")
 
     broker_process.wait ()

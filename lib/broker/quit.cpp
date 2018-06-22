@@ -105,7 +105,35 @@ namespace {
         cp.push_command (std::move (msg), nullptr);
     }
 
-} // namespace
+
+    void
+    ask_status_server_to_exit (pstore::broker::self_client_connection const * const status_client) {
+        using namespace pstore;
+        using namespace pstore::broker;
+        using get_port_result_type = self_client_connection::get_port_result_type;
+
+        maybe<get_port_result_type> const port = status_client != nullptr
+                                                     ? status_client->get_port ()
+                                                     : nothing<get_port_result_type> ();
+        if (!port) {
+            log (logging::priority::info, "status server has already exited");
+            return;
+        }
+
+        broker::socket_descriptor const status_fd = broker::connect_to_status_server (port->first);
+        if (status_fd.valid ()) {
+            char const json[] = "{\"quit\":true}\04";
+            log (logging::priority::info, "sending message to status server:", json);
+            if (::send (status_fd.get (), json, static_cast<int> (array_elements (json)) - 1,
+                        0 /*flags*/) == broker::socket_descriptor::error) {
+                log (logging::priority::error, "send failed ", broker::get_last_error ());
+            }
+        } else {
+            log (logging::priority::error, "unable to connect to status server");
+        }
+    }
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace broker {
@@ -139,25 +167,7 @@ namespace pstore {
                     push (*cp, command_loop_quit_command);
                 }
 
-                // FIXME: using the availability of status_client to detect that the status server
-                // is running isn't quite safe. There's a window of time in which the server's port
-                // has been closed but the status_client shared_ptr is still "alive".
-
-                if (status_client == nullptr) {
-                    log (logging::priority::info, "status server has already exited");
-                } else {
-                    log (logging::priority::info, "shutting down status server");
-                    socket_descriptor status_fd =
-                        connect_to_status_server (status_client->get_port ());
-                    char const json[] = "{\"quit\":true}\04";
-                    log (logging::priority::info, "sending message:", json);
-                    if (::send (status_fd.get (), json,
-                                static_cast<int> (array_elements (json) - 1),
-                                0 /*flags*/) == socket_descriptor::error) {
-                        log (logging::priority::error, "send failed ", get_last_error ());
-                    }
-                }
-
+                ask_status_server_to_exit (status_client);
                 log (logging::priority::info, "shutdown requests complete");
             }
         }
