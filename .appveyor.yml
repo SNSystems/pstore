@@ -1,0 +1,15 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration:
+- Debug
+- Release
+platform: x64
+clone_depth: 3
+before_build:
+- cmd: python .\utils\make_build.py -o build -D PSTORE_EXAMPLES=Yes
+build:
+  project: .\build\pstore.sln
+  parallel: true
+  verbosity: minimal
+after_build:
+- cmd: cmake --build build --config %CONFIGURATION% --target pstore-system-tests
