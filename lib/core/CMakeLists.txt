@@ -132,7 +132,7 @@ if (UNIX AND NOT APPLE)
     endif ()
 endif ()
 
-target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize pstore-support-lib)
+target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize pstore-support)
 
 
 include (clang-tidy)

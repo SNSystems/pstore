@@ -53,5 +53,5 @@ set (PSTORE_SERIALIZE_SRC
     types.cpp
 )
 add_pstore_library (pstore-serialize ${PSTORE_SERIALIZE_SRC})
-target_link_libraries (pstore-serialize PUBLIC pstore-support-lib)
+target_link_libraries (pstore-serialize PUBLIC pstore-support)
 # eof: lib/serialize/CMakeLists.txt

@@ -72,21 +72,16 @@ set (PSTORE_BROKER_INTF_SRC
 )
 
 include (add_pstore)
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_library (pstore-broker-intf STATIC ${PSTORE_BROKER_INTF_SRC})
-    target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
+add_pstore_library (pstore-broker-intf STATIC ${PSTORE_BROKER_INTF_SRC})
+target_link_libraries (pstore-broker-intf PUBLIC pstore-support)
 
+if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
-
     add_pstore_library (pstore-broker-intf-ex STATIC ${PSTORE_BROKER_INTF_SRC})
-    target_link_libraries (pstore-broker-intf-ex PUBLIC pstore-support-lib-ex)
-
+    target_link_libraries (pstore-broker-intf-ex PUBLIC pstore-support-ex)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-else ()
-    add_pstore_library (pstore-broker-intf ${PSTORE_BROKER_INTF_SRC})
-    target_link_libraries (pstore-broker-intf PUBLIC pstore-support-lib)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 if (WIN32)

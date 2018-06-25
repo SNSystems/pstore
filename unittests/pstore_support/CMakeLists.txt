@@ -57,12 +57,8 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_utf_win32.cpp
     test_varint.cpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC} DEPENDS pstore-support-lib)
-else ()
-    add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
-endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-support-unit-tests pstore-support-lib pstore-common)
+add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
+target_link_libraries (pstore-support-unit-tests pstore-support pstore-common)
 
 #eof:pstore/unittests/pstore_support/CMakeLists.txt
 

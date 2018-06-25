@@ -54,14 +54,14 @@ set (PSTORE_JSON_SOURCES
     utf.cpp
 )
 add_pstore_library (pstore-json-lib STATIC ${PSTORE_JSON_SOURCES})
-target_link_libraries (pstore-json-lib PUBLIC pstore-support-lib)
+target_link_libraries (pstore-json-lib PUBLIC pstore-support)
 
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
 
     add_pstore_library (pstore-json-lib-ex STATIC ${PSTORE_JSON_SOURCES})
-    target_link_libraries (pstore-json-lib-ex PUBLIC pstore-support-lib-ex)
+    target_link_libraries (pstore-json-lib-ex PUBLIC pstore-support-ex)
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)

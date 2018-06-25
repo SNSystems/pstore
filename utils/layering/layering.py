@@ -179,11 +179,10 @@ def dependencies_from_source(source_directory):
         # targets and directories are named.
         return frozenset(map(lambda x: {
             'broker': 'broker-lib',
-            'config': 'support-lib',  # config and support are the same library
+            'config': 'support',  # config and support are the same library
             'diff': 'diff-lib',
             'dump': 'dump-lib',
             'json': 'json-lib',
-            'support': 'support-lib',
             'vacuum': 'vacuum-lib',
         }.get(x, x), includes_without_prefix))
 
@@ -304,7 +303,6 @@ def cmake_target_from_path(p):
             ('read', Group.tool): 'read',
             ('serialize', Group.lib): 'serialize',
             ('sieve', Group.tool): 'sieve',
-            ('support', Group.lib): 'support-lib',
             ('vacuum', Group.tool): 'vacuumd',
             ('vacuum', Group.lib): 'vacuum-lib',
             ('vacuum', Group.unit_test): 'vacuum-unit-tests',

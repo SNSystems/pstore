@@ -222,16 +222,16 @@ set (PSTORE_SUPPORT_LIB_SRC
 
 include (add_pstore)
 
-# pstore-support-lib
-add_pstore_library (pstore-support-lib STATIC ${PSTORE_SUPPORT_LIB_SRC})
-target_link_libraries (pstore-support-lib PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+# pstore-support
+add_pstore_library (pstore-support STATIC ${PSTORE_SUPPORT_LIB_SRC})
+target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 
-# Add the exception-handling-enabled pstore-support-lib-ex if we're building inside LLVM
+# Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
-    add_pstore_library (pstore-support-lib-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
-    target_link_libraries (pstore-support-lib-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+    add_pstore_library (pstore-support-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
+    target_link_libraries (pstore-support-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 endif (PSTORE_IS_INSIDE_LLVM)

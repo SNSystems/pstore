@@ -51,6 +51,6 @@ add_pstore_executable (pstore-sieve
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-sieve LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-sieve pstore-support-lib pstore-cmd-util)
+target_link_libraries (pstore-sieve pstore-support pstore-cmd-util)
 
 # eof: tools/sieve/CMakeLists.txt
