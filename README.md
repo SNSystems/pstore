@@ -31,7 +31,8 @@ Optionally:
 
 - [Doxygen](http://doxygen.org) for building the documentation
 - [GraphViz](http://graphviz.org) for graph rendering
-- Python 2.7 or later for running the system tests as well as a few utilities
+- [Python](https://www.python.org) 2.7 or later for running the system tests as well as a few utilities
+- [Valgrind](http://valgrind.org) for extra validation of the executables (enabled by passing the `-D PSTORE_VALGRIND=Yes` argument when running `cmake` to generate the build)
 
 ## Building
 
@@ -45,7 +46,7 @@ The build directory will be one of `build_linux`, `build_mac`, `build_win32`, an
 # Getting started
 ## Using the read and write utilities
 
-The [pstore-read](tools/read/) and [pstore-write](tools/write/) tools provide a simple way to experiment with the capabilities of the pstore library. Consider the following exchange (which assumes a bash shell):
+The [pstore-read](tools/read/) and [pstore-write](tools/write/) tools provide a simple way to experiment with the capabilities of the pstore library. Consider the following exchange:
 
     $ echo foo > foo.txt
     $ echo bar > bar.txt
@@ -75,11 +76,11 @@ Let’s pick this apart one step at a time…
     $ echo foo > foo.txt
     $ echo bar > bar.txt
 
-Create two files which contain short text strings that we’ll shortly record in a pstore file.
+Create two files which contain short text strings that we’ll shortly record in a pstore file:
 
     $ pstore-write --add-file mykey,foo.txt pstore.db
 
-This command creates a new pstore file named `pstore.db` (or appends to that file if it already exists). The choice of file name is entirely arbitrary. The tool creates an entry in one of the pstore indexes with the key “mykey” which has a corresponding value string “foo\n” as read from the `foo.txt` file we created earlier.
+This command creates a new pstore file named `pstore.db` or appends to that file if it already exists. The choice of file name is arbitrary. The tool creates an entry in one of the pstore indexes with the key “mykey” which has a corresponding value string “foo\n” as read from the `foo.txt` file we created earlier.
 
     $ pstore-read pstore.db mykey
     foo
