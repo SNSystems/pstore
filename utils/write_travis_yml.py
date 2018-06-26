@@ -58,7 +58,7 @@ def main():
             'addons': {
                 'apt': {
                     'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8'],
-                    'packages': ['clang-3.8', 'ninja-build'],
+                    'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
                 }
             },
             'env': [
@@ -71,7 +71,7 @@ def main():
             'addons': {
                 'apt': {
                     'sources': [ 'ubuntu-toolchain-r-test' ],
-                    'packages': [ 'g++-7', 'ninja-build' ],
+                    'packages': [ 'g++-7', 'ninja-build', 'valgrind' ],
                 },
             },
             'env':[
@@ -97,7 +97,7 @@ def main():
         },
         'before_install': ['eval "${MATRIX_EVAL}"'],
         'script': [
-            './utils/make_build.py -o build -D PSTORE_EXAMPLES=Yes -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
+            './utils/make_build.py -o build -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=Yes -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests',
         ]
