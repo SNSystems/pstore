@@ -48,33 +48,34 @@
 
 #ifdef _WIN32
 
-// Standard includes
-#include <algorithm>
-#include <array>
-#include <cstdio>
-#include <cstdlib>
-#include <iterator>
-#include <memory>
-#include <utility>
+    // Standard includes
+#    include <algorithm>
+#    include <array>
+#    include <cstdio>
+#    include <cstdlib>
+#    include <iterator>
+#    include <memory>
+#    include <sstream>
+#    include <utility>
 
-// Platform includes
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+    // Platform includes
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 
-// pstore includes
-#include "pstore/broker/command.hpp"
-#include "pstore/broker/globals.hpp"
-#include "pstore/broker/intrusive_list.hpp"
-#include "pstore/broker/message_pool.hpp"
-#include "pstore/broker/quit.hpp"
-#include "pstore/broker/recorder.hpp"
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/support/logging.hpp"
-#include "pstore/support/utf.hpp"
+    // pstore includes
+#    include "pstore/broker/command.hpp"
+#    include "pstore/broker/globals.hpp"
+#    include "pstore/broker/intrusive_list.hpp"
+#    include "pstore/broker/message_pool.hpp"
+#    include "pstore/broker/quit.hpp"
+#    include "pstore/broker/recorder.hpp"
+#    include "pstore/broker_intf/descriptor.hpp"
+#    include "pstore/broker_intf/fifo_path.hpp"
+#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/support/gsl.hpp"
+#    include "pstore/support/logging.hpp"
+#    include "pstore/support/utf.hpp"
 
 namespace {
     using namespace pstore::broker;
@@ -193,6 +194,41 @@ namespace {
         return is_in_flight_;
     }
 
+
+    // Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+    std::string error_message (DWORD errcode) {
+        if (errcode == 0) {
+            return "no error";
+        }
+
+        wchar_t * ptr = nullptr;
+        constexpr DWORD flags =
+            FORMAT_MESSAGE_FROM_SYSTEM       // use system message tables to retrieve error text
+            | FORMAT_MESSAGE_ALLOCATE_BUFFER // allocate buffer on the local heap for error text
+            | FORMAT_MESSAGE_IGNORE_INSERTS;
+        std::size_t size = ::FormatMessageW (flags,
+                                             nullptr, // unused with FORMAT_MESSAGE_FROM_SYSTEM
+                                             errcode, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                             reinterpret_cast<wchar_t *> (&ptr), // output
+                                             0, // minimum size for output buffer
+                                             nullptr);
+        std::unique_ptr<wchar_t, decltype (&LocalFree)> error_text (ptr, &LocalFree);
+        ptr = nullptr; // The pointer is now owned by the error_text unique_ptr.
+
+        if (error_text) {
+            // The string returned by FormatMessage probably ends with a CR. Remove it.
+            auto isspace = [](wchar_t c) {
+                return c = ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+            };
+            for (; size > 0 && isspace (error_text.get ()[size - 1]); --size) {
+            }
+        }
+        if (!error_text || size == 0) {
+            return "unknown error";
+        }
+        return pstore::utf::win32::to8 (error_text.get (), size);
+    }
+
     // read_completed
     // ~~~~~~~~~~~~~~
     /// An I/O completion routine that's called after a read request completes.
@@ -218,8 +254,12 @@ namespace {
                     // The read operation has finished successfully, so process the request.
                     r->completed ();
                 }
-            } else {
-                log (priority::error, "error received ", errcode);
+            } else if (errcode != ERROR_SUCCESS) {
+                std::ostringstream stream;
+                stream << "Read completed with error: " << error_message (errcode) << " ("
+                       << errcode << ')';
+                std::string const & str = stream.str ();
+                log (priority::error, str.c_str ());
                 r->completed_with_error ();
             }
 
@@ -241,6 +281,8 @@ namespace {
         command_processor_->push_command (std::move (request_), record_file_);
     }
 
+    // completed_with_error
+    // ~~~~~~~~~~~~~~~~~~~~
     void reader::completed_with_error () { request_.reset (); }
 
 
@@ -449,15 +491,13 @@ namespace pstore {
                 while (!done) {
                     constexpr DWORD timeout_ms = 60 * 1000; // 60 seconds // TODO: shared with POSIX
                     // Wait for a client to connect, or for a read or write operation to be
-                    // completed,
-                    // which causes a completion routine to be queued for execution.
+                    // completed, which causes a completion routine to be queued for execution.
                     auto const cause = ::WaitForSingleObjectEx (connect_event.get (), timeout_ms,
                                                                 true /*alertable wait?*/);
                     switch (cause) {
                     case WAIT_OBJECT_0:
                         // A connect operation has been completed. If an operation is pending, get
-                        // the
-                        // result of the connect operation.
+                        // the result of the connect operation.
                         if (pending_io) {
                             auto bytes_transferred = DWORD{0};
                             if (!::GetOverlappedResult (pipe.get (), &connect, &bytes_transferred,
@@ -503,4 +543,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/broker/read_loop_win32.cpp
