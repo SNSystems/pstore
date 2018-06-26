@@ -56,14 +56,4 @@ target_link_libraries (pstore-vacuumd pstore-vacuum-lib pstore-cmd-util)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-vacuumd LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-
-add_custom_command (
-    TARGET pstore-vacuumd
-    PRE_LINK
-    COMMAND pstore-vacuum-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/vacuum.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running vacuum unit tests"
-    VERBATIM
-)
-
-# eof: tools/vacuum/CMakeLists.txt
+run_pstore_unit_test (pstore-vacuumd pstore-vacuum-unit-tests)

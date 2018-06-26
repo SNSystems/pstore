@@ -52,23 +52,4 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-dump LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 
-
-add_custom_command (TARGET pstore-dump
-    PRE_LINK
-    COMMAND pstore-dump-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/dump.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore dump unit tests"
-    VERBATIM
-)
-add_dependencies (pstore-dump pstore-dump-unit-tests)
-
-add_custom_command (TARGET pstore-dump
-    PRE_LINK
-    COMMAND pstore-mcrepo-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/mcrepo.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore mcrepo unit tests"
-    VERBATIM
-)
-add_dependencies (pstore-dump pstore-mcrepo-unit-tests)
-
-# eof: tools/dump/CMakeLists.txt
+run_pstore_unit_test (pstore-dump pstore-dump-unit-tests)

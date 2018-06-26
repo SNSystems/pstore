@@ -170,7 +170,9 @@ if (PSTORE_IS_INSIDE_LLVM)
     set_target_properties(PstoreUnitTests PROPERTIES FOLDER "pstore tests")
 endif ()
 
+
 add_subdirectory (3rd_party)
+include (run_pstore_unit_test)
 add_subdirectory (lib)    # add the PStore library itself
 add_subdirectory (examples)
 add_subdirectory (tools) # Add the utility tools
@@ -287,5 +289,6 @@ if (DOXYGEN_FOUND)
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif (DOXYGEN_FOUND)
+
 
 # eof: CMakeLists.txt

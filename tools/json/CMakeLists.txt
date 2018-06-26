@@ -44,13 +44,4 @@
 
 add_pstore_executable (pstore-json json.cpp)
 target_link_libraries (pstore-json pstore-json-lib pstore-dump-lib)
-
-add_custom_command (TARGET pstore-json
-    PRE_LINK
-    COMMAND pstore-json-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/output.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running JSON unit tests"
-    VERBATIM
-)
-
-# eof: tools/json/CMakeLists.txt
+run_pstore_unit_test (pstore-json pstore-json-unit-tests)

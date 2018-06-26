@@ -52,14 +52,6 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-diff LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 
-
-add_custom_command (TARGET pstore-diff
-    PRE_LINK
-    COMMAND pstore-diff-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/diff.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore diff unit tests"
-    VERBATIM
-)
-add_dependencies (pstore-diff pstore-diff-unit-tests)
+run_pstore_unit_test (pstore-diff pstore-diff-unit-tests)
 
 # eof: tools/diff/CMakeLists.txt

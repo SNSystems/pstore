@@ -44,48 +44,21 @@
 
 include (add_pstore)
 add_pstore_executable (pstore-write
-    main.cpp
     error.cpp
     error.hpp
+    main.cpp
+    switches.cpp
+    switches.hpp
     to_value_pair.cpp
     to_value_pair.hpp
-    switches.hpp
-    switches.cpp
 )
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-write LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-write pstore-core pstore-cmd-util)
 
-
-
-add_custom_command (TARGET pstore-write
-    PRE_LINK
-    COMMAND pstore-support-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/support.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore support unit tests"
-    VERBATIM
-)
-add_custom_command (TARGET pstore-write
-    PRE_LINK
-    COMMAND pstore-core-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/core.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore core unit tests"
-    VERBATIM
-)
-add_custom_command (TARGET pstore-write
-    PRE_LINK
-    COMMAND pstore-serialize-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/serialize.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore serialize unit tests"
-    VERBATIM
-)
-add_custom_command (TARGET pstore-write
-    PRE_LINK
-    COMMAND pstore-cmd-util-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/cmd_util.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running pstore cmd-line utility unit tests"
-    VERBATIM
-)
-
-# eof: tools/write/CMakeLists.txt
+run_pstore_unit_test (pstore-write pstore-cmd-util-tests)
+run_pstore_unit_test (pstore-write pstore-core-unit-tests)
+run_pstore_unit_test (pstore-write pstore-mcrepo-unit-tests)
+run_pstore_unit_test (pstore-write pstore-serialize-unit-tests)
+run_pstore_unit_test (pstore-write pstore-support-unit-tests)

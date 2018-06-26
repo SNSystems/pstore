@@ -68,13 +68,7 @@ else ()
 target_link_libraries (pstore-brokerd pstore-cmd-util pstore-broker-lib)
 endif ()
 
-add_custom_command (TARGET pstore-brokerd
-    PRE_LINK
-    COMMAND pstore-broker-unit-tests "--gtest_output=xml:${CMAKE_CURRENT_BINARY_DIR}/broker.xml"
-    WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-    COMMENT "Running broker unit tests"
-    VERBATIM
-)
+run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
 
 
 #######################
