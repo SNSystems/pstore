@@ -562,8 +562,7 @@ namespace {
             file_.open (file_handle::temporary{}, file_handle::get_temporary_directory ());
         }
         ~NativeFile () {
-            PSTORE_TRY { file_.close (); }
-            PSTORE_CATCH (..., {})
+            PSTORE_NO_EX_ESCAPE ({ file_.close (); });
         }
 
     protected:
@@ -574,7 +573,7 @@ namespace {
 
 TEST_F (NativeFile, ReadEmptyFile) {
     char c[2];
-    EXPECT_EQ (0U, file_.read_span (::pstore::gsl::make_span (c)));
+    EXPECT_EQ (0U, file_.read_span (pstore::gsl::make_span (c)));
 
     check_for_error (
         [this]() {

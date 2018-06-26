@@ -73,8 +73,8 @@ namespace {
     template <typename MessageStr, typename PathStr>
     PSTORE_NO_RETURN void raise_file_error (int err, MessageStr message, PathStr path) {
         std::ostringstream str;
-        str << message << " \"" << path << "\"";
-        raise (::pstore::errno_erc{err}, str.str ());
+        str << message << ' ' << pstore::quoted (path);
+        raise (pstore::errno_erc{err}, str.str ());
     }
 
 } // end anonymous namespace
@@ -142,9 +142,8 @@ namespace pstore {
             int const err = errno;
             path_ = buffer.data ();
             is_writable_ = true;
-
             if (file_ == -1) {
-                raise (::pstore::errno_erc{err}, "Unable to create temporary file");
+                raise_file_error (err, "Unable to create unique file in directory", directory);
             }
         }
 
@@ -152,7 +151,7 @@ namespace pstore {
             this->open (unique{}, directory);
             if (::unlink (this->path ().c_str ()) == -1) {
                 int const err = errno;
-                raise (::pstore::errno_erc{err}, "Unable to delete temporary file");
+                raise_file_error (err, "Unable to create temporary file in directory", directory);
             }
         }
 
