@@ -498,7 +498,7 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
     pstore::wsa_startup startup;
     if (!startup.started ()) {
         log (logging::priority::error, "WSAStartup() failed");
-        client_ptr->closed ();
+	self_client_connection::close (client_ptr);
         log (pstore::logging::priority::info, "Status server exited");
         return;
     }
