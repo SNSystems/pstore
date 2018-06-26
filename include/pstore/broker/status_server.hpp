@@ -44,6 +44,7 @@
 #ifndef PSTORE_BROKER_STATUS_SERVER_HPP
 #define PSTORE_BROKER_STATUS_SERVER_HPP
 
+#include <atomic>
 #include <condition_variable>
 #include <memory>
 #include <mutex>
@@ -61,13 +62,8 @@ namespace pstore {
 
         class self_client_connection {
         public:
-            /// Allowed state transitions are:
-            /// - initilizing -> closed
-            /// - initializing -> listening -> closed
-            /// The first of these will happen if the initialization fails for some reason.
-            enum class state { initializing, listening, closed };
-
-            self_client_connection () = default;
+            self_client_connection () noexcept
+                    : state_{state::initializing} {}
             self_client_connection (self_client_connection const &) = delete;
             self_client_connection & operator= (self_client_connection const &) = delete;
             self_client_connection & operator= (self_client_connection &&) = delete;
@@ -75,14 +71,23 @@ namespace pstore {
             using get_port_result_type = std::pair<in_port_t, std::unique_lock<std::mutex>>;
             maybe<get_port_result_type> get_port () const;
 
-            void listening (in_port_t port);
-            void closed ();
+            static void listen (std::shared_ptr<self_client_connection> const & c, in_port_t port);
+            static void close (std::shared_ptr<self_client_connection> const & c) noexcept;
 
         private:
+            void closed ();
+            void listening (in_port_t port);
+
+            /// Allowed state transitions are:
+            /// - initilizing -> closed
+            /// - initializing -> listening -> closed
+            /// The first of these will happen if the initialization fails for some reason.
+            enum class state { initializing, listening, closed };
+
             mutable std::mutex mut_;
             mutable std::condition_variable cv_;
 
-            state state_ = state::initializing;
+            std::atomic<state> state_;
             maybe<in_port_t> port_;
         };
 

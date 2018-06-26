@@ -67,6 +67,7 @@
 #    include <io.h>
 #    include <winsock2.h>
 #    include <ws2tcpip.h>
+using ssize_t = SSIZE_T;
 #endif
 
 #include "pstore/broker/globals.hpp"
@@ -79,6 +80,44 @@
 #include "pstore/json/json.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
+
+namespace {
+
+    template <typename Function>
+    class scope_guard {
+    public:
+        template <typename OtherFunction>
+        explicit scope_guard (OtherFunction && other)
+                : func_ (std::forward<OtherFunction> (other)) {}
+
+        scope_guard (scope_guard const &) = delete;
+        scope_guard & operator= (scope_guard const &) = delete;
+
+        scope_guard (scope_guard && rhs)
+                : committed_ (rhs.committed_)
+                , func_ (std::move (rhs.func_)) {
+            rhs.committed_ = true;
+        }
+
+        ~scope_guard () {
+            if (!committed_) {
+                func_ ();
+            }
+        }
+        void commit () noexcept { committed_ = true; }
+
+    private:
+        bool committed_ = false;
+        Function func_;
+    };
+
+    template <typename Function>
+    scope_guard<Function> make_scope_guard (Function && f) {
+        return scope_guard<Function> (std::forward<Function> (f));
+    }
+
+} // end anonymous namespace
+
 
 //*          _  __      _ _         _                             _   _           *
 //*  ___ ___| |/ _|  __| (_)___ _ _| |_   __ ___ _ _  _ _  ___ __| |_(_)___ _ _   *
@@ -96,8 +135,8 @@ auto pstore::broker::self_client_connection::get_port () const -> maybe<get_port
     if (!predicate ()) {
         cv_.wait (lock, predicate);
     }
-    return port_ ? get_port_result_type{*port_, std::move (lock)}
-                 : nothing<get_port_result_type> ();
+    return predicate () ? get_port_result_type{*port_, std::move (lock)}
+                        : nothing<get_port_result_type> ();
 }
 
 // listening
@@ -110,23 +149,44 @@ void pstore::broker::self_client_connection::listening (in_port_t port) {
     cv_.notify_one ();
 }
 
+// listen
+// ~~~~~~
+void pstore::broker::self_client_connection::listen (
+    std::shared_ptr<self_client_connection> const & client_ptr, in_port_t port) {
+    if (client_ptr) {
+        client_ptr->listening (port);
+    }
+}
+
 // closed
 // ~~~~~~
 void pstore::broker::self_client_connection::closed () {
+    // We need to be certain that the state is 'closed' after this function. The attempt to lock the
+    // mutext could throw. state_ is atomic and notify_one() is noexcept so they're safe; if port_
+    // isn't reset, get_port() will still return.
+    auto const se = make_scope_guard ([this]() noexcept {
+        state_ = state::closed;
+        cv_.notify_one ();
+    });
     std::lock_guard<decltype (mut_)> lock{mut_};
     port_.reset ();
-    state_ = state::closed;
-    cv_.notify_one ();
 }
 
+// close
+// ~~~~~
+void pstore::broker::self_client_connection::close (
+    std::shared_ptr<self_client_connection> const & client_ptr) noexcept {
+    if (client_ptr) {
+        try {
+            client_ptr->closed ();
+        } catch (...) {
+        }
+    }
+}
 
 namespace {
 
     constexpr char EOT = 4; // ASCII "end of transmission"
-
-#ifdef _WIN32
-    using ssize_t = SSIZE_T;
-#endif
 
     std::uint16_t network_to_host (std::uint16_t v) { return ntohs (v); }
     // std::uint32_t network_to_host (std::uint32_t v) { return ntohl (v); }
@@ -430,28 +490,6 @@ namespace {
         }
     }
 
-    class port_setter {
-    public:
-        port_setter (pstore::broker::self_client_connection * const client, in_port_t p)
-                : client_{client} {
-            client_->listening (p);
-        }
-
-        ~port_setter () noexcept {
-            try {
-                client_->closed ();
-            } catch (...) {
-            }
-        }
-
-        // No copying or assignment.
-        port_setter (port_setter const &) = delete;
-        port_setter & operator= (port_setter const &) = delete;
-
-    private:
-        pstore::broker::self_client_connection * const client_;
-    };
-
 } // end anonymous namespace
 
 
@@ -479,16 +517,19 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
         in_port_t const listen_port = get_listen_port (listen_fd);
         std::string const listen_path = get_status_path ();
         write_port_number_file (listen_path, listen_port);
-        file::deleter pfdeleter (listen_path); // delete the file on destruction
+
+        // Delete the file on destruction.
+        file::deleter pfdeleter (listen_path);
 
         log (logging::priority::info, "Waiting for connections on inet port ", listen_port);
 
-        port_setter _{client_ptr.get (), listen_port};
+        self_client_connection::listen (client_ptr, listen_port);
         server_loop (listen_fd);
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());
     } catch (...) {
         log (pstore::logging::priority::error, "An unknown error was detected");
     }
+    self_client_connection::close (client_ptr);
     log (pstore::logging::priority::info, "Status server exited");
 }
