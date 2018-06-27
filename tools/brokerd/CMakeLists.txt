@@ -63,9 +63,9 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif ()
 
 if (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-brokerd pstore-cmd-util-ex pstore-broker-lib)
+target_link_libraries (pstore-brokerd pstore-cmd-util-ex pstore-broker)
 else ()
-target_link_libraries (pstore-brokerd pstore-cmd-util pstore-broker-lib)
+target_link_libraries (pstore-brokerd pstore-cmd-util pstore-broker)
 endif ()
 
 run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
@@ -87,12 +87,12 @@ if (CLANG_TIDY_FOUND)
     set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,modernize-*,--cppcoreguidelines-*,clang-analyzer-nullability*)
 
     # Collect the *.cpp files: clang-tidy will scan these.
-    get_target_property (SOURCE_FILES pstore-broker-lib SOURCES)
+    get_target_property (SOURCE_FILES pstore-broker SOURCES)
     list (FILTER SOURCE_FILES INCLUDE REGEX "cpp")
 
     # Tell clang-tidy about the target's include directories.
     set (TARGET_INCLUDE "")
-    get_target_property (BRROKER_LIB_INCLUDES pstore-broker-lib INCLUDE_DIRECTORIES)
+    get_target_property (BRROKER_LIB_INCLUDES pstore-broker INCLUDE_DIRECTORIES)
     foreach (P ${BROKER_LIB_INCLUDES})
         list (APPEND TARGET_INCLUDE "-I" "${P}")
     endforeach (P)

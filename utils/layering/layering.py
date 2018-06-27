@@ -178,7 +178,6 @@ def dependencies_from_source(source_directory):
         # Convert the include path to the cmake component name. This works around inconsistencies in the way that
         # targets and directories are named.
         return frozenset(map(lambda x: {
-            'broker': 'broker-lib',
             'config': 'support',  # config and support are the same library
             'diff': 'diff-lib',
             'dump': 'dump-lib',
@@ -281,7 +280,6 @@ def cmake_target_from_path(p):
             ('broker-intf', Group.lib): 'broker-intf',
             ('broker-poker', Group.tool): 'broker-poker',
             ('broker-status', Group.tool): 'broker-status',
-            ('broker', Group.lib): 'broker-lib',
             ('broker', Group.unit_test): 'broker-unit-tests',
             ('brokerd', Group.tool): 'brokerd',
             ('cmd-util', Group.lib): 'cmd-util',

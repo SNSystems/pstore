@@ -54,6 +54,6 @@ add_pstore_unit_test (pstore-broker-unit-tests
 # Access the library's private include directory.
 target_include_directories (pstore-broker-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/pstore")
 
-target_link_libraries (pstore-broker-unit-tests pstore-broker-lib)
+target_link_libraries (pstore-broker-unit-tests pstore-broker)
 
 # eof: unittests/broker/CMakeLists.txt
