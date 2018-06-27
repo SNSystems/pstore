@@ -113,6 +113,12 @@ namespace {
         link_stream << "/proc/" << ::getpid () << "/exe";
         return link_stream.str ();
     }
+
+    template <typename T>
+    T clamp (T v, T low, T high) {
+        return std::min (std::max (v, low), high);
+    }
+
 } // namespace
 
 
@@ -120,9 +126,13 @@ namespace pstore {
 
     std::string process_file_name () {
         std::string path = link_path ();
-        auto read_link = [&path](::pstore::gsl::span<char> buffer) {
-            assert (buffer.size () <= SSIZE_MAX);
-            ssize_t const num_chars = ::readlink (path.c_str (), buffer.data (), buffer.size ());
+        auto read_link = [&path](gsl::span<char> buffer) {
+            using size_type = decltype (buffer)::index_type;
+            static_assert (SSIZE_MAX <= std::numeric_limits<size_type>::max (),
+                           "cannot represent SSIZE_MAX as index_type");
+            ssize_t const num_chars =
+                ::readlink (path.c_str (), buffer.data (),
+                            clamp (buffer.size (), size_type{0}, size_type{SSIZE_MAX}));
             if (num_chars < 0) {
                 int const error = errno;
                 std::ostringstream str;
