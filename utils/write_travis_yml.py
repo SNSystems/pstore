@@ -86,6 +86,7 @@ def main():
 
     def add_build_type(d, type):
         d.setdefault('env', []).append('CMAKE_BUILD_TYPE=' + type)
+        d['env'].append ('PSTORE_ALWAYS_SPANNING={0}'.format ('Yes' if type.lower() == 'debug' else 'No'))
         return d
 
     travis = {

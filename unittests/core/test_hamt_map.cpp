@@ -1718,11 +1718,14 @@ namespace {
         void find () const;
 
         std::shared_ptr<internal_node> load_inode (index_pointer ptr);
+        static constexpr unsigned internal_node_children = 2U;
 
     private:
         hash_function hash_;
         static std::map<std::string, std::uint64_t> const hashes_;
     };
+
+    constexpr unsigned CorruptInternalNodes::internal_node_children;
 
     std::map<std::string, std::uint64_t> const CorruptInternalNodes::hashes_{
         {"a", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value},
@@ -1772,7 +1775,7 @@ namespace {
     std::shared_ptr<internal_node> CorruptInternalNodes::load_inode (index_pointer ptr) {
         assert (ptr.is_internal ());
         return std::static_pointer_cast<internal_node> (
-            db_->getrw (ptr.untag_internal_address (), internal_node::size_bytes (1)));
+            db_->getrw (ptr.untag_internal_address (), internal_node::size_bytes (internal_node_children)));
     }
 
 } // end anonymous namespace
@@ -1847,8 +1850,8 @@ TEST_F (CorruptInternalNodes, MatchingChildPointers) {
 
         // The first two child pointers are the same.
         {
-            auto inode = this->load_inode (root);
-            ASSERT_GE (inode->size (), 2U);
+            std::shared_ptr<internal_node> inode = this->load_inode (root);
+            ASSERT_EQ (inode->size (), internal_node_children);
             (*inode)[1] = (*inode)[0];
         }
         t1.commit ();

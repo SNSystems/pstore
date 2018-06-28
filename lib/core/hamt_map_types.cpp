@@ -331,6 +331,8 @@ namespace pstore {
                     raise (error_code::index_corrupt, db.path ());
                 }
                 std::size_t const actual_size = internal_node::size_bytes (base->size ());
+                base.reset ();
+
                 assert (actual_size > sizeof (internal_node) - sizeof (internal_node::children_));
                 auto resl =
                     std::static_pointer_cast<internal_node const> (db.getro (addr, actual_size));
