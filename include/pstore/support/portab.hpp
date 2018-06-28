@@ -65,7 +65,7 @@
     do {                                                                                           \
         PSTORE_TRY { x; }                                                                          \
         PSTORE_CATCH (..., {})                                                                     \
-    } while (0)
+    } while (false)
 
 
 /// PSTORE_CPP_RTTI: Defined if RTTI is enabled.
