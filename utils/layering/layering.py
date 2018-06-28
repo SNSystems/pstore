@@ -274,37 +274,18 @@ def cmake_target_from_path(p):
         Converts a two-tuple (component base name, component group) to its corresponding cmake target name.
 
         :param name:  A two-tuple defining the base component name and component group.
-        :return:  The cmake target name
+        :return:  The cmake target name (without the 'pstore-' prefix)
         """
         return {
-            ('broker-intf', Group.lib): 'broker-intf',
-            ('broker-poker', Group.tool): 'broker-poker',
-            ('broker-status', Group.tool): 'broker-status',
             ('broker', Group.unit_test): 'broker-unit-tests',
-            ('brokerd', Group.tool): 'brokerd',
-            ('cmd-util', Group.lib): 'cmd-util',
-            ('common', Group.unit_test): 'common',
-            ('core', Group.lib): 'core',
-            ('diff', Group.tool): 'diff',
-            ('dump', Group.tool): 'dump',
-            ('hamt-test', Group.tool): 'hamt-test',
-            ('index-structure', Group.tool): 'index-structure',
-            ('inserter', Group.tool): 'inserter',
-            ('json', Group.tool): 'json',
-            ('mangle', Group.tool): 'mangle',
-            ('mcrepo', Group.lib): 'mcrepo',
-            ('pstore-cmd-util', Group.unit_test): 'cmd-util-unit-tests',
-            ('pstore-json', Group.unit_test): 'json-unit-tests',
-            ('pstore-mcrepo', Group.unit_test): 'mcrepo-unit-tests',
-            ('pstore-support', Group.unit_test): 'support-unit-tests',
-            ('pstore', Group.unit_test): 'core-unit-tests',
-            ('read', Group.tool): 'read',
-            ('serialize', Group.lib): 'serialize',
-            ('sieve', Group.tool): 'sieve',
-            ('vacuum', Group.tool): 'vacuumd',
+            ('cmd-util', Group.unit_test): 'cmd-util-unit-tests',
+            ('core', Group.unit_test): 'core-unit-tests',
+            ('json', Group.unit_test): 'json-unit-tests',
+            ('mcrepo', Group.unit_test): 'mcrepo-unit-tests',
+            ('support', Group.unit_test): 'support-unit-tests',
             ('vacuum', Group.lib): 'vacuum-lib',
+            ('vacuum', Group.tool): 'vacuumd',
             ('vacuum', Group.unit_test): 'vacuum-unit-tests',
-            ('write', Group.tool): 'write',
         }.get(name, name[0])
 
     # Produce a component name from a path and convert '_' to '-' to match the convention used by the cmake targets.
@@ -382,6 +363,10 @@ def main(args=sys.argv[1:]):
         c = cmake_target_from_path(path)
         if c is None:
             logger.warning('skipping: "%s"', path)
+            continue
+        if reachable.get (c) is None:
+            logger.error ('unknown target: "%s"', path)
+            exit_code = EXIT_FAILURE
             continue
 
         logger.debug('component: "%s"', c)

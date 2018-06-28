@@ -44,15 +44,15 @@
 
 include (add_pstore)
 add_subdirectory (broker)
+add_subdirectory (cmd_util)
 add_subdirectory (common)
+add_subdirectory (core)
 add_subdirectory (diff)
 add_subdirectory (dump)
-add_subdirectory (pstore)
-add_subdirectory (pstore_cmd_util)
-add_subdirectory (pstore_json)
-add_subdirectory (pstore_mcrepo)
-add_subdirectory (pstore_support)
+add_subdirectory (json)
+add_subdirectory (mcrepo)
 add_subdirectory (serialize)
+add_subdirectory (support)
 add_subdirectory (vacuum)
 
 # eof: unittests/CMakeLists.txt

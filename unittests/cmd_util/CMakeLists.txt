@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore_cmd_util/CMakeLists.txt ----------------------------===//
+#===- unittests/cmd_util/CMakeLists.txt ----------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,6 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
+
 add_pstore_unit_test (pstore-cmd-util-unit-tests
     test_cl_parser.cpp
     test_command_line.cpp
@@ -52,4 +53,4 @@ add_pstore_unit_test (pstore-cmd-util-unit-tests
 )
 target_link_libraries (pstore-cmd-util-unit-tests pstore-cmd-util)
 
-# eof: unittests/pstore_cmd_util/CMakeLists.txt
+# eof: unittests/cmd_util/CMakeLists.txt
