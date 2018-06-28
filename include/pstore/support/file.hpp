@@ -634,7 +634,7 @@ namespace pstore {
                 read_write,
             };
             file_handle () = default;
-            explicit file_handle (std::string const & path) : path_ {path} {}
+            explicit file_handle (std::string path) : path_ {std::move (path)} {}
             void open (create_mode create, writable_mode writable,
                        present_mode present = present_mode::allow_not_found);
 
