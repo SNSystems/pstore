@@ -70,7 +70,7 @@ namespace pstore {
 
     class transaction_base {
     public:
-        virtual ~transaction_base () noexcept {}
+        virtual ~transaction_base () noexcept = default;
 
         transaction_base (transaction_base const &) = delete;
         transaction_base & operator= (transaction_base const &) = delete;
