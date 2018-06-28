@@ -17,7 +17,7 @@ matrix:
         env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
         - CMAKE_BUILD_TYPE=Debug
-        - PSTORE_SPANNING=Yes
+        - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
     -   addons:
             apt:
@@ -32,7 +32,7 @@ matrix:
         env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
         - CMAKE_BUILD_TYPE=Release
-        - PSTORE_SPANNING=No
+        - PSTORE_ALWAYS_SPANNING=No
         os: linux
     -   addons:
             apt:
@@ -46,7 +46,7 @@ matrix:
         env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
         - CMAKE_BUILD_TYPE=Debug
-        - PSTORE_SPANNING=Yes
+        - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
     -   addons:
             apt:
@@ -60,21 +60,21 @@ matrix:
         env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
         - CMAKE_BUILD_TYPE=Release
-        - PSTORE_SPANNING=No
+        - PSTORE_ALWAYS_SPANNING=No
         os: linux
     -   env:
         - CMAKE_BUILD_TYPE=Debug
-        - PSTORE_SPANNING=Yes
+        - PSTORE_ALWAYS_SPANNING=Yes
         os: osx
         osx_image: xcode9.3
     -   env:
         - CMAKE_BUILD_TYPE=Release
-        - PSTORE_SPANNING=No
+        - PSTORE_ALWAYS_SPANNING=No
         os: osx
         osx_image: xcode9.3
 script:
-- ./utils/make_build.py -o build -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=Yes -D
-    CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+- ./utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes
+    -D PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}
 - cmake --build build --config ${CMAKE_BUILD_TYPE}
 - cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests
 sudo: 'false'

@@ -98,7 +98,7 @@ def main():
         },
         'before_install': ['eval "${MATRIX_EVAL}"'],
         'script': [
-            './utils/make_build.py -o build -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=Yes -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
+            './utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests',
         ]
