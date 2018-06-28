@@ -293,7 +293,7 @@ def cmake_target_from_path(p):
             ('json', Group.tool): 'json',
             ('mangle', Group.tool): 'mangle',
             ('mcrepo', Group.lib): 'mcrepo',
-            ('pstore-cmd-util', Group.unit_test): 'cmd-util-tests',
+            ('pstore-cmd-util', Group.unit_test): 'cmd-util-unit-tests',
             ('pstore-json', Group.unit_test): 'json-unit-tests',
             ('pstore-mcrepo', Group.unit_test): 'mcrepo-unit-tests',
             ('pstore-support', Group.unit_test): 'support-unit-tests',

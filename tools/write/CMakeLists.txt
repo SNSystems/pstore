@@ -57,7 +57,7 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-write pstore-core pstore-cmd-util)
 
-run_pstore_unit_test (pstore-write pstore-cmd-util-tests)
+run_pstore_unit_test (pstore-write pstore-cmd-util-unit-tests)
 run_pstore_unit_test (pstore-write pstore-core-unit-tests)
 run_pstore_unit_test (pstore-write pstore-mcrepo-unit-tests)
 run_pstore_unit_test (pstore-write pstore-serialize-unit-tests)

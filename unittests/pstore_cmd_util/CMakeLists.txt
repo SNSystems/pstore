@@ -41,7 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_unit_test (pstore-cmd-util-tests
+add_pstore_unit_test (pstore-cmd-util-unit-tests
     test_cl_parser.cpp
     test_command_line.cpp
     test_parallel_for_each.cpp
@@ -50,6 +50,6 @@ add_pstore_unit_test (pstore-cmd-util-tests
     test_string_distance.cpp
     test_word_wrapper.cpp
 )
-target_link_libraries (pstore-cmd-util-tests pstore-cmd-util)
+target_link_libraries (pstore-cmd-util-unit-tests pstore-cmd-util)
 
 # eof: unittests/pstore_cmd_util/CMakeLists.txt
