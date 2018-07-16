@@ -80,6 +80,4 @@ target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOUR
 
 add_subdirectory (broker_intf)
 
-#eof:pstore/unittests/pstore/CMakeLists.txt
-
 # eof: unittests/pstore/CMakeLists.txt
