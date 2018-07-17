@@ -104,18 +104,16 @@ namespace pstore {
             // step of completing the transaction.
             auto new_footer_pos = typed_address<trailer>::null ();
             {
-                auto head = db.getrw (typed_address<header>::null ());
+                auto const & head = db.get_header ();
+                auto const prev_footer = db.getro (head.footer_pos.load ());
 
-                auto prev_footer = db.getro (head->footer_pos.load ());
+                unsigned const generation = prev_footer->a.generation + 1;
 
-                unsigned generation = prev_footer->a.generation + 1;
-
-                // Make a copy of the index locations; write out any modifications
-                // to the indices. Any updated indices will modify the 'locations'
-                // array.
+                // Make a copy of the index locations; write out any modifications to the indices.
+                // Any updated indices will modify the 'locations' array.
                 //
-                // This must happen before the transaction is final because we're
-                // allocate and writing data here.
+                // This must happen before the transaction is final because we're allocating and
+                // writing data here.
 
                 auto locations = prev_footer->a.index_records;
                 index::flush_indices (*this, &locations, generation);
@@ -133,12 +131,13 @@ namespace pstore {
                     // The size of the transaction doesn't include the size of the footer record.
                     t->a.size = size_ - sizeof (trailer);
                     t->a.time = pstore::milliseconds_since_epoch ();
-                    t->a.prev_generation = head->footer_pos;
+                    t->a.prev_generation = head.footer_pos;
                     t->crc = t->get_crc ();
                 }
-
-                db.set_new_footer (head.get (), new_footer_pos);
             }
+            // Complete the transaction by making it available to other clients. This modifies the
+            // footer pointer in the file's header record.
+            db.set_new_footer (new_footer_pos);
 
             // Mark both this transaction's contents and its trailer as read-only.
             db.protect (first_, (new_footer_pos + 1).to_address ());

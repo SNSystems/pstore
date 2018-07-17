@@ -282,14 +282,14 @@ namespace pstore {
         vacuum_mode get_vacuum_mode () const { return vacuum_mode_; }
         ///@}
 
-
         /// For unit testing
-        class storage const & storage () const {
+        class storage const & storage () const noexcept {
             return storage_;
         }
 
         void close ();
 
+        header const & get_header () const { return *header_; }
         typed_address<trailer> footer_pos () const noexcept { return size_.footer_pos (); }
 
         /// Returns the generation number to which the database is synced.
@@ -327,7 +327,7 @@ namespace pstore {
 
         /// Call as part of completing a transaction. We update the database records to that
         /// the new footer is recorded.
-        void set_new_footer (header * const head, typed_address<trailer> new_footer_pos);
+        void set_new_footer (typed_address<trailer> new_footer_pos);
 
         void protect (address first, address last) { storage_.protect (first, last); }
 
@@ -351,6 +351,7 @@ namespace pstore {
 
     private:
         class storage storage_;
+        std::shared_ptr<header> header_;
         file::range_lock range_lock_;
         std::unique_lock<file::range_lock> lock_;
 
@@ -411,6 +412,8 @@ namespace pstore {
         /// the disk. Used after a sync() operation has changed the current database view.
         void clear_index_cache ();
 
+        /// Returns the lowest address from which a writable pointer can be obtained.
+        address first_writable_address () const;
 
         /// Returns a block of data from the store which spans more than one region. A fresh block
         /// of memory is allocated to which blocks of data from the store are copied. If a writable

@@ -120,7 +120,9 @@ namespace pstore {
         trailer::validate (*this, size_.footer_pos ());
         this->protect (address::make (sizeof (header)), address::make (size_.logical_size ()));
 
-        sync_name_ = this->build_sync_name (*this->getro (typed_address<header>::null ()));
+        header_ = storage_.address_to_pointer (typed_address<header>::null ());
+        sync_name_ = this->build_sync_name (*header_);
+
 #ifdef _WIN32
         shared_ = pstore::shared_memory<pstore::shared> (this->shared_memory_name ());
 #endif
@@ -383,18 +385,14 @@ namespace pstore {
 } // namespace pstore
 
 
-namespace {
-    struct copy_from_store_traits {
-        using in_store_pointer = std::uint8_t const *;
-        using temp_pointer = std::uint8_t *;
-    };
-    struct copy_to_store_traits {
-        using in_store_pointer = std::uint8_t *;
-        using temp_pointer = std::uint8_t const *;
-    };
-} // end anonymous namespace
 
 namespace pstore {
+
+    // first_writable_address
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    address database::first_writable_address () const {
+        return (header_->footer_pos.load () + 1).to_address ();
+    }
 
     // get_spanning
     // ~~~~~~~~~~~~
@@ -404,10 +402,14 @@ namespace pstore {
         // released.
         auto deleter = [this, addr, size, writable](std::uint8_t * p) {
             if (writable) {
+                // Check that this code is not trying to write back to read-only storage. This error
+                // can occur if a non-const pointer is being destroyed after the containing
+                // transaction has been committed.
+                assert (addr >= this->first_writable_address ());
+
                 // If we're returning a writable pointer then we must be copy the (potentially
-                // modified)
-                // contents back to the data store.
-                storage_.copy<copy_to_store_traits> (
+                // modified) contents back to the data store.
+                storage_.copy<storage::copy_to_store_traits> (
                     addr, size, p,
                     [](std::uint8_t * dest, std::uint8_t const * src, std::size_t n) {
                         std::memcpy (dest, src, n);
@@ -418,12 +420,12 @@ namespace pstore {
 
         // Create the memory block that we'll be returning, attaching a suitable deleter
         // which will be responsible for copying the data back to the store (if we're providing
-        // a writable pointer.
+        // a writable pointer).
         std::shared_ptr<std::uint8_t> result{new std::uint8_t[size], deleter};
 
         if (initialized) {
             // Copy from the data store's regions to the newly allocated memory block.
-            storage_.copy<copy_from_store_traits> (
+            storage_.copy<storage::copy_from_store_traits> (
                 addr, size, result.get (),
                 [](std::uint8_t const * src, std::uint8_t * dest, std::size_t n) {
                     std::memcpy (dest, src, n);
@@ -440,6 +442,10 @@ namespace pstore {
             raise (pstore::error_code::store_closed);
         }
 
+        if (writable && addr < first_writable_address ()) {
+            raise (error_code::read_only_address,
+                   "An attempt was made to write to read-only storage");
+        }
         std::uint64_t const start = addr.absolute ();
         std::uint64_t const logical_size = size_.logical_size ();
         if (start > logical_size || size > logical_size - start) {
@@ -489,14 +495,14 @@ namespace pstore {
 
     // set_new_footer
     // ~~~~~~~~~~~~~~
-    void database::set_new_footer (header * const head, typed_address<trailer> new_footer_pos) {
+    void database::set_new_footer (typed_address<trailer> new_footer_pos) {
         size_.update_footer_pos (new_footer_pos);
 
         // Finally (this should be the last thing we do), point the file header at the new
         // footer. Any other threads/processes will now see our new transaction as the state
         // of the database.
 
-        head->footer_pos = new_footer_pos;
+        header_->footer_pos = new_footer_pos;
     }
 
 } // namespace pstore

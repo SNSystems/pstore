@@ -122,11 +122,21 @@ namespace pstore {
         /// happens when the file is initially opened, and when it is grown by calling allocate().
         void update_master_pointers (std::size_t old_length);
 
+        struct copy_from_store_traits {
+            using in_store_pointer = std::uint8_t const *;
+            using temp_pointer = std::uint8_t *;
+        };
+        struct copy_to_store_traits {
+            using in_store_pointer = std::uint8_t *;
+            using temp_pointer = std::uint8_t const *;
+        };
+
         /// This function performs the bulk of the work of creating a "shadow" block when a request
-        /// spans more than one memory-mapped region. It breaks the data into a series of copies
-        /// (each read or writing as much data as possible) and calls the provided "copier" function
-        /// to perform the actual copy. This same function is used to copy data from the store into
-        /// a newly allocated block, and to copy from a contiguous block back to the store.
+        /// spans more than one memory-mapped region (or when PSTORE_ALWAYS_SPANNING is enabled). It
+        /// breaks the data into a series of copies (each read or writing as much data as possible)
+        /// and calls the provided "copier" function to perform the actual copy. This same function
+        /// is used to copy data from the store into a newly allocated block, and to copy from a
+        /// contiguous block back to the store.
         ///
         /// The template traits argument controls the direction of copy: either
         /// copy_from_store_traits or copy_to_store_traits may be used.
@@ -162,11 +172,23 @@ namespace pstore {
         /// Returns the base address of a segment given its index.
         /// \param segment The segment number whose base address it to be returned. The segment
         ///                number must lie within the memory mapped regions.
-        std::shared_ptr<void const> segment_base (address::segment_type segment) const;
-        std::shared_ptr<void> segment_base (address::segment_type segment);
+        std::shared_ptr<void const> segment_base (address::segment_type segment) const noexcept;
+        std::shared_ptr<void> segment_base (address::segment_type segment) noexcept;
         ///@}
-        std::shared_ptr<void> address_to_pointer (address const & sop);
-        std::shared_ptr<void const> address_to_pointer (address const & sop) const;
+
+        ///@{
+        std::shared_ptr<void const> address_to_pointer (address addr) const noexcept;
+        std::shared_ptr<void> address_to_pointer (address addr) noexcept;
+        template <typename T>
+        std::shared_ptr<T const> address_to_pointer (typed_address<T> addr) const noexcept {
+            return std::static_pointer_cast<T const> (address_to_pointer (addr.to_address ()));
+        }
+        template <typename T>
+        std::shared_ptr<T> address_to_pointer (typed_address<T> addr) noexcept {
+            return std::static_pointer_cast<T> (address_to_pointer (addr.to_address ()));
+        }
+        ///@}
+
 
         // For unit testing only.
         region_container const & regions () const { return regions_; }
@@ -189,31 +211,32 @@ namespace pstore {
 
     // segment_base
     // ~~~~~~~~~~~~
-    inline auto storage::segment_base (address::segment_type segment) const
+    inline auto storage::segment_base (address::segment_type segment) const noexcept
         -> std::shared_ptr<void const> {
         assert (segment < sat_->size ());
         sat_entry const & e = (*sat_)[segment];
         assert (e.is_valid ());
         return e.value;
     }
-    inline auto storage::segment_base (address::segment_type segment) -> std::shared_ptr<void> {
+    inline auto storage::segment_base (address::segment_type segment) noexcept
+        -> std::shared_ptr<void> {
         auto const * cthis = this;
         return std::const_pointer_cast<void> (cthis->segment_base (segment));
     }
 
-    // address
-    // ~~~~~~~
-    inline auto storage::address_to_pointer (address const & sop) const
+    // address_to_pointer
+    // ~~~~~~~~~~~~~~~~~~
+    inline auto storage::address_to_pointer (address addr) const noexcept
         -> std::shared_ptr<void const> {
-        std::shared_ptr<void const> segment_base = this->segment_base (sop.segment ());
+        std::shared_ptr<void const> segment_base = this->segment_base (addr.segment ());
         auto ptr =
-            std::static_pointer_cast<std::uint8_t const> (segment_base).get () + sop.offset ();
+            std::static_pointer_cast<std::uint8_t const> (segment_base).get () + addr.offset ();
         return std::shared_ptr<void const> (segment_base, ptr);
     }
 
-    inline auto storage::address_to_pointer (address const & sop) -> std::shared_ptr<void> {
+    inline auto storage::address_to_pointer (address addr) noexcept -> std::shared_ptr<void> {
         auto const * cthis = this;
-        return std::const_pointer_cast<void> (cthis->address_to_pointer (sop));
+        return std::const_pointer_cast<void> (cthis->address_to_pointer (addr));
     }
 
     // copy
@@ -246,11 +269,10 @@ namespace pstore {
         // An initial copy for the tail of the first of the regions covered by the addr..addr+size
         // range.
         copier (in_store_ptr, p, copy_size);
-        p += copy_size;
-        size -= copy_size;
 
         // Now copy the subsequent region(s).
-        while (size > 0) {
+        for (p += copy_size, size -= copy_size; size > 0; p += copy_size, size -= copy_size) {
+
             // We copied all of the necessary data to the previous region. Now move to the next
             // region and do the same.
             std::uint64_t const inc =
@@ -258,14 +280,13 @@ namespace pstore {
             assert (inc < std::numeric_limits<address::segment_type>::max ());
             assert (segment + inc < sat_elements);
             segment += static_cast<address::segment_type> (inc);
+
             region::memory_mapper_ptr region = (*sat_)[segment].region;
             assert (region != nullptr);
 
             copy_size = std::min (static_cast<std::uint64_t> (size), region->size ());
             in_store_ptr = static_cast<typename Traits::in_store_pointer> (region->data ().get ());
             copier (in_store_ptr, p, copy_size);
-            p += copy_size;
-            size -= copy_size;
         }
     }
 

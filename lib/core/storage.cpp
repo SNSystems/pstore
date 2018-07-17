@@ -160,6 +160,8 @@ namespace pstore {
     // request_spans_regions
     // ~~~~~~~~~~~~~~~~~~~~~
     bool storage::request_spans_regions (address const & addr, std::size_t size) const {
+        (void) addr;
+        (void) size;
 #if PSTORE_ALWAYS_SPANNING
         return true;
 #else
@@ -199,8 +201,8 @@ namespace pstore {
             }
 
             if (first_offset >= first.absolute () && last_offset > first_offset) {
-                auto pfirst = std::static_pointer_cast<std::uint8_t> (
-                    this->address_to_pointer (address::make (first_offset)));
+                auto pfirst =
+                    this->address_to_pointer (typed_address<std::uint8_t>::make (first_offset));
 
                 assert (pfirst >= region->data ());
                 assert (last_offset - region->offset () <= region->size ());

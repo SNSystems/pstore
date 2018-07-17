@@ -97,8 +97,6 @@ TEST_F (GenerationIterator, GenerationContainerEnd) {
     EXPECT_EQ (expected, actual);
 }
 
-
-
 TEST_F (GenerationIterator, InitialStoreIterationHasDistance1) {
     auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
     auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
@@ -111,81 +109,6 @@ TEST_F (GenerationIterator, AddTransactionoreIterationHasDistance2) {
     auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
     auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (2U, std::distance (begin, end));
-}
-
-TEST_F (GenerationIterator, ZeroTransactionPrevPointerIsBeyondTheFileEnd) {
-    {
-        // Note that the 'footer' variable is scoped to guarantee that any "spanning" memory is
-        // flush before we try to exercise the generation_iterator.
-        std::shared_ptr<pstore::trailer> footer = db_->getrw (db_->footer_pos ());
-        footer->a.prev_generation =
-            pstore::typed_address<pstore::trailer> (pstore::address::make (file_->size ()));
-        footer->crc =
-            pstore::crc32 (::pstore::gsl::span<pstore::trailer::body> (&(footer.get ())->a, 1));
-        ASSERT_TRUE (footer->crc_is_valid ());
-    }
-
-    auto fn = [&] {
-        auto it = pstore::generation_iterator{*db_, db_->footer_pos ()};
-        return *it;
-    };
-    check_for_error (fn, pstore::error_code::footer_corrupt);
-}
-
-TEST_F (GenerationIterator, ZeroTransactionSizeIsInvalid) {
-    {
-        auto footer = db_->getrw<pstore::trailer> (db_->footer_pos ());
-        footer->a.size = file_->size ();
-        footer->crc = footer->get_crc ();
-        ASSERT_TRUE (footer->crc_is_valid ());
-    }
-
-    auto fn = [&] {
-        auto it = pstore::generation_iterator{*db_, db_->footer_pos ()};
-        return *it;
-    };
-    check_for_error (fn, pstore::error_code::footer_corrupt);
-}
-
-
-TEST_F (GenerationIterator, FooterPosWithinHeader) {
-    this->add_transaction ();
-
-    {
-        std::shared_ptr<pstore::trailer> footer0 = db_->getrw (db_->footer_pos ());
-        std::shared_ptr<pstore::trailer> footer1 = db_->getrw (footer0->a.prev_generation);
-        footer1->a.prev_generation = pstore::typed_address<pstore::trailer> (
-            pstore::address::make (sizeof (pstore::header) / 2));
-        footer1->crc = footer1->get_crc ();
-        ASSERT_TRUE (footer1->crc_is_valid ());
-    }
-
-    auto it = pstore::generation_iterator{*db_, db_->footer_pos ()};
-    auto fn = [&it] {
-        ++it;
-        return *it;
-    };
-    check_for_error (fn, pstore::error_code::footer_corrupt);
-}
-
-TEST_F (GenerationIterator, SecondFooterHasBadSignature) {
-    this->add_transaction ();
-
-    {
-        auto footer0 = db_->getrw<pstore::trailer> (db_->footer_pos ());
-        auto footer1 = db_->getrw<pstore::trailer> (footer0->a.prev_generation);
-        footer1->a.signature1[0] = 0;
-        footer1->crc = footer1->get_crc ();
-        ASSERT_TRUE (footer1->crc_is_valid ());
-    }
-
-    auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
-    auto it = begin;
-    auto fn = [&] {
-        ++it;
-        return *it;
-    };
-    check_for_error (fn, pstore::error_code::footer_corrupt);
 }
 
 TEST_F (GenerationIterator, PostIncrement) {
