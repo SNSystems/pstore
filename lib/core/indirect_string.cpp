@@ -54,8 +54,8 @@ namespace pstore {
             return *reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask);
         }
         assert (this->is_in_store ());
-        using namespace serialize;
-        *owner = read<shared_sstring_view> (archive::make_reader (db_, address{address_}));
+        *owner = serialize::read<shared_sstring_view> (
+            serialize::archive::make_reader (db_, address{address_}));
         return {owner->data (), owner->length ()};
     }
 
@@ -110,6 +110,14 @@ namespace pstore {
     // ~~~~
     indirect_string_adder::indirect_string_adder (std::size_t expected_size) {
         views_.reserve (expected_size);
+    }
+
+    // read
+    // ~~~~
+    indirect_string indirect_string::read (database const & db,
+                                           typed_address<indirect_string> addr) {
+        return serialize::read<indirect_string> (
+            serialize::archive::make_reader (db, addr.to_address ()));
     }
 
 } // namespace pstore

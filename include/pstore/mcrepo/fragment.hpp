@@ -61,6 +61,8 @@
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
+    class indirect_string;
+
     namespace repo {
 
 // TODO: the members of this collection are drawn from
@@ -147,7 +149,7 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         struct external_fixup {
-            pstore::address name;
+            typed_address<indirect_string> name;
             relocation_type type;
             // FIXME: much padding here.
             std::uint64_t offset;

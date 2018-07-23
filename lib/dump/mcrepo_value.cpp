@@ -80,7 +80,7 @@ namespace pstore {
             using serialize::archive::make_reader;
 
             return make_value (object::container{
-                {"name", make_value (read<indirect_string> (make_reader (db, xfx.name)))},
+                {"name", make_value (indirect_string::read (db, xfx.name))},
                 {"type", make_value (static_cast<std::uint64_t> (xfx.type))},
                 {"offset", make_value (xfx.offset)},
                 {"addend", make_value (xfx.addend)},
@@ -163,7 +163,7 @@ namespace pstore {
             using archive::make_reader;
             return make_value (object::container{
                 {"digest", make_value (member.digest)},
-                {"name", make_value (read<indirect_string> (make_reader (db, member.name)))},
+                {"name", make_value (indirect_string::read (db, member.name))},
                 {"linkage", make_value (member.linkage)},
             });
         }
@@ -179,7 +179,7 @@ namespace pstore {
             using archive::make_reader;
             return make_value (object::container{
                 {"members", make_value (members)},
-                {"path", make_value (read<indirect_string> (make_reader (db, ticket->path ())))},
+                {"path", make_value (indirect_string::read (db, ticket->path ()))},
             });
         }
 

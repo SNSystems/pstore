@@ -49,6 +49,7 @@
 
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
+#include "pstore/serialize/types.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -108,6 +109,9 @@ namespace pstore {
         static address write_body_and_patch_address (Transaction & transaction,
                                                      raw_sstring_view const & str,
                                                      typed_address<address> address_to_patch);
+
+        /// Reads an indirect string from the store.
+        static indirect_string read (database const & db, typed_address<indirect_string> addr);
 
     private:
         static constexpr std::uint64_t in_heap_mask = 0x01;
@@ -316,4 +320,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // PSTORE_CORE_INDIRECT_STRING_HPP
-// eof: include/pstore/core/indirect_string.hpp

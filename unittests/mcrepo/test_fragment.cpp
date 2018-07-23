@@ -56,6 +56,11 @@ namespace {
     class FragmentTest : public ::testing::Test {
     protected:
         transaction transaction_;
+
+        using string_address = pstore::typed_address<pstore::indirect_string>;
+        static constexpr string_address indirect_string_address (std::uint64_t x) {
+            return string_address{pstore::address{x}};
+        }
     };
 } // anonymous namespace
 
@@ -113,9 +118,9 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         text.data.assign (std::begin (original), std::end (original));
         text.ifixups.emplace_back (internal_fixup{section_type::text, 1, 1, 1});
         text.ifixups.emplace_back (internal_fixup{section_type::data, 2, 2, 2});
-        text.xfixups.emplace_back (external_fixup{pstore::address{3}, 3, 3, 3});
-        text.xfixups.emplace_back (external_fixup{pstore::address{4}, 4, 4, 4});
-        text.xfixups.emplace_back (external_fixup{pstore::address{5}, 5, 5, 5});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (3), 3, 3, 3});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (4), 4, 4, 4});
+        text.xfixups.emplace_back (external_fixup{indirect_string_address (5), 5, 5, 5});
     }
 
     auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
@@ -139,9 +144,9 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_THAT (s.data (), ElementsAreArray (original));
     EXPECT_THAT (s.ifixups (), ElementsAre (internal_fixup{section_type::text, 1, 1, 1},
                                             internal_fixup{section_type::data, 2, 2, 2}));
-    EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{pstore::address{3}, 3, 3, 3},
-                                            external_fixup{pstore::address{4}, 4, 4, 4},
-                                            external_fixup{pstore::address{5}, 5, 5, 5}));
+    EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{indirect_string_address (3), 3, 3, 3},
+                                            external_fixup{indirect_string_address (4), 4, 4, 4},
+                                            external_fixup{indirect_string_address (5), 5, 5, 5}));
 }
 
 namespace pstore {

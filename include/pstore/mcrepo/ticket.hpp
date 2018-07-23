@@ -73,12 +73,12 @@ namespace pstore {
             /// \param d  The fragment digest for this ticket.
             /// \param n  Symbol name address.
             /// \param l  The symbol linkage.
-            ticket_member (pstore::index::digest d, pstore::address n, linkage_type l)
+            ticket_member (index::digest d, typed_address<indirect_string> n, linkage_type l)
                     : digest (d)
                     , name (n)
                     , linkage (l) {}
-            pstore::index::digest digest;
-            pstore::address name;
+            index::digest digest;
+            typed_address<indirect_string> name;
             linkage_type linkage;
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
@@ -123,9 +123,9 @@ namespace pstore {
             /// newly allocated ticket.
             /// \result An extent which describes the in-store location of the allocated ticket.
             template <typename TransactionType>
-            static pstore::extent<ticket> alloc (TransactionType & transaction,
-                                                 pstore::address path,
-                                                 std::vector<ticket_member> const & members);
+            static extent<ticket> alloc (TransactionType & transaction,
+                                         typed_address<indirect_string> path,
+                                         std::vector<ticket_member> const & members);
 
             /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
@@ -181,7 +181,7 @@ namespace pstore {
             ///@}
 
             /// Returns the ticket file path.
-            pstore::address path () const { return path_addr_; }
+            typed_address<indirect_string> path () const { return path_addr_; }
 
         private:
             ticket () = default;
@@ -194,7 +194,7 @@ namespace pstore {
             void * operator new (std::size_t s, nMembers size);
             void operator delete (void * p, nMembers size);
 
-            pstore::address path_addr_;
+            typed_address<indirect_string> path_addr_;
             std::uint64_t size_ = 0;
             ticket_member members_[1];
         };
@@ -205,8 +205,9 @@ namespace pstore {
         // alloc
         // ~~~~~
         template <typename TransactionType>
-        pstore::extent<ticket> ticket::alloc (TransactionType & transaction, pstore::address path,
-                                              std::vector<ticket_member> const & members) {
+        extent<ticket> ticket::alloc (TransactionType & transaction,
+                                      typed_address<indirect_string> path,
+                                      std::vector<ticket_member> const & members) {
             // First work out its size.
             std::uint64_t const num_members = members.size ();
             auto const size = size_bytes (num_members);

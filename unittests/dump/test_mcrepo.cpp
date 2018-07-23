@@ -75,7 +75,8 @@ namespace {
         using transaction_type = pstore::transaction<lock_guard>;
 
     protected:
-        pstore::address store_str (transaction_type & transaction, std::string const & str);
+        pstore::typed_address<pstore::indirect_string> store_str (transaction_type & transaction,
+                                                                  std::string const & str);
 
         static constexpr std::size_t page_size_ = 4096;
         static constexpr std::size_t file_size_ = pstore::storage::min_region_size * 2;
@@ -100,15 +101,15 @@ namespace {
 
     // store_str
     // ~~~~~~~~~
-    pstore::address MCRepoFixture::store_str (transaction_type & transaction,
-                                              std::string const & str) {
+    pstore::typed_address<pstore::indirect_string>
+    MCRepoFixture::store_str (transaction_type & transaction, std::string const & str) {
         assert (db_.get () == &transaction.db ());
         pstore::raw_sstring_view const sstring = pstore::make_sstring_view (str);
         pstore::indirect_string_adder adder;
         auto const pos =
             adder.add (transaction, pstore::index::get_name_index (*db_), &sstring).first;
         adder.flush (transaction);
-        return pos.get_address ();
+        return pstore::typed_address<pstore::indirect_string> (pos.get_address ());
     }
 
 } // end anonymous namespace

@@ -52,12 +52,18 @@ namespace {
     class TicketTest : public ::testing::Test {
     protected:
         transaction transaction_;
+
+        using string_address = pstore::typed_address<pstore::indirect_string>;
+        static constexpr string_address indirect_string_address (std::uint64_t x) {
+            return string_address{pstore::address{x}};
+        }
     };
+
 } // namespace
 
 TEST_F (TicketTest, Empty) {
     std::vector<ticket_member> m;
-    pstore::extent<ticket> extent = ticket::alloc (transaction_, pstore::address{}, m);
+    pstore::extent<ticket> extent = ticket::alloc (transaction_, indirect_string_address (0U), m);
     auto t = reinterpret_cast<ticket const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==
@@ -69,9 +75,9 @@ TEST_F (TicketTest, Empty) {
 }
 
 TEST_F (TicketTest, SingleMember) {
-    constexpr auto output_file_path = pstore::address{64U};
+    constexpr auto output_file_path = indirect_string_address (64U);
     constexpr auto digest = pstore::index::digest{28U};
-    constexpr auto name = pstore::address{32U};
+    constexpr auto name = indirect_string_address (32U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
 
     ticket_member sm{digest, name, linkage};
@@ -91,10 +97,10 @@ TEST_F (TicketTest, SingleMember) {
 }
 
 TEST_F (TicketTest, MultipleMembers) {
-    constexpr auto output_file_path = pstore::address{32U};
+    constexpr auto output_file_path = indirect_string_address (32U);
     constexpr auto digest1 = pstore::index::digest{128U};
     constexpr auto digest2 = pstore::index::digest{144U};
-    constexpr auto name = pstore::address{16U};
+    constexpr auto name = indirect_string_address (16U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
 
     ticket_member mm1{digest1, name, linkage};
