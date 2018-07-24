@@ -175,6 +175,41 @@ TEST_F (AddressFixture, Address1Minus1) {
     EXPECT_EQ (pstore::address::null (), actual);
 }
 
+TEST_F (AddressFixture, Decrement) {
+    {
+        // Pre-decrement
+        auto a1 = pstore::address::make (1);
+        auto r1 = --a1;
+        EXPECT_EQ (pstore::address::null (), a1);
+        EXPECT_EQ (pstore::address::null (), r1);
+    }
+    {
+        // Post-decrement
+        auto a2 = pstore::address::make (1);
+        auto r2 = a2--;
+        EXPECT_EQ (pstore::address::null (), a2);
+        EXPECT_EQ (pstore::address::make (1), r2);
+    }
+}
+
+TEST_F (AddressFixture, Increment) {
+    {
+        // Pre-increment
+        auto a1 = pstore::address::make (1);
+        auto r1 = ++a1;
+        EXPECT_EQ (pstore::address::make (2), a1);
+        EXPECT_EQ (pstore::address::make (2), r1);
+    }
+    {
+        // Post-increment
+        auto a2 = pstore::address::make (1);
+        auto r2 = a2++;
+        EXPECT_EQ (pstore::address::make (2), a2);
+        EXPECT_EQ (pstore::address::make (1), r2);
+    }
+}
+
+
 TEST_F (AddressFixture, Address0MinusEqual1) {
     auto addr = pstore::address::make (1U);
     addr -= 1;
@@ -195,6 +230,41 @@ TEST_F (AddressFixture, AddressSegment1MinusEqual1) {
     actual -= 1;
     auto const expected = pstore::address::make (0, max_offset);
     EXPECT_EQ (expected, actual);
+}
+
+
+TEST (TypedAddress, Decrement) {
+    {
+        // Pre-decrement
+        auto a1 = pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t));
+        auto r1 = --a1;
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), a1);
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), r1);
+    }
+    {
+        // Post-decrement.
+        auto a2 = pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t));
+        auto r2 = a2--;
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), a2);
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t)), r2);
+    }
+}
+
+TEST (TypedAddress, Increment) {
+    {
+        // Pre-increment
+        auto a1 = pstore::typed_address<std::uint64_t>::null ();
+        auto r1 = ++a1;
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t)), a1);
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t)), r1);
+    }
+    {
+        // Post-increment.
+        auto a2 = pstore::typed_address<std::uint64_t>::null ();
+        auto r2 = a2++;
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::make (sizeof (std::uint64_t)), a2);
+        EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), r2);
+    }
 }
 
 // eof: unittests/pstore/test_address.cpp

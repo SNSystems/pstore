@@ -151,6 +151,19 @@ namespace pstore {
 
         constexpr std::uint64_t absolute () const noexcept { return whole; }
 
+        address operator++ () noexcept { return (*this) += 1U; }
+        address operator++ (int) noexcept {
+            auto const old = *this;
+            ++(*this);
+            return old;
+        }
+        address operator-- () noexcept { return (*this) -= 1U; }
+        address operator-- (int) noexcept {
+            auto const old = *this;
+            --(*this);
+            return old;
+        }
+
         address operator+= (std::uint64_t distance) noexcept {
             assert (whole <= std::numeric_limits<std::uint64_t>::max () - distance);
             whole += distance;
@@ -255,6 +268,11 @@ namespace pstore {
                 : a_{a} {}
         typed_address (typed_address const & addr) noexcept = default;
 
+        template <typename Other>
+        static constexpr typed_address cast (typed_address<Other> other) noexcept {
+            return make (other.to_address ());
+        }
+
         static constexpr typed_address null () noexcept { return make (address::null ()); }
         static constexpr typed_address make (address a) noexcept { return typed_address (a); }
         static constexpr typed_address make (std::uint64_t absolute) noexcept {
@@ -267,6 +285,28 @@ namespace pstore {
         }
         constexpr bool operator!= (typed_address const & rhs) const noexcept {
             return !operator== (rhs);
+        }
+
+        typed_address operator++ () noexcept { return (*this) += 1U; }
+        typed_address operator++ (int) noexcept {
+            auto const old = *this;
+            ++(*this);
+            return old;
+        }
+        typed_address operator-- () noexcept { return (*this) -= 1U; }
+        typed_address operator-- (int) noexcept {
+            auto const old = *this;
+            --(*this);
+            return old;
+        }
+
+        typed_address operator+= (std::uint64_t distance) noexcept {
+            a_ += distance * sizeof (T);
+            return *this;
+        }
+        typed_address operator-= (std::uint64_t distance) noexcept {
+            a_ -= distance * sizeof (T);
+            return *this;
         }
 
         constexpr address to_address () const noexcept { return a_; }
