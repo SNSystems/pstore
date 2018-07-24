@@ -237,7 +237,7 @@ namespace pstore {
         /// \return A mutable pointer to the loaded data.
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T> getrw (extent<T> const & ex) const {
+        std::shared_ptr<T> getrw (extent<T> const & ex) {
             // Note that ex.size specifies the size in bytes of the data to be loaded, not the
             // number of elements of type T. For this reason we call the plain address version of
             // getro().

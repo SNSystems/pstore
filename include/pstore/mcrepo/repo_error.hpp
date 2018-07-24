@@ -54,7 +54,8 @@ namespace pstore {
 
         enum class error_code : int {
             bad_fragment_record = 1,
-            bad_ticket_record,
+            bad_fragment_type, /*an attempt to get an unavailable fragment type*/
+            bad_ticket_record
         };
 
         class error_category : public std::error_category {

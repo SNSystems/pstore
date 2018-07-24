@@ -317,6 +317,15 @@ namespace pstore {
         views_.clear ();
     }
 
+    //*  _        _                  __              _   _           *
+    //* | |_  ___| |_ __  ___ _ _   / _|_  _ _ _  __| |_(_)___ _ _	 *
+    //* | ' \/ -_) | '_ \/ -_) '_| |  _| || | ' \/ _|  _| / _ \ ' \	 *
+    //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
+    //*            |_|                                               *
+
+    auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
+        -> std::pair<shared_sstring_view, raw_sstring_view>;
+
 } // end namespace pstore
 
 #endif // PSTORE_CORE_INDIRECT_STRING_HPP

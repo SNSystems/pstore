@@ -120,6 +120,20 @@ namespace pstore {
             serialize::archive::make_reader (db, addr.to_address ()));
     }
 
+    //*  _        _                  __              _   _           *
+    //* | |_  ___| |_ __  ___ _ _   / _|_  _ _ _  __| |_(_)___ _ _	 *
+    //* | ' \/ -_) | '_ \/ -_) '_| |  _| || | ' \/ _|  _| / _ \ ' \	 *
+    //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
+    //*            |_|                                               *
+    // get_sstring_view
+    // ~~~~~~~~~~~~~~~~
+    auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
+        -> std::pair<shared_sstring_view, raw_sstring_view> {
+        auto str = indirect_string::read (db, addr);
+        shared_sstring_view owner;
+        return {owner, str.as_string_view (&owner)};
+    }
+
 } // namespace pstore
 
 // eof: lib/core/indirect_string.cpp

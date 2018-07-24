@@ -60,7 +60,7 @@ namespace pstore {
 #ifdef _MSC_VER
         /// Count the number of contiguous zero bits starting from the MSB.
         /// It is undefined behavior if x is 0.
-        inline unsigned clz (std::uint64_t x) {
+        inline unsigned clz (std::uint64_t x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
             _BitScanReverse64 (&bit_position, x);
@@ -70,7 +70,7 @@ namespace pstore {
 
         /// Count the  number of contiguous zero bits starting from the LSB.
         /// It is undefined behavior if x is 0.
-        inline unsigned ctz (std::uint64_t x) {
+        inline unsigned ctz (std::uint64_t x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
             _BitScanForward64 (&bit_position, x);
@@ -80,7 +80,7 @@ namespace pstore {
 #else
         /// Count the number of contiguous zero bits starting from the MSB.
         /// It is undefined behavior if x is 0.
-        inline unsigned clz (unsigned long long x) {
+        inline unsigned clz (unsigned long long x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
                            "use of clzll requires unsigned long long to be 64 bits");
             assert (x != 0);
@@ -89,7 +89,7 @@ namespace pstore {
 
         /// Count the  number of contiguous zero bits starting from the LSB.
         /// It is undefined behavior if x is 0.
-        inline unsigned ctz (unsigned long long x) {
+        inline unsigned ctz (unsigned long long x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
                            "use of ctzll requires unsigned long long to be 64 bits");
             assert (x != 0);
@@ -100,41 +100,41 @@ namespace pstore {
 
 #ifdef _MSC_VER
         // TODO: VC2015RC won't allow pop_count to be constexpr. Sigh.
-        inline unsigned pop_count (unsigned char x) {
+        inline unsigned pop_count (unsigned char x) noexcept {
             static_assert (sizeof (unsigned char) <= sizeof (unsigned __int16),
                            "unsigned char > unsigned __int16");
             return __popcnt16 (x);
         }
-        inline unsigned pop_count (unsigned short x) {
+        inline unsigned pop_count (unsigned short x) noexcept {
             static_assert (sizeof (unsigned short) == sizeof (unsigned __int16),
                            "unsigned short != unsigned __int16");
             return __popcnt16 (x);
         }
-        inline unsigned pop_count (unsigned x) { return __popcnt (x); }
-        inline unsigned pop_count (unsigned long x) {
+        inline unsigned pop_count (unsigned x) noexcept { return __popcnt (x); }
+        inline unsigned pop_count (unsigned long x) noexcept {
             static_assert (sizeof (unsigned long) == sizeof (unsigned int),
                            "unsigned long != unsigned int");
             return pop_count (static_cast<unsigned int> (x));
         }
-        inline unsigned pop_count (unsigned long long x) {
+        inline unsigned pop_count (unsigned long long x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (unsigned __int64),
                            "unsigned long long != unsigned __int16");
             return static_cast<unsigned> (__popcnt64 (x));
         }
 #else
-        inline constexpr unsigned pop_count (unsigned char x) {
+        inline constexpr unsigned pop_count (unsigned char x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned short x) {
+        inline constexpr unsigned pop_count (unsigned short x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned x) {
+        inline constexpr unsigned pop_count (unsigned x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned long x) {
+        inline constexpr unsigned pop_count (unsigned long x) noexcept {
             return static_cast<unsigned> (__builtin_popcountl (x));
         }
-        inline constexpr unsigned pop_count (unsigned long long x) {
+        inline constexpr unsigned pop_count (unsigned long long x) noexcept {
             return static_cast<unsigned> (__builtin_popcountll (x));
         }
 #endif

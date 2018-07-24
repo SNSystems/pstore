@@ -56,7 +56,9 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"
+#include "pstore/mcrepo/ticket.hpp"
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/small_vector.hpp"
 
@@ -84,10 +86,20 @@ namespace pstore {
     X (thread_bss)                                                                                 \
     X (thread_data)
 
+#define PSTORE_REPO_METADATA_TYPES X (dependent)
+
 #define X(a) a,
         /// \brief The collection of section types known by the repository.
-        enum class section_type : std::uint8_t { PSTORE_REPO_SECTION_TYPES };
+        enum class section_type : std::uint8_t { PSTORE_REPO_SECTION_TYPES last };
+
+        enum class fragment_type : std::uint8_t {
+            PSTORE_REPO_SECTION_TYPES PSTORE_REPO_METADATA_TYPES last
+        };
 #undef X
+
+        inline bool is_section_type (fragment_type const t) noexcept {
+            return t < static_cast<repo::fragment_type> (repo::section_type::last);
+        }
 
         using relocation_type = std::uint8_t;
 
@@ -176,6 +188,29 @@ namespace pstore {
                        "addend offset differs from expected value");
         static_assert (sizeof (external_fixup) == 32,
                        "external_fixup size does not match expected");
+
+        //*   __                             _        _      _         *
+        //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   __| |__ _| |_ __ _  *
+        //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| / _` / _` |  _/ _` | *
+        //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| \__,_\__,_|\__\__,_| *
+        //*              |___/                                         *
+        //*                                                            *
+        struct fragment_data {
+            explicit fragment_data (fragment_type ft)
+                    : type (ft) {}
+
+            virtual ~fragment_data () = default;
+
+            std::size_t aligned_size_t (std::size_t a) const;
+            std::uint8_t * aligned_ptr (std::uint8_t * in) const;
+
+            virtual std::size_t size_bytes () const = 0;
+            virtual std::uint8_t * write (std::uint8_t * out) const = 0;
+            fragment_type const type;
+
+        private:
+            virtual std::uintptr_t aligned (std::uintptr_t) const = 0;
+        };
 
         //*             _   _           *
         //*  ___ ___ __| |_(_)___ _ _   *
@@ -476,12 +511,12 @@ namespace pstore {
 
         namespace details {
 
-            /// An iterator adaptor which produces a value_type of 'section_type const' from
+            /// An iterator adaptor which produces a value_type of 'fragment_data const' from
             /// values deferenced from the supplied underlying iterator.
             template <typename Iterator>
             class content_type_iterator {
             public:
-                using value_type = section_type const;
+                using value_type = fragment_type const;
                 using difference_type = typename std::iterator_traits<Iterator>::difference_type;
                 using pointer = value_type *;
                 using reference = value_type &;
@@ -527,37 +562,37 @@ namespace pstore {
             /// An iterator adaptor which produces a value_type which dereferences the
             /// value_type of the wrapped iterator.
             template <typename Iterator>
-            class section_content_iterator {
+            class fragment_content_iterator {
             public:
                 using value_type = typename std::pointer_traits<
-                    typename std::pointer_traits<Iterator>::element_type>::element_type;
+                    typename std::iterator_traits<Iterator>::value_type>::element_type;
                 using difference_type = typename std::iterator_traits<Iterator>::difference_type;
                 using pointer = value_type *;
                 using reference = value_type &;
                 using iterator_category = std::input_iterator_tag;
 
-                section_content_iterator ()
+                fragment_content_iterator ()
                         : it_{} {}
-                explicit section_content_iterator (Iterator it)
+                explicit fragment_content_iterator (Iterator it)
                         : it_{it} {}
-                section_content_iterator (section_content_iterator const & rhs)
+                fragment_content_iterator (fragment_content_iterator const & rhs)
                         : it_{rhs.it_} {}
-                section_content_iterator & operator= (section_content_iterator const & rhs) {
+                fragment_content_iterator & operator= (fragment_content_iterator const & rhs) {
                     it_ = rhs.it_;
                     return *this;
                 }
-                bool operator== (section_content_iterator const & rhs) const {
+                bool operator== (fragment_content_iterator const & rhs) const {
                     return it_ == rhs.it_;
                 }
-                bool operator!= (section_content_iterator const & rhs) const {
+                bool operator!= (fragment_content_iterator const & rhs) const {
                     return !(operator== (rhs));
                 }
-                section_content_iterator & operator++ () {
+                fragment_content_iterator & operator++ () {
                     ++it_;
                     return *this;
                 }
-                section_content_iterator operator++ (int) {
-                    section_content_iterator old{*this};
+                fragment_content_iterator operator++ (int) {
+                    fragment_content_iterator old{*this};
                     it_++;
                     return old;
                 }
@@ -571,11 +606,205 @@ namespace pstore {
             };
 
             template <typename Iterator>
-            inline section_content_iterator<Iterator> make_section_content_iterator (Iterator it) {
-                return section_content_iterator<Iterator> (it);
+            inline fragment_content_iterator<Iterator>
+            make_fragment_content_iterator (Iterator it) {
+                return fragment_content_iterator<Iterator> (it);
             }
 
         } // end namespace details
+
+        //*             _   _               _      _         *
+        //*  ___ ___ __| |_(_)___ _ _    __| |__ _| |_ __ _  *
+        //* (_-</ -_) _|  _| / _ \ ' \  / _` / _` |  _/ _` | *
+        //* /__/\___\__|\__|_\___/_||_| \__,_\__,_|\__\__,_| *
+        //*                          						 *
+        class section_data final : public fragment_data {
+        public:
+            section_data (fragment_type const ft, section_content const * sec)
+                    : fragment_data (ft)
+                    , section_ (sec) {}
+
+            section_data (section_data const &) = delete;
+            section_data & operator= (section_data const &) = delete;
+
+
+            std::size_t size_bytes () const final;
+
+            // Write the section data to the memory which the pointer 'out' pointed to.
+            std::uint8_t * write (std::uint8_t * out) const final;
+
+        private:
+            std::uintptr_t aligned (std::uintptr_t in) const final;
+            section_content const * const section_;
+        };
+
+
+
+        //*     _                       _         _       *
+        //*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___ *
+        //* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-< *
+        //* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/ *
+        //*          |_|								  *
+        /// This class represents dependent ticket members of a fragment.
+        ///
+        /// When a new global object (GO) is generated by an LLVM optimisation pass
+        /// after the RepoHashGenerator pass, the digest will be generated by the RepoObjectWriter.
+        /// If a fragment has an external fixup referencing this GO, we add the GO's ticket member
+        /// address to the dependents.
+        ///
+        /// When a fragment is pruned, all its dependents need to be recorded in the repo.tickets
+        /// metadata to guarantee that the dependents (those GO generated by later optimizations)
+        /// are present in the compilation's final ticket.
+        class dependents {
+        public:
+            using iterator = typed_address<ticket_member> *;
+            using const_iterator = typed_address<ticket_member> const *;
+
+            template <typename Iterator>
+            dependents (Iterator begin, Iterator end);
+
+            dependents (dependents const &) = delete;
+            dependents & operator= (dependents const &) = delete;
+
+            /// \name Element access
+            ///@{
+            typed_address<ticket_member> operator[] (std::size_t i) const {
+                assert (i < size_);
+                return ticket_members_[i];
+            }
+            typed_address<ticket_member> & operator[] (std::size_t i) {
+                assert (i < size_);
+                return ticket_members_[i];
+            }
+            ///@}
+
+            /// \name Iterators
+            ///@{
+
+            iterator begin () { return ticket_members_; }
+            const_iterator begin () const { return ticket_members_; }
+            const_iterator cbegin () const { return this->begin (); }
+
+            iterator end () { return ticket_members_ + size_; }
+            const_iterator end () const { return ticket_members_ + size_; }
+            const_iterator cend () const { return this->end (); }
+            ///@}
+
+
+            /// \name Capacity
+            ///@{
+
+            /// Checks whether the container is empty.
+            bool empty () const noexcept { return size_ == 0; }
+            /// Returns the number of elements.
+            std::size_t size () const noexcept { return size_; }
+            ///@}
+
+            /// \name Storage
+            ///@{
+
+            /// Returns the number of bytes of storage required for the dependents with
+            /// 'size' children.
+            static std::size_t size_bytes (std::uint64_t size) noexcept;
+
+            /// Returns the number of bytes of storage required for the dependents.
+            std::size_t size_bytes () const noexcept;
+
+            ///@}
+
+            /// \brief Returns a pointer to the dependents instance.
+            ///
+            /// \param db The database from which the dependents should be loaded.
+            /// \param dependent Address of the dependents in the store.
+            /// \result A pointer to the dependents in-store memory.
+            static auto load (database const & db, typed_address<dependents> const dependent)
+                -> std::shared_ptr<dependents const>;
+
+        private:
+            std::uint64_t size_;
+            typed_address<ticket_member> ticket_members_[1];
+        };
+
+        template <typename Iterator>
+        dependents::dependents (Iterator begin, Iterator end) {
+            static_assert (std::is_same<typename std::iterator_traits<Iterator>::value_type,
+                                        typed_address<ticket_member>>::value,
+                           "Iterator value_type must be typed_address<ticket_member>");
+
+            auto const size = std::distance (begin, end);
+            assert (size >= 0);
+
+            size_ = static_cast<std::uint64_t> (size);
+            std::copy (begin, end, &ticket_members_[0]);
+
+            static_assert (std::is_standard_layout<dependents>::value,
+                           "dependents must be standard-layout");
+            static_assert (offsetof (dependents, size_) == 0,
+                           "offsetof (dependents, size_) must be 0");
+            static_assert (offsetof (dependents, ticket_members_) == 8,
+                           "offset of the first dependent must be 8");
+        }
+
+        //*     _                       _         _           _      _         *
+        //*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  __| |__ _| |_ __ _  *
+        //* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-< / _` / _` |  _/ _` | *
+        //* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/ \__,_\__,_|\__\__,_| *
+        //*          |_|                                                       *
+        class dependents_data final : public fragment_data {
+        public:
+            using const_iterator = typed_address<ticket_member> const *;
+
+            dependents_data (const_iterator begin, const_iterator end)
+                    : fragment_data (fragment_type::dependent)
+                    , begin_ (begin)
+                    , end_ (end) {
+                assert (end >= begin);
+            }
+
+            std::size_t size_bytes () const final;
+
+            std::uint8_t * write (std::uint8_t * out) const final;
+
+            /// Returns a const_iterator for the beginning of the ticket_member address range.
+            const_iterator begin () const { return begin_; }
+            /// Returns a const_iterator for the end of ticket_member address range.
+            const_iterator end () const { return end_; }
+
+        private:
+            std::uintptr_t aligned (std::uintptr_t in) const final {
+                return pstore::aligned<dependents> (in);
+            }
+
+            const_iterator begin_;
+            const_iterator end_;
+        };
+
+        template <fragment_type T>
+        struct enum_to_section {};
+
+        // Explicit specialization
+#    define PSTORE_ENUM_TO_SECTION(t, stored_type)                                                 \
+        template <>                                                                                \
+        struct enum_to_section<t> {                                                                \
+            using type = stored_type;                                                              \
+        };
+
+        PSTORE_ENUM_TO_SECTION (fragment_type::bss, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::data, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_1_byte_c_string, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_2_byte_c_string, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_4_byte_c_string, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_const_16, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_const_32, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_const_4, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_const_8, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::read_only, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::rel_ro, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::text, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::thread_bss, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::thread_data, section)
+        PSTORE_ENUM_TO_SECTION (fragment_type::dependent, dependents)
+#    undef PSTORE_ENUM_TO_SECTION
 
         //*   __                             _    *
         //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
@@ -585,11 +814,11 @@ namespace pstore {
         class fragment {
         public:
             /// \tparam Transaction  The type of the database transaction.
-            /// \tparam Iterator  An iterator which will yield values of type `section_content`. The
+            /// \tparam Iterator  An iterator which will yield values of type `fragment_data`. The
             /// values must be sorted in section_content::type order.
             /// \param transaction  The transaction to which the fragment should be appended.
-            /// \param first  The beginning of the range of `section_content` values.
-            /// \param last  The end of the range of `section_content` values.
+            /// \param first  The beginning of the range of `fragment_data` values.
+            /// \param last  The end of the range of `fragment_data` values.
             template <typename Transaction, typename Iterator>
             static pstore::extent<fragment> alloc (Transaction & transaction, Iterator first,
                                                    Iterator last);
@@ -603,19 +832,39 @@ namespace pstore {
             static std::shared_ptr<fragment const> load (pstore::database const & db,
                                                          pstore::extent<fragment> const & location);
 
+            /// \tparam Transaction  The type of the database transaction.
+            /// Provides a pointer to an individual fragment instance given a database an a record
+            /// describing its address and size.
+            ///
+            /// \param transaction  The transaction to which the fragment should be appended.
+            /// \param location  The address and size of the fragment data.
+            /// \returns  A pointer to the fragment instance.
+            template <typename LockType>
+            static std::shared_ptr<fragment> load (transaction<LockType> & transaction,
+                                                   pstore::extent<fragment> const & location);
+
             using member_array = sparse_array<std::uint64_t>;
 
+            /// Returns a reference to the section type from section enum type in the fragment.
+            /// The section must exist in the fragment.
+            template <fragment_type Key>
+            auto at () const noexcept -> typename enum_to_section<Key>::type const &;
 
-            section const & operator[] (section_type key) const;
             /// Returns true if this fragment contains a section of the given type.
-            bool has_section (section_type type) const noexcept {
-                return arr_.has_index (
-                    static_cast<pstore::repo::fragment::member_array::bitmap_type> (type));
-            }
+            bool has_fragment (fragment_type type) const noexcept;
 
-            std::size_t num_sections () const { return arr_.size (); }
+            /// Return a pointer to a dependents fragment instance in the fragment.
+            class dependents const * dependents () const noexcept;
+            class dependents * dependents () noexcept;
+
+            /// Return a number of sections in the fragment.
+            std::size_t num_sections () const noexcept;
+
+            /// Return a number of instances (include the sections and dependents) in the fragment.
+            std::size_t size () const noexcept;
+
             /// Returns the array of section offsets.
-            member_array const & sections () const { return arr_; }
+            member_array const & members () const noexcept { return arr_; }
 
             /// An InputIterator which makes the process of iterating over the sections within
             /// a loaded fragment quite straightforward.
@@ -624,11 +873,12 @@ namespace pstore {
 
             public:
                 using iterator_category = std::input_iterator_tag;
-                using value_type = section_type;
+                using value_type = fragment_type;
                 using difference_type = wrapped_iterator::difference_type;
                 using pointer = value_type const *;
                 using reference = value_type const &;
 
+                explicit const_iterator (fragment_type type, wrapped_iterator it) noexcept;
                 explicit const_iterator (wrapped_iterator it) noexcept;
                 bool operator== (const_iterator const & rhs) const noexcept {
                     return it_ == rhs.it_;
@@ -637,21 +887,22 @@ namespace pstore {
                     return !operator== (rhs);
                 }
 
-                reference operator* () noexcept;
-                pointer operator-> () noexcept;
+                reference operator* () const noexcept;
+                pointer operator-> () const noexcept;
 
                 const_iterator & operator++ () noexcept;
                 const_iterator operator++ (int) noexcept;
 
             private:
-                section_type section_;
+                fragment_type fragment_;
                 wrapped_iterator it_;
             };
+
             const_iterator begin () const noexcept {
                 return const_iterator{arr_.get_indices ().begin ()};
             }
             const_iterator end () const noexcept {
-                return const_iterator{arr_.get_indices ().end ()};
+                return const_iterator{fragment_type::last, arr_.get_indices ().end ()};
             }
 
             /// Returns the number of bytes of storage that are required for a fragment containing
@@ -675,7 +926,8 @@ namespace pstore {
             template <typename Iterator>
             static void check_range_is_sorted (Iterator first, Iterator last);
 
-            section const & offset_to_section (std::uint64_t offset) const;
+            template <typename InstanceType>
+            InstanceType const & offset_to_instance (std::uint64_t offset) const;
 
             /// Constructs a fragment into the uninitialized memory referred to by ptr and copy the
             /// section contents [first,last) into it.
@@ -700,7 +952,10 @@ namespace pstore {
 #define X(a)                                                                                       \
     case (section_type::a): name = #a; break;
             char const * name = "*unknown*";
-            switch (st) { PSTORE_REPO_SECTION_TYPES }
+            switch (st) {
+                PSTORE_REPO_SECTION_TYPES
+            case section_type::last: break;
+            }
             return os << name;
 #undef X
         }
@@ -717,13 +972,12 @@ namespace pstore {
                 reinterpret_cast<std::uint8_t *> (fragment_ptr) + fragment_ptr->arr_.size_bytes ();
 
             // Copy the contents of each of the segments to the fragment.
-            std::for_each (first, last, [&out, fragment_ptr](section_content const & c) {
-                out = reinterpret_cast<std::uint8_t *> (aligned_ptr<section> (out));
-                auto scn = new (out) section (c.make_sources (), c.align);
-                auto offset = reinterpret_cast<std::uintptr_t> (scn) -
-                              reinterpret_cast<std::uintptr_t> (fragment_ptr);
-                fragment_ptr->arr_[static_cast<unsigned> (c.type)] = offset;
-                out += scn->size_bytes ();
+            std::for_each (first, last, [&out, fragment_ptr](fragment_data const & c) {
+                out = reinterpret_cast<std::uint8_t *> (c.aligned_ptr (out));
+                fragment_ptr->arr_[static_cast<unsigned> (c.type)] =
+                    reinterpret_cast<std::uintptr_t> (out) -
+                    reinterpret_cast<std::uintptr_t> (fragment_ptr);
+                out = c.write (out);
             });
 #ifndef NDEBUG
             {
@@ -737,18 +991,58 @@ namespace pstore {
 
         // alloc
         // ~~~~~
-        template <typename TransactionType, typename Iterator>
-        auto fragment::alloc (TransactionType & transaction, Iterator first, Iterator last)
+        template <typename Transaction, typename Iterator>
+        auto fragment::alloc (Transaction & transaction, Iterator first, Iterator last)
             -> pstore::extent<fragment> {
             fragment::check_range_is_sorted (first, last);
             // Compute the number of bytes of storage that we'll need for this fragment.
             auto const size = fragment::size_bytes (first, last);
 
             // Allocate storage for the fragment including its three arrays.
+            // We can't use the version of alloc_rw() which returns typed_address<> since we need
+            // an explicit number of bytes allocated for the fragment.
             std::pair<std::shared_ptr<void>, pstore::address> storage =
                 transaction.alloc_rw (size, alignof (fragment));
             fragment::populate (storage.first.get (), first, last);
             return {typed_address<fragment> (storage.second), size};
+        }
+
+        // load
+        // ~~~~~
+        template <typename LockType>
+        auto fragment::load (transaction<LockType> & transaction,
+                             pstore::extent<fragment> const & location)
+            -> std::shared_ptr<fragment> {
+            if (location.size >= sizeof (fragment)) {
+                std::shared_ptr<fragment> f = transaction.getrw (location);
+                auto ftype_indices = f->members ().get_indices ();
+                if (!ftype_indices.empty () &&
+                    static_cast<fragment_type> (ftype_indices.back ()) < fragment_type::last &&
+                    f->size_bytes () == location.size) {
+                    return f;
+                }
+            }
+            raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+        }
+
+        // offset_to_instance
+        // ~~~~~~~~~~~~~~~~~~
+        template <typename InstanceType>
+        InstanceType const & fragment::offset_to_instance (std::uint64_t offset) const {
+            auto const ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
+            if (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) != 0) {
+                raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+            }
+            return *reinterpret_cast<InstanceType const *> (ptr);
+        }
+
+        // at
+        // ~~
+        template <fragment_type Key>
+        auto fragment::at () const noexcept -> typename enum_to_section<Key>::type const & {
+            assert (has_fragment (Key));
+            return offset_to_instance<typename enum_to_section<Key>::type const> (
+                arr_[static_cast<std::size_t> (Key)]);
         }
 
         // check_range_is_sorted
@@ -758,10 +1052,10 @@ namespace pstore {
             (void) first;
             (void) last;
             static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
-                                         section_content>::value),
-                           "Iterator value_type should be section_content");
-            assert (std::is_sorted (
-                first, last, [](section_content const & a, section_content const & b) {
+                                         fragment_data>::value),
+                           "Iterator value_type should be fragment_data");
+            assert (
+                std::is_sorted (first, last, [](fragment_data const & a, fragment_data const & b) {
                     return static_cast<unsigned> (a.type) < static_cast<unsigned> (b.type);
                 }));
         }
@@ -772,18 +1066,18 @@ namespace pstore {
         std::size_t fragment::size_bytes (Iterator first, Iterator last) {
             fragment::check_range_is_sorted (first, last);
 
-            auto const num_sections = std::distance (first, last);
-            assert (num_sections >= 0);
-            auto const unum_sections =
-                static_cast<typename std::make_unsigned<decltype (num_sections)>::type> (
-                    num_sections);
+            auto const num_contents = std::distance (first, last);
+            assert (num_contents >= 0);
+            auto const unum_contents =
+                static_cast<typename std::make_unsigned<decltype (num_contents)>::type> (
+                    num_contents);
 
             // Space needed by the section offset array.
-            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (unum_sections);
-            // Now the storage for each of the sections
-            std::for_each (first, last, [&size_bytes](section_content const & c) {
-                size_bytes = aligned<section> (size_bytes);
-                size_bytes += section::size_bytes (c.make_sources ());
+            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (unum_contents);
+            // Now the storage for each of the contents
+            std::for_each (first, last, [&size_bytes](fragment_data const & c) {
+                size_bytes = c.aligned_size_t (size_bytes);
+                size_bytes += c.size_bytes ();
             });
             return size_bytes;
         }
@@ -791,28 +1085,52 @@ namespace pstore {
 
         // fragment::iterator
         // ~~~~~~~~~~~~~~~~~~
-        inline fragment::const_iterator::const_iterator (wrapped_iterator it) noexcept
-                : section_{section_type::text}
+        inline fragment::const_iterator::const_iterator (fragment_type type,
+                                                         wrapped_iterator it) noexcept
+                : fragment_{type}
                 , it_{it} {}
 
-        inline auto fragment::const_iterator::operator* () noexcept -> reference {
-            return section_ = static_cast<section_type> (*it_);
+        inline fragment::const_iterator::const_iterator (wrapped_iterator it) noexcept
+                : const_iterator (static_cast<fragment_type> (*it), it) {
+            assert (*it < static_cast<std::uint64_t> (fragment_type::last));
         }
-        inline auto fragment::const_iterator::operator-> () noexcept -> pointer {
-            section_ = static_cast<section_type> (*it_);
-            return &section_;
+
+        inline auto fragment::const_iterator::operator* () const noexcept -> reference {
+            return fragment_;
+        }
+        inline auto fragment::const_iterator::operator-> () const noexcept -> pointer {
+            return &fragment_;
         }
 
         inline fragment::const_iterator & fragment::const_iterator::operator++ () noexcept {
             ++it_;
+            fragment_ = static_cast<fragment_type> (*it_);
             return *this;
         }
         inline fragment::const_iterator fragment::const_iterator::operator++ (int) noexcept {
             auto const prev = *this;
-            ++it_;
+            ++*this;
             return prev;
         }
 
+        /// Returns the alignment of the given section type in the given fragment.
+        std::uint8_t section_align (fragment const & fragment, section_type type);
+
+        /// Returns the number of bytes of storage that are accupied by the section with the
+        /// given type in the given fragment.
+        std::size_t section_size (fragment const & fragment, section_type type);
+
+        /// Returns the ifixups of the given section type in the given fragment.
+        section::container<internal_fixup> section_ifixups (fragment const & fragment,
+                                                            section_type type);
+
+        /// Returns the xfixups of the given section type in the given fragment.
+        section::container<external_fixup> section_xfixups (fragment const & fragment,
+                                                            section_type Type);
+
+        /// Returns the section content of the given section type in the given fragment.
+        section::container<std::uint8_t> section_value (fragment const & fragment,
+                                                        section_type type);
     } // end namespace repo
 } // end namespace pstore
 

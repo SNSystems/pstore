@@ -82,6 +82,16 @@ namespace pstore {
             linkage_type linkage;
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
+
+            /// \brief Returns a pointer to the ticket_member which is in-store.
+            ///
+            /// \param db The database from which the ticket_member should be loaded.
+            /// \param addr Address of the ticket_member in the store.
+            /// \result a pointer to the ticket_member in-store memory.
+            static std::shared_ptr<ticket_member const>
+            load (pstore::database const & db, pstore::typed_address<ticket_member> addr) {
+                return db.getro (addr);
+            }
         };
 
         static_assert (std::is_standard_layout<ticket_member>::value,
@@ -121,7 +131,8 @@ namespace pstore {
             /// \param path  A ticket file path address in the store.
             /// \param members  A vector of ticket_member whose contents will be copied into the
             /// newly allocated ticket.
-            /// \result An extent which describes the in-store location of the allocated ticket.
+            /// \result A pair of a pointer and an extent which describes the in-store location of
+            /// the allocated ticket.
             template <typename TransactionType>
             static extent<ticket> alloc (TransactionType & transaction,
                                          typed_address<indirect_string> path,
@@ -132,8 +143,8 @@ namespace pstore {
             /// \param db  The database from which the ticket should be loaded.
             /// \param extent  An extent describing the ticket location in the store.
             /// \result  A pointer to the ticket in-store memory.
-            static std::shared_ptr<ticket const> load (pstore::database const & db,
-                                                       pstore::extent<ticket> const & extent);
+            static std::shared_ptr<ticket const> load (database const & db,
+                                                       extent<ticket> const & extent);
 
             ///@}
 
@@ -205,9 +216,9 @@ namespace pstore {
         // alloc
         // ~~~~~
         template <typename TransactionType>
-        extent<ticket> ticket::alloc (TransactionType & transaction,
-                                      typed_address<indirect_string> path,
-                                      std::vector<ticket_member> const & members) {
+        auto ticket::alloc (TransactionType & transaction, typed_address<indirect_string> path,
+                            std::vector<ticket_member> const & members)
+            -> extent<ticket> {
             // First work out its size.
             std::uint64_t const num_members = members.size ();
             auto const size = size_bytes (num_members);
@@ -220,7 +231,7 @@ namespace pstore {
             ptr->path_addr_ = path;
             ptr->size_ = num_members;
             std::copy (members.begin (), members.end (), ptr->begin ());
-            return {typed_address<ticket> (addr), size};
+            return pstore::extent<ticket> (typed_address<ticket> (addr), size);
         }
 
     } // end namespace repo

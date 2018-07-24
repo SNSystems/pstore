@@ -62,13 +62,62 @@ namespace {
             return string_address{pstore::address{x}};
         }
     };
+
+    template <typename Iterator>
+    auto build_sections (Iterator begin, Iterator end)
+        -> std::vector<std::unique_ptr<fragment_data>> {
+        static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
+                                     section_content>::value),
+                       "Iterator value_type must be section_content pointer");
+        assert (std::distance (begin, end) >= 0);
+
+        std::vector<std::unique_ptr<fragment_data>> fdata;
+        std::for_each (begin, end, [&fdata](section_content const & section) {
+            fdata.emplace_back (
+                new section_data (static_cast<fragment_type> (section.type), &section));
+        });
+        return fdata;
+    }
+
+    template <typename Iterator>
+    pstore::extent<fragment> build_fragment (transaction & transaction, Iterator begin,
+                                             Iterator end) {
+        std::vector<std::unique_ptr<fragment_data>> fdata = build_sections (begin, end);
+        return fragment::alloc (transaction,
+                                details::make_fragment_content_iterator (fdata.begin ()),
+                                details::make_fragment_content_iterator (fdata.end ()));
+    }
+
+    template <typename SectionIterator, typename TicketMemberIterator>
+    pstore::extent<fragment>
+    build_fragment (transaction & transaction, SectionIterator section_begin,
+                    SectionIterator section_end, TicketMemberIterator ticket_member_begin,
+                    TicketMemberIterator ticket_member_end) {
+        static_assert (
+            (std::is_same<typename std::iterator_traits<TicketMemberIterator>::value_type,
+                          pstore::typed_address<ticket_member>>::value),
+            "Iterator value_type should be ticket_member typed_address");
+        assert (std::distance (ticket_member_begin, ticket_member_end) > 0);
+
+        std::vector<std::unique_ptr<fragment_data>> fdata =
+            build_sections (section_begin, section_end);
+
+        fdata.emplace_back (new dependents_data (ticket_member_begin, ticket_member_end));
+
+        return fragment::alloc (transaction,
+                                details::make_fragment_content_iterator (fdata.begin ()),
+                                details::make_fragment_content_iterator (fdata.end ()));
+    }
+
 } // anonymous namespace
 
 TEST_F (FragmentTest, Empty) {
-    std::vector<section_content> c;
-    pstore::extent<fragment> extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
-    auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
+    std::vector<std::unique_ptr<fragment_data>> c;
+    auto extent =
+        fragment::alloc (transaction_, details::make_fragment_content_iterator (std::begin (c)),
+                         details::make_fragment_content_iterator (std::end (c)));
 
+    auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
     assert (transaction_.get_storage ().begin ()->first ==
             reinterpret_cast<std::uint8_t const *> (f));
     EXPECT_EQ (0U, f->num_sections ());
@@ -79,19 +128,18 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     c.emplace_back (section_type::read_only, std::uint8_t{4} /*alignment*/);
     section_content & rodata = c.back ();
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
-    auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    auto extent = build_fragment (transaction_, std::begin (c), std::end (c));
 
     ASSERT_EQ (transaction_.get_storage ().begin ()->first,
-	       reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+               reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
-
     std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::read_only)};
-    auto indices = f->sections ().get_indices ();
+    auto indices = f->members ().get_indices ();
     std::vector<std::size_t> Actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
 
-    section const & s = (*f)[section_type::read_only];
+    section const & s = f->at<fragment_type::read_only> ();
     auto data_begin = std::begin (s.data ());
     auto data_end = std::end (s.data ());
     auto rodata_begin = std::begin (rodata.data);
@@ -101,6 +149,7 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     EXPECT_EQ (4U, s.align ());
     EXPECT_EQ (0U, s.ifixups ().size ());
     EXPECT_EQ (0U, s.xfixups ().size ());
+    EXPECT_EQ (f->dependents (), nullptr);
 }
 
 TEST_F (FragmentTest, MakeTextSectionWithFixups) {
@@ -123,19 +172,21 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
         text.xfixups.emplace_back (external_fixup{indirect_string_address (5), 5, 5, 5});
     }
 
-    auto extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
+    auto extent = build_fragment (transaction_, std::begin (c), std::end (c));
 
     ASSERT_EQ (transaction_.get_storage ().begin ()->first,
-	       reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+               reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+
+
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
 
     std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::text)};
-    auto indices = f->sections ().get_indices ();
+    auto indices = f->members ().get_indices ();
     std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
-    section const & s = (*f)[section_type::text];
+    section const & s = f->at<fragment_type::text> ();
     EXPECT_EQ (16U, s.align ());
     EXPECT_EQ (4U, s.data ().size ());
     EXPECT_EQ (2U, s.ifixups ().size ());
@@ -147,6 +198,31 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{indirect_string_address (3), 3, 3, 3},
                                             external_fixup{indirect_string_address (4), 4, 4, 4},
                                             external_fixup{indirect_string_address (5), 5, 5, 5}));
+}
+
+TEST_F (FragmentTest, MakeTextSectionWithDependents) {
+    using ::testing::ElementsAre;
+    using ::testing::ElementsAreArray;
+
+    std::vector<section_content> c;
+
+    constexpr auto addr1 = pstore::typed_address<ticket_member>::make (32U);
+    std::vector<pstore::typed_address<ticket_member>> d{addr1};
+
+    auto extent = build_fragment (transaction_, std::begin (c), std::end (c), d.data (),
+                                  d.data () + d.size ());
+
+    ASSERT_EQ (transaction_.get_storage ().begin ()->first,
+               reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
+    auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
+
+    std::vector<fragment_type> contents (f->begin (), f->end ());
+    EXPECT_THAT (contents, ::testing::ElementsAre (fragment_type::dependent));
+
+    pstore::repo::dependents const * const dependent = f->dependents ();
+    ASSERT_NE (dependent, nullptr);
+    EXPECT_EQ (1U, dependent->size ());
+    EXPECT_EQ ((*dependent)[0], addr1);
 }
 
 namespace pstore {
@@ -178,7 +254,8 @@ namespace {
         EXPECT_EQ (tls.type, section_type::thread_data);
         tls.data.assign ({'t', 'l', 's'});
 
-        auto const extent = fragment::alloc (transaction_, std::begin (c), std::end (c));
+        auto const extent = build_fragment (transaction_, std::begin (c), std::end (c));
+
         ASSERT_EQ (transaction_.get_storage ().begin ()->first,
                    reinterpret_cast<std::uint8_t const *> (extent.addr.absolute ()));
     }
@@ -191,12 +268,12 @@ TEST_F (FragmentTest, TwoSections) {
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
     std::vector<std::size_t> const expected{static_cast<std::size_t> (section_type::read_only),
                                             static_cast<std::size_t> (section_type::thread_data)};
-    auto indices = f->sections ().get_indices ();
+    auto indices = f->members ().get_indices ();
     std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
-    section const & rodata = (*f)[section_type::read_only];
-    section const & tls = (*f)[section_type::thread_data];
+    section const & rodata = f->at<fragment_type::read_only> ();
+    section const & tls = f->at<fragment_type::thread_data> ();
     EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
 }
 
@@ -205,9 +282,9 @@ TEST_F (FragmentTest, Iterator) {
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
     fragment::const_iterator begin = f->begin ();
     fragment::const_iterator end = f->end ();
-    std::vector<section_type> contents{begin, end};
+    std::vector<fragment_type> contents{begin, end};
     EXPECT_THAT (contents,
-                 ::testing::ElementsAre (section_type::read_only, section_type::thread_data));
+                 ::testing::ElementsAre (fragment_type::read_only, fragment_type::thread_data));
 }
 
 // eof: unittests/pstore_mcrepo/test_fragment.cpp

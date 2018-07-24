@@ -437,4 +437,26 @@ TEST_F (Transaction, GetRoInt) {
     }
 }
 
+TEST_F (Transaction, GetRwUInt64) {
+    std::uint64_t const expected = 1ULL << 40;
+    pstore::extent<std::uint64_t> extent;
+    {
+        mock_mutex mutex;
+        auto transaction = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex});
+        {
+            // Allocate the storage
+            pstore::address const addr =
+                transaction.allocate (sizeof (std::uint64_t), alignof (std::uint64_t));
+            extent =
+                make_extent (pstore::typed_address<std::uint64_t> (addr), sizeof (std::uint64_t));
+            std::shared_ptr<std::uint64_t> ptr = transaction.getrw (extent);
+
+            // Save the data to the store
+            *(ptr) = expected;
+        }
+        transaction.commit ();
+    }
+    EXPECT_EQ (expected, *db_->getro (extent));
+}
+
 // eof: unittests/pstore/test_transaction.cpp

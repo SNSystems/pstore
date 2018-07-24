@@ -51,6 +51,7 @@ namespace pstore {
         std::string error_category::message (int error) const {
             switch (static_cast<error_code> (error)) {
             case error_code::bad_fragment_record: return "bad fragment record";
+            case error_code::bad_fragment_type: return "bad fragment type";
             case error_code::bad_ticket_record: return "bad ticket record";
             }
             return "unknown error";

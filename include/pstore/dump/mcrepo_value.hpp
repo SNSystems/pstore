@@ -51,10 +51,10 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (repo::section_type t);
+        value_ptr make_value (repo::fragment_type t);
         value_ptr make_value (repo::internal_fixup const & ifx);
         value_ptr make_value (database & db, repo::external_fixup const & xfx);
-        value_ptr make_value (database & db, repo::section const & section, repo::section_type st,
+        value_ptr make_value (database & db, repo::section const & section, repo::fragment_type st,
                               bool hex_mode);
         value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode);
 

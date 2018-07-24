@@ -125,7 +125,7 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T> getrw (extent<T> const & ex) {
-            return this->getrw (ex.addr, ex.size);
+            return db_.getrw (ex);
         }
 
         template <typename T,

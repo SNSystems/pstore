@@ -122,23 +122,42 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     std::array<section_content, 1> c = {
         {section_content (section_type::data, std::uint8_t{0x10} /*alignment*/)}};
+    section_content & data = c.back ();
+    pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
     {
         // Build the data section's contents and fixups.
-        section_content & data = c.back ();
         data.data.assign ({'t', 'e', 'x', 't'});
         data.ifixups.emplace_back (internal_fixup{section_type::data, 2, 2, 2});
-        data.xfixups.emplace_back (external_fixup{this->store_str (transaction, "foo"), 3, 3, 3});
+        data.xfixups.emplace_back (external_fixup{name, 3, 3, 3});
     }
 
-    auto fragment =
-        fragment::load (*db_, fragment::alloc (transaction, std::begin (c), std::end (c)));
+    // Build the ticket_member 'foo'
+    auto const addr = pstore::typed_address<ticket_member>{transaction.allocate<ticket_member> ()};
+    {
+        auto ptr = transaction.getrw (make_extent (addr, sizeof (ticket_member)));
+        (*ptr) = ticket_member{pstore::index::digest{28U}, name, linkage_type::internal};
+    }
+
+    std::array<pstore::typed_address<ticket_member>, 1> dependents{addr};
+
+    // Build the vector of fragment_data.
+    std::vector<std::unique_ptr<fragment_data>> fdata;
+    fdata.emplace_back (
+        new section_data (static_cast<pstore::repo::fragment_type> (data.type), &data));
+
+    fdata.emplace_back (new dependents_data (&dependents[0], &dependents[0] + dependents.size ()));
+
+    auto fragment = fragment::load (
+        *db_,
+        fragment::alloc (transaction, details::make_fragment_content_iterator (fdata.begin ()),
+                         details::make_fragment_content_iterator (fdata.end ())));
 
     std::ostringstream out;
-    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);
-    addr->write (out);
+    pstore::dump::value_ptr value = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);
+    value->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (13U, lines.size ());
+    ASSERT_EQ (18U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -157,6 +176,12 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x3"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "dependent"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "foo"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "internal"));
 }
 
 TEST_F (MCRepoFixture, DumpTicket) {

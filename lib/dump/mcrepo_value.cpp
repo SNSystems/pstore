@@ -55,18 +55,22 @@ namespace pstore {
     namespace dump {
 
 #define X(a)                                                                                       \
-    case (repo::section_type::a): name = #a; break;
+    case (repo::fragment_type::a): name = #a; break;
 
-        value_ptr make_value (repo::section_type t) {
+        value_ptr make_value (repo::fragment_type t) {
             char const * name = "*unknown*";
-            switch (t) { PSTORE_REPO_SECTION_TYPES }
+            switch (t) {
+                PSTORE_REPO_SECTION_TYPES
+                PSTORE_REPO_METADATA_TYPES
+            case repo::fragment_type::last: break;
+            }
             return make_value (name);
         }
 #undef X
 
         value_ptr make_value (repo::internal_fixup const & ifx) {
             auto v = std::make_shared<object> (object::container{
-                {"section", make_value (ifx.section)},
+                {"section", make_value (static_cast<repo::fragment_type> (ifx.section))},
                 {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
                 {"offset", make_value (ifx.offset)},
                 {"addend", make_value (ifx.addend)},
@@ -87,9 +91,10 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database & db, repo::section const & section, repo::section_type st,
+        value_ptr make_value (database & db, repo::section const & section, repo::fragment_type st,
                               bool hex_mode) {
             (void) st;
+            assert (pstore::repo::is_section_type (st));
             auto const & data = section.data ();
             auto const & ifixups = section.ifixups ();
 
@@ -98,7 +103,7 @@ namespace pstore {
 
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
-            if (st == repo::section_type::text) {
+            if (st == repo::fragment_type::text) {
                 std::uint8_t const * const first = data.data ();
                 std::uint8_t const * const last = first + data.size ();
                 data_value = make_disassembled_value (first, last, hex_mode);
@@ -122,12 +127,36 @@ namespace pstore {
             return make_value (v);
         }
 
+        value_ptr make_value (database & db, repo::dependents const & dependent,
+                              repo::fragment_type st, bool hex_mode) {
+            (void) st;
+            (void) hex_mode;
+            array::container members;
+            members.reserve (dependent.size ());
+            for (auto const & member : dependent) {
+                members.emplace_back (make_value (db, *db.getro (member)));
+            }
+            return make_value (std::move (members));
+        }
+
+
+#define X(a)                                                                                       \
+    case (repo::fragment_type::a):                                                                 \
+        contents = make_value (db, fragment.at<repo::fragment_type::a> (), type, hex_mode);        \
+        break;
+
         value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
             array::container array;
-            for (repo::section_type type : fragment) {
-                array.emplace_back (make_value (object::container{
-                    {"type", make_value (type)},
-                    {"contents", make_value (db, fragment[type], type, hex_mode)}}));
+            for (repo::fragment_type const type : fragment) {
+                assert (fragment.has_fragment (type));
+                value_ptr contents;
+                switch (type) {
+                    PSTORE_REPO_SECTION_TYPES
+                    PSTORE_REPO_METADATA_TYPES
+                case repo::fragment_type::last: assert (false); break;
+                }
+                array.emplace_back (make_value (
+                    object::container{{"type", make_value (type)}, {"contents", contents}}));
             }
             return make_value (std::move (array));
         }
@@ -139,7 +168,7 @@ namespace pstore {
 
                 array::container members;
                 for (auto const & kvp : *digests) {
-                    auto fragment = repo::fragment::load (db, kvp.second);
+                    auto const fragment = repo::fragment::load (db, kvp.second);
                     result.emplace_back (make_value (
                         object::container{{"digest", make_value (kvp.first)},
                                           {"fragment", make_value (db, *fragment, hex_mode)}}));
@@ -147,6 +176,7 @@ namespace pstore {
             }
             return make_value (result);
         }
+#undef X
 
 #define X(a)                                                                                       \
     case (repo::linkage_type::a): Name = #a; break;

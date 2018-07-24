@@ -134,8 +134,12 @@ TEST_F (IndirectString, StoreRoundTrip) {
 
     pstore::shared_sstring_view owner;
     EXPECT_EQ (ind2.as_string_view (&owner), pstore::make_sstring_view (str));
-}
 
+    // check the 'get_sstring_view' helper function.
+    EXPECT_EQ (get_sstring_view (db_, pstore::typed_address<pstore::indirect_string> (pointer_addr))
+                   .second,
+               pstore::make_sstring_view (str));
+}
 
 namespace {
 

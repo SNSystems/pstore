@@ -329,6 +329,17 @@ namespace pstore {
                 const_iterator begin () const { return {bitmap_}; }
                 const_iterator end () const { return {0}; }
 
+                constexpr bool empty () const noexcept { return bitmap_ == 0; }
+                unsigned front () const noexcept {
+                    assert (!empty ());
+                    return bit_count::ctz (bitmap_);
+                }
+                unsigned back () const noexcept {
+                    assert (!empty ());
+                    return sizeof (bitmap_) * 8U - bit_count::clz (bitmap_) - 1U;
+                }
+
+
             private:
                 BitmapType const bitmap_;
             };
@@ -376,25 +387,25 @@ namespace pstore {
             /// empty container is undefined.
             reference front () {
                 assert (!empty ());
-                return (*this)[front_index ()];
+                return (*this)[get_indices ().front ()];
             }
             /// Returns a reference to the first element in the container. Calling front() on an
             /// empty container is undefined.
             const_reference front () const {
                 assert (!empty ());
-                return (*this)[front_index ()];
+                return (*this)[get_indices ().front ()];
             }
             /// Returns a reference to the last element in the container. Calling back() on an empty
             /// container is undefined.
             reference back () {
                 assert (!empty ());
-                return (*this)[back_index ()];
+                return (*this)[get_indices ().back ()];
             }
             /// Returns a reference to the last element in the container. Calling back() on an empty
             /// container is undefined.
             const_reference back () const {
                 assert (!empty ());
-                return (*this)[back_index ()];
+                return (*this)[get_indices ().back ()];
             }
 
             ///@}
@@ -461,15 +472,6 @@ namespace pstore {
             static void operator delete (void * p, InputIterator /*indices_first*/,
                                          InputIterator /*indices_last*/) {
                 return ::operator delete (p);
-            }
-
-            unsigned front_index () const {
-                assert (!empty ());
-                return pstore::bit_count::ctz (bitmap_);
-            }
-            unsigned back_index () const {
-                assert (!empty ());
-                return sizeof (bitmap_) * 8U - pstore::bit_count::clz (bitmap_) - 1U;
             }
 
             BitmapType const bitmap_;
