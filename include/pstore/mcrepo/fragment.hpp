@@ -823,25 +823,25 @@ namespace pstore {
             static pstore::extent<fragment> alloc (Transaction & transaction, Iterator first,
                                                    Iterator last);
 
-            /// Provides a pointer to an individual fragment instance given a database an a record
+            /// Provides a pointer to an individual fragment instance given a database and a extent
             /// describing its address and size.
             ///
             /// \param db  The database from which the fragment is to be read.
             /// \param location  The address and size of the fragment data.
             /// \returns  A pointer to the fragment instance.
             static std::shared_ptr<fragment const> load (pstore::database const & db,
-                                                         pstore::extent<fragment> const & location);
+                                                         extent<fragment> const & location);
 
-            /// \tparam Transaction  The type of the database transaction.
-            /// Provides a pointer to an individual fragment instance given a database an a record
-            /// describing its address and size.
+            /// Provides a pointer to an individual fragment instance given a transaction and an
+            /// extent describing its address and size.
             ///
-            /// \param transaction  The transaction to which the fragment should be appended.
+            /// \tparam LockType  The transaction lock type.
+            /// \param transaction  The transaction from which the fragment is to be read.
             /// \param location  The address and size of the fragment data.
             /// \returns  A pointer to the fragment instance.
             template <typename LockType>
             static std::shared_ptr<fragment> load (transaction<LockType> & transaction,
-                                                   pstore::extent<fragment> const & location);
+                                                   extent<fragment> const & location);
 
             using member_array = sparse_array<std::uint64_t>;
 

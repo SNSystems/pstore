@@ -138,7 +138,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
         (*ptr) = ticket_member{pstore::index::digest{28U}, name, linkage_type::internal};
     }
 
-    std::array<pstore::typed_address<ticket_member>, 1> dependents{addr};
+    std::array<pstore::typed_address<ticket_member>, 1> dependents{{addr}};
 
     // Build the vector of fragment_data.
     std::vector<std::unique_ptr<fragment_data>> fdata;

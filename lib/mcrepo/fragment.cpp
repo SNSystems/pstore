@@ -250,26 +250,25 @@ std::size_t fragment::size () const noexcept {
 
 // size_bytes
 // ~~~~~~~~~~
-#define X(a)                                                                                       \
-    case fragment_type::a:                                                                         \
-        return last_offset +                                                                       \
-               offset_to_instance<enum_to_section<fragment_type::a>::type> (last_offset)           \
-                   .size_bytes ();
-
 std::size_t fragment::size_bytes () const {
     if (arr_.size () == 0) {
         return sizeof (*this);
     }
 
     auto const last_offset = arr_.back ();
-    auto last_type = static_cast<fragment_type> (arr_.get_indices ().back ());
-    switch (last_type) {
+#define X(a)                                                                                       \
+    case fragment_type::a:                                                                         \
+        return last_offset +                                                                       \
+               offset_to_instance<enum_to_section<fragment_type::a>::type> (last_offset)           \
+                   .size_bytes ();
+    switch (static_cast<fragment_type> (arr_.get_indices ().back ())) {
         PSTORE_REPO_SECTION_TYPES
         PSTORE_REPO_METADATA_TYPES
-    default: raise_error_code (std::make_error_code (error_code::bad_fragment_type));
+    case fragment_type::last: break;
     }
-}
 #undef X
+    raise_error_code (std::make_error_code (error_code::bad_fragment_type));
+}
 
 namespace pstore {
     namespace repo {
