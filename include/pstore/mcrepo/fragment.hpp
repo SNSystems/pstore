@@ -923,11 +923,17 @@ namespace pstore {
             fragment (IteratorIdx first_index, IteratorIdx last_index)
                     : arr_ (first_index, last_index) {}
 
+            /// Returns pointer to an individual fragment instance given a function which can yield
+            /// it given the object's extent.
+            template <typename ReturnType, typename GetOp>
+            static ReturnType load_impl (extent<fragment> const & location, GetOp get);
+
             template <typename Iterator>
             static void check_range_is_sorted (Iterator first, Iterator last);
 
             template <typename InstanceType>
             InstanceType const & offset_to_instance (std::uint64_t offset) const;
+
 
             /// Constructs a fragment into the uninitialized memory referred to by ptr and copy the
             /// section contents [first,last) into it.
@@ -1007,14 +1013,12 @@ namespace pstore {
             return {typed_address<fragment> (storage.second), size};
         }
 
-        // load
-        // ~~~~~
-        template <typename LockType>
-        auto fragment::load (transaction<LockType> & transaction,
-                             pstore::extent<fragment> const & location)
-            -> std::shared_ptr<fragment> {
+        // load_impl
+        // ~~~~~~~~~
+        template <typename ReturnType, typename GetOp>
+        auto fragment::load_impl (extent<fragment> const & location, GetOp get) -> ReturnType {
             if (location.size >= sizeof (fragment)) {
-                std::shared_ptr<fragment> f = transaction.getrw (location);
+                ReturnType f = get (location);
                 auto ftype_indices = f->members ().get_indices ();
                 if (!ftype_indices.empty () &&
                     static_cast<fragment_type> (ftype_indices.back ()) < fragment_type::last &&
@@ -1023,6 +1027,17 @@ namespace pstore {
                 }
             }
             raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+        }
+
+        // load
+        // ~~~~~
+        template <typename LockType>
+        auto fragment::load (transaction<LockType> & transaction,
+                             pstore::extent<fragment> const & location)
+            -> std::shared_ptr<fragment> {
+            return load_impl<std::shared_ptr<fragment>> (
+                location,
+                [&transaction](extent<fragment> const & x) { return transaction.getrw (x); });
         }
 
         // offset_to_instance

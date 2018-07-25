@@ -204,16 +204,8 @@ std::uint8_t * dependents_data::write (std::uint8_t * out) const {
 // ~~~~
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
                                                 pstore::extent<fragment> const & location) {
-    if (location.size >= sizeof (fragment)) {
-        std::shared_ptr<fragment const> f = db.getro (location);
-        auto ftype_indices = f->members ().get_indices ();
-        if (!ftype_indices.empty () &&
-            static_cast<fragment_type> (ftype_indices.back ()) < fragment_type::last &&
-            f->size_bytes () == location.size) {
-            return f;
-        }
-    }
-    raise_error_code (std::make_error_code (error_code::bad_fragment_record));
+    return load_impl<std::shared_ptr<fragment const>> (
+        location, [&db](pstore::extent<fragment> const & x) { return db.getro (x); });
 }
 
 // has_fragment
