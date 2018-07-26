@@ -371,7 +371,9 @@ namespace pstore {
         // TODO: should this be a member of 'transaction'?
         class sizes {
         public:
-            sizes () noexcept = default;
+            sizes () noexcept
+                    : footer_pos_{typed_address<trailer>::null ()}
+                    , logical_{0} {}
             explicit sizes (typed_address<trailer> footer_pos) noexcept
                     : footer_pos_ (footer_pos)
                     , logical_ (footer_pos_.absolute () + sizeof (trailer)) {}
@@ -394,7 +396,7 @@ namespace pstore {
             typed_address<trailer> footer_pos_;
 
             /// This value tracks space as it's appended to the file.
-            std::uint64_t logical_ = 0;
+            std::uint64_t logical_;
         };
         sizes size_;
 
