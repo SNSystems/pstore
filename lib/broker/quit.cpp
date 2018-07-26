@@ -112,6 +112,10 @@ namespace {
         using namespace pstore::broker;
         using get_port_result_type = self_client_connection::get_port_result_type;
 
+        // If we've got a status client then find out what port number it's using. The get_port()
+        // method returns the number and a lock which will prevent the server from shutting down.
+        // This enables us to send it a message without the risk that it will quit whilst we're
+        // talking to it.
         maybe<get_port_result_type> const port = status_client != nullptr
                                                      ? status_client->get_port ()
                                                      : nothing<get_port_result_type> ();
@@ -311,5 +315,3 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-
-// eof: lib/broker/quit.cpp

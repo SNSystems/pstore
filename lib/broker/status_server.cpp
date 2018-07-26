@@ -144,8 +144,8 @@ auto pstore::broker::self_client_connection::get_port () const -> maybe<get_port
     if (!predicate ()) {
         cv_.wait (lock, predicate);
     }
-    return predicate () ? get_port_result_type{*port_, std::move (lock)}
-                        : nothing<get_port_result_type> ();
+    return (state_ == state::closed || !port_) ? nothing<get_port_result_type> ()
+                                               : get_port_result_type{*port_, std::move (lock)};
 }
 
 // listening
@@ -171,7 +171,7 @@ void pstore::broker::self_client_connection::listen (
 // ~~~~~~
 void pstore::broker::self_client_connection::closed () {
     // We need to be certain that the state is 'closed' after this function. The attempt to lock the
-    // mutext could throw. state_ is atomic and notify_one() is noexcept so they're safe; if port_
+    // mutex could throw. state_ is atomic and notify_one() is noexcept so they're safe; if port_
     // isn't reset, get_port() will still return.
     auto const se = make_scope_guard ([this]() noexcept {
         state_ = state::closed;
