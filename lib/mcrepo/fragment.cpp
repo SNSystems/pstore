@@ -43,8 +43,10 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/mcrepo/fragment.hpp"
 
+#include <new>
 #include "pstore/config/config.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
+#include "pstore/support/gsl.hpp"
 
 using namespace pstore::repo;
 
@@ -195,6 +197,124 @@ std::uint8_t * dependents_data::write (std::uint8_t * out) const {
     return out + dependent->size_bytes ();
 }
 
+
+namespace {
+
+    /// This class is used to add virtual methods to a fragment's section. The section types
+    /// themselves cannot be virtual because they're written to disk and wouldn't be portable
+    /// between different C++ ABIs. The concrete classes derived from "dispatcher" wrap the real
+    /// section data types and forward to calls directly to them.
+    class dispatcher {
+    public:
+        virtual ~dispatcher () noexcept = default;
+        virtual std::size_t size_bytes () const = 0;
+
+        virtual unsigned align () const = 0;
+        virtual std::size_t size () const = 0;
+        virtual section::container<internal_fixup> ifixups () const = 0;
+        virtual section::container<external_fixup> xfixups () const = 0;
+        virtual section::container<std::uint8_t> data () const = 0;
+    };
+
+    class section_dispatcher final : public dispatcher {
+    public:
+        explicit section_dispatcher (section const & s) noexcept
+                : s_{s} {}
+        std::size_t size_bytes () const final { return s_.size_bytes (); }
+        unsigned align () const final { return s_.align (); }
+        std::size_t size () const final { return s_.data ().size (); }
+        section::container<internal_fixup> ifixups () const final { return s_.ifixups (); }
+        section::container<external_fixup> xfixups () const final { return s_.xfixups (); }
+        section::container<std::uint8_t> data () const final { return s_.data (); }
+
+    private:
+        section const & s_;
+    };
+
+    class dependents_dispatcher final : public dispatcher {
+    public:
+        explicit dependents_dispatcher (dependents const & d) noexcept
+                : d_{d} {}
+        std::size_t size_bytes () const final { return d_.size_bytes (); }
+
+        unsigned align () const final { error (); }
+        std::size_t size () const final { error (); }
+        section::container<internal_fixup> ifixups () const final { error (); }
+        section::container<external_fixup> xfixups () const final { error (); }
+        section::container<std::uint8_t> data () const final { error (); }
+
+    private:
+        PSTORE_NO_RETURN void error () const {
+            pstore::raise_error_code (
+                std::make_error_code (pstore::repo::error_code::bad_fragment_type));
+        }
+        dependents const & d_;
+    };
+
+    /// Maps from the type of data that is associated with a fragment's section to a "dispatcher"
+    /// subclass which provides a generic interface to the behavior of these sections.
+    template <typename T>
+    struct section_to_dispatcher {};
+    template <>
+    struct section_to_dispatcher<section> {
+        using type = section_dispatcher;
+    };
+    template <>
+    struct section_to_dispatcher<dependents> {
+        using type = dependents_dispatcher;
+    };
+
+    /// The size and alignment necessary for a buffer into which any of the dispatcher subclasses
+    /// can be successfully constructed. This must list all of the dispatcher subclasses.
+    using dispatcher_characteristics =
+        pstore::characteristics<section_dispatcher, dependents_dispatcher>;
+
+    /// A type which is suitable for holding an instance of any of the dispatcher subclasses.
+    using dispatcher_buffer = std::aligned_storage<dispatcher_characteristics::size,
+                                                   dispatcher_characteristics::align>::type;
+
+    struct nop_deleter {
+        void operator() (dispatcher * const) const noexcept {}
+    };
+    using dispatcher_ptr = std::unique_ptr<dispatcher, nop_deleter>;
+
+    /// Constructs a dispatcher instance for the a specific section of the given fragment.
+    /// \param buffer A non-null pointer to a buffer into which the object will be constructed. In
+    /// other words, on return the result will be a unique_ptr<> to an object inside this buffer.
+    /// The lifetime of this buffer must be greater than that of the result pointer.
+    dispatcher_ptr make_dispatcher (fragment const & f, fragment_type type,
+                                    pstore::gsl::not_null<dispatcher_buffer *> buffer) {
+        assert (f.has_fragment (static_cast<fragment_type> (type)));
+
+        // This ugly marco is instantiated for each of the various types in the section_type enum.
+        // The enum is mapped to the data type stored, and this type is mapped to a dispatcher
+        // subclass which provides a virtual interface to the underlying data.
+#define X(a)                                                                                       \
+    case fragment_type::a: {                                                                       \
+        using dispatcher_type =                                                                    \
+            section_to_dispatcher<enum_to_section<fragment_type::a>::type>::type;                  \
+        static_assert (sizeof (dispatcher_type) <= sizeof (dispatcher_buffer),                     \
+                       "dispatcher buffer is too small");                                          \
+        static_assert (alignof (dispatcher_type) <= alignof (dispatcher_buffer),                   \
+                       "dispatcher buffer is insufficiently aligned");                             \
+        return dispatcher_ptr (new (buffer) dispatcher_type (f.at<fragment_type::a> ()),           \
+                               nop_deleter{});                                                     \
+    }
+        switch (type) {
+            PSTORE_REPO_SECTION_TYPES
+            PSTORE_REPO_METADATA_TYPES
+        case fragment_type::last: break;
+        }
+#undef X
+        // Here to avoid a bogus warning from MSVC warning (claiming that not all control paths
+        // return a value).
+        pstore::raise_error_code (
+            std::make_error_code (pstore::repo::error_code::bad_fragment_type));
+    }
+
+} // end anonymous namespace
+
+
 //*   __                             _    *
 //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| *
@@ -246,104 +366,49 @@ std::size_t fragment::size_bytes () const {
     if (arr_.size () == 0) {
         return sizeof (*this);
     }
-
     auto const last_offset = arr_.back ();
-#define X(a)                                                                                       \
-    case fragment_type::a:                                                                         \
-        return last_offset +                                                                       \
-               offset_to_instance<enum_to_section<fragment_type::a>::type> (last_offset)           \
-                   .size_bytes ();
-    switch (static_cast<fragment_type> (arr_.get_indices ().back ())) {
-        PSTORE_REPO_SECTION_TYPES
-        PSTORE_REPO_METADATA_TYPES
-    case fragment_type::last: break;
-    }
-#undef X
-    raise_error_code (std::make_error_code (error_code::bad_fragment_type));
+    auto const last_section_type = static_cast<fragment_type> (arr_.get_indices ().back ());
+    dispatcher_buffer buffer;
+    auto const last_section_size =
+        make_dispatcher (*this, last_section_type, &buffer)->size_bytes ();
+    return last_offset + last_section_size;
 }
 
-namespace pstore {
-    namespace repo {
-        // section_align
-        // ~~~~~~~~~~~~~
-#define X(a)                                                                                       \
-    case section_type::a: return Fragment.at<fragment_type::a> ().align ();
 
-        std::uint8_t section_align (fragment const & Fragment, section_type type) {
-            assert (Fragment.has_fragment (static_cast<fragment_type> (type)));
-            switch (type) {
-                PSTORE_REPO_SECTION_TYPES
-            case section_type::last: break;
-            }
-            // Here to avoid a bogus warning from MSVC warning (claiming that not all control paths
-            // return a value).
-            raise_error_code (std::make_error_code (error_code::bad_fragment_type));
-        }
-#undef X
+// section_align
+// ~~~~~~~~~~~~~
+unsigned pstore::repo::section_align (fragment const & f, section_type type) {
+    dispatcher_buffer buffer;
+    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->align ();
+}
 
-        // section_size
-        // ~~~~~~~~~~~~~
-#define X(a)                                                                                       \
-    case section_type::a: return Fragment.at<fragment_type::a> ().data ().size ();
-        std::size_t section_size (fragment const & Fragment, section_type type) {
-            assert (Fragment.has_fragment (static_cast<fragment_type> (type)));
-            switch (type) {
-                PSTORE_REPO_SECTION_TYPES
-            case section_type::last: break;
-            }
-            raise_error_code (std::make_error_code (error_code::bad_fragment_record));
-        }
-#undef X
+// section_size
+// ~~~~~~~~~~~~~
+std::size_t pstore::repo::section_size (fragment const & f, section_type type) {
+    dispatcher_buffer buffer;
+    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->size ();
+}
 
-        // section_ifixups
-        // ~~~~~~~~~~~~~~~
-#define X(a)                                                                                       \
-    case section_type::a: return Fragment.at<fragment_type::a> ().ifixups ();
+// section_ifixups
+// ~~~~~~~~~~~~~~~
+section::container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
+                                                                  section_type type) {
+    dispatcher_buffer buffer;
+    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->ifixups ();
+}
 
-        section::container<internal_fixup> section_ifixups (fragment const & Fragment,
-                                                            section_type type) {
-            assert (Fragment.has_fragment (static_cast<fragment_type> (type)));
-            switch (type) {
-                PSTORE_REPO_SECTION_TYPES
-            case section_type::last: break;
-            }
-            raise_error_code (std::make_error_code (error_code::bad_fragment_record));
-        }
-#undef X
+// section_xfixups
+// ~~~~~~~~~~~~~~~
+section::container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
+                                                                  section_type type) {
+    dispatcher_buffer buffer;
+    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->xfixups ();
+}
 
-        // section_xfixups
-        // ~~~~~~~~~~~~~~~
-#define X(a)                                                                                       \
-    case section_type::a: return Fragment.at<fragment_type::a> ().xfixups ();
-
-        section::container<external_fixup> section_xfixups (fragment const & Fragment,
-                                                            section_type type) {
-            assert (Fragment.has_fragment (static_cast<fragment_type> (type)));
-            switch (type) {
-                PSTORE_REPO_SECTION_TYPES
-            case section_type::last: break;
-            }
-            raise_error_code (std::make_error_code (error_code::bad_fragment_record));
-        }
-#undef X
-
-        // section_data
-        // ~~~~~~~~~~~~
-#define X(a)                                                                                       \
-    case section_type::a: return Fragment.at<fragment_type::a> ().data ();
-
-        section::container<std::uint8_t> section_value (fragment const & Fragment,
-                                                        section_type type) {
-            assert (Fragment.has_fragment (static_cast<fragment_type> (type)));
-            switch (type) {
-                PSTORE_REPO_SECTION_TYPES
-            case section_type::last: break;
-            }
-            raise_error_code (std::make_error_code (error_code::bad_fragment_record));
-        }
-#undef X
-
-    } // namespace repo
-} // namespace pstore
-
-// eof: lib/mcrepo/fragment.cpp
+// section_data
+// ~~~~~~~~~~~~
+section::container<std::uint8_t> pstore::repo::section_value (fragment const & f,
+                                                              section_type type) {
+    dispatcher_buffer buffer;
+    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->data ();
+}

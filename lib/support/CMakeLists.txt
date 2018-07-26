@@ -190,6 +190,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/logging.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"

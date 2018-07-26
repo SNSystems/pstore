@@ -107,7 +107,7 @@ namespace pstore {
     /// \returns  The value that must be added to 'v' in order that it has the alignment given by
     /// 'align'.
     template <typename Ty>
-    inline Ty calc_alignment (Ty v, std::size_t align) {
+    inline Ty calc_alignment (Ty v, std::size_t align) noexcept {
         assert (is_power_of_two (align));
         return (align == 0U) ? 0U : ((v + align - 1U) & ~(align - 1U)) - v;
     }
@@ -119,7 +119,7 @@ namespace pstore {
     /// \returns  The value that must be added to 'v' in order that it has the alignment required by
     /// type Ty.
     template <typename Ty>
-    inline Ty calc_alignment (Ty v) {
+    inline Ty calc_alignment (Ty v) noexcept {
         return calc_alignment (v, alignof (Ty));
     }
 

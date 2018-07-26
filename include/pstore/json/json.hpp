@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_JSON_HPP
-#define PSTORE_JSON_HPP
+#ifndef PSTORE_JSON_JSON_HPP
+#define PSTORE_JSON_JSON_HPP
 
 #include <cassert>
 #include <cctype>
@@ -58,6 +58,7 @@
 #include "pstore/json/json_error.hpp"
 #include "pstore/json/utf.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/max.hpp"
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
@@ -1341,46 +1342,6 @@ namespace pstore {
             }
 
 
-            /// In C++14 std::max() is a constexpr function so we could use it in these templates,
-            /// but our code needs to be compatible with C++11.
-            template <typename T, T V1, T V2>
-            struct max : std::integral_constant<T, (V1 < V2) ? V2 : V1> {};
-
-            // max_sizeof
-            // ~~~~~~~~~~
-            template <typename... T>
-            struct max_sizeof;
-            template <>
-            struct max_sizeof<> : std::integral_constant<std::size_t, 1U> {};
-            template <typename Head, typename... Tail>
-            struct max_sizeof<Head, Tail...>
-                    : std::integral_constant<std::size_t, max<std::size_t, sizeof (Head),
-                                                              max_sizeof<Tail...>::value>::value> {
-            };
-
-            // max_alignment
-            // ~~~~~~~~~~~~~
-            template <typename... Types>
-            struct max_alignment;
-            template <>
-            struct max_alignment<> : std::integral_constant<std::size_t, 1U> {};
-            template <typename Head, typename... Tail>
-            struct max_alignment<Head, Tail...>
-                    : std::integral_constant<
-                          std::size_t,
-                          max<std::size_t, alignof (Head), max_alignment<Tail...>::value>::value> {
-            };
-
-            // characteristics
-            // ~~~~~~~~~~~~~~~
-            /// Given a list of types, find the size of the largest type and the alignment of the
-            /// most aligned type.
-            template <typename... T>
-            struct characteristics {
-                static constexpr std::size_t size = max_sizeof<T...>::value;
-                static constexpr std::size_t align = max_alignment<T...>::value;
-            };
-
             //*     _           _     _                 _                          *
             //*  __(_)_ _  __ _| |___| |_ ___ _ _    __| |_ ___ _ _ __ _ __ _ ___  *
             //* (_-< | ' \/ _` | / -_)  _/ _ \ ' \  (_-<  _/ _ \ '_/ _` / _` / -_) *
@@ -1542,5 +1503,4 @@ namespace pstore {
     } // namespace json
 } // namespace pstore
 
-#endif // PSTORE_JSON_HPP
-// eof: include/pstore/json/json.hpp
+#endif // PSTORE_JSON_JSON_HPP

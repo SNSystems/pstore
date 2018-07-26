@@ -60,6 +60,7 @@
 #include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/mcrepo/ticket.hpp"
 #include "pstore/support/aligned.hpp"
+#include "pstore/support/max.hpp"
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
@@ -781,14 +782,11 @@ namespace pstore {
 
         template <fragment_type T>
         struct enum_to_section {};
-
-        // Explicit specialization
 #    define PSTORE_ENUM_TO_SECTION(t, stored_type)                                                 \
         template <>                                                                                \
         struct enum_to_section<t> {                                                                \
             using type = stored_type;                                                              \
         };
-
         PSTORE_ENUM_TO_SECTION (fragment_type::bss, section)
         PSTORE_ENUM_TO_SECTION (fragment_type::data, section)
         PSTORE_ENUM_TO_SECTION (fragment_type::mergeable_1_byte_c_string, section)
@@ -1129,7 +1127,7 @@ namespace pstore {
         }
 
         /// Returns the alignment of the given section type in the given fragment.
-        std::uint8_t section_align (fragment const & fragment, section_type type);
+        unsigned section_align (fragment const & fragment, section_type type);
 
         /// Returns the number of bytes of storage that are accupied by the section with the
         /// given type in the given fragment.
@@ -1150,4 +1148,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // PSTORE_MCREPO_FRAGMENT_HPP
-// eof: include/pstore/mcrepo/fragment.hpp
