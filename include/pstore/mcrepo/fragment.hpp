@@ -846,7 +846,7 @@ namespace pstore {
             /// Returns a reference to the section type from section enum type in the fragment.
             /// The section must exist in the fragment.
             template <fragment_type Key>
-            auto at () const noexcept -> typename enum_to_section<Key>::type const &;
+            auto at () const -> typename enum_to_section<Key>::type const &;
 
             /// Returns true if this fragment contains a section of the given type.
             bool has_fragment (fragment_type type) const noexcept;
@@ -1052,7 +1052,7 @@ namespace pstore {
         // at
         // ~~
         template <fragment_type Key>
-        auto fragment::at () const noexcept -> typename enum_to_section<Key>::type const & {
+        auto fragment::at () const -> typename enum_to_section<Key>::type const & {
             assert (has_fragment (Key));
             return offset_to_instance<typename enum_to_section<Key>::type const> (
                 arr_[static_cast<std::size_t> (Key)]);
