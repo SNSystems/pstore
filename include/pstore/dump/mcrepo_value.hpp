@@ -56,6 +56,8 @@ namespace pstore {
         value_ptr make_value (database & db, repo::external_fixup const & xfx);
         value_ptr make_value (database & db, repo::section const & section, repo::fragment_type st,
                               bool hex_mode);
+        value_ptr make_value (database & db, repo::dependents const & dependent,
+                              repo::fragment_type st, bool hex_mode);
         value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode);
 
 
@@ -71,4 +73,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DUMP_MCREPO_VALUE_HPP
-// eof: include/pstore/dump/mcrepo_value.hpp

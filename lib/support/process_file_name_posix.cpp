@@ -127,12 +127,11 @@ namespace pstore {
     std::string process_file_name () {
         std::string path = link_path ();
         auto read_link = [&path](gsl::span<char> buffer) {
-            using size_type = decltype (buffer)::index_type;
-            static_assert (SSIZE_MAX <= std::numeric_limits<size_type>::max (),
-                           "cannot represent SSIZE_MAX as index_type");
-            ssize_t const num_chars =
-                ::readlink (path.c_str (), buffer.data (),
-                            clamp (buffer.size (), size_type{0}, size_type{SSIZE_MAX}));
+            auto const buffer_size = buffer.size ();
+            assert (buffer_size >= 0);
+            ssize_t const num_chars = ::readlink (path.c_str (), buffer.data (),
+                                                  clamp (static_cast<std::size_t> (buffer_size),
+                                                         std::size_t{0}, std::size_t{SSIZE_MAX}));
             if (num_chars < 0) {
                 int const error = errno;
                 std::ostringstream str;

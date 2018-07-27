@@ -83,7 +83,7 @@ namespace {
         return ::mkfifo (path, mode);
     }
 
-    pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring path, unsigned flags) {
+    pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring path, int flags) {
         pstore::broker::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
         if (pipe.get () >= 0) {
             // If the file open succeeded. We check whether it's a FIFO.
@@ -110,7 +110,7 @@ namespace {
         raise (pstore::errno_erc{errcode}, str.str ());
     }
 
-} // namespace
+} // end anonymous namespace
 
 namespace pstore {
     namespace broker {

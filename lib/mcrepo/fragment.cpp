@@ -351,7 +351,7 @@ dependents * fragment::dependents () noexcept {
 // num_sections
 // ~~~~~~~~~~~~
 std::size_t fragment::num_sections () const noexcept {
-    return std::count_if (this->begin (), this->end (), is_section_type);
+    return static_cast<std::size_t> (std::count_if (this->begin (), this->end (), is_section_type));
 }
 
 // size
