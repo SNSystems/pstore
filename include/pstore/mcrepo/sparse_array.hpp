@@ -351,14 +351,14 @@ namespace pstore {
             /// \name Element access
             ///@{
 
-            ValueType * data () { return &elements_[0]; }
-            const ValueType * data () const { return &elements_[0]; }
+            ValueType * data () noexcept { return &elements_[0]; }
+            ValueType const * data () const noexcept { return &elements_[0]; }
 
-            reference operator[] (size_type pos) {
+            reference operator[] (size_type pos) noexcept {
                 sparse_array const * cthis = this;
                 return const_cast<reference> (cthis->operator[] (pos));
             }
-            const_reference operator[] (size_type pos) const {
+            const_reference operator[] (size_type pos) const noexcept {
                 assert (pos < max_size ());
                 auto const bit_position = BitmapType{1} << pos;
                 assert ((bitmap_ & bit_position) != 0);
@@ -367,11 +367,11 @@ namespace pstore {
                 return elements_[index];
             }
 
-            reference at (size_type pos) {
+            reference at (size_type pos) noexcept {
                 sparse_array const * cthis = this;
                 return const_cast<reference> (cthis->at (pos));
             }
-            const_reference at (size_type pos) const {
+            const_reference at (size_type pos) const noexcept {
                 if (pos < max_size ()) {
                     auto const bit_position = BitmapType{1} << pos;
                     if ((bitmap_ & bit_position) != 0) {
@@ -649,4 +649,3 @@ namespace std {
 } // end namespace std
 
 #endif // PSTORE_MCREPO_SPARSE_ARRAY_HPP
-// eof: include/pstore/mcrepo/sparse_array.hpp

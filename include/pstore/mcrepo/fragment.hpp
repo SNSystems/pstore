@@ -846,7 +846,7 @@ namespace pstore {
             /// Returns a reference to the section type from section enum type in the fragment.
             /// The section must exist in the fragment.
             template <fragment_type Key>
-            auto at () const -> typename enum_to_section<Key>::type const &;
+            auto at () const noexcept -> typename enum_to_section<Key>::type const &;
 
             /// Returns true if this fragment contains a section of the given type.
             bool has_fragment (fragment_type type) const noexcept;
@@ -930,7 +930,7 @@ namespace pstore {
             static void check_range_is_sorted (Iterator first, Iterator last);
 
             template <typename InstanceType>
-            InstanceType const & offset_to_instance (std::uint64_t offset) const;
+            InstanceType const & offset_to_instance (std::uint64_t offset) const noexcept;
 
 
             /// Constructs a fragment into the uninitialized memory referred to by ptr and copy the
@@ -1041,18 +1041,16 @@ namespace pstore {
         // offset_to_instance
         // ~~~~~~~~~~~~~~~~~~
         template <typename InstanceType>
-        InstanceType const & fragment::offset_to_instance (std::uint64_t offset) const {
+        InstanceType const & fragment::offset_to_instance (std::uint64_t offset) const noexcept {
             auto const ptr = reinterpret_cast<std::uint8_t const *> (this) + offset;
-            if (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) != 0) {
-                raise_error_code (std::make_error_code (error_code::bad_fragment_record));
-            }
+            assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) == 0);
             return *reinterpret_cast<InstanceType const *> (ptr);
         }
 
         // at
         // ~~
         template <fragment_type Key>
-        auto fragment::at () const -> typename enum_to_section<Key>::type const & {
+        auto fragment::at () const noexcept -> typename enum_to_section<Key>::type const & {
             assert (has_fragment (Key));
             return offset_to_instance<typename enum_to_section<Key>::type const> (
                 arr_[static_cast<std::size_t> (Key)]);
