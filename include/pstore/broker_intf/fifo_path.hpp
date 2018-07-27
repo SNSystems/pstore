@@ -109,7 +109,7 @@ namespace pstore {
 
 #ifndef _WIN32
             /// Create the pipe and open a read descriptor. (Used by the pipe server.)
-            server_pipe open_server_pipe () const;
+            server_pipe open_server_pipe ();
 #endif
             /// Open the pipe for writing. (Used by clients to write commands to the pipe.)
             client_pipe open_client_pipe () const;

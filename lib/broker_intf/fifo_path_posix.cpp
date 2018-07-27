@@ -51,14 +51,15 @@
 
 #ifndef _WIN32
 
-#include <cerrno>
-#include <cstdlib>
+#    include <cerrno>
+#    include <cstdlib>
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
+#    include <fcntl.h>
+#    include <sys/stat.h>
+#    include <unistd.h>
 
-#include "pstore/support/error.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/quoted_string.hpp"
 
 namespace {
 
@@ -76,6 +77,39 @@ namespace {
         mode_t const old_;
     };
 
+    int make_fifo (pstore::gsl::czstring path, mode_t mode) {
+        // Temporarily set the umask to 0 so that any user can connect to our pipe.
+        umask_raii umask (0);
+        return ::mkfifo (path, mode);
+    }
+
+    pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring path, unsigned flags) {
+        pstore::broker::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
+        if (pipe.get () >= 0) {
+            // If the file open succeeded. We check whether it's a FIFO.
+            struct stat buf {};
+            if (::fstat (pipe.get (), &buf) != 0) {
+                int errcode = errno;
+                std::ostringstream str;
+                str << "Could not stat the file at " << pstore::quoted (path);
+                raise (pstore::errno_erc{errcode}, str.str ());
+            }
+            if (!S_ISFIFO (buf.st_mode)) {
+                int errcode = errno;
+                std::ostringstream str;
+                str << "The file at " << pstore::quoted (path) << " was not a FIFO";
+                raise (pstore::errno_erc{errcode}, str.str ());
+            }
+        }
+        return pipe;
+    }
+
+    PSTORE_NO_RETURN void raise_cannot_create_fifo (pstore::gsl::czstring path, int errcode) {
+        std::ostringstream str;
+        str << "Could not create FIFO at " << pstore::quoted (path);
+        raise (pstore::errno_erc{errcode}, str.str ());
+    }
+
 } // namespace
 
 namespace pstore {
@@ -92,33 +126,8 @@ namespace pstore {
 
         // open_server_pipe
         // ~~~~~~~~~~~~~~~~
-        auto fifo_path::open_server_pipe () const -> server_pipe {
+        auto fifo_path::open_server_pipe () -> server_pipe {
             auto path = path_.c_str ();
-
-            // Temporarily set the umask to 0 so that any user can connect to our pipe.
-            umask_raii umask (0);
-            mode_t const mode = S_IFIFO | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
-            if (::mkfifo (path, mode) >= 0) {
-                int errcode = errno;
-                if (errcode == EEXIST) {
-                    // TODO: check the file owner and access permissions.
-                    // If the object exists in the file system and it's a FIFO, then we assume that
-                    // its ours (perhaps left behind after a previous crash?) and we use it.
-                    struct stat buf {};
-                    if (::stat (path, &buf) == 0 && S_ISFIFO (buf.st_mode)) {
-                        errcode = 0;
-                    }
-                }
-
-                // If we still have an error to deal with, throw.
-                if (errcode != 0) {
-                    std::ostringstream str;
-                    str << "Could not create FIFO (" << path << ")";
-                    raise (::pstore::errno_erc{errcode}, str.str ());
-                }
-            }
-
-            needs_delete_ = true;
 
             // The server opens its well-known FIFO read-only (since it only reads from it) each
             // time the number of clients goes from 1 to 0, the server will read an end of file on
@@ -127,22 +136,26 @@ namespace pstore {
             // POSIX.1 specifically states that opening a FIFO for read–write is undefined. Although
             // most UNIX systems allow this, we use two open() calls instead.
 
-            int errcode = 0;
-            pipe_descriptor fdread{::open (path, O_RDONLY | O_NONBLOCK)}; // NOLINT
-            pipe_descriptor fdwrite{};
+            pstore::broker::pipe_descriptor fdread = open_fifo (path, O_RDONLY);
             if (fdread.get () < 0) {
-                errcode = errno;
-            } else {
-                fdwrite.reset (::open (path, O_WRONLY | O_NONBLOCK)); // NOLINT
-                if (fdwrite.get () < 0) {
-                    errcode = errno;
+                // If the file open failed, we create the FIFO and try again.
+                if (make_fifo (path, S_IFIFO | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH |
+                                         S_IWOTH) != 0) {
+                    raise_cannot_create_fifo (path, errno);
+                }
+
+                needs_delete_ = true;
+
+                fdread = open_fifo (path, O_RDONLY);
+                if (fdread.get () < 0) {
+                    // Open failed for a second time. Give up.
+                    raise_cannot_create_fifo (path, errno);
                 }
             }
 
-            if (errcode != 0) {
-                std::ostringstream str;
-                str << "Could not open FIFO (" << path << ")";
-                raise (::pstore::errno_erc{errcode}, str.str ());
+            pipe_descriptor fdwrite = open_fifo (path, O_WRONLY);
+            if (fdwrite.get () < 0) {
+                raise_cannot_create_fifo (path, errno);
             }
 
             return {std::move (fdread), std::move (fdwrite)};
@@ -193,4 +206,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif //_WIN32
-// eof: lib/broker_intf/fifo_path_posix.cpp
