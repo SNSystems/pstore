@@ -194,8 +194,9 @@ namespace {
         return is_in_flight_;
     }
 
-
-    // Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+    // error_message
+    // ~~~~~~~~~~~~~
+    /// Yields the description of a win32 error code.
     std::string error_message (DWORD errcode) {
         if (errcode == 0) {
             return "no error";
@@ -217,8 +218,8 @@ namespace {
 
         if (error_text) {
             // The string returned by FormatMessage probably ends with a CR. Remove it.
-            auto isspace = [](wchar_t c) {
-                return c = ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+            auto isspace = [](wchar_t const c) {
+                return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
             };
             for (; size > 0 && isspace (error_text.get ()[size - 1]); --size) {
             }
@@ -474,7 +475,6 @@ namespace pstore {
                 pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
                                       pstore::logging::quoted (path.get ().c_str ()));
                 auto const pipe_name = pstore::utf::win32::to16 (path.get ());
-
                 // Create one event object for the connect operation.
                 unique_handle connect_event = create_event ();
 
