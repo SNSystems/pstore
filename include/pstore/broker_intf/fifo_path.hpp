@@ -123,7 +123,7 @@ namespace pstore {
             client_pipe open_impl () const;
             void wait_until_impl (std::chrono::milliseconds timeout) const;
 
-            mutable std::atomic<bool> needs_delete_{false};
+            std::atomic<bool> needs_delete_{false};
             std::string const path_;
 
             duration_type const retry_timeout_;
