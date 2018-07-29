@@ -107,7 +107,7 @@ namespace pstore {
         }
 
         template <typename InputIterator>
-        value_ptr make_value (InputIterator first, InputIterator last) {
+        value_ptr make_value (InputIterator const & first, InputIterator const & last) {
             array::container members;
             std::for_each (
                 first, last,
