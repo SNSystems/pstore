@@ -90,7 +90,7 @@ namespace vacuum {
 
         st->watch_running = true;
         PSTORE_TRY {
-            std::unique_lock<std::mutex> mlock (wst.start_watch_mutex);
+            std::unique_lock<decltype (wst.start_watch_mutex)> mlock (wst.start_watch_mutex);
             while (!st->done) {
                 // Block until the start_watch condition variable is signaled.
                 auto start_time = from->latest_time ();

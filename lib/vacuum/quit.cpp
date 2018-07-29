@@ -92,7 +92,7 @@ namespace {
             status.done = true;
 
             // Wake up the watch thread immediately.
-            vacuum::wst.start_watch_cv.notify_all ();
+            vacuum::wst.start_watch_cv.notify_one ();
             // vacuum::wst.complete_cv.notify_all ();
             pstore::logging::log (pstore::logging::priority::notice,
                                   "Marked job as done. Notified start_watch_cv and complete_cv.");

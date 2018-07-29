@@ -62,55 +62,60 @@
 #include "pstore/vacuum/user_options.hpp"
 #include "pstore/vacuum/watch.hpp"
 
-#ifdef PSTORE_CPP_EXCEPTIONS
-#define TRY try
-#define CATCH(ex, code) catch (ex) code
-#else
-#define TRY
-#define CATCH(ex, code)
-#endif
-
 namespace {
+
     void stop (vacuum::status * const st) {
         st->done = true;
 
         // Wake up the watch thread immediately.
-        std::lock_guard<std::mutex> lk (vacuum::wst.start_watch_mutex);
-        vacuum::wst.start_watch_cv.notify_all ();
+        auto & wst = vacuum::wst;
+        std::lock_guard<decltype (wst.start_watch_mutex)> lock (wst.start_watch_mutex);
+        wst.start_watch_cv.notify_one ();
     }
 
+
+    // Tell the "watch" thread to start monitoring the store for changes.
+    void start_watching (std::shared_ptr<pstore::database> const & source,
+                         vacuum::status * const st) {
+        auto & wst = vacuum::wst;
+        std::lock_guard<decltype (wst.start_watch_mutex)> lock (wst.start_watch_mutex);
+        source->sync ();
+        wst.start_watch = true;
+        st->modified = false;
+        wst.start_watch_cv.notify_one ();
+    }
+
+
     void precopy_delay (vacuum::status * const st) {
-        using vacuum::wst;
+        auto & wst = vacuum::wst;
+        log (pstore::logging::priority::notice, "waiting before starting to vacuum...");
 
-        pstore::logging::log (pstore::logging::priority::notice,
-                              "waiting before starting to vacuum...");
-
-        std::unique_lock<std::mutex> mlock (wst.start_watch_mutex);
+        std::unique_lock<decltype (wst.start_watch_mutex)> lock (wst.start_watch_mutex);
 
         auto const wait_until = std::chrono::system_clock::now () + vacuum::initial_delay;
         for (auto now = std::chrono::system_clock::now (); now < wait_until && !st->done;
              now = std::chrono::system_clock::now ()) {
             // FIXME: watch the file for modification. If it is touched, reset wait_until.
             auto remaining = wait_until - now;
-            pstore::logging::log (
-                pstore::logging::priority::notice, "Pre-copy delay. Remaining (ms): ",
-                std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count ());
-            wst.start_watch_cv.wait_for (mlock, vacuum::watch_interval);
+            log (pstore::logging::priority::notice, "Pre-copy delay. Remaining (ms): ",
+                 std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count ());
+            wst.start_watch_cv.wait_for (lock, vacuum::watch_interval);
         }
     }
+
 } // end anonymous namespace
 
 namespace vacuum {
+
     void copy (std::shared_ptr<pstore::database> source, status * const st,
                user_options const & opt) {
         pstore::threads::set_name ("copy");
         pstore::logging::create_log_stream ("vacuumd");
 
         PSTORE_TRY {
-            pstore::logging::log (pstore::logging::priority::notice, "Copy thread started");
+            log (pstore::logging::priority::notice, "Copy thread started");
             while (!st->done) {
-                pstore::logging::log (pstore::logging::priority::notice,
-                                      "Waiting before beginning to vacuum...");
+                log (pstore::logging::priority::notice, "Waiting before beginning to vacuum...");
 
                 if (opt.daemon_mode) {
                     precopy_delay (st);
@@ -119,16 +124,10 @@ namespace vacuum {
                     return;
                 }
 
-                pstore::logging::log (pstore::logging::priority::notice, "Collecting...");
+                log (pstore::logging::priority::notice, "Collecting...");
 
                 // Tell the "watch" thread to start monitoring the store for changes.
-                {
-                    std::lock_guard<std::mutex> lk (wst.start_watch_mutex);
-                    source->sync ();
-                    wst.start_watch = true;
-                    st->modified = false;
-                    wst.start_watch_cv.notify_all ();
-                }
+                start_watching (source, st);
 
                 bool copy_aborted = false;
                 // TODO: a new constructor to make a uniquely named file in the same directory as
@@ -142,8 +141,8 @@ namespace vacuum {
                 std::shared_ptr<pstore::index::write_index> const source_names =
                     pstore::index::get_write_index (*source);
                 if (source_names == nullptr) {
-                    pstore::logging::log (pstore::logging::priority::error,
-                                          "Names index was not found in source store");
+                    log (pstore::logging::priority::error,
+                         "Names index was not found in source store");
                     stop (st);
                     return;
                 }
@@ -172,8 +171,8 @@ namespace vacuum {
                         // Has the watch thread asked us to abort the copy?
                         if (st->modified) {
                             copy_aborted = true;
-                            pstore::logging::log (pstore::logging::priority::notice,
-                                                  "Store was modified during vacuuming: aborted.");
+                            log (pstore::logging::priority::notice,
+                                 "Store was modified during vacuuming: aborted.");
                             break;
                         }
                     }
@@ -188,7 +187,7 @@ namespace vacuum {
                 }
 
                 if (!copy_aborted) {
-                    pstore::logging::log (pstore::logging::priority::notice, "Vacuuming complete");
+                    log (pstore::logging::priority::notice, "Vacuuming complete");
                     stop (st);
                     while (st->watch_running) {
                         std::this_thread::sleep_for (std::chrono::microseconds (10));
@@ -212,15 +211,13 @@ namespace vacuum {
         }
         // clang-format off
         PSTORE_CATCH (std::exception const & ex, {
-            pstore::logging::log (pstore::logging::priority::error, "An error occurred: ",
-                                  ex.what ());
+            log (pstore::logging::priority::error, "An error occurred: ", ex.what ());
         })
         PSTORE_CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+            log (pstore::logging::priority::error, "Unknown error");
         })
         // clang-format on
-        pstore::logging::log (pstore::logging::priority::notice, "Copy thread exiting");
+        log (pstore::logging::priority::notice, "Copy thread exiting");
     }
 
 } // end namespace vacuum
-// eof: lib/vacuum/copy.cpp

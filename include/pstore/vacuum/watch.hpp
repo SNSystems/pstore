@@ -63,7 +63,7 @@ namespace pstore {
 
 namespace vacuum {
     struct watch_state {
-        std::atomic<bool> start_watch{false};
+        bool start_watch = false;
         std::mutex start_watch_mutex;
         std::condition_variable start_watch_cv;
     };
