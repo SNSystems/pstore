@@ -1062,11 +1062,9 @@ namespace pstore {
         void fragment::check_range_is_sorted (Iterator first, Iterator last) {
             (void) first;
             (void) last;
-            static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
-                                         fragment_data>::value),
-                           "Iterator value_type should be fragment_data");
+            using value_type = typename std::iterator_traits<Iterator>::value_type;
             assert (
-                std::is_sorted (first, last, [](fragment_data const & a, fragment_data const & b) {
+                std::is_sorted (first, last, [](value_type const & a, value_type const & b) {
                     return static_cast<unsigned> (a.type) < static_cast<unsigned> (b.type);
                 }));
         }
