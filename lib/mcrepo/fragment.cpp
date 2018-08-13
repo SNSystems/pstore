@@ -50,26 +50,6 @@
 
 using namespace pstore::repo;
 
-//*   __                             _        _      _         *
-//*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   __| |__ _| |_ __ _  *
-//* |  _| '_/ _` / _` | '  \/ -_) ' \  _| / _` / _` |  _/ _` | *
-//* |_| |_| \__,_\__, |_|_|_\___|_||_\__| \__,_\__,_|\__\__,_| *
-//*              |___/                      				   *
-//* *
-// aligned_size_t
-// ~~~~~~~~~~~~~~
-std::size_t fragment_data::aligned_size_t (std::size_t a) const {
-    static_assert (sizeof (std::uintptr_t) >= sizeof (std::size_t),
-                   "sizeof uintptr_t should be at least sizeof size_t");
-    return static_cast<std::size_t> (aligned (static_cast<std::uintptr_t> (a)));
-}
-
-// aligned_ptr
-// ~~~~~~~~~~~
-std::uint8_t * fragment_data::aligned_ptr (std::uint8_t * in) const {
-    return reinterpret_cast<std::uint8_t *> (aligned (reinterpret_cast<std::uintptr_t> (in)));
-}
-
 //*             _   _           *
 //*  ___ ___ __| |_(_)___ _ _   *
 //* (_-</ -_) _|  _| / _ \ ' \  *
@@ -119,30 +99,6 @@ void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noex
     std::memcpy (out, &num.bytes[first_byte], out_bytes);
 }
 
-//*             _   _               _      _         *
-//*  ___ ___ __| |_(_)___ _ _    __| |__ _| |_ __ _  *
-//* (_-</ -_) _|  _| / _ \ ' \  / _` / _` |  _/ _` | *
-//* /__/\___\__|\__|_\___/_||_| \__,_\__,_|\__\__,_| *
-//*                          						 *
-// size_bytes
-// ~~~~~~~~~~
-std::size_t section_data::size_bytes () const {
-    return section::size_bytes (section_->make_sources ());
-}
-
-// write
-// ~~~~~
-std::uint8_t * section_data::write (std::uint8_t * out) const {
-    auto scn = new (out) section (section_->make_sources (), section_->align);
-    return out + scn->size_bytes ();
-}
-
-// aligned
-// ~~~~~~~
-std::uintptr_t section_data::aligned (std::uintptr_t in) const {
-    return pstore::aligned<section> (in);
-}
-
 //*     _                       _         _        *
 //*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  *
 //* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-<  *
@@ -174,28 +130,52 @@ dependents::load (pstore::database const & db, pstore::typed_address<dependents>
     return db.getro (dependent, dependents::size_bytes (ln->size ()));
 }
 
-//*     _                       _         _           _      _         *
-//*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  __| |__ _| |_ __ _  *
-//* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-< / _` / _` |  _/ _` | *
-//* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/ \__,_\__,_|\__\__,_| *
-//*          |_|                                                       *
-// size_bytes
-// ~~~~~~~~~~
-std::size_t dependents_data::size_bytes () const {
+
+//*                  _   _               _ _               _      _                *
+//*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _ ___ *
+//* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_(_-< *
+//* \__|_| \___\__,_|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_| /__/ *
+//*                                            |_|                                 *
+
+//*******************
+//* generic section *
+//*******************
+std::size_t generic_section_creation_dispatcher::size_bytes () const {
+    return section::size_bytes (section_->make_sources ());
+}
+
+std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * out) const {
+    assert (this->aligned (out) == out);
+    auto scn = new (out) section (section_->make_sources (), section_->align);
+    return out + scn->size_bytes ();
+}
+
+std::uintptr_t generic_section_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
+    return pstore::aligned<section> (in);
+}
+
+//**************
+//* dependents *
+//**************
+std::size_t dependents_creation_dispatcher::size_bytes () const {
     static_assert (sizeof (std::uint64_t) >= sizeof (std::uintptr_t),
                    "sizeof uint64_t should be at least sizeof uintptr_t");
     return dependents::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
 }
 
-// write
-// ~~~~~
-std::uint8_t * dependents_data::write (std::uint8_t * out) const {
+std::uint8_t * dependents_creation_dispatcher::write (std::uint8_t * out) const {
+    assert (this->aligned (out) == out);
     if (begin_ == end_) {
         return out;
     }
     auto dependent = new (out) dependents (begin_, end_);
     return out + dependent->size_bytes ();
 }
+
+std::uintptr_t dependents_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
+    return pstore::aligned<dependents> (in);
+}
+
 
 
 namespace {
@@ -207,8 +187,8 @@ namespace {
     class dispatcher {
     public:
         virtual ~dispatcher () noexcept = default;
-        virtual std::size_t size_bytes () const = 0;
 
+        virtual std::size_t size_bytes () const = 0;
         virtual unsigned align () const = 0;
         virtual std::size_t size () const = 0;
         virtual section::container<internal_fixup> ifixups () const = 0;
@@ -220,6 +200,7 @@ namespace {
     public:
         explicit section_dispatcher (section const & s) noexcept
                 : s_{s} {}
+
         std::size_t size_bytes () const final { return s_.size_bytes (); }
         unsigned align () const final { return s_.align (); }
         std::size_t size () const final { return s_.data ().size (); }
@@ -235,8 +216,8 @@ namespace {
     public:
         explicit dependents_dispatcher (dependents const & d) noexcept
                 : d_{d} {}
-        std::size_t size_bytes () const final { return d_.size_bytes (); }
 
+        std::size_t size_bytes () const final { return d_.size_bytes (); }
         unsigned align () const final { error (); }
         std::size_t size () const final { error (); }
         section::container<internal_fixup> ifixups () const final { error (); }

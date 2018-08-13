@@ -140,17 +140,17 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     std::array<pstore::typed_address<ticket_member>, 1> dependents{{addr}};
 
-    // Build the vector of fragment_data.
-    std::vector<std::unique_ptr<fragment_data>> fdata;
-    fdata.emplace_back (
-        new section_data (static_cast<pstore::repo::fragment_type> (data.type), &data));
-
-    fdata.emplace_back (new dependents_data (&dependents[0], &dependents[0] + dependents.size ()));
+    // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's various sections.
+    std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
+    dispatchers.emplace_back (new generic_section_creation_dispatcher (
+        static_cast<pstore::repo::fragment_type> (data.type), &data));
+    dispatchers.emplace_back (
+        new dependents_creation_dispatcher (dependents.data (), dependents.data () + dependents.size ()));
 
     auto fragment = fragment::load (
-        *db_,
-        fragment::alloc (transaction, details::make_fragment_content_iterator (fdata.begin ()),
-                         details::make_fragment_content_iterator (fdata.end ())));
+        *db_, fragment::alloc (transaction,
+                               details::make_fragment_content_iterator (dispatchers.begin ()),
+                               details::make_fragment_content_iterator (dispatchers.end ())));
 
     std::ostringstream out;
     pstore::dump::value_ptr value = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);
@@ -211,5 +211,3 @@ TEST_F (MCRepoFixture, DumpTicket) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));
 }
-
-// eof: unittests/dump/test_mcrepo.cpp

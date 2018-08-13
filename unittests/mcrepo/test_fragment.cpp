@@ -65,24 +65,25 @@ namespace {
 
     template <typename Iterator>
     auto build_sections (Iterator begin, Iterator end)
-        -> std::vector<std::unique_ptr<fragment_data>> {
+        -> std::vector<std::unique_ptr<section_creation_dispatcher>> {
         static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
                                      section_content>::value),
                        "Iterator value_type must be section_content pointer");
         assert (std::distance (begin, end) >= 0);
 
-        std::vector<std::unique_ptr<fragment_data>> fdata;
-        std::for_each (begin, end, [&fdata](section_content const & section) {
-            fdata.emplace_back (
-                new section_data (static_cast<fragment_type> (section.type), &section));
+        std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
+        std::for_each (begin, end, [&dispatchers](section_content const & section) {
+            dispatchers.emplace_back (new generic_section_creation_dispatcher (
+                static_cast<fragment_type> (section.type), &section));
         });
-        return fdata;
+        return dispatchers;
     }
 
     template <typename Iterator>
     pstore::extent<fragment> build_fragment (transaction & transaction, Iterator begin,
                                              Iterator end) {
-        std::vector<std::unique_ptr<fragment_data>> fdata = build_sections (begin, end);
+        std::vector<std::unique_ptr<section_creation_dispatcher>> fdata =
+            build_sections (begin, end);
         return fragment::alloc (transaction,
                                 details::make_fragment_content_iterator (fdata.begin ()),
                                 details::make_fragment_content_iterator (fdata.end ()));
@@ -99,20 +100,21 @@ namespace {
             "Iterator value_type should be ticket_member typed_address");
         assert (std::distance (ticket_member_begin, ticket_member_end) > 0);
 
-        std::vector<std::unique_ptr<fragment_data>> fdata =
+        std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
             build_sections (section_begin, section_end);
 
-        fdata.emplace_back (new dependents_data (ticket_member_begin, ticket_member_end));
+        dispatchers.emplace_back (
+            new dependents_creation_dispatcher (ticket_member_begin, ticket_member_end));
 
         return fragment::alloc (transaction,
-                                details::make_fragment_content_iterator (fdata.begin ()),
-                                details::make_fragment_content_iterator (fdata.end ()));
+                                details::make_fragment_content_iterator (dispatchers.begin ()),
+                                details::make_fragment_content_iterator (dispatchers.end ()));
     }
 
 } // anonymous namespace
 
 TEST_F (FragmentTest, Empty) {
-    std::vector<std::unique_ptr<fragment_data>> c;
+    std::vector<std::unique_ptr<section_creation_dispatcher>> c;
     auto extent =
         fragment::alloc (transaction_, details::make_fragment_content_iterator (std::begin (c)),
                          details::make_fragment_content_iterator (std::end (c)));
@@ -286,5 +288,3 @@ TEST_F (FragmentTest, Iterator) {
     EXPECT_THAT (contents,
                  ::testing::ElementsAre (fragment_type::read_only, fragment_type::thread_data));
 }
-
-// eof: unittests/pstore_mcrepo/test_fragment.cpp

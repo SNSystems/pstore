@@ -190,28 +190,7 @@ namespace pstore {
         static_assert (sizeof (external_fixup) == 32,
                        "external_fixup size does not match expected");
 
-        //*   __                             _        _      _         *
-        //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   __| |__ _| |_ __ _  *
-        //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| / _` / _` |  _/ _` | *
-        //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| \__,_\__,_|\__\__,_| *
-        //*              |___/                                         *
-        //*                                                            *
-        struct fragment_data {
-            explicit fragment_data (fragment_type ft)
-                    : type (ft) {}
 
-            virtual ~fragment_data () = default;
-
-            std::size_t aligned_size_t (std::size_t a) const;
-            std::uint8_t * aligned_ptr (std::uint8_t * in) const;
-
-            virtual std::size_t size_bytes () const = 0;
-            virtual std::uint8_t * write (std::uint8_t * out) const = 0;
-            fragment_type const type;
-
-        private:
-            virtual std::uintptr_t aligned (std::uintptr_t) const = 0;
-        };
 
         //*             _   _           *
         //*  ___ ___ __| |_(_)___ _ _   *
@@ -547,9 +526,9 @@ namespace pstore {
                     return old;
                 }
 
-                reference operator* () const { return (*it_).type; }
-                pointer operator-> () const { return &(*it_).type; }
-                reference operator[] (difference_type n) const { return it_[n].type; }
+                reference operator* () const { return (*it_).type (); }
+                pointer operator-> () const { return &(*it_).type (); }
+                reference operator[] (difference_type n) const { return it_[n].type (); }
 
             private:
                 Iterator it_;
@@ -613,32 +592,6 @@ namespace pstore {
             }
 
         } // end namespace details
-
-        //*             _   _               _      _         *
-        //*  ___ ___ __| |_(_)___ _ _    __| |__ _| |_ __ _  *
-        //* (_-</ -_) _|  _| / _ \ ' \  / _` / _` |  _/ _` | *
-        //* /__/\___\__|\__|_\___/_||_| \__,_\__,_|\__\__,_| *
-        //*                          						 *
-        class section_data final : public fragment_data {
-        public:
-            section_data (fragment_type const ft, section_content const * sec)
-                    : fragment_data (ft)
-                    , section_ (sec) {}
-
-            section_data (section_data const &) = delete;
-            section_data & operator= (section_data const &) = delete;
-
-
-            std::size_t size_bytes () const final;
-
-            // Write the section data to the memory which the pointer 'out' pointed to.
-            std::uint8_t * write (std::uint8_t * out) const final;
-
-        private:
-            std::uintptr_t aligned (std::uintptr_t in) const final;
-            section_content const * const section_;
-        };
-
 
 
         //*     _                       _         _       *
@@ -746,21 +699,102 @@ namespace pstore {
                            "offset of the first dependent must be 8");
         }
 
-        //*     _                       _         _           _      _         *
-        //*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  __| |__ _| |_ __ _  *
-        //* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-< / _` / _` |  _/ _` | *
-        //* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/ \__,_\__,_|\__\__,_| *
-        //*          |_|                                                       *
-        class dependents_data final : public fragment_data {
+
+		//*                  _   _               _ _               _      _                *
+        //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _ ___ *
+        //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_(_-< *
+        //* \__|_| \___\__,_|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_| /__/ *
+        //*                                            |_|                                 *
+        /// A section creation dispatcher is used to instantiate and construct each of a fragment's
+        /// sections in pstore memory. Objects in the pstore need to be portable across compilers
+        /// and host ABIs so they must be "standard layout" which basically means that they can't
+        /// have virtual member functions. These classes are used to add dynamic dispatch to those
+        /// types.
+        ///
+        /// \note In addition to the "section creation" dispatcher, there is a second dispatcher
+        /// hierarchy used to provide dynamic behavior for existing section instances.
+        class section_creation_dispatcher {
+        public:
+            explicit section_creation_dispatcher (fragment_type type) noexcept
+                    : type_{type} {}
+            virtual ~section_creation_dispatcher () noexcept = default;
+            section_creation_dispatcher (section_creation_dispatcher const &) = delete;
+            section_creation_dispatcher & operator= (section_creation_dispatcher const &) = delete;
+
+            fragment_type const & type () const noexcept { return type_; }
+
+            /// \param a  The value to be aligned.
+            /// \returns The value closest to but greater than or equal to \p a which is correctly
+            /// aligned for an instance of the type used for an instance of this section kind.
+            template <typename IntType, typename = std::enable_if<std::is_unsigned<IntType>::value>>
+            std::size_t aligned (IntType a) const {
+                static_assert (sizeof (std::uintptr_t) >= sizeof (IntType),
+                               "sizeof uintptr_t must be at least sizeof IntType");
+                return static_cast<std::size_t> (
+                    this->aligned_impl (static_cast<std::uintptr_t> (a)));
+            }
+            /// \param a  The value to be aligned.
+            /// \returns The value closest to but greater than or equal to \p a which is correctly
+            /// aligned for an instance of the type used for an instance of this section kind.
+            std::uint8_t * aligned (std::uint8_t * a) const {
+                return reinterpret_cast<std::uint8_t *> (
+                    this->aligned_impl (reinterpret_cast<std::uintptr_t> (a)));
+            }
+
+            /// Returns the number of bytes of storage that are required for an instance of the
+            /// section data.
+            virtual std::size_t size_bytes () const = 0;
+
+            /// Copies the section instance data to the memory starting at \p out. On entry, \p out
+            /// is aligned according to the result of the aligned() member function. \param out  The
+            /// address to which the instance data will be written. \returns The address past the
+            /// end of instance data where the next section's data can be writen.
+            virtual std::uint8_t * write (std::uint8_t * out) const = 0;
+
+        private:
+            /// \param v  The value to be aligned.
+            /// \returns The value closest to but greater than or equal to \p v which is correctly
+            /// aligned for an instance of the type used for an instance of this section kind.
+            virtual std::uintptr_t aligned_impl (std::uintptr_t v) const = 0;
+
+            fragment_type const type_;
+        };
+
+        class generic_section_creation_dispatcher final : public section_creation_dispatcher {
+        public:
+            generic_section_creation_dispatcher (fragment_type const ft,
+                                                 section_content const * sec)
+                    : section_creation_dispatcher (ft)
+                    , section_ (sec) {}
+
+            generic_section_creation_dispatcher (generic_section_creation_dispatcher const &) =
+                delete;
+            generic_section_creation_dispatcher &
+            operator= (generic_section_creation_dispatcher const &) = delete;
+
+            std::size_t size_bytes () const final;
+
+            // Write the section data to the memory which the pointer 'out' pointed to.
+            std::uint8_t * write (std::uint8_t * out) const final;
+
+        private:
+            std::uintptr_t aligned_impl (std::uintptr_t in) const final;
+            section_content const * const section_;
+        };
+
+        class dependents_creation_dispatcher final : public section_creation_dispatcher {
         public:
             using const_iterator = typed_address<ticket_member> const *;
 
-            dependents_data (const_iterator begin, const_iterator end)
-                    : fragment_data (fragment_type::dependent)
+            dependents_creation_dispatcher (const_iterator begin, const_iterator end)
+                    : section_creation_dispatcher (fragment_type::dependent)
                     , begin_ (begin)
                     , end_ (end) {
-                assert (end >= begin);
+                assert (std::distance (begin, end) >= 0);
             }
+            dependents_creation_dispatcher (dependents_creation_dispatcher const &) = delete;
+            dependents_creation_dispatcher &
+            operator= (dependents_creation_dispatcher const &) = delete;
 
             std::size_t size_bytes () const final;
 
@@ -772,13 +806,13 @@ namespace pstore {
             const_iterator end () const { return end_; }
 
         private:
-            std::uintptr_t aligned (std::uintptr_t in) const final {
-                return pstore::aligned<dependents> (in);
-            }
+            std::uintptr_t aligned_impl (std::uintptr_t in) const final;
 
             const_iterator begin_;
             const_iterator end_;
         };
+
+
 
         template <fragment_type T>
         struct enum_to_section {};
@@ -811,6 +845,9 @@ namespace pstore {
         //*              |___/                    *
         class fragment {
         public:
+            /// Prepares an instance of a fragment with the collection of sections defined by the
+            /// iterator range [first, last).
+            ///
             /// \tparam Transaction  The type of the database transaction.
             /// \tparam Iterator  An iterator which will yield values of type `fragment_data`. The
             /// values must be sorted in section_content::type order.
@@ -964,7 +1001,7 @@ namespace pstore {
 #undef X
         }
 
-        // populate
+        // populate [private, static]
         // ~~~~~~~~
         template <typename Iterator>
         void fragment::populate (void * ptr, Iterator first, Iterator last) {
@@ -976,13 +1013,14 @@ namespace pstore {
                 reinterpret_cast<std::uint8_t *> (fragment_ptr) + fragment_ptr->arr_.size_bytes ();
 
             // Copy the contents of each of the segments to the fragment.
-            std::for_each (first, last, [&out, fragment_ptr](fragment_data const & c) {
-                out = reinterpret_cast<std::uint8_t *> (c.aligned_ptr (out));
-                fragment_ptr->arr_[static_cast<unsigned> (c.type)] =
-                    reinterpret_cast<std::uintptr_t> (out) -
-                    reinterpret_cast<std::uintptr_t> (fragment_ptr);
-                out = c.write (out);
-            });
+            std::for_each (first, last,
+                           [&out, fragment_ptr](section_creation_dispatcher const & c) {
+                               out = reinterpret_cast<std::uint8_t *> (c.aligned (out));
+                               fragment_ptr->arr_[static_cast<unsigned> (c.type ())] =
+                                   reinterpret_cast<std::uintptr_t> (out) -
+                                   reinterpret_cast<std::uintptr_t> (fragment_ptr);
+                               out = c.write (out);
+                           });
 #ifndef NDEBUG
             {
                 auto const size = fragment::size_bytes (first, last);
@@ -1063,10 +1101,9 @@ namespace pstore {
             (void) first;
             (void) last;
             using value_type = typename std::iterator_traits<Iterator>::value_type;
-            assert (
-                std::is_sorted (first, last, [](value_type const & a, value_type const & b) {
-                    return static_cast<unsigned> (a.type) < static_cast<unsigned> (b.type);
-                }));
+            assert (std::is_sorted (first, last, [](value_type const & a, value_type const & b) {
+                return static_cast<unsigned> (a.type ()) < static_cast<unsigned> (b.type ());
+            }));
         }
 
         // size_bytes
@@ -1084,8 +1121,8 @@ namespace pstore {
             // Space needed by the section offset array.
             std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (unum_contents);
             // Now the storage for each of the contents
-            std::for_each (first, last, [&size_bytes](fragment_data const & c) {
-                size_bytes = c.aligned_size_t (size_bytes);
+            std::for_each (first, last, [&size_bytes](section_creation_dispatcher const & c) {
+                size_bytes = c.aligned (size_bytes);
                 size_bytes += c.size_bytes ();
             });
             return size_bytes;

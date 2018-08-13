@@ -54,10 +54,10 @@
 namespace pstore {
     namespace dump {
 
+        value_ptr make_value (repo::fragment_type t) {
 #define X(a)                                                                                       \
     case (repo::fragment_type::a): name = #a; break;
 
-        value_ptr make_value (repo::fragment_type t) {
             char const * name = "*unknown*";
             switch (t) {
                 PSTORE_REPO_SECTION_TYPES
@@ -65,8 +65,8 @@ namespace pstore {
             case repo::fragment_type::last: break;
             }
             return make_value (name);
-        }
 #undef X
+        }
 
         value_ptr make_value (repo::internal_fixup const & ifx) {
             auto v = std::make_shared<object> (object::container{
@@ -140,12 +140,13 @@ namespace pstore {
         }
 
 
+
+        value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
 #define X(a)                                                                                       \
     case (repo::fragment_type::a):                                                                 \
         contents = make_value (db, fragment.at<repo::fragment_type::a> (), type, hex_mode);        \
         break;
 
-        value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
             array::container array;
             for (repo::fragment_type const type : fragment) {
                 assert (fragment.has_fragment (type));
@@ -159,6 +160,7 @@ namespace pstore {
                     object::container{{"type", make_value (type)}, {"contents", contents}}));
             }
             return make_value (std::move (array));
+#undef X
         }
 
         value_ptr make_fragments (database & db, bool hex_mode) {
@@ -176,17 +178,17 @@ namespace pstore {
             }
             return make_value (result);
         }
-#undef X
 
+
+        value_ptr make_value (repo::linkage_type t) {
 #define X(a)                                                                                       \
     case (repo::linkage_type::a): Name = #a; break;
 
-        value_ptr make_value (repo::linkage_type t) {
             char const * Name = "*unknown*";
             switch (t) { PSTORE_REPO_LINKAGE_TYPES }
             return make_value (Name);
-        }
 #undef X
+        }
 
         value_ptr make_value (database const & db, repo::ticket_member const & member) {
             using namespace serialize;
@@ -229,5 +231,3 @@ namespace pstore {
 
     } // namespace dump
 } // namespace pstore
-
-// eof: lib/dump/mcrepo_value.cpp
