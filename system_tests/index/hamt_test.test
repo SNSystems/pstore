@@ -4,9 +4,4 @@
 # %S = the test source directory
 
 # Try to run the hamt_test.exe.
-
-# Delete an existing folder.
-RUN: rm -rf "%T/hamt_test"
-
-RUN: mkdir -p "%T/hamt_test"
-RUN: "%binaries/pstore-hamt-test" "%T/hamt_test/foo.db"
+RUN: "%binaries/pstore-hamt-test" "%stores/pstore_hamt_test.db"
