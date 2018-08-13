@@ -218,10 +218,7 @@ def boilerplate (path, base_path, comment_char=None, figlet_enabled=True):
     prolog += get_path_line (subpath, comment_char)
     prolog += get_license (comment_char)
     prolog += [ comment_char + '===----------------------------------------------------------------------===//\n' ]
-    epilog = [
-        comment_char + ' eof: ' + subpath + '\n',
-    ]
-    return prolog + lines + epilog
+    return prolog + lines
 
 
 def boilerplate_out (path, base_path, comment_char=None, inplace=False, figlet_enabled=True):
@@ -249,5 +246,3 @@ def main (args=sys.argv [1:]):
 
 if __name__ == '__main__':
     sys.exit (main ())
-
-# eof: utils/boilerplate/boilerplate.py
