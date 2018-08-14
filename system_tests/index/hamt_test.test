@@ -3,5 +3,8 @@
 # %T = the test output directory
 # %S = the test source directory
 
+# Delete an existing data store.
+RUN: rm -f "%stores/hamt_test.db"
+
 # Try to run the hamt_test.exe.
-RUN: "%binaries/pstore-hamt-test" "%stores/pstore_hamt_test.db"
+RUN: "%binaries/pstore-hamt-test" "%stores/hamt_test.db"
