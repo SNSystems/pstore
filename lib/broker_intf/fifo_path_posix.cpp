@@ -128,6 +128,7 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         auto fifo_path::open_server_pipe () -> server_pipe {
             auto path = path_.c_str ();
+            std::lock_guard<decltype (open_server_pipe_mut_)> lock (open_server_pipe_mut_);
 
             // The server opens its well-known FIFO read-only (since it only reads from it) each
             // time the number of clients goes from 1 to 0, the server will read an end of file on

@@ -49,6 +49,7 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <tuple>
 
@@ -123,6 +124,11 @@ namespace pstore {
             client_pipe open_impl () const;
             void wait_until_impl (std::chrono::milliseconds timeout) const;
 
+#ifndef _WIN32
+            /// A mutex to prevent more than one thread trying to create/open the server pipe at the
+            /// same time.
+            std::mutex open_server_pipe_mut_;
+#endif
             std::atomic<bool> needs_delete_{false};
             std::string const path_;
 
@@ -135,4 +141,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_INTF_FIFO_PATH_HPP
-// eof: include/pstore/broker_intf/fifo_path.hpp
