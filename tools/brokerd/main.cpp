@@ -48,6 +48,7 @@
 #include <future>
 #include <iostream>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <vector>
 
@@ -195,9 +196,10 @@ int main (int argc, char * argv[]) {
                           status_client.get ());
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
-                    futures.push_back (create_thread ([&fifo, &record_file, commands]() {
-                        threads::set_name ("read");
-                        logging::create_log_stream ("broker.read");
+                    futures.push_back (create_thread ([ctr, &fifo, &record_file, commands]() {
+                        auto const name = std::string{"read"} + std::to_string (ctr);
+                        threads::set_name (name.c_str ());
+                        logging::create_log_stream ("broker." + name);
                         read_loop (fifo, record_file, commands);
                     }));
                 }
