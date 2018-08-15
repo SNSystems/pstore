@@ -201,7 +201,7 @@ namespace pstore {
             ///
             /// \param err  The json error code to be stored in the parser.
             void set_error (error_code err) noexcept {
-                assert (err != error_code::none);
+                assert (error_ == error_code::none || err != error_code::none);
                 error_ = err;
             }
             ///@}
@@ -277,7 +277,9 @@ namespace pstore {
 
                 void set_error (parser<Callbacks> & parser, error_code err) noexcept {
                     parser.set_error (err);
-                    set_state (done);
+                    if (err != error_code::none) {
+                        set_state (done);
+                    }
                 }
                 ///@}
 
@@ -803,8 +805,6 @@ namespace pstore {
                     done_state = matcher<Callbacks>::done,
                 };
 
-                static maybe<unsigned> hex_value (char32_t c, unsigned value);
-
                 class appender {
                 public:
                     bool append32 (char32_t code_point);
@@ -816,6 +816,14 @@ namespace pstore {
                     std::string result_;
                     char16_t high_surrogate_ = 0;
                 };
+
+                static maybe<unsigned> hex_value (char32_t c, unsigned value);
+
+                static std::tuple<unsigned, state, error_code>
+                consume_hex_state (unsigned hex, int state, char32_t code_point, appender & app);
+
+                static std::tuple<state, error_code> consume_escape_state (char32_t code_point,
+                                                                           appender & app);
 
                 utf8_decoder decoder_;
                 appender app_;
@@ -870,6 +878,7 @@ namespace pstore {
                 return ok;
             }
 
+            // [static]
             template <typename Callbacks>
             maybe<unsigned> string_matcher<Callbacks>::hex_value (char32_t c, unsigned value) {
                 auto digit = 0U;
@@ -882,7 +891,59 @@ namespace pstore {
                 } else {
                     return nothing<unsigned> ();
                 }
-                return just (value * 16 + digit);
+                return just (16 * value + digit);
+            }
+
+            // [static]
+            template <typename Callbacks>
+            auto string_matcher<Callbacks>::consume_hex_state (unsigned hex, int state,
+                                                               char32_t code_point, appender & app)
+                -> std::tuple<unsigned, enum state, error_code> {
+
+                if (maybe<unsigned> const v = hex_value (code_point, hex)) {
+                    switch (state) {
+                    case hex1_state: return std::make_tuple (*v, hex2_state, error_code::none);
+                    case hex2_state: return std::make_tuple (*v, hex3_state, error_code::none);
+                    case hex3_state: return std::make_tuple (*v, hex4_state, error_code::none);
+                    case hex4_state:
+                        assert (hex <= std::numeric_limits<std::uint16_t>::max ());
+                        if (!app.append16 (static_cast<char16_t> (*v))) {
+                            return std::make_tuple (*v, normal_char_state, error_code::bad_unicode_code_point);
+                        }
+                        return std::make_tuple (hex, normal_char_state, error_code::none);
+                    default: assert (false); break;
+                    }
+                }
+                return std::make_tuple (hex, normal_char_state, error_code::invalid_hex_char);
+            }
+
+            // [static]
+            template <typename Callbacks>
+            auto string_matcher<Callbacks>::consume_escape_state (char32_t code_point, appender & app)
+                -> std::tuple<state, error_code> {
+                state next_state = normal_char_state;
+                error_code error = error_code::none;
+
+                switch (code_point) {
+                case '"': code_point = '"'; break;
+                case '\\': code_point = '\\'; break;
+                case '/': code_point = '/'; break;
+                case 'b': code_point = '\b'; break;
+                case 'f': code_point = '\f'; break;
+                case 'n': code_point = '\n'; break;
+                case 'r': code_point = '\r'; break;
+                case 't': code_point = '\t'; break;
+                case 'u': next_state = hex1_state; break;
+                default: error = error_code::invalid_escape_char; break;
+                }
+
+                if (next_state == normal_char_state) {
+                    assert (code_point < 0x80);
+                    if (!app.append32 (code_point)) {
+                        error = error_code::invalid_escape_char;
+                    }
+                }
+                return std::make_tuple (next_state, error);
             }
 
             template <typename Callbacks>
@@ -926,58 +987,24 @@ namespace pstore {
                             }
                         }
                         break;
-                    case escape_state:
-                        this->set_state (normal_char_state);
-                        switch (code_point) {
-                        case '"': code_point = '"'; break;
-                        case '\\': code_point = '\\'; break;
-                        case '/': code_point = '/'; break;
-                        case 'b': code_point = '\b'; break;
-                        case 'f': code_point = '\f'; break;
-                        case 'n': code_point = '\n'; break;
-                        case 'r': code_point = '\r'; break;
-                        case 't': code_point = '\t'; break;
-                        case 'u': this->set_state (hex1_state); break;
-                        default: this->set_error (parser, error_code::invalid_escape_char); break;
-                        }
-                        if (this->get_state () == normal_char_state) {
-                            assert (code_point < 0x80);
-                            if (!app_.append32 (code_point)) {
-                                this->set_error (parser, error_code::invalid_escape_char);
-                            }
-                        }
-                        break;
+
+                    case escape_state: {
+                        auto escape_resl = string_matcher<Callbacks>::consume_escape_state (code_point, app_);
+                        this->set_state (std::get<0> (escape_resl));
+                        this->set_error (parser, std::get<1> (escape_resl));
+                    } break;
+
                     case hex1_state: hex_ = 0; PSTORE_FALLTHROUGH;
-                    case hex2_state: PSTORE_FALLTHROUGH;
+                    case hex2_state:
                     case hex3_state:
-                        if (maybe<unsigned> j = hex_value (code_point, hex_)) {
-                            {
-                                auto s = this->get_state ();
-                                switch (s) {
-                                case hex1_state: s = hex2_state; break;
-                                case hex2_state: s = hex3_state; break;
-                                case hex3_state: s = hex4_state; break;
-                                default: assert (false); break;
-                                }
-                                this->set_state (s);
-                            }
-                            hex_ = *j;
-                        } else {
-                            this->set_error (parser, error_code::invalid_escape_char);
-                        }
-                        break;
-                    case hex4_state:
-                        if (maybe<unsigned> j = hex_value (code_point, hex_)) {
-                            this->set_state (normal_char_state);
-                            hex_ = *j;
-                            assert (hex_ <= std::numeric_limits<std::uint16_t>::max ());
-                            if (!app_.append16 (static_cast<char16_t> (hex_))) {
-                                this->set_error (parser, error_code::bad_unicode_code_point);
-                            }
-                        } else {
-                            this->set_error (parser, error_code::bad_unicode_code_point);
-                        }
-                        break;
+                    case hex4_state: {
+                        auto const hex_resl =
+                            string_matcher::consume_hex_state (hex_, this->get_state (), code_point, app_);
+                        hex_ = std::get<0> (hex_resl);
+                        this->set_state (std::get<1> (hex_resl));
+                        this->set_error (parser, std::get<2> (hex_resl));
+                    } break;
+
                     case done_state: assert (false); break;
                     }
                 }

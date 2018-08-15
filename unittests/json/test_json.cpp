@@ -350,7 +350,6 @@ TEST_F (JsonString, Utf16HighWithMissingLowSurrogate) {
 
 TEST_F (JsonString, ControlCharacter) {
     this->check_error ("\"\t\"", json::error_code::bad_unicode_code_point);
-
     this->check ("\"\\u0009\"", "\t", 9U);
 }
 
@@ -701,5 +700,3 @@ TEST_F (JsonObject, BadNestedObject) {
     p.eof ();
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
 }
-
-// eof: unittests/pstore_json/test_json.cpp

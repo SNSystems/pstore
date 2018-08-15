@@ -60,6 +60,7 @@ namespace pstore {
             expected_object_member,
             expected_token,
             invalid_escape_char,
+            invalid_hex_char,
             unrecognized_token,
             unexpected_extra_input,
             bad_unicode_code_point,
@@ -89,4 +90,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_JSON_ERROR_HPP
-// eof: include/pstore/json/json_error.hpp
