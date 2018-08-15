@@ -817,6 +817,10 @@ namespace pstore {
                     char16_t high_surrogate_ = 0;
                 };
 
+                static std::tuple<state, error_code>
+                consume_normal_state (parser<Callbacks> & parser, char32_t code_point,
+                                      appender & app);
+
                 static maybe<unsigned> hex_value (char32_t c, unsigned value);
 
                 static std::tuple<unsigned, state, error_code>
@@ -876,6 +880,37 @@ namespace pstore {
                     }
                 }
                 return ok;
+            }
+
+            // [static]
+            template <typename Callbacks>
+            auto string_matcher<Callbacks>::consume_normal_state (parser<Callbacks> & parser,
+                                                                  char32_t code_point,
+                                                                  appender & app)
+                -> std::tuple<state, error_code> {
+                state next_state = normal_char_state;
+                error_code error = error_code::none;
+
+                if (code_point == '"') {
+                    if (app.has_high_surrogate ()) {
+                        error = error_code::bad_unicode_code_point;
+                    } else {
+                        // Consume the closing quote character.
+                        parser.callbacks ().string_value (app.result ());
+                    }
+                    next_state = done_state;
+                } else if (code_point == '\\') {
+                    next_state = escape_state;
+                } else if (code_point <= 0x1F) {
+                    // Control characters U+0000 through U+001F MUST be escaped.
+                    error = error_code::bad_unicode_code_point;
+                } else {
+                    if (!app.append32 (code_point)) {
+                        error = error_code::bad_unicode_code_point;
+                    }
+                }
+
+                return std::make_tuple (next_state, error);
             }
 
             // [static]
@@ -967,29 +1002,16 @@ namespace pstore {
                             this->set_error (parser, error_code::expected_token);
                         }
                         break;
-                    case normal_char_state:
-                        if (code_point == '"') {
-                            if (app_.has_high_surrogate ()) {
-                                this->set_error (parser, error_code::bad_unicode_code_point);
-                            } else {
-                                // Consume the closing quote character.
-                                parser.callbacks ().string_value (app_.result ());
-                            }
-                            this->set_state (done_state);
-                        } else if (code_point == '\\') {
-                            this->set_state (escape_state);
-                        } else if (code_point <= 0x1F) {
-                            // Control characters U+0000 through U+001F MUST be escaped.
-                            this->set_error (parser, error_code::bad_unicode_code_point);
-                        } else {
-                            if (!app_.append32 (code_point)) {
-                                this->set_error (parser, error_code::bad_unicode_code_point);
-                            }
-                        }
-                        break;
+                    case normal_char_state: {
+                        auto const normal_resl =
+                            string_matcher::consume_normal_state (parser, code_point, app_);
+                        this->set_state (std::get<0> (normal_resl));
+                        this->set_error (parser, std::get<1> (normal_resl));
+                    } break;
 
                     case escape_state: {
-                        auto escape_resl = string_matcher<Callbacks>::consume_escape_state (code_point, app_);
+                        auto const escape_resl =
+                            string_matcher::consume_escape_state (code_point, app_);
                         this->set_state (std::get<0> (escape_resl));
                         this->set_error (parser, std::get<1> (escape_resl));
                     } break;
