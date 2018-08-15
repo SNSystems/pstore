@@ -78,9 +78,8 @@
 #    include "pstore/support/utf.hpp"
 
 namespace {
+    using namespace pstore;
     using namespace pstore::broker;
-    using namespace pstore::gsl;
-    using namespace pstore::logging;
 
     //*                  _          *
     //*  _ _ ___ __ _ __| |___ _ _  *
@@ -90,7 +89,8 @@ namespace {
     class reader {
     public:
         reader () = default;
-        reader (pipe_descriptor && ph, not_null<command_processor *> cp, recorder * record_file);
+        reader (pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
+                recorder * record_file);
 
         ~reader () noexcept;
 
@@ -133,7 +133,8 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    reader::reader (pipe_descriptor && ph, not_null<command_processor *> cp, recorder * record_file)
+    reader::reader (pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
+                    recorder * record_file)
             : pipe_handle_{std::move (ph)}
             , command_processor_{cp}
             , record_file_{record_file} {
@@ -227,7 +228,7 @@ namespace {
         if (!error_text || size == 0) {
             return "unknown error";
         }
-        return pstore::utf::win32::to8 (error_text.get (), size);
+        return utf::win32::to8 (error_text.get (), size);
     }
 
     // read_completed
@@ -241,6 +242,7 @@ namespace {
     /// \param overlap  A pointer to the OVERLAPPED structure specified by the asynchronous I/O
     /// function.
     VOID WINAPI reader::read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap) {
+        using logging::priority;
         auto * r = reinterpret_cast<reader *> (overlap);
         assert (r != nullptr);
 
@@ -295,17 +297,17 @@ namespace {
     /// Manages the process of asynchronously reading from the named pipe.
     class request {
     public:
-        explicit request (not_null<command_processor *> cp, recorder * record_file);
+        explicit request (gsl::not_null<command_processor *> cp, recorder * record_file);
 
         void attach_pipe (pipe_descriptor && p);
-        ~request ();
+        ~request () = default;
 
         void cancel ();
 
     private:
         intrusive_list<reader> list_;
 
-        not_null<command_processor *> command_processor_;
+        gsl::not_null<command_processor *> command_processor_;
         recorder * const record_file_;
 
         /// A class used to insert a reader instance into the list of extant reads and
@@ -324,18 +326,14 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    request::request (not_null<command_processor *> cp, recorder * record_file)
+    request::request (gsl::not_null<command_processor *> cp, recorder * record_file)
             : command_processor_{cp}
             , record_file_{record_file} {}
-
-    // (dtor)
-    // ~~~~~~
-    request::~request () {}
 
     // attach_pipe
     // ~~~~~~~~~~~
     /// Associates the given pipe handle with this request object and starts a read operation.
-    void request::attach_pipe (pstore::broker::pipe_descriptor && pipe) {
+    void request::attach_pipe (pipe_descriptor && pipe) {
         auto r = std::make_unique<reader> (std::move (pipe), command_processor_, record_file_);
 
         // Insert this new object into the list of active reads. We now have two pointers to it:
@@ -357,6 +355,12 @@ namespace {
         }
     }
 
+
+    //*           _ _   _                  _    *
+    //*  _ _ __ _(_|_) (_)_ _  ___ ___ _ _| |_  *
+    //* | '_/ _` | | | | | ' \(_-</ -_) '_|  _| *
+    //* |_| \__,_|_|_| |_|_||_/__/\___|_|  \__| *
+
     request::raii_insert::raii_insert (intrusive_list<reader> & list, reader * r) noexcept
             : r_{r} {
         list.insert_before (r, list.tail ());
@@ -374,9 +378,7 @@ namespace {
         return result;
     }
 
-} // namespace
 
-namespace {
 
     // connect_to_new_client
     // ~~~~~~~~~~~~~~~~~~~~~
@@ -393,7 +395,7 @@ namespace {
 
         auto const errcode = ::GetLastError ();
         if (cnp_res) {
-            raise (::pstore::win32_erc (errcode), "ConnectNamedPipe");
+            raise (win32_erc (errcode), "ConnectNamedPipe");
         }
 
         bool pending_io = false;
@@ -405,12 +407,12 @@ namespace {
         case ERROR_PIPE_CONNECTED:
             // The client is already connected, so signal an event.
             if (!::SetEvent (overlapped.hEvent)) {
-                raise (::pstore::win32_erc (::GetLastError ()), "SetEvent");
+                raise (win32_erc (::GetLastError ()), "SetEvent");
             }
             break;
         default:
             // An error occurred during the connect operation.
-            raise (::pstore::win32_erc (errcode), "ConnectNamedPipe");
+            raise (win32_erc (errcode), "ConnectNamedPipe");
         }
         return pending_io;
     }
@@ -424,26 +426,26 @@ namespace {
     /// pipe creation.
     /// \return  A pair containing both the pipe handle and a boolean which will be true if the
     /// connect operation is pending, and false if the connection has been completed.
-    std::pair<pstore::broker::pipe_descriptor, bool>
-    create_and_connect_instance (std::wstring const & pipe_name, OVERLAPPED & overlap) {
+    std::pair<pipe_descriptor, bool> create_and_connect_instance (std::wstring const & pipe_name,
+                                                                  OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
         static constexpr auto default_pipe_timeout =
             DWORD{5 * 1000}; // TODO: make this user-configurable.
 
-        auto pipe = pstore::broker::pipe_descriptor{
-            ::CreateNamedPipeW (pipe_name.c_str (),
-                                PIPE_ACCESS_INBOUND |             // read/write access
-                                    FILE_FLAG_OVERLAPPED,         // overlapped mode
-                                PIPE_TYPE_BYTE |                  // message-type pipe
-                                    PIPE_READMODE_BYTE |          // message-read mode
-                                    PIPE_WAIT,                    // blocking mode
-                                PIPE_UNLIMITED_INSTANCES,         // unlimited instances
-                                0,                                // output buffer size
-                                pstore::broker::message_size * 4, // input buffer size
-                                default_pipe_timeout,             // client time-out
-                                nullptr)};                        // default security attributes
+        auto pipe =
+            pipe_descriptor{::CreateNamedPipeW (pipe_name.c_str (),
+                                                PIPE_ACCESS_INBOUND |     // read/write access
+                                                    FILE_FLAG_OVERLAPPED, // overlapped mode
+                                                PIPE_TYPE_BYTE |          // message-type pipe
+                                                    PIPE_READMODE_BYTE |  // message-read mode
+                                                    PIPE_WAIT,            // blocking mode
+                                                PIPE_UNLIMITED_INSTANCES, // unlimited instances
+                                                0,                        // output buffer size
+                                                message_size * 4,         // input buffer size
+                                                default_pipe_timeout,     // client time-out
+                                                nullptr)}; // default security attributes
         if (pipe.get () == INVALID_HANDLE_VALUE) {
-            raise (::pstore::win32_erc (::GetLastError ()), "CreateNamedPipeW");
+            raise (win32_erc (::GetLastError ()), "CreateNamedPipeW");
         }
 
         auto const pending_io = connect_to_new_client (pipe.get (), overlap);
@@ -454,14 +456,14 @@ namespace {
     // create_event
     // ~~~~~~~~~~~~
     /// Creates a manual-reset event which is initially signaled.
-    pstore::broker::pipe_descriptor create_event () {
+    pipe_descriptor create_event () {
         if (HANDLE h = ::CreateEvent (nullptr, true, true, nullptr)) {
-            return pstore::broker::pipe_descriptor{h};
+            return pipe_descriptor{h};
         }
-        raise (::pstore::win32_erc (::GetLastError ()), "CreateEvent");
+        raise (win32_erc (::GetLastError ()), "CreateEvent");
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 namespace pstore {
@@ -472,9 +474,9 @@ namespace pstore {
         void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> cp) {
             try {
-                pstore::logging::log (pstore::logging::priority::notice, "listening to named pipe ",
-                                      pstore::logging::quoted (path.get ().c_str ()));
-                auto const pipe_name = pstore::utf::win32::to16 (path.get ());
+                log (logging::priority::notice, "listening to named pipe ",
+                     logging::quoted (path.get ().c_str ()));
+                auto const pipe_name = utf::win32::to16 (path.get ());
                 // Create one event object for the connect operation.
                 unique_handle connect_event = create_event ();
 
@@ -502,7 +504,7 @@ namespace pstore {
                             auto bytes_transferred = DWORD{0};
                             if (!::GetOverlappedResult (pipe.get (), &connect, &bytes_transferred,
                                                         false /*do not wait*/)) {
-                                raise (::pstore::win32_erc (::GetLastError ()), "ConnectNamedPipe");
+                                raise (win32_erc (::GetLastError ()), "ConnectNamedPipe");
                             }
                         }
 
@@ -518,25 +520,24 @@ namespace pstore {
                         // The wait was satisfied by a completed read operation.
                         break;
                     case WAIT_TIMEOUT:
-                        pstore::logging::log (pstore::logging::priority::notice, "wait timeout");
+                        logging::log (logging::priority::notice, "wait timeout");
                         break;
-                    default:
-                        raise (::pstore::win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
+                    default: raise (win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
                     }
                 }
 
                 // Try to cancel any reads that are still in-flight.
                 req.cancel ();
             } catch (std::exception const & ex) {
-                pstore::logging::log (pstore::logging::priority::error, "error: ", ex.what ());
+                logging::log (logging::priority::error, "error: ", ex.what ());
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             } catch (...) {
-                pstore::logging::log (pstore::logging::priority::error, "unknown error");
+                logging::log (logging::priority::error, "unknown error");
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             }
-            pstore::logging::log (pstore::logging::priority::notice, "exiting read loop");
+            logging::log (logging::priority::notice, "exiting read loop");
         }
 
     } // namespace broker
