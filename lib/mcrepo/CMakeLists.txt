@@ -44,11 +44,16 @@
 
 set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (pstore-mcrepo
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/dependents_section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/generic_section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/repo_error.hpp"
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/sparse_array.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/ticket.hpp"
+    dependents_section.cpp
     fragment.cpp
+    generic_section.cpp
     repo_error.cpp
     ticket.cpp
 )

@@ -50,201 +50,7 @@
 
 using namespace pstore::repo;
 
-//*             _   _           *
-//*  ___ ___ __| |_(_)___ _ _   *
-//* (_-</ -_) _|  _| / _ \ ' \  *
-//* /__/\___\__|\__|_\___/_||_| *
-//*                             *
-// size_bytes
-// ~~~~~~~~~~
-std::size_t section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
-                                 std::size_t num_xfixups) {
-    auto result = sizeof (section);
-    result = section::part_size_bytes<std::uint8_t> (result, data_size);
-    result = section::part_size_bytes<internal_fixup> (result, num_ifixups);
-    result = section::part_size_bytes<external_fixup> (result, num_xfixups);
-    return result;
-}
-
-std::size_t section::size_bytes () const {
-    return section::size_bytes (data ().size (), ifixups ().size (), xfixups ().size ());
-}
-
-// three_byte_integer::get
-// ~~~~~~~~~~~~~~~~~~~~~~~
-std::uint32_t section::three_byte_integer::get (std::uint8_t const * src) noexcept {
-    number result;
-#if PSTORE_IS_BIG_ENDIAN
-    result.bytes[0] = 0;
-    std::memcpy (&result[1], src, 3);
-#else
-    std::memcpy (&result, src, 3);
-    result.bytes[3] = 0;
-#endif
-    return result.value;
-}
-
-// three_byte_integer::set
-// ~~~~~~~~~~~~~~~~~~~~~~~
-void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noexcept {
-    constexpr auto out_bytes = std::size_t{3};
-    number num;
-    num.value = v;
-
-#if PSTORE_IS_BIG_ENDIAN
-    constexpr auto first_byte = sizeof (std::uint32_t) - num_bytes;
-#else
-    constexpr auto first_byte = 0U;
-#endif
-    std::memcpy (out, &num.bytes[first_byte], out_bytes);
-}
-
-//*     _                       _         _        *
-//*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  *
-//* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-<  *
-//* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/  *
-//*          |_|								   *
-// size_bytes
-// ~~~~~~~~~~
-std::size_t dependents::size_bytes (std::uint64_t size) noexcept {
-    if (size == 0) {
-        return 0;
-    }
-    return sizeof (dependents) - sizeof (dependents::ticket_members_) +
-           sizeof (dependents::ticket_members_[0]) * size;
-}
-
-// size_bytes
-// ~~~~~~~~~~
-/// Returns the number of bytes of storage required for the dependents.
-std::size_t dependents::size_bytes () const noexcept {
-    return size_bytes (this->size ());
-}
-
-// load
-// ~~~~
-std::shared_ptr<dependents const>
-dependents::load (pstore::database const & db, pstore::typed_address<dependents> const dependent) {
-    // First work out its size, then read the full-size of the object.
-    std::shared_ptr<dependents const> ln = db.getro (dependent);
-    return db.getro (dependent, dependents::size_bytes (ln->size ()));
-}
-
-
-//*                  _   _               _ _               _      _                *
-//*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _ ___ *
-//* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_(_-< *
-//* \__|_| \___\__,_|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_| /__/ *
-//*                                            |_|                                 *
-
-//*******************
-//* generic section *
-//*******************
-std::size_t generic_section_creation_dispatcher::size_bytes () const {
-    return section::size_bytes (section_->make_sources ());
-}
-
-std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * out) const {
-    assert (this->aligned (out) == out);
-    auto scn = new (out) section (section_->make_sources (), section_->align);
-    return out + scn->size_bytes ();
-}
-
-std::uintptr_t generic_section_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
-    return pstore::aligned<section> (in);
-}
-
-//**************
-//* dependents *
-//**************
-std::size_t dependents_creation_dispatcher::size_bytes () const {
-    static_assert (sizeof (std::uint64_t) >= sizeof (std::uintptr_t),
-                   "sizeof uint64_t should be at least sizeof uintptr_t");
-    return dependents::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
-}
-
-std::uint8_t * dependents_creation_dispatcher::write (std::uint8_t * out) const {
-    assert (this->aligned (out) == out);
-    if (begin_ == end_) {
-        return out;
-    }
-    auto dependent = new (out) dependents (begin_, end_);
-    return out + dependent->size_bytes ();
-}
-
-std::uintptr_t dependents_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
-    return pstore::aligned<dependents> (in);
-}
-
-
-
 namespace {
-
-    /// This class is used to add virtual methods to a fragment's section. The section types
-    /// themselves cannot be virtual because they're written to disk and wouldn't be portable
-    /// between different C++ ABIs. The concrete classes derived from "dispatcher" wrap the real
-    /// section data types and forward to calls directly to them.
-    class dispatcher {
-    public:
-        virtual ~dispatcher () noexcept = default;
-
-        virtual std::size_t size_bytes () const = 0;
-        virtual unsigned align () const = 0;
-        virtual std::size_t size () const = 0;
-        virtual section::container<internal_fixup> ifixups () const = 0;
-        virtual section::container<external_fixup> xfixups () const = 0;
-        virtual section::container<std::uint8_t> data () const = 0;
-    };
-
-    class section_dispatcher final : public dispatcher {
-    public:
-        explicit section_dispatcher (section const & s) noexcept
-                : s_{s} {}
-
-        std::size_t size_bytes () const final { return s_.size_bytes (); }
-        unsigned align () const final { return s_.align (); }
-        std::size_t size () const final { return s_.data ().size (); }
-        section::container<internal_fixup> ifixups () const final { return s_.ifixups (); }
-        section::container<external_fixup> xfixups () const final { return s_.xfixups (); }
-        section::container<std::uint8_t> data () const final { return s_.data (); }
-
-    private:
-        section const & s_;
-    };
-
-    class dependents_dispatcher final : public dispatcher {
-    public:
-        explicit dependents_dispatcher (dependents const & d) noexcept
-                : d_{d} {}
-
-        std::size_t size_bytes () const final { return d_.size_bytes (); }
-        unsigned align () const final { error (); }
-        std::size_t size () const final { error (); }
-        section::container<internal_fixup> ifixups () const final { error (); }
-        section::container<external_fixup> xfixups () const final { error (); }
-        section::container<std::uint8_t> data () const final { error (); }
-
-    private:
-        PSTORE_NO_RETURN void error () const {
-            pstore::raise_error_code (
-                std::make_error_code (pstore::repo::error_code::bad_fragment_type));
-        }
-        dependents const & d_;
-    };
-
-    /// Maps from the type of data that is associated with a fragment's section to a "dispatcher"
-    /// subclass which provides a generic interface to the behavior of these sections.
-    template <typename T>
-    struct section_to_dispatcher {};
-    template <>
-    struct section_to_dispatcher<section> {
-        using type = section_dispatcher;
-    };
-    template <>
-    struct section_to_dispatcher<dependents> {
-        using type = dependents_dispatcher;
-    };
-
     /// The size and alignment necessary for a buffer into which any of the dispatcher subclasses
     /// can be successfully constructed. This must list all of the dispatcher subclasses.
     using dispatcher_characteristics =
@@ -356,24 +162,24 @@ std::size_t pstore::repo::section_size (fragment const & f, section_kind kind) {
 
 // section_ifixups
 // ~~~~~~~~~~~~~~~
-section::container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
-                                                                  section_kind kind) {
+container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
+                                                         section_kind kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->ifixups ();
 }
 
 // section_xfixups
 // ~~~~~~~~~~~~~~~
-section::container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
-                                                                  section_kind kind) {
+container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
+                                                         section_kind kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->xfixups ();
 }
 
 // section_data
 // ~~~~~~~~~~~~
-section::container<std::uint8_t> pstore::repo::section_value (fragment const & f,
-                                                              section_kind kind) {
+container<std::uint8_t> pstore::repo::section_value (fragment const & f,
+                                                     section_kind kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->data ();
 }
