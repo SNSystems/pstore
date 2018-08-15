@@ -121,13 +121,13 @@ TEST_F (MCRepoFixture, DumpFragment) {
     transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
     std::array<section_content, 1> c = {
-        {section_content (section_type::data, std::uint8_t{0x10} /*alignment*/)}};
+        {section_content (section_kind::data, std::uint8_t{0x10} /*alignment*/)}};
     section_content & data = c.back ();
     pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
     {
         // Build the data section's contents and fixups.
         data.data.assign ({'t', 'e', 'x', 't'});
-        data.ifixups.emplace_back (internal_fixup{section_type::data, 2, 2, 2});
+        data.ifixups.emplace_back (internal_fixup{section_kind::data, 2, 2, 2});
         data.xfixups.emplace_back (external_fixup{name, 3, 3, 3});
     }
 
@@ -142,8 +142,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's various sections.
     std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
-    dispatchers.emplace_back (new generic_section_creation_dispatcher (
-        static_cast<pstore::repo::fragment_type> (data.type), &data));
+    dispatchers.emplace_back (new generic_section_creation_dispatcher (data.kind, &data));
     dispatchers.emplace_back (
         new dependents_creation_dispatcher (dependents.data (), dependents.data () + dependents.size ()));
 

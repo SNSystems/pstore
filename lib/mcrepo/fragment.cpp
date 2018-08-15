@@ -259,36 +259,52 @@ namespace {
     };
     using dispatcher_ptr = std::unique_ptr<dispatcher, nop_deleter>;
 
-    /// Constructs a dispatcher instance for the a specific section of the given fragment.
-    /// \param buffer A non-null pointer to a buffer into which the object will be constructed. In
-    /// other words, on return the result will be a unique_ptr<> to an object inside this buffer.
-    /// The lifetime of this buffer must be greater than that of the result pointer.
-    dispatcher_ptr make_dispatcher (fragment const & f, fragment_type type,
-                                    pstore::gsl::not_null<dispatcher_buffer *> buffer) {
-        assert (f.has_fragment (static_cast<fragment_type> (type)));
-
-        // This ugly marco is instantiated for each of the various types in the section_type enum.
-        // The enum is mapped to the data type stored, and this type is mapped to a dispatcher
-        // subclass which provides a virtual interface to the underlying data.
-#define X(a)                                                                                       \
-    case fragment_type::a: {                                                                       \
-        using dispatcher_type =                                                                    \
-            section_to_dispatcher<enum_to_section<fragment_type::a>::type>::type;                  \
-        static_assert (sizeof (dispatcher_type) <= sizeof (dispatcher_buffer),                     \
-                       "dispatcher buffer is too small");                                          \
-        static_assert (alignof (dispatcher_type) <= alignof (dispatcher_buffer),                   \
-                       "dispatcher buffer is insufficiently aligned");                             \
-        return dispatcher_ptr (new (buffer) dispatcher_type (f.at<fragment_type::a> ()),           \
-                               nop_deleter{});                                                     \
+    /// The enum is mapped to the data type stored, and this type is mapped to a dispatcher
+    /// subclass which provides a virtual interface to the underlying data.
+    template <section_kind Kind>
+    dispatcher_ptr make_dispatcher_for_kind (fragment const & f,
+                                             pstore::gsl::not_null<dispatcher_buffer *> buffer) {
+        using dispatcher_type =
+            typename section_to_dispatcher<typename enum_to_section<Kind>::type>::type;
+        static_assert (sizeof (dispatcher_type) <= sizeof (dispatcher_buffer),
+                       "dispatcher buffer is too small");
+        static_assert (alignof (dispatcher_type) <= alignof (dispatcher_buffer),
+                       "dispatcher buffer is insufficiently aligned");
+        return dispatcher_ptr (new (buffer) dispatcher_type (f.at<Kind> ()), nop_deleter{});
     }
-        switch (type) {
-            PSTORE_REPO_SECTION_TYPES
-            PSTORE_REPO_METADATA_TYPES
-        case fragment_type::last: break;
+
+    /// Constructs a dispatcher instance for the a specific section of the given fragment.
+    ///
+    /// \param f  The fragment.
+    /// \param kind  The section that is being accessed. The fragment must hold a section of this
+    /// kind. \param buffer A non-null pointer to a buffer into which the object will be
+    /// constructed. In other words, on return the result will be a unique_ptr<> to an object inside
+    /// this buffer. The lifetime of this buffer must be greater than that of the result pointer.
+    dispatcher_ptr make_dispatcher (fragment const & f, section_kind kind,
+                                    pstore::gsl::not_null<dispatcher_buffer *> buffer) {
+        assert (f.has_section (kind));
+
+#define PSTORE_CASE_KIND(k)                                                                        \
+    case k: return make_dispatcher_for_kind<k> (f, buffer);
+        switch (kind) {
+            PSTORE_CASE_KIND (section_kind::text);
+            PSTORE_CASE_KIND (section_kind::bss);
+            PSTORE_CASE_KIND (section_kind::data);
+            PSTORE_CASE_KIND (section_kind::rel_ro);
+            PSTORE_CASE_KIND (section_kind::mergeable_1_byte_c_string);
+            PSTORE_CASE_KIND (section_kind::mergeable_2_byte_c_string);
+            PSTORE_CASE_KIND (section_kind::mergeable_4_byte_c_string);
+            PSTORE_CASE_KIND (section_kind::mergeable_const_4);
+            PSTORE_CASE_KIND (section_kind::mergeable_const_8);
+            PSTORE_CASE_KIND (section_kind::mergeable_const_16);
+            PSTORE_CASE_KIND (section_kind::mergeable_const_32);
+            PSTORE_CASE_KIND (section_kind::read_only);
+            PSTORE_CASE_KIND (section_kind::thread_bss);
+            PSTORE_CASE_KIND (section_kind::thread_data);
+            PSTORE_CASE_KIND (section_kind::dependent);
+        case section_kind::last: break;
         }
-#undef X
-        // Here to avoid a bogus warning from MSVC warning (claiming that not all control paths
-        // return a value).
+#undef PSTORE_CASE_KIND
         pstore::raise_error_code (
             std::make_error_code (pstore::repo::error_code::bad_fragment_type));
     }
@@ -306,39 +322,7 @@ namespace {
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
                                                 pstore::extent<fragment> const & location) {
     return load_impl<std::shared_ptr<fragment const>> (
-        location, [&db](pstore::extent<fragment> const & x) { return db.getro (x); });
-}
-
-// has_fragment
-// ~~~~~~~~~~~~
-bool fragment::has_fragment (fragment_type type) const noexcept {
-    return arr_.has_index (static_cast<fragment::member_array::bitmap_type> (type));
-}
-
-// dependents
-// ~~~~~~~~~~
-dependents const * fragment::dependents () const noexcept {
-    if (!has_fragment (fragment_type::dependent)) {
-        return nullptr;
-    }
-    return &this->at<fragment_type::dependent> ();
-}
-
-dependents * fragment::dependents () noexcept {
-    fragment const * cthis = this;
-    return const_cast<class dependents *> (cthis->dependents ());
-}
-
-// num_sections
-// ~~~~~~~~~~~~
-std::size_t fragment::num_sections () const noexcept {
-    return static_cast<std::size_t> (std::count_if (this->begin (), this->end (), is_section_type));
-}
-
-// size
-// ~~~~
-std::size_t fragment::size () const noexcept {
-    return arr_.size ();
+        location, [&db](extent<fragment> const & x) { return db.getro (x); });
 }
 
 // size_bytes
@@ -348,48 +332,48 @@ std::size_t fragment::size_bytes () const {
         return sizeof (*this);
     }
     auto const last_offset = arr_.back ();
-    auto const last_section_type = static_cast<fragment_type> (arr_.get_indices ().back ());
+    auto const last_section_kind = static_cast<section_kind> (arr_.get_indices ().back ());
     dispatcher_buffer buffer;
     auto const last_section_size =
-        make_dispatcher (*this, last_section_type, &buffer)->size_bytes ();
+        make_dispatcher (*this, last_section_kind, &buffer)->size_bytes ();
     return last_offset + last_section_size;
 }
 
 
 // section_align
 // ~~~~~~~~~~~~~
-unsigned pstore::repo::section_align (fragment const & f, section_type type) {
+unsigned pstore::repo::section_align (fragment const & f, section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->align ();
+    return make_dispatcher (f, kind, &buffer)->align ();
 }
 
 // section_size
 // ~~~~~~~~~~~~~
-std::size_t pstore::repo::section_size (fragment const & f, section_type type) {
+std::size_t pstore::repo::section_size (fragment const & f, section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->size ();
+    return make_dispatcher (f, kind, &buffer)->size ();
 }
 
 // section_ifixups
 // ~~~~~~~~~~~~~~~
 section::container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
-                                                                  section_type type) {
+                                                                  section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->ifixups ();
+    return make_dispatcher (f, kind, &buffer)->ifixups ();
 }
 
 // section_xfixups
 // ~~~~~~~~~~~~~~~
 section::container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
-                                                                  section_type type) {
+                                                                  section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->xfixups ();
+    return make_dispatcher (f, kind, &buffer)->xfixups ();
 }
 
 // section_data
 // ~~~~~~~~~~~~
 section::container<std::uint8_t> pstore::repo::section_value (fragment const & f,
-                                                              section_type type) {
+                                                              section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, static_cast<fragment_type> (type), &buffer)->data ();
+    return make_dispatcher (f, kind, &buffer)->data ();
 }

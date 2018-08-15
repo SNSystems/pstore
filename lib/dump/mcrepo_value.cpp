@@ -54,23 +54,35 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (repo::fragment_type t) {
-#define X(a)                                                                                       \
-    case (repo::fragment_type::a): name = #a; break;
-
+        value_ptr make_value (repo::section_kind t) {
             char const * name = "*unknown*";
+#define PSTORE_KIND_NAME(k)                                                                        \
+    case repo::section_kind::k: name = #k; break;
             switch (t) {
-                PSTORE_REPO_SECTION_TYPES
-                PSTORE_REPO_METADATA_TYPES
-            case repo::fragment_type::last: break;
+                PSTORE_KIND_NAME (text);
+                PSTORE_KIND_NAME (bss);
+                PSTORE_KIND_NAME (data);
+                PSTORE_KIND_NAME (rel_ro);
+                PSTORE_KIND_NAME (mergeable_1_byte_c_string);
+                PSTORE_KIND_NAME (mergeable_2_byte_c_string);
+                PSTORE_KIND_NAME (mergeable_4_byte_c_string);
+                PSTORE_KIND_NAME (mergeable_const_4);
+                PSTORE_KIND_NAME (mergeable_const_8);
+                PSTORE_KIND_NAME (mergeable_const_16);
+                PSTORE_KIND_NAME (mergeable_const_32);
+                PSTORE_KIND_NAME (read_only);
+                PSTORE_KIND_NAME (thread_bss);
+                PSTORE_KIND_NAME (thread_data);
+                PSTORE_KIND_NAME (dependent);
+            case repo::section_kind::last: break;
             }
             return make_value (name);
-#undef X
+#undef PSTORE_KIND_NAME
         }
 
         value_ptr make_value (repo::internal_fixup const & ifx) {
             auto v = std::make_shared<object> (object::container{
-                {"section", make_value (static_cast<repo::fragment_type> (ifx.section))},
+                {"section", make_value (ifx.section)},
                 {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
                 {"offset", make_value (ifx.offset)},
                 {"addend", make_value (ifx.addend)},
@@ -79,7 +91,7 @@ namespace pstore {
             return v;
         }
 
-        value_ptr make_value (database & db, repo::external_fixup const & xfx) {
+        value_ptr make_value (database const & db, repo::external_fixup const & xfx) {
             using serialize::read;
             using serialize::archive::make_reader;
 
@@ -91,10 +103,9 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database & db, repo::section const & section, repo::fragment_type st,
-                              bool hex_mode) {
-            (void) st;
-            assert (pstore::repo::is_section_type (st));
+        value_ptr make_value (database const & db, repo::section const & section,
+                              repo::section_kind sk, bool hex_mode) {
+            (void) sk;
             auto const & data = section.data ();
             auto const & ifixups = section.ifixups ();
 
@@ -103,7 +114,7 @@ namespace pstore {
 
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
-            if (st == repo::fragment_type::text) {
+            if (sk == repo::section_kind::text) {
                 std::uint8_t const * const first = data.data ();
                 std::uint8_t const * const last = first + data.size ();
                 data_value = make_disassembled_value (first, last, hex_mode);
@@ -127,41 +138,56 @@ namespace pstore {
             return make_value (v);
         }
 
-        value_ptr make_value (database & db, repo::dependents const & dependent,
-                              repo::fragment_type st, bool hex_mode) {
-            (void) st;
+
+        value_ptr make_value (database const & db, repo::dependents const & dependents,
+                              repo::section_kind sk, bool hex_mode) {
+            (void) sk;
             (void) hex_mode;
             array::container members;
-            members.reserve (dependent.size ());
-            for (auto const & member : dependent) {
+            members.reserve (dependents.size ());
+            for (auto const & member : dependents) {
                 members.emplace_back (make_value (db, *db.getro (member)));
             }
             return make_value (std::move (members));
         }
 
 
+        value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode) {
 
-        value_ptr make_value (database & db, repo::fragment const & fragment, bool hex_mode) {
-#define X(a)                                                                                       \
-    case (repo::fragment_type::a):                                                                 \
-        contents = make_value (db, fragment.at<repo::fragment_type::a> (), type, hex_mode);        \
+#define PSTORE_KIND_VALUE(k)                                                                       \
+    case repo::section_kind::k:                                                                    \
+        contents = make_value (db, fragment.at<repo::section_kind::k> (), kind, hex_mode);         \
         break;
 
             array::container array;
-            for (repo::fragment_type const type : fragment) {
-                assert (fragment.has_fragment (type));
+            for (repo::section_kind const kind : fragment) {
+                assert (fragment.has_section (kind));
                 value_ptr contents;
-                switch (type) {
-                    PSTORE_REPO_SECTION_TYPES
-                    PSTORE_REPO_METADATA_TYPES
-                case repo::fragment_type::last: assert (false); break;
+                switch (kind) {
+                    PSTORE_KIND_VALUE (text);
+                    PSTORE_KIND_VALUE (bss);
+                    PSTORE_KIND_VALUE (data);
+                    PSTORE_KIND_VALUE (rel_ro);
+                    PSTORE_KIND_VALUE (mergeable_1_byte_c_string);
+                    PSTORE_KIND_VALUE (mergeable_2_byte_c_string);
+                    PSTORE_KIND_VALUE (mergeable_4_byte_c_string);
+                    PSTORE_KIND_VALUE (mergeable_const_4);
+                    PSTORE_KIND_VALUE (mergeable_const_8);
+                    PSTORE_KIND_VALUE (mergeable_const_16);
+                    PSTORE_KIND_VALUE (mergeable_const_32);
+                    PSTORE_KIND_VALUE (read_only);
+                    PSTORE_KIND_VALUE (thread_bss);
+                    PSTORE_KIND_VALUE (thread_data);
+                    PSTORE_KIND_VALUE (dependent);
+                case repo::section_kind::last: assert (false); break;
                 }
                 array.emplace_back (make_value (
-                    object::container{{"type", make_value (type)}, {"contents", contents}}));
+                    object::container{{"type", make_value (kind)}, {"contents", contents}}));
             }
             return make_value (std::move (array));
-#undef X
+#undef PSTORE_KIND_VALUE
         }
+
 
         value_ptr make_fragments (database & db, bool hex_mode) {
             array::container result;

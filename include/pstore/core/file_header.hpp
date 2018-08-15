@@ -190,7 +190,7 @@ namespace pstore {
         std::uint32_t get_crc () const noexcept;
 
         static std::uint16_t const major_version = 0;
-        static std::uint16_t const minor_version = 2;
+        static std::uint16_t const minor_version = 3;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
@@ -336,4 +336,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // PSTORE_FILE_HEADER_HPP
-// eof: include/pstore/core/file_header.hpp
