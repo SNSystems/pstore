@@ -142,4 +142,3 @@ TEST_F (Base64Fixture, LongInput) {
     EXPECT_EQ (expected, actual);
 }
 
-// eof: unittests/dump/test_base64.cpp

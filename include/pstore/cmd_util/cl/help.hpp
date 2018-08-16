@@ -95,4 +95,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_CMD_UTIL_CL_HELP_HPP
-// eof: include/pstore/cmd_util/cl/help.hpp

@@ -95,4 +95,3 @@ namespace pstore {
         } // namespace archive
     }     // namespace serialize
 } // namespace pstore
-// eof: lib/serialize/archive.cpp

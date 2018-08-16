@@ -118,4 +118,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DUMP_LINE_SPLITTER_HPP
-// eof: include/pstore/dump/line_splitter.hpp

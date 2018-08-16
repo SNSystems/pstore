@@ -83,4 +83,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 #endif // PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
 // eof:tools/index_structure/switches.hpp
 
-// eof: tools/index_structure/switches.hpp

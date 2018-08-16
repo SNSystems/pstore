@@ -53,4 +53,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 
-// eof: lib/broker/message_pool.cpp

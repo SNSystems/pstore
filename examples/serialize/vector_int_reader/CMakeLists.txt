@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (vector-int-reader vector_int_reader.cpp)
-# eof: examples/serialize/vector_int_reader/CMakeLists.txt

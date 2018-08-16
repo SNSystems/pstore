@@ -132,4 +132,3 @@ TEST (SerializeBufferReader, ReadPastEnd) {
     check_for_error ([&reader]() { reader.get<std::uint16_t> (); }, std::errc::no_buffer_space);
 }
 
-// eof: unittests/serialize/test_archive.cpp

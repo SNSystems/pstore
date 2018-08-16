@@ -299,4 +299,3 @@ namespace pstore {
     } // end namespace logging
 } // end namespace pstore
 #endif // PSTORE_LOGGING_HPP
-// eof: include/pstore/support/logging.hpp

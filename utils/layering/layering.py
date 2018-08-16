@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-# *  _                       _              *
-# * | | __ _ _   _  ___ _ __(_)_ __   __ _  *
-# * | |/ _` | | | |/ _ \ '__| | '_ \ / _` | *
-# * | | (_| | |_| |  __/ |  | | | | | (_| | *
-# * |_|\__,_|\__, |\___|_|  |_|_| |_|\__, | *
-# *          |___/                   |___/  *
-# ===- utils/layering/layering.py ------------------------------------------===//
+#*  _                       _              *
+#* | | __ _ _   _  ___ _ __(_)_ __   __ _  *
+#* | |/ _` | | | |/ _ \ '__| | '_ \ / _` | *
+#* | | (_| | |_| |  __/ |  | | | | | (_| | *
+#* |_|\__,_|\__, |\___|_|  |_|_| |_|\__, | *
+#*          |___/                   |___/  *
+#===- utils/layering/layering.py ------------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,7 +41,7 @@
 # ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
-# ===----------------------------------------------------------------------===//
+#===----------------------------------------------------------------------===//
 """
 A utility which verifies the pstore project's layering. That is, it checks that the
 dependencies defined by the cmake source files matches the dependencies used by the
@@ -384,4 +384,3 @@ if __name__ == '__main__':
     logging.getLogger().setLevel(logging.NOTSET)
     sys.exit(main())
 
-# eof: utils/layering/layering.py

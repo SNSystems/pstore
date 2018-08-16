@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (write-using-serializer write_using_serializer.cpp)
-# eof: examples/write_using_serializer/CMakeLists.txt

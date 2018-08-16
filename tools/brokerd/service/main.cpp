@@ -131,4 +131,3 @@ int _tmain (int argc, TCHAR * argv[]) {
 
     return exit_code;
 }
-// eof: tools/brokerd/service/main.cpp

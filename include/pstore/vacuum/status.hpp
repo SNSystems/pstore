@@ -64,4 +64,3 @@ namespace vacuum {
 
 } // namespace vacuum
 #endif // VACUUM_STATUS_HPP
-// eof: include/pstore/vacuum/status.hpp

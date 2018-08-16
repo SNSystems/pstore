@@ -227,4 +227,3 @@ namespace pstore {
         } // namespace win32
     }     // namespace path
 } // namespace pstore
-// eof: lib/support/path.cpp

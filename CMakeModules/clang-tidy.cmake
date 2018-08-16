@@ -91,4 +91,3 @@ if (CLANG_TIDY)
 else ()
     set (CLANG_TIDY_FOUND No)
 endif ()
-# eof: CMakeModules/clang-tidy.cmake

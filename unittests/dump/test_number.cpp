@@ -146,4 +146,3 @@ TYPED_TEST (Number, N10DefaultBase16) {
     auto const & expected = convert<TypeParam> ("0xa");
     EXPECT_EQ (expected, actual);
 }
-// eof: unittests/dump/test_number.cpp

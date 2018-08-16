@@ -60,4 +60,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // DUMP_DIFF_VALUE_HPP
-// eof: include/pstore/diff/revision.hpp

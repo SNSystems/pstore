@@ -4,7 +4,7 @@
 //* | |_) | | | (_) | (_|  __/\__ \__ \ |  _| | |  __/ | | | | (_| | | | | | |  __/ *
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
-//===- unittests/pstore/test_process_file_name.cpp ------------------------===//
+//===- unittests/core/test_process_file_name.cpp --------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -272,4 +272,3 @@ TEST_F (ProcessFileNameFreeBSD, LengthIncreasesOnEachIteration) {
     EXPECT_THAT (buffer, ElementsAre (c, c));
 }
 
-// eof: unittests/pstore/test_process_file_name.cpp

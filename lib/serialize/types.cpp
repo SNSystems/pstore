@@ -78,4 +78,3 @@ namespace pstore {
     } // namespace serialize
 } // namespace pstore
 
-// eof: lib/serialize/types.cpp

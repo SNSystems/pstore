@@ -54,4 +54,3 @@ namespace vacuum {
     };
 } // namespace vacuum
 #endif // PSTORE_VACUUM_OPTIONS_HPP
-// eof: include/pstore/vacuum/user_options.hpp

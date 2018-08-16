@@ -4,7 +4,7 @@
 //* | |_ \ V  V / (_) | | (_| (_) | | | | | | |  __/ (__| |_| | (_) | | | \__ \ *
 //*  \__| \_/\_/ \___/   \___\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|___/ *
 //*                                                                             *
-//===- unittests/pstore/test_two_connections.cpp --------------------------===//
+//===- unittests/core/test_two_connections.cpp ----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -157,4 +157,3 @@ TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {
     EXPECT_THAT (buffer2, ContainerEq (buffer1));
 }
 
-// eof: unittests/pstore/test_two_connections.cpp

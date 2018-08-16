@@ -101,4 +101,3 @@ static_assert (binary<unsigned, 1, 0, 0, 0, 0, 0, 0, 0>::length == 8,
                "0b10000000 length should be 8");
 
 #endif // BINARY_HPP
-// eof: unittests/common/binary.hpp

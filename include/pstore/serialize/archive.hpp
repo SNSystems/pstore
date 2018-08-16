@@ -632,4 +632,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SERIALIZE_ARCHIVE_HPP
-// eof: include/pstore/serialize/archive.hpp

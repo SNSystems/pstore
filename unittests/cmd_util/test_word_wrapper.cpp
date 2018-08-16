@@ -4,7 +4,7 @@
 //*  \ V  V / (_) | | | (_| |  \ V  V /| | | (_| | |_) | |_) |  __/ |    *
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
-//===- unittests/pstore_cmd_util/test_word_wrapper.cpp --------------------===//
+//===- unittests/cmd_util/test_word_wrapper.cpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -80,4 +80,3 @@ TEST (WordWrapper, LongWordShortLine) {
     EXPECT_EQ (s, "antidisestablishmentarianism");
 }
 
-// eof: unittests/pstore_cmd_util/test_word_wrapper.cpp

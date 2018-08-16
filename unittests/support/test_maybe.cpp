@@ -4,7 +4,7 @@
 //* | | | | | | (_| | |_| | |_) |  __/ *
 //* |_| |_| |_|\__,_|\__, |_.__/ \___| *
 //*                  |___/             *
-//===- unittests/pstore_support/test_maybe.cpp ----------------------------===//
+//===- unittests/support/test_maybe.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -187,4 +187,3 @@ TEST (Maybe, MoveAssign) {
     }
 }
 
-// eof: unittests/pstore_support/test_maybe.cpp

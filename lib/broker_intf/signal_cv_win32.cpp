@@ -89,4 +89,3 @@ namespace pstore {
 
 #endif //_WIN32
 
-// eof: lib/broker_intf/signal_cv_win32.cpp

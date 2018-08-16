@@ -70,4 +70,3 @@ private:
 };
 
 #endif // BROKER_SAMPLE_SERVICE_HPP
-// eof: tools/brokerd/service/broker_service.hpp

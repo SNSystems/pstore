@@ -98,4 +98,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_GC_HPP
-// eof: include/pstore/broker/gc.hpp

@@ -90,4 +90,3 @@ void check_for_error (Function fn, pstore::win32_erc err) {
 #endif //_WIN32
 
 #endif // CHECK_FOR_ERROR_HPP
-// eof: unittests/common/check_for_error.hpp

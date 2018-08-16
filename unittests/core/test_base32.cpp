@@ -4,7 +4,7 @@
 //* | |_) | (_| \__ \  __/___) / __/  *
 //* |_.__/ \__,_|___/\___|____/_____| *
 //*                                   *
-//===- unittests/pstore/test_base32.cpp -----------------------------------===//
+//===- unittests/core/test_base32.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -173,4 +173,3 @@ TEST (Base32, UInt128TopBitTwoUint64s) {
     uint128 v{UINT64_C (0x8000000000000000), 0U};
     EXPECT_EQ (convert (v), "aaaaaaaaaaaaaaaaaaaaaaaaae");
 }
-// eof: unittests/pstore/test_base32.cpp

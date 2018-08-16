@@ -4,7 +4,7 @@
 //* | (_| (_) | | | | | | | | | | | (_| | | | | (_| | | | | | | |  __/ *
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
-//===- unittests/pstore_cmd_util/test_command_line.cpp --------------------===//
+//===- unittests/cmd_util/test_command_line.cpp ---------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -200,4 +200,3 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
 
-// eof: unittests/pstore_cmd_util/test_command_line.cpp

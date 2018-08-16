@@ -164,4 +164,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/transaction.cpp

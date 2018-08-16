@@ -95,4 +95,3 @@ namespace switches {
 
 } // namespace switches
 
-// eof: tools/sieve/switches.cpp

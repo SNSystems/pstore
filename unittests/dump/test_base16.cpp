@@ -141,4 +141,3 @@ TEST_F (Base16Fixture, LongInput) {
     EXPECT_EQ (expected, actual);
 }
 
-// eof: unittests/dump/test_base16.cpp

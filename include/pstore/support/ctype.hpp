@@ -65,4 +65,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SUPPORT_CTYPE_HPP
-// eof: include/pstore/support/ctype.hpp

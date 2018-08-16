@@ -487,4 +487,3 @@ namespace pstore {
 #endif // !_WIN32
 } // namespace pstore
 #endif // PSTORE_SHARED_MEMORY_HPP
-// eof: include/pstore/core/shared_memory.hpp

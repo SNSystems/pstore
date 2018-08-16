@@ -78,4 +78,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // SERIALIZE_IOS_FLAGS_SAVER_HPP
-// eof: include/pstore/serialize/ios_state.hpp

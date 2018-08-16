@@ -59,4 +59,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/start_vacuum.cpp

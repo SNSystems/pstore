@@ -81,4 +81,3 @@ TEST (BiMap, Present) {
     EXPECT_FALSE (bm.presentr (0));
     EXPECT_TRUE (bm.presentr (42));
 }
-// eof: unittests/broker/test_bimap.cpp

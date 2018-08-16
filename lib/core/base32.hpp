@@ -110,4 +110,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BASE32_HPP
-// eof: lib/core/base32.hpp

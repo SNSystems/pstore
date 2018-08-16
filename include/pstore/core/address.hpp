@@ -442,4 +442,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_ADDRESS_HPP
-// eof: include/pstore/core/address.hpp

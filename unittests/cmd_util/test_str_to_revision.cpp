@@ -4,7 +4,7 @@
 //* \__ \ |_| |    | || (_) | | | |  __/\ V /| \__ \ | (_) | | | | *
 //* |___/\__|_|     \__\___/  |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                                                *
-//===- unittests/pstore_cmd_util/test_str_to_revision.cpp -----------------===//
+//===- unittests/cmd_util/test_str_to_revision.cpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -114,4 +114,3 @@ TEST (StrToRevision, Hex) {
     EXPECT_THAT (pstore::str_to_revision ("0x23"), ::testing::Pair (0U, false));
 }
 
-// eof: unittests/pstore_cmd_util/test_str_to_revision.cpp

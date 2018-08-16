@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore_mcrepo/CMakeLists.txt ------------------------------===//
+#===- unittests/mcrepo/CMakeLists.txt -------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -52,4 +52,3 @@ target_link_libraries (pstore-mcrepo-unit-tests pstore-mcrepo)
 
 #eof pstore/unit_tests/mcrepo/CMakeLists.txt
 
-# eof: unittests/pstore_mcrepo/CMakeLists.txt

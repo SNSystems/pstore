@@ -61,4 +61,3 @@ namespace vacuum {
 } // namespace vacuum
 
 #endif // VACUUM_COPY_HPP
-// eof: include/pstore/vacuum/copy.hpp

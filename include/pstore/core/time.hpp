@@ -53,4 +53,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_TIME_HPP
-// eof: include/pstore/core/time.hpp

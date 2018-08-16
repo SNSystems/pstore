@@ -84,4 +84,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_POKER_IOTA_GENERATOR_HPP
-// eof: include/pstore/cmd_util/iota_generator.hpp

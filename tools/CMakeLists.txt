@@ -57,4 +57,3 @@ add_subdirectory (sieve)        # A utility to generate data for the system test
 add_subdirectory (vacuum)       # Data store garbage collector utility
 add_subdirectory (write)
 
-# eof: tools/CMakeLists.txt

@@ -76,4 +76,3 @@ namespace vacuum {
 } // namespace vacuum
 
 #endif // PSTORE_VACUUM_WATCH_HPP
-// eof: include/pstore/vacuum/watch.hpp

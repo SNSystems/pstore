@@ -68,4 +68,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/uint128.cpp

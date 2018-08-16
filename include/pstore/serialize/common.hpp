@@ -109,4 +109,3 @@ namespace pstore {
     } // namespace serialize
 } // namespace pstore
 #endif // PSTORE_SERIALIZE_COMMON_HPP
-// eof: include/pstore/serialize/common.hpp

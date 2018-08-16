@@ -4,7 +4,7 @@
 //* \__ \ |_| |  | | | | | (_| | | (_| | \__ \ || (_| | | | | (_|  __/ *
 //* |___/\__|_|  |_|_| |_|\__, |  \__,_|_|___/\__\__,_|_| |_|\___\___| *
 //*                       |___/                                        *
-//===- unittests/pstore_cmd_util/test_string_distance.cpp -----------------===//
+//===- unittests/cmd_util/test_string_distance.cpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -91,4 +91,3 @@ TEST (StringDistance, VariedOperations) {
     EXPECT_EQ (string_distance (std::string{"levenshtein"}, std::string{"frankenstein"}), 6U);
     EXPECT_EQ (string_distance (std::string{"distance"}, std::string{"difference"}), 5U);
 }
-// eof: unittests/pstore_cmd_util/test_string_distance.cpp

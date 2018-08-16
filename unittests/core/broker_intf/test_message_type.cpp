@@ -4,7 +4,7 @@
 //* | | | | | |  __/\__ \__ \ (_| | (_| |  __/ | |_| |_| | |_) |  __/ *
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___|  \__|\__, | .__/ \___| *
 //*                                |___/            |___/|_|          *
-//===- unittests/pstore/broker_intf/test_message_type.cpp -----------------===//
+//===- unittests/core/broker_intf/test_message_type.cpp -------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -162,4 +162,3 @@ TEST (BrokerMessageType, NegativeDistanceBetweenIterators) {
     pstore::broker::message_type::payload_type expected_payload{{'\0'}};
     EXPECT_THAT (actual.payload, ::testing::ContainerEq (expected_payload));
 }
-// eof: unittests/pstore/broker_intf/test_message_type.cpp

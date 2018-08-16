@@ -134,4 +134,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_UINT128_HPP
-// eof: include/pstore/core/uint128.hpp

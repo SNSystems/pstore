@@ -88,4 +88,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/generation_iterator.cpp

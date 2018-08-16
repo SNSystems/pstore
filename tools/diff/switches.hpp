@@ -77,4 +77,3 @@ struct switches {
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_DIFF_SWITCHES_HPP
-// eof: tools/diff/switches.hpp

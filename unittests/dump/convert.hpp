@@ -56,4 +56,3 @@ template <>
 std::basic_string<wchar_t> convert (char const * str);
 
 #endif // CONVERT_HPP
-// eof: unittests/dump/convert.hpp

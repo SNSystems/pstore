@@ -4,7 +4,7 @@
 //* | |_| | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | | *
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
-//===- unittests/pstore_mcrepo/transaction.hpp ----------------------------===//
+//===- unittests/mcrepo/transaction.hpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -68,4 +68,3 @@ private:
 };
 
 #endif // MCREPO_TRANSACTION_HPP
-// eof: unittests/pstore_mcrepo/transaction.hpp

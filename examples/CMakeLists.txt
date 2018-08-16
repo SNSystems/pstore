@@ -60,4 +60,3 @@ else ()
 
 endif()
 
-# eof: examples/CMakeLists.txt

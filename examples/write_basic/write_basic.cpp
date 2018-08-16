@@ -84,4 +84,3 @@ int main () {
     }
     return exit_code;
 }
-// eof: examples/write_basic/write_basic.cpp

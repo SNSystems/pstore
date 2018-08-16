@@ -108,4 +108,3 @@ namespace pstore {
 
 } // end namespace pstore
 #endif // PSTORE_GENERATION_ITERATOR_HPP
-// eof: include/pstore/core/generation_iterator.hpp

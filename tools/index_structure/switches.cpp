@@ -108,4 +108,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     return {sw, EXIT_SUCCESS};
 }
 
-// eof: tools/index_structure/switches.cpp

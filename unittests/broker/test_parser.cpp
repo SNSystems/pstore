@@ -92,4 +92,3 @@ TEST_F (MessageParse, TwoPartCommandOutOfOrder) {
     EXPECT_EQ (c2->path, "to be or not to be");
     EXPECT_TRUE (cmds_.empty ());
 }
-// eof: unittests/broker/test_parser.cpp

@@ -91,4 +91,3 @@ else ()
     target_link_libraries (pstore-broker PUBLIC pstore-broker-intf pstore-json-lib pstore-support)
 endif (PSTORE_IS_INSIDE_LLVM)
 
-# eof: lib/broker/CMakeLists.txt

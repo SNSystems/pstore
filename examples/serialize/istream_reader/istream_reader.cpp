@@ -79,4 +79,3 @@ int main () {
         std::cout << value << '\n';
     }
 }
-// eof: examples/serialize/istream_reader/istream_reader.cpp

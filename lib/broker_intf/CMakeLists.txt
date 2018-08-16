@@ -90,4 +90,3 @@ if (WIN32)
         target_link_libraries (pstore-broker-intf-ex PUBLIC Ws2_32.dll)
     endif ()
 endif ()
-# eof: lib/broker_intf/CMakeLists.txt

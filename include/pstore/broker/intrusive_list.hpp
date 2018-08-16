@@ -177,4 +177,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_INTRUSIVE_LIST_HPP
-// eof: include/pstore/broker/intrusive_list.hpp

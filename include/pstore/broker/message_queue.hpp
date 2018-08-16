@@ -95,4 +95,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_MESSAGE_QUEUE_HPP
-// eof: include/pstore/broker/message_queue.hpp

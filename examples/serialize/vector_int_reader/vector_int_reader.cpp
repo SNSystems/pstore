@@ -100,4 +100,3 @@ int main () {
     read_an_array_of_ints (data);
     read_a_series_of_ints (data);
 }
-// eof: examples/serialize/vector_int_reader/vector_int_reader.cpp

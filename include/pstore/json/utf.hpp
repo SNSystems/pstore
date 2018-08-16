@@ -235,4 +235,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_JSON_UTF_HPP
-// eof: include/pstore/json/utf.hpp

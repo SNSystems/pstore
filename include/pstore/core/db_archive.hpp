@@ -225,4 +225,3 @@ namespace pstore {
     }     // namespace serialize
 } // namespace pstore
 #endif // PSTORE_CORE_DB_ARCHIVE_HPP
-// eof: include/pstore/core/db_archive.hpp

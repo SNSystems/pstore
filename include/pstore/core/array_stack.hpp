@@ -147,4 +147,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_ARRAY_STACK_HPP
-// eof: include/pstore/core/array_stack.hpp

@@ -10,7 +10,7 @@
 //* | (_| | | | (__| | | | |\ V /  __/ *
 //*  \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                    *
-//===- unittests/pstore/test_sstring_view_archive.cpp ---------------------===//
+//===- unittests/core/test_sstring_view_archive.cpp -----------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -145,4 +145,3 @@ TEST_F (SStringViewArchive, WriteHello) {
     }
 }
 
-// eof: unittests/pstore/test_sstring_view_archive.cpp

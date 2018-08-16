@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (ostream-writer ostream_writer.cpp)
-# eof: examples/serialize/ostream_writer/CMakeLists.txt

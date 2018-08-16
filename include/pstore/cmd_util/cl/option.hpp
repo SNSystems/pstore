@@ -307,4 +307,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_CMD_UTIL_CL_OPTION_H
-// eof: include/pstore/cmd_util/cl/option.hpp

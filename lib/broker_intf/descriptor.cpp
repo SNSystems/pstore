@@ -60,4 +60,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif
-// eof: lib/broker_intf/descriptor.cpp

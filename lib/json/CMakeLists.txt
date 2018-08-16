@@ -67,4 +67,3 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI No)
 endif ()
 
-# eof: lib/json/CMakeLists.txt

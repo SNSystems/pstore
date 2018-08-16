@@ -76,4 +76,3 @@ struct switches {
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_WRITE_SWITCHES_HPP
-// eof: tools/write/switches.hpp

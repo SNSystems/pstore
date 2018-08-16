@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (istream-reader istream_reader.cpp)
-# eof: examples/serialize/istream_reader/CMakeLists.txt

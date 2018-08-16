@@ -63,4 +63,3 @@ namespace pstore {
 
     } // namespace cmd_util
 } // namespace pstore
-// eof: lib/cmd_util/revision_opt.cpp

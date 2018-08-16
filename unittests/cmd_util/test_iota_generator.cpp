@@ -4,7 +4,7 @@
 //* | | (_) | || (_| | | (_| |  __/ | | |  __/ | | (_| | || (_) | |    *
 //* |_|\___/ \__\__,_|  \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|    *
 //*                     |___/                                          *
-//===- unittests/pstore_cmd_util/test_iota_generator.cpp ------------------===//
+//===- unittests/cmd_util/test_iota_generator.cpp -------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -71,4 +71,3 @@ TEST (IotaGenerator, Increment) {
     EXPECT_EQ (pre, pstore::cmd_util::iota_generator (5));
     EXPECT_EQ (g1, pstore::cmd_util::iota_generator (5));
 }
-// eof: unittests/pstore_cmd_util/test_iota_generator.cpp

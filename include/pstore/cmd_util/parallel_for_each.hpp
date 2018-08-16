@@ -116,4 +116,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_CMD_UTIL_PARALLEL_FOR_EACH_HPP
-// eof: include/pstore/cmd_util/parallel_for_each.hpp

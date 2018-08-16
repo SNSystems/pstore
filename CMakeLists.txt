@@ -291,4 +291,3 @@ if (DOXYGEN_FOUND)
 endif (DOXYGEN_FOUND)
 
 
-# eof: CMakeLists.txt

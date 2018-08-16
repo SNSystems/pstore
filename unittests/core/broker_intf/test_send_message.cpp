@@ -4,7 +4,7 @@
 //* \__ \  __/ | | | (_| | | | | | | |  __/\__ \__ \ (_| | (_| |  __/ *
 //* |___/\___|_| |_|\__,_| |_| |_| |_|\___||___/___/\__,_|\__, |\___| *
 //*                                                       |___/       *
-//===- unittests/pstore/broker_intf/test_send_message.cpp -----------------===//
+//===- unittests/core/broker_intf/test_send_message.cpp -------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -111,4 +111,3 @@ TEST_F (BrokerSendMessage, TwoParts) {
     pstore::broker::send_message (wr, true /*error on timeout*/, verb.c_str (), path.c_str ());
 }
 
-// eof: unittests/pstore/broker_intf/test_send_message.cpp

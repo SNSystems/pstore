@@ -187,4 +187,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // defined (_WIN32)
-// eof: lib/core/memory_mapper_win32.cpp

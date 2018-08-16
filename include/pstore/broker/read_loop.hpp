@@ -63,4 +63,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_READ_LOOP_HPP
-// eof: include/pstore/broker/read_loop.hpp

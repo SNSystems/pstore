@@ -226,4 +226,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // PSTORE_MEMORY_MAPPER_HPP
-// eof: include/pstore/core/memory_mapper.hpp

@@ -45,4 +45,3 @@
 add_pstore_executable (pstore-hamt-test main.cpp print.cpp print.hpp)
 target_link_libraries (pstore-hamt-test pstore-core pstore-cmd-util)
 
-# eof: tools/hamt_test/CMakeLists.txt

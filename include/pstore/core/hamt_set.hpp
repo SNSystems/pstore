@@ -242,4 +242,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // PSTORE_CORE_HAMT_SET_HPP
-// eof: include/pstore/core/hamt_set.hpp

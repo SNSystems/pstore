@@ -50,4 +50,3 @@ add_pstore_unit_test (pstore-diff-unit-tests
 )
 target_link_libraries (pstore-diff-unit-tests pstore-diff-lib pstore-common)
 
-# eof: unittests/diff/CMakeLists.txt

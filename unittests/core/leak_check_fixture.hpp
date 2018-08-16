@@ -4,7 +4,7 @@
 //* | |  __/ (_| |   <  | (__| | | |  __/ (__|   <  |  _| |>  <| |_| |_| | | |  __/ *
 //* |_|\___|\__,_|_|\_\  \___|_| |_|\___|\___|_|\_\ |_| |_/_/\_\\__|\__,_|_|  \___| *
 //*                                                                                 *
-//===- unittests/pstore/leak_check_fixture.hpp ----------------------------===//
+//===- unittests/core/leak_check_fixture.hpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -77,4 +77,3 @@ public:
 #endif
 
 #endif // LEAK_CHECK_FIXTURE_HPP
-// eof: unittests/pstore/leak_check_fixture.hpp

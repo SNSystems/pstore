@@ -529,4 +529,3 @@ namespace pstore {
 } // namespace pstore
 ///@}
 #endif // PSTORE_SERIALIZE_TYPES_HPP
-// eof: include/pstore/serialize/types.hpp

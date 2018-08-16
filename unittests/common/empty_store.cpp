@@ -102,4 +102,3 @@ EmptyStore::EmptyStore ()
     pstore::database::build_new_store (*file_);
 }
 
-// eof: unittests/common/empty_store.cpp

@@ -73,4 +73,3 @@ namespace std {
     }
 
 } // namespace std
-// eof: tools/write/error.cpp

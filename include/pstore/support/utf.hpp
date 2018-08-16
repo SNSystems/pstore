@@ -268,4 +268,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SUPPORT_UTF_HPP
-// eof: include/pstore/support/utf.hpp

@@ -95,4 +95,3 @@ namespace pstore {
 
 #endif // PSTORE_BROKER_POINTER_COMPARE_HPP
 
-// eof: include/pstore/broker/pointer_compare.hpp

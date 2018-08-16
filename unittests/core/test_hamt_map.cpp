@@ -4,7 +4,7 @@
 //* | | | | (_| | | | | | | |_  | | | | | | (_| | |_) | *
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/  *
 //*                                             |_|     *
-//===- unittests/pstore/test_hamt_map.cpp ---------------------------------===//
+//===- unittests/core/test_hamt_map.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -1893,4 +1893,3 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     }
 }
 
-// eof: unittests/pstore/test_hamt_map.cpp

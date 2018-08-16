@@ -71,4 +71,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_WSA_STARTUP_HPP
-// eof: include/pstore/broker_intf/wsa_startup.hpp

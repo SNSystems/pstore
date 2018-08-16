@@ -110,4 +110,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     return {Result, EXIT_SUCCESS};
 }
 
-// eof: tools/broker_poker/switches.cpp

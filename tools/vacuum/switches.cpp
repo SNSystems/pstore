@@ -74,4 +74,3 @@ std::pair<vacuum::user_options, int> get_switches (int argc, pstore_tchar * argv
 
     return {opt, EXIT_SUCCESS};
 }
-// eof: tools/vacuum/switches.cpp

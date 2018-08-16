@@ -223,4 +223,3 @@ int main (int argc, char * argv[]) {
     }
     return broker::exit_code;
 }
-// eof: tools/brokerd/main.cpp

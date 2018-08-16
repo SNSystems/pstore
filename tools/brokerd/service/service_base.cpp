@@ -363,4 +363,3 @@ void service_base::write_error_log_entry (char const * func, DWORD errcode) {
     message[sizeof (message) - 1] = '\0';
     this->write_event_log_entry (message, event_type::error);
 }
-// eof: tools/brokerd/service/service_base.cpp

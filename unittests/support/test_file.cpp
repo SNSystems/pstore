@@ -4,7 +4,7 @@
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- unittests/pstore_support/test_file.cpp -----------------------------===//
+//===- unittests/support/test_file.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -742,4 +742,3 @@ TEST_F (EnvironmentSaveFixture, TaintedEnvironmentInvalidPath) {
 #endif
 
 #endif //_WIN32
-// eof: unittests/pstore_support/test_file.cpp

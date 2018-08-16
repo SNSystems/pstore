@@ -122,4 +122,3 @@ int main () {
         std::cout << std::endl;
     }
 }
-// eof: examples/serialize/nonpod_multiple/nonpod_multiple.cpp

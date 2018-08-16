@@ -45,4 +45,3 @@
 add_pstore_executable (pstore-inserter main.cpp)
 target_link_libraries (pstore-inserter pstore-core pstore-cmd-util)
 
-# eof: tools/inserter/CMakeLists.txt

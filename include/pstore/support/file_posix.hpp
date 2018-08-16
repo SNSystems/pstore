@@ -77,4 +77,3 @@ namespace pstore {
 } // namespace pstore
 #endif //! defined (_WIN32)
 #endif // PSTORE_FILE_POSIX_HPP
-// eof: include/pstore/support/file_posix.hpp

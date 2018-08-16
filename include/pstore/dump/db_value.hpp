@@ -125,4 +125,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DUMP_DB_VALUE_HPP
-// eof: include/pstore/dump/db_value.hpp

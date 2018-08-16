@@ -138,4 +138,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // PSTORE_PROCESS_FILE_NAME_HPP
-// eof: include/pstore/support/process_file_name.hpp

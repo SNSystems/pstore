@@ -178,4 +178,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DIFF_VALUE_HPP
-// eof: include/pstore/diff/diff_value.hpp

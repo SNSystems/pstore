@@ -66,4 +66,3 @@ add_custom_target (pstore-examples-serialize
                            example-write-pod-struct
                    COMMENT "Building Serialization Examples"
                    VERBATIM)
-# eof: examples/serialize/CMakeLists.txt

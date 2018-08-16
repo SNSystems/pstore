@@ -193,4 +193,3 @@ TEST_F (StringFixture, AllChars) {
     EXPECT_EQ (expected, actual);
 }
 
-// eof: unittests/dump/test_string.cpp

@@ -79,4 +79,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif // PSTORE_BROKER_SEND_MESSAGE_HPP
-// eof: include/pstore/broker_intf/send_message.hpp

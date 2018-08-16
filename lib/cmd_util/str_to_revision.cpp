@@ -105,4 +105,3 @@ namespace pstore {
         return {0U, false};
     }
 } // namespace pstore
-// eof: lib/cmd_util/str_to_revision.cpp

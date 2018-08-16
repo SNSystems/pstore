@@ -152,4 +152,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SSTRING_VIEW_ARCHIVE_HPP
-// eof: include/pstore/core/sstring_view_archive.hpp

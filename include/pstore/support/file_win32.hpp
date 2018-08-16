@@ -86,4 +86,3 @@ namespace pstore {
 
 #endif //_WIN32
 #endif // PSTORE_FILE_WIN32_HPP
-// eof: include/pstore/support/file_win32.hpp

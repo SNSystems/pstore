@@ -84,4 +84,3 @@ namespace std {
 #endif
 
 #endif // PSTORE_MAKE_UNIQUE_HPP
-// eof: include/pstore/support/make_unique.hpp

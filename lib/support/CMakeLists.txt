@@ -238,4 +238,3 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI No)
 endif (PSTORE_IS_INSIDE_LLVM)
 
-# eof: lib/support/CMakeLists.txt

@@ -100,4 +100,3 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-// eof: lib/broker_intf/status_path.cpp

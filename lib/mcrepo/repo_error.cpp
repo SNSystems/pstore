@@ -79,4 +79,3 @@ namespace std {
 
 } // namespace std
 
-// eof: lib/mcrepo/repo_error.cpp

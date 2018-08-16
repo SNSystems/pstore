@@ -66,4 +66,3 @@ using pstore_tchar = char;
 std::pair<vacuum::user_options, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_VACUUM_SWITCHES_HPP
-// eof: tools/vacuum/switches.hpp

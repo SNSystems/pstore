@@ -4,7 +4,7 @@
 //* |  _| | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
 //* |_| |_|_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
 //*                                                   *
-//===- unittests/pstore/test_file_header.cpp ------------------------------===//
+//===- unittests/core/test_file_header.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -106,4 +106,3 @@ TEST (PstoreExtent, ComparisonOperators) {
     }
 }
 
-// eof: unittests/pstore/test_file_header.cpp

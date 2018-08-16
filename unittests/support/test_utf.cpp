@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- unittests/pstore_support/test_utf.cpp ------------------------------===//
+//===- unittests/support/test_utf.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -308,4 +308,3 @@ TEST_F (MaxLengthUTFSequence, Slice) {
     ASSERT_EQ (6, start);
     ASSERT_EQ (6, end);
 }
-// eof: unittests/pstore_support/test_utf.cpp

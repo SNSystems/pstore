@@ -139,4 +139,3 @@ std::thread create_quit_thread (vacuum::status & status,
     return quit;
 }
 
-// eof: lib/vacuum/quit.cpp

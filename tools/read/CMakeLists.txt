@@ -53,4 +53,3 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-read pstore-core pstore-cmd-util)
 
-# eof: tools/read/CMakeLists.txt

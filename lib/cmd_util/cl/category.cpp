@@ -54,4 +54,3 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-// eof: lib/cmd_util/cl/category.cpp

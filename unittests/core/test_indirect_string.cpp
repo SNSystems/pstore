@@ -4,7 +4,7 @@
 //* | | | | | (_| | | | |  __/ (__| |_  \__ \ |_| |  | | | | | (_| | *
 //* |_|_| |_|\__,_|_|_|  \___|\___|\__| |___/\__|_|  |_|_| |_|\__, | *
 //*                                                           |___/  *
-//===- unittests/pstore/test_indirect_string.cpp --------------------------===//
+//===- unittests/core/test_indirect_string.cpp ----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -211,4 +211,3 @@ TEST_F (IndirectStringAdder, NewString) {
     }
 }
 
-// eof: unittests/pstore/test_indirect_string.cpp

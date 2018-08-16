@@ -245,4 +245,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_IS_INSIDE_LLVM
-// eof: lib/dump/mcdisassembler_value.cpp

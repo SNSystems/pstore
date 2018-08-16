@@ -686,4 +686,3 @@ namespace pstore {
     } // namespace dump
 } // namespace pstore
 #endif /* defined(PSTORE_DUMP_VALUE_HPP) */
-// eof: include/pstore/dump/value.hpp

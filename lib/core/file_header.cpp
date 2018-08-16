@@ -175,4 +175,3 @@ namespace pstore {
         return ok;
     }
 } // namespace pstore
-// eof: lib/core/file_header.cpp

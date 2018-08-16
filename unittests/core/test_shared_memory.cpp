@@ -4,7 +4,7 @@
 //* \__ \ | | | (_| | | |  __/ (_| | | | | | | |  __/ | | | | | (_) | |  | |_| | *
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
-//===- unittests/pstore/test_shared_memory.cpp ----------------------------===//
+//===- unittests/core/test_shared_memory.cpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -97,4 +97,3 @@ TEST (PosixMutexName, MinimumSizeOutputBuffer) {
     EXPECT_THAT (actual, ::testing::StrEq ("/"));
 }
 
-// eof: unittests/pstore/test_shared_memory.cpp

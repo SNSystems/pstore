@@ -4,7 +4,7 @@
 //* \__ \ | | | | | (_| | | |  \ V /  __/ (__| || (_) | |    *
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
-//===- unittests/pstore_support/test_small_vector.cpp ---------------------===//
+//===- unittests/support/test_small_vector.cpp ----------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -284,4 +284,3 @@ TEST (SmallVector, AppendIteratorRange) {
     EXPECT_THAT (a, ::testing::ElementsAre (0, 1, 2, 3, 100, 101, 102, 103));
 }
 
-// eof: unittests/pstore_support/test_small_vector.cpp

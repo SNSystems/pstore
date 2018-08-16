@@ -172,4 +172,3 @@ namespace pstore {
     } // namespace index
 } // namespace pstore
 #endif // PSTORE_CORE_INDEX_TYPES_HPP
-// eof: include/pstore/core/index_types.hpp

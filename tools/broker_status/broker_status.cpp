@@ -154,4 +154,3 @@ int main (int argc, pstore_tchar * argv[]) {
     })
     return exit_code;
 }
-// eof: tools/broker_status/broker_status.cpp

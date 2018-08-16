@@ -170,4 +170,3 @@ void uninstall_service (TCHAR const * service_name) {
         throw "FIXME";
     }
 }
-// eof: tools/brokerd/service/service_installer.cpp

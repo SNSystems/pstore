@@ -338,4 +338,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_TRANSACTION_HPP
-// eof: include/pstore/core/transaction.hpp

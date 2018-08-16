@@ -137,4 +137,3 @@ namespace vacuum {
         st->watch_running = false;
     }
 } // end namespace vacuum
-// eof: lib/vacuum/watch.cpp

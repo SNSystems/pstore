@@ -506,4 +506,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/database.cpp

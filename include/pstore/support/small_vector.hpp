@@ -345,4 +345,3 @@ namespace pstore {
 
 } // end namespace pstore
 #endif // PSTORE_SMALL_VECTOR_HPP
-// eof: include/pstore/support/small_vector.hpp

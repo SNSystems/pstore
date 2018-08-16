@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (write-integers write_integers.cpp)
-# eof: examples/serialize/write_integers/CMakeLists.txt

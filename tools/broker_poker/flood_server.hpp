@@ -52,4 +52,3 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
                    unsigned max_retries, unsigned long num);
 
 #endif // PSTORE_BROKER_POKER_FLOOD_SERVER_HPP
-// eof: tools/broker_poker/flood_server.hpp

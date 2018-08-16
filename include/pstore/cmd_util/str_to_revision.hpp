@@ -62,4 +62,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_STR_TO_REVISION_HPP
-// eof: include/pstore/cmd_util/str_to_revision.hpp

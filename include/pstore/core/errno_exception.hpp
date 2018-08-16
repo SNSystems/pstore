@@ -69,4 +69,3 @@ namespace pstore {
     };
 } // namespace pstore
 #endif // PSTORE_ERRNO_EXCEPTION_HPP
-// eof: include/pstore/core/errno_exception.hpp

@@ -4,7 +4,7 @@
 //* | (_| | |  | | | (_| | |_| | \__ \ || (_| | (__|   <  *
 //*  \__,_|_|  |_|  \__,_|\__, | |___/\__\__,_|\___|_|\_\ *
 //*                       |___/                           *
-//===- unittests/pstore/test_array_stack.cpp ------------------------------===//
+//===- unittests/core/test_array_stack.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -95,4 +95,3 @@ TEST (ArrayStack, PushAndPopMaxValues) {
     EXPECT_TRUE (stack.empty ());
 }
 
-// eof: unittests/pstore/test_array_stack.cpp

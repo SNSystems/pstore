@@ -506,4 +506,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_SUPPORT_SSTRING_VIEW_HPP
-// eof: include/pstore/support/sstring_view.hpp

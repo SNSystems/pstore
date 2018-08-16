@@ -815,4 +815,3 @@ namespace pstore {
 #endif
 
 #endif // PSTORE_FILE_HPP
-// eof: include/pstore/support/file.hpp

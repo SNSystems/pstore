@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore/CMakeLists.txt -------------------------------------===//
+#===- unittests/core/CMakeLists.txt ---------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -80,4 +80,3 @@ target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOUR
 
 add_subdirectory (broker_intf)
 
-# eof: unittests/pstore/CMakeLists.txt

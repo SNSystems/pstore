@@ -222,4 +222,3 @@ TEST_F (Diff, UncomittedTransaction) {
 
     t2.commit ();
 }
-// eof: unittests/diff/test_diff.cpp

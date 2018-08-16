@@ -72,4 +72,3 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
         });
 }
 
-// eof: tools/broker_poker/flood_server.cpp

@@ -308,4 +308,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/support/utf_win32.cpp

@@ -77,4 +77,3 @@ auto ticket::load (pstore::database const & db, pstore::extent<ticket> const & l
     return t;
 }
 
-// eof: lib/mcrepo/ticket.cpp

@@ -10,7 +10,7 @@
 //* | | | | | | (_| | |_) | |_) |  __/ |    *
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
-//===- unittests/pstore/test_memory_mapper.cpp ----------------------------===//
+//===- unittests/core/test_memory_mapper.cpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -143,4 +143,3 @@ TEST_F (MemoryMapperFixture, MemoryMapThenCheckFileContents) {
     EXPECT_THAT (expected, ::testing::ContainerEq (contents));
 }
 
-// eof: unittests/pstore/test_memory_mapper.cpp

@@ -102,4 +102,3 @@ bool set_from_name (indices_bitset * const bs, std::string const & name);
 #endif // PSTORE_INDEX_STRUCTURE_INDICES_HPP
 // eof:tools/index_structure/indices.hpp
 
-// eof: tools/index_structure/indices.hpp

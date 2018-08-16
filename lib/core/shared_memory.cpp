@@ -81,4 +81,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/shared_memory.cpp

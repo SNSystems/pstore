@@ -124,4 +124,3 @@ TEST_F (RevisionsFixture, InitOneHeadTwoHead) {
     EXPECT_EQ (expected, actual);
 }
 
-// eof: unittests/diff/test_revision.cpp

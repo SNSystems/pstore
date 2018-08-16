@@ -4,7 +4,7 @@
 //*   | \__ \ (_) | | | | *
 //*  _/ |___/\___/|_| |_| *
 //* |__/                  *
-//===- unittests/pstore_json/test_json.cpp --------------------------------===//
+//===- unittests/json/test_json.cpp ---------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

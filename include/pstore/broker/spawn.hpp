@@ -98,4 +98,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_SPAWN_HPP
-// eof: include/pstore/broker/spawn.hpp

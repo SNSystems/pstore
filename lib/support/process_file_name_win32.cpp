@@ -95,4 +95,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // _WIN32
-// eof: lib/support/process_file_name_win32.cpp

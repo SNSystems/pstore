@@ -246,4 +246,3 @@ namespace std {
 } // end namespace std
 
 #endif // PSTORE_BROKER_DESCRIPTOR_HPP
-// eof: include/pstore/broker_intf/descriptor.hpp

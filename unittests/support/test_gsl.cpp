@@ -4,7 +4,7 @@
 //* | (_| \__ \ | *
 //*  \__, |___/_| *
 //*  |___/        *
-//===- unittests/pstore_support/test_gsl.cpp ------------------------------===//
+//===- unittests/support/test_gsl.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -1464,4 +1464,3 @@ TEST (GslSpan, FixedSizeConversions) {
 #endif
 }
 
-// eof: unittests/pstore_support/test_gsl.cpp

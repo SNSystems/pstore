@@ -89,4 +89,3 @@ int main () {
     return exit_code;
 }
 
-// eof: examples/write_using_serializer/write_using_serializer.cpp

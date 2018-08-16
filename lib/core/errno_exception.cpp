@@ -54,4 +54,3 @@ namespace pstore {
     errno_exception::~errno_exception () = default;
 } // namespace pstore
 
-// eof: lib/core/errno_exception.cpp

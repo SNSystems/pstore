@@ -148,4 +148,3 @@ int main (int argc, char * argv[]) {
     // clang-format on
     return exit_code;
 }
-// eof: tools/broker_poker/poke.cpp

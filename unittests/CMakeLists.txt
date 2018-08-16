@@ -55,4 +55,3 @@ add_subdirectory (serialize)
 add_subdirectory (support)
 add_subdirectory (vacuum)
 
-# eof: unittests/CMakeLists.txt

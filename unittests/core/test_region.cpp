@@ -4,7 +4,7 @@
 //* | | |  __/ (_| | | (_) | | | | *
 //* |_|  \___|\__, |_|\___/|_| |_| *
 //*           |___/                *
-//===- unittests/pstore/test_region.cpp -----------------------------------===//
+//===- unittests/core/test_region.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -252,4 +252,3 @@ TEST_F (Region, GrowByMinimumSize) {
     }
 }
 
-// eof: unittests/pstore/test_region.cpp

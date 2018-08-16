@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore_json/CMakeLists.txt --------------------------------===//
+#===- unittests/json/CMakeLists.txt ---------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -50,4 +50,3 @@ add_pstore_unit_test (pstore-json-unit-tests
 )
 target_link_libraries (pstore-json-unit-tests pstore-json-lib)
 
-# eof: unittests/pstore_json/CMakeLists.txt

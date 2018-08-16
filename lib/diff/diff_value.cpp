@@ -68,4 +68,3 @@ namespace pstore {
     } // namespace diff
 } // namespace pstore
 
-// eof: lib/diff/diff_value.cpp

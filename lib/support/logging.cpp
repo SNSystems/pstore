@@ -453,4 +453,3 @@ namespace pstore {
 
     } // end namespace logging
 } // end namespace pstore
-// eof: lib/support/logging.cpp

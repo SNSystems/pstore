@@ -48,4 +48,3 @@ std::string pstore::dump::trim_line (std::string const & str) {
     expand_tabs (std::begin (str), std::end (str), std::back_inserter (result), 8);
     return result;
 }
-// eof: lib/dump/line_splitter.cpp

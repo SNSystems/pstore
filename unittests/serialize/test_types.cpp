@@ -407,4 +407,3 @@ TEST (SerializeTypes, Flood) {
 }
 #endif
 
-// eof: unittests/serialize/test_types.cpp

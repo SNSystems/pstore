@@ -62,4 +62,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_INTF_STATUS_CLIENT_HPP
-// eof: include/pstore/broker_intf/status_client.hpp

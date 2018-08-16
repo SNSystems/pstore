@@ -69,4 +69,3 @@ namespace pstore {
 
 } // end namespace pstore
 
-// eof: lib/support/sstring_view.cpp

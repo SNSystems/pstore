@@ -295,4 +295,3 @@ int main (int argc, char * argv[]) {
     return exit_code;
 }
 
-// eof: tools/hamt_test/main.cpp

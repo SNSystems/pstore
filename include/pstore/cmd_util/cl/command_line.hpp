@@ -236,4 +236,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSRTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
-// eof: include/pstore/cmd_util/cl/command_line.hpp

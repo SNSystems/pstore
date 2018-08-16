@@ -213,4 +213,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SUPPORT_MAYBE_HPP
-// eof: include/pstore/support/maybe.hpp

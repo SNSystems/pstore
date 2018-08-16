@@ -4,7 +4,7 @@
 //* | (_| | (_| | || (_| | |_) | (_| \__ \  __/ *
 //*  \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___| *
 //*                                             *
-//===- unittests/pstore/test_database.cpp ---------------------------------===//
+//===- unittests/core/test_database.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -274,4 +274,3 @@ TEST_F (Database, Allocate16BytesAligned1024) {
 }
 
 
-// eof: unittests/pstore/test_database.cpp

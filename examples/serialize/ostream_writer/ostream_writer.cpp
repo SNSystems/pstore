@@ -93,4 +93,3 @@ int main () {
     // Write the sequence of values as a span.
     pstore::serialize::write (writer, pstore::gsl::make_span (values));
 }
-// eof: examples/serialize/ostream_writer/ostream_writer.cpp

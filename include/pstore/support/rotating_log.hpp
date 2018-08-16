@@ -184,4 +184,3 @@ namespace pstore {
     } // end namespace logging
 } // end namespace pstore
 #endif // PSTORE_ROTATING_LOG_HPP
-// eof: include/pstore/support/rotating_log.hpp

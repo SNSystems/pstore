@@ -101,4 +101,3 @@ void sample_service::stop_handler () {
     is_stopping_ = true;
     thread_.join ();
 }
-// eof: tools/brokerd/service/broker_service.cpp

@@ -73,4 +73,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_RANDOM_HPP
-// eof: include/pstore/support/random.hpp

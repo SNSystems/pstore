@@ -67,4 +67,3 @@ else ()
     target_link_libraries (pstore-broker-service PRIVATE pstore-cmd-util)
 endif ()
 
-# eof: tools/brokerd/service/CMakeLists.txt

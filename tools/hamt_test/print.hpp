@@ -132,4 +132,3 @@ std::ostream & print_cerr_flush (Args const &... args) {
 }
 
 #endif // PRINT_HPP
-// eof: tools/hamt_test/print.hpp

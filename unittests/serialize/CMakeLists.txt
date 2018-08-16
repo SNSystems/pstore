@@ -51,4 +51,3 @@ add_pstore_unit_test (pstore-serialize-unit-tests
 )
 target_link_libraries (pstore-serialize-unit-tests pstore-serialize pstore-common)
 
-# eof: unittests/serialize/CMakeLists.txt

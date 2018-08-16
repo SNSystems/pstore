@@ -85,4 +85,3 @@ namespace pstore {
     } // namespace threads
 } // namespace pstore
 #endif // PSTORE_THREAD_HPP
-// eof: include/pstore/support/thread.hpp

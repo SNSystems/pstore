@@ -104,4 +104,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_INTF_WRITER_HPP
-// eof: include/pstore/broker_intf/writer.hpp

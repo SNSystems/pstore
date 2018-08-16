@@ -55,4 +55,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_QUOTED_STRING_HPP
-// eof: include/pstore/support/quoted_string.hpp

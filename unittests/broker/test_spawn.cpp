@@ -110,4 +110,3 @@ TEST_F (Win32CommandLine, Simple) {
 }
 
 #endif // _WIN32
-// eof: unittests/broker/test_spawn.cpp

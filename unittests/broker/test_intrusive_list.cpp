@@ -93,4 +93,3 @@ TEST (IntrusiveList, IteratorIncrement) {
     EXPECT_EQ (it, it2);
     EXPECT_EQ (it, begin);
 }
-// eof: unittests/broker/test_intrusive_list.cpp

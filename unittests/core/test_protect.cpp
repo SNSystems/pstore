@@ -4,7 +4,7 @@
 //* | |_) | | | (_) | ||  __/ (__| |_  *
 //* | .__/|_|  \___/ \__\___|\___|\__| *
 //* |_|                                *
-//===- unittests/pstore/test_protect.cpp ----------------------------------===//
+//===- unittests/core/test_protect.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -191,4 +191,3 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
     transaction.commit ();
 }
 
-// eof: unittests/pstore/test_protect.cpp

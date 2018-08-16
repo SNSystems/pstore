@@ -674,4 +674,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // GSL_SPAN_HPP
-// eof: include/pstore/support/gsl.hpp

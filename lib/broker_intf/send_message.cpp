@@ -102,4 +102,3 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-// eof: lib/broker_intf/send_message.cpp

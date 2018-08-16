@@ -169,4 +169,3 @@ int main (int argc, const char * argv[]) {
     // clang-format on
     return exit_code;
 }
-// eof: tools/json/json.cpp

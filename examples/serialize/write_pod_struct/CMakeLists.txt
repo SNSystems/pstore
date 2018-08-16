@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (write-pod-struct write_pod_struct.cpp)
-# eof: examples/serialize/write_pod_struct/CMakeLists.txt

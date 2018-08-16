@@ -89,4 +89,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // PSTORE_VACUUM_INTF_HPP
-// eof: include/pstore/core/vacuum_intf.hpp

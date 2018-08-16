@@ -79,4 +79,3 @@ TEST (StickyAssign, Copy) {
     EXPECT_EQ (0, v2.get ());
 }
 
-// eof: unittests/serialize/test_common.cpp

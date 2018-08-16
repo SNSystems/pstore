@@ -118,4 +118,3 @@ TEST_F (Command, Bad) {
     cp_.process_command (fifo_, msg);
 }
 
-// eof: unittests/broker/test_command.cpp

@@ -185,4 +185,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_COMMAND_HPP
-// eof: include/pstore/broker/command.hpp

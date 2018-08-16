@@ -51,4 +51,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_HEAD_REVISION_HPP
-// eof: include/pstore/support/head_revision.hpp

@@ -101,4 +101,3 @@ namespace pstore {
         }
     } // namespace utf
 } // namespace pstore
-// eof: lib/support/utf.cpp

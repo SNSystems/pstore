@@ -78,4 +78,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif // PSTORE_BROKER_SCAVENGER_HPP
-// eof: include/pstore/broker/scavenger.hpp

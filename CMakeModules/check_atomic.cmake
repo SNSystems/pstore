@@ -74,4 +74,3 @@ if(NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB)
     message(WARNING "Host compiler must support std::atomic!")
   endif()
 endif()
-# eof: CMakeModules/check_atomic.cmake

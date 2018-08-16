@@ -4,7 +4,7 @@
 //* \__ \ |_| | | | | (__  *
 //* |___/\__, |_| |_|\___| *
 //*      |___/             *
-//===- unittests/pstore/test_sync.cpp -------------------------------------===//
+//===- unittests/core/test_sync.cpp ---------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -199,4 +199,3 @@ TEST_F (SyncFixture, SyncToBadVersions) {
 
     check_for_error ([this]() { db_->sync (3); }, pstore::error_code::unknown_revision);
 }
-// eof: unittests/pstore/test_sync.cpp

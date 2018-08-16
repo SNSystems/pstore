@@ -238,4 +238,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // PSTORE_MCREPO_TICKET_HPP
-// eof: include/pstore/mcrepo/ticket.hpp

@@ -59,4 +59,3 @@ include (add_pstore)
 add_pstore_library (pstore-diff-lib ${PSTORE_DIFF_LIB_SRC})
 target_link_libraries (pstore-diff-lib pstore-core pstore-dump-lib)
 
-# eof: lib/diff/CMakeLists.txt

@@ -178,4 +178,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_UUID_HPP
-// eof: include/pstore/core/uuid.hpp

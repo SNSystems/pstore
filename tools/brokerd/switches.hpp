@@ -71,4 +71,3 @@ struct switches {
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // SWITCHES_HPP
-// eof: tools/brokerd/switches.hpp

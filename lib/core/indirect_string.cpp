@@ -136,4 +136,3 @@ namespace pstore {
 
 } // namespace pstore
 
-// eof: lib/core/indirect_string.cpp

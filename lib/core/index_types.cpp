@@ -138,4 +138,3 @@ namespace pstore {
         }
     } // namespace index
 } // namespace pstore
-// eof: lib/core/index_types.cpp

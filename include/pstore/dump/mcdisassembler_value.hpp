@@ -63,4 +63,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DUMP_MCDISASSEMBLER_VALUE_HPP
-// eof: include/pstore/dump/mcdisassembler_value.hpp

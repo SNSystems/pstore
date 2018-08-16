@@ -79,4 +79,3 @@ void install_service (ctzstring service_name, ctzstring display_name, DWORD star
 void uninstall_service (ctzstring service_name);
 
 #endif // SERVICE_INSTALLER_HPP
-// eof: tools/brokerd/service/service_installer.hpp

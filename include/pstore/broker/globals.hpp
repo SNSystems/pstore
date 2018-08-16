@@ -58,4 +58,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_GLOBALS_HPP
-// eof: include/pstore/broker/globals.hpp

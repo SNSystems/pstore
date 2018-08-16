@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (write-basic write_basic.cpp)
-# eof: examples/write_basic/CMakeLists.txt

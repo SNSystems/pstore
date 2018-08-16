@@ -143,4 +143,3 @@ namespace pstore {
     } // end namespace broker
 } // end namespace pstore
 
-// eof: lib/broker/gc_common.cpp

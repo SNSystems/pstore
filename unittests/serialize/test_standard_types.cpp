@@ -341,4 +341,3 @@ TEST_F (MapWriter, read) {
     EXPECT_EQ (std::end (writer_), archive.iterator ());
 }
 
-// eof: unittests/serialize/test_standard_types.cpp

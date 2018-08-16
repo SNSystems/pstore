@@ -57,4 +57,3 @@ inline std::pair<std::string, std::string> to_value_pair (std::string const & op
 }
 
 #endif // TO_VALUE_PAIR_HPP
-// eof: tools/write/to_value_pair.hpp

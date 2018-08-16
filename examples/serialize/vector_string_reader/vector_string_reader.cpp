@@ -108,4 +108,3 @@ int main () {
     read_an_array_of_strings (data);
     read_a_series_of_strings (data);
 }
-// eof: examples/serialize/vector_string_reader/vector_string_reader.cpp

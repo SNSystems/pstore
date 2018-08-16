@@ -122,4 +122,3 @@ namespace pstore {
 #endif //_WIN32
 // eof:lib/broker_intf/fifo_path_win32.cpp
 
-// eof: lib/broker_intf/fifo_path_win32.cpp

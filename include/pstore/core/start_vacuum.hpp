@@ -54,4 +54,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_START_VACUUM_HPP
-// eof: include/pstore/core/start_vacuum.hpp

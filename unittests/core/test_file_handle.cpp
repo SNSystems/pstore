@@ -4,7 +4,7 @@
 //* |  _| | |  __/ | | | | (_| | | | | (_| | |  __/ *
 //* |_| |_|_|\___| |_| |_|\__,_|_| |_|\__,_|_|\___| *
 //*                                                 *
-//===- unittests/pstore/test_file_handle.cpp ------------------------------===//
+//===- unittests/core/test_file_handle.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -161,4 +161,3 @@ REGISTER_TYPED_TEST_CASE_P (SplitFixture, Empty, Small, Uint8Max, Uint16Max, Spl
 
 INSTANTIATE_TYPED_TEST_CASE_P (Const, SplitFixture, std::uint8_t const);
 INSTANTIATE_TYPED_TEST_CASE_P (NonConst, SplitFixture, std::uint8_t);
-// eof: unittests/pstore/test_file_handle.cpp

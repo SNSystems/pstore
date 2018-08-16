@@ -4,7 +4,7 @@
 //* | |_| | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | | *
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
-//===- unittests/pstore/test_transaction.cpp ------------------------------===//
+//===- unittests/core/test_transaction.cpp --------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -459,4 +459,3 @@ TEST_F (Transaction, GetRwUInt64) {
     EXPECT_EQ (expected, *db_->getro (extent));
 }
 
-// eof: unittests/pstore/test_transaction.cpp

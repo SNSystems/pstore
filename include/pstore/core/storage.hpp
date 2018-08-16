@@ -43,6 +43,9 @@
 //===----------------------------------------------------------------------===//
 /// \file storage.cpp
 
+#ifndef PSTORE_CORE_STORAGE_HPP
+#define PSTORE_CORE_STORAGE_HPP
+
 #include <cassert>
 #include <memory>
 
@@ -291,4 +294,6 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: include/pstore/core/storage.hpp
+
+#endif // PSTORE_CORE_STORAGE_HPP
+

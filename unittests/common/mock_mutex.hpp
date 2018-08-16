@@ -50,4 +50,3 @@ struct mock_mutex {
 };
 
 #endif // MOCK_MUTEX_HPP
-// eof: unittests/common/mock_mutex.hpp

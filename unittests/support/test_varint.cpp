@@ -4,7 +4,7 @@
 //*  \ V / (_| | |  | | | | | |_  *
 //*   \_/ \__,_|_|  |_|_| |_|\__| *
 //*                               *
-//===- unittests/pstore_support/test_varint.cpp ---------------------------===//
+//===- unittests/support/test_varint.cpp ----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -208,4 +208,3 @@ TEST_F (VarInt, 2pow63) {
 TEST_F (VarInt, 64Bits) {
     check (~UINT64_C (0), {0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});
 }
-// eof: unittests/pstore_support/test_varint.cpp

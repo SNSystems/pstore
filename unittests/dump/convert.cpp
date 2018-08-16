@@ -64,4 +64,3 @@ std::basic_string<wchar_t> convert (char const * str) {
     }
     return result;
 }
-// eof: unittests/dump/convert.cpp

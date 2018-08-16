@@ -75,4 +75,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_INTF_STATUS_PATH_HPP
-// eof: include/pstore/broker_intf/status_path.hpp

@@ -54,4 +54,3 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-broker-poker pstore-broker-intf pstore-cmd-util)
 
-# eof: tools/broker_poker/CMakeLists.txt

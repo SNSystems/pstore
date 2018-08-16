@@ -70,4 +70,3 @@ namespace pstore {
     } // namespace diff
 } // namespace pstore
 
-// eof: lib/diff/revision.cpp

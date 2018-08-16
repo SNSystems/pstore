@@ -62,4 +62,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/address.cpp

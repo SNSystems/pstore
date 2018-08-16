@@ -56,4 +56,3 @@ namespace pstore {
 
 } // namespace pstore
 
-// eof: lib/core/vacuum_intf.cpp

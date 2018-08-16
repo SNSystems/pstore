@@ -69,4 +69,3 @@ namespace pstore {
         return os << "{ offset: " << mm.offset () << ", size: " << mm.size () << " }";
     }
 } // namespace pstore
-// eof: lib/core/memory_mapper.cpp

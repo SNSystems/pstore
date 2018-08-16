@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore_support/CMakeLists.txt -----------------------------===//
+#===- unittests/support/CMakeLists.txt ------------------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -64,4 +64,3 @@ target_link_libraries (pstore-support-unit-tests pstore-support pstore-common)
 #eof:pstore/unittests/pstore_support/CMakeLists.txt
 
 
-# eof: unittests/pstore_support/CMakeLists.txt

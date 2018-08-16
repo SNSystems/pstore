@@ -63,4 +63,3 @@ int main () {
     // Dump the raw contents of the archive.
     std::cout << "Wrote these bytes:\n" << writer << '\n';
 }
-// eof: examples/serialize/write_integers/write_integers.cpp

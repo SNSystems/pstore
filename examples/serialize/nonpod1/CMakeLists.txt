@@ -42,4 +42,3 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_example (nonpod1 nonpod1.cpp)
-# eof: examples/serialize/nonpod1/CMakeLists.txt

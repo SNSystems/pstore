@@ -56,4 +56,3 @@ int main () {
     write (writer, pt);
     std::cout << "Wrote these bytes:\n" << writer << '\n';
 }
-// eof: examples/serialize/write_pod_struct/write_pod_struct.cpp

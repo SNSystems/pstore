@@ -130,4 +130,3 @@ namespace pstore {
     } // end namespace details
 } // end namespace pstore
 
-// eof: lib/core/crc32.cpp

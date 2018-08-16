@@ -70,4 +70,3 @@ namespace pstore {
     } // namespace index
 } // namespace pstore
 #endif // PSTORE_HAMT_MAP_FWD_HPP
-// eof: include/pstore/core/hamt_map_fwd.hpp

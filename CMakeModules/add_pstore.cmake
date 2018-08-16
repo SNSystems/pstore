@@ -242,4 +242,3 @@ function(add_pstore_unit_test test_dirname)
 
 endfunction(add_pstore_unit_test)
 
-# eof: CMakeModules/add_pstore.cmake

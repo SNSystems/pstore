@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/pstore/broker_intf/CMakeLists.txt -------------------------===//
+#===- unittests/core/broker_intf/CMakeLists.txt ---------------------------===//
 # Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -46,4 +46,3 @@ set (BROKER_INTF_UNIT_TEST_SRC
     "${CMAKE_CURRENT_SOURCE_DIR}/test_send_message.cpp"
 )
 target_sources (pstore-core-unit-tests PUBLIC ${BROKER_INTF_UNIT_TEST_SRC})
-# eof: unittests/pstore/broker_intf/CMakeLists.txt

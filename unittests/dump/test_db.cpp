@@ -173,4 +173,3 @@ TEST (Database, Trailer) {
                                                             "0x61,", "0x69,", "0x6c", "]"}));
 }
 
-// eof: unittests/dump/test_db.cpp

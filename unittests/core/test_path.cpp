@@ -4,7 +4,7 @@
 //* | |_) | (_| | |_| | | | *
 //* | .__/ \__,_|\__|_| |_| *
 //* |_|                     *
-//===- unittests/pstore/test_path.cpp -------------------------------------===//
+//===- unittests/core/test_path.cpp ---------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -269,4 +269,3 @@ TEST (Path, PlatformSplitDrive) {
     EXPECT_EQ (expected, pstore::path::split_drive (input));
 }
 
-// eof: unittests/pstore/test_path.cpp

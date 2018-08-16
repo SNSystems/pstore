@@ -76,4 +76,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/broker_intf/writer_win32.cpp

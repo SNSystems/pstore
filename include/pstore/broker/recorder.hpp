@@ -92,4 +92,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_RECORDER_HPP
-// eof: include/pstore/broker/recorder.hpp

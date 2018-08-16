@@ -4,7 +4,7 @@
 //* | (_| (_| | | | |_) | (_| | (__|   <\__ \ *
 //*  \___\__,_|_|_|_.__/ \__,_|\___|_|\_\___/ *
 //*                                           *
-//===- unittests/pstore_json/callbacks.hpp --------------------------------===//
+//===- unittests/json/callbacks.hpp ---------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -100,4 +100,3 @@ private:
 };
 
 #endif /* callbacks_h */
-// eof: unittests/pstore_json/callbacks.hpp

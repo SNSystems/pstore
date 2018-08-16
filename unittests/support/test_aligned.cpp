@@ -4,7 +4,7 @@
 //* | (_| | | | (_| | | | |  __/ (_| | *
 //*  \__,_|_|_|\__, |_| |_|\___|\__,_| *
 //*            |___/                   *
-//===- unittests/pstore_support/test_aligned.cpp --------------------------===//
+//===- unittests/support/test_aligned.cpp ---------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -87,4 +87,3 @@ TEST (Aligned, AlignedUnsigned) {
         EXPECT_EQ (pstore::aligned<unsigned> (8U), unsigned_align);
     }
 }
-// eof: unittests/pstore_support/test_aligned.cpp

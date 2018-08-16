@@ -106,4 +106,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_MESSAGE_POOL_HPP
-// eof: include/pstore/broker/message_pool.hpp

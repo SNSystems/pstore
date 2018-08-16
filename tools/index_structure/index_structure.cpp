@@ -225,4 +225,3 @@ int main (int argc, char * argv[]) {
     return exit_code;
 }
 
-// eof: tools/index_structure/index_structure.cpp

@@ -4,7 +4,7 @@
 //* | | | (_) | || (_| | |_| | | | | (_| | | | (_) | (_| | *
 //* |_|  \___/ \__\__,_|\__|_|_| |_|\__, | |_|\___/ \__, | *
 //*                                 |___/           |___/  *
-//===- unittests/pstore/test_rotating_log.cpp -----------------------------===//
+//===- unittests/core/test_rotating_log.cpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -181,4 +181,3 @@ TEST (RotatingLog, TwoRotations) {
 #endif
 }
 
-// eof: unittests/pstore/test_rotating_log.cpp

@@ -47,4 +47,3 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-mangle LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-mangle pstore-core)
-# eof: tools/mangle/CMakeLists.txt

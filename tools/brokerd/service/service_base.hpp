@@ -128,4 +128,3 @@ private:
     SERVICE_STATUS_HANDLE status_handle_ = nullptr; ///< The service status handle.
 };
 #endif // BROKER_SERVICE_BASE_HPP
-// eof: tools/brokerd/service/service_base.hpp

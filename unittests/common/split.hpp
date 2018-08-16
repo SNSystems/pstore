@@ -90,4 +90,3 @@ std::vector<StringType> split_tokens (StringType const & s) {
 }
 
 #endif // SPLIT_HPP
-// eof: unittests/common/split.hpp

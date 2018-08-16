@@ -111,4 +111,3 @@ def main():
 if __name__ == '__main__':
     sys.exit(main())
 
-# eof: utils/write_travis_yml.py

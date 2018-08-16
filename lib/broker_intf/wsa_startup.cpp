@@ -59,4 +59,3 @@ namespace pstore {
     }
 } // namespace pstore
 #endif // _WIN32
-// eof: lib/broker_intf/wsa_startup.cpp

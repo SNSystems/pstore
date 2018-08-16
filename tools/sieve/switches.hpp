@@ -91,4 +91,3 @@ namespace switches {
 } // namespace switches
 
 #endif // SIEVE_SWITCHES_HPP
-// eof: tools/sieve/switches.hpp

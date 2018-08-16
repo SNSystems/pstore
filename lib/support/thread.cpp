@@ -208,4 +208,3 @@ namespace pstore {
         }
     } // namespace threads
 } // namespace pstore
-// eof: lib/support/thread.cpp

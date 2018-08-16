@@ -69,4 +69,3 @@ namespace pstore {
 
 } // end namespace pstore
 #endif // PSTORE_CRC32_HPP
-// eof: include/pstore/core/crc32.hpp

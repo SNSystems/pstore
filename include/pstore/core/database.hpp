@@ -509,4 +509,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_DATABASE_HPP
-// eof: include/pstore/core/database.hpp

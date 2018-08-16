@@ -84,4 +84,3 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-// eof: lib/broker_intf/message_type.cpp

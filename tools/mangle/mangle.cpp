@@ -177,4 +177,3 @@ int main (int argc, char ** argv) {
     std::cerr << "Mangle returning " << exit_code << '\n';
     return exit_code;
 }
-// eof: tools/mangle/mangle.cpp

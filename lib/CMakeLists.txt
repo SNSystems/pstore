@@ -53,4 +53,3 @@ add_subdirectory (json)
 add_subdirectory (mcrepo)
 add_subdirectory (serialize)
 add_subdirectory (vacuum)
-# eof: lib/CMakeLists.txt

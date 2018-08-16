@@ -76,4 +76,3 @@ std::error_category const & pstore::get_error_category () {
     return cat;
 }
 
-// eof: lib/support/error.cpp

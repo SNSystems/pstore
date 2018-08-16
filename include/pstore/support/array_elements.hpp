@@ -56,4 +56,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SUPPORT_ARRAY_ELEMENTS_HPP
-// eof: include/pstore/support/array_elements.hpp

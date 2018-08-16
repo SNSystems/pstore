@@ -63,4 +63,3 @@ std::thread create_quit_thread (vacuum::status & status,
                                 std::shared_ptr<pstore::database> const & src_db);
 
 #endif // VACUUM_QUIT_HPP
-// eof: include/pstore/vacuum/quit.hpp

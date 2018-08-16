@@ -174,4 +174,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif // PSTORE_MESSAGE_TYPE_HPP
-// eof: include/pstore/broker_intf/message_type.hpp

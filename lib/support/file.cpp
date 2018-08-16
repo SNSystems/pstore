@@ -356,4 +356,3 @@ namespace pstore {
         }
     } // end of namespace file
 } // end of namespace pstore
-// eof: lib/support/file.cpp

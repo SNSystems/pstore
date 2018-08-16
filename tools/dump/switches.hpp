@@ -95,4 +95,3 @@ struct switches {
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_DUMP_SWITCHES_HPP
-// eof: tools/dump/switches.hpp

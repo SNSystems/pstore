@@ -4,7 +4,7 @@
 //* | |_) | (_| \__ \ | (__  | | (_) | (_| | (_| |  __/ |    *
 //* |_.__/ \__,_|___/_|\___| |_|\___/ \__, |\__, |\___|_|    *
 //*                                   |___/ |___/            *
-//===- unittests/pstore/test_basic_logger.cpp -----------------------------===//
+//===- unittests/core/test_basic_logger.cpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -252,4 +252,3 @@ TEST_F (BasicLoggerThreadNameFixture, ThreadNameEmpty) {
     }
     EXPECT_EQ (')', name[length - 1]);
 }
-// eof: unittests/pstore/test_basic_logger.cpp

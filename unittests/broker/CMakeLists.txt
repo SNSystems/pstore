@@ -56,4 +56,3 @@ target_include_directories (pstore-broker-unit-tests PRIVATE "${CMAKE_CURRENT_SO
 
 target_link_libraries (pstore-broker-unit-tests pstore-broker)
 
-# eof: unittests/broker/CMakeLists.txt

@@ -4,7 +4,7 @@
 //* | | | | |_| | | | | | | |_) |  __/ |    *
 //* |_| |_|\__,_|_| |_| |_|_.__/ \___|_|    *
 //*                                         *
-//===- unittests/pstore_json/test_number.cpp ------------------------------===//
+//===- unittests/json/test_number.cpp -------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -279,4 +279,3 @@ TEST_F (JsonNumber, BadExponentAfterPoint) {
     p.input (std::string{"1.E"}).eof ();
     EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
 }
-// eof: unittests/pstore_json/test_number.cpp

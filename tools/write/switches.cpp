@@ -140,4 +140,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
 
     return {result, EXIT_SUCCESS};
 }
-// eof: tools/write/switches.cpp

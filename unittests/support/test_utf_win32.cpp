@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- unittests/pstore_support/test_utf_win32.cpp ------------------------===//
+//===- unittests/support/test_utf_win32.cpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -139,4 +139,3 @@ TEST (UtfStrings, BadUtf16Input) {
 }
 
 #endif // _WIN32
-// eof: unittests/pstore_support/test_utf_win32.cpp

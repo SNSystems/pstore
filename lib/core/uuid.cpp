@@ -285,4 +285,3 @@ namespace pstore {
 
     std::ostream & operator<< (std::ostream & stream, uuid const & m) { return stream << m.str (); }
 } // namespace pstore
-// eof: lib/core/uuid.cpp

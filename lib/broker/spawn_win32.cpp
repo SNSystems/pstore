@@ -162,4 +162,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif //_WIN32
-// eof: lib/broker/spawn_win32.cpp

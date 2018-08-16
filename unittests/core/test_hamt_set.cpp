@@ -4,7 +4,7 @@
 //* | | | | (_| | | | | | | |_  \__ \  __/ |_  *
 //* |_| |_|\__,_|_| |_| |_|\__| |___/\___|\__| *
 //*                                            *
-//===- unittests/pstore/test_hamt_set.cpp ---------------------------------===//
+//===- unittests/core/test_hamt_set.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -240,4 +240,3 @@ TEST_F (SetFixture, FindInternal) {
     EXPECT_EQ (*it, ini);
     EXPECT_EQ (it->size (), 14U); // Check operator ->
 }
-// eof: unittests/pstore/test_hamt_set.cpp

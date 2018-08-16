@@ -81,4 +81,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_DUMP_ERROR_HPP
-// eof: include/pstore/dump/error.hpp

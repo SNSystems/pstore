@@ -4,7 +4,7 @@
 //* | (_| | |_) | | (_| | | | (__| | | | |\ V /  __/ *
 //*  \__,_|_.__/   \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                                  *
-//===- unittests/pstore/test_db_archive.cpp -------------------------------===//
+//===- unittests/core/test_db_archive.cpp ---------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -274,4 +274,3 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
           pstore::gsl::span<std::uint64_t>{actual});
 }
 
-// eof: unittests/pstore/test_db_archive.cpp

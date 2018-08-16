@@ -444,4 +444,3 @@ int main (int argc, char * argv[]) {
     return exit_code;
 }
 
-// eof: tools/dump/main.cpp

@@ -213,4 +213,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/storage.cpp

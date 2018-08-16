@@ -59,4 +59,3 @@ add_pstore_library (pstore-mcrepo
 )
 target_link_libraries (pstore-mcrepo pstore-core)
 
-# eof: lib/mcrepo/CMakeLists.txt

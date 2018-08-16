@@ -106,4 +106,3 @@ int main () {
         std::cout << "Read: " << f << '\n';
     }
 }
-// eof: examples/serialize/nonpod2/nonpod2.cpp

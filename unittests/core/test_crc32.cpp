@@ -4,7 +4,7 @@
 //* | (__| | | (__ ___) / __/  *
 //*  \___|_|  \___|____/_____| *
 //*                            *
-//===- unittests/pstore/test_crc32.cpp ------------------------------------===//
+//===- unittests/core/test_crc32.cpp --------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -60,4 +60,3 @@ TEST (Crc32, Sequence) {
     auto span = pstore::gsl::make_span (str, length);
     EXPECT_EQ (pstore::crc32 (span), 0x0fcdae64U);
 }
-// eof: unittests/pstore/test_crc32.cpp

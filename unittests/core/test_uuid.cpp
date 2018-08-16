@@ -4,7 +4,7 @@
 //* | |_| | |_| | | (_| | *
 //*  \__,_|\__,_|_|\__,_| *
 //*                       *
-//===- unittests/pstore/test_uuid.cpp -------------------------------------===//
+//===- unittests/core/test_uuid.cpp ---------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -271,4 +271,3 @@ TEST_F (CompareUUID, Ge) {
     EXPECT_FALSE (t1_ >= t3_);
 }
 
-// eof: unittests/pstore/test_uuid.cpp

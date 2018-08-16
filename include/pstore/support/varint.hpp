@@ -194,4 +194,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_VARINT_HPP
-// eof: include/pstore/support/varint.hpp

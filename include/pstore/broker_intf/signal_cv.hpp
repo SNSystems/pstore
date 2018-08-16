@@ -108,4 +108,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_SIGNAL_CV_HPP
-// eof: include/pstore/broker_intf/signal_cv.hpp

@@ -4,7 +4,7 @@
 //* |  __/ |  | | | (_) | |    *
 //*  \___|_|  |_|  \___/|_|    *
 //*                            *
-//===- unittests/pstore_support/test_error.cpp ----------------------------===//
+//===- unittests/support/test_error.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -72,4 +72,3 @@ TEST (Error, RaiseErrc) {
     check_for_error (will_throw, std::errc::invalid_argument);
 }
 
-// eof: unittests/pstore_support/test_error.cpp

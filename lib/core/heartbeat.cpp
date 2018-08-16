@@ -143,4 +143,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/core/heartbeat.cpp

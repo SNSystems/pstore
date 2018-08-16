@@ -4,7 +4,7 @@
 //* | | | |  __/ (_| | |  | |_| |_) |  __/ (_| | |_  *
 //* |_| |_|\___|\__,_|_|   \__|_.__/ \___|\__,_|\__| *
 //*                                                  *
-//===- unittests/pstore/test_heartbeat.cpp --------------------------------===//
+//===- unittests/core/test_heartbeat.cpp ----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -125,4 +125,3 @@ TEST_F (HeartbeatAttachDetach, AttachTwoDetachOne) {
     worker_.step ();
 }
 
-// eof: unittests/pstore/test_heartbeat.cpp

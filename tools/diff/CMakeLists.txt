@@ -54,4 +54,3 @@ endif (PSTORE_IS_INSIDE_LLVM)
 
 run_pstore_unit_test (pstore-diff pstore-diff-unit-tests)
 
-# eof: tools/diff/CMakeLists.txt

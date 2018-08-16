@@ -420,4 +420,3 @@ namespace pstore {
     } // namespace file
 } // namespace pstore
 #endif //_WIN32
-// eof: lib/support/file_posix.cpp

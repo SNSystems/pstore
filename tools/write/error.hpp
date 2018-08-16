@@ -78,4 +78,3 @@ namespace std {
 #endif // PSTORE_WRITE_ERROR_HPP
 // eof:tools/write/error.hpp
 
-// eof: tools/write/error.hpp

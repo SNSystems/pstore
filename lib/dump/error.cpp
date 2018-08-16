@@ -85,4 +85,3 @@ std::error_code std::make_error_code (pstore::dump::error_code e) {
                    "base type of error_code must be int to permit safe static cast");
     return {static_cast<int> (e), get_error_category ()};
 }
-// eof: lib/dump/error.cpp

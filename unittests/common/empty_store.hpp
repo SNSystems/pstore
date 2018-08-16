@@ -75,4 +75,3 @@ private:
 };
 
 #endif // EMPTY_STORE_HPP
-// eof: unittests/common/empty_store.hpp

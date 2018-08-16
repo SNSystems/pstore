@@ -79,4 +79,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_JSON_DOM_TYPES_HPP
-// eof: include/pstore/json/dom_types.hpp

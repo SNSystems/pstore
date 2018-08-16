@@ -128,4 +128,3 @@ namespace pstore {
 #undef PSTORE_PLATFORM_NS
 
 #endif // PATH_HPP
-// eof: include/pstore/support/path.hpp

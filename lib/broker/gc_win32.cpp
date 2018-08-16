@@ -197,4 +197,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // _WIN32
-// eof: lib/broker/gc_win32.cpp

@@ -4,7 +4,7 @@
 //* | |_| | | | | | |_| |/ __/ (_) | *
 //*  \__,_|_|_| |_|\__|_|_____\___/  *
 //*                                  *
-//===- unittests/pstore/test_uint128.cpp ----------------------------------===//
+//===- unittests/core/test_uint128.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -114,4 +114,3 @@ TEST (Uint128, ToHexString) {
                "ffffffffffffffffffffffffffffffff");
 }
 
-// eof: unittests/pstore/test_uint128.cpp

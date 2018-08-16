@@ -78,4 +78,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_QUIT_HPP
-// eof: include/pstore/broker/quit.hpp

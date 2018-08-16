@@ -187,4 +187,3 @@ TEST (Object, BackInserter) {
     object object{{{"k1", make_value ("v1")}}};
 }
 
-// eof: unittests/dump/test_object.cpp

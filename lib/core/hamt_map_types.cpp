@@ -432,4 +432,3 @@ namespace pstore {
         } // namespace details
     }     // namespace index
 } // namespace pstore
-// eof: lib/core/hamt_map_types.cpp

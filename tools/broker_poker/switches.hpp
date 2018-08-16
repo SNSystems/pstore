@@ -79,4 +79,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 #endif // PSTORE_BROKER_POKER_SWITCHES_HPP
 // eof:tools/broker_poker/switches.hpp
 
-// eof: tools/broker_poker/switches.hpp

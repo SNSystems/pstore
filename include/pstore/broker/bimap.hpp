@@ -237,4 +237,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_BIMAP_HPP
-// eof: include/pstore/broker/bimap.hpp

@@ -75,4 +75,3 @@ bool set_from_name (indices_bitset * const bs, std::string const & name) {
 }
 // eof:tools/index_structure/indices.cpp
 
-// eof: tools/index_structure/indices.cpp

@@ -4,7 +4,7 @@
 //* | |_| | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | | *
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
-//===- unittests/pstore_mcrepo/transaction.cpp ----------------------------===//
+//===- unittests/mcrepo/transaction.cpp -----------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -67,4 +67,3 @@ auto transaction::alloc_rw (std::size_t size, unsigned align)
     return std::make_pair (ptr, addr);
 }
 
-// eof: unittests/pstore_mcrepo/transaction.cpp

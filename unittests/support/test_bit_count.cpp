@@ -4,7 +4,7 @@
 //* | |_) | | |_  | (_| (_) | |_| | | | | |_  *
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
-//===- unittests/pstore_support/test_bit_count.cpp ------------------------===//
+//===- unittests/support/test_bit_count.cpp -------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -102,4 +102,3 @@ TEST (BitCount, PopCountULongLong) {
     bitmap = 0xFFFFFFFFFFFFFFFF;
     EXPECT_EQ (64U, pstore::bit_count::pop_count (bitmap));
 }
-// eof: unittests/pstore_support/test_bit_count.cpp

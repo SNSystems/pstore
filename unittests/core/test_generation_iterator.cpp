@@ -10,7 +10,7 @@
 //* | | ||  __/ | | (_| | || (_) | |    *
 //* |_|\__\___|_|  \__,_|\__\___/|_|    *
 //*                                     *
-//===- unittests/pstore/test_generation_iterator.cpp ----------------------===//
+//===- unittests/core/test_generation_iterator.cpp ------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -120,4 +120,3 @@ TEST_F (GenerationIterator, PostIncrement) {
     EXPECT_EQ (begin, old);
     EXPECT_EQ (end, it);
 }
-// eof: unittests/pstore/test_generation_iterator.cpp

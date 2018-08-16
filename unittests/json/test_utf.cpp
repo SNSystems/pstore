@@ -4,7 +4,7 @@
 //* | |_| | |_|  _| *
 //*  \__,_|\__|_|   *
 //*                 *
-//===- unittests/pstore_json/test_utf.cpp ---------------------------------===//
+//===- unittests/json/test_utf.cpp ----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -229,4 +229,3 @@ TEST_F (Utf8Decode, IllegalCodePositions) {
     decode_bad (bytes ({0xED, 0xAF, 0xBF, 0xED, 0xB0, 0x80})); // U+DBFF U+DC00
     decode_bad (bytes ({0xED, 0xAF, 0xBF, 0xED, 0xBF, 0xBF})); // U+DBFF U+DFFF
 }
-// eof: unittests/pstore_json/test_utf.cpp

@@ -93,4 +93,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 
-// eof: lib/broker/scavenger.cpp

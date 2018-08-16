@@ -4,7 +4,7 @@
 //* | |_) | (_| | | | (_| | | |  __/ | |  _| (_) | |    |  __/ (_| | (__| | | | *
 //* | .__/ \__,_|_|  \__,_|_|_|\___|_| |_|  \___/|_|     \___|\__,_|\___|_| |_| *
 //* |_|                                                                         *
-//===- unittests/pstore_cmd_util/test_parallel_for_each.cpp ---------------===//
+//===- unittests/cmd_util/test_parallel_for_each.cpp ----------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -134,4 +134,3 @@ TEST_F (ParallelForEach, ConcurrencyPlusOne) {
     auto const out = run_for_each (src);
     EXPECT_THAT (out, ::testing::ContainerEq (expected));
 }
-// eof: unittests/pstore_cmd_util/test_parallel_for_each.cpp

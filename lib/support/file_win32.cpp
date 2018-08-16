@@ -553,4 +553,3 @@ namespace pstore {
     } // namespace file
 } // namespace pstore
 #endif // #ifdef _WIN32
-// eof: lib/support/file_win32.cpp

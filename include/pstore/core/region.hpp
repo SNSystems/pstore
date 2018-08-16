@@ -372,4 +372,3 @@ namespace pstore {
     } // namespace region
 } // namespace pstore
 #endif // PSTORE_REGION_HPP
-// eof: include/pstore/core/region.hpp

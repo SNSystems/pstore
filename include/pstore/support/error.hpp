@@ -192,4 +192,3 @@ namespace pstore {
 } // end namespace pstore
 
 #endif // PSTORE_ERROR_HPP
-// eof: include/pstore/support/error.hpp

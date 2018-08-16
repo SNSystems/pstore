@@ -176,4 +176,3 @@ void write_output (ContainerType const & primes, switches::endian output_endian,
 }
 
 #endif // WRITE_OUTPUT_HPP
-// eof: tools/sieve/write_output.hpp

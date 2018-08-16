@@ -142,4 +142,3 @@ namespace pstore {
     } // namespace bit_count
 } // namespace pstore
 #endif // PSTORE_BIT_COUNT_HPP
-// eof: include/pstore/support/bit_count.hpp

@@ -159,4 +159,3 @@ namespace pstore {
     };
 } // namespace pstore
 #endif // PSTORE_HEARTBEAT_HPP
-// eof: lib/core/heartbeat.hpp

@@ -4,7 +4,7 @@
 //* | (_| | (_| | (_| | | |  __/\__ \__ \ *
 //*  \__,_|\__,_|\__,_|_|  \___||___/___/ *
 //*                                       *
-//===- unittests/pstore/test_address.cpp ----------------------------------===//
+//===- unittests/core/test_address.cpp ------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -267,4 +267,3 @@ TEST (TypedAddress, Increment) {
     }
 }
 
-// eof: unittests/pstore/test_address.cpp

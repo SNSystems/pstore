@@ -102,4 +102,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_BROKER_PARSER_HPP
-// eof: include/pstore/broker/parser.hpp

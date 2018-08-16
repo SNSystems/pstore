@@ -92,4 +92,3 @@ TYPED_TEST (Array, TwoStrings) {
 
     EXPECT_EQ (expected, actual);
 }
-// eof: unittests/dump/test_array.cpp

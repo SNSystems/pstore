@@ -158,4 +158,3 @@ TEST (LineSplitter, TwoStringsInTwoParts) {
     arr.write (out);
     EXPECT_EQ (out.str (), "\n- hello\n- there");
 }
-// eof: unittests/dump/test_line_splitter.cpp

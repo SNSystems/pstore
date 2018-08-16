@@ -73,4 +73,3 @@ namespace pstore {
 
 } // namespace pstore
 #endif // BROKER_SIGNAL_HELPERS_HPP
-// eof: include/pstore/support/signal_helpers.hpp

@@ -153,4 +153,3 @@ namespace pstore {
 #endif // defined(__linux__)
 
 #endif // !defined(_WIN32)
-// eof: lib/support/process_file_name_posix.cpp

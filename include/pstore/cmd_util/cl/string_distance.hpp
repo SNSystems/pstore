@@ -75,4 +75,3 @@ namespace pstore {
 } // namespace pstore
 
 #endif // PSTORE_CMD_UTIL_CL_STRING_DISTANCE_HPP
-// eof: include/pstore/cmd_util/cl/string_distance.hpp

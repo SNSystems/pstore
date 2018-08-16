@@ -152,4 +152,3 @@ namespace pstore {
 
     } // namespace region
 } // namespace pstore
-// eof: lib/core/region.cpp

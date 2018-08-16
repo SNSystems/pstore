@@ -80,4 +80,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_MCREPO_ERROR_HPP
-// eof: include/pstore/mcrepo/repo_error.hpp

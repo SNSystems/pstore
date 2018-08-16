@@ -93,4 +93,3 @@ std::tuple<char32_t, bool> pstore::json::utf8_decoder::get (std::uint8_t byte) {
     codepoint_ = 0;
     return std::make_tuple (res, true);
 }
-// eof: lib/json/utf.cpp

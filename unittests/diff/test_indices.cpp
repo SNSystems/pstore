@@ -289,4 +289,3 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     check (out, "write");
 }
 
-// eof: unittests/diff/test_indices.cpp
