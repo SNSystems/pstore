@@ -141,7 +141,7 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     std::vector<std::size_t> Actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
 
-    section const & s = f->at<section_kind::read_only> ();
+    generic_section const & s = f->at<section_kind::read_only> ();
     auto data_begin = std::begin (s.data ());
     auto data_end = std::end (s.data ());
     auto rodata_begin = std::begin (rodata.data);
@@ -188,7 +188,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     std::vector<std::size_t> actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
-    section const & s = f->at<section_kind::text> ();
+    generic_section const & s = f->at<section_kind::text> ();
     EXPECT_EQ (16U, s.align ());
     EXPECT_EQ (4U, s.data ().size ());
     EXPECT_EQ (2U, s.ifixups ().size ());
@@ -274,8 +274,8 @@ TEST_F (FragmentTest, TwoSections) {
     std::vector<std::size_t> const actual (std::begin (indices), std::end (indices));
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
-    section const & rodata = f->at<section_kind::read_only> ();
-    section const & tls = f->at<section_kind::thread_data> ();
+    generic_section const & rodata = f->at<section_kind::read_only> ();
+    generic_section const & tls = f->at<section_kind::thread_data> ();
     EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
 }
 

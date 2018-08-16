@@ -185,32 +185,29 @@ namespace pstore {
         } // end namespace details
 
 
+        // clang-format off
         /// Maps from the section kind enumeration to the type that is used to represent a section
         /// of that kind.
         template <section_kind T>
         struct enum_to_section {};
-#    define PSTORE_ENUM_TO_SECTION(t, stored_type)                                                 \
-        template <>                                                                                \
-        struct enum_to_section<t> {                                                                \
-            using type = stored_type;                                                              \
-        };
-        PSTORE_ENUM_TO_SECTION (section_kind::bss, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::data, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_1_byte_c_string, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_2_byte_c_string, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_4_byte_c_string, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_const_16, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_const_32, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_const_4, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::mergeable_const_8, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::read_only, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::rel_ro, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::text, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::thread_bss, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::thread_data, section)
-        PSTORE_ENUM_TO_SECTION (section_kind::dependent, dependents)
-#    undef PSTORE_ENUM_TO_SECTION
 
+        template <> struct enum_to_section<section_kind::bss                      > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::data                     > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_1_byte_c_string> { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_2_byte_c_string> { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_4_byte_c_string> { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_const_16       > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_const_32       > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_const_4        > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::mergeable_const_8        > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::read_only                > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::rel_ro                   > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::text                     > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::thread_bss               > { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::thread_data              > { using type = generic_section; };
+
+        template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
+        // clang-format on
 
         //*   __                             _    *
         //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *

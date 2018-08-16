@@ -103,7 +103,7 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database const & db, repo::section const & section,
+        value_ptr make_value (database const & db, repo::generic_section const & section,
                               repo::section_kind sk, bool hex_mode) {
             (void) sk;
             auto const & data = section.data ();

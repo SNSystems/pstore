@@ -48,29 +48,30 @@
 namespace pstore {
     namespace repo {
 
-        //*             _   _           *
-        //*  ___ ___ __| |_(_)___ _ _   *
-        //* (_-</ -_) _|  _| / _ \ ' \  *
-        //* /__/\___\__|\__|_\___/_||_| *
-        //*                             *
+        //*                        _                 _   _           *
+        //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
+        //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
+        //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
+        //* |___/                                                    *
         // size_bytes
         // ~~~~~~~~~~
-        std::size_t section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
-                                         std::size_t num_xfixups) {
-            auto result = sizeof (section);
-            result = section::part_size_bytes<std::uint8_t> (result, data_size);
-            result = section::part_size_bytes<internal_fixup> (result, num_ifixups);
-            result = section::part_size_bytes<external_fixup> (result, num_xfixups);
+        std::size_t generic_section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
+                                                 std::size_t num_xfixups) {
+            auto result = sizeof (generic_section);
+            result = generic_section::part_size_bytes<std::uint8_t> (result, data_size);
+            result = generic_section::part_size_bytes<internal_fixup> (result, num_ifixups);
+            result = generic_section::part_size_bytes<external_fixup> (result, num_xfixups);
             return result;
         }
 
-        std::size_t section::size_bytes () const {
-            return section::size_bytes (data ().size (), ifixups ().size (), xfixups ().size ());
+        std::size_t generic_section::size_bytes () const {
+            return generic_section::size_bytes (data ().size (), ifixups ().size (),
+                                                xfixups ().size ());
         }
 
         // three_byte_integer::get
         // ~~~~~~~~~~~~~~~~~~~~~~~
-        std::uint32_t section::three_byte_integer::get (std::uint8_t const * src) noexcept {
+        std::uint32_t generic_section::three_byte_integer::get (std::uint8_t const * src) noexcept {
             number result;
 #if PSTORE_IS_BIG_ENDIAN
             result.bytes[0] = 0;
@@ -84,7 +85,8 @@ namespace pstore {
 
         // three_byte_integer::set
         // ~~~~~~~~~~~~~~~~~~~~~~~
-        void section::three_byte_integer::set (std::uint8_t * out, std::uint32_t v) noexcept {
+        void generic_section::three_byte_integer::set (std::uint8_t * out,
+                                                       std::uint32_t v) noexcept {
             constexpr auto out_bytes = std::size_t{3};
             number num;
             num.value = v;
@@ -105,17 +107,17 @@ namespace pstore {
         //*                                            |_|                              *
 
         std::size_t generic_section_creation_dispatcher::size_bytes () const {
-            return section::size_bytes (section_->make_sources ());
+            return generic_section::size_bytes (section_->make_sources ());
         }
 
         std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * out) const {
             assert (this->aligned (out) == out);
-            auto scn = new (out) section (section_->make_sources (), section_->align);
+            auto scn = new (out) generic_section (section_->make_sources (), section_->align);
             return out + scn->size_bytes ();
         }
 
         std::uintptr_t generic_section_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
-            return pstore::aligned<section> (in);
+            return pstore::aligned<generic_section> (in);
         }
 
     } // end namespace repo

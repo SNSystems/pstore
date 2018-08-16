@@ -149,12 +149,12 @@ namespace pstore {
                        "external_fixup size does not match expected");
 
 
-        //*             _   _           *
-        //*  ___ ___ __| |_(_)___ _ _   *
-        //* (_-</ -_) _|  _| / _ \ ' \  *
-        //* /__/\___\__|\__|_\___/_||_| *
-        //*                             *
-        class section {
+        //*                        _                 _   _           *
+        //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
+        //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
+        //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
+        //* |___/                                                    *
+        class generic_section {
         public:
             /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
@@ -173,17 +173,19 @@ namespace pstore {
             }
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            section (DataRange const & d, IFixupRange const & i, XFixupRange const & x,
-                     std::uint8_t align);
+            generic_section (DataRange const & d, IFixupRange const & i, XFixupRange const & x,
+                             std::uint8_t align);
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
-            section (sources<DataRange, IFixupRange, XFixupRange> const & src, std::uint8_t align)
-                    : section (src.data_range, src.ifixups_range, src.xfixups_range, align) {}
+            generic_section (sources<DataRange, IFixupRange, XFixupRange> const & src,
+                             std::uint8_t align)
+                    : generic_section (src.data_range, src.ifixups_range, src.xfixups_range,
+                                       align) {}
 
-            section (section const &) = delete;
-            section & operator= (section const &) = delete;
-            section (section &&) = delete;
-            section & operator= (section &&) = delete;
+            generic_section (generic_section const &) = delete;
+            generic_section & operator= (generic_section const &) = delete;
+            generic_section (generic_section &&) = delete;
+            generic_section & operator= (generic_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_; }
 
@@ -282,20 +284,21 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
-        section::section (DataRange const & d, IFixupRange const & i, XFixupRange const & x,
-                          std::uint8_t align)
+        generic_section::generic_section (DataRange const & d, IFixupRange const & i,
+                                          XFixupRange const & x, std::uint8_t align)
                 : align_{static_cast<std::uint8_t> (bit_count::ctz (align))}
                 , num_ifixups_{0} {
 
-            static_assert (std::is_standard_layout<section>::value,
+            static_assert (std::is_standard_layout<generic_section>::value,
                            "section must satisfy StandardLayoutType");
-            static_assert (offsetof (section, align_) == 0, "align_ offset is not 0");
-            static_assert (offsetof (section, num_ifixups_) == 1, "num_ifixups_ offset is not 1");
-            static_assert (offsetof (section, num_xfixups_) == 4,
+            static_assert (offsetof (generic_section, align_) == 0, "align_ offset is not 0");
+            static_assert (offsetof (generic_section, num_ifixups_) == 1,
+                           "num_ifixups_ offset is not 1");
+            static_assert (offsetof (generic_section, num_xfixups_) == 4,
                            "num_xfixups_ offset differs from expected value");
-            static_assert (offsetof (section, data_size_) == 8,
+            static_assert (offsetof (generic_section, data_size_) == 8,
                            "data_size_ offset differs from expected value");
-            static_assert (sizeof (section) == 16, "section size does not match expected");
+            static_assert (sizeof (generic_section) == 16, "section size does not match expected");
 #ifndef NDEBUG
             auto const start = reinterpret_cast<std::uint8_t *> (this);
 #endif
@@ -304,7 +307,7 @@ namespace pstore {
 
             if (d.first != d.second) {
                 p = std::copy (d.first, d.second, aligned_ptr<std::uint8_t> (p));
-                data_size_ = section::set_size<decltype (data_size_)> (d.first, d.second);
+                data_size_ = generic_section::set_size<decltype (data_size_)> (d.first, d.second);
             }
             if (i.first != i.second) {
                 p = reinterpret_cast<std::uint8_t *> (
@@ -314,7 +317,8 @@ namespace pstore {
             if (x.first != x.second) {
                 p = reinterpret_cast<std::uint8_t *> (
                     std::copy (x.first, x.second, aligned_ptr<external_fixup> (p)));
-                num_xfixups_ = section::set_size<decltype (num_xfixups_)> (x.first, x.second);
+                num_xfixups_ =
+                    generic_section::set_size<decltype (num_xfixups_)> (x.first, x.second);
             }
             assert (p >= start && static_cast<std::size_t> (p - start) == size_bytes (d, i, x));
         }
@@ -322,7 +326,7 @@ namespace pstore {
         // set_size
         // ~~~~~~~~
         template <typename IntType, typename Iterator>
-        inline IntType section::set_size (Iterator first, Iterator last) {
+        inline IntType generic_section::set_size (Iterator first, Iterator last) {
             static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
             auto const size = std::distance (first, last);
             assert (size >= 0);
@@ -340,8 +344,8 @@ namespace pstore {
         // size_bytes
         // ~~~~~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
-        std::size_t section::size_bytes (DataRange const & d, IFixupRange const & i,
-                                         XFixupRange const & x) {
+        std::size_t generic_section::size_bytes (DataRange const & d, IFixupRange const & i,
+                                                 XFixupRange const & x) {
             auto const data_size = std::distance (d.first, d.second);
             auto const num_ifixups = std::distance (i.first, i.second);
             auto const num_xfixups = std::distance (x.first, x.second);
@@ -353,7 +357,7 @@ namespace pstore {
 
         // num_ifixups
         // ~~~~~~~~~~~
-        inline std::uint32_t section::num_ifixups () const noexcept {
+        inline std::uint32_t generic_section::num_ifixups () const noexcept {
             static_assert (sizeof (num_ifixups_) == 3, "num_ifixups is expected to be 3 bytes");
             return three_byte_integer::get (num_ifixups_);
         }
@@ -361,7 +365,8 @@ namespace pstore {
         // set_num_ifixups
         // ~~~~~~~~~~~~~~~
         template <typename Iterator>
-        inline void section::set_num_ifixups (Iterator first, Iterator last, std::uint8_t * out) {
+        inline void generic_section::set_num_ifixups (Iterator first, Iterator last,
+                                                      std::uint8_t * out) {
             constexpr auto out_bytes = std::size_t{3};
             static_assert (sizeof (num_ifixups_) == out_bytes,
                            "num_ifixups is expected to be 3 bytes");
@@ -397,11 +402,11 @@ namespace pstore {
             std::vector<external_fixup> xfixups;
 
             auto make_sources () const
-                -> section::sources<range<decltype (data)::const_iterator>,
-                                    range<decltype (ifixups)::const_iterator>,
-                                    range<decltype (xfixups)::const_iterator>> {
+                -> generic_section::sources<range<decltype (data)::const_iterator>,
+                                            range<decltype (ifixups)::const_iterator>,
+                                            range<decltype (xfixups)::const_iterator>> {
 
-                return section::make_sources (
+                return generic_section::make_sources (
                     make_range (std::begin (data), std::end (data)),
                     make_range (std::begin (ifixups), std::end (ifixups)),
                     make_range (std::begin (xfixups), std::end (xfixups)));
@@ -438,7 +443,7 @@ namespace pstore {
 
         class section_dispatcher final : public dispatcher {
         public:
-            explicit section_dispatcher (section const & s) noexcept
+            explicit section_dispatcher (generic_section const & s) noexcept
                     : s_{s} {}
 
             std::size_t size_bytes () const final { return s_.size_bytes (); }
@@ -449,12 +454,12 @@ namespace pstore {
             container<std::uint8_t> data () const final { return s_.data (); }
 
         private:
-            section const & s_;
+            generic_section const & s_;
         };
 
 
         template <>
-        struct section_to_dispatcher<section> {
+        struct section_to_dispatcher<generic_section> {
             using type = section_dispatcher;
         };
 
