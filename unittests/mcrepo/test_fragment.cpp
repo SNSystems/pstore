@@ -84,9 +84,8 @@ namespace {
                                              Iterator end) {
         std::vector<std::unique_ptr<section_creation_dispatcher>> fdata =
             build_sections (begin, end);
-        return fragment::alloc (transaction,
-                                details::make_fragment_content_iterator (fdata.begin ()),
-                                details::make_fragment_content_iterator (fdata.end ()));
+        return fragment::alloc (transaction, make_pointee_adaptor (fdata.begin ()),
+                                make_pointee_adaptor (fdata.end ()));
     }
 
     template <typename SectionIterator, typename TicketMemberIterator>
@@ -106,18 +105,16 @@ namespace {
         dispatchers.emplace_back (
             new dependents_creation_dispatcher (ticket_member_begin, ticket_member_end));
 
-        return fragment::alloc (transaction,
-                                details::make_fragment_content_iterator (dispatchers.begin ()),
-                                details::make_fragment_content_iterator (dispatchers.end ()));
+        return fragment::alloc (transaction, make_pointee_adaptor (dispatchers.begin ()),
+                                make_pointee_adaptor (dispatchers.end ()));
     }
 
 } // anonymous namespace
 
 TEST_F (FragmentTest, Empty) {
     std::vector<std::unique_ptr<section_creation_dispatcher>> c;
-    auto extent =
-        fragment::alloc (transaction_, details::make_fragment_content_iterator (std::begin (c)),
-                         details::make_fragment_content_iterator (std::end (c)));
+    auto extent = fragment::alloc (transaction_, make_pointee_adaptor (std::begin (c)),
+                                   make_pointee_adaptor (std::end (c)));
 
     auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
     assert (transaction_.get_storage ().begin ()->first ==

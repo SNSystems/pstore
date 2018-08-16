@@ -53,6 +53,7 @@
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/support/pointee_adaptor.hpp"
 
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
@@ -147,9 +148,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
         new dependents_creation_dispatcher (dependents.data (), dependents.data () + dependents.size ()));
 
     auto fragment = fragment::load (
-        *db_, fragment::alloc (transaction,
-                               details::make_fragment_content_iterator (dispatchers.begin ()),
-                               details::make_fragment_content_iterator (dispatchers.end ())));
+        *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
+                               pstore::make_pointee_adaptor (dispatchers.end ())));
 
     std::ostringstream out;
     pstore::dump::value_ptr value = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);

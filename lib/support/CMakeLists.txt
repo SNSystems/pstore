@@ -193,6 +193,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/process_file_name.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"

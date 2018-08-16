@@ -130,57 +130,6 @@ namespace pstore {
                 return content_type_iterator<Iterator> (it);
             }
 
-            /// An iterator adaptor which produces a value_type which dereferences the
-            /// value_type of the wrapped iterator.
-            template <typename Iterator>
-            class fragment_content_iterator {
-            public:
-                using value_type = typename std::pointer_traits<
-                    typename std::iterator_traits<Iterator>::value_type>::element_type;
-                using difference_type = typename std::iterator_traits<Iterator>::difference_type;
-                using pointer = value_type *;
-                using reference = value_type &;
-                using iterator_category = std::input_iterator_tag;
-
-                fragment_content_iterator ()
-                        : it_{} {}
-                explicit fragment_content_iterator (Iterator it)
-                        : it_{it} {}
-                fragment_content_iterator (fragment_content_iterator const & rhs)
-                        : it_{rhs.it_} {}
-                fragment_content_iterator & operator= (fragment_content_iterator const & rhs) {
-                    it_ = rhs.it_;
-                    return *this;
-                }
-                bool operator== (fragment_content_iterator const & rhs) const {
-                    return it_ == rhs.it_;
-                }
-                bool operator!= (fragment_content_iterator const & rhs) const {
-                    return !(operator== (rhs));
-                }
-                fragment_content_iterator & operator++ () {
-                    ++it_;
-                    return *this;
-                }
-                fragment_content_iterator operator++ (int) {
-                    fragment_content_iterator old{*this};
-                    it_++;
-                    return old;
-                }
-
-                reference operator* () const { return **it_; }
-                pointer operator-> () const { return &(**it_); }
-                reference operator[] (difference_type n) const { return *(it_[n]); }
-
-            private:
-                Iterator it_;
-            };
-
-            template <typename Iterator>
-            inline fragment_content_iterator<Iterator>
-            make_fragment_content_iterator (Iterator it) {
-                return fragment_content_iterator<Iterator> (it);
-            }
 
         } // end namespace details
 
@@ -208,6 +157,107 @@ namespace pstore {
 
         template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
         // clang-format on
+
+
+        /// An iterator adaptor which produces a value_type which dereferences the
+        /// value_type of the wrapped iterator.
+        template <typename Iterator>
+        class pointee_adaptor {
+        public:
+            using value_type = typename std::pointer_traits<
+                typename std::iterator_traits<Iterator>::value_type>::element_type;
+            using difference_type = typename std::iterator_traits<Iterator>::difference_type;
+            using pointer = value_type *;
+            using reference = value_type &;
+            using iterator_category = typename std::iterator_traits<Iterator>::iterator_category;
+
+            pointee_adaptor () = default;
+            explicit pointee_adaptor (Iterator it)
+                    : it_{it} {}
+            pointee_adaptor (pointee_adaptor const & rhs) = default;
+            pointee_adaptor & operator= (pointee_adaptor const & rhs) = default;
+
+            bool operator== (pointee_adaptor const & rhs) const { return it_ == rhs.it_; }
+            bool operator!= (pointee_adaptor const & rhs) const { return it_ != rhs.it_; }
+            bool operator> (pointee_adaptor const & rhs) const { return it_ > rhs.it_; }
+            bool operator< (pointee_adaptor const & rhs) const { return it_ < rhs.it_; }
+            bool operator>= (pointee_adaptor const & rhs) const { return it_ >= rhs.it_; }
+            bool operator<= (pointee_adaptor const & rhs) const { return it_ <= rhs.it_; }
+
+            // TODO: I'm only providing a limited set of operations here as necessary. The full set
+            // really ought to be here in case Iterator is random access and an algorithm takes
+            // advantage of its full capabilities.
+            pointee_adaptor & operator++ () {
+                ++it_;
+                return *this;
+            }
+            pointee_adaptor operator++ (int) {
+                auto const old = *this;
+                ++it_;
+                return old;
+            }
+            pointee_adaptor & operator-- () {
+                --it_;
+                return *this;
+            }
+            pointee_adaptor operator-- (int) {
+                auto const old = *this;
+                --it_;
+                return old;
+            }
+
+            pointee_adaptor & operator+= (difference_type n) {
+                it_ += n;
+                return *this;
+            }
+            pointee_adaptor & operator-= (difference_type n) {
+                it_ -= n;
+                return *this;
+            }
+
+            // inline Iterator& operator+=(difference_type rhs) {_ptr += rhs; return *this;}
+            // inline Iterator& operator-=(difference_type rhs) {_ptr -= rhs; return *this;}
+            // inline Type& operator*() const {return *_ptr;}
+            // inline Type* operator->() const {return _ptr;}
+            // inline Type& operator[](difference_type rhs) const {return _ptr[rhs];}
+
+            // inline Iterator& operator++() {++_ptr; return *this;}
+            // inline Iterator& operator--() {--_ptr; return *this;}
+            // inline Iterator operator++(int) const {Iterator tmp(*this); ++_ptr; return tmp;}
+            // inline Iterator operator--(int) const {Iterator tmp(*this); --_ptr; return tmp;}
+            /* inline Iterator operator+(const Iterator& rhs) {return Iterator(_ptr+rhs.ptr);} */
+            difference_type operator- (pointee_adaptor const & rhs) const { return it_ - rhs.it_; }
+            pointee_adaptor operator+ (difference_type rhs) const {
+                it_ += rhs;
+                return *this;
+            }
+            pointee_adaptor operator- (difference_type rhs) const {
+                it_ -= rhs;
+                return *this;
+            }
+
+            friend Iterator operator+ (difference_type lhs, const Iterator & rhs) {
+                return Iterator (lhs + rhs._ptr);
+            }
+            friend Iterator operator- (difference_type lhs, const Iterator & rhs) {
+                return Iterator (lhs - rhs._ptr);
+            }
+
+
+
+            reference operator* () const { return **it_; }
+            pointer operator-> () const { return &(**it_); }
+            reference operator[] (difference_type n) const { return *(it_[n]); }
+
+        private:
+            Iterator it_;
+        };
+
+        template <typename Iterator>
+        inline pointee_adaptor<Iterator> make_pointee_adaptor (Iterator it) {
+            return pointee_adaptor<Iterator> (it);
+        }
+
 
         //*   __                             _    *
         //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
@@ -255,8 +305,10 @@ namespace pstore {
                                                    extent<fragment> const & location);
 
             /// Returns true if the fragment contains a section of the kind given by \p kind, false
-            /// otherwise. \param kind  The section kind to check. \returns Returns true if the
-            /// fragment contains a section of the kind given by \p kind, false otherwise.
+            /// otherwise.
+            /// \param kind  The section kind to check.
+            /// \returns Returns true if the fragment contains a section of the kind given by
+            ///   \p kind, false otherwise.
             bool has_section (section_kind kind) const noexcept {
                 return arr_.has_index (static_cast<member_array::bitmap_type> (kind));
             }
@@ -358,7 +410,7 @@ namespace pstore {
                 using utype = std::underlying_type<section_kind>::type;
                 static_assert (static_cast<utype> (section_kind::last) <=
                                    std::numeric_limits<member_array::bitmap_type>::digits,
-                               "section_kind does not fit in the member spare array");
+                               "section_kind does not fit in the member sparse array");
             }
 
             /// Returns pointer to an individual fragment instance given a function which can yield
@@ -371,9 +423,9 @@ namespace pstore {
 
             ///@{
             /// Yields a reference to section data found at a known offset within the fragment
-            /// payload. \param offset The number of bytes from the start of the fragment at which
-            /// the data lies.
-
+            /// payload.
+            /// \param offset The number of bytes from the start of the fragment at which
+            ///   the data lies.
             template <typename InstanceType>
             InstanceType const & offset_to_instance (std::uint64_t offset) const noexcept {
                 return offset_to_instance_impl<InstanceType const> (*this, offset);
@@ -399,15 +451,14 @@ namespace pstore {
             ///   Key and Fragment template arguments.
             /// \param f  The fragment to be accessed.
             /// \returns A constant reference to the instance contained in the Key section if the
-            /// input fragment
-            ///   type is const; non-const otherwise.
+            ///   input fragment type is const; non-const otherwise.
             template <section_kind Key, typename Fragment,
                       typename ResultType = typename details::inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
             static ResultType & at_impl (Fragment & f) {
                 assert (f.has_section (Key));
-                return f.template offset_to_instance<ResultType> (
-                    f.arr_[static_cast<std::size_t> (Key)]);
+                using utype = std::underlying_type<section_kind>::type;
+                return f.template offset_to_instance<ResultType> (f.arr_[static_cast<utype> (Key)]);
             }
 
             /// The implementation of atp<>() (used by the const and non-const flavors).
@@ -418,8 +469,7 @@ namespace pstore {
             ///   Key and Fragment template arguments.
             /// \param f  The fragment to be accessed.
             /// \returns A constant pointer to the instance contained in the Key section if the
-            /// input fragment
-            ///   type is const; non-const otherwise.
+            ///   input fragment type is const; non-const otherwise.
             template <section_kind Key, typename Fragment,
                       typename ResultType = typename details::inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
