@@ -262,9 +262,9 @@ namespace pstore {
                 using index_type = std::ptrdiff_t;
 
                 template <index_type Other>
-                explicit extent_type (extent_type<Other> ext)
+                explicit extent_type (extent_type<Other> ext) noexcept
                         : size_ (ext.size ()) {}
-                explicit extent_type (index_type size)
+                explicit extent_type (index_type size) noexcept
                         : size_ (size) {
                     assert (size >= 0);
                 }
@@ -595,11 +595,11 @@ namespace pstore {
                            "T cannot be assigned nullptr.");
 
         public:
-            not_null (T t)
+            not_null (T t) noexcept
                     : ptr_ (t) {
                 ensure_invariant ();
             }
-            not_null & operator= (T const & t) {
+            not_null & operator= (T const & t) noexcept {
                 ptr_ = t;
                 ensure_invariant ();
                 return *this;
@@ -614,20 +614,20 @@ namespace pstore {
             not_null<T> & operator= (std::nullptr_t) = delete;
             not_null<T> & operator= (int) = delete;
 
-            T get () const { return ptr_; }
+            T get () const noexcept { return ptr_; }
 
-            operator T () const { return get (); }
-            T operator-> () const { return get (); }
+            operator T () const noexcept { return get (); }
+            T operator-> () const noexcept { return get (); }
 
-            bool operator== (T const & rhs) const { return ptr_ == rhs; }
-            bool operator!= (T const & rhs) const { return !(*this == rhs); }
+            bool operator== (T const & rhs) const noexcept { return ptr_ == rhs; }
+            bool operator!= (T const & rhs) const noexcept { return !(*this == rhs); }
 
         private:
             T ptr_;
 
             // we assume that the compiler can hoist/prove away most of the checks inlined from this
             // function if not, we could make them optional via conditional compilation
-            void ensure_invariant () const { assert (ptr_ != nullptr); }
+            void ensure_invariant () const noexcept { assert (ptr_ != nullptr); }
 
             // unwanted operators...pointers only point to single objects!
             // TODO ensure all arithmetic ops on this type are unavailable

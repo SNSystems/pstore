@@ -53,6 +53,8 @@
 #include <type_traits>
 #include <vector>
 
+#include "pstore/support/gsl.hpp"
+
 namespace pstore {
     namespace json {
 
@@ -63,14 +65,15 @@ namespace pstore {
 
         class utf8_decoder {
         public:
-            std::tuple<char32_t, bool> get (std::uint8_t c);
-            bool is_well_formed () const { return well_formed_; }
+            std::tuple<char32_t, bool> get (std::uint8_t c) noexcept;
+            bool is_well_formed () const noexcept { return well_formed_; }
 
         private:
             enum state { accept, reject };
 
-            static std::uint8_t decode (std::uint8_t * const state, char32_t * const codep,
-                                        std::uint32_t const byte);
+            static std::uint8_t decode (gsl::not_null<std::uint8_t *> state,
+                                        gsl::not_null<char32_t *> codep,
+                                        std::uint32_t const byte) noexcept;
 
             static std::uint8_t const utf8d_[];
             char32_t codepoint_ = 0;
@@ -123,15 +126,15 @@ namespace pstore {
             return result;
         }
 
-        inline std::uint16_t nop_swapper (std::uint16_t v) { return v; }
-        inline std::uint16_t byte_swapper (std::uint16_t v) {
+        inline constexpr std::uint16_t nop_swapper (std::uint16_t v) noexcept { return v; }
+        inline constexpr std::uint16_t byte_swapper (std::uint16_t v) noexcept {
             return static_cast<std::uint16_t> (((v & 0x00FF) << 8) | ((v & 0xFF00) >> 8));
         }
 
-        inline bool is_utf16_high_surrogate (std::uint16_t code_unit) {
+        inline constexpr bool is_utf16_high_surrogate (std::uint16_t code_unit) noexcept {
             return code_unit >= 0xD800 && code_unit <= 0xDBFF;
         }
-        inline bool is_utf16_low_surrogate (std::uint16_t code_unit) {
+        inline constexpr bool is_utf16_low_surrogate (std::uint16_t code_unit) noexcept {
             return code_unit >= 0xDC00 && code_unit <= 0xDFFF;
         }
 
