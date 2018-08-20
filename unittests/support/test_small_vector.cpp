@@ -55,14 +55,14 @@ TEST (SmallVector, DefaultCtor) {
 }
 
 TEST (SmallVector, ExplicitCtorLessThanStackBuffer) {
-    pstore::small_vector<int, 8> b (std::size_t{5});
+    pstore::small_vector<int, 8> const b (std::size_t{5});
     EXPECT_EQ (5U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_EQ (5U * sizeof (int), b.size_bytes ());
 }
 
 TEST (SmallVector, ExplicitCtor0) {
-    pstore::small_vector<int, 8> b (std::size_t{0});
+    pstore::small_vector<int, 8> const b (std::size_t{0});
     EXPECT_EQ (0U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_EQ (0U * sizeof (int), b.size_bytes ());
@@ -70,23 +70,30 @@ TEST (SmallVector, ExplicitCtor0) {
 }
 
 TEST (SmallVector, ExplicitCtorGreaterThanStackBuffer) {
-    pstore::small_vector<int, 8> b (std::size_t{10});
+    pstore::small_vector<int, 8> const b (std::size_t{10});
     EXPECT_EQ (10U, b.size ());
     EXPECT_EQ (10U, b.capacity ());
     EXPECT_EQ (10 * sizeof (int), b.size_bytes ());
 }
 
 TEST (SmallVector, CtorInitializerList) {
-    pstore::small_vector<int, 8> b{1, 2, 3};
+    pstore::small_vector<int, 8> const b{1, 2, 3};
     EXPECT_EQ (3U, b.size ());
     EXPECT_EQ (8U, b.capacity ());
     EXPECT_THAT (b, ::testing::ElementsAre (1, 2, 3));
 }
 
+TEST (SmallVector, CtorCopy) {
+    pstore::small_vector<int, 3> const b{3, 5};
+    pstore::small_vector<int, 3> c = b;
+    EXPECT_EQ (2U, c.size ());
+    EXPECT_THAT (c, ::testing::ElementsAre (3, 5));
+}
+
 TEST (SmallVector, MoveCtor) {
     pstore::small_vector<int, 4> a (std::size_t{4});
     std::iota (a.begin (), a.end (), 0); // fill with increasing values
-    pstore::small_vector<int, 4> b (std::move (a));
+    pstore::small_vector<int, 4> const b (std::move (a));
 
     EXPECT_THAT (b, ::testing::ElementsAre (0, 1, 2, 3));
 }
@@ -95,6 +102,13 @@ TEST (SmallVector, AssignInitializerList) {
     pstore::small_vector<int, 3> b{1, 2, 3};
     b.assign ({4, 5, 6, 7});
     EXPECT_THAT (b, ::testing::ElementsAre (4, 5, 6, 7));
+}
+
+TEST (SmallVector, AssignCopy) {
+    pstore::small_vector<int, 3> const b{5, 7};
+    pstore::small_vector<int, 3> c;
+    c = b;
+    EXPECT_THAT (c, ::testing::ElementsAre (5, 7));
 }
 
 TEST (SmallVector, SizeAfterResizeLarger) {
@@ -186,7 +200,7 @@ TEST (SmallVector, IteratorConstIteratorFromConstContainer) {
     std::iota (buffer.begin (), buffer.end (), 42);
 
     auto const & cbuffer = buffer;
-    std::vector<int> actual (cbuffer.begin (), cbuffer.end ());
+    std::vector<int> const actual (cbuffer.begin (), cbuffer.end ());
     EXPECT_THAT (actual, ::testing::ElementsAre (42, 43, 44, 45));
 }
 
@@ -195,11 +209,11 @@ TEST (SmallVector, IteratorNonConstReverse) {
     std::iota (buffer.begin (), buffer.end (), 42);
 
     {
-        std::vector<int> actual (buffer.rbegin (), buffer.rend ());
+        std::vector<int> const actual (buffer.rbegin (), buffer.rend ());
         EXPECT_THAT (actual, ::testing::ElementsAre (45, 44, 43, 42));
     }
     {
-        std::vector<int> actual (buffer.rcbegin (), buffer.rcend ());
+        std::vector<int> const actual (buffer.rcbegin (), buffer.rcend ());
         EXPECT_THAT (actual, ::testing::ElementsAre (45, 44, 43, 42));
     }
 }
@@ -283,4 +297,3 @@ TEST (SmallVector, AppendIteratorRange) {
 
     EXPECT_THAT (a, ::testing::ElementsAre (0, 1, 2, 3, 100, 101, 102, 103));
 }
-

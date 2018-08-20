@@ -45,14 +45,17 @@
 /// \brief Provides a small, normally stack allocated, buffer but which can be
 /// resized dynamically when necessary.
 
-#ifndef PSTORE_SMALL_VECTOR_HPP
-#define PSTORE_SMALL_VECTOR_HPP
+#ifndef PSTORE_SUPPORT_SMALL_VECTOR_HPP
+#define PSTORE_SUPPORT_SMALL_VECTOR_HPP
 
 #include <array>
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
+#include <type_traits>
 #include <vector>
+
+#include "pstore/support/inherit_const.hpp"
 
 namespace pstore {
 
@@ -80,48 +83,41 @@ namespace pstore {
 
 
         /// Constructs the buffer with an initial size of 0.
-        small_vector ();
+        small_vector () noexcept;
         /// Constructs the buffer with the given initial numbe of elements.
         explicit small_vector (std::size_t required_elements);
 
         small_vector (std::initializer_list<ElementType> init);
 
-        // Move is supported.
+        // Move construct and assign.
         small_vector (small_vector && other);
         small_vector & operator= (small_vector && other);
 
-        // No copying or assignment. They could be implemented but probably
-        // wouldn't be terribly efficient.
+        // Copying and assign.
         small_vector (small_vector const & rhs);
-        small_vector & operator= (small_vector const &) = delete;
+        small_vector & operator= (small_vector const &);
 
         /// \name Element access
         ///@{
-        ElementType const * data () const { return buffer_; }
-        ElementType * data () { return buffer_; }
+        ElementType const * data () const noexcept { return buffer_; }
+        ElementType * data () noexcept { return buffer_; }
 
-        ElementType const & operator[] (std::size_t index) const {
-            assert (index < elements_);
-            return buffer_[index];
-        }
-        ElementType & operator[] (std::size_t index) {
-            assert (index < elements_);
-            return buffer_[index];
-        }
+        ElementType const & operator[] (std::size_t n) const noexcept { return index (*this, n); }
+        ElementType & operator[] (std::size_t n) noexcept { return index (*this, n); }
         ///@}
 
         /// \name Capacity
         ///@{
         /// Returns the number of elements.
-        std::size_t size () const { return elements_; }
-        std::size_t size_bytes () const { return elements_ * sizeof (ElementType); }
+        std::size_t size () const noexcept { return elements_; }
+        std::size_t size_bytes () const noexcept { return elements_ * sizeof (ElementType); }
 
         /// Checks whether the container is empty.
-        bool empty () const { return elements_ == 0; }
+        bool empty () const noexcept { return elements_ == 0; }
 
         /// Returns the number of elements that can be held in currently allocated
         /// storage.
-        std::size_t capacity () const {
+        std::size_t capacity () const noexcept {
             return is_small (elements_) ? BodyElements : big_buffer_.capacity ();
         }
 
@@ -129,7 +125,7 @@ namespace pstore {
         /// given number of elements.
         ///
         /// \note Calling this function invalidates the contents of the buffer and
-        /// any iterators.
+        ///   any iterators.
         ///
         /// \param new_elements The number of elements that the buffer is to
         ///                     accommodate.
@@ -181,7 +177,7 @@ namespace pstore {
             this->assign (std::begin (ilist), std::end (ilist));
         }
 
-        /// Add the specified range to the end of the small_vector.
+        /// Add the specified range to the end of the small vector.
         template <typename InputIt>
         void append (InputIt first, InputIt last);
         void append (std::initializer_list<ElementType> ilist) {
@@ -191,13 +187,21 @@ namespace pstore {
         ///@}
 
     private:
+        /// The const- and non-const implementation of operator[].
+        template <typename SmallVector,
+                  typename ResultType = typename inherit_const<SmallVector, ElementType>::type>
+        static ResultType & index (SmallVector && sm, std::size_t n) noexcept {
+            assert (n < sm.size ());
+            return sm.buffer_[n];
+        }
+
         /// The actual number of elements for which this buffer is sized.
         /// Note that this may be less than BodyElements.
         std::size_t elements_;
 
         /// A "small" in-object buffer that is used for relatively small
         /// allocations.
-        std::array<ElementType, BodyElements> small_buffer_;
+        std::array<ElementType, BodyElements> small_buffer_{{}};
 
         /// A (potentially) large buffer that is used to satify requests for
         /// buffer element counts that are too large for small_buffer_.
@@ -208,9 +212,11 @@ namespace pstore {
 
         /// Returns true if the given number of elements will fit in the space
         /// allocated for the "small" in-object buffer.
-        static constexpr bool is_small (std::size_t elements) { return elements <= BodyElements; }
+        static constexpr bool is_small (std::size_t elements) noexcept {
+            return elements <= BodyElements;
+        }
 
-        ElementType * set_buffer_ptr (std::size_t required_elements) {
+        ElementType * set_buffer_ptr (std::size_t required_elements) noexcept {
             buffer_ = is_small (required_elements) ? small_buffer_.data () : big_buffer_.data ();
             return buffer_;
         }
@@ -220,37 +226,39 @@ namespace pstore {
     // ~~~~~~
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::size_t required_elements)
-            : elements_ (required_elements) {
+            : elements_{required_elements}
+            , small_buffer_{} {
 
-        if (!is_small (required_elements)) {
-            big_buffer_.resize (required_elements);
+        if (!is_small (elements_)) {
+            big_buffer_.resize (elements_);
         }
-
-        this->set_buffer_ptr (required_elements);
+        this->set_buffer_ptr (elements_);
     }
 
     template <typename ElementType, std::size_t BodyElements>
-    small_vector<ElementType, BodyElements>::small_vector ()
-            : small_vector (0) {}
+    small_vector<ElementType, BodyElements>::small_vector () noexcept
+            : elements_{0U}
+            , small_buffer_{} {
+        this->set_buffer_ptr (elements_);
+    }
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (small_vector && other)
             : elements_ (std::move (other.elements_))
             , small_buffer_ (std::move (other.small_buffer_))
-            , big_buffer_ (std::move (other.big_buffer_))
-            , buffer_ (nullptr) {
+            , big_buffer_ (std::move (other.big_buffer_)) {
 
         this->set_buffer_ptr (elements_);
     }
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::initializer_list<ElementType> init)
-            : elements_ (init.size ()) {
+            : elements_ (init.size ())
+            , small_buffer_{} {
 
         this->set_buffer_ptr (elements_);
         std::copy (std::begin (init), std::end (init), this->begin ());
     }
-
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (small_vector const & rhs)
@@ -268,6 +276,17 @@ namespace pstore {
         big_buffer_ = std::move (other.big_buffer_);
 
         this->set_buffer_ptr (elements_);
+        return *this;
+    }
+
+    template <typename ElementType, std::size_t BodyElements>
+    auto small_vector<ElementType, BodyElements>::operator= (small_vector const & rhs)
+        -> small_vector & {
+        if (this != &rhs) {
+            this->clear ();
+            this->resize (rhs.size ());
+            std::copy (std::begin (rhs), std::end (rhs), std::begin (*this));
+        }
         return *this;
     }
 
@@ -307,7 +326,7 @@ namespace pstore {
     // ~~~~~~~~~
     template <typename ElementType, std::size_t BodyElements>
     void small_vector<ElementType, BodyElements>::push_back (ElementType const & v) {
-        auto new_elements = elements_ + 1U;
+        auto const new_elements = elements_ + 1U;
         bool const is_small_before = is_small (elements_);
         bool const is_small_after = is_small (new_elements);
         if (is_small_after) {
@@ -329,8 +348,9 @@ namespace pstore {
     template <typename InputIt>
     void small_vector<ElementType, BodyElements>::assign (InputIt first, InputIt last) {
         this->clear ();
-        for (; first != last; ++first)
+        for (; first != last; ++first) {
             this->push_back (*first);
+        }
     }
 
     // append
@@ -344,4 +364,4 @@ namespace pstore {
     }
 
 } // end namespace pstore
-#endif // PSTORE_SMALL_VECTOR_HPP
+#endif // PSTORE_SUPPORT_SMALL_VECTOR_HPP

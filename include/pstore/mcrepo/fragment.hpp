@@ -62,25 +62,15 @@
 #include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/mcrepo/ticket.hpp"
 #include "pstore/support/aligned.hpp"
+#include "pstore/support/inherit_const.hpp"
 #include "pstore/support/max.hpp"
+#include "pstore/support/pointee_adaptor.hpp"
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     namespace repo {
 
         namespace details {
-
-            /// Provides a member typedef inherit_const::type, which is defined as \p R const if
-            /// \p T is a const type and \p R if \p T is non-const.
-            ///
-            /// \tparam T  A type whose constness will determine the constness of
-            ///   inherit_const::type.
-            /// \tparam R  The result type with added const if \p T is const.
-            template <typename T, typename R>
-            struct inherit_const {
-                /// If \p T is const, \p R const otherwise \p R.
-                using type = typename std::conditional<std::is_const<T>::value, R const, R>::type;
-            };
 
             /// An iterator adaptor which produces a value_type of 'section_kind const' from
             /// values deferenced from the supplied underlying iterator.
@@ -158,105 +148,6 @@ namespace pstore {
         template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
         // clang-format on
 
-
-        /// An iterator adaptor which produces a value_type which dereferences the
-        /// value_type of the wrapped iterator.
-        template <typename Iterator>
-        class pointee_adaptor {
-        public:
-            using value_type = typename std::pointer_traits<
-                typename std::iterator_traits<Iterator>::value_type>::element_type;
-            using difference_type = typename std::iterator_traits<Iterator>::difference_type;
-            using pointer = value_type *;
-            using reference = value_type &;
-            using iterator_category = typename std::iterator_traits<Iterator>::iterator_category;
-
-            pointee_adaptor () = default;
-            explicit pointee_adaptor (Iterator it)
-                    : it_{it} {}
-            pointee_adaptor (pointee_adaptor const & rhs) = default;
-            pointee_adaptor & operator= (pointee_adaptor const & rhs) = default;
-
-            bool operator== (pointee_adaptor const & rhs) const { return it_ == rhs.it_; }
-            bool operator!= (pointee_adaptor const & rhs) const { return it_ != rhs.it_; }
-            bool operator> (pointee_adaptor const & rhs) const { return it_ > rhs.it_; }
-            bool operator< (pointee_adaptor const & rhs) const { return it_ < rhs.it_; }
-            bool operator>= (pointee_adaptor const & rhs) const { return it_ >= rhs.it_; }
-            bool operator<= (pointee_adaptor const & rhs) const { return it_ <= rhs.it_; }
-
-            // TODO: I'm only providing a limited set of operations here as necessary. The full set
-            // really ought to be here in case Iterator is random access and an algorithm takes
-            // advantage of its full capabilities.
-            pointee_adaptor & operator++ () {
-                ++it_;
-                return *this;
-            }
-            pointee_adaptor operator++ (int) {
-                auto const old = *this;
-                ++it_;
-                return old;
-            }
-            pointee_adaptor & operator-- () {
-                --it_;
-                return *this;
-            }
-            pointee_adaptor operator-- (int) {
-                auto const old = *this;
-                --it_;
-                return old;
-            }
-
-            pointee_adaptor & operator+= (difference_type n) {
-                it_ += n;
-                return *this;
-            }
-            pointee_adaptor & operator-= (difference_type n) {
-                it_ -= n;
-                return *this;
-            }
-
-            // inline Iterator& operator+=(difference_type rhs) {_ptr += rhs; return *this;}
-            // inline Iterator& operator-=(difference_type rhs) {_ptr -= rhs; return *this;}
-            // inline Type& operator*() const {return *_ptr;}
-            // inline Type* operator->() const {return _ptr;}
-            // inline Type& operator[](difference_type rhs) const {return _ptr[rhs];}
-
-            // inline Iterator& operator++() {++_ptr; return *this;}
-            // inline Iterator& operator--() {--_ptr; return *this;}
-            // inline Iterator operator++(int) const {Iterator tmp(*this); ++_ptr; return tmp;}
-            // inline Iterator operator--(int) const {Iterator tmp(*this); --_ptr; return tmp;}
-            /* inline Iterator operator+(const Iterator& rhs) {return Iterator(_ptr+rhs.ptr);} */
-            difference_type operator- (pointee_adaptor const & rhs) const { return it_ - rhs.it_; }
-            pointee_adaptor operator+ (difference_type rhs) const {
-                it_ += rhs;
-                return *this;
-            }
-            pointee_adaptor operator- (difference_type rhs) const {
-                it_ -= rhs;
-                return *this;
-            }
-
-            friend Iterator operator+ (difference_type lhs, const Iterator & rhs) {
-                return Iterator (lhs + rhs._ptr);
-            }
-            friend Iterator operator- (difference_type lhs, const Iterator & rhs) {
-                return Iterator (lhs - rhs._ptr);
-            }
-
-
-
-            reference operator* () const { return **it_; }
-            pointer operator-> () const { return &(**it_); }
-            reference operator[] (difference_type n) const { return *(it_[n]); }
-
-        private:
-            Iterator it_;
-        };
-
-        template <typename Iterator>
-        inline pointee_adaptor<Iterator> make_pointee_adaptor (Iterator it) {
-            return pointee_adaptor<Iterator> (it);
-        }
 
 
         //*   __                             _    *
@@ -440,7 +331,7 @@ namespace pstore {
             /// The implementation of offset_to_instance<>() (used by the const and non-const
             /// flavors).
             template <typename InstanceType, typename Fragment>
-            static InstanceType & offset_to_instance_impl (Fragment & f,
+            static InstanceType & offset_to_instance_impl (Fragment && f,
                                                            std::uint64_t offset) noexcept;
 
             /// The implementation of at<>() (used by the const and non-const flavors).
@@ -453,9 +344,9 @@ namespace pstore {
             /// \returns A constant reference to the instance contained in the Key section if the
             ///   input fragment type is const; non-const otherwise.
             template <section_kind Key, typename Fragment,
-                      typename ResultType = typename details::inherit_const<
+                      typename ResultType = typename inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
-            static ResultType & at_impl (Fragment & f) {
+            static ResultType & at_impl (Fragment && f) {
                 assert (f.has_section (Key));
                 using utype = std::underlying_type<section_kind>::type;
                 return f.template offset_to_instance<ResultType> (f.arr_[static_cast<utype> (Key)]);
@@ -471,9 +362,9 @@ namespace pstore {
             /// \returns A constant pointer to the instance contained in the Key section if the
             ///   input fragment type is const; non-const otherwise.
             template <section_kind Key, typename Fragment,
-                      typename ResultType = typename details::inherit_const<
+                      typename ResultType = typename inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
-            static ResultType * atp_impl (Fragment & f) {
+            static ResultType * atp_impl (Fragment && f) {
                 return f.has_section (Key) ? &f.template at<Key> () : nullptr;
             }
 
@@ -602,13 +493,12 @@ namespace pstore {
         // offset_to_instance
         // ~~~~~~~~~~~~~~~~~~
         template <typename InstanceType, typename Fragment>
-        InstanceType & fragment::offset_to_instance_impl (Fragment & f,
+        InstanceType & fragment::offset_to_instance_impl (Fragment && f,
                                                           std::uint64_t offset) noexcept {
             // This is the implementation used by both const and non-const flavors of
             // offset_to_instance().
             auto const ptr =
-                reinterpret_cast<typename details::inherit_const<Fragment, std::uint8_t>::type *> (
-                    &f) +
+                reinterpret_cast<typename inherit_const<decltype (f), std::uint8_t>::type *> (&f) +
                 offset;
             assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) == 0);
             return *reinterpret_cast<InstanceType *> (ptr);
