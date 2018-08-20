@@ -57,6 +57,7 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include "pstore/support/inherit_const.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -122,8 +123,8 @@ namespace pstore {
         constexpr operator bool () const noexcept { return valid_; }
         constexpr bool has_value () const noexcept { return valid_; }
 
-        T const & value () const { return const_cast<maybe<T> *> (this)->value (); }
-        T & value ();
+        T const & value () const noexcept { return value_impl (*this); }
+        T & value () noexcept { return value_impl (*this); }
 
         template <typename U>
         constexpr T value_or (U && default_value) const {
@@ -131,6 +132,9 @@ namespace pstore {
         }
 
     private:
+        template <typename Maybe, typename ResultType = typename inherit_const<Maybe, T>::type>
+        static ResultType & value_impl (Maybe && m) noexcept;
+
         bool valid_ = false;
         typename std::aligned_storage<sizeof (T), alignof (T)>::type storage_;
     };
@@ -181,19 +185,13 @@ namespace pstore {
         return *this;
     }
 
-
-    // value
-    // ~~~~~
+    // value_impl
+    // ~~~~~~~~~~
     template <typename T>
-    inline T & maybe<T>::value () {
-#if PSTORE_CPP_EXCEPTIONS
-        if (!has_value ()) {
-            throw std::runtime_error ("no value");
-        }
-#else
-        assert (has_value ());
-#endif
-        return *(*this);
+    template <typename Maybe, typename ResultType>
+    inline ResultType & maybe<T>::value_impl (Maybe && m) noexcept {
+        assert (m.has_value ());
+        return *m;
     }
 
     // just
