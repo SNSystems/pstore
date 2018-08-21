@@ -48,6 +48,7 @@
 #define SERIALIZE_IOS_FLAGS_SAVER_HPP
 
 #include <iosfwd>
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace serialize {
@@ -59,7 +60,7 @@ namespace pstore {
         public:
             explicit ios_flags_saver (std::ios_base & stream)
                     : ios_flags_saver (stream, stream.flags ()) {}
-            ios_flags_saver (std::ios_base & stream, std::ios_base::fmtflags const & flags)
+            ios_flags_saver (std::ios_base & stream, std::ios_base::fmtflags const & flags) noexcept
                     : stream_ (stream)
                     , flags_ (flags) {}
 
@@ -67,7 +68,9 @@ namespace pstore {
             ios_flags_saver (ios_flags_saver const &) = delete;
             ios_flags_saver & operator= (ios_flags_saver const &) = delete;
 
-            ~ios_flags_saver () { stream_.flags (flags_); }
+            ~ios_flags_saver () {
+				PSTORE_NO_EX_ESCAPE ({ stream_.flags (flags_); });
+			}
 
         private:
             std::ios_base & stream_;
