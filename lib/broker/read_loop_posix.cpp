@@ -47,28 +47,28 @@
 
 #ifndef _WIN32
 
-// Standard library includes
-#include <algorithm>
-#include <cassert>
-#include <cerrno>
-#include <string>
+    // Standard library includes
+#    include <algorithm>
+#    include <cassert>
+#    include <cerrno>
+#    include <string>
 
-// Platform includes
-#include <sys/select.h>
-#include <sys/types.h>
-#include <sys/uio.h>
-#include <unistd.h>
+    // Platform includes
+#    include <sys/select.h>
+#    include <sys/types.h>
+#    include <sys/uio.h>
+#    include <unistd.h>
 
-// pstore includes
-#include "pstore/broker/command.hpp"
-#include "pstore/broker/globals.hpp"
-#include "pstore/broker/message_pool.hpp"
-#include "pstore/broker/quit.hpp"
-#include "pstore/broker/recorder.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/error.hpp"
-#include "pstore/support/logging.hpp"
+    // pstore includes
+#    include "pstore/broker/command.hpp"
+#    include "pstore/broker/globals.hpp"
+#    include "pstore/broker/message_pool.hpp"
+#    include "pstore/broker/quit.hpp"
+#    include "pstore/broker/recorder.hpp"
+#    include "pstore/broker_intf/fifo_path.hpp"
+#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/logging.hpp"
 
 namespace {
 
