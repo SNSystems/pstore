@@ -264,7 +264,8 @@ namespace pstore {
 
             /// A helper function which returns the distance between two iterators,
             /// clamped to the maximum range of IntType.
-            template <typename IntType, typename Iterator>
+            template <typename IntType, typename Iterator,
+                      typename = typename std::enable_if<std::is_unsigned<IntType>::value>::type>
             static IntType set_size (Iterator first, Iterator last);
 
             /// Calculates the size of a region in the section including any necessary
@@ -325,20 +326,18 @@ namespace pstore {
 
         // set_size
         // ~~~~~~~~
-        template <typename IntType, typename Iterator>
+        template <typename IntType, typename Iterator, typename>
         inline IntType generic_section::set_size (Iterator first, Iterator last) {
-            static_assert (std::is_unsigned<IntType>::value, "IntType must be unsigned");
             auto const size = std::distance (first, last);
-            assert (size >= 0);
-
-// FIXME: this should be a real check which is evaluated in a release build as well.
-#ifndef NDEBUG
-            auto const usize =
-                static_cast<typename std::make_unsigned<decltype (size)>::type> (size);
-            assert (usize >= std::numeric_limits<IntType>::min ());
-            assert (usize <= std::numeric_limits<IntType>::max ());
-#endif
-            return static_cast<IntType> (size);
+            if (size <= 0) {
+                return 0;
+            }
+            using common =
+                typename std::common_type<IntType,
+                                          typename std::make_unsigned<decltype (size)>::type>::type;
+            return static_cast<IntType> (
+                std::min (static_cast<common> (size),
+                          static_cast<common> (std::numeric_limits<IntType>::max ())));
         }
 
         // size_bytes
