@@ -385,25 +385,39 @@ TEST_F (ArchiveSpan, ReadSingleElementSpan) {
 
 
 #ifndef NDEBUG
-TEST (SerializeTypes, Flood) {
-    using ::testing::ElementsAre;
+namespace {
 
-    std::array<std::uint8_t, 5> buffer{{0}};
-    static std::uint8_t const expected[4] = {std::uint8_t{0xDE}, std::uint8_t{0xAD},
-                                             std::uint8_t{0xBE}, std::uint8_t{0xEF}};
-    constexpr auto zero = std::uint8_t{0x00};
+    class Flood : public ::testing::Test {
+    protected:
+        std::array<std::uint8_t, 5> buffer_{{0}};
+        static constexpr std::array<std::uint8_t, 4> const expected_{
+            {std::uint8_t{0xDE}, std::uint8_t{0xAD}, std::uint8_t{0xBE}, std::uint8_t{0xEF}}};
+        static constexpr std::uint8_t zero_ = 0;
+    };
 
-    pstore::serialize::flood (buffer.data (), 1U);
-    EXPECT_THAT (buffer, ElementsAre (expected[0], zero, zero, zero, zero));
-    pstore::serialize::flood (buffer.data (), 2U);
-    EXPECT_THAT (buffer, ElementsAre (expected[0], expected[1], zero, zero, zero));
-    pstore::serialize::flood (buffer.data (), 3U);
-    EXPECT_THAT (buffer, ElementsAre (expected[0], expected[1], expected[2], zero, zero));
-    pstore::serialize::flood (buffer.data (), 4U);
-    EXPECT_THAT (buffer, ElementsAre (expected[0], expected[1], expected[2], expected[3], zero));
-    pstore::serialize::flood (buffer.data (), 5U);
-    EXPECT_THAT (buffer,
-                 ElementsAre (expected[0], expected[1], expected[2], expected[3], expected[0]));
+    constexpr std::array<std::uint8_t, 4> Flood::expected_;
+    constexpr std::uint8_t Flood::zero_;
+
+} // end anonymous namespace
+
+TEST_F (Flood, One) {
+    pstore::serialize::flood (pstore::gsl::make_span (buffer_.data (), 1U));
+    EXPECT_THAT (buffer_, ::testing::ElementsAre (expected_[0], zero_, zero_, zero_, zero_));
 }
-#endif
-
+TEST_F (Flood, Two) {
+    pstore::serialize::flood (pstore::gsl::make_span (buffer_.data (), 2U));
+    EXPECT_THAT (buffer_, ::testing::ElementsAre (expected_[0], expected_[1], zero_, zero_, zero_));
+}
+TEST_F (Flood, Four) {
+    pstore::serialize::flood (pstore::gsl::make_span (buffer_.data (), 4U));
+    EXPECT_THAT (buffer_, ::testing::ElementsAre (expected_[0], expected_[1], expected_[2],
+                                                  expected_[3], zero_));
+}
+TEST_F (Flood, Five) {
+    // Use the array version of make_span so that flood<> should be instantiated with a different
+    // extent value.
+    pstore::serialize::flood (pstore::gsl::make_span (buffer_));
+    EXPECT_THAT (buffer_, ::testing::ElementsAre (expected_[0], expected_[1], expected_[2],
+                                                  expected_[3], expected_[0]));
+}
+#endif // NDEBUG

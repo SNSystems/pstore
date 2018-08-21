@@ -50,7 +50,6 @@ set (PSTORE_SERIALIZE_SRC
     "${PSTORE_SERIALIZE_INCLUDE_DIR}/types.hpp"
 
     archive.cpp
-    types.cpp
 )
 add_pstore_library (pstore-serialize ${PSTORE_SERIALIZE_SRC})
 target_link_libraries (pstore-serialize PUBLIC pstore-support)

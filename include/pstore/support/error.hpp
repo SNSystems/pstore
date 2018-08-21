@@ -113,9 +113,9 @@ namespace pstore {
     /// std::make_error_code().
     class errno_erc {
     public:
-        explicit errno_erc (int err)
+        explicit errno_erc (int err) noexcept
                 : err_{err} {}
-        int get () const { return err_; }
+        int get () const noexcept { return err_; }
 
     private:
         int err_;
@@ -124,9 +124,9 @@ namespace pstore {
 #ifdef _WIN32
     class win32_erc {
     public:
-        explicit win32_erc (DWORD err)
+        explicit win32_erc (DWORD err) noexcept
                 : err_{err} {}
-        int get () const { return err_; }
+        int get () const noexcept { return err_; }
 
     private:
         DWORD err_;
@@ -146,12 +146,12 @@ namespace std {
         return {static_cast<int> (e), ::pstore::get_error_category ()};
     }
 
-    inline std::error_code make_error_code (pstore::errno_erc e) {
+    inline std::error_code make_error_code (pstore::errno_erc e) noexcept {
         return {e.get (), std::generic_category ()};
     }
 
 #ifdef _WIN32
-    inline std::error_code make_error_code (pstore::win32_erc e) {
+    inline std::error_code make_error_code (pstore::win32_erc e) noexcept {
         return {e.get (), std::system_category ()};
     }
 #endif

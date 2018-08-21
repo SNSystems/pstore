@@ -144,6 +144,7 @@
 
 #include "pstore/serialize/common.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace serialize {
@@ -185,7 +186,9 @@ namespace pstore {
                 writer_base (writer_base &&) noexcept = default;
                 writer_base & operator= (writer_base &&) noexcept = default;
 
-                virtual ~writer_base () { this->flush (); }
+                virtual ~writer_base () {
+                    PSTORE_NO_EX_ESCAPE ({ this->flush (); });
+                }
 
                 ///@{
                 /// \brief Writes one or more instances of a standard-layout type Ty to the output.
@@ -240,8 +243,8 @@ namespace pstore {
 
                 ///@{
                 /// Returns the writer_base output policy object.
-                WriterPolicy & writer_policy () { return policy_; }
-                WriterPolicy const & writer_policy () const { return policy_; }
+                WriterPolicy & writer_policy () noexcept { return policy_; }
+                WriterPolicy const & writer_policy () const noexcept { return policy_; }
                 ///@}
 
             protected:
@@ -311,7 +314,7 @@ namespace pstore {
                     using container = std::vector<std::uint8_t>;
                     using const_iterator = container::const_iterator;
 
-                    vector_writer_policy (container & bytes)
+                    vector_writer_policy (container & bytes) noexcept
                             : bytes_ (bytes) {}
 
                     template <typename Ty>
@@ -333,9 +336,9 @@ namespace pstore {
                     }
 
                     /// Returns the size of the byte vector managed by the object.
-                    std::size_t size () const { return bytes_.size (); }
+                    std::size_t size () const noexcept { return bytes_.size (); }
 
-                    void flush () {}
+                    void flush () noexcept {}
 
                     /// Returns a const_iterator for the beginning of the byte vector managed by the
                     /// object.
@@ -392,7 +395,7 @@ namespace pstore {
                 public:
                     using result_type = void *;
 
-                    buffer_writer_policy (void * first, void * last)
+                    buffer_writer_policy (void * first, void * last) noexcept
                             : begin_ (static_cast<std::uint8_t *> (first))
 #ifndef NDEBUG
                             , end_ (static_cast<std::uint8_t *> (last))
@@ -417,21 +420,21 @@ namespace pstore {
                     }
 
                     /// Returns the number of bytes written to the buffer.
-                    std::size_t size () const {
+                    std::size_t size () const noexcept {
                         assert (it_ >= begin_);
                         static_assert (sizeof (std::size_t) >= sizeof (std::ptrdiff_t),
                                        "sizeof size_t should be at least sizeof ptrdiff_t");
                         return static_cast<std::size_t> (it_ - begin_);
                     }
 
-                    void flush () {}
+                    void flush () noexcept {}
 
                     using const_iterator = std::uint8_t const *;
 
                     /// Returns a const_iterator for the beginning of the byte range.
-                    const_iterator begin () const { return begin_; }
+                    const_iterator begin () const noexcept { return begin_; }
                     /// Returns a const_iterator for the end of byte range written to the buffer.
-                    const_iterator end () const { return it_; }
+                    const_iterator end () const noexcept { return it_; }
 
                 private:
                     /// The start of the input buffer.
@@ -512,13 +515,13 @@ namespace pstore {
                         return {};
                     }
 
-                    void flush () {}
+                    void flush () noexcept {}
                 };
             } // namespace details
 
             class null final : public writer_base<details::null_policy> {
             public:
-                null () {}
+                null () noexcept {}
             };
 
 
@@ -589,20 +592,20 @@ namespace pstore {
             class buffer_reader {
             public:
                 /// Constructs the writer using a pair of pointer to define the range [first, last).
-                buffer_reader (void const * first, void const * last)
+                buffer_reader (void const * first, void const * last) noexcept
                         : first_ (static_cast<std::uint8_t const *> (first))
                         , last_ (static_cast<std::uint8_t const *> (last)) {}
 
                 /// Constructs the writer using a pointer and size to define the range [first,
                 /// first+size).
-                buffer_reader (void const * first, std::size_t size)
+                buffer_reader (void const * first, std::size_t size) noexcept
                         : first_ (static_cast<std::uint8_t const *> (first))
                         , last_ (static_cast<std::uint8_t const *> (first) + size) {}
 
                 /// Constructs the writer using a pointer and size to define the range [first,
                 /// first+size).
                 template <typename SpanType>
-                buffer_reader (SpanType span)
+                buffer_reader (SpanType span) noexcept
                         : first_ (reinterpret_cast<std::uint8_t const *> (span.data ()))
                         , last_ (first_ + span.size_bytes ()) {}
 

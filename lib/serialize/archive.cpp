@@ -63,7 +63,7 @@ namespace {
         char const * separator = "";
         std::for_each (first, last, [&](value_type v) {
             assert (v >= 0 && v <= 0xff);
-            os << separator << std::setw (2) << static_cast<unsigned> (v);
+            os << separator << std::setw (2) << unsigned{v};
             separator = " ";
         });
         return os;

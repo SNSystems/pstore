@@ -382,13 +382,33 @@ namespace pstore {
 
 
 #ifndef NDEBUG
-        void flood (void * ptr, std::size_t size);
+        template <std::ptrdiff_t SpanExtent>
+        void flood (gsl::span<std::uint8_t, SpanExtent> sp) noexcept {
+            static std::array<std::uint8_t, 4> const deadbeef{{0xDE, 0xAD, 0xBE, 0xEF}};
+
+            auto it = std::begin (sp);
+            auto end = std::end (sp);
+
+            for (auto uint32_count = sp.size () / 4U; uint32_count > 0U; --uint32_count) {
+                *(it++) = deadbeef[0];
+                *(it++) = deadbeef[1];
+                *(it++) = deadbeef[2];
+                *(it++) = deadbeef[3];
+            }
+
+            auto index = std::size_t{0};
+            for (; it != end; ++it) {
+                *it = deadbeef.at (index);
+                index = (index + 1) % deadbeef.size ();
+            }
+        }
 #else
-        inline void flood (void *, std::size_t) {}
+        template <std::ptrdiff_t SpanExtent>
+        inline void flood (gsl::span<std::uint8_t, SpanExtent>) noexcept {}
 #endif
         template <typename T>
-        inline void flood (T * t) {
-            flood (t, sizeof (T));
+        inline void flood (T * const t) noexcept {
+            flood (gsl::make_span (reinterpret_cast<std::uint8_t *> (t), sizeof (T)));
         }
 
         //*                  _  *
