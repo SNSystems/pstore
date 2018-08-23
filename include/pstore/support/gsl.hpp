@@ -444,7 +444,7 @@ namespace pstore {
         };
 
         template <typename ElementType, std::ptrdiff_t Extent>
-        typename span<ElementType, Extent>::index_type const span<ElementType, Extent>::extent;
+        constexpr typename span<ElementType, Extent>::index_type const span<ElementType, Extent>::extent;
 
 
         // [span.comparison], span comparison operators
