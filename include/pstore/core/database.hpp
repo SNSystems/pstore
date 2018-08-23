@@ -190,8 +190,9 @@ namespace pstore {
             return std::static_pointer_cast<T const> (this->getro (ex.addr.to_address (), ex.size));
         }
 
-        /// Returns a pointer to a mutable instance of type T.
+        /// Returns a pointer to a immutable instance of type T.
         ///
+        /// \tparam T  The type to be loaded. Must be standard-layout.
         /// \param addr The address at which the data begins.
         /// \return A read-only pointer to the loaded data.
         template <typename T,
@@ -202,6 +203,7 @@ namespace pstore {
 
         /// Returns a pointer to a read-only array of instances of type T.
         ///
+        /// \tparam T  The type to be loaded. Must be standard-layout.
         /// \param addr The address at which the data begins.
         /// \param elements The number of elements in the T[] array.
         /// \return A read-only pointer to the loaded data.
@@ -311,7 +313,8 @@ namespace pstore {
 
         std::string shared_memory_name () const { return this->get_sync_name () + ".pst"; }
 
-        /// Appends an amount of storage to the database.
+        /// \brief Appends an amount of storage to the database.
+        ///
         /// As an append-only system, this function provides the means by which data is recorded in
         /// the underlying storage; it is responsible for increasing the amount of available storage
         /// when necessary.
