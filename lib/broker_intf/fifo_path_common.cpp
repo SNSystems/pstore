@@ -49,8 +49,7 @@
 //===----------------------------------------------------------------------===//
 /// \file fifo_path_common.cpp
 /// \brief Portions of the implementation of the broker::fifo_path class that are common to all
-/// target
-/// platforms.
+///   target platforms.
 
 #include "pstore/broker_intf/fifo_path.hpp"
 
@@ -59,6 +58,7 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/quoted_string.hpp"
 
 namespace pstore {
     namespace broker {
@@ -80,10 +80,9 @@ namespace pstore {
         // open
         // ~~~~
         auto fifo_path::open_client_pipe () const -> client_pipe {
-
             client_pipe fd{};
-            auto retries = 0U;
-            do {
+            auto tries = 0U;
+            for (; max_retries_ == infinite_retries || tries <= max_retries_; ++tries) {
                 update_cb_ (operation::open);
                 fd = this->open_impl ();
                 if (fd.valid ()) {
@@ -91,11 +90,11 @@ namespace pstore {
                 }
                 update_cb_ (operation::wait);
                 this->wait_until_impl (retry_timeout_);
-            } while (retries++ < max_retries_);
+            }
 
             if (!fd.valid ()) {
                 std::ostringstream str;
-                str << "Could not open client named pipe (" << path_ << ")";
+                str << "Could not open client named pipe " << quoted (path_);
                 raise (pstore::error_code::unable_to_open_named_pipe, str.str ());
             }
             return fd;

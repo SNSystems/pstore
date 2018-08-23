@@ -60,7 +60,6 @@ struct switches {
     std::string verb;
     std::string path;
     std::chrono::milliseconds retry_timeout = std::chrono::milliseconds (500);
-    unsigned max_retries = 10;
 
     pstore::maybe<std::string> pipe_path;
 

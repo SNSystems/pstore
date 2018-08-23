@@ -49,11 +49,14 @@
 
 #include <chrono>
 #include <cstdlib>
+#include <limits>
 #include <functional>
 
 // pstore broker-interface
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
+// pstore support
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace broker {
@@ -63,6 +66,7 @@ namespace pstore {
         class writer {
         public:
             using duration_type = std::chrono::milliseconds;
+            static constexpr unsigned infinite_retries = std::numeric_limits<unsigned>::max ();
 
             using update_callback = std::function<void()>;
             /// The default function called by write() to as the write() function retries the

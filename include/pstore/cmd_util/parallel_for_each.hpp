@@ -108,7 +108,11 @@ namespace pstore {
 
             // Join
             for (auto & f : futures) {
-                f.wait ();
+                assert (f.valid ());
+                // Note that future::get<> is normally used to retreive the future's result, but
+                // here I'm calling it to ensure that an exception stored in the future's state is
+                // raised.
+                f.get ();
             }
         }
 

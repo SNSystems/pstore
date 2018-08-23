@@ -53,13 +53,16 @@
 #include "pstore/cmd_util/parallel_for_each.hpp"
 
 void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds retry_timeout,
-                   unsigned max_retries, unsigned long num) {
+                   unsigned long num) {
     auto begin = pstore::cmd_util::iota_generator ();
     auto end = pstore::cmd_util::iota_generator (num);
+
     pstore::cmd_util::parallel_for_each (
-        begin, end, [pipe_path, retry_timeout, max_retries](unsigned long count) {
-            pstore::broker::fifo_path fifo (pipe_path, retry_timeout, max_retries);
-            pstore::broker::writer wr (fifo, retry_timeout, max_retries);
+        begin, end, [pipe_path, retry_timeout](unsigned long count) {
+            pstore::broker::fifo_path fifo (pipe_path, retry_timeout,
+                                            pstore::broker::fifo_path::infinite_retries);
+            pstore::broker::writer wr (fifo, retry_timeout,
+                                       pstore::broker::writer::infinite_retries);
 
             std::string path;
             path.reserve (count);

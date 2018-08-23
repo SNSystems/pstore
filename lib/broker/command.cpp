@@ -151,8 +151,12 @@ namespace pstore {
             constexpr auto max_path_length = std::size_t{32};
 
             std::string message;
-            message.reserve (verb_length + c.verb.length () + path_length + max_path_length);
-            message = verb + c.verb + path + c.path.substr (0, max_path_length);
+            message.reserve (verb_length + c.verb.length () + path_length + max_path_length + 3);
+
+            message = verb + c.verb + path;
+            message += (c.path.length () < max_path_length)
+                           ? c.path
+                           : (c.path.substr (0, max_path_length) + "...");
             logging::log (logging::priority::info, message.c_str ());
         }
 

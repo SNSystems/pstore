@@ -119,11 +119,13 @@ int main (int argc, char * argv[]) {
             opt.pipe_path.has_value () ? opt.pipe_path.value ().c_str () : nullptr;
 
         if (opt.flood > 0) {
-            flood_server (pipe_path, opt.retry_timeout, opt.max_retries, opt.flood);
+            flood_server (pipe_path, opt.retry_timeout, opt.flood);
         }
 
-        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout, opt.max_retries);
-        pstore::broker::writer wr (fifo, opt.retry_timeout, opt.max_retries);
+        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout,
+                                        pstore::broker::fifo_path::infinite_retries);
+        pstore::broker::writer wr (fifo, opt.retry_timeout,
+                                   pstore::broker::writer::infinite_retries);
 
         if (opt.verb.length () > 0) {
             char const * path_str = (opt.path.length () > 0) ? opt.path.c_str () : nullptr;

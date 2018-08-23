@@ -51,10 +51,14 @@
 namespace pstore {
     namespace broker {
         class fifo_path;
-
-
         class command_processor;
         class recorder;
+
+        namespace details {
+
+            constexpr unsigned timeout_seconds = 60U;
+
+        } // end namespace details
 
         void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> cp);

@@ -82,16 +82,17 @@ namespace pstore {
         // write
         // ~~~~~
         void writer::write (message_type const & msg, bool error_on_timeout) {
-            auto retries = 0U;
-            do {
+            auto tries = 0U;
+            bool const infinite_tries = max_retries_ == infinite_retries;
+            for (; infinite_tries || tries <= max_retries_; ++tries) {
                 update_cb_ ();
                 if (this->write_impl (msg)) {
                     break;
                 }
                 std::this_thread::sleep_for (retry_timeout_);
-            } while (retries++ < max_retries_);
+            }
 
-            if (error_on_timeout && retries > max_retries_) {
+            if (error_on_timeout && !infinite_tries && tries > max_retries_) {
                 raise (::pstore::error_code::pipe_write_timeout);
             }
         }

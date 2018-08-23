@@ -214,8 +214,13 @@ def main (argv):
 
     if not report_error ("broker", broker):
         exit_code = 1
+    else:
+        print ("broker exited successfully")
+
     if not report_error ("poker", poker):
         exit_code = 1
+    else:
+        print ("poker exited successfully")
 
     # Note that the output is sorted to guarantee stability: the order in
     # which the broker processes incoming messages may not match the order in

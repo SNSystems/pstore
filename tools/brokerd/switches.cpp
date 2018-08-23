@@ -67,7 +67,7 @@ namespace {
         pipe_path ("pipe-path",
                    cl::desc ("Overrides the path of the FIFO from which commands will be read"));
 
-    cl::opt<unsigned> num_read_threads ("num-read-threads",
+    cl::opt<unsigned> num_read_threads ("read-threads",
                                         cl::desc ("The number of pipe reading threads"),
                                         cl::init (2U));
 

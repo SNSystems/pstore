@@ -55,6 +55,7 @@
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace broker {
@@ -91,7 +92,7 @@ namespace pstore {
             enum class operation { open, wait };
             using update_callback = std::function<void(operation)>;
             static void default_update_cb (operation) {}
-
+            static constexpr unsigned infinite_retries = std::numeric_limits<unsigned>::max ();
 
             /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default
             /// path (as defined at configure time) is used.

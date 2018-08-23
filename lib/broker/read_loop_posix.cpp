@@ -74,7 +74,7 @@ namespace {
 
     // Watch fd to be notified when it has input.
     void block_for_input (int fd) {
-        timeval timeout{60, 0}; // 60 seconds
+        timeval timeout{pstore::broker::details::timeout_seconds, 0};
         fd_set rfds;
         FD_ZERO (&rfds);
         FD_SET (fd, &rfds);

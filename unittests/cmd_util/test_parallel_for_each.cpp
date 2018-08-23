@@ -52,6 +52,7 @@
 #include "gmock/gmock.h"
 
 namespace {
+
     class ParallelForEach : public ::testing::Test {
     protected:
         using container = std::vector<int>;
@@ -97,6 +98,7 @@ namespace {
         std::generate_n (std::back_inserter (v), num, [&count, f]() { return f (++count); });
         return v;
     }
+
 } // end anonymous namespace
 
 TEST_F (ParallelForEach, ZeroElements) {
@@ -133,4 +135,17 @@ TEST_F (ParallelForEach, ConcurrencyPlusOne) {
     auto const expected = make_expected (num);
     auto const out = run_for_each (src);
     EXPECT_THAT (out, ::testing::ContainerEq (expected));
+}
+
+TEST (ParallelForEachException, WorkerExceptionPropogates) {
+    // Check that an exception throw in a worker thread fully propogates back to the caller.
+#if PSTORE_CPP_EXCEPTIONS
+    class custom_exception : public std::exception {};
+    auto op = [&]() {
+        std::array<int, 2> const src{{3, 5}};
+        pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
+                                             [](int v) { throw custom_exception{}; });
+    };
+    EXPECT_THROW (op (), custom_exception);
+#endif // PSTORE_CPP_EXCEPTIONS
 }

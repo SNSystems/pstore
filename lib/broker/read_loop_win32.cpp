@@ -81,6 +81,43 @@ namespace {
     using namespace pstore;
     using namespace pstore::broker;
 
+
+    // error_message
+    // ~~~~~~~~~~~~~
+    /// Yields the description of a win32 error code.
+    std::string error_message (DWORD errcode) {
+        if (errcode == 0) {
+            return "no error";
+        }
+
+        wchar_t * ptr = nullptr;
+        constexpr DWORD flags =
+            FORMAT_MESSAGE_FROM_SYSTEM       // use system message tables to retrieve error text
+            | FORMAT_MESSAGE_ALLOCATE_BUFFER // allocate buffer on the local heap for error text
+            | FORMAT_MESSAGE_IGNORE_INSERTS;
+        std::size_t size = ::FormatMessageW (flags,
+                                             nullptr, // unused with FORMAT_MESSAGE_FROM_SYSTEM
+                                             errcode, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                             reinterpret_cast<wchar_t *> (&ptr), // output
+                                             0, // minimum size for output buffer
+                                             nullptr);
+        std::unique_ptr<wchar_t, decltype (&LocalFree)> error_text (ptr, &LocalFree);
+        ptr = nullptr; // The pointer is now owned by the error_text unique_ptr.
+
+        if (error_text) {
+            // The string returned by FormatMessage probably ends with a CR. Remove it.
+            auto is_space = [](wchar_t const c) {
+                return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
+            };
+            for (; size > 0 && is_space (error_text.get ()[size - 1]); --size) {
+            }
+        }
+        if (!error_text || size == 0) {
+            return "unknown error";
+        }
+        return utf::win32::to8 (error_text.get (), size);
+    }
+
     //*                  _          *
     //*  _ _ ___ __ _ __| |___ _ _  *
     //* | '_/ -_) _` / _` / -_) '_| *
@@ -169,7 +206,7 @@ namespace {
         // Start an asynchronous read. This will either start to read data if it's available
         // or signal (by returning nullptr) that we've read all of the data already. In the latter
         // case we tear down this reader instance by calling done().
-        return this->read () ? this : done (this);
+        return this->read () ? this : this->done (this);
     }
 
     // cancel
@@ -187,49 +224,22 @@ namespace {
         assert (request_.get () == nullptr);
         request_ = pool.get_from_pool ();
 
-        // Start the read and call read_completed() when it finishes.
         assert (sizeof (*request_) <= std::numeric_limits<DWORD>::max ());
-        is_in_flight_ = ::ReadFileEx (pipe_handle_.get (), request_.get (),
-                                      static_cast<DWORD> (sizeof (*request_)), &overlap_,
-                                      &read_completed) != FALSE;
+
+        // Start the read and call read_completed() when it finishes.
+        is_in_flight_ =
+            ::ReadFileEx (pipe_handle_.get (), request_.get (),
+                          static_cast<DWORD> (sizeof (*request_)), &overlap_, &read_completed);
+        DWORD const erc = ::GetLastError ();
+        if (erc != ERROR_SUCCESS && erc != ERROR_BROKEN_PIPE && erc != ERROR_IO_PENDING) {
+            std::ostringstream message;
+            message << error_message (erc) << '(' << erc << ')';
+            log (logging::priority::error, "ReadFileEx: ", message.str ());
+        }
+
         return is_in_flight_;
     }
 
-    // error_message
-    // ~~~~~~~~~~~~~
-    /// Yields the description of a win32 error code.
-    std::string error_message (DWORD errcode) {
-        if (errcode == 0) {
-            return "no error";
-        }
-
-        wchar_t * ptr = nullptr;
-        constexpr DWORD flags =
-            FORMAT_MESSAGE_FROM_SYSTEM       // use system message tables to retrieve error text
-            | FORMAT_MESSAGE_ALLOCATE_BUFFER // allocate buffer on the local heap for error text
-            | FORMAT_MESSAGE_IGNORE_INSERTS;
-        std::size_t size = ::FormatMessageW (flags,
-                                             nullptr, // unused with FORMAT_MESSAGE_FROM_SYSTEM
-                                             errcode, MAKELANGID (LANG_NEUTRAL, SUBLANG_DEFAULT),
-                                             reinterpret_cast<wchar_t *> (&ptr), // output
-                                             0, // minimum size for output buffer
-                                             nullptr);
-        std::unique_ptr<wchar_t, decltype (&LocalFree)> error_text (ptr, &LocalFree);
-        ptr = nullptr; // The pointer is now owned by the error_text unique_ptr.
-
-        if (error_text) {
-            // The string returned by FormatMessage probably ends with a CR. Remove it.
-            auto isspace = [](wchar_t const c) {
-                return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
-            };
-            for (; size > 0 && isspace (error_text.get ()[size - 1]); --size) {
-            }
-        }
-        if (!error_text || size == 0) {
-            return "unknown error";
-        }
-        return utf::win32::to8 (error_text.get (), size);
-    }
 
     // read_completed
     // ~~~~~~~~~~~~~~
@@ -240,21 +250,22 @@ namespace {
     /// \param errcode  The I/O completion status: one of the system error codes.
     /// \param bytes_read  This number of bytes transferred.
     /// \param overlap  A pointer to the OVERLAPPED structure specified by the asynchronous I/O
-    /// function.
+    ///   function.
     VOID WINAPI reader::read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap) {
-        using logging::priority;
         auto * r = reinterpret_cast<reader *> (overlap);
         assert (r != nullptr);
 
         try {
+            assert (r->is_in_flight_);
             r->is_in_flight_ = false;
 
             if (errcode == ERROR_SUCCESS && bytes_read != 0) {
                 if (bytes_read != message_size) {
-                    log (priority::error, "Partial message received. Length ", bytes_read);
+                    log (logging::priority::error, "Partial message received. Length ", bytes_read);
                     r->completed_with_error ();
                 } else {
                     // The read operation has finished successfully, so process the request.
+                    log (logging::priority::debug, "Queueing command");
                     r->completed ();
                 }
             } else if (errcode != ERROR_SUCCESS) {
@@ -262,17 +273,17 @@ namespace {
                 stream << "Read completed with error: " << error_message (errcode) << " ("
                        << errcode << ')';
                 std::string const & str = stream.str ();
-                log (priority::error, str.c_str ());
+                log (logging::priority::error, str.c_str ());
                 r->completed_with_error ();
             }
 
             // Try reading some more from this pipe client.
             r = r->initiate_read ();
         } catch (std::exception const & ex) {
-            log (priority::error, "error: ", ex.what ());
+            log (logging::priority::error, "error: ", ex.what ());
             // This object should now kill itself?
         } catch (...) {
-            log (priority::error, "unknown error");
+            log (logging::priority::error, "unknown error");
             // This object should now kill itself?
         }
     }
@@ -297,7 +308,7 @@ namespace {
     /// Manages the process of asynchronously reading from the named pipe.
     class request {
     public:
-        explicit request (gsl::not_null<command_processor *> cp, recorder * record_file);
+        request (gsl::not_null<command_processor *> cp, recorder * record_file);
 
         void attach_pipe (pipe_descriptor && p);
         ~request () = default;
@@ -315,9 +326,16 @@ namespace {
         /// release() method).
         class raii_insert {
         public:
-            raii_insert (intrusive_list<reader> & list, reader * r) noexcept;
-            ~raii_insert () noexcept;
-            reader * release () noexcept;
+            raii_insert (intrusive_list<reader> & list, reader * r) noexcept
+                    : r_{r} {
+                list.insert_before (r, list.tail ());
+            }
+            ~raii_insert () noexcept {
+                if (r_) {
+                    intrusive_list<reader>::erase (r_);
+                }
+            }
+            void release () noexcept { r_ = nullptr; }
 
         private:
             reader * r_;
@@ -356,36 +374,12 @@ namespace {
     }
 
 
-    //*           _ _   _                  _    *
-    //*  _ _ __ _(_|_) (_)_ _  ___ ___ _ _| |_  *
-    //* | '_/ _` | | | | | ' \(_-</ -_) '_|  _| *
-    //* |_| \__,_|_|_| |_|_||_/__/\___|_|  \__| *
-
-    request::raii_insert::raii_insert (intrusive_list<reader> & list, reader * r) noexcept
-            : r_{r} {
-        list.insert_before (r, list.tail ());
-    }
-
-    request::raii_insert::~raii_insert () noexcept {
-        if (r_) {
-            intrusive_list<reader>::erase (r_);
-        }
-    }
-
-    reader * request::raii_insert::release () noexcept {
-        auto result = r_;
-        r_ = nullptr;
-        return result;
-    }
-
-
-
     // connect_to_new_client
     // ~~~~~~~~~~~~~~~~~~~~~
     /// Initiates the connection between a named pipe and a client.
     bool connect_to_new_client (HANDLE pipe, OVERLAPPED & overlapped) {
         // Start an overlapped connection for this pipe instance.
-        auto cnp_res = ::ConnectNamedPipe (pipe, &overlapped);
+        BOOL const cnp_res = ::ConnectNamedPipe (pipe, &overlapped);
 
         // From MSDN: "In nonblocking mode, ConnectNamedPipe() returns a non-zero value the first
         // time it is called for a pipe instance that is disconnected from a previous client. This
@@ -393,7 +387,7 @@ namespace {
         // other situations when the pipe handle is in nonblocking mode, ConnectNamedPipe() returns
         // zero."
 
-        auto const errcode = ::GetLastError ();
+        DWORD const errcode = ::GetLastError ();
         if (cnp_res) {
             raise (win32_erc (errcode), "ConnectNamedPipe");
         }
@@ -423,9 +417,9 @@ namespace {
     /// Creates a pipe instance and connects to the client.
     /// \param pipe_name  The name of the pipe.
     /// \param overlap  A OVERLAPPED instance which is used to track the state of the asynchronour
-    /// pipe creation.
+    ///   pipe creation.
     /// \return  A pair containing both the pipe handle and a boolean which will be true if the
-    /// connect operation is pending, and false if the connection has been completed.
+    ///   connect operation is pending, and false if the connection has been completed.
     std::pair<pipe_descriptor, bool> create_and_connect_instance (std::wstring const & pipe_name,
                                                                   OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
@@ -491,10 +485,10 @@ namespace pstore {
                 request req (cp.get (), record_file.get ());
 
                 while (!done) {
-                    constexpr DWORD timeout_ms = 60 * 1000; // 60 seconds // TODO: shared with POSIX
                     // Wait for a client to connect, or for a read or write operation to be
                     // completed, which causes a completion routine to be queued for execution.
-                    auto const cause = ::WaitForSingleObjectEx (connect_event.get (), timeout_ms,
+                    auto const cause = ::WaitForSingleObjectEx (connect_event.get (),
+                                                                details::timeout_seconds * 1000,
                                                                 true /*alertable wait?*/);
                     switch (cause) {
                     case WAIT_OBJECT_0:
@@ -519,9 +513,7 @@ namespace pstore {
                     case WAIT_IO_COMPLETION:
                         // The wait was satisfied by a completed read operation.
                         break;
-                    case WAIT_TIMEOUT:
-                        logging::log (logging::priority::notice, "wait timeout");
-                        break;
+                    case WAIT_TIMEOUT: log (logging::priority::notice, "wait timeout"); break;
                     default: raise (win32_erc (::GetLastError ()), "WaitForSingleObjectEx");
                     }
                 }
@@ -529,15 +521,15 @@ namespace pstore {
                 // Try to cancel any reads that are still in-flight.
                 req.cancel ();
             } catch (std::exception const & ex) {
-                logging::log (logging::priority::error, "error: ", ex.what ());
+                log (logging::priority::error, "error: ", ex.what ());
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             } catch (...) {
-                logging::log (logging::priority::error, "unknown error");
+                log (logging::priority::error, "unknown error");
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             }
-            logging::log (logging::priority::notice, "exiting read loop");
+            log (logging::priority::notice, "exiting read loop");
         }
 
     } // namespace broker

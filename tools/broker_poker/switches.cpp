@@ -75,10 +75,6 @@ namespace {
         RetryTimeout ("retry-timeout",
                       cl::desc ("The timeout for connection retries to the broker (ms)."),
                       cl::init (switches{}.retry_timeout.count ()));
-    cl::opt<unsigned>
-        MaxRetries ("max-retries",
-                    cl::desc ("The maximum number of retries that will be attempted."),
-                    cl::init (switches{}.max_retries));
 
     cl::opt<bool> Kill ("kill",
                         cl::desc ("Ask the broker to quit after commands have been processed."));
@@ -103,7 +99,6 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     Result.verb = pstore::utf::from_native_string (Verb);
     Result.path = pstore::utf::from_native_string (Path);
     Result.retry_timeout = std::chrono::milliseconds (RetryTimeout);
-    Result.max_retries = MaxRetries;
     Result.flood = Flood;
     Result.kill = Kill;
     Result.pipe_path = pathOption (PipePath);
