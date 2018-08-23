@@ -101,12 +101,20 @@ if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
 endif ()
 
-if (MSVC)
-    # VS 2017 : Disable warnings from from gtest code, using deprecated code related to TR1 
-    set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
-    set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
-    message (STATUS "Add flag to disable VS2017 warnings from gtest -  _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
-endif ()
+
+if (NOT PSTORE_IS_INSIDE_LLVM)
+    # Some basic tweaks to the compiler switches.
+    if (MSVC)
+        # VS 2017 : Disable warnings from from gtest code, using deprecated code related to TR1
+        set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+        set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+        message (STATUS "Add flag to disable VS2017 warnings from gtest -  _SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING")
+    elseif (CMAKE_HOST_SYSTEM_NAME MATCHES "SunOS")
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
+        set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64")
+        message (STATUS "Add flag to enable 64-bit build")
+    endif ()
+endif (NOT PSTORE_IS_INSIDE_LLVM)
 
 #
 # Define a pair of variables ("EXTRA_CXX_FLAGS" and
