@@ -425,8 +425,7 @@ namespace pstore {
             range_lock (range_lock && other) noexcept;
 
             /// \brief Destroys the range lock.
-            /// The behavior is undefined if the lock is owned by any thread or if any thread
-            /// terminates while holding any ownership of the lock.
+            /// If the lock is owned, it will be unlocked but an error will be lost.
             ~range_lock () noexcept;
 
             /// Move assignment operator. Replaces the contents with those of "other" using move
@@ -440,19 +439,18 @@ namespace pstore {
             range_lock & operator= (range_lock const &) = delete;
 
             /// \brief Blocks until a lock can be obtained for the current thread.
-            /// If an exception is thrown, no lock is obtained.
-            /// \returns False if the lock was already owned before the call otherwise true.
+            ///   If an exception is thrown, no lock is obtained.
+            /// \returns False if the lock was already owned before the call or no file is
+            /// associated with this object otherwise true.
             bool lock ();
 
             /// \brief Attempts to acquire the lock for the current thread without blocking.
-            /// If an exception is thrown, no lock is obtained.
+            ///   If an exception is thrown, no lock is obtained.
             /// \returns true if the lock was acquired, false otherwise.
             bool try_lock ();
 
             /// \brief Releases the file range lock which should be previously be locked by a call
-            /// to lock() or try_lock().
-            /// Throws no exceptions.
-            /// FIXME: Throws no exceptions.
+            ///   to lock() or try_lock().
             void unlock ();
 
             /// \name Observers
@@ -480,6 +478,8 @@ namespace pstore {
             file_base::lock_kind kind_;
             /// True if the file range has been locked
             bool locked_;
+
+            bool lock_impl (file_base::blocking_mode mode);
 
 #if PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
             static_assert (

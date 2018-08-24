@@ -122,7 +122,7 @@ namespace pstore {
 
         // (dtor)
         // ~~~~~~
-        range_lock::~range_lock () noexcept { assert (!locked_); }
+        range_lock::~range_lock () noexcept { PSTORE_NO_EX_ESCAPE (this->unlock ()); }
 
         // operator=
         // ~~~~~~~~~
@@ -143,39 +143,33 @@ namespace pstore {
 
         // lock
         // ~~~~
-        bool range_lock::lock () {
-            if (locked_) {
-                return false;
-            }
-            assert (file_ != nullptr && !locked_);
-            if (file_ != nullptr) {
-                file_->lock (offset_, size_, kind_, file_base::blocking_mode::blocking);
-                locked_ = true;
-            }
-            return true;
-        }
+        bool range_lock::lock () { return this->lock_impl (file_base::blocking_mode::blocking); }
 
         // try_lock
         // ~~~~~~~~
         bool range_lock::try_lock () {
-            assert (file_ != nullptr && !locked_);
-            bool result = false;
-            if (file_ != nullptr) {
-                result =
-                    file_->lock (offset_, size_, kind_, file_base::blocking_mode::non_blocking);
-                locked_ = result;
+            return this->lock_impl (file_base::blocking_mode::non_blocking);
+        }
+
+        // lock_impl
+        // ~~~~~~~~~
+        bool range_lock::lock_impl (file_base::blocking_mode mode) {
+            if (locked_) {
+                return false;
             }
-            return result;
+            if (file_ != nullptr) {
+                locked_ = file_->lock (offset_, size_, kind_, mode);
+            }
+            return locked_;
         }
 
         // unlock
         // ~~~~~~
         void range_lock::unlock () {
-            if (locked_) {
-                assert (file_ != nullptr);
+            if (locked_ && file_ != nullptr) {
                 file_->unlock (offset_, size_);
-                locked_ = false;
             }
+            locked_ = false;
         }
 
 

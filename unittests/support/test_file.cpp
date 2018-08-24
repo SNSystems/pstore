@@ -306,12 +306,43 @@ TEST (RangeLock, TryLockFails) {
                                    UINT64_C (5),   // offset
                                    std::size_t{7}, // size
                                    mock_file::lock_kind::exclusive_write);
-    bool locked = lock.try_lock ();
-    EXPECT_FALSE (locked);
+    EXPECT_FALSE (lock.try_lock ());
     EXPECT_FALSE (lock.is_locked ());
     lock.unlock ();
 }
 
+TEST (RangeLock, LockWithNoFile) {
+    pstore::file::range_lock lock;
+    EXPECT_FALSE (lock.lock ());
+    EXPECT_FALSE (lock.is_locked ());
+    EXPECT_FALSE (lock.try_lock ());
+    lock.unlock ();
+    EXPECT_FALSE (lock.is_locked ());
+}
+
+#if PSTORE_CPP_EXCEPTIONS
+TEST (RangeLock, ErrorWithLockHeld) {
+    mock_file file;
+
+    using ::testing::_;
+    EXPECT_CALL (file, lock (_, _, _, _)).WillOnce (::testing::Return (true));
+    EXPECT_CALL (file, unlock (_, _)).Times (1);
+
+    class custom_exception : public std::exception {};
+
+    try {
+        constexpr auto offset = std::uint64_t{5};
+        constexpr auto size = std::size_t{7};
+        pstore::file::range_lock lock (&file, offset, size, mock_file::lock_kind::exclusive_write);
+        lock.lock ();
+        // Throw with the lock held.
+        throw custom_exception{};
+    } catch (custom_exception const &) {
+    } catch (...) {
+        GTEST_FAIL () << "An unexpected exception was raised.";
+    }
+}
+#endif // PSTORE_CPP_EXCEPTIONS
 
 
 namespace {
