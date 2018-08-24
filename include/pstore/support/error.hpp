@@ -189,6 +189,16 @@ namespace pstore {
         raise_error_code (std::make_error_code (e), what);
     }
 
+    template <typename Exception>
+    PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
+#if PSTORE_CPP_EXCEPTIONS
+        throw ex;
+#else
+        std::cerr << "Error: " << ex.message () << '\n';
+        std::exit (EXIT_FAILURE);
+#endif
+    }
+
 } // end namespace pstore
 
 #endif // PSTORE_ERROR_HPP

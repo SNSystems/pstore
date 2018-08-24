@@ -59,6 +59,8 @@
 #endif
 
 #include "pstore/support/bit_count.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/inherit_const.hpp"
 
 namespace pstore {
     namespace repo {
@@ -355,33 +357,14 @@ namespace pstore {
             ValueType const * data () const noexcept { return &elements_[0]; }
 
             reference operator[] (size_type pos) noexcept {
-                sparse_array const * cthis = this;
-                return const_cast<reference> (cthis->operator[] (pos));
+                return sparse_array::index_impl (*this, pos);
             }
             const_reference operator[] (size_type pos) const noexcept {
-                assert (pos < max_size ());
-                auto const bit_position = BitmapType{1} << pos;
-                assert ((bitmap_ & bit_position) != 0);
-                auto const mask = bit_position - 1U;
-                auto const index = bit_count::pop_count (bitmap_ & mask);
-                return elements_[index];
+                return sparse_array::index_impl (*this, pos);
             }
 
-            reference at (size_type pos) noexcept {
-                sparse_array const * cthis = this;
-                return const_cast<reference> (cthis->at (pos));
-            }
-            const_reference at (size_type pos) const noexcept {
-                if (pos < max_size ()) {
-                    auto const bit_position = BitmapType{1} << pos;
-                    if ((bitmap_ & bit_position) != 0) {
-                        auto const mask = bit_position - 1U;
-                        auto const index = pop_count (bitmap_ & mask);
-                        return elements_[index];
-                    }
-                }
-                assert (!"sparse_array::at out_of_range");
-            }
+            reference at (size_type pos) { return sparse_array::at_impl (*this, pos); }
+            const_reference at (size_type pos) const { return sparse_array::at_impl (*this, pos); }
 
             /// Returns a reference to the first element in the container. Calling front() on an
             /// empty container is undefined.
@@ -481,6 +464,16 @@ namespace pstore {
             /// sequence of indices to be present in a sparse array.
             template <typename InputIterator>
             static BitmapType bitmap (InputIterator first, InputIterator last);
+
+            /// The implementation of operator[].
+            template <typename SparseArray,
+                      typename ResultType = typename inherit_const<SparseArray, ValueType>::type>
+            static ResultType & index_impl (SparseArray && sa, size_type pos) noexcept;
+
+            /// The implementation of at().
+            template <typename SparseArray,
+                      typename ResultType = typename inherit_const<SparseArray, ValueType>::type>
+            static ResultType & at_impl (SparseArray && sa, size_type pos);
         };
 
         // (ctor)
@@ -608,6 +601,34 @@ namespace pstore {
             };
             return std::accumulate (first, last, BitmapType{0}, op);
         }
+
+        // index_impl
+        // ~~~~~~~~~~
+        template <typename ValueType, typename BitmapType>
+        template <typename SparseArray, typename ResultType>
+        ResultType & sparse_array<ValueType, BitmapType>::index_impl (SparseArray && sa,
+                                                                      size_type pos) noexcept {
+            assert (pos < max_size ());
+            auto const bit_position = BitmapType{1} << pos;
+            assert ((sa.bitmap_ & bit_position) != 0);
+            return sa.elements_[bit_count::pop_count (sa.bitmap_ & (bit_position - 1U))];
+        }
+
+        // at_impl
+        // ~~~~~~~
+        template <typename ValueType, typename BitmapType>
+        template <typename SparseArray, typename ResultType>
+        ResultType & sparse_array<ValueType, BitmapType>::at_impl (SparseArray && sa,
+                                                                   size_type pos) {
+            if (pos < max_size ()) {
+                auto const bit_position = BitmapType{1} << pos;
+                if ((sa.bitmap_ & bit_position) != 0) {
+                    return sa.elements_[bit_count::pop_count (sa.bitmap_ & (bit_position - 1U))];
+                }
+            }
+            raise_exception (std::out_of_range ("spare array index out of range"));
+        }
+
 
         // operator==
         // ~~~~~~~~~~
