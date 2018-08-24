@@ -81,13 +81,27 @@
 #    define __has_cpp_attribute(x) 0
 #endif
 
+/// A function-like feature checking macro that is a wrapper around
+/// `__has_attribute`, which is defined by GCC 5+ and Clang and evaluates to a
+/// nonzero constant integer if the attribute is supported or 0 if not.
+/// It evaluates to zero if `__has_attribute` is not defined by the compiler.
+#ifdef __has_attribute
+#define PSTORE_HAS_ATTRIBUTE(x) __has_attribute(x)
+#else
+#define PSTORE_HAS_ATTRIBUTE(x)  false
+#endif
+
+// Specifies that the function does not return.
 #if __has_cpp_attribute(noreturn)
 #    define PSTORE_NO_RETURN [[noreturn]]
 #elif defined(_MSC_VER)
-#    define PSTORE_NO_RETURN __declspec(noreturn)
+#    define PSTORE_NO_RETURN  __declspec(noreturn)
+#elif PSTORE_HAS_ATTRIBUTE(noreturn) && (defined(__GNUC__) || defined(__clang__))
+#    define PSTORE_NO_RETURN  __attribute__(noreturn)
 #else
-#    define PSTORE_NO_RETURN __attribute__ (noreturn)
+#    define PSTORE_NO_RETURN
 #endif
+
 
 #ifdef _WIN32
 #    ifdef min
