@@ -44,6 +44,7 @@
 #include "pstore/broker_intf/status_path.hpp"
 
 #include <cassert>
+#include <cstdio>
 #include <cstring>
 #include "pstore/config/config.hpp"
 #include "pstore/support/file.hpp"
