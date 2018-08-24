@@ -44,6 +44,7 @@
 #include "pstore/json/json.hpp"
 #include <stack>
 #include "callbacks.hpp"
+#include "pstore/support/to_string.hpp"
 
 using namespace pstore;
 using testing::StrictMock;
@@ -57,8 +58,8 @@ namespace {
         result_type result () { return out_; }
 
         void string_value (std::string const & s) { append ('"' + s + '"'); }
-        void integer_value (long v) { append (std::to_string (v)); }
-        void float_value (double v) { append (std::to_string (v)); }
+        void integer_value (long v) { append (pstore::to_string (v)); }
+        void float_value (double v) { append (pstore::to_string (v)); }
         void boolean_value (bool v) { append (v ? "true" : "false"); }
         void null_value () { append ("null"); }
 

@@ -79,6 +79,9 @@
 /// available even when compiling for C++11 on some platforms.
 #cmakedefine PSTORE_HAVE_STD_QUOTED 1
 
+/// Defined if std::to_string<>() is available.
+#cmakedefine PSTORE_HAVE_STD_TO_STRING  1
+
 /// Defined if std::map<> supports the insert_or_assign() member function. This was not officially
 /// introduced until C++17 but is available even when compiling for C++11 on some platforms.
 #cmakedefine PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN 1

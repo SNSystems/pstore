@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file logging.hpp
 
-#ifndef PSTORE_LOGGING_HPP
-#define PSTORE_LOGGING_HPP (1)
+#ifndef PSTORE_SUPPORT_LOGGING_HPP
+#define PSTORE_SUPPORT_LOGGING_HPP (1)
 
 #include <cassert>
 #include <ctime>
@@ -56,6 +56,7 @@
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/file.hpp"
 #include "pstore/support/thread.hpp"
+#include "pstore/support/to_string.hpp"
 
 namespace pstore {
     namespace logging {
@@ -115,7 +116,7 @@ namespace pstore {
         private:
             template <typename T>
             static std::string to_string (char const * message, T t) {
-                return message + std::to_string (t);
+                return message + pstore::to_string (t);
             }
 
             std::string buffer_;
@@ -298,4 +299,4 @@ namespace pstore {
 
     } // end namespace logging
 } // end namespace pstore
-#endif // PSTORE_LOGGING_HPP
+#endif // PSTORE_SUPPORT_LOGGING_HPP

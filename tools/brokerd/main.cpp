@@ -71,6 +71,7 @@
 #include "pstore/config/config.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/thread.hpp"
+#include "pstore/support/to_string.hpp"
 #include "pstore/support/utf.hpp"
 
 #include "switches.hpp"
@@ -197,7 +198,7 @@ int main (int argc, char * argv[]) {
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                     futures.push_back (create_thread ([ctr, &fifo, &record_file, commands]() {
-                        auto const name = std::string{"read"} + std::to_string (ctr);
+                        auto const name = std::string{"read"} + pstore::to_string (ctr);
                         threads::set_name (name.c_str ());
                         logging::create_log_stream ("broker." + name);
                         read_loop (fifo, record_file, commands);

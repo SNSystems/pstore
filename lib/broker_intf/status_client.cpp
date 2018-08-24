@@ -60,6 +60,7 @@
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/to_string.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace {
@@ -104,7 +105,7 @@ namespace {
 
         addrinfo * servinfo = nullptr;
         if (int const gai_status =
-                getaddrinfo (node, std::to_string (port).c_str (), &hints, &servinfo)) {
+                getaddrinfo (node, pstore::to_string (port).c_str (), &hints, &servinfo)) {
 #ifdef _WIN32
             raise (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())},
                    "getaddrinfo failed");

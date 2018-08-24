@@ -94,6 +94,13 @@ check_cxx_source_compiles (
     PSTORE_HAVE_IS_TRIVIALLY_COPYABLE)
 
 check_cxx_source_compiles (
+    "#include <string>
+    int main () {
+        std::to_string(0);
+    }"
+    PSTORE_HAVE_STD_TO_STRING)
+
+check_cxx_source_compiles (
     "#define __STDC_WANT_LIB_EXT1__  1
     #include <time.h>
     int main () {
@@ -204,6 +211,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/to_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
 
