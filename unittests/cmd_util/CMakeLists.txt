@@ -51,5 +51,5 @@ add_pstore_unit_test (pstore-cmd-util-unit-tests
     test_string_distance.cpp
     test_word_wrapper.cpp
 )
-target_link_libraries (pstore-cmd-util-unit-tests pstore-cmd-util)
+target_link_libraries (pstore-cmd-util-unit-tests PRIVATE pstore-cmd-util)
 

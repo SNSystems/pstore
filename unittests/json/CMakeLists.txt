@@ -48,5 +48,5 @@ add_pstore_unit_test (pstore-json-unit-tests
     test_utf.cpp
     test_number.cpp
 )
-target_link_libraries (pstore-json-unit-tests pstore-json-lib)
+target_link_libraries (pstore-json-unit-tests PRIVATE pstore-json-lib)
 

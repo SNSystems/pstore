@@ -59,7 +59,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_varint.cpp
 )
 add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
-target_link_libraries (pstore-support-unit-tests pstore-support pstore-common)
+target_link_libraries (pstore-support-unit-tests PRIVATE pstore-support pstore-common)
 
 #eof:pstore/unittests/pstore_support/CMakeLists.txt
 

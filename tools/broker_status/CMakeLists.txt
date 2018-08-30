@@ -43,10 +43,10 @@
 #===----------------------------------------------------------------------===//
 
 add_pstore_executable (pstore-broker-status broker_status.cpp)
-target_link_libraries (pstore-broker-status pstore-broker-intf pstore-cmd-util)
+target_link_libraries (pstore-broker-status PRIVATE pstore-broker-intf pstore-cmd-util)
 if (WIN32)
-    target_link_libraries (pstore-broker-status Ws2_32.dll)
+    target_link_libraries (pstore-broker-status PRIVATE Ws2_32.dll)
 endif ()
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-broker-status LLVMSupport)
+    target_link_libraries (pstore-broker-status PRIVATE LLVMSupport)
 endif ()

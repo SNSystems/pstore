@@ -49,7 +49,7 @@ add_pstore_executable (pstore-read
     switches.cpp
 )
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-read LLVMSupport)
+    target_link_libraries (pstore-read PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-read pstore-core pstore-cmd-util)
+target_link_libraries (pstore-read PRIVATE pstore-core pstore-cmd-util)
 

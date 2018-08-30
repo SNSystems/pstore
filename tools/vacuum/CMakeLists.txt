@@ -52,8 +52,8 @@ add_pstore_executable (pstore-vacuumd
     switches.hpp
 )
 
-target_link_libraries (pstore-vacuumd pstore-vacuum-lib pstore-cmd-util)
+target_link_libraries (pstore-vacuumd PRIVATE pstore-vacuum-lib pstore-cmd-util)
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-vacuumd LLVMSupport)
+    target_link_libraries (pstore-vacuumd PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 run_pstore_unit_test (pstore-vacuumd pstore-vacuum-unit-tests)

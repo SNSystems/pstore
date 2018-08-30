@@ -61,5 +61,5 @@ set (PSTORE_DUMP_UNIT_TEST_SRC
     test_string.cpp
 )
 add_pstore_unit_test (pstore-dump-unit-tests ${PSTORE_DUMP_UNIT_TEST_SRC})
-target_link_libraries (pstore-dump-unit-tests pstore-dump-lib pstore-common)
+target_link_libraries (pstore-dump-unit-tests PRIVATE pstore-dump-lib pstore-common)
 

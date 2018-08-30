@@ -63,7 +63,7 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif ()
 
 if (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-brokerd pstore-cmd-util-ex pstore-broker)
+target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex pstore-broker)
 else ()
 target_link_libraries (pstore-brokerd pstore-cmd-util pstore-broker)
 endif ()

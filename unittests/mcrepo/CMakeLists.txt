@@ -48,7 +48,7 @@ add_pstore_unit_test (pstore-mcrepo-unit-tests
     test_fragment.cpp
     test_ticket.cpp
 )
-target_link_libraries (pstore-mcrepo-unit-tests pstore-mcrepo)
+target_link_libraries (pstore-mcrepo-unit-tests PRIVATE pstore-mcrepo)
 
 #eof pstore/unit_tests/mcrepo/CMakeLists.txt
 

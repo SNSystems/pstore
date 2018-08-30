@@ -44,6 +44,6 @@
 
 add_pstore_executable (pstore-mangle mangle.cpp)
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-mangle LLVMSupport)
+    target_link_libraries (pstore-mangle PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-mangle pstore-core)
+target_link_libraries (pstore-mangle PRIVATE pstore-core)

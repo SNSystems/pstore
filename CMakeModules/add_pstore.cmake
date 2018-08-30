@@ -191,7 +191,7 @@ function (add_pstore_example name)
     add_pstore_executable (example-${name} ${ARGN})
     set_target_properties (example-${name} PROPERTIES EXCLUDE_FROM_ALL 1)
     set_target_properties (example-${name} PROPERTIES FOLDER "pstore examples")
-    target_link_libraries (example-${name} pstore-core)
+    target_link_libraries (example-${name} PRIVATE pstore-core)
 endfunction (add_pstore_example)
 
 
@@ -237,7 +237,7 @@ function(add_pstore_unit_test test_dirname)
         target_compile_options (${test_dirname} PRIVATE ${EXTRA_CXX_FLAGS})
         target_compile_definitions (${test_dirname} PRIVATE ${EXTRA_CXX_DEFINITIONS})
         add_pstore_additional_compiler_flag (${test_dirname})
-        target_link_libraries (${test_dirname} gmock_main gtest gmock)
+        target_link_libraries (${test_dirname} PRIVATE gmock_main gtest gmock)
     endif(PSTORE_IS_INSIDE_LLVM)
 
 endfunction(add_pstore_unit_test)

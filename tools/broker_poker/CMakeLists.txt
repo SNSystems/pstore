@@ -50,7 +50,7 @@ add_pstore_executable (pstore-broker-poker
     switches.hpp
 )
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-broker-poker LLVMSupport)
+    target_link_libraries (pstore-broker-poker PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-broker-poker pstore-broker-intf pstore-cmd-util)
+target_link_libraries (pstore-broker-poker PRIVATE pstore-broker-intf pstore-cmd-util)
 

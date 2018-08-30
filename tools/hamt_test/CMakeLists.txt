@@ -43,5 +43,5 @@
 #===----------------------------------------------------------------------===//
 
 add_pstore_executable (pstore-hamt-test main.cpp print.cpp print.hpp)
-target_link_libraries (pstore-hamt-test pstore-core pstore-cmd-util)
+target_link_libraries (pstore-hamt-test PRIVATE pstore-core pstore-cmd-util)
 
