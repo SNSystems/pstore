@@ -58,7 +58,9 @@
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/Triple.h"
+#include "llvm/MC/MCAsmBackend.h"
 #include "llvm/MC/MCAsmInfo.h"
+#include "llvm/MC/MCCodeEmitter.h"
 #include "llvm/MC/MCContext.h"
 #include "llvm/MC/MCDisassembler/MCDisassembler.h"
 #include "llvm/MC/MCInst.h"
@@ -164,10 +166,13 @@ namespace {
         auto os = llvm::make_unique<array_stream> (array);
         auto formatted_os = llvm::make_unique<llvm::formatted_raw_ostream> (*os);
         auto raw_formatted_os = formatted_os.get ();
-        std::unique_ptr<llvm::MCStreamer> streamer (llvm::createAsmStreamer (
-            context, std::move (formatted_os), false /*is verbose asm*/,
-            false /*use dwarf directory*/, instruction_printer.release (),
-            nullptr /*MCCodeEmitter*/, nullptr /*MCAsmBackend*/, true /*showInst*/));
+        std::unique_ptr<llvm::MCCodeEmitter> MCE;
+        std::unique_ptr<llvm::MCAsmBackend> MAB;
+        std::unique_ptr<llvm::MCStreamer> streamer (
+            llvm::createAsmStreamer (context, std::move (formatted_os), false /*is verbose asm*/,
+                                     false /*use dwarf directory*/, instruction_printer.release (),
+                                     std::move (MCE) /*MCCodeEmitter*/,
+                                     std::move (MAB) /*MCAsmBackend*/, true /*showInst*/));
         streamer->InitSections (false /*NoExecStack*/);
 
 
