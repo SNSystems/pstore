@@ -260,6 +260,8 @@ add_dependencies (pstore-system-tests
     pstore-write
 )
 if (PSTORE_EXAMPLES)
+   set_target_properties (pstore-examples PROPERTIES FOLDER "pstore examples")
+   set_target_properties (pstore-examples-serialize PROPERTIES FOLDER "pstore examples")
    add_dependencies (pstore-system-tests pstore-examples)
 endif ()
 

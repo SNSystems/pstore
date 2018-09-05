@@ -49,10 +49,11 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/support/portab.hpp"
 
 int main () {
     int exit_code = EXIT_SUCCESS;
-    try {
+    PSTORE_TRY {
         auto const key = std::string{"key"};
         auto const value = std::string{"hello world\n"};
 
@@ -75,12 +76,14 @@ int main () {
         }
 
         t.commit (); // Finalize the transaction.
-    } catch (std::exception const & ex) {
+    }
+    PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';
         exit_code = EXIT_FAILURE;
-    } catch (...) {
+    })
+    PSTORE_CATCH (..., {
         std::cerr << "An unknown error occurred\n";
         exit_code = EXIT_FAILURE;
-    }
+    })
     return exit_code;
 }
