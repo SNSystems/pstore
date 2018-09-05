@@ -1,4 +1,4 @@
-# Check error on an internal shell error (file's contexts are different)
+# Check exit code error (file's contents are different)
 #
 # RUN: echo "hello-first" > %t
 # RUN: echo "hello-second" > %t1
