@@ -96,7 +96,7 @@ namespace pstore {
 
 } // namespace pstore
 
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__sun__)
 
 // Standard includes
 #include <climits>
@@ -108,11 +108,21 @@ namespace pstore {
 #include <unistd.h>
 
 namespace {
+#ifdef __linux__
     std::string link_path () {
         std::ostringstream link_stream;
         link_stream << "/proc/" << ::getpid () << "/exe";
         return link_stream.str ();
     }
+#elif defined (__sun__)
+    std::string link_path () {
+        std::ostringstream link_stream;
+        link_stream << "/proc/" << ::getpid () << "/path/a.out";
+        return link_stream.str ();
+    }
+#else
+#error "Don't know how to build link path for this system"
+#endif
 
     template <typename T>
     T clamp (T v, T low, T high) {
@@ -150,6 +160,8 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // defined(__linux__)
+#else // defined(__linux__)
+#error "Don't know how to implement process_file_name() on this system"
+#endif
 
 #endif // !defined(_WIN32)

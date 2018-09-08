@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file thread.hpp
 
-#ifndef PSTORE_THREAD_HPP
-#define PSTORE_THREAD_HPP (1)
+#ifndef PSTORE_SUPPORT_THREAD_HPP
+#define PSTORE_SUPPORT_THREAD_HPP (1)
 
 #include <cstdint>
 #include <cstdlib>
@@ -67,11 +67,14 @@ namespace pstore {
 #ifdef _WIN32
         typedef DWORD thread_id_type;
 #elif defined(__APPLE__)
-        typedef std::uint64_t thread_id_type;
+      using thread_id_type = std::uint64_t;
 #elif defined(__linux__)
-        typedef int thread_id_type;
+        using thread_id_type = int;
 #elif defined(__FreeBSD__)
-        typedef int thread_id_type;
+        using thread_id_type = int;
+#elif defined (__sun__)
+        using thread_id_type = std::uint32_t;
+        static_assert (sizeof (thread_id_type) == sizeof (pthread_t), "expected pthread_t to be 32-bits");
 #else
 #error "Don't know how to represent a thread-id on this OS"
 #endif
@@ -84,4 +87,4 @@ namespace pstore {
         thread_id_type get_id ();
     } // namespace threads
 } // namespace pstore
-#endif // PSTORE_THREAD_HPP
+#endif // PSTORE_SUPPORT_THREAD_HPP

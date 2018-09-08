@@ -49,6 +49,7 @@
 #ifndef _WIN32
 
 #include <cassert>
+#include <cstring> // for memset() [used by FD_ZERO on solaris]
 #include <fcntl.h>
 #include <unistd.h>
 

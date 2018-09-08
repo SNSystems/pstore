@@ -127,8 +127,8 @@ namespace pstore {
 #else
 
         thread_id_type get_id () {
+	    auto id = thread_id_type{0};
 #ifdef __APPLE__
-            std::uint64_t id = 0;
             // Looking at the source, this API has an extension which allows a NULL pthread_t to
             // mean "current thread". I'm being pedantically correct here, but we could take
             // advantage of that if it turns out that we're in a hurry.
@@ -136,14 +136,16 @@ namespace pstore {
             if (err != 0) {
                 raise (errno_erc{err});
             }
-            return id;
 #elif defined(__linux__)
-            return static_cast <thread_id_type> (syscall (__NR_gettid));
+            id = static_cast <thread_id_type> (syscall (__NR_gettid));
 #elif defined(__FreeBSD__)
-            return pthread_getthreadid_np ();
+            id = pthread_getthreadid_np ();
+#elif defined(__sun__)
+	    id = static_cast <thread_id_type> (pthread_self ());
 #else
 #error "Don't know how to produce a thread-id for the target OS"
 #endif
+	    return id;
         }
 
 
