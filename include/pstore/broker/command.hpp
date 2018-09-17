@@ -77,6 +77,8 @@ namespace pstore {
             // No copying or assignment.
             command_processor (command_processor const &) = delete;
             command_processor & operator= (command_processor const &) = delete;
+            command_processor (command_processor &&) = delete;
+            command_processor & operator= (command_processor &&) = delete;
 
             void thread_entry (fifo_path const & fifo);
 
@@ -101,16 +103,16 @@ namespace pstore {
             class atomic_weak_ptr {
             public:
                 std::shared_ptr<T> get () {
-                    std::lock_guard<decltype (mut_)> lock{mut_};
+                    std::lock_guard<decltype (mut_)> const lock{mut_};
                     return ptr_.lock ();
                 }
 
-                void set (std::shared_ptr<T> & t) {
-                    std::lock_guard<decltype (mut_)> lock{mut_};
+                void set (std::shared_ptr<T> const & t) {
+                    std::lock_guard<decltype (mut_)> const lock{mut_};
                     ptr_ = t;
                 }
                 void set (std::weak_ptr<T> & t) {
-                    std::lock_guard<decltype (mut_)> lock{mut_};
+                    std::lock_guard<decltype (mut_)> const lock{mut_};
                     ptr_ = t;
                 }
 
