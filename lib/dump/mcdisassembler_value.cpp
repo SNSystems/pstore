@@ -109,6 +109,10 @@ namespace {
                        pstore::dump::array::container & array, bool hex_mode) {
         llvm::Triple triple ("x86_64-pc-linux-gnu-repo"); // FIXME: target triple is hardwired!
 
+        if (first == last) {
+            return;
+        }
+
         // Get the target specific parser.
         std::string error;
         std::string arch_name;
