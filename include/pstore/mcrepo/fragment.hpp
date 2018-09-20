@@ -56,6 +56,7 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/dependents_section.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
@@ -128,23 +129,8 @@ namespace pstore {
         /// Maps from the section kind enumeration to the type that is used to represent a section
         /// of that kind.
         template <section_kind T>
-        struct enum_to_section {};
-
-        template <> struct enum_to_section<section_kind::bss                      > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::data                     > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_1_byte_c_string> { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_2_byte_c_string> { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_4_byte_c_string> { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_const_16       > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_const_32       > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_const_4        > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::mergeable_const_8        > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::read_only                > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::rel_ro                   > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::text                     > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::thread_bss               > { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::thread_data              > { using type = generic_section; };
-
+        struct enum_to_section { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::debug_line> { using type = debug_line_section; };
         template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
         // clang-format on
 
@@ -390,24 +376,14 @@ namespace pstore {
         template <typename OStream>
         OStream & operator<< (OStream & os, section_kind kind) {
             char const * name = "*unknown*";
+#define X(k)                                                                                       \
+case section_kind::k: name = #k; break;
+
             switch (kind) {
-            case section_kind::text: name = "text"; break;
-            case section_kind::bss: name = "bss"; break;
-            case section_kind::data: name = "data"; break;
-            case section_kind::rel_ro: name = "rel_ro"; break;
-            case section_kind::mergeable_1_byte_c_string: name = "mergeable_1_byte_c_string"; break;
-            case section_kind::mergeable_2_byte_c_string: name = "mergeable_2_byte_c_string"; break;
-            case section_kind::mergeable_4_byte_c_string: name = "mergeable_4_byte_c_string"; break;
-            case section_kind::mergeable_const_4: name = "mergeable_const_4"; break;
-            case section_kind::mergeable_const_8: name = "mergeable_const_8"; break;
-            case section_kind::mergeable_const_16: name = "mergeable_const_16"; break;
-            case section_kind::mergeable_const_32: name = "mergeable_const_32"; break;
-            case section_kind::read_only: name = "read_only"; break;
-            case section_kind::thread_bss: name = "thread_bss"; break;
-            case section_kind::thread_data: name = "thread_data"; break;
-            case section_kind::dependent: name = "dependent"; break;
+                PSTORE_MCREPO_SECTION_KINDS
             case section_kind::last: assert (false); break;
             }
+#undef X
             return os << name;
         }
 

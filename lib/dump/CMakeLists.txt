@@ -46,15 +46,15 @@
 # PStore Dump Core Library
 ##########################
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
+set (PSTORE_DUMP_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/dump")
 set (PSTORE_DUMP_LIB_SRC
-    "${PSTORE_INCLUDE_DIR}/dump/db_value.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/error.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/line_splitter.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/mcdebugline_value.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/mcdisassembler_value.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/mcrepo_value.hpp"
-    "${PSTORE_INCLUDE_DIR}/dump/value.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/db_value.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/error.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/line_splitter.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/mcdebugline_value.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/mcdisassembler_value.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/mcrepo_value.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/value.hpp"
 
     db_value.cpp
     error.cpp
@@ -83,4 +83,7 @@ set(LLVM_LINK_COMPONENTS
   )
 add_pstore_library (pstore-dump-lib ${PSTORE_DUMP_LIB_SRC})
 target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)
+if (PSTORE_IS_INSIDE_LLVM)
+    target_link_libraries (pstore-dump-lib PUBLIC LLVMSupport)
+endif (PSTORE_IS_INSIDE_LLVM)
 

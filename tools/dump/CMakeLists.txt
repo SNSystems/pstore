@@ -48,8 +48,5 @@ add_pstore_executable (pstore-dump
     switches.hpp
 )
 target_link_libraries (pstore-dump PRIVATE pstore-dump-lib pstore-cmd-util)
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-dump PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
 
 run_pstore_unit_test (pstore-dump pstore-dump-unit-tests)

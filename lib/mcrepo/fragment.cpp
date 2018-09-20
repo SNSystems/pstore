@@ -90,27 +90,13 @@ namespace {
                                     pstore::gsl::not_null<dispatcher_buffer *> buffer) {
         assert (f.has_section (kind));
 
-#define PSTORE_CASE_KIND(k)                                                                        \
-    case k: return make_dispatcher_for_kind<k> (f, buffer);
+#define X(k)                                                                                       \
+    case section_kind::k: return make_dispatcher_for_kind<section_kind::k> (f, buffer);
         switch (kind) {
-            PSTORE_CASE_KIND (section_kind::text);
-            PSTORE_CASE_KIND (section_kind::bss);
-            PSTORE_CASE_KIND (section_kind::data);
-            PSTORE_CASE_KIND (section_kind::rel_ro);
-            PSTORE_CASE_KIND (section_kind::mergeable_1_byte_c_string);
-            PSTORE_CASE_KIND (section_kind::mergeable_2_byte_c_string);
-            PSTORE_CASE_KIND (section_kind::mergeable_4_byte_c_string);
-            PSTORE_CASE_KIND (section_kind::mergeable_const_4);
-            PSTORE_CASE_KIND (section_kind::mergeable_const_8);
-            PSTORE_CASE_KIND (section_kind::mergeable_const_16);
-            PSTORE_CASE_KIND (section_kind::mergeable_const_32);
-            PSTORE_CASE_KIND (section_kind::read_only);
-            PSTORE_CASE_KIND (section_kind::thread_bss);
-            PSTORE_CASE_KIND (section_kind::thread_data);
-            PSTORE_CASE_KIND (section_kind::dependent);
+            PSTORE_MCREPO_SECTION_KINDS
         case section_kind::last: break;
         }
-#undef PSTORE_CASE_KIND
+#undef X
         pstore::raise_error_code (
             std::make_error_code (pstore::repo::error_code::bad_fragment_type));
     }

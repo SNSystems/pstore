@@ -52,29 +52,34 @@ namespace pstore {
 
     namespace repo {
 
+#define PSTORE_MCREPO_SECTION_KINDS                                                                \
+    X (text)                                                                                       \
+    X (bss)                                                                                        \
+    X (data)                                                                                       \
+    X (rel_ro)                                                                                     \
+    X (mergeable_1_byte_c_string)                                                                  \
+    X (mergeable_2_byte_c_string)                                                                  \
+    X (mergeable_4_byte_c_string)                                                                  \
+    X (mergeable_const_4)                                                                          \
+    X (mergeable_const_8)                                                                          \
+    X (mergeable_const_16)                                                                         \
+    X (mergeable_const_32)                                                                         \
+    X (read_only)                                                                                  \
+    X (thread_bss)                                                                                 \
+    X (thread_data)                                                                                \
+    X (debug_line)                                                                                 \
+    X (debug_string)                                                                               \
+    X (debug_ranges)                                                                               \
+    X (dependent)
+
+#define X(a) a,
         // TODO: the members of this collection are drawn from
         // RepoObjectWriter::writeRepoSectionData(). It's missing at least the debugging, and
         // EH-related sections and probably others...
         enum class section_kind : std::uint8_t {
-            text,
-            bss,
-            data,
-            rel_ro,
-            mergeable_1_byte_c_string,
-            mergeable_2_byte_c_string,
-            mergeable_4_byte_c_string,
-            mergeable_const_4,
-            mergeable_const_8,
-            mergeable_const_16,
-            mergeable_const_32,
-            read_only,
-            thread_bss,
-            thread_data,
-
-            // repo metadata sections...
-            dependent,
-            last // always last, never used.
+            PSTORE_MCREPO_SECTION_KINDS last // always last, never used.
         };
+#undef X
 
         constexpr auto first_repo_metadata_section = section_kind::dependent;
 

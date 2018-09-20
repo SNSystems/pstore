@@ -57,28 +57,15 @@ namespace pstore {
 
         value_ptr make_value (repo::section_kind t) {
             char const * name = "*unknown*";
-#define PSTORE_KIND_NAME(k)                                                                        \
+#define X(k)                                                                                       \
     case repo::section_kind::k: name = #k; break;
+
             switch (t) {
-                PSTORE_KIND_NAME (text);
-                PSTORE_KIND_NAME (bss);
-                PSTORE_KIND_NAME (data);
-                PSTORE_KIND_NAME (rel_ro);
-                PSTORE_KIND_NAME (mergeable_1_byte_c_string);
-                PSTORE_KIND_NAME (mergeable_2_byte_c_string);
-                PSTORE_KIND_NAME (mergeable_4_byte_c_string);
-                PSTORE_KIND_NAME (mergeable_const_4);
-                PSTORE_KIND_NAME (mergeable_const_8);
-                PSTORE_KIND_NAME (mergeable_const_16);
-                PSTORE_KIND_NAME (mergeable_const_32);
-                PSTORE_KIND_NAME (read_only);
-                PSTORE_KIND_NAME (thread_bss);
-                PSTORE_KIND_NAME (thread_data);
-                PSTORE_KIND_NAME (dependent);
+                PSTORE_MCREPO_SECTION_KINDS
             case repo::section_kind::last: break;
             }
             return make_value (name);
-#undef PSTORE_KIND_NAME
+#undef X
         }
 
         value_ptr make_value (repo::internal_fixup const & ifx) {
@@ -139,7 +126,6 @@ namespace pstore {
             return make_value (v);
         }
 
-
         value_ptr make_value (database const & db, repo::dependents const & dependents,
                               repo::section_kind sk, bool hex_mode) {
             (void) sk;
@@ -152,10 +138,40 @@ namespace pstore {
             return make_value (std::move (members));
         }
 
+        value_ptr make_value (database const & db, repo::debug_line_section const & section,
+                              repo::section_kind sk, bool hex_mode) {
+            (void) sk;
+            (void) sk;
+            auto const & data = section.data ();
+            auto const & ifixups = section.ifixups ();
+
+            object::container v;
+            v.emplace_back ("header", make_value (section.header_extent ()));
+            v.emplace_back ("align", make_value (section.align ()));
+
+            value_ptr data_value;
+            if (!data_value) {
+                if (hex_mode) {
+                    data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
+                } else {
+                    data_value = std::make_shared<binary> (std::begin (data), std::end (data));
+                }
+            }
+            v.emplace_back ("data", data_value);
+            v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
+
+            array::container xfx_members;
+            for (auto const & xfx : section.xfixups ()) {
+                xfx_members.emplace_back (make_value (db, xfx));
+            }
+            v.emplace_back ("xfixups", make_value (xfx_members));
+            return make_value (v);
+        }
+
 
         value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode) {
 
-#define PSTORE_KIND_VALUE(k)                                                                       \
+#define X(k)                                                                                       \
     case repo::section_kind::k:                                                                    \
         contents = make_value (db, fragment.at<repo::section_kind::k> (), kind, hex_mode);         \
         break;
@@ -165,28 +181,14 @@ namespace pstore {
                 assert (fragment.has_section (kind));
                 value_ptr contents;
                 switch (kind) {
-                    PSTORE_KIND_VALUE (text);
-                    PSTORE_KIND_VALUE (bss);
-                    PSTORE_KIND_VALUE (data);
-                    PSTORE_KIND_VALUE (rel_ro);
-                    PSTORE_KIND_VALUE (mergeable_1_byte_c_string);
-                    PSTORE_KIND_VALUE (mergeable_2_byte_c_string);
-                    PSTORE_KIND_VALUE (mergeable_4_byte_c_string);
-                    PSTORE_KIND_VALUE (mergeable_const_4);
-                    PSTORE_KIND_VALUE (mergeable_const_8);
-                    PSTORE_KIND_VALUE (mergeable_const_16);
-                    PSTORE_KIND_VALUE (mergeable_const_32);
-                    PSTORE_KIND_VALUE (read_only);
-                    PSTORE_KIND_VALUE (thread_bss);
-                    PSTORE_KIND_VALUE (thread_data);
-                    PSTORE_KIND_VALUE (dependent);
+                    PSTORE_MCREPO_SECTION_KINDS
                 case repo::section_kind::last: assert (false); break;
                 }
                 array.emplace_back (make_value (
                     object::container{{"type", make_value (kind)}, {"contents", contents}}));
             }
             return make_value (std::move (array));
-#undef PSTORE_KIND_VALUE
+#undef X
         }
 
 
