@@ -136,7 +136,7 @@ namespace pstore {
         };
 
         using name_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
-
+        using debug_line_header_index = hamt_map<digest, extent<std::uint8_t>, u128_hash>;
 
         /// Returns a pointer to the write index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
@@ -153,6 +153,12 @@ namespace pstore {
         /// Returns a pointer to the name index, loading it from the store on first access. If
         /// 'create' is false and the index does not already exist then nullptr is returned.
         std::shared_ptr<name_index> get_name_index (database & db, bool create = true);
+
+        /// Returns a pointer to the debug line header index, loading it from the store on first
+        /// access. If 'create' is false and the index does not already exist then nullptr is
+        /// returned.
+        std::shared_ptr<debug_line_header_index> get_debug_line_header_index (database & db,
+                                                                              bool create = true);
 
         /// Write out any indices that have changed. Any that haven't will
         /// continue to point at their previous incarnation. Update the

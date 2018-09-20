@@ -109,6 +109,14 @@ namespace pstore {
             return get_index<name_index> (db, trailer::indices::name, create);
         }
 
+        // get_debug_line_header_index
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        std::shared_ptr<debug_line_header_index> get_debug_line_header_index (database & db,
+                                                                              bool create) {
+            return get_index<debug_line_header_index> (db, trailer::indices::debug_line_header,
+                                                       create);
+        }
+
         // flush_indices
         // ~~~~~~~~~~~~~
         void flush_indices (::pstore::transaction_base & transaction,
@@ -132,6 +140,12 @@ namespace pstore {
             if (std::shared_ptr<index::name_index> const name =
                     get_name_index (db, false /*create*/)) {
                 (*locations)[trailer::indices::name] = name->flush (transaction, generation);
+            }
+
+            if (std::shared_ptr<index::debug_line_header_index> const digest =
+                    get_debug_line_header_index (db, false /*create*/)) {
+                (*locations)[trailer::indices::debug_line_header] =
+                    digest->flush (transaction, generation);
             }
 
             assert (locations->size () == trailer::indices::last);

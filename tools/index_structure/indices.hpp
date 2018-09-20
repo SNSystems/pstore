@@ -54,7 +54,8 @@
     X (digest)                                                                                     \
     X (ticket)                                                                                     \
     X (name)                                                                                       \
-    X (write)
+    X (write)                                                                                      \
+    X (debug_line_header)
 
 #define X(a) a,
 enum class indices : unsigned { INDICES last };
@@ -91,7 +92,12 @@ struct index_accessor<indices::write> {
     }
 };
 
-
+template <>
+struct index_accessor<indices::debug_line_header> {
+    static decltype (&pstore::index::get_debug_line_header_index) get () {
+        return &pstore::index::get_debug_line_header_index;
+    }
+};
 
 using indices_bitset =
     std::bitset<static_cast<std::underlying_type<indices>::type> (indices::last)>;

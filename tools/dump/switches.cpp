@@ -82,6 +82,15 @@ namespace {
     cl::opt<bool> AllTickets ("all-tickets", cl::desc ("Dump the contents of the tickets index"),
                               cl::cat (WhatCat));
 
+    cl::list<std::string>
+        DebugLineHeader ("debug-line-header",
+                         cl::desc ("Dump the contents of a specific debug line header"),
+                         cl::cat (WhatCat));
+    cl::opt<bool>
+        AllDebugLineHeaders ("all-debug-line-headers",
+                             cl::desc ("Dump the contents of the debug line headers index"),
+                             cl::cat (WhatCat));
+
 
     cl::opt<bool> Header ("header", cl::desc ("Dump the file header"), cl::cat (WhatCat));
     cl::alias Header2 ("h", cl::desc ("Alias for --header"), cl::aliasopt (Header));

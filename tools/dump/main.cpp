@@ -58,6 +58,7 @@
 #include "pstore/config/config.hpp"
 #include "pstore/dump/db_value.hpp"
 #include "pstore/dump/value.hpp"
+#include "pstore/dump/mcdebugline_value.hpp"
 #include "pstore/dump/mcrepo_value.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
@@ -93,6 +94,7 @@ namespace {
         no_ticket_index,
         ticket_not_found,
         bad_ticket_file,
+        debug_line_header_not_found,
     };
 
     class dump_error_category : public std::error_category {
@@ -115,6 +117,7 @@ namespace {
         case dump_error_code::no_ticket_index: return "no ticket index";
         case dump_error_code::ticket_not_found: return "ticket not found";
         case dump_error_code::bad_ticket_file: return "bad ticket file";
+        case dump_error_code::debug_line_header_not_found: return "debug line header not found";
         }
         return "unknown error";
     }
@@ -328,13 +331,14 @@ int main (int argc, char * argv[]) {
         bool show_contents = opt.show_contents;
         bool show_all_fragments = opt.show_all_fragments;
         bool show_all_tickets = opt.show_all_tickets;
+        bool show_all_debug_line_headers = opt.show_all_debug_line_headers;
         bool show_header = opt.show_header;
         bool show_indices = opt.show_indices;
         bool show_log = opt.show_log;
         bool show_shared = opt.show_shared;
         if (opt.show_all) {
             show_contents = show_all_fragments = show_all_tickets = show_header = show_indices =
-                show_log = true;
+                show_log = show_all_debug_line_headers = true;
         }
 
         if (opt.hex) {
@@ -406,6 +410,30 @@ int main (int argc, char * argv[]) {
                     } else {
                         pstore::raise_error_code (
                             std::make_error_code (dump_error_code::no_ticket_index));
+                    }
+                }
+            }
+
+            if (show_all_debug_line_headers) {
+                file.emplace_back ("debug_line_headers",
+                                   pstore::dump::make_debug_line_headers (db, opt.hex));
+            } else {
+                if (opt.debug_line_headers.size () > 0) {
+                    if (auto const index = pstore::index::get_debug_line_header_index (db, false)) {
+                        auto record =
+                            [&db, &opt](
+                                pstore::index::debug_line_header_index::value_type const & value) {
+                                return make_value (db, value, opt.hex);
+                            };
+
+                        file.emplace_back (
+                            "debug_line_headers",
+                            add_specified (*index, opt.debug_line_headers,
+                                           dump_error_code::debug_line_header_not_found,
+                                           string_to_digest, record));
+                    } else {
+                        pstore::raise_error_code (
+                            std::make_error_code (dump_error_code::debug_line_header_not_found));
                     }
                 }
             }

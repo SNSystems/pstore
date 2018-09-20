@@ -1,10 +1,16 @@
-//*      _ _  __  __              _             *
-//*   __| (_)/ _|/ _| __   ____ _| |_   _  ___  *
-//*  / _` | | |_| |_  \ \ / / _` | | | | |/ _ \ *
-//* | (_| | |  _|  _|  \ V / (_| | | |_| |  __/ *
-//*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
-//*                                             *
-//===- lib/diff/diff_value.cpp --------------------------------------------===//
+//*                    _      _                 _ _             *
+//*  _ __ ___   ___ __| | ___| |__  _   _  __ _| (_)_ __   ___  *
+//* | '_ ` _ \ / __/ _` |/ _ \ '_ \| | | |/ _` | | | '_ \ / _ \ *
+//* | | | | | | (_| (_| |  __/ |_) | |_| | (_| | | | | | |  __/ *
+//* |_| |_| |_|\___\__,_|\___|_.__/ \__,_|\__, |_|_|_| |_|\___| *
+//*                                       |___/                 *
+//*             _             *
+//* __   ____ _| |_   _  ___  *
+//* \ \ / / _` | | | | |/ _ \ *
+//*  \ V / (_| | | |_| |  __/ *
+//*   \_/ \__,_|_|\__,_|\___| *
+//*                           *
+//===- include/pstore/dump/mcdebugline_value.hpp --------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,33 +47,19 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#ifndef PSTORE_DUMP_MCDEBUGLINE_VALUE_HPP
+#define PSTORE_DUMP_MCDEBUGLINE_VALUE_HPP
 
-#include "pstore/diff/diff_value.hpp"
-
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/hamt_set.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/core/sstring_view_archive.hpp"
-
+#include <cstdint>
+#include "pstore/dump/value.hpp"
 
 namespace pstore {
-    namespace diff {
+    namespace dump {
 
-        dump::value_ptr make_indices_diff (database & db, diff::revision_number const new_revision,
-                                           diff::revision_number const old_revision) {
-            assert (new_revision >= old_revision);
-            return dump::make_value (
-                {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
-                                                     index::get_name_index),
-                 make_index_diff<index::digest_index> ("fragments", db, new_revision, old_revision,
-                                                       index::get_digest_index),
-                 make_index_diff<index::ticket_index> ("tickets", db, new_revision, old_revision,
-                                                       index::get_ticket_index),
-                 make_index_diff<index::debug_line_header_index> (
-                     "debug_line_headers", db, new_revision, old_revision,
-                     index::get_debug_line_header_index)});
-        }
+        value_ptr make_debuglineheader_value (std::uint8_t const * first, std::uint8_t const * last,
+                                              bool hex_mode);
 
-    } // namespace diff
+    } // namespace dump
 } // namespace pstore
 
+#endif // PSTORE_DUMP_MCDEBUGLINE_VALUE_HPP

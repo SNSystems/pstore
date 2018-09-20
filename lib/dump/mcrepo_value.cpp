@@ -45,6 +45,7 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/dump/db_value.hpp"
+#include "pstore/dump/mcdebugline_value.hpp"
 #include "pstore/dump/mcdisassembler_value.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/core/db_archive.hpp"
@@ -253,6 +254,30 @@ namespace pstore {
                 }
             }
             return make_value (result);
+        }
+
+        value_ptr make_value (database const & db,
+                              pstore::index::debug_line_header_index::value_type const & value,
+                              bool hex_mode) {
+            auto const debug_line_header = db.getro (value.second);
+            return make_value (object::container{
+                {"digest", make_value (value.first)},
+                {"debug_line_header",
+                 make_debuglineheader_value (debug_line_header.get (),
+                                             debug_line_header.get () + value.second.size,
+                                             hex_mode)}});
+        }
+
+        value_ptr make_debug_line_headers (database & db, bool hex_mode) {
+            array::container members;
+            if (std::shared_ptr<index::debug_line_header_index> const headers =
+                    index::get_debug_line_header_index (db, false /* create */)) {
+                members.reserve (headers->size ());
+                for (auto const & kvp : *headers) {
+                    members.emplace_back (make_value (db, kvp, hex_mode));
+                }
+            }
+            return make_value (members);
         }
 
     } // namespace dump

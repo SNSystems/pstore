@@ -51,6 +51,7 @@ set (PSTORE_DUMP_LIB_SRC
     "${PSTORE_INCLUDE_DIR}/dump/db_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/error.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/line_splitter.hpp"
+    "${PSTORE_INCLUDE_DIR}/dump/mcdebugline_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/mcdisassembler_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/mcrepo_value.hpp"
     "${PSTORE_INCLUDE_DIR}/dump/value.hpp"
@@ -58,6 +59,7 @@ set (PSTORE_DUMP_LIB_SRC
     db_value.cpp
     error.cpp
     line_splitter.cpp
+    mcdebugline_value.cpp
     mcdisassembler_value.cpp
     mcrepo_value.cpp
     value.cpp

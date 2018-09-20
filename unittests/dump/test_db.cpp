@@ -134,7 +134,7 @@ TEST (Database, Header) {
                  ElementsAre ("signature1", ":", "[", "0x70,", "0x53,", "0x74,", "0x72", "]"));
     EXPECT_THAT (split_tokens (lines.at (1)), ElementsAre ("signature2", ":", "0x507ffff"));
     EXPECT_THAT (split_tokens (lines.at (2)),
-                 ElementsAre ("version", ":", "[", "0x0,", "0x3", "]"));
+                 ElementsAre ("version", ":", "[", "0x0,", "0x4", "]"));
     EXPECT_THAT (split_tokens (lines.at (3)), ElementsAre ("uuid", ":", _));
     EXPECT_THAT (split_tokens (lines.at (4)), ElementsAre ("crc", ":", _));
     EXPECT_THAT (split_tokens (lines.at (5)), ElementsAre ("footer_pos", ":", "0x0"));
@@ -164,7 +164,7 @@ TEST (Database, Trailer) {
 
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("prev_generation", ":", "0x0"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
-                 ElementsAre ("indices", ":", "[", "0x0,", "0x0,", "0x0,", "0x0", "]"));
+                 ElementsAre ("indices", ":", "[", "0x0,", "0x0,", "0x0,", "0x0,", "0x0", "]"));
 
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("crc", ":", _));
     EXPECT_THAT (split_tokens (lines.at (line++)),

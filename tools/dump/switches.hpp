@@ -77,6 +77,10 @@ struct switches {
     std::list<std::string> tickets;
     /// True is --all-tickets was specified on the command-line.
     bool show_all_tickets = false;
+    /// A list of the individual debug line header digests from the command-line.
+    std::list<std::string> debug_line_headers;
+    /// True if --all-debug-line-headers was specified on the command-line.
+    bool show_all_debug_line_headers = false;
 
     bool show_header = false;
     bool show_indices = false;

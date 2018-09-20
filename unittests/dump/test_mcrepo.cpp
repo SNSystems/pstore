@@ -79,6 +79,9 @@ namespace {
         pstore::typed_address<pstore::indirect_string> store_str (transaction_type & transaction,
                                                                   std::string const & str);
 
+        pstore::extent<std::uint8_t> store_data (transaction_type & transaction,
+                                                 std::uint8_t const * first, std::size_t size);
+
         static constexpr std::size_t page_size_ = 4096;
         static constexpr std::size_t file_size_ = pstore::storage::min_region_size * 2;
 
@@ -111,6 +114,21 @@ namespace {
             adder.add (transaction, pstore::index::get_name_index (*db_), &sstring).first;
         adder.flush (transaction);
         return pstore::typed_address<pstore::indirect_string> (pos.get_address ());
+    }
+
+    // store_data
+    // ~~~~~~~~~~
+    pstore::extent<std::uint8_t> MCRepoFixture::store_data (transaction_type & transaction,
+                                                            std::uint8_t const * first,
+                                                            std::size_t size) {
+
+        assert (db_.get () == &transaction.db ());
+        // Allocate space in the transaction for 'Size' bytes.
+        auto addr = pstore::typed_address<std::uint8_t>::null ();
+        std::shared_ptr<std::uint8_t> ptr;
+        std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (size);
+        std::copy (first, first + size, ptr.get ());
+		return { addr, size };
     }
 
 } // end anonymous namespace
@@ -209,4 +227,33 @@ TEST_F (MCRepoFixture, DumpTicket) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));
+}
+
+TEST_F (MCRepoFixture, DumpDebugLineHeader) {
+    using ::testing::ElementsAre;
+    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+
+    // debug line header content.
+    static std::uint8_t const data[] = {0x44, 0x00, 0x00, 0x00};
+
+    auto debug_line_header_extent = this->store_data (transaction, &data[0], sizeof (data));
+
+    auto index = pstore::index::get_debug_line_header_index (*db_);
+    index->insert_or_assign (transaction, pstore::index::digest{1U}, debug_line_header_extent);
+    transaction.commit ();
+
+    std::ostringstream out;
+    pstore::dump::value_ptr addr = pstore::dump::make_debug_line_headers (*db_, true);
+    addr->write (out);
+
+    auto const lines = split_lines (out.str ());
+    ASSERT_EQ (4U, lines.size ());
+
+    auto line = 0U;
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("-", "digest", ":", "00000000000000000000000000000001"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("debug_line_header", ":", "!!binary16", "|"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("4400", "0000>"));
 }
