@@ -70,6 +70,7 @@ namespace pstore {
 
 
             extent<std::uint8_t> const & header_extent () const noexcept { return header_; }
+            generic_section const & generic () const noexcept { return g_; }
 
             /// \returns The number of bytes occupied by this section.
             std::size_t size_bytes () const {
@@ -131,7 +132,7 @@ namespace pstore {
 
         class debug_line_dispatcher final : public dispatcher {
         public:
-            constexpr explicit debug_line_dispatcher (debug_line_section const & d) noexcept
+            explicit debug_line_dispatcher (debug_line_section const & d) noexcept
                     : d_{d} {}
 
             std::size_t size_bytes () const final { return d_.size_bytes (); }

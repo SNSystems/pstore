@@ -55,16 +55,16 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (repo::section_kind t) {
+        value_ptr make_value (pstore::repo::section_kind t) {
             char const * name = "*unknown*";
 #define X(k)                                                                                       \
-    case repo::section_kind::k: name = #k; break;
+    case pstore::repo::section_kind::k: name = #k; break;
 
             switch (t) {
                 PSTORE_MCREPO_SECTION_KINDS
-            case repo::section_kind::last: break;
+            case pstore::repo::section_kind::last: break;
             }
-            return make_value (name);
+            return pstore::dump::make_value (name);
 #undef X
         }
 
@@ -93,13 +93,9 @@ namespace pstore {
 
         value_ptr make_value (database const & db, repo::generic_section const & section,
                               repo::section_kind sk, bool hex_mode) {
+
             (void) sk;
             auto const & data = section.data ();
-            auto const & ifixups = section.ifixups ();
-
-            object::container v;
-            v.emplace_back ("align", make_value (section.align ()));
-
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
             if (sk == repo::section_kind::text) {
@@ -115,57 +111,34 @@ namespace pstore {
                     data_value = std::make_shared<binary> (std::begin (data), std::end (data));
                 }
             }
-            v.emplace_back ("data", data_value);
-            v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
-
-            array::container xfx_members;
-            for (auto const & xfx : section.xfixups ()) {
-                xfx_members.emplace_back (make_value (db, xfx));
-            }
-            v.emplace_back ("xfixups", make_value (xfx_members));
-            return make_value (v);
+            return make_value (object::container{
+                {"align", make_value (section.align ())},
+                {"data", data_value},
+                {"ifixups",
+                 make_value (std::begin (section.ifixups ()), std::end (section.ifixups ()))},
+                {"xfixups",
+                 make_value (
+                     std::begin (section.xfixups ()), std::end (section.xfixups ()),
+                     [&db](repo::external_fixup const & xfx) { return make_value (db, xfx); })},
+            });
         }
 
         value_ptr make_value (database const & db, repo::dependents const & dependents,
                               repo::section_kind sk, bool hex_mode) {
             (void) sk;
             (void) hex_mode;
-            array::container members;
-            members.reserve (dependents.size ());
-            for (auto const & member : dependents) {
-                members.emplace_back (make_value (db, *db.getro (member)));
-            }
-            return make_value (std::move (members));
+            return make_value (std::begin (dependents), std::end (dependents),
+                               [&db](typed_address<repo::ticket_member> const & member) {
+                                   return make_value (db, *db.getro (member));
+                               });
         }
 
         value_ptr make_value (database const & db, repo::debug_line_section const & section,
                               repo::section_kind sk, bool hex_mode) {
-            (void) sk;
-            (void) sk;
-            auto const & data = section.data ();
-            auto const & ifixups = section.ifixups ();
-
-            object::container v;
-            v.emplace_back ("header", make_value (section.header_extent ()));
-            v.emplace_back ("align", make_value (section.align ()));
-
-            value_ptr data_value;
-            if (!data_value) {
-                if (hex_mode) {
-                    data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
-                } else {
-                    data_value = std::make_shared<binary> (std::begin (data), std::end (data));
-                }
-            }
-            v.emplace_back ("data", data_value);
-            v.emplace_back ("ifixups", make_value (std::begin (ifixups), std::end (ifixups)));
-
-            array::container xfx_members;
-            for (auto const & xfx : section.xfixups ()) {
-                xfx_members.emplace_back (make_value (db, xfx));
-            }
-            v.emplace_back ("xfixups", make_value (xfx_members));
-            return make_value (v);
+            return make_value (object::container{
+                {"header", make_value (section.header_extent ())},
+                {"generic", make_value (db, section.generic (), sk, hex_mode)},
+            });
         }
 
 

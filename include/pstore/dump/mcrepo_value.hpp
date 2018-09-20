@@ -52,13 +52,15 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (repo::section_kind k);
+        value_ptr make_value (pstore::repo::section_kind t);
         value_ptr make_value (repo::internal_fixup const & ifx);
         value_ptr make_value (database const & db, repo::external_fixup const & xfx);
         value_ptr make_value (database const & db, repo::generic_section const & section,
-                              repo::section_kind kind, bool hex_mode);
+                              repo::section_kind sk, bool hex_mode);
         value_ptr make_value (database const & db, repo::dependents const & dependent,
-                              repo::section_kind kind, bool hex_mode);
+                              repo::section_kind sk, bool hex_mode);
+        value_ptr make_value (database const & db, repo::debug_line_section const & section,
+                              repo::section_kind sk, bool hex_mode);
         value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode);
 
 

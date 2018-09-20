@@ -106,14 +106,21 @@ namespace pstore {
             return v;
         }
 
-        template <typename InputIterator>
-        value_ptr make_value (InputIterator const & first, InputIterator const & last) {
+        namespace details {
+            template <typename T>
+            inline value_ptr default_make_value (T const & t) {
+                return make_value (t);
+            }
+        } // end namespace details
+
+        template <typename InputIterator,
+                  typename ValueType = typename std::iterator_traits<InputIterator>::value_type,
+                  typename MakeValueFn = decltype (&details::default_make_value<ValueType const &>)>
+        value_ptr make_value (InputIterator const & first, InputIterator const & last,
+                              MakeValueFn mk = &details::default_make_value<ValueType const &>) {
             array::container members;
-            std::for_each (
-                first, last,
-                [&members](typename std::iterator_traits<InputIterator>::value_type const & v) {
-                    members.emplace_back (make_value (v));
-                });
+            std::for_each (first, last,
+                           [&members, mk](ValueType const & v) { members.emplace_back (mk (v)); });
             return make_value (std::move (members));
         }
 
