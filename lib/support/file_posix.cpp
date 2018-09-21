@@ -400,6 +400,8 @@ namespace pstore {
 
         namespace posix {
 
+            deleter::~deleter () noexcept = default;
+
             void deleter::platform_unlink (std::string const & path) {
                 pstore::file::unlink (path, true);
             }

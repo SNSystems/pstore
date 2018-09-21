@@ -202,7 +202,7 @@ namespace pstore {
         public:
             file_base (file_base &&) noexcept = default;
             file_base (file_base const &) = default;
-            virtual ~file_base () noexcept = default;
+            virtual ~file_base () noexcept;
 
             file_base & operator= (file_base &&) noexcept = default;
             file_base & operator= (file_base const &) = default;

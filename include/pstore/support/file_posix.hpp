@@ -60,6 +60,7 @@ namespace pstore {
             public:
                 explicit deleter (std::string const & path)
                         : deleter_base (path, &platform_unlink) {}
+                ~deleter () noexcept override;
 
             private:
                 /// The platform-specific file deletion function. file_deleter_base will
