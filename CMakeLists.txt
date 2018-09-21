@@ -147,7 +147,9 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
             -Wno-global-constructors
             -Wno-exit-time-destructors
             -Wno-used-but-marked-unused
-            -Wno-unused-macros)
+            -Wno-unused-macros
+	    -Wno-unused-lambda-capture # remove when VS doesn't require capture
+	)
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
 
