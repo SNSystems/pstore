@@ -106,7 +106,7 @@ namespace pstore {
         public:
             explicit section_creation_dispatcher (section_kind kind) noexcept
                     : kind_{kind} {}
-            virtual ~section_creation_dispatcher () noexcept = default;
+            virtual ~section_creation_dispatcher () noexcept;
             section_creation_dispatcher (section_creation_dispatcher const &) = delete;
             section_creation_dispatcher & operator= (section_creation_dispatcher const &) = delete;
 
@@ -197,7 +197,7 @@ namespace pstore {
         /// section data types and forward to calls directly to them.
         class dispatcher {
         public:
-            virtual ~dispatcher () noexcept = default;
+            virtual ~dispatcher () noexcept;
 
             virtual std::size_t size_bytes () const = 0;
             virtual unsigned align () const = 0;

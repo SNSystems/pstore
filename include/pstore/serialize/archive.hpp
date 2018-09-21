@@ -186,7 +186,7 @@ namespace pstore {
                 writer_base (writer_base &&) noexcept = default;
                 writer_base & operator= (writer_base &&) noexcept = default;
 
-                virtual ~writer_base () {
+                virtual ~writer_base () noexcept {
                     PSTORE_NO_EX_ESCAPE ({ this->flush (); });
                 }
 
@@ -363,6 +363,7 @@ namespace pstore {
             public:
                 vector_writer (std::vector<std::uint8_t> & container)
                         : writer_base<details::vector_writer_policy> (container) {}
+                ~vector_writer () noexcept override;
 
                 using container = policy_type::container;
                 using const_iterator = policy_type::const_iterator;
@@ -460,6 +461,8 @@ namespace pstore {
                 buffer_writer (void * first, void * last)
                         : writer_base<policy_type> (policy_type{first, last}) {}
 
+                ~buffer_writer () noexcept override;
+
                 /// \brief Constructs the writer starting at the address given by 'first' and with a
                 ///        number of bytes 'size'.
                 /// \param first  The start address of the buffer to which buffer_writer will write
@@ -522,6 +525,7 @@ namespace pstore {
             class null final : public writer_base<details::null_policy> {
             public:
                 null () noexcept {}
+                ~null () noexcept override;
             };
 
 

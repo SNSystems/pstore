@@ -1,10 +1,10 @@
-//*                       _               _                  *
-//*   ___ _ __ ___  _ __ | |_ _   _   ___| |_ ___  _ __ ___  *
-//*  / _ \ '_ ` _ \| '_ \| __| | | | / __| __/ _ \| '__/ _ \ *
-//* |  __/ | | | | | |_) | |_| |_| | \__ \ || (_) | | |  __/ *
-//*  \___|_| |_| |_| .__/ \__|\__, | |___/\__\___/|_|  \___| *
-//*                |_|        |___/                          *
-//===- unittests/common/empty_store.hpp -----------------------------------===//
+//*                _   _              *
+//*  ___  ___  ___| |_(_) ___  _ __   *
+//* / __|/ _ \/ __| __| |/ _ \| '_ \  *
+//* \__ \  __/ (__| |_| | (_) | | | | *
+//* |___/\___|\___|\__|_|\___/|_| |_| *
+//*                                   *
+//===- lib/mcrepo/section.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,38 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef EMPTY_STORE_HPP
-#define EMPTY_STORE_HPP
+#include "pstore/mcrepo/section.hpp"
 
-#include <cstdint>
-#include <cstdlib>
-#include <memory>
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+namespace pstore {
+    namespace repo {
 
-#include "pstore/core/database.hpp"
+        section_creation_dispatcher::~section_creation_dispatcher () noexcept = default;
+        dispatcher::~dispatcher () noexcept = default;
 
-
-/// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S memory
-/// allocation API directly and bypasses operator new/malloc(). This is to ensure that the library
-/// can safely change the memory permission (with mprotect() or equivalent).
-std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
-
-
-class EmptyStore : public ::testing::Test {
-public:
-    static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
-
-    // Build an empty, in-memory database.
-    EmptyStore ();
-    ~EmptyStore () override;
-
-protected:
-    std::shared_ptr<std::uint8_t> buffer_;
-    std::shared_ptr<pstore::file::in_memory> file_;
-
-private:
-    static constexpr std::size_t page_size_ = 4096;
-};
-
-#endif // EMPTY_STORE_HPP
+    } // end namespace repo
+} // end namespace pstore

@@ -229,7 +229,7 @@ namespace pstore {
          */
         class factory {
         public:
-            virtual ~factory () noexcept = default;
+            virtual ~factory () noexcept;
 
             /// \brief Creates the memory mapping objects for the given database file.
             ///

@@ -67,7 +67,7 @@ namespace pstore {
     class system_page_size_interface {
     public:
         system_page_size_interface () = default;
-        virtual ~system_page_size_interface () noexcept = default;
+        virtual ~system_page_size_interface () noexcept;
 
         system_page_size_interface (system_page_size_interface &&) noexcept = default;
         system_page_size_interface (system_page_size_interface const &) = default;
@@ -82,6 +82,7 @@ namespace pstore {
     public:
         system_page_size ()
                 : size_{sysconf ()} {}
+        ~system_page_size () noexcept override;
 
         unsigned get () const override { return size_; }
 
@@ -172,17 +173,6 @@ namespace pstore {
 
     std::ostream & operator<< (std::ostream & os, memory_mapper_base const & mm);
 
-    inline void memory_mapper_base::read_only (void * addr, std::size_t len) {
-#ifndef NDEBUG
-        {
-            auto addr8 = static_cast<std::uint8_t *> (addr);
-            auto data8 = static_cast<std::uint8_t *> (this->data ().get ());
-            assert (addr8 >= data8 && addr8 + len <= data8 + this->size ());
-        }
-#endif
-        this->read_only_impl (addr, len);
-    }
-
     /// memory_mapper provides an operating system independent interface for memory mapping of
     /// files. The underlying constaints imposed by the OS are not affected. They are:
     ///
@@ -203,6 +193,7 @@ namespace pstore {
 
         memory_mapper (file::file_handle & file, bool write_enabled, std::uint64_t offset,
                        std::uint64_t length);
+        ~memory_mapper () noexcept override;
 
     private:
         static std::shared_ptr<void> mmap (file::file_handle & file, bool write_enabled,
@@ -214,9 +205,8 @@ namespace pstore {
     public:
         in_memory_mapper (file::in_memory & file, bool write_enabled, std::uint64_t offset,
                           std::uint64_t length)
-                : pstore::memory_mapper_base (pointer (file, offset), write_enabled, offset,
-                                              length) {}
-
+                : memory_mapper_base (pointer (file, offset), write_enabled, offset, length) {}
+        ~in_memory_mapper () noexcept override;
         static std::shared_ptr<std::uint8_t> pointer (pstore::file::in_memory & file,
                                                       std::uint64_t offset) {
             auto p = std::static_pointer_cast<std::uint8_t> (file.data ());

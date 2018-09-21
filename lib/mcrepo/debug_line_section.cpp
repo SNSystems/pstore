@@ -68,5 +68,7 @@ namespace pstore {
             return pstore::aligned<debug_line_section> (in);
         }
 
+        debug_line_dispatcher::~debug_line_dispatcher () noexcept = default;
+
     } // end namespace repo
 } // end namespace pstore

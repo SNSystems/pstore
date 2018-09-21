@@ -158,6 +158,10 @@ namespace pstore {
             : memory_mapper_base (mmap (file, write_enabled, offset, length), write_enabled, offset,
                                   length) {}
 
+    // (dtor)
+    // ~~~~~~
+    memory_mapper::~memory_mapper () noexcept = default;
+
     // mmap [static]
     // ~~~~~~~~~~~~~
     std::shared_ptr<void> memory_mapper::mmap (file::file_handle & file, bool write_enabled,

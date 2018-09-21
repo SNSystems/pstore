@@ -107,6 +107,12 @@ namespace pstore {
         }
 
 
+        //*     _ _               _      _             *
+        //*  __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
+        //* / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
+        //* \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
+        //*           |_|                              *
+        dependents_dispatcher::~dependents_dispatcher () noexcept = default;
 
         PSTORE_NO_RETURN void dependents_dispatcher::error () const {
             pstore::raise_error_code (

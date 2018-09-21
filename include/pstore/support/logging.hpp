@@ -172,6 +172,7 @@ namespace pstore {
         public:
             stdout_logger ()
                     : file_logger (stdout) {}
+            ~stdout_logger () noexcept override;
         };
 
         //*                                  *
@@ -182,6 +183,7 @@ namespace pstore {
         public:
             stderr_logger ()
                     : file_logger (stderr) {}
+            ~stderr_logger () noexcept override;
         };
 
 

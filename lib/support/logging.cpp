@@ -451,5 +451,8 @@ namespace pstore {
             std::fputs (message.c_str (), file_);
         }
 
+
+        stdout_logger::~stdout_logger () noexcept = default;
+        stderr_logger::~stderr_logger () noexcept = default;
     } // end namespace logging
 } // end namespace pstore

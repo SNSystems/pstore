@@ -43,6 +43,7 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 add_pstore_unit_test (pstore-json-unit-tests
+    callbacks.cpp
     callbacks.hpp
     test_json.cpp
     test_utf.cpp

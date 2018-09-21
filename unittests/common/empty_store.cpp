@@ -102,3 +102,4 @@ EmptyStore::EmptyStore ()
     pstore::database::build_new_store (*file_);
 }
 
+EmptyStore::~EmptyStore () {}

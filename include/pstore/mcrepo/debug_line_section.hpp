@@ -134,6 +134,7 @@ namespace pstore {
         public:
             explicit debug_line_dispatcher (debug_line_section const & d) noexcept
                     : d_{d} {}
+            ~debug_line_dispatcher () noexcept;
 
             std::size_t size_bytes () const final { return d_.size_bytes (); }
             unsigned align () const final { return d_.align (); }

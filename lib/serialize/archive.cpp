@@ -75,9 +75,17 @@ namespace pstore {
     namespace serialize {
         namespace archive {
 
+            // ****
+            // null
+            // ****
+            null::~null () noexcept = default;
+
+
             // *************
             // vector_writer
             // *************
+
+            vector_writer::~vector_writer () noexcept = default;
 
             std::ostream & operator<< (std::ostream & os, vector_writer const & writer) {
                 return hex_dump (os, std::begin (writer), std::end (writer));
@@ -87,6 +95,8 @@ namespace pstore {
             // *************
             // buffer_writer
             // *************
+
+            buffer_writer::~buffer_writer () noexcept = default;
 
             std::ostream & operator<< (std::ostream & os, buffer_writer const & writer) {
                 return hex_dump (os, std::begin (writer), std::end (writer));

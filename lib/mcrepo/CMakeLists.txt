@@ -58,6 +58,7 @@ add_pstore_library (pstore-mcrepo
     fragment.cpp
     generic_section.cpp
     repo_error.cpp
+    section.cpp
     ticket.cpp
 )
 target_link_libraries (pstore-mcrepo pstore-core)

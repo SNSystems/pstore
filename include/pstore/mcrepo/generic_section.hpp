@@ -444,6 +444,7 @@ namespace pstore {
         public:
             explicit section_dispatcher (generic_section const & s) noexcept
                     : s_{s} {}
+            ~section_dispatcher () noexcept override;
 
             std::size_t size_bytes () const final { return s_.size_bytes (); }
             unsigned align () const final { return s_.align (); }

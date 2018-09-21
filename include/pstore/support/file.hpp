@@ -186,6 +186,7 @@ namespace pstore {
                           std::string const & path);
             system_error (std::error_code code, gsl::czstring user_message,
                           std::string const & path);
+            ~system_error () noexcept override;
 
             std::string path () const { return path_; }
 

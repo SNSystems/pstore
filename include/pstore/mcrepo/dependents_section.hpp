@@ -205,6 +205,7 @@ namespace pstore {
         public:
             explicit dependents_dispatcher (dependents const & d) noexcept
                     : d_{d} {}
+            ~dependents_dispatcher () noexcept override;
 
             std::size_t size_bytes () const final { return d_.size_bytes (); }
             unsigned align () const final { error (); }

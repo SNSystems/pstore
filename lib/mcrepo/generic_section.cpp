@@ -120,5 +120,14 @@ namespace pstore {
             return pstore::aligned<generic_section> (in);
         }
 
+
+        //*             _   _               _ _               _      _             *
+        //*  ___ ___ __| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
+        //* (_-</ -_) _|  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
+        //* /__/\___\__|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
+        //*                                       |_|                              *
+        section_dispatcher::~section_dispatcher () noexcept {}
+
+
     } // end namespace repo
 } // end namespace pstore
