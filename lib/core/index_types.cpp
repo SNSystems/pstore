@@ -48,106 +48,41 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 
-namespace {
 
-    // get_index
-    // ~~~~~~~~~
-    template <typename IndexType>
-    std::shared_ptr<IndexType> get_index (pstore::database & db,
-                                          enum pstore::trailer::indices which, bool create) {
-        using namespace pstore;
-        auto & dx = db.get_index (which);
-
-        // Have we already loaded this index?
-        if (dx.get () == nullptr) {
-            std::shared_ptr<trailer const> footer = db.get_footer ();
-            typed_address<index::header_block> const location = footer->a.index_records.at (
-                static_cast<std::underlying_type<decltype (which)>::type> (which));
-            if (location == decltype (location)::null ()) {
-                if (create) {
-                    // Create a new (empty) index.
-                    dx = std::make_shared<IndexType> (db);
-                }
-            } else {
-                // Construct the index from the location.
-                dx = std::make_shared<IndexType> (db, location);
-            }
-        }
-
-#ifdef PSTORE_CPP_RTTI
-        assert ((!create && dx.get () == nullptr) ||
-                dynamic_cast<IndexType *> (dx.get ()) != nullptr);
-#endif
-        return std::static_pointer_cast<IndexType> (dx);
-    }
-} // namespace
 
 namespace pstore {
     namespace index {
 
-        // get_write_index
-        // ~~~~~~~~~~~~~~~
-        std::shared_ptr<write_index> get_write_index (database & db, bool create) {
-            return get_index<write_index> (db, trailer::indices::write, create);
-        }
-
-        // get_digest_index
-        // ~~~~~~~~~~~~~~~~
-        std::shared_ptr<digest_index> get_digest_index (database & db, bool create) {
-            return get_index<digest_index> (db, trailer::indices::digest, create);
-        }
-
-        // get_ticket_index
-        // ~~~~~~~~~~~~~~~~
-        std::shared_ptr<ticket_index> get_ticket_index (database & db, bool create) {
-            return get_index<ticket_index> (db, trailer::indices::ticket, create);
-        }
-
-        // get_name_index
-        // ~~~~~~~~~~~~~~
-        std::shared_ptr<name_index> get_name_index (database & db, bool create) {
-            return get_index<name_index> (db, trailer::indices::name, create);
-        }
-
-        // get_debug_line_header_index
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        std::shared_ptr<debug_line_header_index> get_debug_line_header_index (database & db,
-                                                                              bool create) {
-            return get_index<debug_line_header_index> (db, trailer::indices::debug_line_header,
-                                                       create);
-        }
+        namespace details {
+            template <pstore::trailer::indices Index>
+            void flush_index (pstore::transaction_base & transaction,
+                              pstore::trailer::index_records_array * const locations,
+                              unsigned generation) {
+                pstore::database & db = transaction.db ();
+                if (auto const index = pstore::index::get_index<Index> (db, false /*create*/)) {
+                    (*locations)[Index] = index->flush (transaction, generation);
+                }
+            }
+        } // namespace details
 
         // flush_indices
         // ~~~~~~~~~~~~~
         void flush_indices (::pstore::transaction_base & transaction,
                             trailer::index_records_array * const locations, unsigned generation) {
-            pstore::database & db = transaction.db ();
-            if (std::shared_ptr<index::write_index> const write =
-                    get_write_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::write] = write->flush (transaction, generation);
-            }
 
-            if (std::shared_ptr<index::digest_index> const digest =
-                    get_digest_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::digest] = digest->flush (transaction, generation);
-            }
+#define X(k)                                                                                       \
+    case trailer::indices::k:                                                                      \
+        details::flush_index<trailer::indices::k> (transaction, locations, generation);            \
+        break;
 
-            if (std::shared_ptr<index::ticket_index> const ticket =
-                    get_ticket_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::ticket] = ticket->flush (transaction, generation);
+            for (int i = trailer::indices::write; i != trailer::indices::last; i++) {
+                trailer::indices kind = static_cast<trailer::indices> (i);
+                switch (kind) {
+                    PSTORE_INDICES
+                case trailer::indices::last: assert (false); break;
+                }
             }
-
-            if (std::shared_ptr<index::name_index> const name =
-                    get_name_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::name] = name->flush (transaction, generation);
-            }
-
-            if (std::shared_ptr<index::debug_line_header_index> const digest =
-                    get_debug_line_header_index (db, false /*create*/)) {
-                (*locations)[trailer::indices::debug_line_header] =
-                    digest->flush (transaction, generation);
-            }
-
+#undef X
             assert (locations->size () == trailer::indices::last);
         }
     } // namespace index

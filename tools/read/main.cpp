@@ -97,7 +97,7 @@ namespace {
         bool ok = true;
 
         std::shared_ptr<pstore::index::name_index> const strings =
-            pstore::index::get_name_index (db);
+            pstore::index::get_index<pstore::trailer::indices::name> (db);
         if (strings == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Strings index was not found\n");
             ok = false;
@@ -122,7 +122,7 @@ namespace {
         bool ok = true;
 
         std::shared_ptr<pstore::index::write_index> const names =
-            pstore::index::get_write_index (db);
+            pstore::index::get_index<pstore::trailer::indices::write> (db);
         if (names == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Names index was not found\n");
             ok = false;

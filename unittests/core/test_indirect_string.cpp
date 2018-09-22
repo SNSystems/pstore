@@ -159,7 +159,7 @@ namespace {
 TEST_F (IndirectStringAdder, NothingAdded) {
     mock_mutex mutex;
     auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
-    auto const name_index = pstore::index::get_name_index (db_);
+    auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db_);
 
     pstore::indirect_string_adder adder;
     adder.flush (transaction);
@@ -173,7 +173,7 @@ TEST_F (IndirectStringAdder, NewString) {
         mock_mutex mutex;
         auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
         {
-            auto const name_index = pstore::index::get_name_index (db_);
+            auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db_);
 
             // Use the string adder to insert a string into the index and flush it to the store.
             pstore::indirect_string_adder adder;
@@ -201,7 +201,7 @@ TEST_F (IndirectStringAdder, NewString) {
         transaction.commit ();
     }
     {
-        auto const name_index = pstore::index::get_name_index (db_);
+        auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db_);
         auto const sstring = pstore::make_sstring_view (str);
         auto pos = name_index->find (pstore::indirect_string{db_, &sstring});
         ASSERT_NE (pos, name_index->cend ());

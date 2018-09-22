@@ -75,7 +75,7 @@ int main () {
             auto const addr = typed_address<char> (serialize::write (archive, value));
             std::uint64_t const size = db.size () - addr.absolute ();
 
-            auto index = pstore::index::get_write_index (db);
+            auto index = pstore::index::get_index<pstore::trailer::indices::write> (db);
             index->insert_or_assign (t, key, make_extent (addr, size));
         }
 

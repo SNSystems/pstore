@@ -108,7 +108,7 @@ namespace {
             std::copy (std::begin (value), std::end (value), ptr.get ());
         }
 
-        auto index = pstore::index::get_write_index (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         auto const value_extent = make_extent (where, value.length ());
         index->insert_or_assign (transaction, key, value_extent);
         return value_extent;
@@ -125,7 +125,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");
-        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.add (t1, pstore::index::get_index<pstore::trailer::indices::name> (*db_), &str1);
         adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
@@ -136,7 +136,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
 
         pstore::indirect_string_adder adder2;
         auto str2 = pstore::make_sstring_view ("key2");
-        adder2.add (t2, pstore::index::get_name_index (*db_), &str2);
+        adder2.add (t2, pstore::index::get_index<pstore::trailer::indices::name> (*db_), &str2);
         adder2.flush (t2);
 
         this->add (t2, "key2", "first value");
@@ -158,14 +158,16 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     constexpr auto old_revision = 1U;
 
     pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
-        "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
+        "names", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
     addr = pstore::diff::make_index_diff<pstore::index::write_index> (
-        "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
+        "write", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
     check (out, "write");
 }
@@ -180,7 +182,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");
-        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.add (t1, pstore::index::get_index<pstore::trailer::indices::name> (*db_), &str1);
         adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
@@ -191,7 +193,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
 
         pstore::indirect_string_adder adder2;
         auto str2 = pstore::make_sstring_view ("key2");
-        adder2.add (t2, pstore::index::get_name_index (*db_), &str2);
+        adder2.add (t2, pstore::index::get_index<pstore::trailer::indices::name> (*db_), &str2);
         adder2.flush (t2);
 
         this->add (t2, "key2", "first value");
@@ -222,14 +224,16 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     constexpr auto old_revision = 0U;
 
     pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
-        "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
+        "names", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
     addr = pstore::diff::make_index_diff<pstore::index::write_index> (
-        "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
+        "write", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
     check (out, "write");
 }
@@ -242,7 +246,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");
-        adder1.add (t1, pstore::index::get_name_index (*db_), &str1);
+        adder1.add (t1, pstore::index::get_index<pstore::trailer::indices::name> (*db_), &str1);
         adder1.flush (t1);
 
         this->add (t1, "key1", "first value");
@@ -263,29 +267,32 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     constexpr auto old_revision = 1U;
 
     pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
-        "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
+        "names", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
     addr = pstore::diff::make_index_diff<pstore::index::write_index> (
-        "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
+        "write", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
     check (out, "write");
 
     out.clear ();
     out.str ("");
     addr = pstore::diff::make_index_diff<pstore::index::name_index> (
-        "names", *db_, new_revision, old_revision, pstore::index::get_name_index);
+        "names", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
     check (out, "names");
 
     out.clear ();
     out.str ("");
     addr = pstore::diff::make_index_diff<pstore::index::write_index> (
-        "write", *db_, new_revision, old_revision, pstore::index::get_write_index);
+        "write", *db_, new_revision, old_revision,
+        pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
     check (out, "write");
 }
-

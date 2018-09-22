@@ -168,7 +168,7 @@ namespace pstore {
         value_ptr make_fragments (database & db, bool hex_mode) {
             array::container result;
             if (std::shared_ptr<index::digest_index> const digests =
-                    index::get_digest_index (db, false /* create */)) {
+                    index::get_index<pstore::trailer::indices::digest> (db, false /* create */)) {
 
                 array::container members;
                 for (auto const & kvp : *digests) {
@@ -220,7 +220,7 @@ namespace pstore {
         value_ptr make_tickets (database & db) {
             array::container result;
             if (std::shared_ptr<index::ticket_index> const tickets =
-                    index::get_ticket_index (db, false /* create */)) {
+                    index::get_index<pstore::trailer::indices::ticket> (db, false /* create */)) {
 
                 for (auto const & kvp : *tickets) {
                     auto const ticket = repo::ticket::load (db, kvp.second);
@@ -246,7 +246,8 @@ namespace pstore {
         value_ptr make_debug_line_headers (database & db, bool hex_mode) {
             array::container members;
             if (std::shared_ptr<index::debug_line_header_index> const headers =
-                    index::get_debug_line_header_index (db, false /* create */)) {
+                    index::get_index<pstore::trailer::indices::debug_line_header> (
+                        db, false /* create */)) {
                 members.reserve (headers->size ());
                 for (auto const & kvp : *headers) {
                     members.emplace_back (make_value (db, kvp, hex_mode));

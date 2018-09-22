@@ -224,7 +224,7 @@ int main (int argc, char * argv[]) {
 
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
 
-        auto index = pstore::index::get_digest_index (database);
+        auto index = pstore::index::get_index<pstore::trailer::indices::digest> (database);
 
         // generate a large number of unique digests.
         // create a 1k value block (a simulated fragment)

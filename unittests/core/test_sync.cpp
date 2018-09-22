@@ -108,21 +108,21 @@ namespace {
             std::copy (std::begin (value), std::end (value), ptr.get ());
         }
 
-        auto index = pstore::index::get_write_index (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         index->insert_or_assign (transaction, key, make_extent (where, value.length ()));
     }
 
     // find
     // ~~~~
     bool SyncFixture::is_found (std::string const & key) {
-        auto index = pstore::index::get_write_index (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         return index->find (key) != index->cend ();
     }
 
     // read
     // ~~~~
     void SyncFixture::read (std::string const & key, std::string * value_out) {
-        auto index = pstore::index::get_write_index (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         auto const it = index->find (key);
         ASSERT_NE (it, index->cend ());
 

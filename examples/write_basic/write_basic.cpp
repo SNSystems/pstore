@@ -71,7 +71,7 @@ int main () {
             std::memcpy (ptr.get (), value.data (), size); // Copy it to the store.
 
             // Tell the index about this new data.
-            auto index = pstore::index::get_write_index (db);
+            auto index = pstore::index::get_index<pstore::trailer::indices::write> (db);
             index->insert_or_assign (t, key, make_extent (addr, size));
         }
 

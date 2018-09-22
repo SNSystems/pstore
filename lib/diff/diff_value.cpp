@@ -58,14 +58,14 @@ namespace pstore {
             assert (new_revision >= old_revision);
             return dump::make_value (
                 {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
-                                                     index::get_name_index),
+                                                     index::get_index<trailer::indices::name>),
                  make_index_diff<index::digest_index> ("fragments", db, new_revision, old_revision,
-                                                       index::get_digest_index),
+                                                       index::get_index<trailer::indices::digest>),
                  make_index_diff<index::ticket_index> ("tickets", db, new_revision, old_revision,
-                                                       index::get_ticket_index),
+                                                       index::get_index<trailer::indices::ticket>),
                  make_index_diff<index::debug_line_header_index> (
                      "debug_line_headers", db, new_revision, old_revision,
-                     index::get_debug_line_header_index)});
+                     index::get_index<trailer::indices::debug_line_header>)});
         }
 
     } // namespace diff

@@ -48,59 +48,12 @@
 #include <type_traits>
 #include <vector>
 #include "pstore/core/database.hpp"
+#include "pstore/core/file_header.hpp"
 #include "pstore/core/index_types.hpp"
 
-#define INDICES                                                                                    \
-    X (digest)                                                                                     \
-    X (ticket)                                                                                     \
-    X (name)                                                                                       \
-    X (write)                                                                                      \
-    X (debug_line_header)
-
-#define X(a) a,
-enum class indices : unsigned { INDICES last };
-#undef X
-
-template <indices IndexName>
-struct index_accessor {};
-
-template <>
-struct index_accessor<indices::digest> {
-    static decltype (&pstore::index::get_digest_index) get () {
-        return &pstore::index::get_digest_index;
-    }
-};
-
-template <>
-struct index_accessor<indices::ticket> {
-    static decltype (&pstore::index::get_ticket_index) get () {
-        return &pstore::index::get_ticket_index;
-    }
-};
-
-template <>
-struct index_accessor<indices::name> {
-    static decltype (&pstore::index::get_name_index) get () {
-        return &pstore::index::get_name_index;
-    }
-};
-
-template <>
-struct index_accessor<indices::write> {
-    static decltype (&pstore::index::get_write_index) get () {
-        return &pstore::index::get_write_index;
-    }
-};
-
-template <>
-struct index_accessor<indices::debug_line_header> {
-    static decltype (&pstore::index::get_debug_line_header_index) get () {
-        return &pstore::index::get_debug_line_header_index;
-    }
-};
-
 using indices_bitset =
-    std::bitset<static_cast<std::underlying_type<indices>::type> (indices::last)>;
+    std::bitset<static_cast<std::underlying_type<pstore::trailer::indices>::type> (
+        pstore::trailer::indices::last)>;
 extern std::vector<char const *> const index_names;
 
 bool set_from_name (indices_bitset * const bs, std::string const & name);

@@ -180,13 +180,13 @@ namespace {
         }
     }
 
-    template <indices Index>
+    template <pstore::trailer::indices Index>
     void dump_if_selected (switches const & opt, pstore::database & db) {
         if (opt.test (Index)) {
-            auto accessor = index_accessor<Index>::get ();
             char const * name =
-                index_names[static_cast<std::underlying_type<indices>::type> (Index)];
-            dump_index (accessor (db, false /*create*/).get (), name);
+                index_names[static_cast<std::underlying_type<pstore::trailer::indices>::type> (
+                    Index)];
+            dump_index (pstore::index::get_index<Index> (db, false /*create*/).get (), name);
         }
     }
 } // anonymous namespace
@@ -209,9 +209,9 @@ int main (int argc, char * argv[]) {
         pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
         db.sync (opt.revision);
 
-        dump_if_selected<indices::digest> (opt, db);
-        dump_if_selected<indices::name> (opt, db);
-        dump_if_selected<indices::write> (opt, db);
+        dump_if_selected<pstore::trailer::indices::digest> (opt, db);
+        dump_if_selected<pstore::trailer::indices::name> (opt, db);
+        dump_if_selected<pstore::trailer::indices::write> (opt, db);
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {

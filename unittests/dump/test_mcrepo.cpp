@@ -111,7 +111,10 @@ namespace {
         pstore::raw_sstring_view const sstring = pstore::make_sstring_view (str);
         pstore::indirect_string_adder adder;
         auto const pos =
-            adder.add (transaction, pstore::index::get_name_index (*db_), &sstring).first;
+            adder
+                .add (transaction, pstore::index::get_index<pstore::trailer::indices::name> (*db_),
+                      &sstring)
+                .first;
         adder.flush (transaction);
         return pstore::typed_address<pstore::indirect_string> (pos.get_address ());
     }
@@ -238,7 +241,7 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
 
     auto debug_line_header_extent = this->store_data (transaction, &data[0], sizeof (data));
 
-    auto index = pstore::index::get_debug_line_header_index (*db_);
+    auto index = pstore::index::get_index<pstore::trailer::indices::debug_line_header> (*db_);
     index->insert_or_assign (transaction, pstore::index::digest{1U}, debug_line_header_extent);
     transaction.commit ();
 

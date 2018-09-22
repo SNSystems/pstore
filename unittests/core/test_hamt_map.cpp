@@ -1876,12 +1876,12 @@ namespace {
 TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        auto r1index = pstore::index::get_write_index (*db_);
+        auto r1index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         r1index->insert_or_assign (t1, std::string{"key1"}, pstore::extent<char> ());
         t1.commit ();
     }
     db_->sync (0);
-    auto r0index = pstore::index::get_write_index (*db_);
+    auto r0index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
     {
         transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
 

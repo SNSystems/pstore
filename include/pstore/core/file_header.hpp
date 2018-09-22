@@ -249,6 +249,14 @@ namespace pstore {
     class database;
 
     namespace index {
+
+#define PSTORE_INDICES                                                                             \
+    X (write)                                                                                      \
+    X (digest)                                                                                     \
+    X (ticket)                                                                                     \
+    X (name)                                                                                       \
+    X (debug_line_header)
+
         struct header_block;
     } // namespace index
 
@@ -270,15 +278,10 @@ namespace pstore {
         /// Computes the trailer's CRC value.
         std::uint32_t get_crc () const noexcept;
 
-        enum indices {
-            write,
-            digest,
-            ticket,
-            name,
-            debug_line_header,
-            last,
-        };
 
+#define X(a) a,
+        enum indices { PSTORE_INDICES last };
+#undef X
         using index_records_array = std::array<typed_address<index::header_block>, indices::last>;
 
         /// Represents the portion of the trailer structure which is covered by the computed CRC

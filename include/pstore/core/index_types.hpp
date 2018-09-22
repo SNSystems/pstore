@@ -138,27 +138,48 @@ namespace pstore {
         using name_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
         using debug_line_header_index = hamt_map<digest, extent<std::uint8_t>, u128_hash>;
 
-        /// Returns a pointer to the write index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        std::shared_ptr<write_index> get_write_index (database & db, bool create = true);
+        // clang-format off
+        /// Maps from the indices kind enumeration to the type that is used to represent a database index of that kind.
+        template <trailer::indices T>
+        struct enum_to_index {};
 
-        /// Returns a pointer to the digest index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        std::shared_ptr<digest_index> get_digest_index (database & db, bool create = true);
+        template <> struct enum_to_index<trailer::indices::write               > { using type = write_index; };
+        template <> struct enum_to_index<trailer::indices::digest              > { using type = digest_index; };
+        template <> struct enum_to_index<trailer::indices::ticket              > { using type = ticket_index; };
+        template <> struct enum_to_index<trailer::indices::name                > { using type = name_index; };
+        template <> struct enum_to_index<trailer::indices::debug_line_header   > { using type = debug_line_header_index; };
+        // clang-format on
 
-        /// Returns a pointer to the ticket index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        std::shared_ptr<ticket_index> get_ticket_index (database & db, bool create = true);
+        /// Returns a pointer to a index, loading it from the store on first access. If 'create' is
+        /// false and the index does not already exist then nullptr is returned.
+        template <pstore::trailer::indices Index,
+                  typename Return = typename enum_to_index<Index>::type>
+        std::shared_ptr<Return> get_index (pstore::database & db, bool create = true) {
+            using namespace pstore;
+            auto & dx = db.get_index (Index);
 
-        /// Returns a pointer to the name index, loading it from the store on first access. If
-        /// 'create' is false and the index does not already exist then nullptr is returned.
-        std::shared_ptr<name_index> get_name_index (database & db, bool create = true);
+            // Have we already loaded this index?
+            if (dx.get () == nullptr) {
+                std::shared_ptr<trailer const> footer = db.get_footer ();
+                typed_address<index::header_block> const location = footer->a.index_records.at (
+                    static_cast<typename std::underlying_type<decltype (Index)>::type> (Index));
+                if (location == decltype (location)::null ()) {
+                    if (create) {
+                        // Create a new (empty) index.
+                        dx = std::make_shared<Return> (db);
+                    }
+                } else {
+                    // Construct the index from the location.
+                    dx = std::make_shared<Return> (db, location);
+                }
+            }
 
-        /// Returns a pointer to the debug line header index, loading it from the store on first
-        /// access. If 'create' is false and the index does not already exist then nullptr is
-        /// returned.
-        std::shared_ptr<debug_line_header_index> get_debug_line_header_index (database & db,
-                                                                              bool create = true);
+#ifdef PSTORE_CPP_RTTI
+            assert ((!create && dx.get () == nullptr) ||
+                    dynamic_cast<Return *> (dx.get ()) != nullptr);
+#endif
+            return std::static_pointer_cast<Return> (dx);
+        }
 
         /// Write out any indices that have changed. Any that haven't will
         /// continue to point at their previous incarnation. Update the

@@ -181,11 +181,11 @@ namespace {
 
         array::container result;
         if (std::shared_ptr<pstore::index::write_index> const write =
-                pstore::index::get_write_index (db, false /* create*/)) {
+                pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
             result.push_back (make_index ("write", *write));
         }
         if (std::shared_ptr<pstore::index::name_index> const name =
-                pstore::index::get_name_index (db, false /* create */)) {
+                pstore::index::get_index<pstore::trailer::indices::name> (db, false /* create */)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("name")},
                 {"members", make_value (std::begin (*name), std::end (*name))},
@@ -371,7 +371,8 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("fragments", pstore::dump::make_fragments (db, opt.hex));
             } else {
                 if (opt.fragments.size () > 0) {
-                    if (auto const digest_index = pstore::index::get_digest_index (db)) {
+                    if (auto const digest_index =
+                            pstore::index::get_index<pstore::trailer::indices::digest> (db)) {
                         auto record =
                             [&db, &opt](pstore::index::digest_index::value_type const & value) {
                                 auto fragment = pstore::repo::fragment::load (db, value.second);
@@ -395,7 +396,8 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("tickets", pstore::dump::make_tickets (db));
             } else {
                 if (opt.tickets.size () > 0) {
-                    if (auto const ticket_index = pstore::index::get_ticket_index (db)) {
+                    if (auto const ticket_index =
+                            pstore::index::get_index<pstore::trailer::indices::ticket> (db)) {
                         auto record = [&db](pstore::index::ticket_index::value_type const & value) {
                             auto ticket = pstore::repo::ticket::load (db, value.second);
                             return make_value (
@@ -419,7 +421,9 @@ int main (int argc, char * argv[]) {
                                    pstore::dump::make_debug_line_headers (db, opt.hex));
             } else {
                 if (opt.debug_line_headers.size () > 0) {
-                    if (auto const index = pstore::index::get_debug_line_header_index (db, false)) {
+                    if (auto const index =
+                            pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
+                                db, false)) {
                         auto record =
                             [&db, &opt](
                                 pstore::index::debug_line_header_index::value_type const & value) {

@@ -67,13 +67,16 @@ using pstore_tchar = char;
 #endif
 
 struct switches {
-    std::bitset<static_cast<std::underlying_type<indices>::type> (indices::last)> selected;
+    std::bitset<static_cast<std::underlying_type<pstore::trailer::indices>::type> (
+        pstore::trailer::indices::last)>
+        selected;
     unsigned revision = pstore::head_revision;
     std::string db_path;
 
-    bool test (indices idx) const {
-        auto const position = static_cast<std::underlying_type<indices>::type> (idx);
-        assert (idx < indices::last);
+    bool test (pstore::trailer::indices idx) const {
+        auto const position =
+            static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
+        assert (idx < pstore::trailer::indices::last);
         return selected.test (position);
     }
 };

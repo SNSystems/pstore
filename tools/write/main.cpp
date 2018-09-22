@@ -169,9 +169,9 @@ int main (int argc, char * argv[]) {
 
             // Read the write and name indexes.
             std::shared_ptr<pstore::index::name_index> const name =
-                pstore::index::get_name_index (database);
+                pstore::index::get_index<pstore::trailer::indices::name> (database);
             std::shared_ptr<pstore::index::write_index> const write =
-                pstore::index::get_write_index (database);
+                pstore::index::get_index<pstore::trailer::indices::write> (database);
 
             // Scan through the string value arguments from the command line. These are of
             // the form key,value where value is a string which is stored directly.

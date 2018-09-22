@@ -100,7 +100,7 @@ namespace {
             std::copy (std::begin (value), std::end (value), ptr.get ());
         }
 
-        auto index = pstore::index::get_write_index (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         auto const value_extent = make_extent (where, value.length ());
         index->insert_or_assign (transaction, key, value_extent);
         return value_extent;
@@ -144,9 +144,9 @@ TEST_F (Diff, BuildWriteIndexValues) {
 
     {
         // Check the diff between r2 and r0.
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 0U);
-        auto index = pstore::index::get_write_index (*db_);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
             addresses_to_values (*index, std::begin (actual), std::end (actual));
@@ -155,9 +155,9 @@ TEST_F (Diff, BuildWriteIndexValues) {
 
     {
         // Check the diff between r2 and r1.
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 1U);
-        auto index = pstore::index::get_write_index (*db_);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
             addresses_to_values (*index, std::begin (actual), std::end (actual));
@@ -166,8 +166,8 @@ TEST_F (Diff, BuildWriteIndexValues) {
 
     {
         // Check the diff between r2 and r2.
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 2U);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
         EXPECT_EQ (actual.size (), 0U);
     }
 }
@@ -192,9 +192,9 @@ TEST_F (Diff, UncomittedTransaction) {
 
     {
         // Check the diff between now (the uncommitted r2) and r0.
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 0U);
-        auto index = pstore::index::get_write_index (*db_);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
             addresses_to_values (*index, std::begin (actual), std::end (actual));
@@ -203,9 +203,9 @@ TEST_F (Diff, UncomittedTransaction) {
 
     {
         // Check the diff between now and r1.
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 1U);
-        auto index = pstore::index::get_write_index (*db_);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
+        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
             addresses_to_values (*index, std::begin (actual), std::end (actual));
@@ -215,8 +215,8 @@ TEST_F (Diff, UncomittedTransaction) {
     {
         // Note that get_current_revision() still reports 1 even though a transaction is open.
         EXPECT_EQ (db_->get_current_revision (), 1U);
-        pstore::diff::result_type actual =
-            pstore::diff::diff (*pstore::index::get_write_index (*db_), 2U);
+        pstore::diff::result_type actual = pstore::diff::diff (
+            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
         EXPECT_EQ (actual.size (), 0U);
     }
 

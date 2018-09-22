@@ -139,7 +139,7 @@ namespace vacuum {
                 destination->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
                 std::shared_ptr<pstore::index::write_index> const source_names =
-                    pstore::index::get_write_index (*source);
+                    pstore::index::get_index<pstore::trailer::indices::write> (*source);
                 if (source_names == nullptr) {
                     log (pstore::logging::priority::error,
                          "Names index was not found in source store");
@@ -148,7 +148,7 @@ namespace vacuum {
                 }
 
                 std::shared_ptr<pstore::index::write_index> const destination_names =
-                    pstore::index::get_write_index (*destination);
+                    pstore::index::get_index<pstore::trailer::indices::write> (*destination);
 
                 if (!st->done) {
                     auto transaction = pstore::begin (*destination);

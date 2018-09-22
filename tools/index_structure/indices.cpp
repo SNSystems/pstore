@@ -46,7 +46,7 @@
 #include <type_traits>
 
 #define X(a) #a,
-std::vector<char const *> const index_names{INDICES};
+std::vector<char const *> const index_names{PSTORE_INDICES};
 #undef X
 
 bool set_from_name (indices_bitset * const bs, std::string const & name) {
