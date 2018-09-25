@@ -164,24 +164,6 @@ namespace pstore {
 #undef X
         }
 
-
-        value_ptr make_fragments (database & db, bool hex_mode) {
-            array::container result;
-            if (std::shared_ptr<index::digest_index> const digests =
-                    index::get_index<pstore::trailer::indices::digest> (db, false /* create */)) {
-
-                array::container members;
-                for (auto const & kvp : *digests) {
-                    auto const fragment = repo::fragment::load (db, kvp.second);
-                    result.emplace_back (make_value (
-                        object::container{{"digest", make_value (kvp.first)},
-                                          {"fragment", make_value (db, *fragment, hex_mode)}}));
-                }
-            }
-            return make_value (result);
-        }
-
-
         value_ptr make_value (repo::linkage_type t) {
 #define X(a)                                                                                       \
     case (repo::linkage_type::a): Name = #a; break;
@@ -217,18 +199,20 @@ namespace pstore {
             });
         }
 
-        value_ptr make_tickets (database & db) {
-            array::container result;
-            if (std::shared_ptr<index::ticket_index> const tickets =
-                    index::get_index<pstore::trailer::indices::ticket> (db, false /* create */)) {
+        value_ptr make_value (database const & db,
+                              pstore::index::digest_index::value_type const & value,
+                              bool hex_mode) {
+            auto fragment = pstore::repo::fragment::load (db, value.second);
+            return make_value (
+                object::container{{"digest", make_value (value.first)},
+                                  {"fragment", make_value (db, *fragment, hex_mode)}});
+        }
 
-                for (auto const & kvp : *tickets) {
-                    auto const ticket = repo::ticket::load (db, kvp.second);
-                    result.emplace_back (make_value (object::container{
-                        {"digest", make_value (kvp.first)}, {"ticket", make_value (db, ticket)}}));
-                }
-            }
-            return make_value (result);
+        value_ptr make_value (database const & db,
+                              pstore::index::ticket_index::value_type const & value) {
+            auto const ticket = pstore::repo::ticket::load (db, value.second);
+            return make_value (object::container{{"digest", make_value (value.first)},
+                                                 {"ticket", make_value (db, ticket)}});
         }
 
         value_ptr make_value (database const & db,
@@ -241,19 +225,6 @@ namespace pstore {
                  make_debuglineheader_value (debug_line_header.get (),
                                              debug_line_header.get () + value.second.size,
                                              hex_mode)}});
-        }
-
-        value_ptr make_debug_line_headers (database & db, bool hex_mode) {
-            array::container members;
-            if (std::shared_ptr<index::debug_line_header_index> const headers =
-                    index::get_index<pstore::trailer::indices::debug_line_header> (
-                        db, false /* create */)) {
-                members.reserve (headers->size ());
-                for (auto const & kvp : *headers) {
-                    members.emplace_back (make_value (db, kvp, hex_mode));
-                }
-            }
-            return make_value (members);
         }
 
     } // namespace dump

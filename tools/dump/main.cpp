@@ -57,6 +57,7 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/dump/db_value.hpp"
+#include "pstore/dump/index_value.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/dump/mcdebugline_value.hpp"
 #include "pstore/dump/mcrepo_value.hpp"
@@ -95,6 +96,7 @@ namespace {
         ticket_not_found,
         bad_ticket_file,
         debug_line_header_not_found,
+        no_debug_line_header_index,
     };
 
     class dump_error_category : public std::error_category {
@@ -118,6 +120,7 @@ namespace {
         case dump_error_code::ticket_not_found: return "ticket not found";
         case dump_error_code::bad_ticket_file: return "bad ticket file";
         case dump_error_code::debug_line_header_not_found: return "debug line header not found";
+        case dump_error_code::no_debug_line_header_index: return "no debug line header index";
         }
         return "unknown error";
     }
@@ -301,6 +304,41 @@ namespace {
         return pstore::dump::make_value (container);
     }
 
+    char const * index_to_string (pstore::trailer::indices kind) {
+        char const * name = "*unknown*";
+#define X(k)                                                                                       \
+    case pstore::trailer::indices::k: name = #k"s"; break;
+
+        switch (kind) {
+            PSTORE_INDICES
+        case pstore::trailer::indices::last: assert (false); break;
+        }
+#undef X
+        return name;
+    }
+
+    template <typename pstore::trailer::indices Index, typename RecordFunction>
+    void show_index (pstore::dump::object::container & file, pstore::database & db,
+                     bool show_all, std::list<std::string> const & items_to_show,
+                     dump_error_code not_found_error, dump_error_code no_index,
+                     RecordFunction record_function) {
+
+        if (show_all) {
+            file.emplace_back (index_to_string (Index),
+                               pstore::dump::make_index<Index> (db, record_function));
+        } else {
+            if (items_to_show.size () > 0) {
+                if (auto const index = pstore::index::get_index<Index>(db, false)) {
+                    file.emplace_back (index_to_string (Index),
+                                       add_specified (*index, items_to_show, not_found_error,
+                                                      string_to_digest, record_function));
+                } else {
+                    pstore::raise_error_code (std::make_error_code (no_index));
+                }
+            }
+        }
+    }
+
 } // end anonymous namespace
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
@@ -367,80 +405,28 @@ int main (int argc, char * argv[]) {
                 file.emplace_back ("contents",
                                    pstore::dump::make_contents (db, db.footer_pos (), no_times));
             }
-            if (show_all_fragments) {
-                file.emplace_back ("fragments", pstore::dump::make_fragments (db, opt.hex));
-            } else {
-                if (opt.fragments.size () > 0) {
-                    if (auto const digest_index =
-                            pstore::index::get_index<pstore::trailer::indices::digest> (db)) {
-                        auto record =
-                            [&db, &opt](pstore::index::digest_index::value_type const & value) {
-                                auto fragment = pstore::repo::fragment::load (db, value.second);
-                                return make_value (object::container{
-                                    {"digest", make_value (value.first)},
-                                    {"fragment", make_value (db, *fragment, opt.hex)}});
-                            };
 
-                        file.emplace_back ("fragments",
-                                           add_specified (*digest_index, opt.fragments,
-                                                          dump_error_code::fragment_not_found,
-                                                          string_to_digest, record));
-                    } else {
-                        pstore::raise_error_code (
-                            std::make_error_code (dump_error_code::no_digest_index));
-                    }
-                }
-            }
+            show_index<pstore::trailer::indices::digest> (
+                file, db, show_all_fragments, opt.fragments, dump_error_code::fragment_not_found,
+                dump_error_code::no_digest_index,
+                [&db, &opt](pstore::index::digest_index::value_type const & value) {
+                    return make_value (db, value, opt.hex);
+                });
 
-            if (show_all_tickets) {
-                file.emplace_back ("tickets", pstore::dump::make_tickets (db));
-            } else {
-                if (opt.tickets.size () > 0) {
-                    if (auto const ticket_index =
-                            pstore::index::get_index<pstore::trailer::indices::ticket> (db)) {
-                        auto record = [&db](pstore::index::ticket_index::value_type const & value) {
-                            auto ticket = pstore::repo::ticket::load (db, value.second);
-                            return make_value (
-                                object::container{{"id", make_value (value.first)},
-                                                  {"ticket", make_value (db, ticket)}});
-                        };
+            show_index<pstore::trailer::indices::ticket> (
+                file, db, show_all_tickets, opt.tickets, dump_error_code::ticket_not_found,
+                dump_error_code::no_ticket_index,
+                [&db](pstore::index::ticket_index::value_type const & value) {
+                    return make_value (db, value);
+                });
 
-                        file.emplace_back ("tickets",
-                                           add_specified (*ticket_index, opt.tickets,
-                                                          dump_error_code::ticket_not_found,
-                                                          string_to_digest, record));
-                    } else {
-                        pstore::raise_error_code (
-                            std::make_error_code (dump_error_code::no_ticket_index));
-                    }
-                }
-            }
-
-            if (show_all_debug_line_headers) {
-                file.emplace_back ("debug_line_headers",
-                                   pstore::dump::make_debug_line_headers (db, opt.hex));
-            } else {
-                if (opt.debug_line_headers.size () > 0) {
-                    if (auto const index =
-                            pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
-                                db, false)) {
-                        auto record =
-                            [&db, &opt](
-                                pstore::index::debug_line_header_index::value_type const & value) {
-                                return make_value (db, value, opt.hex);
-                            };
-
-                        file.emplace_back (
-                            "debug_line_headers",
-                            add_specified (*index, opt.debug_line_headers,
-                                           dump_error_code::debug_line_header_not_found,
-                                           string_to_digest, record));
-                    } else {
-                        pstore::raise_error_code (
-                            std::make_error_code (dump_error_code::debug_line_header_not_found));
-                    }
-                }
-            }
+            show_index<pstore::trailer::indices::debug_line_header> (
+                file, db, show_all_debug_line_headers, opt.debug_line_headers,
+                dump_error_code::debug_line_header_not_found,
+                dump_error_code::no_debug_line_header_index,
+                [&db, &opt](pstore::index::debug_line_header_index::value_type const & value) {
+                    return make_value (db, value, opt.hex);
+                });
 
             if (show_header) {
                 auto header = db.getro (pstore::typed_address<pstore::header>::null ());

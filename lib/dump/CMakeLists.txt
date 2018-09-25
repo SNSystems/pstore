@@ -50,6 +50,7 @@ set (PSTORE_DUMP_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/dump")
 set (PSTORE_DUMP_LIB_SRC
     "${PSTORE_DUMP_INCLUDE_DIR}/db_value.hpp"
     "${PSTORE_DUMP_INCLUDE_DIR}/error.hpp"
+    "${PSTORE_DUMP_INCLUDE_DIR}/index_value.hpp"
     "${PSTORE_DUMP_INCLUDE_DIR}/line_splitter.hpp"
     "${PSTORE_DUMP_INCLUDE_DIR}/mcdebugline_value.hpp"
     "${PSTORE_DUMP_INCLUDE_DIR}/mcdisassembler_value.hpp"

@@ -63,19 +63,16 @@ namespace pstore {
                               repo::section_kind sk, bool hex_mode);
         value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode);
 
-
-        value_ptr make_fragments (database & db, bool hex_mode);
-
         value_ptr make_value (repo::linkage_type t);
         value_ptr make_value (database const & db, repo::ticket_member const & member);
         value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket);
 
-        value_ptr make_tickets (database & db);
-
-        value_ptr make_value (database const & db,
-                              pstore::index::debug_line_header_index::value_type const & value,
+        value_ptr make_value (database const & db, index::digest_index::value_type const & value,
                               bool hex_mode);
-        value_ptr make_debug_line_headers (database & db, bool hex_mode);
+        value_ptr make_value (database const & db, index::ticket_index::value_type const & value);
+        value_ptr make_value (database const & db,
+                              index::debug_line_header_index::value_type const & value,
+                              bool hex_mode);
 
     } // namespace dump
 } // namespace pstore

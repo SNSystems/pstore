@@ -52,6 +52,7 @@
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/dump/index_value.hpp"
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 
@@ -246,7 +247,12 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
     transaction.commit ();
 
     std::ostringstream out;
-    pstore::dump::value_ptr addr = pstore::dump::make_debug_line_headers (*db_, true);
+    pstore::dump::value_ptr addr =
+        pstore::dump::make_index<pstore::trailer::indices::debug_line_header> (
+            *db_, [this](pstore::index::debug_line_header_index::value_type const & value) {
+                return pstore::dump::make_value (*this->db_, value, true);
+            });
+
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
