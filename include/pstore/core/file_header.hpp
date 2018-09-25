@@ -252,7 +252,7 @@ namespace pstore {
 
 #define PSTORE_INDICES                                                                             \
     X (write)                                                                                      \
-    X (digest)                                                                                     \
+    X (fragment)                                                                                   \
     X (ticket)                                                                                     \
     X (name)                                                                                       \
     X (debug_line_header)

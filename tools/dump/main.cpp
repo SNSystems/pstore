@@ -89,7 +89,7 @@ namespace {
 
     enum class dump_error_code : int {
         bad_digest = 1,
-        no_digest_index,
+        no_fragment_index,
         fragment_not_found,
         bad_uuid,
         no_ticket_index,
@@ -113,7 +113,7 @@ namespace {
     std::string dump_error_category::message (int error) const {
         switch (static_cast<dump_error_code> (error)) {
         case dump_error_code::bad_digest: return "bad digest";
-        case dump_error_code::no_digest_index: return "no digest index";
+        case dump_error_code::no_fragment_index: return "no fragment index";
         case dump_error_code::fragment_not_found: return "fragment not found";
         case dump_error_code::bad_uuid: return "bad UUID";
         case dump_error_code::no_ticket_index: return "no ticket index";
@@ -406,10 +406,10 @@ int main (int argc, char * argv[]) {
                                    pstore::dump::make_contents (db, db.footer_pos (), no_times));
             }
 
-            show_index<pstore::trailer::indices::digest> (
+            show_index<pstore::trailer::indices::fragment> (
                 file, db, show_all_fragments, opt.fragments, dump_error_code::fragment_not_found,
-                dump_error_code::no_digest_index,
-                [&db, &opt](pstore::index::digest_index::value_type const & value) {
+                dump_error_code::no_fragment_index,
+                [&db, &opt](pstore::index::fragment_index::value_type const & value) {
                     return make_value (db, value, opt.hex);
                 });
 

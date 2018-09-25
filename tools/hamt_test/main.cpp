@@ -164,7 +164,7 @@ namespace {
     /// \param maps It is an input and output parameter. The mapped values are updated once the
     ///        values are saved into the database. It stores the actual map in the database.
     template <typename Map>
-    void insert (pstore::index::digest_index & index, Map & maps) {
+    void insert (pstore::index::fragment_index & index, Map & maps) {
         pstore::database & db = index.db ();
 
         // Start a transaction...
@@ -204,7 +204,7 @@ namespace {
     /// \param test_name  A test name which is used to provide useful error information.
     /// \returns True if the test was successful, false otherwise.
     template <typename Map>
-    bool find (pstore::index::digest_index const & index, Map const & expected_results,
+    bool find (pstore::index::fragment_index const & index, Map const & expected_results,
                std::string const & test_name) {
         std::atomic<bool> is_found (true);
         auto check_key = [&index, &test_name, &is_found](typename Map::value_type value) {
@@ -240,7 +240,7 @@ int main (int argc, char * argv[]) {
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-        auto index = pstore::index::get_index<pstore::trailer::indices::digest> (database);
+        auto index = pstore::index::get_index<pstore::trailer::indices::fragment> (database);
 
         // In random number generator, the number is repeated after 300,000. The number of 2 ^ 18 is
         // closest to 300,000. Therefore, the num_keys is 2 ^ 18.

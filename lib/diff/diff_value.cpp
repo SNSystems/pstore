@@ -59,8 +59,9 @@ namespace pstore {
             return dump::make_value (
                 {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
                                                      index::get_index<trailer::indices::name>),
-                 make_index_diff<index::digest_index> ("fragments", db, new_revision, old_revision,
-                                                       index::get_index<trailer::indices::digest>),
+                 make_index_diff<index::fragment_index> (
+                     "fragments", db, new_revision, old_revision,
+                     index::get_index<trailer::indices::fragment>),
                  make_index_diff<index::ticket_index> ("tickets", db, new_revision, old_revision,
                                                        index::get_index<trailer::indices::ticket>),
                  make_index_diff<index::debug_line_header_index> (

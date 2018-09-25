@@ -188,7 +188,7 @@ namespace {
         }
     }
 
-    void find (pstore::index::digest_index const & index, digest_set const & keys) {
+    void find (pstore::index::fragment_index const & index, digest_set const & keys) {
         profile_marker sgn (2);
 
         parallel_for_each (std::begin (keys), std::end (keys),
@@ -224,7 +224,7 @@ int main (int argc, char * argv[]) {
 
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
 
-        auto index = pstore::index::get_index<pstore::trailer::indices::digest> (database);
+        auto index = pstore::index::get_index<pstore::trailer::indices::fragment> (database);
 
         // generate a large number of unique digests.
         // create a 1k value block (a simulated fragment)

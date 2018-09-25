@@ -125,7 +125,7 @@ namespace pstore {
     namespace index {
 
         using write_index = hamt_map<std::string, extent<char>>;
-        using digest_index = hamt_map<digest, extent<repo::fragment>, u128_hash>;
+        using fragment_index = hamt_map<digest, extent<repo::fragment>, u128_hash>;
         using ticket_index = hamt_map<digest, extent<repo::ticket>, u128_hash>;
 
         struct fnv_64a_hash_indirect_string {
@@ -144,7 +144,7 @@ namespace pstore {
         struct enum_to_index {};
 
         template <> struct enum_to_index<trailer::indices::write               > { using type = write_index; };
-        template <> struct enum_to_index<trailer::indices::digest              > { using type = digest_index; };
+        template <> struct enum_to_index<trailer::indices::fragment            > { using type = fragment_index; };
         template <> struct enum_to_index<trailer::indices::ticket              > { using type = ticket_index; };
         template <> struct enum_to_index<trailer::indices::name                > { using type = name_index; };
         template <> struct enum_to_index<trailer::indices::debug_line_header   > { using type = debug_line_header_index; };

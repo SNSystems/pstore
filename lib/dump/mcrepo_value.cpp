@@ -200,7 +200,7 @@ namespace pstore {
         }
 
         value_ptr make_value (database const & db,
-                              pstore::index::digest_index::value_type const & value,
+                              pstore::index::fragment_index::value_type const & value,
                               bool hex_mode) {
             auto fragment = pstore::repo::fragment::load (db, value.second);
             return make_value (

@@ -67,7 +67,7 @@ namespace pstore {
         value_ptr make_value (database const & db, repo::ticket_member const & member);
         value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket);
 
-        value_ptr make_value (database const & db, index::digest_index::value_type const & value,
+        value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
                               bool hex_mode);
         value_ptr make_value (database const & db, index::ticket_index::value_type const & value);
         value_ptr make_value (database const & db,
