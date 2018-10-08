@@ -96,14 +96,14 @@ namespace pstore {
         ///@{
 
         /// Checks whether the stack is empty.
-        bool empty () const { return elements_ == 0; }
+        bool empty () const noexcept { return elements_ == 0; }
 
         /// Returns the number of elements stored on the stack.
-        size_type size () const { return elements_; }
+        size_type size () const noexcept { return elements_; }
 
         /// Returns the maximum number of elements that the stack is able to
         /// hold.
-        constexpr size_t max_size () const { return Size; }
+        constexpr size_t max_size () const noexcept { return Size; }
         ///@}
 
 
@@ -111,12 +111,12 @@ namespace pstore {
         ///@{
 
         /// Acceses the top element
-        reference top () {
+        reference top () noexcept {
             assert (elements_ > 0);
             return c_[elements_ - 1];
         }
         /// Acceses the top element
-        const_reference top () const {
+        const_reference top () const noexcept {
             assert (elements_ > 0);
             return c_[elements_ - 1];
         }

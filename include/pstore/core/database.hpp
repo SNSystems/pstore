@@ -280,8 +280,8 @@ namespace pstore {
             immediate,
             background,
         };
-        void set_vacuum_mode (vacuum_mode mode) { vacuum_mode_ = mode; }
-        vacuum_mode get_vacuum_mode () const { return vacuum_mode_; }
+        void set_vacuum_mode (vacuum_mode mode) noexcept { vacuum_mode_ = mode; }
+        vacuum_mode get_vacuum_mode () const noexcept { return vacuum_mode_; }
         ///@}
 
         /// For unit testing
@@ -291,14 +291,12 @@ namespace pstore {
 
         void close ();
 
-        header const & get_header () const { return *header_; }
+        header const & get_header () const noexcept { return *header_; }
         typed_address<trailer> footer_pos () const noexcept { return size_.footer_pos (); }
 
         /// Returns the generation number to which the database is synced.
         /// \note This generation number doesn't count an open transaction.
-        unsigned get_current_revision () const noexcept {
-            return get_footer ()->a.generation.load ();
-        }
+        unsigned get_current_revision () const { return get_footer ()->a.generation.load (); }
 
         /// \brief Returns the name of the store's synchronisation object.
         ///
