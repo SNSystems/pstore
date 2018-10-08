@@ -56,7 +56,8 @@ namespace {
     template <typename CharType>
     class Number : public testing::Test {
     public:
-        Number () : base_ {pstore::dump::number_base::default_base ()} {}
+        Number ()
+                : base_{pstore::dump::number_base::default_base ()} {}
         ~Number () {
             using namespace ::pstore::dump;
             switch (base_) {
