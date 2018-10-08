@@ -43,37 +43,35 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/value.hpp"
 // System includes
+#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
-// 3rd partly includes
+// 3rd party includes
 #include "gtest/gtest.h"
 // Local includes
 #include "convert.hpp"
 
 namespace {
     template <typename CharType>
-    class Number : public ::testing::Test {
+    class Number : public testing::Test {
     public:
-        void SetUp () final {
-            using namespace ::pstore::dump;
-            base_ = number_base::default_base ();
-        }
-        void TearDown () final {
+        Number () : base_ {pstore::dump::number_base::default_base ()} {}
+        ~Number () {
             using namespace ::pstore::dump;
             switch (base_) {
             case 8: number_base::oct (); break;
             case 10: number_base::dec (); break;
             case 16: number_base::hex (); break;
-            default: ASSERT_TRUE (false); break;
+            default: assert (false); break;
             }
         }
 
     protected:
-        std::basic_ostringstream<CharType> out;
+        std::basic_ostringstream<CharType> out_;
 
     private:
-        unsigned base_ = 0;
+        unsigned const base_ = 0;
     };
 } // namespace
 
@@ -82,40 +80,40 @@ TYPED_TEST_CASE (Number, CharacterTypes);
 
 TYPED_TEST (Number, N0ExplicitBase8) {
     pstore::dump::number_long v (0, 8);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N0ExplicitBase10) {
     pstore::dump::number_long v (0, 10);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N0ExplicitBase16) {
     pstore::dump::number_long v (0, 16);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("0x0");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N10ExplicitBase10) {
     pstore::dump::number_long v (10, 10);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("10");
     EXPECT_EQ (expected, actual);
 }
 
 TYPED_TEST (Number, N15ExplicitBase16) {
     pstore::dump::number_long v (15, 16);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("0xf");
     EXPECT_EQ (expected, actual);
 }
@@ -123,8 +121,8 @@ TYPED_TEST (Number, N15ExplicitBase16) {
 TYPED_TEST (Number, N10DefaultBase8) {
     pstore::dump::number_base::oct ();
     pstore::dump::number_long v (10);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("012");
     EXPECT_EQ (expected, actual);
 }
@@ -132,8 +130,8 @@ TYPED_TEST (Number, N10DefaultBase8) {
 TYPED_TEST (Number, N10DefaultBase10) {
     pstore::dump::number_base::dec ();
     pstore::dump::number_long v (10, 10);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("10");
     EXPECT_EQ (expected, actual);
 }
@@ -141,8 +139,8 @@ TYPED_TEST (Number, N10DefaultBase10) {
 TYPED_TEST (Number, N10DefaultBase16) {
     pstore::dump::number_base::hex ();
     pstore::dump::number_long v (10, 16);
-    v.write (this->out);
-    auto const & actual = this->out.str ();
+    v.write (this->out_);
+    auto const & actual = this->out_.str ();
     auto const & expected = convert<TypeParam> ("0xa");
     EXPECT_EQ (expected, actual);
 }
