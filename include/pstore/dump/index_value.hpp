@@ -52,8 +52,8 @@ namespace pstore {
     namespace dump {
 
         template <typename trailer::indices Index, typename MakeValueFn>
-        value_ptr make_index (database & db, MakeValueFn mk) {
-            using return_type = typename index::enum_to_index<Index>::type;
+        value_ptr make_index (database const & db, MakeValueFn mk) {
+            using return_type = typename index::enum_to_index<Index>::type const;
             using value_type = typename return_type::value_type;
             array::container members;
             if (std::shared_ptr<return_type> const index =

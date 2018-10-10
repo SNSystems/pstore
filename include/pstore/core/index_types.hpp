@@ -152,11 +152,12 @@ namespace pstore {
 
         /// Returns a pointer to a index, loading it from the store on first access. If 'create' is
         /// false and the index does not already exist then nullptr is returned.
-        template <pstore::trailer::indices Index,
-                  typename Return = typename enum_to_index<Index>::type>
-        std::shared_ptr<Return> get_index (pstore::database & db, bool create = true) {
+        template <pstore::trailer::indices Index, typename Database = pstore::database,
+                  typename Return =
+                      typename inherit_const<Database, typename enum_to_index<Index>::type>::type>
+        std::shared_ptr<Return> get_index (Database & db, bool create = true) {
             using namespace pstore;
-            auto & dx = db.get_index (Index);
+            auto & dx = db.get_mutable_index (Index);
 
             // Have we already loaded this index?
             if (dx.get () == nullptr) {
@@ -166,11 +167,11 @@ namespace pstore {
                 if (location == decltype (location)::null ()) {
                     if (create) {
                         // Create a new (empty) index.
-                        dx = std::make_shared<Return> (db);
+                        dx = std::make_shared<typename std::remove_const<Return>::type> (db);
                     }
                 } else {
                     // Construct the index from the location.
-                    dx = std::make_shared<Return> (db, location);
+                    dx = std::make_shared<typename std::remove_const<Return>::type> (db, location);
                 }
             }
 

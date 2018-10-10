@@ -183,15 +183,15 @@ namespace {
         });
     }
 
-    pstore::dump::value_ptr make_indices (pstore::database & db) {
+    pstore::dump::value_ptr make_indices (pstore::database const & db) {
         using namespace pstore::dump;
 
         array::container result;
-        if (std::shared_ptr<pstore::index::write_index> const write =
+        if (std::shared_ptr<pstore::index::write_index const> const write =
                 pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
             result.push_back (make_index ("write", db, *write));
         }
-        if (std::shared_ptr<pstore::index::name_index> const name =
+        if (std::shared_ptr<pstore::index::name_index const> const name =
                 pstore::index::get_index<pstore::trailer::indices::name> (db, false /* create */)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("name")},
@@ -202,7 +202,7 @@ namespace {
     }
 
 
-    pstore::dump::value_ptr make_log (pstore::database & db, bool no_times) {
+    pstore::dump::value_ptr make_log (pstore::database const & db, bool no_times) {
         using namespace pstore::dump;
 
         array::container array;
@@ -220,7 +220,7 @@ namespace {
         return make_value (array);
     }
 
-    pstore::dump::value_ptr make_shared_memory (pstore::database & db, bool no_times) {
+    pstore::dump::value_ptr make_shared_memory (pstore::database const & db, bool no_times) {
         (void) no_times;
         using namespace pstore::dump;
 
@@ -321,7 +321,7 @@ namespace {
     }
 
     template <typename pstore::trailer::indices Index, typename RecordFunction>
-    void show_index (pstore::dump::object::container & file, pstore::database & db,
+    void show_index (pstore::dump::object::container & file, pstore::database const & db,
                      bool show_all, std::list<std::string> const & items_to_show,
                      dump_error_code not_found_error, dump_error_code no_index,
                      RecordFunction record_function) {

@@ -343,7 +343,13 @@ namespace pstore {
         shared const * get_shared () const;
         shared * get_shared ();
 
-        std::shared_ptr<index::index_base> & get_index (enum pstore::trailer::indices which) {
+        /// \brief Returns a pointer to an index base.
+        ///
+        /// \param which  An index type from which the index will be read.
+        //  \warning This function is dangerous. It returns a non-const index from a const
+        //  database.
+        std::shared_ptr<index::index_base> &
+        get_mutable_index (enum pstore::trailer::indices which) const {
             return indices_[static_cast<std::underlying_type<decltype (which)>::type> (which)];
         }
         std::shared_ptr<trailer const> get_footer () const {
@@ -401,8 +407,8 @@ namespace pstore {
         };
         sizes size_;
 
-        std::array<std::shared_ptr<index::index_base>,
-                   static_cast<unsigned> (trailer::indices::last)>
+        mutable std::array<std::shared_ptr<index::index_base>,
+                           static_cast<unsigned> (trailer::indices::last)>
             indices_;
         std::string sync_name_;
         static constexpr auto const sync_name_length = std::size_t{20};

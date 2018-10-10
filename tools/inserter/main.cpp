@@ -188,7 +188,7 @@ namespace {
         }
     }
 
-    void find (pstore::database & database, pstore::index::fragment_index const & index,
+    void find (pstore::database const & database, pstore::index::fragment_index const & index,
                digest_set const & keys) {
         profile_marker sgn (2);
 

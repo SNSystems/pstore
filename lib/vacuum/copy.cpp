@@ -138,7 +138,7 @@ namespace vacuum {
                 // We don't want our pristine new store to be vacuumed; it doesn't need it.
                 destination->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-                std::shared_ptr<pstore::index::write_index> const source_names =
+                std::shared_ptr<pstore::index::write_index const> const source_names =
                     pstore::index::get_index<pstore::trailer::indices::write> (*source);
                 if (source_names == nullptr) {
                     log (pstore::logging::priority::error,

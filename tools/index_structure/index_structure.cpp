@@ -184,7 +184,7 @@ namespace {
     }
 
     template <pstore::trailer::indices Index>
-    void dump_if_selected (switches const & opt, pstore::database & db) {
+    void dump_if_selected (switches const & opt, pstore::database const & db) {
         if (opt.test (Index)) {
             char const * name =
                 index_names[static_cast<std::underlying_type<pstore::trailer::indices>::type> (
