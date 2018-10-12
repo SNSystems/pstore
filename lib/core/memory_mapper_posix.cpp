@@ -67,6 +67,27 @@
 #include "pstore/support/error.hpp"
 
 namespace pstore {
+    // MAP_ANONYMOUS isn't defined by POSIX, but both macOS and Linux support it.
+    // Earlier versions of macOS provided the MAP_ANON name for the flag.
+#    ifndef MAP_ANONYMOUS
+#        define MAP_ANONYMOUS MAP_ANON
+#    endif
+
+    std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+        size += align - 1U;
+
+        auto ptr =
+            ::mmap (nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (ptr == nullptr) {
+            raise (pstore::errno_erc{errno}, "mmap");
+        }
+
+        auto deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
+        auto const mask = ~(std::uintptr_t{align} - 1);
+        auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+            (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+        return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
+    }
 
     //*                 _                                                _           *
     //*   ___ _   _ ___| |_ ___ _ __ ___    _ __   __ _  __ _  ___   ___(_)_______   *
@@ -85,10 +106,7 @@ namespace pstore {
         return static_cast<unsigned> (result);
     }
 
-} // namespace pstore
 
-
-namespace pstore {
 
     // read_only
     // ~~~~~~~~~
@@ -98,10 +116,6 @@ namespace pstore {
         }
     }
 
-} // namespace pstore
-
-
-namespace pstore {
 
     //*   _ __ ___   ___ _ __ ___   ___  _ __ _   _    _ __ ___   __ _ _ __  _ __   ___ _ __   *
     //*  | '_ ` _ \ / _ \ '_ ` _ \ / _ \| '__| | | |  | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|  *

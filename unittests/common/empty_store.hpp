@@ -53,12 +53,6 @@
 #include "pstore/core/database.hpp"
 
 
-/// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S memory
-/// allocation API directly and bypasses operator new/malloc(). This is to ensure that the library
-/// can safely change the memory permission (with mprotect() or equivalent).
-std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
-
-
 class EmptyStore : public ::testing::Test {
 public:
     static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;

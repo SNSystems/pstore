@@ -49,6 +49,7 @@
 #include "gtest/gtest.h"
 
 // Data store includes
+#include "pstore/core/memory_mapper.hpp"
 #include "pstore/core/transaction.hpp"
 
 // Local private includes
@@ -71,7 +72,7 @@ namespace {
     std::size_t constexpr db_file::file_size;
 
     db_file::db_file ()
-            : buffer_ (aligned_valloc (file_size, 4096U))
+            : buffer_ (pstore::aligned_valloc (file_size, 4096U))
             , file_ (std::make_shared<pstore::file::in_memory> (buffer_, file_size)) {
 
         pstore::database::build_new_store (*file_);

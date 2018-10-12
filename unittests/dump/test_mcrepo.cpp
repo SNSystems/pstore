@@ -98,7 +98,7 @@ namespace {
     // ctor
     // ~~~~
     MCRepoFixture::MCRepoFixture ()
-            : buffer_ (aligned_valloc (file_size_, page_size_))
+            : buffer_ (pstore::aligned_valloc (file_size_, page_size_))
             , file_ (std::make_shared<pstore::file::in_memory> (buffer_, file_size_)) {
         pstore::database::build_new_store (*file_);
         db_.reset (new pstore::database (file_));

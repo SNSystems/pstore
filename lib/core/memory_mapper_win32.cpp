@@ -111,6 +111,24 @@ namespace {
 
 namespace pstore {
 
+    std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+        size += align - 1U;
+
+        auto ptr = reinterpret_cast<std::uint8_t *> (
+            ::VirtualAlloc (nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
+        if (ptr == nullptr) {
+            DWORD const last_error = ::GetLastError ();
+            raise (pstore::win32_erc (last_error), "VirtualAlloc");
+        }
+
+        auto deleter = [ptr](std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
+        auto const mask = ~(std::uintptr_t{align} - 1);
+        auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+            (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
+        return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
+    }
+
+
     //*                 _                                                _           *
     //*   ___ _   _ ___| |_ ___ _ __ ___    _ __   __ _  __ _  ___   ___(_)_______   *
     //*  / __| | | / __| __/ _ \ '_ ` _ \  | '_ \ / _` |/ _` |/ _ \ / __| |_  / _ \  *
@@ -126,11 +144,13 @@ namespace pstore {
         assert (result > 0 && result <= std::numeric_limits<unsigned>::max ());
         return static_cast<unsigned> (result);
     }
-} // namespace pstore
 
 
-namespace pstore {
-
+    //*   _ __ ___   ___ _ __ ___   ___  _ __ _   _    _ __ ___   __ _ _ __  _ __   ___ _ __   *
+    //*  | '_ ` _ \ / _ \ '_ ` _ \ / _ \| '__| | | |  | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|  *
+    //*  | | | | | |  __/ | | | | | (_) | |  | |_| |  | | | | | | (_| | |_) | |_) |  __/ |     *
+    //*  |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, |  |_| |_| |_|\__,_| .__/| .__/ \___|_|     *
+    //*                                       |___/                   |_|   |_|                *
     // read_only_impl
     // ~~~~~~~~~~~~~~
     void memory_mapper_base::read_only_impl (void * addr, std::size_t len) {
@@ -141,16 +161,6 @@ namespace pstore {
         }
     }
 
-} // namespace pstore
-
-
-namespace pstore {
-
-    //*   _ __ ___   ___ _ __ ___   ___  _ __ _   _    _ __ ___   __ _ _ __  _ __   ___ _ __   *
-    //*  | '_ ` _ \ / _ \ '_ ` _ \ / _ \| '__| | | |  | '_ ` _ \ / _` | '_ \| '_ \ / _ \ '__|  *
-    //*  | | | | | |  __/ | | | | | (_) | |  | |_| |  | | | | | | (_| | |_) | |_) |  __/ |     *
-    //*  |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, |  |_| |_| |_|\__,_| .__/| .__/ \___|_|     *
-    //*                                       |___/                   |_|   |_|                *
     // (ctor)
     // ~~~~~~
     memory_mapper::memory_mapper (file::file_handle & file, bool write_enabled,

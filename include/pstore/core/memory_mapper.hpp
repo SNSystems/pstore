@@ -63,6 +63,12 @@
 
 namespace pstore {
 
+    /// Allocates memory whose start address is a multiple of 'align'. This function uses the O/S
+    /// memory allocation API directly and bypasses operator new/malloc(). This is to ensure that
+    /// the library can safely change the memory permission (with mprotect() or equivalent).
+    std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align);
+
+
     /// An interface for accessing the fundamental virtual memory page size on the host.
     class system_page_size_interface {
     public:
