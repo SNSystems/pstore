@@ -98,10 +98,11 @@ namespace {
 
     template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
     std::string
-    dump_leaf (pstore::index::hamt_map<KeyType, ValueType, Hash, KeyEqual> const & index,
+    dump_leaf (pstore::database const & db,
+               pstore::index::hamt_map<KeyType, ValueType, Hash, KeyEqual> const & index,
                std::ostream & os, pstore::address addr) {
         auto const this_id = "leaf" + pstore::to_string (addr.absolute ());
-        auto const kvp = index.load_leaf_node (addr);
+        auto const kvp = index.load_leaf_node (db, addr);
 
         std::ostringstream key_stream;
         key_stream << kvp.first;
@@ -114,12 +115,13 @@ namespace {
     }
 
     template <typename KeyType, typename Hash, typename KeyEqual>
-    std::string dump_leaf (pstore::index::hamt_set<KeyType, Hash, KeyEqual> const & index,
+    std::string dump_leaf (pstore::database const & db,
+                           pstore::index::hamt_set<KeyType, Hash, KeyEqual> const & index,
                            std::ostream & os, pstore::address addr) {
         auto const this_id = "leaf" + pstore::to_string (addr.absolute ());
 
         std::ostringstream key_stream;
-        key_stream << index.load_leaf_node (addr);
+        key_stream << index.load_leaf_node (db, addr);
 
         os << this_id << " [shape=record label=\"" << escape (key_stream.str ()) << "\"]\n";
         return this_id;
@@ -127,43 +129,44 @@ namespace {
 
 
     template <typename IndexType>
-    std::string dump (IndexType const & index, std::ostream & os, index_pointer node,
-                      unsigned shifts);
+    std::string dump (pstore::database const & db, IndexType const & index, std::ostream & os,
+                      index_pointer node, unsigned shifts);
 
 
     template <typename NodeType, typename IndexType>
-    std::string dump_intermediate (IndexType const & index, std::ostream & os, index_pointer node,
-                                   unsigned shifts) {
+    std::string dump_intermediate (pstore::database const & db, IndexType const & index,
+                                   std::ostream & os, index_pointer node, unsigned shifts) {
         assert (!node.is_heap ());
         auto const this_id =
             node_type_name<NodeType>::name + pstore::to_string (node.addr.absolute ());
 
         std::shared_ptr<void const> store_ptr;
         NodeType const * ptr = nullptr;
-        std::tie (store_ptr, ptr) = NodeType::get_node (index.db (), node);
+        std::tie (store_ptr, ptr) = NodeType::get_node (db, node);
         assert (ptr != nullptr);
 
         for (auto const & child : *ptr) {
-            auto const child_id = dump (index, os, child, shifts + hash_index_bits);
+            auto const child_id = dump (db, index, os, child, shifts + hash_index_bits);
             os << this_id << " -> " << child_id << ";\n";
         }
         return this_id;
     }
 
     template <typename IndexType>
-    std::string dump (IndexType const & index, std::ostream & os, index_pointer node,
-                      unsigned shifts) {
+    std::string dump (pstore::database const & db, IndexType const & index, std::ostream & os,
+                      index_pointer node, unsigned shifts) {
         if (node.is_leaf ()) {
             assert (node.is_address ());
-            return dump_leaf (index, os, node.addr);
+            return dump_leaf (db, index, os, node.addr);
         }
         return depth_is_internal_node (shifts)
-                   ? dump_intermediate<internal_node> (index, os, node, shifts)
-                   : dump_intermediate<linear_node> (index, os, node, shifts);
+                   ? dump_intermediate<internal_node> (db, index, os, node, shifts)
+                   : dump_intermediate<linear_node> (db, index, os, node, shifts);
     }
 
     template <typename IndexType>
-    void dump_index (IndexType const * const index, char const * name) {
+    void dump_index (pstore::database const & db, IndexType const * const index,
+                     char const * name) {
         if (index == nullptr) {
             std::cerr << name << " index is empty\n";
             return;
@@ -172,7 +175,7 @@ namespace {
         if (index_pointer const root = index->root ()) {
             auto & os = std::cout;
             os << "digraph " << name << " {\ngraph [rankdir=LR];\n";
-            auto label = dump (*index, os, root, 0U);
+            auto label = dump (db, *index, os, root, 0U);
             os << "root -> " << label << '\n';
             os << "}\n";
         } else {
@@ -186,7 +189,7 @@ namespace {
             char const * name =
                 index_names[static_cast<std::underlying_type<pstore::trailer::indices>::type> (
                     Index)];
-            dump_index (pstore::index::get_index<Index> (db, false /*create*/).get (), name);
+            dump_index (db, pstore::index::get_index<Index> (db, false /*create*/).get (), name);
         }
     }
 } // anonymous namespace

@@ -124,10 +124,11 @@ namespace pstore {
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
 
-            auto const differences = diff (*index, old_revision);
+            auto const differences = diff (db, *index, old_revision);
             std::transform (std::begin (differences), std::end (differences),
-                            std::back_inserter (members), [&index](pstore::address addr) {
-                                return dump::make_value (get_key (index->load_leaf_node (addr)));
+                            std::back_inserter (members), [&db, &index](pstore::address addr) {
+                                return dump::make_value (
+                                    get_key (index->load_leaf_node (db, addr)));
                             });
             return dump::make_value (members);
         }

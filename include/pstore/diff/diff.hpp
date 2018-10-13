@@ -67,10 +67,12 @@ namespace pstore {
             template <typename Index>
             class traverser {
             public:
+                /// \param db  The owning database instance.
                 /// \param index  The index to be traversed.
                 /// \param threshold  Addresses less than the threshold value are "old".
-                traverser (Index const & index, address threshold) noexcept
-                        : index_{index}
+                traverser (database const & db, Index const & index, address threshold) noexcept
+                        : db_{db}
+                        , index_{index}
                         , threshold_{threshold} {}
 
                 result_type operator() () const;
@@ -84,7 +86,6 @@ namespace pstore {
 
                 /// Recursively traverses the members of an internal or linear index node.
                 ///
-                /// \param node  The index node to be visited.
                 /// \param shifts  The depth of the node in the tree structure.
                 /// \param result  A container to which the address of leaf nodes may be added.
                 template <typename Node>
@@ -95,6 +96,7 @@ namespace pstore {
                     return node.is_heap () || node.untag_internal_address () >= threshold_;
                 }
 
+                database const & db_;
                 Index const & index_;
                 address const threshold_;
             };
@@ -138,7 +140,7 @@ namespace pstore {
                                                        gsl::not_null<result_type *> result) const {
                 std::shared_ptr<void const> store_ptr;
                 Node const * ptr = nullptr;
-                std::tie (store_ptr, ptr) = Node::get_node (index_.db (), node);
+                std::tie (store_ptr, ptr) = Node::get_node (db_, node);
                 assert (ptr != nullptr);
 
                 for (index_pointer child : *ptr) {
@@ -152,13 +154,12 @@ namespace pstore {
 
 
         template <typename Index>
-        result_type diff (Index const & index, revision_number old) {
-            auto & db = index.db ();
+        result_type diff (database const & db, Index const & index, revision_number old) {
             if (old == pstore::head_revision || old > db.get_current_revision ()) {
                 return {};
             }
             // addresses less than the threshold value are "old".
-            details::traverser<Index> t{index,
+            details::traverser<Index> t{db, index,
                                         (db.older_revision_footer_pos (old) + 1).to_address ()};
             return t ();
         }

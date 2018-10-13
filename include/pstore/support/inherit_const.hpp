@@ -130,13 +130,14 @@ namespace pstore {
     ///
     /// \tparam T  A type whose constness will determine the constness of
     ///   inherit_const::type.
-    /// \tparam R  The result type with added const if \p T is const.
-    template <typename T, typename R>
+    /// \tparam R  The result type.
+    /// \tparam RC  The const-result type.
+    template <typename T, typename R, typename RC = R const>
     struct inherit_const {
         /// If \p T is const, \p R const otherwise \p R.
         using type =
             typename std::conditional<std::is_const<typename std::remove_reference<T>::type>::value,
-                                      R const, R>::type;
+                                      RC, R>::type;
     };
 
 } // namespace pstore

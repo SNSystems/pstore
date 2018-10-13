@@ -112,10 +112,12 @@ namespace {
 
     template <typename Index, typename AddressIterator>
     std::vector<typename Index::value_type>
-    addresses_to_values (Index const & index, AddressIterator first, AddressIterator last) {
+    addresses_to_values (pstore::database const & db, Index const & index, AddressIterator first,
+                         AddressIterator last) {
         std::vector<typename Index::value_type> values;
-        std::transform (first, last, std::back_inserter (values),
-                        [&index](pstore::address addr) { return index.load_leaf_node (addr); });
+        std::transform (
+            first, last, std::back_inserter (values),
+            [&db, &index](pstore::address addr) { return index.load_leaf_node (db, addr); });
         return values;
     }
 
@@ -145,29 +147,29 @@ TEST_F (Diff, BuildWriteIndexValues) {
     {
         // Check the diff between r2 and r0.
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
-            addresses_to_values (*index, std::begin (actual), std::end (actual));
+            addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, ::testing::UnorderedElementsAre (v1, v2));
     }
 
     {
         // Check the diff between r2 and r1.
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
-            addresses_to_values (*index, std::begin (actual), std::end (actual));
+            addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, ::testing::UnorderedElementsAre (v2));
     }
 
     {
         // Check the diff between r2 and r2.
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
         EXPECT_EQ (actual.size (), 0U);
     }
 }
@@ -193,22 +195,22 @@ TEST_F (Diff, UncomittedTransaction) {
     {
         // Check the diff between now (the uncommitted r2) and r0.
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 0U);
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
-            addresses_to_values (*index, std::begin (actual), std::end (actual));
+            addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, UnorderedElementsAre (v1, v2));
     }
 
     {
         // Check the diff between now and r1.
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 1U);
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         ASSERT_NE (index, nullptr);
         auto const actual_values =
-            addresses_to_values (*index, std::begin (actual), std::end (actual));
+            addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, UnorderedElementsAre (v2));
     }
 
@@ -216,7 +218,7 @@ TEST_F (Diff, UncomittedTransaction) {
         // Note that get_current_revision() still reports 1 even though a transaction is open.
         EXPECT_EQ (db_->get_current_revision (), 1U);
         pstore::diff::result_type actual = pstore::diff::diff (
-            *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
+            *db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_), 2U);
         EXPECT_EQ (actual.size (), 0U);
     }
 

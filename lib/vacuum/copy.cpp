@@ -153,7 +153,7 @@ namespace vacuum {
                 if (!st->done) {
                     auto transaction = pstore::begin (*destination);
 
-                    for (auto const & kvp : *source_names) {
+                    for (auto const & kvp : source_names->make_range (*source)) {
                         std::string const & key = kvp.first;
                         pstore::extent<char> const & extent = kvp.second;
 

@@ -134,14 +134,19 @@ namespace pstore {
             /// \name Iterators
             ///@{
 
-            iterator begin () { return {map_.cbegin ()}; }
-            iterator end () { return {map_.cend ()}; }
+            range<database, hamt_set, iterator> make_range (database & db) { return {db, *this}; }
+            range<database const, hamt_set const, const_iterator>
+            make_range (database const & db) const {
+                return {db, *this};
+            }
 
-            const_iterator begin () const { return {map_.cbegin ()}; }
-            const_iterator end () const { return {map_.cend ()}; }
 
-            const_iterator cbegin () const { return {map_.cbegin ()}; }
-            const_iterator cend () const { return {map_.cend ()}; }
+            iterator begin (database & db) { return {map_.begin (db)}; }
+            iterator end (database & db) { return {map_.end (db)}; }
+            const_iterator begin (database const & db) const { return {map_.cbegin (db)}; }
+            const_iterator end (database const & db) const { return {map_.cend (db)}; }
+            const_iterator cbegin (database const & db) const { return {map_.cbegin (db)}; }
+            const_iterator cend (database const & db) const { return {map_.cend (db)}; }
             ///@}
 
             /// \name Capacity
@@ -185,8 +190,8 @@ namespace pstore {
             template <typename OtherKeyType,
                       typename = typename std::enable_if<
                           serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
-            const_iterator find (OtherKeyType const & key) const {
-                return {map_.find (key)};
+            const_iterator find (database const & db, OtherKeyType const & key) const {
+                return {map_.find (db, key)};
             }
 
             typed_address<header_block> flush (transaction_base & transaction,
@@ -199,12 +204,9 @@ namespace pstore {
             ///@{
 
             /// Read a leaf node from a store.
-            value_type load_leaf_node (address const addr) const {
-                return map_.load_leaf_node (addr).first;
+            value_type load_leaf_node (database const & db, address const addr) const {
+                return map_.load_leaf_node (db, addr).first;
             }
-
-            database & db () noexcept { return map_.db (); }
-            database const & db () const noexcept { return map_.db (); }
 
             index_pointer root () const { return map_.root (); }
             ///@}

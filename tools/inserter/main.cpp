@@ -188,11 +188,13 @@ namespace {
         }
     }
 
-    void find (pstore::index::fragment_index const & index, digest_set const & keys) {
+    void find (pstore::database & database, pstore::index::fragment_index const & index,
+               digest_set const & keys) {
         profile_marker sgn (2);
 
-        parallel_for_each (std::begin (keys), std::end (keys),
-                           [&index](pstore::index::digest key) { index.find (key); });
+        parallel_for_each (
+            std::begin (keys), std::end (keys),
+            [&database, &index](pstore::index::digest key) { index.find (database, key); });
     }
 
 } // namespace
@@ -254,7 +256,7 @@ int main (int argc, char * argv[]) {
             }
         }
 
-        find (*index, keys);
+        find (database, *index, keys);
 
         {
             profile_marker sgn (3);

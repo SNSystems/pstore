@@ -203,8 +203,8 @@ TEST_F (IndirectStringAdder, NewString) {
     {
         auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db_);
         auto const sstring = pstore::make_sstring_view (str);
-        auto pos = name_index->find (pstore::indirect_string{db_, &sstring});
-        ASSERT_NE (pos, name_index->cend ());
+        auto pos = name_index->find (db_, pstore::indirect_string{db_, &sstring});
+        ASSERT_NE (pos, name_index->cend (db_));
 
         pstore::shared_sstring_view owner;
         EXPECT_EQ (pos->as_string_view (&owner), pstore::make_sstring_view (str));

@@ -116,15 +116,15 @@ namespace {
     // ~~~~
     bool SyncFixture::is_found (std::string const & key) {
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
-        return index->find (key) != index->cend ();
+        return index->find (*db_, key) != index->cend (*db_);
     }
 
     // read
     // ~~~~
     void SyncFixture::read (std::string const & key, std::string * value_out) {
         auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
-        auto const it = index->find (key);
-        ASSERT_NE (it, index->cend ());
+        auto const it = index->find (*db_, key);
+        ASSERT_NE (it, index->cend (*db_));
 
         pstore::extent<char> const & r = it->second;
         std::shared_ptr<char const> value = db_->getro (r);

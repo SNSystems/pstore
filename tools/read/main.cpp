@@ -103,8 +103,8 @@ namespace {
             ok = false;
         } else {
             auto str = pstore::make_sstring_view (key);
-            auto const it = strings->find (pstore::indirect_string{db, &str});
-            if (it == strings->cend ()) {
+            auto const it = strings->find (db, pstore::indirect_string{db, &str});
+            if (it == strings->cend (db)) {
                 error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.
@@ -127,8 +127,8 @@ namespace {
             error_stream << NATIVE_TEXT ("Error: Names index was not found\n");
             ok = false;
         } else {
-            auto const it = names->find (key);
-            if (it == names->cend ()) {
+            auto const it = names->find (db, key);
+            if (it == names->cend (db)) {
                 error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
                              << std::endl;
                 // note that the program does not signal failure if the key is missing.

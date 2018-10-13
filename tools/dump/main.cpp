@@ -165,10 +165,14 @@ namespace {
 #endif // PSTORE_CPP_EXCEPTIONS
 
     template <typename Index>
-    auto make_index (char const * name, Index const & index) -> pstore::dump::value_ptr {
+    auto make_index (char const * name, pstore::database const & db, Index const & index)
+        -> pstore::dump::value_ptr {
         using namespace pstore::dump;
         array::container members;
-        for (auto const & kvp : index) {
+        auto r = index.make_range (db);
+        typename Index::const_iterator b = r.begin ();
+        typename Index::const_iterator e = r.end ();
+        for (auto const & kvp : index.make_range (db)) {
             members.push_back (make_value (object::container{{"key", make_value (kvp.first)},
                                                              {"value", make_value (kvp.second)}}));
         }
@@ -185,13 +189,13 @@ namespace {
         array::container result;
         if (std::shared_ptr<pstore::index::write_index> const write =
                 pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
-            result.push_back (make_index ("write", *write));
+            result.push_back (make_index ("write", db, *write));
         }
         if (std::shared_ptr<pstore::index::name_index> const name =
                 pstore::index::get_index<pstore::trailer::indices::name> (db, false /* create */)) {
             result.push_back (make_value (object::container{
                 {"name", make_value ("name")},
-                {"members", make_value (std::begin (*name), std::end (*name))},
+                {"members", make_value (name->begin (db), name->end (db))},
             }));
         }
         return make_value (result);
@@ -284,16 +288,15 @@ namespace {
 
     template <typename IndexType, typename StringToKeyFunction, typename RecordFunction>
     pstore::dump::value_ptr
-    add_specified (IndexType const & index, std::list<std::string> const & items_to_show,
-                   dump_error_code not_found_error, StringToKeyFunction string_to_key,
-                   RecordFunction record_function) {
+    add_specified (pstore::database const & db, IndexType const & index,
+                   std::list<std::string> const & items_to_show, dump_error_code not_found_error,
+                   StringToKeyFunction string_to_key, RecordFunction record_function) {
         pstore::dump::array::container container;
         container.reserve (items_to_show.size ());
 
-        auto end = std::end (index);
+        auto end = index.end (db);
         for (std::string const & t : items_to_show) {
-            auto const key = string_to_key (t);
-            auto pos = index.find (key);
+            auto pos = index.find (db, string_to_key (t));
             if (pos == end) {
                 pstore::raise_error_code (std::make_error_code (not_found_error));
             } else {
@@ -330,7 +333,7 @@ namespace {
             if (items_to_show.size () > 0) {
                 if (auto const index = pstore::index::get_index<Index>(db, false)) {
                     file.emplace_back (index_to_string (Index),
-                                       add_specified (*index, items_to_show, not_found_error,
+                                       add_specified (db, *index, items_to_show, not_found_error,
                                                       string_to_digest, record_function));
                 } else {
                     pstore::raise_error_code (std::make_error_code (no_index));

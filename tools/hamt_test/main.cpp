@@ -164,9 +164,7 @@ namespace {
     /// \param maps It is an input and output parameter. The mapped values are updated once the
     ///        values are saved into the database. It stores the actual map in the database.
     template <typename Map>
-    void insert (pstore::index::fragment_index & index, Map & maps) {
-        pstore::database & db = index.db ();
-
+    void insert (pstore::database & db, pstore::index::fragment_index & index, Map & maps) {
         // Start a transaction...
         auto transaction = pstore::begin (db);
 
@@ -204,12 +202,12 @@ namespace {
     /// \param test_name  A test name which is used to provide useful error information.
     /// \returns True if the test was successful, false otherwise.
     template <typename Map>
-    bool find (pstore::index::fragment_index const & index, Map const & expected_results,
-               std::string const & test_name) {
+    bool find (pstore::database const & db, pstore::index::fragment_index const & index,
+               Map const & expected_results, std::string const & test_name) {
         std::atomic<bool> is_found (true);
-        auto check_key = [&index, &test_name, &is_found](typename Map::value_type value) {
-            auto it = index.find (value.first);
-            if (it == index.cend ()) {
+        auto check_key = [&db, &index, &test_name, &is_found](typename Map::value_type value) {
+            auto it = index.find (db, value.first);
+            if (it == index.cend (db)) {
                 print_cerr ("Test name:", test_name, " Error: ", value.first, ": not found");
                 is_found = false;
             } else if (it->second.addr.to_address () != value.second) {
@@ -250,27 +248,27 @@ int main (int argc, char * argv[]) {
         // Case 1a: generate the map with random keys.
         random_list map1 = generate_random_keys_map (num_keys);
         // Case 1b: insert the random keys.
-        insert<random_list> (*index, map1);
+        insert<random_list> (database, *index, map1);
         // Case 1c: find the random keys.
-        if (!find<random_list> (*index, map1, "random key tests")) {
+        if (!find<random_list> (database, *index, map1, "random key tests")) {
             exit_code = EXIT_FAILURE;
         }
 
         // Case 2a: generate the map with increasing keys.
         less_map map2 = generate_ordered_map<less_map> (num_keys, value_step);
         // Case 2b: insert the increasing key.
-        insert<less_map> (*index, map2);
+        insert<less_map> (database, *index, map2);
         // Case 2c: find the increasing key.
-        if (!find<less_map> (*index, map2, "increasing key tests")) {
+        if (!find<less_map> (database, *index, map2, "increasing key tests")) {
             exit_code = EXIT_FAILURE;
         }
 
         // Case 3a: generate the map with decreasing keys .
         greater_map map3 = generate_ordered_map<greater_map> (num_keys, value_step);
         // Case 3b: insert the decreasing key.
-        insert<greater_map> (*index, map3);
+        insert<greater_map> (database, *index, map3);
         // Case 3c: find the decreasing key.
-        if (!find<greater_map> (*index, map3, "decreasing key tests")) {
+        if (!find<greater_map> (database, *index, map3, "decreasing key tests")) {
             exit_code = EXIT_FAILURE;
         }
 

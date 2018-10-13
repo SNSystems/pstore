@@ -100,11 +100,11 @@ TEST_F (SetFixture, DefaultConstructor) {
 
 // test iterator: empty index.
 TEST_F (SetFixture, EmptyBeginEqualsEnd) {
-    iterator begin = index_->begin ();
-    iterator end = index_->end ();
+    iterator begin = index_->begin (*db_);
+    iterator end = index_->end (*db_);
     EXPECT_EQ (begin, end);
-    const_iterator cbegin = index_->cbegin ();
-    const_iterator cend = index_->cend ();
+    const_iterator cbegin = index_->cbegin (*db_);
+    const_iterator cend = index_->cend (*db_);
     EXPECT_EQ (cbegin, cend);
 }
 
@@ -123,15 +123,15 @@ TEST_F (SetFixture, InsertSingleLeaf) {
 // test find: index only contains a single leaf node.
 TEST_F (SetFixture, FindSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    const_iterator cend = index_->cend ();
+    const_iterator cend = index_->cend (*db_);
     std::string const a{"a"};
-    EXPECT_EQ (index_->find (a), cend);
+    EXPECT_EQ (index_->find (*db_, a), cend);
     index_->insert (t1, a);
-    auto it = index_->find (a);
+    auto it = index_->find (*db_, a);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, a);
     index_->flush (t1, db_->get_current_revision());
-    it = index_->find (a);
+    it = index_->find (*db_, a);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, a);
 }
@@ -141,8 +141,8 @@ TEST_F (SetFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     index_->insert (t1, std::string{"a"});
 
-    iterator begin = index_->begin ();
-    iterator end = index_->end ();
+    iterator begin = index_->begin (*db_);
+    iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
     std::string const & v1 = (*begin);
     EXPECT_EQ ("a", v1);
@@ -157,8 +157,8 @@ TEST_F (SetFixture, InsertHeap) {
     index_->insert (t1, std::string{"b"});
     EXPECT_EQ (2U, index_->size ());
 
-    iterator begin = index_->begin ();
-    iterator end = index_->end ();
+    iterator begin = index_->begin (*db_);
+    iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
     ++begin;
     EXPECT_NE (begin, end);
@@ -172,8 +172,8 @@ TEST_F (SetFixture, InsertLeafStore) {
     index_->insert (t1, std::string{"a"});
     index_->flush (t1, db_->get_current_revision());
 
-    const_iterator begin = index_->cbegin ();
-    const_iterator end = index_->cend ();
+    const_iterator begin = index_->cbegin (*db_);
+    const_iterator end = index_->cend (*db_);
     EXPECT_NE (begin, end);
     std::string const & v1 = (*begin);
     EXPECT_EQ ("a", v1);
@@ -188,8 +188,8 @@ TEST_F (SetFixture, InsertInternalStoreIterator) {
     index_->insert (t1, std::string{"b"});
     index_->flush (t1, db_->get_current_revision());
 
-    const_iterator begin = index_->cbegin ();
-    const_iterator end = index_->cend ();
+    const_iterator begin = index_->cbegin (*db_);
+    const_iterator end = index_->cend (*db_);
     EXPECT_NE (begin, end);
     begin++;
     EXPECT_NE (begin, end);
@@ -218,24 +218,24 @@ TEST_F (SetFixture, InsertInternalStore) {
 // test find: index only contains a single leaf node.
 TEST_F (SetFixture, FindInternal) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    const_iterator cend = index_->cend ();
+    const_iterator cend = index_->cend (*db_);
     std::string ini ("Initial string");
 
     index_->insert (t1, std::string{"a"});
     index_->insert (t1, ini);
-    auto it = index_->find (std::string{"a"});
+    auto it = index_->find (*db_, std::string{"a"});
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, std::string{"a"});
-    it = index_->find (ini);
+    it = index_->find (*db_, ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);
 
     index_->flush (t1, db_->get_current_revision ());
 
-    it = index_->find (std::string{"a"});
+    it = index_->find (*db_, std::string{"a"});
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, std::string{"a"});
-    it = index_->find (ini);
+    it = index_->find (*db_, ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);
     EXPECT_EQ (it->size (), 14U); // Check operator ->

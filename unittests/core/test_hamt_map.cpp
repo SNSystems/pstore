@@ -146,8 +146,8 @@ TEST_F (DefaultIndexFixture, DefaultConstructor) {
 
 // test iterator: empty index.
 TEST_F (DefaultIndexFixture, EmptyBeginEqualsEnd) {
-    default_index::const_iterator begin = index_->cbegin ();
-    default_index::const_iterator end = index_->cend ();
+    default_index::const_iterator begin = index_->cbegin (*db_);
+    default_index::const_iterator end = index_->cend (*db_);
     EXPECT_EQ (begin, end);
 }
 
@@ -185,8 +185,8 @@ TEST_F (DefaultIndexFixture, InsertSingleIterator) {
     std::pair<std::string, std::string> first ("a", "b");
     index_->insert_or_assign (t1, first);
 
-    default_index::iterator begin = index_->begin ();
-    default_index::iterator end = index_->end ();
+    default_index::iterator begin = index_->begin (*db_);
+    default_index::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
     std::string const & v1 = (*begin).first;
     EXPECT_EQ (first.first, v1);
@@ -201,8 +201,8 @@ TEST_F (DefaultIndexFixture, InsertHeap) {
     index_->insert_or_assign (t1, first);
     index_->insert_or_assign (t1, second);
 
-    default_index::iterator begin = index_->begin ();
-    default_index::iterator end = index_->end ();
+    default_index::iterator begin = index_->begin (*db_);
+    default_index::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
     ++begin;
     EXPECT_NE (begin, end);
@@ -217,8 +217,8 @@ TEST_F (DefaultIndexFixture, InsertLeafStore) {
     index_->insert_or_assign (t1, first);
     index_->flush (t1, db_->get_current_revision ());
 
-    default_index::const_iterator begin = index_->cbegin ();
-    default_index::const_iterator end = index_->cend ();
+    default_index::const_iterator begin = index_->cbegin (*db_);
+    default_index::const_iterator end = index_->cend (*db_);
     EXPECT_NE (begin, end);
     std::string const & v1 = (*begin).first;
     EXPECT_EQ (first.first, v1);
@@ -234,13 +234,13 @@ TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
     index_->insert_or_assign (t1, second);
 	index_->flush(t1, db_->get_current_revision());
 
-    default_index::const_iterator begin = index_->cbegin ();
-    default_index::const_iterator end = index_->cend ();
-    EXPECT_NE (begin, end);
-    begin++;
-    EXPECT_NE (begin, end);
-    begin++;
-    EXPECT_EQ (begin, end);
+        default_index::const_iterator begin = index_->cbegin (*db_);
+        default_index::const_iterator end = index_->cend (*db_);
+        EXPECT_NE (begin, end);
+        begin++;
+        EXPECT_NE (begin, end);
+        begin++;
+        EXPECT_EQ (begin, end);
 }
 
 // test insert: index contains an internal store node.
@@ -375,7 +375,7 @@ namespace {
     // find a node
     // ~~~
     bool GenericIndexFixture::is_found (std::string const & key) {
-        return (index_->find (key) != index_->cend ());
+        return (index_->find (*db_, key) != index_->cend (*db_));
     }
 
     // check a leaf node
@@ -442,7 +442,7 @@ TEST_F (HamtRoundTrip, LeafMember) {
 
     index_type index2{*db_, addr};
     ASSERT_EQ (index2.size (), 1U);
-    auto const actual = *index2.begin ();
+    auto const actual = *index2.begin (*db_);
     auto const expected = index_type::value_type{"a", "a"};
     EXPECT_EQ (actual, expected);
 }
@@ -628,8 +628,8 @@ TEST_F (OneLevel, ForwardIteration) {
     this->insert_or_assign (t1, "d");
 
     // Check trie iterator in the heap.
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const v1 = (*begin).first;
@@ -650,8 +650,8 @@ TEST_F (OneLevel, ForwardIteration) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    test_trie::const_iterator cbegin = index_->cbegin ();
-    test_trie::const_iterator cend = index_->cend ();
+    test_trie::const_iterator cbegin = index_->cbegin (*db_);
+    test_trie::const_iterator cend = index_->cend (*db_);
     EXPECT_NE (cbegin, cend);
 
     std::string const v5 = cbegin->first;
@@ -678,7 +678,7 @@ TEST_F (OneLevel, UpsertIteration) {
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = itp.first;
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const v1 = (*begin).first;
@@ -828,13 +828,13 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
         auto root_address = root.untag_internal_address ();
-        auto root_internal = internal_node::read_node (index_->db (), root_address);
+        auto root_internal = internal_node::read_node (*db_, root_address);
         EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
         auto level1_address = level1.untag_internal_address ();
-        auto level1_internal = internal_node::read_node (index_->db (), level1_address);
+        auto level1_internal = internal_node::read_node (*db_, level1_address);
         EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1>::value));
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
@@ -891,13 +891,13 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
         auto root_address = root.untag_internal_address ();
-        auto root_internal = internal_node::read_node (index_->db (), root_address);
+        auto root_internal = internal_node::read_node (*db_, root_address);
         EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
         auto level1_address = level1.untag_internal_address ();
-        auto level1_internal = internal_node::read_node (index_->db (), level1_address);
+        auto level1_internal = internal_node::read_node (*db_, level1_address);
         EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1, 1>::value));
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
@@ -914,8 +914,8 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
     this->insert_or_assign (t1, "c");
 
     // Check trie iterator in the heap.
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -933,8 +933,8 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    test_trie::const_iterator cbegin = index_->cbegin ();
-    test_trie::const_iterator cend = index_->cend ();
+    test_trie::const_iterator cbegin = index_->cbegin (*db_);
+    test_trie::const_iterator cend = index_->cend (*db_);
     EXPECT_NE (cbegin, cend);
 
     std::string const v5 = cbegin->first;
@@ -958,7 +958,7 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionUpsertIterator) {
     // Check trie iterator in the heap.
     EXPECT_TRUE (itp.second);
     test_trie::iterator begin = itp.first;
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1063,40 +1063,29 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         // Check that the trie was laid out as we expected in the store.
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
-        auto root_internal =
-            internal_node::read_node (index_->db (), root.untag_internal_address ());
+        auto root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
 
         auto level1 = (*root_internal)[0];
-        auto level1_internal =
-            internal_node::read_node (index_->db (), level1.untag_internal_address ());
+        auto level1_internal = internal_node::read_node (*db_, level1.untag_internal_address ());
         auto level2 = (*level1_internal)[0];
-        auto level2_internal =
-            internal_node::read_node (index_->db (), level2.untag_internal_address ());
+        auto level2_internal = internal_node::read_node (*db_, level2.untag_internal_address ());
         auto level3 = (*level2_internal)[0];
-        auto level3_internal =
-            internal_node::read_node (index_->db (), level3.untag_internal_address ());
+        auto level3_internal = internal_node::read_node (*db_, level3.untag_internal_address ());
         auto level4 = (*level3_internal)[0];
-        auto level4_internal =
-            internal_node::read_node (index_->db (), level4.untag_internal_address ());
+        auto level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
         auto level5 = (*level4_internal)[0];
-        auto level5_internal =
-            internal_node::read_node (index_->db (), level5.untag_internal_address ());
+        auto level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
         EXPECT_EQ (level5_internal->get_bitmap (), (binary<unsigned, 1, 0, 0, 0, 0, 0>::value));
         auto level6 = (*level5_internal)[0];
-        auto level6_internal =
-            internal_node::read_node (index_->db (), level6.untag_internal_address ());
+        auto level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
         auto level7 = (*level6_internal)[0];
-        auto level7_internal =
-            internal_node::read_node (index_->db (), level7.untag_internal_address ());
+        auto level7_internal = internal_node::read_node (*db_, level7.untag_internal_address ());
         auto level8 = (*level7_internal)[0];
-        auto level8_internal =
-            internal_node::read_node (index_->db (), level8.untag_internal_address ());
+        auto level8_internal = internal_node::read_node (*db_, level8.untag_internal_address ());
         auto level9 = (*level8_internal)[0];
-        auto level9_internal =
-            internal_node::read_node (index_->db (), level9.untag_internal_address ());
+        auto level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
         auto level10 = (*level9_internal)[0];
-        auto level10_internal =
-            internal_node::read_node (index_->db (), level10.untag_internal_address ());
+        auto level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
         EXPECT_EQ (level10_internal->get_bitmap (),
                    (binary<unsigned, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value));
         this->check_is_leaf_node ((*level10_internal)[0]);
@@ -1112,8 +1101,8 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
     this->insert_or_assign (t1, "f");
 
     // Check trie iterator in the heap.
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1128,7 +1117,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    begin = index_->begin ();
+    begin = index_->begin (*db_);
     EXPECT_NE (begin, end);
 
     std::string const v3 = begin->first;
@@ -1148,7 +1137,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
     // Check trie iterator in the heap.
     EXPECT_TRUE (itp.second);
     test_trie::iterator begin = itp.first;
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1250,44 +1239,33 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
 
-        auto root_internal =
-            internal_node::read_node (index_->db (), root.untag_internal_address ());
+        auto root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
         auto level1 = (*root_internal)[0];
-        auto level1_internal =
-            internal_node::read_node (index_->db (), level1.untag_internal_address ());
+        auto level1_internal = internal_node::read_node (*db_, level1.untag_internal_address ());
         auto level2 = (*level1_internal)[0];
-        auto level2_internal =
-            internal_node::read_node (index_->db (), level2.untag_internal_address ());
+        auto level2_internal = internal_node::read_node (*db_, level2.untag_internal_address ());
         auto level3 = (*level2_internal)[0];
-        auto level3_internal =
-            internal_node::read_node (index_->db (), level3.untag_internal_address ());
+        auto level3_internal = internal_node::read_node (*db_, level3.untag_internal_address ());
         auto level4 = (*level3_internal)[0];
-        auto level4_internal =
-            internal_node::read_node (index_->db (), level4.untag_internal_address ());
+        auto level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
         auto level5 = (*level4_internal)[0];
-        auto level5_internal =
-            internal_node::read_node (index_->db (), level5.untag_internal_address ());
+        auto level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
         auto level6 = (*level5_internal)[0];
-        auto level6_internal =
-            internal_node::read_node (index_->db (), level6.untag_internal_address ());
+        auto level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
         auto level7 = (*level6_internal)[0];
-        auto level7_internal =
-            internal_node::read_node (index_->db (), level7.untag_internal_address ());
+        auto level7_internal = internal_node::read_node (*db_, level7.untag_internal_address ());
         auto level8 = (*level7_internal)[0];
-        auto level8_internal =
-            internal_node::read_node (index_->db (), level8.untag_internal_address ());
+        auto level8_internal = internal_node::read_node (*db_, level8.untag_internal_address ());
         auto level9 = (*level8_internal)[0];
-        auto level9_internal =
-            internal_node::read_node (index_->db (), level9.untag_internal_address ());
+        auto level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
         auto level10 = (*level9_internal)[0];
-        auto level10_internal =
-            internal_node::read_node (index_->db (), level10.untag_internal_address ());
+        auto level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
         auto level11 = (*level10_internal)[0];
 
         std::shared_ptr<linear_node const> sptr;
         linear_node const * level11_linear = nullptr;
         std::tie (sptr, level11_linear) =
-            linear_node::get_node (index_->db (), level11.untag_internal_address ());
+            linear_node::get_node (*db_, level11.untag_internal_address ());
 
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_TRUE (this->is_found ("g")) << "key \"g\" should be present in the index (store) ";
@@ -1303,8 +1281,8 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
     this->insert_or_assign (t1, "i");
 
     // Check trie iterator in the heap.
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1322,7 +1300,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    begin = index_->begin ();
+    begin = index_->begin (*db_);
     EXPECT_NE (begin, end);
 
     std::string const v4 = begin->first;
@@ -1337,7 +1315,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
     EXPECT_EQ (begin, end);
 
     this->insert_or_assign (t1, "g", "new value g");
-    begin = index_->begin ();
+    begin = index_->begin (*db_);
     std::string const & v7 = (*begin).second;
     EXPECT_EQ ("new value g", v7);
 
@@ -1360,8 +1338,8 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
     this->insert_or_assign (t1, "i");
 
     // Check trie iterator in the heap.
-    test_trie::const_iterator first = index_->find (std::string{"h"});
-    test_trie::const_iterator last = index_->end ();
+    test_trie::const_iterator first = index_->find (*db_, std::string{"h"});
+    test_trie::const_iterator last = index_->end (*db_);
     EXPECT_NE (first, last);
     std::string const & v1 = (*first).first;
     EXPECT_EQ ("h", v1);
@@ -1470,8 +1448,8 @@ TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
     this->insert_or_assign (t1, "d");
 
     // Check trie iterator in the heap.
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1492,8 +1470,8 @@ TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    test_trie::const_iterator cbegin = index_->cbegin ();
-    test_trie::const_iterator cend = index_->cend ();
+    test_trie::const_iterator cbegin = index_->cbegin (*db_);
+    test_trie::const_iterator cend = index_->cend (*db_);
     EXPECT_NE (cbegin, cend);
 
     std::string const v5 = cbegin->first;
@@ -1520,7 +1498,7 @@ TEST_F (FourNodesOnTwoLevels, UpsertIteration) {
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = itp.first;
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1615,8 +1593,8 @@ TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
     this->insert_or_assign (t1, "c");
     this->insert_or_assign (t1, "d");
 
-    test_trie::iterator begin = index_->begin ();
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator begin = index_->begin (*db_);
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1637,8 +1615,8 @@ TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
     this->check_is_store_internal_node (index_->root ());
 
     // Check trie iterator in the store.
-    test_trie::const_iterator cbegin = index_->cbegin ();
-    test_trie::const_iterator cend = index_->cend ();
+    test_trie::const_iterator cbegin = index_->cbegin (*db_);
+    test_trie::const_iterator cend = index_->cend (*db_);
     EXPECT_NE (cbegin, cend);
 
     std::string const v5 = cbegin->first;
@@ -1664,7 +1642,7 @@ TEST_F (LeavesAtDifferentLevels, UpsertIteration) {
     std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "a");
 
     test_trie::iterator begin = itp.first;
-    test_trie::iterator end = index_->end ();
+    test_trie::iterator end = index_->end (*db_);
     EXPECT_NE (begin, end);
 
     std::string const & v1 = (*begin).first;
@@ -1754,9 +1732,9 @@ namespace {
         test_trie const & index = *index_.get ();
         // Using an iterator.
         check_for_error (
-            [&index]() {
+            [this, &index]() {
                 std::list<test_trie::value_type> visited;
-                std::copy (std::begin (index), std::end (index),
+                std::copy (index.begin (*db_), index.end (*db_),
                            std::inserter (visited, visited.end ()));
             },
             pstore::error_code::index_corrupt);
@@ -1766,7 +1744,7 @@ namespace {
     // ~~~~
     void CorruptInternalNodes::find () const {
         test_trie const & index = *index_.get ();
-        check_for_error ([&index]() { index.find (std::string{"a"}); },
+        check_for_error ([this, &index]() { index.find (*db_, std::string{"a"}); },
                          pstore::error_code::index_corrupt);
     }
 
