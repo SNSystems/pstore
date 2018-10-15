@@ -63,7 +63,8 @@ namespace {
 
 TEST_F (TicketTest, Empty) {
     std::vector<ticket_member> m;
-    pstore::extent<ticket> extent = ticket::alloc (transaction_, indirect_string_address (0U), m);
+    pstore::extent<ticket> extent =
+        ticket::alloc (transaction_, indirect_string_address (0U), std::begin (m), std::end (m));
     auto t = reinterpret_cast<ticket const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==
@@ -83,7 +84,7 @@ TEST_F (TicketTest, SingleMember) {
     ticket_member sm{digest, name, linkage};
 
     std::vector<ticket_member> v{sm};
-    ticket::alloc (transaction_, output_file_path, v);
+    ticket::alloc (transaction_, output_file_path, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
 
@@ -107,7 +108,7 @@ TEST_F (TicketTest, MultipleMembers) {
     ticket_member mm2{digest2, name + 24U, linkage};
 
     std::vector<ticket_member> v{mm1, mm2};
-    ticket::alloc (transaction_, output_file_path, v);
+    ticket::alloc (transaction_, output_file_path, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
 

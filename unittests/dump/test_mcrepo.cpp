@@ -214,8 +214,9 @@ TEST_F (MCRepoFixture, DumpTicket) {
     // ticket_member sm{digest, name, linkage};
     std::vector<ticket_member> v{{pstore::index::digest{28U}, this->store_str (transaction, "main"),
                                   linkage_type::external}};
-    auto ticket = ticket::load (
-        *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/"), v));
+    auto ticket = ticket::load (*db_, ticket::alloc (transaction,
+                                                     this->store_str (transaction, "/home/user/"),
+                                                     std::begin (v), std::end (v)));
 
     std::ostringstream out;
     pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, ticket);

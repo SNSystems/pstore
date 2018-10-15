@@ -129,14 +129,16 @@ namespace pstore {
             ///
             /// \param transaction  The transaction to which the ticket will be appended.
             /// \param path  A ticket file path address in the store.
-            /// \param members  A vector of ticket_member whose contents will be copied into the
-            /// newly allocated ticket.
-            /// \result A pair of a pointer and an extent which describes the in-store location of
-            /// the allocated ticket.
-            template <typename TransactionType>
+            /// \param first_member  The first of a sequence of ticket_member instances. The range
+            ///   defined by \p first_member and \p last_member will be copied into the newly
+            ///   allocated ticket.
+            /// \param last_member  The end of the range of ticket_member instances.
+            /// \result A pair of a pointer and an extent which describes
+            ///   the in-store location of the allocated ticket.
+            template <typename TransactionType, typename Iterator>
             static extent<ticket> alloc (TransactionType & transaction,
-                                         typed_address<indirect_string> path,
-                                         std::vector<ticket_member> const & members);
+                                         typed_address<indirect_string> path, Iterator first_member,
+                                         Iterator last_member);
 
             /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
@@ -215,12 +217,13 @@ namespace pstore {
 
         // alloc
         // ~~~~~
-        template <typename TransactionType>
+        template <typename TransactionType, typename Iterator>
         auto ticket::alloc (TransactionType & transaction, typed_address<indirect_string> path,
-                            std::vector<ticket_member> const & members)
-            -> extent<ticket> {
+                            Iterator first_member, Iterator last_member) -> extent<ticket> {
             // First work out its size.
-            std::uint64_t const num_members = members.size ();
+            auto const dist = std::distance (first_member, last_member);
+            assert (dist >= 0);
+            auto const num_members = static_cast<std::uint64_t> (dist);
             auto const size = size_bytes (num_members);
 
             // Allocate the storage.
@@ -230,7 +233,7 @@ namespace pstore {
             // Write the data to the store.
             ptr->path_addr_ = path;
             ptr->size_ = num_members;
-            std::copy (members.begin (), members.end (), ptr->begin ());
+            std::copy (first_member, last_member, ptr->begin ());
             return pstore::extent<ticket> (typed_address<ticket> (addr), size);
         }
 
