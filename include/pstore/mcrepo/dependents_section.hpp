@@ -56,6 +56,7 @@
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/mcrepo/ticket.hpp"
+#include "pstore/support/inherit_const.hpp"
 
 namespace pstore {
     namespace repo {
@@ -77,8 +78,8 @@ namespace pstore {
         /// are present in the compilation's final ticket.
         class dependents {
         public:
-            using iterator = typed_address<ticket_member> *;
-            using const_iterator = typed_address<ticket_member> const *;
+            using iterator = typed_address<compilation_member> *;
+            using const_iterator = typed_address<compilation_member> const *;
 
             template <typename Iterator>
             dependents (Iterator begin, Iterator end);
@@ -89,13 +90,11 @@ namespace pstore {
             /// \name Element access
             ///@{
 
-            typed_address<ticket_member> operator[] (std::size_t i) const {
-                assert (i < size_);
-                return ticket_members_[i];
+            typed_address<compilation_member> const & operator[] (std::size_t i) const {
+                return index_impl (*this, i);
             }
-            typed_address<ticket_member> & operator[] (std::size_t i) {
-                assert (i < size_);
-                return ticket_members_[i];
+            typed_address<compilation_member> & operator[] (std::size_t i) {
+                return index_impl (*this, i);
             }
             ///@}
 
@@ -140,14 +139,21 @@ namespace pstore {
                 -> std::shared_ptr<dependents const>;
 
         private:
+            template <typename Dependents, typename ResultType = typename inherit_const<
+                                               Dependents, typed_address<compilation_member>>::type>
+            static ResultType & index_impl (Dependents & v, std::size_t pos) {
+                assert (pos < v.size ());
+                return v.ticket_members_[pos];
+            }
+
             std::uint64_t size_;
-            typed_address<ticket_member> ticket_members_[1];
+            typed_address<compilation_member> ticket_members_[1];
         };
 
         template <typename Iterator>
         dependents::dependents (Iterator begin, Iterator end) {
             static_assert (std::is_same<typename std::iterator_traits<Iterator>::value_type,
-                                        typed_address<ticket_member>>::value,
+                                        typed_address<compilation_member>>::value,
                            "Iterator value_type must be typed_address<ticket_member>");
 
             auto const size = std::distance (begin, end);
@@ -172,7 +178,7 @@ namespace pstore {
         //*                                            |_|                              *
         class dependents_creation_dispatcher final : public section_creation_dispatcher {
         public:
-            using const_iterator = typed_address<ticket_member> const *;
+            using const_iterator = typed_address<compilation_member> const *;
 
             dependents_creation_dispatcher (const_iterator begin, const_iterator end)
                     : section_creation_dispatcher (section_kind::dependent)

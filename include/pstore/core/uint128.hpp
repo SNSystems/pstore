@@ -47,6 +47,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <ostream>
 #include <string>
@@ -131,6 +132,18 @@ namespace pstore {
         return !(rhs < lhs);
     }
 
-} // namespace pstore
+} // end namespace pstore
+
+namespace std {
+    template <>
+    struct hash<pstore::uint128> {
+        using argument_type = pstore::uint128;
+        using result_type = size_t;
+
+        result_type operator() (argument_type const & s) const {
+            return std::hash<std::uint64_t>{}(s.low ()) ^ std::hash<std::uint64_t>{}(s.high ());
+        }
+    };
+} // end namespace std
 
 #endif // PSTORE_UINT128_HPP

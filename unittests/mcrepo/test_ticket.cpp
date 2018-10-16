@@ -62,7 +62,7 @@ namespace {
 } // namespace
 
 TEST_F (TicketTest, Empty) {
-    std::vector<ticket_member> m;
+    std::vector<compilation_member> m;
     pstore::extent<ticket> extent =
         ticket::alloc (transaction_, indirect_string_address (0U), std::begin (m), std::end (m));
     auto t = reinterpret_cast<ticket const *> (extent.addr.absolute ());
@@ -78,12 +78,14 @@ TEST_F (TicketTest, Empty) {
 TEST_F (TicketTest, SingleMember) {
     constexpr auto output_file_path = indirect_string_address (64U);
     constexpr auto digest = pstore::index::digest{28U};
+    constexpr auto extent = pstore::extent<pstore::repo::fragment> (
+        pstore::typed_address<pstore::repo::fragment>::make (3), 5U);
     constexpr auto name = indirect_string_address (32U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
 
-    ticket_member sm{digest, name, linkage};
+    compilation_member sm{digest, extent, name, linkage};
 
-    std::vector<ticket_member> v{sm};
+    std::vector<compilation_member> v{sm};
     ticket::alloc (transaction_, output_file_path, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
@@ -92,7 +94,8 @@ TEST_F (TicketTest, SingleMember) {
     EXPECT_FALSE (t->empty ());
     EXPECT_EQ (output_file_path, t->path ());
     EXPECT_EQ (sizeof (ticket), t->size_bytes ());
-    EXPECT_EQ (digest, (*t)[0].digest.low ());
+    EXPECT_EQ (digest, (*t)[0].digest);
+    EXPECT_EQ (extent, (*t)[0].fext);
     EXPECT_EQ (name, (*t)[0].name);
     EXPECT_EQ (linkage, (*t)[0].linkage);
 }
@@ -101,20 +104,24 @@ TEST_F (TicketTest, MultipleMembers) {
     constexpr auto output_file_path = indirect_string_address (32U);
     constexpr auto digest1 = pstore::index::digest{128U};
     constexpr auto digest2 = pstore::index::digest{144U};
+    constexpr auto extent1 = pstore::extent<pstore::repo::fragment> (
+        pstore::typed_address<pstore::repo::fragment>::make (1), 1U);
+    constexpr auto extent2 = pstore::extent<pstore::repo::fragment> (
+        pstore::typed_address<pstore::repo::fragment>::make (2), 2U);
     constexpr auto name = indirect_string_address (16U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
 
-    ticket_member mm1{digest1, name, linkage};
-    ticket_member mm2{digest2, name + 24U, linkage};
+    compilation_member mm1{digest1, extent1, name, linkage};
+    compilation_member mm2{digest2, extent2, name + 24U, linkage};
 
-    std::vector<ticket_member> v{mm1, mm2};
+    std::vector<compilation_member> v{mm1, mm2};
     ticket::alloc (transaction_, output_file_path, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
 
     EXPECT_EQ (2U, t->size ());
     EXPECT_FALSE (t->empty ());
-    EXPECT_EQ (80U, t->size_bytes ());
+    EXPECT_EQ (112U, t->size_bytes ());
     for (auto const & m : *t) {
         EXPECT_EQ (linkage, m.linkage);
     }

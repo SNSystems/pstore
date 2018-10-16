@@ -154,20 +154,25 @@ TEST_F (MCRepoFixture, DumpFragment) {
         data.xfixups.emplace_back (external_fixup{name, 3, 3, 3});
     }
 
-    // Build the ticket_member 'foo'
-    auto const addr = pstore::typed_address<ticket_member>{transaction.allocate<ticket_member> ()};
+    // Build the compilation member 'foo'
+    auto const addr =
+        pstore::typed_address<compilation_member>{transaction.allocate<compilation_member> ()};
     {
-        auto ptr = transaction.getrw (make_extent (addr, sizeof (ticket_member)));
-        (*ptr) = ticket_member{pstore::index::digest{28U}, name, linkage_type::internal};
+        auto ptr = transaction.getrw (make_extent (addr, sizeof (compilation_member)));
+        (*ptr) =
+            compilation_member{pstore::index::digest{28U},
+                               pstore::extent<pstore::repo::fragment> (
+                                   pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
+                               name, linkage_type::internal};
     }
 
-    std::array<pstore::typed_address<ticket_member>, 1> dependents{{addr}};
+    std::array<pstore::typed_address<compilation_member>, 1> dependents{{addr}};
 
     // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's various sections.
     std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
     dispatchers.emplace_back (new generic_section_creation_dispatcher (data.kind, &data));
-    dispatchers.emplace_back (
-        new dependents_creation_dispatcher (dependents.data (), dependents.data () + dependents.size ()));
+    dispatchers.emplace_back (new dependents_creation_dispatcher (
+        dependents.data (), dependents.data () + dependents.size ()));
 
     auto fragment = fragment::load (
         *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
@@ -178,7 +183,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     value->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (18U, lines.size ());
+    ASSERT_EQ (19U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -201,6 +206,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "foo"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "internal"));
 }
@@ -211,9 +218,11 @@ TEST_F (MCRepoFixture, DumpTicket) {
     // Write output file path "/home/user/test.c"
     transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
-    // ticket_member sm{digest, name, linkage};
-    std::vector<ticket_member> v{{pstore::index::digest{28U}, this->store_str (transaction, "main"),
-                                  linkage_type::external}};
+    std::vector<compilation_member> v{
+        {pstore::index::digest{28U},
+         pstore::extent<pstore::repo::fragment> (
+             pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
+         this->store_str (transaction, "main"), linkage_type::external}};
     auto ticket = ticket::load (*db_, ticket::alloc (transaction,
                                                      this->store_str (transaction, "/home/user/"),
                                                      std::begin (v), std::end (v)));
@@ -223,12 +232,14 @@ TEST_F (MCRepoFixture, DumpTicket) {
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (5U, lines.size ());
+    ASSERT_EQ (6U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("members", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));

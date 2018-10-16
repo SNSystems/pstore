@@ -128,7 +128,7 @@ namespace pstore {
             (void) sk;
             (void) hex_mode;
             return make_value (std::begin (dependents), std::end (dependents),
-                               [&db](typed_address<repo::ticket_member> const & member) {
+                               [&db](typed_address<repo::compilation_member> const & member) {
                                    return make_value (db, *db.getro (member));
                                });
         }
@@ -174,11 +174,12 @@ namespace pstore {
 #undef X
         }
 
-        value_ptr make_value (database const & db, repo::ticket_member const & member) {
+        value_ptr make_value (database const & db, repo::compilation_member const & member) {
             using namespace serialize;
             using archive::make_reader;
             return make_value (object::container{
                 {"digest", make_value (member.digest)},
+                {"fext", make_value (member.fext)},
                 {"name", make_value (indirect_string::read (db, member.name))},
                 {"linkage", make_value (member.linkage)},
             });

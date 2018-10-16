@@ -61,63 +61,75 @@ namespace pstore {
         enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
 #undef X
 
-        //*  _   _    _       _                     _              *
-        //* | |_(_)__| |_____| |_   _ __  ___ _ __ | |__  ___ _ _  *
-        //* |  _| / _| / / -_)  _| | '  \/ -_) '  \| '_ \/ -_) '_| *
-        //*  \__|_\__|_\_\___|\__| |_|_|_\___|_|_|_|_.__/\___|_|   *
-        //*                                                        *
-        /// \brief Represents an individual element in a ticket.
-        /// The ticket member provides the connection between a symbol name, its linkage, and
+        //*                    _ _      _   _                            _              *
+        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
+        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
+        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| |_|_|_\___|_|_|_|_.__/\___|_|   *
+        //*              |_|                                                            *
+        /// \brief Represents an individual symbol in a compilation.
+        ///
+        /// The compilation member provides the connection between a symbol name, its linkage, and
         /// the fragment which holds the associated data.
-        struct ticket_member {
-            /// \param d  The fragment digest for this ticket.
+        struct compilation_member {
+            /// \param d  The fragment digest for this compilation symbol.
+            /// \param x  The fragment extent for this compilation symbol.
             /// \param n  Symbol name address.
             /// \param l  The symbol linkage.
-            ticket_member (index::digest d, typed_address<indirect_string> n, linkage_type l)
-                    : digest (d)
-                    , name (n)
-                    , linkage (l) {}
+            compilation_member (index::digest d, extent<fragment> x,
+                                typed_address<indirect_string> n, linkage_type l)
+                    : digest{d}
+                    , fext{x}
+                    , name{n}
+                    , linkage{l} {}
+
+            /// The digest of the fragment reference by this compilation symbol.
             index::digest digest;
+            /// The extent of the fragment referenced by this compilation symbol.
+            extent<fragment> fext;
             typed_address<indirect_string> name;
             linkage_type linkage;
-            std::uint16_t padding1 = 0;
-            std::uint32_t padding2 = 0;
+            std::uint8_t padding1 = 0;
+            std::uint16_t padding2 = 0;
+            std::uint32_t padding3 = 0;
 
-            /// \brief Returns a pointer to the ticket_member which is in-store.
+            /// \brief Returns a pointer to an in-store compilation member instance.
             ///
-            /// \param db The database from which the ticket_member should be loaded.
-            /// \param addr Address of the ticket_member in the store.
-            /// \result a pointer to the ticket_member in-store memory.
-            static std::shared_ptr<ticket_member const>
-            load (pstore::database const & db, pstore::typed_address<ticket_member> addr) {
+            /// \param db  The database from which the ticket_member should be loaded.
+            /// \param addr  Address of the compilation member.
+            /// \result  A pointer to the in-store compilation member.
+            static std::shared_ptr<compilation_member const>
+            load (pstore::database const & db, pstore::typed_address<compilation_member> addr) {
                 return db.getro (addr);
             }
         };
 
-        static_assert (std::is_standard_layout<ticket_member>::value,
+        static_assert (std::is_standard_layout<compilation_member>::value,
                        "ticket_member must satisfy StandardLayoutType");
-        static_assert (offsetof (ticket_member, digest) == 0,
-                       "Digest offset differs from expected value");
-        static_assert (sizeof (ticket_member) == 32, "ticket_member size does not match expected");
-        static_assert (offsetof (ticket_member, name) == 16,
-                       "Name offset differs from expected value");
-        static_assert (offsetof (ticket_member, linkage) == 24,
-                       "Linkage offset differs from expected value");
-        static_assert (offsetof (ticket_member, padding1) == 26,
-                       "Padding1 offset differs from expected value");
-        static_assert (offsetof (ticket_member, padding2) == 28,
-                       "Padding2 offset differs from expected value");
+        static_assert (sizeof (compilation_member) == 48,
+                       "compilation_member size does not match expected");
+        static_assert (offsetof (compilation_member, digest) == 0,
+                       "digest offset differs from expected value");
+        static_assert (offsetof (compilation_member, fext) == 16,
+                       "extent offset differs from expected value");
+        static_assert (offsetof (compilation_member, name) == 32,
+                       "name offset differs from expected value");
+        static_assert (offsetof (compilation_member, linkage) == 40,
+                       "linkage offset differs from expected value");
+        static_assert (offsetof (compilation_member, padding1) == 41,
+                       "padding1 offset differs from expected value");
+        static_assert (offsetof (compilation_member, padding2) == 42,
+                       "padding2 offset differs from expected value");
 
         //*  _   _    _       _    *
         //* | |_(_)__| |_____| |_  *
         //* |  _| / _| / / -_)  _| *
         //*  \__|_\__|_\_\___|\__| *
         //*                        *
-        /// \brief A ticket is a holder for zero or more `ticket_member` instances.
+        /// \brief A ticket is a holder for zero or more `compilation_member` instances.
         class ticket {
         public:
-            using iterator = ticket_member *;
-            using const_iterator = ticket_member const *;
+            using iterator = compilation_member *;
+            using const_iterator = compilation_member const *;
 
             void operator delete (void * p);
 
@@ -152,7 +164,7 @@ namespace pstore {
 
             /// \name Element access
             ///@{
-            ticket_member const & operator[] (std::size_t i) const {
+            compilation_member const & operator[] (std::size_t i) const {
                 assert (i < size_);
                 return members_[i];
             }
@@ -209,7 +221,7 @@ namespace pstore {
 
             typed_address<indirect_string> path_addr_;
             std::uint64_t size_ = 0;
-            ticket_member members_[1];
+            compilation_member members_[1];
         };
 
         static_assert (std::is_standard_layout<ticket>::value,

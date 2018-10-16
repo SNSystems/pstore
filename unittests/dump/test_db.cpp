@@ -120,6 +120,18 @@ TEST (Database, Extent) {
                  ElementsAre ("{", "addr:", "0x0,", "size:", "0x0", "}"));
 }
 
+namespace {
+
+    template <typename Int>
+    std::string to_hex_string (Int v) {
+        std::ostringstream os;
+        os << std::hex << "0x" << v;
+        return os.str ();
+    }
+
+} // end anonymous namespace
+
+
 TEST (Database, Header) {
     using ::testing::_;
     using ::testing::ElementsAre;
@@ -134,7 +146,9 @@ TEST (Database, Header) {
                  ElementsAre ("signature1", ":", "[", "0x70,", "0x53,", "0x74,", "0x72", "]"));
     EXPECT_THAT (split_tokens (lines.at (1)), ElementsAre ("signature2", ":", "0x507ffff"));
     EXPECT_THAT (split_tokens (lines.at (2)),
-                 ElementsAre ("version", ":", "[", "0x0,", "0x4", "]"));
+                 ElementsAre ("version", ":", "[",
+                              to_hex_string (pstore::header::major_version) + ",",
+                              to_hex_string (pstore::header::minor_version), "]"));
     EXPECT_THAT (split_tokens (lines.at (3)), ElementsAre ("uuid", ":", _));
     EXPECT_THAT (split_tokens (lines.at (4)), ElementsAre ("crc", ":", _));
     EXPECT_THAT (split_tokens (lines.at (5)), ElementsAre ("footer_pos", ":", "0x0"));

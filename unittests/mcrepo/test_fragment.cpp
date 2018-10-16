@@ -88,22 +88,22 @@ namespace {
                                 pstore::make_pointee_adaptor (fdata.end ()));
     }
 
-    template <typename SectionIterator, typename TicketMemberIterator>
+    template <typename SectionIterator, typename CompilationMemberIterator>
     pstore::extent<fragment>
     build_fragment (transaction & transaction, SectionIterator section_begin,
-                    SectionIterator section_end, TicketMemberIterator ticket_member_begin,
-                    TicketMemberIterator ticket_member_end) {
+                    SectionIterator section_end, CompilationMemberIterator compilation_member_begin,
+                    CompilationMemberIterator compilation_member_end) {
         static_assert (
-            (std::is_same<typename std::iterator_traits<TicketMemberIterator>::value_type,
-                          pstore::typed_address<ticket_member>>::value),
-            "Iterator value_type should be ticket_member typed_address");
-        assert (std::distance (ticket_member_begin, ticket_member_end) > 0);
+            (std::is_same<typename std::iterator_traits<CompilationMemberIterator>::value_type,
+                          pstore::typed_address<compilation_member>>::value),
+            "Iterator value_type should be typed_address<compilation_member>");
+        assert (std::distance (compilation_member_begin, compilation_member_end) > 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
             build_sections (section_begin, section_end);
 
         dispatchers.emplace_back (
-            new dependents_creation_dispatcher (ticket_member_begin, ticket_member_end));
+            new dependents_creation_dispatcher (compilation_member_begin, compilation_member_end));
 
         return fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
                                 pstore::make_pointee_adaptor (dispatchers.end ()));
@@ -205,8 +205,8 @@ TEST_F (FragmentTest, MakeTextSectionWithDependents) {
 
     std::vector<section_content> c;
 
-    constexpr auto addr1 = pstore::typed_address<ticket_member>::make (32U);
-    std::vector<pstore::typed_address<ticket_member>> d{addr1};
+    constexpr auto addr1 = pstore::typed_address<compilation_member>::make (32U);
+    std::vector<pstore::typed_address<compilation_member>> d{addr1};
 
     auto extent = build_fragment (transaction_, std::begin (c), std::end (c), d.data (),
                                   d.data () + d.size ());
