@@ -47,6 +47,17 @@
 
 using namespace pstore::repo;
 
+std::ostream & pstore::repo::operator<< (std::ostream & os, linkage_type l) {
+    char const * str = "unknown";
+    switch (l) {
+#define X(a)                                                                                       \
+    case linkage_type::a: str = #a; break;
+        PSTORE_REPO_LINKAGE_TYPES
+#undef X
+    }
+    return os << str;
+}
+
 // operator new
 // ~~~~~~~~~~~~
 void * ticket::operator new (std::size_t s, nMembers size) {

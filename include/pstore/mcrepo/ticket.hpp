@@ -61,6 +61,8 @@ namespace pstore {
         enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
 #undef X
 
+        std::ostream & operator<< (std::ostream & os, linkage_type l);
+
         //*                    _ _      _   _                            _              *
         //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
         //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
