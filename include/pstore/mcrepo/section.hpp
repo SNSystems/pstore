@@ -54,8 +54,8 @@ namespace pstore {
 
 #define PSTORE_MCREPO_SECTION_KINDS                                                                \
     X (text)                                                                                       \
-    X (bss)                                                                                        \
     X (data)                                                                                       \
+    X (bss)                                                                                        \
     X (rel_ro)                                                                                     \
     X (mergeable_1_byte_c_string)                                                                  \
     X (mergeable_2_byte_c_string)                                                                  \
@@ -65,8 +65,8 @@ namespace pstore {
     X (mergeable_const_16)                                                                         \
     X (mergeable_const_32)                                                                         \
     X (read_only)                                                                                  \
-    X (thread_bss)                                                                                 \
     X (thread_data)                                                                                \
+    X (thread_bss)                                                                                 \
     X (debug_line)                                                                                 \
     X (debug_string)                                                                               \
     X (debug_ranges)                                                                               \
@@ -87,6 +87,11 @@ namespace pstore {
             using utype = std::underlying_type<section_kind>::type;
             return static_cast<utype> (t) < static_cast<utype> (first_repo_metadata_section);
         }
+
+
+        /// An empty class used as the base type for all sections. 
+        struct section_base {};
+
 
 
         //*                  _   _               _ _               _      _             *

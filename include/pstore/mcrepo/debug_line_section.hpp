@@ -58,7 +58,7 @@ namespace pstore {
 
         // TODO: modelling the debug line section as a "generic_section plus an extent for the CU
         // header is expedient but we probably don't need to store the alignment or xfixup array.
-        class debug_line_section {
+        class debug_line_section : public section_base {
         public:
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
             debug_line_section (

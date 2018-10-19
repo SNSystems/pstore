@@ -154,7 +154,7 @@ namespace pstore {
         //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
         //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
         //* |___/                                                    *
-        class generic_section {
+        class generic_section : public section_base {
         public:
             /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
