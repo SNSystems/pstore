@@ -439,6 +439,18 @@ namespace std {
             return std::hash<decltype (abs)>{}(abs);
         }
     };
+
+    template <typename T>
+    struct hash<pstore::typed_address<T>> {
+        using argument_type = pstore::typed_address<T>;
+        using result_type = std::size_t;
+
+        result_type operator() (argument_type s) const {
+            auto addr = s.to_address ();
+            return std::hash<decltype (addr)>{}(addr);
+        }
+    };
+
 } // namespace std
 
 #endif // PSTORE_ADDRESS_HPP
