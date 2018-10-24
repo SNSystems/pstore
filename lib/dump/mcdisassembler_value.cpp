@@ -219,6 +219,11 @@ namespace {
         return true;
     }
 
+} // anonymous namespace
+
+#endif // PSTORE_IS_INSIDE_LLVM
+
+namespace {
 
     pstore::dump::value_ptr make_hex_dump_value (std::uint8_t const * first,
                                                  std::uint8_t const * last, bool hex_mode) {
@@ -230,7 +235,10 @@ namespace {
         }
         return v;
     }
-} // anonymous namespace
+
+} // end anonymous namespace
+
+#if PSTORE_IS_INSIDE_LLVM
 
 namespace pstore {
     namespace dump {
