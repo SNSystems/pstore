@@ -76,7 +76,7 @@ namespace pstore {
 
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
 
-        void set_name (::pstore::gsl::czstring name) {
+        void set_name (gsl::czstring name) {
             // This code taken from http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx
             // Sadly, threads don't actually have names in Win32. The process via
             // RaiseException is just a "Secret Handshake" with the VS Debugger, who
@@ -114,7 +114,7 @@ namespace pstore {
             }
         }
 
-        char const * get_name (::pstore::gsl::span<char, name_size> name /*out*/) {
+        char const * get_name (gsl::span<char, name_size> name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
                 throw std::system_error (EINVAL, std::generic_category ());
@@ -154,7 +154,7 @@ namespace pstore {
 #endif
 
         // TODO: make this gsl::not_null<>
-        void set_name (::pstore::gsl::czstring name) {
+        void set_name (gsl::czstring name) {
             // pthread support for setting thread names comes in various non-portable forms.
             // Here I'm supporting three versions:
             // - the single argument version used by Mac OS X
@@ -183,7 +183,7 @@ namespace pstore {
 #endif
         }
 
-        char const * get_name (::pstore::gsl::span<char, name_size> name /*out*/) {
+        char const * get_name (gsl::span<char, name_size> name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});
@@ -206,7 +206,7 @@ namespace pstore {
 
         std::string get_name () {
             std::array<char, name_size> buffer;
-            return {get_name (::pstore::gsl::make_span (buffer))};
+            return {get_name (gsl::make_span (buffer))};
         }
     } // namespace threads
 } // namespace pstore
