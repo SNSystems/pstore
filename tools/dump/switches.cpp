@@ -132,6 +132,10 @@ namespace {
                            cl::desc ("Emit address values as an explicit segment/offset object"),
                            cl::cat (HowCat));
 
+    cl::opt<std::string>
+        Triple ("triple", cl::desc ("The target triple to use for disassembly if one is not known"),
+                cl::init ("x86_64-pc-linux-gnu-repo"), cl::cat (HowCat));
+
     cl::list<std::string> Paths (cl::Positional, cl::desc ("<filename>..."));
 
 } // anonymous namespace
@@ -156,6 +160,7 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     result.hex = Hex;
     result.no_times = NoTimes;
     result.expanded_addresses = ExpandedAddresses;
+    result.triple = Triple;
 
     std::transform (
         std::begin (Paths), std::end (Paths), std::back_inserter (result.paths),

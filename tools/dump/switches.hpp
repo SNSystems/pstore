@@ -81,6 +81,8 @@ struct switches {
     std::list<std::string> debug_line_headers;
     /// True if --all-debug-line-headers was specified on the command-line.
     bool show_all_debug_line_headers = false;
+    /// The target-triple to use for disassembly if one is not known.
+    std::string triple;
 
     bool show_header = false;
     bool show_indices = false;

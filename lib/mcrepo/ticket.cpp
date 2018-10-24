@@ -60,7 +60,7 @@ std::ostream & pstore::repo::operator<< (std::ostream & os, linkage_type l) {
 
 // operator new
 // ~~~~~~~~~~~~
-void * ticket::operator new (std::size_t s, nMembers size) {
+void * ticket::operator new (std::size_t s, nmembers size) {
     (void) s;
     std::size_t const actual_bytes = ticket::size_bytes (size.n);
     assert (actual_bytes >= s);
@@ -69,7 +69,7 @@ void * ticket::operator new (std::size_t s, nMembers size) {
 
 // operator delete
 // ~~~~~~~~~~~~~~~
-void ticket::operator delete (void * p, nMembers /*size*/) {
+void ticket::operator delete (void * p, nmembers /*size*/) {
     ::operator delete (p);
 }
 

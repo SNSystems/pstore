@@ -105,21 +105,20 @@ namespace {
         return std::max (num_bytes, 1U) * 2U + 2U;
     }
 
-    void disasm_block (std::uint8_t const * first, std::uint8_t const * last,
-                       pstore::dump::array::container & array, bool hex_mode) {
-        llvm::Triple triple ("x86_64-pc-linux-gnu-repo"); // FIXME: target triple is hardwired!
-
+    bool disasm_block (std::uint8_t const * first, std::uint8_t const * last,
+                       pstore::dump::array::container & array, pstore::gsl::czstring triple_str,
+                       bool hex_mode) {
         if (first == last) {
-            return;
+            return true;
         }
 
         // Get the target specific parser.
         std::string error;
-        std::string arch_name;
+        llvm::Triple triple{triple_str};
         llvm::Target const * const target =
-            llvm::TargetRegistry::lookupTarget (arch_name, triple, error);
+            llvm::TargetRegistry::lookupTarget ("" /*arch-name*/, triple, error);
         if (target == nullptr) {
-            pstore::raise (pstore::dump::error_code::cant_find_target, error);
+            return false; // unknown target: fall back to producing a hex-dump.
         }
 
         // Update the triple name and return the found target.
@@ -217,6 +216,19 @@ namespace {
             address += bytes_consumed;
             first += bytes_consumed;
         }
+        return true;
+    }
+
+
+    pstore::dump::value_ptr make_hex_dump_value (std::uint8_t const * first,
+                                                 std::uint8_t const * last, bool hex_mode) {
+        pstore::dump::value_ptr v;
+        if (hex_mode) {
+            v = std::make_shared<pstore::dump::binary16> (first, last);
+        } else {
+            v = std::make_shared<pstore::dump::binary> (first, last);
+        }
+        return v;
     }
 } // anonymous namespace
 
@@ -224,11 +236,13 @@ namespace pstore {
     namespace dump {
 
         value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           bool hex_mode) {
+                                           gsl::czstring triple, bool hex_mode) {
 
             array::container arr;
-            disasm_block (first, last, arr, hex_mode);
-            return make_value (arr);
+            if (disasm_block (first, last, arr, triple, hex_mode)) {
+                return make_value (arr);
+            }
+            return make_hex_dump_value (first, last, hex_mode);
         }
 
     } // namespace dump
@@ -240,14 +254,8 @@ namespace pstore {
     namespace dump {
 
         value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           bool hex_mode) {
-            value_ptr v;
-            if (hex_mode) {
-                v = std::make_shared<binary16> (first, last);
-            } else {
-                v = std::make_shared<binary> (first, last);
-            }
-            return v;
+                                           gsl::czstring triple, bool hex_mode) {
+            return make_hex_dump_value (first, last, hex_mode);
         }
 
     } // namespace dump

@@ -91,8 +91,8 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database const & db, repo::generic_section const & section,
-                              repo::section_kind sk, bool hex_mode) {
+        value_ptr make_section_value (database const & db, repo::generic_section const & section,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
 
             (void) sk;
             auto const & data = section.data ();
@@ -101,7 +101,7 @@ namespace pstore {
             if (sk == repo::section_kind::text) {
                 std::uint8_t const * const first = data.data ();
                 std::uint8_t const * const last = first + data.size ();
-                data_value = make_disassembled_value (first, last, hex_mode);
+                data_value = make_disassembled_value (first, last, triple, hex_mode);
             }
 #endif
             if (!data_value) {
@@ -123,8 +123,8 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database const & db, repo::dependents const & dependents,
-                              repo::section_kind sk, bool hex_mode) {
+        value_ptr make_section_value (database const & db, repo::dependents const & dependents,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
             (void) sk;
             (void) hex_mode;
             return make_value (std::begin (dependents), std::end (dependents),
@@ -133,20 +133,22 @@ namespace pstore {
                                });
         }
 
-        value_ptr make_value (database const & db, repo::debug_line_section const & section,
-                              repo::section_kind sk, bool hex_mode) {
+        value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
             return make_value (object::container{
                 {"header", make_value (section.header_extent ())},
-                {"generic", make_value (db, section.generic (), sk, hex_mode)},
+                {"generic", make_section_value (db, section.generic (), sk, triple, hex_mode)},
             });
         }
 
 
-        value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode) {
+        value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
+                                       gsl::czstring triple, bool hex_mode) {
 
 #define X(k)                                                                                       \
     case repo::section_kind::k:                                                                    \
-        contents = make_value (db, fragment.at<repo::section_kind::k> (), kind, hex_mode);         \
+        contents = make_section_value (db, fragment.at<repo::section_kind::k> (), kind, triple,    \
+                                       hex_mode);                                                  \
         break;
 
             array::container array;
@@ -197,16 +199,17 @@ namespace pstore {
             return make_value (object::container{
                 {"members", make_value (members)},
                 {"path", make_value (indirect_string::read (db, ticket->path ()))},
+                {"triple", make_value (indirect_string::read (db, ticket->triple ()))},
             });
         }
 
         value_ptr make_value (database const & db,
                               pstore::index::fragment_index::value_type const & value,
-                              bool hex_mode) {
+                              pstore::gsl::czstring triple, bool hex_mode) {
             auto fragment = pstore::repo::fragment::load (db, value.second);
-            return make_value (
-                object::container{{"digest", make_value (value.first)},
-                                  {"fragment", make_value (db, *fragment, hex_mode)}});
+            return make_value (object::container{
+                {"digest", make_value (value.first)},
+                {"fragment", make_fragment_value (db, *fragment, triple, hex_mode)}});
         }
 
         value_ptr make_value (database const & db,

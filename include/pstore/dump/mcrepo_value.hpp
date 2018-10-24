@@ -55,20 +55,23 @@ namespace pstore {
         value_ptr make_value (pstore::repo::section_kind t);
         value_ptr make_value (repo::internal_fixup const & ifx);
         value_ptr make_value (database const & db, repo::external_fixup const & xfx);
-        value_ptr make_value (database const & db, repo::generic_section const & section,
-                              repo::section_kind sk, bool hex_mode);
-        value_ptr make_value (database const & db, repo::dependents const & dependent,
-                              repo::section_kind sk, bool hex_mode);
-        value_ptr make_value (database const & db, repo::debug_line_section const & section,
-                              repo::section_kind sk, bool hex_mode);
-        value_ptr make_value (database const & db, repo::fragment const & fragment, bool hex_mode);
+
+        value_ptr make_section_value (database const & db, repo::generic_section const & section,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
+        value_ptr make_section_value (database const & db, repo::dependents const & dependent,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
+        value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode);
+
+        value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
+                                       gsl::czstring triple, bool hex_mode);
 
         value_ptr make_value (repo::linkage_type t);
         value_ptr make_value (database const & db, repo::compilation_member const & member);
         value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket);
 
         value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
-                              bool hex_mode);
+                              gsl::czstring triple, bool hex_mode);
         value_ptr make_value (database const & db, index::ticket_index::value_type const & value);
         value_ptr make_value (database const & db,
                               index::debug_line_header_index::value_type const & value,

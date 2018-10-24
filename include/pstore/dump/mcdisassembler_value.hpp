@@ -52,12 +52,14 @@
 
 #include <cstdint>
 #include "pstore/dump/value.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace dump {
 
         value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           bool hex_mode);
+
+                                           gsl::czstring triple, bool hex_mode);
 
     } // namespace dump
 } // namespace pstore

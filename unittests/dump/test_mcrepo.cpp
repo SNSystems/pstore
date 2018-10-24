@@ -179,7 +179,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
                                pstore::make_pointee_adaptor (dispatchers.end ())));
 
     std::ostringstream out;
-    pstore::dump::value_ptr value = pstore::dump::make_value (*db_, *fragment, false /*hex mode?*/);
+    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (
+        *db_, *fragment, "machine-vendor-os", false /*hex mode?*/);
     value->write (out);
 
     auto const lines = split_lines (out.str ());
@@ -223,16 +224,17 @@ TEST_F (MCRepoFixture, DumpTicket) {
          pstore::extent<pstore::repo::fragment> (
              pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
          this->store_str (transaction, "main"), linkage_type::external}};
-    auto ticket = ticket::load (*db_, ticket::alloc (transaction,
-                                                     this->store_str (transaction, "/home/user/"),
-                                                     std::begin (v), std::end (v)));
+    auto ticket = ticket::load (
+        *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/"),
+                             this->store_str (transaction, "machine-vendor-os"), std::begin (v),
+                             std::end (v)));
 
     std::ostringstream out;
     pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, ticket);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (6U, lines.size ());
+    ASSERT_EQ (7U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("members", ":"));
@@ -243,6 +245,8 @@ TEST_F (MCRepoFixture, DumpTicket) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("triple", ":", "machine-vendor-os"));
 }
 
 TEST_F (MCRepoFixture, DumpDebugLineHeader) {

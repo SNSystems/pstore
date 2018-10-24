@@ -143,6 +143,7 @@ namespace pstore {
             ///
             /// \param transaction  The transaction to which the ticket will be appended.
             /// \param path  A ticket file path address in the store.
+            /// \param triple  The target-triple associated with this compilation.
             /// \param first_member  The first of a sequence of ticket_member instances. The range
             ///   defined by \p first_member and \p last_member will be copied into the newly
             ///   allocated ticket.
@@ -151,8 +152,9 @@ namespace pstore {
             ///   the in-store location of the allocated ticket.
             template <typename TransactionType, typename Iterator>
             static extent<ticket> alloc (TransactionType & transaction,
-                                         typed_address<indirect_string> path, Iterator first_member,
-                                         Iterator last_member);
+                                         typed_address<indirect_string> path,
+                                         typed_address<indirect_string> triple,
+                                         Iterator first_member, Iterator last_member);
 
             /// \brief Returns a pointer to an in-pstore ticket instance.
             ///
@@ -208,20 +210,27 @@ namespace pstore {
             ///@}
 
             /// Returns the ticket file path.
-            typed_address<indirect_string> path () const { return path_addr_; }
+            typed_address<indirect_string> path () const { return path_; }
+            /// Returns the target triple.
+            typed_address<indirect_string> triple () const { return triple_; }
 
         private:
             ticket () = default;
 
-            struct nMembers {
+            struct nmembers {
                 std::size_t n;
             };
             /// A placement-new implementation which allocates sufficient storage for a
             /// ticket with the number of members given by the size parameter.
-            void * operator new (std::size_t s, nMembers size);
-            void operator delete (void * p, nMembers size);
+            void * operator new (std::size_t s, nmembers size);
+            void operator delete (void * p, nmembers size);
 
-            typed_address<indirect_string> path_addr_;
+            /// The path containing the ticket file when it was created. (Used to guide the garbage
+            /// collector's ticket-file search.)
+            typed_address<indirect_string> path_;
+            /// The target triple for this compilation.
+            typed_address<indirect_string> triple_;
+            /// The number of entries in the members_ array.
             std::uint64_t size_ = 0;
             compilation_member members_[1];
         };
@@ -233,7 +242,8 @@ namespace pstore {
         // ~~~~~
         template <typename TransactionType, typename Iterator>
         auto ticket::alloc (TransactionType & transaction, typed_address<indirect_string> path,
-                            Iterator first_member, Iterator last_member) -> extent<ticket> {
+                            typed_address<indirect_string> triple, Iterator first_member,
+                            Iterator last_member) -> extent<ticket> {
             // First work out its size.
             auto const dist = std::distance (first_member, last_member);
             assert (dist >= 0);
@@ -245,7 +255,8 @@ namespace pstore {
             auto ptr = std::static_pointer_cast<ticket> (transaction.getrw (addr, size));
 
             // Write the data to the store.
-            ptr->path_addr_ = path;
+            ptr->path_ = path;
+            ptr->triple_ = triple;
             ptr->size_ = num_members;
             std::copy (first_member, last_member, ptr->begin ());
             return pstore::extent<ticket> (typed_address<ticket> (addr), size);

@@ -413,7 +413,7 @@ int main (int argc, char * argv[]) {
                 file, db, show_all_fragments, opt.fragments, dump_error_code::fragment_not_found,
                 dump_error_code::no_fragment_index,
                 [&db, &opt](pstore::index::fragment_index::value_type const & value) {
-                    return make_value (db, value, opt.hex);
+                    return make_value (db, value, opt.triple.c_str (), opt.hex);
                 });
 
             show_index<pstore::trailer::indices::ticket> (
