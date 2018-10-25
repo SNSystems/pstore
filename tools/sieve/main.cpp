@@ -70,7 +70,7 @@ namespace {
     };
     template <typename T>
     struct check_range<T, T> {
-        void operator() (T value) const {}
+        void operator() (T ) const {}
     };
 
 
