@@ -280,7 +280,7 @@ namespace pstore {
 
 
 #define X(a) a,
-        enum class indices { PSTORE_INDICES last };
+        enum class indices : unsigned { PSTORE_INDICES last };
 #undef X
         using index_records_array =
             std::array<typed_address<index::header_block>,
