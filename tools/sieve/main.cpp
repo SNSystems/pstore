@@ -60,21 +60,23 @@
 // Local includes
 #include "switches.hpp"
 #include "write_output.hpp"
-
-#ifdef PSTORE_IS_INSIDE_LLVM
-#define TRY
-#define CATCH(ex, body)
-#else
-#define TRY try
-#define CATCH(ex, body) catch (ex) body
-#endif
-
+#include "pstore/support/portab.hpp"
 
 namespace {
 
+    template <typename T, typename R>
+    struct check_range {
+        void operator() (R value) const { assert (value <= std::numeric_limits<T>::max ()); }
+    };
+    template <typename T>
+    struct check_range<T, T> {
+        void operator() (T value) const {}
+    };
+
+
     template <typename IntType>
-    std::vector<IntType> sieve (unsigned long top_value) {
-        assert (top_value <= std::numeric_limits<IntType>::max ());
+    std::vector<IntType> sieve (std::uint64_t top_value) {
+        check_range<IntType, decltype (top_value)>{}(top_value);
 
         std::vector<IntType> result;
         result.push_back (1);
@@ -103,7 +105,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    TRY {
+    PSTORE_TRY {
         switches::user_options const opt = switches::user_options::get (argc, argv);
 
         std::unique_ptr<std::ostream> out_ptr;
@@ -130,13 +132,14 @@ int main (int argc, char * argv[]) {
         }
     }
     // clang-format off
-    CATCH (switches::parse_failure const &, {
+    PSTORE_CATCH (switches::parse_failure const &, {
         exit_code = EXIT_FAILURE;
     })
-    CATCH (std::exception const & ex, {
+    PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "An error occurred: " << ex.what () << std::endl;
         exit_code = EXIT_FAILURE;
-    }) CATCH (..., {
+    })
+    PSTORE_CATCH (..., {
         std::cerr << "Unknown exception" << std::endl;
         exit_code = EXIT_FAILURE;
     })
