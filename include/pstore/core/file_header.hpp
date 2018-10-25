@@ -280,9 +280,11 @@ namespace pstore {
 
 
 #define X(a) a,
-        enum indices { PSTORE_INDICES last };
+        enum class indices { PSTORE_INDICES last };
 #undef X
-        using index_records_array = std::array<typed_address<index::header_block>, indices::last>;
+        using index_records_array =
+            std::array<typed_address<index::header_block>,
+                       static_cast<std::underlying_type<indices>::type> (indices::last)>;
 
         /// Represents the portion of the trailer structure which is covered by the computed CRC
         /// value.

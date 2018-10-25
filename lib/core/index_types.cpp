@@ -48,7 +48,14 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 
+namespace {
 
+    constexpr auto index_integral (pstore::trailer::indices idx)
+        -> std::underlying_type<pstore::trailer::indices>::type {
+        return static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
+    }
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace index {
@@ -60,7 +67,7 @@ namespace pstore {
                               unsigned generation) {
                 pstore::database & db = transaction.db ();
                 if (auto const index = pstore::index::get_index<Index> (db, false /*create*/)) {
-                    (*locations)[Index] = index->flush (transaction, generation);
+                    (*locations)[index_integral (Index)] = index->flush (transaction, generation);
                 }
             }
         } // namespace details
@@ -75,15 +82,15 @@ namespace pstore {
         details::flush_index<trailer::indices::k> (transaction, locations, generation);            \
         break;
 
-            for (int i = trailer::indices::write; i != trailer::indices::last; i++) {
-                trailer::indices kind = static_cast<trailer::indices> (i);
-                switch (kind) {
+            for (auto ctr = index_integral (trailer::indices::write);
+                 ctr <= index_integral (trailer::indices::last); ++ctr) {
+                switch (static_cast<trailer::indices> (ctr)) {
                     PSTORE_INDICES
-                case trailer::indices::last: assert (false); break;
+                case trailer::indices::last: break;
                 }
             }
 #undef X
-            assert (locations->size () == trailer::indices::last);
+            assert (locations->size () == index_integral (trailer::indices::last));
         }
     } // namespace index
 } // namespace pstore
