@@ -44,6 +44,7 @@
 
 cmake_minimum_required (VERSION 3.4)
 
+include (CheckCSourceCompiles)
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
 
 # Work out whether the pstore library is being built inside the
@@ -132,13 +133,19 @@ set (EXTRA_CXX_DEFINITIONS "")
 if (NOT PSTORE_IS_INSIDE_LLVM)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
+        # Remove when VS doesn't require capture
+        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+        set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-unused-lambda-capture")
+        check_c_source_compiles ("int main() {}" PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
+        set (CMAKE_REQUIRED_FLAGS ${PSTORE_OLD_CMAKE_REQUIRED_FLAGS})
+
         # For Clang, I enable all of the warnings and then disable some of
         # the unwanted ones.
         set (EXTRA_CXX_FLAGS
             -Weverything
             -Wno-undef
             -Wno-padded
-	    -Wno-disabled-macro-expansion
+            -Wno-disabled-macro-expansion
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
             -Wno-c99-extensions
@@ -148,8 +155,12 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
             -Wno-exit-time-destructors
             -Wno-used-but-marked-unused
             -Wno-unused-macros
-	    -Wno-unused-lambda-capture # remove when VS doesn't require capture
-	)
+        )
+
+        # Remove when VS doesn't require capture
+        if (PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
+            list (APPEND EXTRA_CXX_FLAGS -Wno-unused-lambda-capture)
+        endif ()
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
 
