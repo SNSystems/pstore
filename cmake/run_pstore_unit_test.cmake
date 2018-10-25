@@ -72,7 +72,7 @@ function (run_pstore_unit_test prelink_target test_target)
                         --tool=memcheck --leak-check=full --show-reachable=yes
                         --undef-value-errors=yes --track-origins=no
                         --child-silent-after-fork=no --trace-children=no
-                        --log-file=${OUT_LOG} --error-exitcode=1
+                        --log-file=${OUT_LOG} --error-exitcode=13
                         "$<TARGET_FILE:${test_target}>" "--gtest_output=xml:${OUT_XML}"
                 COMMAND cat ${OUT_LOG}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
