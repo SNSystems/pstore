@@ -143,7 +143,8 @@ namespace pstore {
             relocation_type type;
             // FIXME: much padding here.
             std::uint8_t padding1 = 0;
-            std::uint32_t padding2 = 0;
+            std::uint16_t padding2 = 0;
+            std::uint32_t padding3 = 0;
             std::uint64_t offset;
             std::uint64_t addend;
         };
@@ -154,6 +155,12 @@ namespace pstore {
                        "name offset differs from expected value");
         static_assert (offsetof (external_fixup, type) == 8,
                        "type offset differs from expected value");
+        static_assert (offsetof (external_fixup, padding1) == 9,
+                       "padding1 offset differs from expected value");
+        static_assert (offsetof (external_fixup, padding2) == 10,
+                       "padding2 offset differs from expected value");
+        static_assert (offsetof (external_fixup, padding3) == 12,
+                       "padding3 offset differs from expected value");
         static_assert (offsetof (external_fixup, offset) == 16,
                        "offset offset differs from expected value");
         static_assert (offsetof (external_fixup, addend) == 24,
