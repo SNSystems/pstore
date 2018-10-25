@@ -112,7 +112,7 @@ namespace pstore {
         static_assert (offsetof (internal_fixup, addend) == 16,
                        "addend offset differs from expected value");
         static_assert (sizeof (internal_fixup) == 24,
-                       "internal_fixup size does not match expected");
+                       "internal_fixup size differs from expected value");
 
         //*          _                     _    __ _                *
         //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
@@ -120,11 +120,16 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         struct external_fixup {
-            typed_address<indirect_string> name;
-            relocation_type type;
-            // FIXME: much padding here.
-            std::uint64_t offset;
-            std::uint64_t addend;
+            external_fixup (typed_address<indirect_string> name_, relocation_type type_,
+                            std::uint64_t offset_, std::uint64_t addend_) noexcept
+                    : name{name_}
+                    , type{type_}
+                    , offset{offset_}
+                    , addend{addend_} {}
+            external_fixup (external_fixup const &) noexcept = default;
+            external_fixup (external_fixup &&) noexcept = default;
+            external_fixup & operator= (external_fixup const &) noexcept = default;
+            external_fixup & operator= (external_fixup &&) noexcept = default;
 
             bool operator== (external_fixup const & rhs) const noexcept {
                 return name == rhs.name && type == rhs.type && offset == rhs.offset &&
@@ -133,6 +138,14 @@ namespace pstore {
             bool operator!= (external_fixup const & rhs) const noexcept {
                 return !operator== (rhs);
             }
+
+            typed_address<indirect_string> name;
+            relocation_type type;
+            // FIXME: much padding here.
+            std::uint8_t padding1 = 0;
+            std::uint32_t padding2 = 0;
+            std::uint64_t offset;
+            std::uint64_t addend;
         };
 
         static_assert (std::is_standard_layout<external_fixup>::value,
@@ -146,7 +159,7 @@ namespace pstore {
         static_assert (offsetof (external_fixup, addend) == 24,
                        "addend offset differs from expected value");
         static_assert (sizeof (external_fixup) == 32,
-                       "external_fixup size does not match expected");
+                       "external_fixup size differs from expected value");
 
 
         //*                        _                 _   _           *
