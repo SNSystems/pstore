@@ -262,7 +262,7 @@ namespace pstore {
     namespace dump {
 
         value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           gsl::czstring triple, bool hex_mode) {
+                                           gsl::czstring /*triple*/, bool hex_mode) {
             return make_hex_dump_value (first, last, hex_mode);
         }
 

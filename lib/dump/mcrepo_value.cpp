@@ -95,6 +95,7 @@ namespace pstore {
                                       repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
 
             (void) sk;
+            (void) triple;
             auto const & data = section.data ();
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
@@ -124,9 +125,7 @@ namespace pstore {
         }
 
         value_ptr make_section_value (database const & db, repo::dependents const & dependents,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
-            (void) sk;
-            (void) hex_mode;
+                                      repo::section_kind /*sk*/, gsl::czstring /*triple*/, bool /*hex_mode*/) {
             return make_value (std::begin (dependents), std::end (dependents),
                                [&db](typed_address<repo::compilation_member> const & member) {
                                    return make_value (db, *db.getro (member));
