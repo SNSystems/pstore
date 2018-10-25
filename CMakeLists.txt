@@ -45,7 +45,7 @@
 cmake_minimum_required (VERSION 3.4)
 
 include (CheckCSourceCompiles)
-list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMakeModules")
+list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Work out whether the pstore library is being built inside the
 # larger LLVM framework or if it's a standalone build.
