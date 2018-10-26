@@ -208,13 +208,13 @@ namespace pstore {
             file_base & operator= (file_base &&) noexcept = default;
             file_base & operator= (file_base const &) = default;
 
-            virtual bool is_open () const = 0;
+            virtual bool is_open () const noexcept = 0;
             virtual void close () = 0;
 
             /// \brief Return true if the object was created as writable.
             /// \note This does not necessarily reflect the underlying file system's read/write
             /// flag: this function may return true, but a write() might still fail.
-            virtual bool is_writable () const = 0;
+            virtual bool is_writable () const noexcept = 0;
 
             /// \brief Returns the name of the file originally associated with this file object.
             /// \note Depending on the host operating system, if the file was moved or deleted since
@@ -456,16 +456,16 @@ namespace pstore {
 
             /// \name Observers
             ///@{
-            file_base * file () { return file_; }
-            file_base const * file () const { return file_; }
+            file_base * file () noexcept { return file_; }
+            file_base const * file () const noexcept { return file_; }
 
             /// \returns The offset of the first locked byte of the file to be locked.
-            std::uint64_t offset () const { return offset_; }
+            std::uint64_t offset () const noexcept { return offset_; }
             /// \returns The number bytes to be locked.
-            std::size_t size () const { return size_; }
+            std::size_t size () const noexcept { return size_; }
             /// \returns The type of lock to be obtained when lock() is called.
-            file_base::lock_kind kind () const { return kind_; }
-            bool is_locked () const { return locked_; }
+            file_base::lock_kind kind () const noexcept { return kind_; }
+            bool is_locked () const noexcept { return locked_; }
             ///@}
 
         private:
@@ -517,7 +517,7 @@ namespace pstore {
             using memory_mapper = pstore::in_memory_mapper;
 
             in_memory (std::shared_ptr<void> buffer, std::uint64_t length, std::uint64_t eof = 0,
-                       bool writable = true)
+                       bool writable = true) noexcept
                     : buffer_ (std::static_pointer_cast<std::uint8_t> (buffer))
                     , length_ (length)
                     , eof_ (eof)
@@ -528,8 +528,8 @@ namespace pstore {
             }
 
             void close () override {}
-            bool is_open () const override { return true; }
-            bool is_writable () const override { return writable_; }
+            bool is_open () const noexcept override { return true; }
+            bool is_writable () const noexcept override { return writable_; }
             std::string path () const override {
                 // In-memory files obviously don't have a path, so it's hard to know quite what to
                 // return!
@@ -635,7 +635,8 @@ namespace pstore {
                 read_write,
             };
             file_handle () = default;
-            explicit file_handle (std::string path) : path_ {std::move (path)} {}
+            explicit file_handle (std::string path) noexcept
+                    : path_{std::move (path)} {}
             void open (create_mode create, writable_mode writable,
                        present_mode present = present_mode::allow_not_found);
 
@@ -672,8 +673,8 @@ namespace pstore {
             /// directory to fail.
             static std::string get_temporary_directory ();
 
-            bool is_open () const override { return file_ != invalid_oshandle; }
-            bool is_writable () const override { return is_writable_; }
+            bool is_open () const noexcept override { return file_ != invalid_oshandle; }
+            bool is_writable () const noexcept override { return is_writable_; }
             std::string path () const override { return path_; }
 
             void close () override;
@@ -707,7 +708,7 @@ namespace pstore {
             oshandle const invalid_oshandle = -1;
 #endif
 
-            oshandle raw_handle () { return file_; }
+            oshandle raw_handle () noexcept { return file_; }
 
         private:
             void ensure_open ();

@@ -181,7 +181,7 @@ namespace pstore {
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
         std::size_t length (::pstore::gsl::czstring str);
 
-        inline std::size_t length (std::nullptr_t) { return 0; }
+        inline std::size_t length (std::nullptr_t) noexcept { return 0; }
         ///@}
 
         ///@{

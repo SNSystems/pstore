@@ -102,7 +102,7 @@ namespace pstore {
                 constexpr span_iterator () noexcept
                         : span_iterator (nullptr, 0) {}
 
-                span_iterator (Span const * span, typename Span::index_type index)
+                span_iterator (Span const * span, typename Span::index_type index) noexcept
                         : span_ (span)
                         , index_ (index) {
                     assert (span == nullptr || (index_ >= 0 && index <= span_->length ()));
@@ -125,7 +125,7 @@ namespace pstore {
                     return &((*span_)[index_]);
                 }
 
-                span_iterator & operator++ () {
+                span_iterator & operator++ () noexcept {
                     assert (span_ && index_ >= 0 && index_ < span_->length ());
                     ++index_;
                     return *this;
@@ -137,7 +137,7 @@ namespace pstore {
                     return ret;
                 }
 
-                span_iterator & operator-- () {
+                span_iterator & operator-- () noexcept {
                     assert (span_ && index_ > 0 && index_ <= span_->length ());
                     --index_;
                     return *this;
@@ -379,7 +379,8 @@ namespace pstore {
             }
 
             span<element_type, dynamic_extent> subspan (index_type offset,
-                                                        index_type count = dynamic_extent) const {
+                                                        index_type count = dynamic_extent) const
+                noexcept {
                 assert ((offset == 0 || (offset > 0 && offset <= size ())) &&
                         (count == dynamic_extent || (count >= 0 && offset + count <= size ())));
                 return {data () + offset, count == dynamic_extent ? size () - offset : count};

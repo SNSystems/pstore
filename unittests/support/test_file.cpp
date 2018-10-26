@@ -96,11 +96,18 @@ TEST_F (FileNameTemplate, CharacterWithLeadingAndMultipleTrailingX) {
 
 namespace {
     // A file class which is used to mock the lock() and unlock() methods.
-    class mock_file final : public ::pstore::file::file_base {
+    class mock_file final : public pstore::file::file_base {
     public:
         MOCK_METHOD0 (close, void());
-        MOCK_CONST_METHOD0 (is_open, bool());
-        MOCK_CONST_METHOD0 (is_writable, bool());
+
+        // is_open() and is_writable() are noexcept functions which gmock cannot currently directly
+        // intercept.
+        MOCK_CONST_METHOD0 (is_open_hook, bool());
+        bool is_open () const noexcept override { return this->is_open_hook (); }
+
+        MOCK_CONST_METHOD0 (is_writable_hook, bool());
+        bool is_writable () const noexcept override { return this->is_writable_hook (); }
+
         MOCK_CONST_METHOD0 (path, std::string ());
         MOCK_METHOD1 (seek, void(std::uint64_t));
         MOCK_METHOD0 (tell, std::uint64_t ());
@@ -131,8 +138,8 @@ TEST (RangeLock, ExplicitInitialization) {
     // These expectations are present to suppress a warning from clang about the member functions
     // being unused...
     EXPECT_CALL (file, close ()).Times (0);
-    EXPECT_CALL (file, is_open ()).Times (0);
-    EXPECT_CALL (file, is_writable ()).Times (0);
+    EXPECT_CALL (file, is_open_hook ()).Times (0);
+    EXPECT_CALL (file, is_writable_hook ()).Times (0);
     EXPECT_CALL (file, path ()).Times (0);
     EXPECT_CALL (file, seek (_)).Times (0);
     EXPECT_CALL (file, tell ()).Times (0);
