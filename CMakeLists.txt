@@ -178,7 +178,6 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
         set (EXTRA_CXX_DEFINITIONS 
             -D_CRT_SECURE_NO_WARNINGS 
             -D_SCL_SECURE_NO_WARNINGS 
-            -D_ENABLE_EXTENDED_ALIGNED_STORAGE
         )
 
     endif ()

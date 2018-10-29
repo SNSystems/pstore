@@ -411,6 +411,27 @@ namespace pstore {
             flood (gsl::make_span (reinterpret_cast<std::uint8_t *> (t), sizeof (T)));
         }
 
+
+        namespace details {
+
+            // A simplified definition of std::aligned_storage to workaround a bug in Visual Stdio
+            // 2017 prior to v15.8. Microsoft's fix for that bug introduces a binary
+            // incompatibility. In order to avoid introducing that binary incompatibility to
+            // projects using store, we have our own version of aligned_sotrage here. (See the
+            // description of Microsoft's
+            // "_ENABLE_EXTENDED_ALIGNED_STORAGE" macro.)
+            template <std::size_t Len, std::size_t Align>
+            struct aligned_storage {
+                struct alignas (Align) type {
+                    std::uint8_t _[(Len + Align - 1) / Align * Align];
+                };
+
+                PSTORE_STATIC_ASSERT (alignof (type) >= Align);
+                PSTORE_STATIC_ASSERT (sizeof (type) >= Len);
+            };
+
+        } // end namespace details
+
         //*                  _  *
         //*  _ _ ___ __ _ __| | *
         //* | '_/ -_) _` / _` | *
@@ -421,11 +442,7 @@ namespace pstore {
         template <typename Ty, typename Archive>
         Ty read (Archive && archive) {
             using T2 = typename std::remove_const<Ty>::type;
-            typename std::aligned_storage<sizeof (T2), alignof (T2)>::type uninit_buffer;
-            // An assertion to check the behavior of aligned_storage which was broken in VS before
-            // 2017 15.8 when alignof (Ty) > alignof (max_align_t). (See
-            // _ENABLE_EXTENDED_ALIGNED_STORAGE.)
-            PSTORE_STATIC_ASSERT (alignof (decltype (uninit_buffer)) == alignof (Ty));
+            typename details::aligned_storage<sizeof (T2), alignof (T2)>::type uninit_buffer;
             flood (&uninit_buffer);
 
             // Deserialize into the uninitialized buffer.
