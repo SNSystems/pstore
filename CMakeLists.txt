@@ -175,7 +175,11 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
         # assignment operator is needed.
         LIST (APPEND EXTRA_CXX_FLAGS /wd4512)
 
-        set (EXTRA_CXX_DEFINITIONS -D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
+        set (EXTRA_CXX_DEFINITIONS 
+            -D_CRT_SECURE_NO_WARNINGS 
+            -D_SCL_SECURE_NO_WARNINGS 
+            -D_ENABLE_EXTENDED_ALIGNED_STORAGE
+        )
 
     endif ()
 endif (NOT PSTORE_IS_INSIDE_LLVM)

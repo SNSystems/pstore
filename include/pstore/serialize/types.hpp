@@ -106,8 +106,7 @@
 
 /// \example vector_int_writer.cpp
 /// This example shows how to read data from a container of bytes (a std::vector<> in this
-/// particular
-/// case).
+/// particular case).
 ///
 /// On a little-endian system with a four-byte int type, it will produce the following output:
 ///
@@ -128,6 +127,7 @@
 
 #include "pstore/serialize/common.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace serialize {
@@ -422,6 +422,10 @@ namespace pstore {
         Ty read (Archive && archive) {
             using T2 = typename std::remove_const<Ty>::type;
             typename std::aligned_storage<sizeof (T2), alignof (T2)>::type uninit_buffer;
+            // An assertion to check the behavior of aligned_storage which was broken in VS before
+            // 2017 15.8 when alignof (Ty) > alignof (max_align_t). (See
+            // _ENABLE_EXTENDED_ALIGNED_STORAGE.)
+            PSTORE_STATIC_ASSERT (alignof (decltype (uninit_buffer)) == alignof (Ty));
             flood (&uninit_buffer);
 
             // Deserialize into the uninitialized buffer.

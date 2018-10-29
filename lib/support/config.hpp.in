@@ -48,6 +48,9 @@
 /// Is the host system big endian?
 #cmakedefine PSTORE_IS_BIG_ENDIAN 1
 
+/// Does the compiler support __uint128_t?
+#cmakedefine PSTORE_HAVE_UINT128_T  1
+
 #cmakedefine PSTORE_VENDOR_ID "@PSTORE_VENDOR_ID@"
 #cmakedefine PSTORE_IS_INSIDE_LLVM 1
 

@@ -125,7 +125,7 @@ TEST_F (TicketTest, MultipleMembers) {
 
     EXPECT_EQ (2U, t->size ());
     EXPECT_FALSE (t->empty ());
-    EXPECT_EQ (120U, t->size_bytes ());
+    EXPECT_EQ (128U, t->size_bytes ());
     for (auto const & m : *t) {
         EXPECT_EQ (linkage, m.linkage);
     }

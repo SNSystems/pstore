@@ -43,6 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/uint128.hpp"
+#include <array>
 #include <gtest/gtest.h>
 
 TEST (UInt128, DefaultCtor) {
@@ -114,3 +115,60 @@ TEST (Uint128, ToHexString) {
                "ffffffffffffffffffffffffffffffff");
 }
 
+TEST (Uint128, FromBytes) {
+    EXPECT_EQ (pstore::uint128 (0, 0), (pstore::uint128{std::array<std::uint8_t, 16>{
+                                           {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xffffffffffffffff, 0xffffffffffffffff),
+               (pstore::uint128{std::array<std::uint8_t, 16>{{0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                              0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+                                                              0xff, 0xff, 0xff, 0xff}}}));
+
+    EXPECT_EQ (pstore::uint128 (0, 0xff),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff00),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff0000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff000000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff00000000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff0000000000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff000000000000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0, 0xff00000000000000),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff00, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff0000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff000000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff00000000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff0000000000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff000000000000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0, 0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+    EXPECT_EQ (pstore::uint128 (0xff00000000000000, 0),
+               (pstore::uint128{std::array<std::uint8_t, 16>{
+                   {0xff, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}}}));
+}

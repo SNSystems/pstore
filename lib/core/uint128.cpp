@@ -43,28 +43,50 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/uint128.hpp"
 #include <cassert>
+
+namespace {
+
+    constexpr std::size_t expected_length = 32;
+    inline char digit_to_hex (unsigned v) {
+        assert (v < 0x10);
+        return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
 
+#if PSTORE_HAVE_UINT128_T
+
     std::string uint128::to_hex_string () const {
-        constexpr std::size_t expected_length = 32;
         std::string str;
         str.reserve (expected_length);
 
-        auto digit_to_hex = [](unsigned v) {
-            assert (v < 0x10);
-            return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
-        };
-
-        for (int shift = 64 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((high_ >> shift) & 0x0F);
+        for (auto shift = 128 - 4; shift >= 0; shift -= 4) {
+            str += digit_to_hex ((v_ >> shift) & 0x0F);
         }
 
-        for (int shift = 64 - 4; shift >= 0; shift -= 4) {
+        assert (str.length () == expected_length);
+        return str;
+    }
+
+#else
+
+    std::string uint128::to_hex_string () const {
+        std::string str;
+        str.reserve (expected_length);
+
+        for (auto shift = 64 - 4; shift >= 0; shift -= 4) {
+            str += digit_to_hex ((high_ >> shift) & 0x0F);
+        }
+        for (auto shift = 64 - 4; shift >= 0; shift -= 4) {
             str += digit_to_hex ((low_ >> shift) & 0x0F);
         }
 
         assert (str.length () == expected_length);
         return str;
     }
+
+#endif // PSTORE_HAVE_UINT128_T
 
 } // namespace pstore

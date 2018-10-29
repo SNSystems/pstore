@@ -90,6 +90,7 @@ namespace pstore {
             extent<fragment> fext;
             typed_address<indirect_string> name;
             linkage_type linkage;
+            // TODO: eliminate this padding.
             std::uint8_t padding1 = 0;
             std::uint16_t padding2 = 0;
             std::uint32_t padding3 = 0;
@@ -103,24 +104,21 @@ namespace pstore {
             load (pstore::database const & db, pstore::typed_address<compilation_member> addr) {
                 return db.getro (addr);
             }
+
+        private:
+            friend class ticket;
+            compilation_member () noexcept = default;
         };
 
-        static_assert (std::is_standard_layout<compilation_member>::value,
-                       "ticket_member must satisfy StandardLayoutType");
-        static_assert (sizeof (compilation_member) == 48,
-                       "compilation_member size does not match expected");
-        static_assert (offsetof (compilation_member, digest) == 0,
-                       "digest offset differs from expected value");
-        static_assert (offsetof (compilation_member, fext) == 16,
-                       "extent offset differs from expected value");
-        static_assert (offsetof (compilation_member, name) == 32,
-                       "name offset differs from expected value");
-        static_assert (offsetof (compilation_member, linkage) == 40,
-                       "linkage offset differs from expected value");
-        static_assert (offsetof (compilation_member, padding1) == 41,
-                       "padding1 offset differs from expected value");
-        static_assert (offsetof (compilation_member, padding2) == 42,
-                       "padding2 offset differs from expected value");
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation_member>::value);
+        PSTORE_STATIC_ASSERT (alignof (compilation_member) == 16);
+        PSTORE_STATIC_ASSERT (sizeof (compilation_member) == 48);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, digest) == 0);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, fext) == 16);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, name) == 32);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, linkage) == 40);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 41);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
 
         //*  _   _    _       _    *
         //* | |_(_)__| |_____| |_  *
@@ -215,7 +213,7 @@ namespace pstore {
             typed_address<indirect_string> triple () const { return triple_; }
 
         private:
-            ticket () = default;
+            ticket () noexcept;
 
             struct nmembers {
                 std::size_t n;
@@ -232,11 +230,21 @@ namespace pstore {
             typed_address<indirect_string> triple_;
             /// The number of entries in the members_ array.
             std::uint64_t size_ = 0;
+            std::uint64_t padding1_ = 0;
             compilation_member members_[1];
         };
 
-        static_assert (std::is_standard_layout<ticket>::value,
-                       "Ticket must satisfy StandardLayoutType");
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<ticket>::value);
+        PSTORE_STATIC_ASSERT (alignof (ticket) == 16);
+
+        inline ticket::ticket () noexcept {
+            (void) padding1_; // silence warning about an unused private class member.
+            PSTORE_STATIC_ASSERT (offsetof (ticket, path_) == 0);
+            PSTORE_STATIC_ASSERT (offsetof (ticket, triple_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (ticket, size_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (ticket, padding1_) == 24);
+            PSTORE_STATIC_ASSERT (offsetof (ticket, members_) == 32);
+        }
 
         // alloc
         // ~~~~~

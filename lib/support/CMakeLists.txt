@@ -62,6 +62,12 @@ set (CMAKE_REQUIRED_LIBRARIES )
 
 
 check_cxx_source_compiles (
+    "int main () {
+        __uint128_t a;
+    }"
+    PSTORE_HAVE_UINT128_T)
+
+check_cxx_source_compiles (
     "#include <string>
     int main () {
         std::string s;
