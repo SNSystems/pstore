@@ -282,3 +282,43 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
                  ElementsAre ("debug_line_header", ":", "!!binary16", "|"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("4400", "0000>"));
 }
+
+TEST_F (MCRepoFixture, DumpBssSection) {
+    using ::testing::ElementsAre;
+    using ::testing::ElementsAreArray;
+
+    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+
+    std::array<section_content, 1> c = {
+        {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
+    section_content & data = c.back ();
+    pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
+    {
+        // Build the bss section's data, no internal and external fixups.
+        data.data.assign ({0, 0, 0, 0});
+    }
+
+    // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
+    // various sections.
+    std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
+    dispatchers.emplace_back (new bss_section_creation_dispatcher (&data));
+
+    auto fragment = fragment::load (
+        *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
+                               pstore::make_pointee_adaptor (dispatchers.end ())));
+
+    std::ostringstream out;
+    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (
+        *db_, *fragment, "machine-vendor-os", false /*hex mode?*/);
+    value->write (out);
+
+    auto const lines = split_lines (out.str ());
+    ASSERT_EQ (5U, lines.size ());
+
+    auto line = 0U;
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "bss"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("align", ":", "0x10"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("size", ":", "0x4"));
+}

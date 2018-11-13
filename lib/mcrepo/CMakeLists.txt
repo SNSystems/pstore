@@ -44,6 +44,7 @@
 
 set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (pstore-mcrepo
+    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/bss_section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/debug_line_section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/dependents_section.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
@@ -53,6 +54,7 @@ add_pstore_library (pstore-mcrepo
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/sparse_array.hpp"
     "${PSTORE_MCREPO_PUBLIC_INCLUDE}/ticket.hpp"
 
+    bss_section.cpp
     debug_line_section.cpp
     dependents_section.cpp
     fragment.cpp
