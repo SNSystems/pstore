@@ -80,10 +80,11 @@ namespace pstore {
             /// deleter is intended for use as a unique_ptr<> Deleter. It enables unique_ptr<> to be
             /// used with a mixture of heap-allocated and placement-new-allocated objects.
             template <typename T>
-            struct deleter {
+            class deleter {
+            public:
                 /// \param d True if the managed object should be deleted; false, if it only the
                 /// detructor should be called.
-                deleter (bool d = true) noexcept
+                constexpr deleter (bool d = true) noexcept
                         : delete_{d} {}
                 void operator() (T * const p) const noexcept {
                     if (delete_) {
