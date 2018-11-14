@@ -140,9 +140,10 @@ namespace pstore {
             virtual std::size_t size_bytes () const = 0;
 
             /// Copies the section instance data to the memory starting at \p out. On entry, \p out
-            /// is aligned according to the result of the aligned() member function. \param out  The
-            /// address to which the instance data will be written. \returns The address past the
-            /// end of instance data where the next section's data can be writen.
+            /// is aligned according to the result of the aligned() member function.
+            /// \param out  The address to which the instance data will be written.
+            /// \returns The address past the end of instance data where the next section's data can
+            /// be writen.
             virtual std::uint8_t * write (std::uint8_t * out) const = 0;
 
         private:
@@ -171,6 +172,7 @@ namespace pstore {
             using iterator = const_pointer;
             using const_iterator = iterator;
 
+            container () = default;
             container (const_pointer begin, const_pointer end)
                     : begin_{begin}
                     , end_{end} {
@@ -209,6 +211,8 @@ namespace pstore {
             virtual std::size_t size () const = 0;
             virtual container<internal_fixup> ifixups () const = 0;
             virtual container<external_fixup> xfixups () const = 0;
+            /// Return the data section stored in the object file. For example, the bss section has
+            /// empty data section.
             virtual container<std::uint8_t> data () const = 0;
         };
 

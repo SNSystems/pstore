@@ -140,6 +140,13 @@ namespace pstore {
             });
         }
 
+        value_ptr make_section_value (database const & db, repo::bss_section const & section,
+                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
+            return make_value (object::container{
+                {"align", make_value (section.align ())},
+                {"size", make_value (section.size ())},
+            });
+        }
 
         value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
                                        gsl::czstring triple, bool hex_mode) {

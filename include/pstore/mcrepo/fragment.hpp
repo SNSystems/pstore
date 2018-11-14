@@ -56,6 +56,7 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/dependents_section.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
@@ -130,6 +131,7 @@ namespace pstore {
         /// of that kind.
         template <section_kind T>
         struct enum_to_section { using type = generic_section; };
+        template <> struct enum_to_section<section_kind::bss> { using type = bss_section; };
         template <> struct enum_to_section<section_kind::debug_line> { using type = debug_line_section; };
         template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
         // clang-format on
