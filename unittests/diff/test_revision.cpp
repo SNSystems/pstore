@@ -92,7 +92,7 @@ TEST_F (RevisionsFixture, InitOne5Two3) {
 
 TEST_F (RevisionsFixture, InitOne4Two7) {
     constexpr auto r1 = diff::revision_number{4};
-    auto r2 = just (diff::revision_number{7});
+    auto const r2 = just (diff::revision_number{7});
 
     diff::revisions_type const expected = this->expected_revisions (r2.value (), r1);
     diff::revisions_type const actual =

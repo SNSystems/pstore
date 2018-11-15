@@ -48,6 +48,7 @@
 #include <gtest/gtest.h>
 #include "pstore/support/make_unique.hpp"
 
+using pstore::just;
 using pstore::maybe;
 using pstore::nothing;
 
@@ -84,6 +85,10 @@ TEST (Maybe, NoValue) {
 
 TEST (Maybe, Nothing) {
     EXPECT_EQ (nothing<value> (), maybe<value> ());
+}
+
+TEST (Maybe, Just) {
+    EXPECT_EQ (just (value (37)), maybe<value> (37));
 }
 
 TEST (Maybe, Value) {
@@ -134,7 +139,7 @@ TEST (Maybe, AssignValue) {
 
 TEST (Maybe, AssignZero) {
     maybe<char> m;
-    m = 0;
+    m = char{0};
     EXPECT_TRUE (m.operator bool ());
     EXPECT_TRUE (m.has_value ());
     EXPECT_EQ (m.value (), 0);
@@ -148,7 +153,7 @@ TEST (Maybe, AssignZero) {
 
 TEST (Maybe, MoveCtor) {
     {
-        maybe<std::string> m1 = std::string{"test"};
+        maybe<std::string> m1{std::string{"test"}};
         EXPECT_TRUE (m1.has_value ());
         EXPECT_EQ (m1.value (), "test");
 
@@ -187,3 +192,55 @@ TEST (Maybe, MoveAssign) {
     }
 }
 
+TEST (Maybe, CopyAssign) {
+    // both lhs and rhs have no value.
+    {
+        maybe<std::string> m1;
+        maybe<std::string> const m2;
+        m1.operator= (m2);
+        EXPECT_FALSE (m1.has_value ());
+    }
+
+    // lhs with no value, rhs with value.
+    {
+        maybe<std::string> m1;
+        maybe<std::string> const m2 ("test");
+        m1.operator= (m2);
+        ASSERT_TRUE (m1.has_value ());
+        EXPECT_EQ (m1.value (), std::string{"test"});
+    }
+
+    // lhs with value, rhs with no value.
+    {
+        maybe<std::string> m1 ("test");
+        maybe<std::string> m2;
+        m1.operator= (m2);
+        EXPECT_FALSE (m1.has_value ());
+    }
+
+    // both lhs and rhs have a value.
+    {
+        maybe<std::string> m1 ("original");
+        maybe<std::string> m2 ("new");
+        m1.operator= (m2);
+        ASSERT_TRUE (m1.has_value ());
+        EXPECT_EQ (m1.value (), std::string{"new"});
+    }
+}
+
+TEST (Maybe, SelfAssign) {
+    // self-assign with no value
+    {
+        maybe<std::string> m1;
+        m1.operator= (m1);
+        EXPECT_FALSE (m1.has_value ());
+    }
+
+    // self-assign with a value
+    {
+        maybe<std::string> m1 ("test");
+        m1.operator= (m1);
+        ASSERT_TRUE (m1.has_value ());
+        EXPECT_EQ (m1.value (), std::string{"test"});
+    }
+}
