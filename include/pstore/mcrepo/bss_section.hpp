@@ -60,6 +60,7 @@ namespace pstore {
             bss_section (std::uint8_t align, std::uint64_t size)
                     : align_{static_cast<std::uint8_t> (bit_count::ctz (align))}
                     , size_{size} {
+                (void) padding_;
                 PSTORE_STATIC_ASSERT (std::is_standard_layout<bss_section>::value);
                 PSTORE_STATIC_ASSERT (offsetof (bss_section, align_) == 0);
                 PSTORE_STATIC_ASSERT (offsetof (bss_section, size_) == 8);
