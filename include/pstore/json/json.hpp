@@ -258,7 +258,7 @@ namespace pstore {
                 /// matcher is pushed onto the parse stack; if null the same matcher object is used
                 /// to process the next character. The boolean value is false if the same character
                 /// must be passed to the next consume() call; true indicates that the character was
-                /// correctly match by this consume() call.
+                /// correctly matched by this consume() call.
                 virtual std::pair<pointer, bool> consume (parser<Callbacks> & parser,
                                                           maybe<char> ch) = 0;
 
