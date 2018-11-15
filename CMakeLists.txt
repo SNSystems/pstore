@@ -98,6 +98,8 @@ option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and foote
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
 
+option (PSTORE_ENABLE_BROKER_TESTS "Run broker system tests. Disable if the compiler does not support exceptions." ON)
+
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
 endif ()
@@ -253,7 +255,11 @@ find_program (PYTHON_EXECUTABLE
 set (LIT_PARAMS "")
 # Add the examples to the collection of tests.
 if (PSTORE_EXAMPLES)
-   list (APPEND LIT_PARAMS --param examples)
+    list (APPEND LIT_PARAMS --param examples)
+endif ()
+# Add the broker system tests to the collection of tests.
+if (PSTORE_ENABLE_BROKER_TESTS)
+    list (APPEND LIT_PARAMS --param broker)
 endif ()
 
 # Add a target to the build which will run the system tests.

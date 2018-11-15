@@ -85,6 +85,10 @@ config.target_triple = 'foo'
 if lit_config.params.get ('examples') is not None:
     config.available_features.add ('examples')
 
+# add 'broker' if '--param broker' was specified on the command line.
+if lit_config.params.get ('broker') is not None:
+    config.available_features.add ('broker')
+
 config.substitutions.append (('%binaries', '@LIT_CONFIG_DIR@'))
 config.substitutions.append (('%foo', 'this-is-foo'))
 config.substitutions.append (('%stores', data_store_path ()))

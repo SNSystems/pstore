@@ -1,2 +1,4 @@
+REQUIRES: broker
+
 RUN: python "%S/broker_kill.py" "%binaries"
 #eof broker_kill.test
