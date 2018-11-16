@@ -134,14 +134,17 @@ namespace pstore {
 
         value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
                                       repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
+            assert (sk == repo::section_kind::debug_line);
             return make_value (object::container{
                 {"header", make_value (section.header_extent ())},
                 {"generic", make_section_value (db, section.generic (), sk, triple, hex_mode)},
             });
         }
 
-        value_ptr make_section_value (database const & db, repo::bss_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
+        value_ptr make_section_value (database const & /*db*/, repo::bss_section const & section,
+                                      repo::section_kind sk, gsl::czstring /*triple*/, bool /*hex_mode*/) {
+            (void) sk;
+            assert (sk == repo::section_kind::bss);
             return make_value (object::container{
                 {"align", make_value (section.align ())},
                 {"size", make_value (section.size ())},
