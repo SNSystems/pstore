@@ -287,29 +287,32 @@ TEST_F (MCRepoFixture, DumpBssSection) {
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
 
-    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+    // Create a fragment which containing a BSS section.
+    std::shared_ptr<fragment const> frag = [this] () {
+        transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
 
-    std::array<section_content, 1> c = {
-        {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
-    section_content & data = c.back ();
-    pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
-    {
-        // Build the bss section's data, no internal and external fixups.
+        std::array<section_content, 1> c = {
+            {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
+
+        section_content & data = c.back ();
+        // Build the bss section's data, no internal and external fixups. (Note that this is used by the dispatcher and it doesn't end up in the resulting bss_section instance.)
         data.data.assign ({0, 0, 0, 0});
-    }
 
-    // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
-    // various sections.
-    std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
-    dispatchers.emplace_back (new bss_section_creation_dispatcher (&data));
+        // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
+        // various sections.
+        std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
+        dispatchers.emplace_back (new bss_section_creation_dispatcher (&data));
 
-    auto fragment = fragment::load (
-        *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
-                               pstore::make_pointee_adaptor (dispatchers.end ())));
+        std::shared_ptr<fragment const> f = fragment::load (
+            *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
+                                   pstore::make_pointee_adaptor (dispatchers.end ())));
+        transaction.commit ();
+        return f;
+    } ();
 
     std::ostringstream out;
     pstore::dump::value_ptr value = pstore::dump::make_fragment_value (
-        *db_, *fragment, "machine-vendor-os", false /*hex mode?*/);
+        *db_, *frag, "machine-vendor-os", false /*hex mode?*/);
     value->write (out);
 
     auto const lines = split_lines (out.str ());
