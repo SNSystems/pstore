@@ -48,21 +48,21 @@
 #include <gtest/gtest.h>
 #include "pstore/support/make_unique.hpp"
 
-using pstore::just;
 using pstore::maybe;
-using pstore::nothing;
 
 namespace {
 
     class value {
     public:
-        value (int v)
+        explicit value (int v)
                 : v_{std::make_unique<int> (v)} {}
         value (value const & v)
                 : v_{std::make_unique<int> (v.get ())} {}
 
         value & operator= (value const & rhs) {
-            v_ = std::make_unique<int> (rhs.get ());
+            if (&rhs != this) {
+                v_ = std::make_unique<int> (rhs.get ());
+            }
             return *this;
         }
 
@@ -74,7 +74,7 @@ namespace {
         std::unique_ptr<int> v_;
     };
 
-} // namespace
+} // end anonymous namespace
 
 TEST (Maybe, NoValue) {
     maybe<value> m;
@@ -84,11 +84,11 @@ TEST (Maybe, NoValue) {
 }
 
 TEST (Maybe, Nothing) {
-    EXPECT_EQ (nothing<value> (), maybe<value> ());
+    EXPECT_EQ (pstore::nothing<value> (), maybe<value> ());
 }
 
 TEST (Maybe, Just) {
-    EXPECT_EQ (just (value (37)), maybe<value> (37));
+    EXPECT_EQ (pstore::just (value (37)), maybe<value> (37));
 }
 
 TEST (Maybe, Value) {
@@ -111,29 +111,29 @@ TEST (Maybe, CtorWithMaybeHoldingAValue) {
 
 TEST (Maybe, ValueOr) {
     maybe<value> m1;
-    EXPECT_EQ (m1.value_or (37), 37);
+    EXPECT_EQ (m1.value_or (value{37}), value{37});
 
     maybe<value> m2 (5);
-    EXPECT_EQ (m2.value_or (37), 5);
+    EXPECT_EQ (m2.value_or (value{37}), value{5});
 }
 
 TEST (Maybe, AssignValue) {
     maybe<value> m;
 
     // First assignment, m has no value
-    m.operator= (43);
+    m.operator= (value{43});
     EXPECT_TRUE (m.has_value ());
     EXPECT_TRUE (m);
-    EXPECT_EQ (m.value (), 43);
+    EXPECT_EQ (m.value (), value{43});
 
     // Second assignment, m holds a value
-    m.operator= (44);
+    m.operator= (value{44});
     EXPECT_TRUE (m.has_value ());
     EXPECT_TRUE (m);
-    EXPECT_EQ (m.value (), 44);
+    EXPECT_EQ (m.value (), value{44});
 
     // Third assignment, m holds a value, assigning nothing.
-    m.operator= (nothing<value> ());
+    m.operator= (pstore::nothing<value> ());
     EXPECT_FALSE (m.has_value ());
 }
 
