@@ -156,9 +156,8 @@ namespace pstore {
             details::revision_restorer _(db);
             db.sync (new_revision);
 
-            using dump::make_value;
             return dump::make_value (dump::object::container{
-                {"name", make_value (name)},
+                {"name", dump::make_value (name)},
                 {"members", make_diff<Index> (db, old_revision, get_index)},
             });
         }
