@@ -143,9 +143,10 @@ namespace pstore {
                 std::tie (store_ptr, ptr) = Node::get_node (db_, node);
                 assert (ptr != nullptr);
 
-                for (index_pointer child : *ptr) {
+                for (auto child : *ptr) {
                     if (this->is_new (node)) {
-                        this->visit_node (child, shifts + index::details::hash_index_bits, result);
+                        this->visit_node (index_pointer{child},
+                                          shifts + index::details::hash_index_bits, result);
                     }
                 }
             }

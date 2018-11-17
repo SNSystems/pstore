@@ -156,11 +156,11 @@ namespace pstore {
             union index_pointer {
                 index_pointer ()
                         : internal{nullptr} {}
-                index_pointer (address const a)
+                explicit index_pointer (address const a)
                         : addr (a) {}
-                index_pointer (internal_node * p)
+                explicit index_pointer (internal_node * p)
                         : internal{tag_node (p)} {}
-                index_pointer (linear_node * p)
+                explicit index_pointer (linear_node * p)
                         : linear{tag_node (p)} {}
                 index_pointer (index_pointer const &) = default;
                 index_pointer (index_pointer &&) noexcept = default;
@@ -235,10 +235,10 @@ namespace pstore {
                 static std::uintptr_t tag (void * p) {
                     return reinterpret_cast<std::uintptr_t> (p) | internal_node_bit | heap_node_bit;
                 }
-                static inline internal_node * tag_node (internal_node * p) {
+                static internal_node * tag_node (internal_node * p) {
                     return reinterpret_cast<internal_node *> (tag (p));
                 }
-                static inline linear_node * tag_node (linear_node * p) {
+                static linear_node * tag_node (linear_node * p) {
                     return reinterpret_cast<linear_node *> (tag (p));
                 }
 
@@ -252,6 +252,7 @@ namespace pstore {
 
 
             PSTORE_STATIC_ASSERT (sizeof (index_pointer) == 8);
+            PSTORE_STATIC_ASSERT (alignof (index_pointer) == 8);
             PSTORE_STATIC_ASSERT (offsetof (index_pointer, addr) == 0);
             PSTORE_STATIC_ASSERT (sizeof (index_pointer::internal) == sizeof (index_pointer::addr));
             PSTORE_STATIC_ASSERT (offsetof (index_pointer, internal) == 0);

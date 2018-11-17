@@ -390,7 +390,7 @@ namespace pstore {
 
                 this->bitmap_ = this->bitmap_ | bit_pos;
                 assert (bit_count::pop_count (this->bitmap_) == old_size + 1);
-                parents->push ({this, index});
+                parents->push ({index_pointer{this}, index});
             }
 
             // store_node

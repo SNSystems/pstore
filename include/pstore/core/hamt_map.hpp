@@ -543,7 +543,7 @@ namespace pstore {
                             visited_parents_.push ({child});
                         }
                     } else {
-                        visited_parents_.push ({(*linear)[parent.position]});
+                        visited_parents_.push ({index_pointer{(*linear)[parent.position]}});
                     }
                 }
             }
@@ -666,7 +666,7 @@ namespace pstore {
             address const result =
                 serialize::write (serialize::archive::make_writer (transaction), v);
             assert ((result.absolute () & (aligned_to - 1U)) == 0U);
-            parents->push ({result});
+            parents->push ({index_pointer{result}});
 
             return result;
         }
@@ -685,11 +685,11 @@ namespace pstore {
                 auto old_hash = existing_hash & details::hash_index_mask;
                 if (new_hash != old_hash) {
                     address leaf_addr = this->store_leaf_node (transaction, new_leaf, parents);
-                    auto internal_ptr =
-                        new internal_node (existing_leaf, leaf_addr, old_hash, new_hash);
+                    auto internal_ptr = new internal_node (existing_leaf, index_pointer{leaf_addr},
+                                                           old_hash, new_hash);
                     auto new_leaf_index = internal_node::get_new_index (new_hash, old_hash);
-                    parents->push ({internal_ptr, new_leaf_index});
-                    return internal_ptr;
+                    parents->push ({index_pointer{internal_ptr}, new_leaf_index});
+                    return index_pointer{internal_ptr};
                 }
 
                 // We've found a (partial) hash collision. Replace this leaf node with an internal
@@ -708,14 +708,14 @@ namespace pstore {
                     transaction, existing_leaf, new_leaf, existing_hash, hash, shifts, parents);
                 auto internal_ptr =
                     std::unique_ptr<internal_node> (new internal_node (leaf_ptr, old_hash));
-                parents->push ({internal_ptr.get (), 0});
+                parents->push ({index_pointer{internal_ptr.get ()}, 0});
                 return index_pointer{internal_ptr.release ()};
             }
 
             // We ran out of hash bits: create a new linear node.
             std::unique_ptr<linear_node> linear_ptr = linear_node::allocate (
                 existing_leaf.addr, this->store_leaf_node (transaction, new_leaf, parents));
-            parents->push ({linear_ptr.get (), 1});
+            parents->push ({index_pointer{linear_ptr.get ()}, 1});
             return index_pointer{linear_ptr.release ()};
         }
 
@@ -760,10 +760,11 @@ namespace pstore {
                 internal_node * inode = nullptr;
                 std::tie (new_node, inode) = internal_node::make_writable (node, *internal);
 
-                inode->insert_child (hash, this->store_leaf_node (transaction, value, parents),
-                                     parents);
+                inode->insert_child (
+                    hash, index_pointer{this->store_leaf_node (transaction, value, parents)},
+                    parents);
                 new_node.release ();
-                return {inode, false};
+                return {index_pointer{inode}, false};
             }
 
             shifts += details::hash_index_bits;
@@ -845,7 +846,7 @@ namespace pstore {
                     (*lnode)[index] = this->store_leaf_node (transaction, value, parents);
                     new_node.release ();
                 } else {
-                    parents->push (details::parent_type{(*orig_node)[index]});
+                    parents->push (details::parent_type{index_pointer{(*orig_node)[index]}});
 
                     // We didn't modify the node so our return value is the original node index
                     // pointer.

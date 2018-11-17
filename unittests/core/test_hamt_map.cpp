@@ -1265,7 +1265,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         std::shared_ptr<linear_node const> sptr;
         linear_node const * level11_linear = nullptr;
         std::tie (sptr, level11_linear) =
-            linear_node::get_node (*db_, level11.untag_internal_address ());
+            linear_node::get_node (*db_, index_pointer{level11.untag_internal_address ()});
 
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_TRUE (this->is_found ("g")) << "key \"g\" should be present in the index (store) ";

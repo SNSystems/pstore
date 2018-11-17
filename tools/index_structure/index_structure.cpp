@@ -146,7 +146,8 @@ namespace {
         assert (ptr != nullptr);
 
         for (auto const & child : *ptr) {
-            auto const child_id = dump (db, index, os, child, shifts + hash_index_bits);
+            auto const child_id =
+                dump (db, index, os, index_pointer{child}, shifts + hash_index_bits);
             os << this_id << " -> " << child_id << ";\n";
         }
         return this_id;
