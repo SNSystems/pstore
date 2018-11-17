@@ -111,8 +111,6 @@ namespace pstore {
 namespace pstore {
     namespace index {
 
-        using ::pstore::gsl::not_null;
-
         //*  _                _           _    _         _    *
         //* | |_  ___ __ _ __| |___ _ _  | |__| |___  __| |__ *
         //* | ' \/ -_) _` / _` / -_) '_| | '_ \ / _ \/ _| / / *
@@ -266,7 +264,8 @@ namespace pstore {
             //* | .__/\__,_|_| \___|_||_\__|  \__|\_, | .__/\___| *
             //* |_|                               |__/|_|         *
             /// \brief A class used to keep the pointer to parent node and the child slot.
-            struct parent_type {
+            class parent_type {
+            public:
                 parent_type () = default;
 
                 /// Constructs a parent type object.
@@ -573,7 +572,7 @@ namespace pstore {
 
                 /// Insert a child into the internal node (this).
                 void insert_child (hash_type const hash, index_pointer const leaf,
-                                   not_null<parent_stack *> parents);
+                                   gsl::not_null<parent_stack *> parents);
 
                 /// Write an internal node and its children into a store.
                 address flush (transaction_base & transaction, unsigned shifts);
