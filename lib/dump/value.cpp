@@ -55,7 +55,9 @@
 #include <sstream>
 #include <tuple>
 
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/utf.hpp"
+#include "pstore/support/time.hpp"
 
 namespace {
 
@@ -296,18 +298,18 @@ namespace pstore {
         OStream & time::writer (OStream & os) const {
             bool fallback = true;
             std::time_t t = this->milliseconds_to_time ();
-            if (std::tm const * tm = std::gmtime (&t)) {
-                char time_str[100];
-                // strftime() returns 0 if the result doesn't fit in the provided buffer;
-                // the contents are undefined.
-                // TODO: use small_vector? 100 characters should be plenty for an ISO8601 date.
-                if (std::strftime (time_str, sizeof (time_str), "%FT%TZ", tm) != 0) {
-                    // Guarantee that the string is null terminated.
-                    time_str[sizeof (time_str) / sizeof (time_str[0]) - 1] = '\0';
-                    os << time_str;
-                    fallback = false;
-                }
+            std::tm const tm = gm_time (t);
+            char time_str[100];
+            // strftime() returns 0 if the result doesn't fit in the provided buffer;
+            // the contents are undefined.
+            // TODO: use small_vector? 100 characters should be plenty for an ISO8601 date.
+            if (std::strftime (time_str, sizeof (time_str), "%FT%TZ", &tm) != 0) {
+                // Guarantee that the string is null terminated.
+                time_str[array_elements (time_str) - 1] = '\0';
+                os << time_str;
+                fallback = false;
             }
+
             if (fallback) {
                 os << "Time(" << ms_ << "ms)";
             }

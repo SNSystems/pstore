@@ -144,8 +144,6 @@ namespace pstore {
         private:
             virtual void log_impl (std::string const & message) = 0;
 
-            static struct tm local_time (time_t const & clock);
-
             static std::mutex mutex_;
             std::string thread_name_;
         };

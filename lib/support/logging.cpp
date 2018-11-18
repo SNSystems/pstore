@@ -58,6 +58,7 @@
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/rotating_log.hpp"
+#include "pstore/support/time.hpp"
 
 #if PSTORE_HAVE_ASL_H
 #include <asl.h>
@@ -114,29 +115,6 @@ namespace pstore {
 //* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
 //* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
 //*                             |___/|___/          *
-#if PSTORE_HAVE_LOCALTIME_S
-        struct tm basic_logger::local_time (time_t const & clock) {
-            struct tm result;
-            if (errno_t const err = localtime_s (&result, &clock)) {
-                raise (errno_erc{errno}, "localtime_s");
-            }
-            return result;
-        }
-#elif PSTORE_HAVE_LOCALTIME_R
-        struct tm basic_logger::local_time (time_t const & clock) {
-            errno = 0;
-            struct tm result {};
-            struct tm * res = localtime_r (&clock, &result);
-            if (res == nullptr) {
-                raise (errno_erc{errno}, "localtime_r");
-            }
-            assert (res == &result);
-            return result;
-        }
-#else
-#error "Need localtime_r() or localtime_s()"
-#endif
-
         // time_string
         // ~~~~~~~~~~~
         std::size_t basic_logger::time_string (std::time_t t,

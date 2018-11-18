@@ -125,6 +125,28 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_LOCALTIME_R)
 
+
+check_cxx_source_compiles (
+    "#define __STDC_WANT_LIB_EXT1__  1
+    #include <time.h>
+    int main () {
+        time_t t = time (NULL);
+        struct tm buf;
+        gmtime_s (&buf, &t);
+    }"
+    PSTORE_HAVE_GMTIME_S)
+
+check_cxx_source_compiles (
+    "#include <time.h>
+    int main () {
+        time_t t = time (NULL);
+        struct tm buf;
+        gmtime_r (&t, &buf);
+    }"
+    PSTORE_HAVE_GMTIME_R)
+
+
+
 # The time members of struct stat might be called st_Xtimespec (of type struct timespec)
 # or st_Xtime (and be of type time_t).
 check_cxx_source_compiles (
@@ -202,6 +224,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/inherit_const.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/time.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/logging.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
@@ -226,6 +249,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     file_posix.cpp
     file_win32.cpp
     fnv.cpp
+    time.cpp
     logging.cpp
     path.cpp
     process_file_name_posix.cpp

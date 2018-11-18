@@ -65,6 +65,7 @@
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/writer.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/time.hpp"
 
 namespace {
     template <typename T, std::size_t N>
@@ -260,12 +261,11 @@ namespace pstore {
                     char time_str[time_size];
                     bool got_time = false;
 
-                    if (std::tm const * tm = std::gmtime (&t)) {
-                        // strftime() returns 0 if the result doesn't fit in the provided buffer;
-                        // the contents are undefined.
-                        if (std::strftime (time_str, time_size, "%FT%TZ", tm) != 0) {
-                            got_time = true;
-                        }
+                    std::tm const tm = gm_time (t);
+                    // strftime() returns 0 if the result doesn't fit in the provided buffer;
+                    // the contents are undefined.
+                    if (std::strftime (time_str, time_size, "%FT%TZ", &tm) != 0) {
+                        got_time = true;
                     }
                     if (!got_time) {
                         std::strncpy (time_str, "(unknown)", time_size);
