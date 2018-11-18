@@ -156,7 +156,6 @@ namespace pstore {
                   typename Return =
                       typename inherit_const<Database, typename enum_to_index<Index>::type>::type>
         std::shared_ptr<Return> get_index (Database & db, bool create = true) {
-            using namespace pstore;
             auto & dx = db.get_mutable_index (Index);
 
             // Have we already loaded this index?
