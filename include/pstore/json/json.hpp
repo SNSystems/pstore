@@ -84,7 +84,7 @@ namespace pstore {
             public:
                 /// \param d True if the managed object should be deleted; false, if it only the
                 /// detructor should be called.
-                constexpr deleter (bool d = true) noexcept
+                constexpr explicit deleter (bool d = true) noexcept
                         : delete_{d} {}
                 void operator() (T * const p) const noexcept {
                     if (delete_) {
@@ -101,6 +101,7 @@ namespace pstore {
             private:
                 bool delete_;
             };
+
         } // namespace details
 
         // clang-format off
@@ -1438,13 +1439,15 @@ namespace pstore {
                 , coordinate_ (std::make_tuple (1U, 1U)) {
 
             using mpointer = typename matcher::pointer;
+            using deleter = typename mpointer::deleter_type;
             // The EOF matcher is placed at the bottom of the stack to ensure that the input JSON
             // ends after a single top-level object.
-            stack_.push (
-                mpointer (new (&singletons_->eof) details::eof_matcher<Callbacks>{}, false));
+            stack_.push (mpointer (new (&singletons_->eof) details::eof_matcher<Callbacks>{},
+                                   deleter{false}));
             // We permit whitespace after the top-level object.
-            stack_.push (mpointer (
-                new (&singletons_->trailing_ws) details::whitespace_matcher<Callbacks>{}, false));
+            stack_.push (mpointer (new (&singletons_->trailing_ws)
+                                       details::whitespace_matcher<Callbacks>{},
+                                   deleter{false}));
             stack_.push (this->make_root_matcher ());
         }
 
@@ -1453,7 +1456,8 @@ namespace pstore {
         template <typename Callbacks>
         auto parser<Callbacks>::make_root_matcher (bool only_string_allowed) -> pointer {
             using root_matcher = details::root_matcher<Callbacks>;
-            return pointer (new (&singletons_->root) root_matcher (only_string_allowed), false);
+            return pointer (new (&singletons_->root) root_matcher (only_string_allowed),
+                            typename pointer::deleter_type{false});
         }
 
         // make_whitespace_matcher
@@ -1482,7 +1486,7 @@ namespace pstore {
                            "terminal storage is not sufficiently aligned for Matcher type");
 
             return pointer (new (&singletons_->terminal) Matcher (std::forward<Args> (args)...),
-                            false);
+                            typename pointer::deleter_type{false});
         }
 
         // input
