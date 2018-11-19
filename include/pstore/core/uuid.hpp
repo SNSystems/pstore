@@ -99,7 +99,7 @@ namespace pstore {
         explicit uuid (std::string const & s);
 
         /// A constructor used to construct a specific UUID from its binary value.
-        uuid (container_type c)
+        explicit uuid (container_type c)
                 : data_ (std::move (c)) {}
 
         /// Converts a string to a UUID following the convention defined by RFC4122. If the string
@@ -110,9 +110,9 @@ namespace pstore {
 
 #if defined(_WIN32)
         /// Convert from the native Win32 UUID type.
-        uuid (UUID const & u);
+        explicit uuid (UUID const & u);
 #elif defined(__APPLE__)
-        uuid (uuid_t const & bytes);
+        explicit uuid (uuid_t const & bytes);
 #endif
 
         iterator begin () noexcept { return std::begin (data_); }
