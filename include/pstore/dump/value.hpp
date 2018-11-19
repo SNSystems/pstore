@@ -424,9 +424,9 @@ namespace pstore {
             using container = std::vector<value_ptr>;
 
             array () = default;
-            array (container const & values)
+            explicit array (container const & values)
                     : values_ (values) {}
-            array (container && values)
+            explicit array (container && values)
                     : values_ (std::move (values)) {}
             array (array && rhs) = default;
             array (array const & rhs) = delete;
@@ -495,9 +495,9 @@ namespace pstore {
             using container = std::vector<member>;
 
             object () = default;
-            object (container && m)
+            explicit object (container && m)
                     : members_ (std::move (m)) {}
-            object (container const & m)
+            explicit object (container const & m)
                     : members_ (m) {}
             object (object && rhs) = default;
             object (object const & rhs) = delete;
