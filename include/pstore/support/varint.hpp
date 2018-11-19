@@ -97,7 +97,7 @@ namespace pstore {
         inline unsigned encoded_size (std::uint64_t x) {
             // Each additional byte that we emit steals one bit from the first byte. We therefore
             // manage 7 bits per byte.
-            auto const nine_byte_threshold = (UINT64_C (1) << (7 * 8)) - 1U;
+            auto const nine_byte_threshold = (UINT64_C (1) << (7U * 8U)) - 1U;
             if (x > nine_byte_threshold) {
                 return 9;
             } else {
@@ -124,15 +124,15 @@ namespace pstore {
             assert (bytes < 9);
             // clang-format off
             switch (bytes) {
-            case 8: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 7: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 6: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 5: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 4: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 3: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
-            case 2: *(out++) = x & 0xff; x >>= 8; PSTORE_FALLTHROUGH;
+            case 8: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 7: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 6: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 5: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 4: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 3: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 2: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
             default:
-                *(out++) = x & 0xff;
+                *(out++) = x & 0xFFU;
             }
             // clang-format on
             return out;
@@ -152,7 +152,7 @@ namespace pstore {
             std::uint64_t decode9 (InputIterator in) {
                 ++in; // skip the length byte
                 auto result = std::uint64_t{0};
-                for (auto shift = 0; shift < 64; shift += 8) {
+                for (auto shift = 0U; shift < 64U; shift += 8U) {
                     result |= std::uint64_t{*(in++)} << shift;
                 }
                 return result;

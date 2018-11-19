@@ -99,7 +99,7 @@ std::uint8_t pstore::json::utf8_decoder::decode (gsl::not_null<std::uint8_t *> s
                                                  gsl::not_null<char32_t *> codep,
                                                  std::uint32_t const byte) noexcept {
     auto const type = utf8d_[byte];
-    *codep = (*state != accept) ? (byte & 0x3F) | (*codep << 6) : (0xFF >> type) & byte;
+    *codep = (*state != accept) ? (byte & 0x3FU) | (*codep << 6U) : (0xFFU >> type) & byte;
     *state = utf8d_[256 + *state * 16 + type];
     return *state;
 }

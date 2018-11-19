@@ -156,8 +156,8 @@ namespace pstore {
         template <typename OStream, typename UCharType>
         OStream & string::write_codepoint_hex (OStream & os, UCharType ch) {
             static_assert (std::is_unsigned<UCharType>::value, "UCharType must be unsigned");
-            return os << "\\x" << to_hex<UCharType> ((ch >> 4) & 0x0F)
-                      << to_hex<UCharType> (ch & 0x0F);
+            return os << "\\x" << to_hex<UCharType> ((ch >> 4U) & 0x0FU)
+                      << to_hex<UCharType> (ch & 0x0FU);
         }
 
         // write_character
@@ -694,8 +694,8 @@ namespace pstore {
                         // Values grouped into two-byte pairs.
                         os << ' ';
                     }
-                    char_type const hex[3] = {to_hex<char_type> ((b >> 4) & 0x0f),
-                                              to_hex<char_type> (b & 0x0f), '\0'};
+                    char_type const hex[3] = {to_hex<char_type> ((b >> 4U) & 0x0FU),
+                                              to_hex<char_type> (b & 0x0FU), '\0'};
                     os << hex;
                     ++ctr;
                 }
