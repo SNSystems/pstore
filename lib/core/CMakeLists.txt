@@ -124,13 +124,12 @@ add_pstore_library (pstore-core ${PSTORE_SRC})
 
 
 # Our use of shared memory needs an extra library on a Linux system.
-if (UNIX AND NOT APPLE)
-    include (CheckLibraryExists)
-    check_library_exists (rt shm_open "" NEED_LIBRT)
-    if (NEED_LIBRT)
-        target_link_libraries (pstore-core PRIVATE rt)
-    endif ()
+include (CheckLibraryExists)
+check_library_exists (rt shm_open "" NEED_LIBRT)
+if (NEED_LIBRT)
+    target_link_libraries (pstore-core PRIVATE rt)
 endif ()
+
 
 target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize pstore-support)
 
