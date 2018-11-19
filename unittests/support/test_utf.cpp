@@ -70,7 +70,7 @@ TEST (Utf, LengthOfSequenceIncludingNullCharacter) {
 
 
 namespace {
-    struct SimpleAsciiFixture : public testing::Test {
+    struct SimpleAsciiFixture : testing::Test {
         static std::string const str;
     };
 
@@ -124,7 +124,7 @@ TEST_F (SimpleAsciiFixture, IndexStdString) {
 
 
 namespace {
-    struct ShortJapaneseStringFixture : public testing::Test {
+    struct ShortJapaneseStringFixture : testing::Test {
         static std::uint8_t const bytes[];
         static std::string const str;
     };
@@ -192,7 +192,7 @@ TEST_F (ShortJapaneseStringFixture, IndexStdString) {
 
 
 namespace {
-    struct FourByteUtf8ChineseCharacters : public testing::Test {
+    struct FourByteUtf8ChineseCharacters : testing::Test {
         static std::uint8_t const bytes[];
         static std::string const str;
     };
@@ -247,7 +247,7 @@ namespace {
     // 4 bytes are now illegal
     // (see http://www.w3.org/2001/06/utf-8-wrong/UTF-8-test.html)
 
-    struct MaxLengthUTFSequence : public testing::Test {
+    struct MaxLengthUTFSequence : testing::Test {
         static std::uint8_t const bytes[];
         static char const * str;
     };

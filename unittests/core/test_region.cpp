@@ -49,13 +49,15 @@
 #include "pstore/support/file.hpp"
 
 namespace {
-    struct Region : public ::testing::Test {
 
+    class Region : public ::testing::Test {
+    public:
         std::shared_ptr<std::uint8_t> make_array (std::size_t size) {
             return std::shared_ptr<std::uint8_t>{new std::uint8_t[size],
                                                  [](std::uint8_t * p) { delete[] p; }};
         }
     };
+
 } // namespace
 
 TEST_F (Region, Single) {

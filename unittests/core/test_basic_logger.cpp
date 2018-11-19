@@ -132,7 +132,8 @@ namespace {
     //***************************************************
     //*   B a s i c L o g g e r T i m e F i x t u r e   *
     //***************************************************
-    struct BasicLoggerTimeFixture : public ::testing::Test {
+    class BasicLoggerTimeFixture : public ::testing::Test {
+    public:
         std::array<char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
         static constexpr unsigned const sign_index_ = 19;
 

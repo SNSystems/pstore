@@ -135,7 +135,7 @@ namespace {
 namespace std {
 
     template <>
-    struct is_error_code_enum<dump_error_code> : public std::true_type {};
+    struct is_error_code_enum<dump_error_code> : std::true_type {};
 
     std::error_code make_error_code (dump_error_code e);
     std::error_code make_error_code (dump_error_code e) {

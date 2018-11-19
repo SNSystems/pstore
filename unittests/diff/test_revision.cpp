@@ -48,7 +48,8 @@
 using namespace pstore;
 
 namespace {
-    struct RevisionsFixture : public ::testing::Test {
+    class RevisionsFixture : public ::testing::Test {
+    public:
         diff::revisions_type expected_revisions (diff::revision_number r1,
                                                  diff::revision_number r2) const {
             return std::make_pair (r1, just (r2));

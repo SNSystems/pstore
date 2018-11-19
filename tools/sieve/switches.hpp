@@ -64,13 +64,13 @@ namespace switches {
     using pstore_tchar = char;
 #endif
 
-    struct bad_number : public std::runtime_error {
+    struct bad_number : std::runtime_error {
         bad_number ();
     };
-    struct bad_endian : public std::runtime_error {
+    struct bad_endian : std::runtime_error {
         bad_endian ();
     };
-    struct parse_failure : public std::runtime_error {
+    struct parse_failure : std::runtime_error {
         parse_failure ();
     };
 

@@ -51,7 +51,8 @@ namespace {
         virtual ~callback_base () {}
         virtual void callback (pstore::heartbeat::key_type) {}
     };
-    struct mock_callback final : public callback_base {
+    class mock_callback final : public callback_base {
+    public:
         MOCK_METHOD1 (callback, void(pstore::heartbeat::key_type));
     };
 

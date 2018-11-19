@@ -248,7 +248,7 @@ TEST_F (SetWriter, read) {
 
 
 namespace {
-    struct MapWriter : public ::testing::Test {
+    class MapWriter : public ::testing::Test {
     public:
         using map_type = std::map<std::string, std::string>;
         MapWriter ()

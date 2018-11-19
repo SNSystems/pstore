@@ -74,7 +74,7 @@ namespace pstore {
 namespace std {
 
     template <>
-    struct is_error_code_enum<pstore::dump::error_code> : public std::true_type {};
+    struct is_error_code_enum<pstore::dump::error_code> : std::true_type {};
 
     std::error_code make_error_code (pstore::dump::error_code e);
 

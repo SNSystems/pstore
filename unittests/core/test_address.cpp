@@ -48,7 +48,9 @@
 #include "gtest/gtest.h"
 
 namespace {
-    struct AddressFixture : public ::testing::Test {
+
+    class AddressFixture : public ::testing::Test {
+    public:
         pstore::address expected_address (std::uint64_t segment, std::uint64_t offset) const {
             return pstore::address::make ((segment << pstore::address::offset_number_bits) |
                                           offset);
@@ -60,6 +62,7 @@ namespace {
 
     constexpr pstore::address::offset_type AddressFixture::max_offset;
     constexpr pstore::address::segment_type AddressFixture::max_segment;
+
 } // namespace
 
 

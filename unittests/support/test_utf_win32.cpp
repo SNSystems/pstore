@@ -53,7 +53,7 @@
 #include "pstore/support/utf.hpp"
 
 namespace {
-    struct UtfStringsFixture : public testing::Test {
+    struct UtfStringsFixture : testing::Test {
         static std::uint8_t const utf8_bytes[];
         static char const * utf8_str;
 

@@ -82,7 +82,7 @@ namespace pstore {
 
 namespace std {
     template <>
-    struct is_error_code_enum<::pstore::json::error_code> : public std::true_type {};
+    struct is_error_code_enum<::pstore::json::error_code> : std::true_type {};
 
     inline std::error_code make_error_code (::pstore::json::error_code e) noexcept {
         return {static_cast<int> (e), ::pstore::json::get_error_category ()};

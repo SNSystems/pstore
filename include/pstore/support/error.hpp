@@ -138,7 +138,7 @@ namespace pstore {
 namespace std {
 
     template <>
-    struct is_error_code_enum<pstore::error_code> : public std::true_type {};
+    struct is_error_code_enum<pstore::error_code> : std::true_type {};
 
     inline std::error_code make_error_code (pstore::error_code e) {
         static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,

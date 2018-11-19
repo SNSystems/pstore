@@ -61,7 +61,8 @@
 #include "empty_store.hpp"
 
 namespace {
-    struct GenerationIterator : public EmptyStore {
+    class GenerationIterator : public EmptyStore {
+    public:
         void SetUp () override {
             EmptyStore::SetUp ();
             db_.reset (new pstore::database (file_));
