@@ -142,7 +142,7 @@ namespace pstore {
             /// parser. Has no effect.
             /// \tparam Parser The parser which will convert from the user's string to type T.
             template <typename T, bool ExternalStorage = false, typename Parser = parser<T>>
-            class opt : public option {
+            class opt final : public option {
             public:
                 template <class... Mods>
                 explicit opt (Mods const &... mods)
@@ -195,10 +195,10 @@ namespace pstore {
             //* \___/ .__/\__| |_.__/\___/\___/_| *
             //*     |_|                           *
             template <>
-            class opt<bool> : public option {
+            class opt<bool> final : public option {
             public:
                 template <class... Mods>
-                opt (Mods const &... mods) {
+                explicit opt (Mods const &... mods) {
                     apply (*this, mods...);
                 }
                 opt (opt const &) = delete;
@@ -225,14 +225,14 @@ namespace pstore {
             //* |_|_/__/\__| *
             //*              *
             template <typename T, typename Parser = parser<T>>
-            class list : public option {
+            class list final : public option {
                 using container = std::list<T>;
 
             public:
                 using value_type = T;
 
                 template <class... Mods>
-                list (Mods const &... mods) {
+                explicit list (Mods const &... mods) {
                     set_num_occurrences_flag (num_occurrences_flag::zero_or_more);
                     apply (*this, mods...);
                 }
@@ -276,7 +276,7 @@ namespace pstore {
             //* / _` | | / _` (_-< *
             //* \__,_|_|_\__,_/__/ *
             //*                    *
-            class alias : public option {
+            class alias final : public option {
             public:
                 template <typename... Mods>
                 explicit alias (Mods const &... mods) {
