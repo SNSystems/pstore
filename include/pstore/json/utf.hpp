@@ -128,7 +128,7 @@ namespace pstore {
 
         inline constexpr std::uint16_t nop_swapper (std::uint16_t v) noexcept { return v; }
         inline constexpr std::uint16_t byte_swapper (std::uint16_t v) noexcept {
-            return static_cast<std::uint16_t> (((v & 0x00FF) << 8) | ((v & 0xFF00) >> 8));
+            return static_cast<std::uint16_t> (((v & 0x00FFU) << 8U) | ((v & 0xFF00U) >> 8U));
         }
 
         inline constexpr bool is_utf16_high_surrogate (std::uint16_t code_unit) noexcept {

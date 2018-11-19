@@ -54,15 +54,15 @@ std::uint8_t * write (IntType v, std::uint8_t * out);
 template <>
 inline std::uint8_t * write<std::uint16_t, switches::endian::big> (std::uint16_t v,
                                                                    std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v) &0xFFU);
     return out;
 }
 template <>
 inline std::uint8_t * write<std::uint16_t, switches::endian::little> (std::uint16_t v,
                                                                       std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
+    *(out++) = static_cast<std::uint8_t> (v & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
     return out;
 }
 template <>
@@ -78,19 +78,19 @@ inline std::uint8_t * write<std::uint16_t, switches::endian::native> (std::uint1
 template <>
 inline std::uint8_t * write<std::uint32_t, switches::endian::big> (std::uint32_t v,
                                                                    std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v >> 24) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 16) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
+    *(out++) = static_cast<std::uint8_t> ((v >> 24U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 16U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> (v & 0xFFU);
     return out;
 }
 template <>
 inline std::uint8_t * write<std::uint32_t, switches::endian::little> (std::uint32_t v,
                                                                       std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 16) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 24) & 0xFF);
+    *(out++) = static_cast<std::uint8_t> (v & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 16U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 24U) & 0xFFU);
     return out;
 }
 template <>
@@ -108,27 +108,27 @@ inline std::uint8_t * write<std::uint32_t, switches::endian::native> (std::uint3
 template <>
 inline std::uint8_t * write<std::uint64_t, switches::endian::big> (std::uint64_t v,
                                                                    std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v >> 56) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 48) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 40) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 32) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 24) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 16) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
+    *(out++) = static_cast<std::uint8_t> ((v >> 56U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 48U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 40U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 32U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 24U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 16U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> (v & 0xFF);
     return out;
 }
 template <>
 inline std::uint8_t * write<std::uint64_t, switches::endian::little> (std::uint64_t v,
                                                                       std::uint8_t * out) {
-    *(out++) = static_cast<std::uint8_t> ((v) &0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 8) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 16) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 24) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 32) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 40) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 48) & 0xFF);
-    *(out++) = static_cast<std::uint8_t> ((v >> 56) & 0xFF);
+    *(out++) = static_cast<std::uint8_t> (v & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 8U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 16U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 24U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 32U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 40U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 48U) & 0xFFU);
+    *(out++) = static_cast<std::uint8_t> ((v >> 56U) & 0xFFU);
     return out;
 }
 template <>

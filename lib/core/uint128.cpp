@@ -62,8 +62,8 @@ namespace pstore {
         std::string str;
         str.reserve (expected_length);
 
-        for (auto shift = 128 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((v_ >> shift) & 0x0F);
+        for (auto shift = 4U; shift <= 128U; shift += 4U) {
+            str += digit_to_hex ((v_ >> (128U - shift)) & 0x0FU);
         }
 
         assert (str.length () == expected_length);
@@ -76,11 +76,11 @@ namespace pstore {
         std::string str;
         str.reserve (expected_length);
 
-        for (auto shift = 64 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((high_ >> shift) & 0x0F);
+        for (auto shift = 4U; shift <= 64; shift += 4U) {
+            str += digit_to_hex ((high_ >> (64U - shift)) & 0x0FU);
         }
-        for (auto shift = 64 - 4; shift >= 0; shift -= 4) {
-            str += digit_to_hex ((low_ >> shift) & 0x0F);
+        for (auto shift = 4U; shift <= 64; shift += 4U) {
+            str += digit_to_hex ((low_ >> (64U - shift)) & 0x0FU);
         }
 
         assert (str.length () == expected_length);
