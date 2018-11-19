@@ -58,7 +58,7 @@ namespace pstore {
 
     template <typename SpanType>
     std::uint32_t crc32 (SpanType buf) noexcept {
-        auto p = reinterpret_cast<std::uint8_t const *> (buf.data ());
+        auto * p = reinterpret_cast<std::uint8_t const *> (buf.data ());
         auto crc = std::uint32_t{0};
         auto size = buf.size_bytes ();
         while (size--) {
