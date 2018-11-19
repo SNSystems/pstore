@@ -49,7 +49,6 @@
 #include <iterator>
 #include <type_traits>
 
-
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
@@ -63,7 +62,6 @@ namespace pstore {
     class transaction_base;
 
     namespace index {
-        using ::pstore::gsl::not_null;
 
         inline index_base::~index_base () {}
 
@@ -374,7 +372,7 @@ namespace pstore {
             /// Stores a key/value data pair.
             template <typename OtherValueType>
             address store_leaf_node (transaction_base & transaction, OtherValueType const & v,
-                                     not_null<parent_stack *> parents);
+                                     gsl::not_null<parent_stack *> parents);
 
             /// If the \p node is a heap internal node, clear its children and itself.
             void clear (index_pointer node, unsigned shifts);
@@ -397,7 +395,7 @@ namespace pstore {
                                    index_pointer const & existing_leaf,
                                    OtherValueType const & new_leaf, hash_type existing_hash,
                                    hash_type hash, unsigned shifts,
-                                   not_null<parent_stack *> parents) -> index_pointer;
+                                   gsl::not_null<parent_stack *> parents) -> index_pointer;
 
             /// Inserts a key-value pair into an internal node, potentially traversing to deeper
             /// nodes in the tree.
@@ -419,20 +417,21 @@ namespace pstore {
             template <typename OtherValueType>
             auto insert_into_internal (transaction_base & transaction, index_pointer node,
                                        OtherValueType const & value, hash_type hash,
-                                       unsigned shifts, not_null<parent_stack *> parents,
+                                       unsigned shifts, gsl::not_null<parent_stack *> parents,
                                        bool is_upsert) -> std::pair<index_pointer, bool>;
 
             template <typename OtherValueType>
             auto insert_into_linear (transaction_base & transaction, index_pointer const node,
-                                     OtherValueType const & value, not_null<parent_stack *> parents,
-                                     bool is_upsert) -> std::pair<index_pointer, bool>;
+                                     OtherValueType const & value,
+                                     gsl::not_null<parent_stack *> parents, bool is_upsert)
+                -> std::pair<index_pointer, bool>;
 
             /// Insert a new key/value pair into a existing node, which could be a leaf node, an
             /// internal store node or an internal heap node.
             template <typename OtherValueType>
             auto insert_node (transaction_base & transaction, index_pointer const node,
                               OtherValueType const & value, hash_type hash, unsigned shifts,
-                              not_null<parent_stack *> parents, bool is_upsert)
+                              gsl::not_null<parent_stack *> parents, bool is_upsert)
                 -> std::pair<index_pointer, bool>;
 
             template <typename Database, typename HamtMap,
@@ -653,7 +652,7 @@ namespace pstore {
         template <typename OtherValueType>
         address hamt_map<KeyType, ValueType, Hash, KeyEqual>::store_leaf_node (
             transaction_base & transaction, OtherValueType const & v,
-            not_null<parent_stack *> parents) {
+            gsl::not_null<parent_stack *> parents) {
 
             // Make sure the alignment of leaf node is 4 to ensure that the two LSB are guaranteed
             // 0. If 'v' has greater alignment, serialize::write() will add additional padding.
@@ -678,7 +677,7 @@ namespace pstore {
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_leaf (
             transaction_base & transaction, index_pointer const & existing_leaf,
             OtherValueType const & new_leaf, hash_type existing_hash, hash_type hash,
-            unsigned shifts, not_null<parent_stack *> parents) -> index_pointer {
+            unsigned shifts, gsl::not_null<parent_stack *> parents) -> index_pointer {
 
             if (details::depth_is_internal_node (shifts)) {
                 auto new_hash = hash & details::hash_index_mask;
@@ -740,7 +739,7 @@ namespace pstore {
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_internal (
             transaction_base & transaction, index_pointer node, OtherValueType const & value,
-            hash_type hash, unsigned shifts, not_null<parent_stack *> parents, bool is_upsert)
+            hash_type hash, unsigned shifts, gsl::not_null<parent_stack *> parents, bool is_upsert)
             -> std::pair<index_pointer, bool> {
 
             std::shared_ptr<internal_node const> iptr;
@@ -803,7 +802,8 @@ namespace pstore {
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_linear (
             transaction_base & transaction, index_pointer const node, OtherValueType const & value,
-            not_null<parent_stack *> parents, bool is_upsert) -> std::pair<index_pointer, bool> {
+            gsl::not_null<parent_stack *> parents, bool is_upsert)
+            -> std::pair<index_pointer, bool> {
 
             index_pointer result;
             bool key_exists = false;
@@ -864,7 +864,7 @@ namespace pstore {
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_node (
             transaction_base & transaction, index_pointer const node, OtherValueType const & value,
-            hash_type hash, unsigned shifts, not_null<parent_stack *> parents, bool is_upsert)
+            hash_type hash, unsigned shifts, gsl::not_null<parent_stack *> parents, bool is_upsert)
             -> std::pair<index_pointer, bool> {
 
             index_pointer result;
