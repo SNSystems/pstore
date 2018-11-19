@@ -73,9 +73,9 @@ namespace pstore {
                 return true;
             }
 
-            auto ptr = static_cast<std::uint8_t const *> (value.get ());
-            auto region_base = static_cast<std::uint8_t const *> (region->data ().get ());
-            auto region_end = region_base + region->size ();
+            auto * ptr = static_cast<std::uint8_t const *> (value.get ());
+            auto * region_base = static_cast<std::uint8_t const *> (region->data ().get ());
+            auto * region_end = region_base + region->size ();
             return ptr >= region_base && ptr + address::segment_size <= region_end;
         }
 #endif
@@ -107,7 +107,7 @@ namespace pstore {
                 , regions_{region_factory_->init ()} {}
 
         template <typename File>
-        storage (std::shared_ptr<File> const & file)
+        explicit storage (std::shared_ptr<File> const & file)
                 : sat_{new segment_address_table}
                 , file_{std::static_pointer_cast<file::file_base> (file)}
                 , page_size_{std::make_unique<system_page_size> ()}
@@ -116,8 +116,8 @@ namespace pstore {
                       min_region_size)}
                 , regions_{region_factory_->init ()} {}
 
-        file::file_base * file () { return file_.get (); }
-        file::file_base const * file () const { return file_.get (); }
+        file::file_base * file () noexcept { return file_.get (); }
+        file::file_base const * file () const noexcept { return file_.get (); }
 
         void map_bytes (std::uint64_t new_size);
 
@@ -232,7 +232,7 @@ namespace pstore {
     inline auto storage::address_to_pointer (address addr) const noexcept
         -> std::shared_ptr<void const> {
         std::shared_ptr<void const> segment_base = this->segment_base (addr.segment ());
-        auto ptr =
+        auto * ptr =
             std::static_pointer_cast<std::uint8_t const> (segment_base).get () + addr.offset ();
         return std::shared_ptr<void const> (segment_base, ptr);
     }
