@@ -73,7 +73,7 @@ namespace pstore {
             bss_section & operator= (bss_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_; }
-            unsigned size () const noexcept { return size_; }
+	    std::size_t size () const noexcept { return size_; }
 
             container<internal_fixup> ifixups () const { return {}; }
             container<external_fixup> xfixups () const { return {}; }
