@@ -147,6 +147,8 @@ namespace pstore {
     //* (_-<_-<  _| '_| | ' \/ _` | \ V / / -_) V  V / *
     //* /__/__/\__|_| |_|_||_\__, |  \_/|_\___|\_/\_/  *
     //*                      |___/                     *
+    /// \note This class implements a subset of the std::string_view methods. Complete the set of
+    /// members as we need them...
     template <typename PointerType>
     class sstring_view {
     public:
@@ -222,8 +224,6 @@ namespace pstore {
         // 7.7, sstring_view modifiers
         void clear () noexcept { size_ = 0; }
 
-        // void remove_prefix (size_type n);
-        // void remove_suffix (size_type n);
         void swap (sstring_view & s) noexcept {
             std::swap (ptr_, s.ptr_);
             std::swap (size_, s.size_);
@@ -238,8 +238,6 @@ namespace pstore {
             return {data (), size_, a};
         }
 
-        // size_type copy (char * s, size_type n, size_type pos = 0) const;
-
         /// Returns a view of the substring [\p pos, \p pos + rcount), where rcount is the smaller
         /// of \p n and size() - \p pos.
         /// \param pos position of the first character
@@ -249,17 +247,8 @@ namespace pstore {
             return {data () + pos, std::min (n, size_ - pos)};
         }
 
-        // int compare (size_type pos1, size_type n1, sstring_view s) const;
-        // int compare (size_type pos1, size_type n1, sstring_view s, size_type pos2, size_type n2)
-        // const;
-
         template <typename StringType>
         int compare (StringType const & s) const;
-
-        // int compare (size_type pos1, size_type n1, char const * s) const;
-        // int compare (size_type pos1, size_type n1, char const * s, size_type n2) const;
-
-        // size_type find (sstring_view const & v, size_type pos = 0) const;
 
         /// Finds the first occurrence of \p ch in this view, starting at position \p pos.
         size_type find (value_type ch, size_type pos = 0) const noexcept {
@@ -270,28 +259,6 @@ namespace pstore {
             }
             return npos;
         }
-        // size_type find (char const * s, size_type pos, size_type n) const;
-        // size_type find (char const * s, size_type pos = 0) const;
-        // size_type rfind(sstring_view s, size_type pos = npos) const noexcept;
-        // size_type rfind(char c, size_type pos = npos) const noexcept;
-        // size_type rfind(char const * s, size_type pos, size_type n) const;
-        // size_type rfind(char const * s, size_type pos = npos) const;
-        // size_type find_first_of(sstring_view s, size_type pos = 0) const noexcept;
-        // size_type find_first_of(char c, size_type pos = 0) const noexcept;
-        // size_type find_first_of(char const * s, size_type pos, size_type n) const;
-        // size_type find_first_of(char const * s, size_type pos = 0) const;
-        // size_type find_last_of(sstring_view s, size_type pos = npos) const noexcept;
-        // size_type find_last_of(char c, size_type pos = npos) const noexcept;
-        // size_type find_last_of(char const * s, size_type pos, size_type n) const;
-        // size_type find_last_of(char const * s, size_type pos = npos) const;
-        // size_type find_first_not_of(sstring_view s, size_type pos = 0) const noexcept;
-        // size_type find_first_not_of(char c, size_type pos = 0) const noexcept;
-        // size_type find_first_not_of(char const * s, size_type pos, size_type n) const;
-        // size_type find_first_not_of(char const * s, size_type pos = 0) const;
-        // size_type find_last_not_of(sstring_view s, size_type pos = npos) const noexcept;
-        // size_type find_last_not_of(char c, size_type pos = npos) const noexcept;
-        // size_type find_last_not_of(char const * s, size_type pos, size_type n) const;
-        // size_type find_last_not_of(char const * s, size_type pos = npos) const;
 
     private:
         PointerType ptr_;
