@@ -197,7 +197,7 @@ namespace pstore {
         //*********************************
         class number_double final : public number_base {
         public:
-            number_double (double v) noexcept
+            explicit number_double (double v) noexcept
                     : number_base ()
                     , v_{v} {}
             double get () const noexcept { return v_; }
@@ -219,7 +219,7 @@ namespace pstore {
         //*****************************
         class number_long final : public number_base {
         public:
-            number_long (long long v) noexcept
+            explicit number_long (long long v) noexcept
                     : number_base ()
                     , v_{v} {}
             number_long (long long v, unsigned base)
@@ -242,7 +242,7 @@ namespace pstore {
         //*******************************
         class number_ulong final : public number_base {
         public:
-            number_ulong (unsigned long long v) noexcept
+            explicit number_ulong (unsigned long long v) noexcept
                     : number_base ()
                     , v_{v} {}
             number_ulong (unsigned long long v, unsigned base)
@@ -362,7 +362,7 @@ namespace pstore {
         class binary final : public value {
         public:
             template <typename InputIterator>
-            explicit binary (InputIterator begin, InputIterator end)
+            binary (InputIterator begin, InputIterator end)
                     : v_ (begin, end) {}
 
         private:
@@ -381,7 +381,7 @@ namespace pstore {
         class binary16 final : public value {
         public:
             template <typename InputIterator>
-            explicit binary16 (InputIterator begin, InputIterator end)
+            binary16 (InputIterator begin, InputIterator end)
                     : v_ (begin, end) {}
 
         private:
