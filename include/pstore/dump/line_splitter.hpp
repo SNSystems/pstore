@@ -76,7 +76,7 @@ namespace pstore {
 
         class line_splitter {
         public:
-            line_splitter (gsl::not_null<dump::array::container *> arr)
+            explicit line_splitter (gsl::not_null<dump::array::container *> arr)
                     : arr_{arr} {}
 
             void append (std::string const & s) { this->append (gsl::make_span (s)); }
@@ -104,7 +104,7 @@ namespace pstore {
                     break;
                 }
 
-                auto first = std::begin (sv);
+                auto * first = std::begin (sv);
                 str_.append (first, first + cr_pos);
                 arr_->emplace_back (make_value (operation (str_)));
                 // Reset the accumulation buffer.
