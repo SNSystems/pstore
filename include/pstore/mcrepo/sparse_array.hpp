@@ -289,7 +289,7 @@ namespace pstore {
                     using pointer = value_type const *;
                     using reference = value_type const &;
 
-                    const_iterator (BitmapType bitmap) noexcept
+                    explicit const_iterator (BitmapType bitmap) noexcept
                             : bitmap_{bitmap}
                             , pos_{0} {
                         next ();
@@ -320,7 +320,8 @@ namespace pstore {
 
                 private:
                     void next () noexcept {
-                        for (; bitmap_ != 0 && (bitmap_ & 1U) == 0U; ++pos_, bitmap_ >>= 1) {
+                        for (; bitmap_ != 0 && (bitmap_ & 1U) == 0U; bitmap_ >>= 1) {
+                            ++pos_;
                         }
                     }
                     BitmapType bitmap_;
@@ -328,8 +329,8 @@ namespace pstore {
                 };
                 explicit indices (sparse_array const & arr)
                         : bitmap_{arr.bitmap_} {}
-                const_iterator begin () const { return {bitmap_}; }
-                const_iterator end () const { return {0}; }
+                const_iterator begin () const { return const_iterator{bitmap_}; }
+                const_iterator end () const { return const_iterator{0}; }
 
                 constexpr bool empty () const noexcept { return bitmap_ == 0; }
                 unsigned front () const noexcept {
@@ -416,9 +417,9 @@ namespace pstore {
                 return count - sizeof (elements_) + elements * sizeof (ValueType);
             }
 
-            static void * operator new (std::size_t /*count*/, void * ptr) { return ptr; }
-            static void operator delete (void * /*ptr*/, void * /*place*/) {}
-            static void operator delete (void * p) { ::operator delete (p); }
+            void * operator new (std::size_t /*count*/, void * ptr) { return ptr; }
+            void operator delete (void * /*ptr*/, void * /*place*/) {}
+            void operator delete (void * p) { ::operator delete (p); }
 
             /// Constructs a sparse array whose available indices are defined by the
             /// iterator range from [first_index,last_index) and the values assigned to
@@ -443,8 +444,7 @@ namespace pstore {
             /// \param indices_last  The end of the range of index values.
             /// \returns A pointer to the newly allocated memory block.
             template <typename InputIterator>
-            static void * operator new (std::size_t count, InputIterator indices_first,
-                                        InputIterator indices_last) {
+            void * operator new (std::size_t count, InputIterator indices_first, InputIterator indices_last) {
                 return ::operator new (
                     sparse_array::allocate_bytes (count, indices_first, indices_last));
             }
@@ -452,8 +452,7 @@ namespace pstore {
             /// Placement delete member function to match the placement new member
             /// function which takes two input iterators.
             template <typename InputIterator>
-            static void operator delete (void * p, InputIterator /*indices_first*/,
-                                         InputIterator /*indices_last*/) {
+            void operator delete (void * p, InputIterator /*indices_first*/, InputIterator /*indices_last*/) {
                 return ::operator delete (p);
             }
 
