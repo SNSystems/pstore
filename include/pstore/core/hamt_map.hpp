@@ -613,7 +613,7 @@ namespace pstore {
                                                                   unsigned shifts) {
             assert (node.is_heap () && !node.is_leaf ());
             if (details::depth_is_internal_node (shifts)) {
-                auto internal = node.untag_node<internal_node *> ();
+                auto * const internal = node.untag_node<internal_node *> ();
                 // Recursively release the children of this internal node.
                 for (auto p : *internal) {
                     if (p.is_heap ()) {
