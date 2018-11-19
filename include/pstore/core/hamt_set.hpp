@@ -80,7 +80,7 @@ namespace pstore {
                 using typename base::pointer;
                 using typename base::reference;
 
-                set_iterator (MapIterator const & it)
+                explicit set_iterator (MapIterator const & it)
                         : it_ (it) {}
 
                 bool operator== (set_iterator const & other) const { return it_ == other.it_; }
@@ -141,12 +141,12 @@ namespace pstore {
             }
 
 
-            iterator begin (database & db) { return {map_.begin (db)}; }
-            iterator end (database & db) { return {map_.end (db)}; }
-            const_iterator begin (database const & db) const { return {map_.cbegin (db)}; }
-            const_iterator end (database const & db) const { return {map_.cend (db)}; }
-            const_iterator cbegin (database const & db) const { return {map_.cbegin (db)}; }
-            const_iterator cend (database const & db) const { return {map_.cend (db)}; }
+            iterator begin (database & db) { return iterator{map_.begin (db)}; }
+            iterator end (database & db) { return iterator{map_.end (db)}; }
+            const_iterator begin (database const & db) const { return const_iterator{map_.cbegin (db)}; }
+            const_iterator end (database const & db) const { return const_iterator{map_.cend (db)}; }
+            const_iterator cbegin (database const & db) const { return const_iterator{map_.cbegin (db)}; }
+            const_iterator cend (database const & db) const { return const_iterator{map_.cend (db)}; }
             ///@}
 
             /// \name Capacity
@@ -176,7 +176,7 @@ namespace pstore {
             std::pair<iterator, bool> insert (transaction_base & transaction,
                                               OtherKeyType const & key) {
                 auto it = map_.insert (transaction, std::make_pair (key, details::empty_class ()));
-                return {{it.first}, it.second};
+                return {iterator{it.first}, it.second};
             }
 
             /// \brief Find the element with a specific key.
@@ -191,7 +191,7 @@ namespace pstore {
                       typename = typename std::enable_if<
                           serialize::is_compatible<KeyType, OtherKeyType>::value>::type>
             const_iterator find (database const & db, OtherKeyType const & key) const {
-                return {map_.find (db, key)};
+                return const_iterator{map_.find (db, key)};
             }
 
             typed_address<header_block> flush (transaction_base & transaction,
