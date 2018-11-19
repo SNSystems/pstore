@@ -27,7 +27,7 @@ pstore is built and tested on a variety of platforms:
 
 To build it, you’ll also need the following tools:
 
-- [cmake](http://cmake.org) (version 3.4 or later)
+- [cmake](http://cmake.org) (version 3.6 or later)
 
 Optionally:
 
