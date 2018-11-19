@@ -63,8 +63,6 @@ namespace pstore {
         class hamt_set final : public index_base {
             using index_pointer = pstore::index::details::index_pointer;
 
-        private:
-
             template <typename MapIterator>
             class set_iterator : public std::iterator<std::forward_iterator_tag,
                                                       typename std::add_const<KeyType>::type> {
