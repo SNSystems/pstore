@@ -96,7 +96,7 @@ namespace pstore {
                 static constexpr error_type error = DescriptorTraits::error;
 #endif
 
-                descriptor (DescriptorTraits traits = DescriptorTraits ()) noexcept
+                explicit descriptor (DescriptorTraits traits = DescriptorTraits ()) noexcept
                         : fd_{invalid}
                         , traits_{traits} {}
                 explicit descriptor (value_type fd,

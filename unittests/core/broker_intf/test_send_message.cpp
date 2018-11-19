@@ -54,7 +54,7 @@
 
 namespace {
 
-    auto make_pipe () -> pstore::broker::fifo_path::client_pipe { return {}; }
+    auto make_pipe () -> pstore::broker::fifo_path::client_pipe { return pstore::broker::fifo_path::client_pipe{}; }
 
     class mock_writer : public pstore::broker::writer {
     public:

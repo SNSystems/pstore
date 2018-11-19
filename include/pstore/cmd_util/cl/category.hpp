@@ -54,7 +54,7 @@ namespace pstore {
 
             class OptionCategory {
             public:
-                OptionCategory (std::string const title);
+                explicit OptionCategory (std::string const title);
 
             private:
                 std::string title_;

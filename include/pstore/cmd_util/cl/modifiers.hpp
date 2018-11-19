@@ -77,7 +77,7 @@ namespace pstore {
             namespace details {
                 class values {
                 public:
-                    values (std::initializer_list<OptionEnumValue> options);
+                    explicit values (std::initializer_list<OptionEnumValue> options);
 
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -97,12 +97,12 @@ namespace pstore {
             /// as an initializer list to the ValuesClass constructor.
             template <typename... OptsTy>
             details::values values (OptsTy... options) {
-                return {options...};
+                return details::values{options...};
             }
 
             class name {
             public:
-                name (std::string const & name);
+                explicit name (std::string const & name);
 
                 template <typename Opt>
                 void apply (Opt & o) const {
@@ -158,7 +158,7 @@ namespace pstore {
                 template <typename T>
                 class initializer {
                 public:
-                    initializer (T const & t)
+                    explicit initializer (T const & t)
                             : init_{t} {}
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -172,7 +172,7 @@ namespace pstore {
 
             template <typename T>
             details::initializer<T> init (T const & t) {
-                return {t};
+                return details::initializer<T>{t};
             }
 
             //*                                              *
@@ -238,7 +238,7 @@ namespace pstore {
             namespace details {
                 class category {
                 public:
-                    category (OptionCategory const & cat)
+                    explicit category (OptionCategory const & cat)
                             : cat_{cat} {}
 
                     template <typename Opt>
@@ -251,7 +251,7 @@ namespace pstore {
                 };
             } // namespace details
 
-            inline details::category cat (OptionCategory const & c) { return {c}; }
+            inline details::category cat (OptionCategory const & c) { return details::category{c}; }
 
         } // namespace cl
     }     // namespace cmd_util
