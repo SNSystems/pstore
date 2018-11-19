@@ -45,9 +45,9 @@
 #ifndef PSTORE_BROKER_WSA_STARTUP_HPP
 #define PSTORE_BROKER_WSA_STARTUP_HPP
 
-namespace pstore {
-
 #ifdef _WIN32
+
+namespace pstore {
 
     class wsa_startup {
     public:
@@ -66,8 +66,8 @@ namespace pstore {
         bool started_;
     };
 
-#endif // _WIN32
+} // end namespace pstore
 
-} // namespace pstore
+#endif // _WIN32
 
 #endif // PSTORE_BROKER_WSA_STARTUP_HPP
