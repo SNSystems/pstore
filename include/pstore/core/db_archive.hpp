@@ -68,7 +68,7 @@ namespace pstore {
                 public:
                     using result_type = pstore::address;
 
-                    database_writer_policy (Transaction & trans) noexcept
+                    explicit database_writer_policy (Transaction & trans) noexcept
                             : transaction_ (trans) {}
 
                     /// Writes an instance of a standard-layout type T to the database.
@@ -112,7 +112,7 @@ namespace pstore {
                 /// \brief Constructs the writer using the transaction.
                 /// \param transaction The active transaction to the store to which the
                 ///                    database_writer will write.
-                database_writer (Transaction & transaction)
+                explicit database_writer (Transaction & transaction)
                         : writer_base<typename details::database_writer_policy<Transaction>> (
                               transaction) {}
             };
