@@ -57,7 +57,7 @@ namespace pstore {
 
         std::uint8_t * bss_section_creation_dispatcher::write (std::uint8_t * out) const {
             assert (this->aligned (out) == out);
-            auto scn = new (out) bss_section (section_->align, section_->data.size ());
+            auto * const scn = new (out) bss_section (section_->align, section_->data.size ());
             return out + scn->size_bytes ();
         }
 
