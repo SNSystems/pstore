@@ -676,7 +676,7 @@ namespace pstore {
             array::container contents;
             contents.reserve (Size);
             std::transform (std::begin (arr), std::end (arr), std::back_inserter (contents),
-                            [](T const & in) -> value_ptr { return make_value (in); });
+                            [](T const & in) { return make_value (in); });
             return make_value (std::move (contents));
         }
 
