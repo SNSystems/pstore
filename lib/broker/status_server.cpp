@@ -144,8 +144,9 @@ auto pstore::broker::self_client_connection::get_port () const -> maybe<get_port
     if (!predicate ()) {
         cv_.wait (lock, predicate);
     }
-    return (state_ == state::closed || !port_) ? nothing<get_port_result_type> ()
-                                               : get_port_result_type{*port_, std::move (lock)};
+    return (state_ == state::closed || !port_)
+               ? nothing<get_port_result_type> ()
+               : just (get_port_result_type{*port_, std::move (lock)});
 }
 
 // listening

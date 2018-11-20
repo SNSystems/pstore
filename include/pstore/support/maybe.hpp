@@ -94,9 +94,9 @@ namespace pstore {
                   typename = typename std::enable_if<
                       std::is_constructible<T, U &&>::value &&
                       !std::is_same<typename details::remove_cvref_t<U>, maybe<T>>::value>::type>
-        maybe (U && value) noexcept (std::is_nothrow_move_constructible<T>::value &&
-                                         std::is_nothrow_copy_constructible<T>::value &&
-                                         !std::is_convertible<U&&, T>::value) {
+        explicit maybe (U && value) noexcept (std::is_nothrow_move_constructible<T>::value &&
+                                                  std::is_nothrow_copy_constructible<T>::value &&
+                                              !std::is_convertible<U &&, T>::value) {
 
             new (&storage_) T (std::forward<U> (value));
             valid_ = true;
@@ -181,6 +181,12 @@ namespace pstore {
         }
 
 
+        bool operator== (maybe const & other) const {
+            return this->has_value () == other.has_value () &&
+                   (!this->has_value () || this->value () == other.value ());
+        }
+        bool operator!= (maybe const & other) const { return !operator== (other); }
+
         /// accesses the contained value
         T const & operator* () const noexcept { return *(operator-> ()); }
         /// accesses the contained value
@@ -197,7 +203,7 @@ namespace pstore {
         }
 
         /// checks whether the object contains a value
-        constexpr operator bool () const noexcept { return valid_; }
+        constexpr explicit operator bool () const noexcept { return valid_; }
         /// checks whether the object contains a value
         constexpr bool has_value () const noexcept { return valid_; }
 
@@ -225,14 +231,14 @@ namespace pstore {
     // ~~~~
     template <typename T>
     inline maybe<typename details::remove_cvref_t<T>> just (T && value) {
-        return {std::forward<T> (value)};
+        return maybe<typename details::remove_cvref_t<T>>{std::forward<T> (value)};
     }
 
     // nothing
     // ~~~~~~~
     template <typename T>
-    inline maybe<T> nothing () noexcept {
-        return {};
+    inline maybe<typename details::remove_cvref_t<T>> nothing () noexcept {
+        return maybe<typename details::remove_cvref_t<T>>{};
     }
 
 } // namespace pstore

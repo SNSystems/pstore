@@ -244,3 +244,45 @@ TEST (Maybe, SelfAssign) {
         EXPECT_EQ (m1.value (), std::string{"test"});
     }
 }
+
+TEST (Maybe, Equal) {
+    // neither lhs nor rhs have a value
+    {
+        maybe<int> m1;
+        maybe<int> m2;
+        EXPECT_TRUE (m1 == m2);
+        EXPECT_FALSE (m1 != m2);
+    }
+
+    // lhs has a value, rhs not.
+    {
+        maybe<int> m1 (3);
+        maybe<int> m2;
+        EXPECT_FALSE (m1 == m2);
+        EXPECT_TRUE (m1 != m2);
+    }
+
+    // lhs has no value, rhs does.
+    {
+        maybe<int> m1;
+        maybe<int> m2 (5);
+        EXPECT_FALSE (m1 == m2);
+        EXPECT_TRUE (m1 != m2);
+    }
+
+    // both lhs and rhs have values but they are different.
+    {
+        maybe<int> m1 (7);
+        maybe<int> m2 (11);
+        EXPECT_FALSE (m1 == m2);
+        EXPECT_TRUE (m1 != m2);
+    }
+
+    // lhs both have the same value.
+    {
+        maybe<int> m1 (13);
+        maybe<int> m2 (13);
+        EXPECT_TRUE (m1 == m2);
+        EXPECT_FALSE (m1 != m2);
+    }
+}

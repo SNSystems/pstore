@@ -48,6 +48,7 @@
 using namespace pstore;
 
 namespace {
+
     class RevisionsFixture : public ::testing::Test {
     public:
         diff::revisions_type expected_revisions (diff::revision_number r1,
@@ -58,6 +59,7 @@ namespace {
     };
 
     constexpr diff::revision_number RevisionsFixture::db_head_revision;
+
 } // namespace
 
 TEST_F (RevisionsFixture, InitNothing) {
@@ -84,7 +86,7 @@ TEST_F (RevisionsFixture, InitOne5Two3) {
     constexpr auto r1 = diff::revision_number{5};
     auto r2 = just (diff::revision_number{3});
 
-    diff::revisions_type const expected = this->expected_revisions (r1, r2);
+    diff::revisions_type const expected = this->expected_revisions (r1, r2.value ());
     diff::revisions_type const actual =
         diff::update_revisions (std::make_pair (r1, r2), db_head_revision);
 

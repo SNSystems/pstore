@@ -1515,7 +1515,7 @@ namespace pstore {
             while (first != last) {
                 assert (!stack_.empty ());
                 auto & handler = stack_.top ();
-                auto res = handler->consume (*this, *first);
+                auto res = handler->consume (*this, just (*first));
                 if (handler->is_done ()) {
                     if (error_ != error_code::none) {
                         break;
