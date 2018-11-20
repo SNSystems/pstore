@@ -63,5 +63,5 @@ add_pstore_library (pstore-mcrepo
     section.cpp
     ticket.cpp
 )
-target_link_libraries (pstore-mcrepo pstore-core)
+target_link_libraries (pstore-mcrepo PUBLIC pstore-core)
 

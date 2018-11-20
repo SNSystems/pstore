@@ -98,7 +98,9 @@ option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and foote
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
 
-option (PSTORE_ENABLE_BROKER_TESTS "Run broker system tests. Disable if the compiler does not support exceptions." ON)
+option (PSTORE_ENABLE_BROKER_TESTS "Run broker system tests. Disable if the compiler does not support exceptions." Yes)
+option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
+option (PSTORE_COVERAGE "Enable generation of coverage reports.")
 
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
@@ -116,72 +118,6 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
         set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -m64")
         set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -m64")
         message (STATUS "Add flag to enable 64-bit build")
-    endif ()
-endif (NOT PSTORE_IS_INSIDE_LLVM)
-
-#
-# Define a pair of variables ("EXTRA_CXX_FLAGS" and
-# "EXTRA_CXX_DEFINITIONS" which a project that wants the standard set
-# of PStore compiler flags should apply using the cmake
-# target_compile_options() and target_compile_definitions()
-# functions. This avoids cranking up the warning level on the external
-# projects that we're using and getting a big pile of unwanted
-# warnings as a result.
-#
-
-set (EXTRA_CXX_FLAGS "")
-set (EXTRA_CXX_DEFINITIONS "")
-
-if (NOT PSTORE_IS_INSIDE_LLVM)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-
-        # Remove when VS doesn't require capture
-        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-        set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-unused-lambda-capture")
-        check_c_source_compiles ("int main() {}" PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
-        set (CMAKE_REQUIRED_FLAGS ${PSTORE_OLD_CMAKE_REQUIRED_FLAGS})
-
-        # For Clang, I enable all of the warnings and then disable some of
-        # the unwanted ones.
-        set (EXTRA_CXX_FLAGS
-            -Weverything
-            -Wno-undef
-            -Wno-padded
-            -Wno-disabled-macro-expansion
-            -Wno-c++98-compat
-            -Wno-c++98-compat-pedantic
-            -Wno-c99-extensions
-            -Wno-weak-vtables
-            -Wno-missing-noreturn
-            -Wno-global-constructors
-            -Wno-exit-time-destructors
-            -Wno-used-but-marked-unused
-            -Wno-unused-macros
-        )
-
-        # Remove when VS doesn't require capture
-        if (PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
-            list (APPEND EXTRA_CXX_FLAGS -Wno-unused-lambda-capture)
-        endif ()
-
-    elseif (CMAKE_COMPILER_IS_GNUCXX)
-
-        set (EXTRA_CXX_FLAGS -Wall -Wextra -pedantic)
-
-    elseif (MSVC)
-
-        set (EXTRA_CXX_FLAGS "/W4")
-
-        # Disable the "assignment operator could not be generated"
-        # message. It's pointless since we'll see an error if an
-        # assignment operator is needed.
-        LIST (APPEND EXTRA_CXX_FLAGS /wd4512)
-
-        set (EXTRA_CXX_DEFINITIONS 
-            -D_CRT_SECURE_NO_WARNINGS 
-            -D_SCL_SECURE_NO_WARNINGS 
-        )
-
     endif ()
 endif (NOT PSTORE_IS_INSIDE_LLVM)
 

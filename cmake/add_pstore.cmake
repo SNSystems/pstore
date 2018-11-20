@@ -50,13 +50,33 @@ endmacro()
 
 function (add_pstore_additional_compiler_flag name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        # Disable warnings from the google test headers.
+        # For Clang, I enable all of the warnings and then disable some of
+        # the unwanted ones.
         target_compile_options (${name} PRIVATE
+            -Weverything
+            -Wno-c++98-compat
+            -Wno-c++98-compat-pedantic
+            -Wno-c99-extensions
             -Wno-deprecated
+            -Wno-disabled-macro-expansion
+            -Wno-exit-time-destructors
+            -Wno-global-constructors
             -Wno-inconsistent-missing-override
+            -Wno-missing-noreturn
             -Wno-missing-variable-declarations
+            -Wno-padded
             -Wno-shift-sign-overflow
+            -Wno-undef
+            -Wno-unused-macros
+            -Wno-used-but-marked-unused
+            -Wno-weak-vtables
         )
+
+        if (PSTORE_COVERAGE)
+	    # TODO: investigate llvm-cov.
+            target_compile_options (${name} PRIVATE -fprofile-arcs -ftest-coverage)
+            target_link_libraries (${name} PUBLIC --coverage)
+        endif ()
 
         # The "zero-as-null-pointer-constant" warning was added to Clang at some point.
         # Disable it if we can.
@@ -65,10 +85,47 @@ function (add_pstore_additional_compiler_flag name)
         set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-zero-as-null-pointer-constant")
         check_c_source_compiles ("int main () {}" PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
         set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
-
         if (PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
             target_compile_options (${name} PRIVATE -Wno-zero-as-null-pointer-constant)
         endif ()
+
+        # Disable the "unused lambda capture" warning since we must capture
+        # extra variables for MSVC to swallow the code. Remove when VS doesn't require capture
+        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
+        set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-unused-lambda-capture")
+        check_c_source_compiles ("int main() {}" PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
+        set (CMAKE_REQUIRED_FLAGS ${PSTORE_OLD_CMAKE_REQUIRED_FLAGS})
+        if (PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
+            target_compile_options (${name} PRIVATE -Wno-unused-lambda-capture)
+        endif ()
+
+    elseif (CMAKE_COMPILER_IS_GNUCXX)
+
+        target_compile_options (${name} PRIVATE
+            -Wall
+            -Wextra
+            -pedantic
+        )
+        if (PSTORE_COVERAGE)
+            target_compile_options (${name} PRIVATE -fprofile-arcs -ftest-coverage)
+            target_link_libraries (${name} PUBLIC --coverage)
+        endif ()
+
+    elseif (MSVC)
+
+        # 4512: assignment operator could not be generated.
+        # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
+        #       not available.
+        target_compile_options (${name} PRIVATE
+            -W4
+            -wd4512
+            -wd4127
+        )
+        target_compile_definitions (${name} PRIVATE
+            -D_CRT_SECURE_NO_WARNINGS
+            -D_SCL_SECURE_NO_WARNINGS
+        )
+
     endif ()
 endfunction(add_pstore_additional_compiler_flag)
 
@@ -133,9 +190,7 @@ function (add_pstore_library target_name)
 
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
-
-        target_compile_options     (${target_name} PRIVATE ${EXTRA_CXX_FLAGS})
-        target_compile_definitions (${target_name} PRIVATE ${EXTRA_CXX_DEFINITIONS})
+        add_pstore_additional_compiler_flag (${target_name})
 
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -165,9 +220,7 @@ function (add_pstore_executable target_name)
 
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD 11)
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD_REQUIRED Yes)
-
-        target_compile_options ("${target_name}" PRIVATE ${EXTRA_CXX_FLAGS})
-        target_compile_definitions ("${target_name}" PRIVATE ${EXTRA_CXX_DEFINITIONS})
+        add_pstore_additional_compiler_flag (${target_name})
 
         # On Windows, we're a "Unicode" app.
         if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -206,16 +259,14 @@ function (add_pstore_test_library target_name)
     set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
 
     target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-    target_compile_options     (${target_name} PRIVATE ${EXTRA_CXX_FLAGS})
-    target_compile_definitions (${target_name} PRIVATE ${EXTRA_CXX_DEFINITIONS})
     add_pstore_additional_compiler_flag (${target_name})
 
     if (PSTORE_IS_INSIDE_LLVM)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
-        target_link_libraries (${target_name} gtest_main gtest)
+        target_link_libraries (${target_name} PRIVATE gtest_main gtest)
     else ()
-        target_link_libraries (${target_name} gmock_main gtest gmock)
+        target_link_libraries (${target_name} PRIVATE gmock_main gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
 endfunction(add_pstore_test_library)
 
@@ -234,11 +285,7 @@ function(add_pstore_unit_test test_dirname)
         set_property (TARGET ${test_dirname} PROPERTY CXX_STANDARD_REQUIRED Yes)
 
         target_include_directories (${test_dirname} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-        target_compile_options (${test_dirname} PRIVATE ${EXTRA_CXX_FLAGS})
-        target_compile_definitions (${test_dirname} PRIVATE ${EXTRA_CXX_DEFINITIONS})
         add_pstore_additional_compiler_flag (${test_dirname})
         target_link_libraries (${test_dirname} PRIVATE gmock_main gtest gmock)
     endif(PSTORE_IS_INSIDE_LLVM)
-
 endfunction(add_pstore_unit_test)
-

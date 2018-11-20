@@ -81,7 +81,7 @@ list (APPEND PSTORE_CMD_UTIL_SRC
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/parallel_for_each.hpp"
 )
 add_pstore_library (pstore-cmd-util STATIC ${PSTORE_CMD_UTIL_SRC})
-target_link_libraries (pstore-cmd-util pstore-support)
+target_link_libraries (pstore-cmd-util PUBLIC pstore-support)
 
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
