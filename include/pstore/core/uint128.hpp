@@ -87,7 +87,7 @@ namespace pstore {
                 , high_{bytes_to_uint64 (&bytes[0])} {}
 #endif
 
-        uint128 (std::array<std::uint8_t, 16> const & bytes) noexcept
+        explicit uint128 (std::array<std::uint8_t, 16> const & bytes) noexcept
                 : uint128 (bytes.data ()) {}
 
         uint128 (uint128 const &) = default;
