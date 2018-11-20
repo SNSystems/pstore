@@ -112,7 +112,7 @@ namespace pstore {
 
         std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * out) const {
             assert (this->aligned (out) == out);
-            auto scn = new (out) generic_section (section_->make_sources (), section_->align);
+            auto * const scn = new (out) generic_section (section_->make_sources (), section_->align);
             return out + scn->size_bytes ();
         }
 

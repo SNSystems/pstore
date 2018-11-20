@@ -58,7 +58,7 @@ namespace pstore {
 
         std::uint8_t * debug_line_section_creation_dispatcher::write (std::uint8_t * out) const {
             assert (this->aligned (out) == out);
-            auto scn =
+            auto * const scn =
                 new (out) debug_line_section (header_, section_->make_sources (), section_->align);
             return out + scn->size_bytes ();
         }

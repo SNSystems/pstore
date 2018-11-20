@@ -98,7 +98,7 @@ namespace pstore {
             if (begin_ == end_) {
                 return out;
             }
-            auto dependent = new (out) dependents (begin_, end_);
+            auto * const dependent = new (out) dependents (begin_, end_);
             return out + dependent->size_bytes ();
         }
 
