@@ -316,15 +316,13 @@ namespace {
         constexpr auto ipstr_max_len =
             INET6_ADDRSTRLEN > INET_ADDRSTRLEN ? INET6_ADDRSTRLEN : INET_ADDRSTRLEN;
         char ipstr[ipstr_max_len + 1] = {'\0'};
-        // int port = 0;
 
         bool is_localhost = false;
 
         // deal with both IPv4 and IPv6:
         switch (their_addr.ss_family) {
         case AF_INET: {
-            auto v4s = reinterpret_cast<sockaddr_in const *> (&their_addr);
-            // port = ntohs(v4s->sin_port);
+            auto * const v4s = reinterpret_cast<sockaddr_in const *> (&their_addr);
             inet_ntop (AF_INET, &v4s->sin_addr, ipstr, sizeof ipstr);
             static_assert (INADDR_LOOPBACK <= std::numeric_limits<std::uint32_t>::max (),
                            "INADDR_LOOPBACK is too large to be a uint32_t");
@@ -333,8 +331,7 @@ namespace {
         } break;
 
         case AF_INET6: {
-            auto v6s = reinterpret_cast<sockaddr_in6 const *> (&their_addr);
-            // port = ntohs(v6s->sin6_port);
+            auto * const v6s = reinterpret_cast<sockaddr_in6 const *> (&their_addr);
             in6_addr const & addr6 = v6s->sin6_addr;
             inet_ntop (AF_INET6, &addr6, ipstr, sizeof ipstr);
             is_localhost =
