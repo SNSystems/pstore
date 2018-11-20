@@ -53,7 +53,7 @@ namespace pstore {
         /// An InputIterator which will generate a monotonically increasing integer value.
         class iota_generator : public std::iterator<std::input_iterator_tag, unsigned long> {
         public:
-            iota_generator (unsigned long v = 0UL)
+            explicit iota_generator (unsigned long v = 0UL)
                     : v_{v} {}
             iota_generator (iota_generator const & rhs) = default;
             iota_generator & operator= (iota_generator const & rhs) = default;
