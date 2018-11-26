@@ -283,7 +283,9 @@ def main (args = sys.argv [1:]):
         _logger.info ('cwd "%s"', options.directory)
         _logger.info ('Running: %s', _as_command_line (cmd))
         if not options.dry_run:
-            subprocess.call (cmd, cwd=options.directory)
+            status = subprocess.call (cmd, cwd=options.directory)
+            if status:
+                exit_code = EXIT_FAILURE
 
     return exit_code
 
