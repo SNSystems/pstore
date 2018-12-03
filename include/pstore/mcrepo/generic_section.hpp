@@ -46,6 +46,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstring>
 #include <type_traits>
 
 #include "pstore/core/address.hpp"
@@ -323,21 +324,31 @@ namespace pstore {
 #ifndef NDEBUG
             auto const start = reinterpret_cast<std::uint8_t *> (this);
 #endif
+            // note that the memory pointed to by 'p' is uninitialized.
             auto p = reinterpret_cast<std::uint8_t *> (this + 1);
             assert (bit_count::pop_count (align) == 1);
 
             if (d.first != d.second) {
-                p = std::copy (d.first, d.second, aligned_ptr<std::uint8_t> (p));
                 data_size_ = generic_section::set_size<decltype (data_size_)> (d.first, d.second);
+                std::memcpy (p, d.first, data_size_);
+                p += data_size_;
             }
             if (i.first != i.second) {
-                p = reinterpret_cast<std::uint8_t *> (
-                    std::copy (i.first, i.second, aligned_ptr<internal_fixup> (p)));
+                auto iout = aligned_ptr<internal_fixup> (p);
+                std::for_each (i.first, i.second, [&iout](internal_fixup const & ifx) {
+                    new (iout) internal_fixup (ifx);
+                    ++iout;
+                });
+                p = reinterpret_cast<std::uint8_t *> (iout);
                 this->set_num_ifixups (i.first, i.second, &num_ifixups_[0]);
             }
             if (x.first != x.second) {
-                p = reinterpret_cast<std::uint8_t *> (
-                    std::copy (x.first, x.second, aligned_ptr<external_fixup> (p)));
+                auto xout = aligned_ptr<external_fixup> (p);
+                std::for_each (x.first, x.second, [&xout](external_fixup const & xfx) {
+                    new (xout) external_fixup (xfx);
+                    ++xout;
+                });
+                p = reinterpret_cast<std::uint8_t *> (xout);
                 num_xfixups_ =
                     generic_section::set_size<decltype (num_xfixups_)> (x.first, x.second);
             }
