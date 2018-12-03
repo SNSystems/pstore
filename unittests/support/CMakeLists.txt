@@ -45,6 +45,7 @@ include (add_pstore)
 set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_aligned.cpp
     test_bit_count.cpp
+    test_bit_field.cpp
     test_error.cpp
     test_file.cpp
     test_fnv.cpp
