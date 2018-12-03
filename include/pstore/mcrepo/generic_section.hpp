@@ -53,6 +53,7 @@
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/bit_count.hpp"
+#include "pstore/support/bit_field.hpp"
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
@@ -247,41 +248,20 @@ namespace pstore {
             ///@}
 
         private:
-            /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
-            /// expressed as an align_ value of 3).
-            std::uint8_t align_;
-            /// The number of internal fixups, stored as a three byte integer (see
-            /// `section::three_byte_integer`).
-            std::uint8_t num_ifixups_[3];
+            union {
+                std::uint32_t field32_;
+                /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
+                /// expressed as an align_ value of 3).
+                bit_field <std::uint32_t, 0, 8> align_;
+                /// The number of internal fixups.
+                bit_field <std::uint32_t, 8, 24> num_ifixups_;
+            };
             /// The number of external fixups in this section.
             std::uint32_t num_xfixups_ = 0;
             /// The number of data bytes contained by this section.
             std::uint64_t data_size_ = 0;
 
-            /// A simple helper type which implements an integer in 3 bytes storing those bytes
-            /// in the machine's native integer representation (big- or little-endian).
-            class three_byte_integer {
-            public:
-                /// Reads a three byte integer from the memory at `src`.
-                /// \param src  The address of three bytes of memory containing a three-byte
-                /// integer.
-                /// \result  The value of the integer contained in the memory at `src`.
-                static std::uint32_t get (std::uint8_t const * src) noexcept;
-                /// Sets the three bytes in the memory at `out` to the value `v`.
-                /// \param out  A 3-byte region of memory which will receive the value of `v`.
-                /// \param v  The value to be stored.
-                static void set (std::uint8_t * out, std::uint32_t v) noexcept;
-
-            private:
-                union number {
-                    std::uint32_t value;
-                    std::uint8_t bytes[sizeof (std::uint32_t)];
-                };
-            };
-
             std::uint32_t num_ifixups () const noexcept;
-            template <typename Iterator>
-            static void set_num_ifixups (Iterator first, Iterator last, std::uint8_t * out);
 
             /// A helper function which returns the distance between two iterators,
             /// clamped to the maximum range of IntType.
@@ -308,19 +288,21 @@ namespace pstore {
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
         generic_section::generic_section (DataRange const & d, IFixupRange const & i,
                                           XFixupRange const & x, std::uint8_t align)
-                : align_{static_cast<std::uint8_t> (bit_count::ctz (align))}
-                , num_ifixups_{0} {
+                : field32_{0} {
 
-            static_assert (std::is_standard_layout<generic_section>::value,
-                           "section must satisfy StandardLayoutType");
-            static_assert (offsetof (generic_section, align_) == 0, "align_ offset is not 0");
-            static_assert (offsetof (generic_section, num_ifixups_) == 1,
-                           "num_ifixups_ offset is not 1");
-            static_assert (offsetof (generic_section, num_xfixups_) == 4,
-                           "num_xfixups_ offset differs from expected value");
-            static_assert (offsetof (generic_section, data_size_) == 8,
-                           "data_size_ offset differs from expected value");
-            static_assert (sizeof (generic_section) == 16, "section size does not match expected");
+            align_ = bit_count::ctz (align);
+            num_ifixups_ = 0;
+
+            PSTORE_STATIC_ASSERT (std::is_standard_layout<generic_section>::value);
+
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, field32_) == 0);
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, align_) == offsetof (generic_section, field32_));
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, num_ifixups_) == offsetof (generic_section, field32_));
+
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, num_xfixups_) == 4);
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, data_size_) == 8);
+            PSTORE_STATIC_ASSERT (sizeof (generic_section) == 16);
+            PSTORE_STATIC_ASSERT (alignof (generic_section) == 8);
 #ifndef NDEBUG
             auto const start = reinterpret_cast<std::uint8_t *> (this);
 #endif
@@ -340,7 +322,8 @@ namespace pstore {
                     ++iout;
                 });
                 p = reinterpret_cast<std::uint8_t *> (iout);
-                this->set_num_ifixups (i.first, i.second, &num_ifixups_[0]);
+                num_ifixups_ =
+                    generic_section::set_size<decltype (num_ifixups_)::value_type> (i.first, i.second);
             }
             if (x.first != x.second) {
                 auto xout = aligned_ptr<external_fixup> (p);
@@ -388,25 +371,8 @@ namespace pstore {
         // num_ifixups
         // ~~~~~~~~~~~
         inline std::uint32_t generic_section::num_ifixups () const noexcept {
-            static_assert (sizeof (num_ifixups_) == 3, "num_ifixups is expected to be 3 bytes");
-            return three_byte_integer::get (num_ifixups_);
+            return num_ifixups_;
         }
-
-        // set_num_ifixups
-        // ~~~~~~~~~~~~~~~
-        template <typename Iterator>
-        inline void generic_section::set_num_ifixups (Iterator first, Iterator last,
-                                                      std::uint8_t * out) {
-            constexpr auto out_bytes = std::size_t{3};
-            static_assert (sizeof (num_ifixups_) == out_bytes,
-                           "num_ifixups is expected to be 3 bytes");
-
-            auto const size = std::distance (first, last);
-            // FIXME: this should be a real runtime check even in a release build.
-            assert (size >= 0 && size < (1U << (out_bytes * 8)));
-            three_byte_integer::set (out, static_cast<std::uint32_t> (size));
-        }
-
 
         struct section_content {
             section_content (section_kind kind_, std::uint8_t align_) noexcept

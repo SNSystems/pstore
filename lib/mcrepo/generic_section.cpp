@@ -69,37 +69,6 @@ namespace pstore {
                                                 xfixups ().size ());
         }
 
-        // three_byte_integer::get
-        // ~~~~~~~~~~~~~~~~~~~~~~~
-        std::uint32_t generic_section::three_byte_integer::get (std::uint8_t const * src) noexcept {
-            number result;
-#if PSTORE_IS_BIG_ENDIAN
-            result.bytes[0] = 0;
-            std::memcpy (&result[1], src, 3);
-#else
-            std::memcpy (&result, src, 3);
-            result.bytes[3] = 0;
-#endif
-            return result.value;
-        }
-
-        // three_byte_integer::set
-        // ~~~~~~~~~~~~~~~~~~~~~~~
-        void generic_section::three_byte_integer::set (std::uint8_t * out,
-                                                       std::uint32_t v) noexcept {
-            constexpr auto out_bytes = std::size_t{3};
-            number num;
-            num.value = v;
-
-#if PSTORE_IS_BIG_ENDIAN
-            constexpr auto first_byte = sizeof (std::uint32_t) - num_bytes;
-#else
-            constexpr auto first_byte = 0U;
-#endif
-            std::memcpy (out, &num.bytes[first_byte], out_bytes);
-        }
-
-
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
         //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
