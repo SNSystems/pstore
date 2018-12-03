@@ -180,3 +180,34 @@ TEST (BitField, OneBitBoolean) {
     EXPECT_FALSE (f1.value ());
     EXPECT_FALSE (static_cast<bool> (f1));
 }
+
+TEST (BitField, Max) {
+    EXPECT_EQ ((pstore::bit_field<std::uint8_t, 0, 1>::max ()), 1U);
+    EXPECT_EQ ((pstore::bit_field<std::uint16_t, 0, 1>::max ()), 1U);
+    EXPECT_EQ ((pstore::bit_field<std::uint32_t, 0, 1>::max ()), 1U);
+    EXPECT_EQ ((pstore::bit_field<std::uint64_t, 0, 1>::max ()), 1U);
+
+    EXPECT_EQ ((pstore::bit_field<std::uint8_t, 0, 8>::max ()),
+               std::numeric_limits<std::uint8_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint16_t, 0, 8>::max ()),
+               std::numeric_limits<std::uint8_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint32_t, 0, 8>::max ()),
+               std::numeric_limits<std::uint8_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint64_t, 0, 8>::max ()),
+               std::numeric_limits<std::uint8_t>::max ());
+
+    EXPECT_EQ ((pstore::bit_field<std::uint16_t, 0, 16>::max ()),
+               std::numeric_limits<std::uint16_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint32_t, 0, 16>::max ()),
+               std::numeric_limits<std::uint16_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint64_t, 0, 16>::max ()),
+               std::numeric_limits<std::uint16_t>::max ());
+
+    EXPECT_EQ ((pstore::bit_field<std::uint32_t, 0, 32>::max ()),
+               std::numeric_limits<std::uint32_t>::max ());
+    EXPECT_EQ ((pstore::bit_field<std::uint64_t, 0, 32>::max ()),
+               std::numeric_limits<std::uint32_t>::max ());
+
+    EXPECT_EQ ((pstore::bit_field<std::uint64_t, 0, 64>::max ()),
+               std::numeric_limits<std::uint64_t>::max ());
+}

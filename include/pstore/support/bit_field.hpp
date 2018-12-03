@@ -84,6 +84,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <type_traits>
 
 namespace pstore {
@@ -92,25 +93,40 @@ namespace pstore {
 
         template <typename ValueType, unsigned Bits>
         struct max_value {
-            static constexpr auto value = static_cast<ValueType> ((ValueType{1} << Bits) - 1);
+            static constexpr ValueType value = static_cast<ValueType> ((ValueType{1} << Bits) - 1);
         };
 
         template <typename ValueType>
         struct max_value<ValueType, 8U> {
-            static constexpr auto value = static_cast<ValueType> (~std::uint8_t{0});
+            static constexpr ValueType value = std::numeric_limits<std::uint8_t>::max ();
         };
+
         template <typename ValueType>
         struct max_value<ValueType, 16U> {
-            static constexpr auto value = static_cast<ValueType> (~std::uint16_t{0});
+            static constexpr ValueType value = std::numeric_limits<std::uint16_t>::max ();
         };
+
         template <typename ValueType>
         struct max_value<ValueType, 32U> {
-            static constexpr auto value = static_cast<ValueType> (~std::uint32_t{0});
+            static constexpr ValueType value = std::numeric_limits<std::uint32_t>::max ();
         };
+
         template <typename ValueType>
         struct max_value<ValueType, 64U> {
-            static constexpr auto value = static_cast<ValueType> (~std::uint64_t{0});
+            static constexpr ValueType value = std::numeric_limits<std::uint64_t>::max ();
         };
+
+        template <typename ValueType, unsigned Bits>
+        constexpr ValueType max_value<ValueType, Bits>::value;
+        template <typename ValueType>
+        constexpr ValueType max_value<ValueType, 8U>::value;
+        template <typename ValueType>
+        constexpr ValueType max_value<ValueType, 16U>::value;
+        template <typename ValueType>
+        constexpr ValueType max_value<ValueType, 32U>::value;
+        template <typename ValueType>
+        constexpr ValueType max_value<ValueType, 64U>::value;
+
 
 
         template <typename ValueType, unsigned Index, unsigned Bits,
