@@ -62,8 +62,9 @@ namespace pstore {
                  make_index_diff<index::fragment_index> (
                      "fragments", db, new_revision, old_revision,
                      index::get_index<trailer::indices::fragment>),
-                 make_index_diff<index::ticket_index> ("tickets", db, new_revision, old_revision,
-                                                       index::get_index<trailer::indices::ticket>),
+                 make_index_diff<index::compilation_index> (
+                     "compilations", db, new_revision, old_revision,
+                     index::get_index<trailer::indices::compilation>),
                  make_index_diff<index::debug_line_header_index> (
                      "debug_line_headers", db, new_revision, old_revision,
                      index::get_index<trailer::indices::debug_line_header>)});

@@ -82,7 +82,7 @@ namespace pstore {
         details::flush_index<trailer::indices::k> (transaction, locations, generation);            \
         break;
 
-            for (auto ctr = index_integral (trailer::indices::write);
+            for (auto ctr = std::underlying_type<pstore::trailer::indices>::type{0};
                  ctr <= index_integral (trailer::indices::last); ++ctr) {
                 switch (static_cast<trailer::indices> (ctr)) {
                     PSTORE_INDICES

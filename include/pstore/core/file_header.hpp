@@ -190,7 +190,7 @@ namespace pstore {
         std::uint32_t get_crc () const noexcept;
 
         static std::uint16_t const major_version = 0;
-        static std::uint16_t const minor_version = 8;
+        static std::uint16_t const minor_version = 9;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
@@ -251,11 +251,11 @@ namespace pstore {
     namespace index {
 
 #define PSTORE_INDICES                                                                             \
-    X (write)                                                                                      \
+    X (compilation)                                                                                \
+    X (debug_line_header)                                                                          \
     X (fragment)                                                                                   \
-    X (ticket)                                                                                     \
     X (name)                                                                                       \
-    X (debug_line_header)
+    X (write)
 
         struct header_block;
     } // namespace index
@@ -280,6 +280,8 @@ namespace pstore {
 
 
 #define X(a) a,
+        // Note that the first enum member must have the value 0 or flush_indices() will need to
+        // change.
         enum class indices : unsigned { PSTORE_INDICES last };
 #undef X
         using index_records_array =

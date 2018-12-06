@@ -213,7 +213,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "internal"));
 }
 
-TEST_F (MCRepoFixture, DumpTicket) {
+TEST_F (MCRepoFixture, DumpCompilation) {
     using ::testing::ElementsAre;
 
     // Write output file path "/home/user/test.c"
@@ -224,13 +224,13 @@ TEST_F (MCRepoFixture, DumpTicket) {
          pstore::extent<pstore::repo::fragment> (
              pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
          this->store_str (transaction, "main"), linkage_type::external}};
-    auto ticket = ticket::load (
-        *db_, ticket::alloc (transaction, this->store_str (transaction, "/home/user/"),
-                             this->store_str (transaction, "machine-vendor-os"), std::begin (v),
-                             std::end (v)));
+    auto compilation = compilation::load (
+        *db_, compilation::alloc (transaction, this->store_str (transaction, "/home/user/"),
+                                  this->store_str (transaction, "machine-vendor-os"),
+                                  std::begin (v), std::end (v)));
 
     std::ostringstream out;
-    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, ticket);
+    pstore::dump::value_ptr addr = pstore::dump::make_value (*db_, compilation);
     addr->write (out);
 
     auto const lines = split_lines (out.str ());

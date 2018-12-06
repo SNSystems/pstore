@@ -196,10 +196,11 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket) {
+        value_ptr make_value (database const & db,
+                              std::shared_ptr<repo::compilation const> const & compilation) {
             array::container members;
-            members.reserve (ticket->size ());
-            for (auto const & member : *ticket) {
+            members.reserve (compilation->size ());
+            for (auto const & member : *compilation) {
                 members.emplace_back (make_value (db, member));
             }
 
@@ -207,8 +208,8 @@ namespace pstore {
             using archive::make_reader;
             return make_value (object::container{
                 {"members", make_value (members)},
-                {"path", make_value (indirect_string::read (db, ticket->path ()))},
-                {"triple", make_value (indirect_string::read (db, ticket->triple ()))},
+                {"path", make_value (indirect_string::read (db, compilation->path ()))},
+                {"triple", make_value (indirect_string::read (db, compilation->triple ()))},
             });
         }
 
@@ -222,10 +223,10 @@ namespace pstore {
         }
 
         value_ptr make_value (database const & db,
-                              pstore::index::ticket_index::value_type const & value) {
-            auto const ticket = pstore::repo::ticket::load (db, value.second);
+                              pstore::index::compilation_index::value_type const & value) {
+            auto const compilation = pstore::repo::compilation::load (db, value.second);
             return make_value (object::container{{"digest", make_value (value.first)},
-                                                 {"ticket", make_value (db, ticket)}});
+                                                 {"compilation", make_value (db, compilation)}});
         }
 
         value_ptr make_value (database const & db,

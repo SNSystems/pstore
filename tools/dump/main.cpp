@@ -92,9 +92,8 @@ namespace {
         no_fragment_index,
         fragment_not_found,
         bad_uuid,
-        no_ticket_index,
-        ticket_not_found,
-        bad_ticket_file,
+        no_compilation_index,
+        compilation_not_found,
         debug_line_header_not_found,
         no_debug_line_header_index,
     };
@@ -116,9 +115,8 @@ namespace {
         case dump_error_code::no_fragment_index: return "no fragment index";
         case dump_error_code::fragment_not_found: return "fragment not found";
         case dump_error_code::bad_uuid: return "bad UUID";
-        case dump_error_code::no_ticket_index: return "no ticket index";
-        case dump_error_code::ticket_not_found: return "ticket not found";
-        case dump_error_code::bad_ticket_file: return "bad ticket file";
+        case dump_error_code::no_compilation_index: return "no compilation index";
+        case dump_error_code::compilation_not_found: return "compilation not found";
         case dump_error_code::debug_line_header_not_found: return "debug line header not found";
         case dump_error_code::no_debug_line_header_index: return "no debug line header index";
         }
@@ -371,15 +369,15 @@ int main (int argc, char * argv[]) {
 
         bool show_contents = opt.show_contents;
         bool show_all_fragments = opt.show_all_fragments;
-        bool show_all_tickets = opt.show_all_tickets;
+        bool show_all_compilations = opt.show_all_compilations;
         bool show_all_debug_line_headers = opt.show_all_debug_line_headers;
         bool show_header = opt.show_header;
         bool show_indices = opt.show_indices;
         bool show_log = opt.show_log;
         bool show_shared = opt.show_shared;
         if (opt.show_all) {
-            show_contents = show_all_fragments = show_all_tickets = show_header = show_indices =
-                show_log = show_all_debug_line_headers = true;
+            show_contents = show_all_fragments = show_all_compilations = show_header =
+                show_indices = show_log = show_all_debug_line_headers = true;
         }
 
         if (opt.hex) {
@@ -416,10 +414,10 @@ int main (int argc, char * argv[]) {
                     return make_value (db, value, opt.triple.c_str (), opt.hex);
                 });
 
-            show_index<pstore::trailer::indices::ticket> (
-                file, db, show_all_tickets, opt.tickets, dump_error_code::ticket_not_found,
-                dump_error_code::no_ticket_index,
-                [&db](pstore::index::ticket_index::value_type const & value) {
+            show_index<pstore::trailer::indices::compilation> (
+                file, db, show_all_compilations, opt.compilations,
+                dump_error_code::compilation_not_found, dump_error_code::no_compilation_index,
+                [&db](pstore::index::compilation_index::value_type const & value) {
                     return make_value (db, value);
                 });
 

@@ -46,8 +46,8 @@
 
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/dump/value.hpp"
+#include "pstore/mcrepo/compilation.hpp"
 #include "pstore/mcrepo/fragment.hpp"
-#include "pstore/mcrepo/ticket.hpp"
 
 namespace pstore {
     namespace dump {
@@ -70,11 +70,13 @@ namespace pstore {
 
         value_ptr make_value (repo::linkage_type t);
         value_ptr make_value (database const & db, repo::compilation_member const & member);
-        value_ptr make_value (database const & db, std::shared_ptr<repo::ticket const> ticket);
+        value_ptr make_value (database const & db,
+                              std::shared_ptr<repo::compilation const> const & compilation);
 
         value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
                               gsl::czstring triple, bool hex_mode);
-        value_ptr make_value (database const & db, index::ticket_index::value_type const & value);
+        value_ptr make_value (database const & db,
+                              index::compilation_index::value_type const & value);
         value_ptr make_value (database const & db,
                               index::debug_line_header_index::value_type const & value,
                               bool hex_mode);

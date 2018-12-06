@@ -119,14 +119,15 @@ namespace pstore {
 
     namespace repo {
         class fragment;
-        class ticket;
+        class compilation;
     } // end namespace repo
 
     namespace index {
 
-        using write_index = hamt_map<std::string, extent<char>>;
+        using compilation_index = hamt_map<digest, extent<repo::compilation>, u128_hash>;
+        using debug_line_header_index = hamt_map<digest, extent<std::uint8_t>, u128_hash>;
         using fragment_index = hamt_map<digest, extent<repo::fragment>, u128_hash>;
-        using ticket_index = hamt_map<digest, extent<repo::ticket>, u128_hash>;
+        using write_index = hamt_map<std::string, extent<char>>;
 
         struct fnv_64a_hash_indirect_string {
             std::uint64_t operator() (indirect_string const & indir) const {
@@ -136,18 +137,17 @@ namespace pstore {
         };
 
         using name_index = hamt_set<indirect_string, fnv_64a_hash_indirect_string>;
-        using debug_line_header_index = hamt_map<digest, extent<std::uint8_t>, u128_hash>;
 
         // clang-format off
         /// Maps from the indices kind enumeration to the type that is used to represent a database index of that kind.
         template <trailer::indices T>
         struct enum_to_index {};
 
-        template <> struct enum_to_index<trailer::indices::write               > { using type = write_index; };
-        template <> struct enum_to_index<trailer::indices::fragment            > { using type = fragment_index; };
-        template <> struct enum_to_index<trailer::indices::ticket              > { using type = ticket_index; };
-        template <> struct enum_to_index<trailer::indices::name                > { using type = name_index; };
+        template <> struct enum_to_index<trailer::indices::compilation         > { using type = compilation_index; };
         template <> struct enum_to_index<trailer::indices::debug_line_header   > { using type = debug_line_header_index; };
+        template <> struct enum_to_index<trailer::indices::fragment            > { using type = fragment_index; };
+        template <> struct enum_to_index<trailer::indices::name                > { using type = name_index; };
+        template <> struct enum_to_index<trailer::indices::write               > { using type = write_index; };
         // clang-format on
 
         /// Returns a pointer to a index, loading it from the store on first access. If 'create' is

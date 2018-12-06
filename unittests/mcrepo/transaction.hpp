@@ -44,15 +44,15 @@
 #ifndef MCREPO_TRANSACTION_HPP
 #define MCREPO_TRANSACTION_HPP
 
-#include "pstore/mcrepo/ticket.hpp"
 #include "gmock/gmock.h"
 #include <memory>
 #include <vector>
 
+#include "pstore/core/address.hpp"
 
 class transaction {
 public:
-    using storage_tpye = std::map<std::uint8_t *, std::shared_ptr<std::uint8_t>>;
+    using storage_type = std::map<std::uint8_t *, std::shared_ptr<std::uint8_t>>;
 
     auto allocate (std::size_t size, unsigned align) -> pstore::address;
 
@@ -61,10 +61,10 @@ public:
     auto alloc_rw (std::size_t size, unsigned align)
         -> std::pair<std::shared_ptr<void>, pstore::address>;
 
-    storage_tpye const & get_storage () const { return storage_; }
+    storage_type const & get_storage () const { return storage_; }
 
 private:
-    storage_tpye storage_;
+    storage_type storage_;
 };
 
 #endif // MCREPO_TRANSACTION_HPP

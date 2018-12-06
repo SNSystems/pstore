@@ -44,8 +44,6 @@
 
 #include "transaction.hpp"
 
-using namespace pstore::repo;
-
 auto transaction::allocate (std::size_t size, unsigned /*align*/) -> pstore::address {
     auto ptr = std::shared_ptr<std::uint8_t> (new std::uint8_t[size],
                                               [](std::uint8_t * p) { delete[] p; });

@@ -62,7 +62,6 @@
 #include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"
-#include "pstore/mcrepo/ticket.hpp"
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/inherit_const.hpp"
 #include "pstore/support/max.hpp"

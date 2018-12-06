@@ -1,10 +1,10 @@
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//*                           *
-//===- lib/mcrepo/ticket.cpp ----------------------------------------------===//
+//*                            _ _       _   _              *
+//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __   *
+//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \  *
+//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | | *
+//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_| *
+//*                     |_|                                 *
+//===- lib/mcrepo/compilation.cpp -----------------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/mcrepo/ticket.hpp"
+#include "pstore/mcrepo/compilation.hpp"
 
 #include "pstore/mcrepo/repo_error.hpp"
 
@@ -60,31 +60,30 @@ std::ostream & pstore::repo::operator<< (std::ostream & os, linkage_type l) {
 
 // operator new
 // ~~~~~~~~~~~~
-void * ticket::operator new (std::size_t s, nmembers size) {
+void * compilation::operator new (std::size_t s, nmembers size) {
     (void) s;
-    std::size_t const actual_bytes = ticket::size_bytes (size.n);
+    std::size_t const actual_bytes = compilation::size_bytes (size.n);
     assert (actual_bytes >= s);
     return ::operator new (actual_bytes);
 }
 
 // operator delete
 // ~~~~~~~~~~~~~~~
-void ticket::operator delete (void * p, nmembers /*size*/) {
+void compilation::operator delete (void * p, nmembers /*size*/) {
     ::operator delete (p);
 }
 
-void ticket::operator delete (void * p) {
+void compilation::operator delete (void * p) {
     ::operator delete (p);
 }
 
 // load
 // ~~~~
-auto ticket::load (pstore::database const & db, pstore::extent<ticket> const & location)
-    -> std::shared_ptr<ticket const> {
-    std::shared_ptr<ticket const> t = db.getro (location);
+auto compilation::load (pstore::database const & db, pstore::extent<compilation> const & location)
+    -> std::shared_ptr<compilation const> {
+    std::shared_ptr<compilation const> t = db.getro (location);
     if (t->size_bytes () != location.size) {
-        raise_error_code (std::make_error_code (error_code::bad_ticket_record));
+        raise_error_code (std::make_error_code (error_code::bad_compilation_record));
     }
     return t;
 }
-

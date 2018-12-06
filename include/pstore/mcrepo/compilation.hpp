@@ -1,10 +1,10 @@
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//*                           *
-//===- include/pstore/mcrepo/ticket.hpp -----------------------------------===//
+//*                            _ _       _   _              *
+//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __   *
+//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \  *
+//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | | *
+//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_| *
+//*                     |_|                                 *
+//===- include/pstore/mcrepo/compilation.hpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPO_TICKET_HPP
-#define PSTORE_MCREPO_TICKET_HPP
+#ifndef PSTORE_MCREPO_COMPILATION_HPP
+#define PSTORE_MCREPO_COMPILATION_HPP
 
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
@@ -106,7 +106,7 @@ namespace pstore {
             }
 
         private:
-            friend class ticket;
+            friend class compilation;
             compilation_member () noexcept = default;
         };
 
@@ -120,13 +120,15 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 41);
         PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
 
-        //*  _   _    _       _    *
-        //* | |_(_)__| |_____| |_  *
-        //* |  _| / _| / / -_)  _| *
-        //*  \__|_\__|_\_\___|\__| *
-        //*                        *
-        /// \brief A ticket is a holder for zero or more `compilation_member` instances.
-        class ticket {
+        //*                    _ _      _   _           *
+        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
+        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
+        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
+        //*              |_|                            *
+        /// A compilation is a holder for zero or more `compilation_member` instances. It is the
+        /// top-level object representing the result of processing of a transaction unit by the
+        /// compiler.
+        class compilation {
         public:
             using iterator = compilation_member *;
             using const_iterator = compilation_member const *;
@@ -136,31 +138,32 @@ namespace pstore {
             /// \name Construction
             ///@{
 
-            /// \brief Allocates a new Ticket in-store and copy the ticket file path and the
-            /// contents of a vector of ticket_members into it.
+            /// \brief Allocates a new compilation in-store and copy the ticket file path and the
+            /// contents of a vector of compilation_members into it.
             ///
-            /// \param transaction  The transaction to which the ticket will be appended.
+            /// \param transaction  The transaction to which the compilation will be appended.
             /// \param path  A ticket file path address in the store.
             /// \param triple  The target-triple associated with this compilation.
-            /// \param first_member  The first of a sequence of ticket_member instances. The range
+            /// \param first_member  The first of a sequence of compilation_member instances. The
+            /// range
             ///   defined by \p first_member and \p last_member will be copied into the newly
-            ///   allocated ticket.
-            /// \param last_member  The end of the range of ticket_member instances.
+            ///   allocated compilation.
+            /// \param last_member  The end of the range of compilation_member instances.
             /// \result A pair of a pointer and an extent which describes
-            ///   the in-store location of the allocated ticket.
+            ///   the in-store location of the allocated compilation.
             template <typename TransactionType, typename Iterator>
-            static extent<ticket> alloc (TransactionType & transaction,
-                                         typed_address<indirect_string> path,
-                                         typed_address<indirect_string> triple,
-                                         Iterator first_member, Iterator last_member);
+            static extent<compilation> alloc (TransactionType & transaction,
+                                              typed_address<indirect_string> path,
+                                              typed_address<indirect_string> triple,
+                                              Iterator first_member, Iterator last_member);
 
-            /// \brief Returns a pointer to an in-pstore ticket instance.
+            /// \brief Returns a pointer to an in-pstore compilation instance.
             ///
-            /// \param db  The database from which the ticket should be loaded.
-            /// \param extent  An extent describing the ticket location in the store.
-            /// \result  A pointer to the ticket in-store memory.
-            static std::shared_ptr<ticket const> load (database const & db,
-                                                       extent<ticket> const & extent);
+            /// \param db  The database from which the compilation should be loaded.
+            /// \param extent  An extent describing the compilation location in the store.
+            /// \result  A pointer to the compilation in-store memory.
+            static std::shared_ptr<compilation const> load (database const & db,
+                                                            extent<compilation> const & extent);
 
             ///@}
 
@@ -196,15 +199,15 @@ namespace pstore {
             /// \name Storage
             ///@{
 
-            /// Returns the number of bytes of storage required for a TicketContent with 'size'
+            /// Returns the number of bytes of storage required for a compilation with 'size'
             /// members.
             static std::size_t size_bytes (std::uint64_t size) {
-                return sizeof (ticket) - sizeof (ticket::members_) +
-                       sizeof (ticket::members_[0]) * size;
+                return sizeof (compilation) - sizeof (compilation::members_) +
+                       sizeof (compilation::members_[0]) * size;
             }
 
-            /// \returns The number of bytes needed to accommodate this ticket.
-            std::size_t size_bytes () const { return ticket::size_bytes (this->size ()); }
+            /// \returns The number of bytes needed to accommodate this compilation.
+            std::size_t size_bytes () const { return compilation::size_bytes (this->size ()); }
             ///@}
 
             /// Returns the ticket file path.
@@ -213,13 +216,13 @@ namespace pstore {
             typed_address<indirect_string> triple () const { return triple_; }
 
         private:
-            ticket () noexcept;
+            compilation () noexcept;
 
             struct nmembers {
                 std::size_t n;
             };
             /// A placement-new implementation which allocates sufficient storage for a
-            /// ticket with the number of members given by the size parameter.
+            /// compilation with the number of members given by the size parameter.
             void * operator new (std::size_t s, nmembers size);
             void operator delete (void * p, nmembers size);
 
@@ -234,24 +237,24 @@ namespace pstore {
             compilation_member members_[1];
         };
 
-        PSTORE_STATIC_ASSERT (std::is_standard_layout<ticket>::value);
-        PSTORE_STATIC_ASSERT (alignof (ticket) == 16);
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
+        PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
-        inline ticket::ticket () noexcept {
+        inline compilation::compilation () noexcept {
             (void) padding1_; // silence warning about an unused private class member.
-            PSTORE_STATIC_ASSERT (offsetof (ticket, path_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (ticket, triple_) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (ticket, size_) == 16);
-            PSTORE_STATIC_ASSERT (offsetof (ticket, padding1_) == 24);
-            PSTORE_STATIC_ASSERT (offsetof (ticket, members_) == 32);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, path_) == 0);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 24);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
         }
 
         // alloc
         // ~~~~~
         template <typename TransactionType, typename Iterator>
-        auto ticket::alloc (TransactionType & transaction, typed_address<indirect_string> path,
-                            typed_address<indirect_string> triple, Iterator first_member,
-                            Iterator last_member) -> extent<ticket> {
+        auto compilation::alloc (TransactionType & transaction, typed_address<indirect_string> path,
+                                 typed_address<indirect_string> triple, Iterator first_member,
+                                 Iterator last_member) -> extent<compilation> {
             // First work out its size.
             auto const dist = std::distance (first_member, last_member);
             assert (dist >= 0);
@@ -259,18 +262,18 @@ namespace pstore {
             auto const size = size_bytes (num_members);
 
             // Allocate the storage.
-            auto const addr = transaction.allocate (size, alignof (ticket));
-            auto ptr = std::static_pointer_cast<ticket> (transaction.getrw (addr, size));
+            auto const addr = transaction.allocate (size, alignof (compilation));
+            auto ptr = std::static_pointer_cast<compilation> (transaction.getrw (addr, size));
 
             // Write the data to the store.
             ptr->path_ = path;
             ptr->triple_ = triple;
             ptr->size_ = num_members;
             std::copy (first_member, last_member, ptr->begin ());
-            return pstore::extent<ticket> (typed_address<ticket> (addr), size);
+            return pstore::extent<compilation> (typed_address<compilation> (addr), size);
         }
 
     } // end namespace repo
 } // end namespace pstore
 
-#endif // PSTORE_MCREPO_TICKET_HPP
+#endif // PSTORE_MCREPO_COMPILATION_HPP

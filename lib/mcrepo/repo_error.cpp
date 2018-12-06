@@ -52,7 +52,7 @@ namespace pstore {
             switch (static_cast<error_code> (error)) {
             case error_code::bad_fragment_record: return "bad fragment record";
             case error_code::bad_fragment_type: return "bad fragment type";
-            case error_code::bad_ticket_record: return "bad ticket record";
+            case error_code::bad_compilation_record: return "bad compilation record";
             }
             return "unknown error";
         }

@@ -63,8 +63,8 @@ namespace pstore {
             if (size == 0) {
                 return 0;
             }
-            return sizeof (dependents) - sizeof (dependents::ticket_members_) +
-                   sizeof (dependents::ticket_members_[0]) * size;
+            return sizeof (dependents) - sizeof (dependents::compilation_members_) +
+                   sizeof (dependents::compilation_members_[0]) * size;
         }
 
         // size_bytes

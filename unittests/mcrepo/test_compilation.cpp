@@ -1,10 +1,10 @@
-//*  _   _      _        _    *
-//* | |_(_) ___| | _____| |_  *
-//* | __| |/ __| |/ / _ \ __| *
-//* | |_| | (__|   <  __/ |_  *
-//*  \__|_|\___|_|\_\___|\__| *
-//*                           *
-//===- unittests/mcrepo/test_ticket.cpp -----------------------------------===//
+//*                            _ _       _   _              *
+//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __   *
+//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \  *
+//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | | *
+//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_| *
+//*                     |_|                                 *
+//===- unittests/mcrepo/test_compilation.cpp ------------------------------===//
 // Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,14 +42,14 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/mcrepo/ticket.hpp"
+#include "pstore/mcrepo/compilation.hpp"
 #include "transaction.hpp"
 
 using namespace pstore::repo;
 
 
 namespace {
-    class TicketTest : public ::testing::Test {
+    class CompilationTest : public ::testing::Test {
     protected:
         transaction transaction_;
 
@@ -61,12 +61,12 @@ namespace {
 
 } // namespace
 
-TEST_F (TicketTest, Empty) {
+TEST_F (CompilationTest, Empty) {
     std::vector<compilation_member> m;
-    pstore::extent<ticket> extent =
-        ticket::alloc (transaction_, indirect_string_address (0U), indirect_string_address (0U),
-                       std::begin (m), std::end (m));
-    auto t = reinterpret_cast<ticket const *> (extent.addr.absolute ());
+    pstore::extent<compilation> extent =
+        compilation::alloc (transaction_, indirect_string_address (0U),
+                            indirect_string_address (0U), std::begin (m), std::end (m));
+    auto t = reinterpret_cast<compilation const *> (extent.addr.absolute ());
 
     assert (transaction_.get_storage ().begin ()->first ==
             reinterpret_cast<std::uint8_t const *> (t));
@@ -76,7 +76,7 @@ TEST_F (TicketTest, Empty) {
     EXPECT_TRUE (t->empty ());
 }
 
-TEST_F (TicketTest, SingleMember) {
+TEST_F (CompilationTest, SingleMember) {
     constexpr auto output_file_path = indirect_string_address (61U);
     constexpr auto triple = indirect_string_address (67U);
     constexpr auto digest = pstore::index::digest{28U};
@@ -88,22 +88,22 @@ TEST_F (TicketTest, SingleMember) {
     compilation_member sm{digest, extent, name, linkage};
 
     std::vector<compilation_member> v{sm};
-    ticket::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
+    compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
 
-    auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
+    auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);
 
     EXPECT_EQ (1U, t->size ());
     EXPECT_FALSE (t->empty ());
     EXPECT_EQ (output_file_path, t->path ());
     EXPECT_EQ (triple, t->triple ());
-    EXPECT_EQ (sizeof (ticket), t->size_bytes ());
+    EXPECT_EQ (sizeof (compilation), t->size_bytes ());
     EXPECT_EQ (digest, (*t)[0].digest);
     EXPECT_EQ (extent, (*t)[0].fext);
     EXPECT_EQ (name, (*t)[0].name);
     EXPECT_EQ (linkage, (*t)[0].linkage);
 }
 
-TEST_F (TicketTest, MultipleMembers) {
+TEST_F (CompilationTest, MultipleMembers) {
     constexpr auto output_file_path = indirect_string_address (32U);
     constexpr auto triple = indirect_string_address (33U);
     constexpr auto digest1 = pstore::index::digest{128U};
@@ -119,9 +119,9 @@ TEST_F (TicketTest, MultipleMembers) {
     compilation_member mm2{digest2, extent2, name + 24U, linkage};
 
     std::vector<compilation_member> v{mm1, mm2};
-    ticket::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
+    compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
 
-    auto t = reinterpret_cast<ticket const *> (transaction_.get_storage ().begin ()->first);
+    auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);
 
     EXPECT_EQ (2U, t->size ());
     EXPECT_FALSE (t->empty ());
@@ -130,4 +130,3 @@ TEST_F (TicketTest, MultipleMembers) {
         EXPECT_EQ (linkage, m.linkage);
     }
 }
-
