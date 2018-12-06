@@ -151,6 +151,9 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     std::copy (std::begin (Compilation), std::end (Compilation),
                std::back_inserter (result.compilations));
     result.show_all_compilations = AllCompilations;
+    std::copy (std::begin (DebugLineHeader), std::end (DebugLineHeader),
+               std::back_inserter (result.debug_line_headers));
+    result.show_all_debug_line_headers = AllDebugLineHeaders;
 
     result.show_header = Header;
     result.show_indices = Indices;
