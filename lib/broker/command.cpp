@@ -64,15 +64,9 @@
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/writer.hpp"
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/time.hpp"
-
-namespace {
-    template <typename T, std::size_t N>
-    constexpr std::size_t array_size (T const (&)[N]) {
-        return N;
-    }
-} // anonymous namespace
 
 namespace pstore {
     namespace broker {
@@ -146,9 +140,9 @@ namespace pstore {
         // ~~~
         void command_processor::log (broker_command const & c) const {
             constexpr char const verb[] = "verb:";
-            constexpr auto verb_length = array_size (verb) - 1;
+            constexpr auto verb_length = array_elements (verb) - 1;
             constexpr char const path[] = " path:";
-            constexpr auto path_length = array_size (path) - 1;
+            constexpr auto path_length = array_elements (path) - 1;
             constexpr auto max_path_length = std::size_t{32};
 
             std::string message;
