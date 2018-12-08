@@ -315,15 +315,17 @@ namespace pstore {
             /// A matcher which checks for a specific keyword such as "true", "false", or "null".
             /// \tparam Callbacks  The parser callback structure.
             /// \tparam DoneFunction  A function matching the signature void(parser<Callbacks>&)
-            /// that will be called when the token is successfully matcher.
+            ///   that will be called when the token is successfully matched.
             template <typename Callbacks, typename DoneFunction>
             class token_matcher : public matcher<Callbacks> {
             public:
-                explicit token_matcher (char const * text,
-                                        DoneFunction done_fn = DoneFunction ()) noexcept
+                /// \param text  The string to be matched.
+                /// \param done  The function called when the source string is matched.
+                explicit token_matcher (gsl::czstring text,
+                                        DoneFunction done = DoneFunction ()) noexcept
                         : matcher<Callbacks> (start_state)
                         , text_ (text)
-                        , done_fn_ (std::move (done_fn)) {}
+                        , done_ (std::move (done)) {}
 
                 std::pair<typename matcher<Callbacks>::pointer, bool>
                 consume (parser<Callbacks> & parser, maybe<char> ch) override;
@@ -338,10 +340,10 @@ namespace pstore {
                 /// The keyword to be matched. The input sequence must exactly match this string or
                 /// an unrecognized token error is raised. Once all of the characters are matched,
                 /// complete() is called.
-                char const * text_;
+                gsl::czstring text_;
 
                 /// This function is called once the complete token text has been matched.
-                DoneFunction done_fn_;
+                DoneFunction done_;
             };
 
             template <typename Callbacks, typename DoneFunction>
@@ -370,7 +372,7 @@ namespace pstore {
                         }
                         match = false;
                     }
-                    done_fn_ (parser);
+                    done_ (parser);
                     this->set_state (done_state);
                     break;
                 case done_state: assert (false); break;
