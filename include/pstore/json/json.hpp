@@ -320,12 +320,12 @@ namespace pstore {
             class token_matcher : public matcher<Callbacks> {
             public:
                 /// \param text  The string to be matched.
-                /// \param done  The function called when the source string is matched.
+                /// \param done_fn  The function called when the source string is matched.
                 explicit token_matcher (gsl::czstring text,
-                                        DoneFunction done = DoneFunction ()) noexcept
+                                        DoneFunction done_fn = DoneFunction ()) noexcept
                         : matcher<Callbacks> (start_state)
                         , text_ (text)
-                        , done_ (std::move (done)) {}
+                        , done_ (std::move (done_fn)) {}
 
                 std::pair<typename matcher<Callbacks>::pointer, bool>
                 consume (parser<Callbacks> & parser, maybe<char> ch) override;
