@@ -113,13 +113,15 @@ function (add_pstore_additional_compiler_flag name)
 
     elseif (MSVC)
 
-        # 4512: assignment operator could not be generated.
         # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
         #       not available.
+		# 4146: unary minus applied to unsigned, result still unsigned.
+        # 4512: assignment operator could not be generated.
         target_compile_options (${name} PRIVATE
             -W4
-            -wd4512
             -wd4127
+			-wd4146
+            -wd4512
         )
         target_compile_definitions (${name} PRIVATE
             -D_CRT_SECURE_NO_WARNINGS

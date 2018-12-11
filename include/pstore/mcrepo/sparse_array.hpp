@@ -61,6 +61,7 @@
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/inherit_const.hpp"
+#include "pstore/support/uint128.hpp"
 
 namespace pstore {
     namespace repo {
@@ -243,7 +244,7 @@ namespace pstore {
 
             /// \name Capacity
             ///@{
-            constexpr bool empty () const noexcept { return bitmap_ == 0; }
+            constexpr bool empty () const noexcept { return bitmap_ == 0U; }
             constexpr size_type size () const noexcept { return bit_count::pop_count (bitmap_); }
 
             /// Returns the maximum number of indices that could be contained by an instance of this
@@ -252,11 +253,7 @@ namespace pstore {
 
             /// Returns true if the sparse array has an index 'pos'.
             bool has_index (size_type pos) const noexcept {
-                if (pos >= max_size ()) {
-                    return false;
-                }
-                auto const bit_position = BitmapType{1} << pos;
-                return (bitmap_ & bit_position) != 0;
+                return pos < max_size () ? (bitmap_ & (BitmapType{1U} << pos)) != 0U : false;
             }
             ///@}
 
@@ -320,7 +317,7 @@ namespace pstore {
 
                 private:
                     void next () noexcept {
-                        for (; bitmap_ != 0 && (bitmap_ & 1U) == 0U; bitmap_ >>= 1) {
+                        for (; bitmap_ != 0U && (bitmap_ & 1U) == 0U; bitmap_ >>= 1) {
                             ++pos_;
                         }
                     }
@@ -330,9 +327,9 @@ namespace pstore {
                 explicit indices (sparse_array const & arr)
                         : bitmap_{arr.bitmap_} {}
                 const_iterator begin () const { return const_iterator{bitmap_}; }
-                const_iterator end () const { return const_iterator{0}; }
+                const_iterator end () const { return const_iterator{0U}; }
 
-                constexpr bool empty () const noexcept { return bitmap_ == 0; }
+                constexpr bool empty () const noexcept { return bitmap_ == 0U; }
                 unsigned front () const noexcept {
                     assert (!empty ());
                     return bit_count::ctz (bitmap_);
@@ -543,8 +540,8 @@ namespace pstore {
             auto end_second =
                 details::make_pair_field_iterator (end, details::second_accessor<Iterator>);
             return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
-                new (begin_first, end_first)
-                    sparse_array<ValueType> (begin_first, end_first, begin_second, end_second)};
+                new (begin_first, end_first) sparse_array<ValueType, BitmapType> (
+                    begin_first, end_first, begin_second, end_second)};
         }
 
         template <typename ValueType, typename BitmapType>
@@ -555,9 +552,9 @@ namespace pstore {
                                                                IteratorV last_value)
             -> std::unique_ptr<sparse_array> {
 
-            return std::unique_ptr<sparse_array<ValueType>>{
-                new (first_index, last_index)
-                    sparse_array<ValueType> (first_index, last_index, first_value, last_value)};
+            return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
+                new (first_index, last_index) sparse_array<ValueType, BitmapType> (
+                    first_index, last_index, first_value, last_value)};
         }
 
         template <typename ValueType, typename BitmapType>
@@ -578,8 +575,8 @@ namespace pstore {
                                                           std::initializer_list<ValueType> values)
             -> std::unique_ptr<sparse_array> {
 
-            return std::unique_ptr<sparse_array<ValueType>>{
-                new (first_index, last_index) sparse_array<ValueType> (
+            return std::unique_ptr<sparse_array<ValueType, BitmapType>>{
+                new (first_index, last_index) sparse_array<ValueType, BitmapType> (
                     first_index, last_index, std::begin (values), std::end (values))};
         }
 
@@ -593,12 +590,12 @@ namespace pstore {
             auto op = [](BitmapType mm, iter_value_type v) {
                 auto idx = static_cast<unsigned> (v);
                 assert (idx >= 0 && idx < max_size ());
-                auto const mask = BitmapType{1} << idx;
-                assert ((mm & mask) == 0 && "The same index must not appear more than once in the "
-                                            "collection of sparse indices");
+                auto const mask = BitmapType{1U} << idx;
+                assert ((mm & mask) == 0U && "The same index must not appear more than once in the "
+                                             "collection of sparse indices");
                 return mm | mask;
             };
-            return std::accumulate (first, last, BitmapType{0}, op);
+            return std::accumulate (first, last, BitmapType{0U}, op);
         }
 
         // index_impl
@@ -608,9 +605,10 @@ namespace pstore {
         ResultType & sparse_array<ValueType, BitmapType>::index_impl (SparseArray && sa,
                                                                       size_type pos) noexcept {
             assert (pos < max_size ());
-            auto const bit_position = BitmapType{1} << pos;
-            assert ((sa.bitmap_ & bit_position) != 0);
-            return sa.elements_[bit_count::pop_count (sa.bitmap_ & (bit_position - 1U))];
+            auto mask = BitmapType{1U} << pos;
+            assert ((sa.bitmap_ & mask) != 0U);
+            mask--;
+            return sa.elements_[bit_count::pop_count (static_cast<BitmapType> (sa.bitmap_ & mask))];
         }
 
         // at_impl

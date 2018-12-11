@@ -242,6 +242,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/time.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/to_string.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
 
@@ -258,6 +259,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     signal_helpers.cpp
     sstring_view.cpp
     thread.cpp
+    uint128.cpp
     utf.cpp
     utf_win32.cpp
 )

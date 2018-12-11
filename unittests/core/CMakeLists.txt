@@ -70,7 +70,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_sync.cpp
     test_transaction.cpp
     test_two_connections.cpp
-    test_uint128.cpp
     test_uuid.cpp
 )
 target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)

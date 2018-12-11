@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file database.hpp
 
-#ifndef PSTORE_DATABASE_HPP
-#define PSTORE_DATABASE_HPP (1)
+#ifndef PSTORE_CORE_DATABASE_HPP
+#define PSTORE_CORE_DATABASE_HPP (1)
 
 #include <array>
 #include <atomic>
@@ -65,7 +65,6 @@
 #include "pstore/core/region.hpp"
 #include "pstore/core/shared_memory.hpp"
 #include "pstore/core/storage.hpp"
-#include "pstore/core/uint128.hpp"
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/file.hpp"
@@ -73,6 +72,7 @@
 #include "pstore/support/head_revision.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/sstring_view.hpp"
+#include "pstore/support/uint128.hpp"
 
 namespace pstore {
 
@@ -515,4 +515,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_DATABASE_HPP
+#endif // PSTORE_CORE_DATABASE_HPP

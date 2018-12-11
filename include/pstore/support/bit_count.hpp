@@ -45,8 +45,8 @@
 /// \brief Implements portable functions for bit twiddling operations including counting leading and
 /// trailing zero bits as well as population count.
 
-#ifndef PSTORE_BIT_COUNT_HPP
-#define PSTORE_BIT_COUNT_HPP
+#ifndef PSTORE_SUPPORT_BIT_COUNT_HPP
+#define PSTORE_SUPPORT_BIT_COUNT_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -54,12 +54,30 @@
 #include <intrin.h>
 #endif
 
+#include "pstore/support/uint128.hpp"
+
 namespace pstore {
     namespace bit_count {
 
-#ifdef _MSC_VER
+        //*         _        *
+        //*   ___  | |  ____ *
+        //*  / __| | | |_  / *
+        //* | (__  | |  / /  *
+        //*  \___| |_| /___| *
+        //*                  *
+        ///@{
         /// Count the number of contiguous zero bits starting from the MSB.
         /// It is undefined behavior if x is 0.
+
+#ifdef _MSC_VER
+        inline unsigned clz (std::uint32_t x) noexcept {
+            assert (x != 0);
+            unsigned long bit_position = 0;
+            _BitScanReverse (&bit_position, x);
+            assert (bit_position < 32);
+            return 31 - bit_position;
+        }
+
         inline unsigned clz (std::uint64_t x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
@@ -67,9 +85,45 @@ namespace pstore {
             assert (bit_position < 64);
             return 63 - bit_position;
         }
+#else
+        /// Count the number of contiguous zero bits starting from the MSB.
+        /// It is undefined behavior if x is 0.
+        inline unsigned clz (std::uint32_t x) noexcept {
+            static_assert (sizeof (x) == sizeof (unsigned int),
+                           "use of clz requires unsigned int to be 32 bits");
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clz (x));
+        }
+        inline unsigned clz (std::uint64_t x) noexcept {
+            static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
+                           "use of clzll requires unsigned long long to be 64 bits");
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clzll (x));
+        }
+#endif
+        // TODO: haven't bothered to implement clz(uint8_t).
+        unsigned clz (std::uint8_t x) noexcept;
 
+        inline unsigned clz (std::uint16_t x) noexcept {
+            unsigned r = clz (static_cast<std::uint32_t> (x));
+            assert (r >= 16U);
+            return r - 16U;
+        }
+        inline unsigned clz (uint128 x) noexcept {
+            return x.high () != 0U ? clz (x.high ()) : 64U + clz (x.low ());
+        }
+        ///@}
+
+        //*         _          *
+        //*   ___  | |_   ____ *
+        //*  / __| | __| |_  / *
+        //* | (__  | |_   / /  *
+        //*  \___|  \__| /___| *
+        //*                    *
+        ///@{
         /// Count the  number of contiguous zero bits starting from the LSB.
         /// It is undefined behavior if x is 0.
+#ifdef _MSC_VER
         inline unsigned ctz (std::uint64_t x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
@@ -78,17 +132,6 @@ namespace pstore {
             return bit_position;
         }
 #else
-        /// Count the number of contiguous zero bits starting from the MSB.
-        /// It is undefined behavior if x is 0.
-        inline unsigned clz (unsigned long long x) noexcept {
-            static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
-                           "use of clzll requires unsigned long long to be 64 bits");
-            assert (x != 0);
-            return static_cast<unsigned> (__builtin_clzll (x));
-        }
-
-        /// Count the  number of contiguous zero bits starting from the LSB.
-        /// It is undefined behavior if x is 0.
         inline unsigned ctz (unsigned long long x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
                            "use of ctzll requires unsigned long long to be 64 bits");
@@ -96,6 +139,11 @@ namespace pstore {
             return static_cast<unsigned> (__builtin_ctzll (x));
         }
 #endif
+        inline unsigned ctz (uint128 x) noexcept {
+            assert (x != 0U);
+            return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
+        }
+        ///@}
 
 
 #ifdef _MSC_VER
@@ -121,6 +169,9 @@ namespace pstore {
                            "unsigned long long != unsigned __int16");
             return static_cast<unsigned> (__popcnt64 (x));
         }
+        inline unsigned pop_count (uint128 x) noexcept {
+            return pop_count (x.high ()) + pop_count (x.low ());
+        }
 #else
         inline constexpr unsigned pop_count (unsigned char x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
@@ -137,7 +188,11 @@ namespace pstore {
         inline constexpr unsigned pop_count (unsigned long long x) noexcept {
             return static_cast<unsigned> (__builtin_popcountll (x));
         }
+        inline constexpr unsigned pop_count (uint128 x) noexcept {
+            return pop_count (x.high ()) + pop_count (x.low ());
+        }
 #endif
+
 
     } // namespace bit_count
 } // namespace pstore

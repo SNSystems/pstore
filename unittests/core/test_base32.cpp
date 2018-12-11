@@ -44,7 +44,7 @@
 /// \file test_base32.cpp
 #include "base32.hpp"
 #include "gtest/gtest.h"
-#include "pstore/core/uint128.hpp"
+#include "pstore/support/uint128.hpp"
 
 TEST (Base32, Zero) {
     using namespace pstore::base32;

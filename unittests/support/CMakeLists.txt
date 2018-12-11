@@ -55,6 +55,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_pointee_adaptor.cpp
     test_small_vector.cpp
     test_sstring_view.cpp
+    test_uint128.cpp
     test_utf.cpp
     test_utf_win32.cpp
     test_varint.cpp

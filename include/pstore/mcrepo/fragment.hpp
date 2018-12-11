@@ -188,7 +188,8 @@ namespace pstore {
             /// \returns Returns true if the fragment contains a section of the kind given by
             ///   \p kind, false otherwise.
             bool has_section (section_kind kind) const noexcept {
-                return arr_.has_index (static_cast<member_array::bitmap_type> (kind));
+                return arr_.has_index (
+                    static_cast<std::underlying_type<section_kind>::type> (kind));
             }
 
             /// \name Section Access
