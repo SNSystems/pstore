@@ -67,6 +67,15 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_UINT128_T)
 
+if (PSTORE_HAVE_UINT128)
+    check_cxx_source_compiles (
+        #include <type_traits>
+        "int main () {
+            return std::is_unsigned<__uint128_t>::value;
+        }"
+        PSTORE_HAVE_UINT128_TRAITS_SUPPORT)
+endif ()
+
 check_cxx_source_compiles (
     "#include <string>
     int main () {

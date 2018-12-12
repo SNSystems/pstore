@@ -57,7 +57,6 @@
 #include <utility>
 
 #include "pstore/config/config.hpp"
-//#undef PSTORE_HAVE_UINT128_T
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -67,9 +66,16 @@ namespace pstore {
 namespace std {
     template <>
     struct is_unsigned<pstore::uint128> : public integral_constant<bool, true> {};
-
     template <>
     struct is_signed<pstore::uint128> : public integral_constant<bool, false> {};
+
+#if !PSTORE_HAVE_UINT128_TRAITS_SUPPORT
+    template <>
+    struct is_unsigned<__uint128_t> : public integral_constant<bool, true> {};
+    template <>
+    struct is_signed<__uint128_t> : public integral_constant<bool, false> {};
+#endif // PSTORE_HAVE_UINT128_TRAITS_SUPPORT
+
 } // namespace std
 
 namespace pstore {
