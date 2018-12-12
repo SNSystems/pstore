@@ -49,6 +49,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/mcdisassembler_value.hpp"
 
+#include <type_traits>
+
 #include "pstore/config/config.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
@@ -100,7 +102,8 @@ namespace {
 
     unsigned hex_width (std::uint8_t const * first, std::uint8_t const * last) {
         assert (last >= first);
-        auto const power = 64U - pstore::bit_count::clz (last - first);
+        using uptrdiff_t = std::make_unsigned<std::ptrdiff_t>::type;
+        auto const power = 64U - pstore::bit_count::clz (static_cast<uptrdiff_t> (last - first));
         auto const num_bytes = (power + 8U - 1U) / 8U;
         return std::max (num_bytes, 1U) * 2U + 2U;
     }

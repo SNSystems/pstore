@@ -86,17 +86,20 @@ namespace pstore {
             return 63 - bit_position;
         }
 #else
-        /// Count the number of contiguous zero bits starting from the MSB.
-        /// It is undefined behavior if x is 0.
         inline unsigned clz (std::uint32_t x) noexcept {
-            static_assert (sizeof (x) == sizeof (unsigned int),
-                           "use of clz requires unsigned int to be 32 bits");
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (unsigned int));
             assert (x != 0);
             return static_cast<unsigned> (__builtin_clz (x));
         }
-        inline unsigned clz (std::uint64_t x) noexcept {
-            static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
-                           "use of clzll requires unsigned long long to be 64 bits");
+
+        inline unsigned clz (unsigned long x) noexcept {
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clzl (x));
+        }
+
+        inline unsigned clz (unsigned long long x) noexcept {
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
             assert (x != 0);
             return static_cast<unsigned> (__builtin_clzll (x));
         }
