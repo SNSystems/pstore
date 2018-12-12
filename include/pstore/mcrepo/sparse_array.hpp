@@ -593,7 +593,7 @@ namespace pstore {
                 auto const mask = BitmapType{1U} << idx;
                 assert ((mm & mask) == 0U && "The same index must not appear more than once in the "
                                              "collection of sparse indices");
-                return mm | mask;
+                return static_cast<BitmapType> (mm | mask);
             };
             return std::accumulate (first, last, BitmapType{0U}, op);
         }
