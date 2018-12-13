@@ -98,14 +98,14 @@ namespace pstore {
 
                 explicit descriptor (DescriptorTraits traits = DescriptorTraits ()) noexcept
                         : fd_{invalid}
-                        , traits_{traits} {}
+                        , traits_(traits) {}
                 explicit descriptor (value_type fd,
                                      DescriptorTraits traits = DescriptorTraits ()) noexcept
                         : fd_{fd}
-                        , traits_{traits} {}
+                        , traits_(traits) {}
                 descriptor (descriptor && rhs) noexcept
                         : fd_{rhs.release ()}
-                        , traits_{std::move (rhs.traits_)} {}
+                        , traits_(std::move (rhs.traits_)) {}
                 descriptor (descriptor const &) = delete;
 
                 ~descriptor () {
