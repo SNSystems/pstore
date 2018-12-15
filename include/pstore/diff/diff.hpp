@@ -73,7 +73,7 @@ namespace pstore {
                 traverser (database const & db, Index const & index, address threshold) noexcept
                         : db_{db}
                         , index_{index}
-                        , threshold_{threshold} {}
+                        , threshold_ (std::move (threshold)) {}
 
                 result_type operator() () const;
 

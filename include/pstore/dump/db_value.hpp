@@ -54,7 +54,7 @@ namespace pstore {
         class address final : public value {
         public:
             explicit address (pstore::address addr)
-                    : addr_{addr}
+                    : addr_ (std::move (addr))
                     , expanded_{default_expanded_} {}
 
             bool is_number_like () const override {

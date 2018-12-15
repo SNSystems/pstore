@@ -85,8 +85,8 @@
 // (There isn't a one-to-one correspondence between regions or segments and "file mappings" (on
 // Windows). file is modified we decide if a new segment needs to be created.
 
-#ifndef PSTORE_ADDRESS_HPP
-#define PSTORE_ADDRESS_HPP
+#ifndef PSTORE_CORE_ADDRESS_HPP
+#define PSTORE_CORE_ADDRESS_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -265,7 +265,7 @@ namespace pstore {
 
         typed_address () = default;
         explicit constexpr typed_address (address a) noexcept
-                : a_{a} {}
+                : a_ (std::move (a)) {}
         typed_address (typed_address const & addr) noexcept = default;
 
         template <typename Other>
@@ -453,4 +453,4 @@ namespace std {
 
 } // namespace std
 
-#endif // PSTORE_ADDRESS_HPP
+#endif // PSTORE_CORE_ADDRESS_HPP

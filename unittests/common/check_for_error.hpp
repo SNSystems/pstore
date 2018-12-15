@@ -64,6 +64,10 @@ void check_for_error (Function fn, int err, std::error_category const & category
             }
         },
         std::system_error);
+#else
+    (void) fn;
+    (void) err;
+    (void) category;
 #endif
 }
 

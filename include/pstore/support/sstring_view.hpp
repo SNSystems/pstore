@@ -179,8 +179,8 @@ namespace pstore {
         sstring_view (sstring_view const &) = default;
         sstring_view (sstring_view &&) noexcept = default;
         ~sstring_view () = default;
-        sstring_view & operator= (sstring_view const &) noexcept = default;
-        sstring_view & operator= (sstring_view &&) noexcept = default;
+        sstring_view & operator= (sstring_view const &) = default;
+        sstring_view & operator= (sstring_view &&) = default;
 
         // 7.4, sstring_view iterator support
         const_iterator begin () const noexcept { return data (); }

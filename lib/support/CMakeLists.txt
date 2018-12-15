@@ -62,6 +62,15 @@ set (CMAKE_REQUIRED_LIBRARIES )
 
 
 check_cxx_source_compiles (
+    "#include <cstdlib>
+    __attribute__((noreturn)) int f () {
+        std::exit(0);
+    }
+    int main () {}"
+    PSTORE_HAVE_ATTRIBUTE_NORETURN
+)
+
+check_cxx_source_compiles (
     "int main () {
         __uint128_t a;
     }"

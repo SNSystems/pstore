@@ -66,7 +66,8 @@ function (run_pstore_unit_test prelink_target test_target)
 
 	if (PSTORE_VALGRIND)
 	    set (OUT_LOG "${CMAKE_BINARY_DIR}/${test_target}-memcheck.log")
-            add_custom_command (TARGET ${prelink_target}
+            add_custom_command (
+                TARGET ${prelink_target}
                 PRE_LINK
                 COMMAND "${VALGRIND_PATH}"
                         --tool=memcheck --leak-check=full --show-reachable=yes
@@ -81,16 +82,31 @@ function (run_pstore_unit_test prelink_target test_target)
                 BYPRODUCTS ${OUT_LOG} ${OUT_XML}
                 VERBATIM
             )
-        else ()
-            add_custom_command (TARGET ${prelink_target}
+        elseif (PSTORE_COVERAGE)
+            add_custom_command (
+                TARGET ${prelink_target}
                 PRE_LINK
-                COMMAND ${test_target} "--gtest_output=xml:${OUT_XML}"
+                COMMAND ${CMAKE_COMMAND}
+                        -E env "LLVM_PROFILE_FILE=$<TARGET_FILE:${test_target}>.profraw"
+                        "$<TARGET_FILE:${test_target}>"
+                        "--gtest_output=xml:${OUT_XML}"
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Running ${test_target}"
                 DEPENDS ${test_target}
                 BYPRODUCTS ${OUT_XML}
                 VERBATIM
             )
-        endif (PSTORE_VALGRIND)
+        else ()
+            add_custom_command (
+                TARGET ${prelink_target}
+                PRE_LINK
+                COMMAND "${test_target}" "--gtest_output=xml:${OUT_XML}"
+                WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+                COMMENT "Running ${test_target}"
+                DEPENDS ${test_target}
+                BYPRODUCTS ${OUT_XML}
+                VERBATIM
+            )
+        endif ()
     endif ()
 endfunction (run_pstore_unit_test)

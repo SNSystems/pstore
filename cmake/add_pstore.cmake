@@ -42,11 +42,25 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
+include (CheckCSourceCompiles)
+
 macro(add_pstore_subdirectory name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_subdirectory(PSTORE TOOL ${name})
     endif ()
 endmacro()
+
+
+function (disable_clang_warning_if_possible target_name flag)
+    set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+    set (CMAKE_REQUIRED_FLAGS "-Werror ${flag}")
+    check_c_source_compiles ("int main () {}" PSTORE_CLANG_SUPPORTS_FLAG)
+    set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
+    if (PSTORE_CLANG_SUPPORTS_FLAG)
+        target_compile_options (${name} PRIVATE ${flag})
+    endif ()
+endfunction()
+
 
 function (add_pstore_additional_compiler_flag name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -61,7 +75,6 @@ function (add_pstore_additional_compiler_flag name)
             -Wno-disabled-macro-expansion
             -Wno-exit-time-destructors
             -Wno-global-constructors
-            -Wno-inconsistent-missing-override
             -Wno-missing-noreturn
             -Wno-missing-variable-declarations
             -Wno-padded
@@ -72,32 +85,24 @@ function (add_pstore_additional_compiler_flag name)
             -Wno-weak-vtables
         )
 
-        if (PSTORE_COVERAGE)
-	    # TODO: investigate llvm-cov.
-            target_compile_options (${name} PRIVATE -fprofile-arcs -ftest-coverage)
-            target_link_libraries (${name} PUBLIC --coverage)
-        endif ()
-
         # The "zero-as-null-pointer-constant" warning was added to Clang at some point.
         # Disable it if we can.
-        include (CheckCSourceCompiles)
-        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
-        set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-zero-as-null-pointer-constant")
-        check_c_source_compiles ("int main () {}" PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
-        set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
-        if (PSTORE_CLANG_SUPPORTS_WNO_ZERO_AS_NULL_POINTER_CONSTANT)
-            target_compile_options (${name} PRIVATE -Wno-zero-as-null-pointer-constant)
-        endif ()
+        disable_clang_warning_if_possible (${name} -Wno-zero-as-null-pointer-constant)
+
+        # The "inconsistent-missing-override" option is not available in all versions of clang.
+        # Disable it if we can.
+        # TODO: this warning is issued (at the time of writing) by gtest. It should only be disabled for that target.
+        disable_clang_warning_if_possible (${name} -Wno-inconsistent-missing-override)
 
         # Disable the "unused lambda capture" warning since we must capture
-        # extra variables for MSVC to swallow the code. Remove when VS doesn't require capture
-        set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
-        set (CMAKE_REQUIRED_FLAGS "-Werror -Wno-unused-lambda-capture")
-        check_c_source_compiles ("int main() {}" PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
-        set (CMAKE_REQUIRED_FLAGS ${PSTORE_OLD_CMAKE_REQUIRED_FLAGS})
-        if (PSTORE_CLANG_SUPPORTS_NO_LAMBDA_CAPTURE)
-            target_compile_options (${name} PRIVATE -Wno-unused-lambda-capture)
-        endif ()
+        # extra variables for MSVC to swallow the code. Remove when VS doesn't require capture.
+        disable_clang_warning_if_possible (${name} -Wno-unused-lambda-capture)
+
+        if (PSTORE_COVERAGE)
+            target_compile_options (${name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+            target_compile_options (${name} PRIVATE -fno-inline-functions)
+            target_link_libraries (${name} PUBLIC -fprofile-instr-generate -fcoverage-mapping)
+        endif (PSTORE_COVERAGE)
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
 
@@ -109,7 +114,7 @@ function (add_pstore_additional_compiler_flag name)
         if (PSTORE_COVERAGE)
             target_compile_options (${name} PRIVATE -fprofile-arcs -ftest-coverage)
             target_link_libraries (${name} PUBLIC --coverage)
-        endif ()
+        endif (PSTORE_COVERAGE)
 
     elseif (MSVC)
 
@@ -127,6 +132,10 @@ function (add_pstore_additional_compiler_flag name)
             -D_CRT_SECURE_NO_WARNINGS
             -D_SCL_SECURE_NO_WARNINGS
         )
+
+        if (PSTORE_COVERAGE)
+            message (WARNING "PSTORE_COVERAGE is not yet implemented for MSVC")
+        endif (PSTORE_COVERAGE)
 
     endif ()
 endfunction(add_pstore_additional_compiler_flag)

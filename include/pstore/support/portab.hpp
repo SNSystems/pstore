@@ -45,6 +45,15 @@
 #ifndef PSTORE_SUPPORT_PORTAB_HPP
 #define PSTORE_SUPPORT_PORTAB_HPP
 
+#include "pstore/config/config.hpp"
+
+
+/// PSTORE_CPP_EXCEPTIONS: Defined if exceptions are enabled.
+#if defined(__clang__) && !defined(__cpp_exceptions) &&                                            \
+    (defined(__EXCEPTIONS) || defined(_CPPUNWIND))
+#    define __cpp_exceptions 190000
+#endif
+
 #ifdef __cpp_exceptions
 #    define PSTORE_CPP_EXCEPTIONS __cpp_exceptions
 #elif defined(_MSC_VER) && defined(_CPPUNWIND)
@@ -94,10 +103,10 @@
 // Specifies that the function does not return.
 #if __has_cpp_attribute(noreturn)
 #    define PSTORE_NO_RETURN [[noreturn]]
+#elif PSTORE_HAVE_ATTRIBUTE_NORETURN
+#    define PSTORE_NO_RETURN __attribute__ ((noreturn))
 #elif defined(_MSC_VER)
 #    define PSTORE_NO_RETURN  __declspec(noreturn)
-#elif PSTORE_HAS_ATTRIBUTE(noreturn) && (defined(__GNUC__) || defined(__clang__))
-#    define PSTORE_NO_RETURN  __attribute__(noreturn)
 #else
 #    define PSTORE_NO_RETURN
 #endif
@@ -126,17 +135,17 @@
 #    define PSTORE_FALLTHROUGH [[fallthrough]]
 #elif __has_cpp_attribute(gnu::fallthrough)
 #    define PSTORE_FALLTHROUGH [[gnu::fallthrough]]
+#elif defined(_MSC_VER)
+// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
+// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
+#    include <sal.h>
+#    define PSTORE_FALLTHROUGH __fallthrough
 #elif !__cplusplus
     // Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
     // error when __has_cpp_attribute is given a scoped attribute in C mode.
 #    define PSTORE_FALLTHROUGH
-#elif __has_cpp_attribute(clang::fallthrough)
+#elif __clang__ && __has_feature(cxx_attributes) && __has_warning("-Wimplicit-fallthrough")
 #    define PSTORE_FALLTHROUGH [[clang::fallthrough]]
-#elif defined(_MSC_VER)
-    // MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
-    // https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
-#    include <sal.h>
-#    define PSTORE_FALLTHROUGH __fallthrough
 #else
 #    define PSTORE_FALLTHROUGH
 #endif
