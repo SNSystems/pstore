@@ -212,15 +212,15 @@ namespace pstore {
             unsigned align () const noexcept { return 1U << align_; }
 
             container<std::uint8_t> data () const {
-                auto begin = aligned_ptr<std::uint8_t> (this + 1);
+                auto * begin = aligned_ptr<std::uint8_t> (this + 1);
                 return {begin, begin + data_size_};
             }
             container<internal_fixup> ifixups () const {
-                auto begin = aligned_ptr<internal_fixup> (data ().end ());
+                auto * begin = aligned_ptr<internal_fixup> (data ().end ());
                 return {begin, begin + this->num_ifixups ()};
             }
             container<external_fixup> xfixups () const {
-                auto begin = aligned_ptr<external_fixup> (ifixups ().end ());
+                auto * begin = aligned_ptr<external_fixup> (ifixups ().end ());
                 return {begin, begin + num_xfixups_};
             }
 
@@ -304,10 +304,10 @@ namespace pstore {
             PSTORE_STATIC_ASSERT (sizeof (generic_section) == 16);
             PSTORE_STATIC_ASSERT (alignof (generic_section) == 8);
 #ifndef NDEBUG
-            auto const start = reinterpret_cast<std::uint8_t *> (this);
+            auto * const start = reinterpret_cast<std::uint8_t const *> (this);
 #endif
             // note that the memory pointed to by 'p' is uninitialized.
-            auto p = reinterpret_cast<std::uint8_t *> (this + 1);
+            auto * p = reinterpret_cast<std::uint8_t *> (this + 1);
             assert (bit_count::pop_count (align) == 1);
 
             if (d.first != d.second) {
@@ -316,7 +316,7 @@ namespace pstore {
                 p += data_size_;
             }
             if (i.first != i.second) {
-                auto iout = aligned_ptr<internal_fixup> (p);
+                auto * iout = aligned_ptr<internal_fixup> (p);
                 std::for_each (i.first, i.second, [&iout](internal_fixup const & ifx) {
                     new (iout) internal_fixup (ifx);
                     ++iout;
@@ -326,7 +326,7 @@ namespace pstore {
                     generic_section::set_size<decltype (num_ifixups_)::value_type> (i.first, i.second);
             }
             if (x.first != x.second) {
-                auto xout = aligned_ptr<external_fixup> (p);
+                auto * xout = aligned_ptr<external_fixup> (p);
                 std::for_each (x.first, x.second, [&xout](external_fixup const & xfx) {
                     new (xout) external_fixup (xfx);
                     ++xout;
