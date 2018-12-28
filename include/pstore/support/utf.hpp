@@ -179,7 +179,7 @@ namespace pstore {
         std::size_t length (char const * str, std::size_t nbytes);
 
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
-        std::size_t length (::pstore::gsl::czstring str);
+        std::size_t length (gsl::czstring str);
 
         inline std::size_t length (std::nullptr_t) noexcept { return 0; }
         ///@}
@@ -189,7 +189,7 @@ namespace pstore {
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the buffer at str
-        char const * index (::pstore::gsl::czstring str, std::size_t pos);
+        char const * index (gsl::czstring str, std::size_t pos);
 
         /// Returns an iterator to the beginning of the pos'th UTF-8 codepoint
         /// in the range given by first and last.
@@ -253,12 +253,12 @@ namespace pstore {
             return win32::to_mbcs (str);
         }
         inline std::string to_native_string (char const * str) { return win32::to_mbcs (str); }
-#endif
+#endif //_UNICODE
         inline std::string from_native_string (std::string const & str) {
             return win32::mbcs_to8 (str);
         }
         inline std::string from_native_string (char const * str) { return win32::mbcs_to8 (str); }
-#else
+#else //_WIN32
         inline std::string to_native_string (std::string const & str) { return str; }
         inline std::string to_native_string (char const * str) { return str; }
         inline std::string from_native_string (std::string const & str) { return str; }
