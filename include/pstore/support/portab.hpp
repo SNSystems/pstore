@@ -95,9 +95,9 @@
 /// nonzero constant integer if the attribute is supported or 0 if not.
 /// It evaluates to zero if `__has_attribute` is not defined by the compiler.
 #ifdef __has_attribute
-#define PSTORE_HAS_ATTRIBUTE(x) __has_attribute(x)
+#    define PSTORE_HAS_ATTRIBUTE(x) __has_attribute (x)
 #else
-#define PSTORE_HAS_ATTRIBUTE(x)  false
+#    define PSTORE_HAS_ATTRIBUTE(x) false
 #endif
 
 // Specifies that the function does not return.
@@ -106,7 +106,7 @@
 #elif PSTORE_HAVE_ATTRIBUTE_NORETURN
 #    define PSTORE_NO_RETURN __attribute__ ((noreturn))
 #elif defined(_MSC_VER)
-#    define PSTORE_NO_RETURN  __declspec(noreturn)
+#    define PSTORE_NO_RETURN __declspec(noreturn)
 #else
 #    define PSTORE_NO_RETURN
 #endif
@@ -125,9 +125,20 @@
 #endif
 
 #ifndef PSTORE_STATIC_ASSERT
-    /// A single-argument version of static_assert. Remove once we can run the compiler in C++14
-    /// mode.
+/// A single-argument version of static_assert. Remove once we can run the compiler in C++14
+/// mode.
 #    define PSTORE_STATIC_ASSERT(x) static_assert (x, #    x)
+#endif
+
+#ifndef __has_feature          // Optional of course.
+#    define __has_feature(x) 0 // Compatibility with non-clang compilers.
+#endif
+#ifndef __has_extension
+#    define __has_extension __has_feature // Compatibility with pre-3.0 compilers.
+#endif
+
+#ifndef __has_warning
+#    define __has_warning(x) 0 // Compatibility with non-clang compilers.
 #endif
 
 /// PSTORE_FALLTHROUGH - Mark fallthrough cases in switch statements.
@@ -136,13 +147,13 @@
 #elif __has_cpp_attribute(gnu::fallthrough)
 #    define PSTORE_FALLTHROUGH [[gnu::fallthrough]]
 #elif defined(_MSC_VER)
-// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
-// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
+    // MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
+    // https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
 #    include <sal.h>
 #    define PSTORE_FALLTHROUGH __fallthrough
 #elif !__cplusplus
-    // Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
-    // error when __has_cpp_attribute is given a scoped attribute in C mode.
+// Workaround for llvm.org/PR23435, since clang 3.6 and below emit a spurious
+// error when __has_cpp_attribute is given a scoped attribute in C mode.
 #    define PSTORE_FALLTHROUGH
 #elif __clang__ && __has_feature(cxx_attributes) && __has_warning("-Wimplicit-fallthrough")
 #    define PSTORE_FALLTHROUGH [[clang::fallthrough]]
