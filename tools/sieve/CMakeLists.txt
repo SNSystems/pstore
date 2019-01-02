@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/sieve/CMakeLists.txt ------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -52,4 +52,3 @@ if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-sieve PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-sieve PRIVATE pstore-support pstore-cmd-util)
-

@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |___/\___|\__| *
 //*                                            *
 //===- unittests/core/test_hamt_set.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

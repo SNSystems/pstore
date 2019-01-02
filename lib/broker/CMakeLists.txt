@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/broker/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -90,4 +90,3 @@ else ()
     add_pstore_library (pstore-broker ${PSTORE_BROKER_LIB_SRC})
     target_link_libraries (pstore-broker PUBLIC pstore-broker-intf pstore-json-lib pstore-support)
 endif (PSTORE_IS_INSIDE_LLVM)
-

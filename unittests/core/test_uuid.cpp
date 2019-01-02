@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|_|\__,_| *
 //*                       *
 //===- unittests/core/test_uuid.cpp ---------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -270,4 +270,3 @@ TEST_F (CompareUUID, Ge) {
     EXPECT_TRUE (t2_ >= t1_);
     EXPECT_FALSE (t1_ >= t3_);
 }
-

@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/CMakeLists.txt ------------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -56,4 +56,3 @@ add_subdirectory (read)         # A utility for reading the write or strings ind
 add_subdirectory (sieve)        # A utility to generate data for the system tests
 add_subdirectory (vacuum)       # Data store garbage collector utility
 add_subdirectory (write)
-

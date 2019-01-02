@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/serialize/CMakeLists.txt ----------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -50,4 +50,3 @@ add_pstore_unit_test (pstore-serialize-unit-tests
     test_types.cpp
 )
 target_link_libraries (pstore-serialize-unit-tests PRIVATE pstore-serialize pstore-common)
-

@@ -5,7 +5,7 @@
 //*  \__| \_/\_/ \___/   \___\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|___/ *
 //*                                                                             *
 //===- unittests/core/test_two_connections.cpp ----------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -157,4 +157,3 @@ TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {
     std::vector<std::uint8_t> buffer2 (r.get (), r.get () + t1.size);
     EXPECT_THAT (buffer2, ContainerEq (buffer1));
 }
-

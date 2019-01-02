@@ -5,7 +5,7 @@
 //* |_| |_|_|  \___/  | .__/ \__,_|\__|_| |_| *
 //*                   |_|                     *
 //===- lib/broker_intf/fifo_path_win32.cpp --------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -120,5 +120,3 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 #endif //_WIN32
-// eof:lib/broker_intf/fifo_path_win32.cpp
-

@@ -4,8 +4,8 @@
 #* | (__| | (_| | | | | (_| |_____| |_| | (_| | |_| | *
 #*  \___|_|\__,_|_| |_|\__, |      \__|_|\__,_|\__, | *
 #*                     |___/                   |___/  *
-#===- CMakeModules/clang-tidy.cmake ---------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+#===- cmake/clang-tidy.cmake ----------------------------------------------===//
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

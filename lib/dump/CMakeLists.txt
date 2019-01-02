@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/dump/CMakeLists.txt ---------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -87,4 +87,3 @@ target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-dump-lib PUBLIC LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-

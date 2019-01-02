@@ -4,8 +4,8 @@
 #* | (__| | | |  __/ (__|   <  | (_| | || (_) | | | | | | | (__  *
 #*  \___|_| |_|\___|\___|_|\_\  \__,_|\__\___/|_| |_| |_|_|\___| *
 #*                                                               *
-#===- CMakeModules/check_atomic.cmake -------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+#===- cmake/check_atomic.cmake --------------------------------------------===//
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

@@ -5,7 +5,7 @@
 //* |_|___/\__|_|  \___|\__,_|_| |_| |_| |_|  \___|\__,_|\__,_|\___|_|    *
 //*                                                                       *
 //===- examples/serialize/istream_reader/istream_reader.cpp ---------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //*  \__,_|_|  |_|  \__,_|\__, | |___/\__\__,_|\___|_|\_\ *
 //*                       |___/                           *
 //===- unittests/core/test_array_stack.cpp --------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -94,4 +94,3 @@ TEST (ArrayStack, PushAndPopMaxValues) {
     EXPECT_EQ (0U, stack.size ());
     EXPECT_TRUE (stack.empty ());
 }
-

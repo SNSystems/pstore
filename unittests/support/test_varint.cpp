@@ -5,7 +5,7 @@
 //*   \_/ \__,_|_|  |_|_| |_|\__| *
 //*                               *
 //===- unittests/support/test_varint.cpp ----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

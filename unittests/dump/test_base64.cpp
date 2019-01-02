@@ -5,7 +5,7 @@
 //* |_.__/ \__,_|___/\___|\___/   |_|   *
 //*                                     *
 //===- unittests/dump/test_base64.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -141,4 +141,3 @@ TEST_F (Base64Fixture, LongInput) {
 
     EXPECT_EQ (expected, actual);
 }
-

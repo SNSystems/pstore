@@ -5,7 +5,7 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/read/main.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -205,4 +205,3 @@ int main (int argc, char * argv[]) {
 
     return exit_code;
 }
-

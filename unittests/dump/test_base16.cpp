@@ -5,7 +5,7 @@
 //* |_.__/ \__,_|___/\___|_|\___/  *
 //*                                *
 //===- unittests/dump/test_base16.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -140,4 +140,3 @@ TEST_F (Base16Fixture, LongInput) {
                                           "F0F1 F2F3 F4F5 F6F7 F8F9 FAFB FCFD FEFF>";
     EXPECT_EQ (expected, actual);
 }
-

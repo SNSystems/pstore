@@ -5,7 +5,7 @@
 //* |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                      *
 //===- unittests/diff/test_revision.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -126,4 +126,3 @@ TEST_F (RevisionsFixture, InitOneHeadTwoHead) {
 
     EXPECT_EQ (expected, actual);
 }
-

@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/support/CMakeLists.txt ------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -62,7 +62,4 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
 )
 add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
 target_link_libraries (pstore-support-unit-tests PRIVATE pstore-support pstore-common)
-
-#eof:pstore/unittests/pstore_support/CMakeLists.txt
-
 

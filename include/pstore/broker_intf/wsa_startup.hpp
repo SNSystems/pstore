@@ -5,7 +5,7 @@
 //*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
 //*                                                  |_|     *
 //===- include/pstore/broker_intf/wsa_startup.hpp -------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

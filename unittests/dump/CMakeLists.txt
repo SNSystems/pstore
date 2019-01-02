@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/dump/CMakeLists.txt ---------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -62,4 +62,3 @@ set (PSTORE_DUMP_UNIT_TEST_SRC
 )
 add_pstore_unit_test (pstore-dump-unit-tests ${PSTORE_DUMP_UNIT_TEST_SRC})
 target_link_libraries (pstore-dump-unit-tests PRIVATE pstore-dump-lib pstore-common)
-

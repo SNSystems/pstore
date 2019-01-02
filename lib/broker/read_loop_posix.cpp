@@ -5,7 +5,7 @@
 //* |_|  \___|\__,_|\__,_| |_|\___/ \___/| .__/  *
 //*                                      |_|     *
 //===- lib/broker/read_loop_posix.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

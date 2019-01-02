@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \__\___|\___|\__| *
 //* |_|                                *
 //===- unittests/core/test_protect.cpp ------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -190,4 +190,3 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
 
     transaction.commit ();
 }
-

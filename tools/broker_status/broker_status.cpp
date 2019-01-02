@@ -5,7 +5,7 @@
 //* |_.__/|_|  \___/|_|\_\___|_|    |___/\__\__,_|\__|\__,_|___/ *
 //*                                                              *
 //===- tools/broker_status/broker_status.cpp ------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

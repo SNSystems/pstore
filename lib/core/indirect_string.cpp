@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|_|_|  \___|\___|\__| |___/\__|_|  |_|_| |_|\__, | *
 //*                                                           |___/  *
 //===- lib/core/indirect_string.cpp ---------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -135,4 +135,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-

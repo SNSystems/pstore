@@ -5,7 +5,7 @@
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
 //===- unittests/core/test_transaction.cpp --------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -458,4 +458,3 @@ TEST_F (Transaction, GetRwUInt64) {
     }
     EXPECT_EQ (expected, *db_->getro (extent));
 }
-

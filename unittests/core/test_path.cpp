@@ -5,7 +5,7 @@
 //* | .__/ \__,_|\__|_| |_| *
 //* |_|                     *
 //===- unittests/core/test_path.cpp ---------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -268,4 +268,3 @@ TEST (Path, PlatformSplitDrive) {
     auto const expected = split_drive (input);
     EXPECT_EQ (expected, pstore::path::split_drive (input));
 }
-

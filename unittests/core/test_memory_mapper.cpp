@@ -11,7 +11,7 @@
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
 //===- unittests/core/test_memory_mapper.cpp ------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -142,4 +142,3 @@ TEST_F (MemoryMapperFixture, MemoryMapThenCheckFileContents) {
 
     EXPECT_THAT (expected, ::testing::ContainerEq (contents));
 }
-

@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/  *
 //*                                             |_|     *
 //===- unittests/core/test_hamt_map.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -1870,4 +1870,3 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
             pstore::error_code::index_not_latest_revision);
     }
 }
-

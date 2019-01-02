@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|\__,_|_|  \___||___/___/ *
 //*                                       *
 //===- unittests/core/test_address.cpp ------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -269,4 +269,3 @@ TEST (TypedAddress, Increment) {
         EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), r2);
     }
 }
-

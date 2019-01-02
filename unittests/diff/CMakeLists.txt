@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/diff/CMakeLists.txt ---------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -49,4 +49,3 @@ add_pstore_unit_test (pstore-diff-unit-tests
     test_revision.cpp
 )
 target_link_libraries (pstore-diff-unit-tests PRIVATE pstore-diff-lib pstore-common)
-

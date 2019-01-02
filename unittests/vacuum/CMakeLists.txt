@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/vacuum/CMakeLists.txt -------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -45,4 +45,3 @@
 include (add_pstore)
 add_pstore_unit_test (pstore-vacuum-unit-tests test_fake.cpp)
 target_link_libraries (pstore-vacuum-unit-tests PRIVATE pstore-vacuum-lib)
-

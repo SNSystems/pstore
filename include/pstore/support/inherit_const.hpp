@@ -5,7 +5,7 @@
 //* |_|_| |_|_| |_|\___|_|  |_|\__|  \___\___/|_| |_|___/\__| *
 //*                                                           *
 //===- include/pstore/support/inherit_const.hpp ---------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

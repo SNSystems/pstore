@@ -6,7 +6,7 @@
 #*  \__,_|_|_| *
 #*             *
 #===- utils/boilerplate/all.py --------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -80,4 +80,3 @@ def main ():
 
 if __name__ == '__main__':
     sys.exit (main ())
-

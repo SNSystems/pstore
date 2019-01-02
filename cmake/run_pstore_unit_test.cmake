@@ -10,8 +10,8 @@
 #* | ||  __/\__ \ |_  *
 #*  \__\___||___/\__| *
 #*                    *
-#===- CMakeModules/run_pstore_unit_test.cmake -----------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+#===- cmake/run_pstore_unit_test.cmake ------------------------------------===//
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

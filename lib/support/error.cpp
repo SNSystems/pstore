@@ -5,7 +5,7 @@
 //*  \___|_|  |_|  \___/|_|    *
 //*                            *
 //===- lib/support/error.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -75,4 +75,3 @@ std::error_category const & pstore::get_error_category () {
     static pstore::error_category const cat;
     return cat;
 }
-

@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/cmd_util/CMakeLists.txt -----------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -52,4 +52,3 @@ add_pstore_unit_test (pstore-cmd-util-unit-tests
     test_word_wrapper.cpp
 )
 target_link_libraries (pstore-cmd-util-unit-tests PRIVATE pstore-cmd-util)
-

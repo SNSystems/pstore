@@ -5,7 +5,7 @@
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
 //===- unittests/core/test_shared_memory.cpp ------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -96,4 +96,3 @@ TEST (PosixMutexName, MinimumSizeOutputBuffer) {
     char const * actual = pstore::posix::shm_name ("name", arr);
     EXPECT_THAT (actual, ::testing::StrEq ("/"));
 }
-

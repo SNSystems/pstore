@@ -5,7 +5,7 @@
 //* |___/\___|_| |_|\__,_| |_| |_| |_|\___||___/___/\__,_|\__, |\___| *
 //*                                                       |___/       *
 //===- unittests/core/broker_intf/test_send_message.cpp -------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -110,4 +110,3 @@ TEST_F (BrokerSendMessage, TwoParts) {
 
     pstore::broker::send_message (wr, true /*error on timeout*/, verb.c_str (), path.c_str ());
 }
-

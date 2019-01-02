@@ -5,7 +5,7 @@
 //*  \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                    *
 //===- unittests/serialize/test_archive.cpp -------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -131,4 +131,3 @@ TEST (SerializeBufferReader, ReadPastEnd) {
     pstore::serialize::archive::buffer_reader reader (::pstore::gsl::make_span (buffer));
     check_for_error ([&reader]() { reader.get<std::uint16_t> (); }, std::errc::no_buffer_space);
 }
-

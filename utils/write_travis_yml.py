@@ -6,7 +6,7 @@
 #*   \_/\_/ |_|  |_|\__\___|  \__|_|  \__,_| \_/ |_|___/  \__, |_| |_| |_|_| *
 #*                                                        |___/              *
 #===- utils/write_travis_yml.py -------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -110,4 +110,3 @@ def main():
 
 if __name__ == '__main__':
     sys.exit(main())
-

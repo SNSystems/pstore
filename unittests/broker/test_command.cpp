@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- unittests/broker/test_command.cpp ----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -117,4 +117,3 @@ TEST_F (Command, Bad) {
     pstore::broker::message_type msg{message_id, part_no, num_parts, "bad command"};
     cp_.process_command (fifo_, msg);
 }
-

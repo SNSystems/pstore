@@ -5,7 +5,7 @@
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
 //===- tools/broker_poker/switches.hpp ------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -76,5 +76,3 @@ using pstore_tchar = char;
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
 
 #endif // PSTORE_BROKER_POKER_SWITCHES_HPP
-// eof:tools/broker_poker/switches.hpp
-

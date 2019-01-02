@@ -5,7 +5,7 @@
 //*  \___|_|  |_|  \___/|_|    *
 //*                            *
 //===- tools/write/error.hpp ----------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -76,5 +76,3 @@ namespace std {
 } // namespace std
 
 #endif // PSTORE_WRITE_ERROR_HPP
-// eof:tools/write/error.hpp
-

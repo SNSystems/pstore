@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/diff/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -53,4 +53,3 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 run_pstore_unit_test (pstore-diff pstore-diff-unit-tests)
-

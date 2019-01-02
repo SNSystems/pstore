@@ -5,7 +5,7 @@
 //*   \_/ \__,_|\___|\__,_|\__,_|_| |_| |_| |_|_| |_|\__|_|   *
 //*                                                           *
 //===- lib/core/vacuum_intf.cpp -------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -55,4 +55,3 @@ namespace pstore {
             : open_tick (milliseconds_since_epoch ()) {}
 
 } // namespace pstore
-

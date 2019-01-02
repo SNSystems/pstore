@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|_|\___\___||___/ *
 //*                                 *
 //===- tools/index_structure/indices.hpp ----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -59,5 +59,3 @@ extern std::vector<char const *> const index_names;
 bool set_from_name (indices_bitset * const bs, std::string const & name);
 
 #endif // PSTORE_INDEX_STRUCTURE_INDICES_HPP
-// eof:tools/index_structure/indices.hpp
-

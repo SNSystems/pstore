@@ -6,7 +6,7 @@
 #* |_|\__,_|\__, |\___|_|  |_|_| |_|\__, | *
 #*          |___/                   |___/  *
 #===- utils/layering/layering.py ------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -386,4 +386,3 @@ def main(args=sys.argv[1:]):
 if __name__ == '__main__':
     logging.getLogger().setLevel(logging.NOTSET)
     sys.exit(main())
-

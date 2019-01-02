@@ -5,7 +5,7 @@
 //*  \__, |___/_| *
 //*  |___/        *
 //===- unittests/support/test_gsl.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -1463,4 +1463,3 @@ TEST (GslSpan, FixedSizeConversions) {
     CHECK_THROW(f(), fail_fast);
 #endif
 }
-

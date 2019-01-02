@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
 //===- unittests/cmd_util/test_command_line.cpp ---------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -199,4 +199,3 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
     EXPECT_EQ (opt.get (), "");
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
-

@@ -5,7 +5,7 @@
 //* |_|  \___|\__, |_|\___/|_| |_| *
 //*           |___/                *
 //===- unittests/core/test_region.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -253,4 +253,3 @@ TEST_F (Region, GrowByMinimumSize) {
         EXPECT_TRUE (region1.is_writable ()) << "The 2nd region is expected to be writable";
     }
 }
-

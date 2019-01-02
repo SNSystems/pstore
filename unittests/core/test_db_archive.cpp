@@ -5,7 +5,7 @@
 //*  \__,_|_.__/   \__,_|_|  \___|_| |_|_| \_/ \___| *
 //*                                                  *
 //===- unittests/core/test_db_archive.cpp ---------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -273,4 +273,3 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     read (archive::database_reader (db, addr.to_address ()),
           pstore::gsl::span<std::uint64_t>{actual});
 }
-

@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/cmd_util/CMakeLists.txt -----------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -93,4 +93,3 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 endif (PSTORE_IS_INSIDE_LLVM)
-

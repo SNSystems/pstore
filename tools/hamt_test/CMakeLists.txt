@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/hamt_test/CMakeLists.txt --------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -44,4 +44,3 @@
 
 add_pstore_executable (pstore-hamt-test main.cpp print.cpp print.hpp)
 target_link_libraries (pstore-hamt-test PRIVATE pstore-core pstore-cmd-util)
-

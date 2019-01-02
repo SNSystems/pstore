@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|_|_|  \___|\___|\__| |___/\__|_|  |_|_| |_|\__, | *
 //*                                                           |___/  *
 //===- unittests/core/test_indirect_string.cpp ----------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -210,4 +210,3 @@ TEST_F (IndirectStringAdder, NewString) {
         EXPECT_EQ (pos->as_string_view (&owner), pstore::make_sstring_view (str));
     }
 }
-

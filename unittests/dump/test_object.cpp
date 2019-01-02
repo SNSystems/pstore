@@ -5,7 +5,7 @@
 //*  \___/|_.__// |\___|\___|\__| *
 //*           |__/                *
 //===- unittests/dump/test_object.cpp -------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -186,4 +186,3 @@ TEST (Object, BackInserter) {
     using namespace ::pstore::dump;
     object object{{{"k1", make_value ("v1")}}};
 }
-

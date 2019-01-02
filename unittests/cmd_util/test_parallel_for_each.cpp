@@ -5,7 +5,7 @@
 //* | .__/ \__,_|_|  \__,_|_|_|\___|_| |_|  \___/|_|     \___|\__,_|\___|_| |_| *
 //* |_|                                                                         *
 //===- unittests/cmd_util/test_parallel_for_each.cpp ----------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

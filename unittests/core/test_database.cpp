@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___| *
 //*                                             *
 //===- unittests/core/test_database.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -272,5 +272,3 @@ TEST_F (Database, Allocate16BytesAligned1024) {
     pstore::address addr2 = db.allocate (size, align);
     EXPECT_EQ (addr.absolute () + align, addr2.absolute ());
 }
-
-

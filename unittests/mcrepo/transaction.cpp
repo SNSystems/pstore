@@ -5,7 +5,7 @@
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
 //===- unittests/mcrepo/transaction.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -64,4 +64,3 @@ auto transaction::alloc_rw (std::size_t size, unsigned align)
     auto ptr = getrw (addr, size);
     return std::make_pair (ptr, addr);
 }
-

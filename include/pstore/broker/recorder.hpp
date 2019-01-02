@@ -5,7 +5,7 @@
 //* |_|  \___|\___\___/|_|  \__,_|\___|_|    *
 //*                                          *
 //===- include/pstore/broker/recorder.hpp ---------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

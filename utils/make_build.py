@@ -6,7 +6,7 @@
 #* |_| |_| |_|\__,_|_|\_\___| |_.__/ \__,_|_|_|\__,_| *
 #*                                                    *
 #===- utils/make_build.py -------------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

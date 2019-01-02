@@ -5,7 +5,7 @@
 //* |_| |_|\___/ \___/ \__,_| |___/\___|_|    \_/ \___|_|    *
 //*                                                          *
 //===- tools/broker_poker/flood_server.cpp --------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -74,4 +74,3 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
             pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
         });
 }
-

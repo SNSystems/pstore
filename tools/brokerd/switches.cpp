@@ -5,7 +5,7 @@
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
 //===- tools/brokerd/switches.cpp -----------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -92,4 +92,3 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     result.num_read_threads = num_read_threads;
     return {std::move (result), EXIT_SUCCESS};
 }
-

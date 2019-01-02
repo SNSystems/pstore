@@ -5,7 +5,7 @@
 //*  \___|_|  |_|  \___/|_|    *
 //*                            *
 //===- unittests/support/test_error.cpp -----------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -71,4 +71,3 @@ TEST (Error, RaiseErrc) {
     auto will_throw = []() { pstore::raise (std::errc::invalid_argument); };
     check_for_error (will_throw, std::errc::invalid_argument);
 }
-

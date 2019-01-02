@@ -5,7 +5,7 @@
 //*  \___\__,_|_|_|_.__/ \__,_|\___|_|\_\___/ *
 //*                                           *
 //===- unittests/json/callbacks.hpp ---------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

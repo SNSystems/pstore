@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___| *
 //*                                             *
 //===- lib/core/database.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

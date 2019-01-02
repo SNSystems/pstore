@@ -5,7 +5,7 @@
 //* |_|  \___| .__/ \___/   \___|_|  |_|  \___/|_|    *
 //*          |_|                                      *
 //===- lib/mcrepo/repo_error.cpp ------------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -78,4 +78,3 @@ namespace std {
     }
 
 } // namespace std
-

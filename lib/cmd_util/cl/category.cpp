@@ -5,7 +5,7 @@
 //*  \___\__,_|\__\___|\__, |\___/|_|   \__, | *
 //*                    |___/            |___/  *
 //===- lib/cmd_util/cl/category.cpp ---------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -53,4 +53,3 @@ namespace pstore {
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-

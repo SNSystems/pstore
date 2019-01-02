@@ -6,7 +6,7 @@
 #* |_.__/|_|  \___/|_|\_\___|_|    |_|\_\_|_|_| *
 #*                                              *
 #===- system_tests/broker/broker_kill.py ----------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -120,4 +120,3 @@ def main (argv):
 
 if __name__ == '__main__':
     sys.exit (main (sys.argv [1:]))
-

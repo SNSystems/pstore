@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\___/|_| |_| *
 //*                                             *
 //===- unittests/serialize/test_common.cpp --------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -78,4 +78,3 @@ TEST (StickyAssign, Copy) {
     v2 = 42;                                       // assignment to v2 is ignored.
     EXPECT_EQ (0, v2.get ());
 }
-

@@ -5,7 +5,7 @@
 //*  \__,_|_.__/  *
 //*               *
 //===- unittests/dump/test_db.cpp -----------------------------------------===//
-// Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -186,4 +186,3 @@ TEST (Database, Trailer) {
                                                             "0x50,", "0x50,", "0x79,", "0x54,",
                                                             "0x61,", "0x69,", "0x6c", "]"}));
 }
-

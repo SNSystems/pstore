@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/vacuum/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -62,4 +62,3 @@ set (PSTORE_VACUUM_LIB_SRC
 include (add_pstore)
 add_pstore_library (pstore-vacuum-lib ${PSTORE_VACUUM_LIB_SRC})
 target_link_libraries (pstore-vacuum-lib PUBLIC pstore-broker-intf pstore-core)
-

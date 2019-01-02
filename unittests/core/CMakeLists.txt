@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/core/CMakeLists.txt ---------------------------------------===//
-# Copyright (c) 2017-2018 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -78,4 +78,3 @@ target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)
 target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")
 
 add_subdirectory (broker_intf)
-
