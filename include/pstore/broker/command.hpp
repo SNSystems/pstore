@@ -98,7 +98,6 @@ namespace pstore {
             void process_command (fifo_path const & fifo, message_type const & msg);
 
         private:
-
             template <typename T>
             class atomic_weak_ptr {
             public:

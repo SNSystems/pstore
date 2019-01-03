@@ -134,20 +134,12 @@ namespace pstore {
             };
 
             using right_iterator = iterator<typename right_container::const_iterator>;
-            right_iterator right_begin () const {
-                return right_iterator {std::begin (right_)};
-            }
-            right_iterator right_end () const {
-                return right_iterator{std::end (right_)};
-            }
+            right_iterator right_begin () const { return right_iterator{std::begin (right_)}; }
+            right_iterator right_end () const { return right_iterator{std::end (right_)}; }
 
             using left_iterator = iterator<typename left_container::const_iterator>;
-            left_iterator left_begin () const {
-                return left_iterator{std::begin (left_)};
-            }
-            left_iterator left_end () const {
-                return left_iterator {std::end (left_)};
-            }
+            left_iterator left_begin () const { return left_iterator{std::begin (left_)}; }
+            left_iterator left_end () const { return left_iterator{std::end (left_)}; }
 
         private:
             left_container left_;
