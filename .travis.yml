@@ -62,6 +62,34 @@ matrix:
         - CMAKE_BUILD_TYPE=Release
         - PSTORE_ALWAYS_SPANNING=No
         os: linux
+    -   addons:
+            apt:
+                packages:
+                - g++-5
+                - ninja-build
+                - valgrind
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - CMAKE_BUILD_TYPE=Debug
+        - PSTORE_ALWAYS_SPANNING=Yes
+        os: linux
+    -   addons:
+            apt:
+                packages:
+                - g++-5
+                - ninja-build
+                - valgrind
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - CMAKE_BUILD_TYPE=Release
+        - PSTORE_ALWAYS_SPANNING=No
+        os: linux
     -   env:
         - CMAKE_BUILD_TYPE=Debug
         - PSTORE_ALWAYS_SPANNING=Yes

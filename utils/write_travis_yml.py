@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-#*                _ _         _                   _                       _  *
-#* __      ___ __(_) |_ ___  | |_ _ __ __ ___   _(_)___   _   _ _ __ ___ | | *
-#* \ \ /\ / / '__| | __/ _ \ | __| '__/ _` \ \ / / / __| | | | | '_ ` _ \| | *
-#*  \ V  V /| |  | | ||  __/ | |_| | | (_| |\ V /| \__ \ | |_| | | | | | | | *
-#*   \_/\_/ |_|  |_|\__\___|  \__|_|  \__,_| \_/ |_|___/  \__, |_| |_| |_|_| *
-#*                                                        |___/              *
-#===- utils/write_travis_yml.py -------------------------------------------===//
+# *                _ _         _                   _                       _  *
+# * __      ___ __(_) |_ ___  | |_ _ __ __ ___   _(_)___   _   _ _ __ ___ | | *
+# * \ \ /\ / / '__| | __/ _ \ | __| '__/ _` \ \ / / / __| | | | | '_ ` _ \| | *
+# *  \ V  V /| |  | | ||  __/ | |_| | | (_| |\ V /| \__ \ | |_| | | | | | | | *
+# *   \_/\_/ |_|  |_|\__\___|  \__|_|  \__,_| \_/ |_|___/  \__, |_| |_| |_|_| *
+# *                                                        |___/              *
+# ===- utils/write_travis_yml.py -------------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,64 +41,82 @@
 # ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
-#===----------------------------------------------------------------------===//
+# ===----------------------------------------------------------------------===//
 
 from __future__ import print_function
+
 import copy
 import sys
 from pprint import pprint
+
 import yaml
 
 
+def add_build_type(d, type):
+    d.setdefault('env', []).append('CMAKE_BUILD_TYPE=' + type)
+    d['env'].append('PSTORE_ALWAYS_SPANNING={0}'.format('Yes' if type.lower() == 'debug' else 'No'))
+    return d
+
+
+BUILDS = [
+    {
+        'os': 'linux',
+        'dist': 'trusty',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8'],
+                'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
+            }
+        },
+        'env': [
+            'MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"'
+        ]
+    },
+    {
+        'os': 'linux',
+        'dist': 'trusty',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test'],
+                'packages': ['g++-7', 'ninja-build', 'valgrind'],
+            },
+        },
+        'env': [
+            'MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"'
+        ]
+    },
+    {
+        'os': 'linux',
+        'dist': 'trusty',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test'],
+                'packages': ['g++-5', 'ninja-build', 'valgrind'],
+            },
+        },
+        'env': [
+            'MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"'
+        ]
+    },
+    {
+        'os': 'osx',
+        'osx_image': 'xcode9.3',
+    }
+]
+
+
 def main():
-    builds = [
-        {
-            'os': 'linux',
-            'dist': 'trusty',
-            'addons': {
-                'apt': {
-                    'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8'],
-                    'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
-                }
-            },
-            'env': [
-                'MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"'
-            ]
-        },
-        {
-            'os': 'linux',
-            'dist': 'trusty',
-            'addons': {
-                'apt': {
-                    'sources': [ 'ubuntu-toolchain-r-test' ],
-                    'packages': [ 'g++-7', 'ninja-build', 'valgrind' ],
-                },
-            },
-            'env':[
-                'MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"'
-            ]
-        },
-        {
-            'os': 'osx',
-            'osx_image': 'xcode9.3',
-        }
-    ]
-
-    def add_build_type(d, type):
-        d.setdefault('env', []).append('CMAKE_BUILD_TYPE=' + type)
-        d['env'].append ('PSTORE_ALWAYS_SPANNING={0}'.format ('Yes' if type.lower() == 'debug' else 'No'))
-        return d
-
     travis = {
         'language': 'cpp',
         'sudo': 'false',
         'matrix': {
-            'include': [add_build_type(copy.deepcopy(build), type) for build in builds for type in
+            'include': [add_build_type(copy.deepcopy(build), t) for build in BUILDS for t in
                         ['Debug', 'Release']],
         },
         'before_install': ['eval "${MATRIX_EVAL}"'],
         'script': [
-            './utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}',
+            './utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes -D '
+            'PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests',
         ]
