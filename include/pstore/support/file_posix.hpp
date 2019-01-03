@@ -44,8 +44,8 @@
 /// \file file_posix.hpp
 /// \brief Posix-specific implementations of file APIs.
 
-#ifndef PSTORE_FILE_POSIX_HPP
-#define PSTORE_FILE_POSIX_HPP
+#ifndef PSTORE_SUPPORT_FILE_POSIX_HPP
+#define PSTORE_SUPPORT_FILE_POSIX_HPP
 
 #if !defined(_WIN32)
 
@@ -74,7 +74,9 @@ namespace pstore {
         /// \brief The cross-platform name for the deleter class.
         /// This should always be preferred to the platform-specific variation.
         using deleter = posix::deleter;
+
     } // namespace file
 } // namespace pstore
 #endif //! defined (_WIN32)
-#endif // PSTORE_FILE_POSIX_HPP
+
+#endif // PSTORE_SUPPORT_FILE_POSIX_HPP

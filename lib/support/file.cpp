@@ -355,7 +355,12 @@ namespace pstore {
                 : path_{std::move (path)}
                 , unlinker_{std::move (unlinker)} {}
 
-        deleter_base::~deleter_base () { this->unlink (); }
+        deleter_base::~deleter_base () noexcept {
+            try {
+                this->unlink ();
+            } catch (...) {
+            }
+        }
 
         void deleter_base::unlink () {
             if (!released_) {

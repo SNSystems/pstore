@@ -44,8 +44,8 @@
 /// \file file_win32.hpp
 /// \brief Windows-specific implementations of file APIs.
 
-#ifndef PSTORE_FILE_WIN32_HPP
-#define PSTORE_FILE_WIN32_HPP
+#ifndef PSTORE_SUPPORT_FILE_WIN32_HPP
+#define PSTORE_SUPPORT_FILE_WIN32_HPP
 
 #ifdef _WIN32
 
@@ -69,6 +69,7 @@ namespace pstore {
             public:
                 explicit deleter (std::string const & path)
                         : deleter_base (path, &platform_unlink) {}
+                ~deleter () noexcept override;
 
             private:
                 /// The platform-specific file deletion function. file_deleter_base will
@@ -85,4 +86,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif //_WIN32
-#endif // PSTORE_FILE_WIN32_HPP
+#endif // PSTORE_SUPPORT_FILE_WIN32_HPP

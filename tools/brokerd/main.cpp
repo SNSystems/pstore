@@ -212,6 +212,7 @@ int main (int argc, char * argv[]) {
             assert (f.valid ());
             f.get ();
         }
+        logging::log (logging::priority::notice, "worker threads done: stopping quit thread");
         broker::notify_quit_thread ();
         quit.join ();
         logging::log (logging::priority::notice, "exiting");

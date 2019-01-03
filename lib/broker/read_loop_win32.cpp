@@ -128,13 +128,17 @@ namespace {
         reader () = default;
         reader (pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
                 recorder * record_file);
-
+        reader (reader const &) = delete;
+        reader (reader &&) = delete;
         ~reader () noexcept;
+
+        reader & operator= (reader const &) = delete;
+        reader & operator= (reader &&) = delete;
 
         reader * initiate_read ();
         void cancel ();
 
-        list_member<reader> & get_list_member () { return listm_; }
+        list_member<reader> & get_list_member () noexcept { return listm_; }
 
     private:
         /// Must be the first object in the structure. The address of this member is passed to the
@@ -269,11 +273,13 @@ namespace {
                     r->completed ();
                 }
             } else if (errcode != ERROR_SUCCESS) {
-                std::ostringstream stream;
-                stream << "Read completed with error: " << error_message (errcode) << " ("
-                       << errcode << ')';
-                std::string const & str = stream.str ();
-                log (logging::priority::error, str.c_str ());
+                if (errcode == ERROR_BROKEN_PIPE) {
+                    log (logging::priority::debug, "Pipe was broken");
+                } else {
+                    std::ostringstream stream;
+                    stream << error_message (errcode) << " (" << errcode << ')';
+                    log (logging::priority::error, "Read completed with error: ", stream.str ());
+                }
                 r->completed_with_error ();
             }
 
@@ -311,7 +317,6 @@ namespace {
         request (gsl::not_null<command_processor *> cp, recorder * record_file);
 
         void attach_pipe (pipe_descriptor && p);
-        ~request () = default;
 
         void cancel ();
 
@@ -330,11 +335,18 @@ namespace {
                     : r_{r} {
                 list.insert_before (r, list.tail ());
             }
+            raii_insert (raii_insert const &) = delete;
+            raii_insert (raii_insert &&) = delete;
+
             ~raii_insert () noexcept {
                 if (r_) {
                     intrusive_list<reader>::erase (r_);
                 }
             }
+
+            raii_insert & operator= (raii_insert const &) = delete;
+            raii_insert & operator= (raii_insert &&) = delete;
+
             void release () noexcept { r_ = nullptr; }
 
         private:

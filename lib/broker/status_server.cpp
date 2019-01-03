@@ -495,6 +495,8 @@ namespace {
                 it = next;
             }
         }
+
+        log (pstore::logging::priority::info, "Status server-loop done");
     }
 
 } // end anonymous namespace
@@ -505,7 +507,7 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
     pstore::wsa_startup startup;
     if (!startup.started ()) {
         log (logging::priority::error, "WSAStartup() failed");
-	self_client_connection::close (client_ptr);
+        self_client_connection::close (client_ptr);
         log (pstore::logging::priority::info, "Status server exited");
         return;
     }
@@ -532,6 +534,9 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
 
         self_client_connection::listen (client_ptr, listen_port);
         server_loop (listen_fd);
+
+        log (logging::priority::debug, "Deleting port file");
+        pfdeleter.unlink ();
     } catch (std::exception const & ex) {
         log (pstore::logging::priority::error, ex.what ());
     } catch (...) {

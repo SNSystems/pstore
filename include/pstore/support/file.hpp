@@ -758,7 +758,7 @@ namespace pstore {
         public:
             using unlink_proc = std::function<void(std::string const &)>;
 
-            virtual ~deleter_base ();
+            virtual ~deleter_base () noexcept;
 
             // No copying or assignment
             deleter_base (deleter_base const &) = delete;

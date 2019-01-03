@@ -102,12 +102,12 @@ namespace pstore {
             iterator begin () const { return iterator (head_->get_list_member ().next); }
             iterator end () const { return iterator (tail_.get ()); }
 
-            void insert_before (T * element, T * before);
+            void insert_before (T * element, T * before) noexcept;
             static void erase (T * element) noexcept;
             std::size_t size () const;
 
             void check () noexcept;
-            T * tail () const { return tail_.get (); }
+            T * tail () const noexcept { return tail_.get (); }
 
         private:
             std::unique_ptr<T> head_;
@@ -146,7 +146,7 @@ namespace pstore {
         // insert_before
         // ~~~~~~~~~~~~~
         template <typename T>
-        void intrusive_list<T>::insert_before (T * element, T * before) {
+        void intrusive_list<T>::insert_before (T * element, T * before) noexcept {
             auto & element_member = element->get_list_member ();
             auto & before_member = before->get_list_member ();
 

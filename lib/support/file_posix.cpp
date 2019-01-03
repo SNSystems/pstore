@@ -400,6 +400,8 @@ namespace pstore {
 
         namespace posix {
 
+            // An out-of-line virtual destructor to avoid a vtable in every file that includes
+            // deleter.
             deleter::~deleter () noexcept = default;
 
             void deleter::platform_unlink (std::string const & path) {
