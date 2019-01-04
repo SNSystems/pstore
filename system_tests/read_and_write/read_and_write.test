@@ -1,0 +1,12 @@
+# %binaries = the directories containing the executable binaries
+# %stores = a directory in which data stores may be created
+# %T = the test output directory
+# %S = the test source directory
+
+RUN: rm -f "%T/pstore.db"
+RUN: "%binaries/pstore-write" --add mykey,foo "%T/pstore.db"
+RUN: "%binaries/pstore-read" "%T/pstore.db" mykey > "%T/out.txt"
+RUN: "%binaries/pstore-write" --add mykey,bar "%T/pstore.db"
+RUN: "%binaries/pstore-read" "%T/pstore.db" mykey >> "%T/out.txt"
+RUN: "%binaries/pstore-read" -r 1 "%T/pstore.db" mykey >> "%T/out.txt"
+RUN: diff -w "%S/expected.txt" "%T/out.txt"
