@@ -301,6 +301,7 @@ TEST_F (JsonString, EscapeN) {
 
 TEST_F (JsonString, BadEscape) {
     this->check_error ("\"a\\qb\"", json::error_code::invalid_escape_char);
+    this->check_error ("\"\\\xC3\xBF\"", json::error_code::invalid_escape_char);
 }
 
 TEST_F (JsonString, BackslashQuoteUnterminated) {
@@ -319,6 +320,11 @@ TEST_F (JsonString, GCleffUtf8) {
 
 TEST_F (JsonString, SlashUnicodeUpper) {
     this->check ("\"\\u002F\"", "/", 9U);
+}
+
+TEST_F (JsonString, FourFs) {
+    // Note that there is no unicode code-point at U+FFFF.
+    this->check ("\"\\uFFFF\"", "\xEF\xBF\xBF", 9U);
 }
 
 TEST_F (JsonString, TwoUtf16Chars) {

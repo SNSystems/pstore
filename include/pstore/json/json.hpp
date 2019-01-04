@@ -827,8 +827,8 @@ namespace pstore {
 
                 static maybe<unsigned> hex_value (char32_t c, unsigned value);
 
-                static std::tuple<unsigned, state, error_code>
-                consume_hex_state (unsigned hex, int state, char32_t code_point, appender & app);
+                static maybe<std::tuple<unsigned, state>>
+                consume_hex_state (unsigned hex, enum state state, char32_t code_point);
 
                 static std::tuple<state, error_code> consume_escape_state (char32_t code_point,
                                                                            appender & app);
@@ -935,54 +935,69 @@ namespace pstore {
 
             // [static]
             template <typename Callbacks>
-            auto string_matcher<Callbacks>::consume_hex_state (unsigned hex, int state,
-                                                               char32_t code_point, appender & app)
-                -> std::tuple<unsigned, enum state, error_code> {
+            auto string_matcher<Callbacks>::consume_hex_state (unsigned hex, enum state state,
+                                                               char32_t code_point)
+                -> maybe<std::tuple<unsigned, enum state>> {
 
-                if (maybe<unsigned> const v = hex_value (code_point, hex)) {
-                    switch (state) {
-                    case hex1_state: return std::make_tuple (*v, hex2_state, error_code::none);
-                    case hex2_state: return std::make_tuple (*v, hex3_state, error_code::none);
-                    case hex3_state: return std::make_tuple (*v, hex4_state, error_code::none);
-                    case hex4_state:
-                        assert (hex <= std::numeric_limits<std::uint16_t>::max ());
-                        if (!app.append16 (static_cast<char16_t> (*v))) {
-                            return std::make_tuple (*v, normal_char_state, error_code::bad_unicode_code_point);
-                        }
-                        return std::make_tuple (hex, normal_char_state, error_code::none);
-                    default: assert (false); break;
-                    }
+                    return hex_value (code_point, hex) >>=
+                           [=](unsigned value) {
+                               assert (value <= std::numeric_limits<std::uint16_t>::max ());
+                               auto next_state = state;
+                               switch (state) {
+                               case hex1_state: next_state = hex2_state; break;
+                               case hex2_state: next_state = hex3_state; break;
+                               case hex3_state: next_state = hex4_state; break;
+                               case hex4_state: next_state = normal_char_state; break;
+
+                               case start_state:
+                               case normal_char_state:
+                               case escape_state:
+                               case done_state:
+                                   assert (false);
+                                   return nothing<std::tuple<unsigned, enum state>> ();
+                               }
+
+                               return just (std::make_tuple (value, next_state));
+                           };
                 }
-                return std::make_tuple (hex, normal_char_state, error_code::invalid_hex_char);
-            }
 
             // [static]
             template <typename Callbacks>
             auto string_matcher<Callbacks>::consume_escape_state (char32_t code_point, appender & app)
                 -> std::tuple<state, error_code> {
-                state next_state = normal_char_state;
-                error_code error = error_code::none;
 
-                switch (code_point) {
-                case '"': code_point = '"'; break;
-                case '\\': code_point = '\\'; break;
-                case '/': code_point = '/'; break;
-                case 'b': code_point = '\b'; break;
-                case 'f': code_point = '\f'; break;
-                case 'n': code_point = '\n'; break;
-                case 'r': code_point = '\r'; break;
-                case 't': code_point = '\t'; break;
-                case 'u': next_state = hex1_state; break;
-                default: error = error_code::invalid_escape_char; break;
-                }
-
-                if (next_state == normal_char_state) {
-                    assert (code_point < 0x80);
-                    if (!app.append32 (code_point)) {
-                        error = error_code::invalid_escape_char;
+                auto decode = [](char32_t code_point) {
+                    state next_state = normal_char_state;
+                    switch (code_point) {
+                    case '"': code_point = '"'; break;
+                    case '\\': code_point = '\\'; break;
+                    case '/': code_point = '/'; break;
+                    case 'b': code_point = '\b'; break;
+                    case 'f': code_point = '\f'; break;
+                    case 'n': code_point = '\n'; break;
+                    case 'r': code_point = '\r'; break;
+                    case 't': code_point = '\t'; break;
+                    case 'u': next_state = hex1_state; break;
+                    default: return nothing<std::tuple<char32_t, state>> ();
                     }
-                }
-                return std::make_tuple (next_state, error);
+                    return just (std::make_tuple (code_point, next_state));
+                };
+
+                auto append = [&app](std::tuple<char32_t, state> const & s) -> maybe<state> {
+                    char32_t const code_point = std::get<0> (s);
+                    state const next_state = std::get<1> (s);
+                    assert (next_state == normal_char_state || next_state == hex1_state);
+                    if (next_state == normal_char_state) {
+                        if (!app.append32 (code_point)) {
+                            return nothing<state> ();
+                        }
+                    }
+                    return just (next_state);
+                };
+
+                maybe<state> const x = decode (code_point) >>= append;
+                return x ? std::make_tuple (*x, error_code::none)
+                         : std::make_tuple (normal_char_state, error_code::invalid_escape_char);
             }
 
             template <typename Callbacks>
@@ -1024,11 +1039,24 @@ namespace pstore {
                     case hex2_state:
                     case hex3_state:
                     case hex4_state: {
-                        auto const hex_resl =
-                            string_matcher::consume_hex_state (hex_, this->get_state (), code_point, app_);
-                        hex_ = std::get<0> (hex_resl);
-                        this->set_state (std::get<1> (hex_resl));
-                        this->set_error (parser, std::get<2> (hex_resl));
+                        maybe<std::tuple<unsigned, state>> const hex_resl =
+                            string_matcher::consume_hex_state (
+                                hex_, static_cast<state> (this->get_state ()), code_point);
+                        if (!hex_resl) {
+                            this->set_error (parser, error_code::invalid_hex_char);
+                            break;
+                        }
+                        hex_ = std::get<0> (*hex_resl);
+                        state const next_state = std::get<1> (*hex_resl);
+                        this->set_state (next_state);
+                        // We're done with the hex characters and are switching back to the "normal"
+                        // state. The means that we can add the accumulated code-point (in hex_) to
+                        // the string.
+                        if (next_state == normal_char_state) {
+                            if (!app_.append16 (static_cast<char16_t> (hex_))) {
+                                this->set_error (parser, error_code::bad_unicode_code_point);
+                            }
+                        }
                     } break;
 
                     case done_state: assert (false); break;
