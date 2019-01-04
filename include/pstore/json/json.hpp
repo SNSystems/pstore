@@ -966,29 +966,29 @@ namespace pstore {
             auto string_matcher<Callbacks>::consume_escape_state (char32_t code_point, appender & app)
                 -> std::tuple<state, error_code> {
 
-                auto decode = [](char32_t code_point) {
+                auto decode = [](char32_t cp) {
                     state next_state = normal_char_state;
-                    switch (code_point) {
-                    case '"': code_point = '"'; break;
-                    case '\\': code_point = '\\'; break;
-                    case '/': code_point = '/'; break;
-                    case 'b': code_point = '\b'; break;
-                    case 'f': code_point = '\f'; break;
-                    case 'n': code_point = '\n'; break;
-                    case 'r': code_point = '\r'; break;
-                    case 't': code_point = '\t'; break;
+                    switch (cp) {
+                    case '"': cp = '"'; break;
+                    case '\\': cp = '\\'; break;
+                    case '/': cp = '/'; break;
+                    case 'b': cp = '\b'; break;
+                    case 'f': cp = '\f'; break;
+                    case 'n': cp = '\n'; break;
+                    case 'r': cp = '\r'; break;
+                    case 't': cp = '\t'; break;
                     case 'u': next_state = hex1_state; break;
                     default: return nothing<std::tuple<char32_t, state>> ();
                     }
-                    return just (std::make_tuple (code_point, next_state));
+                    return just (std::make_tuple (cp, next_state));
                 };
 
                 auto append = [&app](std::tuple<char32_t, state> const & s) -> maybe<state> {
-                    char32_t const code_point = std::get<0> (s);
+                    char32_t const cp = std::get<0> (s);
                     state const next_state = std::get<1> (s);
                     assert (next_state == normal_char_state || next_state == hex1_state);
                     if (next_state == normal_char_state) {
-                        if (!app.append32 (code_point)) {
+                        if (!app.append32 (cp)) {
                             return nothing<state> ();
                         }
                     }
