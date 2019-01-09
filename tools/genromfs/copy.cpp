@@ -87,8 +87,13 @@ void copy (std::string const & path, unsigned file_no) {
         for (auto n = std::size_t{0}; n < num_read; ++n) {
             char const * cr;
             std::tie (width, cr) = getcr (width);
-            width +=
+            int const written =
                 std::fprintf (stdout, "%s%s%u", separator, cr, static_cast<unsigned> (buffer[n]));
+            if (written < 0) {
+                // FIXME: report an error
+                return;
+            }
+            width += static_cast<std::make_unsigned<decltype (written)>::type> (written);
             separator = ",";
         }
     } while (num_read >= buffer_size);
