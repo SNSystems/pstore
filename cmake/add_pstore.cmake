@@ -57,7 +57,7 @@ function (disable_clang_warning_if_possible target_name flag)
     check_c_source_compiles ("int main () {}" PSTORE_CLANG_SUPPORTS_FLAG)
     set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
     if (PSTORE_CLANG_SUPPORTS_FLAG)
-        target_compile_options (${name} PRIVATE ${flag})
+        target_compile_options (${target_name} PRIVATE ${flag})
     endif ()
 endfunction()
 
