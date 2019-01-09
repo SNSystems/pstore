@@ -51,12 +51,22 @@ macro(add_pstore_subdirectory name)
 endmacro()
 
 
-function (disable_clang_warning_if_possible target_name flag)
+# disable_clang_warning_if_possible
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Adds a switch to the compile options if supported by the compiler.
+#
+# target_name: The name of the target to which the compile option should be
+#              added.
+# flag:        The name of the compiler switch to be added.
+# result_var:  The name of the CMake cache variable into which the result of the
+#              test will be stored. This should be different for each switch
+#              being tested.
+function (disable_clang_warning_if_possible target_name flag result_var)
     set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
     set (CMAKE_REQUIRED_FLAGS "-Werror ${flag}")
-    check_c_source_compiles ("int main () {}" PSTORE_CLANG_SUPPORTS_FLAG)
+    check_c_source_compiles ("int main () {}" ${result_var})
     set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
-    if (PSTORE_CLANG_SUPPORTS_FLAG)
+    if (${${result_var}})
         target_compile_options (${target_name} PRIVATE ${flag})
     endif ()
 endfunction()
@@ -85,20 +95,27 @@ function (add_pstore_additional_compiler_flag name)
             -Wno-weak-vtables
         )
 
-        # The "zero-as-null-pointer-constant" warning was added to Clang at some point.
-        # Disable it if we can.
-        disable_clang_warning_if_possible (${name} -Wno-zero-as-null-pointer-constant)
+        disable_clang_warning_if_possible (${name}
+            -Wno-nullability-extension
+            PSTORE_CLANG_SUPPORTS_NX
+        )
+        disable_clang_warning_if_possible (${name}
+            -Wno-zero-as-null-pointer-constant
+            PSTORE_CLANG_SUPPORTS_NPC
+        )
+        # TODO: this warning is issued (at the time of writing) by gtest. It should only be disabled
+        # for that target.
+        disable_clang_warning_if_possible (${name}
+            -Wno-inconsistent-missing-override
+            PSTORE_CLANG_SUPPORTS_IMO
+        )
 
-        # The "inconsistent-missing-override" option is not available in all versions of clang.
-        # Disable it if we can.
-        # TODO: this warning is issued (at the time of writing) by gtest. It should only be disabled for that target.
-        disable_clang_warning_if_possible (${name} -Wno-inconsistent-missing-override)
-
-        # Disable the "unused lambda capture" warning since we must capture
-        # extra variables for MSVC to swallow the code. Remove when VS doesn't require capture.
-        disable_clang_warning_if_possible (${name} -Wno-unused-lambda-capture)
-
-	disable_clang_warning_if_possible (${name} -Wno-nullability-extension)
+        # Disable the "unused lambda capture" warning since we must capture extra variables for MSVC
+        # to swallow the code. Remove when VS doesn't require capture.
+        disable_clang_warning_if_possible (${name}
+            -Wno-unused-lambda-capture
+            PSTORE_CLANG_SUPPORTS_ULC
+        )
 
         if (PSTORE_COVERAGE)
             target_compile_options (${name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
@@ -122,12 +139,12 @@ function (add_pstore_additional_compiler_flag name)
 
         # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
         #       not available.
-		# 4146: unary minus applied to unsigned, result still unsigned.
+                # 4146: unary minus applied to unsigned, result still unsigned.
         # 4512: assignment operator could not be generated.
         target_compile_options (${name} PRIVATE
             -W4
             -wd4127
-			-wd4146
+            -wd4146
             -wd4512
         )
         target_compile_definitions (${name} PRIVATE
