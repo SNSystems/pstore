@@ -343,8 +343,6 @@ namespace pstore {
             return os << R"({ file:")" << fh.path () << R"(" })";
         }
 
-#undef PSTORE_NO_EX_ESCAPE
-
         //*       _      _      _              _                      *
         //*    __| | ___| | ___| |_ ___ _ __  | |__   __ _ ___  ___   *
         //*   / _` |/ _ \ |/ _ \ __/ _ \ '__| | '_ \ / _` / __|/ _ \  *
@@ -356,10 +354,7 @@ namespace pstore {
                 , unlinker_{std::move (unlinker)} {}
 
         deleter_base::~deleter_base () noexcept {
-            try {
-                this->unlink ();
-            } catch (...) {
-            }
+            PSTORE_NO_EX_ESCAPE ({ this->unlink (); });
         }
 
         void deleter_base::unlink () {

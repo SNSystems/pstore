@@ -163,6 +163,14 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_GMTIME_R)
 
+check_cxx_source_compiles (
+    "int main () { int a; int * _Nonnull b = &a; return *b; }"
+    PSTORE_HAVE_NONNULL_KEYWORD
+)
+check_cxx_source_compiles (
+    "int main () { int a; int * _Nullable b = &a; return *b; }"
+    PSTORE_HAVE_NULLABLE_KEYWORD
+)
 
 
 # The time members of struct stat might be called st_Xtimespec (of type struct timespec)

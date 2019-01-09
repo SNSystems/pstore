@@ -98,6 +98,8 @@ function (add_pstore_additional_compiler_flag name)
         # extra variables for MSVC to swallow the code. Remove when VS doesn't require capture.
         disable_clang_warning_if_possible (${name} -Wno-unused-lambda-capture)
 
+	disable_clang_warning_if_possible (${name} -Wno-nullability-extension)
+
         if (PSTORE_COVERAGE)
             target_compile_options (${name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
             target_compile_options (${name} PRIVATE -fno-inline-functions)

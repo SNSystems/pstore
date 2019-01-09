@@ -54,6 +54,9 @@
 /// Does the compiler support __attribute__((noreturn))?
 #cmakedefine PSTORE_HAVE_ATTRIBUTE_NORETURN  1
 
+#cmakedefine PSTORE_HAVE_NONNULL_KEYWORD  1
+#cmakedefine PSTORE_HAVE_NULLABLE_KEYWORD  1
+
 /// If the compiler support __uint128_t, does the standard library include std::is_unsigned<>?
 #cmakedefine PSTORE_HAVE_UINT128_TRAITS_SUPPORT  1
 
