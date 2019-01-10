@@ -225,9 +225,9 @@ TEST (Uint128, ShiftRightAssign) {
 }
 
 TEST_F (UInt128, BitwiseAnd) {
-    EXPECT_EQ ((pstore::uint128{max64, max64} & 0x01), (pstore::uint128{0x00, 0x01}));
-    EXPECT_EQ ((pstore::uint128{0x00, max64} & 0x01), (pstore::uint128{0x00, 0x01}));
-    EXPECT_EQ ((pstore::uint128{max64, 0x00} & 0x01), (pstore::uint128{0x00, 0x00}));
+    EXPECT_EQ ((pstore::uint128{max64, max64} & 0x01U), (pstore::uint128{0x00, 0x01}));
+    EXPECT_EQ ((pstore::uint128{0x00, max64} & 0x01U), (pstore::uint128{0x00, 0x01}));
+    EXPECT_EQ ((pstore::uint128{max64, 0x00} & 0x01U), (pstore::uint128{0x00, 0x00}));
 
     EXPECT_EQ ((pstore::uint128{max64, max64} & pstore::uint128{0x00, 0x01}),
                (pstore::uint128{0x00, 0x01}));
