@@ -529,12 +529,12 @@ namespace pstore {
                 using string_type = std::basic_string<char_type>;
 
                 explicit object_strings (ObjectCharacterTraits const & traits) noexcept
-                        : space_str{{traits.space}}
-                        , cr_str{{traits.cr}}
-                        , colon_space_str{{traits.colon, traits.space}}
-                        , comma_space_str{{traits.comma, traits.space}}
-                        , openbrace_str{{traits.openbrace}}
-                        , space_closebrace_str{{traits.space, traits.closebrace}} {}
+                        : space_str ({traits.space})
+                        , cr_str ({traits.cr})
+                        , colon_space_str ({traits.colon, traits.space})
+                        , comma_space_str ({traits.comma, traits.space})
+                        , openbrace_str ({traits.openbrace})
+                        , space_closebrace_str ({traits.space, traits.closebrace}) {}
 
                 string_type const space_str;
                 string_type const cr_str;
