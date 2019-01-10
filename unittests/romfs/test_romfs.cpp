@@ -162,14 +162,14 @@ TEST_F (RomFs, OpenDir) {
     error_or<dirent_descriptor> eod = fs_.opendir ("/");
     ASSERT_FALSE (eod.has_error ());
     auto & value = eod.get_value ();
-    ASSERT_EQ (value.read ()->name (), ".");
-    ASSERT_EQ (value.read ()->name (), "..");
-    ASSERT_EQ (value.read ()->name (), "dir");
-    ASSERT_EQ (value.read ()->name (), "hello");
+    ASSERT_STREQ (value.read ()->name (), ".");
+    ASSERT_STREQ (value.read ()->name (), "..");
+    ASSERT_STREQ (value.read ()->name (), "dir");
+    ASSERT_STREQ (value.read ()->name (), "hello");
     ASSERT_EQ (value.read (), nullptr);
 
     value.rewind ();
-    ASSERT_EQ (value.read ()->name (), ".");
+    ASSERT_STREQ (value.read ()->name (), ".");
 }
 
 TEST_F (RomFs, Seek) {
