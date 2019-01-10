@@ -66,20 +66,16 @@ namespace pstore {
             return "unknown error";
         }
 
-        std::error_category const & get_error_category () {
-            static error_category const cat;
-            return cat;
-        }
-
     } // end namespace romfs
 } // end namespace pstore
 
 namespace std {
 
     std::error_code make_error_code (pstore::romfs::error_code e) {
+        static pstore::romfs::error_category const cat;
         static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                        "base type of error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), pstore::romfs::get_error_category ()};
+        return {static_cast<int> (e), cat};
     }
 
 } // namespace std
@@ -122,7 +118,7 @@ namespace pstore {
             open_file (open_file const &) = delete;
             open_file & operator= (open_file const &) = delete;
 
-            error_or<off_t> seek (off_t offset, int whence);
+            error_or<std::size_t> seek (off_t offset, int whence);
             std::size_t read (void * PSTORE_NONNULL buffer, std::size_t size, std::size_t count);
             struct stat stat () {
                 return dir_.stat ();
@@ -130,7 +126,7 @@ namespace pstore {
 
         private:
             dirent const & dir_;
-            off_t pos_ = 0;
+            std::size_t pos_ = 0;
         };
 
         // read
@@ -141,7 +137,7 @@ namespace pstore {
                 return 0;
             }
             auto const file_size =
-                std::make_unsigned<off_t>::type (std::max (dir_.stat ().st_size, off_t{0}));
+                std::make_unsigned<off_t>::type (std::max (dir_.stat ().st_size, std::size_t{0}));
             auto num_read = std::size_t{0};
             auto start = reinterpret_cast<std::uint8_t const *> (dir_.contents ()) + pos_;
             for (; num_read < count; ++num_read) {
@@ -158,25 +154,45 @@ namespace pstore {
 
         // seek
         // ~~~~
-        error_or<off_t> open_file::seek (off_t offset, int whence) {
-            off_t new_pos;
+        error_or<std::size_t> open_file::seek (off_t offset, int whence) {
+            auto make_error = [](error_code erc) {
+                return error_or<std::size_t> (std::make_error_code (erc));
+            };
+            using uoff_type = std::make_unsigned<off_t>::type;
+            std::size_t new_pos;
+            std::size_t const file_size = dir_.stat ().st_size;
             switch (whence) {
-            case SEEK_SET: new_pos = offset; break;
-            case SEEK_CUR: new_pos = pos_ + offset; break;
-            case SEEK_END: new_pos = dir_.stat ().st_size + offset; break;
+            case SEEK_SET:
+                if (offset < 0) {
+                    return make_error (error_code::einval);
+                }
+                new_pos = static_cast<uoff_type> (offset);
+                break;
+            case SEEK_CUR:
+                if (offset < 0) {
+                    auto const positive_offset = static_cast<uoff_type> (-offset);
+                    if (positive_offset > pos_) {
+                        return make_error (error_code::einval);
+                    }
+                    new_pos = pos_ - positive_offset;
+                } else {
+                    new_pos = pos_ + static_cast<uoff_type> (offset);
+                }
+                break;
+            case SEEK_END:
+                if (offset < 0 && static_cast<std::size_t> (-offset) > file_size) {
+                    return make_error (error_code::einval);
+                }
+                new_pos = (offset >= 0) ? (file_size + static_cast<uoff_type> (offset))
+                                        : (file_size - static_cast<uoff_type> (-offset));
+                break;
             default:
                 // Whence is not a proper value.
-                return error_or<off_t> (std::make_error_code (error_code::einval));
+                return make_error (error_code::einval);
             }
 
-            if (new_pos < 0) {
-                // The seek location (calculated from offset and whence) is negative.
-                return error_or<off_t> (std::make_error_code (error_code::einval));
-            }
-
-            // FIXME: limit to the file size!
             pos_ = new_pos;
-            return error_or<off_t>{new_pos};
+            return error_or<std::size_t>{new_pos};
         }
 
 
@@ -217,7 +233,7 @@ namespace pstore {
                                       std::size_t count) {
             return f_->read (buffer, size, count);
         }
-        error_or<off_t> descriptor::seek (off_t offset, int whence) {
+        error_or<std::size_t> descriptor::seek (off_t offset, int whence) {
             return f_->seek (offset, whence);
         }
         auto descriptor::stat () const -> struct stat {
@@ -327,7 +343,10 @@ namespace pstore {
                 // note that component is not null terminated!
                 p = next_component (tail);
 
-                current_de = dir->find (component, tail - component);
+                assert (tail > component);
+                current_de = dir->find (
+                    component,
+                    static_cast<std::make_unsigned<std::ptrdiff_t>::type> (tail - component));
                 if (current_de == nullptr) {
                     // name not found
                     return error_or<dirent_ptr>{std::make_error_code (error_code::enoent)};

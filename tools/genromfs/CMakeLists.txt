@@ -54,3 +54,4 @@ add_pstore_executable (pstore-genromfs
     scan.hpp
 )
 target_link_libraries (pstore-genromfs PRIVATE pstore-romfs pstore-cmd-util)
+run_pstore_unit_test (pstore-genromfs pstore-romfs-unit-tests)

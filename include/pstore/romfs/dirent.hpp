@@ -64,7 +64,7 @@ namespace pstore {
             bool operator!= (stat const & rhs) const noexcept { return !operator== (rhs); }
 
             static constexpr auto is_directory_flag = std::uint16_t{0x01};
-            off_t st_size;
+            std::size_t st_size;
             mode_t mode;
         };
 
@@ -73,7 +73,7 @@ namespace pstore {
         class dirent {
         public:
             constexpr dirent (gsl::czstring PSTORE_NONNULL name,
-                              void const * PSTORE_NONNULL contents, off_t size,
+                              void const * PSTORE_NONNULL contents, std::size_t size,
                               mode_t mode) noexcept
                     : name_{name}
                     , contents_{contents}
@@ -100,7 +100,7 @@ namespace pstore {
         private:
             gsl::czstring PSTORE_NONNULL name_;
             void const * PSTORE_NONNULL contents_;
-            off_t size_;
+            std::size_t size_;
             mode_t mode_;
         };
 

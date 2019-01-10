@@ -51,7 +51,7 @@
 #include <tuple>
 
 #ifndef _WIN32
-#include <sys/types.h>
+#    include <sys/types.h>
 #endif
 
 #include "pstore/romfs/error_or.hpp"
@@ -109,7 +109,7 @@ namespace pstore {
             descriptor & operator= (descriptor && other) = default;
 
             std::size_t read (void * PSTORE_NONNULL buffer, std::size_t size, std::size_t count);
-            error_or<off_t> seek (off_t offset, int whence);
+            error_or<std::size_t> seek (off_t offset, int whence);
             struct stat stat () const;
 
         private:
@@ -173,12 +173,16 @@ namespace pstore {
                 return parse_path (path, cwd_);
             }
 
-            /// Parse a path string returning the directory-entry to which it refers or an error. Paths follow the POSIX convention of using a slash ('/') to separate components.
-            /// A leading slash indicates that the search should start at the file system's root directory rather than the default directory given by the \p start_dir argument.
+            /// Parse a path string returning the directory-entry to which it refers or an error.
+            /// Paths follow the POSIX convention of using a slash ('/') to separate components. A
+            /// leading slash indicates that the search should start at the file system's root
+            /// directory rather than the default directory given by the \p start_dir argument.
             ///
             /// \param path The path string to be parsed.
-            /// \param start_dir  The directory to which the path is relative. Ignored if the initial character of the \p path argument is a slash.
-            /// \returns  The directory entry described by the \p path argument or an error if the string was not valid.
+            /// \param start_dir  The directory to which the path is relative. Ignored if the
+            /// initial character of the \p path argument is a slash.
+            /// \returns  The directory entry described by the \p path argument or an error if the
+            /// string was not valid.
             error_or<dirent_ptr> parse_path (gsl::czstring PSTORE_NONNULL path,
                                              directory const * PSTORE_NONNULL start_dir) const;
 

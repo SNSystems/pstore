@@ -75,22 +75,8 @@ namespace pstore {
                     : state_ (value) {
                 new (value_storage ()) T (std::forward<Other> (t));
             }
-
             error_or (error_or const & rhs) { copy_construct (rhs); }
-            template <typename Other>
-            error_or (
-                error_or<Other> const & rhs,
-                typename std::enable_if<std::is_convertible<Other, T>::value>::type * = nullptr) {
-                copy_construct (rhs);
-            }
-
             error_or (error_or && rhs) { move_construct (std::move (rhs)); }
-            template <typename Other>
-            error_or (
-                error_or<Other> && rhs,
-                typename std::enable_if<std::is_convertible<Other, T>::value>::type * = nullptr) {
-                move_construct (std::move (rhs));
-            }
             template <typename... Args>
             error_or (in_place_t, Args &&... args)
                     : state_ (value) {
@@ -100,7 +86,7 @@ namespace pstore {
             ~error_or () noexcept { destroy (); }
 
 
-            error_or * operator= (error_or const & rhs) {
+            error_or & operator= (error_or const & rhs) {
                 if (&rhs != this) {
                     this->copy_assign (rhs);
                 }
@@ -137,10 +123,8 @@ namespace pstore {
             T const & get_value () const noexcept { return *value_storage (); }
 
         private:
-            template <typename Other>
-            void copy_construct (error_or<Other> const & rhs);
-            template <typename Other>
-            void move_construct (error_or<Other> && rhs);
+            void copy_construct (error_or const & rhs);
+            void move_construct (error_or && rhs);
             template <typename Other>
             void copy_assign (error_or<Other> const & rhs);
             void destroy () noexcept;
@@ -173,8 +157,7 @@ namespace pstore {
         };
 
         template <typename T>
-        template <typename Other>
-        void error_or<T>::copy_construct (error_or<Other> const & rhs) {
+        void error_or<T>::copy_construct (error_or const & rhs) {
             switch (rhs.state_) {
             case error:
                 new (error_storage ()) std::error_code (rhs.get_error ());
@@ -188,8 +171,7 @@ namespace pstore {
         }
 
         template <typename T>
-        template <typename Other>
-        void error_or<T>::move_construct (error_or<Other> && rhs) {
+        void error_or<T>::move_construct (error_or && rhs) {
             switch (rhs.state_) {
             case error:
                 new (error_storage ()) std::error_code (std::move (rhs.get_error ()));
@@ -244,7 +226,6 @@ namespace pstore {
                 break;
             }
             }
-            return *this;
         }
 
 

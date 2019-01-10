@@ -151,7 +151,7 @@ TEST_F (RomFs, OpenAndReadFile) {
     EXPECT_EQ (d.read (buffer.data (), sizeof (std::uint8_t), 1), 0U);
 
     EXPECT_EQ (d.seek (0, SEEK_CUR), file2_size);
-    EXPECT_EQ (d.seek (0, SEEK_SET), (error_or<off_t>{0}));
+    EXPECT_EQ (d.seek (0, SEEK_SET), (error_or<std::size_t>{0U}));
     EXPECT_EQ (d.seek (0, SEEK_CUR), 0);
 }
 
@@ -170,4 +170,49 @@ TEST_F (RomFs, OpenDir) {
 
     value.rewind ();
     ASSERT_EQ (value.read ()->name (), ".");
+}
+
+TEST_F (RomFs, Seek) {
+    error_or<descriptor> eod = fs_.open ("./hello");
+    ASSERT_FALSE (eod.has_error ());
+    descriptor & d = eod.get_value ();
+
+    std::uint8_t v;
+    EXPECT_EQ (d.read (&v, sizeof (v), 1U), 1U);
+    EXPECT_EQ (v, 104U);
+    error_or<std::size_t> eos = d.seek (0, SEEK_SET);
+    EXPECT_FALSE (eos.has_error ());
+    EXPECT_EQ (eos.get_value (), 0U);
+
+    eos = d.seek (1, SEEK_SET);
+    EXPECT_FALSE (eos.has_error ());
+    EXPECT_EQ (eos.get_value (), 1U);
+
+    eos = d.seek (0, SEEK_CUR);
+    EXPECT_FALSE (eos.has_error ());
+    EXPECT_EQ (eos.get_value (), 1U);
+
+    eos = d.seek (-2, SEEK_CUR);
+    EXPECT_TRUE (eos.has_error ()) << "Seek past start of file is disallowed";
+    EXPECT_EQ (eos.get_error (), std::make_error_code (pstore::romfs::error_code::einval));
+
+    eos = d.seek (-1, SEEK_CUR);
+    EXPECT_FALSE (eos.has_error ());
+}
+
+TEST_F (RomFs, SeekPastEnd) {
+    error_or<descriptor> eod = fs_.open ("./hello");
+    ASSERT_FALSE (eod.has_error ());
+    descriptor & d = eod.get_value ();
+
+    error_or<std::size_t> eos = d.seek (3, SEEK_END);
+    EXPECT_FALSE (eos.has_error ()) << "Seek past EOF should be allowed";
+    EXPECT_EQ (eos.get_value (), sizeof (file2) + 3U);
+
+    eos = d.seek (0, SEEK_CUR);
+    EXPECT_FALSE (eos.has_error ()) << "Should get current position";
+    EXPECT_EQ (eos.get_value (), sizeof (file2) + 3U);
+
+    std::uint8_t v;
+    EXPECT_EQ (d.read (&v, sizeof (v), 1U), 0U) << "Read from beyond EOF should return 0";
 }
