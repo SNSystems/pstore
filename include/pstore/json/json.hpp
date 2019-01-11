@@ -940,7 +940,7 @@ namespace pstore {
                 -> maybe<std::tuple<unsigned, enum state>> {
 
                     return hex_value (code_point, hex) >>=
-                           [=](unsigned value) {
+                           [state](unsigned value) {
                                assert (value <= std::numeric_limits<std::uint16_t>::max ());
                                auto next_state = state;
                                switch (state) {
