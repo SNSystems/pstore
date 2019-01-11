@@ -64,7 +64,7 @@ namespace {
 void copy (std::string const & path, unsigned file_no) {
     constexpr std::size_t indent_size = pstore::array_elements (indent) - 1U;
     constexpr auto line_width = std::size_t{80} - indent_size;
-    auto getcr = [](std::size_t width) {
+    auto getcr = [line_width](std::size_t width) {
         return width >= line_width ? std::make_pair (std::size_t{0}, crindent)
                                    : std::make_pair (width, "");
     };
