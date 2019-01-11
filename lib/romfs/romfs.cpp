@@ -52,23 +52,6 @@
 #include "pstore/romfs/directory.hpp"
 #include "pstore/romfs/dirent.hpp"
 
-namespace pstore {
-    namespace romfs {
-
-        char const * error_category::name () const noexcept { return "pstore-romfs category"; }
-
-        std::string error_category::message (int error) const {
-            switch (static_cast<error_code> (error)) {
-            case error_code::einval: return "EINVAL";
-            case error_code::enoent: return "ENOENT";
-            case error_code::enotdir: return "ENOTDIR";
-            }
-            return "unknown error";
-        }
-
-    } // end namespace romfs
-} // end namespace pstore
-
 namespace std {
 
     std::error_code make_error_code (pstore::romfs::error_code e) {
@@ -78,21 +61,23 @@ namespace std {
         return {static_cast<int> (e), cat};
     }
 
-} // namespace std
+} // end namespace std
 
 namespace {
 
-    std::pair<char const *, pstore::gsl::czstring> path_component (pstore::gsl::czstring path) {
+    std::pair<char const * PSTORE_NULLABLE, pstore::gsl::czstring PSTORE_NULLABLE>
+    path_component (pstore::gsl::czstring PSTORE_NULLABLE path) {
         if (path == nullptr) {
             return {nullptr, nullptr};
         }
         char const * p = path;
-        for (; *p != '\0' && *p != '/'; ++p) {
+        while (*p != '\0' && *p != '/') {
+            ++p;
         }
         return {path, p};
     }
 
-    pstore::gsl::czstring next_component (pstore::gsl::czstring p) {
+    pstore::gsl::czstring PSTORE_NULLABLE next_component (pstore::gsl::czstring PSTORE_NULLABLE p) {
         if (p == nullptr) {
             return p;
         }
@@ -106,6 +91,22 @@ namespace {
 
 namespace pstore {
     namespace romfs {
+
+        //*                                _                          *
+        //*  ___ _ _ _ _ ___ _ _   __ __ _| |_ ___ __ _ ___ _ _ _  _  *
+        //* / -_) '_| '_/ _ \ '_| / _/ _` |  _/ -_) _` / _ \ '_| || | *
+        //* \___|_| |_| \___/_|   \__\__,_|\__\___\__, \___/_|  \_, | *
+        //*                                       |___/         |__/  *
+        char const * error_category::name () const noexcept { return "pstore-romfs category"; }
+
+        std::string error_category::message (int error) const {
+            switch (static_cast<error_code> (error)) {
+            case error_code::einval: return "EINVAL";
+            case error_code::enoent: return "ENOENT";
+            case error_code::enotdir: return "ENOTDIR";
+            }
+            return "unknown error";
+        }
 
         //*                        __ _ _      *
         //*  ___ _ __  ___ _ _    / _(_) |___  *
