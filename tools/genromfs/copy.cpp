@@ -43,6 +43,8 @@
 //===----------------------------------------------------------------------===//
 #include "copy.hpp"
 
+#include <cstdio>
+
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/utf.hpp"
 #include "./indent.hpp"
@@ -62,13 +64,13 @@ namespace {
 void copy (std::string const & path, unsigned file_no) {
     constexpr std::size_t indent_size = pstore::array_elements (indent) - 1U;
     constexpr auto line_width = std::size_t{80} - indent_size;
-    auto getcr = [&](std::size_t width) -> std::pair<std::size_t, char const *> {
+    auto getcr = [](std::size_t width) {
         return width >= line_width ? std::make_pair (std::size_t{0}, crindent)
                                    : std::make_pair (width, "");
     };
 
     constexpr auto buffer_size = std::size_t{1024};
-    std::uint8_t buffer[buffer_size];
+    std::uint8_t buffer[buffer_size] = {0};
     std::unique_ptr<FILE, decltype (&std::fclose)> file (file_open (path), &std::fclose);
     if (!file) {
         // FIXME: report an error
@@ -79,9 +81,10 @@ void copy (std::string const & path, unsigned file_no) {
     char const * separator = "";
     auto num_read = std::size_t{0};
     do {
-        num_read = std::fread (buffer, sizeof (buffer[0]), buffer_size, file.get ());
+        num_read = std::fread (&buffer[0], sizeof (buffer[0]), buffer_size, file.get ());
+        num_read = std::min (buffer_size, num_read);
         if (std::ferror (file.get ())) {
-            // report an error
+            // FIXME: report an error
             return;
         }
         for (auto n = std::size_t{0}; n < num_read; ++n) {

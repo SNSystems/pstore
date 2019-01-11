@@ -292,7 +292,7 @@ TEST_F (JsonString, Simple) {
 }
 
 TEST_F (JsonString, Unterminated) {
-    this->check_error ("\"hello", json::error_code::expected_close_quote);
+    check_error ("\"hello", json::error_code::expected_close_quote);
 }
 
 TEST_F (JsonString, EscapeN) {
@@ -300,16 +300,16 @@ TEST_F (JsonString, EscapeN) {
 }
 
 TEST_F (JsonString, BadEscape) {
-    this->check_error ("\"a\\qb\"", json::error_code::invalid_escape_char);
-    this->check_error ("\"\\\xC3\xBF\"", json::error_code::invalid_escape_char);
+    check_error ("\"a\\qb\"", json::error_code::invalid_escape_char);
+    check_error ("\"\\\xC3\xBF\"", json::error_code::invalid_escape_char);
 }
 
 TEST_F (JsonString, BackslashQuoteUnterminated) {
-    this->check_error ("\"a\\\"", json::error_code::expected_close_quote);
+    check_error ("\"a\\\"", json::error_code::expected_close_quote);
 }
 
 TEST_F (JsonString, TrailingBackslashUnterminated) {
-    this->check_error ("\"a\\", json::error_code::invalid_escape_char);
+    check_error ("\"a\\", json::error_code::invalid_escape_char);
 }
 
 TEST_F (JsonString, GCleffUtf8) {
@@ -341,36 +341,36 @@ TEST_F (JsonString, Utf16Surrogates) {
 
 TEST_F (JsonString, Utf16HighWithNoLowSurrogate) {
     // UTF-16 high surrogate followed by non-surrogate UTF-16 hex code point.
-    this->check_error ("\"\\uD834\\u30A1\"", json::error_code::bad_unicode_code_point);
+    check_error ("\"\\uD834\\u30A1\"", json::error_code::bad_unicode_code_point);
 }
 
 TEST_F (JsonString, Utf16HighFollowedByUtf8Char) {
     // UTF-16 high surrogate followed by non-surrogate UTF-16 hex code point.
-    this->check_error ("\"\\uD834!\"", json::error_code::bad_unicode_code_point);
+    check_error ("\"\\uD834!\"", json::error_code::bad_unicode_code_point);
 }
 
 TEST_F (JsonString, Utf16HighWithMissingLowSurrogate) {
     // Encoding for MUSICAL SYMBOL G CLEF (U+1D11E) expressed as a UTF-16
     // surrogate pair.
-    this->check_error ("\"\\uDD1E\\u30A1\"", json::error_code::bad_unicode_code_point);
+    check_error ("\"\\uDD1E\\u30A1\"", json::error_code::bad_unicode_code_point);
 }
 
 TEST_F (JsonString, ControlCharacter) {
-    this->check_error ("\"\t\"", json::error_code::bad_unicode_code_point);
+    check_error ("\"\t\"", json::error_code::bad_unicode_code_point);
     this->check ("\"\\u0009\"", "\t", 9U);
 }
 
 TEST_F (JsonString, Utf16LowWithNoHighSurrogate) {
     // UTF-16 high surrogate followed by non-surrogate UTF-16 hex code point.
-    this->check_error ("\"\\uD834\"", json::error_code::bad_unicode_code_point);
+    check_error ("\"\\uD834\"", json::error_code::bad_unicode_code_point);
 }
 
 TEST_F (JsonString, SlashBadHexChar) {
-    this->check_error ("\"\\u00xF\"", json::error_code::invalid_escape_char);
+    check_error ("\"\\u00xF\"", json::error_code::invalid_escape_char);
 }
 
 TEST_F (JsonString, PartialHexChar) {
-    this->check_error ("\"\\u00", json::error_code::invalid_escape_char);
+    check_error ("\"\\u00", json::error_code::invalid_escape_char);
 }
 
 

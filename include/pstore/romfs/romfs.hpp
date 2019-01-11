@@ -113,7 +113,7 @@ namespace pstore {
             struct stat stat () const;
 
         private:
-            descriptor (std::shared_ptr<open_file> const & f)
+            explicit descriptor (std::shared_ptr<open_file> const & f)
                     : f_{f} {}
             // Using a shared_ptr<> here so that descriptor instances can be passed around in
             // the same way as they would if 'descriptor' was the int type that's traditionally
@@ -134,7 +134,7 @@ namespace pstore {
             void rewind ();
 
         private:
-            dirent_descriptor (std::shared_ptr<open_directory> const & f)
+            explicit dirent_descriptor (std::shared_ptr<open_directory> const & f)
                     : f_{f} {}
             std::shared_ptr<open_directory> f_;
         };

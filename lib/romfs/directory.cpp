@@ -60,7 +60,7 @@ auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) c
     -> dirent const * PSTORE_NULLABLE {
 
     // TODO: this is a straightfoward linear search. Could this be a performance problem?
-    auto pos = std::find_if (begin (), end (), [=](dirent const & de) -> bool {
+    auto pos = std::find_if (begin (), end (), [d](dirent const & de) {
         auto const od = de.opendir ();
         return od.has_value () && od.get_value () == d;
     });

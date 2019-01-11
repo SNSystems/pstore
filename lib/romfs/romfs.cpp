@@ -96,7 +96,8 @@ namespace {
         if (p == nullptr) {
             return p;
         }
-        for (; *p == '/'; ++p) {
+        while (*p == '/') {
+            ++p;
         }
         return p;
     }
@@ -278,7 +279,7 @@ namespace pstore {
         // opendir
         // ~~~~~~~
         auto romfs::opendir (gsl::czstring path) -> error_or<dirent_descriptor> {
-            auto get_directory = [](dirent_ptr de) -> error_or<directory const * PSTORE_NONNULL> {
+            auto get_directory = [](dirent_ptr de) {
                 using rett = error_or<directory const * PSTORE_NONNULL>;
                 return de->is_directory () ? rett{de->opendir ()}
                                            : rett{std::make_error_code (error_code::enotdir)};
@@ -376,18 +377,19 @@ namespace pstore {
             }
             dirent const * const parent_de = dir->find ("..");
             assert (parent_de != nullptr);
-            return parent_de->opendir () >>= [=](directory const * const PSTORE_NONNULL parent) {
-                return this->dir_to_string (parent) >>= [=](std::string s) {
-                    assert (s.length () > 0);
-                    if (s.back () != '/') {
-                        s += '/';
-                    }
+            return parent_de->opendir () >>=
+                   [this, dir](directory const * const PSTORE_NONNULL parent) {
+                       return this->dir_to_string (parent) >>= [dir, parent](std::string s) {
+                           assert (s.length () > 0);
+                           if (s.back () != '/') {
+                               s += '/';
+                           }
 
-                    dirent const * const p = parent->find (dir);
-                    assert (p != nullptr);
-                    return error_or<std::string> (s + p->name ());
-                };
-            };
+                           dirent const * const p = parent->find (dir);
+                           assert (p != nullptr);
+                           return error_or<std::string> (s + p->name ());
+                       };
+                   };
         }
 
         // fsck

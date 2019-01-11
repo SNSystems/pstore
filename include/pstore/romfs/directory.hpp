@@ -61,11 +61,11 @@ namespace pstore {
                     : size_{size}
                     , members_{members} {}
             template <std::size_t N>
-            constexpr directory (dirent const (&members)[N]) noexcept
+            explicit constexpr directory (dirent const (&members)[N]) noexcept
                     : directory (N, members) {}
 
             template <typename Container>
-            constexpr directory (Container const & c) noexcept
+            explicit constexpr directory (Container const & c) noexcept
                     : directory (c.size (), c.data ()) {}
 
             directory (directory const &) = delete;

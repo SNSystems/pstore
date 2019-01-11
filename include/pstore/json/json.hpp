@@ -983,7 +983,7 @@ namespace pstore {
                     return just (std::make_tuple (cp, next_state));
                 };
 
-                auto append = [&app](std::tuple<char32_t, state> const & s) -> maybe<state> {
+                auto append = [&app](std::tuple<char32_t, state> const & s) {
                     char32_t const cp = std::get<0> (s);
                     state const next_state = std::get<1> (s);
                     assert (next_state == normal_char_state || next_state == hex1_state);
