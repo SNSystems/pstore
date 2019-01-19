@@ -43,6 +43,7 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
+include (clang_tidy)
 
 ###########################
 # pstore-brokerd Executable
@@ -68,6 +69,7 @@ else ()
 target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util pstore-broker)
 endif ()
 
+add_clang_tidy_target (pstore-broker)
 run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
 
 
@@ -79,41 +81,3 @@ if (WIN32)
 endif ()
 
 
-###################
-# clang-tidy-broker
-###################
-include (clang-tidy)
-if (CLANG_TIDY_FOUND)
-    set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,modernize-*,--cppcoreguidelines-*,clang-analyzer-nullability*)
-
-    # Collect the *.cpp files: clang-tidy will scan these.
-    get_target_property (SOURCE_FILES pstore-broker SOURCES)
-    list (FILTER SOURCE_FILES INCLUDE REGEX "cpp")
-
-    # Tell clang-tidy about the target's include directories.
-    set (TARGET_INCLUDE "")
-    get_target_property (BRROKER_LIB_INCLUDES pstore-broker INCLUDE_DIRECTORIES)
-    foreach (P ${BROKER_LIB_INCLUDES})
-        list (APPEND TARGET_INCLUDE "-I" "${P}")
-    endforeach (P)
-
-    # Add in the pstore public includes
-    get_target_property (PSTORE_LIB_INCLUDES pstore-core INTERFACE_INCLUDE_DIRECTORIES)
-    foreach (P ${PSTORE_LIB_INCLUDES})
-        list (APPEND TARGET_INCLUDE "-I" "${P}")
-    endforeach (P)
-
-    add_custom_target(
-        "clang-tidy-broker"
-        COMMAND "${CLANG_TIDY}"
-        ${CLANG_TIDY_CHECKS}
-        ${SOURCE_FILES}
-        --
-        -std=c++14
-        ${TARGET_INCLUDE}
-        ${CLANG_TIDY_SYS_INCLUDE}
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-    )
-else()
-
-endif()

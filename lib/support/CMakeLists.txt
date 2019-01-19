@@ -42,6 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
+
 include (CheckCXXSourceCompiles)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
@@ -291,10 +292,12 @@ set (PSTORE_SUPPORT_LIB_SRC
 )
 
 include (add_pstore)
+include (clang_tidy)
 
 # pstore-support
 add_pstore_library (pstore-support STATIC ${PSTORE_SUPPORT_LIB_SRC})
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
 if (PSTORE_IS_INSIDE_LLVM)

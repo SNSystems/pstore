@@ -42,6 +42,9 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
+include (add_pstore)
+include (clang_tidy)
+
 set (PSTORE_PUBLIC_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/core")
 set (PSTORE_SRC )
 set (PSTORE_CORE_SRC
@@ -130,34 +133,7 @@ endif ()
 
 
 target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize pstore-support)
-
-
-include (clang-tidy)
-if (CLANG_TIDY_FOUND)
-    #set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,cppcoreguidelines-*,modernize-*,-cppcoreguidelines-pro-type-union-access,clang-analyzer-nullability*)
-    set (CLANG_TIDY_CHECKS -checks=cert-*,misc-*,modernize-*,clang-analyzer-nullability*,hicpp-*,performance-*,portability-*)
-
-    # Collect the *.cpp files: clang-tidy will scan these.
-    get_target_property (SOURCE_FILES pstore-core SOURCES)
-    list (FILTER SOURCE_FILES INCLUDE REGEX "cpp")
-
-    add_custom_target (pstore-clang-tidy
-        COMMAND "${CLANG_TIDY}"
-                ${CLANG_TIDY_CHECKS}
-                -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
-                ${SOURCE_FILES}
-                --
-                -std=c++11
-                -D NDEBUG
-                "-I$<JOIN:$<TARGET_PROPERTY:pstore-core,INCLUDE_DIRECTORIES>,;-I>"
-                ${CLANG_TIDY_SYS_INCLUDE}
-        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-	    COMMENT "Running clang-tidy"
-        COMMAND_EXPAND_LISTS
-    )
-else()
-    message (STATUS "clang-tidy executable was not found.")
-endif()
+add_clang_tidy_target (pstore-core)
 
 
 include (check_atomic)
