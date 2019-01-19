@@ -44,8 +44,8 @@
 
 /// \file signal_helpers.hpp
 
-#ifndef PSTORE_SIGNAL_HELPERS_HPP
-#define PSTORE_SIGNAL_HELPERS_HPP (1)
+#ifndef PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
+#define PSTORE_SUPPORT_SIGNAL_HELPERS_HPP (1)
 
 #include <errno.h>
 #include <signal.h>
@@ -72,4 +72,5 @@ namespace pstore {
     signal_function register_signal_handler (int signo, signal_function func);
 
 } // namespace pstore
-#endif // BROKER_SIGNAL_HELPERS_HPP
+
+#endif // PSTORE_SUPPORT_SIGNAL_HELPERS_HPP

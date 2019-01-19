@@ -80,8 +80,8 @@
 /// value   | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
 ///         +-----------------------+-------+ +-------------------------------+
 
-#ifndef PSTORE_VARINT_HPP
-#define PSTORE_VARINT_HPP
+#ifndef PSTORE_SUPPORT_VARINT_HPP
+#define PSTORE_SUPPORT_VARINT_HPP
 
 #include <utility>
 
@@ -193,4 +193,4 @@ namespace pstore {
     } // namespace varint
 } // namespace pstore
 
-#endif // PSTORE_VARINT_HPP
+#endif // PSTORE_SUPPORT_VARINT_HPP

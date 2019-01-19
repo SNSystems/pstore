@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file rotating_log.hpp
 
-#ifndef PSTORE_ROTATING_LOG_HPP
-#define PSTORE_ROTATING_LOG_HPP (1)
+#ifndef PSTORE_SUPPORT_ROTATING_LOG_HPP
+#define PSTORE_SUPPORT_ROTATING_LOG_HPP (1)
 
 #include <sstream>
 #include <iostream>
@@ -183,4 +183,5 @@ namespace pstore {
 
     } // end namespace logging
 } // end namespace pstore
-#endif // PSTORE_ROTATING_LOG_HPP
+
+#endif // PSTORE_SUPPORT_ROTATING_LOG_HPP

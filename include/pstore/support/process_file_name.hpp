@@ -44,8 +44,8 @@
 /// \file process_file_name.hpp
 /// \brief Functions to return the path of the current process image.
 
-#ifndef PSTORE_PROCESS_FILE_NAME_HPP
-#define PSTORE_PROCESS_FILE_NAME_HPP (1)
+#ifndef PSTORE_SUPPORT_PROCESS_FILE_NAME_HPP
+#define PSTORE_SUPPORT_PROCESS_FILE_NAME_HPP (1)
 
 #include <algorithm>
 #include <cassert>
@@ -137,4 +137,4 @@ namespace pstore {
     } // namespace freebsd
 
 } // namespace pstore
-#endif // PSTORE_PROCESS_FILE_NAME_HPP
+#endif // PSTORE_SUPPORT_PROCESS_FILE_NAME_HPP

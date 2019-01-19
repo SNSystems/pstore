@@ -160,8 +160,6 @@
 #else
 #    define PSTORE_FALLTHROUGH
 #endif
-#endif // PSTORE_SUPPORT_PORTAB_HPP
-
 
 
 #if PSTORE_HAVE_NONNULL_KEYWORD
@@ -174,3 +172,5 @@
 #else
 #    define PSTORE_NULLABLE
 #endif
+
+#endif // PSTORE_SUPPORT_PORTAB_HPP

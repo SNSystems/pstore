@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef GSL_SPAN_HPP
-#define GSL_SPAN_HPP
+#ifndef PSTORE_SUPPORT_GSL_HPP
+#define PSTORE_SUPPORT_GSL_HPP
 
 #include <array>
 #include <cassert>
@@ -674,4 +674,4 @@ namespace pstore {
     } // namespace gsl
 } // end namespace pstore
 
-#endif // GSL_SPAN_HPP
+#endif // PSTORE_SUPPORT_GSL_HPP

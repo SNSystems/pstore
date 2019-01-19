@@ -51,8 +51,8 @@
  ***************************************************************************
  */
 
-#ifndef PSTORE_CORE_FNV_HPP
-#define PSTORE_CORE_FNV_HPP
+#ifndef PSTORE_SUPPORT_FNV_HPP
+#define PSTORE_SUPPORT_FNV_HPP
 
 #include <cstdint>
 #include <cstdlib>
@@ -98,5 +98,4 @@ namespace pstore {
     };
 
 } // namespace pstore
-#endif // PSTORE_CORE_FNV_HPP
-// eof: include/pstore/fnv.hpp
+#endif // PSTORE_SUPPORT_FNV_HPP

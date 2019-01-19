@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file quoted_string.hpp
 
-#ifndef PSTORE_QUOTED_STRING_HPP
-#define PSTORE_QUOTED_STRING_HPP
+#ifndef PSTORE_SUPPORT_QUOTED_STRING_HPP
+#define PSTORE_SUPPORT_QUOTED_STRING_HPP
 
 #include <string>
 
@@ -54,4 +54,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_QUOTED_STRING_HPP
+#endif // PSTORE_SUPPORT_QUOTED_STRING_HPP

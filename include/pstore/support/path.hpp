@@ -44,8 +44,8 @@
 /// \file path.hpp
 /// \brief Functions to operate on native file paths.
 
-#ifndef PSTORE_PATH_HPP
-#define PSTORE_PATH_HPP (1)
+#ifndef PSTORE_SUPPORT_PATH_HPP
+#define PSTORE_SUPPORT_PATH_HPP (1)
 
 #include <initializer_list>
 #include <string>
@@ -127,4 +127,4 @@ namespace pstore {
 
 #undef PSTORE_PLATFORM_NS
 
-#endif // PATH_HPP
+#endif // PSTORE_SUPPORT_PATH_HPP

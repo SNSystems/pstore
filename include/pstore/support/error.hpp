@@ -44,8 +44,8 @@
 /// \file support/error.hpp
 /// \brief Provides an pstore-specific error codes and a suitable error category for them.
 
-#ifndef PSTORE_ERROR_HPP
-#define PSTORE_ERROR_HPP
+#ifndef PSTORE_SUPPORT_ERROR_HPP
+#define PSTORE_SUPPORT_ERROR_HPP
 
 #include <cstdlib>
 #include <string>
@@ -201,4 +201,4 @@ namespace pstore {
 
 } // end namespace pstore
 
-#endif // PSTORE_ERROR_HPP
+#endif // PSTORE_SUPPORT_ERROR_HPP

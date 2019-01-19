@@ -44,8 +44,8 @@
 /// \file make_unique.hpp
 /// \brief An implementation of std::make_unique<>() for platforms that do not provide it natively.
 
-#ifndef PSTORE_MAKE_UNIQUE_HPP
-#define PSTORE_MAKE_UNIQUE_HPP (1)
+#ifndef PSTORE_SUPPORT_MAKE_UNIQUE_HPP
+#define PSTORE_SUPPORT_MAKE_UNIQUE_HPP (1)
 
 #include <memory>
 #include <type_traits>
@@ -83,4 +83,4 @@ namespace std {
 
 #endif
 
-#endif // PSTORE_MAKE_UNIQUE_HPP
+#endif // PSTORE_SUPPORT_MAKE_UNIQUE_HPP

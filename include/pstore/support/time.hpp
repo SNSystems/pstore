@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef PSTORE_SUPPORT_LOCAL_TIME_HPP
-#define PSTORE_SUPPORT_LOCAL_TIME_HPP
+#ifndef PSTORE_SUPPORT_TIME_HPP
+#define PSTORE_SUPPORT_TIME_HPP
 
 #include <ctime>
 
@@ -54,4 +54,4 @@ namespace pstore {
 
 } // end namespace pstore
 
-#endif // PSTORE_SUPPORT_LOCAL_TIME_HPP
+#endif // PSTORE_SUPPORT_TIME_HPP

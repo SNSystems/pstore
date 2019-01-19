@@ -199,4 +199,4 @@ namespace pstore {
 
     } // namespace bit_count
 } // namespace pstore
-#endif // PSTORE_BIT_COUNT_HPP
+#endif // PSTORE_SUPPORT_BIT_COUNT_HPP

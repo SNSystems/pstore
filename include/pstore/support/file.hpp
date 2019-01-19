@@ -44,8 +44,8 @@
 /// \file file.hpp
 /// \brief Cross platform file management functions and classes.
 
-#ifndef PSTORE_FILE_HPP
-#define PSTORE_FILE_HPP
+#ifndef PSTORE_SUPPORT_FILE_HPP
+#define PSTORE_SUPPORT_FILE_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -816,4 +816,4 @@ namespace pstore {
 #include "file_posix.hpp"
 #endif
 
-#endif // PSTORE_FILE_HPP
+#endif // PSTORE_SUPPORT_FILE_HPP
