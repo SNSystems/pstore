@@ -46,6 +46,7 @@
 #include "pstore/support/logging.hpp"
 
 #include <algorithm>
+#include <array>
 #include <bitset>
 #include <cstdio>
 #include <cstring>
@@ -189,33 +190,43 @@ namespace {
     // log
     // ~~~
     void asl_logger::log (logging::priority p, std::string const & message) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ());
     }
     void asl_logger::log (logging::priority p, char const * message, int d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%d", message, d);
     }
     void asl_logger::log (logging::priority p, char const * message, unsigned d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%u", message, d);
     }
     void asl_logger::log (logging::priority p, char const * message, long d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%ld", message, d);
     }
     void asl_logger::log (logging::priority p, char const * message, unsigned long d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lu", message, d);
     }
     void asl_logger::log (logging::priority p, char const * message, long long d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lld", message, d);
     }
     void asl_logger::log (logging::priority p, char const * message, unsigned long long d) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%llu", message, d);
     }
     void asl_logger::log (logging::priority p, gsl::czstring message) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s", message);
     }
     void asl_logger::log (logging::priority p, gsl::czstring part1, gsl::czstring part2) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%s", part1, part2);
     }
     void asl_logger::log (logging::priority p, gsl::czstring part1, logging::quoted part2) {
+        // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s\"%s\"", part1,
                           static_cast<gsl::czstring> (part2));
     }
@@ -255,23 +266,25 @@ namespace {
         static int priority_code (logging::priority p);
 
         int facility_;
-        char ident_[50];
+        std::array<char, 50> ident_;
     };
 
     // (ctor)
     // ~~~~~~
     syslog_logger::syslog_logger (std::string const & ident, int facility)
-            : facility_ (facility) {
+            : facility_ (facility)
+            , ident_{{0}} {
 
-        std::strncpy (ident_, ident.c_str (), sizeof (ident_));
-        ident_[sizeof (ident_) - 1] = '\0';
+        std::strncpy (ident_.data (), ident.c_str (), sizeof (ident_));
+        ident_[ident_.size () - 1] = '\0';
 
-        openlog (ident_, LOG_PID, facility_);
+        openlog (ident_.data (), LOG_PID, facility_);
     }
 
     // log
     // ~~~
     void syslog_logger::log (logging::priority p, std::string const & message) {
+        // NOLINTNEXTLINE
         syslog (priority_code (p), "%s", message.c_str ());
     }
 
