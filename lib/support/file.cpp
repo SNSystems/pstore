@@ -50,8 +50,8 @@
 #include <cctype>
 #include <cstring>
 #include <iterator>
-#include <stdexcept>
 #include <sstream>
+#include <stdexcept>
 
 #include "pstore/config/config.hpp"
 #include "pstore/support/portab.hpp"

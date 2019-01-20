@@ -59,14 +59,14 @@
 
 // platform includes
 #include <fcntl.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#    include <unistd.h>
 
-#include "pstore/support/small_vector.hpp"
-#include "pstore/support/path.hpp"
-#include "pstore/support/quoted_string.hpp"
-
+// local includes
+#    include "pstore/support/path.hpp"
+#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/small_vector.hpp"
 
 namespace {
 
@@ -99,17 +99,25 @@ namespace pstore {
             int oflag = is_writable_ ? O_RDWR : O_RDONLY;
             switch (create) {
             // Creates a new file, only if it does not already exist
-            case create_mode::create_new: oflag |= O_CREAT | O_EXCL; break;
+            case create_mode::create_new:
+                // NOLINTNEXTLINE(hicpp-signed-bitwise)
+                oflag |= O_CREAT | O_EXCL;
+                break;
             // Opens a file only if it already exists
             case create_mode::open_existing: break;
             // Opens an existing file if present, and creates a new file otherwise.
-            case create_mode::open_always: oflag |= O_CREAT; break;
+            case create_mode::open_always:
+                // NOLINTNEXTLINE(hicpp-signed-bitwise)
+                oflag |= O_CREAT;
+                break;
             }
 
             // user, group, and others have read permission.
+            // NOLINTNEXTLINE(hicpp-signed-bitwise)
             mode_t pmode = S_IRUSR | S_IRGRP | S_IROTH;
             if (is_writable_) {
                 // user, group, and others have read and write permission.
+                // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 pmode |= S_IWUSR | S_IWGRP | S_IWOTH;
             }
 

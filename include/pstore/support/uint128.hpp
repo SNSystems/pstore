@@ -128,7 +128,7 @@ namespace pstore {
 
 #if PSTORE_HAVE_UINT128_T
         constexpr std::uint64_t high () const noexcept {
-            return static_cast<std::uint64_t> (v_ >> 64);
+            return static_cast<std::uint64_t> (v_ >> 64U);
         }
         constexpr std::uint64_t low () const noexcept {
             return static_cast<std::uint64_t> (v_ & max64);
@@ -181,7 +181,7 @@ namespace pstore {
     // ~~~~
 #if PSTORE_HAVE_UINT128_T
     inline constexpr uint128::uint128 (std::uint64_t high, std::uint64_t low) noexcept
-            : v_{__uint128_t{high} << 64 | __uint128_t{low}} {}
+            : v_{__uint128_t{high} << 64U | __uint128_t{low}} {}
 #else
     inline constexpr uint128::uint128 (std::uint64_t high, std::uint64_t low) noexcept
             : low_{low}
@@ -376,14 +376,14 @@ namespace pstore {
     // ~~~~~~~~~~~~~~~
 #if PSTORE_HAVE_UINT128_T
     inline __uint128_t uint128::bytes_to_uint128 (std::uint8_t const * bytes) noexcept {
-        return __uint128_t{bytes[0]} << 120 | __uint128_t{bytes[1]} << 112 |
-               __uint128_t{bytes[2]} << 104 | __uint128_t{bytes[3]} << 96 |
-               __uint128_t{bytes[4]} << 88 | __uint128_t{bytes[5]} << 80 |
-               __uint128_t{bytes[6]} << 72 | __uint128_t{bytes[7]} << 64 |
-               __uint128_t{bytes[8]} << 56 | __uint128_t{bytes[9]} << 48 |
-               __uint128_t{bytes[10]} << 40 | __uint128_t{bytes[11]} << 32 |
-               __uint128_t{bytes[12]} << 24 | __uint128_t{bytes[13]} << 16 |
-               __uint128_t{bytes[14]} << 8 | __uint128_t{bytes[15]};
+        return __uint128_t{bytes[0]} << 120U | __uint128_t{bytes[1]} << 112U |
+               __uint128_t{bytes[2]} << 104U | __uint128_t{bytes[3]} << 96U |
+               __uint128_t{bytes[4]} << 88U | __uint128_t{bytes[5]} << 80U |
+               __uint128_t{bytes[6]} << 72U | __uint128_t{bytes[7]} << 64U |
+               __uint128_t{bytes[8]} << 56U | __uint128_t{bytes[9]} << 48U |
+               __uint128_t{bytes[10]} << 40U | __uint128_t{bytes[11]} << 32U |
+               __uint128_t{bytes[12]} << 24U | __uint128_t{bytes[13]} << 16U |
+               __uint128_t{bytes[14]} << 8U | __uint128_t{bytes[15]};
     }
 #else
     inline std::uint64_t uint128::bytes_to_uint64 (std::uint8_t const * bytes) noexcept {

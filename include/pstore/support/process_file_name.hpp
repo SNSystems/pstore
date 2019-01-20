@@ -54,8 +54,8 @@
 #include <string>
 #include <type_traits>
 
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     /// Returns the path of the current process image.

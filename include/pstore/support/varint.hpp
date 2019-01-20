@@ -124,13 +124,13 @@ namespace pstore {
             assert (bytes < 9);
             // clang-format off
             switch (bytes) {
-            case 8: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 7: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 6: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 5: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 4: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 3: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
-            case 2: *(out++) = x & 0xFFU; x >>= 8; PSTORE_FALLTHROUGH;
+            case 8: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 7: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 6: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 5: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 4: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 3: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
+            case 2: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
             default:
                 *(out++) = x & 0xFFU;
             }

@@ -46,12 +46,12 @@
 #ifndef PSTORE_SUPPORT_ROTATING_LOG_HPP
 #define PSTORE_SUPPORT_ROTATING_LOG_HPP (1)
 
-#include <sstream>
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <type_traits>
 
-#include "logging.hpp"
+#include "pstore/support/logging.hpp"
 
 namespace pstore {
     namespace logging {

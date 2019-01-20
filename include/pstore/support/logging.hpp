@@ -53,8 +53,8 @@
 #include <mutex>
 #include <string>
 
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/file.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/thread.hpp"
 #include "pstore/support/to_string.hpp"
 

@@ -148,7 +148,7 @@ namespace pstore {
         template <typename CharType>
         inline constexpr bool is_utf_char_start (CharType c) {
             using uchar_type = typename std::make_unsigned<CharType>::type;
-            return (static_cast<uchar_type> (c) & 0xC0) != 0x80;
+            return (static_cast<uchar_type> (c) & 0xC0U) != 0x80U;
         }
 
         ///@{

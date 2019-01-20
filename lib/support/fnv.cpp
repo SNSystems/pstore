@@ -72,7 +72,8 @@ namespace {
 #ifdef NO_FNV_GCC_OPTIMIZATION
         hval *= fnv_64_prime;
 #else
-        hval += (hval << 1) + (hval << 4) + (hval << 5) + (hval << 7) + (hval << 8) + (hval << 40);
+        hval += (hval << 1U) + (hval << 4U) + (hval << 5U) + (hval << 7U) + (hval << 8U) +
+                (hval << 40U);
 #endif
         return hval;
     }
@@ -99,4 +100,3 @@ namespace pstore {
     }
 
 } // namespace pstore
-// eof: lib/pstore/fnv.cpp

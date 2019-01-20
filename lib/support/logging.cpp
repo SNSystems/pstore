@@ -338,6 +338,7 @@ namespace pstore {
 #endif
 #if PSTORE_HAVE_SYS_LOG_H
             if (enabled.test (handlers::syslog)) {
+                // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 loggers->emplace_back (new syslog_logger (ident, LOG_USER));
             }
 #endif
