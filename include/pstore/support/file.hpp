@@ -516,8 +516,8 @@ namespace pstore {
             /// The type which can be used to memory-map instances of in_memory files.
             using memory_mapper = pstore::in_memory_mapper;
 
-            in_memory (std::shared_ptr<void> buffer, std::uint64_t length, std::uint64_t eof = 0,
-                       bool writable = true) noexcept
+            in_memory (std::shared_ptr<void> const & buffer, std::uint64_t length,
+                       std::uint64_t eof = 0, bool writable = true) noexcept
                     : buffer_ (std::static_pointer_cast<std::uint8_t> (buffer))
                     , length_ (length)
                     , eof_ (eof)
@@ -702,10 +702,10 @@ namespace pstore {
 
 #ifdef _WIN32
             using oshandle = HANDLE;
-            oshandle const invalid_oshandle = INVALID_HANDLE_VALUE;
+            static constexpr oshandle invalid_oshandle = INVALID_HANDLE_VALUE;
 #else
             using oshandle = int;
-            oshandle const invalid_oshandle = -1;
+            static constexpr oshandle invalid_oshandle = -1;
 #endif
 
             oshandle raw_handle () noexcept { return file_; }
