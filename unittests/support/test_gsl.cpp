@@ -126,20 +126,20 @@ TEST (GslSpan, SizeOptimization) {
 
 TEST (GslSpan, FromNullptrCtor) {
     {
-        span<int> s = nullptr;
+        auto s = span<int>{nullptr};
         EXPECT_EQ (s.length (), 0);
         EXPECT_EQ (s.data (), nullptr);
 
-        span<int const> cs = nullptr;
+        auto cs = span<int const>{nullptr};
         EXPECT_EQ (cs.length (), 0);
         EXPECT_EQ (cs.data (), nullptr);
     }
     {
-        span<int, 0> s = nullptr;
+        auto s = span<int, 0>{nullptr};
         EXPECT_EQ (s.length (), 0);
         EXPECT_EQ (s.data (), nullptr);
 
-        span<int const, 0> cs = nullptr;
+        auto cs = span<int const, 0>{nullptr};
         EXPECT_EQ (cs.length (), 0);
         EXPECT_EQ (cs.data (), nullptr);
     }
@@ -759,7 +759,7 @@ TEST (GslSpan, CopyMoveAndAssignment) {
 
     int arr[] = {3, 4, 5};
 
-    span<int const> s2 = arr;
+    auto s2 = span<int const>{arr};
     EXPECT_EQ (s2.length (), 3);
     EXPECT_EQ (s2.data (), &arr[0]);
 
@@ -767,7 +767,7 @@ TEST (GslSpan, CopyMoveAndAssignment) {
     EXPECT_TRUE (s2.empty ());
 
     auto get_temp_span = [&]() -> span<int> { return {&arr[1], 2}; };
-    auto use_span = [&](span<const int> s) {
+    auto use_span = [&](span<int const> s) {
         EXPECT_EQ (s.length (), 2);
         EXPECT_EQ (s.data (), &arr[1]);
     };
@@ -782,12 +782,12 @@ TEST (GslSpan, First) {
     int arr[5] = {1, 2, 3, 4, 5};
 
     {
-        span<int, 5> av = arr;
+        auto av = span<int, 5>{arr};
         EXPECT_EQ (av.first<2> ().length (), 2);
         EXPECT_EQ (av.first (2).length (), 2);
     }
     {
-        span<int, 5> av = arr;
+        auto av = span<int, 5>{arr};
         EXPECT_EQ (av.first<0> ().length (), 0);
         EXPECT_EQ (av.first (0).length (), 0);
     }

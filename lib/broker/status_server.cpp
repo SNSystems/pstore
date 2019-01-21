@@ -208,7 +208,7 @@ namespace {
     using json_parser = pstore::json::parser<pstore::json::null_output>;
     using socket_descriptor = pstore::broker::socket_descriptor;
 
-    std::tuple<bool, bool> handle_request (pstore::gsl::span<char const> buf,
+    std::tuple<bool, bool> handle_request (pstore::gsl::span<char> buf,
                                            socket_descriptor::value_type clifd,
                                            json_parser & parser) {
         auto report_error = [](std::error_code err) {

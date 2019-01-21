@@ -131,7 +131,7 @@ namespace pstore {
                     return *this;
                 }
 
-                span_iterator operator++ (int) noexcept {
+                span_iterator const operator++ (int) noexcept {
                     auto ret = *this;
                     ++(*this);
                     return ret;
@@ -143,7 +143,7 @@ namespace pstore {
                     return *this;
                 }
 
-                span_iterator operator-- (int) const noexcept {
+                span_iterator const operator-- (int) const noexcept {
                     auto ret = *this;
                     --(*this);
                     return ret;
@@ -211,7 +211,7 @@ namespace pstore {
                     std::swap (span_, rhs.span_);
                 }
 
-            protected:
+            private:
                 Span const * span_;
                 std::ptrdiff_t index_;
             };
@@ -240,7 +240,7 @@ namespace pstore {
                 constexpr extent_type () noexcept = default;
 
                 template <index_type Other>
-                extent_type (extent_type<Other> ext) {
+                explicit extent_type (extent_type<Other> ext) {
                     static_assert (
                         Other == Extent || Other == dynamic_extent,
                         "Mismatch between fixed-size extent and size of initializing data.");
@@ -248,7 +248,7 @@ namespace pstore {
                     assert (ext.size () == Extent);
                 }
 
-                extent_type (index_type size) {
+                explicit extent_type (index_type size) noexcept {
                     (void) size;
                     assert (size == Extent);
                 }
@@ -296,6 +296,9 @@ namespace pstore {
             // [span.cons], span constructors, copy, assignment, and destructor
             constexpr span () noexcept
                     : storage_ (nullptr, details::extent_type<0> ()) {}
+            // Disable the clang-tidy check for explicit single-argument constructors. We actively
+            // want to allow implicit conversions to span<>.
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             constexpr span (std::nullptr_t) noexcept
                     : span () {}
             constexpr span (pointer ptr, index_type count)
@@ -306,22 +309,27 @@ namespace pstore {
 
 
             template <size_t N>
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             constexpr span (element_type (&arr)[N]) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <size_t N, class ArrayElementType = element_type>
             constexpr span (std::array<ArrayElementType, N> & arr) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <size_t N, class ArrayElementType = element_type>
             constexpr span (std::array<ArrayElementType, N> const & arr) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename MemberType>
             constexpr span (std::vector<MemberType> & cont)
                     : span (cont.data (), static_cast<index_type> (cont.size ())) {}
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename MemberType>
             constexpr span (std::vector<MemberType> const & cont)
                     : span (cont.data (), static_cast<index_type> (cont.size ())) {}
@@ -330,12 +338,15 @@ namespace pstore {
             template <typename ArrayElementType = std::add_pointer<element_type>>
             constexpr span (std::unique_ptr<ArrayElementType> const & ptr, index_type count)
                     : storage_ (ptr.get (), count) {}
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             constexpr span (std::unique_ptr<element_type> const & ptr)
                     : storage_ (ptr.get (), ptr.get () ? 1 : 0) {}
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             constexpr span (std::shared_ptr<element_type> const & ptr)
                     : storage_ (ptr.get (), ptr.get () ? 1 : 0) {}
 
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename OtherElementType, std::ptrdiff_t OtherExtent>
             constexpr span (span<OtherElementType, OtherExtent> const & other)
                     : storage_ (other.data (), details::extent_type<OtherExtent> (other.size ())) {}
@@ -596,22 +607,27 @@ namespace pstore {
                            "T cannot be assigned nullptr.");
 
         public:
+            // NOLINTNEXTLINE (hicpp-explicit-conversions)
             not_null (T t) noexcept
                     : ptr_ (t) {
                 ensure_invariant ();
             }
+
+            // prevents compilation when someone attempts to assign a nullptr
+            not_null (std::nullptr_t) = delete;
+            not_null (int) = delete;
+
+            ~not_null () = default;
+
             not_null & operator= (T const & t) noexcept {
                 ptr_ = t;
                 ensure_invariant ();
                 return *this;
             }
-
             not_null (not_null const & other) = default;
             not_null & operator= (not_null const & other) = default;
 
             // prevents compilation when someone attempts to assign a nullptr
-            not_null (std::nullptr_t) = delete;
-            not_null (int) = delete;
             not_null<T> & operator= (std::nullptr_t) = delete;
             not_null<T> & operator= (int) = delete;
 
@@ -623,23 +639,23 @@ namespace pstore {
             bool operator== (T const & rhs) const noexcept { return ptr_ == rhs; }
             bool operator!= (T const & rhs) const noexcept { return !(*this == rhs); }
 
-        private:
-            T ptr_;
-
-            // we assume that the compiler can hoist/prove away most of the checks inlined from this
-            // function if not, we could make them optional via conditional compilation
-            void ensure_invariant () const noexcept { assert (ptr_ != nullptr); }
-
             // unwanted operators...pointers only point to single objects!
             // TODO ensure all arithmetic ops on this type are unavailable
             not_null<T> & operator++ () = delete;
             not_null<T> & operator-- () = delete;
-            not_null<T> operator++ (int) = delete;
-            not_null<T> operator-- (int) = delete;
+            not_null<T> const operator++ (int) = delete;
+            not_null<T> const operator-- (int) = delete;
             not_null<T> & operator+ (size_t) = delete;
             not_null<T> & operator+= (size_t) = delete;
             not_null<T> & operator- (size_t) = delete;
             not_null<T> & operator-= (size_t) = delete;
+
+        private:
+            T ptr_;
+
+            // We assume that the compiler can hoist/prove away most of the checks inlined from this
+            // function. If not, we could make them optional via conditional compilation.
+            void ensure_invariant () const noexcept { assert (ptr_ != nullptr); }
         };
 
 
