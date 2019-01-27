@@ -62,6 +62,22 @@ function (pstore_can_tidy result)
 endfunction (pstore_can_tidy)
 
 
+# pstore_add_tidy_all_target
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~
+function (pstore_add_tidy_all_target)
+
+    pstore_can_tidy (can_tidy)
+    if (can_tidy)
+         find_program (PSTORE_CLANG_TIDY "clang-tidy")
+         if (NOT PSTORE_CLANG_TIDY STREQUAL "PSTORE_CLANG_TIDY-NOTFOUND")
+             add_custom_target (pstore-clang-tidy-all)
+        endif ()
+    endif ()
+
+endfunction (pstore_add_tidy_all_target)
+
+
+
 # pstore_find_clang_tidy
 # ~~~~~~~~~~~~~~~~~~~~~~
 # Locates the clang-tidy executable (if we're using a supported host/compiler
@@ -143,8 +159,6 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
                     endif ()
                 endforeach (P)
                 set (PSTORE_SYS_INCLUDES ${sys_includes} CACHE INTERNAL "The compiler's system include paths")
-
-                add_custom_target (pstore-clang-tidy-all)
             endif ()
         endif (NOT PSTORE_SYS_INCLUDES)
         
@@ -155,7 +169,7 @@ endfunction (pstore_find_clang_tidy)
 
 
 
-function (add_clang_tidy_target source) 
+function (add_clang_tidy_target source_target)
 
     pstore_find_clang_tidy (tidy_path sys_includes)
 
@@ -163,19 +177,33 @@ function (add_clang_tidy_target source)
         set (clang_tidy_checks -checks=cert-*,misc-*,modernize-*,clang-analyzer-nullability*,hicpp-*,performance-*,portability-*)
 
         # Collect the *.cpp files: clang-tidy will scan these.
-        get_target_property (source_files "${source}" SOURCES)
-    
+        get_target_property (source_files "${source_target}" SOURCES)
+
         # In cmake 3.6 or later we could use
         #   list (FILTER source_files INCLUDE REGEX "cpp")
         # However, this needs to work in 3.4...
+
+        get_target_property (source_target_dir "${source_target}" SOURCE_DIR)
+
         set (cpp_files "")
         foreach (src_file ${source_files})
-            if (${src_file} MATCHES "\.cpp$")
-                list (APPEND cpp_files ${src_file})
+            get_filename_component (src_file_name "${src_file}" NAME)
+            get_filename_component (src_file_directory "${src_file}" DIRECTORY)
+            if (NOT src_file_directory)
+               get_target_property (src_file_directory "${source_target}" SOURCE_DIR)
+            endif ()
+
+            # Only target source files ending in .cpp and in the target's
+            # source directory.
+
+            if (    ("${src_file_name}" MATCHES "\.cpp$")
+                AND ("${src_file_directory}" STREQUAL "${source_target_dir}")
+            )
+                list (APPEND cpp_files "${src_file}")
             endif ()
         endforeach (src_file)
-
-        set (tidy_target "${source}-tidy")
+        
+        set (tidy_target "${source_target}-tidy")
 
         add_custom_target ("${tidy_target}"
             COMMAND "${tidy_path}"
@@ -185,10 +213,10 @@ function (add_clang_tidy_target source)
                     --
                     -std=c++11
                     -D NDEBUG
-                    "-I$<JOIN:$<TARGET_PROPERTY:${source},INCLUDE_DIRECTORIES>,;-I>"
+                    "-I$<JOIN:$<TARGET_PROPERTY:${source_target},INCLUDE_DIRECTORIES>,;-I>"
                     ${sys_includes}
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            COMMENT "Running clang-tidy for target ${source}"
+            WORKING_DIRECTORY "${source_target_dir}"
+            COMMENT "Running clang-tidy for target ${source_target}"
             COMMAND_EXPAND_LISTS
         )
         set_target_properties ("${tidy_target}" PROPERTIES FOLDER "pstore clang-tidy")

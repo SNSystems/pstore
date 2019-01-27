@@ -134,6 +134,10 @@ endif ()
 
 
 add_subdirectory (3rd_party)
+
+include (clang_tidy)
+pstore_add_tidy_all_target ()
+
 include (run_pstore_unit_test)
 add_subdirectory (lib)    # add the PStore library itself
 add_subdirectory (examples)
