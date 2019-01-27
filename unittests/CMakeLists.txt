@@ -43,6 +43,22 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
+
+
+add_library (pstore-unit-test-harness STATIC harness.cpp)
+set_target_properties (pstore-unit-test-harness PROPERTIES FOLDER "pstore test libraries")
+set_property (TARGET pstore-unit-test-harness PROPERTY CXX_STANDARD 11)
+set_property (TARGET pstore-unit-test-harness PROPERTY CXX_STANDARD_REQUIRED Yes)
+add_pstore_additional_compiler_flag (pstore-unit-test-harness)
+target_link_libraries (pstore-unit-test-harness PUBLIC gtest gmock)
+if (PSTORE_IS_INSIDE_LLVM)
+    include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
+    include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
+    target_link_libraries (pstore-unit-test-harness PUBLIC LLVMSupport)
+endif (PSTORE_IS_INSIDE_LLVM)
+
+
+
 add_subdirectory (broker)
 add_subdirectory (cmd_util)
 add_subdirectory (common)
