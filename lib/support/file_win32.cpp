@@ -174,6 +174,8 @@ namespace {
 
 namespace pstore {
     namespace file {
+        file_handle::oshandle const file_handle::invalid_oshandle = INVALID_HANDLE_VALUE;
+
         // open
         // ~~~~
         void file_handle::open (create_mode create,

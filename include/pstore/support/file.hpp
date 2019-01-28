@@ -702,7 +702,9 @@ namespace pstore {
 
 #ifdef _WIN32
             using oshandle = HANDLE;
-            static constexpr oshandle invalid_oshandle = INVALID_HANDLE_VALUE;
+            // TODO: making invalid_oshandle constexpr results in it having the value 0 (rather than
+            // -1).
+            static oshandle const invalid_oshandle;
 #else
             using oshandle = int;
             static constexpr oshandle invalid_oshandle = -1;
