@@ -49,7 +49,10 @@
 #cmakedefine PSTORE_IS_BIG_ENDIAN 1
 
 /// Does the compiler support __uint128_t?
+#cmakedefine PSTORE_DISABLE_UINT128_T  1
+#if !PSTORE_DISABLE_UINT128_T
 #cmakedefine PSTORE_HAVE_UINT128_T  1
+#endif
 
 /// Does the compiler support __attribute__((noreturn))?
 #cmakedefine PSTORE_HAVE_ATTRIBUTE_NORETURN  1

@@ -101,9 +101,22 @@ option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to beh
 option (PSTORE_ENABLE_BROKER_TESTS "Run broker system tests. Disable if the compiler does not support exceptions." Yes)
 option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")
+option (PSTORE_DISABLE_UINT128_T "Disable support for __uint128_t")
 
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
+endif ()
+
+
+find_program (PSTORE_KLEE_PATH klee)
+set (PSTORE_BITCODE No)
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
+    if ("${PSTORE_KLEE_PATH}" STREQUAL "PSTORE_KLEE_PATH-NOTFOUND")
+        message (STATUS "Klee was not found")
+    else ()
+        message (STATUS "Found klee at: ${PSTORE_KLEE_PATH}")
+        set (PSTORE_BITCODE Yes)
+    endif ()
 endif ()
 
 

@@ -64,11 +64,14 @@ namespace pstore {
 } // end namespace pstore
 
 namespace std {
+
     template <>
     struct is_unsigned<pstore::uint128> : true_type {};
     template <>
     struct is_signed<pstore::uint128> : false_type {};
 
+    // Provide the is_(un)signed<__uint128_t> if we have support for the type in the compiler but
+    // not in the standard library.
 #if PSTORE_HAVE_UINT128_T && !PSTORE_HAVE_UINT128_TRAITS_SUPPORT
     template <>
     struct is_unsigned<__uint128_t> : true_type {};
@@ -79,6 +82,31 @@ namespace std {
 } // namespace std
 
 namespace pstore {
+
+    namespace details {
+
+        /// A function object which can extract the high 64-bits from an integer type. If the
+        /// compiler doesn't support __uint128_t then this value is always 0.
+        template <typename T, typename Enable = void>
+        class high {
+        public:
+            constexpr std::uint64_t operator() (T) const noexcept { return 0; }
+        };
+
+        /// A function object which can extract the high 64-bits from an integer type. This partial
+        /// specialization of the template covers the case where the compiler has native support for
+        /// the __uint128_t type. Note that we can't use PSTORE_HAVE_UINT128_T to determine this
+        /// because we enable this flag to be disabled for testing.
+        template <typename T>
+        class high<T, typename std::enable_if<(sizeof (T) > sizeof (std::uint64_t))>::type> {
+        public:
+            constexpr std::uint64_t operator() (T v) const noexcept {
+                return (v >> 64U) & ((T{1} << 64) - 1U);
+            }
+        };
+
+    } // end namespace details
+
 
     class alignas (16) uint128 {
     public:
@@ -196,7 +224,7 @@ namespace pstore {
 #if PSTORE_HAVE_UINT128_T
         return v_ == rhs;
 #else
-        return this->high () == 0U && this->low () == rhs;
+        return this->high () == details::high<T>{}(rhs) && this->low () == (rhs & max64);
 #endif
     }
 
@@ -215,7 +243,7 @@ namespace pstore {
 #if PSTORE_HAVE_UINT128_T
         ++v_;
 #else
-        if (++low_ == 0) {
+        if (++low_ == 0U) {
             ++high_;
         }
 #endif
@@ -233,8 +261,11 @@ namespace pstore {
 #if PSTORE_HAVE_UINT128_T
         --v_;
 #else
-        if (low_-- == 0) {
+        if (low_ == 0U) {
+            low_ = max64;
             --high_;
+        } else {
+            --low_;
         }
 #endif
         return *this;
@@ -345,11 +376,15 @@ namespace pstore {
         return {v_ << n};
 #else
         if (n >= 64U) {
-            return uint128{low () << (n - 64U), 0U};
+            return {low () << (n - 64U), 0U};
+        }
+        if (n == 0U) {
+            return *this;
         }
         std::uint64_t const mask = (std::uint64_t{1} << n) - 1U;
-        std::uint64_t const top_of_low_mask = mask << (64U - n);
-        std::uint64_t const bottom_of_high = (low () & top_of_low_mask) >> (64U - n);
+        auto const dist = 64U - n;
+        std::uint64_t const top_of_low_mask = mask << dist;
+        std::uint64_t const bottom_of_high = (low () & top_of_low_mask) >> dist;
         return {(high () << n) | bottom_of_high, low () << n};
 #endif
     }
@@ -364,7 +399,7 @@ namespace pstore {
         if (n >= 64) {
             low_ = high_ >> (n - 64U);
             high_ = 0U;
-        } else {
+        } else if (n > 0) {
             std::uint64_t const mask = (std::uint64_t{1} << n) - 1U;
             low_ = (low_ >> n) | ((high_ & mask) << (64U - n));
             high_ >>= n;

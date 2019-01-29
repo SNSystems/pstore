@@ -71,11 +71,13 @@ check_cxx_source_compiles (
     PSTORE_HAVE_ATTRIBUTE_NORETURN
 )
 
-check_cxx_source_compiles (
-    "int main () {
-        __uint128_t a;
-    }"
-    PSTORE_HAVE_UINT128_T)
+if (NOT PSTORE_DISABLE_UINT128_T)
+    check_cxx_source_compiles (
+        "int main () {
+            __uint128_t a;
+        }"
+        PSTORE_HAVE_UINT128_T)
+endif ()
 
 if (PSTORE_HAVE_UINT128)
     check_cxx_source_compiles (
@@ -308,3 +310,13 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 endif (PSTORE_IS_INSIDE_LLVM)
+
+if (PSTORE_BITCODE)
+    add_pstore_library (pstore-support-bc STATIC ${PSTORE_SUPPORT_LIB_SRC})
+    target_compile_options (pstore-support-bc PRIVATE -emit-llvm)
+    target_compile_options (pstore-support-bc PRIVATE
+        -fsanitize=signed-integer-overflow
+        -fsanitize=unsigned-integer-overflow
+    )
+    target_link_libraries (pstore-support-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+endif (PSTORE_BITCODE)

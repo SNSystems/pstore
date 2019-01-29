@@ -62,3 +62,13 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
 )
 add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
 target_link_libraries (pstore-support-unit-tests PRIVATE pstore-support pstore-common)
+
+
+if (NOT "${PSTORE_KLEE_PATH}" STREQUAL "PSTORE_KLEE_PATH-NOTFOUND")
+    if (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 9)
+         message (WARNING "Klee targets require cmake vesion 3.9 or later")
+    else ()
+        add_subdirectory (klee EXCLUDE_FROM_ALL)
+    endif ()
+endif ()
+

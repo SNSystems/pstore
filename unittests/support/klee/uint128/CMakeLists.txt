@@ -1,0 +1,5 @@
+add_klee_test (uint128 add)
+add_klee_test (uint128 postinc)
+add_klee_test (uint128 postdec)
+add_klee_test (uint128 shiftleft)
+#add_klee_test (uint128 shiftrightassign)
