@@ -67,15 +67,11 @@ def _select_generator(system):
     """Select the most appropriate generator based on system"""
     if system == 'darwin':
         return 'Xcode'
-    elif system == 'linux':
-        if _find_on_path('ninja'):
-            return 'Ninja'
-        else:
-            return 'Unix Makefiles'
+    elif system == 'linux' and _find_on_path('ninja'):
+        return 'Ninja'
     elif system == 'win32':
         return 'Visual Studio 15 2017 Win64'
-    else:
-        return 'Unix Makefiles'
+    return 'Unix Makefiles'
 
 def _options (args):
     platform_name = sys.platform
