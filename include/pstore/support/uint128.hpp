@@ -61,7 +61,7 @@
 
 namespace pstore {
     class uint128;
-} // end anonymous namespace
+} // end namespace pstore
 
 namespace std {
     template <>
@@ -89,12 +89,12 @@ namespace pstore {
         /// Construct from an unsigned integer that's 128-bits wide or fewer.
         template <typename IntType,
                   typename = typename std::enable_if<std::is_unsigned<IntType>::value>::type>
-        constexpr uint128 (IntType v) noexcept
+        constexpr uint128 (IntType v) noexcept // NOLINT(hicpp-explicit-conversions)
                 : v_{v} {}
 
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
         /// value.
-        explicit uint128 (std::uint8_t const * bytes) noexcept
+        explicit constexpr uint128 (std::uint8_t const * bytes) noexcept
                 : v_{bytes_to_uint128 (bytes)} {}
 #else
         /// Construct from an unsigned integer that's 64-bits wide or fewer.
@@ -105,7 +105,7 @@ namespace pstore {
 
         /// \param bytes Points to an array of 16 bytes whose contents represent a 128 bit
         /// value.
-        explicit uint128 (std::uint8_t const * bytes) noexcept
+        explicit constexpr uint128 (std::uint8_t const * bytes) noexcept
                 : low_{bytes_to_uint64 (&bytes[8])}
                 , high_{bytes_to_uint64 (&bytes[0])} {}
 #endif
@@ -115,6 +115,7 @@ namespace pstore {
 
         constexpr uint128 (uint128 const &) = default;
         constexpr uint128 (uint128 &&) noexcept = default;
+        ~uint128 () noexcept = default;
 
         uint128 & operator= (uint128 const &) = default;
         uint128 & operator= (uint128 &&) noexcept = default;
@@ -143,9 +144,9 @@ namespace pstore {
         uint128 operator~ () const noexcept;
 
         uint128 & operator++ () noexcept;
-        uint128 operator++ (int) noexcept;
+        uint128 const operator++ (int) noexcept;
         uint128 & operator-- () noexcept;
-        uint128 operator-- (int) noexcept;
+        uint128 const operator-- (int) noexcept;
 
         uint128 & operator+= (uint128 b);
         uint128 & operator-= (uint128 b) { return *this += -b; }
@@ -165,11 +166,11 @@ namespace pstore {
         static constexpr std::uint64_t max64 = std::numeric_limits<std::uint64_t>::max ();
 #if PSTORE_HAVE_UINT128_T
         __uint128_t v_ = 0U;
-        static __uint128_t bytes_to_uint128 (std::uint8_t const * bytes) noexcept;
+        static constexpr __uint128_t bytes_to_uint128 (std::uint8_t const * bytes) noexcept;
 #else
         std::uint64_t low_ = 0U;
         std::uint64_t high_ = 0U;
-        static std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept;
+        static constexpr std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept;
 #endif // PSTORE_HAVE_UINT128_T
     };
 
@@ -220,7 +221,7 @@ namespace pstore {
 #endif
         return *this;
     }
-    inline uint128 uint128::operator++ (int) noexcept {
+    inline uint128 const uint128::operator++ (int) noexcept {
         auto const prev = *this;
         ++(*this);
         return prev;
@@ -239,7 +240,7 @@ namespace pstore {
         return *this;
     }
 
-    inline uint128 uint128::operator-- (int) noexcept {
+    inline uint128 const uint128::operator-- (int) noexcept {
         auto const prev = *this;
         --(*this);
         return prev;
@@ -375,7 +376,7 @@ namespace pstore {
     // bytes_to_uintXX
     // ~~~~~~~~~~~~~~~
 #if PSTORE_HAVE_UINT128_T
-    inline __uint128_t uint128::bytes_to_uint128 (std::uint8_t const * bytes) noexcept {
+    inline constexpr __uint128_t uint128::bytes_to_uint128 (std::uint8_t const * bytes) noexcept {
         return __uint128_t{bytes[0]} << 120U | __uint128_t{bytes[1]} << 112U |
                __uint128_t{bytes[2]} << 104U | __uint128_t{bytes[3]} << 96U |
                __uint128_t{bytes[4]} << 88U | __uint128_t{bytes[5]} << 80U |
@@ -386,7 +387,7 @@ namespace pstore {
                __uint128_t{bytes[14]} << 8U | __uint128_t{bytes[15]};
     }
 #else
-    inline std::uint64_t uint128::bytes_to_uint64 (std::uint8_t const * bytes) noexcept {
+    inline constexpr std::uint64_t uint128::bytes_to_uint64 (std::uint8_t const * bytes) noexcept {
         return std::uint64_t{bytes[0]} << 56 | std::uint64_t{bytes[1]} << 48 |
                std::uint64_t{bytes[2]} << 40 | std::uint64_t{bytes[3]} << 32 |
                std::uint64_t{bytes[4]} << 24 | std::uint64_t{bytes[5]} << 16 |
@@ -437,6 +438,7 @@ namespace std {
     template <>
     class numeric_limits<pstore::uint128> {
         using type = pstore::uint128;
+
     public:
         static constexpr bool is_specialized = true;
         static constexpr bool is_signed = false;
@@ -463,13 +465,20 @@ namespace std {
         static constexpr const int max_exponent10 = 0;
 
         static constexpr const bool has_infinity = false;
-        static constexpr const bool has_quiet_NaN = false;
+        static constexpr const bool has_quiet_NaN = false; // NOLINT(readability-identifier-naming)
+        // NOLINTNEXTLINE(readability-identifier-naming)
         static constexpr const bool has_signaling_NaN = false;
         static constexpr const float_denorm_style has_denorm = denorm_absent;
         static constexpr const bool has_denorm_loss = false;
         static constexpr type infinity () noexcept { return {0U}; }
-        static constexpr type quiet_NaN () noexcept { return {0U}; }
-        static constexpr type signaling_NaN () noexcept { return {0U}; }
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        static constexpr type quiet_NaN () noexcept {
+            return {0U};
+        }
+        // NOLINTNEXTLINE(readability-identifier-naming)
+        static constexpr type signaling_NaN () noexcept {
+            return {0U};
+        }
         static constexpr type denorm_min () noexcept { return {0U}; }
 
         static constexpr const bool is_iec559 = false;
