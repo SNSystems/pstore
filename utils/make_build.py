@@ -61,13 +61,17 @@ PLATFORM_TO_DIR_MAP = {
     'darwin': 'mac',
 }
 
-PLATFORM_TO_GENERATOR_MAP = {
-    'darwin': 'Xcode',
-    'linux': 'Ninja',
-    'win32': 'Visual Studio 15 2017 Win64',
-}
-
 _logger = logging.getLogger (__name__)
+
+def _select_generator(system):
+    """Select the most appropriate generator based on system"""
+    if system == 'darwin':
+        return 'Xcode'
+    elif system == 'linux' and _find_on_path('ninja'):
+        return 'Ninja'
+    elif system == 'win32':
+        return 'Visual Studio 15 2017 Win64'
+    return 'Unix Makefiles'
 
 def _options (args):
     platform_name = sys.platform
@@ -89,7 +93,7 @@ def _options (args):
     if options.directory is None:
         options.directory = 'build_' + PLATFORM_TO_DIR_MAP.get (options.system, options.system)
     if options.generator is None:
-        options.generator = PLATFORM_TO_GENERATOR_MAP.get (options.system, 'Unix Makefiles')
+        options.generator = _select_generator(options.system)
     return options
 
 
