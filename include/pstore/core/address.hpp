@@ -152,13 +152,13 @@ namespace pstore {
         constexpr std::uint64_t absolute () const noexcept { return whole; }
 
         address operator++ () noexcept { return (*this) += 1U; }
-        address operator++ (int) noexcept {
+        address const operator++ (int) noexcept {
             auto const old = *this;
             ++(*this);
             return old;
         }
         address operator-- () noexcept { return (*this) -= 1U; }
-        address operator-- (int) noexcept {
+        address const operator-- (int) noexcept {
             auto const old = *this;
             --(*this);
             return old;
@@ -265,8 +265,10 @@ namespace pstore {
 
         typed_address () = default;
         explicit constexpr typed_address (address a) noexcept
-                : a_ (std::move (a)) {}
+                : a_ (a) {}
         typed_address (typed_address const & addr) noexcept = default;
+        typed_address (typed_address && addr) noexcept = default;
+        ~typed_address () noexcept = default;
 
         template <typename Other>
         static constexpr typed_address cast (typed_address<Other> other) noexcept {
@@ -280,6 +282,8 @@ namespace pstore {
         }
 
         typed_address & operator= (typed_address const & rhs) noexcept = default;
+        typed_address & operator= (typed_address && rhs) noexcept = default;
+
         constexpr bool operator== (typed_address const & rhs) const noexcept {
             return a_ == rhs.a_;
         }
@@ -288,13 +292,13 @@ namespace pstore {
         }
 
         typed_address operator++ () noexcept { return (*this) += 1U; }
-        typed_address operator++ (int) noexcept {
+        typed_address const operator++ (int) noexcept {
             auto const old = *this;
             ++(*this);
             return old;
         }
         typed_address operator-- () noexcept { return (*this) -= 1U; }
-        typed_address operator-- (int) noexcept {
+        typed_address const operator-- (int) noexcept {
             auto const old = *this;
             --(*this);
             return old;
@@ -397,17 +401,21 @@ namespace std {
         static constexpr const int max_exponent10 = base::max_exponent10;
 
         static constexpr const bool has_infinity = base::has_infinity;
-        static constexpr const bool has_quiet_NaN = base::has_quiet_NaN;
-        static constexpr const bool has_signaling_NaN = base::has_signaling_NaN;
+        static constexpr const bool has_quiet_NaN = base::has_quiet_NaN;         // NOLINT
+        static constexpr const bool has_signaling_NaN = base::has_signaling_NaN; // NOLINT
         static constexpr const float_denorm_style has_denorm = base::has_denorm;
         static constexpr const bool has_denorm_loss = base::has_denorm_loss;
         static constexpr type infinity () noexcept {
             return pstore::address::make (base::infinity ());
         }
+        // NOLINTNEXTLINE(readability-identifier-naming)
         static constexpr type quiet_NaN () noexcept {
+            // NOLINTNEXTLINE(readability-identifier-naming)
             return pstore::address::make (base::quiet_NaN ());
         }
+        // NOLINTNEXTLINE(readability-identifier-naming)
         static constexpr type signaling_NaN () noexcept {
+            // NOLINTNEXTLINE(readability-identifier-naming)
             return pstore::address::make (base::signaling_NaN ());
         }
         static constexpr type denorm_min () noexcept {
