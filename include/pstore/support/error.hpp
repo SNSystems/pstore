@@ -99,7 +99,7 @@ namespace pstore {
     public:
         // The need for this constructor was removed by CWG defect 253 but Clang (prior to 3.9.0)
         // and GCC (before 4.6.4) require its presence.
-        error_category () noexcept {}
+        error_category () noexcept {} // NOLINT
         char const * name () const noexcept override;
         std::string message (int error) const override;
     };
