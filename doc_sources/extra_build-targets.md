@@ -22,10 +22,10 @@ Create a container from this image:
 
     $ docker run --rm -ti --ulimit='stack=-1:-1' -v <path-to-pstore>:/home/klee/pstore klee/klee
 
-The options specified her are:
+The options specified here are:
 
 - The `--rm` option automatically remove the container when it exits.
-- The `-ti` options create an interactive command-line propmt.
+- The `-ti` options create an interactive command-line prompt.
 - The `--ulimit` option sets an unlimited stack size inside the container. This is to avoid stack overflow issues when running KLEE.
 - The `-v` switch maps the directory containing the pstore source code on the host into the container as `/home/klee/pstore`.
 
