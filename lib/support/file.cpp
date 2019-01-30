@@ -66,16 +66,20 @@ namespace pstore {
         //*       |___/                                                    *
         // (ctor)
         // ~~~~~~
-        system_error::system_error (std::error_code code, std::string const & user_message,
-                                    std::string const & path)
-                : std::system_error (code, message (user_message, path))
-                , path_ (path) {}
+        system_error::system_error (std::error_code code, std::string user_message,
+                                    std::string path)
+                : std::system_error (code, message (std::move (user_message), path))
+                , path_ (std::move (path)) {}
 
         system_error::system_error (std::error_code code, gsl::czstring user_message,
-                                    std::string const & path)
+                                    std::string path)
                 : std::system_error (
                       code, message (user_message != nullptr ? user_message : "File", path))
-                , path_ (path) {}
+                , path_ (std::move (path)) {}
+
+        // dtor
+        // ~~~~
+        system_error::~system_error () noexcept = default;
 
         // message
         // ~~~~~~~
@@ -171,14 +175,6 @@ namespace pstore {
             }
             locked_ = false;
         }
-
-
-        //*             _                                    *
-        //*  ____  _ __| |_ ___ _ __    ___ _ _ _ _ ___ _ _  *
-        //* (_-< || (_-<  _/ -_) '  \  / -_) '_| '_/ _ \ '_| *
-        //* /__/\_, /__/\__\___|_|_|_| \___|_| |_| \___/_|   *
-        //*     |__/                                         *
-        system_error::~system_error () noexcept = default;
 
 
         //*   __ _ _       _                   *

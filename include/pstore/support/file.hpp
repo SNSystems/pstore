@@ -182,13 +182,18 @@ namespace pstore {
 
         class system_error : public std::system_error {
         public:
-            system_error (std::error_code code, std::string const & user_message,
-                          std::string const & path);
-            system_error (std::error_code code, gsl::czstring user_message,
-                          std::string const & path);
+            system_error (std::error_code code, std::string user_message, std::string path);
+            system_error (std::error_code code, gsl::czstring user_message, std::string path);
+
+            system_error (system_error const &) = default;
+            system_error (system_error &&) noexcept = default;
+
             ~system_error () noexcept override;
 
-            std::string path () const { return path_; }
+            system_error & operator= (system_error const &) = default;
+            system_error & operator= (system_error &&) noexcept = default;
+
+            std::string const & path () const noexcept { return path_; }
 
         private:
             std::string path_;
@@ -762,9 +767,11 @@ namespace pstore {
 
             virtual ~deleter_base () noexcept;
 
-            // No copying or assignment
+            // No copying, moving, or assignment
             deleter_base (deleter_base const &) = delete;
+            deleter_base (deleter_base &&) noexcept = delete;
             deleter_base & operator= (deleter_base const &) = delete;
+            deleter_base & operator= (deleter_base &&) noexcept = delete;
 
             /// \brief Explicitly deletes the file at the path given to the
             ///        constructor.
