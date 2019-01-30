@@ -150,6 +150,8 @@ add_subdirectory (3rd_party)
 
 include (clang_tidy)
 pstore_add_tidy_all_target ()
+include (klee)
+pstore_add_klee_run_all_target (PSTORE_BITCODE)
 
 include (run_pstore_unit_test)
 add_subdirectory (lib)    # add the PStore library itself

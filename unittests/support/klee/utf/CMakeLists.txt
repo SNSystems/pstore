@@ -1,1 +1,1 @@
-add_klee_test (utf length)
+pstore_add_klee_test (utf length)

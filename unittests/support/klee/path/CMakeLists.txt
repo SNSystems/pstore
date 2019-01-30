@@ -1,1 +1,1 @@
-add_klee_test (path join)
+pstore_add_klee_test (path join)

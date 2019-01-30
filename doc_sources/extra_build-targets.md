@@ -35,7 +35,7 @@ You will then be presented with a Linux command-line prompt logged into the virt
     klee
     klee@ec6d366e9990:~$
 
-Install the build tools (cmake and ninja) into the container:
+Install the build tools (cmake and ninja) into the container (the `klee` user's password is `klee`):
 
     klee@ec6d366e9990:~$ wget https://github.com/Kitware/CMake/releases/download/v3.13.1/cmake-3.13.1-Linux-x86_64.sh
     klee@ec6d366e9990:~$ sudo mkdir /opt/cmake
