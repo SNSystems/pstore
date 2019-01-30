@@ -182,16 +182,16 @@ namespace pstore {
 
         class system_error : public std::system_error {
         public:
-            system_error (std::error_code code, std::string user_message, std::string path);
+            system_error (std::error_code code, std::string const & user_message, std::string path);
             system_error (std::error_code code, gsl::czstring user_message, std::string path);
 
             system_error (system_error const &) = default;
-            system_error (system_error &&) noexcept = default;
+            system_error (system_error &&) = default;
 
             ~system_error () noexcept override;
 
             system_error & operator= (system_error const &) = default;
-            system_error & operator= (system_error &&) noexcept = default;
+            system_error & operator= (system_error &&) = default;
 
             std::string const & path () const noexcept { return path_; }
 

@@ -66,9 +66,9 @@ namespace pstore {
         //*       |___/                                                    *
         // (ctor)
         // ~~~~~~
-        system_error::system_error (std::error_code code, std::string user_message,
+        system_error::system_error (std::error_code code, std::string const & user_message,
                                     std::string path)
-                : std::system_error (code, message (std::move (user_message), path))
+                : std::system_error (code, message (user_message, path))
                 , path_ (std::move (path)) {}
 
         system_error::system_error (std::error_code code, gsl::czstring user_message,
