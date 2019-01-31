@@ -52,6 +52,7 @@ namespace pstore {
     transaction_base::transaction_base (transaction_base && rhs) noexcept
             : db_{rhs.db_}
             , size_{rhs.size_}
+            , dbsize_{rhs.dbsize_}
             , first_ (rhs.first_) {
         rhs.first_ = address::null ();
         assert (!rhs.is_open ());
@@ -153,12 +154,13 @@ namespace pstore {
     // ~~~~~~~~
     transaction_base & transaction_base::rollback () noexcept {
         if (this->is_open ()) {
-            // TODO:
-            // If we extended the file and added new memory regions, then we need to undo that
-            // here. Perhaps a) not bother at all and do nothing or b) delay until the file
-            // itself is closed on the basis that we may need the space for the next transaction.
             first_ = address::null ();
             assert (!this->is_open ());
+            // if we grew the db, truncate it back
+            if (db_.size () > dbsize_) {
+              db_.truncate(dbsize_);
+              assert (db_.size () == dbsize_);
+            }
         }
         return *this;
     }

@@ -491,6 +491,26 @@ namespace pstore {
         return address::make (result + extra_for_alignment);
     }
 
+    // truncate
+    // ~~~~~~~~
+    void database::truncate (std::uint64_t size) {
+        if (closed_) {
+            raise (error_code::store_closed);
+        }
+        modified_ = true;
+
+
+        std::uint64_t const new_logical_size = size;
+
+        // Memory map space if necessary.
+        storage_.map_bytes (new_logical_size);
+
+        size_.truncate_logical_size (new_logical_size);
+        if (database::small_files_enabled ()) {
+            this->file ()->truncate (new_logical_size);
+        }
+    }
+
 
 
     // set_new_footer
