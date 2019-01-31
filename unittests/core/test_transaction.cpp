@@ -258,48 +258,6 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
     }
 }
 
-TEST_F (Transaction, RollbackAfterAppending4mb) {
-
-    pstore::database db{file_};
-    db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-
-    // A quick check of the initial state.
-    auto header = this->get_header ();
-    ASSERT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ());
-
-    {
-        mock_mutex mutex;
-        typedef std::unique_lock<mock_mutex> guard_type;
-        auto transaction = pstore::begin (db, guard_type{mutex});
-
-        std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
-        transaction.allocate (elements * sizeof (int), 1 /*align*/);
-
-        // Abandon the transaction.
-        transaction.rollback ();
-    }
-
-    // Header checks
-    EXPECT_THAT (pstore::header::file_signature1, ::testing::ContainerEq (header->a.signature1))
-        << "File header was missing";
-    EXPECT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ())
-        << "Expected the file header footer_pos to point to r0 header";
-
-    {
-        auto r0footer =
-            reinterpret_cast<pstore::trailer const *> (buffer_.get () + sizeof (pstore::header));
-        EXPECT_THAT (pstore::trailer::default_signature1,
-                     ::testing::ContainerEq (r0footer->a.signature1))
-            << "Did not find r0 footer signature1";
-        EXPECT_EQ (0U, r0footer->a.generation) << "r0 footer generation number must be 0";
-        EXPECT_EQ (0U, r0footer->a.size);
-        EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), r0footer->a.prev_generation);
-        EXPECT_THAT (pstore::trailer::default_signature2,
-                     ::testing::ContainerEq (r0footer->signature2))
-            << "Did not find r0 footer signature2";
-    }
-}
-
 TEST_F (Transaction, CommitAfterAppending4Mb) {
 
     pstore::database db{file_};

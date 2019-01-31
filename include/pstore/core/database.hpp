@@ -326,8 +326,6 @@ namespace pstore {
         /// \returns The address of the newly allocated storage.
         virtual address allocate (std::uint64_t bytes, unsigned align);
 
-        virtual void truncate (std::uint64_t size);
-
         /// Call as part of completing a transaction. We update the database records to that
         /// the new footer is recorded.
         void set_new_footer (typed_address<trailer> new_footer_pos);
@@ -399,11 +397,6 @@ namespace pstore {
             void update_logical_size (std::uint64_t new_logical_size) noexcept {
                 assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = std::max (logical_, new_logical_size);
-            }
-
-            void truncate_logical_size (std::uint64_t new_logical_size) noexcept {
-                assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
-                logical_ = new_logical_size;
             }
 
         private:
