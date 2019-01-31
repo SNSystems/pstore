@@ -49,8 +49,8 @@
 #include <sys/types.h>
 
 #include "pstore/romfs/error_or.hpp"
-#include "pstore/support/portab.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace romfs {

@@ -69,9 +69,9 @@ namespace pstore {
                 new (error_storage ()) std::error_code (std::move (ec));
             }
             template <typename Other>
-            explicit error_or (
-                Other && t,
-                typename std::enable_if<std::is_convertible<Other, T>::value>::type * = nullptr)
+            explicit error_or (Other && t,
+                               typename std::enable_if<std::is_convertible<Other, T>::value>::type *
+                                   PSTORE_NULLABLE = nullptr)
                     : state_ (value) {
                 new (value_storage ()) T (std::forward<Other> (t));
             }
@@ -122,6 +122,9 @@ namespace pstore {
             T & get_value () noexcept { return *value_storage (); }
             T const & get_value () const noexcept { return *value_storage (); }
 
+            T * PSTORE_NONNULL operator-> () noexcept { return value_storage (); }
+            T const * PSTORE_NONNULL operator-> () const noexcept { return value_storage (); }
+
         private:
             void copy_construct (error_or const & rhs);
             void move_construct (error_or && rhs);
@@ -130,22 +133,26 @@ namespace pstore {
             void destroy () noexcept;
 
 
-            std::error_code * error_storage () noexcept { return error_storage_impl (*this); }
-            std::error_code const * error_storage () const noexcept {
+            std::error_code * PSTORE_NONNULL error_storage () noexcept {
+                return error_storage_impl (*this);
+            }
+            std::error_code const * PSTORE_NONNULL error_storage () const noexcept {
                 return error_storage_impl (*this);
             }
 
-            T * value_storage () noexcept { return value_storage_impl (*this); }
-            T const * value_storage () const noexcept { return value_storage_impl (*this); }
+            T * PSTORE_NONNULL value_storage () noexcept { return value_storage_impl (*this); }
+            T const * PSTORE_NONNULL value_storage () const noexcept {
+                return value_storage_impl (*this);
+            }
 
             template <typename ErrorOr,
                       typename ResultType = typename inherit_const<ErrorOr, std::error_code>::type>
-            static ResultType * error_storage_impl (ErrorOr && e) noexcept {
+            static ResultType * PSTORE_NONNULL error_storage_impl (ErrorOr && e) noexcept {
                 return reinterpret_cast<ResultType *> (&e.storage_);
             }
             template <typename ErrorOr,
                       typename ResultType = typename inherit_const<ErrorOr, T>::type>
-            static ResultType * value_storage_impl (ErrorOr && e) noexcept {
+            static ResultType * PSTORE_NONNULL value_storage_impl (ErrorOr && e) noexcept {
                 return reinterpret_cast<ResultType *> (&e.storage_);
             }
 

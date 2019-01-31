@@ -153,9 +153,14 @@ namespace pstore {
 
             error_or<descriptor> open (gsl::czstring PSTORE_NONNULL path);
             error_or<dirent_descriptor> opendir (gsl::czstring PSTORE_NONNULL path);
-            struct stat stat (gsl::czstring PSTORE_NONNULL path);
+            error_or<struct stat> stat (gsl::czstring PSTORE_NONNULL path);
+
             error_or<std::string> getcwd () const;
             std::error_code chdir (gsl::czstring PSTORE_NONNULL path);
+
+            /// \brief Check that the file system's structures are intact.
+            ///
+            /// Since the data is read-only there should be no need to call this function except as a belf-and-braces debug check.
             bool fsck () const;
 
         private:

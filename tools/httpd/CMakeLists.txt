@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- tools/httpd/CMakeLists.txt ------------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,17 +41,19 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (support)
 
-add_subdirectory (broker)
-add_subdirectory (broker_intf)
-add_subdirectory (cmd_util)
-add_subdirectory (core)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (httpd)
-add_subdirectory (json)
-add_subdirectory (mcrepo)
-add_subdirectory (romfs)
-add_subdirectory (serialize)
-add_subdirectory (vacuum)
+# Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
+set (pstore_http_fs_source "${CMAKE_CURRENT_BINARY_DIR}/fs.cpp")
+add_custom_target (pstore-http-fs
+    COMMAND
+        pstore-genromfs "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_http_fs_source}"
+    BYPRODUCTS
+        "${pstore_http_fs_source}"
+)
+add_dependencies (pstore-http-fs pstore-genromfs)
+
+
+add_pstore_executable (pstore-httpd httpd.cpp "${pstore_http_fs_source}")
+add_dependencies (pstore-httpd pstore-http-fs)
+target_link_libraries (pstore-httpd PRIVATE pstore-httpd-lib)
+

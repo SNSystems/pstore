@@ -173,12 +173,9 @@ namespace pstore {
                 using error_type = type;
                 posix_descriptor_traits () = default;
 
-                struct {
-                    bool operator() (int fd) const noexcept { return fd >= 0; }
-                } is_valid;
-                struct {
-                    void operator() (int fd) const noexcept { ::close (fd); }
-                } close;
+                static bool is_valid (type fd) noexcept { return fd >= 0; }
+                static void close (type fd) noexcept { ::close (fd); }
+
                 static constexpr type const invalid = -1;
                 static constexpr error_type const error = -1;
             };
@@ -192,12 +189,9 @@ namespace pstore {
                 using type = SOCKET;
                 using error_type = int;
 
-                struct {
-                    bool operator() (type fd) const noexcept { return fd != invalid; }
-                } is_valid;
-                struct {
-                    void operator() (type fd) const noexcept { ::closesocket (fd); }
-                } close;
+                static bool is_valid (type fd) noexcept { return fd != invalid; }
+                static void close (type fd) noexcept { ::closesocket (fd); }
+
                 static constexpr type const invalid = INVALID_SOCKET;
                 static constexpr error_type const error = SOCKET_ERROR;
             };
@@ -207,12 +201,9 @@ namespace pstore {
                 using type = HANDLE;
                 using error_type = type;
 
-                struct {
-                    bool operator() (type h) const noexcept { return h != invalid; }
-                } is_valid;
-                struct {
-                    void operator() (type h) const noexcept { ::CloseHandle (h); }
-                } close;
+                static bool is_valid (type h) noexcept { return h != invalid; }
+                static void close (type h) noexcept { ::CloseHandle (h); }
+
                 static type const invalid;
                 static error_type const error;
             };

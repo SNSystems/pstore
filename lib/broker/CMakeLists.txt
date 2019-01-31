@@ -83,10 +83,19 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     add_pstore_library (pstore-broker STATIC ${PSTORE_BROKER_LIB_SRC})
-    target_link_libraries (pstore-broker PUBLIC pstore-broker-intf-ex pstore-json-lib-ex pstore-support-ex)
+    target_link_libraries (pstore-broker PUBLIC
+        pstore-broker-intf-ex
+        pstore-json-lib-ex
+        pstore-support-ex
+    )
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 else ()
     add_pstore_library (pstore-broker ${PSTORE_BROKER_LIB_SRC})
-    target_link_libraries (pstore-broker PUBLIC pstore-broker-intf pstore-json-lib pstore-support)
+    target_link_libraries (pstore-broker PUBLIC
+        pstore-broker-intf
+        pstore-httpd-lib
+        pstore-json-lib
+        pstore-support
+    )
 endif (PSTORE_IS_INSIDE_LLVM)

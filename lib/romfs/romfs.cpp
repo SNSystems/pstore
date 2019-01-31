@@ -294,6 +294,10 @@ namespace pstore {
             return (this->parse_path (path) >>= get_directory) >>= create_descriptor;
         }
 
+        error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL path) {
+            return this->parse_path (path) >>= [] (dirent_ptr de) { return error_or <struct stat> {de->stat ()}; };
+        }
+
         // getcwd
         // ~~~~~~
         error_or<std::string> romfs::getcwd () const { return dir_to_string (cwd_); }
