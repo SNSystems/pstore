@@ -8,8 +8,8 @@ template <typename NamePolicy>
 class variable_name {
 public:
     explicit constexpr variable_name (unsigned id, NamePolicy policy = NamePolicy ()) noexcept
-            : id_{id}
-            , policy_{policy} {}
+            : id_(id)
+            , policy_(policy) {}
     variable_name (variable_name const &) noexcept = default;
     variable_name (variable_name &&) noexcept = default;
 
