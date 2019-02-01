@@ -18,13 +18,13 @@ Download the KLEE docker image:
 
     $ docker pull klee/klee
     
-Create a container from this image:
+Create a container from this image (replace `<path-to-pstore>` with the path of your pstore checkout; e.g. `~/llvm-prepo/tools/pstore`):
 
     $ docker run --rm -ti --ulimit='stack=-1:-1' -v <path-to-pstore>:/home/klee/pstore klee/klee
 
 The options specified here are:
 
-- The `--rm` option automatically remove the container when it exits.
+- The `--rm` option automatically remove the container when it exits. Any changes made to the container (such as installed software) will be lost on exit.
 - The `-ti` options create an interactive command-line prompt.
 - The `--ulimit` option sets an unlimited stack size inside the container. This is to avoid stack overflow issues when running KLEE.
 - The `-v` switch maps the directory containing the pstore source code on the host into the container as `/home/klee/pstore`.
@@ -43,9 +43,14 @@ Install the build tools (cmake and ninja) into the container (the `klee` user's 
     klee@ec6d366e9990:~$ export PATH=/opt/cmake/cmake-3.13.1-Linux-x86_64/bin/:$PATH
     klee@ec6d366e9990:~$ sudo apt install ninja-build
 
+Now we can use CMake to create the pstore build:
+
     klee@ec6d366e9990:$ cd ~/pstore
     klee@ec6d366e9990:~/pstore$ ./utils/make_build.py -o build_klee -D PSTORE_DISABLE_UINT128_T=Yes
-    
+    klee@ec6d366e9990:~/pstore$
+
+Note that I override the default output directory created by `make_build.py` so that the build is in `./build_klee`. This also disables use of the compiler's native `__uint128_t` so that we can exercise the pstore 128-bit integer class.
+
 Finally, build the project and run the tests:
 
     klee@ec6d366e9990:~/pstore$ ninja -C build_klee pstore-klee-run-all
