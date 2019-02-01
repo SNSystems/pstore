@@ -43,28 +43,41 @@
 //===----------------------------------------------------------------------===//
 #include "copy.hpp"
 
-#include <cstdio>
+// Standard Library includes
+#include <array>
+#include <iostream>
 
+// pstore includes
 #include "pstore/support/array_elements.hpp"
+#include "pstore/support/error.hpp"
 #include "pstore/support/utf.hpp"
-#include "./indent.hpp"
+
+// Local includes
+#include "indent.hpp"
+#include "vars.hpp"
 
 namespace {
 
 #ifdef _WIN32
+
     FILE * file_open (std::string const & filename) {
         return _wfopen (pstore::utf::win32::to16 (filename).c_str (), L"r");
     }
+
 #else
+
     FILE * file_open (std::string const & filename) { return std::fopen (filename.c_str (), "r"); }
+
 #endif
 
 } // end anonymous namespace
 
 void copy (std::string const & path, unsigned file_no) {
-    constexpr std::size_t indent_size = pstore::array_elements (indent) - 1U;
-    constexpr auto line_width = std::size_t{80} - indent_size;
-    auto getcr = [line_width](std::size_t width) {
+    static constexpr auto indent_size = pstore::array_elements (indent) - 1U;
+    static constexpr auto crindent_size = pstore::array_elements (crindent) - 1U;
+    static constexpr auto line_width = std::size_t{80} - indent_size;
+
+    auto getcr = [](std::size_t width) {
         return width >= line_width ? std::make_pair (std::size_t{0}, crindent)
                                    : std::make_pair (width, "");
     };
@@ -73,10 +86,9 @@ void copy (std::string const & path, unsigned file_no) {
     std::uint8_t buffer[buffer_size] = {0};
     std::unique_ptr<FILE, decltype (&std::fclose)> file (file_open (path), &std::fclose);
     if (!file) {
-        // FIXME: report an error
-        return;
+        raise (pstore::errno_erc{errno}, "fopen");
     }
-    std::fprintf (stdout, "std::uint8_t const file%u[] = {\n%s", file_no, indent);
+    std::cout << "std::uint8_t const " << file_var (file_no) << "[] = {\n" << indent;
     std::size_t width = indent_size;
     char const * separator = "";
     auto num_read = std::size_t{0};
@@ -90,15 +102,21 @@ void copy (std::string const & path, unsigned file_no) {
         for (auto n = std::size_t{0}; n < num_read; ++n) {
             char const * cr;
             std::tie (width, cr) = getcr (width);
-            int const written =
-                std::fprintf (stdout, "%s%s%u", separator, cr, static_cast<unsigned> (buffer[n]));
+
+            std::array<char, 1 + crindent_size + 3 + 1> vbuf{{0}};
+            int written = std::snprintf (vbuf.data (), vbuf.size (), "%s%s%u", separator, cr,
+                                         static_cast<unsigned> (buffer[n]));
             if (written < 0) {
-                // FIXME: report an error
-                return;
+                // TODO: an error occurred. Do something about it.
             }
+            assert (vbuf[vbuf.size () - 1U] == '\0' && "vbuf was not big enough");
+            assert (static_cast<unsigned> (written) <= vbuf.size ());
+            // Absolute guarantee of nul termination.
+            vbuf[vbuf.size () - 1U] = '\0';
+            std::cout << vbuf.data ();
             width += static_cast<std::make_unsigned<decltype (written)>::type> (written);
             separator = ",";
         }
     } while (num_read >= buffer_size);
-    std::fprintf (stdout, "\n};\n");
+    std::cout << "\n};\n";
 }

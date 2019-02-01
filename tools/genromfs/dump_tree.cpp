@@ -43,15 +43,20 @@
 //===----------------------------------------------------------------------===//
 #include "dump_tree.hpp"
 
+// Standard Library includes
 #include <ostream>
-#include "./indent.hpp"
+
+// Local includes
+#include "copy.hpp"
+#include "indent.hpp"
+#include "vars.hpp"
 
 namespace {
 
     void forward_declaration (std::ostream & os, std::unordered_set<unsigned> & forwards,
                               unsigned dirid, unsigned id) {
         if (dirid >= id && forwards.find (dirid) == forwards.end ()) {
-            os << "extern pstore::romfs::directory const dir" << dirid << ";\n";
+            os << "extern pstore::romfs::directory const " << directory_var (dirid) << ";\n";
             forwards.insert (dirid);
         }
     }
@@ -61,12 +66,13 @@ namespace {
 
 void dump_tree (std::ostream & os, std::unordered_set<unsigned> & forwards,
                 directory_container const & dir, unsigned id, unsigned parent_id) {
+
     for (directory_entry const & de : dir) {
         if (de.children) {
             dump_tree (os, forwards, *de.children, de.contents, id);
         }
     }
-    std::string const dir_name = std::string{"dir"} + std::to_string (id);
+    std::string const dir_name = directory_var (id).as_string ();
     std::string const dirent_array_name = dir_name + "_membs";
 
     for (directory_entry const & de : dir) {
@@ -79,14 +85,14 @@ void dump_tree (std::ostream & os, std::unordered_set<unsigned> & forwards,
 
     os << "std::array<pstore::romfs::dirent," << dir.size () + 2U << "> const " << dirent_array_name
        << " = {{\n"
-       << indent << "{\".\", &dir" << id << "},\n"
-       << indent << "{\"..\", &dir" << parent_id << "},\n";
+       << indent << "{\".\", &" << directory_var (id) << "},\n"
+       << indent << "{\"..\", &" << directory_var (parent_id) << "},\n";
 
     for (directory_entry const & de : dir) {
         if (de.children) {
-            os << indent << "{\"" << de.name << "\", &dir" << de.contents;
+            os << indent << "{\"" << de.name << "\", &" << directory_var (de.contents);
         } else {
-            auto const contents_name = "file" + std::to_string (de.contents);
+            auto const contents_name = file_var (de.contents);
             os << indent << "{\"" << de.name << "\", " << contents_name << ", sizeof ("
                << contents_name << "), 0";
         }
