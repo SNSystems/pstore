@@ -57,15 +57,19 @@ char const * pstore::dump::error_category::name () const noexcept {
 std::string pstore::dump::error_category::message (int error) const {
     static_assert (std::is_same<std::underlying_type<error_code>::type, decltype (error)>::value,
                    "base type of pstore::error_code must be int to permit safe static cast");
+
+    auto * result = "unknown value error";
     switch (static_cast<error_code> (error)) {
-    case error_code::cant_find_target: return "can't find target";
-    case error_code::no_register_info_for_target: return "no register info for target";
-    case error_code::no_assembly_info_for_target: return "no assembly info for target";
-    case error_code::no_subtarget_info_for_target: return "no subtarget info_for_target";
-    case error_code::no_instruction_info_for_target: return "no instruction info for target";
-    case error_code::no_disassembler_for_target: return "no disassembler for target";
+    case error_code::cant_find_target: result = "can't find target"; break;
+    case error_code::no_register_info_for_target: result = "no register info for target"; break;
+    case error_code::no_assembly_info_for_target: result = "no assembly info for target"; break;
+    case error_code::no_subtarget_info_for_target: result = "no subtarget info_for_target"; break;
+    case error_code::no_instruction_info_for_target:
+        result = "no instruction info for target";
+        break;
+    case error_code::no_disassembler_for_target: result = "no disassembler for target"; break;
     }
-    return "unknown value error";
+    return result;
 }
 
 namespace {

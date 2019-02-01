@@ -48,10 +48,13 @@ char const * write_error_category::name () const noexcept {
 }
 
 std::string write_error_category::message (int error) const {
+    auto * result = "unknown error";
     switch (static_cast<write_error_code> (error)) {
-    case write_error_code::unrecognized_compaction_mode: return "unrecognized compaction mode";
+    case write_error_code::unrecognized_compaction_mode:
+        result = "unrecognized compaction mode";
+        break;
     }
-    return "unknown error";
+    return result;
 }
 
 

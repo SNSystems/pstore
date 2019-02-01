@@ -110,17 +110,22 @@ namespace {
     char const * dump_error_category::name () const noexcept { return "pstore-dump category"; }
 
     std::string dump_error_category::message (int error) const {
+        auto * result = "unknown error";
         switch (static_cast<dump_error_code> (error)) {
-        case dump_error_code::bad_digest: return "bad digest";
-        case dump_error_code::no_fragment_index: return "no fragment index";
-        case dump_error_code::fragment_not_found: return "fragment not found";
-        case dump_error_code::bad_uuid: return "bad UUID";
-        case dump_error_code::no_compilation_index: return "no compilation index";
-        case dump_error_code::compilation_not_found: return "compilation not found";
-        case dump_error_code::debug_line_header_not_found: return "debug line header not found";
-        case dump_error_code::no_debug_line_header_index: return "no debug line header index";
+        case dump_error_code::bad_digest: result = "bad digest"; break;
+        case dump_error_code::no_fragment_index: result = "no fragment index"; break;
+        case dump_error_code::fragment_not_found: result = "fragment not found"; break;
+        case dump_error_code::bad_uuid: result = "bad UUID"; break;
+        case dump_error_code::no_compilation_index: result = "no compilation index"; break;
+        case dump_error_code::compilation_not_found: result = "compilation not found"; break;
+        case dump_error_code::debug_line_header_not_found:
+            result = "debug line header not found";
+            break;
+        case dump_error_code::no_debug_line_header_index:
+            result = "no debug line header index";
+            break;
         }
-        return "unknown error";
+        return result;
     }
 
     std::error_category const & get_dump_error_category () {

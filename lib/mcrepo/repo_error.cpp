@@ -49,12 +49,13 @@ namespace pstore {
         char const * error_category::name () const noexcept { return "pstore_mcrepo category"; }
 
         std::string error_category::message (int error) const {
+            auto * result = "unknown error";
             switch (static_cast<error_code> (error)) {
-            case error_code::bad_fragment_record: return "bad fragment record";
-            case error_code::bad_fragment_type: return "bad fragment type";
-            case error_code::bad_compilation_record: return "bad compilation record";
+            case error_code::bad_fragment_record: result = "bad fragment record"; break;
+            case error_code::bad_fragment_type: result = "bad fragment type"; break;
+            case error_code::bad_compilation_record: result = "bad compilation record"; break;
             }
-            return "unknown error";
+            return result;
         }
 
     } // namespace repo

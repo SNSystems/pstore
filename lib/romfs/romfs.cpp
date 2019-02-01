@@ -100,12 +100,13 @@ namespace pstore {
         char const * error_category::name () const noexcept { return "pstore-romfs category"; }
 
         std::string error_category::message (int error) const {
+            auto * result = "unknown error";
             switch (static_cast<error_code> (error)) {
-            case error_code::einval: return "EINVAL";
-            case error_code::enoent: return "ENOENT";
-            case error_code::enotdir: return "ENOTDIR";
+            case error_code::einval: result = "EINVAL"; break;
+            case error_code::enoent: result = "ENOENT"; break;
+            case error_code::enotdir: result = "ENOTDIR"; break;
             }
-            return "unknown error";
+            return result;
         }
 
         //*                        __ _ _      *
