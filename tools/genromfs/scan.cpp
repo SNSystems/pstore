@@ -44,6 +44,9 @@
 
 #include "scan.hpp"
 
+#include <cerrno>
+#include <sstream>
+
 #ifdef _WIN32
 #    define WIN32_LEAN_AND_MEAN
 #    define NO_MIN_MAX
@@ -53,7 +56,9 @@
 #    include <sys/stat.h>
 #endif
 
+#include "pstore/support/error.hpp"
 #include "pstore/support/make_unique.hpp"
+#include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 
 #include "copy.hpp"
@@ -87,18 +92,26 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
     WIN32_FIND_DATA ffd;
     HANDLE find = ::FindFirstFileW (pstore::utf::win32::to16 (path + "\\*").c_str (), &ffd);
     if (find == INVALID_HANDLE_VALUE) {
-        // printf ("FindFirstFile failed (%d)\n", GetLastError ());
-        return count;
+        DWORD const last_error = ::GetLastError ();
+        std::ostringstream str;
+        str << "Could not scan directory " << pstore::quoted (path);
+        raise (pstore::win32_erc (last_error), str.str ());
     }
 
     do {
-        if (!is_hidden (ffd)) {
-            auto name = pstore::utf::win32::to8 (ffd.cFileName);
-            if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-                count = add_directory (directory, path, name, count);
-            } else {
-                count = add_file (directory, path, name, count);
-            }
+        if (is_hidden (ffd)) {
+            continue;
+        }
+
+        auto const name = pstore::utf::win32::to8 (ffd.cFileName);
+        if (name == "." || name == "..") {
+            continue;
+        }
+
+        if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+            count = add_directory (directory, path, name, count);
+        } else {
+            count = add_file (directory, path, name, count);
         }
     } while (::FindNextFileW (find, &ffd) != 0);
 
@@ -112,7 +125,10 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
 
     std::unique_ptr<DIR, decltype (&closedir)> dirp (opendir (path.c_str ()), &closedir);
     if (dirp == nullptr) {
-        return count;
+        int const erc = errno;
+        std::ostringstream str;
+        str << "opendir " << pstore::quoted (path);
+        raise (pstore::errno_erc{erc}, str.str ());
     }
 
     auto is_hidden = [](std::string const & n) { return n.length () == 0 || n.front () == '.'; };
