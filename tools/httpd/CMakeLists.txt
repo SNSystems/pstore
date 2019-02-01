@@ -44,16 +44,15 @@
 
 # Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
 set (pstore_http_fs_source "${CMAKE_CURRENT_BINARY_DIR}/fs.cpp")
-add_custom_target (pstore-http-fs
-    COMMAND
-        pstore-genromfs "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_http_fs_source}"
-    BYPRODUCTS
-        "${pstore_http_fs_source}"
+add_custom_command (
+    COMMAND pstore-genromfs "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_http_fs_source}"
+    OUTPUT "${pstore_http_fs_source}"
+    DEPENDS pstore-genromfs
 )
-add_dependencies (pstore-http-fs pstore-genromfs)
 
-
-add_pstore_executable (pstore-httpd httpd.cpp "${pstore_http_fs_source}")
-add_dependencies (pstore-httpd pstore-http-fs)
+add_pstore_executable (pstore-httpd
+    httpd.cpp
+    "${pstore_http_fs_source}"
+)
 target_link_libraries (pstore-httpd PRIVATE pstore-httpd-lib)
 
