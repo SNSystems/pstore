@@ -46,10 +46,12 @@
 // Standard Library includes
 #include <array>
 #include <iostream>
+#include <sstream>
 
 // pstore includes
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 
 // Local includes
@@ -86,7 +88,10 @@ void copy (std::string const & path, unsigned file_no) {
     std::uint8_t buffer[buffer_size] = {0};
     std::unique_ptr<FILE, decltype (&std::fclose)> file (file_open (path), &std::fclose);
     if (!file) {
-        raise (pstore::errno_erc{errno}, "fopen");
+        int const erc = errno;
+        std::stringstream str;
+        str << "fopen " << pstore::quoted (path);
+        raise (pstore::errno_erc{erc}, str.str ());
     }
     std::cout << "std::uint8_t const " << file_var (file_no) << "[] = {\n" << indent;
     std::size_t width = indent_size;
