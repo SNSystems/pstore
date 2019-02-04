@@ -55,6 +55,7 @@ set (PSTORE_JSON_SOURCES
 )
 add_pstore_library (pstore-json-lib STATIC ${PSTORE_JSON_SOURCES})
 target_link_libraries (pstore-json-lib PUBLIC pstore-support)
+add_clang_tidy_target (pstore-json-lib)
 
 if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)

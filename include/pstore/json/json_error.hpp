@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_JSON_ERROR_HPP
-#define PSTORE_JSON_ERROR_HPP
+#ifndef PSTORE_JSON_JSON_ERROR_HPP
+#define PSTORE_JSON_JSON_ERROR_HPP
 
 #include <string>
 #include <system_error>
@@ -89,4 +89,4 @@ namespace std {
     }
 } // namespace std
 
-#endif // PSTORE_JSON_ERROR_HPP
+#endif // PSTORE_JSON_JSON_ERROR_HPP
