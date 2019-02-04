@@ -66,20 +66,20 @@ namespace pstore {
     template <typename ElementType, std::size_t BodyElements = 256>
     class small_vector {
     public:
-        typedef ElementType value_type;
+        using value_type = ElementType;
 
-        typedef value_type & reference;
-        typedef value_type const & const_reference;
-        typedef value_type * pointer;
-        typedef value_type const * const_pointer;
+        using reference = value_type &;
+        using const_reference = value_type const &;
+        using pointer = value_type *;
+        using const_pointer = value_type const *;
 
-        typedef std::size_t size_type;
-        typedef std::ptrdiff_t difference_type;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
 
-        typedef value_type * iterator;
-        typedef value_type const * const_iterator;
-        typedef std::reverse_iterator<iterator> reverse_iterator;
-        typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+        using iterator = value_type *;
+        using const_iterator = value_type const *;
+        using reverse_iterator = std::reverse_iterator<iterator>;
+        using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
 
         /// Constructs the buffer with an initial size of 0.
@@ -96,6 +96,8 @@ namespace pstore {
         // Copying and assign.
         small_vector (small_vector const & rhs);
         small_vector & operator= (small_vector const &);
+
+        ~small_vector () noexcept = default;
 
         /// \name Element access
         ///@{
