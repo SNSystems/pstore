@@ -60,6 +60,12 @@ namespace pstore {
             public:
                 explicit deleter (std::string const & path)
                         : deleter_base (path, &platform_unlink) {}
+                // No copying, moving, or assignment
+                deleter (deleter const &) = delete;
+                deleter (deleter &&) noexcept = delete;
+                deleter & operator= (deleter const &) = delete;
+                deleter & operator= (deleter &&) noexcept = delete;
+
                 ~deleter () noexcept override;
 
             private:
