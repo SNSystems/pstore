@@ -607,25 +607,27 @@ namespace pstore {
                            "T cannot be assigned nullptr.");
 
         public:
-            // NOLINTNEXTLINE (hicpp-explicit-conversions)
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             not_null (T t) noexcept
                     : ptr_ (t) {
                 ensure_invariant ();
             }
 
             // prevents compilation when someone attempts to assign a nullptr
-            not_null (std::nullptr_t) = delete;
-            not_null (int) = delete;
+            not_null (std::nullptr_t) noexcept = delete;
+            not_null (int) noexcept = delete;
 
-            ~not_null () = default;
+            ~not_null () noexcept = default;
 
             not_null & operator= (T const & t) noexcept {
                 ptr_ = t;
                 ensure_invariant ();
                 return *this;
             }
-            not_null (not_null const & other) = default;
-            not_null & operator= (not_null const & other) = default;
+            not_null (not_null const &) noexcept = default;
+            not_null (not_null && ) noexcept = default;
+            not_null & operator= (not_null const &) noexcept= default;
+            not_null & operator= (not_null &&) noexcept = default;
 
             // prevents compilation when someone attempts to assign a nullptr
             not_null<T> & operator= (std::nullptr_t) = delete;
@@ -633,6 +635,7 @@ namespace pstore {
 
             T get () const noexcept { return ptr_; }
 
+            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             operator T () const noexcept { return get (); }
             T operator-> () const noexcept { return get (); }
 
