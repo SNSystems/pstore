@@ -135,6 +135,11 @@ namespace pstore {
 
 } // namespace pstore
 
+// Disable cert-dcl58-cpp: modifying namespace std is allowed to add template specializations for
+// standard library templates when the declaration depends on at least one program-defined type and
+// the specialization satisfies all requirements for the original template, except where such
+// specializations are prohibited.
+// NOLINTNEXTLINE(cert-dcl58-cpp)
 namespace std {
 
     template <>
