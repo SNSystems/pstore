@@ -102,10 +102,7 @@ namespace {
 
         ~scope_guard () noexcept {
             if (execute_on_destruction_) {
-                try {
-                    exit_function_ ();
-                } catch (...) {
-                }
+                PSTORE_NO_EX_ESCAPE (exit_function_ ());
             }
         }
 
@@ -187,10 +184,7 @@ void pstore::broker::self_client_connection::closed () {
 void pstore::broker::self_client_connection::close (
     std::shared_ptr<self_client_connection> const & client_ptr) noexcept {
     if (client_ptr) {
-        try {
-            client_ptr->closed ();
-        } catch (...) {
-        }
+        PSTORE_NO_EX_ESCAPE (client_ptr->closed ());
     }
 }
 

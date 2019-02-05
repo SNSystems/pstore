@@ -93,14 +93,7 @@ namespace pstore {
                 revision_restorer (revision_restorer const & ) = delete;
                 revision_restorer & operator= (revision_restorer const & ) = delete;
                 ~revision_restorer () noexcept {
-#if PSTORE_CPP_EXCEPTIONS
-                    try {
-#endif
-		      db_.sync (old_revision_);
-#if PSTORE_CPP_EXCEPTIONS
-                    } catch (...) {
-                    }
-#endif
+                    PSTORE_NO_EX_ESCAPE(db_.sync (old_revision_));
                 }
 
             private:
