@@ -58,7 +58,8 @@ namespace pstore {
         };
 
         template <typename T>
-        struct intrusive_list {
+        class intrusive_list {
+        public:
             intrusive_list ();
             ~intrusive_list () noexcept { this->check (); }
 

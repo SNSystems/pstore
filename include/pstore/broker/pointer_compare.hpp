@@ -59,7 +59,8 @@ namespace pstore {
         /// shared_ptr<> and unique_ptr<> instances are converted to the underlying raw type before
         /// comparison.
         template <typename Ptr>
-        struct pointer_compare {
+        class pointer_compare {
+        public:
             static_assert (std::is_pointer<Ptr>::value, "Ptr must be a pointer type");
             using is_transparent = std::true_type;
 
