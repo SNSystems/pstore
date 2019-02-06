@@ -55,7 +55,7 @@ set (PSTORE_KLEE_LIB_DIR "/home/klee/klee_build/klee/lib/libkleeRuntest.so")
 
 function (pstore_can_klee result)
 
-    set (${result} Yes PARENT_SCOPE)
+    set (${result} No PARENT_SCOPE)
 
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang$")
 
@@ -164,10 +164,10 @@ set (name ${klee_prefix_NAME})
             target_link_libraries (${exe_tname} PRIVATE ${dependent})
         endforeach (dependent)
 
-set (link_llvm_lib "")
-foreach (dependent ${klee_prefix_DEPENDS})
-    list (APPEND link_llvm_lib "--link-llvm-lib=$<TARGET_FILE:${dependent}-bc>")
-endforeach (dependent)
+	set (link_llvm_lib "")
+	foreach (dependent ${klee_prefix_DEPENDS})
+	    list (APPEND link_llvm_lib "--link-llvm-lib=$<TARGET_FILE:${dependent}-bc>")
+	endforeach (dependent)
 
         add_custom_target (
             "${tname_base}-run"
@@ -191,7 +191,6 @@ endforeach (dependent)
         )
         set_target_properties ("${tname_base}-run" PROPERTIES FOLDER "pstore-klee")
         foreach (dependent ${klee_prefix_DEPENDS})
-                message (STATUS "*** dependency: ${tname_base}-run ${dependent}-bc")
             add_dependencies ("${tname_base}-run" "${dependent}-bc")
         endforeach (dependent)
         
