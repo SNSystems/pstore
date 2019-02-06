@@ -56,3 +56,16 @@ set (PSTORE_ROMFS_LIB_SRC
 
 add_pstore_library (pstore-romfs ${PSTORE_ROMFS_LIB_SRC})
 target_link_libraries (pstore-romfs PUBLIC pstore-support)
+
+if (PSTORE_BITCODE)
+message (STATUS "*** adding pstore-romfs-bc")
+    add_pstore_library (pstore-romfs-bc STATIC ${PSTORE_ROMFS_LIB_SRC})
+    target_compile_options (pstore-romfs-bc PRIVATE -emit-llvm)
+    target_compile_options (pstore-romfs-bc PRIVATE
+        -fsanitize=signed-integer-overflow
+        -fsanitize=unsigned-integer-overflow
+    )
+    target_compile_options (pstore-romfs-bc PRIVATE "-fno-threadsafe-statics")
+
+    target_link_libraries (pstore-romfs-bc PUBLIC pstore-support-bc)
+endif (PSTORE_BITCODE)

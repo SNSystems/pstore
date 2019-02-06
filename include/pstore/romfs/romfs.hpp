@@ -48,6 +48,7 @@
 #include <cerrno>
 #include <memory>
 #include <string>
+#include <system_error>
 #include <tuple>
 
 #ifndef _WIN32

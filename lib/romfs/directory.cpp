@@ -70,27 +70,19 @@ auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) c
 auto pstore::romfs::directory::find (char const * PSTORE_NONNULL name, std::size_t length) const
     -> dirent const * PSTORE_NULLABLE {
 
-    // TODO: do this by hand rather than by std::string.
-    auto const value = std::string (name, length);
-    auto comp = [&value](dirent const & de) { return de.name () < value; };
-
-    auto first = begin ();
-    auto last = end ();
-
-    // FIXME: use lower_bound() rather than a hand-coded binary chop.
-    auto count = std::distance (first, last);
-    while (count > 0) {
-        auto it = first;
-        auto const step = count / 2;
-        std::advance (it, step);
-        if (comp (*it)) {
-            first = ++it;
-            count -= step + 1;
-        } else {
-            count = step;
+    auto end = this->end ();
+    auto it = std::lower_bound (
+        this->begin (), end, std::make_pair (name, length),
+        [](dirent const & a, std::pair<char const * PSTORE_NONNULL, std::size_t> const & b) {
+            return std::strncmp (a.name (), b.first, b.second) < 0;
+        });
+    if (it != end) {
+        gsl::czstring n = it->name ();
+        if (std::strncmp (n, name, length) == 0 && n[length] == '\0') {
+            return it;
         }
     }
-    return first != end () && first->name () == value ? first : nullptr;
+    return nullptr;
 }
 
 bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL parent) const {
