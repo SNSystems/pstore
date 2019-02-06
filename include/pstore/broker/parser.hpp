@@ -60,14 +60,15 @@ namespace pstore {
 
         struct broker_command {
         public:
-            broker_command (std::string const & v, std::string const & p)
-                    : verb{v}
-                    , path{p} {}
+            broker_command (std::string v, std::string p)
+                    : verb{std::move (v)}
+                    , path{std::move (p)} {}
             broker_command (broker_command const &) = default;
-            broker_command (broker_command &&) noexcept = default;
+            broker_command (broker_command &&) = default;
+            ~broker_command () noexcept = default;
 
             broker_command & operator= (broker_command const &) = default;
-            broker_command & operator= (broker_command &&) noexcept = default;
+            broker_command & operator= (broker_command &&) = default;
 
             bool operator== (broker_command const & rhs) const {
                 return verb == rhs.verb && path == rhs.path;
