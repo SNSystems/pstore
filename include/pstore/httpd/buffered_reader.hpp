@@ -46,6 +46,7 @@
 
 #include <array>
 #include <cassert>
+#include <string>
 
 #include "pstore/support/error_or.hpp"
 #include "pstore/support/maybe.hpp"
