@@ -68,19 +68,25 @@ namespace pstore {
             // uses std::less<Ptr> to compare them.
             class helper {
             public:
-                helper ()
+                helper () noexcept
                         : ptr_ (nullptr) {}
-                helper (helper const &) = default;
-                helper (Ptr p)
+                explicit constexpr helper (Ptr p) noexcept
                         : ptr_ (p) {}
+                helper (helper const &) noexcept = default;
+                helper (helper &&) noexcept = default;
 
                 template <typename U>
-                helper (std::shared_ptr<U> const & sp)
+                explicit helper (std::shared_ptr<U> const & sp) noexcept
                         : ptr_{sp.get ()} {}
 
                 template <typename U, typename Deleter = std::default_delete<U>>
-                helper (std::unique_ptr<U, Deleter> const & up)
+                explicit helper (std::unique_ptr<U, Deleter> const & up) noexcept
                         : ptr_{up.get ()} {}
+
+                ~helper () noexcept = default;
+
+                helper & operator= (helper const &) noexcept = default;
+                helper & operator= (helper &&) noexcept = default;
 
                 bool operator< (helper other) const { return std::less<Ptr> () (ptr_, other.ptr_); }
 
