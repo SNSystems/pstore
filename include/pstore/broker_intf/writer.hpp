@@ -61,7 +61,7 @@
 namespace pstore {
     namespace broker {
 
-        struct message_type;
+        class message_type;
 
         class writer {
         public:

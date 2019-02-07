@@ -76,7 +76,8 @@ namespace pstore {
 #endif
 
         /// Instances of this structure are written to the broker's communication pipe.
-        struct message_type {
+        class message_type {
+        public:
             message_type ()
                     : payload{{'\0'}} {}
 

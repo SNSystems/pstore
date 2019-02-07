@@ -56,9 +56,10 @@
 
 namespace pstore {
     namespace broker {
-        struct message_type;
 
-        struct broker_command {
+        class message_type;
+
+        class broker_command {
         public:
             broker_command (std::string v, std::string p)
                     : verb{std::move (v)}
