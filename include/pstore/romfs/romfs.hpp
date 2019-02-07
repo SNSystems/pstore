@@ -44,8 +44,8 @@
 #ifndef PSTORE_ROMFS_ROMFS_HPP
 #define PSTORE_ROMFS_ROMFS_HPP
 
-#include <cstdlib>
 #include <cerrno>
+#include <cstdlib>
 #include <memory>
 #include <string>
 #include <system_error>
@@ -55,9 +55,9 @@
 #    include <sys/types.h>
 #endif
 
-#include "pstore/romfs/error_or.hpp"
 #include "pstore/romfs/dirent.hpp"
 #include "pstore/romfs/directory.hpp"
+#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

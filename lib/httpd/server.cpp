@@ -1,8 +1,53 @@
+//*                                *
+//*  ___  ___ _ ____   _____ _ __  *
+//* / __|/ _ \ '__\ \ / / _ \ '__| *
+//* \__ \  __/ |   \ V /  __/ |    *
+//* |___/\___|_|    \_/ \___|_|    *
+//*                                *
+//===- lib/httpd/server.cpp -----------------------------------------------===//
+// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// All rights reserved.
+//
+// Developed by:
+//   Toolchain Team
+//   SN Systems, Ltd.
+//   www.snsystems.com
+//
+// Permission is hereby granted, free of charge, to any person obtaining a
+// copy of this software and associated documentation files (the
+// "Software"), to deal with the Software without restriction, including
+// without limitation the rights to use, copy, modify, merge, publish,
+// distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to
+// the following conditions:
+//
+// - Redistributions of source code must retain the above copyright notice,
+//   this list of conditions and the following disclaimers.
+//
+// - Redistributions in binary form must reproduce the above copyright
+//   notice, this list of conditions and the following disclaimers in the
+//   documentation and/or other materials provided with the distribution.
+//
+// - Neither the names of SN Systems Ltd., Sony Interactive Entertainment,
+//   Inc. nor the names of its contributors may be used to endorse or
+//   promote products derived from this Software without specific prior
+//   written permission.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+// OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+// MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+// IN NO EVENT SHALL THE CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR
+// ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+// SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
+//===----------------------------------------------------------------------===//
 #include "pstore/httpd/server.hpp"
 
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <string>
+#include <iostream>
 
 #ifdef _WIN32
 
@@ -27,29 +72,101 @@
 #endif
 
 #include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
+#include "pstore/support/error.hpp"
 
-void error (char const *) {}
-/*
- * cerror - returns an error message to the client
- */
-void cerror (FILE * const stream, char const * cause, char const * error_no, char const * shortmsg,
-             char const * longmsg) {
-    std::fprintf (stream, "HTTP/1.1 %s %s\n", error_no, shortmsg);
-    std::fprintf (stream, "Content-type: text/html\n");
-    std::fprintf (stream, "\n");
-    std::fprintf (stream, "<html><title>pstore-httpd Error</title>\n");
-    std::fprintf (stream, "<body bgcolor=ffffff>\n");
-    std::fprintf (stream, "<h1>pstore-httpd Web Server Error</h1>\n");
-    std::fprintf (stream, "<p>%s: %s\n", error_no, shortmsg);
-    std::fprintf (stream, "<p>%s: %s\n", longmsg, cause);
-    std::fprintf (stream, "<hr><em>The pstore-httpd Web server</em>\n");
-    std::fprintf (stream, "</body>\n");
-}
+
+// FIXME: there are multiple definitions of this type.
+#ifdef _WIN32
+using ssize_t = SSIZE_T;
+#endif
 
 namespace {
 
+    void error (char const * msg) { std::cerr << msg << '\n'; }
+
+    void send (pstore::broker::socket_descriptor const & socket, void const * ptr,
+               std::size_t size) {
+        ::send (socket.get (), static_cast<char const *> (ptr), size, 0 /*flags*/);
+    }
+    void send (pstore::broker::socket_descriptor const & socket, std::string const & str) {
+        // FIXME: error handling.
+        send (socket, str.data (), str.length ());
+    }
+    void send (pstore::broker::socket_descriptor const & socket, std::ostringstream const & os) {
+        send (socket, os.str ());
+    }
+    void cerror (pstore::broker::socket_descriptor const & socket, char const * cause,
+                 char const * error_no, char const * shortmsg, char const * longmsg) {
+        std::ostringstream os;
+        os << "HTTP/1.1 " << error_no << ' ' << shortmsg
+           << "\n"
+              "Content-type: text/html\n"
+              "\n"
+              "<html>\n"
+              "<head><title>pstore-httpd Error</title></head>\n"
+              "<body>\n"
+              "<h1>pstore-httpd Web Server Error</h1>\n"
+              "<p>"
+           << error_no << ": " << shortmsg
+           << "</p>\n"
+              "<p>"
+           << longmsg << ": " << cause
+           << "</p>\n"
+              "<hr><em>The pstore-httpd Web server</em>\n"
+              "</body>\n"
+              "</html>\n";
+        send (socket, os);
+    }
+
+    // FIXME: the following two functions were copied from the broker.
+    // is_recv_error
+    // ~~~~~~~~~~~~~
+    constexpr bool is_recv_error (ssize_t nread) {
+#ifdef _WIN32
+        return nread == SOCKET_ERROR;
+#else
+        return nread < 0;
+#endif // !_WIN32
+    }
+
+    // get_last_error
+    // ~~~~~~~~~~~~~~
+    inline std::error_code get_last_error () noexcept {
+#ifdef _WIN32
+        return std::make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
+#else
+        return std::make_error_code (std::errc (errno));
+#endif
+    }
+
+
+    class refiller {
+    public:
+        explicit constexpr refiller (pstore::broker::socket_descriptor * const socket) noexcept
+                : socket_{socket} {}
+        constexpr refiller (refiller const & rhs) noexcept = default;
+        constexpr refiller (refiller && rhs) noexcept = default;
+
+        refiller & operator= (refiller const &) noexcept = default;
+
+        pstore::error_or<char *> operator() (char * first, char * last);
+
+    private:
+        pstore::broker::socket_descriptor * socket_;
+    };
+    pstore::error_or<char *> refiller::operator() (char * first, char * last) {
+        assert (last > first);
+        ssize_t const nread =
+            recv (socket_->get (), first, static_cast<std::size_t> (last - first), 0 /*flags*/);
+        assert (is_recv_error (nread) || nread <= last - first);
+        if (is_recv_error (nread)) {
+            return pstore::error_or<char *>{get_last_error ()};
+        }
+        return pstore::error_or<char *>{first + nread};
+    }
 
 } // end anonymous namespace
 
@@ -121,11 +238,7 @@ namespace pstore {
                     error ("ERROR on inet_ntoa\n");
                 }
 
-                // Open the child socket descriptor as a stream.
-                FILE * const stream = fdopen (childfd.get (), "r+"); /* stream version of childfd */
-                if (stream == nullptr) {
-                    error ("ERROR on fdopen");
-                }
+                auto reader = make_buffered_reader (refiller (&childfd));
 
                 /* get the HTTP request line */
                 constexpr std::size_t buffer_size = 1024;
@@ -133,30 +246,41 @@ namespace pstore {
                 char version[buffer_size]; // request method
                 char uri[buffer_size];     // request uri
                 {
-                    char buf[buffer_size]; // message buffer
-                    fgets (buf, buffer_size, stream);
-                    std::printf ("%s", buf);
-                    sscanf (buf, "%s %s %s\n", method, uri, version);
+                    // char buf[buffer_size]; // message buffer
+                    error_or<maybe<std::string>> ebuf = reader.gets ();
+                    if (ebuf.has_error ()) {
+                        std::error_code const erc = ebuf.get_error ();
+                        std::cerr << "Error on recv: " << erc << '\n';
+                        // childfd.reset ();
+                        continue;
+                    }
+                    maybe<std::string> buf = ebuf.get_value ();
+                    if (!buf) {
+                        continue;
+                    }
+                    // fgets (buf, buffer_size, stream);
+                    std::cout << *buf << '\n';
+                    sscanf (buf->c_str (), "%s %s %s\n", method, uri, version);
                 }
 
                 // We  only currently support the GET method.
                 if (strcmp (method, "GET") != 0) {
-                    cerror (stream, method, "501", "Not Implemented",
+                    cerror (childfd, method, "501", "Not Implemented",
                             "httpd does not implement this method");
-                    std::fclose (stream);
+
                     childfd.reset ();
                     continue;
                 }
 
                 /* read (and ignore) the HTTP headers */
                 {
-                    char buf[buffer_size]; /* message buffer */
-                    fgets (buf, buffer_size, stream);
-                    std::printf ("%s", buf);
-                    while (std::strcmp (buf, "\r\n") != 0) {
-                        std::fgets (buf, buffer_size, stream);
-                        std::printf ("%s", buf);
-                    }
+                    // char buf[buffer_size]; /* message buffer */
+                    std::string s;
+                    do {
+                        error_or<maybe<std::string>> es = reader.gets ();
+                        s = es.get_value ().value ();
+                        std::cout << s << '\n';
+                    } while (s.length () > 0);
                 }
 
                 /* parse the uri [crufty] */
@@ -165,7 +289,7 @@ namespace pstore {
                 char cgiargs[buffer_size];      /* cgi argument list */
                 if (!strstr (uri, "cgi-bin")) { /* static content */
                     is_static = true;
-                    std::strcpy (cgiargs, "");
+                    cgiargs[0] = '\0';
                     filename = ".";
                     filename += uri;
                     if (uri[std::strlen (uri) - 1] == '/') {
@@ -187,11 +311,11 @@ namespace pstore {
 
                 /* make sure the file exists */
                 // struct stat sbuf; /* file status */
-                romfs::error_or<struct romfs::stat> sbuf = file_system.stat (filename.c_str ());
+                error_or<struct romfs::stat> sbuf = file_system.stat (filename.c_str ());
                 if (sbuf.has_error ()) {
-                    cerror (stream, filename.c_str (), "404", "Not found",
+                    cerror (childfd, filename.c_str (), "404", "Not found",
                             "pstore-httpd couldn't find this file");
-                    std::fclose (stream);
+
                     childfd.reset ();
                     continue;
                 }
@@ -201,33 +325,24 @@ namespace pstore {
                     /* print response header */
                     //auto const * reply = "<html><body>Hello</body></html>";
                     //auto const content_length = std::strlen (reply);
-
-                    std::fprintf (stream, "HTTP/1.1 200 OK\nServer: pstore-httpd\n");
-                    // std::fprintf (stream, "Content-length: %d\n", static_cast<int>
-                    // (sbuf->st_size));
-                    std::fprintf (stream, "Content-length: %u\n",
-                                  static_cast<unsigned> (sbuf->st_size));
-                    std::fprintf (stream, "Content-type: %s\n",
-                                  media_type_from_filename (filename));
-                    std::fprintf (stream, "\r\n");
-                    std::fflush (stream);
-
+                    {
+                        std::ostringstream os;
+                        os << "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
+                        os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << '\n';
+                        os << "Content-type: " << media_type_from_filename (filename) << '\n';
+                        os << "\r\n";
+                        send (childfd, os.str ());
+                    }
                     std::array <std::uint8_t, 256> buffer;
-                    romfs::error_or<romfs::descriptor> descriptor = file_system.open (filename.c_str ());
+                    error_or<romfs::descriptor> descriptor = file_system.open (filename.c_str ());
                     assert (!descriptor.has_error ());
                     for (;;) {
                         std::size_t num_read = descriptor->read (buffer.data (), sizeof (std::uint8_t), buffer.size ());
                         if (num_read == 0) {
                             break;
                         }
-                        std::fwrite (buffer.data (), sizeof(std::uint8_t), num_read, stream);
+                        send (childfd, buffer.data (), num_read);
                     }
-                    /* Use mmap to return arbitrary-sized response body */
-                    //                    int fd = open (filename.c_str (), O_RDONLY);
-                    //                    void * p = mmap (0, sbuf.st_size, PROT_READ, MAP_PRIVATE,
-                    //                    fd, 0); std::fwrite (p, 1, sbuf.st_size, stream); munmap
-                    //                    (p, sbuf.st_size); close (fd);
-                    //std::fwrite (reply, 1, content_length, stream);
                 } else {
 #if 0
                     /* serve dynamic content */
@@ -275,7 +390,6 @@ namespace pstore {
                 }
 
                 /* clean up */
-                std::fclose (stream);
                 childfd.reset ();
             }
         }

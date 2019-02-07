@@ -96,13 +96,14 @@ namespace pstore {
                 static constexpr error_type error = DescriptorTraits::error;
 #endif
 
-                explicit descriptor (DescriptorTraits traits = DescriptorTraits ()) noexcept
+                explicit constexpr descriptor (
+                    DescriptorTraits traits = DescriptorTraits ()) noexcept
                         : fd_{invalid}
-                        , traits_(traits) {}
-                explicit descriptor (value_type fd,
-                                     DescriptorTraits traits = DescriptorTraits ()) noexcept
+                        , traits_ (traits) {}
+                explicit constexpr descriptor (
+                    value_type fd, DescriptorTraits traits = DescriptorTraits ()) noexcept
                         : fd_{fd}
-                        , traits_(traits) {}
+                        , traits_ (traits) {}
                 descriptor (descriptor && rhs) noexcept
                         : fd_{rhs.release ()}
                         , traits_(std::move (rhs.traits_)) {}

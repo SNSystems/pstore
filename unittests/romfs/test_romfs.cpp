@@ -44,6 +44,7 @@
 #include "pstore/romfs/romfs.hpp"
 #include <array>
 #include "pstore/support/array_elements.hpp"
+#include "pstore/support/error_or.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/romfs/dirent.hpp"
 
@@ -82,7 +83,7 @@ namespace {
         romfs fs_;
 
         template <typename T>
-        void check_for_error (error_or<T> const & eo, pstore::romfs::error_code actual) {
+        void check_for_error (pstore::error_or<T> const & eo, pstore::romfs::error_code actual) {
             ASSERT_TRUE (eo.has_error ());
             EXPECT_EQ (eo.get_error (), std::make_error_code (actual));
         }
@@ -107,25 +108,25 @@ namespace pstore {
 } // end namespace pstore
 
 TEST_F (RomFs, WorkingDirectory) {
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/"));
     EXPECT_EQ (fs_.chdir ("/."), std::error_code{});
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/"));
 
     EXPECT_EQ (fs_.chdir ("hello"), std::make_error_code (error_code::enotdir));
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/"))
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/"))
         << "Expected no change to the WD after a failed chdir";
 
     EXPECT_EQ (fs_.chdir ("./dir"), std::error_code{});
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/dir"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/dir"));
 
     EXPECT_EQ (fs_.chdir ("../dir"), std::error_code{});
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/dir"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/dir"));
 
     EXPECT_EQ (fs_.chdir (".."), std::error_code{});
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/"));
 
     EXPECT_EQ (fs_.chdir (".."), std::error_code{});
-    EXPECT_EQ (fs_.getcwd (), error_or<std::string> (in_place, "/"));
+    EXPECT_EQ (fs_.getcwd (), pstore::error_or<std::string> (pstore::in_place, "/"));
 }
 
 TEST_F (RomFs, OpenFile) {
@@ -137,7 +138,7 @@ TEST_F (RomFs, OpenFile) {
 }
 
 TEST_F (RomFs, OpenAndReadFile) {
-    error_or<descriptor> eod = fs_.open ("./hello");
+    pstore::error_or<descriptor> eod = fs_.open ("./hello");
     ASSERT_FALSE (eod.has_error ());
     descriptor & d = eod.get_value ();
 
@@ -151,7 +152,7 @@ TEST_F (RomFs, OpenAndReadFile) {
     EXPECT_EQ (d.read (buffer.data (), sizeof (std::uint8_t), 1), 0U);
 
     EXPECT_EQ (d.seek (0, SEEK_CUR), file2_size);
-    EXPECT_EQ (d.seek (0, SEEK_SET), (error_or<std::size_t>{0U}));
+    EXPECT_EQ (d.seek (0, SEEK_SET), (pstore::error_or<std::size_t>{0U}));
     EXPECT_EQ (d.seek (0, SEEK_CUR), 0);
 }
 
@@ -159,7 +160,7 @@ TEST_F (RomFs, OpenDir) {
     this->check_for_error (fs_.opendir ("hello"), pstore::romfs::error_code::enotdir);
     EXPECT_FALSE (fs_.opendir ("/").has_error ());
 
-    error_or<dirent_descriptor> eod = fs_.opendir ("/");
+    pstore::error_or<dirent_descriptor> eod = fs_.opendir ("/");
     ASSERT_FALSE (eod.has_error ());
     auto & value = eod.get_value ();
     ASSERT_STREQ (value.read ()->name (), ".");
@@ -173,14 +174,14 @@ TEST_F (RomFs, OpenDir) {
 }
 
 TEST_F (RomFs, Seek) {
-    error_or<descriptor> eod = fs_.open ("./hello");
+    pstore::error_or<descriptor> eod = fs_.open ("./hello");
     ASSERT_FALSE (eod.has_error ());
     descriptor & d = eod.get_value ();
 
     std::uint8_t v;
     EXPECT_EQ (d.read (&v, sizeof (v), 1U), 1U);
     EXPECT_EQ (v, 104U);
-    error_or<std::size_t> eos = d.seek (0, SEEK_SET);
+    pstore::error_or<std::size_t> eos = d.seek (0, SEEK_SET);
     EXPECT_FALSE (eos.has_error ());
     EXPECT_EQ (eos.get_value (), 0U);
 
@@ -201,11 +202,11 @@ TEST_F (RomFs, Seek) {
 }
 
 TEST_F (RomFs, SeekPastEnd) {
-    error_or<descriptor> eod = fs_.open ("./hello");
+    pstore::error_or<descriptor> eod = fs_.open ("./hello");
     ASSERT_FALSE (eod.has_error ());
     descriptor & d = eod.get_value ();
 
-    error_or<std::size_t> eos = d.seek (3, SEEK_END);
+    pstore::error_or<std::size_t> eos = d.seek (3, SEEK_END);
     EXPECT_FALSE (eos.has_error ()) << "Seek past EOF should be allowed";
     EXPECT_EQ (eos.get_value (), sizeof (file2) + 3U);
 

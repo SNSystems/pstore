@@ -48,7 +48,7 @@
 #include <cstdint>
 #include <sys/types.h>
 
-#include "pstore/romfs/error_or.hpp"
+#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
 

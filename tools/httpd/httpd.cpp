@@ -43,16 +43,24 @@
 //===----------------------------------------------------------------------===//
 
 #include <iostream>
+#include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/httpd/server.hpp"
 #include "pstore/romfs/romfs.hpp"
 
 extern pstore::romfs::romfs fs;
 
-int main (int argc, const char * argv[]) {
+int main (int, const char *[]) {
     int exit_code = EXIT_SUCCESS;
-    PSTORE_TRY {
-        pstore::httpd::server (8080 /*port number*/, fs);
+
+#ifdef _WIN32
+    pstore::wsa_startup startup;
+    if (!startup.started ()) {
+        std::cerr << "WSAStartup() failed\n";
+        return EXIT_FAILURE;
     }
+#endif // _WIN32
+
+    PSTORE_TRY { pstore::httpd::server (8080 /*port number*/, fs); }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';

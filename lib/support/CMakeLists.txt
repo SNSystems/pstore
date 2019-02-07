@@ -247,6 +247,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_field.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/error.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/error_or.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file_posix.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/file_win32.hpp"
