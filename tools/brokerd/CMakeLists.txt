@@ -79,5 +79,3 @@ run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
 if (WIN32)
     add_subdirectory (service)
 endif ()
-
-

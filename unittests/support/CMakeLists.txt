@@ -64,4 +64,3 @@ add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
 target_link_libraries (pstore-support-unit-tests PRIVATE pstore-support pstore-common)
 
 add_subdirectory (klee EXCLUDE_FROM_ALL)
-
