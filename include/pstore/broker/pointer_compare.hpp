@@ -70,17 +70,17 @@ namespace pstore {
             public:
                 helper () noexcept
                         : ptr_ (nullptr) {}
-                explicit constexpr helper (Ptr p) noexcept
+                constexpr helper (Ptr p) noexcept
                         : ptr_ (p) {}
                 helper (helper const &) noexcept = default;
                 helper (helper &&) noexcept = default;
 
                 template <typename U>
-                explicit helper (std::shared_ptr<U> const & sp) noexcept
+                helper (std::shared_ptr<U> const & sp) noexcept
                         : ptr_{sp.get ()} {}
 
                 template <typename U, typename Deleter = std::default_delete<U>>
-                explicit helper (std::unique_ptr<U, Deleter> const & up) noexcept
+                helper (std::unique_ptr<U, Deleter> const & up) noexcept
                         : ptr_{up.get ()} {}
 
                 ~helper () noexcept = default;
@@ -94,7 +94,10 @@ namespace pstore {
                 Ptr ptr_;
             };
 
-            bool operator() (helper const & lhs, helper const & rhs) const { return lhs < rhs; }
+            template <typename Lhs, typename Rhs>
+            bool operator() (Lhs const & lhs, Rhs const & rhs) const {
+                return helper{lhs} < helper{rhs};
+            }
         };
 
     } // namespace broker
