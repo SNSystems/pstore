@@ -136,34 +136,38 @@ namespace {
 
     class TransactionFile : public EmptyStoreFile {
     protected:
-        void SetUp () override {
-            EmptyStoreFile::SetUp ();
-            file_->open (pstore::file::file_handle::temporary ());
-            db_->build_new_store (*file_);
-            auto db_file = new mock_database_file{file_};
-            db_.reset (db_file);
-            db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-            using ::testing::_;
-            using ::testing::Invoke;
+        void SetUp () override;
 
-            // Pass the mocked calls through to their original implementations.
-            // I'm simply using the mocking framework to observe that the
-            // correct calls are made. The precise division of labor between
-            // the database and transaction classes is enforced or determined here.
-            auto invoke_allocate = Invoke (db_.get (), &mock_database_file::base_allocate);
-            auto invoke_get = Invoke (db_.get (), &mock_database_file::base_get);
-
-            EXPECT_CALL (*db_, get (_, _, _, _)).WillRepeatedly (invoke_get);
-            EXPECT_CALL (*db_, allocate (_, _)).WillRepeatedly (invoke_allocate);
-        }
-
-        void TearDown () override {
-            db_.reset ();
-            EmptyStoreFile::TearDown ();
-        }
+        void TearDown () override;
 
         std::unique_ptr<mock_database_file> db_;
     };
+
+    void TransactionFile::SetUp () {
+        EmptyStoreFile::SetUp ();
+        file_->open (pstore::file::file_handle::temporary ());
+        db_->build_new_store (*file_);
+        auto db_file = new mock_database_file{file_};
+        db_.reset (db_file);
+        db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        using ::testing::_;
+        using ::testing::Invoke;
+
+        // Pass the mocked calls through to their original implementations.
+        // I'm simply using the mocking framework to observe that the
+        // correct calls are made. The precise division of labor between
+        // the database and transaction classes is enforced or determined here.
+        auto invoke_allocate = Invoke (db_.get (), &mock_database_file::base_allocate);
+        auto invoke_get = Invoke (db_.get (), &mock_database_file::base_get);
+
+        EXPECT_CALL (*db_, get (_, _, _, _)).WillRepeatedly (invoke_get);
+        EXPECT_CALL (*db_, allocate (_, _)).WillRepeatedly (invoke_allocate);
+    }
+
+    void TransactionFile::TearDown () {
+        db_.reset ();
+        EmptyStoreFile::TearDown ();
+    }
 
 } // namespace
 
@@ -283,7 +287,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 
     {
         mock_mutex mutex;
-        typedef std::unique_lock<mock_mutex> guard_type;
+        using guard_type = std::unique_lock<mock_mutex>;
         auto transaction = pstore::begin (db, guard_type{mutex});
 
         // Write an integer to the store.
@@ -317,7 +321,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 TEST_F (TransactionFile, RollbackAfterAppendingFile4mb) {
       // similar to above but use file based DB and check regions reclaimed
       mock_mutex mutex;
-      typedef std::unique_lock<mock_mutex> guard_type;
+      using guard_type =  std::unique_lock<mock_mutex>;
       auto num_regions = db_->storage().regions().size ();
       auto transaction = pstore::begin (*db_, guard_type{mutex});
 

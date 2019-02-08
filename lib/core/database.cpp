@@ -499,15 +499,12 @@ namespace pstore {
         }
         modified_ = true;
 
-
-        std::uint64_t const new_logical_size = size;
-
         // Memory map space if necessary.
-        storage_.map_bytes (new_logical_size);
+        storage_.map_bytes (size);
 
-        size_.truncate_logical_size (new_logical_size);
+        size_.truncate_logical_size (size);
         if (database::small_files_enabled ()) {
-            this->file ()->truncate (new_logical_size);
+            this->file ()->truncate (size);
         }
     }
 

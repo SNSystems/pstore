@@ -93,23 +93,21 @@ namespace pstore {
             bool done = false;
             // we now look backwards through the regions, discarding segments and regions introduced by this transaction
             while (!done && (regions_.size () > 0)) {
-                if (regions_.back()->offset () > new_size) {
+                if (regions_.back ()->offset () <= new_size) {
+                    done = true;
+                } else {
                     // destroy our use of the shared ptr
                     auto region = regions_.back ();
                     // remove segments
-                    auto segment_it = std::begin (*sat_);
-                    auto segment_end = std::end (*sat_);
-                    for (; segment_it != segment_end; ++segment_it) {
-                        if (segment_it->region && segment_it->region->data() == region->data()) {
-                            auto segment = *segment_it;
-                            segment_it->region = nullptr;
-                            segment_it->value = nullptr;
+                    for (auto sat_segment : *sat_) {
+                        if (sat_segment.region && sat_segment.region->data () == region->data ()) {
+                            sat_segment.region = nullptr;
+                            sat_segment.value = nullptr;
                         }
-                    } 
+                    }
                     // remove region
                     regions_.pop_back ();
-                } else
-                    done = true;
+                }
             }
         }
     }
