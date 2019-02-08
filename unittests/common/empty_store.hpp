@@ -69,4 +69,19 @@ private:
     static constexpr std::size_t page_size_ = 4096;
 };
 
+class EmptyStoreFile : public ::testing::Test {
+public:
+    static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
+
+    // Build an empty, file database.
+    EmptyStoreFile ();
+    ~EmptyStoreFile () override;
+
+protected:
+    std::shared_ptr<pstore::file::file_handle> file_;
+
+private:
+    static constexpr std::size_t page_size_ = 4096;
+};
+
 #endif // EMPTY_STORE_HPP

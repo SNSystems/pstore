@@ -109,6 +109,66 @@ namespace {
 
         std::unique_ptr<mock_database> db_;
     };
+
+    class mock_database_file : public pstore::database {
+    public:
+        mock_database_file (std::shared_ptr<pstore::file::file_handle> const & file)
+                : pstore::database (file) {
+
+            this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        }
+
+        MOCK_CONST_METHOD4 (get, std::shared_ptr<void const> (pstore::address, std::size_t,
+                                                              bool /*is_initialized*/,
+                                                              bool /*is_writable*/));
+        MOCK_METHOD2 (allocate, pstore::address (std::uint64_t /*size*/, unsigned /*align*/));
+
+        // The next two methods simply allow the mocks to call through to the base class's
+        // implementation of allocate() and get().
+        pstore::address base_allocate (std::uint64_t bytes, unsigned align) {
+            return pstore::database::allocate (bytes, align);
+        }
+        auto base_get (pstore::address const & addr, std::size_t size, bool is_initialized,
+                       bool is_writable) const -> std::shared_ptr<void const> {
+            return pstore::database::get (addr, size, is_initialized, is_writable);
+        }
+    };
+
+    class TransactionFile : public EmptyStoreFile {
+    protected:
+        void SetUp () override;
+
+        void TearDown () override;
+
+        std::unique_ptr<mock_database_file> db_;
+    };
+
+    void TransactionFile::SetUp () {
+        EmptyStoreFile::SetUp ();
+        file_->open (pstore::file::file_handle::temporary ());
+        db_->build_new_store (*file_);
+        auto db_file = new mock_database_file{file_};
+        db_.reset (db_file);
+        db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        using ::testing::_;
+        using ::testing::Invoke;
+
+        // Pass the mocked calls through to their original implementations.
+        // I'm simply using the mocking framework to observe that the
+        // correct calls are made. The precise division of labor between
+        // the database and transaction classes is enforced or determined here.
+        auto invoke_allocate = Invoke (db_.get (), &mock_database_file::base_allocate);
+        auto invoke_get = Invoke (db_.get (), &mock_database_file::base_get);
+
+        EXPECT_CALL (*db_, get (_, _, _, _)).WillRepeatedly (invoke_get);
+        EXPECT_CALL (*db_, allocate (_, _)).WillRepeatedly (invoke_allocate);
+    }
+
+    void TransactionFile::TearDown () {
+        db_.reset ();
+        EmptyStoreFile::TearDown ();
+    }
+
 } // namespace
 
 TEST_F (Transaction, CommitEmptyDoesNothing) {
@@ -227,7 +287,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 
     {
         mock_mutex mutex;
-        typedef std::unique_lock<mock_mutex> guard_type;
+        using guard_type = std::unique_lock<mock_mutex>;
         auto transaction = pstore::begin (db, guard_type{mutex});
 
         // Write an integer to the store.
@@ -256,6 +316,22 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
                      ::testing::ContainerEq (r0footer->signature2))
             << "Did not find r0 footer signature2";
     }
+}
+
+TEST_F (TransactionFile, RollbackAfterAppendingFile4mb) {
+      // similar to above but use file based DB and check regions reclaimed
+      mock_mutex mutex;
+      using guard_type =  std::unique_lock<mock_mutex>;
+      auto num_regions = db_->storage().regions().size ();
+      auto transaction = pstore::begin (*db_, guard_type{mutex});
+
+      std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
+      transaction.allocate (elements * sizeof (int), 1 /*align*/);
+      EXPECT_NE (db_->storage ().regions ().size (), num_regions) << "allocate did not create regions";
+      // Abandon the transaction.
+      transaction.rollback ();
+
+      EXPECT_EQ (db_->storage().regions().size (), num_regions) << "Rollback did not reclaim regions";
 }
 
 TEST_F (Transaction, CommitAfterAppending4Mb) {

@@ -54,4 +54,10 @@ EmptyStore::EmptyStore ()
     pstore::database::build_new_store (*file_);
 }
 
-EmptyStore::~EmptyStore () {}
+EmptyStore::~EmptyStore () = default;
+
+EmptyStoreFile::EmptyStoreFile ()
+        : file_{std::make_shared<pstore::file::file_handle> ()} {
+}
+
+EmptyStoreFile::~EmptyStoreFile () = default;
