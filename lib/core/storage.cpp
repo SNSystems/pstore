@@ -83,11 +83,34 @@ namespace pstore {
     void storage::map_bytes (std::uint64_t new_size) {
         // Get the file offset of the end of the last memory mapped region.
         std::uint64_t const old_size = regions_.size () == 0 ? 0 : regions_.back ()->end ();
-        if (new_size > old_size) {
+        // if growing the storage
+        if (new_size > old_size) { 
             auto const old_num_regions = regions_.size ();
             // Allocate new memory region(s) to accommodate the additional bytes requested.
             region_factory_->add (&regions_, old_size, new_size);
             this->update_master_pointers (old_num_regions);
+        } else if (new_size < old_size) {   // if shrinking the storage
+            bool done = false;
+            // we now look backwards through the regions, discarding segments and regions introduced by this transaction
+            while (!done && (regions_.size () > 0)) {
+                if (regions_.back()->offset () > new_size) {
+                    // destroy our use of the shared ptr
+                    auto region = regions_.back ();
+                    // remove segments
+                    auto segment_it = std::begin (*sat_);
+                    auto segment_end = std::end (*sat_);
+                    for (; segment_it != segment_end; ++segment_it) {
+                        if (segment_it->region && segment_it->region->data() == region->data()) {
+                            auto segment = *segment_it;
+                            segment_it->region = nullptr;
+                            segment_it->value = nullptr;
+                        }
+                    } 
+                    // remove region
+                    regions_.pop_back ();
+                } else
+                    done = true;
+            }
         }
     }
 

@@ -198,12 +198,16 @@ namespace pstore {
             // First thing that creating a transaction does is update the view
             // to that of the head revision.
             db_.sync ();
+            dbsize_ = db.size ();
         }
 
     private:
         database & db_;
         /// The number of bytes allocated in this transaction.
         std::uint64_t size_ = 0;
+
+        /// The size of the db at the creation of this transaction
+        std::uint64_t dbsize_ = 0;
 
         /// The first address occupied by this transaction. 0 if the transaction
         /// has not yet allocated any data.

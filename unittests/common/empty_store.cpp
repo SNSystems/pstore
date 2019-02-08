@@ -55,3 +55,10 @@ EmptyStore::EmptyStore ()
 }
 
 EmptyStore::~EmptyStore () {}
+
+EmptyStoreFile::EmptyStoreFile ()
+        : file_{std::make_shared<pstore::file::file_handle> ()} {
+//    pstore::database::build_new_store (*file_);
+}
+
+EmptyStoreFile::~EmptyStoreFile () {}
