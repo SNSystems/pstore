@@ -49,10 +49,10 @@
 #include <ostream>
 
 #ifndef _WIN32
-#include <unistd.h>
+#    include <unistd.h>
 #else
-#include <io.h>
-#include <Winsock2.h>
+#    include <io.h>
+#    include <Winsock2.h>
 #endif
 
 namespace pstore {
@@ -169,10 +169,10 @@ namespace pstore {
 #ifndef _WIN32
 
             // Not Windows.
-            struct posix_descriptor_traits {
+            class posix_descriptor_traits {
+            public:
                 using type = int;
                 using error_type = type;
-                posix_descriptor_traits () = default;
 
                 static bool is_valid (type fd) noexcept { return fd >= 0; }
                 static void close (type fd) noexcept { ::close (fd); }
@@ -186,7 +186,8 @@ namespace pstore {
 #else
 
             // Windows.
-            struct win32_socket_descriptor_traits {
+            class win32_socket_descriptor_traits {
+            public:
                 using type = SOCKET;
                 using error_type = int;
 
@@ -198,7 +199,8 @@ namespace pstore {
             };
             using socket_descriptor = descriptor<win32_socket_descriptor_traits>;
 
-            struct win32_pipe_descriptor_traits {
+            class win32_pipe_descriptor_traits {
+            public:
                 using type = HANDLE;
                 using error_type = type;
 
