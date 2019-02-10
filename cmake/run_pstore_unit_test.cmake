@@ -65,7 +65,6 @@ function (run_pstore_unit_test prelink_target test_target)
         set (OUT_XML "${CMAKE_BINARY_DIR}/${test_target}.xml")
 
 	if (PSTORE_VALGRIND)
-	    set (OUT_LOG "${CMAKE_BINARY_DIR}/${test_target}-memcheck.log")
             add_custom_command (
                 TARGET ${prelink_target}
                 PRE_LINK
@@ -73,13 +72,12 @@ function (run_pstore_unit_test prelink_target test_target)
                         --tool=memcheck --leak-check=full --show-reachable=yes
                         --undef-value-errors=yes --track-origins=no
                         --child-silent-after-fork=no --trace-children=no
-                        --log-file=${OUT_LOG} --error-exitcode=13
+                        --error-exitcode=13
                         "$<TARGET_FILE:${test_target}>" "--gtest_output=xml:${OUT_XML}"
-                COMMAND cat ${OUT_LOG}
                 WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
                 COMMENT "Valgrind Running ${test_target}"
                 DEPENDS ${test_target}
-                BYPRODUCTS ${OUT_LOG} ${OUT_XML}
+                BYPRODUCTS ${OUT_XML}
                 VERBATIM
             )
         elseif (PSTORE_COVERAGE)
