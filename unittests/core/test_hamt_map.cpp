@@ -425,6 +425,7 @@ TEST_F (HamtRoundTrip, Empty) {
     {
         auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         addr = index1.flush (t1, db_->get_current_revision());
+        t1.commit ();
     }
 
     index_type index2{*db_, addr};
@@ -438,6 +439,7 @@ TEST_F (HamtRoundTrip, LeafMember) {
         auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         index1.insert_or_assign (t1, index_type::value_type{"a", "a"});
         addr = index1.flush (t1, db_->get_current_revision());
+        t1.commit ();
     }
 
     index_type index2{*db_, addr};
@@ -540,23 +542,15 @@ TEST_F (OneLevel, InsertSecondNode) {
 }
 
 TEST_F (OneLevel, InsertOfExistingKeyDoesNotResultInHeapNode) {
-    {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        index_->insert (t1, test_trie::value_type{"a", "a"});
-        index_->insert (t1, test_trie::value_type{"b", "b"});
-        index_->flush (t1, db_->get_current_revision());
+    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    index_->insert (t1, test_trie::value_type{"a", "a"});
+    index_->insert (t1, test_trie::value_type{"b", "b"});
+    index_->flush (t1, db_->get_current_revision ());
 
-        auto root = index_->root ();
-        EXPECT_FALSE (root.is_heap ());
-    }
-    {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
-        auto const kvp = test_trie::value_type{"a", "a2"};
-        index_->insert (t2, kvp);
+    EXPECT_FALSE (index_->root ().is_heap ());
 
-        auto root = index_->root ();
-        EXPECT_FALSE (root.is_heap ());
-    }
+    index_->insert (t1, test_trie::value_type{"a", "a2"});
+    EXPECT_FALSE (index_->root ().is_heap ());
 }
 
 // insert_or_assign a new node into the store internal node.
