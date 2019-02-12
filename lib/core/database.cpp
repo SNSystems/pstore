@@ -288,11 +288,11 @@ namespace pstore {
         {
             file.seek (0);
 
-            header header;
+            header header{};
             header.footer_pos = typed_address<trailer>::make (sizeof (header));
             file.write (header);
 
-//            assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
+            assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
 
             trailer t{};
             std::fill (std::begin (t.a.index_records), std::end (t.a.index_records),
