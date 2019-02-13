@@ -225,8 +225,6 @@ namespace pstore {
         std::uint32_t crc = 0;
         std::uint32_t unused1 = 0;
 
-        std::uint64_t unused2 = 0;
-
         /// The file offset of the current (most recent) file footer. This value is modified as the
         /// the very last step of commiting a transaction.
         std::atomic<typed_address<trailer>> footer_pos;
@@ -241,10 +239,9 @@ namespace pstore {
 
     PSTORE_STATIC_ASSERT (offsetof (header, a) == 0);
     PSTORE_STATIC_ASSERT (offsetof (header, crc) == 32);
-    PSTORE_STATIC_ASSERT (offsetof (header, unused2) == 40);
-    PSTORE_STATIC_ASSERT (offsetof (header, footer_pos) == 48);
+    PSTORE_STATIC_ASSERT (offsetof (header, footer_pos) == 40);
     PSTORE_STATIC_ASSERT (alignof (header) == 8);
-    PSTORE_STATIC_ASSERT (sizeof (header) == 56);
+    PSTORE_STATIC_ASSERT (sizeof (header) == 48);
 
 
     class database;
