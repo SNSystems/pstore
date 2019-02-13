@@ -223,6 +223,7 @@ namespace pstore {
         /// This crc is used to ensure that the fields from #signature1 to #sync_name are not
         /// modified.
         std::uint32_t crc = 0;
+        std::uint32_t unused1 = 0;
 
         std::uint64_t unused2 = 0;
 
