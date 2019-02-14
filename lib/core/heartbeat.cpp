@@ -60,9 +60,10 @@ namespace pstore {
     heartbeat::worker_thread::duration_type const heartbeat::worker_thread::max_time_ =
         duration_type::max ();
 
-    heartbeat::worker_thread::worker_thread ()
+    heartbeat::worker_thread::worker_thread (bool unittest)
             : sleep_time_ (&max_time_) {
-        threads::set_name ("heartbeat");
+        if (!unittest)
+            threads::set_name ("heartbeat");
     }
 
     void heartbeat::worker_thread::attach (heartbeat::key_type key, callback cb) {

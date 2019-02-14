@@ -91,7 +91,7 @@ namespace pstore {
         /// \note This class is in the public interface to enable it to be unit tested.
         class worker_thread {
         public:
-            worker_thread ();
+            worker_thread (bool unittest=false);
             ~worker_thread () = default;
 
             // Move.
