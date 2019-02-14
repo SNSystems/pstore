@@ -288,7 +288,7 @@ namespace pstore {
         {
             file.seek (0);
 
-            header header;
+            header header{};
             header.footer_pos = typed_address<trailer>::make (sizeof (header));
             file.write (header);
 

@@ -190,7 +190,7 @@ namespace pstore {
         std::uint32_t get_crc () const noexcept;
 
         static std::uint16_t const major_version = 0;
-        static std::uint16_t const minor_version = 9;
+        static std::uint16_t const minor_version = 10;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
@@ -223,8 +223,7 @@ namespace pstore {
         /// This crc is used to ensure that the fields from #signature1 to #sync_name are not
         /// modified.
         std::uint32_t crc = 0;
-
-        std::uint64_t unused2 = 0;
+        std::uint32_t unused1 = 0;
 
         /// The file offset of the current (most recent) file footer. This value is modified as the
         /// the very last step of commiting a transaction.
@@ -240,10 +239,9 @@ namespace pstore {
 
     PSTORE_STATIC_ASSERT (offsetof (header, a) == 0);
     PSTORE_STATIC_ASSERT (offsetof (header, crc) == 32);
-    PSTORE_STATIC_ASSERT (offsetof (header, unused2) == 40);
-    PSTORE_STATIC_ASSERT (offsetof (header, footer_pos) == 48);
+    PSTORE_STATIC_ASSERT (offsetof (header, footer_pos) == 40);
     PSTORE_STATIC_ASSERT (alignof (header) == 8);
-    PSTORE_STATIC_ASSERT (sizeof (header) == 56);
+    PSTORE_STATIC_ASSERT (sizeof (header) == 48);
 
 
     class database;
