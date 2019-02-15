@@ -43,7 +43,7 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
-add_pstore_executable (pstore-read
+add_pstore_tool (pstore-read
     main.cpp
     switches.hpp
     switches.cpp

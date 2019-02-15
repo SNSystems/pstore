@@ -53,7 +53,7 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
 endif ()
-add_pstore_executable (pstore-brokerd
+add_pstore_tool (pstore-brokerd
     main.cpp
     switches.hpp
     switches.cpp

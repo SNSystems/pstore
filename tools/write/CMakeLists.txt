@@ -43,7 +43,7 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
-add_pstore_executable (pstore-write
+add_pstore_tool (pstore-write
     error.cpp
     error.hpp
     main.cpp

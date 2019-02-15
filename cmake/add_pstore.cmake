@@ -266,6 +266,47 @@ function (add_pstore_executable target_name)
 endfunction(add_pstore_executable)
 
 
+############################
+# add_pstore_install_targets
+############################
+
+function(add_pstore_install_targets target)
+  cmake_parse_arguments(ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
+  if(ARG_COMPONENT)
+    set(component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
+  endif()
+  if(ARG_PREFIX)
+    set(prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
+  endif()
+
+  add_custom_target(${target}
+                    DEPENDS ${ARG_DEPENDS}
+                    COMMAND "${CMAKE_COMMAND}"
+                            ${component_option}
+                            ${prefix_option}
+                            -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+                    USES_TERMINAL)
+endfunction()
+
+
+#################
+# add_pstore_tool
+#################
+
+function (add_pstore_tool name)
+
+    add_pstore_executable(${name} ${ARGN})
+
+    install(TARGETS ${name}
+            RUNTIME DESTINATION bin
+            COMPONENT pstore)
+
+    add_pstore_install_targets(install-${name}
+                               DEPENDS ${name}
+                               COMPONENT pstore)
+endfunction(add_pstore_tool)
+
+
 ####################
 # add_pstore_example
 ####################

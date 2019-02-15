@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_executable (pstore-mangle mangle.cpp)
+add_pstore_tool (pstore-mangle mangle.cpp)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-mangle PRIVATE LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
