@@ -266,26 +266,26 @@ function (add_pstore_executable target_name)
 endfunction(add_pstore_executable)
 
 
-############################
-# add_pstore_install_targets
-############################
+###########################
+# add_pstore_install_target
+###########################
 
-function(add_pstore_install_targets target)
-  cmake_parse_arguments(ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
-  if(ARG_COMPONENT)
-    set(component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
-  endif()
-  if(ARG_PREFIX)
-    set(prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
-  endif()
+function(add_pstore_install_target target)
+    cmake_parse_arguments(ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
+    if(ARG_COMPONENT)
+      set(component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
+    endif()
+    if(ARG_PREFIX)
+        set(prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
+    endif()
 
-  add_custom_target(${target}
-                    DEPENDS ${ARG_DEPENDS}
-                    COMMAND "${CMAKE_COMMAND}"
-                            ${component_option}
-                            ${prefix_option}
-                            -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-                    USES_TERMINAL)
+    add_custom_target(${target}
+                      DEPENDS ${ARG_DEPENDS}
+                      COMMAND "${CMAKE_COMMAND}"
+                              ${component_option}
+                              ${prefix_option}
+                              -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+                      USES_TERMINAL)
 endfunction()
 
 
@@ -301,9 +301,9 @@ function (add_pstore_tool name)
             RUNTIME DESTINATION bin
             COMPONENT pstore)
 
-    add_pstore_install_targets(install-${name}
-                               DEPENDS ${name}
-                               COMPONENT pstore)
+    add_pstore_install_target(install-${name}
+                              DEPENDS ${name}
+                              COMPONENT pstore)
 endfunction(add_pstore_tool)
 
 

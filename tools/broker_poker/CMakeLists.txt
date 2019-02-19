@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_tool (pstore-broker-poker
+add_pstore_executable (pstore-broker-poker
     flood_server.cpp
     flood_server.hpp
     poke.cpp

@@ -280,17 +280,15 @@ endif (DOXYGEN_FOUND)
 ##############
 # Add a target to the build which will install the pstore components.
 
-add_pstore_install_targets (
-    install-pstore
+add_pstore_install_target (
+    install-pstore 
     DEPENDS
-        pstore-broker-poker
         pstore-broker-status
-        #pstore-broker-service
         pstore-brokerd
+        $<$<PLATFORM_ID:Windows>:pstore-broker-service>
         pstore-diff
         pstore-dump
         pstore-genromfs
-        pstore-hamt-test
         pstore-index-structure
         pstore-inserter
         pstore-json
