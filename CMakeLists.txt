@@ -299,3 +299,6 @@ add_pstore_install_target (
         pstore-write
     COMPONENT pstore
 )
+
+set_target_properties (install-pstore PROPERTIES FOLDER "pstore install")
+
