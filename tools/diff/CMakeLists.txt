@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_executable (pstore-diff
+add_pstore_tool (pstore-diff
     main.cpp
     switches.cpp
     switches.hpp

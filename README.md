@@ -45,6 +45,20 @@ The pstore build system uses cmake. If you’re not very familiar with cmake, th
 
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
 
+## Installing
+
+After pstore has finished building, install it from the build directory:
+
+    $ cmake --build . --target install-pstore
+
+The --target option with install-pstore parameter in addition to the --build option tells cmake to build the install-pstore target.
+
+Assuming the build system is Ninja, the following command:
+
+    $ ninja install-pstore
+
+will build and install pstore in the default installation directory. The CMAKE_INSTALL_PREFIX variable can be used to set a different install prefix.
+
 # Getting started
 ## Using the read and write utilities
 

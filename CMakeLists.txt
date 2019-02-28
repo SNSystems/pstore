@@ -276,3 +276,29 @@ if (DOXYGEN_FOUND)
                        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                        COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif (DOXYGEN_FOUND)
+
+##############
+# Add a target to the build which will install the pstore components.
+
+add_pstore_install_target (
+    install-pstore
+    DEPENDS
+        pstore-broker-status
+        pstore-brokerd
+        $<$<BOOL:${WIN32}>:pstore-broker-service>
+        pstore-diff
+        pstore-dump
+        pstore-genromfs
+        pstore-index-structure
+        pstore-inserter
+        pstore-json
+        pstore-mangle
+        pstore-read
+        pstore-sieve
+        pstore-vacuumd
+        pstore-write
+    COMPONENT pstore
+)
+
+set_target_properties (install-pstore PROPERTIES FOLDER "pstore install")
+

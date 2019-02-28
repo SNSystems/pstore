@@ -49,7 +49,7 @@ if (PSTORE_IS_INSIDE_LLVM)
     set (LLVM_REQUIRES_RTTI Yes)
 endif ()
 
-add_pstore_executable (pstore-broker-service 
+add_pstore_tool (pstore-broker-service
     main.cpp
     broker_service.cpp
     broker_service.hpp

@@ -46,7 +46,7 @@
 # vacuumd Executable
 ################
 
-add_pstore_executable (pstore-vacuumd
+add_pstore_tool (pstore-vacuumd
     main.cpp
     switches.cpp
     switches.hpp

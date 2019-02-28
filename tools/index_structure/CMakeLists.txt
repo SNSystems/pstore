@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_executable (pstore-index-structure
+add_pstore_tool (pstore-index-structure
     index_structure.cpp
     indices.hpp
     indices.cpp

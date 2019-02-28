@@ -42,6 +42,34 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
+# --------------------------------------------------------------------------
+# Extracted from the LLVM CMake Primer documentation:
+#
+# LLVM Project Wrappers
+# ---------------------
+#
+# LLVM projects provide lots of wrappers around critical CMake built-in
+# commands. We use these wrappers to provide consistent behaviors across
+# LLVM components and to reduce code duplication.
+#
+# We generally (but not always) follow the convention that commands prefaced
+# with llvm_ are intended to be used only as building blocks for other
+# commands. Wrapper commands that are intended for direct use are generally
+# named following with the project in the middle of the command name
+# (i.e. add_llvm_executable is the wrapper for add_executable).
+# The LLVM add_* wrapper functions are all defined in AddLLVM.cmake which is
+# installed as part of the LLVM distribution. It can be included and used by
+# any LLVM sub-project that requires LLVM.
+# --------------------------------------------------------------------------
+
+# Expanding these guidelines, add_llvm_tool is the wrapper for add_executable
+# followed by install CMake commands. Is used to create and install a given
+# target.
+
+# We have 2 functions for the pstore project:
+#   add_pstore_executable
+#   add_pstore_tool
+
 include (CheckCSourceCompiles)
 
 macro(add_pstore_subdirectory name)
@@ -264,6 +292,49 @@ function (add_pstore_executable target_name)
         set_target_properties ("${target_name}" PROPERTIES LINK_FLAGS "setargv.obj")
     endif ()
 endfunction(add_pstore_executable)
+
+
+###########################
+# add_pstore_install_target
+###########################
+
+function(add_pstore_install_target target)
+    cmake_parse_arguments(ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
+    if(ARG_COMPONENT)
+      set(component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
+    endif()
+    if(ARG_PREFIX)
+        set(prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
+    endif()
+
+    add_custom_target(${target}
+                      DEPENDS ${ARG_DEPENDS}
+                      COMMAND "${CMAKE_COMMAND}"
+                              ${component_option}
+                              ${prefix_option}
+                              -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+                      USES_TERMINAL)
+endfunction()
+
+
+#################
+# add_pstore_tool
+#################
+
+function (add_pstore_tool name)
+
+    add_pstore_executable(${name} ${ARGN})
+
+    install(TARGETS ${name}
+            RUNTIME DESTINATION bin
+            COMPONENT pstore)
+
+    add_pstore_install_target(install-${name}
+                              DEPENDS ${name}
+                              COMPONENT pstore)
+
+    set_target_properties ("install-${name}" PROPERTIES FOLDER "pstore install")
+endfunction(add_pstore_tool)
 
 
 ####################

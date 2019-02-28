@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_executable (pstore-broker-status broker_status.cpp)
+add_pstore_tool (pstore-broker-status broker_status.cpp)
 target_link_libraries (pstore-broker-status PRIVATE pstore-broker-intf pstore-cmd-util)
 if (WIN32)
     target_link_libraries (pstore-broker-status PRIVATE Ws2_32.dll)
