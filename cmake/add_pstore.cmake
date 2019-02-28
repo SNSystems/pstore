@@ -332,6 +332,8 @@ function (add_pstore_tool name)
     add_pstore_install_target(install-${name}
                               DEPENDS ${name}
                               COMPONENT pstore)
+
+    set_target_properties ("install-${name}" PROPERTIES FOLDER "pstore install")
 endfunction(add_pstore_tool)
 
 
