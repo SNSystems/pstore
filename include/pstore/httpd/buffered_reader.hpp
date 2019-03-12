@@ -195,10 +195,10 @@ namespace pstore {
                                                               std::size_t buffer_size)
                 : refill_{refill}
                 , buf_ (buffer_size, char{0})
-                , span_{gsl::make_span (buf_)}
-                , pos_{span_.begin ()}
-                , end_{span_.begin ()}
-                , push_{} {
+                , span_ (gsl::make_span (buf_))
+                , pos_ (span_.begin ())
+                , end_ (span_.begin ())
+                , push_ () {
             this->check_invariants ();
         }
 
