@@ -44,181 +44,255 @@
 #include "pstore/httpd/buffered_reader.hpp"
 
 #include <cassert>
-#include <queue>
+#include <cerrno>
+#include <string>
 
 #include "gmock/gmock.h"
 
-#include "pstore/support/array_elements.hpp"
+using pstore::error_or;
+using pstore::in_place;
+using pstore::maybe;
+using pstore::gsl::span;
+using pstore::httpd::make_buffered_reader;
+using testing::_;
+using testing::Invoke;
 
 namespace {
+
+    using getc_result_type = error_or<std::pair<int, maybe<char>>>;
+    using gets_result_type = error_or<std::pair<int, maybe<std::string>>>;
+
+    using refiller_result_type = error_or<std::pair<int, span<char>::iterator>>;
+    using refiller_function = std::function<refiller_result_type (int, span<char> const &)>;
 
     class mock_refiller {
     public:
         virtual ~mock_refiller () = default;
-        virtual pstore::error_or<char *> fill (char * first, char * last) = 0;
+        virtual refiller_result_type fill (int c, span<char> const &) const = 0;
     };
 
     class refiller : public mock_refiller {
     public:
-        MOCK_METHOD2 (fill, pstore::error_or<char *> (char *, char *));
-        std::queue<std::function<pstore::error_or<char *> (char *, char *)>> fns;
+        MOCK_CONST_METHOD2 (fill, refiller_result_type (int, span<char> const &));
+
+        refiller_function refill_function () const {
+            return [this](int io, span<char> const & s) { return this->fill (io, s); };
+        }
     };
-} // namespace
+
+    /// Returns a function which which simply returns end-of-stream when invoked.
+    refiller_function eof () {
+        return [](int io, span<char> const & s) {
+            return refiller_result_type{in_place, io + 1, s.begin ()};
+        };
+    }
+
+    /// Returns a function which will yield the string passed as its argument.
+    refiller_function yield_string (std::string const & str) {
+        return [str](int io, span<char> const & s) {
+#ifndef DEBUG
+            auto const size = s.size ();
+            assert (size > 0 &&
+                    str.length () <=
+                        static_cast<std::make_unsigned<decltype (size)>::type> (s.size ()));
+#endif
+            return refiller_result_type{in_place, io + 1,
+                                        std::copy (str.begin (), str.end (), s.begin ())};
+        };
+    }
+
+} // end anonymous namespace
 
 TEST (HttpdBufferedReader, GetcThenEOF) {
-    using pstore::error_or;
-    using pstore::maybe;
-    using testing::_;
-    using testing::Invoke;
-
     refiller r;
-    int call_count = 0;
-    EXPECT_CALL (r, fill (_, _))
-        .Times (2)
-        .WillRepeatedly (Invoke ([&call_count](char * first, char * last) {
-            switch (++call_count) {
-            case 1:
-                *(first++) = 'a';
-                assert (first < last);
-                break;
-            default: first = nullptr; break;
-            }
-            return error_or<char *> (pstore::in_place, first);
-        }));
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("a")));
 
-    auto br = pstore::httpd::make_buffered_reader (
-        [&r](char * first, char * last) { return r.fill (first, last); });
-
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
     {
-        error_or<maybe<char>> const c1 = br.getc ();
+        getc_result_type const c1 = br.getc (io);
         ASSERT_FALSE (c1.has_error ());
-        ASSERT_TRUE (c1.get_value ().has_value ());
-        EXPECT_EQ (c1.get_value ().value (), 'a');
+        maybe<char> char1;
+        std::tie (io, char1) = c1.get_value ();
+        ASSERT_TRUE (char1.has_value ());
+        EXPECT_EQ (char1.value (), 'a');
     }
     {
-        error_or<maybe<char>> const c2 = br.getc ();
+        getc_result_type const c2 = br.getc (io);
         ASSERT_FALSE (c2.has_error ());
-        ASSERT_FALSE (c2.get_value ().has_value ());
+        maybe<char> char2;
+        std::tie (io, char2) = c2.get_value ();
+        ASSERT_FALSE (char2.has_value ());
     }
 }
 
 TEST (HttpdBufferedReader, GetTwoStringsLFThenEOF) {
-    using pstore::error_or;
-    using pstore::maybe;
-    using testing::_;
-    using testing::Invoke;
-
     refiller r;
-    r.fns.push ([](char * first, char * last) {
-        static char str[] = "abc\ndef";
-        first = std::copy_n (str, pstore::array_elements (str) - 1U, first);
-        assert (first < last);
-        return error_or<char *> (pstore::in_place, first);
-    });
-    r.fns.push ([](char *, char *) { return error_or<char *> (pstore::in_place, nullptr); });
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\ndef")));
 
-    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke ([&r](char * first, char * last) {
-        assert (!r.fns.empty ());
-        auto f = r.fns.front ();
-        r.fns.pop ();
-        return f (first, last);
-    }));
-
-    auto br = pstore::httpd::make_buffered_reader (
-        [&r](char * first, char * last) { return r.fill (first, last); });
-
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
     {
-        error_or<maybe<std::string>> const s1 = br.gets ();
+        gets_result_type const s1 = br.gets (io);
         ASSERT_FALSE (s1.has_error ());
-        ASSERT_TRUE (s1.get_value ().has_value ());
-        EXPECT_EQ (s1.get_value ().value (), "abc");
+        maybe<std::string> str1;
+        std::tie (io, str1) = s1.get_value ();
+        ASSERT_TRUE (str1.has_value ());
+        EXPECT_EQ (str1.value (), "abc");
     }
     {
-        error_or<maybe<std::string>> const s2 = br.gets ();
+        gets_result_type const s2 = br.gets (io);
         ASSERT_FALSE (s2.has_error ());
-        ASSERT_TRUE (s2.get_value ().has_value ());
-        EXPECT_EQ (s2.get_value ().value (), "def");
+        maybe<std::string> str2;
+        std::tie (io, str2) = s2.get_value ();
+        ASSERT_TRUE (str2.has_value ());
+        EXPECT_EQ (str2.value (), "def");
     }
     {
-        error_or<maybe<std::string>> const s3 = br.gets ();
+        gets_result_type const s3 = br.gets (io);
         ASSERT_FALSE (s3.has_error ());
-        ASSERT_FALSE (s3.get_value ().has_value ());
+        maybe<std::string> str3;
+        std::tie (io, str3) = s3.get_value ();
+        ASSERT_FALSE (str3.has_value ());
     }
 }
 
 TEST (HttpdBufferedReader, StringCRLF) {
-    using pstore::error_or;
-    using pstore::maybe;
-    using testing::_;
-    using testing::Invoke;
-
     refiller r;
-    r.fns.push ([](char * first, char * last) {
-        static char str[] = "abc\r\n";
-        first = std::copy_n (str, pstore::array_elements (str) - 1U, first);
-        assert (first < last);
-        return error_or<char *> (pstore::in_place, first);
-    });
-    r.fns.push ([](char *, char *) { return error_or<char *> (pstore::in_place, nullptr); });
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\r\ndef")));
 
-    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke ([&r](char * first, char * last) {
-        assert (!r.fns.empty ());
-        auto f = r.fns.front ();
-        r.fns.pop ();
-        return f (first, last);
-    }));
-
-    auto br = pstore::httpd::make_buffered_reader (
-        [&r](char * first, char * last) { return r.fill (first, last); });
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
     {
-        error_or<maybe<std::string>> const s1 = br.gets ();
+        gets_result_type const s1 = br.gets (io);
         ASSERT_FALSE (s1.has_error ());
-        ASSERT_TRUE (s1.get_value ().has_value ());
-        EXPECT_EQ (s1.get_value ().value (), "abc");
+        maybe<std::string> str1;
+        std::tie (io, str1) = s1.get_value ();
+        ASSERT_TRUE (str1.has_value ());
+        EXPECT_EQ (str1.value (), "abc");
     }
     {
-        error_or<maybe<std::string>> const s3 = br.gets ();
+        gets_result_type const s2 = br.gets (io);
+        ASSERT_FALSE (s2.has_error ());
+        maybe<std::string> str2;
+        std::tie (io, str2) = s2.get_value ();
+        ASSERT_TRUE (str2.has_value ());
+        EXPECT_EQ (str2.value (), "def");
+    }
+    {
+        gets_result_type const s3 = br.gets (io);
         ASSERT_FALSE (s3.has_error ());
-        ASSERT_FALSE (s3.get_value ().has_value ());
+        maybe<std::string> str3;
+        std::tie (io, str3) = s3.get_value ();
+        ASSERT_FALSE (str3.has_value ());
     }
 }
 
-TEST (HttpdBufferedReader, StringCRNoLF) {
-    using pstore::error_or;
-    using pstore::maybe;
-    using testing::_;
-    using testing::Invoke;
-
+TEST (HttpdBufferedReader, StringCRNoLFThenEOF) {
     refiller r;
-    std::queue<std::function<error_or<char *> (char *, char *)>> fns;
-    fns.push ([](char * first, char * last) {
-        static char str[] = "abc\r";
-        first = std::copy_n (str, pstore::array_elements (str) - 1U, first);
-        assert (first < last);
-        return error_or<char *> (pstore::in_place, first);
-    });
-    auto eof_func = [](char *, char *) { return error_or<char *> (pstore::in_place, nullptr); };
-    fns.push (eof_func);
-    fns.push (eof_func);
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\r")));
 
-    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke ([&fns](char * first, char * last) {
-        assert (!fns.empty ());
-        auto f = fns.front ();
-        fns.pop ();
-        return f (first, last);
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
+    {
+        gets_result_type const s1 = br.gets (io);
+        ASSERT_FALSE (s1.has_error ());
+        maybe<std::string> str1;
+        std::tie (io, str1) = s1.get_value ();
+        ASSERT_TRUE (str1.has_value ());
+        EXPECT_EQ (str1.value (), "abc");
+    }
+    {
+        gets_result_type const s2 = br.gets (io);
+        ASSERT_FALSE (s2.has_error ());
+        maybe<std::string> str2;
+        std::tie (io, str2) = s2.get_value ();
+        ASSERT_FALSE (str2.has_value ());
+    }
+}
+
+TEST (HttpdBufferedReader, StringCRNoLFChars) {
+    refiller r;
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\rdef")));
+
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
+    {
+        gets_result_type const s1 = br.gets (io);
+        ASSERT_FALSE (s1.has_error ());
+        maybe<std::string> str1;
+        std::tie (io, str1) = s1.get_value ();
+        ASSERT_TRUE (str1.has_value ());
+        EXPECT_EQ (str1.value (), "abc");
+    }
+    {
+        gets_result_type const s2 = br.gets (io);
+        ASSERT_FALSE (s2.has_error ());
+        maybe<std::string> str2;
+        std::tie (io, str2) = s2.get_value ();
+        ASSERT_TRUE (str2.has_value ());
+        EXPECT_EQ (str2.value (), "def");
+    }
+}
+
+TEST (HttpdBufferedReader, SomeCharactersThenAnError) {
+    refiller r;
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\nd")));
+    EXPECT_CALL (r, fill (1, _)).WillOnce (Invoke ([](int, span<char> const &) {
+        return refiller_result_type (std::make_error_code (std::errc::operation_not_permitted));
     }));
 
-    auto br = pstore::httpd::make_buffered_reader (
-        [&r](char * first, char * last) { return r.fill (first, last); });
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function ());
     {
-        error_or<maybe<std::string>> const s1 = br.gets ();
-        ASSERT_FALSE (s1.has_error ());
-        ASSERT_TRUE (s1.get_value ().has_value ());
-        EXPECT_EQ (s1.get_value ().value (), "abc");
+        gets_result_type const s1 = br.gets (io);
+        ASSERT_FALSE (s1.has_error ()) << "Error: " << s1.get_error ();
+        maybe<std::string> str1;
+        std::tie (io, str1) = s1.get_value ();
+        ASSERT_TRUE (str1.has_value ());
+        EXPECT_EQ (str1.value (), "abc");
     }
     {
-        error_or<maybe<std::string>> const s3 = br.gets ();
-        ASSERT_FALSE (s3.has_error ());
-        ASSERT_FALSE (s3.get_value ().has_value ());
+        gets_result_type const s2 = br.gets (io);
+        ASSERT_TRUE (s2.has_error ());
+        EXPECT_EQ (s2.get_error (), (std::make_error_code (std::errc::operation_not_permitted)));
     }
+}
+
+TEST (HttpdBufferedReader, MaxLengthString) {
+    using pstore::httpd::max_string_length;
+    std::string const max_length_string (max_string_length, 'a');
+
+    refiller r;
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string (max_length_string)));
+
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function (), max_string_length);
+    error_or<std::pair<int, maybe<std::string>>> const s1 = br.gets (io);
+    ASSERT_FALSE (s1.has_error ()) << "Error: " << s1.get_error ();
+    maybe<std::string> str1;
+    std::tie (io, str1) = s1.get_value ();
+    ASSERT_TRUE (str1.has_value ());
+    EXPECT_EQ (str1.value (), max_length_string);
+}
+
+TEST (HttpdBufferedReader, StringTooLong) {
+    using pstore::httpd::max_string_length;
+
+    refiller r;
+    EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _))
+        .WillOnce (Invoke (yield_string (std::string (max_string_length + 1U, 'a'))));
+
+    auto io = 0;
+    auto br = make_buffered_reader<int> (r.refill_function (), max_string_length + 1U);
+    error_or<std::pair<int, maybe<std::string>>> const s2 = br.gets (io);
+    ASSERT_TRUE (s2.has_error ());
+    EXPECT_EQ (s2.get_error (), std::make_error_code (pstore::httpd::error_code::string_too_long));
 }

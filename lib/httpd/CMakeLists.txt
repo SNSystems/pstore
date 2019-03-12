@@ -50,6 +50,7 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
 
+    buffered_reader.cpp
     media_type.cpp
     query_to_kvp.cpp
     server.cpp

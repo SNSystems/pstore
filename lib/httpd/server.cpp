@@ -45,9 +45,9 @@
 
 #include <cstdio>
 #include <cstring>
+#include <iostream>
 #include <sstream>
 #include <string>
-#include <iostream>
 
 #ifdef _WIN32
 
@@ -85,21 +85,22 @@ using ssize_t = SSIZE_T;
 
 namespace {
 
+    using socket_descriptor = pstore::broker::socket_descriptor;
+
     void error (char const * msg) { std::cerr << msg << '\n'; }
 
-    void send (pstore::broker::socket_descriptor const & socket, void const * ptr,
-               std::size_t size) {
+    void send (socket_descriptor const & socket, void const * ptr, std::size_t size) {
         ::send (socket.get (), static_cast<char const *> (ptr), size, 0 /*flags*/);
     }
-    void send (pstore::broker::socket_descriptor const & socket, std::string const & str) {
+    void send (socket_descriptor const & socket, std::string const & str) {
         // FIXME: error handling.
         send (socket, str.data (), str.length ());
     }
-    void send (pstore::broker::socket_descriptor const & socket, std::ostringstream const & os) {
+    void send (socket_descriptor const & socket, std::ostringstream const & os) {
         send (socket, os.str ());
     }
-    void cerror (pstore::broker::socket_descriptor const & socket, char const * cause,
-                 char const * error_no, char const * shortmsg, char const * longmsg) {
+    void cerror (socket_descriptor const & socket, char const * cause, char const * error_no,
+                 char const * shortmsg, char const * longmsg) {
         std::ostringstream os;
         os << "HTTP/1.1 " << error_no << ' ' << shortmsg
            << "\n"
@@ -142,38 +143,26 @@ namespace {
 #endif
     }
 
-
-    class refiller {
-    public:
-        explicit constexpr refiller (pstore::broker::socket_descriptor * const socket) noexcept
-                : socket_{socket} {}
-        constexpr refiller (refiller const & rhs) noexcept = default;
-        constexpr refiller (refiller && rhs) noexcept = default;
-
-        refiller & operator= (refiller const &) noexcept = default;
-
-        pstore::error_or<char *> operator() (char * first, char * last);
-
-    private:
-        pstore::broker::socket_descriptor * socket_;
-    };
-    pstore::error_or<char *> refiller::operator() (char * first, char * last) {
-        assert (last > first);
-        ssize_t const nread =
-            recv (socket_->get (), first, static_cast<std::size_t> (last - first), 0 /*flags*/);
-        assert (is_recv_error (nread) || nread <= last - first);
+    // refiller
+    // ~~~~~~~~
+    /// Called when the buffered_reader<> needs more characters from the data stream.
+    pstore::error_or<std::pair<socket_descriptor &, pstore::gsl::span<char>::iterator>>
+    refiller (socket_descriptor & socket, pstore::gsl::span<char> const & s) {
+        using result_type =
+            pstore::error_or<std::pair<socket_descriptor &, pstore::gsl::span<char>::iterator>>;
+        auto const size = s.size ();
+        ssize_t const nread = ::recv (socket.get (), s.data (), size, 0 /*flags*/);
+        assert (is_recv_error (nread) || nread <= size);
         if (is_recv_error (nread)) {
-            return pstore::error_or<char *>{get_last_error ()};
+            return result_type{get_last_error ()};
         }
-        return pstore::error_or<char *>{first + nread};
+        return result_type{pstore::in_place, socket, s.begin () + nread};
     }
 
 } // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
-
-        using socket_descriptor = pstore::broker::socket_descriptor;
 
         int server (in_port_t port_number, romfs::romfs & file_system) {
             // open socket descriptor.
@@ -191,20 +180,20 @@ namespace pstore {
 
             {
                 // Bind port to socket.
-                sockaddr_in serveraddr; /* server's addr */
+                sockaddr_in serveraddr; // server's addr.
                 std::memset (&serveraddr, 0, sizeof (serveraddr));
                 serveraddr.sin_family = AF_INET;
                 serveraddr.sin_addr.s_addr = htonl (INADDR_ANY);
                 serveraddr.sin_port = htons (port_number);
-                if (bind (parentfd.get (), reinterpret_cast<sockaddr *> (&serveraddr),
-                          sizeof (serveraddr)) < 0) {
+                if (::bind (parentfd.get (), reinterpret_cast<sockaddr *> (&serveraddr),
+                            sizeof (serveraddr)) < 0) {
                     error ("ERROR on binding");
                 }
             }
 
             /* get us ready to accept connection requests */
-            // FIXMW: socket_error on win32
-            if (listen (parentfd.get (), 5) < 0) { /* allow 5 requests to queue up */
+            // FIXME: socket_error on win32
+            if (::listen (parentfd.get (), 5) < 0) { /* allow 5 requests to queue up */
                 error ("ERROR on listen");
             }
 
@@ -233,12 +222,12 @@ namespace pstore {
                 if (hostp == nullptr) {
                     error ("ERROR on gethostbyaddr");
                 }
-                char const * hostaddrp = inet_ntoa (clientaddr.sin_addr);
+                char const * const hostaddrp = inet_ntoa (clientaddr.sin_addr);
                 if (hostaddrp == nullptr) {
                     error ("ERROR on inet_ntoa\n");
                 }
 
-                auto reader = make_buffered_reader (refiller (&childfd));
+                auto reader = make_buffered_reader<socket_descriptor &> (refiller);
 
                 /* get the HTTP request line */
                 constexpr std::size_t buffer_size = 1024;
@@ -246,39 +235,42 @@ namespace pstore {
                 char version[buffer_size]; // request method
                 char uri[buffer_size];     // request uri
                 {
-                    // char buf[buffer_size]; // message buffer
-                    error_or<maybe<std::string>> ebuf = reader.gets ();
+                    error_or<std::pair<socket_descriptor &, maybe<std::string>>> const ebuf =
+                        reader.gets (childfd);
                     if (ebuf.has_error ()) {
-                        std::error_code const erc = ebuf.get_error ();
-                        std::cerr << "Error on recv: " << erc << '\n';
-                        // childfd.reset ();
+                        std::cerr << "Error on recv: " << ebuf.get_error () << '\n';
                         continue;
                     }
-                    maybe<std::string> buf = ebuf.get_value ();
+
+                    assert (std::get<0> (ebuf.get_value ()) == childfd);
+                    maybe<std::string> const & buf = std::get<1> (ebuf.get_value ());
                     if (!buf) {
                         continue;
                     }
-                    // fgets (buf, buffer_size, stream);
+
                     std::cout << *buf << '\n';
-                    sscanf (buf->c_str (), "%s %s %s\n", method, uri, version);
+                    std::sscanf (buf->c_str (), "%s %s %s\n", method, uri, version);
                 }
 
                 // We  only currently support the GET method.
-                if (strcmp (method, "GET") != 0) {
+                if (std::strcmp (method, "GET") != 0) {
                     cerror (childfd, method, "501", "Not Implemented",
                             "httpd does not implement this method");
-
-                    childfd.reset ();
                     continue;
                 }
 
-                /* read (and ignore) the HTTP headers */
+                // read (and for the moment ignore) the HTTP headers.
                 {
-                    // char buf[buffer_size]; /* message buffer */
                     std::string s;
                     do {
-                        error_or<maybe<std::string>> es = reader.gets ();
-                        s = es.get_value ().value ();
+                        error_or<std::pair<socket_descriptor &, maybe<std::string>>> const es =
+                            reader.gets (childfd);
+                        if (es.has_error ()) {
+                            std::cerr << "Error on recv: " << es.get_error () << '\n';
+                            continue;
+                        }
+                        assert (std::get<0> (es.get_value ()) == childfd);
+                        s = std::get<1> (es.get_value ()).value ();
                         std::cout << s << '\n';
                     } while (s.length () > 0);
                 }
@@ -309,8 +301,7 @@ namespace pstore {
 #endif
                 }
 
-                /* make sure the file exists */
-                // struct stat sbuf; /* file status */
+                // Make sure the file exists.
                 error_or<struct romfs::stat> sbuf = file_system.stat (filename.c_str ());
                 if (sbuf.has_error ()) {
                     cerror (childfd, filename.c_str (), "404", "Not found",
@@ -322,10 +313,8 @@ namespace pstore {
 
                 /* serve static content */
                 if (is_static) {
-                    /* print response header */
-                    //auto const * reply = "<html><body>Hello</body></html>";
-                    //auto const content_length = std::strlen (reply);
                     {
+                        // Send the response header.
                         std::ostringstream os;
                         os << "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
                         os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << '\n';
@@ -333,7 +322,7 @@ namespace pstore {
                         os << "\r\n";
                         send (childfd, os.str ());
                     }
-                    std::array <std::uint8_t, 256> buffer;
+                    std::array<std::uint8_t, 256> buffer{{0}};
                     error_or<romfs::descriptor> descriptor = file_system.open (filename.c_str ());
                     assert (!descriptor.has_error ());
                     for (;;) {
@@ -344,49 +333,7 @@ namespace pstore {
                         send (childfd, buffer.data (), num_read);
                     }
                 } else {
-#if 0
-                    /* serve dynamic content */
-
-                    /* make sure file is a regular executable file */
-                    if (!(S_IFREG & sbuf.st_mode) || !(S_IXUSR & sbuf.st_mode)) {
-                        cerror (stream, filename.c_str (), "403", "Forbidden",
-                                "You are not allowed to access this item");
-                        std::fclose (stream);
-                        close (childfd);
-                        continue;
-                    }
-
-                    /* a real server would set other CGI environ vars as well*/
-                    setenv ("QUERY_STRING", cgiargs, 1);
-
-                    {
-                        // print first part of response header
-                        char const header1[] = "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
-                        write (childfd, header1, sizeof (header1) - 1);
-                    }
-
-                    /* create and run the child CGI process so that all child
-                       output to stdout and stderr goes back to the client via the
-                       childfd socket descriptor */
-                    int pid = fork ();
-                    if (pid < 0) {
-                        perror ("ERROR in fork");
-                        std::exit (1);
-                    } else if (pid > 0) {
-                        /* parent process */
-                        int wait_status; /* status from wait */
-                        wait (&wait_status);
-                    } else {
-                        /* child  process*/
-                        close (0);              /* close stdin */
-                        dup2 (childfd, 1);      /* map socket to stdout */
-                        dup2 (childfd, 2);      /* map socket to stderr */
-                        extern char ** environ; /* the environment */
-                        if (execve (filename.c_str (), NULL, environ) < 0) {
-                            perror ("ERROR in execve");
-                        }
-                    }
-#endif
+                    // TODO: serve dynamic content.
                 }
 
                 /* clean up */
