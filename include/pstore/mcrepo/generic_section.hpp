@@ -47,6 +47,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
+#include <new>
 #include <type_traits>
 
 #include "pstore/core/address.hpp"
@@ -178,6 +179,10 @@ namespace pstore {
         //* |___/                                                    *
         class generic_section : public section_base {
         public:
+            static void * operator new (std::size_t size, void * ptr) {
+                return ::operator new (size, ptr);
+            }
+
             /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
             template <typename DataRangeType, typename IFixupRangeType, typename XFixupRangeType>
@@ -248,6 +253,19 @@ namespace pstore {
             ///@}
 
         private:
+            // The ctor assumes that memory has been allocated for the variable length arrays that
+            // follow an instance of this type. This is performed by the
+            // generic_section_creation_dispatcher. Prevent usage of standard operator new and
+            // friends to avoid someone forgetting to use that helper in the future.
+            static void * operator new (std::size_t) = delete;
+            static void * operator new (std::size_t, std::nothrow_t const &) noexcept = delete;
+            static void * operator new[] (std::size_t) = delete;
+            static void * operator new[] (std::size_t, std::nothrow_t const &) = delete;
+            static void operator delete (void *) noexcept = delete;
+            static void operator delete (void * ptr, std::nothrow_t const &) noexcept = delete;
+            static void operator delete[] (void *) noexcept = delete;
+            static void operator delete[] (void *, std::nothrow_t const &) noexcept = delete;
+
             union {
                 std::uint32_t field32_;
                 /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
