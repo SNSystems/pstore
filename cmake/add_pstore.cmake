@@ -63,7 +63,7 @@
 # --------------------------------------------------------------------------
 
 # Expanding these guidelines, add_llvm_tool is the wrapper for add_executable
-# followed by install CMake commands. Is used to create and install a given
+# followed by install CMake commands. It is used to create and install a given
 # target.
 
 # We have 2 functions for the pstore project:
@@ -100,11 +100,14 @@ function (disable_clang_warning_if_possible target_name flag result_var)
 endfunction()
 
 
-function (add_pstore_additional_compiler_flag name)
+#######################################
+# add_pstore_additional_compiler_flags #
+#######################################
+function (add_pstore_additional_compiler_flags target_name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         # For Clang, I enable all of the warnings and then disable some of
         # the unwanted ones.
-        target_compile_options (${name} PRIVATE
+        target_compile_options (${target_name} PRIVATE
             -Weverything
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
@@ -123,59 +126,59 @@ function (add_pstore_additional_compiler_flag name)
             -Wno-weak-vtables
         )
 
-        disable_clang_warning_if_possible (${name}
+        disable_clang_warning_if_possible (${target_name}
             -Wno-nullability-extension
             PSTORE_CLANG_SUPPORTS_NX
         )
-        disable_clang_warning_if_possible (${name}
+        disable_clang_warning_if_possible (${target_name}
             -Wno-zero-as-null-pointer-constant
             PSTORE_CLANG_SUPPORTS_NPC
         )
         # TODO: this warning is issued (at the time of writing) by gtest. It should only be disabled
         # for that target.
-        disable_clang_warning_if_possible (${name}
+        disable_clang_warning_if_possible (${target_name}
             -Wno-inconsistent-missing-override
             PSTORE_CLANG_SUPPORTS_IMO
         )
 
         # Disable the "unused lambda capture" warning since we must capture extra variables for MSVC
         # to swallow the code. Remove when VS doesn't require capture.
-        disable_clang_warning_if_possible (${name}
+        disable_clang_warning_if_possible (${target_name}
             -Wno-unused-lambda-capture
             PSTORE_CLANG_SUPPORTS_ULC
         )
 
         if (PSTORE_COVERAGE)
-            target_compile_options (${name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
-            target_compile_options (${name} PRIVATE -fno-inline-functions)
-            target_link_libraries (${name} PUBLIC -fprofile-instr-generate -fcoverage-mapping)
+            target_compile_options (${target_name} PRIVATE -fprofile-instr-generate -fcoverage-mapping)
+            target_compile_options (${target_name} PRIVATE -fno-inline-functions)
+            target_link_libraries (${target_name} PUBLIC -fprofile-instr-generate -fcoverage-mapping)
         endif (PSTORE_COVERAGE)
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
 
-        target_compile_options (${name} PRIVATE
+        target_compile_options (${target_name} PRIVATE
             -Wall
             -Wextra
             -pedantic
         )
         if (PSTORE_COVERAGE)
-            target_compile_options (${name} PRIVATE -fprofile-arcs -ftest-coverage)
-            target_link_libraries (${name} PUBLIC --coverage)
+            target_compile_options (${target_name} PRIVATE -fprofile-arcs -ftest-coverage)
+            target_link_libraries (${target_name} PUBLIC --coverage)
         endif (PSTORE_COVERAGE)
 
     elseif (MSVC)
 
         # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
         #       not available.
-                # 4146: unary minus applied to unsigned, result still unsigned.
+        # 4146: unary minus applied to unsigned, result still unsigned.
         # 4512: assignment operator could not be generated.
-        target_compile_options (${name} PRIVATE
+        target_compile_options (${target_name} PRIVATE
             -W4
             -wd4127
             -wd4146
             -wd4512
         )
-        target_compile_definitions (${name} PRIVATE
+        target_compile_definitions (${target_name} PRIVATE
             -D_CRT_SECURE_NO_WARNINGS
             -D_SCL_SECURE_NO_WARNINGS
         )
@@ -185,7 +188,7 @@ function (add_pstore_additional_compiler_flag name)
         endif (PSTORE_COVERAGE)
 
     endif ()
-endfunction(add_pstore_additional_compiler_flag)
+endfunction(add_pstore_additional_compiler_flags)
 
 
 #############################
@@ -243,12 +246,13 @@ endfunction()
 function (add_pstore_library target_name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_library (${target_name} STATIC ${ARGN})
+        add_pstore_additional_compiler_flags (${target_name})
     else ()
         add_library (${target_name} STATIC ${ARGN})
 
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
-        add_pstore_additional_compiler_flag (${target_name})
+        add_pstore_additional_compiler_flags (${target_name})
 
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
@@ -273,12 +277,13 @@ endfunction(add_pstore_library)
 function (add_pstore_executable target_name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_executable ("${target_name}" ${ARGN})
+        add_pstore_additional_compiler_flags (${target_name})
     else ()
         add_executable ("${target_name}" ${ARGN})
 
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD 11)
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD_REQUIRED Yes)
-        add_pstore_additional_compiler_flag (${target_name})
+        add_pstore_additional_compiler_flags (${target_name})
 
         # On Windows, we're a "Unicode" app.
         if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
@@ -299,39 +304,40 @@ endfunction(add_pstore_executable)
 ###########################
 
 function(add_pstore_install_target target)
-    cmake_parse_arguments(ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
-    if(ARG_COMPONENT)
-      set(component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
+    cmake_parse_arguments (ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
+    if (ARG_COMPONENT)
+        set (component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
     endif()
-    if(ARG_PREFIX)
-        set(prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
-    endif()
+    if (ARG_PREFIX)
+        set (prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
+    endif ()
 
-    add_custom_target(${target}
-                      DEPENDS ${ARG_DEPENDS}
-                      COMMAND "${CMAKE_COMMAND}"
-                              ${component_option}
-                              ${prefix_option}
-                              -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-                      USES_TERMINAL)
-endfunction()
+    add_custom_target (${target}
+                       DEPENDS ${ARG_DEPENDS}
+                       COMMAND "${CMAKE_COMMAND}"
+                               ${component_option}
+                               ${prefix_option}
+                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+                       USES_TERMINAL)
+endfunction(add_pstore_install_target)
 
 
 #################
 # add_pstore_tool
 #################
+# add_pstore_tool is a wrapper for add_pstore_executable which also creates an
+# install target.
 
 function (add_pstore_tool name)
+    add_pstore_executable (${name} ${ARGN})
 
-    add_pstore_executable(${name} ${ARGN})
+    install (TARGETS ${name}
+             RUNTIME DESTINATION bin
+             COMPONENT pstore)
 
-    install(TARGETS ${name}
-            RUNTIME DESTINATION bin
-            COMPONENT pstore)
-
-    add_pstore_install_target(install-${name}
-                              DEPENDS ${name}
-                              COMPONENT pstore)
+    add_pstore_install_target (install-${name}
+                               DEPENDS ${name}
+                               COMPONENT pstore)
 
     set_target_properties ("install-${name}" PROPERTIES FOLDER "pstore install")
 endfunction(add_pstore_tool)
@@ -360,7 +366,7 @@ function (add_pstore_test_library target_name)
     set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
 
     target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-    add_pstore_additional_compiler_flag (${target_name})
+    add_pstore_additional_compiler_flags (${target_name})
 
     if (PSTORE_IS_INSIDE_LLVM)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
@@ -379,6 +385,7 @@ endfunction(add_pstore_test_library)
 function(add_pstore_unit_test test_dirname)
     if (PSTORE_IS_INSIDE_LLVM)
         add_unittest (PstoreUnitTests ${test_dirname} ${ARGN})
+        add_pstore_additional_compiler_flags (${test_dirname})
     else()
         add_executable (${test_dirname} ${ARGN})
         set_target_properties (${test_dirname} PROPERTIES FOLDER "pstore tests")
@@ -386,7 +393,7 @@ function(add_pstore_unit_test test_dirname)
         set_property (TARGET ${test_dirname} PROPERTY CXX_STANDARD_REQUIRED Yes)
 
         target_include_directories (${test_dirname} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-        add_pstore_additional_compiler_flag (${test_dirname})
+        add_pstore_additional_compiler_flags (${test_dirname})
         target_link_libraries (${test_dirname} PRIVATE pstore-unit-test-harness gtest gmock)
     endif(PSTORE_IS_INSIDE_LLVM)
 endfunction(add_pstore_unit_test)
