@@ -179,9 +179,10 @@ namespace pstore {
         //* |___/                                                    *
         class generic_section : public section_base {
         public:
-            static void * operator new (std::size_t size, void * ptr) {
+            void * operator new (std::size_t size, void * ptr) {
                 return ::operator new (size, ptr);
             }
+            void operator delete (void * ptr, void * p) { ::operator delete (ptr, p); }
 
             /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
@@ -257,14 +258,14 @@ namespace pstore {
             // follow an instance of this type. This is performed by the
             // generic_section_creation_dispatcher. Prevent usage of standard operator new and
             // friends to avoid someone forgetting to use that helper in the future.
-            static void * operator new (std::size_t) = delete;
-            static void * operator new (std::size_t, std::nothrow_t const &) noexcept = delete;
-            static void * operator new[] (std::size_t) = delete;
-            static void * operator new[] (std::size_t, std::nothrow_t const &) = delete;
-            static void operator delete (void *) noexcept = delete;
-            static void operator delete (void * ptr, std::nothrow_t const &) noexcept = delete;
-            static void operator delete[] (void *) noexcept = delete;
-            static void operator delete[] (void *, std::nothrow_t const &) noexcept = delete;
+            void * operator new (std::size_t) = delete;
+            void * operator new (std::size_t, std::nothrow_t const &) noexcept = delete;
+            void * operator new[] (std::size_t) = delete;
+            void * operator new[] (std::size_t, std::nothrow_t const &) = delete;
+            void operator delete (void *) noexcept = delete;
+            void operator delete (void * ptr, std::nothrow_t const &) noexcept = delete;
+            void operator delete[] (void *) noexcept = delete;
+            void operator delete[] (void *, std::nothrow_t const &) noexcept = delete;
 
             union {
                 std::uint32_t field32_;
