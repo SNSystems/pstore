@@ -52,7 +52,6 @@ add_pstore_library (pstore-httpd-lib
 
     buffered_reader.cpp
     media_type.cpp
-    query_to_kvp.cpp
     server.cpp
 )
 target_link_libraries (pstore-httpd-lib PUBLIC pstore-broker-intf pstore-romfs pstore-support)

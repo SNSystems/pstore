@@ -43,5 +43,7 @@
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-httpd-unit-tests
     test_buffered_reader.cpp
+    test_media_type.cpp
+    test_query_to_kvp.cpp
 )
 target_link_libraries (pstore-httpd-unit-tests PRIVATE pstore-httpd-lib)
