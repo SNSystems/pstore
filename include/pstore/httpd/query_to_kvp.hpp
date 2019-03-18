@@ -242,6 +242,11 @@ namespace pstore {
                     }
                     do_append = false;
                     break;
+
+                default:
+                    // just append the character.
+                    do_append = true;
+                    break;
                 }
 
                 if (do_append) {
