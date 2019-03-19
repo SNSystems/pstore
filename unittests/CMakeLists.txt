@@ -51,12 +51,12 @@ set_property (TARGET pstore-unit-test-harness PROPERTY CXX_STANDARD 11)
 set_property (TARGET pstore-unit-test-harness PROPERTY CXX_STANDARD_REQUIRED Yes)
 add_pstore_additional_compiler_flags (pstore-unit-test-harness)
 target_link_libraries (pstore-unit-test-harness PUBLIC gtest gmock)
+target_include_directories (pstore-unit-test-harness PRIVATE ../include)
 if (PSTORE_IS_INSIDE_LLVM)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
     target_link_libraries (pstore-unit-test-harness PUBLIC LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
-
 
 
 add_subdirectory (broker)

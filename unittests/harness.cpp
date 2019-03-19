@@ -55,9 +55,12 @@
 #    endif
 #endif
 
+#include "pstore/support/portab.hpp"
+
 #if PSTORE_IS_INSIDE_LLVM
 #    include "llvm/Support/Signals.h"
 #endif
+
 
 class quiet_event_listener : public testing::TestEventListener {
 public:
@@ -127,45 +130,53 @@ void quiet_event_listener::OnTestProgramEnd (testing::UnitTest const & test) {
 
 
 int main (int argc, char ** argv) {
+    PSTORE_TRY {
 #if PSTORE_IS_INSIDE_LLVM
-    llvm::sys::PrintStackTraceOnErrorSignal (argv[0], true /* Disable crash reporting */);
+        llvm::sys::PrintStackTraceOnErrorSignal (argv[0], true /* Disable crash reporting */);
 #endif
 
-    // Since Google Mock depends on Google Test, InitGoogleMock() is
-    // also responsible for initializing Google Test. Therefore there's
-    // no need for calling testing::InitGoogleTest() separately.
-    testing::InitGoogleMock (&argc, argv);
+        // Since Google Mock depends on Google Test, InitGoogleMock() is
+        // also responsible for initializing Google Test. Therefore there's
+        // no need for calling testing::InitGoogleTest() separately.
+        testing::InitGoogleMock (&argc, argv);
 
-    // Remove the default listener
-    testing::TestEventListeners & listeners = testing::UnitTest::GetInstance ()->listeners ();
-    testing::TestEventListener * const default_printer =
-        listeners.Release (listeners.default_result_printer ());
+        // Remove the default listener
+        testing::TestEventListeners & listeners = testing::UnitTest::GetInstance ()->listeners ();
+        testing::TestEventListener * const default_printer =
+            listeners.Release (listeners.default_result_printer ());
 
-    // add our listener, by default everything is on (the same as using the default listener)
-    // here I am turning everything off so I only see the 3 lines for the result
-    // (plus any failures at the end), like:
+        // Add our listener. By default everything is on (as when using the default listener)
+        // but here we turn everything off so we only see the 3 lines for the result (plus any failures at the end), like:
+        //
+        // [==========] Running 149 tests from 53 test cases.
+        // [==========] 149 tests from 53 test cases ran. (1 ms total)
+        // [  PASSED  ] 149 tests.
 
-    // [==========] Running 149 tests from 53 test cases.
-    // [==========] 149 tests from 53 test cases ran. (1 ms total)
-    // [  PASSED  ] 149 tests.
-
-    listeners.Append (new quiet_event_listener (default_printer));
+        listeners.Append (new quiet_event_listener (default_printer));
 
 #if defined(_WIN32)
-    // Disable all of the possible ways Windows conspires to make automated
-    // testing impossible.
-    ::SetErrorMode (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
+        // Disable all of the possible ways Windows conspires to make automated
+        // testing impossible.
+        ::SetErrorMode (SEM_FAILCRITICALERRORS | SEM_NOGPFAULTERRORBOX);
 #    if defined(_MSC_VER)
-    ::_set_error_mode (_OUT_TO_STDERR);
-    _CrtSetReportMode (_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_WARN, _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_ERROR, _CRTDBG_FILE_STDERR);
-    _CrtSetReportMode (_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
-    _CrtSetReportFile (_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+        ::_set_error_mode (_OUT_TO_STDERR);
+        _CrtSetReportMode (_CRT_WARN, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile (_CRT_WARN, _CRTDBG_FILE_STDERR);
+        _CrtSetReportMode (_CRT_ERROR, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile (_CRT_ERROR, _CRTDBG_FILE_STDERR);
+        _CrtSetReportMode (_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_DEBUG);
+        _CrtSetReportFile (_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 #    endif
 #endif
-
-    // run
-    return RUN_ALL_TESTS ();
+        return RUN_ALL_TESTS ();
+    }
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, {
+        std::cerr << "Error: " << ex.what () << '\n';
+    })
+    PSTORE_CATCH (..., {
+       std::cerr << "Unknown exception\n";
+    })
+    // clang-format on
+    return EXIT_FAILURE;
 }
