@@ -87,13 +87,36 @@ namespace {
 
     using socket_descriptor = pstore::broker::socket_descriptor;
 
-    void error (char const * msg) { std::cerr << msg << '\n'; }
+    // FIXME: the following two functions were copied from the broker.
+    // is_recv_error
+    // ~~~~~~~~~~~~~
+    constexpr bool is_recv_error (ssize_t nread) {
+#ifdef _WIN32
+        return nread == SOCKET_ERROR;
+#else
+        return nread < 0;
+#endif // !_WIN32
+    }
+
+    // get_last_error
+    // ~~~~~~~~~~~~~~
+    inline std::error_code get_last_error () noexcept {
+#ifdef _WIN32
+        return std::make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
+#else
+        return std::make_error_code (std::errc (errno));
+#endif // !_WIN32
+    }
+
+
+    void error (char const * msg) { std::cerr << msg << '(' << get_last_error () << ")\n"; }
 
     void send (socket_descriptor const & socket, void const * ptr, std::size_t size) {
-        ::send (socket.get (), static_cast<char const *> (ptr), size, 0 /*flags*/);
+        if (::send (socket.get (), static_cast<char const *> (ptr), size, 0 /*flags*/) < 0) {
+            error ("ERROR on send");
+        }
     }
     void send (socket_descriptor const & socket, std::string const & str) {
-        // FIXME: error handling.
         send (socket, str.data (), str.length ());
     }
     void send (socket_descriptor const & socket, std::ostringstream const & os) {
@@ -120,27 +143,6 @@ namespace {
               "</body>\n"
               "</html>\n";
         send (socket, os);
-    }
-
-    // FIXME: the following two functions were copied from the broker.
-    // is_recv_error
-    // ~~~~~~~~~~~~~
-    constexpr bool is_recv_error (ssize_t nread) {
-#ifdef _WIN32
-        return nread == SOCKET_ERROR;
-#else
-        return nread < 0;
-#endif // !_WIN32
-    }
-
-    // get_last_error
-    // ~~~~~~~~~~~~~~
-    inline std::error_code get_last_error () noexcept {
-#ifdef _WIN32
-        return std::make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
-#else
-        return std::make_error_code (std::errc (errno));
-#endif
     }
 
     // refiller
@@ -174,8 +176,10 @@ namespace pstore {
             {
                 // Allows us to restart the server immediately.
                 int const optval = 1;
-                setsockopt (parentfd.get (), SOL_SOCKET, SO_REUSEADDR,
-                            reinterpret_cast<char const *> (&optval), sizeof (optval));
+                if (::setsockopt (parentfd.get (), SOL_SOCKET, SO_REUSEADDR,
+                                  reinterpret_cast<char const *> (&optval), sizeof (optval))) {
+                    error ("ERROR on setsockopt");
+                }
             }
 
             {
