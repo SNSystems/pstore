@@ -43,9 +43,9 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/httpd/server.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
-#include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
@@ -77,6 +77,7 @@
 #include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/logging.hpp"
 
 
 // FIXME: there are multiple definitions of this type.
@@ -110,13 +111,16 @@ namespace {
     }
 
 
-    void error (char const * msg) { std::cerr << msg << '(' << get_last_error () << ")\n"; }
-
     void send (socket_descriptor const & socket, void const * ptr, std::size_t size) {
+#ifdef _WIN32
         assert (size <= std::numeric_limits<int>::max ());
-        if (::send (socket.get (), static_cast<char const *> (ptr), static_cast<int> (size),
+        using size_type = int;
+#else
+        using size_type = std::size_t;
+#endif // _!WIN32
+        if (::send (socket.get (), static_cast<char const *> (ptr), static_cast<size_type> (size),
                     0 /*flags*/) < 0) {
-            error ("ERROR on send");
+            log (pstore::logging::priority::error, "send", get_last_error ().message ());
         }
     }
     void send (socket_descriptor const & socket, std::string const & str) {
@@ -156,10 +160,16 @@ namespace {
         using result_type =
             pstore::error_or<std::pair<socket_descriptor &, pstore::gsl::span<char>::iterator>>;
 
-        auto const size = s.size ();
+        auto size = s.size ();
+        size = std::max (size, decltype (size){0});
+#ifdef _WIN32
         assert (size < std::numeric_limits<int>::max ());
+        using size_type = int;
+#else
+        using size_type = std::size_t;
+#endif //!_WIN32
         ssize_t const nread =
-            ::recv (socket.get (), s.data (), static_cast<int> (size), 0 /*flags*/);
+            ::recv (socket.get (), s.data (), static_cast<size_type> (size), 0 /*flags*/);
         assert (is_recv_error (nread) || (nread >= 0 && nread <= size));
         if (is_recv_error (nread)) {
             return result_type{get_last_error ()};
@@ -256,7 +266,7 @@ namespace {
         error_or<std::pair<socket_descriptor &, maybe<std::string>>> const es =
             reader.gets (childfd);
         if (es.has_error ()) {
-            std::cerr << "Error on recv: " << es.get_error () << '\n';
+            log (pstore::logging::priority::error, "recv", es.get_error ().message ());
             return reader;
         }
         assert (std::get<0> (es.get_value ()) == childfd);
@@ -268,51 +278,67 @@ namespace {
         return read_headers (reader, childfd, handler);
     }
 
+    pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
+        std::array<char, 64> host_name;
+        constexpr std::size_t size = host_name.size ();
+#ifdef _WIN32
+        using size_type = DWORD;
+#else
+        using size_type = std::size_t;
+#endif //!_WIN32
+        int const gni_err = ::getnameinfo (
+            reinterpret_cast<sockaddr const *> (&client_addr), sizeof (client_addr),
+            host_name.data (), static_cast<size_type> (size), nullptr, socklen_t{0}, 0 /*flags*/);
+        if (gni_err != 0) {
+            return pstore::error_or<std::string>{get_last_error ()};
+        }
+        host_name.back () = '\0'; // guarantee nul termination.
+        return pstore::error_or<std::string>{pstore::in_place, std::string{host_name.data ()}};
+    }
 } // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
 
         int server (in_port_t port_number, romfs::romfs & file_system) {
+            logging::create_log_stream ("httpd");
+
             pstore::error_or<socket_descriptor> eparentfd = initialize_socket (port_number);
             if (eparentfd.has_error ()) {
-                error ("ERROR opening socket");
+                log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
+                return 0;
             }
             socket_descriptor const & parentfd = eparentfd.get_value ();
 
             // main loop: wait for a connection request, parse HTTP,
             // serve requested content, close connection.
-            sockaddr_in clientaddr; // client address.
+            sockaddr_in client_addr; // client address.
             auto clientlen =
-                static_cast<socklen_t> (sizeof (clientaddr)); // byte size of client's address
+                static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
             for (;;) {
 
                 // Wait for a connection request.
                 // TODO: some kind of shutdown procedure.
                 socket_descriptor childfd{
-                    ::accept (parentfd.get (), reinterpret_cast<struct sockaddr *> (&clientaddr),
+                    ::accept (parentfd.get (), reinterpret_cast<struct sockaddr *> (&client_addr),
                               &clientlen)};
                 if (!childfd.valid ()) {
-                    error ("ERROR on accept");
+                    log (logging::priority::error, "accept", get_last_error ().message ());
                     continue;
                 }
 
                 // Determine who sent the message.
-                std::array<char, 64> host_name;
-                int const gni_err = ::getnameinfo (
-                    reinterpret_cast<sockaddr *> (&clientaddr), sizeof (clientaddr),
-                    host_name.data (), host_name.size (), nullptr, socklen_t{0}, 0 /*flags*/);
-                if (gni_err != 0) {
-                    error ("ERROR on getnameinfo");
+                pstore::error_or<std::string> ename = get_client_name (client_addr);
+                if (ename.has_error ()) {
+                    log (logging::priority::error, "getnameinfo", ename.get_error ().message ());
                     continue;
                 }
-                host_name.back () = '\0'; // guarantee nul termination.
-                std::cout << "-- Connection from " << host_name.data () << '\n';
+                log (logging::priority::info, "Connection from ", ename.get_value ());
 
 #if 0
                 char const * const hostaddrp = inet_ntoa (clientaddr.sin_addr);
                 if (hostaddrp == nullptr) {
-                    error ("ERROR on inet_ntoa\n");
+                    log (logging::priority::error, "inet_ntoa");
                     continue;
                 }
 #endif
@@ -322,7 +348,8 @@ namespace pstore {
 
                 pstore::error_or<request_info> eri = read_request (reader, childfd);
                 if (eri.has_error ()) {
-                    std::cerr << "Error when reading HTTP request: " << eri.get_error () << '\n';
+                    log (logging::priority::error, "reading HTTP request",
+                         eri.get_error ().message ());
                     continue;
                 }
 
@@ -337,7 +364,7 @@ namespace pstore {
 
                 // read (and for the moment simply print) the HTTP headers.
                 read_headers (reader, childfd, [](std::string const & header) {
-                    std::cout << "  " << header << '\n';
+                    log (logging::priority::info, "header:", header);
                 });
 
                 /* parse the uri [crufty] */
