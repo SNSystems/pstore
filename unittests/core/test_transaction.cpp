@@ -60,7 +60,7 @@ namespace {
     //*                                                             *
     class mock_database : public pstore::database {
     public:
-        mock_database (std::shared_ptr<pstore::file::in_memory> const & file)
+        explicit mock_database (std::shared_ptr<pstore::file::in_memory> const & file)
                 : pstore::database (file) {
 
             this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -131,7 +131,7 @@ namespace {
     //*                                                                           *
     class mock_database_file : public pstore::database {
     public:
-        mock_database_file (std::shared_ptr<pstore::file::file_handle> const & file)
+        explicit mock_database_file (std::shared_ptr<pstore::file::file_handle> const & file)
                 : pstore::database (file) {
 
             this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -159,7 +159,7 @@ namespace {
     //*   |_||_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_|_| |_|_\___| *
     //*                                                             *
     class TransactionFile : public EmptyStoreFile {
-    protected:
+    public:
         TransactionFile ();
         void SetUp () override;
 
@@ -210,7 +210,6 @@ namespace {
 
 
 TEST_F (Transaction, CommitEmptyDoesNothing) {
-
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
@@ -229,7 +228,6 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
 }
 
 TEST_F (Transaction, CommitInt) {
-
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
@@ -425,11 +423,10 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
 }
 
 TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
-
-    static std::size_t initial_elements = pstore::address::segment_size -
-                                          (sizeof (pstore::header) + sizeof (pstore::trailer)) -
-                                          16 * sizeof (int);
-    initial_elements /= sizeof (int);
+    static constexpr std::size_t initial_elements =
+        (pstore::address::segment_size - (sizeof (pstore::header) + sizeof (pstore::trailer)) -
+         16 * sizeof (int)) /
+        sizeof (int);
     static std::size_t const elements = 32;
 
     pstore::database db{this->file ()};
@@ -502,11 +499,9 @@ TEST_F (Transaction, CommitTwoSeparateTransactions) {
     EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (footer2), header->footer_pos.load ());
 }
 
+// Use the alloc_rw<> convenience method to return a pointer to an int that has been freshly
+// allocated within the transaction.
 TEST_F (Transaction, GetRwInt) {
-
-    // Use the alloc_rw<> convenience method to return a pointer to an int that has been freshly
-    // allocated within the transaction.
-
     mock_database * const database = this->db ();
 
     // First setup the mock expectations.
@@ -535,10 +530,8 @@ TEST_F (Transaction, GetRwInt) {
     }
 }
 
+// Use the getro<> method to return a address to the first int in the store.
 TEST_F (Transaction, GetRoInt) {
-
-    // Use the getro<> method to return a address to the first int in the store.
-
     mock_database * const database = this->db ();
 
     // First setup the mock expectations.
