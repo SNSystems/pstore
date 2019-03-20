@@ -77,10 +77,8 @@ namespace {
         return {path, p};
     }
 
-    pstore::gsl::czstring PSTORE_NULLABLE next_component (pstore::gsl::czstring PSTORE_NULLABLE p) {
-        if (p == nullptr) {
-            return p;
-        }
+    pstore::gsl::czstring PSTORE_NONNULL next_component (pstore::gsl::czstring PSTORE_NONNULL p) {
+        assert (p != nullptr);
         while (*p == '/') {
             ++p;
         }
@@ -119,7 +117,11 @@ namespace pstore {
             explicit open_file (dirent const & d)
                     : dir_{d} {}
             open_file (open_file const &) = delete;
+            open_file (open_file &&) = delete;
+            ~open_file () noexcept = default;
+
             open_file & operator= (open_file const &) = delete;
+            open_file & operator= (open_file &&) = delete;
 
             error_or<std::size_t> seek (off_t offset, int whence);
             std::size_t read (void * PSTORE_NONNULL buffer, std::size_t size, std::size_t count);
@@ -209,7 +211,11 @@ namespace pstore {
             explicit open_directory (directory const & dir) noexcept
                     : dir_{dir} {}
             open_directory (open_directory const &) = delete;
-            open_directory & operator= (open_file const &) = delete;
+            open_directory (open_directory &&) = delete;
+            ~open_directory () noexcept = default;
+
+            open_directory & operator= (open_directory const &) = delete;
+            open_directory & operator= (open_directory &&) = delete;
 
             void rewind () noexcept { index_ = 0U; }
             dirent const * PSTORE_NULLABLE read ();
@@ -335,7 +341,7 @@ namespace pstore {
                 return error_or<dirent_ptr> (std::make_error_code (error_code::enoent));
             }
 
-            gsl::czstring p = path;
+            gsl::czstring PSTORE_NONNULL p = path;
             if (p[0] == '/') {
                 dir = root_;
                 p = next_component (path);

@@ -42,7 +42,9 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/romfs/dirent.hpp"
+
 #include <stdexcept>
+
 #include "pstore/romfs/romfs.hpp"
 
 auto pstore::romfs::dirent::opendir () const -> error_or<class directory const * PSTORE_NONNULL> {

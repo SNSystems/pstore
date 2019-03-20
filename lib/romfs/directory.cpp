@@ -42,9 +42,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/romfs/directory.hpp"
+
 #include <algorithm>
 #include <cstring>
 #include <string>
+
 #include "pstore/romfs/dirent.hpp"
 
 auto pstore::romfs::directory::end () const -> dirent const * {

@@ -55,8 +55,8 @@
 #    include <sys/types.h>
 #endif
 
-#include "pstore/romfs/dirent.hpp"
 #include "pstore/romfs/directory.hpp"
+#include "pstore/romfs/dirent.hpp"
 #include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -73,7 +73,7 @@ namespace pstore {
         public:
             // The need for this constructor was removed by CWG defect 253 but Clang (prior
             // to 3.9.0) and GCC (before 4.6.4) require its presence.
-            error_category () noexcept {}
+            error_category () noexcept {} // NOLINT
             char const * PSTORE_NONNULL name () const noexcept override;
             std::string message (int error) const override;
         };
@@ -106,6 +106,8 @@ namespace pstore {
         public:
             descriptor (descriptor const & other) = default;
             descriptor (descriptor && other) = default;
+            ~descriptor () noexcept = default;
+
             descriptor & operator= (descriptor const & other) = default;
             descriptor & operator= (descriptor && other) = default;
 
@@ -114,8 +116,8 @@ namespace pstore {
             struct stat stat () const;
 
         private:
-            explicit descriptor (std::shared_ptr<open_file> const & f)
-                    : f_{f} {}
+            explicit descriptor (std::shared_ptr<open_file> f)
+                    : f_{std::move (f)} {}
             // Using a shared_ptr<> here so that descriptor instances can be passed around in
             // the same way as they would if 'descriptor' was the int type that's traditionally
             // used to represent file descriptors.
@@ -135,8 +137,8 @@ namespace pstore {
             void rewind ();
 
         private:
-            explicit dirent_descriptor (std::shared_ptr<open_directory> const & f)
-                    : f_{f} {}
+            explicit dirent_descriptor (std::shared_ptr<open_directory> f)
+                    : f_{std::move (f)} {}
             std::shared_ptr<open_directory> f_;
         };
 
@@ -150,7 +152,11 @@ namespace pstore {
         public:
             explicit romfs (directory const * PSTORE_NONNULL root);
             romfs (romfs const &) noexcept = default;
+            romfs (romfs &&) noexcept = default;
             ~romfs () noexcept = default;
+
+            romfs & operator= (romfs const &) = delete;
+            romfs & operator= (romfs &&) = delete;
 
             error_or<descriptor> open (gsl::czstring PSTORE_NONNULL path);
             error_or<dirent_descriptor> opendir (gsl::czstring PSTORE_NONNULL path);

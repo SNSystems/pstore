@@ -69,7 +69,11 @@ namespace pstore {
                     : directory (c.size (), c.data ()) {}
 
             directory (directory const &) = delete;
+            directory (directory &&) = delete;
+            ~directory () noexcept = default;
+
             directory & operator= (directory const &) = delete;
+            directory & operator= (directory &&) = delete;
 
             dirent const * PSTORE_NONNULL begin () const { return members_; }
             dirent const * PSTORE_NONNULL end () const;
@@ -82,7 +86,7 @@ namespace pstore {
 
             template <std::size_t Size>
             dirent const * PSTORE_NULLABLE find (char const (&name)[Size]) const {
-                return this->find (name, Size - 1U);
+                return this->find (&name[0], Size - 1U);
             }
 
             dirent const * PSTORE_NULLABLE find (directory const * PSTORE_NONNULL d) const;

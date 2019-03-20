@@ -55,6 +55,7 @@ set (PSTORE_ROMFS_LIB_SRC
 )
 
 add_pstore_library (pstore-romfs ${PSTORE_ROMFS_LIB_SRC})
+add_clang_tidy_target (pstore-romfs)
 target_link_libraries (pstore-romfs PUBLIC pstore-support)
 
 if (PSTORE_BITCODE)
