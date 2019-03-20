@@ -53,6 +53,11 @@
 
 namespace {
 
+    //*                _        _      _        _                   *
+    //*  _ __  ___  __| |__  __| |__ _| |_ __ _| |__  __ _ ___ ___  *
+    //* | '  \/ _ \/ _| / / / _` / _` |  _/ _` | '_ \/ _` (_-</ -_) *
+    //* |_|_|_\___/\__|_\_\ \__,_\__,_|\__\__,_|_.__/\__,_/__/\___| *
+    //*                                                             *
     class mock_database : public pstore::database {
     public:
         mock_database (std::shared_ptr<pstore::file::in_memory> const & file)
@@ -77,39 +82,53 @@ namespace {
         }
     };
 
+    //*  _____                          _   _           *
+    //* |_   _| _ __ _ _ _  ___ __ _ __| |_(_)___ _ _   *
+    //*   | || '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  *
+    //*   |_||_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| *
+    //*                                                 *
     class Transaction : public EmptyStore {
+    public:
+        Transaction ();
+        void SetUp () override;
+
     protected:
         pstore::header const * get_header () {
             auto h = reinterpret_cast<pstore::header const *> (this->buffer ().get ());
             return h;
         }
+        mock_database * db () { return db_.get (); }
 
-        void SetUp () override {
-            EmptyStore::SetUp ();
-            db_.reset (new mock_database{this->file ()});
-            db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-            using ::testing::_;
-            using ::testing::Invoke;
-
-            // Pass the mocked calls through to their original implementations.
-            // I'm simply using the mocking framework to observe that the
-            // correct calls are made. The precise division of labor between
-            // the database and transaction classes is enforced or determined here.
-            auto invoke_allocate = Invoke (db_.get (), &mock_database::base_allocate);
-            auto invoke_get = Invoke (db_.get (), &mock_database::base_get);
-
-            EXPECT_CALL (*db_, get (_, _, _, _)).WillRepeatedly (invoke_get);
-            EXPECT_CALL (*db_, allocate (_, _)).WillRepeatedly (invoke_allocate);
-        }
-
-        void TearDown () override {
-            db_.reset ();
-            EmptyStore::TearDown ();
-        }
-
+    private:
         std::unique_ptr<mock_database> db_;
     };
 
+    Transaction::Transaction ()
+            : db_{new mock_database{this->file ()}} {
+        db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+    }
+
+    void Transaction::SetUp () {
+        EmptyStore::SetUp ();
+        using ::testing::_;
+        using ::testing::Invoke;
+
+        // Pass the mocked calls through to their original implementations.
+        // I'm simply using the mocking framework to observe that the
+        // correct calls are made. The precise division of labor between
+        // the database and transaction classes is enforced or determined here.
+        EXPECT_CALL (*db_, get (_, _, _, _))
+            .WillRepeatedly (Invoke (db_.get (), &mock_database::base_get));
+        EXPECT_CALL (*db_, allocate (_, _))
+            .WillRepeatedly (Invoke (db_.get (), &mock_database::base_allocate));
+    }
+
+
+    //*                _        _      _        _                     __ _ _      *
+    //*  _ __  ___  __| |__  __| |__ _| |_ __ _| |__  __ _ ___ ___   / _(_) |___  *
+    //* | '  \/ _ \/ _| / / / _` / _` |  _/ _` | '_ \/ _` (_-</ -_) |  _| | / -_) *
+    //* |_|_|_\___/\__|_\_\ \__,_\__,_|\__\__,_|_.__/\__,_/__/\___| |_| |_|_\___| *
+    //*                                                                           *
     class mock_database_file : public pstore::database {
     public:
         mock_database_file (std::shared_ptr<pstore::file::file_handle> const & file)
@@ -134,22 +153,45 @@ namespace {
         }
     };
 
+    //*  _____                          _   _          ___ _ _      *
+    //* |_   _| _ __ _ _ _  ___ __ _ __| |_(_)___ _ _ | __(_) |___  *
+    //*   | || '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \| _|| | / -_) *
+    //*   |_||_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_|_| |_|_\___| *
+    //*                                                             *
     class TransactionFile : public EmptyStoreFile {
     protected:
+        TransactionFile ();
         void SetUp () override;
 
-        void TearDown () override;
+    protected:
+        mock_database_file * db () { return db_.get (); }
 
+    private:
         std::unique_ptr<mock_database_file> db_;
+
+        static std::unique_ptr<mock_database_file>
+        create (std::shared_ptr<pstore::file::file_handle> const & file);
     };
 
-    void TransactionFile::SetUp () {
-        EmptyStoreFile::SetUp ();
-        this->file ()->open (pstore::file::file_handle::temporary ());
-        db_->build_new_store (*this->file ());
-        auto db_file = new mock_database_file{this->file ()};
-        db_.reset (db_file);
+    // ctor
+    // ~~~~
+    TransactionFile::TransactionFile ()
+            : db_{create (this->file ())} {
         db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+    }
+
+    // create
+    // ~~~~~~
+    std::unique_ptr<mock_database_file>
+    TransactionFile::create (std::shared_ptr<pstore::file::file_handle> const & file) {
+        file->open (pstore::file::file_handle::temporary ());
+        pstore::database::build_new_store (*file);
+        return std::unique_ptr<mock_database_file>{new mock_database_file{file}};
+    }
+
+    // SetUp
+    // ~~~~~
+    void TransactionFile::SetUp () {
         using ::testing::_;
         using ::testing::Invoke;
 
@@ -164,12 +206,8 @@ namespace {
         EXPECT_CALL (*db_, allocate (_, _)).WillRepeatedly (invoke_allocate);
     }
 
-    void TransactionFile::TearDown () {
-        db_.reset ();
-        EmptyStoreFile::TearDown ();
-    }
+} // end anonymous namespace
 
-} // namespace
 
 TEST_F (Transaction, CommitEmptyDoesNothing) {
 
@@ -277,7 +315,6 @@ TEST_F (Transaction, CommitInt) {
 }
 
 TEST_F (Transaction, RollbackAfterAppendingInt) {
-
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
@@ -319,23 +356,24 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 }
 
 TEST_F (TransactionFile, RollbackAfterAppendingFile4mb) {
-      // similar to above but use file based DB and check regions reclaimed
-      mock_mutex mutex;
-      using guard_type =  std::unique_lock<mock_mutex>;
-      auto num_regions = db_->storage().regions().size ();
-      auto transaction = pstore::begin (*db_, guard_type{mutex});
+    mock_database_file * db = this->db ();
 
-      std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
-      transaction.allocate (elements * sizeof (int), 1 /*align*/);
-      EXPECT_NE (db_->storage ().regions ().size (), num_regions) << "allocate did not create regions";
-      // Abandon the transaction.
-      transaction.rollback ();
+    // similar to above but use file based DB and check regions reclaimed
+    mock_mutex mutex;
+    using guard_type = std::unique_lock<mock_mutex>;
+    auto num_regions = db->storage ().regions ().size ();
+    auto transaction = pstore::begin (*db, guard_type{mutex});
+    std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
+    transaction.allocate (elements * sizeof (int), 1 /*align*/);
+    EXPECT_NE (db->storage ().regions ().size (), num_regions) << "allocate did not create regions";
+    // Abandon the transaction.
+    transaction.rollback ();
 
-      EXPECT_EQ (db_->storage().regions().size (), num_regions) << "Rollback did not reclaim regions";
+    EXPECT_EQ (db->storage ().regions ().size (), num_regions)
+        << "Rollback did not reclaim regions";
 }
 
 TEST_F (Transaction, CommitAfterAppending4Mb) {
-
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
     {
@@ -469,28 +507,29 @@ TEST_F (Transaction, GetRwInt) {
     // Use the alloc_rw<> convenience method to return a pointer to an int that has been freshly
     // allocated within the transaction.
 
+    mock_database * const database = this->db ();
+
     // First setup the mock expectations.
     {
         using ::testing::Expectation;
         using ::testing::Ge;
         using ::testing::Invoke;
 
-        Expectation allocate_int =
-            EXPECT_CALL (*db_.get (), allocate (sizeof (int), alignof (int)))
-                .WillOnce (Invoke (db_.get (), &mock_database::base_allocate));
+        Expectation allocate_int = EXPECT_CALL (*database, allocate (sizeof (int), alignof (int)))
+                                       .WillOnce (Invoke (database, &mock_database::base_allocate));
 
         // A call to get(). First argument (address) must lie beyond the initial transaction
         // and must request a writable int.
-        EXPECT_CALL (*db_.get (), get (Ge (pstore::address::make (sizeof (pstore::header) +
-                                                                  sizeof (pstore::trailer))),
-                                       sizeof (int), false, true))
+        EXPECT_CALL (*database, get (Ge (pstore::address::make (sizeof (pstore::header) +
+                                                                sizeof (pstore::trailer))),
+                                     sizeof (int), false, true))
             .After (allocate_int)
-            .WillOnce (Invoke (db_.get (), &mock_database::base_get));
+            .WillOnce (Invoke (database, &mock_database::base_get));
     }
     // Now the real body of the test
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
         transaction.alloc_rw<int> ();
         transaction.commit ();
     }
@@ -500,25 +539,28 @@ TEST_F (Transaction, GetRoInt) {
 
     // Use the getro<> method to return a address to the first int in the store.
 
+    mock_database * const database = this->db ();
+
     // First setup the mock expectations.
-    EXPECT_CALL (*db_, get (pstore::address::null (), sizeof (int), true, false))
-        .WillOnce (::testing::Invoke (db_.get (), &mock_database::base_get));
+    EXPECT_CALL (*database, get (pstore::address::null (), sizeof (int), true, false))
+        .WillOnce (::testing::Invoke (database, &mock_database::base_get));
 
     // Now the real body of the test
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex});
-        db_->getro (pstore::typed_address<int>::null (), 1);
+        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
+        database->getro (pstore::typed_address<int>::null (), 1);
         transaction.commit ();
     }
 }
 
 TEST_F (Transaction, GetRwUInt64) {
+    mock_database * const database = this->db ();
     std::uint64_t const expected = 1ULL << 40;
     pstore::extent<std::uint64_t> extent;
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
         {
             // Allocate the storage
             pstore::address const addr =
@@ -532,5 +574,5 @@ TEST_F (Transaction, GetRwUInt64) {
         }
         transaction.commit ();
     }
-    EXPECT_EQ (expected, *db_->getro (extent));
+    EXPECT_EQ (expected, *database->getro (extent));
 }
