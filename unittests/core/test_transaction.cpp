@@ -80,13 +80,13 @@ namespace {
     class Transaction : public EmptyStore {
     protected:
         pstore::header const * get_header () {
-            auto h = reinterpret_cast<pstore::header const *> (buffer_.get ());
+            auto h = reinterpret_cast<pstore::header const *> (this->buffer ().get ());
             return h;
         }
 
         void SetUp () override {
             EmptyStore::SetUp ();
-            db_.reset (new mock_database{file_});
+            db_.reset (new mock_database{this->file ()});
             db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
             using ::testing::_;
             using ::testing::Invoke;
@@ -145,9 +145,9 @@ namespace {
 
     void TransactionFile::SetUp () {
         EmptyStoreFile::SetUp ();
-        file_->open (pstore::file::file_handle::temporary ());
-        db_->build_new_store (*file_);
-        auto db_file = new mock_database_file{file_};
+        this->file ()->open (pstore::file::file_handle::temporary ());
+        db_->build_new_store (*this->file ());
+        auto db_file = new mock_database_file{this->file ()};
         db_.reset (db_file);
         db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         using ::testing::_;
@@ -173,7 +173,7 @@ namespace {
 
 TEST_F (Transaction, CommitEmptyDoesNothing) {
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     // A quick check of the initial state.
@@ -192,7 +192,7 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
 
 TEST_F (Transaction, CommitInt) {
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     auto header = this->get_header ();
@@ -239,7 +239,7 @@ TEST_F (Transaction, CommitInt) {
     // Check the two footers.
     {
         auto r0footer =
-            reinterpret_cast<pstore::trailer const *> (buffer_.get () + r0footer_offset);
+            reinterpret_cast<pstore::trailer const *> (this->buffer ().get () + r0footer_offset);
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r0footer->a.signature1))
             << "Did not find the r0 footer signature1";
@@ -252,7 +252,7 @@ TEST_F (Transaction, CommitInt) {
             << "Did not find r0 footer signature2";
 
         auto r1footer =
-            reinterpret_cast<pstore::trailer const *> (buffer_.get () + g1footer_offset);
+            reinterpret_cast<pstore::trailer const *> (this->buffer ().get () + g1footer_offset);
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r1footer->a.signature1))
             << "Did not find the r1 footer signature1";
@@ -271,14 +271,14 @@ TEST_F (Transaction, CommitInt) {
 
     // Finally check the r1 contents
     {
-        auto r1data = reinterpret_cast<int const *> (buffer_.get () + r1contents_offset);
+        auto r1data = reinterpret_cast<int const *> (this->buffer ().get () + r1contents_offset);
         EXPECT_EQ (data_value, *r1data);
     }
 }
 
 TEST_F (Transaction, RollbackAfterAppendingInt) {
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     // A quick check of the initial state.
@@ -304,8 +304,8 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
         << "Expected the file header footer_pos to point to r0 header";
 
     {
-        auto r0footer =
-            reinterpret_cast<pstore::trailer const *> (buffer_.get () + sizeof (pstore::header));
+        auto r0footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
+                                                                   sizeof (pstore::header));
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r0footer->a.signature1))
             << "Did not find r0 footer signature1";
@@ -336,7 +336,7 @@ TEST_F (TransactionFile, RollbackAfterAppendingFile4mb) {
 
 TEST_F (Transaction, CommitAfterAppending4Mb) {
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
     {
         mock_mutex mutex;
@@ -352,7 +352,7 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
         pstore::header const * const header = this->get_header ();
         pstore::typed_address<pstore::trailer> const r1_footer_offset = header->footer_pos;
 
-        auto r1_footer = reinterpret_cast<pstore::trailer const *> (buffer_.get () +
+        auto r1_footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
                                                                     r1_footer_offset.absolute ());
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r1_footer->a.signature1))
@@ -368,7 +368,7 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
         pstore::typed_address<pstore::trailer> const r0_footer_offset =
             r1_footer->a.prev_generation;
 
-        auto r0_footer = reinterpret_cast<pstore::trailer const *> (buffer_.get () +
+        auto r0_footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
                                                                     r0_footer_offset.absolute ());
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r0_footer->a.signature1))
@@ -394,7 +394,7 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
     initial_elements /= sizeof (int);
     static std::size_t const elements = 32;
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     auto addr = pstore::typed_address<int>::null ();
@@ -432,7 +432,7 @@ namespace {
 TEST_F (Transaction, CommitTwoSeparateTransactions) {
     // Append to individual transactions, each containing a single int.
     {
-        pstore::database db{file_};
+        pstore::database db{this->file ()};
         db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         mock_mutex mutex;
         {

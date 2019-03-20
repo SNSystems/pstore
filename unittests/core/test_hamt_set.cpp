@@ -79,7 +79,7 @@ namespace {
     // ~~~~~
     void SetFixture::SetUp () {
         EmptyStore::SetUp ();
-        db_.reset (new pstore::database (file_));
+        db_.reset (new pstore::database (this->file ()));
         db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         index_.reset (new set{*db_});
     }

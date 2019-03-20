@@ -62,26 +62,26 @@ public:
     ~EmptyStore () override;
 
 protected:
-    std::shared_ptr<std::uint8_t> buffer_;
-    std::shared_ptr<pstore::file::in_memory> file_;
+    std::shared_ptr<pstore::file::in_memory> const & file () const { return file_; }
+    std::shared_ptr<std::uint8_t> const & buffer () const { return buffer_; }
 
 private:
+    std::shared_ptr<std::uint8_t> buffer_;
+    std::shared_ptr<pstore::file::in_memory> file_;
     static constexpr std::size_t page_size_ = 4096;
 };
 
 class EmptyStoreFile : public ::testing::Test {
 public:
-    static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
-
     // Build an empty, file database.
     EmptyStoreFile ();
     ~EmptyStoreFile () override;
 
 protected:
-    std::shared_ptr<pstore::file::file_handle> file_;
+    std::shared_ptr<pstore::file::file_handle> const & file () { return file_; }
 
 private:
-    static constexpr std::size_t page_size_ = 4096;
+    std::shared_ptr<pstore::file::file_handle> file_;
 };
 
 #endif // EMPTY_STORE_HPP

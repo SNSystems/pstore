@@ -83,7 +83,7 @@ namespace {
     // ~~~~~
     void IndexFixture::SetUp () {
         EmptyStore::SetUp ();
-        db_.reset (new pstore::database (file_));
+        db_.reset (new pstore::database (this->file ()));
         db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
     }
 
@@ -406,7 +406,7 @@ namespace {
     class HamtRoundTrip : public EmptyStore {
     public:
         HamtRoundTrip ()
-                : db_{new pstore::database (file_)} {}
+                : db_{new pstore::database (this->file ())} {}
 
     protected:
         using lock_guard = std::unique_lock<mock_mutex>;

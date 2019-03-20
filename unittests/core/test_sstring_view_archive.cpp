@@ -65,7 +65,7 @@ namespace {
     class SStringViewArchive : public EmptyStore {
     public:
         SStringViewArchive ()
-                : db_{file_} {
+                : db_{this->file ()} {
             db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 

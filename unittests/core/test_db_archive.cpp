@@ -78,7 +78,7 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (DbArchive, ReadASingleUint64) {
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::uint64_t v1 = UINT64_C (0xF0F0F0F0F0F0F0F0);
@@ -98,7 +98,7 @@ TEST_F (DbArchive, ReadASingleUint64) {
 TEST_F (DbArchive, ReadAUint64Span) {
     using ::testing::ContainerEq;
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
@@ -121,7 +121,7 @@ TEST_F (DbArchive, ReadAUint64Span) {
 }
 
 TEST_F (DbArchive, WriteASingleUint64) {
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::uint64_t const original = UINT64_C (0xF0F0F0F0F0F0F0F0);
@@ -142,7 +142,7 @@ TEST_F (DbArchive, WriteASingleUint64) {
 }
 
 TEST_F (DbArchive, WriteAUint64Span) {
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> const original{{
@@ -190,7 +190,7 @@ TEST_F (DbArchiveWriteSpan, WriteUint64Span) {
     using ::testing::_;
     using ::testing::Invoke;
 
-    pstore::database db{file_};
+    pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
     std::array<std::uint64_t, 2> original{{
@@ -244,7 +244,7 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     using ::testing::_;
     using ::testing::Invoke;
 
-    mock_database db{file_};
+    mock_database db{this->file ()};
 
     // All calls to db.get() are forwarded to the real implementation.
     auto invoke_base_get = Invoke (&db, &mock_database::base_get);
