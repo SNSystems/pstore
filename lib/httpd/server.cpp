@@ -194,12 +194,11 @@ namespace {
             return eo{get_last_error ()};
         }
 
-        sockaddr_in serveraddr; // server's addr.
-        std::memset (&serveraddr, 0, sizeof (serveraddr));
-        serveraddr.sin_family = AF_INET;
-        serveraddr.sin_addr.s_addr = htonl (INADDR_ANY);
-        serveraddr.sin_port = htons (port_number);
-        if (::bind (fd.get (), reinterpret_cast<sockaddr *> (&serveraddr), sizeof (serveraddr)) <
+        sockaddr_in server_addr{}; // server's addr.
+        server_addr.sin_family = AF_INET;
+        server_addr.sin_addr.s_addr = htonl (INADDR_ANY); // NOLINT
+        server_addr.sin_port = htons (port_number);       // NOLINT
+        if (::bind (fd.get (), reinterpret_cast<sockaddr *> (&server_addr), sizeof (server_addr)) <
             0) {
             return eo{get_last_error ()};
         }
@@ -213,19 +212,26 @@ namespace {
     }
 
     struct request_info {
+    public:
         request_info (std::string m, std::string v, std::string u)
-                : method{std::move (m)}
-                , version{std::move (v)}
-                , uri{std::move (u)} {}
+                : method_{std::move (m)}
+                , version_{std::move (v)}
+                , uri_{std::move (u)} {}
         request_info (request_info const &) = default;
         request_info (request_info &&) = default;
+        ~request_info () = default;
 
         request_info & operator= (request_info const &) = delete;
         request_info & operator= (request_info &&) = delete;
 
-        std::string const method;
-        std::string const version;
-        std::string const uri;
+        std::string const & method () const { return method_; }
+        std::string const & version () const { return version_; }
+        std::string const & uri () const { return uri_; }
+
+    private:
+        std::string method_;
+        std::string version_;
+        std::string uri_;
     };
 
     // read_request
@@ -279,8 +285,9 @@ namespace {
     }
 
     pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
-        std::array<char, 64> host_name;
-        constexpr std::size_t size = host_name.size ();
+        std::array<char, 64> host_name {
+            {
+                '\0}}; constexpr std::size_t size = host_name.size ();
 #ifdef _WIN32
         using size_type = DWORD;
 #else
@@ -294,8 +301,8 @@ namespace {
         }
         host_name.back () = '\0'; // guarantee nul termination.
         return pstore::error_or<std::string>{pstore::in_place, std::string{host_name.data ()}};
-    }
-} // end anonymous namespace
+            }
+        } // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
@@ -312,7 +319,7 @@ namespace pstore {
 
             // main loop: wait for a connection request, parse HTTP,
             // serve requested content, close connection.
-            sockaddr_in client_addr; // client address.
+            sockaddr_in client_addr{}; // client address.
             auto clientlen =
                 static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
             for (;;) {
@@ -354,10 +361,12 @@ namespace pstore {
                 }
 
                 request_info const & request = eri.get_value ();
+                log (logging::priority::info, "Request: ",
+                     request.method () + ' ' + request.version () + ' ' + request.uri ());
 
                 // We  only currently support the GET method.
-                if (request.method != "GET") {
-                    cerror (childfd, request.method.c_str (), "501", "Not Implemented",
+                if (request.method () != "GET") {
+                    cerror (childfd, request.method ().c_str (), "501", "Not Implemented",
                             "httpd does not implement this method");
                     continue;
                 }
@@ -372,12 +381,12 @@ namespace pstore {
                 std::string filename;
                 constexpr std::size_t buffer_size = 1024;
                 char cgiargs[buffer_size];      /* cgi argument list */
-                if (!strstr (request.uri.c_str (), "cgi-bin")) { /* static content */
+                if (!strstr (request.uri ().c_str (), "cgi-bin")) { /* static content */
                     is_static = true;
                     cgiargs[0] = '\0';
                     filename = ".";
-                    filename += request.uri;
-                    if (request.uri.back () == '/') {
+                    filename += request.uri ();
+                    if (request.uri ().back () == '/') {
                         filename += "index.html";
                     }
                 } else { /* dynamic content */
