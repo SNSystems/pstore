@@ -92,7 +92,6 @@ namespace pstore {
         using iterator = container_type::iterator;
         using const_iterator = container_type::const_iterator;
 
-    public:
         uuid ();
         /// Converts a string following the convention defined by RFC4122 to a UUID. If the string
         /// is not valid an error is raised.
