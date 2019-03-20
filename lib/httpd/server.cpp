@@ -285,9 +285,8 @@ namespace {
     }
 
     pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
-        std::array<char, 64> host_name {
-            {
-                '\0}}; constexpr std::size_t size = host_name.size ();
+        std::array<char, 64> host_name {{'\0'}};
+        constexpr std::size_t size = host_name.size ();
 #ifdef _WIN32
         using size_type = DWORD;
 #else
@@ -301,8 +300,9 @@ namespace {
         }
         host_name.back () = '\0'; // guarantee nul termination.
         return pstore::error_or<std::string>{pstore::in_place, std::string{host_name.data ()}};
-            }
-        } // end anonymous namespace
+    }
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
