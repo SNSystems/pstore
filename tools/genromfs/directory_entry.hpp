@@ -59,11 +59,11 @@ struct directory_entry {
             , contents (dirno)
             , children (std::move (children_)) {}
     directory_entry (std::string name_, unsigned fileno)
-            : name (name_)
+            : name (std::move (name_))
             , contents (fileno) {}
 
-    std::string const name;
-    unsigned const contents;
+    std::string name;
+    unsigned contents;
     std::unique_ptr<directory_container> children;
 };
 

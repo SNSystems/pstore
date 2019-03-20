@@ -116,6 +116,9 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
     } while (::FindNextFileW (find, &ffd) != 0);
 
     ::FindClose (find);
+    std::sort (
+        std::begin (directory), std::end (directory),
+        [](directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
     return count;
 }
 
@@ -157,6 +160,10 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
             }
         }
     }
+
+    std::sort (
+        std::begin (directory), std::end (directory),
+        [](directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
     return count;
 }
 
