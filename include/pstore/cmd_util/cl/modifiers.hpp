@@ -184,7 +184,7 @@ namespace pstore {
                 struct positional {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    positional () noexcept {}
+                    positional () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -195,7 +195,7 @@ namespace pstore {
                 struct required {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    required () noexcept {}
+                    required () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -206,7 +206,7 @@ namespace pstore {
                 struct optional {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    optional () noexcept {}
+                    optional () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {

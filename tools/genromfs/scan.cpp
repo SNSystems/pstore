@@ -122,7 +122,6 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
 #else
 
 unsigned scan (directory_container & directory, std::string const & path, unsigned count) {
-
     std::unique_ptr<DIR, decltype (&closedir)> dirp (opendir (path.c_str ()), &closedir);
     if (dirp == nullptr) {
         int const erc = errno;
@@ -132,19 +131,25 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
     }
 
     auto is_hidden = [](std::string const & n) { return n.length () == 0 || n.front () == '.'; };
+    auto path_string = [&path](std::string const & n) {
+        std::string res = path;
+        res += '/';
+        res += n;
+        return res;
+    };
 
-    while (struct dirent const * dp = readdir (dirp.get ())) {
+    while (struct dirent const * const dp = readdir (dirp.get ())) {
         auto const name = std::string (dp->d_name);
         if (!is_hidden (name)) {
-            struct stat sb;
-            if (lstat ((path + '/' + name).c_str (), &sb) != 0) {
+            struct stat sb {};
+            if (lstat (path_string (name).c_str (), &sb) != 0) {
                 return count;
             }
 
-            if (S_ISREG (sb.st_mode)) {
+            if (S_ISREG (sb.st_mode)) { // NOLINT
                 // It's a regular file
                 count = add_file (directory, path, name, count);
-            } else if (S_ISDIR (sb.st_mode)) {
+            } else if (S_ISDIR (sb.st_mode)) { // NOLINT
                 // A directory
                 count = add_directory (directory, path, name, count);
             } else {

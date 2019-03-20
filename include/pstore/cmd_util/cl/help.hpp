@@ -45,6 +45,7 @@
 #define PSTORE_CMD_UTIL_CL_HELP_HPP
 
 #include <limits>
+
 #include "pstore/cmd_util/cl/option.hpp"
 
 namespace pstore {
@@ -54,10 +55,10 @@ namespace pstore {
             class help : public option {
             public:
                 template <class... Mods>
-                explicit help (std::string const & program_name,
-                               std::string const & program_overview, Mods const &... mods)
-                        : program_name_{program_name}
-                        , overview_{program_overview} {
+                explicit help (std::string program_name, std::string program_overview,
+                               Mods const &... mods)
+                        : program_name_{std::move (program_name)}
+                        , overview_{std::move (program_overview)} {
 
                     static_assert (max_width > overlong_opt_max,
                                    "Must allow some space for the descriptions!");
@@ -65,7 +66,11 @@ namespace pstore {
                 }
 
                 help (help const &) = delete;
+                help (help &&) = delete;
+                ~help () override = default;
+
                 help & operator= (help const &) = delete;
+                help & operator= (help &&) = delete;
 
                 bool takes_argument () const override;
                 void add_occurrence () override;

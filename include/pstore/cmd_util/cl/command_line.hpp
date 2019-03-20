@@ -235,4 +235,4 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif // PSRTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
+#endif // PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
