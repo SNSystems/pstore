@@ -314,7 +314,7 @@ namespace pstore {
                     using container = std::vector<std::uint8_t>;
                     using const_iterator = container::const_iterator;
 
-                    vector_writer_policy (container & bytes) noexcept
+                    explicit vector_writer_policy (container & bytes) noexcept
                             : bytes_ (bytes) {}
 
                     template <typename Ty>
@@ -361,8 +361,9 @@ namespace pstore {
 
             class vector_writer final : public writer_base<details::vector_writer_policy> {
             public:
-                vector_writer (std::vector<std::uint8_t> & container)
-                        : writer_base<details::vector_writer_policy> (container) {}
+                explicit vector_writer (std::vector<std::uint8_t> & container)
+                        : writer_base<details::vector_writer_policy> (
+                              details::vector_writer_policy{container}) {}
                 ~vector_writer () noexcept override;
 
                 using container = policy_type::container;
@@ -542,7 +543,7 @@ namespace pstore {
 
             public:
                 /// Constructs the writer using an input iterator.
-                range_reader (InputIterator first)
+                explicit range_reader (InputIterator first)
                         : first_ (first) {}
 
                 InputIterator iterator () { return first_; }
@@ -584,7 +585,7 @@ namespace pstore {
             /// iterator.
             template <typename InputIterator>
             range_reader<InputIterator> make_reader (InputIterator first) {
-                return {first};
+                return range_reader<InputIterator>{first};
             }
 
 
@@ -609,7 +610,7 @@ namespace pstore {
                 /// Constructs the writer using a pointer and size to define the range [first,
                 /// first+size).
                 template <typename SpanType>
-                buffer_reader (SpanType span) noexcept
+                explicit buffer_reader (SpanType span) noexcept
                         : first_ (reinterpret_cast<std::uint8_t const *> (span.data ()))
                         , last_ (first_ + span.size_bytes ()) {}
 
