@@ -65,13 +65,13 @@ namespace pstore {
             template <typename InputIt, typename OutputIt>
             OutputIt escape (InputIt first, InputIt last, OutputIt out) {
                 std::for_each (first, last, [&out](char c) {
-                    auto const is_unreserved_char = [](char c) {
-                        return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') ||
-                               (c >= '0' && c <= '9') || c == '-' || c == '.' || c == '_' ||
-                               c == '~';
+                    auto const is_unreserved_char = [](char c2) {
+                        return (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z') ||
+                               (c2 >= '0' && c2 <= '9') || c2 == '-' || c2 == '.' || c2 == '_' ||
+                               c2 == '~';
                     };
-                    auto const nibble_to_hex_char = [](unsigned c) {
-                        auto const c2 = c & 0x0FU;
+                    auto const nibble_to_hex_char = [](unsigned n) {
+                        auto const c2 = n & 0x0FU;
                         return static_cast<char> (c2 < 10 ? c2 + '0' : c2 - 10 + 'A');
                     };
 
@@ -106,11 +106,11 @@ namespace pstore {
                     *(out++) = '&';
                 }
 
-                auto const & first = std::get<0> (value);
-                auto const & second = std::get<1> (value);
-                out = details::escape (first.begin (), first.end (), out);
+                out =
+                    details::escape (std::get<0> (value).begin (), std::get<0> (value).end (), out);
                 *(out++) = '=';
-                out = details::escape (second.begin (), second.end (), out);
+                out =
+                    details::escape (std::get<1> (value).begin (), std::get<1> (value).end (), out);
             };
             std::for_each (first, last, f);
             return out;
