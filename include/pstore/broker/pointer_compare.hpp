@@ -76,11 +76,11 @@ namespace pstore {
                 helper (helper &&) noexcept = default;
 
                 template <typename U>
-                helper (std::shared_ptr<U> const & sp) noexcept
+                explicit helper (std::shared_ptr<U> const & sp) noexcept
                         : ptr_{sp.get ()} {}
 
                 template <typename U, typename Deleter = std::default_delete<U>>
-                helper (std::unique_ptr<U, Deleter> const & up) noexcept
+                explicit helper (std::unique_ptr<U, Deleter> const & up) noexcept
                         : ptr_{up.get ()} {}
 
                 ~helper () noexcept = default;
