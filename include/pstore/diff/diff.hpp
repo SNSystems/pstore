@@ -62,10 +62,9 @@ namespace pstore {
 
         namespace details {
 
-            using index::details::index_pointer;
-
             template <typename Index>
             class traverser {
+                using index_pointer = index::details::index_pointer;
             public:
                 /// \param db  The owning database instance.
                 /// \param index  The index to be traversed.
