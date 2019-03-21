@@ -128,7 +128,7 @@ namespace pstore {
         public:
             using result_type = typename Callbacks::result_type;
 
-            parser (Callbacks callbacks = Callbacks ());
+            explicit parser (Callbacks callbacks = Callbacks ());
 
             ///@{
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
@@ -301,7 +301,7 @@ namespace pstore {
 
                 /// The value to be used for the "done" state in the each of the matcher state
                 /// machines.
-                static constexpr std::uint8_t done = 0xFFU;
+                static constexpr auto done = std::uint8_t{1};
 
             private:
                 int state_;
@@ -332,9 +332,9 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     last_state,
-                    done_state = matcher<Callbacks>::done,
                 };
 
                 /// The keyword to be matched. The input sequence must exactly match this string or
@@ -471,6 +471,7 @@ namespace pstore {
                 void make_result (parser<Callbacks> & parser);
 
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     leading_minus_state,
                     integer_initial_digit_state,
                     integer_digit_state,
@@ -480,7 +481,6 @@ namespace pstore {
                     exponent_sign_state,
                     exponent_initial_digit_state,
                     exponent_digit_state,
-                    done_state = matcher<Callbacks>::done,
                 };
 
                 bool is_neg_ = false;
@@ -799,6 +799,7 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     normal_char_state,
                     escape_state,
@@ -806,7 +807,6 @@ namespace pstore {
                     hex2_state,
                     hex3_state,
                     hex4_state,
-                    done_state = matcher<Callbacks>::done,
                 };
 
                 class appender {
@@ -1085,10 +1085,10 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     object_state,
                     comma_state,
-                    done_state = matcher<Callbacks>::done,
                 };
                 bool is_first_ = true; // FIXME: use an additional state instead.
             };
@@ -1155,13 +1155,13 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     first_key_state,
                     key_state,
                     colon_state,
                     value_state,
                     comma_state,
-                    done_state = matcher<Callbacks>::done,
                 };
             };
 
@@ -1245,9 +1245,9 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     crlf_state,
-                    done_state = matcher<Callbacks>::done,
                 };
             };
 
@@ -1306,8 +1306,8 @@ namespace pstore {
 
             private:
                 enum state {
-                    start_state,
                     done_state = matcher<Callbacks>::done,
+                    start_state,
                 };
             };
 
@@ -1339,9 +1339,9 @@ namespace pstore {
 
             private:
                 enum state {
+                    done_state = matcher<Callbacks>::done,
                     start_state,
                     new_token_state,
-                    done_state = matcher<Callbacks>::done,
                 };
                 bool const only_string_;
             };
