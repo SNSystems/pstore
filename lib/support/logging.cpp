@@ -106,16 +106,16 @@ namespace pstore {
         void logger::log (priority p, gsl::czstring part1, quoted part2) {
             auto message = std::string{part1};
             message += '"';
-            message += part2;
+            message += static_cast<gsl::czstring> (part2);
             message += '"';
             this->log (p, message);
         }
 
-//*  _             _      _                         *
-//* | |__  __ _ __(_)__  | |___  __ _ __ _ ___ _ _  *
-//* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
-//* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
-//*                             |___/|___/          *
+        //*  _             _      _                         *
+        //* | |__  __ _ __(_)__  | |___  __ _ __ _ ___ _ _  *
+        //* | '_ \/ _` (_-< / _| | / _ \/ _` / _` / -_) '_| *
+        //* |_.__/\__,_/__/_\__| |_\___/\__, \__, \___|_|   *
+        //*                             |___/|___/          *
         // time_string
         // ~~~~~~~~~~~
         std::size_t basic_logger::time_string (std::time_t t,

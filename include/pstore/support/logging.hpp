@@ -74,9 +74,9 @@ namespace pstore {
 
         class quoted {
         public:
-            quoted (gsl::czstring str)
+            explicit quoted (gsl::czstring str) noexcept
                     : str_{str} {}
-            operator gsl::czstring () const noexcept { return str_; }
+            explicit operator gsl::czstring () const noexcept { return str_; }
 
         private:
             gsl::czstring str_;
