@@ -279,7 +279,7 @@ namespace {
         resl.reserve (16);
         for (int j = 0; j < 16; ++j) {
             resl += num2hex (rnd.get (16U));
-        };
+        }
         return resl;
     }
 
