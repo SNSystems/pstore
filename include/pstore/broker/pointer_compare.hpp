@@ -70,7 +70,7 @@ namespace pstore {
             public:
                 helper () noexcept
                         : ptr_ (nullptr) {}
-                constexpr helper (Ptr p) noexcept
+                constexpr explicit helper (Ptr p) noexcept
                         : ptr_ (p) {}
                 helper (helper const &) noexcept = default;
                 helper (helper &&) noexcept = default;
