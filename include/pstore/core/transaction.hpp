@@ -193,7 +193,7 @@ namespace pstore {
         std::uint64_t size () const noexcept { return size_; }
 
     protected:
-        transaction_base (database & db)
+        explicit transaction_base (database & db)
                 : db_{db} {
             // First thing that creating a transaction does is update the view
             // to that of the head revision.
