@@ -42,8 +42,12 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-httpd-unit-tests
+    buffered_reader_mocks.cpp
+    buffered_reader_mocks.hpp
+
     test_buffered_reader.cpp
     test_media_type.cpp
     test_query_to_kvp.cpp
+    test_request.cpp
 )
 target_link_libraries (pstore-httpd-unit-tests PRIVATE pstore-httpd-lib)

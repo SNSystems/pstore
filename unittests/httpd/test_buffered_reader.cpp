@@ -49,6 +49,8 @@
 
 #include "gmock/gmock.h"
 
+#include "buffered_reader_mocks.hpp"
+
 using pstore::error_or;
 using pstore::in_place;
 using pstore::maybe;
@@ -56,52 +58,6 @@ using pstore::gsl::span;
 using pstore::httpd::make_buffered_reader;
 using testing::_;
 using testing::Invoke;
-
-namespace {
-
-    using getc_result_type = error_or<std::pair<int, maybe<char>>>;
-    using gets_result_type = error_or<std::pair<int, maybe<std::string>>>;
-
-    using refiller_result_type = error_or<std::pair<int, span<char>::iterator>>;
-    using refiller_function = std::function<refiller_result_type (int, span<char> const &)>;
-
-    class mock_refiller {
-    public:
-        virtual ~mock_refiller () = default;
-        virtual refiller_result_type fill (int c, span<char> const &) const = 0;
-    };
-
-    class refiller : public mock_refiller {
-    public:
-        MOCK_CONST_METHOD2 (fill, refiller_result_type (int, span<char> const &));
-
-        refiller_function refill_function () const {
-            return [this](int io, span<char> const & s) { return this->fill (io, s); };
-        }
-    };
-
-    /// Returns a function which which simply returns end-of-stream when invoked.
-    refiller_function eof () {
-        return [](int io, span<char> const & s) {
-            return refiller_result_type{in_place, io + 1, s.begin ()};
-        };
-    }
-
-    /// Returns a function which will yield the string passed as its argument.
-    refiller_function yield_string (std::string const & str) {
-        return [str](int io, span<char> const & s) {
-#ifndef DEBUG
-            auto const size = s.size ();
-            assert (size > 0 &&
-                    str.length () <=
-                        static_cast<std::make_unsigned<decltype (size)>::type> (s.size ()));
-#endif
-            return refiller_result_type{in_place, io + 1,
-                                        std::copy (str.begin (), str.end (), s.begin ())};
-        };
-    }
-
-} // end anonymous namespace
 
 TEST (HttpdBufferedReader, GetcThenEOF) {
     refiller r;

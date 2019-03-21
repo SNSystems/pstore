@@ -119,6 +119,8 @@ namespace pstore {
             using io_mchar = std::pair<IO, maybe<char>>;
 
         public:
+            using state_type = IO;
+
             using refill_result_value = std::pair<IO, gsl::span<char>::iterator>;
             using refill_result_type = error_or<refill_result_value>;
             using getc_result_type = error_or<io_mchar>;

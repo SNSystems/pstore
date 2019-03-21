@@ -49,6 +49,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <unordered_map>
 
 #ifdef _WIN32
 
@@ -76,9 +77,11 @@
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
+#include "pstore/httpd/request.hpp"
+#include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/logging.hpp"
-
+#include "pstore/support/random.hpp"
 
 // FIXME: there are multiple definitions of this type.
 #ifdef _WIN32
@@ -211,78 +214,6 @@ namespace {
         return eo{pstore::in_place, std::move (fd)};
     }
 
-    struct request_info {
-    public:
-        request_info (std::string m, std::string v, std::string u)
-                : method_{std::move (m)}
-                , version_{std::move (v)}
-                , uri_{std::move (u)} {}
-        request_info (request_info const &) = default;
-        request_info (request_info &&) = default;
-        ~request_info () = default;
-
-        request_info & operator= (request_info const &) = delete;
-        request_info & operator= (request_info &&) = delete;
-
-        std::string const & method () const { return method_; }
-        std::string const & version () const { return version_; }
-        std::string const & uri () const { return uri_; }
-
-    private:
-        std::string method_;
-        std::string version_;
-        std::string uri_;
-    };
-
-    // read_request
-    // ~~~~~~~~~~~~
-    template <typename ReaderType>
-    pstore::error_or<request_info> read_request (ReaderType & reader, socket_descriptor & socket) {
-        using pstore::error_or;
-        using pstore::maybe;
-
-        auto check_for_eof = [](std::pair<socket_descriptor &, maybe<std::string>> const & p) {
-            auto const & buf = std::get<1> (p);
-            if (!buf) {
-                // TODO: use a more suitable error.
-                return error_or<std::string>{std::make_error_code (std::errc (ENOTCONN))};
-            }
-            return error_or<std::string>{pstore::in_place, *buf};
-        };
-
-        auto extract_request_info = [](std::string const & s) {
-            std::istringstream str{s};
-            std::string method;
-            std::string version;
-            std::string uri;
-            str >> method >> uri >> version;
-            return error_or<request_info>{pstore::in_place, method, version, uri};
-        };
-
-        return (reader.gets (socket) >>= check_for_eof) >>= extract_request_info;
-    }
-
-    // read_headers
-    // ~~~~~~~~~~~~
-    template <typename ReaderType, typename HandleFn>
-    ReaderType & read_headers (ReaderType & reader, socket_descriptor & childfd, HandleFn handler) {
-        using pstore::error_or;
-        using pstore::maybe;
-
-        error_or<std::pair<socket_descriptor &, maybe<std::string>>> const es =
-            reader.gets (childfd);
-        if (es.has_error ()) {
-            log (pstore::logging::priority::error, "recv", es.get_error ().message ());
-            return reader;
-        }
-        assert (std::get<0> (es.get_value ()) == childfd);
-        std::string const & s = std::get<1> (es.get_value ()).value ();
-        if (s.length () == 0) {
-            return reader;
-        }
-        handler (s);
-        return read_headers (reader, childfd, handler);
-    }
 
     pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
         std::array<char, 64> host_name {{'\0'}};
@@ -302,14 +233,110 @@ namespace {
         return pstore::error_or<std::string>{pstore::in_place, std::string{host_name.data ()}};
     }
 
+
+
+    void serve_static_content (socket_descriptor & childfd, std::string const & path,
+                               pstore::romfs::romfs & file_system) {
+        pstore::error_or<struct pstore::romfs::stat> sbuf = file_system.stat (path.c_str ());
+        if (sbuf.has_error ()) {
+            cerror (childfd, path.c_str (), "404", "Not found",
+                    "pstore-httpd couldn't find this file");
+            return;
+        }
+
+        {
+            // Send the response header.
+            std::ostringstream os;
+            os << "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
+            os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << '\n';
+            os << "Content-type: " << pstore::httpd::media_type_from_filename (path) << '\n';
+            os << "\r\n";
+            send (childfd, os.str ());
+        }
+        std::array<std::uint8_t, 256> buffer{{0}};
+        pstore::error_or<pstore::romfs::descriptor> descriptor = file_system.open (path.c_str ());
+        assert (!descriptor.has_error ());
+        for (;;) {
+            std::size_t num_read =
+                descriptor->read (buffer.data (), sizeof (std::uint8_t), buffer.size ());
+            if (num_read == 0) {
+                break;
+            }
+            send (childfd, buffer.data (), num_read);
+        }
+    }
+
+    /// Producesj a 16 digit random hex number. This is sent along with a GET of /cmd/quit to
+    /// dissuade the status server from trivially shutdown by a client.
+    std::string make_quit_magic () {
+        std::string resl;
+        pstore::random_generator<unsigned> rnd;
+
+        auto num2hex = [](unsigned a) {
+            assert (a < 16);
+            return static_cast<char> (a < 10 ? a + '0' : a - 10 + 'a');
+        };
+        resl.reserve (16);
+        for (int j = 0; j < 16; ++j) {
+            resl += num2hex (rnd.get (16U));
+        };
+        return resl;
+    }
+
+    // Returns true if the string \p s starts with the given prefix.
+    bool starts_with (std::string const & s, std::string const & prefix) {
+        std::string::size_type pos = 0;
+        while (pos < s.length () && pos < prefix.length () && s[pos] == prefix[pos]) {
+            ++pos;
+        }
+        return pos == prefix.length ();
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
 
+        std::string get_quit_magic () {
+            static std::string const quit_magic = make_quit_magic ();
+            return quit_magic;
+        }
+
+        struct server_state {
+            bool done = false;
+        };
+        using error_or_server_state = pstore::error_or<server_state>;
+        using query_container = std::unordered_map<std::string, std::string>;
+
+
+
+        error_or_server_state handle_quit (server_state state, socket_descriptor const & childfd,
+                                           query_container const & query) {
+            auto const pos = query.find ("magic");
+            if (pos != std::end (query) && pos->second == get_quit_magic ()) {
+                state.done = true;
+            } else {
+                cerror (childfd, "Bad request", "501", "bad request", "That was a bad request");
+            }
+            return error_or_server_state{pstore::in_place, state};
+        }
+
+
+
+        using commands_container =
+            std::unordered_map<std::string, std::function<error_or_server_state (
+                                                server_state, socket_descriptor const & childfd,
+                                                query_container const &)>>;
+
+        commands_container get_commands () {
+            static commands_container const commands = {{"quit", handle_quit}};
+            return commands;
+        }
+
         int server (in_port_t port_number, romfs::romfs & file_system) {
             logging::create_log_stream ("httpd");
 
+            log (logging::priority::info, "initializing");
             pstore::error_or<socket_descriptor> eparentfd = initialize_socket (port_number);
             if (eparentfd.has_error ()) {
                 log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
@@ -322,7 +349,10 @@ namespace pstore {
             sockaddr_in client_addr{}; // client address.
             auto clientlen =
                 static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
-            for (;;) {
+            log (logging::priority::info, "starting server-loop");
+
+            server_state state;
+            while (!state.done) {
 
                 // Wait for a connection request.
                 // TODO: some kind of shutdown procedure.
@@ -342,25 +372,18 @@ namespace pstore {
                 }
                 log (logging::priority::info, "Connection from ", ename.get_value ());
 
-#if 0
-                char const * const hostaddrp = inet_ntoa (clientaddr.sin_addr);
-                if (hostaddrp == nullptr) {
-                    log (logging::priority::error, "inet_ntoa");
-                    continue;
-                }
-#endif
-
                 // Get the HTTP request line.
                 auto reader = make_buffered_reader<socket_descriptor &> (refiller);
 
-                pstore::error_or<request_info> eri = read_request (reader, childfd);
+                pstore::error_or<std::pair<socket_descriptor &, request_info>> eri =
+                    read_request (reader, childfd);
                 if (eri.has_error ()) {
                     log (logging::priority::error, "reading HTTP request",
                          eri.get_error ().message ());
                     continue;
                 }
 
-                request_info const & request = eri.get_value ();
+                request_info const & request = std::get<1> (eri.get_value ());
                 log (logging::priority::info, "Request: ",
                      request.method () + ' ' + request.version () + ' ' + request.uri ());
 
@@ -376,70 +399,43 @@ namespace pstore {
                     log (logging::priority::info, "header:", header);
                 });
 
-                /* parse the uri [crufty] */
-                bool is_static = true; /* static request? */
-                std::string filename;
-                constexpr std::size_t buffer_size = 1024;
-                char cgiargs[buffer_size];      /* cgi argument list */
-                if (!strstr (request.uri ().c_str (), "cgi-bin")) { /* static content */
-                    is_static = true;
-                    cgiargs[0] = '\0';
-                    filename = ".";
+
+                static char const dynamic_path[] = "/cmd/";
+                if (!starts_with (request.uri (), dynamic_path)) {
+                    std::string filename = ".";
                     filename += request.uri ();
                     if (request.uri ().back () == '/') {
                         filename += "index.html";
                     }
-                } else { /* dynamic content */
-#if 0
-                    is_static = false;
-                    if (char * p = index (uri, '?')) {
-                        std::strcpy (cgiargs, p + 1);
-                        *p = '\0';
-                    } else {
-                        std::strcpy (cgiargs, "");
-                    }
-                    filename = ".";
-                    filename += uri;
-#endif
-                }
-
-                // Make sure the file exists.
-                error_or<struct romfs::stat> sbuf = file_system.stat (filename.c_str ());
-                if (sbuf.has_error ()) {
-                    cerror (childfd, filename.c_str (), "404", "Not found",
-                            "pstore-httpd couldn't find this file");
-                    childfd.reset ();
+                    serve_static_content (childfd, filename, file_system);
                     continue;
                 }
 
-                /* serve static content */
-                if (is_static) {
-                    {
-                        // Send the response header.
-                        std::ostringstream os;
-                        os << "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
-                        os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << '\n';
-                        os << "Content-type: " << media_type_from_filename (filename) << '\n';
-                        os << "\r\n";
-                        send (childfd, os.str ());
-                    }
-                    std::array<std::uint8_t, 256> buffer{{0}};
-                    error_or<romfs::descriptor> descriptor = file_system.open (filename.c_str ());
-                    assert (!descriptor.has_error ());
-                    for (;;) {
-                        std::size_t num_read = descriptor->read (buffer.data (), sizeof (std::uint8_t), buffer.size ());
-                        if (num_read == 0) {
-                            break;
-                        }
-                        send (childfd, buffer.data (), num_read);
-                    }
-                } else {
-                    // TODO: serve dynamic content.
-                }
 
-                /* clean up */
-                childfd.reset ();
+                // Serve dynamic content.
+                std::string uri = request.uri ();
+                assert (starts_with (uri, dynamic_path));
+                uri.erase (std::begin (uri), std::begin (uri) + array_elements (dynamic_path) - 1U);
+
+                auto const pos = uri.find ('?');
+                auto const command = uri.substr (0, pos);
+                auto it = pos != std::string::npos ? std::begin (uri) + pos + 1 : std::end (uri);
+                query_container arguments;
+                if (it != std::end (uri)) {
+                    it = query_to_kvp (it, std::end (uri), make_insert_iterator (arguments));
+                }
+                auto const & commands = get_commands ();
+                auto command_it = commands.find (uri.substr (0, pos));
+                if (command_it == std::end (commands)) {
+                    // return an error
+                } else {
+                    error_or_server_state e_state = command_it->second (state, childfd, arguments);
+                    // TODO: if an error is returned, report it to the client.
+                    state = e_state.get_value ();
+                }
             }
+
+            return 0;
         }
 
     } // end namespace httpd
