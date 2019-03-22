@@ -86,7 +86,8 @@ namespace pstore {
             }
 
             for (std::uint8_t const b : span) {
-                message_block_[index_++] = b;
+                message_block_[index_] = b;
+                ++index_;
 
                 auto const old_length = length_;
                 length_ += 8;
@@ -124,8 +125,8 @@ namespace pstore {
         // process_message_block
         // ~~~~~~~~~~~~~~~~~~~~~
         void sha1::process_message_block () noexcept {
-            static constexpr std::uint32_t k[] = {// Constants defined in SHA-1.
-                                                  0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6};
+            // Constants defined in SHA-1.
+            static constexpr std::uint32_t k[] = {0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6};
             std::uint32_t w[80]; // Word sequence.
 
             for (auto t = 0U; t < 16U; ++t) {
@@ -201,20 +202,22 @@ namespace pstore {
             // bits and length.  If so, we will pad the block, process it, and then continue padding
             // into a second block.
             if (index_ > 55) {
-                message_block_[index_++] = 0x80;
-                while (index_ < 64) {
-                    message_block_[index_++] = 0;
+                message_block_[index_z] = 0x80;
+                ++index_;
+
+                for (; index_ < 64; ++index_) {
+                    message_block_[index_] = 0;
                 }
 
                 this->process_message_block ();
 
-                while (index_ < 56) {
-                    message_block_[index_++] = 0;
+                for (; index_ < 56; ++index_) {
+                    message_block_[index_] = 0;
                 }
             } else {
                 message_block_[index_++] = 0x80;
-                while (index_ < 56) {
-                    message_block_[index_++] = 0;
+                for (; index_ < 56; ++index_) {
+                    message_block_[index_] = 0;
                 }
             }
 
@@ -247,7 +250,7 @@ namespace pstore {
             }
             result += alphabet[(digest[18] >> 2U) & 0x3F];
             result += alphabet[((digest[18] & 0x03) << 4U) | ((digest[19] & 0xF0) >> 4U)];
-            result += alphabet[((digest[19] & 0x0F) << 2U)];
+            result += alphabet[(digest[19] & 0x0F) << 2U];
             result += '=';
             return result;
         }
