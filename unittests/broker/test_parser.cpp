@@ -47,48 +47,47 @@
 
 #include "pstore/broker_intf/message_type.hpp"
 
-namespace {
-    class MessageParse : public ::testing::Test {
-    protected:
-        pstore::broker::partial_cmds cmds_;
-        static constexpr std::uint32_t message_id_ = 1234;
-    };
-} // namespace
-
-TEST_F (MessageParse, SinglePartCommand) {
+TEST (MessageParse, SinglePartCommand) {
     using namespace pstore::broker;
+    pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> command =
-        parse (message_type (message_id_, 0, 1, std::string{"HELO hello world"}), cmds_);
+        parse (message_type (1234, 0, 1, std::string{"HELO hello world"}), cmds);
     ASSERT_NE (command.get (), nullptr);
     EXPECT_EQ (command->verb, "HELO");
     EXPECT_EQ (command->path, "hello world");
-    EXPECT_EQ (cmds_.size (), 0U);
+    EXPECT_EQ (cmds.size (), 0U);
 }
 
-TEST_F (MessageParse, TwoPartCommandInOrder) {
+TEST (MessageParse, TwoPartCommandInOrder) {
     using namespace pstore::broker;
+    static constexpr std::uint32_t message_id = 1234;
+
+    pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> c1 =
-        parse (message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
-    EXPECT_EQ (cmds_.size (), 1U);
+        parse (message_type (message_id, 0, 2, std::string{"HELO to be"}), cmds);
+    EXPECT_EQ (cmds.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
     std::unique_ptr<broker_command> c2 =
-        parse (message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
+        parse (message_type (message_id, 1, 2, std::string{" or not to be"}), cmds);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");
-    EXPECT_TRUE (cmds_.empty ());
+    EXPECT_TRUE (cmds.empty ());
 }
 
-TEST_F (MessageParse, TwoPartCommandOutOfOrder) {
+TEST (MessageParse, TwoPartCommandOutOfOrder) {
     using namespace pstore::broker;
+    static constexpr std::uint32_t message_id = 1234;
+
+    pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> c1 =
-        parse (message_type (message_id_, 1, 2, std::string{" or not to be"}), cmds_);
-    EXPECT_EQ (cmds_.size (), 1U);
+        parse (message_type (message_id, 1, 2, std::string{" or not to be"}), cmds);
+    EXPECT_EQ (cmds.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
     std::unique_ptr<broker_command> c2 =
-        parse (message_type (message_id_, 0, 2, std::string{"HELO to be"}), cmds_);
+        parse (message_type (message_id, 0, 2, std::string{"HELO to be"}), cmds);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");
-    EXPECT_TRUE (cmds_.empty ());
+    EXPECT_TRUE (cmds.empty ());
 }
