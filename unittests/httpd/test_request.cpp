@@ -99,6 +99,7 @@ namespace {
 
     class header_handler {
     public:
+        virtual ~header_handler () noexcept = default;
         virtual void call (std::string const & key, std::string const & value) const = 0;
     };
     class mocked_header_handler : public header_handler {
