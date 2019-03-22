@@ -56,6 +56,7 @@ using pstore::error_or;
 using pstore::httpd::make_buffered_reader;
 using pstore::httpd::request_info;
 using testing::_;
+using testing::AnyNumber;
 using testing::Invoke;
 
 TEST (Request, Empty) {
@@ -92,4 +93,39 @@ TEST (Request, Partial) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     error_or<std::pair<int, request_info>> res = read_request (br, io);
     ASSERT_TRUE (res.has_error ());
+}
+
+namespace {
+
+    class header_handler {
+    public:
+        virtual void call (std::string const & key, std::string const & value) const = 0;
+    };
+    class mocked_header_handler : public header_handler {
+    public:
+        MOCK_CONST_METHOD2 (call, void(std::string const &, std::string const &));
+    };
+
+} // end anonymous namespace
+
+TEST (ReadHeaders, Common) {
+    refiller r;
+    EXPECT_CALL (r, fill (_, _)).Times (AnyNumber ()).WillRepeatedly (Invoke (eof ()));
+    EXPECT_CALL (r, fill (0, _))
+        .Times (AnyNumber ())
+        .WillRepeatedly (Invoke (yield_string ("Host: localhost:8080\r\n"
+                                               "Accept-Encoding: gzip, deflate\r\n"
+                                               "Referer: http://localhost:8080/\r\n"
+                                               "\r\n")));
+
+    auto br = make_buffered_reader<int> (r.refill_function ());
+
+    mocked_header_handler handler;
+    EXPECT_CALL (handler, call ("Host", "localhost:8080"));
+    EXPECT_CALL (handler, call ("Accept-Encoding", "gzip, deflate"));
+    EXPECT_CALL (handler, call ("Referer", "http://localhost:8080/"));
+    error_or<std::pair<int, int>> const res = pstore::httpd::read_headers (
+        br, 0, [&handler](std::string const & key, std::string const & value) {
+            handler.call (key, value);
+        });
 }

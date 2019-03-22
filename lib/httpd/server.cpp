@@ -395,9 +395,11 @@ namespace pstore {
                 }
 
                 // read (and for the moment simply print) the HTTP headers.
-                read_headers (reader, childfd, [](std::string const & header) {
-                    log (logging::priority::info, "header:", header);
-                });
+                read_headers (reader, childfd,
+                              [](std::string const & key, std::string const & value) {
+                                  std::string const header = key + ':' + value;
+                                  log (logging::priority::info, "header:", header);
+                              });
 
 
                 static char const dynamic_path[] = "/cmd/";

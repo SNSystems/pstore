@@ -137,7 +137,24 @@ namespace pstore {
                            return error_or<std::pair<state_type, int>>{pstore::in_place,
                                                                        std::get<0> (p), 0};
                        }
-                       handler (*ms);
+
+                       std::string key;
+                       std::string value;
+                       auto pos = ms->find (':');
+                       if (pos == std::string::npos) {
+                           key = *ms;
+                       } else {
+                           key = ms->substr (0, pos);
+                           // TODO: convert to lower-case to satisfy the requirement of
+                           // case-insensitivity?
+                           ++pos; // skip the colon
+                           for (; pos < ms->length () && std::isspace ((*ms)[pos]); ++pos) {
+                           }
+                           value = ms->substr (pos);
+                       }
+
+                       handler (key, value);
+
                        return read_headers (reader, std::get<0> (p), handler);
                    };
         }
