@@ -202,7 +202,7 @@ namespace pstore {
             // bits and length.  If so, we will pad the block, process it, and then continue padding
             // into a second block.
             if (index_ > 55) {
-                message_block_[index_z] = 0x80;
+                message_block_[index_] = 0x80;
                 ++index_;
 
                 for (; index_ < 64; ++index_) {
