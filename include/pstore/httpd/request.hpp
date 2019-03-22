@@ -46,6 +46,7 @@
 #define PSTORE_HTTPD_REQUEST_HPP
 
 #include <cassert>
+#include <cctype>
 #include <cerrno>
 #include <sstream>
 #include <string>
