@@ -215,7 +215,8 @@ namespace pstore {
                     message_block_[index_] = 0;
                 }
             } else {
-                message_block_[index_++] = 0x80;
+                message_block_[index_] = 0x80;
+                ++index_;
                 for (; index_ < 56; ++index_) {
                     message_block_[index_] = 0;
                 }
