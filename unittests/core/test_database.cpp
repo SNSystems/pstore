@@ -217,7 +217,8 @@ TEST_F (Database, GetEndPastLogicalEOF) {
 
     auto const addr = pstore::address::null ();
     std::size_t size = db.size () + 1;
-    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
 }
 
 TEST_F (Database, GetStartPastLogicalEOF) {
@@ -226,7 +227,8 @@ TEST_F (Database, GetStartPastLogicalEOF) {
 
     auto const addr = pstore::address::make (db.size () + 1);
     std::size_t size = 1;
-    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
 }
 
 TEST_F (Database, GetLocationOverflows) {
@@ -238,7 +240,8 @@ TEST_F (Database, GetLocationOverflows) {
                           std::numeric_limits<std::uint64_t>::max ());
     std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
     ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
-    check_for_error ([&]() { db.getro (addr, size); }, pstore::error_code::bad_address);
+    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+                     pstore::error_code::bad_address);
 }
 
 
