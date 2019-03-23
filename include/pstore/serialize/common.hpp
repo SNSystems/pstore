@@ -86,6 +86,7 @@ namespace pstore {
             explicit sticky_assign (Other const & t)
                     : t_ (t)
                     , is_first_{false} {}
+            sticky_assign (sticky_assign &&) = delete;
 
             ~sticky_assign () = default;
 
@@ -100,6 +101,8 @@ namespace pstore {
                 }
                 return *this;
             }
+            sticky_assign & operator= (sticky_assign const &) = delete;
+            sticky_assign & operator= (sticky_assign &&) = delete;
 
             T const & get () const { return t_; }
 
