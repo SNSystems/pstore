@@ -52,4 +52,5 @@ set (PSTORE_SERIALIZE_SRC
     archive.cpp
 )
 add_pstore_library (pstore-serialize ${PSTORE_SERIALIZE_SRC})
+add_clang_tidy_target (pstore-serialize)
 target_link_libraries (pstore-serialize PUBLIC pstore-support)
