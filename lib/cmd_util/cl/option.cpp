@@ -78,7 +78,7 @@ namespace pstore {
                 case num_occurrences_flag::required: result = num_occurrences_ >= 1U; break;
                 case num_occurrences_flag::one_or_more: result = num_occurrences_ > 1U; break;
                 case num_occurrences_flag::optional:
-                case num_occurrences_flag::zero_or_more: break; ;
+                case num_occurrences_flag::zero_or_more: break;
                 }
                 return result;
             }
