@@ -49,18 +49,18 @@
 #include <iterator>
 
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #else
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 
-namespace {
 #ifdef _WIN32
+namespace {
     inline DWORD getpid () { return ::GetCurrentProcessId (); }
+} // end anonymous namespace
 #endif
-} // namespace
 
 namespace pstore {
     namespace broker {
@@ -82,5 +82,5 @@ namespace pstore {
                    part_no == rhs.part_no && num_parts == rhs.num_parts && payload == rhs.payload;
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
