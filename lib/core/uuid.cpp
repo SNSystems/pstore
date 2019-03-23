@@ -268,7 +268,7 @@ namespace pstore {
         case uuid::version_type::random_number_based: str = "random_number_based"; break;
         case uuid::version_type::name_based_sha1: str = "name_based_sha1"; break;
         case uuid::version_type::unknown: str = "unknown"; break;
-        };
+        }
         return stream << str;
     }
 
@@ -279,7 +279,7 @@ namespace pstore {
         case uuid::variant_type::rfc_4122: str = "rfc_4122"; break;
         case uuid::variant_type::microsoft: str = "microsoft"; break;
         case uuid::variant_type::future: str = "future"; break; // future definition
-        };
+        }
         return stream << str;
     }
 
