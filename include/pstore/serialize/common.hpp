@@ -83,11 +83,13 @@ namespace pstore {
             /// Construct from a type that is implicitly convertible to T. This is considered
             /// equivalent to assignment.
             template <typename Other>
-            sticky_assign (Other const & t)
+            explicit sticky_assign (Other const & t)
                     : t_ (t)
                     , is_first_{false} {}
 
-            /// Assign from a type that is implicitly convertable to T. This
+            ~sticky_assign () = default;
+
+            /// Assign from a type that is implicitly convertible to T. This
             /// assignment will take place once only: any subsequent assignments
             /// will be ignored.
             template <typename Other>
