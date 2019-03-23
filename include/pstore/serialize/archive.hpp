@@ -258,8 +258,10 @@ namespace pstore {
                 public:
                     explicit bytes_produced_helper (writer_base const & writer)
                             : writer_{writer} {}
+                    // (This is a varargs function so that it is considered last in template
+                    // resolution.)
                     template <typename Policy>
-                    std::size_t get (Policy const & /*policy*/, ...) {
+                    std::size_t get (Policy const & /*policy*/, ...) { // NOLINT(cert-dcl50-cpp)
                         return writer_.bytes_consumed ();
                     }
                     template <typename Policy>
@@ -284,7 +286,8 @@ namespace pstore {
                     // This overload is always in the set of overloads but a function with
                     // ellipsis parameter has the lowest ranking for overload resolution.
                     template <typename P, typename Span>
-                    static auto invoke (P & policy, Span span, ...) -> result_type {
+                    static auto invoke (P & policy, Span span, ...) // NOLINT(cert-dcl50-cpp)
+                        -> result_type {
                         sticky_assign<result_type> r;
                         for (auto & v : span) {
                             r = policy.put (v);
@@ -364,7 +367,13 @@ namespace pstore {
                 explicit vector_writer (std::vector<std::uint8_t> & container)
                         : writer_base<details::vector_writer_policy> (
                               details::vector_writer_policy{container}) {}
+                vector_writer (vector_writer const &) = delete;
+                vector_writer (vector_writer &&) = delete;
+
                 ~vector_writer () noexcept override;
+
+                vector_writer & operator= (vector_writer const &) = delete;
+                vector_writer & operator= (vector_writer &&) = delete;
 
                 using container = policy_type::container;
                 using const_iterator = policy_type::const_iterator;
@@ -461,8 +470,8 @@ namespace pstore {
                 ///              write data.
                 buffer_writer (void * first, void * last)
                         : writer_base<policy_type> (policy_type{first, last}) {}
-
-                ~buffer_writer () noexcept override;
+                buffer_writer (buffer_writer const &) = delete;
+                buffer_writer (buffer_writer &&) = delete;
 
                 /// \brief Constructs the writer starting at the address given by 'first' and with a
                 ///        number of bytes 'size'.
@@ -479,6 +488,10 @@ namespace pstore {
                 explicit buffer_writer (T * t)
                         : buffer_writer (t, sizeof (T)) {}
 
+                ~buffer_writer () noexcept override;
+
+                buffer_writer & operator= (buffer_writer const &) = delete;
+                buffer_writer & operator= (buffer_writer &&) = delete;
 
                 using const_iterator = policy_type::const_iterator;
 
@@ -525,8 +538,14 @@ namespace pstore {
 
             class null final : public writer_base<details::null_policy> {
             public:
-                null () noexcept {}
+                null () = default;
+                null (null const &) = delete;
+                null (null &&) = delete;
+
                 ~null () noexcept override;
+
+                null & operator= (null const &) = delete;
+                null & operator= (null &&) = delete;
             };
 
 
