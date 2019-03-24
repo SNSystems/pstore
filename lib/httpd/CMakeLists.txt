@@ -46,6 +46,7 @@ include (add_pstore)
 set (PSTORE_HTTPD_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/httpd")
 add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/headers.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/media_type.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/request.hpp"
@@ -53,6 +54,7 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/sha1.hpp"
 
     buffered_reader.cpp
+    headers.cpp
     media_type.cpp
     server.cpp
     sha1.cpp

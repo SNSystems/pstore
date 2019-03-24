@@ -75,6 +75,7 @@
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
+#include "pstore/httpd/headers.hpp"
 #include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
 #include "pstore/httpd/request.hpp"
@@ -292,10 +293,7 @@ namespace {
         return pos == prefix.length ();
     }
 
-} // end anonymous namespace
 
-namespace pstore {
-    namespace httpd {
 
         std::string get_quit_magic () {
             static std::string const quit_magic = make_quit_magic ();
@@ -328,10 +326,24 @@ namespace pstore {
                                                 server_state, socket_descriptor const & childfd,
                                                 query_container const &)>>;
 
-        commands_container get_commands () {
+        commands_container const & get_commands () {
             static commands_container const commands = {{"quit", handle_quit}};
             return commands;
         }
+
+
+        template <typename T>
+        auto clamp_to_signed_max (T v) noexcept -> typename std::make_signed<T>::type {
+            using st = typename std::make_signed<T>::type;
+            constexpr auto maxs = std::numeric_limits<st>::max ();
+            PSTORE_STATIC_ASSERT (maxs >= 0);
+            return static_cast<st> (std::min (static_cast<T> (maxs), v));
+        }
+} // end anonymous namespace
+
+namespace pstore {
+    namespace httpd {
+
 
         int server (in_port_t port_number, romfs::romfs & file_system) {
             logging::create_log_stream ("httpd");
@@ -387,22 +399,28 @@ namespace pstore {
                 log (logging::priority::info, "Request: ",
                      request.method () + ' ' + request.version () + ' ' + request.uri ());
 
-                // We  only currently support the GET method.
+                // We only currently support the GET method.
                 if (request.method () != "GET") {
                     cerror (childfd, request.method ().c_str (), "501", "Not Implemented",
                             "httpd does not implement this method");
                     continue;
                 }
 
-                // read (and for the moment simply print) the HTTP headers.
-                auto handler = [](int io, std::string const & key, std::string const & value) {
-                    std::string const header = key + ':' + value;
-                    log (logging::priority::info, "header:", header);
-                    return io;
-                };
+                // Scan the HTTP headers.
+                error_or<std::pair<socket_descriptor &, header_info>> const res = read_headers (
+                    reader, childfd,
+                    [](header_info io, std::string const & key, std::string const & value) {
+                        log (logging::priority::info, "header:", key + ": " + value);
+                        return io.handler (key, value);
+                    },
+                    header_info ());
+                assert (!res.has_error ()); // FIXME! There may have been an error!
+                header_info header_contents = std::get<1> (res.get_value ());
 
-                read_headers (reader, childfd, handler, 0);
-
+                if (header_contents.connection_upgrade && header_contents.upgrade_to_websocket &&
+                    header_contents.websocket_key && header_contents.websocket_version) {
+                    log (logging::priority::info, "WebSocket upgrade requested");
+                }
 
                 static char const dynamic_path[] = "/cmd/";
                 if (!starts_with (request.uri (), dynamic_path)) {
@@ -415,7 +433,6 @@ namespace pstore {
                     continue;
                 }
 
-
                 // Serve dynamic content.
                 std::string uri = request.uri ();
                 assert (starts_with (uri, dynamic_path));
@@ -423,7 +440,9 @@ namespace pstore {
 
                 auto const pos = uri.find ('?');
                 auto const command = uri.substr (0, pos);
-                auto it = pos != std::string::npos ? std::begin (uri) + pos + 1 : std::end (uri);
+                auto it = pos != std::string::npos
+                              ? std::begin (uri) + clamp_to_signed_max (pos + 1)
+                              : std::end (uri);
                 query_container arguments;
                 if (it != std::end (uri)) {
                     it = query_to_kvp (it, std::end (uri), make_insert_iterator (arguments));
