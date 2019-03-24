@@ -51,7 +51,7 @@
 #include "pstore/support/error.hpp"
 #include "check_for_error.hpp"
 
-    TEST (BrokerMessageType, BadPartNo) {
+TEST (BrokerMessageType, BadPartNo) {
     auto create = []() {
         std::uint32_t const mid = 3;
         std::uint16_t const part = 2;
