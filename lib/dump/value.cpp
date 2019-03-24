@@ -499,7 +499,7 @@ namespace pstore {
         // get
         // ~~~
         value_ptr object::get (std::string const & name) {
-            auto predicate = [&](object::member const & mem) { return mem.property == name; };
+            auto predicate = [&name](object::member const & mem) { return mem.property == name; };
             auto it = std::find_if (std::begin (members_), std::end (members_), predicate);
             return (it != members_.end ()) ? it->val : value_ptr (nullptr);
         }
@@ -625,7 +625,7 @@ namespace pstore {
                 acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
                 acc.write (alphabet[(temp & 0x0003F000) >> 12]);
                 acc.write (alphabet[(temp & 0x00000FC0) >> 6]);
-                acc.write (alphabet[(temp & 0x0000003F)]);
+                acc.write (alphabet[temp & 0x0000003F]);
             }
 
             switch (size % 3) {
