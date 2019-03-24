@@ -321,7 +321,7 @@ namespace pstore {
             switch (kind) {
             case lock_kind::shared_read: type = F_RDLCK; break;
             case lock_kind::exclusive_write: type = F_WRLCK; break;
-            };
+            }
 
             bool got_lock = true;
             if (file_handle::lock_reg (file_,
