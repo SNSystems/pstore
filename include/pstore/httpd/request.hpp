@@ -45,6 +45,7 @@
 #ifndef PSTORE_HTTPD_REQUEST_HPP
 #define PSTORE_HTTPD_REQUEST_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cctype>
 #include <cerrno>
@@ -156,9 +157,10 @@ namespace pstore {
                        } else {
                            key = ms->substr (0, pos);
                            // HTTP header names are case-insensitive so convert to lower-case here.
-                           std::transform (key.begin (), key.end (), key.begin (), [](char c) {
-                               return static_cast<char> (std::tolower (c));
-                           });
+                           std::transform (key.begin (), key.end (), key.begin (),
+                                           [](unsigned char c) {
+                                               return static_cast<char> (std::tolower (c));
+                                           });
 
                            ++pos; // skip the colon
                            // skip optional whitespace before the value string.
