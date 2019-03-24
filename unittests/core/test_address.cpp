@@ -45,7 +45,7 @@
 
 #include "pstore/core/address.hpp"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace {
 
@@ -55,15 +55,9 @@ namespace {
             return pstore::address::make ((segment << pstore::address::offset_number_bits) |
                                           offset);
         }
-
-        static constexpr pstore::address::offset_type max_offset = pstore::address::max_offset;
-        static constexpr pstore::address::segment_type max_segment = pstore::address::max_segment;
     };
 
-    constexpr pstore::address::offset_type AddressFixture::max_offset;
-    constexpr pstore::address::segment_type AddressFixture::max_segment;
-
-} // namespace
+} // end anonymous namespace
 
 
 TEST_F (AddressFixture, InitNull) {
@@ -87,11 +81,11 @@ TEST_F (AddressFixture, InitSegment0Offset1) {
 }
 
 TEST_F (AddressFixture, InitSegment0OffsetMax) {
-    auto const segment = pstore::address::segment_type{0};
-    auto const offset = this->max_offset;
+    constexpr auto segment = pstore::address::segment_type{0};
+    constexpr auto offset = pstore::address::max_offset;
 
     auto const expected = this->expected_address (segment, offset);
-    auto const actual = pstore::address::make (segment, offset);
+    constexpr auto actual = pstore::address::make (segment, offset);
 
     EXPECT_EQ (expected, actual);
     EXPECT_EQ (expected.absolute (), actual.absolute ());
@@ -104,7 +98,7 @@ TEST_F (AddressFixture, InitSegment1Offset0) {
     constexpr auto offset = pstore::address::offset_type{0};
 
     auto const expected = this->expected_address (segment, offset);
-    auto const actual = pstore::address::make (segment, offset);
+    constexpr auto actual = pstore::address::make (segment, offset);
 
     EXPECT_EQ (expected, actual);
     EXPECT_EQ (expected.absolute (), actual.absolute ());
@@ -113,8 +107,8 @@ TEST_F (AddressFixture, InitSegment1Offset0) {
 }
 
 TEST_F (AddressFixture, InitSegmentMaxOffsetMax) {
-    auto const segment = this->max_segment;
-    auto const offset = this->max_offset;
+    constexpr auto segment = pstore::address::max_segment;
+    constexpr auto offset = pstore::address::max_offset;
 
     auto const expected = this->expected_address (segment, offset);
     auto const actual = pstore::address::make (segment, offset);
@@ -126,7 +120,7 @@ TEST_F (AddressFixture, InitSegmentMaxOffsetMax) {
 }
 
 TEST_F (AddressFixture, Address0Plus1) {
-    auto addr = pstore::address::null ();
+    constexpr auto addr = pstore::address::null ();
     pstore::address actual = addr + 1;
     EXPECT_EQ (pstore::address::make (1), actual);
 }
@@ -138,17 +132,17 @@ TEST_F (AddressFixture, Address0PlusEqual1) {
 }
 
 TEST_F (AddressFixture, Address0PlusOffsetMax) {
-    auto addr = pstore::address::null ();
-    constexpr auto increment = max_offset;
+    constexpr auto addr = pstore::address::null ();
+    constexpr auto increment = pstore::address::max_offset;
     pstore::address actual = addr + increment;
     EXPECT_EQ (pstore::address::make (increment), actual);
     EXPECT_EQ (0U, actual.segment ());
-    EXPECT_EQ (this->max_offset, actual.offset ());
+    EXPECT_EQ (pstore::address::max_offset, actual.offset ());
 }
 
 TEST_F (AddressFixture, Address0PlusOffsetMaxPlus1) {
     auto addr = pstore::address::null ();
-    constexpr auto increment = max_offset + 1;
+    constexpr auto increment = pstore::address::max_offset + 1;
     pstore::address actual = addr + increment;
     EXPECT_EQ (pstore::address::make (increment), actual);
     EXPECT_EQ (1U, actual.segment ());
@@ -156,7 +150,7 @@ TEST_F (AddressFixture, Address0PlusOffsetMaxPlus1) {
 }
 
 TEST_F (AddressFixture, AddressMaxOffsetPlus1) {
-    auto addr = pstore::address::make (max_offset);
+    constexpr auto addr = pstore::address::make (pstore::address::max_offset);
     pstore::address const actual = addr + 1;
     auto const expected = pstore::address::make (1, 0);
     EXPECT_EQ (expected, actual);
@@ -166,14 +160,14 @@ TEST_F (AddressFixture, AddressMaxOffsetPlus1) {
 
 
 TEST_F (AddressFixture, NotEqual) {
-    auto zero = pstore::address::null ();
-    auto one = pstore::address::make (1);
+    constexpr auto zero = pstore::address::null ();
+    constexpr auto one = pstore::address::make (1);
     EXPECT_NE (zero, one);
 }
 
 
 TEST_F (AddressFixture, Address1Minus1) {
-    auto const addr = pstore::address::make (1);
+    constexpr auto const addr = pstore::address::make (1);
     pstore::address const actual = addr - 1;
     EXPECT_EQ (pstore::address::null (), actual);
 }
@@ -212,7 +206,6 @@ TEST_F (AddressFixture, Increment) {
     }
 }
 
-
 TEST_F (AddressFixture, Address0MinusEqual1) {
     auto addr = pstore::address::make (1U);
     addr -= 1;
@@ -221,9 +214,9 @@ TEST_F (AddressFixture, Address0MinusEqual1) {
 
 TEST_F (AddressFixture, AddressSegment1Minus1) {
     // {segment: 1 offset: 0} minus 1 equals {segment: 0, offset: max_offset}
-    auto const addr = pstore::address::make (1, 0);
+    constexpr auto addr = pstore::address::make (1, 0);
     pstore::address const actual = addr - 1;
-    auto const expected = pstore::address::make (0, max_offset);
+    auto const expected = pstore::address::make (0, pstore::address::max_offset);
     EXPECT_EQ (expected, actual);
 }
 
@@ -231,10 +224,9 @@ TEST_F (AddressFixture, AddressSegment1MinusEqual1) {
     // {segment: 1 offset: 0} minus 1 equals {segment: 0, offset: max_offset}
     auto actual = pstore::address::make (1, 0);
     actual -= 1;
-    auto const expected = pstore::address::make (0, max_offset);
+    auto const expected = pstore::address::make (0, pstore::address::max_offset);
     EXPECT_EQ (expected, actual);
 }
-
 
 TEST (TypedAddress, Decrement) {
     {
