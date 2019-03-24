@@ -127,36 +127,49 @@ namespace pstore {
 
         // read_headers
         // ~~~~~~~~~~~~
-        template <typename ReaderType, typename HandleFn>
-        error_or<std::pair<typename ReaderType::state_type, int>>
-        read_headers (ReaderType & reader, typename ReaderType::state_type io, HandleFn handler) {
-            using state_type = typename ReaderType::state_type;
-            return reader.gets (io) >>=
-                   [&reader, &handler](std::pair<state_type, maybe<std::string>> const & p) {
+        /// \tparam Reader  The buffered_reader<> type from which data is to be read.
+        /// \tparam HandleFn A function of the form `std::function<IO(IO, std::string const &,
+        /// std::string const &)>`. \tparam IO The type of the state object passed to handler().
+        /// \param reader  An instance of Reader: a buffered_reader<> from which data is read.
+        /// \param reader_state  The state passed to the reader's refill function.
+        /// \param handler  A function called for each HTTP header. It is passed a state value, the
+        /// key (lower-cased to ensure case insensitivity) and the associate value. \param
+        /// handler_state  The state passed to handler.
+        template <typename Reader, typename HandleFn, typename IO>
+        error_or<std::pair<typename Reader::state_type, IO>>
+        read_headers (Reader & reader, typename Reader::state_type reader_state, HandleFn handler,
+                      IO handler_state) {
+            return reader.gets (reader_state) >>=
+                   [&reader, &handler, &handler_state](
+                       std::pair<typename Reader::state_type, maybe<std::string>> const & p) {
                        auto const & ms = std::get<1> (p);
                        if (!ms || ms->length () == 0) {
-                           return error_or<std::pair<state_type, int>>{pstore::in_place,
-                                                                       std::get<0> (p), 0};
+                           return error_or<std::pair<typename Reader::state_type, IO>>{
+                               pstore::in_place, std::get<0> (p), handler_state};
                        }
 
                        std::string key;
                        std::string value;
                        auto pos = ms->find (':');
                        if (pos == std::string::npos) {
-                           key = *ms;
+                           value = *ms;
                        } else {
                            key = ms->substr (0, pos);
-                           // TODO: convert to lower-case to satisfy the requirement of
-                           // case-insensitivity?
+                           // HTTP header names are case-insensitive so convert to lower-case here.
+                           std::transform (key.begin (), key.end (), key.begin (), [](char c) {
+                               return static_cast<char> (std::tolower (c));
+                           });
+
                            ++pos; // skip the colon
-                           for (; pos < ms->length () && std::isspace ((*ms)[pos]); ++pos) {
+                           // skip optional whitespace before the value string.
+                           while (pos < ms->length () && std::isspace ((*ms)[pos])) {
+                               ++pos;
                            }
                            value = ms->substr (pos);
                        }
 
-                       handler (key, value);
-
-                       return read_headers (reader, std::get<0> (p), handler);
+                       return read_headers (reader, std::get<0> (p), handler,
+                                            handler (handler_state, key, value));
                    };
         }
 

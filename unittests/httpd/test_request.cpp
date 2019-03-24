@@ -58,6 +58,7 @@ using pstore::httpd::request_info;
 using testing::_;
 using testing::AnyNumber;
 using testing::Invoke;
+using testing::Return;
 
 TEST (Request, Empty) {
     refiller r;
@@ -100,11 +101,11 @@ namespace {
     class header_handler {
     public:
         virtual ~header_handler () noexcept = default;
-        virtual void call (std::string const & key, std::string const & value) const = 0;
+        virtual int call (int io, std::string const & key, std::string const & value) const = 0;
     };
     class mocked_header_handler : public header_handler {
     public:
-        MOCK_CONST_METHOD2 (call, void(std::string const &, std::string const &));
+        MOCK_CONST_METHOD3 (call, int(int, std::string const &, std::string const &));
     };
 
 } // end anonymous namespace
@@ -114,7 +115,7 @@ TEST (ReadHeaders, Common) {
     EXPECT_CALL (r, fill (_, _)).Times (AnyNumber ()).WillRepeatedly (Invoke (eof ()));
     EXPECT_CALL (r, fill (0, _))
         .Times (AnyNumber ())
-        .WillRepeatedly (Invoke (yield_string ("Host: localhost:8080\r\n"
+        .WillRepeatedly (Invoke (yield_string ("HOST: localhost:8080\r\n"
                                                "Accept-Encoding: gzip, deflate\r\n"
                                                "Referer: http://localhost:8080/\r\n"
                                                "\r\n")));
@@ -122,11 +123,16 @@ TEST (ReadHeaders, Common) {
     auto br = make_buffered_reader<int> (r.refill_function ());
 
     mocked_header_handler handler;
-    EXPECT_CALL (handler, call ("Host", "localhost:8080"));
-    EXPECT_CALL (handler, call ("Accept-Encoding", "gzip, deflate"));
-    EXPECT_CALL (handler, call ("Referer", "http://localhost:8080/"));
+    EXPECT_CALL (handler, call (0, "host", "localhost:8080")).WillOnce (Return (1));
+    EXPECT_CALL (handler, call (1, "accept-encoding", "gzip, deflate")).WillOnce (Return (2));
+    EXPECT_CALL (handler, call (2, "referer", "http://localhost:8080/")).WillOnce (Return (3));
     error_or<std::pair<int, int>> const res = pstore::httpd::read_headers (
-        br, 0, [&handler](std::string const & key, std::string const & value) {
-            handler.call (key, value);
-        });
+        br, 0,
+        [&handler](int io, std::string const & key, std::string const & value) {
+            return handler.call (io, key, value);
+        },
+        0);
+    ASSERT_FALSE (res.has_error ());
+    EXPECT_EQ (std::get<0> (res.get_value ()), 1) << "Reader state is incorrect";
+    EXPECT_EQ (std::get<1> (res.get_value ()), 3) << "Handler state is incorrect";
 }
