@@ -73,6 +73,10 @@
  */
 #include "pstore/httpd/sha1.hpp"
 
+#include <cctype>
+
+#include "pstore/support/array_elements.hpp"
+
 namespace pstore {
     namespace httpd {
 
@@ -254,6 +258,34 @@ namespace pstore {
             result += alphabet[(digest[19] & 0x0F) << 2U];
             result += '=';
             return result;
+        }
+
+
+
+        std::string source_key (std::string const & k) {
+            sha1 hash;
+
+            auto first = std::string::size_type{0};
+            auto const length = k.length ();
+            while (first < length && std::isspace (static_cast<unsigned char> (k[first]))) {
+                ++first;
+            }
+            auto last = length;
+            while (last > 0 && std::isspace (static_cast<unsigned char> (k[last - 1]))) {
+                --last;
+            }
+
+            hash.input (gsl::make_span (reinterpret_cast<std::uint8_t const *> (&k[first]),
+                                        reinterpret_cast<std::uint8_t const *> (&k[last])));
+
+            static char const magic[] = {'2', '5', '8', 'E', 'A', 'F', 'A', '5', '-',
+                                         'E', '9', '1', '4', '-', '4', '7', 'D', 'A',
+                                         '-', '9', '5', 'C', 'A', '-', 'C', '5', 'A',
+                                         'B', '0', 'D', 'C', '8', '5', 'B', '1', '1'};
+            hash.input (gsl::make_span (reinterpret_cast<std::uint8_t const *> (magic),
+                                        array_elements (magic)));
+
+            return sha1::digest_to_base64 (hash.result ());
         }
 
     } // end namespace httpd

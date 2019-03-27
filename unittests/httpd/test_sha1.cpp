@@ -115,3 +115,7 @@ TEST (Sha1, Test4) {
                               0xED, 0xC5, 0xEB, 0xB5, 0x63, 0x93, 0x4F, 0x46, 0x04, 0x52}}));
     EXPECT_EQ (pstore::httpd::sha1::digest_to_base64 (digest), "3qNWos3dkMen7O3F67Vjk09GBFI=");
 }
+
+TEST (Sha1, Handshake) {
+    EXPECT_EQ (pstore::httpd::source_key ("dGhlIHNhbXBsZSBub25jZQ=="), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+}

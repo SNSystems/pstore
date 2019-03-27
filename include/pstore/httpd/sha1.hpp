@@ -52,6 +52,7 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 
 #include "pstore/support/gsl.hpp"
 
@@ -70,7 +71,8 @@ namespace pstore {
 
             /// This function will return the 160-bit message digest.
             /// \note The first octet of hash is stored in the 0th element, the last octet of hash
-            /// in the 19th element. \returns The SHA1 hash digest.
+            /// in the 19th element.
+            /// \returns The SHA1 hash digest.
             result_type result () noexcept;
 
             static std::string digest_to_base64 (sha1::result_type const & digest);
@@ -86,12 +88,12 @@ namespace pstore {
             bool computed_ = false;  // Is the digest computed?
             bool corrupted_ = false; // Is the message digest corrupted?
 
-            /// Processes the next 512 bits of the message stored in the Message_Block array.
+            /// Processes the next 512 bits of the message stored in the message_block_ array.
             void process_message_block () noexcept;
 
-            /// According to the standard, the message must be padded to an even 512 bits.  The
-            /// first padding bit must be a '1'.  The last 64 bits represent the length of the
-            /// original message. All bits in between should be 0.  This function will pad the
+            /// According to the standard, the message must be padded to an even 512 bits. The
+            /// first padding bit must be a '1'. The last 64 bits represent the length of the
+            /// original message. All bits in between should be 0. This function will pad the
             /// message according to those rules by filling the message_block_ array accordingly. It
             /// will also call process_message_block(). When it returns, it can be assumed that the
             /// message digest has been computed.
@@ -107,6 +109,7 @@ namespace pstore {
                 {0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0}};
         };
 
+        std::string source_key (std::string const & k);
 
     } // end namespace httpd
 } // end namespace pstore
