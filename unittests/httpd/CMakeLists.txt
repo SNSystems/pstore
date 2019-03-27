@@ -50,6 +50,6 @@ add_pstore_unit_test (pstore-httpd-unit-tests
     test_media_type.cpp
     test_query_to_kvp.cpp
     test_request.cpp
-    test_sha1.cpp
+    test_wskey.cpp
 )
 target_link_libraries (pstore-httpd-unit-tests PRIVATE pstore-httpd-lib)

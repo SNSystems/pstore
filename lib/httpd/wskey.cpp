@@ -1,10 +1,10 @@
-//*      _           _  *
-//*  ___| |__   __ _/ | *
-//* / __| '_ \ / _` | | *
-//* \__ \ | | | (_| | | *
-//* |___/_| |_|\__,_|_| *
-//*                     *
-//===- lib/httpd/sha1.cpp -------------------------------------------------===//
+//*               _               *
+//* __      _____| | _____ _   _  *
+//* \ \ /\ / / __| |/ / _ \ | | | *
+//*  \ V  V /\__ \   <  __/ |_| | *
+//*   \_/\_/ |___/_|\_\___|\__, | *
+//*                        |___/  *
+//===- lib/httpd/wskey.cpp ------------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -71,7 +71,7 @@
  *      a multiple of the size of an 8-bit character.
  *
  */
-#include "pstore/httpd/sha1.hpp"
+#include "pstore/httpd/wskey.hpp"
 
 #include <cctype>
 

@@ -51,13 +51,13 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/request.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/sha1.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
 
     buffered_reader.cpp
     headers.cpp
     media_type.cpp
     server.cpp
-    sha1.cpp
+    wskey.cpp
 )
 target_link_libraries (pstore-httpd-lib PUBLIC pstore-broker-intf pstore-romfs pstore-support)
 add_clang_tidy_target (pstore-httpd-lib)

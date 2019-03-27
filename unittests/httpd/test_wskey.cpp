@@ -1,10 +1,10 @@
-//*      _           _  *
-//*  ___| |__   __ _/ | *
-//* / __| '_ \ / _` | | *
-//* \__ \ | | | (_| | | *
-//* |___/_| |_|\__,_|_| *
-//*                     *
-//===- unittests/httpd/test_sha1.cpp --------------------------------------===//
+//*               _               *
+//* __      _____| | _____ _   _  *
+//* \ \ /\ / / __| |/ / _ \ | | | *
+//*  \ V  V /\__ \   <  __/ |_| | *
+//*   \_/\_/ |___/_|\_\___|\__, | *
+//*                        |___/  *
+//===- unittests/httpd/test_wskey.cpp -------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/httpd/sha1.hpp"
+#include "pstore/httpd/wskey.hpp"
 
 #include <gmock/gmock.h>
 
@@ -117,5 +117,6 @@ TEST (Sha1, Test4) {
 }
 
 TEST (Sha1, Handshake) {
-    EXPECT_EQ (pstore::httpd::source_key ("dGhlIHNhbXBsZSBub25jZQ=="), "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
+    EXPECT_EQ (pstore::httpd::source_key ("dGhlIHNhbXBsZSBub25jZQ=="),
+               "s3pPLMBiTxaQ9kYGzzhZRbK+xOo=");
 }
