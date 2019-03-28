@@ -190,6 +190,14 @@ namespace pstore {
         //* | | ' \  | '  \/ -_) '  \/ _ \ '_| || | *
         //* |_|_||_| |_|_|_\___|_|_|_\___/_|  \_, | *
         //*                                   |__/  *
+        // path
+        // ~~~~
+        std::string in_memory::path () const {
+            // In-memory files obviously don't have a path, so it's hard to know quite what to
+            // return!
+            return ":in-memory:";
+        }
+
         // check_writable
         // ~~~~~~~~~~~~~~
         void in_memory::check_writable () const {

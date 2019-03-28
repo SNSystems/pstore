@@ -535,12 +535,7 @@ namespace pstore {
             void close () override {}
             bool is_open () const noexcept override { return true; }
             bool is_writable () const noexcept override { return writable_; }
-            std::string path () const override {
-                // In-memory files obviously don't have a path, so it's hard to know quite what to
-                // return!
-                // TODO: should I add the buffer pointer and length to uniquely identify the "file"?
-                return ":in-memory:";
-            }
+            std::string path () const override;
 
             void seek (std::uint64_t position) override;
             std::uint64_t tell () override { return pos_; }
