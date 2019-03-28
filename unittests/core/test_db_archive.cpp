@@ -221,8 +221,8 @@ namespace {
     protected:
         class mock_database : public pstore::database {
         public:
-            mock_database (std::shared_ptr<pstore::file::in_memory> const & file)
-                    : pstore::database (file) {
+            explicit mock_database (std::shared_ptr<pstore::file::in_memory> file)
+                    : pstore::database (std::move (file)) {
 
                 this->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
             }
