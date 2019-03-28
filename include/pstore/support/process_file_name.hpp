@@ -117,7 +117,7 @@ namespace pstore {
             static_assert (std::is_same<typename SpanType::element_type, int>::value,
                            "mib must be a span of integers");
 
-            auto read_link = [&](::pstore::gsl::span<char> b) -> std::size_t {
+            auto read_link = [&mib, &ctl](::pstore::gsl::span<char> b) {
                 assert (b.size () >= 0);
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;
@@ -130,7 +130,7 @@ namespace pstore {
                     raise (errno_erc{errno}, "sysctl(CTL_KERN/KERN_PROC/KERN_PROC_PATHNAME)");
                 }
                 // Subtract 1 to ignore the terminating null character.
-                return std::max (std::size_t{1}, length) - 1U;
+                return std::max (std::size_t{1}, length) - std::size_t{1};
             };
             return pstore::process_file_name (read_link, buffer);
         }
