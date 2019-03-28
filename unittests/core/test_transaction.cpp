@@ -395,8 +395,6 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
             << "Did not find r1 footer signature1";
         EXPECT_EQ (1U, r1_footer->a.generation) << "r1 footer generation number must be 1";
         EXPECT_EQ (4194304U, r1_footer->a.size);
-        // EXPECT_EQ (pstore::address (sizeof (pstore::header)), r1footer->prev_generation) << "r1
-        // previous pointer must point to r0 footer";
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (r1_footer->signature2))
             << "Did not find r1 footer signature2";
