@@ -156,7 +156,7 @@ namespace pstore {
                 // Deleter will ensure that the string is destroyed on exit if an exception is
                 // raised here.
                 auto dtor = [](value_type * p) {
-                    using namespace std;
+                    using string = std::string;
                     p->~string ();
                 };
                 std::unique_ptr<value_type, decltype (dtor)> deleter (&str, dtor);
