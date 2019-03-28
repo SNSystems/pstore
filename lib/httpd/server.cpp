@@ -136,23 +136,23 @@ namespace {
     void cerror (socket_descriptor const & socket, char const * cause, char const * error_no,
                  char const * shortmsg, char const * longmsg) {
         std::ostringstream os;
-        os << "HTTP/1.1 " << error_no << ' ' << shortmsg
-           << "\n"
-              "Content-type: text/html\n"
-              "\n"
-              "<html>\n"
-              "<head><title>pstore-httpd Error</title></head>\n"
-              "<body>\n"
-              "<h1>pstore-httpd Web Server Error</h1>\n"
+        os << "HTTP/1.1 " << error_no << ' ' << shortmsg << "\r\n"
+           << "Content-type: text/html\r\n"
+              "\r\n";
+
+        os << "<html>"
+              "<head><title>pstore-httpd Error</title></head>"
+              "<body>"
+              "<h1>pstore-httpd Web Server Error</h1>"
               "<p>"
            << error_no << ": " << shortmsg
-           << "</p>\n"
+           << "</p>"
               "<p>"
            << longmsg << ": " << cause
-           << "</p>\n"
-              "<hr><em>The pstore-httpd Web server</em>\n"
-              "</body>\n"
-              "</html>\n";
+           << "</p>"
+              "<hr><em>The pstore-httpd Web server</em>"
+              "</body>"
+              "</html>";
         send (socket, os);
     }
 
@@ -217,7 +217,7 @@ namespace {
 
 
     pstore::error_or<std::string> get_client_name (sockaddr_in const & client_addr) {
-        std::array<char, 64> host_name {{'\0'}};
+        std::array<char, 64> host_name{{'\0'}};
         constexpr std::size_t size = host_name.size ();
 #ifdef _WIN32
         using size_type = DWORD;
@@ -235,7 +235,6 @@ namespace {
     }
 
 
-
     void serve_static_content (socket_descriptor & childfd, std::string const & path,
                                pstore::romfs::romfs & file_system) {
         pstore::error_or<struct pstore::romfs::stat> sbuf = file_system.stat (path.c_str ());
@@ -248,9 +247,9 @@ namespace {
         {
             // Send the response header.
             std::ostringstream os;
-            os << "HTTP/1.1 200 OK\nServer: pstore-httpd\n";
-            os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << '\n';
-            os << "Content-type: " << pstore::httpd::media_type_from_filename (path) << '\n';
+            os << "HTTP/1.1 200 OK\nServer: pstore-httpd\r\n";
+            os << "Content-length: " << static_cast<unsigned> (sbuf->st_size) << "\r\n";
+            os << "Content-type: " << pstore::httpd::media_type_from_filename (path) << "\r\n";
             os << "\r\n";
             send (childfd, os.str ());
         }
@@ -267,7 +266,8 @@ namespace {
         }
     }
 
-    /// Producesj a 16 digit random hex number. This is sent along with a GET of /cmd/quit to
+
+    /// Produces a 16 digit random hex number. This is sent along with a GET of /cmd/quit to
     /// dissuade the status server from trivially shutdown by a client.
     std::string make_quit_magic () {
         std::string resl;
@@ -284,6 +284,7 @@ namespace {
         return resl;
     }
 
+
     // Returns true if the string \p s starts with the given prefix.
     bool starts_with (std::string const & s, std::string const & prefix) {
         std::string::size_type pos = 0;
@@ -295,59 +296,135 @@ namespace {
 
 
 
-        std::string get_quit_magic () {
-            static std::string const quit_magic = make_quit_magic ();
-            return quit_magic;
+    std::string get_quit_magic () {
+        static std::string const quit_magic = make_quit_magic ();
+        return quit_magic;
+    }
+
+    struct server_state {
+        bool done = false;
+    };
+    using error_or_server_state = pstore::error_or<server_state>;
+    using query_container = std::unordered_map<std::string, std::string>;
+
+
+
+    error_or_server_state handle_quit (server_state state, socket_descriptor const & childfd,
+                                       query_container const & query) {
+        auto const pos = query.find ("magic");
+        if (pos != std::end (query) && pos->second == get_quit_magic ()) {
+            state.done = true;
+
+            char quit_message[] = "Quitting";
+            std::ostringstream os;
+            os << "HTTP/1.1 200 OK\nServer: pstore-httpd\r\n";
+            os << "Content-length: " << pstore::array_elements (quit_message) - 1U << "\r\n";
+            os << "Content-type: text/plain\r\n";
+            os << "\r\n";
+            send (childfd, quit_message);
+        } else {
+            cerror (childfd, "Bad request", "501", "bad request", "That was a bad request");
         }
-
-        struct server_state {
-            bool done = false;
-        };
-        using error_or_server_state = pstore::error_or<server_state>;
-        using query_container = std::unordered_map<std::string, std::string>;
+        return error_or_server_state{pstore::in_place, state};
+    }
 
 
 
-        error_or_server_state handle_quit (server_state state, socket_descriptor const & childfd,
-                                           query_container const & query) {
-            auto const pos = query.find ("magic");
-            if (pos != std::end (query) && pos->second == get_quit_magic ()) {
-                state.done = true;
-            } else {
-                cerror (childfd, "Bad request", "501", "bad request", "That was a bad request");
-            }
-            return error_or_server_state{pstore::in_place, state};
+    using commands_container =
+        std::unordered_map<std::string, std::function<error_or_server_state (
+                                            server_state, socket_descriptor const & childfd,
+                                            query_container const &)>>;
+
+    commands_container const & get_commands () {
+        static commands_container const commands = {{"quit", handle_quit}};
+        return commands;
+    }
+
+
+    template <typename T>
+    auto clamp_to_signed_max (T v) noexcept -> typename std::make_signed<T>::type {
+        using st = typename std::make_signed<T>::type;
+        constexpr auto maxs = std::numeric_limits<st>::max ();
+        PSTORE_STATIC_ASSERT (maxs >= 0);
+        return static_cast<st> (std::min (static_cast<T> (maxs), v));
+    }
+
+
+    static char const dynamic_path[] = "/cmd/";
+
+    pstore::error_or<server_state>
+    serve_dynamic_content (std::string uri, socket_descriptor & childfd, server_state state) {
+        assert (starts_with (uri, dynamic_path));
+        uri.erase (std::begin (uri), std::begin (uri) + pstore::array_elements (dynamic_path) - 1U);
+
+        auto const pos = uri.find ('?');
+        auto const command = uri.substr (0, pos);
+        auto it = pos != std::string::npos ? std::begin (uri) + clamp_to_signed_max (pos + 1)
+                                           : std::end (uri);
+        query_container arguments;
+        if (it != std::end (uri)) {
+            it = query_to_kvp (it, std::end (uri), pstore::httpd::make_insert_iterator (arguments));
         }
-
-
-
-        using commands_container =
-            std::unordered_map<std::string, std::function<error_or_server_state (
-                                                server_state, socket_descriptor const & childfd,
-                                                query_container const &)>>;
-
-        commands_container const & get_commands () {
-            static commands_container const commands = {{"quit", handle_quit}};
-            return commands;
+        auto const & commands = get_commands ();
+        auto command_it = commands.find (uri.substr (0, pos));
+        if (command_it == std::end (commands)) {
+            // TODO: return an error
+        } else {
+            error_or_server_state e_state = command_it->second (state, childfd, arguments);
+            // TODO: if an error is returned, report it to the client.
+            state = e_state.get_value ();
         }
+        return pstore::error_or<server_state>{state};
+    }
 
-
-        template <typename T>
-        auto clamp_to_signed_max (T v) noexcept -> typename std::make_signed<T>::type {
-            using st = typename std::make_signed<T>::type;
-            constexpr auto maxs = std::numeric_limits<st>::max ();
-            PSTORE_STATIC_ASSERT (maxs >= 0);
-            return static_cast<st> (std::min (static_cast<T> (maxs), v));
-        }
 } // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
 
+        void quit (in_port_t port_number) {
+            socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
+            if (!fd.valid ()) {
+                log (logging::priority::error, "Could not open socket ",
+                     get_last_error ().message ());
+                return;
+            }
+
+            struct sockaddr_in sock_addr {};
+            sock_addr.sin_port = htons (port_number); // NOLINT
+            sock_addr.sin_family = AF_INET;
+            sock_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK); // NOLINT
+
+            log (logging::priority::info, "Connecting");
+
+            if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&sock_addr),
+                           sizeof (sock_addr)) != 0) {
+                log (logging::priority::error, "Could not connect to localhost");
+                return;
+            }
+
+            log (logging::priority::info, "Connected");
+
+            std::ostringstream str;
+            str << "GET /cmd/quit?magic=" << get_quit_magic () << " HTTP1.1\r\n";
+            str << "Host: localhost:" << port_number << "\r\n";
+            str << "Connection: close\r\n";
+            str << "\r\n";
+            std::string const & req = str.str ();
+            ::send (fd.get (), req.c_str (), req.size (), 0);
+
+            std::array<char, 1024> buffer;
+            int nlen = 0;
+
+            std::string response;
+            while ((nlen = recv (fd.get (), buffer.data (), buffer.size (), 0)) > 0) {
+                response.append (buffer.data (), 0, nlen);
+            }
+            log (logging::priority::info, "Response: ", response);
+        }
+
 
         int server (in_port_t port_number, romfs::romfs & file_system) {
-            logging::create_log_stream ("httpd");
-
             log (logging::priority::info, "initializing");
             pstore::error_or<socket_descriptor> eparentfd = initialize_socket (port_number);
             if (eparentfd.has_error ()) {
@@ -363,7 +440,7 @@ namespace pstore {
                 static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
             log (logging::priority::info, "starting server-loop");
 
-            server_state state;
+            server_state state{};
             while (!state.done) {
 
                 // Wait for a connection request.
@@ -422,7 +499,6 @@ namespace pstore {
                     log (logging::priority::info, "WebSocket upgrade requested");
                 }
 
-                static char const dynamic_path[] = "/cmd/";
                 if (!starts_with (request.uri (), dynamic_path)) {
                     std::string filename = ".";
                     filename += request.uri ();
@@ -430,31 +506,10 @@ namespace pstore {
                         filename += "index.html";
                     }
                     serve_static_content (childfd, filename, file_system);
-                    continue;
-                }
-
-                // Serve dynamic content.
-                std::string uri = request.uri ();
-                assert (starts_with (uri, dynamic_path));
-                uri.erase (std::begin (uri), std::begin (uri) + array_elements (dynamic_path) - 1U);
-
-                auto const pos = uri.find ('?');
-                auto const command = uri.substr (0, pos);
-                auto it = pos != std::string::npos
-                              ? std::begin (uri) + clamp_to_signed_max (pos + 1)
-                              : std::end (uri);
-                query_container arguments;
-                if (it != std::end (uri)) {
-                    it = query_to_kvp (it, std::end (uri), make_insert_iterator (arguments));
-                }
-                auto const & commands = get_commands ();
-                auto command_it = commands.find (uri.substr (0, pos));
-                if (command_it == std::end (commands)) {
-                    // return an error
                 } else {
-                    error_or_server_state e_state = command_it->second (state, childfd, arguments);
-                    // TODO: if an error is returned, report it to the client.
-                    state = e_state.get_value ();
+                    pstore::error_or<server_state> eo_state =
+                        serve_dynamic_content (request.uri (), childfd, state);
+                    state = eo_state.get_value ();
                 }
             }
 

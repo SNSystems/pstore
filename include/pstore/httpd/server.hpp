@@ -57,6 +57,7 @@ namespace pstore {
     namespace httpd {
 
         int server (in_port_t port_number, romfs::romfs & file_system);
+        void quit (in_port_t port_number = 8080);
 
     } // end namespace httpd
 } // end namespace pstore
