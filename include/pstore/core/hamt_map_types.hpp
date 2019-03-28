@@ -182,46 +182,46 @@ namespace pstore {
                 bool operator== (index_pointer const & other) const { return addr == other.addr; }
                 bool operator!= (index_pointer const & other) const { return !operator== (other); }
 
-                operator bool () const { return !this->is_empty (); }
+                explicit operator bool () const noexcept { return !this->is_empty (); }
 
                 /// Returns true if the index_pointer is pointing to an internal node, false
                 /// otherwise.
                 /// \sa is_leaf
-                bool is_internal () const {
+                bool is_internal () const noexcept {
                     return (reinterpret_cast<std::uintptr_t> (internal) & internal_node_bit) != 0;
                 }
 
                 /// Returns true if the index_pointer is pointing to a linear node, false otherwise.
                 /// \sa is_leaf
-                bool is_linear () const { return is_internal (); }
+                bool is_linear () const noexcept { return is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a value address in the store,
                 /// false otherwise.
                 /// \sa is_internal
-                bool is_leaf () const { return !is_internal (); }
+                bool is_leaf () const noexcept { return !is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a heap node, false otherwise.
                 /// \sa is_addr
-                bool is_heap () const {
+                bool is_heap () const noexcept {
                     return (reinterpret_cast<std::uintptr_t> (internal) & heap_node_bit) != 0;
                 }
 
                 /// Returns true if the index_pointer is pointing to a store node, false otherwise.
                 /// \sa is_heap
-                bool is_address () const { return !is_heap (); }
+                bool is_address () const noexcept { return !is_heap (); }
 
-                bool is_empty () const { return internal == nullptr; }
+                bool is_empty () const noexcept { return internal == nullptr; }
                 template <typename T>
-                T tag_node () const {
+                T tag_node () const noexcept {
                     return reinterpret_cast<T> (tag ());
                 }
 
                 template <typename T>
-                T untag_node () const {
+                T untag_node () const noexcept {
                     return reinterpret_cast<T> (untag ());
                 }
 
-                address untag_internal_address () const {
+                address untag_internal_address () const noexcept {
                     return address::make (addr.absolute () & ~internal_node_bit);
                 }
 
@@ -230,19 +230,19 @@ namespace pstore {
                 linear_node * linear;
 
             private:
-                static std::uintptr_t tag (void * p) {
+                static std::uintptr_t tag (void * p) noexcept {
                     return reinterpret_cast<std::uintptr_t> (p) | internal_node_bit | heap_node_bit;
                 }
-                static internal_node * tag_node (internal_node * p) {
+                static internal_node * tag_node (internal_node * p) noexcept {
                     return reinterpret_cast<internal_node *> (tag (p));
                 }
-                static linear_node * tag_node (linear_node * p) {
+                static linear_node * tag_node (linear_node * p) noexcept {
                     return reinterpret_cast<linear_node *> (tag (p));
                 }
 
-                std::uintptr_t tag () const { return tag (internal); }
+                std::uintptr_t tag () const noexcept { return tag (internal); }
 
-                std::uintptr_t untag () const {
+                std::uintptr_t untag () const noexcept {
                     return reinterpret_cast<std::uintptr_t> (internal) & ~internal_node_bit &
                            ~heap_node_bit;
                 }
