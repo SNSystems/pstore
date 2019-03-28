@@ -42,9 +42,13 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
+#include <chrono>
 #include <iostream>
+#include <thread>
+
 #include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/httpd/server.hpp"
+#include "pstore/support/logging.hpp"
 #include "pstore/romfs/romfs.hpp"
 
 extern pstore::romfs::romfs fs;
@@ -60,7 +64,11 @@ int main (int, const char *[]) {
     }
 #endif // _WIN32
 
-    PSTORE_TRY { pstore::httpd::server (8080 /*port number*/, fs); }
+    PSTORE_TRY {
+        in_port_t const port_number = 8080;
+        pstore::logging::create_log_stream ("server");
+        pstore::httpd::server (port_number, fs);
+    }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';
