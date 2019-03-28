@@ -98,7 +98,8 @@ option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and foote
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
 
-option (PSTORE_ENABLE_BROKER_TESTS "Run broker system tests. Disable if the compiler does not support exceptions." Yes)
+# FIXME: PSTORE_ENABLE_BROKER is only implemented to enable testing with the early prepo compiler that doesn't yet support exceptions.
+option (PSTORE_ENABLE_BROKER "Build broker related libraries and tools and run broker system tests. Disable if the compiler does not support exceptions." Yes)
 option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")
 option (PSTORE_DISABLE_UINT128_T "Disable support for __uint128_t")
@@ -213,7 +214,7 @@ if (PSTORE_EXAMPLES)
     list (APPEND LIT_PARAMS --param examples)
 endif ()
 # Add the broker system tests to the collection of tests.
-if (PSTORE_ENABLE_BROKER_TESTS)
+if (PSTORE_ENABLE_BROKER)
     list (APPEND LIT_PARAMS --param broker)
 endif ()
 
@@ -225,17 +226,32 @@ add_custom_target (pstore-system-tests
     VERBATIM
 )
 set_target_properties (pstore-system-tests PROPERTIES FOLDER "pstore tests")
-add_dependencies (pstore-system-tests
-    pstore-broker-poker
-    pstore-brokerd
-    pstore-dump
-    pstore-hamt-test
-    pstore-mangle
-    pstore-read
-    pstore-sieve
-    pstore-vacuumd
-    pstore-write
-)
+
+if (PSTORE_ENABLE_BROKER)
+    add_dependencies (pstore-system-tests
+        pstore-broker-poker
+        pstore-brokerd
+        pstore-dump
+        pstore-hamt-test
+        pstore-mangle
+        pstore-read
+        pstore-sieve
+        pstore-vacuumd
+        pstore-write
+    )
+else ()
+    add_dependencies (pstore-system-tests
+        pstore-broker-poker
+        pstore-dump
+        pstore-hamt-test
+        pstore-mangle
+        pstore-read
+        pstore-sieve
+        pstore-vacuumd
+        pstore-write
+    )
+endif ()
+
 if (PSTORE_EXAMPLES)
    set_target_properties (pstore-examples PROPERTIES FOLDER "pstore examples")
    set_target_properties (pstore-examples-serialize PROPERTIES FOLDER "pstore examples")

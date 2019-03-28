@@ -42,16 +42,21 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-include (add_pstore)
-add_pstore_unit_test (pstore-broker-unit-tests
-    test_bimap.cpp
-    test_command.cpp
-    test_intrusive_list.cpp
-    test_parser.cpp
-    test_spawn.cpp
-)
+if (NOT PSTORE_ENABLE_BROKER)
+    message (STATUS "pstore broker unittests is excluded (PSTORE_ENABLE_BROKER)")
+else ()
 
-# Access the library's private include directory.
-target_include_directories (pstore-broker-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/pstore")
+    include (add_pstore)
+    add_pstore_unit_test (pstore-broker-unit-tests
+        test_bimap.cpp
+        test_command.cpp
+        test_intrusive_list.cpp
+        test_parser.cpp
+        test_spawn.cpp
+    )
 
-target_link_libraries (pstore-broker-unit-tests PRIVATE pstore-broker)
+    # Access the library's private include directory.
+    target_include_directories (pstore-broker-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/pstore")
+
+    target_link_libraries (pstore-broker-unit-tests PRIVATE pstore-broker)
+endif ()

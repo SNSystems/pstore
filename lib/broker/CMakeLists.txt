@@ -42,60 +42,66 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore")
-
-set (PSTORE_BROKER_LIB_SRC
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/command.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/gc.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/globals.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/intrusive_list.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_pool.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_queue.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/parser.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/pointer_compare.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/quit.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/read_loop.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/recorder.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/scavenger.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/spawn.hpp"
-    "${BROKER_PUBLIC_INCLUDES_DIR}/broker/status_server.hpp"
-
-    command.cpp
-    gc_common.cpp
-    gc_posix.cpp
-    gc_win32.cpp
-    globals.cpp
-    message_pool.cpp
-    parser.cpp
-    quit.cpp
-    read_loop_posix.cpp
-    read_loop_win32.cpp
-    recorder.cpp
-    scavenger.cpp
-    spawn_posix.cpp
-    spawn_win32.cpp
-    status_server.cpp
-)
-
-include (add_pstore)
-if (PSTORE_IS_INSIDE_LLVM)
-    set (LLVM_REQUIRES_EH Yes)
-    set (LLVM_REQUIRES_RTTI Yes)
-    add_pstore_library (pstore-broker STATIC ${PSTORE_BROKER_LIB_SRC})
-    target_link_libraries (pstore-broker PUBLIC
-        pstore-broker-intf-ex
-        pstore-json-lib-ex
-        pstore-support-ex
-    )
-    set (LLVM_REQUIRES_EH No)
-    set (LLVM_REQUIRES_RTTI No)
+if (NOT PSTORE_ENABLE_BROKER)
+    message (STATUS "pstore broker library is excluded (PSTORE_ENABLE_BROKER)")
 else ()
-    add_pstore_library (pstore-broker ${PSTORE_BROKER_LIB_SRC})
-    target_link_libraries (pstore-broker PUBLIC
-        pstore-broker-intf
-        pstore-httpd-lib
-        pstore-json-lib
-        pstore-support
+
+    set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore")
+
+    set (PSTORE_BROKER_LIB_SRC
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/command.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/gc.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/globals.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/intrusive_list.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_pool.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_queue.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/parser.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/pointer_compare.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/quit.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/read_loop.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/recorder.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/scavenger.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/spawn.hpp"
+        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/status_server.hpp"
+
+        command.cpp
+        gc_common.cpp
+        gc_posix.cpp
+        gc_win32.cpp
+        globals.cpp
+        message_pool.cpp
+        parser.cpp
+        quit.cpp
+        read_loop_posix.cpp
+        read_loop_win32.cpp
+        recorder.cpp
+        scavenger.cpp
+        spawn_posix.cpp
+        spawn_win32.cpp
+        status_server.cpp
     )
-endif (PSTORE_IS_INSIDE_LLVM)
+
+    include (add_pstore)
+    if (PSTORE_IS_INSIDE_LLVM)
+        set (LLVM_REQUIRES_EH Yes)
+        set (LLVM_REQUIRES_RTTI Yes)
+        add_pstore_library (pstore-broker STATIC ${PSTORE_BROKER_LIB_SRC})
+        target_link_libraries (pstore-broker PUBLIC
+            pstore-broker-intf-ex
+            pstore-json-lib-ex
+            pstore-support-ex
+        )
+        set (LLVM_REQUIRES_EH No)
+        set (LLVM_REQUIRES_RTTI No)
+    else ()
+        add_pstore_library (pstore-broker ${PSTORE_BROKER_LIB_SRC})
+        target_link_libraries (pstore-broker PUBLIC
+            pstore-broker-intf
+            pstore-httpd-lib
+            pstore-json-lib
+            pstore-support
+        )
+    endif (PSTORE_IS_INSIDE_LLVM)
+
+endif (NOT PSTORE_ENABLE_BROKER)

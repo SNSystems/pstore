@@ -42,40 +42,46 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-include (add_pstore)
-include (clang_tidy)
-
-###########################
-# pstore-brokerd Executable
-###########################
-
-if (PSTORE_IS_INSIDE_LLVM)
-    set (LLVM_REQUIRES_EH Yes)
-    set (LLVM_REQUIRES_RTTI Yes)
-endif ()
-add_pstore_tool (pstore-brokerd
-    main.cpp
-    switches.hpp
-    switches.cpp
-)
-if (PSTORE_IS_INSIDE_LLVM)
-    set (LLVM_REQUIRES_EH No)
-    set (LLVM_REQUIRES_RTTI No)
-endif ()
-
-if (PSTORE_IS_INSIDE_LLVM)
-target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex pstore-broker)
+if (NOT PSTORE_ENABLE_BROKER)
+    message (STATUS "pstore broker tool is excluded (PSTORE_ENABLE_BROKER)")
 else ()
-target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util pstore-broker)
-endif ()
 
-add_clang_tidy_target (pstore-broker)
-run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
+    include (add_pstore)
+    include (clang_tidy)
+
+    ###########################
+    # pstore-brokerd Executable
+    ###########################
+
+    if (PSTORE_IS_INSIDE_LLVM)
+        set (LLVM_REQUIRES_EH Yes)
+        set (LLVM_REQUIRES_RTTI Yes)
+    endif ()
+    add_pstore_tool (pstore-brokerd
+        main.cpp
+        switches.hpp
+        switches.cpp
+    )
+    if (PSTORE_IS_INSIDE_LLVM)
+        set (LLVM_REQUIRES_EH No)
+        set (LLVM_REQUIRES_RTTI No)
+    endif ()
+
+    if (PSTORE_IS_INSIDE_LLVM)
+        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex pstore-broker)
+    else ()
+        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util pstore-broker)
+    endif ()
+
+    add_clang_tidy_target (pstore-broker)
+    run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
 
 
-#######################
-# pstore_broker_service
-#######################
-if (WIN32)
-    add_subdirectory (service)
+    #######################
+    # pstore_broker_service
+    #######################
+    if (WIN32)
+        add_subdirectory (service)
+    endif ()
+
 endif ()
