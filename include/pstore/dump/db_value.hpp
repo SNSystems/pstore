@@ -80,6 +80,7 @@ namespace pstore {
         inline value_ptr make_value (pstore::address addr) {
             return std::static_pointer_cast<value> (std::make_shared<address> (addr));
         }
+
         template <typename T>
         inline value_ptr make_value (pstore::typed_address<T> addr) {
             return make_value (addr.to_address ());
@@ -103,7 +104,7 @@ namespace pstore {
                 {"size", make_value (ex.size)},
             });
             v->compact ();
-            return v;
+            return std::static_pointer_cast<value> (v);
         }
 
         namespace details {

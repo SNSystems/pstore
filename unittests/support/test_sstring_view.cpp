@@ -70,7 +70,7 @@ namespace {
                 std::shared_ptr<char> (new char[str.length ()], [](char * p) { delete[] p; });
             auto ptr = const_cast<typename std::remove_const<CharType>::type *> (result.get ());
             std::copy (std::begin (str), std::end (str), ptr);
-            return result;
+            return std::static_pointer_cast<CharType> (result);
         }
     };
 

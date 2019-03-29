@@ -76,7 +76,7 @@ namespace pstore {
                 {"addend", make_value (ifx.addend)},
             });
             v->compact ();
-            return v;
+            return std::static_pointer_cast<value> (v);
         }
 
         value_ptr make_value (database const & db, repo::external_fixup const & xfx) {
