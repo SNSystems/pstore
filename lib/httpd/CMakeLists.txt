@@ -48,14 +48,19 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/headers.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/media_type.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/net_txrx.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/quit.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/request.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_static_content.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
 
     buffered_reader.cpp
     headers.cpp
     media_type.cpp
+    net_txrx.cpp
+    quit.cpp
     server.cpp
     wskey.cpp
 )

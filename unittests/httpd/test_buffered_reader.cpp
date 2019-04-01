@@ -68,17 +68,17 @@ TEST (HttpdBufferedReader, GetcThenEOF) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         getc_result_type const c1 = br.getc (io);
-        ASSERT_FALSE (c1.has_error ());
+        ASSERT_TRUE (static_cast<bool> (c1));
         maybe<char> char1;
-        std::tie (io, char1) = c1.get_value ();
+        std::tie (io, char1) = *c1;
         ASSERT_TRUE (char1.has_value ());
         EXPECT_EQ (char1.value (), 'a');
     }
     {
         getc_result_type const c2 = br.getc (io);
-        ASSERT_FALSE (c2.has_error ());
+        ASSERT_TRUE (static_cast<bool> (c2));
         maybe<char> char2;
-        std::tie (io, char2) = c2.get_value ();
+        std::tie (io, char2) = *c2;
         ASSERT_FALSE (char2.has_value ());
     }
 }
@@ -92,25 +92,25 @@ TEST (HttpdBufferedReader, GetTwoStringsLFThenEOF) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         gets_result_type const s1 = br.gets (io);
-        ASSERT_FALSE (s1.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s1));
         maybe<std::string> str1;
-        std::tie (io, str1) = s1.get_value ();
+        std::tie (io, str1) = *s1;
         ASSERT_TRUE (str1.has_value ());
         EXPECT_EQ (str1.value (), "abc");
     }
     {
         gets_result_type const s2 = br.gets (io);
-        ASSERT_FALSE (s2.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s2));
         maybe<std::string> str2;
-        std::tie (io, str2) = s2.get_value ();
+        std::tie (io, str2) = *s2;
         ASSERT_TRUE (str2.has_value ());
         EXPECT_EQ (str2.value (), "def");
     }
     {
         gets_result_type const s3 = br.gets (io);
-        ASSERT_FALSE (s3.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s3));
         maybe<std::string> str3;
-        std::tie (io, str3) = s3.get_value ();
+        std::tie (io, str3) = *s3;
         ASSERT_FALSE (str3.has_value ());
     }
 }
@@ -124,25 +124,28 @@ TEST (HttpdBufferedReader, StringCRLF) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         gets_result_type const s1 = br.gets (io);
-        ASSERT_FALSE (s1.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s1))
+            << "There was an unexpected error: " << s1.get_error ();
         maybe<std::string> str1;
-        std::tie (io, str1) = s1.get_value ();
+        std::tie (io, str1) = *s1;
         ASSERT_TRUE (str1.has_value ());
         EXPECT_EQ (str1.value (), "abc");
     }
     {
         gets_result_type const s2 = br.gets (io);
-        ASSERT_FALSE (s2.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s2))
+            << "There was an unexpected error: " << s2.get_error ();
         maybe<std::string> str2;
-        std::tie (io, str2) = s2.get_value ();
+        std::tie (io, str2) = *s2;
         ASSERT_TRUE (str2.has_value ());
         EXPECT_EQ (str2.value (), "def");
     }
     {
         gets_result_type const s3 = br.gets (io);
-        ASSERT_FALSE (s3.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s3))
+            << "There was an unexpected error: " << s3.get_error ();
         maybe<std::string> str3;
-        std::tie (io, str3) = s3.get_value ();
+        std::tie (io, str3) = *s3;
         ASSERT_FALSE (str3.has_value ());
     }
 }
@@ -156,17 +159,19 @@ TEST (HttpdBufferedReader, StringCRNoLFThenEOF) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         gets_result_type const s1 = br.gets (io);
-        ASSERT_FALSE (s1.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s1))
+            << "There was an unexpected error: " << s1.get_error ();
         maybe<std::string> str1;
-        std::tie (io, str1) = s1.get_value ();
+        std::tie (io, str1) = *s1;
         ASSERT_TRUE (str1.has_value ());
         EXPECT_EQ (str1.value (), "abc");
     }
     {
         gets_result_type const s2 = br.gets (io);
-        ASSERT_FALSE (s2.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s2))
+            << "There was an unexpected error: " << s2.get_error ();
         maybe<std::string> str2;
-        std::tie (io, str2) = s2.get_value ();
+        std::tie (io, str2) = *s2;
         ASSERT_FALSE (str2.has_value ());
     }
 }
@@ -180,17 +185,19 @@ TEST (HttpdBufferedReader, StringCRNoLFChars) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         gets_result_type const s1 = br.gets (io);
-        ASSERT_FALSE (s1.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s1))
+            << "There was an unexpected error: " << s1.get_error ();
         maybe<std::string> str1;
-        std::tie (io, str1) = s1.get_value ();
+        std::tie (io, str1) = *s1;
         ASSERT_TRUE (str1.has_value ());
         EXPECT_EQ (str1.value (), "abc");
     }
     {
         gets_result_type const s2 = br.gets (io);
-        ASSERT_FALSE (s2.has_error ());
+        ASSERT_TRUE (static_cast<bool> (s2))
+            << "There was an unexpected error: " << s2.get_error ();
         maybe<std::string> str2;
-        std::tie (io, str2) = s2.get_value ();
+        std::tie (io, str2) = *s2;
         ASSERT_TRUE (str2.has_value ());
         EXPECT_EQ (str2.value (), "def");
     }
@@ -207,15 +214,15 @@ TEST (HttpdBufferedReader, SomeCharactersThenAnError) {
     auto br = make_buffered_reader<int> (r.refill_function ());
     {
         gets_result_type const s1 = br.gets (io);
-        ASSERT_FALSE (s1.has_error ()) << "Error: " << s1.get_error ();
+        ASSERT_TRUE (static_cast<bool> (s1)) << "Error: " << s1.get_error ();
         maybe<std::string> str1;
-        std::tie (io, str1) = s1.get_value ();
+        std::tie (io, str1) = *s1;
         ASSERT_TRUE (str1.has_value ());
         EXPECT_EQ (str1.value (), "abc");
     }
     {
         gets_result_type const s2 = br.gets (io);
-        ASSERT_TRUE (s2.has_error ());
+        ASSERT_FALSE (static_cast<bool> (s2)) << "An error was expected";
         EXPECT_EQ (s2.get_error (), (std::make_error_code (std::errc::operation_not_permitted)));
     }
 }
@@ -231,9 +238,9 @@ TEST (HttpdBufferedReader, MaxLengthString) {
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length);
     error_or<std::pair<int, maybe<std::string>>> const s1 = br.gets (io);
-    ASSERT_FALSE (s1.has_error ()) << "Error: " << s1.get_error ();
+    ASSERT_TRUE (static_cast<bool> (s1)) << "Error: " << s1.get_error ();
     maybe<std::string> str1;
-    std::tie (io, str1) = s1.get_value ();
+    std::tie (io, str1) = *s1;
     ASSERT_TRUE (str1.has_value ());
     EXPECT_EQ (str1.value (), max_length_string);
 }
@@ -249,6 +256,5 @@ TEST (HttpdBufferedReader, StringTooLong) {
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length + 1U);
     error_or<std::pair<int, maybe<std::string>>> const s2 = br.gets (io);
-    ASSERT_TRUE (s2.has_error ());
     EXPECT_EQ (s2.get_error (), std::make_error_code (pstore::httpd::error_code::string_too_long));
 }

@@ -47,6 +47,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_bit_count.cpp
     test_bit_field.cpp
     test_error.cpp
+    test_error_or.cpp
     test_file.cpp
     test_fnv.cpp
     test_gsl.cpp

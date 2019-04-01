@@ -44,6 +44,7 @@
 #ifndef PSTORE_SUPPORT_ERROR_OR_HPP
 #define PSTORE_SUPPORT_ERROR_OR_HPP
 
+#include <cassert>
 #include <new>
 #include <system_error>
 
@@ -54,209 +55,306 @@
 namespace pstore {
 
     struct in_place_t {
-        explicit in_place_t () = default;
+        explicit in_place_t () noexcept = default;
     };
     constexpr in_place_t in_place{};
 
+    template <typename Error>
+    struct is_error : std::integral_constant<bool, std::is_error_code_enum<Error>::value ||
+                                                       std::is_error_condition_enum<Error>::value> {
+    };
+
     template <typename T>
     class error_or {
+        template <typename Other>
+        friend class error_or;
+
+        using wrapper = std::reference_wrapper<typename std::remove_reference<T>::type>;
+        using storage_type =
+            typename std::conditional<std::is_reference<T>::value, wrapper, T>::type;
+
     public:
         using value_type = T;
+        using reference = T &;
+        using const_reference = typename std::remove_reference<T>::type const &;
+        using pointer = typename std::remove_reference<T>::type * PSTORE_NONNULL;
+        using const_pointer = typename std::remove_reference<T>::type const * PSTORE_NONNULL;
 
-        explicit error_or (std::error_code ec)
-                : state_ (error) {
-            new (error_storage ()) std::error_code (std::move (ec));
+        // construction
+
+        template <typename ErrorCode,
+                  typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
+        explicit error_or (ErrorCode erc)
+                : has_error_{true} {
+            new (get_error_storage ()) std::error_code (std::make_error_code (erc));
         }
-        template <typename Other>
-        explicit error_or (Other && t,
-                           typename std::enable_if<std::is_convertible<Other, T>::value>::type *
-                               PSTORE_NULLABLE = nullptr)
-                : state_ (value) {
-            new (value_storage ()) T (std::forward<Other> (t));
+
+        explicit error_or (std::error_code erc)
+                : has_error_{true} {
+            new (get_error_storage ()) std::error_code (std::move (erc));
         }
-        error_or (error_or const & rhs)
-                : state_{rhs.state_} {
-            copy_construct (rhs);
+
+        template <typename Other,
+                  typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
+        explicit error_or (Other && other)
+                : has_error_{false} {
+            new (get_storage ()) storage_type (std::forward<Other> (other));
         }
-        error_or (error_or && rhs)
-                : state_{rhs.state_} {
-            move_construct (std::move (rhs));
-        }
+
         template <typename... Args>
         error_or (in_place_t, Args &&... args)
-                : state_ (value) {
-            new (value_storage ()) T (std::forward<Args> (args)...);
+                : has_error_{false} {
+            new (get_storage ()) storage_type (std::forward<Args> (args)...);
         }
 
-        ~error_or () noexcept { destroy (); }
+        error_or (error_or const & rhs) { copy_construct (rhs); }
 
-
-        error_or & operator= (error_or const & rhs) {
-            if (&rhs != this) {
-                this->copy_assign (rhs);
-            }
-            return *this;
+        template <typename Other,
+                  typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
+        error_or (error_or<Other> const & rhs) {
+            copy_construct (rhs);
         }
 
-        template <typename Other>
-        error_or & operator= (error_or<Other> const & rhs) {
-            this->copy_assign (rhs);
-            return *this;
+        error_or (error_or && rhs) { move_construct (std::move (rhs)); }
+
+        template <typename Other,
+                  typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
+        error_or (error_or<Other> && rhs) {
+            move_construct (std::move (rhs));
         }
 
-        bool operator== (T const & rhs) const { return state_ == value && get_value () == rhs; }
+        ~error_or ();
+
+
+        // assignment
+
+        template <typename ErrorCode,
+                  typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
+        error_or & operator= (ErrorCode rhs) {
+            return operator=(error_or<T>{rhs});
+        }
+        error_or & operator= (std::error_code const & rhs) { return operator= (error_or<T> (rhs)); }
+        error_or & operator= (error_or const & rhs) { return copy_assign (rhs); }
+        error_or & operator= (error_or && rhs) { return move_assign (std::move (rhs)); }
+
+
+        // comparison (operator== and operator!=)
+
+        bool operator== (T const & rhs) const {
+            return static_cast<bool> (*this) && this->get () == rhs;
+        }
         bool operator!= (T const & rhs) const { return !operator== (rhs); }
 
-        bool operator== (error_or const & rhs) const {
-            if (state_ != rhs.state_) {
-                return false;
-            }
-            bool resl = false;
-            switch (state_) {
-            case error: resl = this->get_error () == rhs.get_error (); break;
-            case value: resl = this->get_value () == rhs.get_value (); break;
-            }
-            return resl;
+        template <typename Error>
+        typename std::enable_if<is_error<Error>::value, bool>::type operator== (Error rhs) const {
+            return get_error () == rhs;
         }
-        bool operator!= (error_or const & rhs) const { return !operator== (rhs); }
 
-        bool has_error () const noexcept { return state_ == error; }
-        bool has_value () const noexcept { return state_ == value; }
+        template <typename Error>
+        typename std::enable_if<is_error<Error>::value, bool>::type operator!= (Error rhs) const {
+            return !operator== (rhs);
+        }
 
-        std::error_code const & get_error () const noexcept { return *error_storage (); }
-        T & get_value () noexcept { return *value_storage (); }
-        T const & get_value () const noexcept { return *value_storage (); }
+        bool operator== (std::error_code rhs) const { return get_error () == rhs; }
+        bool operator!= (std::error_code rhs) const { return !operator== (rhs); }
 
-        T * PSTORE_NONNULL operator-> () noexcept { return value_storage (); }
-        T const * PSTORE_NONNULL operator-> () const noexcept { return value_storage (); }
+        bool operator== (error_or const & rhs);
+        bool operator!= (error_or const & rhs) { return !operator== (rhs); }
+
+
+        // access
+
+        /// Return true if a value is held, otherwise false.
+        explicit operator bool () const noexcept { return !has_error_; }
+
+        std::error_code get_error () const noexcept;
+
+        reference get () noexcept { return *get_storage (); }
+        const_reference get () const noexcept { return *get_storage (); }
+        pointer operator-> () noexcept { return to_pointer (get_storage ()); }
+        const_pointer operator-> () const noexcept { return to_pointer (get_storage ()); }
+        reference operator* () noexcept { return *get_storage (); }
+        const_reference operator* () const noexcept { return *get_storage (); }
 
     private:
-        void copy_construct (error_or const & rhs);
-        void move_construct (error_or && rhs);
         template <typename Other>
-        void copy_assign (error_or<Other> const & rhs);
-        void destroy () noexcept;
+        void copy_construct (error_or<Other> const & rhs);
 
-
-        std::error_code * PSTORE_NONNULL error_storage () noexcept {
-            return error_storage_impl (*this);
-        }
-        std::error_code const * PSTORE_NONNULL error_storage () const noexcept {
-            return error_storage_impl (*this);
+        template <typename T1>
+        static constexpr bool compareThisIfSameType (T1 const & lhs, T1 const & rhs) noexcept {
+            return &lhs == &rhs;
         }
 
-        T * PSTORE_NONNULL value_storage () noexcept { return value_storage_impl (*this); }
-        T const * PSTORE_NONNULL value_storage () const noexcept {
+        template <typename T1, typename T2>
+        static constexpr bool compareThisIfSameType (T1 const &, T2 const &) noexcept {
+            return false;
+        }
+
+        template <typename Other>
+        error_or & copy_assign (error_or<Other> const & rhs);
+
+        template <typename Other>
+        void move_construct (error_or<Other> && rhs);
+
+        template <typename Other>
+        error_or & move_assign (error_or<Other> && rhs);
+
+        pointer to_pointer (wrapper * PSTORE_NONNULL val) noexcept { return &val->get (); }
+        pointer to_pointer (pointer val) noexcept { return val; }
+        const_pointer to_pointer (const_pointer val) const noexcept { return val; }
+        const_pointer to_pointer (wrapper const * PSTORE_NONNULL val) const noexcept {
+            return &val->get ();
+        }
+
+        template <typename ErrorOr,
+                  typename ResultType = typename inherit_const<ErrorOr, storage_type>::type>
+        static ResultType * PSTORE_NONNULL value_storage_impl (ErrorOr && e) noexcept {
+            assert (!e.has_error_);
+            return reinterpret_cast<ResultType *> (&e.storage_);
+        }
+
+        storage_type * PSTORE_NONNULL get_storage () noexcept { return value_storage_impl (*this); }
+        storage_type const * PSTORE_NONNULL get_storage () const noexcept {
             return value_storage_impl (*this);
         }
 
         template <typename ErrorOr,
                   typename ResultType = typename inherit_const<ErrorOr, std::error_code>::type>
         static ResultType * PSTORE_NONNULL error_storage_impl (ErrorOr && e) noexcept {
-            assert (e.state_ == error);
-            return reinterpret_cast<ResultType *> (&e.storage_);
+            assert (e.has_error_);
+            return reinterpret_cast<ResultType *> (&e.error_storage_);
         }
-        template <typename ErrorOr, typename ResultType = typename inherit_const<ErrorOr, T>::type>
-        static ResultType * PSTORE_NONNULL value_storage_impl (ErrorOr && e) noexcept {
-            assert (e.state_ == value);
-            return reinterpret_cast<ResultType *> (&e.storage_);
-        }
+        std::error_code * PSTORE_NONNULL get_error_storage () noexcept;
+        std::error_code const * PSTORE_NONNULL get_error_storage () const noexcept;
 
-
-        using characteristics = pstore::characteristics<T, std::error_code>;
-        typename std::aligned_storage<characteristics::size, characteristics::align>::type storage_;
-        enum { error, value } state_;
+        union {
+            typename std::aligned_storage<sizeof (storage_type), alignof (storage_type)>::type
+                storage_;
+            std::aligned_storage<sizeof (std::error_code), alignof (std::error_code)>::type
+                error_storage_;
+        };
+        bool has_error_ = true;
     };
 
+
+    // dtor
+    // ~~~~
     template <typename T>
-    void error_or<T>::copy_construct (error_or const & rhs) {
-        switch (rhs.state_) {
-        case error:
-            state_ = error;
-            new (error_storage ()) std::error_code (rhs.get_error ());
-            break;
-        case value:
-            state_ = value;
-            new (value_storage ()) T (rhs.get_value ());
-            break;
+    error_or<T>::~error_or () {
+        if (!has_error_) {
+            get_storage ()->~storage_type ();
+        } else {
+            using error_code = std::error_code;
+            get_error_storage ()->~error_code ();
         }
     }
 
-    template <typename T>
-    void error_or<T>::move_construct (error_or && rhs) {
-        state_ = rhs.state_;
-        switch (rhs.state_) {
-        case error: new (error_storage ()) std::error_code (std::move (rhs.get_error ())); break;
-        case value:
-            // note that we access the value storage directly here.
-            new (value_storage ()) T (std::move (*rhs.value_storage ()));
-            break;
-        }
-    }
-
+    // copy_construct
+    // ~~~~~~~~~~~~~~
     template <typename T>
     template <typename Other>
-    void error_or<T>::copy_assign (error_or<Other> const & rhs) {
-        switch (rhs.state_) {
-        case error: {
-            std::error_code e = rhs.get_error ();
-            switch (state_) {
-            case error: std::swap (e, *this->error_storage ()); break;
-            case value:
-                this->destroy ();
-                state_ = error;
-                // The standard error_code constructor is noexcept, so this is safe.
-                new (error_storage ()) std::error_code (std::move (e));
-                break;
-            }
-            break;
-        }
-        case value: {
-            Other t = rhs.get_value ();
-            switch (state_) {
-            case error: {
-#if PSTORE_CPP_EXCEPTIONS
-                std::error_code e = this->get_error ();
-#endif
-                this->destroy ();
-                state_ = value;
-                PSTORE_TRY { new (value_storage ()) T (std::move (t)); }
-                PSTORE_CATCH (..., {
-                    state_ = error;
-                    // std::error_code ctors are noexcept, so this is safe.
-                    new (error_storage ()) std::error_code (e);
-                    throw;
-                })
-                break;
-            }
-            case value: std::swap (t, *this->value_storage ()); break;
-            }
-            state_ = value;
-            break;
-        }
+    void error_or<T>::copy_construct (error_or<Other> const & rhs) {
+        has_error_ = rhs.has_error_;
+        if (has_error_) {
+            new (get_error_storage ()) std::error_code (rhs.get_error ());
+        } else {
+            new (get_storage ()) storage_type (*rhs.get_storage ());
         }
     }
 
-
+    // copy_assign
+    // ~~~~~~~~~~~
     template <typename T>
-    void error_or<T>::destroy () noexcept {
-        switch (state_) {
-        case value: get_value ().~T (); break;
-        case error: {
-            using type = std::error_code;
-            get_error ().~type ();
-            break;
+    template <typename Other>
+    auto error_or<T>::copy_assign (error_or<Other> const & rhs) -> error_or & {
+        if (compareThisIfSameType (*this, rhs)) {
+            return *this;
         }
+
+        if (has_error_ && rhs.has_error_) {
+            *get_error_storage () = *rhs.get_error_storage ();
+        } else if (!has_error_ && !rhs.has_error_) {
+            *get_storage () = *rhs.get_storage ();
+        } else {
+            this->~error_or ();
+            new (this) error_or (rhs);
+        }
+        return *this;
+    }
+
+    // move_construct
+    // ~~~~~~~~~~~~~~
+    template <typename T>
+    template <typename Other>
+    void error_or<T>::move_construct (error_or<Other> && rhs) {
+        has_error_ = rhs.has_error_;
+        if (has_error_) {
+            new (get_error_storage ()) std::error_code (rhs.get_error ());
+        } else {
+            new (get_storage ()) storage_type (std::move (*rhs.get_storage ()));
         }
     }
 
-
-    template <typename T, typename Function>
-    auto operator>>= (error_or<T> const & t, Function f) -> decltype (f (t.get_value ())) {
-        if (t.has_value ()) {
-            return f (t.get_value ());
+    // move_assign
+    // ~~~~~~~~~~~
+    template <typename T>
+    template <typename Other>
+    auto error_or<T>::move_assign (error_or<Other> && rhs) -> error_or & {
+        if (compareThisIfSameType (*this, rhs)) {
+            return *this;
         }
-        return error_or<typename decltype (f (t.get_value ()))::value_type> (t.get_error ());
+
+        if (has_error_ && rhs.has_error_) {
+            *get_error_storage () = std::move (*rhs.get_error_storage ());
+        } else if (!has_error_ && !rhs.has_error_) {
+            *get_storage () = std::move (*rhs.get_storage ());
+        } else {
+            this->~error_or ();
+            new (this) error_or (std::move (rhs));
+        }
+        return *this;
+    }
+
+    // operator==
+    // ~~~~~~~~~~
+    template <typename T>
+    bool error_or<T>::operator== (error_or const & rhs) {
+        if (has_error_ != rhs.has_error_) {
+            return false;
+        }
+        if (has_error_) {
+            return this->operator== (rhs.get_error ());
+        }
+        return this->operator== (rhs.get ());
+    }
+
+    // get_error
+    // ~~~~~~~~~
+    template <typename T>
+    std::error_code error_or<T>::get_error () const noexcept {
+        return has_error_ ? *get_error_storage () : std::error_code{};
+    }
+
+    // get_error_storage
+    // ~~~~~~~~~~~~~~~~~
+    template <typename T>
+    inline std::error_code * PSTORE_NONNULL error_or<T>::get_error_storage () noexcept {
+        return error_storage_impl (*this);
+    }
+    template <typename T>
+    inline std::error_code const * PSTORE_NONNULL error_or<T>::get_error_storage () const noexcept {
+        return error_storage_impl (*this);
+    }
+
+
+    // operator>>= (bind)
+    // ~~~~~~~~~~~
+    template <typename T, typename Function>
+    auto operator>>= (error_or<T> const & t, Function f) -> decltype ((f (t.get ()))) {
+        if (t) {
+            return f (t.get ());
+        }
+        return error_or<typename decltype (f (t.get ()))::value_type> (t.get_error ());
     }
 
 

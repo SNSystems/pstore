@@ -66,8 +66,8 @@ TEST (Request, Empty) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> res = read_request (br, io);
-    ASSERT_TRUE (res.has_error ());
+    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    ASSERT_FALSE (static_cast<bool> (res));
 }
 
 TEST (Request, Complete) {
@@ -77,9 +77,9 @@ TEST (Request, Complete) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> res = read_request (br, io);
-    ASSERT_FALSE (res.has_error ());
-    auto const & request = std::get<1> (res.get_value ());
+    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    ASSERT_TRUE (static_cast<bool> (res)) << "There was an error:" << res.get_error ();
+    auto const & request = std::get<1> (*res);
     EXPECT_EQ (request.method (), "GET");
     EXPECT_EQ (request.uri (), "/uri");
     EXPECT_EQ (request.version (), "HTTP/1.1");
@@ -92,8 +92,8 @@ TEST (Request, Partial) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> res = read_request (br, io);
-    ASSERT_TRUE (res.has_error ());
+    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    ASSERT_FALSE (static_cast<bool> (res));
 }
 
 namespace {
@@ -132,7 +132,7 @@ TEST (ReadHeaders, Common) {
             return handler.call (io, key, value);
         },
         0);
-    ASSERT_FALSE (res.has_error ());
-    EXPECT_EQ (std::get<0> (res.get_value ()), 1) << "Reader state is incorrect";
-    EXPECT_EQ (std::get<1> (res.get_value ()), 3) << "Handler state is incorrect";
+    ASSERT_TRUE (static_cast<bool> (res)) << "There was an error:" << res.get_error ();
+    EXPECT_EQ (std::get<0> (*res), 1) << "Reader state is incorrect";
+    EXPECT_EQ (std::get<1> (*res), 3) << "Handler state is incorrect";
 }

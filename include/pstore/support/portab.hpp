@@ -45,6 +45,11 @@
 #ifndef PSTORE_SUPPORT_PORTAB_HPP
 #define PSTORE_SUPPORT_PORTAB_HPP
 
+#ifdef _WIN32
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
+#endif // _WIN32
+
 #include "pstore/config/config.hpp"
 
 
@@ -171,6 +176,12 @@
 #    define PSTORE_NULLABLE _Nullable
 #else
 #    define PSTORE_NULLABLE
+#endif
+
+
+// FIXME: there are multiple definitions of this type.
+#ifdef _WIN32
+using ssize_t = SSIZE_T;
 #endif
 
 #endif // PSTORE_SUPPORT_PORTAB_HPP

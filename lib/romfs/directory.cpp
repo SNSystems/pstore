@@ -64,7 +64,7 @@ auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) c
     // TODO: this is a straightfoward linear search. Could this be a performance problem?
     auto pos = std::find_if (begin (), end (), [d](dirent const & de) {
         auto const od = de.opendir ();
-        return od.has_value () && od.get_value () == d;
+        return od && od.get () == d;
     });
     return pos != end () ? &(*pos) : nullptr;
 }
@@ -101,7 +101,7 @@ bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL par
             return false;
         }
         error_or<directory const * PSTORE_NONNULL> od = d->opendir ();
-        return od.has_value () && od.get_value () == expected;
+        return od && od.get () == expected;
     };
     if (!isdir (this->find (".", 1), this) && isdir (this->find ("..", 2), parent)) {
         return false;
@@ -114,10 +114,7 @@ bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL par
         }
         if (de.is_directory ()) {
             error_or<directory const * PSTORE_NONNULL> od = de.opendir ();
-            if (od.has_error ()) {
-                return false;
-            }
-            if (!od.get_value ()->check (this)) {
+            if (!od || !od.get ()->check (this)) {
                 return false;
             }
         }

@@ -277,7 +277,7 @@ namespace pstore {
 
         // open
         // ~~~~
-        auto romfs::open (gsl::czstring path) -> error_or<descriptor> {
+        auto romfs::open (gsl::czstring PSTORE_NONNULL path) const -> error_or<descriptor> {
             return this->parse_path (path) >>= [](dirent_ptr de) {
                 auto file = std::make_shared<open_file> (*de);
                 return error_or<descriptor>{descriptor{file}};
@@ -301,7 +301,7 @@ namespace pstore {
             return (this->parse_path (path) >>= get_directory) >>= create_descriptor;
         }
 
-        error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL path) {
+        error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL path) const {
             return this->parse_path (path) >>= [] (dirent_ptr de) { return error_or <struct stat> {de->stat ()}; };
         }
 
@@ -320,7 +320,7 @@ namespace pstore {
             };
 
             auto const eo = (this->parse_path (path) >>= dirent_to_directory) >>= set_cwd;
-            return eo.has_error () ? eo.get_error () : std::error_code{};
+            return eo.get_error ();
         }
 
         // directory_to_dirent [static]
@@ -368,10 +368,10 @@ namespace pstore {
                 if (current_de->is_directory ()) {
                     error_or<directory const * PSTORE_NONNULL> eo_directory =
                         current_de->opendir ();
-                    if (eo_directory.has_error ()) {
+                    if (!eo_directory) {
                         return error_or<dirent_ptr>{eo_directory.get_error ()};
                     }
-                    dir = eo_directory.get_value ();
+                    dir = eo_directory.get ();
                 } else if (*p != '\0') {
                     // not a directory and wasn't the last component.
                     return error_or<dirent_ptr> (std::make_error_code (error_code::enotdir));
@@ -385,7 +385,7 @@ namespace pstore {
         error_or<std::string>
         romfs::dir_to_string (directory const * const PSTORE_NONNULL dir) const {
             if (dir == root_) {
-                return error_or<std::string>{in_place, "/"};
+                return error_or<std::string>{"/"};
             }
             dirent const * const parent_de = dir->find ("..");
             assert (parent_de != nullptr);

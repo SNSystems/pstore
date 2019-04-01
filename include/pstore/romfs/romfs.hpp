@@ -158,9 +158,9 @@ namespace pstore {
             romfs & operator= (romfs const &) = delete;
             romfs & operator= (romfs &&) = delete;
 
-            error_or<descriptor> open (gsl::czstring PSTORE_NONNULL path);
+            error_or<descriptor> open (gsl::czstring PSTORE_NONNULL path) const;
             error_or<dirent_descriptor> opendir (gsl::czstring PSTORE_NONNULL path);
-            error_or<struct stat> stat (gsl::czstring PSTORE_NONNULL path);
+            error_or<struct stat> stat (gsl::czstring PSTORE_NONNULL path) const;
 
             error_or<std::string> getcwd () const;
             std::error_code chdir (gsl::czstring PSTORE_NONNULL path);
