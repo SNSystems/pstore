@@ -66,9 +66,6 @@ namespace pstore {
 
     template <typename T>
     class error_or {
-        template <typename Other>
-        friend class error_or;
-
         using wrapper = std::reference_wrapper<typename std::remove_reference<T>::type>;
         using storage_type =
             typename std::conditional<std::is_reference<T>::value, wrapper, T>::type;
