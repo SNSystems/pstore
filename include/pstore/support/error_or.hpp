@@ -66,6 +66,9 @@ namespace pstore {
 
     template <typename T>
     class error_or {
+        template <typename Other>
+        friend class error_or;
+
         using wrapper = std::reference_wrapper<typename std::remove_reference<T>::type>;
         using storage_type =
             typename std::conditional<std::is_reference<T>::value, wrapper, T>::type;
@@ -77,7 +80,9 @@ namespace pstore {
         using pointer = typename std::remove_reference<T>::type * PSTORE_NONNULL;
         using const_pointer = typename std::remove_reference<T>::type const * PSTORE_NONNULL;
 
+        // ****
         // construction
+        // ****
 
         template <typename ErrorCode,
                   typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
@@ -123,20 +128,32 @@ namespace pstore {
         ~error_or ();
 
 
+        // ****
         // assignment
-
+        // ****
         template <typename ErrorCode,
                   typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
         error_or & operator= (ErrorCode rhs) {
-            return operator=(error_or<T>{rhs});
+            operator=(error_or<T>{rhs});
+            return *this;
         }
-        error_or & operator= (std::error_code const & rhs) { return operator= (error_or<T> (rhs)); }
-        error_or & operator= (error_or const & rhs) { return copy_assign (rhs); }
-        error_or & operator= (error_or && rhs) { return move_assign (std::move (rhs)); }
+        error_or & operator= (std::error_code const & rhs) {
+            operator= (error_or<T> (rhs));
+            return *this;
+        }
+        error_or & operator= (error_or const & rhs) {
+            copy_assign (rhs);
+            return *this;
+        }
+        error_or & operator= (error_or && rhs) {
+            move_assign (std::move (rhs));
+            return *this;
+        }
 
 
+        // ****
         // comparison (operator== and operator!=)
-
+        // ****
         bool operator== (T const & rhs) const {
             return static_cast<bool> (*this) && this->get () == rhs;
         }
@@ -159,7 +176,9 @@ namespace pstore {
         bool operator!= (error_or const & rhs) { return !operator== (rhs); }
 
 
+        // ****
         // access
+        // ****
 
         /// Return true if a value is held, otherwise false.
         explicit operator bool () const noexcept { return !has_error_; }
