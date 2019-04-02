@@ -58,14 +58,14 @@
 
 namespace {
 
-    char const index[] = "<!DOCTYPE html><html></html>";
-    static constexpr std::size_t index_size = pstore::array_elements (index) - 1U;
+    char const index_html[] = "<!DOCTYPE html><html></html>";
+    static constexpr std::size_t index_size = pstore::array_elements (index_html) - 1U;
 
     extern pstore::romfs::directory const root_dir;
     std::array<pstore::romfs::dirent, 3> const root_dir_membs = {{
         {".", &root_dir},
         {"..", &root_dir},
-        {"index.html", reinterpret_cast<std::uint8_t const *> (index), index_size, 0},
+        {"index.html", reinterpret_cast<std::uint8_t const *> (index_html), index_size, 0},
     }};
     pstore::romfs::directory const root_dir{root_dir_membs};
     pstore::romfs::directory const * const root = &root_dir;
@@ -106,7 +106,7 @@ namespace {
     std::string ServeStaticContent::index_expected () const {
         std::ostringstream str;
         str << "HTTP/1.1 200 OK\r\nServer: pstore-httpd" << crlf << "Content-length: " << index_size
-            << crlf << "Content-type: text/html" << crlf << crlf << index;
+            << crlf << "Content-type: text/html" << crlf << crlf << index_html;
         return str.str ();
     }
 
