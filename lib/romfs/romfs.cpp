@@ -52,17 +52,6 @@
 #include "pstore/romfs/directory.hpp"
 #include "pstore/romfs/dirent.hpp"
 
-namespace std {
-
-    std::error_code make_error_code (pstore::romfs::error_code e) {
-        static pstore::romfs::error_category const cat;
-        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-                       "base type of error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), cat};
-    }
-
-} // end namespace std
-
 namespace {
 
     std::pair<char const * PSTORE_NULLABLE, pstore::gsl::czstring PSTORE_NULLABLE>
@@ -100,11 +89,20 @@ namespace pstore {
         std::string error_category::message (int error) const {
             auto * result = "unknown error";
             switch (static_cast<error_code> (error)) {
-            case error_code::einval: result = "EINVAL"; break;
-            case error_code::enoent: result = "ENOENT"; break;
-            case error_code::enotdir: result = "ENOTDIR"; break;
+            case error_code::einval: result = "There was an invalid operation"; break;
+            case error_code::enoent: result = "The path was not found"; break;
+            case error_code::enotdir:
+                result = "Cannot apply a directory operation to a non-directory path";
+                break;
             }
             return result;
+        }
+
+        std::error_code make_error_code (pstore::romfs::error_code e) {
+            static pstore::romfs::error_category const cat;
+            static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                           "base type of error_code must be int to permit safe static cast");
+            return {static_cast<int> (e), cat};
         }
 
         //*                        __ _ _      *
@@ -161,7 +159,7 @@ namespace pstore {
         // ~~~~
         error_or<std::size_t> open_file::seek (off_t offset, int whence) {
             auto make_error = [](error_code erc) {
-                return error_or<std::size_t> (std::make_error_code (erc));
+                return error_or<std::size_t> (make_error_code (erc));
             };
             using uoff_type = std::make_unsigned<off_t>::type;
             std::size_t new_pos;
@@ -290,7 +288,7 @@ namespace pstore {
             auto get_directory = [](dirent_ptr de) {
                 using rett = error_or<directory const * PSTORE_NONNULL>;
                 return de->is_directory () ? rett{de->opendir ()}
-                                           : rett{std::make_error_code (error_code::enotdir)};
+                                           : rett{make_error_code (error_code::enotdir)};
             };
 
             auto create_descriptor = [](directory const * PSTORE_NONNULL d) {
@@ -338,7 +336,7 @@ namespace pstore {
             -> error_or<dirent const *> {
 
             if (!path || !dir) {
-                return error_or<dirent_ptr> (std::make_error_code (error_code::enoent));
+                return error_or<dirent_ptr> (make_error_code (error_code::enoent));
             }
 
             gsl::czstring PSTORE_NONNULL p = path;
@@ -362,7 +360,7 @@ namespace pstore {
                     static_cast<std::make_unsigned<std::ptrdiff_t>::type> (tail - component));
                 if (current_de == nullptr) {
                     // name not found
-                    return error_or<dirent_ptr>{std::make_error_code (error_code::enoent)};
+                    return error_or<dirent_ptr>{make_error_code (error_code::enoent)};
                 }
 
                 if (current_de->is_directory ()) {
@@ -374,7 +372,7 @@ namespace pstore {
                     dir = eo_directory.get ();
                 } else if (*p != '\0') {
                     // not a directory and wasn't the last component.
-                    return error_or<dirent_ptr> (std::make_error_code (error_code::enotdir));
+                    return error_or<dirent_ptr> (make_error_code (error_code::enotdir));
                 }
             }
             return error_or<dirent_ptr>{current_de};

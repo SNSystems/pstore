@@ -54,6 +54,8 @@
 namespace pstore {
     namespace httpd {
 
+        static constexpr auto crlf = "\r\n";
+
         template <typename Sender, typename IO>
         error_or<IO> send (Sender sender, IO io, gsl::span<std::uint8_t const> const & s) {
             return sender (io, s);

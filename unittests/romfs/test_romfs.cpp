@@ -87,7 +87,7 @@ namespace {
         template <typename T>
         void check_for_error (pstore::error_or<T> const & eo, pstore::romfs::error_code actual) {
             ASSERT_FALSE (static_cast<bool> (eo));
-            EXPECT_EQ (eo.get_error (), std::make_error_code (actual));
+            EXPECT_EQ (eo.get_error (), make_error_code (actual));
         }
 
     private:
@@ -101,7 +101,7 @@ TEST_F (RomFs, WorkingDirectory) {
     EXPECT_EQ (fs ().chdir ("/."), std::error_code{});
     EXPECT_EQ (fs ().getcwd (), std::string{"/"});
 
-    EXPECT_EQ (fs ().chdir ("hello"), std::make_error_code (error_code::enotdir));
+    EXPECT_EQ (fs ().chdir ("hello"), make_error_code (error_code::enotdir));
     EXPECT_EQ (fs ().getcwd (), std::string{"/"})
         << "Expected no change to the WD after a failed chdir";
 
@@ -184,7 +184,7 @@ TEST_F (RomFs, Seek) {
 
     eos = d.seek (-2, SEEK_CUR);
     EXPECT_FALSE (static_cast<bool> (eos)) << "Seek past start of file is disallowed";
-    EXPECT_EQ (eos.get_error (), std::make_error_code (pstore::romfs::error_code::einval));
+    EXPECT_EQ (eos.get_error (), make_error_code (pstore::romfs::error_code::einval));
 
     eos = d.seek (-1, SEEK_CUR);
     EXPECT_TRUE (static_cast<bool> (eos)) << "Seek backwards inside the file should be allowed";

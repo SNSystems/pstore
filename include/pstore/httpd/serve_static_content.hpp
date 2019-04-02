@@ -57,7 +57,6 @@
 namespace pstore {
     namespace httpd {
 
-
         namespace details {
 
             template <typename Sender, typename IO>
@@ -77,16 +76,14 @@ namespace pstore {
                 }
                 return read_and_send (sender, io, fd);
             }
-        } // namespace details
 
+        } // end namespace details
 
         template <typename Sender, typename IO>
         pstore::error_or<IO> serve_static_content (Sender sender, IO io, std::string const & path,
                                                    pstore::romfs::romfs const & file_system) {
             return file_system.stat (path.c_str ()) >>= [&](pstore::romfs::stat const & stat) {
                 return file_system.open (path.c_str ()) >>= [&](pstore::romfs::descriptor fd) {
-                    static constexpr auto crlf = "\r\n";
-
                     // Send the response header.
                     std::ostringstream os;
                     os << "HTTP/1.1 200 OK" << crlf << "Server: pstore-httpd" << crlf

@@ -80,6 +80,7 @@
 #include "pstore/httpd/query_to_kvp.hpp"
 #include "pstore/httpd/quit.hpp"
 #include "pstore/httpd/request.hpp"
+#include "pstore/httpd/send.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
@@ -102,9 +103,9 @@ namespace {
 
 
     template <typename Sender, typename IO>
-    pstore::error_or<IO> cerror (Sender sender, IO io, char const * cause, char const * error_no,
+    pstore::error_or<IO> cerror (Sender sender, IO io, char const * cause, unsigned error_no,
                                  char const * shortmsg, char const * longmsg) {
-        static constexpr auto crlf = "\r\n";
+        static constexpr auto crlf = pstore::httpd::crlf;
         std::ostringstream os;
         os << "HTTP/1.1 " << error_no << ' ' << shortmsg << crlf << "Content-type: text/html"
            << crlf << crlf;
@@ -206,6 +207,8 @@ namespace {
 
     error_or_server_state handle_quit (server_state state, socket_descriptor & childfd,
                                        query_container const & query) {
+        static constexpr auto crlf = pstore::httpd::crlf;
+
         auto const pos = query.find ("magic");
         if (pos != std::end (query) && pos->second == pstore::httpd::get_quit_magic ()) {
             state.done = true;
@@ -216,15 +219,14 @@ namespace {
                                         "<body><h1>pstore-httpd Exiting</h1></body>\n"
                                         "</html>\n";
             std::ostringstream os;
-            os << "HTTP/1.1 200 OK\nServer: pstore-httpd\r\n";
-            os << "Content-length: " << pstore::array_elements (quit_message) - 1U << "\r\n";
-            os << "Content-type: text/plain\r\n";
-            os << "\r\n" << quit_message;
+            os << "HTTP/1.1 200 OK\nServer: pstore-httpd" << crlf
+               << "Content-length: " << pstore::array_elements (quit_message) - 1U << crlf
+               << "Content-type: text/plain" << crlf << crlf << quit_message;
             pstore::httpd::send (pstore::httpd::net::network_sender,
                                  std::reference_wrapper<socket_descriptor> (childfd),
                                  os.str ()); // TODO: errors!
         } else {
-            cerror (pstore::httpd::net::network_sender, std::ref (childfd), "Bad request", "501",
+            cerror (pstore::httpd::net::network_sender, std::ref (childfd), "Bad request", 501,
                     "bad request",
                     "That was a bad request"); // TODO: errors!
         }
@@ -339,44 +341,69 @@ namespace pstore {
                 // We only currently support the GET method.
                 if (request.method () != "GET") {
                     cerror (pstore::httpd::net::network_sender, std::ref (childfd),
-                            request.method ().c_str (), "501", "Not Implemented",
+                            request.method ().c_str (), 501, "Not Implemented",
                             "httpd does not implement this method");
                     continue;
                 }
 
                 // Scan the HTTP headers.
-                error_or<std::pair<socket_descriptor &, header_info>> const res = read_headers (
+                error_or<server_state> eo = read_headers (
                     reader, childfd,
                     [](header_info io, std::string const & key, std::string const & value) {
                         log (logging::priority::info, "header:", key + ": " + value);
                         return io.handler (key, value);
                     },
-                    header_info ());
-                assert (res); // FIXME! There may have been an error!
-                header_info header_contents = std::get<1> (res.get ());
+                    header_info ()) >>=
+                    [&request, &file_system,
+                     &state](std::pair<socket_descriptor &, header_info> const & res) {
+                        header_info const & header_contents = std::get<1> (res);
 
-                if (header_contents.connection_upgrade && header_contents.upgrade_to_websocket &&
-                    header_contents.websocket_key && header_contents.websocket_version) {
-                    log (logging::priority::info, "WebSocket upgrade requested");
-                }
+                        if (header_contents.connection_upgrade &&
+                            header_contents.upgrade_to_websocket && header_contents.websocket_key &&
+                            header_contents.websocket_version) {
 
-                if (!starts_with (request.uri (), dynamic_path)) {
-                    std::string filename = ".";
-                    filename += request.uri ();
-                    if (request.uri ().back () == '/') {
-                        filename += "index.html";
-                    }
-                    serve_static_content (pstore::httpd::net::network_sender, std::ref (childfd),
-                                          filename, file_system);
+                            // TODO: here we go into the WebSockets world!
+                            log (logging::priority::info, "WebSocket upgrade requested");
+                            return error_or<server_state> (state);
+                        }
+
+                        if (!starts_with (request.uri (), dynamic_path)) {
+                            std::string file_path = request.uri ();
+                            if (file_path.length () == 0) {
+                                file_path = "/";
+                            }
+                            if (file_path.back () == '/') {
+                                file_path += "index.html";
+                            }
+
+                            error_or<socket_descriptor &> eo2 = serve_static_content (
+                                pstore::httpd::net::network_sender, std::ref (std::get<0> (res)),
+                                file_path, file_system);
+                            if (!eo2) {
+                                return error_or<server_state> (eo2.get_error ());
+                            }
+                            assert (&*eo2 == &std::get<0> (res));
+                            return error_or<server_state> (state);
+                        }
+
+                        return serve_dynamic_content (request.uri (), std::get<0> (res), state);
+                    };
+
+                if (eo) {
+                    state = *eo;
                 } else {
-                    pstore::error_or<server_state> eo_state =
-                        serve_dynamic_content (request.uri (), childfd, state);
-                    if (!eo_state) {
-                        log (logging::priority::info, "Could not server dynamic content: ",
-                             eo_state.get_error ().message ());
-                        continue;
+                    // Here we bridge from the std::error_code world to HTTP status codes.
+                    std::error_code const & error = eo.get_error ();
+                    log (logging::priority::error, "Error:", error.message ());
+                    if (error == romfs::error_code::enoent || error == romfs::error_code::enotdir) {
+                        cerror (pstore::httpd::net::network_sender, std::ref (childfd),
+                                request.uri ().c_str (), 404, "Not found",
+                                eo.get_error ().message ().c_str ());
+                    } else {
+                        cerror (pstore::httpd::net::network_sender, std::ref (childfd),
+                                request.uri ().c_str (), 501, "Server internal error",
+                                eo.get_error ().message ().c_str ());
                     }
-                    state = eo_state.get ();
                 }
             }
 

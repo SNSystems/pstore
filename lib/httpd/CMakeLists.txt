@@ -52,6 +52,7 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/quit.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/request.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/send.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_static_content.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"

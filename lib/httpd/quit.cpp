@@ -117,7 +117,6 @@ namespace pstore {
             log (logging::priority::info, "Connected");
 
             std::ostringstream str;
-            static constexpr auto crlf = "\r\n";
             str << "GET /cmd/quit?magic=" << get_quit_magic () << " HTTP1.1 " << crlf
                 << "Host: localhost:" << port_number << crlf << "Connection: close" << crlf << crlf;
             std::string const & req = str.str ();

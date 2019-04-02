@@ -63,7 +63,7 @@
 namespace pstore {
     namespace romfs {
 
-        enum class error_code {
+        enum class error_code : int {
             einval = EINVAL,
             enoent = ENOENT,
             enotdir = ENOTDIR,
@@ -78,6 +78,8 @@ namespace pstore {
             std::string message (int error) const override;
         };
 
+        std::error_code make_error_code (pstore::romfs::error_code e);
+
     } // end namespace romfs
 } // end namespace pstore
 
@@ -85,8 +87,6 @@ namespace std {
 
     template <>
     struct is_error_code_enum<pstore::romfs::error_code> : std::true_type {};
-
-    std::error_code make_error_code (pstore::romfs::error_code e);
 
 } // namespace std
 
