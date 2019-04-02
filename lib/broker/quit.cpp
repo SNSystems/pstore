@@ -179,9 +179,6 @@ namespace pstore {
     } // namespace broker
 } // namespace pstore
 
-namespace {
-
-    using pstore::broker::sig_self_quit;
 #define COMMON_SIGNALS                                                                             \
     X (SIGABRT)                                                                                    \
     X (SIGFPE)                                                                                     \
@@ -190,6 +187,7 @@ namespace {
     X (SIGSEGV)                                                                                    \
     X (SIGTERM)                                                                                    \
     X (sig_self_quit)
+
 #ifdef _WIN32
 #define SIGNALS COMMON_SIGNALS X (SIGBREAK)
 #else
@@ -214,7 +212,12 @@ namespace {
     X (SIGVTALRM)                                                                                  \
     X (SIGXCPU)                                                                                    \
     X (SIGXFSZ)
-#endif
+#endif //_WIN32
+
+namespace {
+
+    using pstore::broker::sig_self_quit;
+
     template <ssize_t Size>
     char const * signal_name (int signo, pstore::gsl::span<char, Size> buffer) {
         static_assert (Size > 0, "signal name needs a buffer of size > 0");
@@ -227,8 +230,12 @@ namespace {
         buffer[size - 1] = '\0';
         return buffer.data ();
     }
+
+} // end anonymous namespace
+
 #undef SIGNALS
 
+namespace {
 
     pstore::signal_cv quit_info;
 
