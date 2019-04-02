@@ -82,6 +82,7 @@
 #include "pstore/httpd/request.hpp"
 #include "pstore/httpd/send.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
+#include "pstore/httpd/wskey.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/logging.hpp"
@@ -298,6 +299,39 @@ namespace {
         }
     }
 
+
+    pstore::error_or<socket_descriptor &>
+    upgrade_to_ws (pstore::httpd::header_info const & header_contents, socket_descriptor & socket) {
+        assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
+
+        // Validate the request headers/
+        if (!header_contents.websocket_key || !header_contents.websocket_version) {
+            return cerror (pstore::httpd::net::network_sender, std::ref (socket),
+                           "Missing HTTP header", 400, "Bad request", "Missing HTTP header");
+        }
+
+        if (*header_contents.websocket_version != 13) {
+            // send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
+        }
+
+
+        // send back the server handshake response.
+
+        // HTTP/1.1 101 Switching Protocols
+        // Upgrade: websocket
+        // Connection: Upgrade
+        // Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
+        static constexpr auto crlf = pstore::httpd::crlf;
+        std::ostringstream os;
+        os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: websocket" << crlf
+           << "Connection: upgrade" << crlf
+           << "Sec-WebSocket-Accept: " << pstore::httpd::source_key (*header_contents.websocket_key)
+           << crlf << crlf;
+        log (pstore::logging::priority::info, "Sending:", os.str ());
+        return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (socket), os) >>=
+               [&](socket_descriptor & s) { return pstore::error_or<socket_descriptor &> (s); };
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -371,17 +405,19 @@ namespace pstore {
                         return io.handler (key, value);
                     },
                     header_info ()) >>=
-                    [&request, &file_system,
-                     &state](std::pair<socket_descriptor &, header_info> const & res) {
+                    [&](std::pair<socket_descriptor &, header_info> const & res) {
                         header_info const & header_contents = std::get<1> (res);
 
                         if (header_contents.connection_upgrade &&
-                            header_contents.upgrade_to_websocket && header_contents.websocket_key &&
-                            header_contents.websocket_version) {
+                            header_contents.upgrade_to_websocket) {
 
                             // TODO: here we go into the WebSockets world!
                             log (logging::priority::info, "WebSocket upgrade requested");
-                            return error_or<server_state> (state);
+
+                            return upgrade_to_ws (header_contents, childfd) >>=
+                                   [&state](socket_descriptor &) {
+                                       return error_or<server_state> (state);
+                                   };
                         }
 
                         if (!starts_with (request.uri (), dynamic_path)) {

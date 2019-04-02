@@ -197,12 +197,12 @@ namespace pstore {
         void copy_construct (error_or<Other> const & rhs);
 
         template <typename T1>
-        static constexpr bool compareThisIfSameType (T1 const & lhs, T1 const & rhs) noexcept {
+        static constexpr bool same_object (T1 const & lhs, T1 const & rhs) noexcept {
             return &lhs == &rhs;
         }
 
         template <typename T1, typename T2>
-        static constexpr bool compareThisIfSameType (T1 const &, T2 const &) noexcept {
+        static constexpr bool same_object (T1 const &, T2 const &) noexcept {
             return false;
         }
 
@@ -283,7 +283,7 @@ namespace pstore {
     template <typename T>
     template <typename Other>
     auto error_or<T>::copy_assign (error_or<Other> const & rhs) -> error_or & {
-        if (compareThisIfSameType (*this, rhs)) {
+        if (same_object (*this, rhs)) {
             return *this;
         }
 
@@ -316,7 +316,7 @@ namespace pstore {
     template <typename T>
     template <typename Other>
     auto error_or<T>::move_assign (error_or<Other> && rhs) -> error_or & {
-        if (compareThisIfSameType (*this, rhs)) {
+        if (same_object (*this, rhs)) {
             return *this;
         }
 
@@ -365,14 +365,19 @@ namespace pstore {
 
     // operator>>= (bind)
     // ~~~~~~~~~~~
+    /// The monadic "bind" operator for error_or<T>. If \p t has an error then then returns the
+    /// error where the return type is derived from the return type of \p f.  If \p t has a value
+    /// then returns the result of calling \p f.
+    ///
+    /// \tparam T  The input type wrapped by a error_or<>.
+    /// \tparam Function  A callable object whose signature is of the form `error_or<U> f(T t)`.
     template <typename T, typename Function>
-    auto operator>>= (error_or<T> const & t, Function f) -> decltype ((f (t.get ()))) {
+    auto operator>>= (error_or<T> && t, Function f) -> decltype ((f (t.get ()))) {
         if (t) {
-            return f (t.get ());
+            return f (*t);
         }
         return error_or<typename decltype (f (t.get ()))::value_type> (t.get_error ());
     }
-
 
 } // end namespace pstore
 

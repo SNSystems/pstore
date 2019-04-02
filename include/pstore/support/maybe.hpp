@@ -248,7 +248,7 @@ namespace pstore {
     /// \tparam T  The input type wrapped by a maybe<>.
     /// \tparam Function  A callable object whose signature is of the form `maybe<U> f(T t)`.
     template <typename T, typename Function>
-    auto operator>>= (maybe<T> const & t, Function f) -> decltype (f (*t)) {
+    auto operator>>= (maybe<T> && t, Function f) -> decltype (f (*t)) {
         if (t) {
             return f (*t);
         }
