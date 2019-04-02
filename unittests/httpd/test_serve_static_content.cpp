@@ -58,14 +58,14 @@
 
 namespace {
 
-    char const file1[] = "<!DOCTYPE html><html></html>";
-    static constexpr std::size_t file1_size = pstore::array_elements (file1) - 1U;
+    char const index[] = "<!DOCTYPE html><html></html>";
+    static constexpr std::size_t index_size = pstore::array_elements (index) - 1U;
 
     extern pstore::romfs::directory const root_dir;
     std::array<pstore::romfs::dirent, 3> const root_dir_membs = {{
         {".", &root_dir},
         {"..", &root_dir},
-        {"index.html", reinterpret_cast<std::uint8_t const *> (file1), file1_size, 0},
+        {"index.html", reinterpret_cast<std::uint8_t const *> (index), index_size, 0},
     }};
     pstore::romfs::directory const root_dir{root_dir_membs};
     pstore::romfs::directory const * const root = &root_dir;
@@ -80,33 +80,52 @@ namespace {
                 : fs_{root} {}
 
     protected:
-        pstore::romfs::romfs & fs () noexcept { return fs_; }
+        pstore::romfs::romfs const & fs () const noexcept { return fs_; }
+        std::string index_expected () const;
+
+        pstore::error_or<std::string> serve_path (std::string const & path) const;
 
     private:
         pstore::romfs::romfs fs_;
+        static constexpr auto crlf = "\r\n";
     };
+
+    pstore::error_or<std::string> ServeStaticContent::serve_path (std::string const & path) const {
+        std::string actual;
+        pstore::error_or<int> const err = pstore::httpd::serve_static_content (
+            [&actual](int io, pstore::gsl::span<std::uint8_t const> const & sp) {
+                std::transform (std::begin (sp), std::end (sp), std::back_inserter (actual),
+                                [](std::uint8_t b) { return static_cast<char> (b); });
+                return pstore::error_or<int> (io + 1);
+            },
+            0, path, fs ());
+        return static_cast<bool> (err) ? pstore::error_or<std::string>{actual}
+                                       : pstore::error_or<std::string>{err.get_error ()};
+    }
+
+    std::string ServeStaticContent::index_expected () const {
+        std::ostringstream str;
+        str << "HTTP/1.1 200 OK\r\nServer: pstore-httpd" << crlf << "Content-length: " << index_size
+            << crlf << "Content-type: text/html" << crlf << crlf << index;
+        return str.str ();
+    }
 
 } // end anonymous namespace
 
 
 TEST_F (ServeStaticContent, Simple) {
-    std::ostringstream str;
-    str << "HTTP/1.1 200 OK\r\nServer: pstore-httpd\r\n"
-           "Content-length: "
-        << file1_size
-        << "\r\n"
-           "Content-type: text/html\r\n\r\n"
-        << file1;
-    std::string const expected = str.str ();
+    pstore::error_or<std::string> const actual = serve_path ("/index.html");
+    ASSERT_TRUE (static_cast<bool> (actual));
+    EXPECT_EQ (actual, index_expected ());
+}
 
-    std::string actual;
-    pstore::error_or<int> const err = pstore::httpd::serve_static_content (
-        [&actual](int io, pstore::gsl::span<std::uint8_t const> const & sp) {
-            std::transform (std::begin (sp), std::end (sp), std::back_inserter (actual),
-                            [](std::uint8_t b) { return static_cast<char> (b); });
-            return pstore::error_or<int> (io + 1);
-        },
-        0, "/index.html", fs ());
-    ASSERT_TRUE (static_cast<bool> (err));
-    EXPECT_EQ (actual, expected);
+TEST_F (ServeStaticContent, MissingFile) {
+    pstore::error_or<std::string> const actual = serve_path ("/foo.html");
+    EXPECT_EQ (actual.get_error (), make_error_code (pstore::romfs::error_code::enoent));
+}
+
+TEST_F (ServeStaticContent, EmptyPath) {
+    pstore::error_or<std::string> const actual = serve_path ("");
+    ASSERT_TRUE (static_cast<bool> (actual));
+    EXPECT_EQ (actual, index_expected ());
 }

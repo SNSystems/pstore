@@ -281,6 +281,23 @@ namespace {
         return pstore::error_or<server_state>{state};
     }
 
+    // Here we bridge from the std::error_code world to HTTP status codes.
+    void report_error (std::error_code error, pstore::httpd::request_info const & request,
+                       socket_descriptor & socket) {
+        auto report = [&error, &request, &socket](unsigned code, char const * message) {
+            cerror (pstore::httpd::net::network_sender, std::ref (socket), request.uri ().c_str (),
+                    code, message, error.message ().c_str ());
+        };
+
+        log (pstore::logging::priority::error, "Error:", error.message ());
+        if (error == pstore::romfs::error_code::enoent ||
+            error == pstore::romfs::error_code::enotdir) {
+            report (404, "Not found");
+        } else {
+            report (501, "Server internal error");
+        }
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -368,22 +385,12 @@ namespace pstore {
                         }
 
                         if (!starts_with (request.uri (), dynamic_path)) {
-                            std::string file_path = request.uri ();
-                            if (file_path.length () == 0) {
-                                file_path = "/";
-                            }
-                            if (file_path.back () == '/') {
-                                file_path += "index.html";
-                            }
-
-                            error_or<socket_descriptor &> eo2 = serve_static_content (
-                                pstore::httpd::net::network_sender, std::ref (std::get<0> (res)),
-                                file_path, file_system);
-                            if (!eo2) {
-                                return error_or<server_state> (eo2.get_error ());
-                            }
-                            assert (&*eo2 == &std::get<0> (res));
-                            return error_or<server_state> (state);
+                            return serve_static_content (pstore::httpd::net::network_sender,
+                                                         std::ref (std::get<0> (res)),
+                                                         request.uri (), file_system) >>=
+                                   [&state](socket_descriptor &) {
+                                       return error_or<server_state> (state);
+                                   };
                         }
 
                         return serve_dynamic_content (request.uri (), std::get<0> (res), state);
@@ -392,18 +399,8 @@ namespace pstore {
                 if (eo) {
                     state = *eo;
                 } else {
-                    // Here we bridge from the std::error_code world to HTTP status codes.
-                    std::error_code const & error = eo.get_error ();
-                    log (logging::priority::error, "Error:", error.message ());
-                    if (error == romfs::error_code::enoent || error == romfs::error_code::enotdir) {
-                        cerror (pstore::httpd::net::network_sender, std::ref (childfd),
-                                request.uri ().c_str (), 404, "Not found",
-                                eo.get_error ().message ().c_str ());
-                    } else {
-                        cerror (pstore::httpd::net::network_sender, std::ref (childfd),
-                                request.uri ().c_str (), 501, "Server internal error",
-                                eo.get_error ().message ().c_str ());
-                    }
+                    // Report the error to the user as an HTTP error.
+                    report_error (eo.get_error (), request, childfd);
                 }
             }
 
