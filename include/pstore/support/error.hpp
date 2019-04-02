@@ -92,6 +92,8 @@ namespace pstore {
     enum class error_code : int { PSTORE_ERROR_CODES };
 #undef X
 
+
+
     // ******************
     // * error category *
     // ******************
@@ -105,6 +107,12 @@ namespace pstore {
     };
 
     std::error_category const & get_error_category ();
+
+    inline std::error_code make_error_code (error_code e) {
+        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                       "base type of pstore::error_code must be int to permit safe static cast");
+        return {static_cast<int> (e), get_error_category ()};
+    }
 
     // *************
     // * errno_erc *
@@ -121,6 +129,10 @@ namespace pstore {
         int err_;
     };
 
+    inline std::error_code make_error_code (errno_erc e) noexcept {
+        return {e.get (), std::generic_category ()};
+    }
+
 #ifdef _WIN32
     class win32_erc {
     public:
@@ -131,35 +143,25 @@ namespace pstore {
     private:
         DWORD err_;
     };
-#endif
+
+    inline std::error_code make_error_code (pstore::win32_erc e) noexcept {
+        return {e.get (), std::system_category ()};
+    }
+#endif //_WIN32
 
 } // namespace pstore
 
-// Disable cert-dcl58-cpp: modifying namespace std is allowed to add template specializations for
-// standard library templates when the declaration depends on at least one program-defined type and
-// the specialization satisfies all requirements for the original template, except where such
-// specializations are prohibited.
-// NOLINTNEXTLINE(cert-dcl58-cpp)
 namespace std {
 
     template <>
     struct is_error_code_enum<pstore::error_code> : std::true_type {};
-
-    inline std::error_code make_error_code (pstore::error_code e) {
-        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-                       "base type of pstore::error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), ::pstore::get_error_category ()};
-    }
-
-    inline std::error_code make_error_code (pstore::errno_erc e) noexcept {
-        return {e.get (), std::generic_category ()};
-    }
+    template <>
+    struct is_error_code_enum<pstore::errno_erc> : std::true_type {};
 
 #ifdef _WIN32
-    inline std::error_code make_error_code (pstore::win32_erc e) noexcept {
-        return {e.get (), std::system_category ()};
-    }
-#endif
+    template <>
+    struct is_error_code_enum<pstore::win32_erc> : std::true_type {};
+#endif //_WIN32
 
 } // namespace std
 
@@ -187,11 +189,11 @@ namespace pstore {
 
     template <typename ErrorType>
     PSTORE_NO_RETURN void raise (ErrorType e) {
-        raise_error_code (std::make_error_code (e));
+        raise_error_code (make_error_code (e));
     }
     template <typename ErrorType, typename StrType>
     PSTORE_NO_RETURN void raise (ErrorType e, StrType const & what) {
-        raise_error_code (std::make_error_code (e), what);
+        raise_error_code (make_error_code (e), what);
     }
 
     template <typename Exception>

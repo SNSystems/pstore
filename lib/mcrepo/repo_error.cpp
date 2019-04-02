@@ -58,24 +58,12 @@ namespace pstore {
             return result;
         }
 
-    } // namespace repo
-} // namespace pstore
-
-namespace {
-
-    std::error_category const & get_error_category () {
-        static pstore::repo::error_category const cat;
-        return cat;
-    }
-
-} // namespace
-
-namespace std {
-
     std::error_code make_error_code (pstore::repo::error_code e) {
         static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                        "base type of error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), get_error_category ()};
+        static pstore::repo::error_category const cat;
+        return {static_cast<int> (e), cat};
     }
 
-} // namespace std
+    } // namespace repo
+} // namespace pstore

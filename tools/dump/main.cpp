@@ -128,9 +128,12 @@ namespace {
         return result;
     }
 
-    std::error_category const & get_dump_error_category () {
+    std::error_code make_error_code (dump_error_code e) {
+        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                       "base type of error_code must be int to permit safe static cast");
+
         static dump_error_category const cat;
-        return cat;
+        return {static_cast<int> (e), cat};
     }
 
 } // end anonymous namespace
@@ -140,14 +143,7 @@ namespace std {
     template <>
     struct is_error_code_enum<dump_error_code> : std::true_type {};
 
-    std::error_code make_error_code (dump_error_code e);
-    std::error_code make_error_code (dump_error_code e) {
-        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-                       "base type of error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), get_dump_error_category ()};
-    }
-
-} // namespace std
+} // end namespace std
 
 namespace {
 
@@ -270,12 +266,12 @@ namespace {
         if (digit >= '0' && digit <= '9') {
             return static_cast<unsigned> (digit) - '0';
         }
-        pstore::raise_error_code (std::make_error_code (dump_error_code::bad_digest));
+        pstore::raise_error_code (make_error_code (dump_error_code::bad_digest));
     }
 
     pstore::index::digest string_to_digest (std::string const & str) {
         if (str.length () != 32) {
-            pstore::raise_error_code (std::make_error_code (dump_error_code::bad_digest));
+            pstore::raise_error_code (make_error_code (dump_error_code::bad_digest));
         }
         auto get64 = [&str](unsigned index) {
             assert (index < str.length ());
@@ -301,7 +297,7 @@ namespace {
         for (std::string const & t : items_to_show) {
             auto pos = index.find (db, string_to_key (t));
             if (pos == end) {
-                pstore::raise_error_code (std::make_error_code (not_found_error));
+                pstore::raise_error_code (make_error_code (not_found_error));
             } else {
                 container.emplace_back (record_function (*pos));
             }
@@ -339,7 +335,7 @@ namespace {
                                        add_specified (db, *index, items_to_show, not_found_error,
                                                       string_to_digest, record_function));
                 } else {
-                    pstore::raise_error_code (std::make_error_code (no_index));
+                    pstore::raise_error_code (make_error_code (no_index));
                 }
             }
         }

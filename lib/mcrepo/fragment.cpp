@@ -97,8 +97,7 @@ namespace {
         case section_kind::last: break;
         }
 #undef X
-        pstore::raise_error_code (
-            std::make_error_code (pstore::repo::error_code::bad_fragment_type));
+        pstore::raise_error_code (make_error_code (pstore::repo::error_code::bad_fragment_type));
     }
 
 } // end anonymous namespace

@@ -115,8 +115,7 @@ namespace pstore {
         dependents_dispatcher::~dependents_dispatcher () noexcept = default;
 
         PSTORE_NO_RETURN void dependents_dispatcher::error () const {
-            pstore::raise_error_code (
-                std::make_error_code (pstore::repo::error_code::bad_fragment_type));
+            pstore::raise_error_code (make_error_code (error_code::bad_fragment_type));
         }
 
     } // end namespace repo

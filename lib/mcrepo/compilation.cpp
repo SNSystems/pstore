@@ -83,7 +83,7 @@ auto compilation::load (pstore::database const & db, pstore::extent<compilation>
     -> std::shared_ptr<compilation const> {
     std::shared_ptr<compilation const> t = db.getro (location);
     if (t->size_bytes () != location.size) {
-        raise_error_code (std::make_error_code (error_code::bad_compilation_record));
+        raise_error_code (make_error_code (error_code::bad_compilation_record));
     }
     return t;
 }

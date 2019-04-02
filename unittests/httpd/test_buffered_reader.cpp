@@ -256,5 +256,5 @@ TEST (HttpdBufferedReader, StringTooLong) {
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length + 1U);
     error_or<std::pair<int, maybe<std::string>>> const s2 = br.gets (io);
-    EXPECT_EQ (s2.get_error (), std::make_error_code (pstore::httpd::error_code::string_too_long));
+    EXPECT_EQ (s2.get_error (), make_error_code (pstore::httpd::error_code::string_too_long));
 }

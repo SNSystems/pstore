@@ -75,24 +75,25 @@ namespace pstore {
 
         std::error_category const & get_error_category () noexcept;
 
+        inline std::error_code make_error_code (error_code e) {
+            static_assert (
+                std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                "base type of pstore::httpd::error_code must be int to permit safe static cast");
+            return {static_cast<int> (e), get_error_category ()};
+        }
+
     } // namespace httpd
 } // namespace pstore
 
 
-// NOLINTNEXTLINE(cert-dcl58-cpp)
 namespace std {
 
     template <>
     struct is_error_code_enum<pstore::httpd::error_code> : std::true_type {};
 
-    inline std::error_code make_error_code (pstore::httpd::error_code e) {
-        static_assert (
-            std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-            "base type of pstore::httpd::error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), pstore::httpd::get_error_category ()};
-    }
-
 } // end namespace std
+
+
 
 namespace pstore {
     namespace httpd {
@@ -241,8 +242,7 @@ namespace pstore {
             auto const check_refill_response = [this](refill_result_value const & r) {
                 gsl::span<char>::iterator const & end = std::get<1> (r);
                 if (end < span_.begin () || end > span_.end ()) {
-                    return refill_result_type{
-                        std::make_error_code (error_code::refill_out_of_range)};
+                    return refill_result_type{make_error_code (error_code::refill_out_of_range)};
                 }
                 return refill_result_type{r};
             };
@@ -310,7 +310,7 @@ namespace pstore {
                 }
 
                 if (str.length () >= max_string_length) {
-                    return gets_result_type{std::make_error_code (error_code::string_too_long)};
+                    return gets_result_type{make_error_code (error_code::string_too_long)};
                 }
                 return this->gets_impl (std::get<0> (r), str + *mc);
             };

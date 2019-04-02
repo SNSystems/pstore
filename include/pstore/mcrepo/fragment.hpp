@@ -453,7 +453,7 @@ case section_kind::k: name = #k; break;
                     return f;
                 }
             }
-            raise_error_code (std::make_error_code (error_code::bad_fragment_record),
+            raise_error_code (make_error_code (error_code::bad_fragment_record),
                               "the fragment extent is invalid");
         }
 

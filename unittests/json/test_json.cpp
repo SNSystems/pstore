@@ -89,7 +89,7 @@ namespace {
             json::parser<json_out_callbacks> p;
             std::string res = p.input (src).eof ();
             EXPECT_EQ (res, "");
-            EXPECT_NE (p.last_error (), std::make_error_code (json::error_code::none));
+            EXPECT_NE (p.last_error (), make_error_code (json::error_code::none));
         }
     };
 
@@ -98,7 +98,7 @@ namespace {
 TEST_F (Json, Empty) {
     json::parser<json_out_callbacks> p;
     p.input (std::string{}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     EXPECT_EQ (p.coordinate (), std::make_tuple (1U, 1U));
 }
 
@@ -207,7 +207,7 @@ TEST_F (Json, TwoKeywords) {
     p.input (std::string{" true false "});
     std::string const res = p.eof ();
     EXPECT_EQ (res, "");
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unexpected_extra_input));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unexpected_extra_input));
     EXPECT_EQ (p.coordinate (), std::make_tuple (7U, 1U));
 }
 
@@ -279,7 +279,7 @@ namespace {
             p.input (src);
             p.eof ();
             EXPECT_FALSE (p.has_error ());
-            EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+            EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
             EXPECT_EQ (p.coordinate (), std::make_tuple (column, 1U));
         }
     };
@@ -401,14 +401,14 @@ TEST_F (JsonArray, Empty) {
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[\n]\n"});
     p.eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
     EXPECT_EQ (p.coordinate (), std::make_tuple (1U, 3U));
 }
 
 TEST_F (JsonArray, ArrayNoCloseBracket) {
     auto p = json::make_parser (json_out_callbacks{});
     p.input (std::string{"["}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_array_member));
 }
 
 TEST_F (JsonArray, SingleElement) {
@@ -422,7 +422,7 @@ TEST_F (JsonArray, SingleElement) {
     std::string const input = "[ 1 ]";
     p.input (gsl::make_span (input));
     p.eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
     EXPECT_EQ (p.coordinate (), std::make_tuple (input.length () + 1U, 1U));
 }
 
@@ -435,7 +435,7 @@ TEST_F (JsonArray, SingleStringElement) {
     }
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[\"a\"]"});
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
 }
 
 TEST_F (JsonArray, ZeroExpPlus1) {
@@ -447,7 +447,7 @@ TEST_F (JsonArray, ZeroExpPlus1) {
     }
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[0e+1]"});
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
 }
 
 TEST_F (JsonArray, SimpleFloat) {
@@ -459,7 +459,7 @@ TEST_F (JsonArray, SimpleFloat) {
     }
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[1.234]"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
 }
 
 TEST_F (JsonArray, MinusZero) {
@@ -471,7 +471,7 @@ TEST_F (JsonArray, MinusZero) {
     }
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[-0]"});
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
 }
 
 TEST_F (JsonArray, TwoElements) {
@@ -484,7 +484,7 @@ TEST_F (JsonArray, TwoElements) {
     }
     auto p = json::make_parser (proxy_);
     p.input (std::string{"[ 1 ,\n \"hello\" ]"});
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::none));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::none));
     EXPECT_EQ (p.coordinate (), std::make_tuple (11U, 2U));
 }
 
@@ -493,37 +493,37 @@ TEST_F (JsonArray, MisplacedComma) {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[,"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[,]"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[\"\",]"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[,1"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[1,,2]"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[1 true]"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_array_member));
     }
 }
 
@@ -532,13 +532,13 @@ TEST_F (JsonArray, NestedError) {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[[no"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
     }
     {
         json::parser<json_out_callbacks> p;
         p.input (std::string{"[[null"});
         p.eof ();
-        EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_array_member));
+        EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_array_member));
     }
 }
 
@@ -674,21 +674,21 @@ TEST_F (JsonObject, MisplacedComma) {
         json::parser<json_out_callbacks> p1;
         p1.input (std::string{"{\"a\":1,}"});
         p1.eof ();
-        EXPECT_EQ (p1.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p1.last_error (), make_error_code (json::error_code::expected_token));
         EXPECT_EQ (p1.coordinate (), std::make_tuple (8U, 1U));
     }
     {
         json::parser<json_out_callbacks> p2;
         p2.input (std::string{"{\"a\":1 \"b\":1}"});
         p2.eof ();
-        EXPECT_EQ (p2.last_error (), std::make_error_code (json::error_code::expected_object_member));
+        EXPECT_EQ (p2.last_error (), make_error_code (json::error_code::expected_object_member));
         EXPECT_EQ (p2.coordinate (), std::make_tuple (8U, 1U));
     }
     {
         json::parser<json_out_callbacks> p3;
         p3.input (std::string{"{\"a\":1,,\"b\":1}"});
         p3.eof ();
-        EXPECT_EQ (p3.last_error (), std::make_error_code (json::error_code::expected_token));
+        EXPECT_EQ (p3.last_error (), make_error_code (json::error_code::expected_token));
         EXPECT_EQ (p3.coordinate (), std::make_tuple (8U, 1U));
     }
 }
@@ -697,7 +697,7 @@ TEST_F (JsonObject, KeyIsNotString) {
     json::parser<json_out_callbacks> p;
     p.input (std::string{"{{}:{}}"});
     p.eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_string));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_string));
     EXPECT_EQ (p.coordinate (), std::make_tuple (2U, 1U));
 }
 
@@ -705,5 +705,5 @@ TEST_F (JsonObject, BadNestedObject) {
     json::parser<json_out_callbacks> p;
     p.input (std::string{"{\"a\":nu}"});
     p.eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }

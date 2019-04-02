@@ -89,7 +89,7 @@ TEST_F (JsonNumber, One) {
 TEST_F (JsonNumber, LeadingZero) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"01"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, MinusOne) {
@@ -103,18 +103,18 @@ TEST_F (JsonNumber, MinusOne) {
 TEST_F (JsonNumber, MinusOneLeadingZero) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"-01"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, MinusOnly) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"-"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::expected_digits));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_digits));
 }
 TEST_F (JsonNumber, MinusMinus) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"--"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 
 TEST_F (JsonNumber, AllDigits) {
@@ -227,13 +227,13 @@ TEST_F (JsonNumber, IntegerPositiveOverflow) {
 
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (str).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, IntegerNegativeOverflow) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"-123123123123123123123123123123"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 // FIXME: is this test testing what it claims to?
@@ -243,40 +243,40 @@ TEST_F (JsonNumber, IntegerNegativeOverflow2) {
 
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (str).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealPositiveOverflow) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"123123e100000"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealPositiveOverflow2) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"9999E999"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealUnderflow) {
     json::parser<decltype (proxy_)> p = json::make_parser (proxy_);
     p.input (std::string{"123e-10000000"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::number_out_of_range));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, BadExponentDigit) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"1Ex"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 
 TEST_F (JsonNumber, BadFractionDigit) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"1.."}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 TEST_F (JsonNumber, BadExponentAfterPoint) {
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{"1.E"}).eof ();
-    EXPECT_EQ (p.last_error (), std::make_error_code (json::error_code::unrecognized_token));
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }

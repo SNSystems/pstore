@@ -164,7 +164,7 @@ namespace pstore {
             /// \returns True if the parser has signalled an error.
             bool has_error () const noexcept { return error_ != error_code::none; }
             /// \returns The error code held by the parser.
-            std::error_code last_error () const noexcept { return std::make_error_code (error_); }
+            std::error_code last_error () const noexcept { return make_error_code (error_); }
 
             ///@{
             Callbacks & callbacks () noexcept { return callbacks_; }
@@ -1169,7 +1169,7 @@ namespace pstore {
             std::pair<typename matcher<Callbacks>::pointer, bool>
             object_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch) {
                 if (this->get_state () == done_state) {
-                    assert (parser.last_error () != std::make_error_code (error_code::none));
+                    assert (parser.last_error () != make_error_code (error_code::none));
                     return {nullptr, true};
                 }
                 if (!ch) {

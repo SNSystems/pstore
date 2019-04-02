@@ -102,8 +102,7 @@ namespace {
             return pstore::database::vacuum_mode::background;
         }
 
-        pstore::raise_error_code (
-            std::make_error_code (write_error_code::unrecognized_compaction_mode));
+        pstore::raise_error_code (make_error_code (write_error_code::unrecognized_compaction_mode));
     }
 
 } // end anonymous namespace

@@ -68,16 +68,16 @@ namespace pstore {
             std::string message (int error) const override;
         };
 
-    } // namespace dump
-} // namespace pstore
+        std::error_code make_error_code (error_code e);
+
+    } // end namespace dump
+} // end namespace pstore
 
 namespace std {
 
     template <>
     struct is_error_code_enum<pstore::dump::error_code> : std::true_type {};
 
-    std::error_code make_error_code (pstore::dump::error_code e);
-
-} // namespace std
+} // end namespace std
 
 #endif // PSTORE_DUMP_ERROR_HPP

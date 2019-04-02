@@ -77,16 +77,18 @@ namespace pstore {
         };
 
         std::error_category const & get_error_category () noexcept;
-    } // namespace json
-} // namespace pstore
+
+        inline std::error_code make_error_code (error_code e) noexcept {
+            return {static_cast<int> (e), get_error_category ()};
+        }
+    } // end namespace json
+} // end namespace pstore
 
 namespace std {
+
     template <>
     struct is_error_code_enum<::pstore::json::error_code> : std::true_type {};
 
-    inline std::error_code make_error_code (::pstore::json::error_code e) noexcept {
-        return {static_cast<int> (e), ::pstore::json::get_error_category ()};
-    }
-} // namespace std
+} // end namespace std
 
 #endif // PSTORE_JSON_JSON_ERROR_HPP

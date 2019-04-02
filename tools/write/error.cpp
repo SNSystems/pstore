@@ -57,22 +57,10 @@ std::string write_error_category::message (int error) const {
     return result;
 }
 
+std::error_code make_error_code (write_error_code e) {
+    static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                   "base type of error_code must be int to permit safe static cast");
 
-namespace {
-
-    std::error_category const & get_write_error_category () {
-        static write_error_category const cat;
-        return cat;
-    }
-
-} // namespace
-
-namespace std {
-
-    std::error_code make_error_code (write_error_code e) {
-        static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-                       "base type of error_code must be int to permit safe static cast");
-        return {static_cast<int> (e), get_write_error_category ()};
-    }
-
-} // namespace std
+    static write_error_category const cat;
+    return {static_cast<int> (e), cat};
+}

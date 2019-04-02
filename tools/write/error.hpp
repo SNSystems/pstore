@@ -66,12 +66,12 @@ public:
     std::string message (int error) const override;
 };
 
+std::error_code make_error_code (write_error_code e);
+
 namespace std {
 
     template <>
     struct is_error_code_enum<write_error_category> : std::true_type {};
-
-    std::error_code make_error_code (write_error_code e);
 
 } // namespace std
 

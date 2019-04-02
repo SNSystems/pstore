@@ -72,20 +72,9 @@ std::string pstore::dump::error_category::message (int error) const {
     return result;
 }
 
-namespace {
-
-    // **********************
-    // * get_error_category *
-    // **********************
-    std::error_category const & get_error_category () {
-        static ::pstore::dump::error_category const cat;
-        return cat;
-    }
-
-} // anonymous namespace
-
-std::error_code std::make_error_code (pstore::dump::error_code e) {
+std::error_code pstore::dump::make_error_code (pstore::dump::error_code e) {
     static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                    "base type of error_code must be int to permit safe static cast");
-    return {static_cast<int> (e), get_error_category ()};
+    static error_category const cat;
+    return {static_cast<int> (e), cat};
 }
