@@ -58,9 +58,9 @@ namespace {
     // ~~~~~~~~~~~~~~
     inline std::error_code get_last_error () noexcept {
 #ifdef _WIN32
-        return std::make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
+        return make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
 #else
-        return std::make_error_code (std::errc (errno));
+        return make_error_code (std::errc (errno));
 #endif // !_WIN32
     }
 
