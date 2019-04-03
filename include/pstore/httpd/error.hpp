@@ -1,10 +1,10 @@
-//*  _            __  __                   _                      _            *
-//* | |__  _   _ / _|/ _| ___ _ __ ___  __| |  _ __ ___  __ _  __| | ___ _ __  *
-//* | '_ \| | | | |_| |_ / _ \ '__/ _ \/ _` | | '__/ _ \/ _` |/ _` |/ _ \ '__| *
-//* | |_) | |_| |  _|  _|  __/ | |  __/ (_| | | | |  __/ (_| | (_| |  __/ |    *
-//* |_.__/ \__,_|_| |_|  \___|_|  \___|\__,_| |_|  \___|\__,_|\__,_|\___|_|    *
-//*                                                                            *
-//===- lib/httpd/buffered_reader.cpp --------------------------------------===//
+//*                            *
+//*   ___ _ __ _ __ ___  _ __  *
+//*  / _ \ '__| '__/ _ \| '__| *
+//* |  __/ |  | | | (_) | |    *
+//*  \___|_|  |_|  \___/|_|    *
+//*                            *
+//===- include/pstore/httpd/error.hpp -------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,36 +41,54 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/httpd/buffered_reader.hpp"
+#ifndef PSTORE_HTTPD_ERROR_HPP
+#define PSTORE_HTTPD_ERROR_HPP
+
+#include <system_error>
 
 namespace pstore {
     namespace httpd {
+        // **************
+        // * error code *
+        // **************
+        enum class error_code : int {
+            bad_request = 1,
+            not_implemented,
+            string_too_long,
+            refill_out_of_range
+        };
 
         // ******************
         // * error category *
         // ******************
-        // name
-        // ~~~~
-        char const * error_category::name () const noexcept { return "pstore httpd category"; }
+        class error_category : public std::error_category {
+        public:
+            // The need for this constructor was removed by CWG defect 253 but Clang (prior
+            // to 3.9.0) and GCC (before 4.6.4) require its presence.
+            error_category () noexcept {} // NOLINT
+            char const * name () const noexcept override;
+            std::string message (int error) const override;
+        };
 
-        // message
-        // ~~~~~~~
-        std::string error_category::message (int error) const {
-            auto * result = "unknown pstore::category error";
-            switch (static_cast<error_code> (error)) {
-            case error_code::string_too_long: return "string too long";
-            case error_code::refill_out_of_range: return "refill result out of range";
-            }
-            return result;
+        std::error_category const & get_error_category () noexcept;
+
+        inline std::error_code make_error_code (error_code e) {
+            static_assert (
+                std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
+                "base type of pstore::httpd::error_code must be int to permit safe static cast");
+            return {static_cast<int> (e), get_error_category ()};
         }
 
-        // **********************
-        // * get_error_category *
-        // **********************
-        std::error_category const & get_error_category () noexcept {
-            static error_category const cat;
-            return cat;
-        }
+    } // namespace httpd
+} // namespace pstore
 
-    } // end namespace httpd
-} // end namespace pstore
+
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::httpd::error_code> : std::true_type {};
+
+} // end namespace std
+
+
+#endif // PSTORE_HTTPD_ERROR_HPP

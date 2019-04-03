@@ -88,7 +88,7 @@ namespace pstore {
                   typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
         explicit error_or (ErrorCode erc)
                 : has_error_{true} {
-            new (get_error_storage ()) std::error_code (std::make_error_code (erc));
+            new (get_error_storage ()) std::error_code (make_error_code (erc));
         }
 
         explicit error_or (std::error_code erc)

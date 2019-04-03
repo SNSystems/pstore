@@ -43,14 +43,17 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/httpd/server.hpp"
 
+// Standard library includes
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
 #include <limits>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <unordered_map>
 
+// OS-specific includes
 #ifdef _WIN32
 
 #    include <io.h>
@@ -59,34 +62,25 @@
 
 #else
 
-#    include <arpa/inet.h>
-#    include <fcntl.h>
 #    include <netdb.h>
-#    include <netinet/in.h>
-#    include <sys/mman.h>
 #    include <sys/socket.h>
-#    include <sys/socket.h>
-#    include <sys/stat.h>
 #    include <sys/types.h>
-#    include <unistd.h>
 
 #endif
 
+// Local includes
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/headers.hpp"
-#include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
 #include "pstore/httpd/quit.hpp"
 #include "pstore/httpd/request.hpp"
 #include "pstore/httpd/send.hpp"
+#include "pstore/httpd/serve_dynamic_content.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
 #include "pstore/httpd/wskey.hpp"
-#include "pstore/support/array_elements.hpp"
-#include "pstore/support/error.hpp"
 #include "pstore/support/logging.hpp"
-#include "pstore/support/random.hpp"
 
 namespace {
 
@@ -185,103 +179,6 @@ namespace {
     }
 
 
-
-
-    // Returns true if the string \p s starts with the given prefix.
-    bool starts_with (std::string const & s, std::string const & prefix) {
-        std::string::size_type pos = 0;
-        while (pos < s.length () && pos < prefix.length () && s[pos] == prefix[pos]) {
-            ++pos;
-        }
-        return pos == prefix.length ();
-    }
-
-
-
-    struct server_state {
-        bool done = false;
-    };
-    using error_or_server_state = pstore::error_or<server_state>;
-    using query_container = std::unordered_map<std::string, std::string>;
-
-
-
-    error_or_server_state handle_quit (server_state state, socket_descriptor & childfd,
-                                       query_container const & query) {
-        static constexpr auto crlf = pstore::httpd::crlf;
-
-        auto const pos = query.find ("magic");
-        if (pos != std::end (query) && pos->second == pstore::httpd::get_quit_magic ()) {
-            state.done = true;
-
-            char const quit_message[] = "<!DOCTYPE html>\n"
-                                        "<html>\n"
-                                        "<head><title>pstore-httpd Exiting</title></head>\n"
-                                        "<body><h1>pstore-httpd Exiting</h1></body>\n"
-                                        "</html>\n";
-            std::ostringstream os;
-            os << "HTTP/1.1 200 OK\nServer: pstore-httpd" << crlf
-               << "Content-length: " << pstore::array_elements (quit_message) - 1U << crlf
-               << "Content-type: text/plain" << crlf << crlf << quit_message;
-            pstore::httpd::send (pstore::httpd::net::network_sender,
-                                 std::reference_wrapper<socket_descriptor> (childfd),
-                                 os.str ()); // TODO: errors!
-        } else {
-            cerror (pstore::httpd::net::network_sender, std::ref (childfd), "Bad request", 501,
-                    "bad request",
-                    "That was a bad request"); // TODO: errors!
-        }
-        return error_or_server_state{state};
-    }
-
-
-
-    using commands_container = std::unordered_map<
-        std::string, std::function<error_or_server_state (server_state, socket_descriptor & childfd,
-                                                          query_container const &)>>;
-
-    commands_container const & get_commands () {
-        static commands_container const commands = {{"quit", handle_quit}};
-        return commands;
-    }
-
-
-    template <typename T>
-    auto clamp_to_signed_max (T v) noexcept -> typename std::make_signed<T>::type {
-        using st = typename std::make_signed<T>::type;
-        constexpr auto maxs = std::numeric_limits<st>::max ();
-        PSTORE_STATIC_ASSERT (maxs >= 0);
-        return static_cast<st> (std::min (static_cast<T> (maxs), v));
-    }
-
-
-    static char const dynamic_path[] = "/cmd/";
-
-    pstore::error_or<server_state>
-    serve_dynamic_content (std::string uri, socket_descriptor & childfd, server_state state) {
-        assert (starts_with (uri, dynamic_path));
-        uri.erase (std::begin (uri), std::begin (uri) + pstore::array_elements (dynamic_path) - 1U);
-
-        auto const pos = uri.find ('?');
-        auto const command = uri.substr (0, pos);
-        auto it = pos != std::string::npos ? std::begin (uri) + clamp_to_signed_max (pos + 1)
-                                           : std::end (uri);
-        query_container arguments;
-        if (it != std::end (uri)) {
-            it = query_to_kvp (it, std::end (uri), pstore::httpd::make_insert_iterator (arguments));
-        }
-        auto const & commands = get_commands ();
-        auto command_it = commands.find (uri.substr (0, pos));
-        if (command_it == std::end (commands)) {
-            // TODO: return an error
-        } else {
-            error_or_server_state e_state = command_it->second (state, childfd, arguments);
-            // TODO: if an error is returned, report it to the client.
-            state = e_state.get ();
-        }
-        return pstore::error_or<server_state>{state};
-    }
-
     // Here we bridge from the std::error_code world to HTTP status codes.
     void report_error (std::error_code error, pstore::httpd::request_info const & request,
                        socket_descriptor & socket) {
@@ -291,8 +188,10 @@ namespace {
         };
 
         log (pstore::logging::priority::error, "Error:", error.message ());
-        if (error == pstore::romfs::error_code::enoent ||
-            error == pstore::romfs::error_code::enotdir) {
+        if (error == pstore::httpd::error_code::bad_request) {
+            report (400, "Bad request");
+        } else if (error == pstore::romfs::error_code::enoent ||
+                   error == pstore::romfs::error_code::enotdir) {
             report (404, "Not found");
         } else {
             report (501, "Server internal error");
@@ -300,14 +199,18 @@ namespace {
     }
 
 
-    pstore::error_or<socket_descriptor &>
+    pstore::error_or<std::unique_ptr<std::thread>>
     upgrade_to_ws (pstore::httpd::header_info const & header_contents, socket_descriptor & socket) {
+        using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
+        using pstore::logging::priority;
         assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
+
+        log (priority::info, "WebSocket upgrade requested");
 
         // Validate the request headers/
         if (!header_contents.websocket_key || !header_contents.websocket_version) {
-            return cerror (pstore::httpd::net::network_sender, std::ref (socket),
-                           "Missing HTTP header", 400, "Bad request", "Missing HTTP header");
+            log (priority::error, "Missing WebSockets upgrade key or version header.");
+            return return_type{pstore::httpd::error_code::bad_request};
         }
 
         if (*header_contents.websocket_version != 13) {
@@ -315,21 +218,35 @@ namespace {
         }
 
 
-        // send back the server handshake response.
+        // Send back the server handshake response.
+        auto const accept_ws_connection = [&]() {
+            log (priority::info, "Accepting WebSockets upgrade");
 
-        // HTTP/1.1 101 Switching Protocols
-        // Upgrade: websocket
-        // Connection: Upgrade
-        // Sec-WebSocket-Accept: s3pPLMBiTxaQ9kYGzzhZRbK+xOo=
-        static constexpr auto crlf = pstore::httpd::crlf;
-        std::ostringstream os;
-        os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: websocket" << crlf
-           << "Connection: upgrade" << crlf
-           << "Sec-WebSocket-Accept: " << pstore::httpd::source_key (*header_contents.websocket_key)
-           << crlf << crlf;
-        log (pstore::logging::priority::info, "Sending:", os.str ());
-        return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (socket), os) >>=
-               [&](socket_descriptor & s) { return pstore::error_or<socket_descriptor &> (s); };
+            static constexpr auto crlf = pstore::httpd::crlf;
+            std::ostringstream os;
+            os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: websocket" << crlf
+               << "Connection: upgrade" << crlf << "Sec-WebSocket-Accept: "
+               << pstore::httpd::source_key (*header_contents.websocket_key) << crlf << crlf;
+            return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (socket), os);
+        };
+
+        // Spawn a thread to manage this WebSockets session.
+        auto const create_ws_server = [&](socket_descriptor & s) {
+            return return_type{pstore::in_place,
+                               new std::thread (
+                                   [](socket_descriptor && sd) {
+                                       constexpr auto ident = "websocket";
+                                       pstore::threads::set_name (ident);
+                                       pstore::logging::create_log_stream (ident);
+
+                                       log (priority::info, "Started WebSockets session");
+                                       // TODO: server goes here!
+                                       log (priority::info, "Ended WebSockets session");
+                                   },
+                                   std::move (s))};
+        };
+
+        return accept_ws_connection () >>= create_ws_server;
     }
 
 } // end anonymous namespace
@@ -352,6 +269,8 @@ namespace pstore {
             auto clientlen =
                 static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
             log (logging::priority::info, "starting server-loop");
+
+            std::vector<std::unique_ptr<std::thread>> websockets_workers;
 
             server_state state{};
             while (!state.done) {
@@ -397,30 +316,21 @@ namespace pstore {
                     continue;
                 }
 
-                // Scan the HTTP headers.
-                error_or<server_state> eo = read_headers (
-                    reader, childfd,
-                    [](header_info io, std::string const & key, std::string const & value) {
-                        log (logging::priority::info, "header:", key + ": " + value);
-                        return io.handler (key, value);
-                    },
-                    header_info ()) >>=
+                // Respond appropriately based on the request and headers.
+                auto const serve_reply =
                     [&](std::pair<socket_descriptor &, header_info> const & res) {
                         header_info const & header_contents = std::get<1> (res);
 
                         if (header_contents.connection_upgrade &&
                             header_contents.upgrade_to_websocket) {
-
-                            // TODO: here we go into the WebSockets world!
-                            log (logging::priority::info, "WebSocket upgrade requested");
-
                             return upgrade_to_ws (header_contents, childfd) >>=
-                                   [&state](socket_descriptor &) {
+                                   [&](std::unique_ptr<std::thread> & worker) {
+                                       websockets_workers.emplace_back (std::move (worker));
                                        return error_or<server_state> (state);
                                    };
                         }
 
-                        if (!starts_with (request.uri (), dynamic_path)) {
+                        if (!details::starts_with (request.uri (), dynamic_path)) {
                             return serve_static_content (pstore::httpd::net::network_sender,
                                                          std::ref (std::get<0> (res)),
                                                          request.uri (), file_system) >>=
@@ -429,8 +339,21 @@ namespace pstore {
                                    };
                         }
 
-                        return serve_dynamic_content (request.uri (), std::get<0> (res), state);
+                        return serve_dynamic_content (pstore::httpd::net::network_sender,
+                                                      std::ref (std::get<0> (res)), request.uri (),
+                                                      state) >>=
+                               [&state](std::pair<socket_descriptor &, server_state> const & p) {
+                                   return error_or<server_state> (std::get<1> (p));
+                               };
                     };
+
+                // Scan the HTTP headers.
+                error_or<server_state> const eo = read_headers (
+                    reader, childfd,
+                    [](header_info io, std::string const & key, std::string const & value) {
+                        return io.handler (key, value);
+                    },
+                    header_info ()) >>= serve_reply;
 
                 if (eo) {
                     state = *eo;
@@ -438,6 +361,10 @@ namespace pstore {
                     // Report the error to the user as an HTTP error.
                     report_error (eo.get_error (), request, childfd);
                 }
+            }
+
+            for (std::unique_ptr<std::thread> const & worker : websockets_workers) {
+                worker->join ();
             }
 
             return 0;

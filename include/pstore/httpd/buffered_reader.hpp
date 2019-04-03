@@ -50,49 +50,10 @@
 #include <utility>
 #include <vector>
 
+#include "pstore/httpd/error.hpp"
 #include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
-
-namespace pstore {
-    namespace httpd {
-        // **************
-        // * error code *
-        // **************
-        enum class error_code : int { string_too_long = 1, refill_out_of_range };
-
-        // ******************
-        // * error category *
-        // ******************
-        class error_category : public std::error_category {
-        public:
-            // The need for this constructor was removed by CWG defect 253 but Clang (prior
-            // to 3.9.0) and GCC (before 4.6.4) require its presence.
-            error_category () noexcept {} // NOLINT
-            char const * name () const noexcept override;
-            std::string message (int error) const override;
-        };
-
-        std::error_category const & get_error_category () noexcept;
-
-        inline std::error_code make_error_code (error_code e) {
-            static_assert (
-                std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
-                "base type of pstore::httpd::error_code must be int to permit safe static cast");
-            return {static_cast<int> (e), get_error_category ()};
-        }
-
-    } // namespace httpd
-} // namespace pstore
-
-
-namespace std {
-
-    template <>
-    struct is_error_code_enum<pstore::httpd::error_code> : std::true_type {};
-
-} // end namespace std
-
 
 
 namespace pstore {

@@ -98,8 +98,8 @@ namespace pstore {
             return result;
         }
 
-        std::error_code make_error_code (pstore::romfs::error_code e) {
-            static pstore::romfs::error_category const cat;
+        std::error_code make_error_code (error_code e) {
+            static error_category const cat;
             static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                            "base type of error_code must be int to permit safe static cast");
             return {static_cast<int> (e), cat};

@@ -126,8 +126,8 @@ namespace pstore {
             ssize_t nlen = 0;
 
             std::string response;
-            // TODO: need to extend buffered_reader so that it can read a block of data. Use it here
-            // to decouple this code from the network APIs.
+            // FIXME: need to extend buffered_reader so that it can read a block of data. Use it
+            // here to decouple this code from the network APIs.
             while ((nlen = recv (fd.get (), buffer.data (), buffer.size (), 0)) > 0) {
                 response.append (buffer.data (), 0, nlen);
             }
