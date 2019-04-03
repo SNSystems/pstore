@@ -57,8 +57,8 @@ namespace pstore {
             // refiller
             // ~~~~~~~~
             /// Called when the buffered_reader<> needs more characters from the data stream.
-            pstore::error_or<std::pair<socket_descriptor &, gsl::span<char>::iterator>>
-            refiller (socket_descriptor & socket, gsl::span<char> const & s);
+            pstore::error_or<std::pair<socket_descriptor &, gsl::span<std::uint8_t>::iterator>>
+            refiller (socket_descriptor & socket, gsl::span<std::uint8_t> const & s);
 
             error_or<socket_descriptor &> network_sender (socket_descriptor & socket,
                                                           gsl::span<std::uint8_t const> const & s);

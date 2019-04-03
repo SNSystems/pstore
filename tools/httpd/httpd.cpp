@@ -66,7 +66,9 @@ int main (int, const char *[]) {
 
     PSTORE_TRY {
         in_port_t const port_number = 8080;
-        pstore::logging::create_log_stream ("server");
+        static constexpr auto ident = "main";
+        pstore::threads::set_name (ident);
+        pstore::logging::create_log_stream (ident);
         pstore::httpd::server (port_number, fs);
     }
     // clang-format off

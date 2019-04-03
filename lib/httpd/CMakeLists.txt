@@ -58,6 +58,7 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_static_content.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/ws_server.hpp"
 
     error.cpp
     headers.cpp
@@ -66,6 +67,7 @@ add_pstore_library (pstore-httpd-lib
     quit.cpp
     server.cpp
     wskey.cpp
+    ws_server.cpp
 )
 target_link_libraries (pstore-httpd-lib PUBLIC pstore-broker-intf pstore-romfs pstore-support)
 add_clang_tidy_target (pstore-httpd-lib)

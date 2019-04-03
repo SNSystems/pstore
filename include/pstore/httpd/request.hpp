@@ -84,7 +84,7 @@ namespace pstore {
         };
 
         namespace details {
-            std::error_code out_of_data_error () {
+            inline std::error_code out_of_data_error () {
                 // TODO: we're returning that we ran out of data. Is there a more suitable
                 // error?
                 return std::make_error_code (std::errc (ENOTCONN));
@@ -104,7 +104,7 @@ namespace pstore {
                 if (!buf) {
                     return result_type{details::out_of_data_error ()};
                 }
-                return result_type{pstore::in_place, std::get<0> (p), *buf};
+                return result_type{in_place, std::get<0> (p), *buf};
             };
 
             auto extract_request_info = [](std::pair<state_type, std::string> const & s) {
@@ -119,7 +119,7 @@ namespace pstore {
                     return result_type{details::out_of_data_error ()};
                 }
                 return result_type{
-                    pstore::in_place, std::get<0> (s),
+                    in_place, std::get<0> (s),
                     request_info{std::move (method), std::move (uri), std::move (version)}};
             };
 

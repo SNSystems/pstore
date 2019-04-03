@@ -78,13 +78,15 @@ namespace pstore {
         /// returned in the first half of the result pair.
         template <typename IO, typename RefillFunction>
         class buffered_reader {
+            using io_mbyte = std::pair<IO, maybe<std::uint8_t>>;
             using io_mchar = std::pair<IO, maybe<char>>;
 
         public:
             using state_type = IO;
 
-            using refill_result_value = std::pair<IO, gsl::span<char>::iterator>;
+            using refill_result_value = std::pair<IO, gsl::span<std::uint8_t>::iterator>;
             using refill_result_type = error_or<refill_result_value>;
+            using geto_result_type = error_or<io_mbyte>;
             using getc_result_type = error_or<io_mchar>;
             using gets_result_type = error_or<std::pair<IO, maybe<std::string>>>;
 
@@ -97,6 +99,8 @@ namespace pstore {
 
             buffered_reader & operator= (buffered_reader const &) = delete;
             buffered_reader & operator= (buffered_reader &&) noexcept = delete;
+
+            geto_result_type geto (IO io);
 
             /// \brief Read a single character from the data source.
             ///
@@ -125,9 +129,12 @@ namespace pstore {
             /// been encountered.
             gets_result_type gets (IO io);
 
+            // error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
+            // fill (IO io, gsl::span<std::uint8_t> & s);
+
         private:
             void check_invariants () noexcept;
-            std::ptrdiff_t pos (gsl::span<char>::iterator const & s) noexcept {
+            std::ptrdiff_t pos (gsl::span<std::uint8_t>::iterator const & s) noexcept {
                 assert (s >= span_.begin () && s <= span_.end ());
                 return s - span_.begin ();
             }
@@ -137,19 +144,19 @@ namespace pstore {
             RefillFunction refill_;
             /// The internal buffer. Filled by a call to the refill function and emptied by calls to
             /// getc().
-            std::vector<char> buf_;
+            std::vector<std::uint8_t> buf_;
             /// Spans the entire contents of buf_. Both the pos_ and end_ iterators refer to this
             /// span.
-            gsl::span<char> const span_;
-            /// The next character in the buffer buf_.
-            gsl::span<char>::iterator pos_;
-            /// One beyond the last valid character in the buffer buf_.
-            gsl::span<char>::iterator end_;
+            gsl::span<std::uint8_t> const span_;
+            /// The next byte in the buffer buf_.
+            gsl::span<std::uint8_t>::iterator pos_;
+            /// One beyond the last valid byte in the buffer buf_.
+            gsl::span<std::uint8_t>::iterator end_;
             /// Set to true once the refill function returns end of stream.
             bool is_eof_ = false;
-            /// A one character push-back container. When just a character, getc() will yield (and
-            /// reset) its value rather than extracting a character from buf_.
-            maybe<char> push_;
+            /// A one byte push-back container. When just a byte, geto() will yield (and
+            /// reset) its value rather than extracting a byte from buf_.
+            maybe<std::uint8_t> push_;
         };
 
         // ctor
@@ -158,7 +165,7 @@ namespace pstore {
         buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction refill,
                                                               std::size_t buffer_size)
                 : refill_{refill}
-                , buf_ (buffer_size, char{0})
+                , buf_ (buffer_size, std::uint8_t{0})
                 , span_ (gsl::make_span (buf_))
                 , pos_ (span_.begin ())
                 , end_ (span_.begin ())
@@ -178,30 +185,35 @@ namespace pstore {
             this->check_invariants ();
         }
 
-        // getc
+        // template <typename IO, typename RefillFunction>
+        // error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
+        // buffered_reader<IO, RefillFunction>::fill (IO io, gsl::span<std::uint8_t> & s) {
+        //}
+
+        // geto
         // ~~~~
         template <typename IO, typename RefillFunction>
-        auto buffered_reader<IO, RefillFunction>::getc (IO io) -> getc_result_type {
-            // If a character has been "pushed back" then return it immediately.
+        auto buffered_reader<IO, RefillFunction>::geto (IO io) -> geto_result_type {
+            // If a byte has been "pushed back" then return it immediately.
             if (push_) {
-                char const c = *push_;
+                auto const v = *push_;
                 push_.reset ();
-                return getc_result_type{in_place, io, just (c)};
+                return geto_result_type{in_place, io, just (v)};
             }
 
-            // If we have characters in the buffer, return the next one.
+            // If we have bytes in the buffer, return the next one.
             if (pos_ != end_) {
                 this->check_invariants ();
-                return getc_result_type{in_place, io, just (*(pos_++))};
+                return geto_result_type{in_place, io, just (*(pos_++))};
             }
 
             // We've seen an EOF condition so don't try refilling the buffer.
             if (is_eof_) {
-                return getc_result_type{in_place, io, nothing<char> ()};
+                return geto_result_type{in_place, io, nothing<std::uint8_t> ()};
             }
 
             auto const check_refill_response = [this](refill_result_value const & r) {
-                gsl::span<char>::iterator const & end = std::get<1> (r);
+                gsl::span<std::uint8_t>::iterator const & end = std::get<1> (r);
                 if (end < span_.begin () || end > span_.end ()) {
                     return refill_result_type{make_error_code (error_code::refill_out_of_range)};
                 }
@@ -209,21 +221,35 @@ namespace pstore {
             };
 
             auto const yield_result = [this](refill_result_value const & r) {
-                gsl::span<char>::iterator const & end = std::get<1> (r);
+                gsl::span<std::uint8_t>::iterator const & end = std::get<1> (r);
                 if (end == span_.begin ()) {
                     // that's the end of the source data.
                     is_eof_ = true;
-                    return getc_result_type{in_place, std::get<0> (r), nothing<char> ()};
+                    return geto_result_type{in_place, std::get<0> (r), nothing<std::uint8_t> ()};
                 }
 
                 end_ = end;
                 pos_ = span_.begin ();
                 this->check_invariants ();
-                return getc_result_type{in_place, std::get<0> (r), just (*(pos_++))};
+                return geto_result_type{in_place, std::get<0> (r), just (*(pos_++))};
             };
 
             // Refill the buffer.
             return (refill_ (io, span_) >>= check_refill_response) >>= yield_result;
+        }
+
+        // getc
+        // ~~~~
+        template <typename IO, typename RefillFunction>
+        auto buffered_reader<IO, RefillFunction>::getc (IO io) -> getc_result_type {
+            // TODO: We don't consider extended characters here: only ASCII will work. Should we
+            // handle UTF-8 correctly? If so, then if needs to potentially read more than one octect
+            // and return a char32_t.
+            return geto (io) >>= [](io_mbyte const & r) {
+                maybe<std::uint8_t> const & mb = std::get<1> (r);
+                maybe<char> const mc = mb ? just (static_cast<char> (*mb)) : nothing<char> ();
+                return getc_result_type{in_place, std::get<0> (r), mc};
+            };
         }
 
         // gets
@@ -262,7 +288,9 @@ namespace pstore {
                                    // We had a CR followed by something that's NOT an LF. Save it so
                                    // that the next call to getc() will yield it again.
                                    assert (!push_);
-                                   push_ = *mc2;
+                                   // TODO: the conversion below assumes that we're only dealing
+                                   // with ASCII.
+                                   push_ = static_cast<std::uint8_t> (*mc2);
                                }
                                return gets_result_type{in_place, std::get<0> (r2), just (str)};
                            };
@@ -287,7 +315,7 @@ namespace pstore {
         template <typename IO, typename RefillFunction>
         void buffered_reader<IO, RefillFunction>::check_invariants () noexcept {
 #ifndef NDEBUG
-            auto is_valid = [this](gsl::span<char>::iterator it) noexcept {
+            auto is_valid = [this](gsl::span<std::uint8_t>::iterator it) noexcept {
                 ptrdiff_t const p = this->pos (it);
                 return p >= 0 &&
                        static_cast<std::make_unsigned<ptrdiff_t>::type> (p) <= buf_.size ();

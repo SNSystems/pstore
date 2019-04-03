@@ -111,7 +111,7 @@ namespace pstore {
 
             // TODO: there's a similar function in command_line.cpp
             // Returns true if the string \p s starts with the given prefix.
-            bool starts_with (std::string const & s, std::string const & prefix) {
+            inline bool starts_with (std::string const & s, std::string const & prefix) {
                 std::string::size_type pos = 0;
                 while (pos < s.length () && pos < prefix.length () && s[pos] == prefix[pos]) {
                     ++pos;

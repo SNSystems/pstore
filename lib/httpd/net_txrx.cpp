@@ -93,10 +93,10 @@ namespace pstore {
             // refiller
             // ~~~~~~~~
             /// Called when the buffered_reader<> needs more characters from the data stream.
-            error_or<std::pair<socket_descriptor &, gsl::span<char>::iterator>>
-            refiller (socket_descriptor & socket, gsl::span<char> const & s) {
+            error_or<std::pair<socket_descriptor &, gsl::span<std::uint8_t>::iterator>>
+            refiller (socket_descriptor & socket, gsl::span<std::uint8_t> const & s) {
                 using result_type =
-                    error_or<std::pair<socket_descriptor &, gsl::span<char>::iterator>>;
+                    error_or<std::pair<socket_descriptor &, gsl::span<std::uint8_t>::iterator>>;
 
                 auto size = s.size ();
                 size = std::max (size, decltype (size){0});
@@ -104,8 +104,8 @@ namespace pstore {
                         static_cast<size_type> (size) < std::numeric_limits<size_type>::max ());
 
                 errno = 0;
-                ssize_t const nread =
-                    ::recv (socket.get (), s.data (), static_cast<size_type> (size), 0 /*flags*/);
+                ssize_t const nread = ::recv (socket.get (), reinterpret_cast<char *> (s.data ()),
+                                              static_cast<size_type> (size), 0 /*flags*/);
                 assert (is_recv_error (nread) || (nread >= 0 && nread <= size));
                 if (is_recv_error (nread)) {
                     return result_type{get_last_error ()};

@@ -206,7 +206,7 @@ TEST (HttpdBufferedReader, StringCRNoLFChars) {
 TEST (HttpdBufferedReader, SomeCharactersThenAnError) {
     refiller r;
     EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\nd")));
-    EXPECT_CALL (r, fill (1, _)).WillOnce (Invoke ([](int, span<char> const &) {
+    EXPECT_CALL (r, fill (1, _)).WillOnce (Invoke ([](int, span<std::uint8_t> const &) {
         return refiller_result_type (std::make_error_code (std::errc::operation_not_permitted));
     }));
 

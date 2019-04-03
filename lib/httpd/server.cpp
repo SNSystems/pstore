@@ -80,6 +80,7 @@
 #include "pstore/httpd/serve_dynamic_content.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
 #include "pstore/httpd/wskey.hpp"
+#include "pstore/httpd/ws_server.hpp"
 #include "pstore/support/logging.hpp"
 
 namespace {
@@ -198,16 +199,16 @@ namespace {
         }
     }
 
-
+    template <typename Reader, typename IO>
     pstore::error_or<std::unique_ptr<std::thread>>
-    upgrade_to_ws (pstore::httpd::header_info const & header_contents, socket_descriptor & socket) {
+    upgrade_to_ws (Reader & reader, IO io, pstore::httpd::header_info const & header_contents) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
         using pstore::logging::priority;
         assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
 
         log (priority::info, "WebSocket upgrade requested");
 
-        // Validate the request headers/
+        // Validate the request headers
         if (!header_contents.websocket_key || !header_contents.websocket_version) {
             log (priority::error, "Missing WebSockets upgrade key or version header.");
             return return_type{pstore::httpd::error_code::bad_request};
@@ -216,7 +217,6 @@ namespace {
         if (*header_contents.websocket_version != 13) {
             // send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
         }
-
 
         // Send back the server handshake response.
         auto const accept_ws_connection = [&]() {
@@ -227,25 +227,37 @@ namespace {
             os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: websocket" << crlf
                << "Connection: upgrade" << crlf << "Sec-WebSocket-Accept: "
                << pstore::httpd::source_key (*header_contents.websocket_key) << crlf << crlf;
-            return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (socket), os);
+            // Here I assume that the send() IO param is the same as the Reader's IO parameter.
+            return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
         // Spawn a thread to manage this WebSockets session.
         auto const create_ws_server = [&](socket_descriptor & s) {
-            return return_type{pstore::in_place,
-                               new std::thread (
-                                   [](socket_descriptor && sd) {
-                                       constexpr auto ident = "websocket";
-                                       pstore::threads::set_name (ident);
-                                       pstore::logging::create_log_stream (ident);
+            assert (s.valid ());
+            return return_type{
+                pstore::in_place,
+                new std::thread (
+                    [](Reader reader2, socket_descriptor io) {
+                        PSTORE_TRY {
+                            constexpr auto ident = "websocket";
+                            pstore::threads::set_name (ident);
+                            pstore::logging::create_log_stream (ident);
 
-                                       log (priority::info, "Started WebSockets session");
-                                       // TODO: server goes here!
-                                       log (priority::info, "Ended WebSockets session");
-                                   },
-                                   std::move (s))};
+                            log (priority::info, "Started WebSockets session");
+
+                            assert (io.valid ());
+                            ws_server_loop (reader2, std::ref (io));
+
+                            log (priority::info, "Ended WebSockets session");
+                        }
+                        PSTORE_CATCH (std::exception const & ex,
+                                      { log (priority::error, "Error: ", ex.what ()); })
+                        PSTORE_CATCH (..., { log (priority::error, "Unknown exception"); })
+                    },
+                    std::move (reader), std::move (s))};
         };
 
+        assert (io.get ().valid ());
         return accept_ws_connection () >>= create_ws_server;
     }
 
@@ -274,9 +286,7 @@ namespace pstore {
 
             server_state state{};
             while (!state.done) {
-
                 // Wait for a connection request.
-                // TODO: some kind of shutdown procedure.
                 socket_descriptor childfd{
                     ::accept (parentfd.get (), reinterpret_cast<struct sockaddr *> (&client_addr),
                               &clientlen)};
@@ -323,7 +333,7 @@ namespace pstore {
 
                         if (header_contents.connection_upgrade &&
                             header_contents.upgrade_to_websocket) {
-                            return upgrade_to_ws (header_contents, childfd) >>=
+                            return upgrade_to_ws (reader, std::ref (childfd), header_contents) >>=
                                    [&](std::unique_ptr<std::thread> & worker) {
                                        websockets_workers.emplace_back (std::move (worker));
                                        return error_or<server_state> (state);
