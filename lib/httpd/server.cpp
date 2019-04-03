@@ -231,30 +231,30 @@ namespace {
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
+        auto server_loop_thread = [](Reader reader2, socket_descriptor io2) {
+            PSTORE_TRY {
+                constexpr auto ident = "websocket";
+                pstore::threads::set_name (ident);
+                pstore::logging::create_log_stream (ident);
+
+                log (priority::info, "Started WebSockets session");
+
+                assert (io2.valid ());
+                ws_server_loop (reader2, std::ref (io2));
+
+                log (priority::info, "Ended WebSockets session");
+            }
+            PSTORE_CATCH (std::exception const & ex,
+                          { log (priority::error, "Error: ", ex.what ()); })
+            PSTORE_CATCH (..., { log (priority::error, "Unknown exception"); })
+        };
+
         // Spawn a thread to manage this WebSockets session.
         auto const create_ws_server = [&](socket_descriptor & s) {
             assert (s.valid ());
             return return_type{
                 pstore::in_place,
-                new std::thread (
-                    [](Reader reader2, socket_descriptor io) {
-                        PSTORE_TRY {
-                            constexpr auto ident = "websocket";
-                            pstore::threads::set_name (ident);
-                            pstore::logging::create_log_stream (ident);
-
-                            log (priority::info, "Started WebSockets session");
-
-                            assert (io.valid ());
-                            ws_server_loop (reader2, std::ref (io));
-
-                            log (priority::info, "Ended WebSockets session");
-                        }
-                        PSTORE_CATCH (std::exception const & ex,
-                                      { log (priority::error, "Error: ", ex.what ()); })
-                        PSTORE_CATCH (..., { log (priority::error, "Unknown exception"); })
-                    },
-                    std::move (reader), std::move (s))};
+                new std::thread (server_loop_thread, std::move (reader), std::move (s))};
         };
 
         assert (io.get ().valid ());

@@ -44,8 +44,8 @@ namespace pstore {
         template <typename Reader, typename IO>
         error_or<std::pair<IO, maybe<packet1>>> get_packet1 (Reader & reader, IO io) {
             using rtype = std::pair<IO, maybe<std::uint8_t>>;
-            return reader.geto (io) >>= [&](rtype const & p1) {
-                return reader.geto (std::get<0> (p1)) >>= [&](rtype const & p2) {
+            return reader.geto (io) >>= [&reader](rtype const & p1) {
+                return reader.geto (std::get<0> (p1)) >>= [&p1](rtype const & p2) {
                     using return_type = error_or<std::pair<IO, maybe<packet1>>>;
 
                     auto byte1 = std::get<1> (p1);
@@ -53,9 +53,11 @@ namespace pstore {
                     if (!byte1 || !byte2) {
                         return return_type{in_place, std::get<0> (p2), nothing<packet1> ()};
                     }
+
                     packet1 res;
                     res.bytes[0] = *byte1;
                     res.bytes[1] = *byte2;
+
                     log (pstore::logging::priority::info,
                          "fin:", static_cast<std::uint16_t> (res.fin));
                     log (pstore::logging::priority::info,
@@ -70,7 +72,8 @@ namespace pstore {
                          "mask:", static_cast<std::uint16_t> (res.mask));
                     log (pstore::logging::priority::info,
                          "payload_length:", static_cast<std::uint16_t> (res.payload_length));
-                    return return_type{in_place, std::get<0> (p2), res};
+
+                    return return_type{in_place, std::get<0> (p2), just (res)};
                 };
             };
         }
