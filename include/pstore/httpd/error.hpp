@@ -44,6 +44,7 @@
 #ifndef PSTORE_HTTPD_ERROR_HPP
 #define PSTORE_HTTPD_ERROR_HPP
 
+#include <string>
 #include <system_error>
 
 namespace pstore {
