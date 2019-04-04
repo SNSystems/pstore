@@ -69,7 +69,6 @@
 #    include <io.h>
 #    include <winsock2.h>
 #    include <ws2tcpip.h>
-using ssize_t = SSIZE_T;
 #endif
 
 #include "pstore/broker/globals.hpp"

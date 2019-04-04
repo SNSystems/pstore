@@ -80,10 +80,6 @@
 #include "pstore/support/signal_helpers.hpp"
 #include "pstore/support/thread.hpp"
 
-#ifdef _WIN32
-using ssize_t = SSIZE_T;
-#endif
-
 namespace {
 
     // TODO: these are shared with the command processor and should be somewhere common.

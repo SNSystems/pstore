@@ -178,8 +178,6 @@
 #    define PSTORE_NULLABLE
 #endif
 
-
-// FIXME: there are multiple definitions of this type.
 #ifdef _WIN32
 using ssize_t = SSIZE_T;
 #endif
