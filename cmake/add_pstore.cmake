@@ -126,6 +126,12 @@ function (add_pstore_additional_compiler_flags target_name)
             -Wno-weak-vtables
         )
 
+        # TODO: this warning is far too pervasive in clang3.8 but much better in later
+        # builds. Only disable for older versions.
+        disable_clang_warning_if_possible (${target_name}
+            -Wno-nullability-completeness
+            PSTORE_CLANG_SUPPORTS_NX
+        )
         disable_clang_warning_if_possible (${target_name}
             -Wno-nullability-extension
             PSTORE_CLANG_SUPPORTS_NX
