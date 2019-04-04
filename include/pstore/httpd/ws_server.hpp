@@ -68,7 +68,9 @@ namespace pstore {
         template <typename Reader, typename IO>
         error_or_n<IO> get_span (Reader & reader, IO io, gsl::span<std::uint8_t> const & sp) {
             return get_span_impl (reader, io, sp) >>=
-                   [&sp](IO io2, gsl::span<std::uint8_t> const &) { return error_or_n<IO>{io2}; };
+                   [&sp](IO io2, gsl::span<std::uint8_t> const &) {
+                       return error_or_n<IO>{in_place, io2};
+                   };
         }
 
         template <typename Reader, typename IO>
