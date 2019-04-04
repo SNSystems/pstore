@@ -219,7 +219,7 @@ namespace {
         }
 
         // Send back the server handshake response.
-        auto const accept_ws_connection = [&]() {
+        auto const accept_ws_connection = [&header_contents, &io]() {
             log (priority::info, "Accepting WebSockets upgrade");
 
             static constexpr auto crlf = pstore::httpd::crlf;
@@ -250,7 +250,7 @@ namespace {
         };
 
         // Spawn a thread to manage this WebSockets session.
-        auto const create_ws_server = [&](socket_descriptor & s) {
+        auto const create_ws_server = [&reader, server_loop_thread](socket_descriptor & s) {
             assert (s.valid ());
             return return_type{
                 pstore::in_place,
@@ -328,9 +328,7 @@ namespace pstore {
 
                 // Respond appropriately based on the request and headers.
                 auto const serve_reply =
-                    [&](std::pair<socket_descriptor &, header_info> const & res) {
-                        header_info const & header_contents = std::get<1> (res);
-
+                    [&](socket_descriptor & io2, header_info const & header_contents) {
                         if (header_contents.connection_upgrade &&
                             header_contents.upgrade_to_websocket) {
                             return upgrade_to_ws (reader, std::ref (childfd), header_contents) >>=
@@ -342,16 +340,15 @@ namespace pstore {
 
                         if (!details::starts_with (request.uri (), dynamic_path)) {
                             return serve_static_content (pstore::httpd::net::network_sender,
-                                                         std::ref (std::get<0> (res)),
-                                                         request.uri (), file_system) >>=
+                                                         std::ref (io2), request.uri (),
+                                                         file_system) >>=
                                    [&state](socket_descriptor &) {
                                        return error_or<server_state> (state);
                                    };
                         }
 
                         return serve_dynamic_content (pstore::httpd::net::network_sender,
-                                                      std::ref (std::get<0> (res)), request.uri (),
-                                                      state) >>=
+                                                      std::ref (io2), request.uri (), state) >>=
                                [&state](std::pair<socket_descriptor &, server_state> const & p) {
                                    return error_or<server_state> (std::get<1> (p));
                                };

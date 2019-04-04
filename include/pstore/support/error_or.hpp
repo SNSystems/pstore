@@ -47,6 +47,7 @@
 #include <cassert>
 #include <new>
 #include <system_error>
+#include <tuple>
 
 #include "pstore/support/inherit_const.hpp"
 #include "pstore/support/max.hpp"
@@ -377,6 +378,88 @@ namespace pstore {
             return f (*t);
         }
         return error_or<typename decltype (f (t.get ()))::value_type> (t.get_error ());
+    }
+
+
+    template <typename... Args>
+    using error_or_n = error_or<std::tuple<Args...>>;
+
+} // end namespace pstore
+
+// std::get<> support for error_or_n<>.
+namespace std {
+
+    template <std::size_t I, class... Types>
+    typename std::tuple_element<I, std::tuple<Types...>>::type &
+    get (pstore::error_or_n<Types...> & eon) noexcept {
+        return std::get<I> (*eon);
+    }
+
+    template <std::size_t I, class... Types>
+    typename std::tuple_element<I, std::tuple<Types...>>::type &&
+    get (pstore::error_or_n<Types...> && eon) noexcept {
+        return std::get<I> (*eon);
+    }
+
+    template <std::size_t I, class... Types>
+    typename std::tuple_element<I, std::tuple<Types...>>::type const &
+    get (pstore::error_or_n<Types...> const & eon) noexcept {
+        return std::get<I> (*eon);
+    }
+
+
+} // end namespace std
+
+
+
+namespace pstore {
+    namespace details {
+
+        template <std::size_t N>
+        struct applier {
+            template <typename Function, typename Tuple, typename... Args>
+            static auto apply (Function && f, Tuple && t, Args &&... a)
+                -> decltype (applier<N - 1>::apply (std::forward<Function> (f),
+                                                    std::forward<Tuple> (t),
+                                                    std::get<N - 1> (std::forward<Tuple> (t)),
+                                                    std::forward<Args> (a)...)) {
+
+                return applier<N - 1>::apply (std::forward<Function> (f), std::forward<Tuple> (t),
+                                              std::get<N - 1> (std::forward<Tuple> (t)),
+                                              std::forward<Args> (a)...);
+            }
+        };
+
+        template <>
+        struct applier<std::size_t{0}> {
+            template <typename Function, typename Tuple, typename... Args>
+            static auto apply (Function && f, Tuple &&, Args &&... a)
+                -> decltype (std::forward<Function> (f) (std::forward<Args> (a)...)) {
+
+                return std::forward<Function> (f) (std::forward<Args> (a)...);
+            }
+        };
+
+        template <typename Function, typename Tuple>
+        inline auto apply (Function && f, Tuple && t)
+            -> decltype (applier<std::tuple_size<typename std::decay<Tuple>::type>::value>::apply (
+                std::forward<Function> (f), std::forward<Tuple> (t))) {
+
+            return applier<std::tuple_size<typename std::decay<Tuple>::type>::value>::apply (
+                std::forward<Function> (f), std::forward<Tuple> (t));
+        }
+
+    } // end namespace details
+
+
+    template <typename Function, typename... Args>
+    auto operator>>= (error_or_n<Args...> const & t, Function && f)
+        -> decltype (details::apply (f, t.get ())) {
+
+        if (t) {
+            return details::apply (std::forward<Function> (f), t.get ());
+        }
+        return decltype (details::apply (f, t.get ())){t.get_error ()};
     }
 
 } // end namespace pstore

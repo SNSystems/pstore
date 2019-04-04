@@ -98,28 +98,27 @@ namespace pstore {
         read_request (ReaderType & reader, typename ReaderType::state_type io) {
             using state_type = typename ReaderType::state_type;
 
-            auto check_for_eof = [](std::pair<state_type, maybe<std::string>> const & p) {
-                using result_type = error_or<std::pair<state_type, std::string>>;
-                auto const & buf = std::get<1> (p);
+            auto check_for_eof = [](state_type io2, maybe<std::string> const & buf) {
+                using result_type = error_or_n<state_type, std::string>;
                 if (!buf) {
                     return result_type{details::out_of_data_error ()};
                 }
-                return result_type{in_place, std::get<0> (p), *buf};
+                return result_type{in_place, io2, *buf};
             };
 
-            auto extract_request_info = [](std::pair<state_type, std::string> const & s) {
+            auto extract_request_info = [](state_type io3, std::string const & s) {
                 using result_type = error_or<std::pair<state_type, request_info>>;
 
-                std::istringstream str{std::get<1> (s)};
+                std::istringstream is{s};
                 std::string method;
                 std::string uri;
                 std::string version;
-                str >> method >> uri >> version;
+                is >> method >> uri >> version;
                 if (method.length () == 0 || uri.length () == 0 || version.length () == 0) {
                     return result_type{details::out_of_data_error ()};
                 }
                 return result_type{
-                    in_place, std::get<0> (s),
+                    in_place, io3,
                     request_info{std::move (method), std::move (uri), std::move (version)}};
             };
 
@@ -130,49 +129,50 @@ namespace pstore {
         // ~~~~~~~~~~~~
         /// \tparam Reader  The buffered_reader<> type from which data is to be read.
         /// \tparam HandleFn A function of the form `std::function<IO(IO, std::string const &,
-        /// std::string const &)>`. \tparam IO The type of the state object passed to handler().
+        /// std::string const &)>`.
+        /// \tparam IO The type of the state object passed to handler().
+        ///
         /// \param reader  An instance of Reader: a buffered_reader<> from which data is read.
         /// \param reader_state  The state passed to the reader's refill function.
         /// \param handler  A function called for each HTTP header. It is passed a state value, the
-        /// key (lower-cased to ensure case insensitivity) and the associate value. \param
-        /// handler_state  The state passed to handler.
+        /// key (lower-cased to ensure case insensitivity) and the associate value.
+        /// \param handler_state  The state passed to handler.
         template <typename Reader, typename HandleFn, typename IO>
-        error_or<std::pair<typename Reader::state_type, IO>>
+        error_or_n<typename Reader::state_type, IO>
         read_headers (Reader & reader, typename Reader::state_type reader_state, HandleFn handler,
                       IO handler_state) {
             return reader.gets (reader_state) >>=
-                   [&reader, &handler, &handler_state](
-                       std::pair<typename Reader::state_type, maybe<std::string>> const & p) {
-                       auto const & ms = std::get<1> (p);
-                       if (!ms || ms->length () == 0) {
-                           return error_or<std::pair<typename Reader::state_type, IO>>{
-                               pstore::in_place, std::get<0> (p), handler_state};
-                       }
+                   [
+                       &reader, &handler, &handler_state
+                   ](typename Reader::state_type state2,
+                     maybe<std::string> const & ms) -> error_or_n<typename Reader::state_type, IO> {
+                if (!ms || ms->length () == 0) {
+                    return error_or<std::pair<typename Reader::state_type, IO>>{
+                        pstore::in_place, state2, handler_state};
+                }
 
-                       std::string key;
-                       std::string value;
-                       auto pos = ms->find (':');
-                       if (pos == std::string::npos) {
-                           value = *ms;
-                       } else {
-                           key = ms->substr (0, pos);
-                           // HTTP header names are case-insensitive so convert to lower-case here.
-                           std::transform (key.begin (), key.end (), key.begin (),
-                                           [](unsigned char c) {
-                                               return static_cast<char> (std::tolower (c));
-                                           });
+                std::string key;
+                std::string value;
+                auto pos = ms->find (':');
+                if (pos == std::string::npos) {
+                    value = *ms;
+                } else {
+                    key = ms->substr (0, pos);
+                    // HTTP header names are case-insensitive so convert to lower-case here.
+                    std::transform (key.begin (), key.end (), key.begin (), [](unsigned char c) {
+                        return static_cast<char> (std::tolower (c));
+                    });
 
-                           ++pos; // skip the colon
-                           // skip optional whitespace before the value string.
-                           while (pos < ms->length () && std::isspace ((*ms)[pos])) {
-                               ++pos;
-                           }
-                           value = ms->substr (pos);
-                       }
+                    ++pos; // skip the colon
+                    // skip optional whitespace before the value string.
+                    while (pos < ms->length () && std::isspace ((*ms)[pos])) {
+                        ++pos;
+                    }
+                    value = ms->substr (pos);
+                }
 
-                       return read_headers (reader, std::get<0> (p), handler,
-                                            handler (handler_state, key, value));
-                   };
+                return read_headers (reader, state2, handler, handler (handler_state, key, value));
+            };
         }
 
     } // namespace httpd

@@ -53,6 +53,7 @@
 #include "buffered_reader_mocks.hpp"
 
 using pstore::error_or;
+using pstore::error_or_n;
 using pstore::httpd::make_buffered_reader;
 using pstore::httpd::request_info;
 using testing::_;
@@ -126,7 +127,7 @@ TEST (ReadHeaders, Common) {
     EXPECT_CALL (handler, call (0, "host", "localhost:8080")).WillOnce (Return (1));
     EXPECT_CALL (handler, call (1, "accept-encoding", "gzip, deflate")).WillOnce (Return (2));
     EXPECT_CALL (handler, call (2, "referer", "http://localhost:8080/")).WillOnce (Return (3));
-    error_or<std::pair<int, int>> const res = pstore::httpd::read_headers (
+    error_or_n<int, int> const res = pstore::httpd::read_headers (
         br, 0,
         [&handler](int io, std::string const & key, std::string const & value) {
             return handler.call (io, key, value);

@@ -52,6 +52,7 @@
 #include "buffered_reader_mocks.hpp"
 
 using pstore::error_or;
+using pstore::error_or_n;
 using pstore::in_place;
 using pstore::maybe;
 using pstore::gsl::span;
@@ -237,7 +238,7 @@ TEST (HttpdBufferedReader, MaxLengthString) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length);
-    error_or<std::pair<int, maybe<std::string>>> const s1 = br.gets (io);
+    error_or_n<int, maybe<std::string>> const s1 = br.gets (io);
     ASSERT_TRUE (static_cast<bool> (s1)) << "Error: " << s1.get_error ();
     maybe<std::string> str1;
     std::tie (io, str1) = *s1;
@@ -255,6 +256,6 @@ TEST (HttpdBufferedReader, StringTooLong) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function (), max_string_length + 1U);
-    error_or<std::pair<int, maybe<std::string>>> const s2 = br.gets (io);
+    error_or_n<int, maybe<std::string>> const s2 = br.gets (io);
     EXPECT_EQ (s2.get_error (), make_error_code (pstore::httpd::error_code::string_too_long));
 }

@@ -60,11 +60,10 @@
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 
-using getc_result_type = pstore::error_or<std::pair<int, pstore::maybe<char>>>;
-using gets_result_type = pstore::error_or<std::pair<int, pstore::maybe<std::string>>>;
+using getc_result_type = pstore::error_or_n<int, pstore::maybe<char>>;
+using gets_result_type = pstore::error_or_n<int, pstore::maybe<std::string>>;
 
-using refiller_result_type =
-    pstore::error_or<std::pair<int, pstore::gsl::span<std::uint8_t>::iterator>>;
+using refiller_result_type = pstore::error_or_n<int, pstore::gsl::span<std::uint8_t>::iterator>;
 using refiller_function =
     std::function<refiller_result_type (int, pstore::gsl::span<std::uint8_t> const &)>;
 

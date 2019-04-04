@@ -78,17 +78,13 @@ namespace pstore {
         /// returned in the first half of the result pair.
         template <typename IO, typename RefillFunction>
         class buffered_reader {
-            using io_mbyte = std::pair<IO, maybe<std::uint8_t>>;
-            using io_mchar = std::pair<IO, maybe<char>>;
-
         public:
             using state_type = IO;
 
-            using refill_result_value = std::pair<IO, gsl::span<std::uint8_t>::iterator>;
-            using refill_result_type = error_or<refill_result_value>;
-            using geto_result_type = error_or<io_mbyte>;
-            using getc_result_type = error_or<io_mchar>;
-            using gets_result_type = error_or<std::pair<IO, maybe<std::string>>>;
+            using refill_result_type = error_or_n<IO, gsl::span<std::uint8_t>::iterator>;
+            using geto_result_type = error_or_n<IO, maybe<std::uint8_t>>;
+            using getc_result_type = error_or_n<IO, maybe<char>>;
+            using gets_result_type = error_or_n<IO, maybe<std::string>>;
 
             explicit buffered_reader (RefillFunction refill,
                                       std::size_t buffer_size = default_buffer_size);
@@ -99,6 +95,9 @@ namespace pstore {
 
             buffered_reader & operator= (buffered_reader const &) = delete;
             buffered_reader & operator= (buffered_reader &&) noexcept = delete;
+
+            error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
+            get_span (IO io, gsl::span<std::uint8_t> const & s);
 
             geto_result_type geto (IO io);
 
@@ -212,30 +211,36 @@ namespace pstore {
                 return geto_result_type{in_place, io, nothing<std::uint8_t> ()};
             }
 
-            auto const check_refill_response = [this](refill_result_value const & r) {
-                gsl::span<std::uint8_t>::iterator const & end = std::get<1> (r);
+            auto const check_refill_response = [this](IO io2,
+                                                      gsl::span<std::uint8_t>::iterator end) {
                 if (end < span_.begin () || end > span_.end ()) {
                     return refill_result_type{make_error_code (error_code::refill_out_of_range)};
                 }
-                return refill_result_type{r};
+                return refill_result_type{in_place, io2, end};
             };
 
-            auto const yield_result = [this](refill_result_value const & r) {
-                gsl::span<std::uint8_t>::iterator const & end = std::get<1> (r);
+            auto const yield_result = [this](IO io3, gsl::span<std::uint8_t>::iterator end) {
                 if (end == span_.begin ()) {
                     // that's the end of the source data.
                     is_eof_ = true;
-                    return geto_result_type{in_place, std::get<0> (r), nothing<std::uint8_t> ()};
+                    return geto_result_type{in_place, io3, nothing<std::uint8_t> ()};
                 }
 
                 end_ = end;
                 pos_ = span_.begin ();
                 this->check_invariants ();
-                return geto_result_type{in_place, std::get<0> (r), just (*(pos_++))};
+                return geto_result_type{in_place, io3, just (*(pos_++))};
             };
 
             // Refill the buffer.
-            return (refill_ (io, span_) >>= check_refill_response) >>= yield_result;
+            error_or_n<IO, gsl::span<std::uint8_t>::iterator> x = refill_ (io, span_);
+            return (x >>= check_refill_response) >>= yield_result;
+        }
+
+        template <typename IO>
+        error_or<std::pair<IO, maybe<char>>> foo (IO io, maybe<std::uint8_t> mb) {
+            maybe<char> const mc = mb ? just (static_cast<char> (*mb)) : nothing<char> ();
+            return error_or<std::pair<IO, maybe<char>>>{in_place, io, mc};
         }
 
         // getc
@@ -245,11 +250,14 @@ namespace pstore {
             // TODO: We don't consider extended characters here: only ASCII will work. Should we
             // handle UTF-8 correctly? If so, then if needs to potentially read more than one octect
             // and return a char32_t.
-            return geto (io) >>= [](io_mbyte const & r) {
-                maybe<std::uint8_t> const & mb = std::get<1> (r);
+#if 0
+            return geto (io) >>= &foo;
+#else
+            return geto (io) >>= [](IO io2, maybe<std::uint8_t> const & mb) {
                 maybe<char> const mc = mb ? just (static_cast<char> (*mb)) : nothing<char> ();
-                return getc_result_type{in_place, std::get<0> (r), mc};
+                return getc_result_type{in_place, io2, mc};
             };
+#endif
         }
 
         // gets
@@ -266,10 +274,9 @@ namespace pstore {
                                         str.empty () ? nothing<std::string> () : just (str)};
             };
 
-            return this->getc (io) >>= [this, &str, eos](io_mchar const & r) {
-                maybe<char> const & mc = std::get<1> (r);
+            return this->getc (io) >>= [this, &str, eos](IO io3, maybe<char> mc) {
                 if (!mc) {
-                    return eos (std::get<0> (r)); // We saw end-of-stream.
+                    return eos (io3); // We saw end-of-stream.
                 }
 
                 constexpr auto cr = '\r';
@@ -277,31 +284,29 @@ namespace pstore {
                 switch (*mc) {
                 case cr:
                     // We read a CR. If so, look to see if the next character is LF.
-                    return this->getc (std::get<0> (r)) >>=
-                           [this, str, eos, lf](io_mchar const & r2) {
-                               maybe<char> const & mc2 = std::get<1> (r2);
-                               if (!mc2) {
-                                   return eos (std::get<0> (r2)); // We saw end-of-stream.
-                               }
+                    return this->getc (io3) >>= [this, str, eos, lf](IO io4, maybe<char> mc2) {
+                        if (!mc2) {
+                            return eos (io4); // We saw end-of-stream.
+                        }
 
-                               if (*mc2 != lf) {
-                                   // We had a CR followed by something that's NOT an LF. Save it so
-                                   // that the next call to getc() will yield it again.
-                                   assert (!push_);
-                                   // TODO: the conversion below assumes that we're only dealing
-                                   // with ASCII.
-                                   push_ = static_cast<std::uint8_t> (*mc2);
-                               }
-                               return gets_result_type{in_place, std::get<0> (r2), just (str)};
-                           };
-                case lf: return gets_result_type{in_place, std::get<0> (r), just (str)};
+                        if (*mc2 != lf) {
+                            // We had a CR followed by something that's NOT an LF. Save it so
+                            // that the next call to getc() will yield it again.
+                            assert (!push_);
+                            // TODO: the conversion below assumes that we're only dealing
+                            // with ASCII.
+                            push_ = static_cast<std::uint8_t> (*mc2);
+                        }
+                        return gets_result_type{in_place, io4, just (str)};
+                    };
+                case lf: return gets_result_type{in_place, io3, just (str)};
                 default: break;
                 }
 
                 if (str.length () >= max_string_length) {
                     return gets_result_type{make_error_code (error_code::string_too_long)};
                 }
-                return this->gets_impl (std::get<0> (r), str + *mc);
+                return this->gets_impl (io3, str + *mc);
             };
         }
 
