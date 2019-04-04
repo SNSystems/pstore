@@ -94,7 +94,6 @@ namespace pstore {
 
         ///@{
         std::shared_ptr<void const> getro (address addr, std::size_t size) {
-            // TODO: perhaps raise an exception if addr does not lie within the current transaction.
             assert (addr >= first_ && addr + size <= first_ + size_);
             return db ().getro (addr, size);
         }
@@ -117,7 +116,6 @@ namespace pstore {
 
         ///@{
         std::shared_ptr<void> getrw (address addr, std::size_t size) {
-            // TODO: raise an exception if addr does not lie within the current transaction.
             assert (addr >= first_ && addr + size <= first_ + size_);
             return db_.getrw (addr, size);
         }
