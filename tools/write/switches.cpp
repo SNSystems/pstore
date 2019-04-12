@@ -78,13 +78,13 @@ namespace {
 
     cl::list<std::string>
         AddFile ("add-file",
-                 cl::desc ("Add key with the named file's contents as the corresponding value. May "
-                           "be repeated to add several files."));
+                 cl::desc ("Add key with the named file's contents as the corresponding value."
+                           " Specified as 'key,filename'. May be repeated to add several files."));
     cl::alias AddFile2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (AddString));
 
 
     cl::opt<std::string> DbPath (cl::Positional,
-                                 cl::desc ("Path of the pstore repository to be written."),
+                                 cl::desc ("<Path of the pstore repository to be written>"),
                                  cl::Required);
     cl::list<std::string> Files (cl::Positional, cl::desc ("<filename>..."));
 
