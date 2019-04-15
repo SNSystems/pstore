@@ -459,7 +459,7 @@ namespace pstore {
                     case opcode::close: break;
 
                     case opcode::ping: {
-                        error_or_n<IO> eo2 = pong (sender, std::get<0> (eo));
+                        error_or<IO> eo2 = pong (sender, std::get<0> (eo));
                         if (!eo2) {
                             // ERROR: send failed
                         }
