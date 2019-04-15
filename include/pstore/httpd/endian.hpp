@@ -54,6 +54,9 @@
 #    if PSTORE_HAVE_BYTESWAP_H
 #        include <byteswap.h>
 #    endif
+#    if PSTORE_HAVE_SYS_ENDIAN_H
+#        include <sys/endian.h>
+#    endif
 
 #endif
 
@@ -77,6 +80,8 @@ namespace pstore {
 #else
 #    if PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
+#    elif PSTORE_HAVE_SYS_ENDIAN_H
+            return bswap64 (x);
 #    else
             return ntohll (x); // NOLINT
 #    endif // PSTORE_HAVE_BYTESWAP_H
@@ -102,8 +107,10 @@ namespace pstore {
 #else
 #    if PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
+#    elif PSTORE_HAVE_SYS_ENDIAN_H
+            return bswap64 (x);
 #    else
-            return htonll (x); // NOLINT
+            return ntohll (x); // NOLINT
 #    endif // PSTORE_HAVE_BYTESWAP_H
 #endif     // PSTORE_IS_BIG_ENDIAN
         }
