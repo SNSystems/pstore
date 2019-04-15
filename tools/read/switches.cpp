@@ -69,10 +69,10 @@ namespace {
     cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
 
     cl::opt<std::string> DbPath (cl::Positional,
-                                 cl::desc ("Path of the pstore repository to be read."),
+                                 cl::desc ("<Path of the pstore repository to be read>"),
                                  cl::Required);
     cl::opt<std::string> Key (cl::Positional,
-                              cl::desc ("Reads the value associated with the key in the index."),
+                              cl::desc ("key"),
                               cl::Required);
     cl::opt<bool>
         StringMode ("strings", cl::init (false),
@@ -82,7 +82,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
+    cl::ParseCommandLineOptions (argc, argv, "pstore read utility\n");
 
     switches result;
     result.revision = static_cast<pstore::cmd_util::revision_opt> (Revision).r;
