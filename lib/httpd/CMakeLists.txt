@@ -46,6 +46,7 @@ include (add_pstore)
 set (PSTORE_HTTPD_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/httpd")
 add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/endian.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/error.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/headers.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/media_type.hpp"

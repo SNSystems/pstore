@@ -240,7 +240,7 @@ namespace {
                 log (priority::info, "Started WebSockets session");
 
                 assert (io2.valid ());
-                ws_server_loop (reader2, std::ref (io2));
+                ws_server_loop (reader2, pstore::httpd::net::network_sender, std::ref (io2));
 
                 log (priority::info, "Ended WebSockets session");
             }

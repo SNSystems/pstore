@@ -57,7 +57,7 @@ endif ()
 check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
 check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
 check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
-
+check_include_files ("byteswap.h" PSTORE_HAVE_BYTESWAP_H)
 
 set (CMAKE_REQUIRED_LIBRARIES )
 

@@ -56,7 +56,7 @@ namespace pstore {
             bad_request = 1,
             not_implemented,
             string_too_long,
-            refill_out_of_range
+            refill_out_of_range,
         };
 
         // ******************

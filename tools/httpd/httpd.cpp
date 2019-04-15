@@ -65,11 +65,19 @@ int main (int, const char *[]) {
 #endif // _WIN32
 
     PSTORE_TRY {
-        in_port_t const port_number = 8080;
+        constexpr in_port_t port_number = 8080;
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);
         pstore::logging::create_log_stream (ident);
-        pstore::httpd::server (port_number, fs);
+
+        std::thread t ([port_number]() {
+            static constexpr auto name = "http";
+            pstore::threads::set_name (name);
+            pstore::logging::create_log_stream (name);
+
+            pstore::httpd::server (port_number, fs);
+        });
+        t.join ();
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {

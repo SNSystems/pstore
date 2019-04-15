@@ -48,6 +48,7 @@
 #include <sstream>
 #include <string>
 
+#include "pstore/httpd/endian.hpp"
 #include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -68,6 +69,13 @@ namespace pstore {
         template <typename Sender, typename IO>
         error_or<IO> send (Sender sender, IO io, std::ostringstream const & os) {
             return send (sender, io, os.str ());
+        }
+
+        template <typename Sender, typename IO, typename T,
+                  typename = typename std::enable_if<std::is_integral<T>::value>::type>
+        error_or<IO> send (Sender sender, IO io, T v) {
+            T const nv = host_to_network (v);
+            return send (sender, io, as_bytes (gsl::make_span (&nv, 1)));
         }
 
     } // end namespace httpd
