@@ -42,8 +42,8 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef PSTORE_BROKER_DESCRIPTOR_HPP
-#define PSTORE_BROKER_DESCRIPTOR_HPP
+#ifndef PSTORE_BROKER_INTF_DESCRIPTOR_HPP
+#define PSTORE_BROKER_INTF_DESCRIPTOR_HPP
 
 #include <cerrno>
 #include <ostream>
@@ -239,4 +239,4 @@ namespace std {
 
 } // end namespace std
 
-#endif // PSTORE_BROKER_DESCRIPTOR_HPP
+#endif // PSTORE_BROKER_INTF_DESCRIPTOR_HPP

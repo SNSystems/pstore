@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_HTTPD_NET_TX_HPP
-#define PSTORE_HTTPD_NET_TX_HPP
+#ifndef PSTORE_HTTPD_NET_TXRX_HPP
+#define PSTORE_HTTPD_NET_TXRX_HPP
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/support/error_or.hpp"
@@ -67,4 +67,4 @@ namespace pstore {
     }     // end namespace httpd
 } // end namespace pstore
 
-#endif // PSTORE_HTTPD_NET_TX_HPP
+#endif // PSTORE_HTTPD_NET_TXRX_HPP

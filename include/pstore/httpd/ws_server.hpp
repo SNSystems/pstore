@@ -173,8 +173,8 @@ namespace pstore {
         };
 
         struct frame {
-            opcode op;
-            bool fin;
+            opcode op = opcode::unknown;
+            bool fin = false;
             std::vector<std::uint8_t> payload;
         };
 
@@ -255,7 +255,7 @@ namespace pstore {
 
         template <typename Reader, typename IO>
         error_or_n<IO, frame> read_frame (Reader & reader, IO io) {
-            frame_fixed_layout res;
+            frame_fixed_layout res{};
 
             return read_span (
                        reader, io,
@@ -280,7 +280,7 @@ namespace pstore {
                 // meanings for non-zero values. If a nonzero value is received and none of the
                 // negotiated extensions defines the meaning of such a nonzero value, the receiving
                 // endpoint MUST _Fail the WebSocket Connection_."
-                if (part1.rsv1 != 0 || part1.rsv2 != 0 || part1.rsv3 != 0) {
+                if (part1.rsv1 || part1.rsv2 || part1.rsv3) {
                     return return_type{ws_error::reserved_bit_set};
                 }
 
@@ -288,7 +288,7 @@ namespace pstore {
                            reader, io1,
                            part1.payload_length) >>= [&](IO io2, std::uint64_t payload_length) {
                     log (pstore::logging::priority::info, "Payload length: ", payload_length);
-                    if ((payload_length & std::uint64_t{1} << 63) != 0) {
+                    if ((payload_length & (std::uint64_t{1} << 63U)) != 0U) {
                         // "The most significant bit MUST be 0."
                         return return_type{ws_error::payload_too_long};
                     }
@@ -339,7 +339,7 @@ namespace pstore {
 
         template <typename Sender, typename IO>
         error_or<IO> pong (Sender sender, IO io) {
-            frame_fixed_layout f;
+            frame_fixed_layout f{};
             f.fin = true;
             f.rsv1 = false;
             f.rsv2 = false;
@@ -369,7 +369,7 @@ namespace pstore {
 
         template <typename Sender, typename IO>
         error_or<IO> send_message (Sender sender, IO io, std::string const & message) {
-            frame_fixed_layout f;
+            frame_fixed_layout f{};
             f.fin = true;
             f.rsv1 = false;
             f.rsv2 = false;
@@ -393,7 +393,7 @@ namespace pstore {
             }
 
             // The payload length must not have the top bit set.
-            if (length & std::uint64_t{1} << 63) {
+            if (length & std::uint64_t{1} << 63U) {
                 return error_or<IO>{ws_error::message_too_long};
             }
 
@@ -422,7 +422,7 @@ namespace pstore {
                     frame const & wsp = std::get<1> (eo);
                     switch (wsp.op) {
                     case opcode::continuation:
-                        if ((static_cast<unsigned> (op) & 0x08) != 0) {
+                        if ((static_cast<unsigned> (op) & 0x08) != 0U) {
                             // FIXME: ERROR: continuation of a control frame.
                         }
                         payload.insert (std::end (payload), std::begin (wsp.payload),

@@ -64,11 +64,11 @@ namespace pstore {
         T network_to_host (T) noexcept;
         template <>
         inline std::uint16_t network_to_host<std::uint16_t> (std::uint16_t x) noexcept {
-            return ntohs (x);
+            return ntohs (x); // NOLINT
         }
         template <>
         inline std::uint32_t network_to_host<std::uint32_t> (std::uint32_t x) noexcept {
-            return ntohl (x);
+            return ntohl (x); // NOLINT
         }
         template <>
         inline std::uint64_t network_to_host<std::uint64_t> (std::uint64_t x) noexcept {
@@ -78,7 +78,7 @@ namespace pstore {
 #    if PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
 #    else
-            return ntohll (x);
+            return ntohll (x); // NOLINT
 #    endif // PSTORE_HAVE_BYTESWAP_H
 #endif     // PSTORE_IS_BIG_ENDIAN
         }
@@ -89,11 +89,11 @@ namespace pstore {
         T host_to_network (T) noexcept;
         template <>
         inline std::uint16_t host_to_network<std::uint16_t> (std::uint16_t x) noexcept {
-            return htons (x);
+            return htons (x); // NOLINT
         }
         template <>
         inline std::uint32_t host_to_network<std::uint32_t> (std::uint32_t x) noexcept {
-            return htonl (x);
+            return htonl (x); // NOLINT
         }
         template <>
         inline std::uint64_t host_to_network<std::uint64_t> (std::uint64_t x) noexcept {
@@ -103,7 +103,7 @@ namespace pstore {
 #    if PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
 #    else
-            return htonll (x);
+            return htonll (x); // NOLINT
 #    endif // PSTORE_HAVE_BYTESWAP_H
 #endif     // PSTORE_IS_BIG_ENDIAN
         }

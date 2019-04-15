@@ -46,8 +46,8 @@
 ///
 /// Many of the variable names in this code, especially the single character names, were used
 /// because those were the names used in the publication.
-#ifndef PSTORE_HTTPD_SHA1_HPP
-#define PSTORE_HTTPD_SHA1_HPP
+#ifndef PSTORE_HTTPD_WSKEY_HPP
+#define PSTORE_HTTPD_WSKEY_HPP
 
 #include <array>
 #include <cstdint>
@@ -114,4 +114,4 @@ namespace pstore {
     } // end namespace httpd
 } // end namespace pstore
 
-#endif // PSTORE_HTTPD_SHA1_HPP
+#endif // PSTORE_HTTPD_WSKEY_HPP

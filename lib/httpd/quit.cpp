@@ -45,6 +45,11 @@
 
 #include <sstream>
 
+#ifndef _WIN32
+#    include <sys/types.h>
+#    include <sys/socket.h>
+#endif
+
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/send.hpp"

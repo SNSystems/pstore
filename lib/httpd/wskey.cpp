@@ -73,6 +73,7 @@
  */
 #include "pstore/httpd/wskey.hpp"
 
+#include <array>
 #include <cctype>
 
 #include "pstore/support/array_elements.hpp"
@@ -120,8 +121,8 @@ namespace pstore {
 
             result_type digest;
             for (auto i = 0U; i < hash_size; ++i) {
-                digest[i] =
-                    static_cast<std::uint8_t> (intermediate_hash_[i >> 2] >> 8 * (3 - (i & 0x03)));
+                digest[i] = static_cast<std::uint8_t> (intermediate_hash_[i >> 2] >>
+                                                       8U * (3U - (i & 0x03U)));
             }
             return digest;
         }
@@ -131,7 +132,7 @@ namespace pstore {
         void sha1::process_message_block () noexcept {
             // Constants defined in SHA-1.
             static constexpr std::uint32_t k[] = {0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6};
-            std::uint32_t w[80]; // Word sequence.
+            std::array<std::uint32_t, 80> w; // Word sequence.
 
             for (auto t = 0U; t < 16U; ++t) {
                 w[t] = static_cast<std::uint32_t> (message_block_[t * 4U] << 24U);
@@ -227,13 +228,13 @@ namespace pstore {
             }
 
             // Store the message length as the last 8 octets.
-            message_block_[56] = static_cast<std::uint8_t> (length_ >> 56);
-            message_block_[57] = static_cast<std::uint8_t> (length_ >> 48);
-            message_block_[58] = static_cast<std::uint8_t> (length_ >> 40);
-            message_block_[59] = static_cast<std::uint8_t> (length_ >> 32);
-            message_block_[60] = static_cast<std::uint8_t> (length_ >> 24);
-            message_block_[61] = static_cast<std::uint8_t> (length_ >> 16);
-            message_block_[62] = static_cast<std::uint8_t> (length_ >> 8);
+            message_block_[56] = static_cast<std::uint8_t> (length_ >> 56U);
+            message_block_[57] = static_cast<std::uint8_t> (length_ >> 48U);
+            message_block_[58] = static_cast<std::uint8_t> (length_ >> 40U);
+            message_block_[59] = static_cast<std::uint8_t> (length_ >> 32U);
+            message_block_[60] = static_cast<std::uint8_t> (length_ >> 24U);
+            message_block_[61] = static_cast<std::uint8_t> (length_ >> 16U);
+            message_block_[62] = static_cast<std::uint8_t> (length_ >> 8U);
             message_block_[63] = static_cast<std::uint8_t> (length_);
 
             this->process_message_block ();
@@ -248,13 +249,13 @@ namespace pstore {
             for (auto ctr = 0U; ctr < 18U; ctr += 3U) {
                 result += alphabet[(digest[ctr] >> 2U) & 0x3F];
                 result +=
-                    alphabet[((digest[ctr] & 0x03) << 4U) | ((digest[ctr + 1U] & 0xF0) >> 4U)];
-                result +=
-                    alphabet[((digest[ctr + 1U] & 0x0F) << 2U) | ((digest[ctr + 2U] & 0xC0) >> 6U)];
+                    alphabet[((digest[ctr] & 0x03) << 4U) | ((digest[ctr + 1U] & 0xF0U) >> 4U)];
+                result += alphabet[((digest[ctr + 1U] & 0x0F) << 2U) |
+                                   ((digest[ctr + 2U] & 0xC0U) >> 6U)];
                 result += alphabet[digest[ctr + 2U] & 0x3F];
             }
             result += alphabet[(digest[18] >> 2U) & 0x3F];
-            result += alphabet[((digest[18] & 0x03) << 4U) | ((digest[19] & 0xF0) >> 4U)];
+            result += alphabet[((digest[18] & 0x03) << 4U) | ((digest[19] & 0xF0U) >> 4U)];
             result += alphabet[(digest[19] & 0x0F) << 2U];
             result += '=';
             return result;

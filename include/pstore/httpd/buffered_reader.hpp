@@ -211,15 +211,17 @@ namespace pstore {
                 return geto_result_type{in_place, io, nothing<std::uint8_t> ()};
             }
 
-            auto const check_refill_response = [this](IO io2,
-                                                      gsl::span<std::uint8_t>::iterator end) {
+            auto const check_refill_response = [this](
+                                                   IO io2,
+                                                   gsl::span<std::uint8_t>::iterator const & end) {
                 if (end < span_.begin () || end > span_.end ()) {
                     return refill_result_type{make_error_code (error_code::refill_out_of_range)};
                 }
                 return refill_result_type{in_place, io2, end};
             };
 
-            auto const yield_result = [this](IO io3, gsl::span<std::uint8_t>::iterator end) {
+            auto const yield_result = [this](IO io3,
+                                             gsl::span<std::uint8_t>::iterator const & end) {
                 if (end == span_.begin ()) {
                     // that's the end of the source data.
                     is_eof_ = true;
