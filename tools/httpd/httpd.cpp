@@ -47,13 +47,24 @@
 #include <thread>
 
 #include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/cmd_util/cl/command_line.hpp"
 #include "pstore/httpd/server.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/romfs/romfs.hpp"
 
 extern pstore::romfs::romfs fs;
 
-int main (int, const char *[]) {
+namespace {
+
+    using namespace pstore::cmd_util;
+    cl::opt<in_port_t> port ("port", cl::desc ("The port number on which the server will listen"),
+                             cl::init (in_port_t{8080}));
+
+    cl::alias port2 ("p", cl::desc ("Alias for --port"), cl::aliasopt (port));
+
+} // end anonymous namespace
+
+int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
 #ifdef _WIN32
@@ -65,17 +76,20 @@ int main (int, const char *[]) {
 #endif // _WIN32
 
     PSTORE_TRY {
-        constexpr in_port_t port_number = 8080;
+        cl::ParseCommandLineOptions (
+            argc, argv,
+            "pstore httpd: A basic HTTP/WS server for testing the pstore-httpd library.\n");
+
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);
         pstore::logging::create_log_stream (ident);
 
-        std::thread t ([port_number]() {
+        std::thread t ([]() {
             static constexpr auto name = "http";
             pstore::threads::set_name (name);
             pstore::logging::create_log_stream (name);
 
-            pstore::httpd::server (port_number, fs);
+            pstore::httpd::server (port, fs);
         });
         t.join ();
     }
