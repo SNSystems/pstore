@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file random.hpp
 
-#ifndef PSTORE_RANDOM_HPP
-#define PSTORE_RANDOM_HPP
+#ifndef PSTORE_SUPPORT_RANDOM_HPP
+#define PSTORE_SUPPORT_RANDOM_HPP
 
 #include <limits>
 #include <random>
@@ -72,4 +72,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_RANDOM_HPP
+#endif // PSTORE_SUPPORT_RANDOM_HPP
