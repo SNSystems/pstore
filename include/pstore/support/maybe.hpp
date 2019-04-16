@@ -84,7 +84,6 @@ namespace pstore {
                        "Instantiation of maybe<> with an object type that is not noexcept "
                        "destructible is undefined behavior.");
 
-
         /// Constructs an object that does not contain a value.
         constexpr maybe () noexcept = default;
 

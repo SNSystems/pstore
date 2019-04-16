@@ -196,7 +196,7 @@ TEST (Maybe, CopyAssign) {
     // both lhs and rhs have no value.
     {
         maybe<std::string> m1;
-        maybe<std::string> const m2;
+        maybe<std::string> const m2{};
         m1.operator= (m2);
         EXPECT_FALSE (m1.has_value ());
     }
