@@ -79,8 +79,8 @@
 #include "pstore/httpd/send.hpp"
 #include "pstore/httpd/serve_dynamic_content.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
-#include "pstore/httpd/wskey.hpp"
 #include "pstore/httpd/ws_server.hpp"
+#include "pstore/httpd/wskey.hpp"
 #include "pstore/support/logging.hpp"
 
 namespace {
