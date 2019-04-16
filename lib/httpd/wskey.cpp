@@ -121,7 +121,7 @@ namespace pstore {
 
             result_type digest;
             for (auto i = 0U; i < hash_size; ++i) {
-                digest[i] = static_cast<std::uint8_t> (intermediate_hash_[i >> 2] >>
+                digest[i] = static_cast<std::uint8_t> (intermediate_hash_[i >> 2U] >>
                                                        8U * (3U - (i & 0x03U)));
             }
             return digest;
@@ -247,16 +247,16 @@ namespace pstore {
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             std::string result;
             for (auto ctr = 0U; ctr < 18U; ctr += 3U) {
-                result += alphabet[(digest[ctr] >> 2U) & 0x3F];
+                result += alphabet[(digest[ctr] >> 2U) & 0x3FU];
                 result +=
-                    alphabet[((digest[ctr] & 0x03) << 4U) | ((digest[ctr + 1U] & 0xF0U) >> 4U)];
-                result += alphabet[((digest[ctr + 1U] & 0x0F) << 2U) |
+                    alphabet[((digest[ctr] & 0x03U) << 4U) | ((digest[ctr + 1U] & 0xF0U) >> 4U)];
+                result += alphabet[((digest[ctr + 1U] & 0x0FU) << 2U) |
                                    ((digest[ctr + 2U] & 0xC0U) >> 6U)];
-                result += alphabet[digest[ctr + 2U] & 0x3F];
+                result += alphabet[digest[ctr + 2U] & 0x3FU];
             }
-            result += alphabet[(digest[18] >> 2U) & 0x3F];
-            result += alphabet[((digest[18] & 0x03) << 4U) | ((digest[19] & 0xF0U) >> 4U)];
-            result += alphabet[(digest[19] & 0x0F) << 2U];
+            result += alphabet[(digest[18] >> 2U) & 0x3FU];
+            result += alphabet[((digest[18] & 0x03U) << 4U) | ((digest[19] & 0xF0U) >> 4U)];
+            result += alphabet[(digest[19] & 0x0FU) << 2U];
             result += '=';
             return result;
         }
