@@ -86,7 +86,7 @@ namespace pstore {
 
 
         /// Constructs an object that does not contain a value.
-        constexpr maybe () noexcept {}
+        constexpr maybe () noexcept = default;
 
         /// Constructs an optional object that contains a value, initialized with the expression
         /// std::forward<U>(value).
