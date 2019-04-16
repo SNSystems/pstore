@@ -44,6 +44,10 @@
 #ifndef PSTORE_HTTPD_WS_SERVER_HPP
 #define PSTORE_HTTPD_WS_SERVER_HPP
 
+#include <cassert>
+#include <cstdint>
+#include <limits>
+
 #ifdef _WIN32
 #    include <Winsock2.h>
 #else
@@ -53,6 +57,7 @@
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/endian.hpp"
+#include "pstore/httpd/send.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/logging.hpp"
 
@@ -151,7 +156,7 @@ namespace pstore {
             unknown = 0xFF,
         };
 
-        enum class close_status_code {
+        enum class close_status_code : std::uint16_t {
             normal = 1000,           // Normal Closure
             going_away = 1001,       // Going Away
             protocol_error = 1002,   // Protocol error
@@ -183,32 +188,29 @@ namespace pstore {
         namespace details {
 
             template <typename T, typename Reader, typename IO>
-            pstore::error_or_n<IO, T> read_and_byte_swap (Reader & reader, IO io) {
+            error_or_n<IO, T> read_and_byte_swap (Reader & reader, IO io) {
                 auto v = T{0};
-                return read_span (reader, io, pstore::gsl::make_span (&v, 1)) >>=
-                       [](IO io2, pstore::gsl::span<T> const & l1) {
-                           return pstore::error_or_n<IO, T>{pstore::in_place, io2,
-                                                            network_to_host (l1.at (0))};
+                return read_span (reader, io, gsl::make_span (&v, 1)) >>=
+                       [](IO io2, gsl::span<T> const & l1) {
+                           return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
             }
 
             template <typename T, typename Reader, typename IO>
-            pstore::error_or_n<IO, std::uint64_t> read_extended_payload_length (Reader & reader,
-                                                                                IO io) {
+            error_or_n<IO, std::uint64_t> read_extended_payload_length (Reader & reader, IO io) {
                 auto length16n = T{0};
-                return read_span (reader, io, pstore::gsl::make_span (&length16n, 1)) >>=
-                       [](IO io2, pstore::gsl::span<T> const & l1) {
-                           return pstore::error_or_n<IO, T>{pstore::in_place, io2,
-                                                            network_to_host (l1.at (0))};
+                return read_span (reader, io, gsl::make_span (&length16n, 1)) >>=
+                       [](IO io2, gsl::span<T> const & l1) {
+                           return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
             }
 
             template <typename Reader, typename IO>
-            pstore::error_or_n<IO, std::uint64_t> read_payload_length (Reader & reader, IO io,
-                                                                       unsigned base_length) {
+            error_or_n<IO, std::uint64_t> read_payload_length (Reader & reader, IO io,
+                                                               unsigned base_length) {
                 if (base_length < 126U) {
                     // "If 0-125, that is the payload length."
-                    return pstore::error_or_n<IO, std::uint64_t>{pstore::in_place, io, base_length};
+                    return error_or_n<IO, std::uint64_t>{in_place, io, base_length};
                 }
                 if (base_length == 126U) {
                     // "If 126, the following 2 bytes interpreted as a 16-bit unsigned integer are
@@ -337,59 +339,52 @@ namespace pstore {
             };
         }
 
-        template <typename Sender, typename IO>
-        error_or<IO> pong (Sender sender, IO io) {
-            frame_fixed_layout f{};
-            f.fin = true;
-            f.rsv1 = false;
-            f.rsv2 = false;
-            f.rsv3 = false;
-            f.opcode = static_cast<std::uint16_t> (opcode::pong);
-            f.mask = false;
-            f.payload_length = 0;
-            return send (sender, io, f.raw);
-        }
 
         namespace details {
 
             template <typename LengthType, typename Sender, typename IO>
-            pstore::error_or<IO> send_extended_length_message (Sender sender, IO io,
-                                                               frame_fixed_layout const & f,
-                                                               std::string const & message) {
-
-                return send (sender, io, f.raw) >>= [sender, &message](IO io2) {
-                    return send (sender, io2, static_cast<LengthType> (message.length ())) >>=
-                           [sender, &message](IO io3) {
-                               return send (sender, io3, as_bytes (gsl::make_span (message)));
-                           };
+            error_or<IO> send_extended_length_message (Sender sender, IO io,
+                                                       frame_fixed_layout const & f,
+                                                       gsl::span<std::uint8_t const> const & span) {
+                auto send_length = [&](IO io2) {
+                    auto const size = span.size ();
+                    using usize = std::make_unsigned<decltype (size)>::type;
+                    assert (size >= 0 &&
+                            static_cast<usize> (size) <= std::numeric_limits<LengthType>::max ());
+                    return send (sender, io2, static_cast<LengthType> (size));
                 };
+                auto send_payload = [&](IO io3) { return send (sender, io3, span); };
+
+                return (send (sender, io, f.raw) >>= send_length) >>= send_payload;
             }
 
         } // end namespace details
 
+
+        // send_message
+        // ~~~~~~~~~~~~
         template <typename Sender, typename IO>
-        error_or<IO> send_message (Sender sender, IO io, std::string const & message) {
+        error_or<IO> send_message (Sender sender, IO io, opcode op,
+                                   gsl::span<std::uint8_t const> const & span) {
             frame_fixed_layout f{};
             f.fin = true;
             f.rsv1 = false;
             f.rsv2 = false;
             f.rsv3 = false;
-            f.opcode = static_cast<std::uint16_t> (opcode::text);
+            f.opcode = static_cast<std::uint16_t> (op);
             f.mask = false;
-            assert (message.length () < 126);
-            auto const length = message.length ();
+
+            auto const length = span.size ();
             if (length < 126) {
                 f.payload_length = length;
-                return send (sender, io, f.raw) >>= [sender, &message](IO io2) {
-                   return send (sender, io2, as_bytes (gsl::make_span (message)));
-               };
+                return send (sender, io, f.raw) >>=
+                       [sender, &span](IO io2) { return send (sender, io2, span); };
             }
 
             if (length < std::numeric_limits<std::uint16_t>::max ()) {
                 // Length is sent as 16-bits.
                 f.payload_length = 126;
-                return details::send_extended_length_message<std::uint16_t> (sender, io, f,
-                                                                             message);
+                return details::send_extended_length_message<std::uint16_t> (sender, io, f, span);
             }
 
             // The payload length must not have the top bit set.
@@ -399,17 +394,38 @@ namespace pstore {
 
             // Send the length as a full 64-bit value.
             f.payload_length = 127;
-            return details::send_extended_length_message<std::uint64_t> (sender, io, f, message);
+            return details::send_extended_length_message<std::uint64_t> (sender, io, f, span);
         }
 
 
+        // pong
+        // ~~~~
+        template <typename Sender, typename IO>
+        error_or<IO> pong (Sender sender, IO io) {
+            return send_message (sender, io, opcode::pong, gsl::span<std::uint8_t>{});
+        }
+
+
+        // send_close_frame
+        // ~~~~~~~~~~~~~~~~
+        template <typename Sender, typename IO>
+        error_or<IO> send_close_frame (Sender sender, IO io, close_status_code status) {
+            PSTORE_STATIC_ASSERT ((
+                std::is_same<std::underlying_type<close_status_code>::type, std::uint16_t>::value));
+            std::uint16_t const ns = host_to_network (static_cast<std::uint16_t> (status));
+            return send_message (sender, io, opcode::close, as_bytes (gsl::make_span (&ns, 1)));
+        }
+
+
+        // ws_server_loop
+        // ~~~~~~~~~~~~~~
         template <typename Reader, typename Sender, typename IO>
         void ws_server_loop (Reader & reader, Sender sender, IO io) {
             opcode op = opcode::unknown;
             std::vector<std::uint8_t> payload;
             bool done = false;
             while (!done) {
-                error_or_n<IO, frame> eo = read_frame (reader, io);
+                error_or_n<IO, frame> const eo = read_frame (reader, io);
                 if (!eo) {
                     log (logging::priority::error, "Error: ", eo.get_error ().message ());
                     if (eo.get_error () == make_error_code (ws_error::unmasked_frame)) {
@@ -456,7 +472,19 @@ namespace pstore {
                         // ERROR: unknown opcode.
                         break;
 
-                    case opcode::close: break;
+                    case opcode::close: {
+                        auto state = close_status_code::normal;
+                        if (payload.size () >= sizeof (std::uint16_t)) {
+                            state = static_cast<close_status_code> (network_to_host (
+                                *reinterpret_cast<std::uint16_t const *> (payload.data ())));
+                        }
+
+                        error_or<IO> eo3 = send_close_frame (sender, std::get<0> (eo), state);
+                        if (!eo3) {
+                            // ERROR: send failed
+                        }
+                        done = true;
+                    } break;
 
                     case opcode::ping: {
                         error_or<IO> eo2 = pong (sender, std::get<0> (eo));
@@ -480,7 +508,8 @@ namespace pstore {
                                         [](std::uint8_t v) { return static_cast<char> (v); });
                         log (logging::priority::info, "Received: ", str);
 
-                        error_or<IO> const eo3 = send_message (sender, std::get<0> (eo), str);
+                        error_or<IO> const eo3 = send_message (
+                            sender, std::get<0> (eo), opcode::text, gsl::make_span (payload));
                         // FIXME: error handling!
 
                         payload.clear ();

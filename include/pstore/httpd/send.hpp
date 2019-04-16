@@ -47,6 +47,7 @@
 #include <cstdint>
 #include <sstream>
 #include <string>
+#include <type_traits>
 
 #include "pstore/httpd/endian.hpp"
 #include "pstore/support/error_or.hpp"
