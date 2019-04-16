@@ -190,7 +190,7 @@ namespace pstore {
             template <typename T, typename Reader, typename IO>
             error_or_n<IO, T> read_and_byte_swap (Reader & reader, IO io) {
                 auto v = T{0};
-                return read_span (reader, io, gsl::make_span (&v, 1)) >>=
+                return reader.get_span (io, gsl::make_span (&v, 1)) >>=
                        [](IO io2, gsl::span<T> const & l1) {
                            return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
@@ -199,7 +199,7 @@ namespace pstore {
             template <typename T, typename Reader, typename IO>
             error_or_n<IO, std::uint64_t> read_extended_payload_length (Reader & reader, IO io) {
                 auto length16n = T{0};
-                return read_span (reader, io, gsl::make_span (&length16n, 1)) >>=
+                return reader.get_span (io, gsl::make_span (&length16n, 1)) >>=
                        [](IO io2, gsl::span<T> const & l1) {
                            return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
@@ -226,44 +226,16 @@ namespace pstore {
         } // end namespace details
 
 
-        using byte_span = gsl::span<std::uint8_t>;
-
-        // TODO: repeatedly calling reader.geto() is hideously inefficient. Add a span-based method
-        // to Reader.
-        template <typename Reader, typename IO>
-        error_or_n<IO, byte_span> read_span_impl (Reader & reader, IO io, byte_span const & sp) {
-            if (sp.size () == 0) {
-                return error_or_n<IO, byte_span>{in_place, io, sp};
-            }
-            return reader.geto (io) >>= [&reader, &sp](IO io1, maybe<std::uint8_t> const & b) {
-                if (!b) {
-                    return error_or_n<IO, byte_span>{in_place, io1, sp};
-                }
-                auto data = sp.data ();
-                *data = *b;
-                return read_span_impl (reader, io1, byte_span{data + 1, sp.size () - 1});
-            };
-        }
-
-        // TODO: move read_span and read_span_impl to buffered_reader.
-        template <typename Reader, typename IO, typename SpanType>
-        auto read_span (Reader & reader, IO io, SpanType const & sp) -> error_or_n<IO, SpanType> {
-            return read_span_impl (reader, io, as_writeable_bytes (sp)) >>=
-                   [&sp](IO io2, gsl::span<std::uint8_t> const &) {
-                       return error_or_n<IO, SpanType>{in_place, io2, sp};
-                   };
-        }
 
 
         template <typename Reader, typename IO>
         error_or_n<IO, frame> read_frame (Reader & reader, IO io) {
             frame_fixed_layout res{};
 
-            return read_span (
-                       reader, io,
-                       gsl::make_span (&res,
-                                       1)) >>= [&reader](IO io1,
-                                                         gsl::span<frame_fixed_layout> const & p1) {
+            return reader.get_span (
+                       io, gsl::make_span (
+                               &res, 1)) >>= [&reader](IO io1,
+                                                       gsl::span<frame_fixed_layout> const & p1) {
                 using return_type = error_or_n<IO, frame>;
                 frame_fixed_layout & part1 = p1.at (0);
                 part1.raw = network_to_host (part1.raw);
@@ -302,7 +274,7 @@ namespace pstore {
                         // not masked."
                         return return_type{ws_error::unmasked_frame};
                     }
-                    return read_span (reader, io2, gsl::make_span (mask)) >>=
+                    return reader.get_span (io2, gsl::make_span (mask)) >>=
                            [&](IO io3, gsl::span<std::uint8_t> const & mask_span) {
                                if (mask_span.size () != mask_length) {
                                    // FIXME: ERRORS! EOF before mask was received.
@@ -312,7 +284,7 @@ namespace pstore {
                                    std::vector<std::uint8_t>::size_type{payload_length},
                                    std::uint8_t{0});
 
-                               return read_span (reader, io3, gsl::make_span (payload)) >>=
+                               return reader.get_span (io3, gsl::make_span (payload)) >>=
                                       [&](IO io4, gsl::span<std::uint8_t> const & payload_span) {
                                           auto const payload_size = payload_span.size ();
                                           using usize =

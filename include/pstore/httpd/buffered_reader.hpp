@@ -80,6 +80,7 @@ namespace pstore {
         class buffered_reader {
         public:
             using state_type = IO;
+            using byte_span = gsl::span<std::uint8_t>;
 
             using refill_result_type = error_or_n<IO, gsl::span<std::uint8_t>::iterator>;
             using geto_result_type = error_or_n<IO, maybe<std::uint8_t>>;
@@ -96,8 +97,8 @@ namespace pstore {
             buffered_reader & operator= (buffered_reader const &) = delete;
             buffered_reader & operator= (buffered_reader &&) noexcept = delete;
 
-            error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
-            get_span (IO io, gsl::span<std::uint8_t> const & s);
+            template <typename SpanType>
+            error_or_n<IO, SpanType> get_span (IO io, SpanType const & sp);
 
             geto_result_type geto (IO io);
 
@@ -139,6 +140,8 @@ namespace pstore {
             }
 
             gets_result_type gets_impl (IO io, std::string const & str);
+
+            error_or_n<IO, byte_span> get_span_impl (IO io, byte_span const & sp);
 
             RefillFunction refill_;
             /// The internal buffer. Filled by a call to the refill function and emptied by calls to
@@ -188,6 +191,39 @@ namespace pstore {
         // error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
         // buffered_reader<IO, RefillFunction>::fill (IO io, gsl::span<std::uint8_t> & s) {
         //}
+
+
+
+        // TODO: repeatedly calling reader.geto() is hideously inefficient. Add a span-based method
+        // to Reader.
+        template <typename IO, typename RefillFunction>
+        auto buffered_reader<IO, RefillFunction>::get_span_impl (IO io, byte_span const & sp)
+            -> error_or_n<IO, byte_span> {
+            if (sp.size () == 0) {
+                return error_or_n<IO, byte_span>{in_place, io, sp};
+            }
+            return this->geto (io) >>= [this, &sp](IO io1, maybe<std::uint8_t> const & b) {
+                if (!b) {
+                    return error_or_n<IO, byte_span>{in_place, io1, sp};
+                }
+                auto data = sp.data ();
+                *data = *b;
+                return this->get_span_impl (io1, byte_span{data + 1, sp.size () - 1});
+            };
+        }
+
+        // TODO: move read_span and read_span_impl to buffered_reader.
+        template <typename IO, typename RefillFunction>
+        template <typename SpanType>
+        auto buffered_reader<IO, RefillFunction>::get_span (IO io, SpanType const & sp)
+            -> error_or_n<IO, SpanType> {
+            return this->get_span_impl (io, as_writeable_bytes (sp)) >>=
+                   [&sp](IO io2, gsl::span<std::uint8_t> const &) {
+                       return error_or_n<IO, SpanType>{in_place, io2, sp};
+                   };
+        }
+
+
 
         // geto
         // ~~~~
@@ -239,12 +275,6 @@ namespace pstore {
             return (x >>= check_refill_response) >>= yield_result;
         }
 
-        template <typename IO>
-        error_or<std::pair<IO, maybe<char>>> foo (IO io, maybe<std::uint8_t> mb) {
-            maybe<char> const mc = mb ? just (static_cast<char> (*mb)) : nothing<char> ();
-            return error_or<std::pair<IO, maybe<char>>>{in_place, io, mc};
-        }
-
         // getc
         // ~~~~
         template <typename IO, typename RefillFunction>
@@ -252,14 +282,10 @@ namespace pstore {
             // TODO: We don't consider extended characters here: only ASCII will work. Should we
             // handle UTF-8 correctly? If so, then if needs to potentially read more than one octect
             // and return a char32_t.
-#if 0
-            return geto (io) >>= &foo;
-#else
             return geto (io) >>= [](IO io2, maybe<std::uint8_t> const & mb) {
                 maybe<char> const mc = mb ? just (static_cast<char> (*mb)) : nothing<char> ();
                 return getc_result_type{in_place, io2, mc};
             };
-#endif
         }
 
         // gets
