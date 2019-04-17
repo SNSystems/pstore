@@ -375,11 +375,9 @@ namespace {
         cpstring decode (pstore::utf::utf8_decoder & decoder, char const * src) {
             cpstring result;
             for (; *src != '\0'; ++src) {
-                std::uint32_t code_point;
-                bool complete;
-                std::tie (code_point, complete) = decoder.get (static_cast<std::uint8_t> (*src));
-                if (complete) {
-                    result += code_point;
+                if (pstore::maybe<char32_t> const code_point =
+                        decoder.get (static_cast<std::uint8_t> (*src))) {
+                    result += *code_point;
                 }
             }
             return result;

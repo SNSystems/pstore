@@ -1006,14 +1006,13 @@ namespace pstore {
                     this->set_error (parser, error_code::expected_close_quote);
                     return {nullptr, true};
                 }
-                char32_t code_point;
-                bool complete;
-                std::tie (code_point, complete) = decoder_.get (static_cast<std::uint8_t> (*ch));
-                if (complete) {
+
+                if (maybe<char32_t> const code_point =
+                        decoder_.get (static_cast<std::uint8_t> (*ch))) {
                     switch (this->get_state ()) {
                     // Matches the opening quote.
                     case start_state:
-                        if (code_point == '"') {
+                        if (*code_point == '"') {
                             assert (!app_.has_high_surrogate ());
                             this->set_state (normal_char_state);
                         } else {
@@ -1022,14 +1021,14 @@ namespace pstore {
                         break;
                     case normal_char_state: {
                         auto const normal_resl =
-                            string_matcher::consume_normal_state (parser, code_point, app_);
+                            string_matcher::consume_normal_state (parser, *code_point, app_);
                         this->set_state (std::get<0> (normal_resl));
                         this->set_error (parser, std::get<1> (normal_resl));
                     } break;
 
                     case escape_state: {
                         auto const escape_resl =
-                            string_matcher::consume_escape_state (code_point, app_);
+                            string_matcher::consume_escape_state (*code_point, app_);
                         this->set_state (std::get<0> (escape_resl));
                         this->set_error (parser, std::get<1> (escape_resl));
                     } break;
@@ -1040,7 +1039,7 @@ namespace pstore {
                     case hex4_state: {
                         maybe<std::tuple<unsigned, state>> const hex_resl =
                             string_matcher::consume_hex_state (
-                                hex_, static_cast<state> (this->get_state ()), code_point);
+                                hex_, static_cast<state> (this->get_state ()), *code_point);
                         if (!hex_resl) {
                             this->set_error (parser, error_code::invalid_hex_char);
                             break;

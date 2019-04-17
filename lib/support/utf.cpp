@@ -182,15 +182,15 @@ namespace pstore {
             return *state;
         }
 
-        std::tuple<char32_t, bool> utf8_decoder::get (std::uint8_t byte) noexcept {
+        maybe<char32_t> utf8_decoder::get (std::uint8_t byte) noexcept {
             if (decode (&state_, &codepoint_, byte)) {
                 well_formed_ = false;
-                return std::make_tuple (char32_t{0}, false);
+                return nothing<char32_t> ();
             }
             auto const res = codepoint_;
             well_formed_ = true;
             codepoint_ = 0;
-            return std::make_tuple (res, true);
+            return just (res);
         }
 
     } // namespace utf

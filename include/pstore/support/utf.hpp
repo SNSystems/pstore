@@ -59,6 +59,7 @@
 #include <vector>
 
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 
 #if defined(_WIN32)
@@ -156,7 +157,7 @@ namespace pstore {
 
         class utf8_decoder {
         public:
-            std::tuple<char32_t, bool> get (std::uint8_t c) noexcept;
+            maybe<char32_t> get (std::uint8_t c) noexcept;
             bool is_well_formed () const noexcept { return well_formed_; }
 
         private:
