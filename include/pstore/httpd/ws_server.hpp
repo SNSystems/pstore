@@ -62,7 +62,7 @@
 #include "pstore/support/logging.hpp"
 #include "pstore/support/utf.hpp"
 
-#define PSTORE_LOG_FRAME_INFO 1 // Define as 1 to log the frame header as it is received.
+#define PSTORE_LOG_FRAME_INFO 0 // Define as 1 to log the frame header as it is received.
 
 namespace pstore {
     namespace httpd {
@@ -186,6 +186,9 @@ namespace pstore {
                                      // to 502 HTTP Status Code."
             tls_handshake = 1015,    // TLS handshake
         };
+
+        bool is_valid_close_status_code (std::uint16_t code);
+
 
         struct frame {
             opcode op = opcode::unknown;
@@ -384,6 +387,7 @@ namespace pstore {
         // ~~~~
         template <typename Sender, typename IO>
         error_or<IO> pong (Sender sender, IO io, gsl::span<std::uint8_t const> const & payload) {
+            log (logging::priority::info, "Sending pong. Length=", payload.size ());
             return send_message (sender, io, opcode::pong, payload);
         }
 
@@ -392,12 +396,95 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         template <typename Sender, typename IO>
         error_or<IO> send_close_frame (Sender sender, IO io, close_status_code status) {
+            log (logging::priority::info,
+                 "Sending close frame code=", static_cast<std::uint16_t> (status));
             PSTORE_STATIC_ASSERT ((
                 std::is_same<std::underlying_type<close_status_code>::type, std::uint16_t>::value));
             std::uint16_t const ns = host_to_network (static_cast<std::uint16_t> (status));
             return send_message (sender, io, opcode::close, as_bytes (gsl::make_span (&ns, 1)));
         }
 
+
+        // is_valid_utf8
+        // ~~~~~~~~~~~~~
+        template <typename Iterator>
+        bool is_valid_utf8 (Iterator first, Iterator last) {
+            utf::utf8_decoder decoder;
+            std::for_each (first, last, [&decoder](std::uint8_t cu) { decoder.get (cu); });
+            return decoder.is_well_formed ();
+        }
+
+
+        template <typename Sender, typename IO>
+        error_or<IO> close_message (Sender sender, IO io, frame const & wsp) {
+            auto state = close_status_code::normal;
+            auto payload_size = wsp.payload.size ();
+
+            // "If there is a body, the first two bytes of the body MUST be a 2-byte unsigned
+            // integer (in network byte order) representing a status code with value /code/ defined
+            // in Section 7.4. Following the 2-byte integer, the body MAY contain UTF-8-encoded data
+            // with value /reason/, the interpretation of which is not defined by this
+            // specification."
+            if (payload_size == 0U) {
+                // That's fine. Just a normal close.
+                state = close_status_code::normal;
+            } else if (payload_size < sizeof (std::uint16_t)) {
+                // Bad message. Payload must be 0 or at least a 2 byte close-code.
+                state = close_status_code::protocol_error;
+            } else {
+                // Extract the close state from the message payload.
+                assert (payload_size >= sizeof (std::uint16_t));
+                state = static_cast<close_status_code> (network_to_host (
+                    *reinterpret_cast<std::uint16_t const *> (wsp.payload.data ())));
+
+                if (!is_valid_close_status_code (static_cast<std::uint16_t> (state))) {
+                    state = close_status_code::protocol_error;
+                } else if (payload_size > sizeof (std::uint16_t)) {
+                    auto first = std::begin (wsp.payload);
+                    std::advance (first, sizeof (std::uint16_t));
+                    if (!is_valid_utf8 (first, std::end (wsp.payload))) {
+                        state = close_status_code::invalid_payload;
+                    }
+                }
+            }
+
+            return send_close_frame (sender, io, state);
+        }
+
+        template <typename Sender, typename IO>
+        bool check_message_complete (Sender sender, IO io, frame const & wsp, opcode & op,
+                                     std::vector<std::uint8_t> & payload) {
+            if (wsp.fin) {
+                // We've got the complete message. If this was a text message, we need to
+                // validate the UTF-8 that it contains.
+                //
+                // "When an endpoint is to interpret a byte stream as UTF-8 but finds that
+                // the byte stream is not, in fact, a valid UTF-8 stream, that endpoint MUST
+                // _Fail the WebSocket Connection_.
+                if (op == opcode::text &&
+                    !is_valid_utf8 (std::begin (payload), std::end (payload))) {
+                    send_close_frame (sender, io, close_status_code::invalid_payload);
+                    return false;
+                }
+
+                // Just log the message received for the time being.
+                {
+                    std::string str;
+                    std::transform (std::begin (payload), std::end (payload),
+                                    std::back_inserter (str),
+                                    [](std::uint8_t v) { return static_cast<char> (v); });
+                    log (logging::priority::info, "Received: ", str);
+                }
+
+                // FIXME: this implements a simple echo server ATM. Need something more useful...
+                error_or<IO> const eo3 = send_message (sender, io, op, gsl::make_span (payload));
+                // FIXME: error handling!
+
+                payload.clear ();
+                op = opcode::unknown;
+            }
+            return true;
+        }
 
         // ws_server_loop
         // ~~~~~~~~~~~~~~
@@ -410,67 +497,40 @@ namespace pstore {
                 error_or_n<IO, frame> const eo = read_frame (reader, io);
                 if (!eo) {
                     log (logging::priority::error, "Error: ", eo.get_error ().message ());
-                    if (eo.get_error () == make_error_code (ws_error::unmasked_frame)) {
+                    auto const error = eo.get_error ();
+                    if (error == make_error_code (ws_error::unmasked_frame)) {
                         // "The server MUST close the connection upon receiving a frame that is not
                         // masked.  In this case, a server MAY send a Close frame with a status code
                         // of 1002 (protocol error)."
                         send_close_frame (sender, io, close_status_code::protocol_error);
-                        return;
+                    } else if (error == make_error_code (ws_error::reserved_bit_set)) {
+                        send_close_frame (sender, io, close_status_code::protocol_error);
                     }
-                    break;
+                    return;
                 }
 
                 frame const & wsp = std::get<1> (eo);
 
-                // TODO: this implements a simple echo server ATM. Need something more useful...
-                auto check_message_complete = [&]() {
-                    if (wsp.fin) {
-                        // We've got the complete message. If this was a text message, we need to
-                        // validate the UTF-8 that it contains.
-                        //
-                        // "When an endpoint is to interpret a byte stream as UTF-8 but finds that
-                        // the byte stream is not, in fact, a valid UTF-8 stream, that endpoint MUST
-                        // _Fail the WebSocket Connection_.
-                        if (op == opcode::text) {
-                            utf::utf8_decoder decoder;
-                            for (auto b : payload) {
-                                decoder.get (b);
-                            }
-                            if (!decoder.is_well_formed ()) {
-                                send_close_frame (sender, io, close_status_code::invalid_payload);
-                                return false;
-                            }
-                        }
-
-                        std::string str;
-                        std::transform (std::begin (payload), std::end (payload),
-                                        std::back_inserter (str),
-                                        [](std::uint8_t v) { return static_cast<char> (v); });
-                        log (logging::priority::info, "Received: ", str);
-
-                        error_or<IO> const eo3 =
-                            send_message (sender, std::get<0> (eo), op, gsl::make_span (payload));
-                        // FIXME: error handling!
-
-                        payload.clear ();
-                        op = opcode::unknown;
+                if (is_control_frame_opcode (wsp.op)) {
+                    // "All control frames MUST have a payload length of 125 bytes or less and MUST
+                    // NOT be fragmented."
+                    if (!wsp.fin || wsp.payload.size () > 125) {
+                        send_close_frame (sender, std::get<0> (eo),
+                                          close_status_code::protocol_error);
+                        return;
                     }
-                    return true;
-                };
-
-                if (is_control_frame_opcode (wsp.op) && wsp.payload.size () > 125) {
-                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
-                    return;
                 }
 
                 switch (wsp.op) {
                 case opcode::continuation:
                     if (is_control_frame_opcode (op)) {
-                        // FIXME: ERROR: continuation of a control frame.
+                        send_close_frame (sender, std::get<0> (eo),
+                                          close_status_code::protocol_error);
+                        return;
                     }
                     payload.insert (std::end (payload), std::begin (wsp.payload),
                                     std::end (wsp.payload));
-                    if (!check_message_complete ()) {
+                    if (!check_message_complete (sender, std::get<0> (eo), wsp, op, payload)) {
                         return;
                     }
                     break;
@@ -478,13 +538,19 @@ namespace pstore {
                 // Data frame opcodes.
                 case opcode::text:
                 case opcode::binary:
+                    if (op != opcode::unknown) {
+                        send_close_frame (sender, std::get<0> (eo),
+                                          close_status_code::protocol_error);
+                        return;
+                    }
+
                     if (!payload.empty ()) {
                         // FIXME: ERROR: We didn't see a FIN frame before a new data frame.
                         return;
                     }
                     payload = std::move (wsp.payload);
                     op = wsp.op;
-                    if (!check_message_complete ()) {
+                    if (!check_message_complete (sender, std::get<0> (eo), wsp, op, payload)) {
                         return;
                     }
                     break;
@@ -502,24 +568,11 @@ namespace pstore {
                     send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
                     return;
 
-                case opcode::close: {
-                    auto state = close_status_code::normal;
-                    if (wsp.payload.size () >= sizeof (std::uint16_t)) {
-                        state = static_cast<close_status_code> (network_to_host (
-                            *reinterpret_cast<std::uint16_t const *> (wsp.payload.data ())));
-                    }
+                case opcode::close: close_message (sender, std::get<0> (eo), wsp); return;
 
-                    send_close_frame (sender, std::get<0> (eo), state);
-                    return;
-                }
-
-                case opcode::ping: {
-                    error_or<IO> eo2 =
-                        pong (sender, std::get<0> (eo), gsl::make_span (wsp.payload));
-                    if (!eo2) {
-                        // ERROR: send failed
-                    }
-                } break;
+                case opcode::ping:
+                    pong (sender, std::get<0> (eo), gsl::make_span (wsp.payload));
+                    break;
 
                 case opcode::pong:
                     // TODO: Bad opcode?
