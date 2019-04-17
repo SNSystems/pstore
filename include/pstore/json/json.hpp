@@ -56,7 +56,6 @@
 #include <type_traits>
 
 #include "pstore/json/json_error.hpp"
-#include "pstore/json/utf.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/max.hpp"
 #include "pstore/support/maybe.hpp"
@@ -833,7 +832,7 @@ namespace pstore {
                 static std::tuple<state, error_code> consume_escape_state (char32_t code_point,
                                                                            appender & app);
 
-                utf8_decoder decoder_;
+                utf::utf8_decoder decoder_;
                 appender app_;
                 unsigned hex_ = 0U;
             };
@@ -845,7 +844,7 @@ namespace pstore {
                     // A high surrogate followed by something other than a low surrogate.
                     ok = false;
                 } else {
-                    code_point_to_utf8<char> (code_point, std::back_inserter (result_));
+                    utf::code_point_to_utf8<char> (code_point, std::back_inserter (result_));
                 }
                 return ok;
             }
@@ -853,14 +852,14 @@ namespace pstore {
             template <typename Callbacks>
             bool string_matcher<Callbacks>::appender::append16 (char16_t cu) {
                 bool ok = true;
-                if (is_utf16_high_surrogate (cu)) {
+                if (utf::is_utf16_high_surrogate (cu)) {
                     if (!this->has_high_surrogate ()) {
                         high_surrogate_ = cu;
                     } else {
                         // A high surrogate following another high surrogate.
                         ok = false;
                     }
-                } else if (is_utf16_low_surrogate (cu)) {
+                } else if (utf::is_utf16_low_surrogate (cu)) {
                     if (!this->has_high_surrogate ()) {
                         // A low surrogate following by something other than a high surrogate.
                         ok = false;
@@ -870,8 +869,8 @@ namespace pstore {
                         auto last = std::end (surrogates);
                         auto code_point = char32_t{0};
                         std::tie (first, code_point) =
-                            utf16_to_code_point (first, last, nop_swapper);
-                        code_point_to_utf8 (code_point, std::back_inserter (result_));
+                            utf::utf16_to_code_point (first, last, utf::nop_swapper);
+                        utf::code_point_to_utf8 (code_point, std::back_inserter (result_));
                         high_surrogate_ = 0;
                     }
                 } else {
@@ -880,7 +879,7 @@ namespace pstore {
                         ok = false;
                     } else {
                         auto const code_point = static_cast<char32_t> (cu);
-                        code_point_to_utf8 (code_point, std::back_inserter (result_));
+                        utf::code_point_to_utf8 (code_point, std::back_inserter (result_));
                     }
                 }
                 return ok;

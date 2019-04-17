@@ -47,7 +47,6 @@
 
 #include "pstore/dump/value.hpp"
 #include "pstore/json/json.hpp"
-#include "pstore/json/utf.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace {

@@ -46,7 +46,6 @@ add_pstore_unit_test (pstore-json-unit-tests
     callbacks.cpp
     callbacks.hpp
     test_json.cpp
-    test_utf.cpp
     test_number.cpp
 )
 target_link_libraries (pstore-json-unit-tests PRIVATE pstore-json-lib)

@@ -48,10 +48,8 @@ set (PSTORE_JSON_SOURCES
     "${PSTORE_JSON_INCLUDES_DIR}/dom_types.hpp"
     "${PSTORE_JSON_INCLUDES_DIR}/json.hpp"
     "${PSTORE_JSON_INCLUDES_DIR}/json_error.hpp"
-    "${PSTORE_JSON_INCLUDES_DIR}/utf.hpp"
 
     json_error.cpp
-    utf.cpp
 )
 add_pstore_library (pstore-json-lib STATIC ${PSTORE_JSON_SOURCES})
 target_link_libraries (pstore-json-lib PUBLIC pstore-support)
