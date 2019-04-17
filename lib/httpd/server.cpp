@@ -267,7 +267,7 @@ namespace pstore {
     namespace httpd {
 
         int server (in_port_t port_number, romfs::romfs & file_system) {
-            log (logging::priority::info, "initializing");
+            log (logging::priority::info, "initializing on port: ", port_number);
             pstore::error_or<socket_descriptor> eparentfd = initialize_socket (port_number);
             if (!eparentfd) {
                 log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
@@ -275,11 +275,6 @@ namespace pstore {
             }
             socket_descriptor const & parentfd = eparentfd.get ();
 
-            // main loop: wait for a connection request, parse HTTP,
-            // serve requested content, close connection.
-            sockaddr_in client_addr{}; // client address.
-            auto clientlen =
-                static_cast<socklen_t> (sizeof (client_addr)); // byte size of client's address
             log (logging::priority::info, "starting server-loop");
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
@@ -287,6 +282,8 @@ namespace pstore {
             server_state state{};
             while (!state.done) {
                 // Wait for a connection request.
+                sockaddr_in client_addr{}; // client address.
+                auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
                 socket_descriptor childfd{
                     ::accept (parentfd.get (), reinterpret_cast<struct sockaddr *> (&client_addr),
                               &clientlen)};

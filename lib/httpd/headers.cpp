@@ -52,15 +52,31 @@ using pstore::httpd::header_info;
 
 namespace {
 
+    bool case_insensitive_equal (std::string const & lhs, std::string const & rhs) noexcept {
+        auto const length = lhs.length ();
+        if (length != rhs.length ()) {
+            return false;
+        }
+        auto lower = [](char c) noexcept {
+            return static_cast<char> (std::tolower (static_cast<unsigned char> (c)));
+        };
+        for (std::string::size_type idx = 0; idx < length; ++idx) {
+            if (lower (lhs[idx]) != lower (rhs[idx])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     header_info upgrade (header_info hi, std::string const & value) {
-        if (value == "websocket") {
+        if (case_insensitive_equal ("websocket", value)) {
             hi.upgrade_to_websocket = true;
         }
         return hi;
     }
 
     header_info connection (header_info hi, std::string const & value) {
-        if (value == "Upgrade") {
+        if (case_insensitive_equal ("upgrade", value)) {
             hi.connection_upgrade = true;
         }
         return hi;

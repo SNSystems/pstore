@@ -73,3 +73,13 @@ TEST (Headers, ExampleWS) {
     expected.websocket_version = just (13U);
     EXPECT_EQ (hi, expected);
 }
+
+TEST (Headers, ExampleWSCaseInsensitive) {
+    header_info const hi =
+        header_info ().handler ("upgrade", "WEBSOCKET").handler ("connection", "UPGRADE");
+
+    header_info expected;
+    expected.upgrade_to_websocket = true;
+    expected.connection_upgrade = true;
+    EXPECT_EQ (hi, expected);
+}

@@ -46,13 +46,24 @@
 #include <iostream>
 #include <thread>
 
+#ifndef _WIN32
+#    include <signal.h>
+#endif
+
 #include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
+
 #include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/server.hpp"
+#include "pstore/httpd/net_txrx.hpp"
+#include "pstore/httpd/ws_server.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/romfs/romfs.hpp"
 
 extern pstore::romfs::romfs fs;
+
+
 
 namespace {
 
@@ -73,6 +84,8 @@ int main (int argc, char * argv[]) {
         std::cerr << "WSAStartup() failed\n";
         return EXIT_FAILURE;
     }
+#else
+    signal (SIGPIPE, SIG_IGN);
 #endif // _WIN32
 
     PSTORE_TRY {
@@ -84,14 +97,13 @@ int main (int argc, char * argv[]) {
         pstore::threads::set_name (ident);
         pstore::logging::create_log_stream (ident);
 
-        std::thread t ([]() {
+        std::thread ([]() {
             static constexpr auto name = "http";
             pstore::threads::set_name (name);
             pstore::logging::create_log_stream (name);
 
             pstore::httpd::server (port, fs);
-        });
-        t.join ();
+        }).join ();
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {

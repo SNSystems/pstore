@@ -61,7 +61,7 @@
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/logging.hpp"
 
-#define PSTORE_LOG_FRAME_INFO 0 // Define as 1 to log the frame header as it is received.
+#define PSTORE_LOG_FRAME_INFO 1 // Define as 1 to log the frame header as it is received.
 
 namespace pstore {
     namespace httpd {
@@ -156,6 +156,15 @@ namespace pstore {
             unknown = 0xFF,
         };
 
+#if PSTORE_LOG_FRAME_INFO
+        char const * opcode_name (opcode op) noexcept;
+#endif
+
+        inline bool is_control_frame_opcode (opcode c) noexcept {
+            return (static_cast<unsigned> (c) & 0x08U) != 0U;
+        };
+
+
         enum class close_status_code : std::uint16_t {
             normal = 1000,           // Normal Closure
             going_away = 1001,       // Going Away
@@ -227,7 +236,6 @@ namespace pstore {
 
 
 
-
         template <typename Reader, typename IO>
         error_or_n<IO, frame> read_frame (Reader & reader, IO io) {
             frame_fixed_layout res{};
@@ -245,7 +253,8 @@ namespace pstore {
                 log (pstore::logging::priority::info, "rsv1: ", part1.rsv1);
                 log (pstore::logging::priority::info, "rsv2: ", part1.rsv2);
                 log (pstore::logging::priority::info, "rsv3: ", part1.rsv3);
-                log (pstore::logging::priority::info, "opcode: ", part1.opcode);
+                log (pstore::logging::priority::info,
+                     "opcode: ", opcode_name (static_cast<opcode> (part1.opcode.value ())));
                 log (pstore::logging::priority::info, "mask: ", part1.mask);
                 log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
 #endif // PSTORE_LOG_FRAME_INFO
@@ -373,8 +382,8 @@ namespace pstore {
         // pong
         // ~~~~
         template <typename Sender, typename IO>
-        error_or<IO> pong (Sender sender, IO io) {
-            return send_message (sender, io, opcode::pong, gsl::span<std::uint8_t>{});
+        error_or<IO> pong (Sender sender, IO io, gsl::span<std::uint8_t const> const & payload) {
+            return send_message (sender, io, opcode::pong, payload);
         }
 
 
@@ -401,77 +410,19 @@ namespace pstore {
                 if (!eo) {
                     log (logging::priority::error, "Error: ", eo.get_error ().message ());
                     if (eo.get_error () == make_error_code (ws_error::unmasked_frame)) {
-                        // TODO: ERROR: The server MUST close the connection upon receiving a frame
-                        // that is not masked.  In this case, a server MAY send a Close frame with a
-                        // status code of 1002 (protocol error)
+                        // "The server MUST close the connection upon receiving a frame that is not
+                        // masked.  In this case, a server MAY send a Close frame with a status code
+                        // of 1002 (protocol error)."
+                        send_close_frame (sender, io, close_status_code::protocol_error);
                         return;
                     }
-                } else {
-                    frame const & wsp = std::get<1> (eo);
-                    switch (wsp.op) {
-                    case opcode::continuation:
-                        if ((static_cast<unsigned> (op) & 0x08) != 0U) {
-                            // FIXME: ERROR: continuation of a control frame.
-                        }
-                        payload.insert (std::end (payload), std::begin (wsp.payload),
-                                        std::end (wsp.payload));
-                        break;
+                    break;
+                }
 
-                    // Data frame opcodes.
-                    case opcode::text:
-                    case opcode::binary:
-                        if (!payload.empty ()) {
-                            // FIXME: ERROR: We didn't see a FIN frame before a new data frame.
-                            return;
-                        }
-                        payload = std::move (wsp.payload);
-                        op = wsp.op;
-                        break;
+                frame const & wsp = std::get<1> (eo);
 
-                    case opcode::reserved_nc_1:
-                    case opcode::reserved_nc_2:
-                    case opcode::reserved_nc_3:
-                    case opcode::reserved_nc_4:
-                    case opcode::reserved_nc_5:
-                        // FIXME: ERROR: Unknown data frame opcode.
-                        break;
-
-                    case opcode::reserved_control_1:
-                    case opcode::reserved_control_2:
-                    case opcode::reserved_control_3:
-                    case opcode::reserved_control_4:
-                    case opcode::reserved_control_5:
-                        // ERROR: unknown opcode.
-                        break;
-
-                    case opcode::close: {
-                        auto state = close_status_code::normal;
-                        if (payload.size () >= sizeof (std::uint16_t)) {
-                            state = static_cast<close_status_code> (network_to_host (
-                                *reinterpret_cast<std::uint16_t const *> (payload.data ())));
-                        }
-
-                        error_or<IO> eo3 = send_close_frame (sender, std::get<0> (eo), state);
-                        if (!eo3) {
-                            // ERROR: send failed
-                        }
-                        done = true;
-                    } break;
-
-                    case opcode::ping: {
-                        error_or<IO> eo2 = pong (sender, std::get<0> (eo));
-                        if (!eo2) {
-                            // ERROR: send failed
-                        }
-                    } break;
-
-                    case opcode::pong:
-                        // TODO: Bad opcode?
-                        break;
-
-                    case opcode::unknown: assert (0); break;
-                    }
-
+                // TODO: this implements a simple echo server ATM. Need something more useful...
+                auto check_message_complete = [&]() {
                     if (wsp.fin) {
                         // We've got the complete message.
                         std::string str;
@@ -480,13 +431,79 @@ namespace pstore {
                                         [](std::uint8_t v) { return static_cast<char> (v); });
                         log (logging::priority::info, "Received: ", str);
 
-                        error_or<IO> const eo3 = send_message (
-                            sender, std::get<0> (eo), opcode::text, gsl::make_span (payload));
+                        error_or<IO> const eo3 =
+                            send_message (sender, std::get<0> (eo), op, gsl::make_span (payload));
                         // FIXME: error handling!
 
                         payload.clear ();
                         op = opcode::unknown;
                     }
+                };
+
+                if (is_control_frame_opcode (wsp.op) && wsp.payload.size () > 125) {
+                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
+                    return;
+                }
+
+                switch (wsp.op) {
+                case opcode::continuation:
+                    if (is_control_frame_opcode (op)) {
+                        // FIXME: ERROR: continuation of a control frame.
+                    }
+                    payload.insert (std::end (payload), std::begin (wsp.payload),
+                                    std::end (wsp.payload));
+                    check_message_complete ();
+                    break;
+
+                // Data frame opcodes.
+                case opcode::text:
+                case opcode::binary:
+                    if (!payload.empty ()) {
+                        // FIXME: ERROR: We didn't see a FIN frame before a new data frame.
+                        return;
+                    }
+                    payload = std::move (wsp.payload);
+                    op = wsp.op;
+                    check_message_complete ();
+                    break;
+
+                case opcode::reserved_nc_1:
+                case opcode::reserved_nc_2:
+                case opcode::reserved_nc_3:
+                case opcode::reserved_nc_4:
+                case opcode::reserved_nc_5:
+                case opcode::reserved_control_1:
+                case opcode::reserved_control_2:
+                case opcode::reserved_control_3:
+                case opcode::reserved_control_4:
+                case opcode::reserved_control_5:
+                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
+                    return;
+
+                case opcode::close: {
+                    auto state = close_status_code::normal;
+                    if (wsp.payload.size () >= sizeof (std::uint16_t)) {
+                        state = static_cast<close_status_code> (network_to_host (
+                            *reinterpret_cast<std::uint16_t const *> (wsp.payload.data ())));
+                    }
+
+                    send_close_frame (sender, std::get<0> (eo), state);
+                    return;
+                }
+
+                case opcode::ping: {
+                    error_or<IO> eo2 =
+                        pong (sender, std::get<0> (eo), gsl::make_span (wsp.payload));
+                    if (!eo2) {
+                        // ERROR: send failed
+                    }
+                } break;
+
+                case opcode::pong:
+                    // TODO: Bad opcode?
+                    break;
+
+                case opcode::unknown: assert (0); break;
                 }
             }
         }

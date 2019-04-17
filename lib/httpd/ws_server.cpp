@@ -67,5 +67,31 @@ namespace pstore {
         }
 
 
+#if PSTORE_LOG_FRAME_INFO
+        char const * opcode_name (opcode op) noexcept {
+            switch (op) {
+            case opcode::continuation: return "continuation";
+            case opcode::text: return "text";
+            case opcode::binary: return "binary";
+            case opcode::reserved_nc_1: return "reserved_nc_1";
+            case opcode::reserved_nc_2: return "reserved_nc_2";
+            case opcode::reserved_nc_3: return "reserved_nc_3";
+            case opcode::reserved_nc_4: return "reserved_nc_4";
+            case opcode::reserved_nc_5: return "reserved_nc_5";
+            case opcode::close: return "close";
+            case opcode::ping: return "ping";
+            case opcode::pong: return "pong";
+            case opcode::reserved_control_1: return "reserved_control_1";
+            case opcode::reserved_control_2: return "reserved_control_2";
+            case opcode::reserved_control_3: return "reserved_control_3";
+            case opcode::reserved_control_4: return "reserved_control_4";
+            case opcode::reserved_control_5: return "reserved_control_5";
+            case opcode::unknown: break;
+            }
+            return "unknown";
+        }
+#endif // PSTORE_LOG_FRAME_INFO
+
+
     } // end namespace httpd
 } // end namespace pstore
