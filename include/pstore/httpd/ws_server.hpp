@@ -60,6 +60,7 @@
 #include "pstore/httpd/send.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/utf.hpp"
 
 #define PSTORE_LOG_FRAME_INFO 1 // Define as 1 to log the frame header as it is received.
 
@@ -424,7 +425,23 @@ namespace pstore {
                 // TODO: this implements a simple echo server ATM. Need something more useful...
                 auto check_message_complete = [&]() {
                     if (wsp.fin) {
-                        // We've got the complete message.
+                        // We've got the complete message. If this was a text message, we need to
+                        // validate the UTF-8 that it contains.
+                        //
+                        // "When an endpoint is to interpret a byte stream as UTF-8 but finds that
+                        // the byte stream is not, in fact, a valid UTF-8 stream, that endpoint MUST
+                        // _Fail the WebSocket Connection_.
+                        if (op == opcode::text) {
+                            utf::utf8_decoder decoder;
+                            for (auto b : payload) {
+                                decoder.get (b);
+                            }
+                            if (!decoder.is_well_formed ()) {
+                                send_close_frame (sender, io, close_status_code::invalid_payload);
+                                return false;
+                            }
+                        }
+
                         std::string str;
                         std::transform (std::begin (payload), std::end (payload),
                                         std::back_inserter (str),
@@ -438,6 +455,7 @@ namespace pstore {
                         payload.clear ();
                         op = opcode::unknown;
                     }
+                    return true;
                 };
 
                 if (is_control_frame_opcode (wsp.op) && wsp.payload.size () > 125) {
@@ -452,7 +470,9 @@ namespace pstore {
                     }
                     payload.insert (std::end (payload), std::begin (wsp.payload),
                                     std::end (wsp.payload));
-                    check_message_complete ();
+                    if (!check_message_complete ()) {
+                        return;
+                    }
                     break;
 
                 // Data frame opcodes.
@@ -464,7 +484,9 @@ namespace pstore {
                     }
                     payload = std::move (wsp.payload);
                     op = wsp.op;
-                    check_message_complete ();
+                    if (!check_message_complete ()) {
+                        return;
+                    }
                     break;
 
                 case opcode::reserved_nc_1:
