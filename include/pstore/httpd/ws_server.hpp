@@ -162,7 +162,7 @@ namespace pstore {
 
         inline bool is_control_frame_opcode (opcode c) noexcept {
             return (static_cast<unsigned> (c) & 0x08U) != 0U;
-        };
+        }
 
 
         enum class close_status_code : std::uint16_t {
