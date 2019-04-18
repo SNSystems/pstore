@@ -117,9 +117,11 @@ namespace pstore {
 
                 descriptor & operator= (descriptor const &) = delete;
                 descriptor & operator= (descriptor && rhs) noexcept {
-                    reset ();
-                    fd_ = rhs.release ();
-                    traits_ = std::move (rhs.traits_);
+                    if (this != &rhs) {
+                        reset ();
+                        fd_ = rhs.release ();
+                        traits_ = std::move (rhs.traits_);
+                    }
                     return *this;
                 }
 

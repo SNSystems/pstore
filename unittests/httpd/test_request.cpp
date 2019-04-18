@@ -67,7 +67,7 @@ TEST (Request, Empty) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    error_or_n<int, request_info> const res = read_request (br, io);
     ASSERT_FALSE (static_cast<bool> (res));
 }
 
@@ -78,9 +78,9 @@ TEST (Request, Complete) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    error_or_n<int, request_info> const res = read_request (br, io);
     ASSERT_TRUE (static_cast<bool> (res)) << "There was an error:" << res.get_error ();
-    auto const & request = std::get<1> (*res);
+    auto const & request = std::get<1> (res);
     EXPECT_EQ (request.method (), "GET");
     EXPECT_EQ (request.uri (), "/uri");
     EXPECT_EQ (request.version (), "HTTP/1.1");
@@ -93,7 +93,7 @@ TEST (Request, Partial) {
 
     auto io = 0;
     auto br = make_buffered_reader<int> (r.refill_function ());
-    error_or<std::pair<int, request_info>> const res = read_request (br, io);
+    error_or_n<int, request_info> const res = read_request (br, io);
     ASSERT_FALSE (static_cast<bool> (res));
 }
 

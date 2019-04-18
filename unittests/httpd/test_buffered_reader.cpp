@@ -70,16 +70,16 @@ TEST (HttpdBufferedReader, GetcThenEOF) {
     {
         getc_result_type const c1 = br.getc (io);
         ASSERT_TRUE (static_cast<bool> (c1));
-        maybe<char> char1;
-        std::tie (io, char1) = *c1;
+        io = std::get<0> (*c1);
+        maybe<char> const char1 = std::get<1> (*c1);
         ASSERT_TRUE (char1.has_value ());
         EXPECT_EQ (char1.value (), 'a');
     }
     {
         getc_result_type const c2 = br.getc (io);
         ASSERT_TRUE (static_cast<bool> (c2));
-        maybe<char> char2;
-        std::tie (io, char2) = *c2;
+        io = std::get<0> (*c2);
+        maybe<char> const char2 = std::get<1> (*c2);
         ASSERT_FALSE (char2.has_value ());
     }
 }

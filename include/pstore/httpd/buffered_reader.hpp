@@ -44,6 +44,7 @@
 #ifndef PSTORE_HTTPD_BUFFERED_READER_HPP
 #define PSTORE_HTTPD_BUFFERED_READER_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <string>
@@ -98,7 +99,8 @@ namespace pstore {
             buffered_reader & operator= (buffered_reader &&) noexcept = delete;
 
             template <typename SpanType>
-            error_or_n<IO, SpanType> get_span (IO io, SpanType const & sp);
+            error_or_n<IO, gsl::span<typename SpanType::element_type>>
+            get_span (IO io, SpanType const & sp);
 
             geto_result_type geto (IO io);
 
@@ -187,92 +189,79 @@ namespace pstore {
             this->check_invariants ();
         }
 
-        // template <typename IO, typename RefillFunction>
-        // error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
-        // buffered_reader<IO, RefillFunction>::fill (IO io, gsl::span<std::uint8_t> & s) {
-        //}
-
-
-
-        // TODO: repeatedly calling reader.geto() is hideously inefficient. Add a span-based method
-        // to Reader.
+        // get_span_impl
+        // ~~~~~~~~~~~~~
         template <typename IO, typename RefillFunction>
         auto buffered_reader<IO, RefillFunction>::get_span_impl (IO io, byte_span const & sp)
             -> error_or_n<IO, byte_span> {
-            if (sp.size () == 0) {
-                return error_or_n<IO, byte_span>{in_place, io, sp};
+
+            auto available = sp;
+            if (push_ && sp.size () > 0) {
+                sp[0] = *push_;
+                push_.reset ();
+                available = available.subspan (1);
             }
-            return this->geto (io) >>= [this, &sp](IO io1, maybe<std::uint8_t> const & b) {
-                if (!b) {
-                    return error_or_n<IO, byte_span>{in_place, io1, sp};
+
+            while (available.size () > 0 && !is_eof_) {
+                if (pos_ == end_) {
+                    // Refill the buffer.
+                    error_or_n<IO, gsl::span<std::uint8_t>::iterator> x = refill_ (io, span_);
+                    if (!x) {
+                        return error_or_n<IO, byte_span>{x.get_error ()};
+                    }
+                    io = std::move (std::get<0> (x));
+                    auto const & end = std::get<1> (x);
+                    if (end == span_.begin ()) {
+                        // that's the end of the source data.
+                        is_eof_ = true;
+                        return {in_place, io,
+                                byte_span{sp.data (), available.data () - sp.data ()}};
+                    }
+
+                    end_ = end;
+                    pos_ = span_.begin ();
                 }
-                auto data = sp.data ();
-                *data = *b;
-                return this->get_span_impl (io1, byte_span{data + 1, sp.size () - 1});
-            };
+
+                // If we have bytes in the buffer, copy as many as we can.
+
+                this->check_invariants ();
+                auto to_copy = std::min (std::distance (pos_, end_), available.size ());
+                std::copy_n (pos_, to_copy, available.data ());
+                pos_ += to_copy;
+                available = available.subspan (to_copy);
+            }
+            return {in_place, io, byte_span{sp.data (), available.data () - sp.data ()}};
         }
 
-        // TODO: move read_span and read_span_impl to buffered_reader.
+        // get_span
+        // ~~~~~~~~
         template <typename IO, typename RefillFunction>
         template <typename SpanType>
         auto buffered_reader<IO, RefillFunction>::get_span (IO io, SpanType const & sp)
-            -> error_or_n<IO, SpanType> {
+            -> error_or_n<IO, gsl::span<typename SpanType::element_type>> {
+
             return this->get_span_impl (io, as_writeable_bytes (sp)) >>=
-                   [&sp](IO io2, gsl::span<std::uint8_t> const &) {
-                       return error_or_n<IO, SpanType>{in_place, io2, sp};
+                   [](IO io2, byte_span const & sp2) {
+                       using element_type = typename SpanType::element_type;
+                       auto const first = reinterpret_cast<element_type *> (sp2.data ());
+                       return error_or_n<IO, gsl::span<element_type>>{
+                           in_place, io2,
+                           gsl::make_span (first, first + sp2.size () / sizeof (element_type))};
                    };
         }
-
-
 
         // geto
         // ~~~~
         template <typename IO, typename RefillFunction>
         auto buffered_reader<IO, RefillFunction>::geto (IO io) -> geto_result_type {
-            // If a byte has been "pushed back" then return it immediately.
-            if (push_) {
-                auto const v = *push_;
-                push_.reset ();
-                return geto_result_type{in_place, io, just (v)};
+            std::uint8_t result;
+            error_or_n<IO, byte_span> const eo = get_span (io, gsl::make_span (&result, 1));
+            if (!eo) {
+                return geto_result_type{eo.get_error ()};
             }
-
-            // If we have bytes in the buffer, return the next one.
-            if (pos_ != end_) {
-                this->check_invariants ();
-                return geto_result_type{in_place, io, just (*(pos_++))};
-            }
-
-            // We've seen an EOF condition so don't try refilling the buffer.
-            if (is_eof_) {
-                return geto_result_type{in_place, io, nothing<std::uint8_t> ()};
-            }
-
-            auto const check_refill_response = [this](
-                                                   IO io2,
-                                                   gsl::span<std::uint8_t>::iterator const & end) {
-                if (end < span_.begin () || end > span_.end ()) {
-                    return refill_result_type{make_error_code (error_code::refill_out_of_range)};
-                }
-                return refill_result_type{in_place, io2, end};
-            };
-
-            auto const yield_result = [this](IO io3,
-                                             gsl::span<std::uint8_t>::iterator const & end) {
-                if (end == span_.begin ()) {
-                    // that's the end of the source data.
-                    is_eof_ = true;
-                    return geto_result_type{in_place, io3, nothing<std::uint8_t> ()};
-                }
-
-                end_ = end;
-                pos_ = span_.begin ();
-                this->check_invariants ();
-                return geto_result_type{in_place, io3, just (*(pos_++))};
-            };
-
-            // Refill the buffer.
-            error_or_n<IO, gsl::span<std::uint8_t>::iterator> x = refill_ (io, span_);
-            return (x >>= check_refill_response) >>= yield_result;
+            auto const sp = std::get<1> (eo);
+            return {in_place, std::get<0> (eo),
+                    sp.size () == 1 ? just (sp[0]) : nothing<std::uint8_t> ()};
         }
 
         // getc

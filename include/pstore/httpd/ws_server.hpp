@@ -63,6 +63,7 @@
 #include "pstore/support/utf.hpp"
 
 #define PSTORE_LOG_FRAME_INFO 0 // Define as 1 to log the frame header as it is received.
+#define PSTORE_LOG_RECEIVED_MESSAGES 0 // Define as 1 to log the text of received messages.
 
 namespace pstore {
     namespace httpd {
@@ -366,7 +367,7 @@ namespace pstore {
                        [sender, &span](IO io2) { return send (sender, io2, span); };
             }
 
-            if (length < std::numeric_limits<std::uint16_t>::max ()) {
+            if (length <= std::numeric_limits<std::uint16_t>::max ()) {
                 // Length is sent as 16-bits.
                 f.payload_length = 126;
                 return details::send_extended_length_message<std::uint16_t> (sender, io, f, span);
@@ -415,6 +416,8 @@ namespace pstore {
         }
 
 
+        // close_message
+        // ~~~~~~~~~~~~~
         template <typename Sender, typename IO>
         error_or<IO> close_message (Sender sender, IO io, frame const & wsp) {
             auto state = close_status_code::normal;
@@ -469,16 +472,20 @@ namespace pstore {
 
                 // Just log the message received for the time being.
                 {
+#if PSTORE_LOG_RECEIVED_MESSAGES
                     std::string str;
                     std::transform (std::begin (payload), std::end (payload),
                                     std::back_inserter (str),
                                     [](std::uint8_t v) { return static_cast<char> (v); });
                     log (logging::priority::info, "Received: ", str);
+#endif // PSTORE_LOG_RECEIVED_MESSAGES
                 }
 
                 // FIXME: this implements a simple echo server ATM. Need something more useful...
                 error_or<IO> const eo3 = send_message (sender, io, op, gsl::make_span (payload));
-                // FIXME: error handling!
+                if (!eo3) {
+                    log (logging::priority::error, "Send error: ", eo3.get_error ().message ());
+                }
 
                 payload.clear ();
                 op = opcode::unknown;

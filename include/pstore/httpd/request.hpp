@@ -94,7 +94,7 @@ namespace pstore {
         // read_request
         // ~~~~~~~~~~~~
         template <typename ReaderType>
-        error_or<std::pair<typename ReaderType::state_type, request_info>>
+        error_or_n<typename ReaderType::state_type, request_info>
         read_request (ReaderType & reader, typename ReaderType::state_type io) {
             using state_type = typename ReaderType::state_type;
 
@@ -107,7 +107,7 @@ namespace pstore {
             };
 
             auto extract_request_info = [](state_type io3, std::string const & s) {
-                using result_type = error_or<std::pair<state_type, request_info>>;
+                using result_type = error_or_n<state_type, request_info>;
 
                 std::istringstream is{s};
                 std::string method;

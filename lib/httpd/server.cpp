@@ -303,15 +303,16 @@ namespace pstore {
                 // Get the HTTP request line.
                 auto reader = make_buffered_reader<socket_descriptor &> (net::refiller);
 
-                pstore::error_or<std::pair<socket_descriptor &, request_info>> eri =
-                    read_request (reader, childfd);
+                assert (childfd.valid ());
+                pstore::error_or_n<socket_descriptor &, request_info> eri =
+                    read_request (reader, std::ref (childfd));
                 if (!eri) {
                     log (logging::priority::error, "reading HTTP request",
                          eri.get_error ().message ());
                     continue;
                 }
-
-                request_info const & request = std::get<1> (eri.get ());
+                childfd = std::move (std::get<0> (eri));
+                request_info const & request = std::get<1> (eri);
                 log (logging::priority::info, "Request: ",
                      request.method () + ' ' + request.version () + ' ' + request.uri ());
 
@@ -352,6 +353,7 @@ namespace pstore {
                     };
 
                 // Scan the HTTP headers.
+                assert (childfd.valid ());
                 error_or<server_state> const eo = read_headers (
                     reader, childfd,
                     [](header_info io, std::string const & key, std::string const & value) {
