@@ -181,7 +181,7 @@ namespace pstore {
                     value = static_cast<value_type> (value * 16 + hex_digit (hex_char));
                 }
 
-                return std::make_tuple (value, it);
+                return std::make_tuple (value, --it);
             }
 
         } // end namespace details
@@ -214,7 +214,16 @@ namespace pstore {
 
                 case '+': c = ' '; break;
 
-                case '%': std::tie (c, it) = details::value_from_hex (it, end); break;
+                case '%': {
+                    // Skip the percent character.
+                    ++it;
+                    if (it == end) {
+                        do_append = false;
+                        --it;
+                    } else {
+                        std::tie (c, it) = details::value_from_hex (it, end);
+                    }
+                } break;
 
                 case '=':
                     if (state == key_mode) {

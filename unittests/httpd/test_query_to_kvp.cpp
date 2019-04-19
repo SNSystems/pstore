@@ -102,6 +102,38 @@ TEST (QueryToKvp, HashTerminatesQuery) {
     EXPECT_THAT (result, ContainerEq (string_map{{"k1", "v1"}, {"k2", "v2"}}));
 }
 
+TEST (QueryToKvp, Plus) {
+    string_map result1;
+    query_to_kvp ("k1=v1+v2", pstore::httpd::make_insert_iterator (result1));
+    EXPECT_THAT (result1, ContainerEq (string_map{{"k1", "v1 v2"}}));
+}
+
+TEST (QueryToKvp, Hex) {
+    {
+        // Hex digits
+        string_map result1;
+        query_to_kvp ("k1=v1%20v2", pstore::httpd::make_insert_iterator (result1));
+        EXPECT_THAT (result1, ContainerEq (string_map{{"k1", "v1 v2"}}));
+    }
+    {
+        // Mixed upper/lower hex letters
+        string_map result2;
+        query_to_kvp ("k1=v1%C2%a9v2", pstore::httpd::make_insert_iterator (result2));
+        EXPECT_THAT (result2, ContainerEq (string_map{{"k1", "v1\xc2\xa9v2"}}));
+    }
+    {
+        // Partial hex value.
+        string_map result3;
+        query_to_kvp ("k1=v1%Cv2", pstore::httpd::make_insert_iterator (result3));
+        EXPECT_THAT (result3, ContainerEq (string_map{{"k1", "v1\x0cv2"}}));
+    }
+    {
+        // Trailing percent.
+        string_map result4;
+        query_to_kvp ("k1=v1%", pstore::httpd::make_insert_iterator (result4));
+        EXPECT_THAT (result4, ContainerEq (string_map{{"k1", "v1"}}));
+    }
+}
 
 
 TEST (KvpToQuery, Empty) {
