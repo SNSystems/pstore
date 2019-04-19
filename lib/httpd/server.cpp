@@ -218,15 +218,17 @@ namespace {
             // send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
         }
 
+
         // Send back the server handshake response.
         auto const accept_ws_connection = [&header_contents, &io]() {
             log (priority::info, "Accepting WebSockets upgrade");
 
             static constexpr auto crlf = pstore::httpd::crlf;
             std::ostringstream os;
-            os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: websocket" << crlf
-               << "Connection: upgrade" << crlf << "Sec-WebSocket-Accept: "
+            os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: WebSocket" << crlf
+               << "Connection: Upgrade" << crlf << "Sec-WebSocket-Accept: "
                << pstore::httpd::source_key (*header_contents.websocket_key) << crlf << crlf;
+
             // Here I assume that the send() IO param is the same as the Reader's IO parameter.
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };

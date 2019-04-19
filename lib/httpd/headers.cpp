@@ -43,30 +43,69 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/httpd/headers.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <functional>
 #include <limits>
 #include <unordered_map>
+#include <vector>
+
+#include "pstore/support/ctype.hpp"
 
 using pstore::httpd::header_info;
 
 namespace {
 
-    bool case_insensitive_equal (std::string const & lhs, std::string const & rhs) noexcept {
-        auto const length = lhs.length ();
-        if (length != rhs.length ()) {
+    bool case_insensitive_equal (std::string::const_iterator lhs_first,
+                                 std::string::const_iterator lhs_last,
+                                 std::string::const_iterator rhs_first,
+                                 std::string::const_iterator rhs_last) noexcept {
+        if (std::distance (lhs_first, lhs_last) != std::distance (rhs_first, rhs_last)) {
             return false;
         }
-        auto lower = [](char c) noexcept {
-            return static_cast<char> (std::tolower (static_cast<unsigned char> (c)));
-        };
-        for (std::string::size_type idx = 0; idx < length; ++idx) {
-            if (lower (lhs[idx]) != lower (rhs[idx])) {
-                return false;
+        return std::equal (
+            lhs_first, lhs_last, rhs_first, [](char a, char b) noexcept {
+                auto lower = [](char c) noexcept {
+                    return static_cast<char> (std::tolower (static_cast<unsigned char> (c)));
+                };
+                return lower (a) == lower (b);
+            });
+    }
+
+
+    bool case_insensitive_equal (std::string const & lhs, std::string::const_iterator rhs_first,
+                                 std::string::const_iterator rhs_last) noexcept {
+        return case_insensitive_equal (std::begin (lhs), std::end (lhs), rhs_first, rhs_last);
+    }
+
+    bool case_insensitive_equal (std::string const & lhs, std::string const & rhs) noexcept {
+        return case_insensitive_equal (std::begin (lhs), std::end (lhs), std::begin (rhs),
+                                       std::end (rhs));
+    }
+
+
+    template <typename InputIterator, typename OutputIterator>
+    OutputIterator split (InputIterator first, InputIterator last, OutputIterator out,
+                          typename std::iterator_traits<InputIterator>::value_type separator) {
+        for (;;) {
+            auto const next = std::find (first, last, separator);
+            (*out)++ = std::string{first, next};
+            if (next == last) {
+                break;
+            } else {
+                first = std::next (next);
             }
         }
-        return true;
+        return out;
     }
+
+    template <typename Container, typename OutputIterator>
+    OutputIterator split (Container const & c, OutputIterator out,
+                          typename Container::value_type separator) {
+        return split (std::begin (c), std::end (c), out, separator);
+    }
+
+
 
     header_info upgrade (header_info hi, std::string const & value) {
         if (case_insensitive_equal ("websocket", value)) {
@@ -75,10 +114,25 @@ namespace {
         return hi;
     }
 
+    // The "connection" header is a comma-separated string. We're looking for the "upgrade" request.
     header_info connection (header_info hi, std::string const & value) {
-        if (case_insensitive_equal ("upgrade", value)) {
-            hi.connection_upgrade = true;
+        static std::string const upgrade = "upgrade";
+
+        std::vector<std::string> strings;
+        split (value, std::back_inserter (strings), ',');
+
+        for (auto const & str : strings) {
+            auto is_ws = [](char c) { return pstore::isspace (c); };
+            // Remove trailing whitespace.
+            auto end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
+            // Skip leading whitespace.
+            auto begin = std::find_if_not (str.begin (), end, is_ws);
+
+            if (case_insensitive_equal (upgrade, begin, end)) {
+                hi.connection_upgrade = true;
+            }
         }
+
         return hi;
     }
 

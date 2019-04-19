@@ -55,6 +55,7 @@ namespace pstore {
             case ws_error::payload_too_long: return "The frame's payload length was too large";
             case ws_error::unmasked_frame: return "The client sent an unmasked frame";
             case ws_error::message_too_long: return "Message too long";
+            case ws_error::insufficient_data: return "Insufficient data was received";
             }
             return "Unknown error";
         }

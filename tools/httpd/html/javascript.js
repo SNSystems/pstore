@@ -1,7 +1,7 @@
 (function () {
     'use strict';
 
-    var ws = new WebSocket ("ws://" + window.location.host + "/socketserver", "json");
+    var ws = new WebSocket ("ws://" + window.location.host + "/socketserver");
     ws.onerror = function (error) {
         console.error(error);
     };

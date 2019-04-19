@@ -74,6 +74,13 @@ TEST (Headers, ExampleWS) {
     EXPECT_EQ (hi, expected);
 }
 
+TEST (Headers, ConnectionCommaSeparatedList) {
+    header_info const hi = header_info ().handler ("connection", "Keep-Alive, Upgrade");
+    header_info expected;
+    expected.connection_upgrade = true;
+    EXPECT_EQ (hi, expected);
+}
+
 TEST (Headers, ExampleWSCaseInsensitive) {
     header_info const hi =
         header_info ().handler ("upgrade", "WEBSOCKET").handler ("connection", "UPGRADE");

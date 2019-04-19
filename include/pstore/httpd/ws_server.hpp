@@ -73,6 +73,7 @@ namespace pstore {
             payload_too_long,
             unmasked_frame,
             message_too_long,
+            insufficient_data,
         };
 
         // *********************
@@ -250,6 +251,11 @@ namespace pstore {
                                &res, 1)) >>= [&reader](IO io1,
                                                        gsl::span<frame_fixed_layout> const & p1) {
                 using return_type = error_or_n<IO, frame>;
+
+                if (p1.size () != 1) {
+                    return return_type{ws_error::insufficient_data};
+                }
+
                 frame_fixed_layout & part1 = p1.at (0);
                 part1.raw = network_to_host (part1.raw);
 
