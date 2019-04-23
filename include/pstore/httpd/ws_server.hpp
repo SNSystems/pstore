@@ -297,7 +297,7 @@ namespace pstore {
                     return reader.get_span (io2, gsl::make_span (mask)) >>=
                            [&](IO io3, gsl::span<std::uint8_t> const & mask_span) {
                                if (mask_span.size () != mask_length) {
-                                   // FIXME: ERRORS! EOF before mask was received.
+                                   return return_type{ws_error::insufficient_data};
                                }
 
                                std::vector<std::uint8_t> payload (
@@ -311,7 +311,7 @@ namespace pstore {
                                               std::make_unsigned<decltype (payload_size)>::type;
                                           if (payload_size < 0 ||
                                               static_cast<usize> (payload_size) != payload_length) {
-                                              // FIXME: ERRORS! EOF before payload was received.
+                                              return return_type{ws_error::insufficient_data};
                                           }
 
                                           for (auto ctr = gsl::span<std::uint8_t>::index_type{0};
@@ -471,6 +471,7 @@ namespace pstore {
                 // _Fail the WebSocket Connection_.
                 if (op == opcode::text &&
                     !is_valid_utf8 (std::begin (payload), std::end (payload))) {
+
                     send_close_frame (sender, io, close_status_code::invalid_payload);
                     return false;
                 }
@@ -486,7 +487,7 @@ namespace pstore {
 #endif // PSTORE_LOG_RECEIVED_MESSAGES
                 }
 
-                // FIXME: this implements a simple echo server ATM. Need something more useful...
+                // TODO: this implements a simple echo server ATM. Need something more useful...
                 error_or<IO> const eo3 = send_message (sender, io, op, gsl::make_span (payload));
                 if (!eo3) {
                     log (logging::priority::error, "Send error: ", eo3.get_error ().message ());
@@ -550,16 +551,13 @@ namespace pstore {
                 // Data frame opcodes.
                 case opcode::text:
                 case opcode::binary:
-                    if (op != opcode::unknown) {
+                    // We didn't see a FIN frame before a new data frame.
+                    if (op != opcode::unknown || !payload.empty ()) {
                         send_close_frame (sender, std::get<0> (eo),
                                           close_status_code::protocol_error);
                         return;
                     }
 
-                    if (!payload.empty ()) {
-                        // FIXME: ERROR: We didn't see a FIN frame before a new data frame.
-                        return;
-                    }
                     payload = std::move (wsp.payload);
                     op = wsp.op;
                     if (!check_message_complete (sender, std::get<0> (eo), wsp, op, payload)) {
