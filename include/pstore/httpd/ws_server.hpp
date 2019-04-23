@@ -524,14 +524,11 @@ namespace pstore {
 
                 frame const & wsp = std::get<1> (eo);
 
-                if (is_control_frame_opcode (wsp.op)) {
-                    // "All control frames MUST have a payload length of 125 bytes or less and MUST
-                    // NOT be fragmented."
-                    if (!wsp.fin || wsp.payload.size () > 125) {
-                        send_close_frame (sender, std::get<0> (eo),
-                                          close_status_code::protocol_error);
-                        return;
-                    }
+                // "All control frames MUST have a payload length of 125 bytes or less and MUST
+                // NOT be fragmented."
+                if (is_control_frame_opcode (wsp.op) && (!wsp.fin || wsp.payload.size () > 125)) {
+                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
+                    return;
                 }
 
                 switch (wsp.op) {

@@ -98,17 +98,33 @@ namespace pstore {
             buffered_reader & operator= (buffered_reader const &) = delete;
             buffered_reader & operator= (buffered_reader &&) noexcept = delete;
 
+            /// \brief Read a span of objects from the data source.
+            ///
+            /// Returns an error or a "maybe span". The latter is just span if data was available;
+            /// it is nothing if the data source was exhausted due to an end-of-stream condition.
+            /// Note that the returned span may be shorter than the \p sp span if insufficient data
+            /// was available from the data source.
             template <typename SpanType>
             error_or_n<IO, gsl::span<typename SpanType::element_type>>
             get_span (IO io, SpanType const & sp);
 
+            /// \brief Read a single octet from the data source.
+            ///
+            /// Returns an error or a "maybe byte". The latter is just a byte if one was
+            /// available; it is nothing if the data source was exhausted due to an end-of-file or
+            /// end-of-stream condition.
+            ///
+            /// \param io The IO state that will be passed to the refill function if the reader's
+            /// buffer is exhausted.
+            /// \returns  An error or a pair containing the (potentially updated) IO state and maybe
+            /// a byte. If the latter is "nothing", this signals that the end of stream has
+            /// been encountered.
             geto_result_type geto (IO io);
 
             /// \brief Read a single character from the data source.
             ///
-            /// Returns an error or a "maybe character". The latter is just a character if one was
-            /// available; it is nothing if the data source was exhausted due to an end-of-file or
-            /// end-of-stream condition.
+            /// This is a simple wrapper for geto(): there is currently no consideration for
+            /// multibyte characters.
             ///
             /// \param io The IO state that will be passed to the refill function if the reader's
             /// buffer is exhausted.
@@ -130,9 +146,6 @@ namespace pstore {
             /// a string. If the latter is "nothing", this signals that the end of stream has
             /// been encountered.
             gets_result_type gets (IO io);
-
-            // error_or<std::pair<IO, gsl::span<std::uint8_t>::iterator>>
-            // fill (IO io, gsl::span<std::uint8_t> & s);
 
         private:
             void check_invariants () noexcept;

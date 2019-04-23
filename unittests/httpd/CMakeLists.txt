@@ -52,5 +52,6 @@ add_pstore_unit_test (pstore-httpd-unit-tests
     test_request.cpp
     test_serve_static_content.cpp
     test_wskey.cpp
+    test_ws_server.cpp
 )
 target_link_libraries (pstore-httpd-unit-tests PRIVATE pstore-httpd-lib)
