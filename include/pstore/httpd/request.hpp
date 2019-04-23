@@ -84,19 +84,27 @@ namespace pstore {
         };
 
         namespace details {
+
             inline std::error_code out_of_data_error () {
                 // TODO: we're returning that we ran out of data. Is there a more suitable
                 // error?
                 return std::make_error_code (std::errc (ENOTCONN));
             }
+
         } // end namespace details
 
         // read_request
         // ~~~~~~~~~~~~
-        template <typename ReaderType>
-        error_or_n<typename ReaderType::state_type, request_info>
-        read_request (ReaderType & reader, typename ReaderType::state_type io) {
-            using state_type = typename ReaderType::state_type;
+        /// \tparam Reader  The buffered_reader<> type from which data is to be read.
+        /// \param reader  An instance of Reader: a buffered_reader<> from which data is read,
+        /// \param io  The state passed to the reader's refill function.
+        /// \returns  Type error_or_n<Reader::state_type, request_info>. Either an error or the
+        /// updated reader state value and an instance of request_info containing the HTTP method,
+        /// URI and version strings.
+        template <typename Reader>
+        error_or_n<typename Reader::state_type, request_info>
+        read_request (Reader & reader, typename Reader::state_type io) {
+            using state_type = typename Reader::state_type;
 
             auto check_for_eof = [](state_type io2, maybe<std::string> const & buf) {
                 using result_type = error_or_n<state_type, std::string>;
@@ -153,6 +161,7 @@ namespace pstore {
 
                 std::string key;
                 std::string value;
+
                 auto pos = ms->find (':');
                 if (pos == std::string::npos) {
                     value = *ms;

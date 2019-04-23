@@ -1,10 +1,10 @@
-//*      _ _                _    *
-//*   __| (_)_ __ ___ _ __ | |_  *
-//*  / _` | | '__/ _ \ '_ \| __| *
-//* | (_| | | | |  __/ | | | |_  *
-//*  \__,_|_|_|  \___|_| |_|\__| *
-//*                              *
-//===- lib/romfs/dirent.cpp -----------------------------------------------===//
+//*  _     _   _               _       _        *
+//* | |__ | |_| |_ _ __     __| | __ _| |_ ___  *
+//* | '_ \| __| __| '_ \   / _` |/ _` | __/ _ \ *
+//* | | | | |_| |_| |_) | | (_| | (_| | ||  __/ *
+//* |_| |_|\__|\__| .__/   \__,_|\__,_|\__\___| *
+//*               |_|                           *
+//===- include/pstore/httpd/http_date.hpp ---------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,15 +41,20 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/romfs/dirent.hpp"
+#ifndef PSTORE_HTTPD_HTTP_DATE_HPP
+#define PSTORE_HTTPD_HTTP_DATE_HPP
 
-#include <stdexcept>
+#include <chrono>
+#include <ctime>
+#include <string>
 
-#include "pstore/romfs/romfs.hpp"
+namespace pstore {
+    namespace httpd {
 
-auto pstore::romfs::dirent::opendir () const -> error_or<class directory const * PSTORE_NONNULL> {
-    if (!is_directory () || stat_.st_size != sizeof (directory const *)) {
-        return error_or<directory const *> (make_error_code (error_code::enotdir));
-    }
-    return error_or<directory const *> (reinterpret_cast<directory const *> (contents_));
-}
+        std::string http_date (std::chrono::system_clock::time_point time);
+        std::string http_date (std::time_t time);
+
+    } // namespace httpd
+} // end namespace pstore
+
+#endif // PSTORE_HTTPD_HTTP_DATE_HPP

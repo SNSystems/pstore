@@ -46,6 +46,8 @@
 
 #include <cassert>
 #include <cstdint>
+#include <ctime>
+
 #include <sys/types.h>
 
 #include "pstore/support/error_or.hpp"
@@ -55,16 +57,23 @@
 namespace pstore {
     namespace romfs {
 
-        using mode_t = std::uint8_t;
+        // using mode_t = std::uint8_t;
+        enum class mode_t { file, directory };
 
         struct stat {
+            constexpr stat (std::size_t size, std::time_t mtime, mode_t m) noexcept
+                    : st_size{size}
+                    , st_mtime{mtime}
+                    , mode{m} {}
+
             bool operator== (stat const & rhs) const noexcept {
-                return st_size == rhs.st_size && mode == rhs.mode;
+                return st_size == rhs.st_size && st_mtime == rhs.st_mtime && mode == rhs.mode;
             }
             bool operator!= (stat const & rhs) const noexcept { return !operator== (rhs); }
 
-            static constexpr auto is_directory_flag = std::uint16_t{0x01};
-            std::size_t st_size;
+            // static constexpr auto is_directory_flag = std::uint16_t{0x01};
+            std::size_t st_size;  ///< File size in bytes.
+            std::time_t st_mtime; ///< Time when file data was last modified.
             mode_t mode;
         };
 
@@ -73,35 +82,33 @@ namespace pstore {
         class dirent {
         public:
             constexpr dirent (gsl::czstring PSTORE_NONNULL name,
-                              void const * PSTORE_NONNULL contents, std::size_t size,
-                              mode_t mode) noexcept
+                              void const * PSTORE_NONNULL contents, stat s) noexcept
                     : name_{name}
                     , contents_{contents}
-                    , size_{size}
-                    , mode_{mode} {}
+                    , stat_{s} {}
             constexpr dirent (gsl::czstring PSTORE_NONNULL name,
                               directory const * PSTORE_NONNULL dir) noexcept
                     : name_{name}
                     , contents_{dir}
-                    , size_{sizeof (dir)}
-                    , mode_{stat::is_directory_flag} {}
+                    , stat_{sizeof (dir), 0 /*time*/, mode_t::directory} {}
 
             constexpr gsl::czstring PSTORE_NONNULL name () const noexcept { return name_; }
             constexpr bool is_directory () const noexcept {
-                return mode_ & stat::is_directory_flag;
+                return stat_.mode == mode_t::directory;
             }
             constexpr void const * PSTORE_NONNULL contents () const noexcept { return contents_; }
 
             error_or<class directory const * PSTORE_NONNULL> opendir () const;
             struct stat stat () const noexcept {
-                return {size_, mode_};
+                return stat_;
             }
 
         private:
             gsl::czstring PSTORE_NONNULL name_;
             void const * PSTORE_NONNULL contents_;
-            std::size_t size_;
-            mode_t mode_;
+            struct stat stat_;
+            //            std::size_t size_;
+            //            mode_t mode_;
         };
 
     } // end namespace romfs

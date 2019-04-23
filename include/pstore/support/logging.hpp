@@ -290,16 +290,18 @@ namespace pstore {
 
 
         inline void log (priority p, gsl::czstring message) {
-            assert (details::log_destinations != nullptr);
-            for (std::unique_ptr <logger> & destination : *details::log_destinations) {
-                destination->log (p, message);
+            if (details::log_destinations != nullptr) {
+                for (std::unique_ptr<logger> & destination : *details::log_destinations) {
+                    destination->log (p, message);
+                }
             }
         }
         template <typename T>
         inline void log (priority p, gsl::czstring message, T d) {
-            assert (details::log_destinations != nullptr);
-            for (std::unique_ptr <logger> & destination : *details::log_destinations) {
-                destination->log (p, message, d);
+            if (details::log_destinations != nullptr) {
+                for (std::unique_ptr<logger> & destination : *details::log_destinations) {
+                    destination->log (p, message, d);
+                }
             }
         }
 

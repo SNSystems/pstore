@@ -44,6 +44,7 @@
 
 #include "scan.hpp"
 
+#include <algorithm>
 #include <cerrno>
 #include <sstream>
 
@@ -73,8 +74,8 @@ namespace {
     }
 
     unsigned add_file (directory_container & directory, std::string const & path,
-                       std::string const & file_name, unsigned count) {
-        directory.emplace_back (file_name, count);
+                       std::string const & file_name, unsigned count, std::time_t modtime) {
+        directory.emplace_back (file_name, count, modtime);
         copy (path + '/' + file_name, directory.back ().contents);
         return count + 1U;
     }
@@ -83,6 +84,24 @@ namespace {
 
 
 #ifdef _WIN32
+
+namespace {
+
+    std::time_t filetime_to_timet (FILETIME const & ft) noexcept {
+        // Windows ticks are 100 nanoseconds.
+        static constexpr auto windows_tick = 10000000ULL;
+        // The number of seconds between the Windows epoch (1601-01-01T00:00:00Z) and the Unix epoch
+        // (1601-01-01T00:00:00Z).
+        static constexpr auto secs_to_unix_epoch = 11644473600ULL;
+
+        ULARGE_INTEGER ull;
+        ull.LowPart = ft.dwLowDateTime;
+        ull.HighPart = ft.dwHighDateTime;
+        return std::max (ull.QuadPart / windows_tick, secs_to_unix_epoch) - secs_to_unix_epoch;
+    }
+
+} // end anonymous namespace
+
 
 unsigned scan (directory_container & directory, std::string const & path, unsigned count) {
     auto is_hidden = [](WIN32_FIND_DATA const & fd) -> bool {
@@ -111,7 +130,9 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
         if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
             count = add_directory (directory, path, name, count);
         } else {
-            count = add_file (directory, path, name, count);
+            ;
+            count =
+                add_file (directory, path, name, count, filetime_to_timet (ffd.ftLastWriteTime));
         }
     } while (::FindNextFileW (find, &ffd) != 0);
 
@@ -151,7 +172,7 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
 
             if (S_ISREG (sb.st_mode)) { // NOLINT
                 // It's a regular file
-                count = add_file (directory, path, name, count);
+                count = add_file (directory, path, name, count, sb.st_mtime);
             } else if (S_ISDIR (sb.st_mode)) { // NOLINT
                 // A directory
                 count = add_directory (directory, path, name, count);

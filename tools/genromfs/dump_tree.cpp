@@ -93,8 +93,9 @@ void dump_tree (std::ostream & os, std::unordered_set<unsigned> & forwards,
             os << indent << "{\"" << de.name << "\", &" << directory_var (de.contents);
         } else {
             auto const contents_name = file_var (de.contents);
-            os << indent << "{\"" << de.name << "\", " << contents_name << ", sizeof ("
-               << contents_name << "), 0";
+            os << indent << "{\"" << de.name << "\", " << contents_name
+               << ", pstore::romfs::stat{sizeof (" << contents_name << "), " << de.modtime
+               << ", pstore::romfs::mode_t::file}";
         }
         os << "},\n";
     }

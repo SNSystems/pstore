@@ -49,6 +49,7 @@ add_pstore_library (pstore-httpd-lib
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/endian.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/error.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/headers.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/http_date.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/media_type.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/net_txrx.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
@@ -63,6 +64,7 @@ add_pstore_library (pstore-httpd-lib
 
     error.cpp
     headers.cpp
+    http_date.cpp
     media_type.cpp
     net_txrx.cpp
     quit.cpp

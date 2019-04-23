@@ -340,9 +340,8 @@ namespace pstore {
                                                        gsl::span<std::uint8_t const> const & span) {
                 auto send_length = [&](IO io2) {
                     auto const size = span.size ();
-                    using usize = std::make_unsigned<decltype (size)>::type;
-                    assert (size >= 0 &&
-                            static_cast<usize> (size) <= std::numeric_limits<LengthType>::max ());
+                    assert (size >= 0 && static_cast<std::make_unsigned<decltype (size)>::type> (
+                                             size) <= std::numeric_limits<LengthType>::max ());
                     return send (sender, io2, static_cast<LengthType> (size));
                 };
                 auto send_payload = [&](IO io3) { return send (sender, io3, span); };
@@ -381,7 +380,7 @@ namespace pstore {
 
             // The payload length must not have the top bit set.
             if (length & std::uint64_t{1} << 63U) {
-                return error_or<IO>{ws_error::message_too_long};
+                return error_or<IO>{make_error_code (ws_error::message_too_long)};
             }
 
             // Send the length as a full 64-bit value.

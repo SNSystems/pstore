@@ -44,6 +44,7 @@
 #ifndef PSTORE_GENROMFS_DIRECTORY_ENTRY_HPP
 #define PSTORE_GENROMFS_DIRECTORY_ENTRY_HPP
 
+#include <ctime>
 #include <memory>
 #include <string>
 #include <utility>
@@ -57,13 +58,16 @@ struct directory_entry {
                      std::unique_ptr<directory_container> && children_)
             : name (std::move (name_))
             , contents (dirno)
+            , modtime{0}
             , children (std::move (children_)) {}
-    directory_entry (std::string name_, unsigned fileno)
+    directory_entry (std::string name_, unsigned fileno, std::time_t modtime_)
             : name (std::move (name_))
-            , contents (fileno) {}
+            , contents (fileno)
+            , modtime{modtime_} {}
 
     std::string name;
     unsigned contents;
+    std::time_t modtime;
     std::unique_ptr<directory_container> children;
 };
 

@@ -50,6 +50,7 @@
 #ifndef PSTORE_HTTPD_SERVE_STATIC_CONTENT_HPP
 #define PSTORE_HTTPD_SERVE_STATIC_CONTENT_HPP
 
+#include "pstore/httpd/http_date.hpp"
 #include "pstore/httpd/media_type.hpp"
 #include "pstore/httpd/send.hpp"
 #include "pstore/romfs/romfs.hpp"
@@ -82,7 +83,7 @@ namespace pstore {
         template <typename Sender, typename IO>
         pstore::error_or<IO> serve_static_content (Sender sender, IO io, std::string path,
                                                    pstore::romfs::romfs const & file_system) {
-            if (path.length () == 0) {
+            if (path.empty ()) {
                 path = "/";
             }
             if (path.back () == '/') {
@@ -96,7 +97,8 @@ namespace pstore {
                     os << "HTTP/1.1 200 OK" << crlf << "Server: pstore-httpd" << crlf
                        << "Content-length: " << stat.st_size << crlf
                        << "Content-type: " << pstore::httpd::media_type_from_filename (path) << crlf
-                       << crlf;
+                       << "Date: " << http_date (std::chrono::system_clock::now ()) << crlf
+                       << "Last-Modified: " << http_date (stat.st_mtime) << crlf << crlf;
                     return send (sender, io, os.str ()) >>=
                            [&](IO io2) { return details::read_and_send (sender, io2, fd); };
                 };

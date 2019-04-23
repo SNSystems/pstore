@@ -60,17 +60,20 @@ namespace {
     std::uint8_t const file2[] = {104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 10};
     extern directory const dir0;
     extern directory const dir3;
+    constexpr std::time_t foo_mtime = 123;
+    constexpr std::time_t hello_mtime = 456;
     std::array<dirent, 3> const dir0_membs = {{
         {".", &dir0},
         {"..", &dir3},
-        {"foo", file1, sizeof (file1), 0},
+        {"foo", file1, pstore::romfs::stat{sizeof (file1), foo_mtime, pstore::romfs::mode_t::file}},
     }};
     directory const dir0{dir0_membs};
     std::array<dirent, 4> const dir3_membs = {{
         {".", &dir3},
         {"..", &dir3},
         {"dir", &dir0},
-        {"hello", file2, sizeof (file2), 0},
+        {"hello", file2,
+         pstore::romfs::stat{sizeof (file2), hello_mtime, pstore::romfs::mode_t::file}},
     }};
     directory const dir3{dir3_membs};
     directory const * const root = &dir3;
@@ -133,7 +136,7 @@ TEST_F (RomFs, OpenAndReadFile) {
 
     constexpr std::size_t file2_size = pstore::array_elements (file2);
     pstore::romfs::stat const & s = d.stat ();
-    EXPECT_EQ (s, (pstore::romfs::stat{file2_size, 0}));
+    EXPECT_EQ (s, (pstore::romfs::stat{file2_size, hello_mtime, pstore::romfs::mode_t::file}));
 
     std::array<std::uint8_t, file2_size> buffer;
     EXPECT_EQ (d.read (buffer.data (), sizeof (std::uint8_t), buffer.size ()), buffer.size ());
