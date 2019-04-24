@@ -379,7 +379,7 @@ namespace pstore {
             }
 
             // The payload length must not have the top bit set.
-            if (length & std::uint64_t{1} << 63U) {
+            if (static_cast<std::uint64_t> (length) & (std::uint64_t{1} << 63U)) {
                 return error_or<IO>{make_error_code (ws_error::message_too_long)};
             }
 
