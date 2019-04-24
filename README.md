@@ -24,7 +24,7 @@ pstore is built and tested on a variety of platforms:
 - macOS (building with Xcode 9.0)
 - Windows (building with Visual Studio 2017 version 15.8)
 
-(In addition, there’s basic support for FreeBSD 11 and Solaris 11.4  beta using clang 4.0.0 and GCC 5.5.0 respectively.)
+(In addition, there’s basic support for FreeBSD 11 and Solaris 11.4 beta using clang 4.0.0 and GCC 5.5.0 respectively. However, note that Windows Subsystem for Linux does not currently work: perhaps due to [this](https://github.com/Microsoft/WSL/issues/1927) bug?)
 
 To build it, you’ll also need the following tools:
 
