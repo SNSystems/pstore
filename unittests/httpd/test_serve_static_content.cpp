@@ -51,6 +51,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstring>
 #include <string>
 
 #include "pstore/support/array_elements.hpp"
