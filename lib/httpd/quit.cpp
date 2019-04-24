@@ -51,6 +51,7 @@
 #endif
 
 #include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/send.hpp"
 #include "pstore/support/logging.hpp"
@@ -127,14 +128,23 @@ namespace pstore {
             std::string const & req = str.str ();
             send (net::network_sender, std::ref (fd), req);
 
-            std::array<char, 1024> buffer;
-            ssize_t nlen = 0;
-
             std::string response;
-            // FIXME: need to extend buffered_reader so that it can read a block of data. Use it
-            // here to decouple this code from the network APIs.
-            while ((nlen = recv (fd.get (), buffer.data (), buffer.size (), 0)) > 0) {
-                response.append (buffer.data (), 0, nlen);
+            std::array<char, 256> buffer;
+            auto reader = make_buffered_reader<socket_descriptor &> (net::refiller);
+            for (;;) {
+                error_or_n<socket_descriptor &, gsl::span<char>> const eo =
+                    reader.get_span (fd, gsl::make_span (buffer));
+                if (!eo) {
+                    log (logging::priority::error, "Read error: ", eo.get_error ().message ());
+                    return;
+                }
+
+                fd = std::move (std::get<0> (eo));
+                auto const & span = std::get<1> (eo);
+                if (span.size () == 0) {
+                    break;
+                }
+                response.append (span.begin (), span.end ());
             }
             log (logging::priority::info, "Response: ", response);
         }

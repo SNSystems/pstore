@@ -253,14 +253,16 @@ namespace pstore {
         auto buffered_reader<IO, RefillFunction>::get_span (IO io, SpanType const & sp)
             -> error_or_n<IO, gsl::span<typename SpanType::element_type>> {
 
-            return this->get_span_impl (io, as_writeable_bytes (sp)) >>=
-                   [](IO io2, byte_span const & sp2) {
-                       using element_type = typename SpanType::element_type;
-                       auto const first = reinterpret_cast<element_type *> (sp2.data ());
-                       return error_or_n<IO, gsl::span<element_type>>{
-                           in_place, io2,
-                           gsl::make_span (first, first + sp2.size () / sizeof (element_type))};
-                   };
+            auto cast = [](IO io2, byte_span const & sp2) {
+                using element_type = typename SpanType::element_type;
+                using index_type = typename SpanType::index_type;
+                auto const first = reinterpret_cast<element_type *> (sp2.data ());
+                auto const elements =
+                    std::max (sp2.size (), index_type{0}) / index_type{sizeof (element_type)};
+                return error_or_n<IO, gsl::span<element_type>>{
+                    in_place, io2, gsl::make_span (first, first + elements)};
+            };
+            return this->get_span_impl (io, as_writeable_bytes (sp)) >>= cast;
         }
 
         // geto
