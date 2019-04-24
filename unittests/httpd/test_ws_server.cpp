@@ -72,7 +72,8 @@ TEST (WsServer, NothingFromClient) {
     ws_server_loop (br, sender, io);
 
     // a close frame with error 0x3ee (1006: abnormal closure).
-    EXPECT_THAT (output, ::testing::ElementsAre (0x88, 0x02, 0x03, 0xee));
+    EXPECT_THAT (output, ::testing::ElementsAre (std::uint8_t{0x88}, std::uint8_t{0x02},
+                                                 std::uint8_t{0x03}, std::uint8_t{0xee}));
 }
 
 struct frame_and_mask {
@@ -94,7 +95,7 @@ TEST (WsServer, Ping) {
         auto const sf1_span = as_bytes (make_span (&sf1, 1));
         std::copy (std::begin (sf1_span), std::end (sf1_span), std::back_inserter (send_frames));
         // 4 mask bytes (all 0)
-        std::generate_n (std::back_inserter (send_frames), 4, []() { return 0; });
+        std::generate_n (std::back_inserter (send_frames), 4, []() { return std::uint8_t{0}; });
     }
     {
         pstore::httpd::frame_fixed_layout sf2{};
@@ -105,7 +106,7 @@ TEST (WsServer, Ping) {
         auto const sf2_span = as_bytes (make_span (&sf2, 1));
         std::copy (std::begin (sf2_span), std::end (sf2_span), std::back_inserter (send_frames));
         // 4 mask bytes (all 0)
-        std::generate_n (std::back_inserter (send_frames), 4, []() { return 0; });
+        std::generate_n (std::back_inserter (send_frames), 4, []() { return std::uint8_t{0}; });
     }
 
 
