@@ -73,8 +73,8 @@ namespace pstore {
             //          / %x46.72.69 ; "Fri", case-sensitive
             //          / %x53.61.74 ; "Sat", case-sensitive
             //          / %x53.75.6E ; "Sun", case-sensitive
-            static constexpr std::array<char const *, 7> days{"Sun", "Mon", "Tue", "Wed",
-                                                              "Thu", "Fri", "Sat"};
+            static constexpr std::array<char const *, 7> days{
+                {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}};
             auto const day_name = days[as_index (t.tm_wday, days.size ())];
 
             // month = %x4A.61.6E ; "Jan", case-sensitive
@@ -89,8 +89,9 @@ namespace pstore {
             //       / %x4F.63.74 ; "Oct", case-sensitive
             //       / %x4E.6F.76 ; "Nov", case-sensitive
             //       / %x44.65.63 ; "Dec", case-sensitive
-            static constexpr std::array<char const *, 12> months{
-                "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+            static constexpr std::array<char const *, 12> months{{"Jan", "Feb", "Mar", "Apr", "May",
+                                                                  "Jun", "Jul", "Aug", "Sep", "Oct",
+                                                                  "Nov", "Dec"}};
             auto const month = months[as_index (t.tm_mon, months.size ())];
 
             // hour         = 2DIGIT
