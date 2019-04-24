@@ -14,6 +14,15 @@ Its design goals are:
 - Multiple indices
 - In-process
 
+# Table of Contents
+
+* [Building pstore](#building-pstore)
+  * [Prerequisites](#prerequisites)
+  * [Building](#building)
+    * [Installing](#installing)
+* [Getting started](#getting-started)
+  * [Using the read and write utilities](#using-the-read-and-write-utilities)
+
 # Building pstore
 
 ## Prerequisites
@@ -24,7 +33,7 @@ pstore is built and tested on a variety of platforms:
 - macOS (building with Xcode 9.0)
 - Windows (building with Visual Studio 2017 version 15.8)
 
-(In addition, there’s basic support for FreeBSD 11 and Solaris 11.4 beta using clang 4.0.0 and GCC 5.5.0 respectively. However, note that Windows Subsystem for Linux does not currently work: perhaps due to [this](https://github.com/Microsoft/WSL/issues/1927) bug?)
+In addition, there’s basic support for FreeBSD 11 and Solaris 11.4 beta using clang 4.0.0 and GCC 5.5.0 respectively. However, note that Windows Subsystem for Linux does not currently work: perhaps due to [this](https://github.com/Microsoft/WSL/issues/1927) bug.
 
 To build it, you’ll also need the following tools:
 
@@ -46,19 +55,13 @@ The pstore build system uses cmake. If you’re not very familiar with cmake, th
 
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
 
-## Installing
+### Installing
 
 After pstore has finished building, install it from the build directory:
 
-    $ cmake --build . --target install-pstore
+    $ cmake --build build_linux --target install-pstore
 
-The --target option with install-pstore parameter in addition to the --build option tells cmake to build the install-pstore target.
-
-Assuming the build system is Ninja, the following command:
-
-    $ ninja install-pstore
-
-will build and install pstore in the default installation directory. The CMAKE_INSTALL_PREFIX variable can be used to set a different install prefix.
+The `‑‑target install-pstore` option in addition to the `‑‑build` option tells cmake to build the install-pstore target. Note that the `CMAKE_INSTALL_PREFIX` variable can be used to change the installation path.
 
 # Getting started
 ## Using the read and write utilities
