@@ -489,6 +489,7 @@ case section_kind::k: name = #k; break;
         void fragment::check_range_is_sorted (Iterator first, Iterator last) {
             (void) first;
             (void) last;
+#ifndef NDEBUG
             using value_type = typename std::iterator_traits<Iterator>::value_type;
             assert (std::is_sorted (first, last, [](value_type const & a, value_type const & b) {
                 section_kind const akind = a.kind ();
@@ -496,6 +497,7 @@ case section_kind::k: name = #k; break;
                 using utype = std::underlying_type<section_kind>::type;
                 return static_cast<utype> (akind) < static_cast<utype> (bkind);
             }));
+#endif
         }
 
         // size_bytes
