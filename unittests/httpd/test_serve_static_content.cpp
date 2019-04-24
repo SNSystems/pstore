@@ -54,9 +54,9 @@
 #include <string>
 
 #include "pstore/support/array_elements.hpp"
-#include <iostream>
 #include "pstore/support/maybe.hpp"
 #include "pstore/httpd/request.hpp"
+#include "pstore/httpd/send.hpp"
 
 #include <gmock/gmock.h>
 
@@ -103,7 +103,7 @@ namespace {
             return eoint (io + 1);
         };
 
-        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual](int io) {
+        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual](int) {
             return pstore::error_or<std::string>{pstore::in_place, actual};
         };
     }
@@ -116,15 +116,16 @@ namespace {
 
         explicit reader (std::string const & src) noexcept
                 : src_{src} {}
-        pstore::error_or_n<state_type, pstore::maybe<std::string>> gets (state_type io) {
-            if (io == std::string::npos) {
-                return {pstore::in_place, io, pstore::nothing<std::string> ()};
-            }
-            auto const start = io;
-            auto const pos = src_.find ("\r\n", start);
-            return {pstore::in_place, (pos == std::string::npos) ? pos : pos + 2,
-                    pstore::just (std::string{
-                        src_, start, (pos == std::string::npos ? src_.length () : pos) - start})};
+
+        pstore::error_or_n<state_type, pstore::maybe<std::string>> gets (state_type const start) {
+            static auto const crlf = pstore::httpd::crlf;
+            static auto const crlf_len = std::strlen (crlf);
+
+            assert (start != std::string::npos);
+            auto const pos = src_.find (crlf, start);
+            assert (pos != std::string::npos);
+            return {pstore::in_place, pos + crlf_len,
+                    pstore::just (src_.substr (start, pos - start))};
         }
 
     private:
@@ -157,7 +158,6 @@ TEST_F (ServeStaticContent, Simple) {
 
     pstore::error_or_n<std::string::size_type, int> const eo =
         pstore::httpd::read_request (r, std::string::size_type{0}) >>= record_headers;
-    ;
 
     ASSERT_TRUE (static_cast<bool> (eo));
     EXPECT_THAT (headers, ::testing::UnorderedElementsAre (
