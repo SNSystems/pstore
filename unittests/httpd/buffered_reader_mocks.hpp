@@ -82,6 +82,8 @@ public:
 /// Returns a function which which simply returns end-of-stream when invoked.
 refiller_function eof ();
 
+refiller_function yield_bytes (pstore::gsl::span<std::uint8_t const> const & v);
+
 /// Returns a function which will yield the string passed as its argument.
 refiller_function yield_string (std::string const & str);
 

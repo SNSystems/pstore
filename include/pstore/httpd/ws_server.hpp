@@ -132,11 +132,16 @@ namespace pstore {
             bit_field<std::uint16_t, 0, 7> payload_length;
             bit_field<std::uint16_t, 7, 1> mask;
             bit_field<std::uint16_t, 8, 4> opcode;
-            bit_field<std::uint16_t, 12, 1> rsv3;
-            bit_field<std::uint16_t, 13, 1> rsv2;
-            bit_field<std::uint16_t, 14, 1> rsv1;
+            bit_field<std::uint16_t, 12, 3> rsv;
             bit_field<std::uint16_t, 15, 1> fin;
         };
+
+        template <>
+        inline frame_fixed_layout
+        host_to_network<frame_fixed_layout> (frame_fixed_layout x) noexcept {
+            x.raw = host_to_network (x.raw);
+            return x;
+        }
 
         enum class opcode {
             continuation = 0x0,  // %x0 denotes a continuation frame
@@ -193,8 +198,13 @@ namespace pstore {
 
 
         struct frame {
-            opcode op = opcode::unknown;
-            bool fin = false;
+            frame (std::uint16_t op_, bool fin_, std::vector<std::uint8_t> && p)
+                    : op{static_cast<opcode> (static_cast<std::uint16_t> (op_))}
+                    , fin{fin_}
+                    , payload{std::move (p)} {}
+
+            opcode op;
+            bool fin;
             std::vector<std::uint8_t> payload;
         };
 
@@ -270,12 +280,19 @@ namespace pstore {
                 log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
 #endif // PSTORE_LOG_FRAME_INFO
 
+                // FIXME: check that opcode is valid!
+
                 // "The rsv[n] fields MUST be 0 unless an extension is negotiated that defines
                 // meanings for non-zero values. If a nonzero value is received and none of the
                 // negotiated extensions defines the meaning of such a nonzero value, the receiving
                 // endpoint MUST _Fail the WebSocket Connection_."
-                if (part1.rsv1 || part1.rsv2 || part1.rsv3) {
+                if (part1.rsv != 0) {
                     return return_type{ws_error::reserved_bit_set};
+                }
+
+                // "The server MUST close the connection upon receiving a frame that is not masked."
+                if (!part1.mask) {
+                    return return_type{ws_error::unmasked_frame};
                 }
 
                 return details::read_payload_length (
@@ -287,16 +304,11 @@ namespace pstore {
                         return return_type{ws_error::payload_too_long};
                     }
 
-                    constexpr auto mask_length = 4;
-                    std::array<std::uint8_t, mask_length> mask{{0}};
-                    if (!part1.mask) {
-                        // "The server MUST close the connection upon receiving a frame that is
-                        // not masked."
-                        return return_type{ws_error::unmasked_frame};
-                    }
-                    return reader.get_span (io2, gsl::make_span (mask)) >>=
-                           [&](IO io3, gsl::span<std::uint8_t> const & mask_span) {
-                               if (mask_span.size () != mask_length) {
+                    constexpr auto mask_length = 4U;
+                    std::array<std::uint8_t, mask_length> mask_arr{{0}};
+                    return reader.get_span (io2, gsl::make_span (mask_arr)) >>=
+                           [&](IO io3, gsl::span<std::uint8_t> const & mask) {
+                               if (mask.size () != mask_length) {
                                    return return_type{ws_error::insufficient_data};
                                }
 
@@ -305,26 +317,24 @@ namespace pstore {
                                    std::uint8_t{0});
 
                                return reader.get_span (io3, gsl::make_span (payload)) >>=
-                                      [&](IO io4, gsl::span<std::uint8_t> const & payload_span) {
+                                      [&payload, payload_length, &mask, &part1](
+                                          IO io4, gsl::span<std::uint8_t> const & payload_span) {
                                           auto const payload_size = payload_span.size ();
-                                          using usize =
-                                              std::make_unsigned<decltype (payload_size)>::type;
                                           if (payload_size < 0 ||
-                                              static_cast<usize> (payload_size) != payload_length) {
+                                              static_cast<std::make_unsigned<decltype (
+                                                      payload_size)>::type> (payload_size) !=
+                                                  payload_length) {
                                               return return_type{ws_error::insufficient_data};
                                           }
 
                                           for (auto ctr = gsl::span<std::uint8_t>::index_type{0};
                                                ctr < payload_size; ++ctr) {
-                                              payload_span[ctr] ^= mask_span[ctr % 4];
+                                              payload_span[ctr] ^= mask[ctr % 4];
                                           }
 
-                                          frame resl;
-                                          resl.fin = part1.fin;
-                                          resl.op = static_cast<opcode> (
-                                              static_cast<std::uint16_t> (part1.opcode));
-                                          resl.payload = std::move (payload);
-                                          return return_type{in_place, io4, std::move (resl)};
+                                          return return_type{
+                                              in_place, io4,
+                                              frame{part1.opcode, part1.fin, std::move (payload)}};
                                       };
                            };
                 };
@@ -359,9 +369,7 @@ namespace pstore {
                                    gsl::span<std::uint8_t const> const & span) {
             frame_fixed_layout f{};
             f.fin = true;
-            f.rsv1 = false;
-            f.rsv2 = false;
-            f.rsv3 = false;
+            f.rsv = 0;
             f.opcode = static_cast<std::uint16_t> (op);
             f.mask = false;
 
@@ -518,29 +526,31 @@ namespace pstore {
                         send_close_frame (sender, io, close_status_code::protocol_error);
                     } else if (error == make_error_code (ws_error::reserved_bit_set)) {
                         send_close_frame (sender, io, close_status_code::protocol_error);
+                    } else {
+                        send_close_frame (sender, io, close_status_code::abnormal_closure);
                     }
                     return;
                 }
 
+                io = std::get<0> (eo);
                 frame const & wsp = std::get<1> (eo);
 
                 // "All control frames MUST have a payload length of 125 bytes or less and MUST
                 // NOT be fragmented."
                 if (is_control_frame_opcode (wsp.op) && (!wsp.fin || wsp.payload.size () > 125)) {
-                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
+                    send_close_frame (sender, io, close_status_code::protocol_error);
                     return;
                 }
 
                 switch (wsp.op) {
                 case opcode::continuation:
                     if (is_control_frame_opcode (op)) {
-                        send_close_frame (sender, std::get<0> (eo),
-                                          close_status_code::protocol_error);
+                        send_close_frame (sender, io, close_status_code::protocol_error);
                         return;
                     }
                     payload.insert (std::end (payload), std::begin (wsp.payload),
                                     std::end (wsp.payload));
-                    if (!check_message_complete (sender, std::get<0> (eo), wsp, op, payload)) {
+                    if (!check_message_complete (sender, io, wsp, op, payload)) {
                         return;
                     }
                     break;
@@ -550,14 +560,13 @@ namespace pstore {
                 case opcode::binary:
                     // We didn't see a FIN frame before a new data frame.
                     if (op != opcode::unknown || !payload.empty ()) {
-                        send_close_frame (sender, std::get<0> (eo),
-                                          close_status_code::protocol_error);
+                        send_close_frame (sender, io, close_status_code::protocol_error);
                         return;
                     }
 
                     payload = std::move (wsp.payload);
                     op = wsp.op;
-                    if (!check_message_complete (sender, std::get<0> (eo), wsp, op, payload)) {
+                    if (!check_message_complete (sender, io, wsp, op, payload)) {
                         return;
                     }
                     break;
@@ -572,17 +581,15 @@ namespace pstore {
                 case opcode::reserved_control_3:
                 case opcode::reserved_control_4:
                 case opcode::reserved_control_5:
-                    send_close_frame (sender, std::get<0> (eo), close_status_code::protocol_error);
+                    send_close_frame (sender, io, close_status_code::protocol_error);
                     return;
 
-                case opcode::close: close_message (sender, std::get<0> (eo), wsp); return;
+                case opcode::close: close_message (sender, io, wsp); return;
 
-                case opcode::ping:
-                    pong (sender, std::get<0> (eo), gsl::make_span (wsp.payload));
-                    break;
+                case opcode::ping: pong (sender, io, gsl::make_span (wsp.payload)); break;
 
                 case opcode::pong:
-                    // TODO: Bad opcode?
+                    // TODO: A reply to a ping that we sent.
                     break;
 
                 case opcode::unknown: assert (0); break;
