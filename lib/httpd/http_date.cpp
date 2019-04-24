@@ -50,6 +50,15 @@
 
 #include "pstore/support/time.hpp"
 
+namespace {
+
+    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
+    constexpr std::size_t as_index (T v, std::size_t size) noexcept {
+        return std::min (static_cast<std::size_t> (std::max (v, T{0})), size - std::size_t{1});
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
     namespace httpd {
 
@@ -66,8 +75,7 @@ namespace pstore {
             //          / %x53.75.6E ; "Sun", case-sensitive
             static constexpr std::array<char const *, 7> days{"Sun", "Mon", "Tue", "Wed",
                                                               "Thu", "Fri", "Sat"};
-            auto const day_name = days[std::min (static_cast<std::size_t> (std::max (t.tm_wday, 0)),
-                                                 days.size () - std::size_t{1})];
+            auto const day_name = days[as_index (t.tm_wday, days.size ())];
 
             // month = %x4A.61.6E ; "Jan", case-sensitive
             //       / %x46.65.62 ; "Feb", case-sensitive
@@ -83,7 +91,7 @@ namespace pstore {
             //       / %x44.65.63 ; "Dec", case-sensitive
             static constexpr std::array<char const *, 12> months{
                 "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-            auto const month = months[std::min (std::max (t.tm_mon, 0), 11)];
+            auto const month = months[as_index (t.tm_mon, months.size ())];
 
             // hour         = 2DIGIT
             // minute       = 2DIGIT
