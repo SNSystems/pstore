@@ -44,6 +44,7 @@
 #ifndef PSTORE_HTTPD_NET_TXRX_HPP
 #define PSTORE_HTTPD_NET_TXRX_HPP
 
+// FIXME: move descriptor.hpp to the pstore-support library.
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"

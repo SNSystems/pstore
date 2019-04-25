@@ -54,9 +54,8 @@
 namespace pstore {
 
     /// On POSIX, This class implements the "self pipe trick" to enable a signal handler to call
-    /// notify() to
-    /// wake up a thread waiting on wait(). On Windows, an Event object is used to provide similar
-    /// condition-variable-like behavior.
+    /// notify() to wake up a thread waiting on wait(). On Windows, an Event object is used to
+    /// provide similar condition-variable like behavior.
     class signal_cv {
     public:
         signal_cv ();

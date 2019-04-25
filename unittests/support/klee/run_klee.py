@@ -46,13 +46,10 @@ from __future__ import print_function
 import argparse
 import fnmatch
 import os
-import re
 import subprocess
 import sys
-
 import threading
-import time
-import itertools
+
 
 class PipeReader (threading.Thread):
     def __init__ (self, pipe):
@@ -71,14 +68,23 @@ class PipeReader (threading.Thread):
         except ValueError:
             pass
 
-    def close (self):
-        self.__pipe.close ()
     def output (self):
         return self.__output
 
 
+def find_on_path (name):
+    for directory in os.environ.get ('PATH', '').split (':'):
+        path = os.path.join (directory, name)
+        if os.path.exists (path):
+            return path
+    raise IOError ("not found")
+
+
 def run_process (args, env={}):
-    print ("running:", ' '.join (args))
+    print ("\n-- running:", ' '.join (args))
+    if len (env) > 0:
+        print ("-- environment:", env)
+
     child = subprocess.Popen (args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     stdout = PipeReader (child.stdout)
     stdout.start ()
@@ -86,10 +92,8 @@ def run_process (args, env={}):
     stderr.start ()
 
     return_code = child.wait ()
-    stdout.close ()
-    stderr.close ()
     if return_code != 0:
-        raise subprocess.CalledProcessError (return_code, self.__cmd)
+        raise subprocess.CalledProcessError (return_code, args)
 
     stdout.join ()
     stderr.join ()
@@ -103,14 +107,15 @@ def main (argv):
     parser.add_argument ('bcobject', nargs='+')
     args = parser.parse_args (args=argv)
 
+    ktest_tool_path = find_on_path ('ktest-tool') if args.ktest_tool else None
+
     output_dir = os.path.join (os.path.dirname (args.bcobject [0]), 'klee-last')
     for dir_path, sub_dirs, files in os.walk (output_dir):
         for file_name in fnmatch.filter (files, '*.ktest'):
             test_file = os.path.join (dir_path, file_name)
             if args.ktest_tool:
                 _, _ = run_process ([
-                    'ktest-tool',
-                    '--write-ints',
+                    ktest_tool_path,
                     test_file
                 ])
 

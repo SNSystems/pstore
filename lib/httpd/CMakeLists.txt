@@ -44,7 +44,7 @@
 include (add_pstore)
 
 set (PSTORE_HTTPD_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/httpd")
-add_pstore_library (pstore-httpd-lib
+set (PSTORE_HTTPD_LIB_SRC
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/endian.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/error.hpp"
@@ -72,5 +72,26 @@ add_pstore_library (pstore-httpd-lib
     wskey.cpp
     ws_server.cpp
 )
-target_link_libraries (pstore-httpd-lib PUBLIC pstore-broker-intf pstore-romfs pstore-support)
+add_pstore_library (pstore-httpd-lib ${PSTORE_HTTPD_LIB_SRC})
+target_link_libraries (pstore-httpd-lib PUBLIC
+    pstore-broker-intf
+    pstore-romfs
+    pstore-support
+)
 add_clang_tidy_target (pstore-httpd-lib)
+
+if (PSTORE_BITCODE)
+    add_pstore_library (pstore-httpd-lib-bc STATIC ${PSTORE_HTTPD_LIB_SRC})
+    target_compile_options (pstore-httpd-lib-bc PRIVATE
+        -emit-llvm
+        -target x86_64-pc-linux-gnu
+        -fsanitize=signed-integer-overflow
+        -fsanitize=unsigned-integer-overflow
+        -fno-threadsafe-statics
+    )
+    target_link_libraries (pstore-httpd-lib-bc PUBLIC
+        pstore-broker-intf-bc
+        pstore-romfs-bc
+        pstore-support-bc
+    )
+endif (PSTORE_BITCODE)

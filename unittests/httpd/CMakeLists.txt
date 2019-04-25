@@ -55,3 +55,5 @@ add_pstore_unit_test (pstore-httpd-unit-tests
     test_ws_server.cpp
 )
 target_link_libraries (pstore-httpd-unit-tests PRIVATE pstore-httpd-lib)
+
+add_subdirectory (klee EXCLUDE_FROM_ALL)

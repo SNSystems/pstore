@@ -72,11 +72,11 @@ namespace pstore {
         ///
         /// \tparam RefillFunction  A function which is called when the buffer needs to be filled
         /// from the data source. It must have a signature compatible with `refill_result_type (IO
-        /// io, char * first, char * last)`. On failure the function should return an error. On
-        /// success the buffer in the range [first, last) should be populated and returning the end
-        /// of data in the second half of the result pair. This value (_x_) must be (first >= x <
-        /// last); end of stream is indicated by _x_ being equal to first. The updated IO value is
-        /// returned in the first half of the result pair.
+        /// io, gsl::span<std::uint8_t> const &)`. On failure the function should return an error.
+        /// On success the buffer given by the span argument should be populated. The end of the
+        /// valid bytes are denoted by the iterator returned in the second member of the result
+        /// type. End of stream is indicated when this is equal to the beginning of the span
+        /// argument. The updated IO value is returned in the first member of the result type.
         template <typename IO, typename RefillFunction>
         class buffered_reader {
         public:
@@ -160,7 +160,7 @@ namespace pstore {
 
             RefillFunction refill_;
             /// The internal buffer. Filled by a call to the refill function and emptied by calls to
-            /// getc().
+            /// get_span_impl().
             std::vector<std::uint8_t> buf_;
             /// Spans the entire contents of buf_. Both the pos_ and end_ iterators refer to this
             /// span.
@@ -182,7 +182,7 @@ namespace pstore {
         buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction refill,
                                                               std::size_t buffer_size)
                 : refill_{refill}
-                , buf_ (buffer_size, std::uint8_t{0})
+                , buf_ (std::max (buffer_size, std::size_t{1}), std::uint8_t{0})
                 , span_ (gsl::make_span (buf_))
                 , pos_ (span_.begin ())
                 , end_ (span_.begin ())
@@ -269,14 +269,11 @@ namespace pstore {
         // ~~~~
         template <typename IO, typename RefillFunction>
         auto buffered_reader<IO, RefillFunction>::geto (IO io) -> geto_result_type {
-            std::uint8_t result;
-            error_or_n<IO, byte_span> const eo = get_span (io, gsl::make_span (&result, 1));
-            if (!eo) {
-                return geto_result_type{eo.get_error ()};
-            }
-            auto const sp = std::get<1> (eo);
-            return {in_place, std::get<0> (eo),
-                    sp.size () == 1 ? just (sp[0]) : nothing<std::uint8_t> ()};
+            std::uint8_t result{};
+            return get_span (io, gsl::make_span (&result, 1)) >>= [](IO io2, byte_span const & sp) {
+                return geto_result_type{in_place, io2,
+                                        sp.size () == 1 ? just (sp[0]) : nothing<std::uint8_t> ()};
+            };
         }
 
         // getc

@@ -57,8 +57,7 @@ using namespace pstore::romfs;
 
 #include <system_error>
 namespace std {
-    error_category::error_category () noexcept = default;
-    error_category::~error_category () noexcept = default;
+    error_category::~error_category () = default;
     error_condition error_category::default_error_condition (int ev) const noexcept {
         return error_condition (ev, *this);
     }
@@ -86,14 +85,14 @@ namespace {
     std::array<dirent, 3> const dir0_membs = {{
         {".", &dir0},
         {"..", &dir3},
-        {"f", file1, sizeof (file1), 0},
+        {"f", file1, pstore::romfs::stat{sizeof (file1), 0, pstore::romfs::mode_t::file}},
     }};
     directory const dir0{dir0_membs};
     std::array<dirent, 4> const dir3_membs = {{
         {".", &dir3},
         {"..", &dir3},
         {"d", &dir0},
-        {"g", file1, sizeof (file1), 0},
+        {"g", file1, pstore::romfs::stat{sizeof (file1), 0, pstore::romfs::mode_t::file}},
     }};
     directory const dir3{dir3_membs};
     directory const * const root = &dir3;

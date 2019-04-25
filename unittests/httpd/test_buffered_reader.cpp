@@ -45,7 +45,9 @@
 
 #include <cassert>
 #include <cerrno>
+#include <cstring>
 #include <string>
+#include <vector>
 
 #include "gmock/gmock.h"
 
@@ -59,6 +61,25 @@ using pstore::gsl::span;
 using pstore::httpd::make_buffered_reader;
 using testing::_;
 using testing::Invoke;
+
+TEST (HttpdBufferedReader, Span) {
+    using byte_span = pstore::gsl::span<std::uint8_t>;
+    auto refill = [](int io, byte_span const & sp) {
+        std::memset (sp.data (), 0, sp.size ());
+        return pstore::error_or_n<int, byte_span::iterator>{pstore::in_place, io, sp.end ()};
+    };
+
+    constexpr auto buffer_size = std::size_t{0};
+    constexpr auto requested_size = std::size_t{1};
+    auto br = pstore::httpd::make_buffered_reader<int> (refill, buffer_size);
+
+    std::vector<std::uint8_t> v (requested_size, std::uint8_t{0xFF});
+    pstore::error_or_n<int, byte_span> res = br.get_span (0, pstore::gsl::make_span (v));
+    ASSERT_TRUE (res);
+    auto const & sp = std::get<1> (res);
+    ASSERT_EQ (sp.size (), 1);
+    EXPECT_EQ (sp[0], std::uint8_t{0});
+}
 
 TEST (HttpdBufferedReader, GetcThenEOF) {
     refiller r;

@@ -59,14 +59,13 @@ add_clang_tidy_target (pstore-romfs)
 target_link_libraries (pstore-romfs PUBLIC pstore-support)
 
 if (PSTORE_BITCODE)
-message (STATUS "*** adding pstore-romfs-bc")
     add_pstore_library (pstore-romfs-bc STATIC ${PSTORE_ROMFS_LIB_SRC})
-    target_compile_options (pstore-romfs-bc PRIVATE -emit-llvm)
     target_compile_options (pstore-romfs-bc PRIVATE
+        -emit-llvm
+        -target x86_64-pc-linux-gnu
         -fsanitize=signed-integer-overflow
         -fsanitize=unsigned-integer-overflow
+        -fno-threadsafe-statics
     )
-    target_compile_options (pstore-romfs-bc PRIVATE "-fno-threadsafe-statics")
-
     target_link_libraries (pstore-romfs-bc PUBLIC pstore-support-bc)
 endif (PSTORE_BITCODE)

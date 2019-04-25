@@ -315,10 +315,12 @@ endif (PSTORE_IS_INSIDE_LLVM)
 
 if (PSTORE_BITCODE)
     add_pstore_library (pstore-support-bc STATIC ${PSTORE_SUPPORT_LIB_SRC})
-    target_compile_options (pstore-support-bc PRIVATE -emit-llvm)
     target_compile_options (pstore-support-bc PRIVATE
+        -emit-llvm
+        -target x86_64-pc-linux-gnu
         -fsanitize=signed-integer-overflow
         -fsanitize=unsigned-integer-overflow
+        -fno-threadsafe-statics
     )
     target_link_libraries (pstore-support-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_BITCODE)
