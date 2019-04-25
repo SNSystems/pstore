@@ -158,16 +158,16 @@ endfunction (pstore_configure_klee_test_target)
 # ~~~~~~~~~~~~~~~~~~~~
 function (pstore_add_klee_test )
 
-cmake_parse_arguments (
-                      klee_prefix
-                      "" # options
-                      "CATEGORY;NAME" # one-value keywords
-                      "DEPENDS" # multi-value keywords.
-                      ${ARGN}
-                      )
+    cmake_parse_arguments (
+        klee_prefix
+        "" # options
+        "CATEGORY;NAME" # one-value keywords
+        "DEPENDS" # multi-value keywords.
+        ${ARGN}
+    )
 
-set (category ${klee_prefix_CATEGORY})
-set (name ${klee_prefix_NAME})
+    set (category ${klee_prefix_CATEGORY})
+    set (name ${klee_prefix_NAME})
 
     pstore_can_klee (can_klee)
     if (can_klee)
@@ -186,9 +186,6 @@ set (name ${klee_prefix_NAME})
             get_target_property (includes ${dependent} INTERFACE_INCLUDE_DIRECTORIES)
             target_include_directories ("${bc_tname}" PUBLIC "${includes}")
         endforeach (dependent)
-
-#        get_target_property (support_includes pstore-support INTERFACE_INCLUDE_DIRECTORIES)
-#        target_include_directories ("${bc_tname}" PUBLIC "${support_includes}")
 
         # The executable.
 
