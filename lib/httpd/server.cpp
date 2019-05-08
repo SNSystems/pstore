@@ -215,7 +215,8 @@ namespace {
         }
 
         if (*header_contents.websocket_version != 13) {
-            // send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
+            // FIXME: send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
+            assert (false);
         }
 
 
@@ -224,10 +225,13 @@ namespace {
             log (priority::info, "Accepting WebSockets upgrade");
 
             static constexpr auto crlf = pstore::httpd::crlf;
+            std::string const date = pstore::httpd::http_date (std::chrono::system_clock::now ());
             std::ostringstream os;
             os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: WebSocket" << crlf
                << "Connection: Upgrade" << crlf << "Sec-WebSocket-Accept: "
-               << pstore::httpd::source_key (*header_contents.websocket_key) << crlf << crlf;
+               << pstore::httpd::source_key (*header_contents.websocket_key) << crlf
+               << "Server: pstore-httpd" << crlf << "Date: " << date << crlf
+               << "Last-Modified: " << date << crlf << crlf;
 
             // Here I assume that the send() IO param is the same as the Reader's IO parameter.
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
