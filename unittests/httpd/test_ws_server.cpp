@@ -56,22 +56,22 @@ namespace {}
 
 
 TEST (WsServer, NothingFromClient) {
+    // Define what the client will send to the server (just EOF).
     refiller r;
     EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
+    auto io = 0;
+    auto br = make_buffered_reader<decltype (io)> (r.refill_function ());
 
+    // Record the server's response.
     std::vector<std::uint8_t> output;
-
     auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (s.begin (), s.end (), std::back_inserter (output));
         return pstore::error_or<int>{pstore::in_place, io + 1};
     };
 
-    auto io = 0;
-    auto br = make_buffered_reader<int> (r.refill_function ());
-
     ws_server_loop (br, sender, io);
 
-    // a close frame with error 0x3ee (1006: abnormal closure).
+    // A close frame with error 0x3ee (1006: abnormal closure).
     EXPECT_THAT (output, ::testing::ElementsAre (std::uint8_t{0x88}, std::uint8_t{0x02},
                                                  std::uint8_t{0x03}, std::uint8_t{0xee}));
 }
@@ -84,7 +84,6 @@ struct frame_and_mask {
 TEST (WsServer, Ping) {
     using namespace pstore::gsl;
 
-    refiller r;
     std::vector<std::uint8_t> send_frames;
     {
         pstore::httpd::frame_fixed_layout sf1{};
@@ -139,20 +138,21 @@ TEST (WsServer, Ping) {
     }
 
 
-
+    // Define what the client will send to the server (the contents of send_frames above).
+    refiller r;
     EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
     EXPECT_CALL (r, fill (0, _))
         .WillOnce (Invoke (yield_bytes (as_bytes (make_span (send_frames)))));
+    auto io = 0;
+    auto br = make_buffered_reader<decltype (io)> (r.refill_function ());
 
+    // Record the server's response.
     std::vector<std::uint8_t> output;
-
     auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (s.begin (), s.end (), std::back_inserter (output));
         return pstore::error_or<int>{pstore::in_place, io + 1};
     };
 
-    auto io = 0;
-    auto br = make_buffered_reader<int> (r.refill_function ());
 
     ws_server_loop (br, sender, io);
 

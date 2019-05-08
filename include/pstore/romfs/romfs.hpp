@@ -64,9 +64,9 @@ namespace pstore {
     namespace romfs {
 
         enum class error_code : int {
-            einval = EINVAL,
-            enoent = ENOENT,
-            enotdir = ENOTDIR,
+            einval = static_cast<int> (std::errc::invalid_argument),
+            enoent = static_cast<int> (std::errc::no_such_file_or_directory),
+            enotdir = static_cast<int> (std::errc::not_a_directory),
         };
 
         class error_category : public std::error_category {
@@ -78,6 +78,7 @@ namespace pstore {
             std::string message (int error) const override;
         };
 
+        error_category const & get_romfs_error_category () noexcept;
         std::error_code make_error_code (pstore::romfs::error_code e);
 
     } // end namespace romfs

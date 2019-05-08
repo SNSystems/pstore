@@ -54,6 +54,7 @@ namespace pstore {
         // **************
         enum class error_code : int {
             bad_request = 1,
+            bad_websocket_version,
             not_implemented,
             string_too_long,
             refill_out_of_range,

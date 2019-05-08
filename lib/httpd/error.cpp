@@ -59,6 +59,7 @@ namespace pstore {
             auto * result = "unknown pstore::category error";
             switch (static_cast<error_code> (error)) {
             case error_code::bad_request: return "Bad request";
+            case error_code::bad_websocket_version: return "Bad WebSocket version requested";
             case error_code::not_implemented: return "Not implemented";
             case error_code::string_too_long: return "String too long";
             case error_code::refill_out_of_range: return "Refill result out of range";

@@ -68,6 +68,9 @@
 namespace pstore {
     namespace httpd {
 
+        // The version of the WebSockets protocol that we support.
+        constexpr unsigned ws_version = 13;
+
         enum ws_error : int {
             reserved_bit_set = 1,
             payload_too_long,
@@ -510,7 +513,7 @@ namespace pstore {
         // ws_server_loop
         // ~~~~~~~~~~~~~~
         template <typename Reader, typename Sender, typename IO>
-        void ws_server_loop (Reader & reader, Sender sender, IO io) {
+        void ws_server_loop (Reader && reader, Sender && sender, IO io) {
             opcode op = opcode::unknown;
             std::vector<std::uint8_t> payload;
             bool done = false;

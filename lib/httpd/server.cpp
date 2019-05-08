@@ -183,20 +183,53 @@ namespace {
     // Here we bridge from the std::error_code world to HTTP status codes.
     void report_error (std::error_code error, pstore::httpd::request_info const & request,
                        socket_descriptor & socket) {
+        static constexpr auto crlf = pstore::httpd::crlf;
+        static constexpr auto sender = pstore::httpd::net::network_sender;
+
         auto report = [&error, &request, &socket](unsigned code, char const * message) {
-            cerror (pstore::httpd::net::network_sender, std::ref (socket), request.uri ().c_str (),
-                    code, message, error.message ().c_str ());
+            cerror (sender, std::ref (socket), request.uri ().c_str (), code, message,
+                    error.message ().c_str ());
         };
 
         log (pstore::logging::priority::error, "Error:", error.message ());
-        if (error == pstore::httpd::error_code::bad_request) {
-            report (400, "Bad request");
-        } else if (error == pstore::romfs::error_code::enoent ||
-                   error == pstore::romfs::error_code::enotdir) {
-            report (404, "Not found");
-        } else {
-            report (501, "Server internal error");
+        if (error.category () == pstore::httpd::get_error_category ()) {
+            switch (static_cast<pstore::httpd::error_code> (error.value ())) {
+            case pstore::httpd::error_code::bad_request: report (400, "Bad request"); return;
+
+            case pstore::httpd::error_code::bad_websocket_version: {
+                // From rfc6455: "The |Sec-WebSocket-Version| header field in the client's handshake
+                // includes the version of the WebSocket Protocol with which the client is
+                // attempting to communicate. If this version does not match a version understood by
+                // the server, the server MUST abort the WebSocket handshake described in this
+                // section and instead send an appropriate HTTP error code (such as 426 Upgrade
+                // Required) and a |Sec-WebSocket-Version| header field indicating the version(s)
+                // the server is capable of understanding."
+                std::ostringstream os;
+                os << "HTTP/1.1 426 OK" << crlf
+                   << "Sec-WebSocket-Version: " << pstore::httpd::ws_version << crlf
+                   << "Server: pstore-httpd" << crlf << crlf;
+                std::string const & reply = os.str ();
+                sender (socket, as_bytes (pstore::gsl::make_span (reply)));
+            }
+                return;
+
+            case pstore::httpd::error_code::not_implemented:
+            case pstore::httpd::error_code::string_too_long:
+            case pstore::httpd::error_code::refill_out_of_range: break;
+            }
+        } else if (error.category () == pstore::romfs::get_romfs_error_category ()) {
+            switch (static_cast<pstore::romfs::error_code> (error.value ())) {
+            case pstore::romfs::error_code::enoent:
+            case pstore::romfs::error_code::enotdir: report (404, "Not found"); return;
+
+            case pstore::romfs::error_code::einval: break;
+            }
         }
+
+        // Some error that we don't know how to report properly.
+        std::ostringstream message;
+        message << "Server internal error: " << error.message ();
+        report (501, message.str ().c_str ());
     }
 
     template <typename Reader, typename IO>
@@ -214,9 +247,9 @@ namespace {
             return return_type{pstore::httpd::error_code::bad_request};
         }
 
-        if (*header_contents.websocket_version != 13) {
-            // FIXME: send back a "Sec-WebSocket-Version: 13" header along with a 400 error.
-            assert (false);
+        if (*header_contents.websocket_version != pstore::httpd::ws_version) {
+            log (priority::error, "Bad Websocket version number requested");
+            return return_type{pstore::httpd::error_code::bad_websocket_version};
         }
 
 
@@ -237,7 +270,7 @@ namespace {
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
-        auto server_loop_thread = [](Reader reader2, socket_descriptor io2) {
+        auto server_loop_thread = [](Reader && reader2, socket_descriptor io2) {
             PSTORE_TRY {
                 constexpr auto ident = "websocket";
                 pstore::threads::set_name (ident);
@@ -246,7 +279,8 @@ namespace {
                 log (priority::info, "Started WebSockets session");
 
                 assert (io2.valid ());
-                ws_server_loop (reader2, pstore::httpd::net::network_sender, std::ref (io2));
+                ws_server_loop (std::move (reader2), pstore::httpd::net::network_sender,
+                                std::ref (io2));
 
                 log (priority::info, "Ended WebSockets session");
             }
