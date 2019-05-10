@@ -101,29 +101,41 @@ namespace {
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, char const * cause, unsigned error_no,
                                  char const * shortmsg, char const * longmsg) {
-        static constexpr auto crlf = pstore::httpd::crlf;
-        std::ostringstream os;
-        os << "HTTP/1.1 " << error_no << ' ' << shortmsg << crlf << "Content-type: text/html"
-           << crlf << crlf;
+        static auto const & crlf = pstore::httpd::crlf;
 
-        os << "<!DOCTYPE html>\n"
-              "<html lang=\"en\">"
-              "<head>\n"
-              "<meta charset=\"utf-8\">\n"
-              "<title>pstore-httpd Error</title>\n"
-              "</head>\n"
-              "<body>\n"
-              "<h1>pstore-httpd Web Server Error</h1>\n"
-              "<p>"
-           << error_no << ": " << shortmsg
-           << "</p>"
-              "<p>"
-           << longmsg << ": " << cause
-           << "</p>\n"
-              "<hr>\n"
-              "<em>The pstore-httpd Web server</em>\n"
-              "</body>\n"
-              "</html>\n";
+        std::ostringstream content;
+        content << "<!DOCTYPE html>\n"
+                   "<html lang=\"en\">"
+                   "<head>\n"
+                   "<meta charset=\"utf-8\">\n"
+                   "<title>pstore-httpd Error</title>\n"
+                   "</head>\n"
+                   "<body>\n"
+                   "<h1>pstore-httpd Web Server Error</h1>\n"
+                   "<p>"
+                << error_no << ": " << shortmsg
+                << "</p>"
+                   "<p>"
+                << longmsg << ": " << cause
+                << "</p>\n"
+                   "<hr>\n"
+                   "<em>The pstore-httpd Web server</em>\n"
+                   "</body>\n"
+                   "</html>\n";
+        std::string const & content_str = content.str ();
+        auto const now = std::chrono::system_clock::now ();
+
+        std::ostringstream os;
+        // clang-format off
+        os << "HTTP/1.1 200 OK" << crlf
+           << "Server: pstore-httpd" << crlf
+           << "Content-length: " << content_str.length () << crlf
+           << "Content-type: " << "text/html" << crlf
+           << "Date: " << pstore::httpd::http_date (now) << crlf
+           << "Last-Modified: " << pstore::httpd::http_date (now) << crlf
+           << crlf
+           << content_str;
+        // clang-format on
         return pstore::httpd::send (sender, io, os);
     }
 
@@ -247,6 +259,7 @@ namespace {
             return return_type{pstore::httpd::error_code::bad_request};
         }
 
+
         if (*header_contents.websocket_version != pstore::httpd::ws_version) {
             log (priority::error, "Bad Websocket version number requested");
             return return_type{pstore::httpd::error_code::bad_websocket_version};
@@ -260,11 +273,17 @@ namespace {
             static constexpr auto crlf = pstore::httpd::crlf;
             std::string const date = pstore::httpd::http_date (std::chrono::system_clock::now ());
             std::ostringstream os;
-            os << "HTTP/1.1 101 Switching Protocols" << crlf << "Upgrade: WebSocket" << crlf
-               << "Connection: Upgrade" << crlf << "Sec-WebSocket-Accept: "
-               << pstore::httpd::source_key (*header_contents.websocket_key) << crlf
-               << "Server: pstore-httpd" << crlf << "Date: " << date << crlf
-               << "Last-Modified: " << date << crlf << crlf;
+            // clang-format off
+            os << "HTTP/1.1 101 Switching Protocols" << crlf
+               << "Server: pstore-httpd" << crlf
+               << "Upgrade: WebSocket" << crlf
+               << "Connection: Upgrade" << crlf
+               << "Sec-WebSocket-Accept: " << pstore::httpd::source_key (*header_contents.websocket_key) << crlf
+               << "Server: pstore-httpd" << crlf
+               << "Date: " << date << crlf
+               << "Last-Modified: " << date << crlf
+               << crlf;
+            // clang-format on
 
             // Here I assume that the send() IO param is the same as the Reader's IO parameter.
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
