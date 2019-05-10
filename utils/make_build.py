@@ -80,6 +80,7 @@ def _options (args):
         platform_name = 'linux'
 
     parser = argparse.ArgumentParser (description='Generate a build using cmake')
+    parser.add_argument ('build_dir', nargs='?', default=os.getcwd ())
     parser.add_argument ('-s', '--system', default=platform_name)
     parser.add_argument ('-c', '--configuration', default='Debug')
     parser.add_argument ('-o', '--directory', help='The directory in which the build will be created. Normally derived from the system name.')
@@ -88,7 +89,6 @@ def _options (args):
     parser.add_argument ('-n', '--dry-run', action='store_true', help='Previews the operation without performing any action.')
     parser.add_argument ('--no-clean', dest='clean', action='store_false')
     options = parser.parse_args (args)
-
 
     if options.directory is None:
         options.directory = 'build_' + PLATFORM_TO_DIR_MAP.get (options.system, options.system)
@@ -235,7 +235,9 @@ def main (args = sys.argv [1:]):
     options = _options (args)
 
     # Check for a cmakelists.txt
-    if not os.path.exists ('CMakeLists.txt'):
+    cmakelists_path = os.path.abspath (os.path.join (options.build_dir, 'CMakeLists.txt'))
+    _logger.info('Looking for CMakeLists.txt in "%s"', cmakelists_path)
+    if not os.path.exists (cmakelists_path):
         _logger.error ('Did not find a CMake CMakeLists.txt file')
         exit_code = EXIT_FAILURE
 
@@ -282,7 +284,7 @@ def main (args = sys.argv [1:]):
             cmd.extend (('-T', 'host=x64'))
 
         # Finally add the build root directory.
-        cmd.append (_as_native_path (os.getcwd ()))
+        cmd.append (_as_native_path (os.path.abspath (options.build_dir)))
 
         _logger.info ('cwd "%s"', options.directory)
         _logger.info ('Running: %s', _as_command_line (cmd))
