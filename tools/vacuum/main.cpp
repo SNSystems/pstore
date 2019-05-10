@@ -86,14 +86,14 @@
 
 namespace {
 
-#ifdef PSTORE_CPP_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
 #if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
 #else
         std::cerr;
 #endif
-#endif // PSTORE_CPP_EXCEPTIONS
+#endif // PSTORE_EXCEPTIONS
 
 } // namespace
 

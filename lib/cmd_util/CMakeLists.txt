@@ -83,13 +83,16 @@ list (APPEND PSTORE_CMD_UTIL_SRC
 add_pstore_library (pstore-cmd-util STATIC ${PSTORE_CMD_UTIL_SRC})
 target_link_libraries (pstore-cmd-util PUBLIC pstore-support)
 
-if (PSTORE_IS_INSIDE_LLVM)
+if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
 
     add_pstore_library (pstore-cmd-util-ex STATIC ${PSTORE_CMD_UTIL_SRC})
-    target_link_libraries (pstore-cmd-util-ex pstore-support-ex)
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-endif (PSTORE_IS_INSIDE_LLVM)
+    set (PSTORE_EXCEPTIONS No)
+
+    target_link_libraries (pstore-cmd-util-ex pstore-support-ex)
+endif (NOT PSTORE_EXCEPTIONS)

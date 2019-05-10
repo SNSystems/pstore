@@ -52,19 +52,22 @@ import threading
 
 
 class PipeReader (threading.Thread):
-    def __init__ (self, pipe):
+    def __init__ (self, process, pipe):
         super (PipeReader, self).__init__()
+        self.__process = process
         self.__pipe = pipe
         self.__output = ''
 
     def run (self):
         try:
-            for line in iter (self.__pipe.readline, ''):
-                if len (line) > 0:
+            while True:
+                line = self.__pipe.readline ()
+                if len (line) == 0 and self.__process.poll() is not None:
+                    break
+                if line:
                     line = line.decode ('utf-8')
                     print (line, end='')
                     self.__output += line
-                #time.sleep (0.25)
         except ValueError:
             pass
 
@@ -86,17 +89,16 @@ def run_process (args, env={}):
         print ("-- environment:", env)
 
     child = subprocess.Popen (args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
-    stdout = PipeReader (child.stdout)
+    stdout = PipeReader (child, child.stdout)
     stdout.start ()
-    stderr = PipeReader (child.stderr)
+    stderr = PipeReader (child, child.stderr)
     stderr.start ()
 
     return_code = child.wait ()
     if return_code != 0:
         raise subprocess.CalledProcessError (return_code, args)
 
-    stdout.join ()
-    stderr.join ()
+    print ("-- done")
     return (stdout.output (), stderr.output ())
 
 

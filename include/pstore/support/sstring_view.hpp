@@ -64,6 +64,7 @@
 #include <type_traits>
 #include <utility>
 
+#include "pstore/config/config.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/make_unique.hpp"
@@ -204,7 +205,7 @@ namespace pstore {
             return (this->data ())[pos];
         }
         const_reference at (size_type pos) const {
-#ifdef PSTORE_CPP_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
             if (pos >= size_) {
                 throw std::out_of_range ("sstring_view access out of range");
             }

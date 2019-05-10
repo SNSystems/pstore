@@ -167,7 +167,7 @@ TEST_F (ProcessFileNameFreeBSD, CommandContents) {
 }
 
 TEST_F (ProcessFileNameFreeBSD, RaisesError) {
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
     sysctl_mock2 callback;
 
     using namespace testing;
@@ -181,7 +181,7 @@ TEST_F (ProcessFileNameFreeBSD, RaisesError) {
         ::pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
     };
     check_for_error (fn, ::pstore::errno_erc{EPERM});
-#endif
+#endif // PSTORE_EXCEPTIONS
 }
 
 TEST_F (ProcessFileNameFreeBSD, AlwaysRaisesNoMem) {

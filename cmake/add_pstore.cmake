@@ -71,6 +71,7 @@
 #   add_pstore_tool
 
 include (CheckCSourceCompiles)
+include (CheckCXXCompilerFlag)
 
 macro(add_pstore_subdirectory name)
     if (PSTORE_IS_INSIDE_LLVM)
@@ -79,7 +80,7 @@ macro(add_pstore_subdirectory name)
 endmacro()
 
 
-# disable_clang_warning_if_possible
+# disable_warning_if_possible
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Adds a switch to the compile options if supported by the compiler.
 #
@@ -89,11 +90,8 @@ endmacro()
 # result_var:  The name of the CMake cache variable into which the result of the
 #              test will be stored. This should be different for each switch
 #              being tested.
-function (disable_clang_warning_if_possible target_name flag result_var)
-    set (PSTORE_OLD_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
-    set (CMAKE_REQUIRED_FLAGS "-Werror ${flag}")
-    check_c_source_compiles ("int main () {}" ${result_var})
-    set (CMAKE_REQUIRED_FLAGS "${PSTORE_OLD_CMAKE_REQUIRED_FLAGS}")
+function (disable_warning_if_possible target_name flag result_var)
+    check_cxx_compiler_flag (${flag} ${result_var})
     if (${${result_var}})
         target_compile_options (${target_name} PRIVATE ${flag})
     endif ()
@@ -105,6 +103,10 @@ endfunction()
 #######################################
 function (add_pstore_additional_compiler_flags target_name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        if (NOT PSTORE_EXCEPTIONS)
+           target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
+        endif ()
+
         # For Clang, I enable all of the warnings and then disable some of
         # the unwanted ones.
         target_compile_options (${target_name} PRIVATE
@@ -128,28 +130,29 @@ function (add_pstore_additional_compiler_flags target_name)
 
         # TODO: this warning is far too pervasive in clang3.8 but much better in later
         # builds. Only disable for older versions.
-        disable_clang_warning_if_possible (${target_name}
+
+        disable_warning_if_possible (${target_name}
             -Wno-nullability-completeness
             PSTORE_CLANG_SUPPORTS_NX
         )
-        disable_clang_warning_if_possible (${target_name}
+        disable_warning_if_possible (${target_name}
             -Wno-nullability-extension
             PSTORE_CLANG_SUPPORTS_NX
         )
-        disable_clang_warning_if_possible (${target_name}
+        disable_warning_if_possible (${target_name}
             -Wno-zero-as-null-pointer-constant
             PSTORE_CLANG_SUPPORTS_NPC
         )
         # TODO: this warning is issued (at the time of writing) by gtest. It should only be disabled
         # for that target.
-        disable_clang_warning_if_possible (${target_name}
+        disable_warning_if_possible (${target_name}
             -Wno-inconsistent-missing-override
             PSTORE_CLANG_SUPPORTS_IMO
         )
 
         # Disable the "unused lambda capture" warning since we must capture extra variables for MSVC
         # to swallow the code. Remove when VS doesn't require capture.
-        disable_clang_warning_if_possible (${target_name}
+        disable_warning_if_possible (${target_name}
             -Wno-unused-lambda-capture
             PSTORE_CLANG_SUPPORTS_ULC
         )
@@ -162,6 +165,10 @@ function (add_pstore_additional_compiler_flags target_name)
 
     elseif (CMAKE_COMPILER_IS_GNUCXX)
 
+        if (NOT PSTORE_EXCEPTIONS)
+           target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
+        endif ()
+
         target_compile_options (${target_name} PRIVATE
             -Wall
             -Wextra
@@ -173,6 +180,19 @@ function (add_pstore_additional_compiler_flags target_name)
         endif (PSTORE_COVERAGE)
 
     elseif (MSVC)
+
+        if (NOT PSTORE_EXCEPTIONS)
+            #target_compile_options (${target_name} PRIVATE "/EHs-" "/EHc-" "/GR-")
+
+            # Remove /EHsc (which enables exceptions) from the cmake's default compiler switches.
+            string (REPLACE "/EHsc" #match string
+                            "" #replace string
+                            CMAKE_CXX_FLAGS
+                            ${CMAKE_CXX_FLAGS})
+
+            target_compile_options (${target_name} PUBLIC -EHs-c-)
+            target_compile_definitions (${target_name} PRIVATE -D_HAS_EXCEPTIONS=0)
+        endif (NOT PSTORE_EXCEPTIONS)
 
         # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
         #       not available.

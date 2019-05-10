@@ -53,25 +53,30 @@ else ()
     # pstore-brokerd Executable
     ###########################
 
-    if (PSTORE_IS_INSIDE_LLVM)
-        set (LLVM_REQUIRES_EH Yes)
-        set (LLVM_REQUIRES_RTTI Yes)
-    endif ()
+    set (old_llvm_requires_eh ${LLVM_REQUIRES_EH})
+    set (old_llvm_requires_rtti ${LLVM_REQUIRES_RTTI})
+    set (old_pstore_exceptions ${PSTORE_EXCEPTIONS})
+
+    set (LLVM_REQUIRES_EH Yes)
+    set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
+
     add_pstore_tool (pstore-brokerd
         main.cpp
         switches.hpp
         switches.cpp
     )
-    if (PSTORE_IS_INSIDE_LLVM)
-        set (LLVM_REQUIRES_EH No)
-        set (LLVM_REQUIRES_RTTI No)
-    endif ()
 
-    if (PSTORE_IS_INSIDE_LLVM)
-        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex pstore-broker)
+    set (LLVM_REQUIRES_EH ${old_llvm_requires_eh})
+    set (LLVM_REQUIRES_RTTI ${old_llvm_requires_rtti})
+    set (PSTORE_EXCEPTIONS ${old_pstore_exceptions})
+
+    if (PSTORE_EXCEPTIONS)
+        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util)
     else ()
-        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util pstore-broker)
+        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex)
     endif ()
+    target_link_libraries (pstore-brokerd PRIVATE pstore-broker)
 
     add_clang_tidy_target (pstore-broker)
     run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)

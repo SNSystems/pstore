@@ -327,7 +327,7 @@ TEST (RangeLock, LockWithNoFile) {
     EXPECT_FALSE (lock.is_locked ());
 }
 
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
 TEST (RangeLock, ErrorWithLockHeld) {
     mock_file file;
 
@@ -349,7 +349,7 @@ TEST (RangeLock, ErrorWithLockHeld) {
         GTEST_FAIL () << "An unexpected exception was raised.";
     }
 }
-#endif // PSTORE_CPP_EXCEPTIONS
+#endif // PSTORE_EXCEPTIONS
 
 
 namespace {
@@ -721,7 +721,7 @@ namespace {
     }
 } // namespace
 
-#ifdef PSTORE_CPP_EXCEPTIONS
+#    ifdef PSTORE_EXCEPTIONS
 
 TEST_F (EnvironmentSaveFixture, TaintedEnvironmentBadUTF16) {
     // Cook up a temporary path which will be on the "system" drive and contain
@@ -777,6 +777,6 @@ TEST_F (EnvironmentSaveFixture, TaintedEnvironmentInvalidPath) {
         ASSERT_TRUE (false) << "shouldn't be reachable";
     }
 }
-#endif
+#    endif // PSTORE_EXCEPTIONS
 
 #endif //_WIN32

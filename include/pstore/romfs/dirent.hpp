@@ -57,7 +57,6 @@
 namespace pstore {
     namespace romfs {
 
-        // using mode_t = std::uint8_t;
         enum class mode_t { file, directory };
 
         struct stat {
@@ -71,7 +70,6 @@ namespace pstore {
             }
             bool operator!= (stat const & rhs) const noexcept { return !operator== (rhs); }
 
-            // static constexpr auto is_directory_flag = std::uint16_t{0x01};
             std::size_t st_size;  ///< File size in bytes.
             std::time_t st_mtime; ///< Time when file data was last modified.
             mode_t mode;
@@ -107,8 +105,6 @@ namespace pstore {
             gsl::czstring PSTORE_NONNULL name_;
             void const * PSTORE_NONNULL contents_;
             struct stat stat_;
-            //            std::size_t size_;
-            //            mode_t mode_;
         };
 
     } // end namespace romfs

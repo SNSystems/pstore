@@ -41,6 +41,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
+
+
+
 execute_process(COMMAND cmake --help-property-list OUTPUT_VARIABLE CMAKE_PROPERTY_LIST)
 
 # Convert command output into a CMake list
@@ -81,12 +84,17 @@ endfunction(print_target_properties)
 
 
 
-set (PSTORE_RUN_KLEE  "${PSTORE_ROOT_DIR}/unittests/support/klee/run_klee.py")
+set (PSTORE_RUN_KLEE  "${PSTORE_ROOT_DIR}/unittests/klee/run_klee.py")
 
 # The suport code assumes that we're using the KLEE Docker container which has
 # the sources and libraries in the locations given by the following two variables:
+
 set (PSTORE_KLEE_SRC_DIR "/home/klee/klee_src/include")
-set (PSTORE_KLEE_LIB_DIR "/home/klee/klee_build/lib/libkleeRuntest.so")
+find_library (PSTORE_KLEE_LIB_DIR
+    libkleeRuntest.so
+    PATHS /home/klee/klee_build/klee/lib
+          /home/klee/klee_build/lib
+)
 
 
 # pstore_can_klee
@@ -105,9 +113,11 @@ function (pstore_can_klee result)
         find_program (PSTORE_KLEE_PATH klee)
         if (NOT "${PSTORE_KLEE_PATH}" STREQUAL "PSTORE_KLEE_PATH-NOTFOUND")
 
-            # The klee custom cmake targets requires that we running cmake 3.9
+            # The klee custom cmake targets require that we running cmake 3.9
             # or later.
-            if (NOT (${CMAKE_MAJOR_VERSION} EQUAL 3 AND ${CMAKE_MINOR_VERSION} LESS 9))
+            if (${CMAKE_MAJOR_VERSION} GREATER 3)
+                set (${result} Yes PARENT_SCOPE)
+            elseif ((${CMAKE_MAJOR_VERSION} EQUAL 3) AND (${CMAKE_MINOR_VERSION} GREATER_EQUAL 9))
                 set (${result} Yes PARENT_SCOPE)
             endif ()
 
@@ -159,6 +169,10 @@ endfunction (pstore_configure_klee_test_target)
 
 # pstore_add_klee_test
 # ~~~~~~~~~~~~~~~~~~~~
+# Adds a single KLEE test target.
+# Usage:
+#     pstore_add_klee_test (CATEGORY <library> NAME <test-name> DEPENDS <dependencies...>)
+
 function (pstore_add_klee_test )
 
     cmake_parse_arguments (
@@ -171,6 +185,7 @@ function (pstore_add_klee_test )
 
     set (category ${klee_prefix_CATEGORY})
     set (name ${klee_prefix_NAME})
+    set (depends ${klee_prefix_DEPENDS})
 
     pstore_can_klee (can_klee)
     if (can_klee)
@@ -178,17 +193,26 @@ function (pstore_add_klee_test )
 
         set (bc_tname "${tname_base}-bc")
         set (exe_tname "${tname_base}-exe")
+        set (run_tname "${tname_base}-run")
 
         # The bitcode library.
 
-        add_library ("${bc_tname}" OBJECT ${name}.cpp)
+        add_library ("${bc_tname}" OBJECT
+            ${name}.cpp
+
+        )
         pstore_configure_klee_test_target ("${bc_tname}")
         target_compile_options ("${bc_tname}" PRIVATE -emit-llvm)
-
-        foreach (dependent ${klee_prefix_DEPENDS})
+        
+        foreach (dependent ${depends})
+            # If the dependent target has public include directories, then add the same to the
+            # bitcode library.
             get_target_property (includes ${dependent} INTERFACE_INCLUDE_DIRECTORIES)
-            target_include_directories ("${bc_tname}" PUBLIC "${includes}")
+            if (NOT "${includes}" STREQUAL "includes-NOTFOUND")
+                target_include_directories ("${bc_tname}" PUBLIC "${includes}")
+            endif ()
         endforeach (dependent)
+
 
         # The executable.
 
@@ -196,47 +220,51 @@ function (pstore_add_klee_test )
         pstore_configure_klee_test_target (${exe_tname})
         target_compile_definitions (${exe_tname} PRIVATE -DPSTORE_KLEE_RUN)
 
-        set (sanitizers "-fsanitize=undefined,address")
+        #set (sanitizers "-fsanitize=undefined,address")
+        set (sanitizers "")
         target_compile_options (${exe_tname} PRIVATE ${sanitizers})
-        set_target_properties (${exe_tname} PROPERTIES LINK_FLAGS ${sanitizers})
+        #set_target_properties (${exe_tname} PROPERTIES LINK_FLAGS ${sanitizers})
 
         target_link_libraries (${exe_tname} PRIVATE "${PSTORE_KLEE_LIB_DIR}")
 
-        foreach (dependent ${klee_prefix_DEPENDS})
+        foreach (dependent ${depends})
             target_link_libraries (${exe_tname} PRIVATE ${dependent})
         endforeach (dependent)
 
         set (link_llvm_lib "")
-        foreach (dependent ${klee_prefix_DEPENDS})
+        foreach (dependent ${depends})
             list (APPEND link_llvm_lib "--link-llvm-lib=$<TARGET_FILE:${dependent}-bc>")
         endforeach (dependent)
+        list (APPEND link_llvm_lib --link-llvm-lib=$<TARGET_OBJECTS:pstore-klee-cxxstdlib-bc>)
 
         add_custom_target (
-            "${tname_base}-run"
+            "${run_tname}"
             COMMAND klee
                     --libc=uclibc
                     --posix-runtime
                     --only-output-states-covering-new
                     --optimize
-                    "${link_llvm_lib}"
-                    "$<TARGET_OBJECTS:${bc_tname}>"
+                    ${link_llvm_lib}
+                    $<TARGET_OBJECTS:${bc_tname}>
 
             COMMAND "${PSTORE_RUN_KLEE}"
                     --ktest-tool
-                    "$<TARGET_FILE:${exe_tname}>"
-                    "$<TARGET_OBJECTS:${bc_tname}>"
+                    $<TARGET_FILE:${exe_tname}>
+                    $<TARGET_OBJECTS:${bc_tname}>
 
             DEPENDS "${bc_tname}"
                     ${exe_tname}
 
             COMMENT "Running KLEE for '${bc_tname}'"
         )
-        set_target_properties ("${tname_base}-run" PROPERTIES FOLDER "pstore-klee")
-        foreach (dependent ${klee_prefix_DEPENDS})
-            add_dependencies ("${tname_base}-run" "${dependent}-bc")
+        add_dependencies ("${run_tname}" pstore-klee-cxxstdlib-bc)
+
+        set_target_properties ("${run_tname}" PROPERTIES FOLDER "pstore-klee")
+        foreach (dependent ${depends})
+            add_dependencies ("${run_tname}" "${dependent}-bc")
         endforeach (dependent)
 
-        add_dependencies (pstore-klee-run-all ${tname_base}-run)
+        add_dependencies (pstore-klee-run-all "${run_tname}")
     endif (can_klee)
 
 endfunction (pstore_add_klee_test)

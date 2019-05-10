@@ -41,4 +41,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-pstore_add_klee_test (CATEGORY romfs NAME open DEPENDS pstore-romfs)
+
+pstore_add_klee_test (CATEGORY romfs
+    NAME open
+    DEPENDS pstore-romfs
+)

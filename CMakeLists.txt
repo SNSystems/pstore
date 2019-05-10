@@ -45,7 +45,10 @@
 cmake_minimum_required (VERSION 3.4)
 
 include (CheckCSourceCompiles)
+include (CMakeDependentOption)
+
 list (APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
 
 # Work out whether the pstore library is being built inside the
 # larger LLVM framework or if it's a standalone build.
@@ -53,6 +56,13 @@ set (PSTORE_IS_INSIDE_LLVM No)
 if (LLVM_MAIN_SRC_DIR)
     set (PSTORE_IS_INSIDE_LLVM Yes)
 endif ()
+
+cmake_dependent_option (PSTORE_EXCEPTIONS
+    "Compile with exceptions enabled (always Off when compiling inside LLVM)"
+    On
+    "NOT PSTORE_IS_INSIDE_LLVM" Off
+)
+message (STATUS "Exception handling is ${PSTORE_EXCEPTIONS}")
 
 # If we are not building as a part of LLVM, build pstore as a
 # standalone project, using LLVM as an external library:
@@ -144,7 +154,7 @@ endif ()
 if (PSTORE_IS_INSIDE_LLVM)
     add_custom_target (PstoreUnitTests)
     set_target_properties(PstoreUnitTests PROPERTIES FOLDER "pstore tests")
-endif ()
+endif (PSTORE_IS_INSIDE_LLVM)
 
 
 add_subdirectory (3rd_party)

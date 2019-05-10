@@ -181,7 +181,7 @@ namespace pstore {
         template <typename IO, typename RefillFunction>
         buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction refill,
                                                               std::size_t buffer_size)
-                : refill_{refill}
+                : refill_ (refill)
                 , buf_ (std::max (buffer_size, std::size_t{1}), std::uint8_t{0})
                 , span_ (gsl::make_span (buf_))
                 , pos_ (span_.begin ())
@@ -192,7 +192,7 @@ namespace pstore {
 
         template <typename IO, typename RefillFunction>
         buffered_reader<IO, RefillFunction>::buffered_reader (buffered_reader && other) noexcept
-                : refill_{std::move (other.refill_)}
+                : refill_ (std::move (other.refill_))
                 , buf_{std::move (other.buf_)}
                 , span_{gsl::make_span (buf_)}
                 , pos_{span_.begin () + other.pos (other.pos_)}

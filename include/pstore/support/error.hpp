@@ -58,8 +58,8 @@
 #endif
 #include "pstore/support/portab.hpp"
 
-#if !PSTORE_CPP_EXCEPTIONS
-#include <iostream>
+#if !PSTORE_EXCEPTIONS
+#    include <iostream>
 #endif
 
 namespace pstore {
@@ -170,7 +170,7 @@ namespace pstore {
 
     template <typename ErrorCode>
     PSTORE_NO_RETURN void raise_error_code (ErrorCode e) {
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
         throw std::system_error{e};
 #else
         std::cerr << "Error: " << e.message () << '\n';
@@ -179,7 +179,7 @@ namespace pstore {
     }
     template <typename ErrorCode, typename StrType>
     PSTORE_NO_RETURN void raise_error_code (ErrorCode e, StrType const & what) {
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
         throw std::system_error{e, what};
 #else
         std::cerr << "Error: " << e.message () << " : " << what << '\n';
@@ -198,7 +198,7 @@ namespace pstore {
 
     template <typename Exception>
     PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
         throw ex;
 #else
         std::cerr << "Error: " << ex.message () << '\n';

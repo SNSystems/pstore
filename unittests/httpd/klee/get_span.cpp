@@ -9,7 +9,7 @@ using IO = int;
 using byte_span = pstore::gsl::span<std::uint8_t>;
 
 
-int main () {
+int main (int argc, char * argv[]) {
 
     auto refill = [](IO io, byte_span const & sp) {
         std::memset (sp.data (), 0, sp.size ());
@@ -24,11 +24,10 @@ int main () {
     klee_assume (buffer_size < 5);
     klee_assume (requested_size < 5);
 
-    auto br = pstore::httpd::make_buffered_reader<int> (refill, buffer_size);
-
     std::vector<std::uint8_t> v;
     v.resize (requested_size);
 
     auto io = IO{};
+    auto br = pstore::httpd::make_buffered_reader<decltype (io)> (refill, buffer_size);
     br.get_span (io, pstore::gsl::make_span (v));
 }

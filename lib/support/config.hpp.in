@@ -45,6 +45,12 @@
 #ifndef PSTORE_CONFIG_HPP
 #define PSTORE_CONFIG_HPP 1
 
+/// Is pstore being compiled inside the larger LLVM framework?
+#cmakedefine PSTORE_IS_INSIDE_LLVM 1
+
+/// Is exception handling enabled?
+#cmakedefine PSTORE_EXCEPTIONS  1
+
 /// Is the host system big endian?
 #cmakedefine PSTORE_IS_BIG_ENDIAN 1
 
@@ -64,7 +70,6 @@
 #cmakedefine PSTORE_HAVE_UINT128_TRAITS_SUPPORT  1
 
 #cmakedefine PSTORE_VENDOR_ID "@PSTORE_VENDOR_ID@"
-#cmakedefine PSTORE_IS_INSIDE_LLVM 1
 
 /// Defined if Apple System Log API is available. Probably only on Apple platforms.
 #cmakedefine PSTORE_HAVE_ASL_H 1

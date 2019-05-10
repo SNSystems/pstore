@@ -304,14 +304,17 @@ target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
-if (PSTORE_IS_INSIDE_LLVM)
+if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
     add_pstore_library (pstore-support-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
-    target_link_libraries (pstore-support-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
-endif (PSTORE_IS_INSIDE_LLVM)
+    set (PSTORE_EXCEPTIONS No)
+
+    target_link_libraries (pstore-support-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (pstore-support-bc STATIC ${PSTORE_SUPPORT_LIB_SRC})

@@ -46,13 +46,15 @@
 #define CHECK_FOR_ERROR_HPP
 
 #include <system_error>
-#include "gtest/gtest.h"
+
+#include <gtest/gtest.h>
+
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 
 template <typename Function>
 void check_for_error (Function fn, int err, std::error_category const & category) {
-#if PSTORE_CPP_EXCEPTIONS
+#if PSTORE_EXCEPTIONS
     EXPECT_THROW (
         {
             try {
@@ -68,7 +70,7 @@ void check_for_error (Function fn, int err, std::error_category const & category
     (void) fn;
     (void) err;
     (void) category;
-#endif
+#endif // PSTORE_EXCEPTIONS
 }
 
 template <typename Function>

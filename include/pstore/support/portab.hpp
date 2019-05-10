@@ -52,22 +52,7 @@
 
 #include "pstore/config/config.hpp"
 
-
-/// PSTORE_CPP_EXCEPTIONS: Defined if exceptions are enabled.
-#if defined(__clang__) && !defined(__cpp_exceptions) &&                                            \
-    (defined(__EXCEPTIONS) || defined(_CPPUNWIND))
-#    define __cpp_exceptions 190000
-#endif
-
-#ifdef __cpp_exceptions
-#    define PSTORE_CPP_EXCEPTIONS __cpp_exceptions
-#elif defined(_MSC_VER) && defined(_CPPUNWIND)
-#    define PSTORE_CPP_EXCEPTIONS 199711
-#else
-#    undef PSTORE_CPP_EXCEPTIONS
-#endif
-
-#ifdef PSTORE_CPP_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
 #    define PSTORE_TRY try
 #    define PSTORE_CATCH(x, code) catch (x) code
 #else
