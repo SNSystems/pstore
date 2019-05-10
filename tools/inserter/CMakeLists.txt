@@ -42,5 +42,5 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_tool (pstore-inserter main.cpp)
+add_pstore_executable (pstore-inserter main.cpp)
 target_link_libraries (pstore-inserter PRIVATE pstore-core pstore-cmd-util)

@@ -41,7 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_tool (pstore-genromfs
+add_pstore_executable (pstore-genromfs
     genromfs.cpp
 
     copy.cpp

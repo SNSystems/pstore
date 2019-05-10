@@ -42,7 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_pstore_tool (pstore-sieve
+add_pstore_executable (pstore-sieve
     main.cpp
     switches.cpp
     switches.hpp
