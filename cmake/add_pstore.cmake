@@ -179,6 +179,7 @@ function (add_pstore_additional_compiler_flags target_name)
         target_compile_definitions (${target_name} PRIVATE
             -D_CRT_SECURE_NO_WARNINGS
             -D_SCL_SECURE_NO_WARNINGS
+            -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
         )
 
         if (PSTORE_COVERAGE)

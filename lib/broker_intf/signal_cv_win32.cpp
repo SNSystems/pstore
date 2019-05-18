@@ -47,14 +47,20 @@
 
 #ifdef _WIN32
 
-#include <cassert>
-#include "pstore/support/error.hpp"
+#    include <cassert>
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/scope_guard.hpp"
 
 namespace pstore {
 
+    //*     _                _      _              _____   __ *
+    //*  __| |___ ___ __ _ _(_)_ __| |_ ___ _ _   / __\ \ / / *
+    //* / _` / -_|_-</ _| '_| | '_ \  _/ _ \ '_| | (__ \ V /  *
+    //* \__,_\___/__/\__|_| |_| .__/\__\___/_|    \___| \_/   *
+    //*                       |_|                             *
     // (ctor)
     // ~~~~~~
-    signal_cv::signal_cv ()
+    descriptor_condition_variable::descriptor_condition_variable ()
             : event_{::CreateEvent (nullptr /*security attributes*/, FALSE /*manual reset?*/,
                                     FALSE /*initially signalled?*/, nullptr /*name*/)} {
         if (event_.get () == nullptr) {
@@ -62,10 +68,21 @@ namespace pstore {
         }
     }
 
+    // wait_descriptor
+    // ~~~~~~~~~~~~~~~
+    pstore::broker::pipe_descriptor const & descriptor_condition_variable::wait_descriptor () const
+        noexcept {
+        return event_;
+    }
+
+    // notify
+    // ~~~~~~
+    void descriptor_condition_variable::notify () noexcept { ::SetEvent (event_.get ()); }
+
     // wait
     // ~~~~
-    void signal_cv::wait () {
-        switch (::WaitForSingleObject (get (), INFINITE)) {
+    void descriptor_condition_variable::wait () {
+        switch (::WaitForSingleObject (this->wait_descriptor ().get (), INFINITE)) {
         case WAIT_ABANDONED:
         case WAIT_OBJECT_0: return;
         case WAIT_TIMEOUT: assert (0);
@@ -74,17 +91,25 @@ namespace pstore {
         }
     }
 
+    void descriptor_condition_variable::wait (std::unique_lock<std::mutex> & lock) {
+        lock.unlock ();
+        auto _ = make_scope_guard ([&lock]() { lock.lock (); });
+        this->wait ();
+    }
+
+    //*     _                _           *
+    //*  __(_)__ _ _ _  __ _| |  ____ __ *
+    //* (_-< / _` | ' \/ _` | | / _\ V / *
+    //* /__/_\__, |_||_\__,_|_| \__|\_/  *
+    //*      |___/                       *
+
     // notify
     // ~~~~~~
     void signal_cv::notify (int sig) noexcept {
         signal_ = sig;
-        ::SetEvent (get ());
+        descriptor_condition_variable::notify ();
     }
 
-    // get
-    // ~~~
-    HANDLE signal_cv::get () const { return event_.get (); }
-
-} // namespace pstore
+} // end namespace pstore
 
 #endif //_WIN32

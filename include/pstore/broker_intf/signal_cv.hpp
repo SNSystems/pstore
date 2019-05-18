@@ -56,23 +56,56 @@ namespace pstore {
     /// On POSIX, This class implements the "self pipe trick" to enable a signal handler to call
     /// notify() to wake up a thread waiting on wait(). On Windows, an Event object is used to
     /// provide similar condition-variable like behavior.
-    class signal_cv {
+    class descriptor_condition_variable {
     public:
-        signal_cv ();
-
+        descriptor_condition_variable ();
         // No copying or assignment.
-        signal_cv (signal_cv const &) = delete;
-        signal_cv & operator= (signal_cv const &) = delete;
+        descriptor_condition_variable (descriptor_condition_variable const &) = delete;
+        descriptor_condition_variable (descriptor_condition_variable &&) = delete;
+        descriptor_condition_variable & operator= (descriptor_condition_variable const &) = delete;
+        descriptor_condition_variable & operator= (descriptor_condition_variable &&) = delete;
 
-        /// Blocks forever or until notify() is called by another thread or signal handler.
-        void wait ();
+        virtual ~descriptor_condition_variable () = default;
+
+
+        /// \brief Unblocks all threads currently waiting for *this.
+        ///
+        /// \note On POSIX, this function is called from a signal handler. It must only call
+        /// signal-safe functions.
+        void notify () noexcept;
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when
-        /// notify() is executed. When unblocked, lock is reacquired and wait exits. If this
-        /// function exits via exception, lock is also reacquired. (until C++14)
+        /// notify() is executed. When unblocked, lock is reacquired and wait exits.
+        ///
         /// \param lock  An object of type std::unique_lock<std::mutex>, which must be locked by the
         /// current thread
         void wait (std::unique_lock<std::mutex> & lock);
+
+        void wait ();
+
+
+        broker::pipe_descriptor const & wait_descriptor () const noexcept;
+
+    private:
+#ifdef _WIN32
+        broker::pipe_descriptor event_;
+#else
+        broker::pipe_descriptor read_fd_;
+        broker::pipe_descriptor write_fd_;
+        static void make_non_blocking (int fd);
+#endif
+    };
+
+
+    class signal_cv : public descriptor_condition_variable {
+    public:
+        signal_cv () = default;
+
+        // No copying or assignment.
+        signal_cv (signal_cv const &) = delete;
+        signal_cv (signal_cv &&) = delete;
+        signal_cv & operator= (signal_cv const &) = delete;
+        signal_cv & operator= (signal_cv &&) = delete;
 
         /// \param signal  The signal number responsible for the "wake".
         /// \note On POSIX, this function is called from a signal handler. It must only call
@@ -81,28 +114,9 @@ namespace pstore {
 
         int signal () const { return signal_.load (); }
 
-#ifdef _WIN32
-        HANDLE get () const;
-#endif
-
     private:
-#ifdef _WIN32
-        pstore::broker::pipe_descriptor event_;
-#else
-        pstore::broker::pipe_descriptor read_fd_;
-        pstore::broker::pipe_descriptor write_fd_;
-        static void make_non_blocking (int fd);
-#endif
         std::atomic<int> signal_{-1};
     };
-
-    // wait
-    // ~~~~
-    inline void signal_cv::wait (std::unique_lock<std::mutex> & lock) {
-        lock.unlock ();
-        this->wait ();
-        lock.lock ();
-    }
 
 } // namespace pstore
 

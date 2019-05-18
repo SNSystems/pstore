@@ -48,18 +48,24 @@
 
 #ifndef _WIN32
 
-#include <cassert>
-#include <cstring> // for memset() [used by FD_ZERO on solaris]
-#include <fcntl.h>
-#include <unistd.h>
+#    include <cassert>
+#    include <cstring> // for memset() [used by FD_ZERO on solaris]
+#    include <fcntl.h>
+#    include <unistd.h>
 
-#include "pstore/support/error.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/scope_guard.hpp"
 
 namespace pstore {
 
+    //*     _                _      _              _____   __ *
+    //*  __| |___ ___ __ _ _(_)_ __| |_ ___ _ _   / __\ \ / / *
+    //* / _` / -_|_-</ _| '_| | '_ \  _/ _ \ '_| | (__ \ V /  *
+    //* \__,_\___/__/\__|_| |_| .__/\__\___/_|    \___| \_/   *
+    //*                       |_|                             *
     // (ctor)
     // ~~~~~~
-    signal_cv::signal_cv ()
+    descriptor_condition_variable::descriptor_condition_variable ()
             : read_fd_{}
             , write_fd_{} {
 
@@ -75,19 +81,53 @@ namespace pstore {
         assert (write_fd_.valid ());
 
         // Make both pipe descriptors non-blocking.
-        make_non_blocking (read_fd_.get ());
-        make_non_blocking (write_fd_.get ());
+        signal_cv::make_non_blocking (read_fd_.get ());
+        signal_cv::make_non_blocking (write_fd_.get ());
+    }
+
+    // wait_descriptor
+    // ~~~~~~~~~~~~~~~
+    pstore::broker::pipe_descriptor const & descriptor_condition_variable::wait_descriptor () const
+        noexcept {
+        return read_fd_;
+    }
+
+    // notify
+    // ~~~~~~
+    // To wake up the listener, we just write a single character to the write file descriptor.
+    // On POSIX, this function is called from a signal handler. It must only call
+    // signal-safe functions.
+    void descriptor_condition_variable::notify () noexcept {
+        auto const write_fd = write_fd_.get ();
+        auto const buffer = 'x';
+        if (::write (write_fd, &buffer, sizeof (buffer)) == -1 && errno != EAGAIN) {
+            ; // TODO: Can I report this error somehow?
+        }
+    }
+
+    // make_non_blocking
+    // ~~~~~~~~~~~~~~~~~
+    void descriptor_condition_variable::make_non_blocking (int fd) {
+        int flags = ::fcntl (fd, F_GETFL); // NOLINT
+        if (flags == -1) {
+            raise (errno_erc{errno}, "fcntl");
+        }
+        flags |= O_NONBLOCK;
+        if (::fcntl (fd, F_SETFL, flags) == -1) { // NOLINT
+            raise (errno_erc{errno}, "fcntl");
+        }
     }
 
     // wait
     // ~~~~
-    void signal_cv::wait () {
-        auto const read_fd = read_fd_.get ();
+    void descriptor_condition_variable::wait () {
+        int const read_fd = this->wait_descriptor ().get ();
         fd_set readfds{};
         FD_ZERO (&readfds);
         // Add the read end of pipe to 'readfds'.
         FD_SET (read_fd, &readfds); // NOLINT
         int nfds = read_fd + 1;
+
         do {
             int err = 0;
             while ((err = ::select (nfds, &readfds, nullptr, nullptr, nullptr)) == -1 &&
@@ -106,29 +146,23 @@ namespace pstore {
         } while (!FD_ISSET (read_fd, &readfds));
     }
 
-    // notify
-    // ~~~~~~
-    /// To wake up the listener, we just write a single characater to the write file descriptor.
-    void signal_cv::notify (int signal) noexcept {
-        signal_ = signal;
-        auto const write_fd = write_fd_.get ();
-        char const buffer = 'x';
-        if (::write (write_fd, &buffer, sizeof (buffer)) == -1 && errno != EAGAIN) {
-            ; // TODO: Can I report this error somehow?
-        }
+    void descriptor_condition_variable::wait (std::unique_lock<std::mutex> & lock) {
+        lock.unlock ();
+        auto _ = make_scope_guard ([&lock]() { lock.lock (); });
+        this->wait ();
     }
 
-    // make_non_blocking
-    // ~~~~~~~~~~~~~~~~~
-    void signal_cv::make_non_blocking (int fd) {
-        int flags = ::fcntl (fd, F_GETFL); // NOLINT
-        if (flags == -1) {
-            raise (errno_erc{errno}, "fcntl");
-        }
-        flags |= O_NONBLOCK;
-        if (::fcntl (fd, F_SETFL, flags) == -1) { // NOLINT
-            raise (errno_erc{errno}, "fcntl");
-        }
+
+    //*     _                _           *
+    //*  __(_)__ _ _ _  __ _| |  ____ __ *
+    //* (_-< / _` | ' \/ _` | | / _\ V / *
+    //* /__/_\__, |_||_\__,_|_| \__|\_/  *
+    //*      |___/                       *
+    // notify
+    // ~~~~~~
+    void signal_cv::notify (int signal) noexcept {
+        signal_ = signal;
+        descriptor_condition_variable::notify ();
     }
 
 } // namespace pstore

@@ -267,6 +267,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/rotating_log.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"

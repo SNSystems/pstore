@@ -114,7 +114,7 @@ namespace {
 
         v->clear ();
         v->reserve (roundup (processes.size () + 1U, round_to));
-        v->push_back (cv.get ());
+        v->push_back (cv.wait_descriptor ().get ());
         std::transform (
             processes.right_begin (), processes.right_end (), std::back_inserter (*v),
             [](pstore::broker::process_identifier const & process) { return process.get (); });
@@ -164,7 +164,7 @@ namespace pstore {
                         HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
                         // We may have been woken by the notify condition variable rather than as a
                         // result of a process exiting.
-                        if (h != cv_.get ()) {
+                        if (h != cv_.wait_descriptor ().get ()) {
                             // A GC process exited so let the user know and remove it from the
                             // collection of child processes.
                             pr_exit (h);
