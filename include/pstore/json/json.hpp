@@ -117,7 +117,7 @@ namespace pstore {
         ///     void end_array () | Called indicate that an array has been completely parsed. This will always follow an earlier call to begin_array().
         ///     void begin_object () | Called to notify the start of an object. Subsequent event notifications are for members of this object until a matching call to Callbacks::end_object().
         ///     void end_object () | Called to indicate that an object has been completely parsed. This will always follow an earlier call to begin_object().
-        ///     result_type result () const | Returns the result of the parse. If the parse was successful, this function is called by parser<>::elf() which will return its result.
+        ///     result_type result () const | Returns the result of the parse. If the parse was successful, this function is called by parser<>::eof() which will return its result.
         // clang-format on
         template <typename Callbacks>
         class parser {

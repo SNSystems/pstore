@@ -81,7 +81,7 @@ namespace pstore {
                 server_pipe (server_pipe const &) = delete;
                 server_pipe & operator= (server_pipe const &) = delete;
 
-                value_type get () const noexcept { return read_pipe ().get (); }
+                value_type native_handle () const noexcept { return read_pipe ().native_handle (); }
                 bool valid () const noexcept { return read_pipe ().valid (); }
 
             private:

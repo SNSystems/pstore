@@ -1,10 +1,10 @@
-//*      _                   _                          *
-//*   __| | ___  _ __ ___   | |_ _   _ _ __   ___  ___  *
-//*  / _` |/ _ \| '_ ` _ \  | __| | | | '_ \ / _ \/ __| *
-//* | (_| | (_) | | | | | | | |_| |_| | |_) |  __/\__ \ *
-//*  \__,_|\___/|_| |_| |_|  \__|\__, | .__/ \___||___/ *
-//*                              |___/|_|               *
-//===- include/pstore/json/dom_types.hpp ----------------------------------===//
+//*              _   _                 *
+//*  _   _ _ __ | |_(_)_ __ ___   ___  *
+//* | | | | '_ \| __| | '_ ` _ \ / _ \ *
+//* | |_| | |_) | |_| | | | | | |  __/ *
+//*  \__,_| .__/ \__|_|_| |_| |_|\___| *
+//*       |_|                          *
+//===- lib/httpd/uptime.cpp -----------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,43 +41,54 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file dom_types.hpp
+#include "pstore/httpd/uptime.hpp"
 
-#ifndef PSTORE_JSON_DOM_TYPES_HPP
-#define PSTORE_JSON_DOM_TYPES_HPP
+#include <sstream>
+#include <thread>
 
-#include <cassert>
-#include <string>
-#include <unordered_map>
-#include <memory>
-#include <ostream>
-#include <stack>
-#include <utility>
-#include <vector>
+#include "pstore/json/json.hpp"
+#include "pstore/json/dom_types.hpp"
+#include "pstore/support/thread.hpp"
+
+namespace {
+
+#ifndef NDEBUG
+    bool is_valid_json (std::string const & str) {
+        pstore::json::parser<pstore::json::null_output> p;
+        p.input (pstore::gsl::make_span (str));
+        p.eof ();
+        return !p.has_error ();
+    }
+#endif
+
+} // end anonymous namespace
+
 
 namespace pstore {
-    namespace json {
+    namespace httpd {
 
-        class null_output {
-        public:
-            using result_type = void;
+        descriptor_condition_variable uptime_cv;
+        channel<descriptor_condition_variable> uptime_channel (&uptime_cv);
 
-            void string_value (std::string const &) const noexcept {}
-            void integer_value (long ) const noexcept {}
-            void float_value (double ) const noexcept {}
-            void boolean_value (bool) const noexcept {}
-            void null_value () const noexcept {}
+        void uptime (gsl::not_null<bool *> done) {
+            threads::set_name ("uptime");
 
-            void begin_array () const noexcept {}
-            void end_array () const noexcept {}
+            auto count = 0U;
+            auto until = std::chrono::system_clock::now ();
+            while (!*done) {
+                until += std::chrono::seconds{1};
+                std::this_thread::sleep_until (until);
+                ++count;
 
-            void begin_object () const noexcept {}
-            void end_object () const noexcept {}
+                uptime_channel.publish ([count]() {
+                    std::ostringstream os;
+                    os << "{ \"uptime\": " << count << " }";
+                    std::string const & str = os.str ();
+                    assert (is_valid_json (str));
+                    return str;
+                });
+            }
+        }
 
-            result_type result () const noexcept {}
-        };
-
-    } // namespace json
-} // namespace pstore
-
-#endif // PSTORE_JSON_DOM_TYPES_HPP
+    } // end namespace httpd
+} // end namespace pstore

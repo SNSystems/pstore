@@ -1,18 +1,21 @@
 (function () {
     'use strict';
 
-    var ws = new WebSocket ("ws://" + window.location.host + "/socketserver");
-    ws.onerror = function (error) {
+    var uptime = new WebSocket ("ws://" + window.location.host + "/uptime");
+    uptime.onerror = function (error) {
         console.error(error);
     };
-    ws.onclose = function () {
-        console.log ('socket closed.');
+    uptime.onclose = function () {
+        console.log("uptime websocket closed.");
     };
-    ws.onopen = function () {
-        console.log ("connection open");
-        ws.send("Hello server!");
+    uptime.onopen = function () {
+        console.log("uptime websocket open.");
     };
-    ws.onmessage = function (msg) {
-        $ ("#message").text(msg.data);
+    uptime.onmessage = function (msg) {
+        var obj = JSON.parse(msg.data);
+        var el = document.getElementById("message");
+        if (el !== null) {
+            el.textContent = obj.uptime !== undefined ? obj.uptime : "Unknown";
+        }
     };
 } ());

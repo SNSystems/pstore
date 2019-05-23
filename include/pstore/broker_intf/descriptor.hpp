@@ -132,7 +132,7 @@ namespace pstore {
                 bool operator< (descriptor const & rhs) const noexcept { return fd_ < rhs.fd_; }
 
                 bool valid () const noexcept { return traits_.is_valid (fd_); }
-                value_type get () const noexcept { return fd_; }
+                value_type native_handle () const noexcept { return fd_; }
 
                 value_type release () noexcept {
                     auto const r = fd_;
@@ -235,7 +235,7 @@ namespace std {
         using result_type = std::size_t;
 
         result_type operator() (argument_type const & s) const noexcept {
-            return std::hash<typename argument_type::value_type> () (s.get ());
+            return std::hash<typename argument_type::value_type> () (s.native_handle ());
         }
     };
 

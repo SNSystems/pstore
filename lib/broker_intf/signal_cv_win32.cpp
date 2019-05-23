@@ -63,7 +63,7 @@ namespace pstore {
     descriptor_condition_variable::descriptor_condition_variable ()
             : event_{::CreateEvent (nullptr /*security attributes*/, FALSE /*manual reset?*/,
                                     FALSE /*initially signalled?*/, nullptr /*name*/)} {
-        if (event_.get () == nullptr) {
+        if (event_.native_handle () == nullptr) {
             raise (win32_erc (::GetLastError ()), "CreateEvent");
         }
     }
@@ -77,12 +77,14 @@ namespace pstore {
 
     // notify
     // ~~~~~~
-    void descriptor_condition_variable::notify () noexcept { ::SetEvent (event_.get ()); }
+    void descriptor_condition_variable::notify_all () noexcept {
+        ::SetEvent (event_.native_handle ());
+    }
 
     // wait
     // ~~~~
     void descriptor_condition_variable::wait () {
-        switch (::WaitForSingleObject (this->wait_descriptor ().get (), INFINITE)) {
+        switch (::WaitForSingleObject (this->wait_descriptor ().native_handle (), INFINITE)) {
         case WAIT_ABANDONED:
         case WAIT_OBJECT_0: return;
         case WAIT_TIMEOUT: assert (0);
@@ -97,6 +99,10 @@ namespace pstore {
         this->wait ();
     }
 
+    // reset
+    // ~~~~~
+    void descriptor_condition_variable::reset () { ::ResetEvent (event_.native_handle ()); }
+
     //*     _                _           *
     //*  __(_)__ _ _ _  __ _| |  ____ __ *
     //* (_-< / _` | ' \/ _` | | / _\ V / *
@@ -105,9 +111,9 @@ namespace pstore {
 
     // notify
     // ~~~~~~
-    void signal_cv::notify (int sig) noexcept {
+    void signal_cv::notify_all (int sig) noexcept {
         signal_ = sig;
-        descriptor_condition_variable::notify ();
+        descriptor_condition_variable::notify_all ();
     }
 
 } // end namespace pstore

@@ -72,7 +72,7 @@ namespace pstore {
         ///
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify () noexcept;
+        void notify_all () noexcept;
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when
         /// notify() is executed. When unblocked, lock is reacquired and wait exits.
@@ -83,8 +83,8 @@ namespace pstore {
 
         void wait ();
 
-
         broker::pipe_descriptor const & wait_descriptor () const noexcept;
+        void reset ();
 
     private:
 #ifdef _WIN32
@@ -110,7 +110,7 @@ namespace pstore {
         /// \param signal  The signal number responsible for the "wake".
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify (int signal) noexcept;
+        void notify_all (int signal) noexcept;
 
         int signal () const { return signal_.load (); }
 

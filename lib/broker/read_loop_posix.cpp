@@ -110,7 +110,7 @@ namespace pstore {
 
                 for (;;) {
                     while (ssize_t const bytes_read =
-                               ::read (fd.get (), readbuf.get (), sizeof (*readbuf))) {
+                               ::read (fd.native_handle (), readbuf.get (), sizeof (*readbuf))) {
                         if (bytes_read < 0) {
                             int const err = errno;
                             if (err == EAGAIN || err == EWOULDBLOCK) {
@@ -143,7 +143,7 @@ namespace pstore {
                     // another thread may also wake in response to its presence. Bear in mind that
                     // that other thread may read the data before this one attempts to do so
                     // (resulting in EWOULDBLOCK).
-                    block_for_input (fd.get ());
+                    block_for_input (fd.native_handle ());
                 }
             } catch (std::exception const & ex) {
                 log (logging::priority::error, "error: ", ex.what ());

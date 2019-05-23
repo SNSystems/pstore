@@ -60,11 +60,11 @@ namespace pstore {
         bool writer::write_impl (message_type const & msg) {
             // Send a message to the pipe server.
             auto bytes_written = DWORD{0};
-            BOOL ok = ::WriteFile (fd_.get (),     // pipe handle
-                                   &msg,           // message
-                                   sizeof (msg),   // message length
-                                   &bytes_written, // bytes written
-                                   nullptr);       // not overlapped
+            BOOL ok = ::WriteFile (fd_.native_handle (), // pipe handle
+                                   &msg,                 // message
+                                   sizeof (msg),         // message length
+                                   &bytes_written,       // bytes written
+                                   nullptr);             // not overlapped
             if (!ok) {
                 DWORD const errcode = ::GetLastError ();
                 raise (::pstore::win32_erc (errcode), "WriteFile to pipe failed");

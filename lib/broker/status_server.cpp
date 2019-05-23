@@ -279,8 +279,9 @@ namespace {
     template <typename T>
     socket_descriptor accept (socket_descriptor const & listenfd, T * const their_addr) {
         auto addr_size = static_cast<socklen_t> (sizeof (T));
-        auto client_fd = socket_descriptor{::accept (
-            listenfd.get (), reinterpret_cast<struct sockaddr *> (their_addr), &addr_size)};
+        auto client_fd = socket_descriptor{
+            ::accept (listenfd.native_handle (), reinterpret_cast<struct sockaddr *> (their_addr),
+                      &addr_size)};
         if (!client_fd.valid ()) {
             raise (platform_erc (pstore::broker::get_last_error ()), "accept failed");
         }
@@ -360,8 +361,8 @@ namespace {
         address.sin6_family = AF_INET6;
         address.sin6_port = host_to_network (in_port_t{0});
         address.sin6_addr = in6addr_any;
-        if (::bind (sock.get (), reinterpret_cast<sockaddr const *> (&address), sizeof (address)) !=
-            0) {
+        if (::bind (sock.native_handle (), reinterpret_cast<sockaddr const *> (&address),
+                    sizeof (address)) != 0) {
             raise (platform_erc (pstore::broker::get_last_error ()), "socket bind failed");
         }
         return sock;
@@ -373,7 +374,8 @@ namespace {
         sockaddr_storage address;
         std::memset (&address, 0, sizeof address);
         socklen_t sock_addr_len = sizeof (address);
-        if (getsockname (fd.get (), reinterpret_cast<sockaddr *> (&address), &sock_addr_len) != 0) {
+        if (getsockname (fd.native_handle (), reinterpret_cast<sockaddr *> (&address),
+                         &sock_addr_len) != 0) {
             pstore::raise (platform_erc (pstore::broker::get_last_error ()), "getsockname failed");
         }
 
@@ -412,8 +414,8 @@ namespace {
 
         fd_set all_set;
         FD_ZERO (&all_set);
-        FD_SET (listen_fd.get (), &all_set);
-        auto max_fd = listen_fd.get ();
+        FD_SET (listen_fd.native_handle (), &all_set);
+        auto max_fd = listen_fd.native_handle ();
 
         std::unordered_map<socket_descriptor, json_parser> clients;
 
@@ -425,17 +427,17 @@ namespace {
                 log (logging::priority::error, "select error ", broker::get_last_error ());
             }
 
-            if (FD_ISSET (listen_fd.get (), &rset)) {
+            if (FD_ISSET (listen_fd.native_handle (), &rset)) {
                 socket_descriptor client_fd =
                     server_accept_connection (listen_fd, true /*localhost only?*/);
                 if (!client_fd.valid ()) {
                     log (logging::priority::error, "server_accept_connection error ",
-                         client_fd.get ());
+                         client_fd.native_handle ());
                     continue;
                 }
 
-                FD_SET (client_fd.get (), &all_set);
-                max_fd = std::max (max_fd, client_fd.get ()); // max fd for select()
+                FD_SET (client_fd.native_handle (), &all_set);
+                max_fd = std::max (max_fd, client_fd.native_handle ()); // max fd for select()
 
                 clients.emplace (std::move (client_fd), json_parser{});
                 continue;
@@ -448,13 +450,13 @@ namespace {
 
                 socket_descriptor const & client_fd = it->first;
 
-                if (FD_ISSET (client_fd.get (), &rset)) {
+                if (FD_ISSET (client_fd.native_handle (), &rset)) {
                     // FIXME: stupidly small at the moment to work the server loop harder.
                     std::array<char, 4> read_buffer;
 
                     // read data from the client
                     ssize_t const nread =
-                        recv (client_fd.get (), read_buffer.data (),
+                        recv (client_fd.native_handle (), read_buffer.data (),
                               static_cast<int> (read_buffer.size ()), 0 /*flags*/);
                     assert (is_recv_error (nread) ||
                             static_cast<std::size_t> (nread) <= read_buffer.size ());
@@ -468,19 +470,20 @@ namespace {
                         // client has closed the connection.
                         log (logging::priority::error,
                              "client closed the connection before ^D was received. fd=",
-                             client_fd.get ());
+                             client_fd.native_handle ());
                     } else {
                         // process the client's request.
                         std::tie (more, done) =
                             handle_request (pstore::gsl::make_span (read_buffer.data (), nread),
-                                            client_fd.get (), it->second);
+                                            client_fd.native_handle (), it->second);
                         assert (!done || (done && !more));
                     }
 
                     // If we're done with the client, close the file descriptor.
                     if (!more) {
-                        log (logging::priority::notice, "Closing connection ", client_fd.get ());
-                        FD_CLR (client_fd.get (), &all_set);
+                        log (logging::priority::notice, "Closing connection ",
+                             client_fd.native_handle ());
+                        FD_CLR (client_fd.native_handle (), &all_set);
                         clients.erase (it);
                     }
                 }
@@ -512,7 +515,7 @@ void pstore::broker::status_server (std::shared_ptr<self_client_connection> clie
 
         // Tell the kernel we're a server
         constexpr int qlen = 10;
-        if (listen (listen_fd.get (), qlen) != 0) {
+        if (listen (listen_fd.native_handle (), qlen) != 0) {
             raise (platform_erc (get_last_error ()), "listen failed");
         }
 

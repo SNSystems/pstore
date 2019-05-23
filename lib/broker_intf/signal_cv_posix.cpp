@@ -56,6 +56,13 @@
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/scope_guard.hpp"
 
+namespace {
+
+    /// Instances of this type are written to and read from our pipe.
+    using pipe_content_type = char;
+
+} // end anonymous namespace
+
 namespace pstore {
 
     //*     _                _      _              _____   __ *
@@ -81,8 +88,8 @@ namespace pstore {
         assert (write_fd_.valid ());
 
         // Make both pipe descriptors non-blocking.
-        signal_cv::make_non_blocking (read_fd_.get ());
-        signal_cv::make_non_blocking (write_fd_.get ());
+        signal_cv::make_non_blocking (read_fd_.native_handle ());
+        signal_cv::make_non_blocking (write_fd_.native_handle ());
     }
 
     // wait_descriptor
@@ -97,9 +104,9 @@ namespace pstore {
     // To wake up the listener, we just write a single character to the write file descriptor.
     // On POSIX, this function is called from a signal handler. It must only call
     // signal-safe functions.
-    void descriptor_condition_variable::notify () noexcept {
-        auto const write_fd = write_fd_.get ();
-        auto const buffer = 'x';
+    void descriptor_condition_variable::notify_all () noexcept {
+        auto const write_fd = write_fd_.native_handle ();
+        pipe_content_type const buffer{};
         if (::write (write_fd, &buffer, sizeof (buffer)) == -1 && errno != EAGAIN) {
             ; // TODO: Can I report this error somehow?
         }
@@ -121,7 +128,7 @@ namespace pstore {
     // wait
     // ~~~~
     void descriptor_condition_variable::wait () {
-        int const read_fd = this->wait_descriptor ().get ();
+        int const read_fd = this->wait_descriptor ().native_handle ();
         fd_set readfds{};
         FD_ZERO (&readfds);
         // Add the read end of pipe to 'readfds'.
@@ -138,11 +145,7 @@ namespace pstore {
                 raise (errno_erc{errno}, "select");
             }
 
-            char buffer{};
-            ssize_t bytes_read = ::read (read_fd, &buffer, sizeof (buffer));
-            if (bytes_read == -1) {
-                raise (errno_erc{errno}, "read");
-            }
+            this->reset ();
         } while (!FD_ISSET (read_fd, &readfds));
     }
 
@@ -152,6 +155,16 @@ namespace pstore {
         this->wait ();
     }
 
+    // reset
+    // ~~~~~
+    void descriptor_condition_variable::reset () {
+        pipe_content_type buffer{};
+        ssize_t const bytes_read =
+            ::read (this->wait_descriptor ().native_handle (), &buffer, sizeof (buffer));
+        if (bytes_read == -1) {
+            raise (errno_erc{errno}, "read");
+        }
+    }
 
     //*     _                _           *
     //*  __(_)__ _ _ _  __ _| |  ____ __ *
@@ -160,9 +173,9 @@ namespace pstore {
     //*      |___/                       *
     // notify
     // ~~~~~~
-    void signal_cv::notify (int signal) noexcept {
+    void signal_cv::notify_all (int signal) noexcept {
         signal_ = signal;
-        descriptor_condition_variable::notify ();
+        descriptor_condition_variable::notify_all ();
     }
 
 } // namespace pstore

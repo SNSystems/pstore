@@ -49,20 +49,24 @@
 #include <limits>
 
 #ifdef _WIN32
-#    include <Winsock2.h>
+#    include <winsock2.h>
 #else
 #    include <arpa/inet.h>
 #endif //_WIN32
 
 #include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/httpd/block_for_input.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/endian.hpp"
 #include "pstore/httpd/send.hpp"
+#include "pstore/httpd/uptime.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/pubsub.hpp"
 #include "pstore/support/utf.hpp"
 
-#define PSTORE_LOG_FRAME_INFO 0 // Define as 1 to log the frame header as it is received.
+#define PSTORE_LOG_FRAME_INFO 0        // Define as 1 to log the frame header as it is received.
 #define PSTORE_LOG_RECEIVED_MESSAGES 0 // Define as 1 to log the text of received messages.
 
 namespace pstore {
@@ -309,37 +313,39 @@ namespace pstore {
 
                     constexpr auto mask_length = 4U;
                     std::array<std::uint8_t, mask_length> mask_arr{{0}};
-                    return reader.get_span (io2, gsl::make_span (mask_arr)) >>=
-                           [&](IO io3, gsl::span<std::uint8_t> const & mask) {
-                               if (mask.size () != mask_length) {
-                                   return return_type{ws_error::insufficient_data};
-                               }
+                    return reader.get_span (
+                               io2, gsl::make_span (
+                                        mask_arr)) >>= [&](IO io3,
+                                                           gsl::span<std::uint8_t> const & mask) {
+                        if (mask.size () != mask_length) {
+                            return return_type{ws_error::insufficient_data};
+                        }
 
-                               std::vector<std::uint8_t> payload (
-                                   std::vector<std::uint8_t>::size_type{payload_length},
-                                   std::uint8_t{0});
+                        std::vector<std::uint8_t> payload (
+                            std::vector<std::uint8_t>::size_type{payload_length}, std::uint8_t{0});
 
-                               return reader.get_span (io3, gsl::make_span (payload)) >>=
-                                      [&payload, payload_length, &mask, &part1](
-                                          IO io4, gsl::span<std::uint8_t> const & payload_span) {
-                                          auto const payload_size = payload_span.size ();
-                                          if (payload_size < 0 ||
-                                              static_cast<std::make_unsigned<decltype (
-                                                      payload_size)>::type> (payload_size) !=
-                                                  payload_length) {
-                                              return return_type{ws_error::insufficient_data};
-                                          }
+                        return reader.get_span (
+                                   io3, gsl::make_span (
+                                            payload)) >>= [&payload, payload_length, &mask,
+                                                           &part1](IO io4,
+                                                                   gsl::span<std::uint8_t> const &
+                                                                       payload_span) {
+                            auto const payload_size = payload_span.size ();
+                            if (payload_size < 0 ||
+                                static_cast<std::make_unsigned<decltype (payload_size)>::type> (
+                                    payload_size) != payload_length) {
+                                return return_type{ws_error::insufficient_data};
+                            }
 
-                                          for (auto ctr = gsl::span<std::uint8_t>::index_type{0};
-                                               ctr < payload_size; ++ctr) {
-                                              payload_span[ctr] ^= mask[ctr % 4];
-                                          }
+                            for (auto ctr = gsl::span<std::uint8_t>::index_type{0};
+                                 ctr < payload_size; ++ctr) {
+                                payload_span[ctr] ^= mask[ctr % 4];
+                            }
 
-                                          return return_type{
-                                              in_place, io4,
-                                              frame{part1.opcode, part1.fin, std::move (payload)}};
-                                      };
-                           };
+                            return return_type{in_place, io4,
+                                               frame{part1.opcode, part1.fin, std::move (payload)}};
+                        };
+                    };
                 };
             };
         }
@@ -510,92 +516,128 @@ namespace pstore {
             return true;
         }
 
+
+        struct ws_command {
+            opcode op = opcode::unknown;
+            std::vector<std::uint8_t> payload;
+        };
+
+        template <typename Reader, typename Sender, typename IO>
+        std::tuple<IO, bool> socket_read (Reader && reader, Sender && sender, IO io,
+                                          gsl::not_null<ws_command *> command) {
+            error_or_n<IO, frame> const eo = read_frame (reader, io);
+            if (!eo) {
+                log (logging::priority::error, "Error: ", eo.get_error ().message ());
+                auto const error = eo.get_error ();
+                if (error == make_error_code (ws_error::unmasked_frame)) {
+                    // "The server MUST close the connection upon receiving a frame that is not
+                    // masked.  In this case, a server MAY send a Close frame with a status code
+                    // of 1002 (protocol error)."
+                    send_close_frame (sender, io, close_status_code::protocol_error);
+                } else if (error == make_error_code (ws_error::reserved_bit_set)) {
+                    send_close_frame (sender, io, close_status_code::protocol_error);
+                } else {
+                    send_close_frame (sender, io, close_status_code::abnormal_closure);
+                }
+                return {std::move (io), true};
+            }
+
+            io = std::get<0> (eo);
+            frame const & wsp = std::get<1> (eo);
+
+            // "All control frames MUST have a payload length of 125 bytes or less and MUST
+            // NOT be fragmented."
+            if (is_control_frame_opcode (wsp.op) && (!wsp.fin || wsp.payload.size () > 125)) {
+                send_close_frame (sender, io, close_status_code::protocol_error);
+                return {std::move (io), true};
+            }
+
+            switch (wsp.op) {
+            case opcode::continuation:
+                if (is_control_frame_opcode (command->op)) {
+                    send_close_frame (sender, io, close_status_code::protocol_error);
+                    return {std::move (io), true};
+                }
+                command->payload.insert (std::end (command->payload), std::begin (wsp.payload),
+                                         std::end (wsp.payload));
+                if (!check_message_complete (sender, io, wsp, command->op, command->payload)) {
+                    return {std::move (io), true};
+                }
+                break;
+
+            // Data frame opcodes.
+            case opcode::text:
+            case opcode::binary:
+                // We didn't see a FIN frame before a new data frame.
+                if (command->op != opcode::unknown || !command->payload.empty ()) {
+                    send_close_frame (sender, io, close_status_code::protocol_error);
+                    return {std::move (io), true};
+                }
+
+                command->payload = std::move (wsp.payload);
+                command->op = wsp.op;
+                if (!check_message_complete (sender, io, wsp, command->op, command->payload)) {
+                    return {std::move (io), true};
+                }
+                break;
+
+            case opcode::reserved_nc_1:
+            case opcode::reserved_nc_2:
+            case opcode::reserved_nc_3:
+            case opcode::reserved_nc_4:
+            case opcode::reserved_nc_5:
+            case opcode::reserved_control_1:
+            case opcode::reserved_control_2:
+            case opcode::reserved_control_3:
+            case opcode::reserved_control_4:
+            case opcode::reserved_control_5:
+                send_close_frame (sender, io, close_status_code::protocol_error);
+                return {std::move (io), true};
+
+            case opcode::close: close_message (sender, io, wsp); return {std::move (io), true};
+
+            case opcode::ping: pong (sender, io, gsl::make_span (wsp.payload)); break;
+
+            case opcode::pong:
+                // TODO: A reply to a ping that we sent.
+                break;
+
+            case opcode::unknown: assert (0); break;
+            }
+            return {std::move (io), false};
+        }
+
         // ws_server_loop
         // ~~~~~~~~~~~~~~
         template <typename Reader, typename Sender, typename IO>
-        void ws_server_loop (Reader && reader, Sender && sender, IO io) {
-            opcode op = opcode::unknown;
-            std::vector<std::uint8_t> payload;
+        void ws_server_loop (Reader && reader, Sender && sender, IO io, std::string const & uri) {
+            ws_command command;
+            channel<descriptor_condition_variable>::subscriber_pointer uptime_sub;
+            if (uri == "/uptime") {
+                uptime_sub = uptime_channel.new_subscriber ();
+            }
+
             bool done = false;
             while (!done) {
-                error_or_n<IO, frame> const eo = read_frame (reader, io);
-                if (!eo) {
-                    log (logging::priority::error, "Error: ", eo.get_error ().message ());
-                    auto const error = eo.get_error ();
-                    if (error == make_error_code (ws_error::unmasked_frame)) {
-                        // "The server MUST close the connection upon receiving a frame that is not
-                        // masked.  In this case, a server MAY send a Close frame with a status code
-                        // of 1002 (protocol error)."
-                        send_close_frame (sender, io, close_status_code::protocol_error);
-                    } else if (error == make_error_code (ws_error::reserved_bit_set)) {
-                        send_close_frame (sender, io, close_status_code::protocol_error);
-                    } else {
-                        send_close_frame (sender, io, close_status_code::abnormal_closure);
-                    }
-                    return;
+                inputs_ready const avail =
+                    block_for_input (reader, io, uptime_cv.wait_descriptor ());
+                if (avail.socket) {
+                    std::tie (io, done) = socket_read (reader, sender, io, &command);
                 }
-
-                io = std::get<0> (eo);
-                frame const & wsp = std::get<1> (eo);
-
-                // "All control frames MUST have a payload length of 125 bytes or less and MUST
-                // NOT be fragmented."
-                if (is_control_frame_opcode (wsp.op) && (!wsp.fin || wsp.payload.size () > 125)) {
-                    send_close_frame (sender, io, close_status_code::protocol_error);
-                    return;
-                }
-
-                switch (wsp.op) {
-                case opcode::continuation:
-                    if (is_control_frame_opcode (op)) {
-                        send_close_frame (sender, io, close_status_code::protocol_error);
-                        return;
+                if (avail.cv) {
+                    // There's a message to push to our peer.
+                    uptime_cv.reset ();
+                    if (uptime_sub) {
+                        while (maybe<std::string> const message = uptime_sub->pop ()) {
+                            log (logging::priority::info, "sending \"uptime\": ", *message);
+                            error_or<IO> const eo3 = send_message (
+                                sender, io, opcode::text, as_bytes (gsl::make_span (*message)));
+                            if (!eo3) {
+                                log (logging::priority::error,
+                                     "Send error: ", eo3.get_error ().message ());
+                            }
+                        }
                     }
-                    payload.insert (std::end (payload), std::begin (wsp.payload),
-                                    std::end (wsp.payload));
-                    if (!check_message_complete (sender, io, wsp, op, payload)) {
-                        return;
-                    }
-                    break;
-
-                // Data frame opcodes.
-                case opcode::text:
-                case opcode::binary:
-                    // We didn't see a FIN frame before a new data frame.
-                    if (op != opcode::unknown || !payload.empty ()) {
-                        send_close_frame (sender, io, close_status_code::protocol_error);
-                        return;
-                    }
-
-                    payload = std::move (wsp.payload);
-                    op = wsp.op;
-                    if (!check_message_complete (sender, io, wsp, op, payload)) {
-                        return;
-                    }
-                    break;
-
-                case opcode::reserved_nc_1:
-                case opcode::reserved_nc_2:
-                case opcode::reserved_nc_3:
-                case opcode::reserved_nc_4:
-                case opcode::reserved_nc_5:
-                case opcode::reserved_control_1:
-                case opcode::reserved_control_2:
-                case opcode::reserved_control_3:
-                case opcode::reserved_control_4:
-                case opcode::reserved_control_5:
-                    send_close_frame (sender, io, close_status_code::protocol_error);
-                    return;
-
-                case opcode::close: close_message (sender, io, wsp); return;
-
-                case opcode::ping: pong (sender, io, gsl::make_span (wsp.payload)); break;
-
-                case opcode::pong:
-                    // TODO: A reply to a ping that we sent.
-                    break;
-
-                case opcode::unknown: assert (0); break;
                 }
             }
         }

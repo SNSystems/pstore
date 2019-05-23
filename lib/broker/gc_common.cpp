@@ -78,7 +78,7 @@ namespace pstore {
                 // An initial wakeup of the GC-watcher thread in case the child process exited
                 // before we
                 // had time to install the SIGCHLD signal handler.
-                cv_.notify (-1);
+                cv_.notify_all (-1);
             }
         }
 
@@ -87,7 +87,7 @@ namespace pstore {
         void gc_watch_thread::stop (int signum) {
             assert (done);
             logging::log (logging::priority::info, "asking gc process watch thread to exit");
-            cv_.notify (signum);
+            cv_.notify_all (signum);
         }
 
         // vacuumd_path

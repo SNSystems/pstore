@@ -161,11 +161,12 @@ TEST_F (ServeStaticContent, Simple) {
         pstore::httpd::read_request (r, std::string::size_type{0}) >>= record_headers;
 
     ASSERT_TRUE (static_cast<bool> (eo));
-    EXPECT_THAT (headers, ::testing::UnorderedElementsAre (
-                              string_pair{"content-length", "28"},
-                              string_pair{"content-type", "text/html"}, string_pair{"date", ""},
-                              string_pair{"last-modified", "Tue, 23 Apr 2019 09:10:27 GMT"},
-                              string_pair{"server", "pstore-httpd"}));
+    EXPECT_THAT (headers,
+                 ::testing::UnorderedElementsAre (
+                     string_pair{"content-length", "28"}, string_pair{"content-type", "text/html"},
+                     string_pair{"date", ""}, string_pair{"connection", "close"},
+                     string_pair{"last-modified", "Tue, 23 Apr 2019 09:10:27 GMT"},
+                     string_pair{"server", "pstore-httpd"}));
     EXPECT_EQ ((std::string{*actual, std::get<0> (eo)}), index_html);
 }
 

@@ -85,10 +85,10 @@ namespace {
 
     pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring path, int flags) {
         pstore::broker::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
-        if (pipe.get () >= 0) {
+        if (pipe.native_handle () >= 0) {
             // If the file open succeeded. We check whether it's a FIFO.
             struct stat buf {};
-            if (::fstat (pipe.get (), &buf) != 0) {
+            if (::fstat (pipe.native_handle (), &buf) != 0) {
                 int errcode = errno;
                 std::ostringstream str;
                 str << "Could not stat the file at " << pstore::quoted (path);
@@ -138,7 +138,7 @@ namespace pstore {
             // most UNIX systems allow this, we use two open() calls instead.
 
             pstore::broker::pipe_descriptor fdread = open_fifo (path, O_RDONLY);
-            if (fdread.get () < 0) {
+            if (fdread.native_handle () < 0) {
                 // If the file open failed, we create the FIFO and try again.
                 if (make_fifo (path, S_IFIFO | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH |
                                          S_IWOTH) != 0) {
@@ -148,14 +148,14 @@ namespace pstore {
                 needs_delete_ = true;
 
                 fdread = open_fifo (path, O_RDONLY);
-                if (fdread.get () < 0) {
+                if (fdread.native_handle () < 0) {
                     // Open failed for a second time. Give up.
                     raise_cannot_create_fifo (path, errno);
                 }
             }
 
             pipe_descriptor fdwrite = open_fifo (path, O_WRONLY);
-            if (fdwrite.get () < 0) {
+            if (fdwrite.native_handle () < 0) {
                 raise_cannot_create_fifo (path, errno);
             }
 
@@ -174,7 +174,7 @@ namespace pstore {
             // writes to the FIFO.
 
             client_pipe fdwrite{::open (path.c_str (), O_WRONLY | O_NONBLOCK)}; // NOLINT
-            if (fdwrite.get () < 0) {
+            if (fdwrite.native_handle () < 0) {
                 int const err = errno;
 
                 // If O_NONBLOCK is specified an open for write-only returns –1 with errno set to

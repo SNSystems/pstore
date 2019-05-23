@@ -79,9 +79,11 @@
 #include "pstore/httpd/send.hpp"
 #include "pstore/httpd/serve_dynamic_content.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
+#include "pstore/httpd/uptime.hpp"
 #include "pstore/httpd/ws_server.hpp"
 #include "pstore/httpd/wskey.hpp"
 #include "pstore/support/logging.hpp"
+#include "pstore/support/pubsub.hpp"
 
 namespace {
 
@@ -127,9 +129,10 @@ namespace {
 
         std::ostringstream os;
         // clang-format off
-        os << "HTTP/1.1 200 OK" << crlf
+        os << "HTTP/1.1 " << error_no << " OK" << crlf
            << "Server: pstore-httpd" << crlf
            << "Content-length: " << content_str.length () << crlf
+           << "Connection: close" << crlf  // TODO remove this when we support persistent connections
            << "Content-type: " << "text/html" << crlf
            << "Date: " << pstore::httpd::http_date (now) << crlf
            << "Last-Modified: " << pstore::httpd::http_date (now) << crlf
@@ -150,7 +153,7 @@ namespace {
         }
 
         int const optval = 1;
-        if (::setsockopt (fd.get (), SOL_SOCKET, SO_REUSEADDR,
+        if (::setsockopt (fd.native_handle (), SOL_SOCKET, SO_REUSEADDR,
                           reinterpret_cast<char const *> (&optval), sizeof (optval))) {
             return eo{get_last_error ()};
         }
@@ -159,13 +162,13 @@ namespace {
         server_addr.sin_family = AF_INET;
         server_addr.sin_addr.s_addr = htonl (INADDR_ANY); // NOLINT
         server_addr.sin_port = htons (port_number);       // NOLINT
-        if (::bind (fd.get (), reinterpret_cast<sockaddr *> (&server_addr), sizeof (server_addr)) <
-            0) {
+        if (::bind (fd.native_handle (), reinterpret_cast<sockaddr *> (&server_addr),
+                    sizeof (server_addr)) < 0) {
             return eo{get_last_error ()};
         }
 
         // Get ready to accept connection requests.
-        if (::listen (fd.get (), 5) < 0) { // allow 5 requests to queue up.
+        if (::listen (fd.native_handle (), 5) < 0) { // allow 5 requests to queue up.
             return eo{get_last_error ()};
         }
 
@@ -246,13 +249,13 @@ namespace {
 
     template <typename Reader, typename IO>
     pstore::error_or<std::unique_ptr<std::thread>>
-    upgrade_to_ws (Reader & reader, IO io, pstore::httpd::header_info const & header_contents) {
+    upgrade_to_ws (Reader & reader, IO io, pstore::httpd::request_info const & request,
+                   pstore::httpd::header_info const & header_contents) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
         using pstore::logging::priority;
         assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
 
         log (priority::info, "WebSocket upgrade requested");
-
         // Validate the request headers
         if (!header_contents.websocket_key || !header_contents.websocket_version) {
             log (priority::error, "Missing WebSockets upgrade key or version header.");
@@ -279,7 +282,6 @@ namespace {
                << "Upgrade: WebSocket" << crlf
                << "Connection: Upgrade" << crlf
                << "Sec-WebSocket-Accept: " << pstore::httpd::source_key (*header_contents.websocket_key) << crlf
-               << "Server: pstore-httpd" << crlf
                << "Date: " << date << crlf
                << "Last-Modified: " << date << crlf
                << crlf;
@@ -289,7 +291,8 @@ namespace {
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
-        auto server_loop_thread = [](Reader && reader2, socket_descriptor io2) {
+        auto server_loop_thread = [](Reader && reader2, socket_descriptor io2,
+                                     std::string const uri) {
             PSTORE_TRY {
                 constexpr auto ident = "websocket";
                 pstore::threads::set_name (ident);
@@ -299,7 +302,7 @@ namespace {
 
                 assert (io2.valid ());
                 ws_server_loop (std::move (reader2), pstore::httpd::net::network_sender,
-                                std::ref (io2));
+                                std::ref (io2), uri);
 
                 log (priority::info, "Ended WebSockets session");
             }
@@ -309,16 +312,42 @@ namespace {
         };
 
         // Spawn a thread to manage this WebSockets session.
-        auto const create_ws_server = [&reader, server_loop_thread](socket_descriptor & s) {
+        auto const create_ws_server = [&reader, server_loop_thread,
+                                       &request](socket_descriptor & s) {
             assert (s.valid ());
-            return return_type{
-                pstore::in_place,
-                new std::thread (server_loop_thread, std::move (reader), std::move (s))};
+            return return_type{pstore::in_place,
+                               new std::thread (server_loop_thread, std::move (reader),
+                                                std::move (s), request.uri ())};
         };
 
         assert (io.get ().valid ());
         return accept_ws_connection () >>= create_ws_server;
     }
+
+#ifndef NDEBUG
+    template <typename BufferedReader>
+    bool input_is_empty (BufferedReader const & reader, socket_descriptor const & fd) {
+        if (reader.available () == 0) {
+            return true;
+        }
+#    ifdef _WIN32
+        // TODO: not yet implemented for Windows.
+        (void) fd;
+        return true;
+#    else
+        // There should be nothing in the buffered-reader or the input socket waiting to be read.
+        errno = 0;
+        std::array<std::uint8_t, 256> buf;
+        ssize_t const nread = recv (fd.native_handle (), buf.data (),
+                                    static_cast<int> (buf.size ()), MSG_PEEK /*flags*/);
+        int err = errno;
+        if (nread == -1) {
+            log (pstore::logging::priority::error, "error:", err);
+        }
+        return nread == 0 || nread == -1;
+#    endif
+    }
+#endif
 
 } // end anonymous namespace
 
@@ -338,20 +367,25 @@ namespace pstore {
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
 
+
             server_state state{};
+
+            std::thread uptime_thread{uptime, gsl::not_null<bool *> (&state.done)};
+
             while (!state.done) {
                 // Wait for a connection request.
                 sockaddr_in client_addr{}; // client address.
                 auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
                 socket_descriptor childfd{
-                    ::accept (parentfd.get (), reinterpret_cast<struct sockaddr *> (&client_addr),
-                              &clientlen)};
+                    ::accept (parentfd.native_handle (),
+                              reinterpret_cast<struct sockaddr *> (&client_addr), &clientlen)};
                 if (!childfd.valid ()) {
                     log (logging::priority::error, "accept", get_last_error ().message ());
                     continue;
                 }
 
                 // Determine who sent the message.
+                assert (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
                 pstore::error_or<std::string> ename = get_client_name (client_addr);
                 if (!ename) {
                     log (logging::priority::error, "getnameinfo", ename.get_error ().message ());
@@ -388,7 +422,9 @@ namespace pstore {
                     [&](socket_descriptor & io2, header_info const & header_contents) {
                         if (header_contents.connection_upgrade &&
                             header_contents.upgrade_to_websocket) {
-                            return upgrade_to_ws (reader, std::ref (childfd), header_contents) >>=
+
+                            return upgrade_to_ws (reader, std::ref (childfd), request,
+                                                  header_contents) >>=
                                    [&](std::unique_ptr<std::thread> & worker) {
                                        websockets_workers.emplace_back (std::move (worker));
                                        return error_or<server_state> (state);
@@ -414,7 +450,7 @@ namespace pstore {
                 // Scan the HTTP headers.
                 assert (childfd.valid ());
                 error_or<server_state> const eo = read_headers (
-                    reader, childfd,
+                    reader, std::ref (childfd),
                     [](header_info io, std::string const & key, std::string const & value) {
                         return io.handler (key, value);
                     },
@@ -426,7 +462,11 @@ namespace pstore {
                     // Report the error to the user as an HTTP error.
                     report_error (eo.get_error (), request, childfd);
                 }
+
+                assert (input_is_empty (reader, childfd));
             }
+
+            uptime_thread.join ();
 
             for (std::unique_ptr<std::thread> const & worker : websockets_workers) {
                 worker->join ();

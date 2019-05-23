@@ -191,7 +191,7 @@ namespace {
         assert (!is_in_flight_);
         // Close this pipe instance.
         if (pipe_handle_.valid ()) {
-            ::DisconnectNamedPipe (pipe_handle_.get ());
+            ::DisconnectNamedPipe (pipe_handle_.native_handle ());
         }
     }
 
@@ -215,7 +215,7 @@ namespace {
 
     // cancel
     // ~~~~~~
-    void reader::cancel () { ::CancelIoEx (pipe_handle_.get (), &overlap_); }
+    void reader::cancel () { ::CancelIoEx (pipe_handle_.native_handle (), &overlap_); }
 
     // read
     // ~~~~
@@ -232,7 +232,7 @@ namespace {
 
         // Start the read and call read_completed() when it finishes.
         is_in_flight_ =
-            ::ReadFileEx (pipe_handle_.get (), request_.get (),
+            ::ReadFileEx (pipe_handle_.native_handle (), request_.get (),
                           static_cast<DWORD> (sizeof (*request_)), &overlap_, &read_completed);
         DWORD const erc = ::GetLastError ();
         if (erc != ERROR_SUCCESS && erc != ERROR_BROKEN_PIPE && erc != ERROR_IO_PENDING) {
@@ -450,11 +450,11 @@ namespace {
                                                 message_size * 4,         // input buffer size
                                                 default_pipe_timeout,     // client time-out
                                                 nullptr)}; // default security attributes
-        if (pipe.get () == INVALID_HANDLE_VALUE) {
+        if (pipe.native_handle () == INVALID_HANDLE_VALUE) {
             raise (win32_erc (::GetLastError ()), "CreateNamedPipeW");
         }
 
-        auto const pending_io = connect_to_new_client (pipe.get (), overlap);
+        auto const pending_io = connect_to_new_client (pipe.native_handle (), overlap);
         return std::make_pair (std::move (pipe), pending_io);
     }
 
@@ -487,7 +487,7 @@ namespace pstore {
                 unique_handle connect_event = create_event ();
 
                 OVERLAPPED connect{0};
-                connect.hEvent = connect_event.get ();
+                connect.hEvent = connect_event.native_handle ();
 
                 // Create a pipe instance and and wait for a the client to connect.
                 bool pending_io;
@@ -499,7 +499,7 @@ namespace pstore {
                 while (!done) {
                     // Wait for a client to connect, or for a read or write operation to be
                     // completed, which causes a completion routine to be queued for execution.
-                    auto const cause = ::WaitForSingleObjectEx (connect_event.get (),
+                    auto const cause = ::WaitForSingleObjectEx (connect_event.native_handle (),
                                                                 details::timeout_seconds * 1000,
                                                                 true /*alertable wait?*/);
                     switch (cause) {
@@ -508,7 +508,8 @@ namespace pstore {
                         // the result of the connect operation.
                         if (pending_io) {
                             auto bytes_transferred = DWORD{0};
-                            if (!::GetOverlappedResult (pipe.get (), &connect, &bytes_transferred,
+                            if (!::GetOverlappedResult (pipe.native_handle (), &connect,
+                                                        &bytes_transferred,
                                                         false /*do not wait*/)) {
                                 raise (win32_erc (::GetLastError ()), "ConnectNamedPipe");
                             }

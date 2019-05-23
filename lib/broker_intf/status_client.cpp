@@ -141,8 +141,8 @@ namespace {
                 continue;
             }
 
-            if (::connect (sock_fd.get (), p->ai_addr, static_cast<socklen_t> (p->ai_addrlen)) ==
-                socket_descriptor::error) {
+            if (::connect (sock_fd.native_handle (), p->ai_addr,
+                           static_cast<socklen_t> (p->ai_addrlen)) == socket_descriptor::error) {
                 // log_error (std::cerr, pstore::get_last_error (), "connect() returned");
                 continue;
             }

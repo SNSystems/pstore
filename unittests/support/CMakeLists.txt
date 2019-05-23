@@ -54,6 +54,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_make_unique.cpp
     test_maybe.cpp
     test_pointee_adaptor.cpp
+    test_pubsub.cpp
     test_small_vector.cpp
     test_sstring_view.cpp
     test_uint128.cpp

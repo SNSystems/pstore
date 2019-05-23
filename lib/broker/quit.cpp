@@ -124,7 +124,8 @@ namespace {
         if (status_fd.valid ()) {
             char const json[] = "{\"quit\":true}\04";
             log (logging::priority::info, "sending message to status server:", json);
-            if (::send (status_fd.get (), json, static_cast<int> (array_elements (json)) - 1,
+            if (::send (status_fd.native_handle (), json,
+                        static_cast<int> (array_elements (json)) - 1,
                         0 /*flags*/) == broker::socket_descriptor::error) {
                 log (logging::priority::error, "send failed ", broker::get_last_error ());
             }
@@ -284,7 +285,7 @@ namespace {
     void signal_handler (int sig) {
         pstore::broker::exit_code = sig;
         pstore::errno_saver saver;
-        quit_info.notify (sig);
+        quit_info.notify_all (sig);
     }
 
 } // end anonymous namespace
@@ -295,7 +296,7 @@ namespace pstore {
 
         // notify_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        void notify_quit_thread () { quit_info.notify (sig_self_quit); }
+        void notify_quit_thread () { quit_info.notify_all (sig_self_quit); }
 
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~

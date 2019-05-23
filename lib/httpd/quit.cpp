@@ -114,7 +114,7 @@ namespace pstore {
 
             log (logging::priority::info, "Connecting");
 
-            if (::connect (fd.get (), reinterpret_cast<struct sockaddr *> (&sock_addr),
+            if (::connect (fd.native_handle (), reinterpret_cast<struct sockaddr *> (&sock_addr),
                            sizeof (sock_addr)) != 0) {
                 log (logging::priority::error, "Could not connect to localhost");
                 return;

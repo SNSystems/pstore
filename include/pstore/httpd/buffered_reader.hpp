@@ -147,6 +147,9 @@ namespace pstore {
             /// been encountered.
             gets_result_type gets (IO io);
 
+            /// Returns the number of bytes that are held in the reader's buffer.
+            std::size_t available () const;
+
         private:
             void check_invariants () noexcept;
             std::ptrdiff_t pos (gsl::span<std::uint8_t>::iterator const & s) noexcept {
@@ -342,6 +345,18 @@ namespace pstore {
         template <typename IO, typename RefillFunction>
         auto buffered_reader<IO, RefillFunction>::gets (IO io) -> gets_result_type {
             return this->gets_impl (io, std::string{});
+        }
+
+        // available
+        // ~~~~~~~~~
+        template <typename IO, typename RefillFunction>
+        std::size_t buffered_reader<IO, RefillFunction>::available () const {
+            auto result = std::distance (pos_, end_);
+            assert (result >= 0);
+            if (push_) {
+                ++result;
+            }
+            return static_cast<std::size_t> (result);
         }
 
         // check_invariants

@@ -177,7 +177,7 @@ namespace pstore {
         // ~~~~~~~~~~~~
         /// \note This function is called from a signal handler so muyst restrict itself to
         /// signal-safe functions.
-        void gc_watch_thread::child_signal (int sig) noexcept { cv_.notify (sig); }
+        void gc_watch_thread::child_signal (int sig) noexcept { cv_.notify_all (sig); }
 
     } // namespace broker
 } // namespace pstore

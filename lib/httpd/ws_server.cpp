@@ -95,23 +95,23 @@ namespace pstore {
 
         bool is_valid_close_status_code (std::uint16_t code) {
             switch (static_cast<close_status_code> (code)) {
-            case close_status_code::normal:
             case close_status_code::going_away:
-            case close_status_code::protocol_error:
-            case close_status_code::unsupported_data:
-            case close_status_code::invalid_payload:
-            case close_status_code::policy_violation:
-            case close_status_code::message_too_big:
-            case close_status_code::mandatory_ext:
             case close_status_code::internal_error:
-            case close_status_code::service_restart:
-            case close_status_code::try_again:
-            case close_status_code::invalid_response:
-            case close_status_code::tls_handshake: return true;
+            case close_status_code::invalid_payload:
+            case close_status_code::mandatory_ext:
+            case close_status_code::message_too_big:
+            case close_status_code::normal:
+            case close_status_code::policy_violation:
+            case close_status_code::protocol_error:
+            case close_status_code::unsupported_data: return true;
 
-            case close_status_code::reserved:
+            case close_status_code::abnormal_closure:
+            case close_status_code::invalid_response:
             case close_status_code::no_status_rcvd:
-            case close_status_code::abnormal_closure: return false;
+            case close_status_code::reserved:
+            case close_status_code::service_restart:
+            case close_status_code::tls_handshake:
+            case close_status_code::try_again: return false;
             }
 
             if (code >= 3000 && code < 5000) {

@@ -113,7 +113,7 @@ namespace {
     /// A signal handler entry point.
     void signal_handler (int sig) {
         pstore::errno_saver saver;
-        quit_info.notify (sig);
+        quit_info.notify_all (sig);
     }
 
 } // namespace
@@ -122,7 +122,7 @@ namespace {
 // notify_quit_thread
 // ~~~~~~~~~~~~~~~~~~
 void notify_quit_thread () {
-    quit_info.notify (-1);
+    quit_info.notify_all (-1);
 }
 
 // create_quit_thread

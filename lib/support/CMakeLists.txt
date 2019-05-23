@@ -264,6 +264,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/process_file_name.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/rotating_log.hpp"

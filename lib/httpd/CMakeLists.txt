@@ -45,6 +45,7 @@ include (add_pstore)
 
 set (PSTORE_HTTPD_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/httpd")
 set (PSTORE_HTTPD_LIB_SRC
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/block_for_input.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/endian.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/error.hpp"
@@ -59,8 +60,9 @@ set (PSTORE_HTTPD_LIB_SRC
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_dynamic_content.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_static_content.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/uptime.hpp"
     "${PSTORE_HTTPD_PUBLIC_INCLUDE}/ws_server.hpp"
+    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
 
     error.cpp
     headers.cpp
@@ -69,12 +71,14 @@ set (PSTORE_HTTPD_LIB_SRC
     net_txrx.cpp
     quit.cpp
     server.cpp
-    wskey.cpp
+    uptime.cpp
     ws_server.cpp
+    wskey.cpp
 )
 add_pstore_library (pstore-httpd-lib ${PSTORE_HTTPD_LIB_SRC})
 target_link_libraries (pstore-httpd-lib PUBLIC
     pstore-broker-intf
+    pstore-json-lib
     pstore-romfs
     pstore-support
 )
