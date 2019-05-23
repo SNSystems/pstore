@@ -539,7 +539,7 @@ namespace pstore {
                 } else {
                     send_close_frame (sender, io, close_status_code::abnormal_closure);
                 }
-                return {std::move (io), true};
+                return std::tuple<IO, bool>{std::move (io), true};
             }
 
             io = std::get<0> (eo);
@@ -549,19 +549,19 @@ namespace pstore {
             // NOT be fragmented."
             if (is_control_frame_opcode (wsp.op) && (!wsp.fin || wsp.payload.size () > 125)) {
                 send_close_frame (sender, io, close_status_code::protocol_error);
-                return {std::move (io), true};
+                return std::tuple<IO, bool>{std::move (io), true};
             }
 
             switch (wsp.op) {
             case opcode::continuation:
                 if (is_control_frame_opcode (command->op)) {
                     send_close_frame (sender, io, close_status_code::protocol_error);
-                    return {std::move (io), true};
+                    return std::tuple<IO, bool>{std::move (io), true};
                 }
                 command->payload.insert (std::end (command->payload), std::begin (wsp.payload),
                                          std::end (wsp.payload));
                 if (!check_message_complete (sender, io, wsp, command->op, command->payload)) {
-                    return {std::move (io), true};
+                    return std::tuple<IO, bool>{std::move (io), true};
                 }
                 break;
 
@@ -571,13 +571,13 @@ namespace pstore {
                 // We didn't see a FIN frame before a new data frame.
                 if (command->op != opcode::unknown || !command->payload.empty ()) {
                     send_close_frame (sender, io, close_status_code::protocol_error);
-                    return {std::move (io), true};
+                    return std::tuple<IO, bool>{std::move (io), true};
                 }
 
                 command->payload = std::move (wsp.payload);
                 command->op = wsp.op;
                 if (!check_message_complete (sender, io, wsp, command->op, command->payload)) {
-                    return {std::move (io), true};
+                    return std::tuple<IO, bool>{std::move (io), true};
                 }
                 break;
 
@@ -592,9 +592,11 @@ namespace pstore {
             case opcode::reserved_control_4:
             case opcode::reserved_control_5:
                 send_close_frame (sender, io, close_status_code::protocol_error);
-                return {std::move (io), true};
+                return std::tuple<IO, bool>{std::move (io), true};
 
-            case opcode::close: close_message (sender, io, wsp); return {std::move (io), true};
+            case opcode::close:
+                close_message (sender, io, wsp);
+                return std::tuple<IO, bool>{std::move (io), true};
 
             case opcode::ping: pong (sender, io, gsl::make_span (wsp.payload)); break;
 
@@ -604,7 +606,7 @@ namespace pstore {
 
             case opcode::unknown: assert (0); break;
             }
-            return {std::move (io), false};
+            return std::tuple<IO, bool>{std::move (io), false};
         }
 
         // ws_server_loop
