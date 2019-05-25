@@ -100,11 +100,36 @@ namespace pstore {
                 "<body><h1>pstore-httpd Exiting</h1></body>\n"
                 "</html>\n";
             std::ostringstream os;
-            os << "HTTP/1.1 200 OK\nServer: pstore-httpd" << crlf
-               << "Content-length: " << pstore::array_elements (quit_message) - 1U << crlf
-               << "Content-type: text/plain" << crlf << crlf << quit_message;
+            os << "HTTP/1.1 200 OK" << crlf                                                //
+               << "Connection: close" << crlf                                              //
+               << "Content-length: " << pstore::array_elements (quit_message) - 1U << crlf //
+               << "Content-type: text/html" << crlf                                        //
+               << "Server: pstore-httpd" << crlf                                           //
+               << crlf // End of headers
+               << quit_message;
             return pstore::httpd::send (sender, io, os.str ()) >>= fix_return_type;
         }
+
+
+        template <typename Sender, typename IO>
+        command_return_type<IO> handle_version (Sender sender, IO io, server_state state,
+                                                query_container const & query) {
+            std::string const version =
+                "{ \"version\": \"0.1\" }"; // TODO: compute a proper version string.
+
+            std::ostringstream os;
+            os << "HTTP/1.1 200 OK" << crlf                       //
+               << "Connection: close" << crlf                     //
+               << "Content-length: " << version.length () << crlf //
+               << "Content-type: application/json" << crlf        //
+               << "Server: pstore-httpd" << crlf                  //
+               << crlf                                            // End of headers
+               << version;
+            auto fix_return_type = [&state](IO io2) {
+                return command_return_type<IO>{in_place, io2, state};
+            };
+            return pstore::httpd::send (sender, io, os.str ()) >>= fix_return_type;
+        };
 
 
         namespace details {
@@ -142,7 +167,9 @@ namespace pstore {
             template <typename Sender, typename IO>
             typename commands_helper<Sender, IO>::container const & get_commands () {
                 static typename commands_helper<Sender, IO>::container const commands = {
-                    {"quit", handle_quit<Sender, IO>}};
+                    {"quit", handle_quit<Sender, IO>},
+                    {"version", handle_version<Sender, IO>},
+                };
                 return commands;
             }
 
