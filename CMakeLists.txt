@@ -157,11 +157,14 @@ if (PSTORE_IS_INSIDE_LLVM)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 
-add_subdirectory (3rd_party)
 
-# Add a target to the build which will install the pstore components.
-include (add_pstore)
-add_pstore_install_target (install-pstore COMPONENT pstore)
+# A custom target from which the installs will hang.
+add_custom_target (install-pstore)
+set_target_properties (install-pstore PROPERTIES FOLDER "pstore install")
+
+
+
+add_subdirectory (3rd_party)
 
 include (clang_tidy)
 pstore_add_tidy_all_target ()
@@ -206,6 +209,10 @@ else ()
     write_lit_config ("${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 endif ()
 
+
+
+
+
 ##############
 # Add a custom target for running the system tests.
 
@@ -241,30 +248,21 @@ add_custom_target (pstore-system-tests
 )
 set_target_properties (pstore-system-tests PROPERTIES FOLDER "pstore tests")
 
+add_dependencies (pstore-system-tests
+    pstore-broker-poker
+    pstore-dump
+    pstore-hamt-test
+    pstore-mangle
+    pstore-read
+    pstore-sieve
+    pstore-vacuumd
+    pstore-write
+)
 if (PSTORE_ENABLE_BROKER)
-    add_dependencies (pstore-system-tests
-        pstore-broker-poker
-        pstore-brokerd
-        pstore-dump
-        pstore-hamt-test
-        pstore-mangle
-        pstore-read
-        pstore-sieve
-        pstore-vacuumd
-        pstore-write
-    )
-else ()
-    add_dependencies (pstore-system-tests
-        pstore-broker-poker
-        pstore-dump
-        pstore-hamt-test
-        pstore-mangle
-        pstore-read
-        pstore-sieve
-        pstore-vacuumd
-        pstore-write
-    )
-endif ()
+    add_dependencies (pstore-system-tests pstore-brokerd)
+endif (PSTORE_ENABLE_BROKER)
+
+
 
 if (PSTORE_EXAMPLES)
    set_target_properties (pstore-examples PROPERTIES FOLDER "pstore examples")

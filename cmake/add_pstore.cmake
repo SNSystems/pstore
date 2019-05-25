@@ -311,13 +311,15 @@ function (add_pstore_install_target target)
         set (prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
     endif ()
 
+
     add_custom_target (${target}
-                       DEPENDS ${ARG_DEPENDS}
-                       COMMAND "${CMAKE_COMMAND}"
-                               ${component_option}
-                               ${prefix_option}
-                               -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-                       USES_TERMINAL)
+        DEPENDS ${ARG_DEPENDS}
+        COMMAND "${CMAKE_COMMAND}"
+                ${component_option}
+                ${prefix_option}
+                -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+        USES_TERMINAL
+    )
     set_target_properties ("${target}" PROPERTIES FOLDER "pstore install")
 endfunction (add_pstore_install_target)
 
@@ -339,7 +341,7 @@ function (add_pstore_tool name)
     add_pstore_install_target (install-${name}
                                DEPENDS ${name}
                                COMPONENT pstore)
-    add_dependencies (install-pstore install-${name})
+    add_dependencies (install-pstore ${name})
 endfunction (add_pstore_tool)
 
 
