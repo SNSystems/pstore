@@ -266,7 +266,7 @@ function (add_pstore_library target_name)
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
-endfunction(add_pstore_library)
+endfunction (add_pstore_library)
 
 
 #######################
@@ -295,14 +295,14 @@ function (add_pstore_executable target_name)
     if (MSVC)
         set_target_properties ("${target_name}" PROPERTIES LINK_FLAGS "setargv.obj")
     endif ()
-endfunction(add_pstore_executable)
+endfunction (add_pstore_executable)
 
 
 ###########################
 # add_pstore_install_target
 ###########################
 
-function(add_pstore_install_target target)
+function (add_pstore_install_target target)
     cmake_parse_arguments (ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
     if (ARG_COMPONENT)
         set (component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
@@ -318,7 +318,8 @@ function(add_pstore_install_target target)
                                ${prefix_option}
                                -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
                        USES_TERMINAL)
-endfunction(add_pstore_install_target)
+    set_target_properties ("${target}" PROPERTIES FOLDER "pstore install")
+endfunction (add_pstore_install_target)
 
 
 #################
@@ -329,7 +330,6 @@ endfunction(add_pstore_install_target)
 # that is to be installed.
 
 function (add_pstore_tool name)
-
     add_pstore_executable (${name} ${ARGN})
 
     install (TARGETS ${name}
@@ -339,9 +339,7 @@ function (add_pstore_tool name)
     add_pstore_install_target (install-${name}
                                DEPENDS ${name}
                                COMPONENT pstore)
-
-    set_target_properties ("install-${name}" PROPERTIES FOLDER "pstore install")
-
+    add_dependencies (install-pstore install-${name})
 endfunction (add_pstore_tool)
 
 
