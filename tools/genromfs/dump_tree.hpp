@@ -45,9 +45,7 @@
 #define PSTORE_GENROMFS_DUMP_TREE_HPP
 
 #include <iosfwd>
-#include <string>
 #include <unordered_set>
-#include <vector>
 
 #include "./directory_entry.hpp"
 

@@ -41,11 +41,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
 #ifndef PSTORE_GENROMFS_SCAN_HPP
 #define PSTORE_GENROMFS_SCAN_HPP
 
 #include <string>
+
 #include "directory_entry.hpp"
 
 unsigned scan (directory_container & directory, std::string const & path, unsigned count);
