@@ -179,12 +179,22 @@ namespace pstore {
 
         value_ptr make_value (repo::linkage_type t) {
 #define X(a)                                                                                       \
-    case (repo::linkage_type::a): Name = #a; break;
+    case (repo::linkage_type::a): name = #a; break;
 
-            char const * Name = "*unknown*";
+            char const * name = "*unknown*";
             switch (t) { PSTORE_REPO_LINKAGE_TYPES }
-            return make_value (Name);
+            return make_value (name);
 #undef X
+        }
+
+        value_ptr make_value (repo::visibility_type v) {
+            char const * name = "*unknown*";
+            switch (v) {
+            case repo::visibility_type::default_visibility: name = "default"; break;
+            case repo::visibility_type::hidden_visibility: name = "hidden"; break;
+            case repo::visibility_type::protected_visibility: name = "protected"; break;
+            }
+            return make_value (name);
         }
 
         value_ptr make_value (database const & db, repo::compilation_member const & member) {
@@ -195,6 +205,7 @@ namespace pstore {
                 {"fext", make_value (member.fext)},
                 {"name", make_value (indirect_string::read (db, member.name))},
                 {"linkage", make_value (member.linkage)},
+                {"visibility", make_value (member.visibility)},
             });
         }
 

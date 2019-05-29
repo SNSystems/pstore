@@ -84,8 +84,9 @@ TEST_F (CompilationTest, SingleMember) {
         pstore::typed_address<pstore::repo::fragment>::make (3), 5U);
     constexpr auto name = indirect_string_address (32U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
+    constexpr auto visibility = pstore::repo::visibility_type::protected_visibility;
 
-    compilation_member sm{digest, extent, name, linkage};
+    compilation_member sm{digest, extent, name, linkage, visibility};
 
     std::vector<compilation_member> v{sm};
     compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
@@ -101,6 +102,7 @@ TEST_F (CompilationTest, SingleMember) {
     EXPECT_EQ (extent, (*t)[0].fext);
     EXPECT_EQ (name, (*t)[0].name);
     EXPECT_EQ (linkage, (*t)[0].linkage);
+    EXPECT_EQ (visibility, (*t)[0].visibility);
 }
 
 TEST_F (CompilationTest, MultipleMembers) {
@@ -114,9 +116,10 @@ TEST_F (CompilationTest, MultipleMembers) {
         pstore::typed_address<pstore::repo::fragment>::make (2), 2U);
     constexpr auto name = indirect_string_address (16U);
     constexpr auto linkage = pstore::repo::linkage_type::external;
+    constexpr auto visibility = pstore::repo::visibility_type::default_visibility;
 
-    compilation_member mm1{digest1, extent1, name, linkage};
-    compilation_member mm2{digest2, extent2, name + 24U, linkage};
+    compilation_member mm1{digest1, extent1, name, linkage, visibility};
+    compilation_member mm2{digest2, extent2, name + 24U, linkage, visibility};
 
     std::vector<compilation_member> v{mm1, mm2};
     compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
@@ -128,5 +131,6 @@ TEST_F (CompilationTest, MultipleMembers) {
     EXPECT_EQ (128U, t->size_bytes ());
     for (auto const & m : *t) {
         EXPECT_EQ (linkage, m.linkage);
+        EXPECT_EQ (visibility, m.visibility);
     }
 }
