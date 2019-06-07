@@ -48,11 +48,6 @@
 #include <condition_variable>
 #include <memory>
 #include <mutex>
-#ifdef _WIN32
-using in_port_t = unsigned short; // FIXME: multiple definitions of this type.
-#else
-#    include <netinet/in.h>
-#endif
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/support/maybe.hpp"

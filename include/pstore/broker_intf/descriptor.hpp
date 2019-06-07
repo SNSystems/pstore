@@ -49,11 +49,14 @@
 #include <ostream>
 
 #ifndef _WIN32
+#    include <netinet/in.h>
 #    include <unistd.h>
 #else
 #    include <io.h>
 #    include <Winsock2.h>
+using in_port_t = unsigned short;
 #endif
+
 
 namespace pstore {
     namespace broker {

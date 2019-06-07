@@ -50,16 +50,16 @@
 #    include <signal.h>
 #endif
 
-#include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
-
+#include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/cmd_util/cl/command_line.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
-#include "pstore/httpd/server.hpp"
 #include "pstore/httpd/net_txrx.hpp"
+#include "pstore/httpd/server.hpp"
+#include "pstore/httpd/server_status.hpp"
 #include "pstore/httpd/ws_server.hpp"
-#include "pstore/support/logging.hpp"
 #include "pstore/romfs/romfs.hpp"
+#include "pstore/support/logging.hpp"
 
 extern pstore::romfs::romfs fs;
 
@@ -96,13 +96,13 @@ int main (int argc, char * argv[]) {
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);
         pstore::logging::create_log_stream (ident);
+        pstore::httpd::server_status status{port};
 
-        std::thread ([]() {
+        std::thread ([&status]() {
             static constexpr auto name = "http";
             pstore::threads::set_name (name);
             pstore::logging::create_log_stream (name);
-
-            pstore::httpd::server (port, fs);
+            pstore::httpd::server (fs, &status, pstore::httpd::channel_container{});
         }).join ();
     }
     // clang-format off

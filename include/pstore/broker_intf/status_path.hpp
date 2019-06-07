@@ -48,12 +48,12 @@
 #include <string>
 
 #ifndef _WIN32
-#include <cerrno>
-#include <netinet/in.h>
+#    include <cerrno>
 #else
-#include <Winsock2.h>
-using in_port_t = unsigned short;
+#    include <Winsock2.h>
 #endif
+
+#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
 
 namespace pstore {
     namespace broker {

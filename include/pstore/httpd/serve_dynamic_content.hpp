@@ -53,15 +53,19 @@
 #include <cassert>
 #include <functional>
 #include <limits>
+#include <sstream>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 
+#include "pstore/core/file_header.hpp"
 #include "pstore/httpd/error.hpp"
+#include "pstore/httpd/http_date.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
 #include "pstore/httpd/quit.hpp"
 #include "pstore/httpd/send.hpp"
+#include "pstore/json/utility.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error_or.hpp"
 
@@ -70,66 +74,33 @@ namespace pstore {
 
         constexpr char dynamic_path[] = "/cmd/";
 
-        struct server_state {
-            bool done = false;
-        };
-
-        template <typename IO>
-        using command_return_type = pstore::error_or<std::pair<IO, server_state>>;
-
         using query_container = std::unordered_map<std::string, std::string>;
 
         template <typename Sender, typename IO>
-        command_return_type<IO> handle_quit (Sender sender, IO io, server_state state,
-                                             query_container const & query) {
-            auto fix_return_type = [&state](IO io2) {
-                return command_return_type<IO>{in_place, io2, state};
+        pstore::error_or<IO> handle_version (Sender sender, IO io, query_container const &) {
+            auto version_string = []() {
+                std::ostringstream os;
+                os << "{ \"version\": \"" << header::major_version << '.' << header::minor_version
+                   << "\" }";
+                auto const & v = os.str ();
+                assert (json::is_valid (v));
+                return v;
             };
+            static std::string const version = version_string ();
+            static auto const modified = std::chrono::system_clock::now ();
 
-            auto const pos = query.find ("magic");
-            if (pos == std::end (query) || pos->second != pstore::httpd::get_quit_magic ()) {
-                return command_return_type<IO>{error_code::bad_request};
-            }
-
-            state.done = true;
-
-            static constexpr char quit_message[] =
-                "<!DOCTYPE html>\n"
-                "<html>\n"
-                "<head><title>pstore-httpd Exiting</title></head>\n"
-                "<body><h1>pstore-httpd Exiting</h1></body>\n"
-                "</html>\n";
             std::ostringstream os;
-            os << "HTTP/1.1 200 OK" << crlf                                                //
-               << "Connection: close" << crlf                                              //
-               << "Content-length: " << pstore::array_elements (quit_message) - 1U << crlf //
-               << "Content-type: text/html" << crlf                                        //
-               << "Server: pstore-httpd" << crlf                                           //
+            os << "HTTP/1.1 200 OK" << crlf                                         //
+               << "Connection: close" << crlf                                       //
+               << "Content-length: " << version.length () << crlf                   //
+               << "Content-type: application/json" << crlf                          //
+               << "Date: " << http_date (std::chrono::system_clock::now ()) << crlf //
+               << "Last-Modified: " << http_date (modified) << crlf                 //
+               << "Server: pstore-httpd" << crlf                                    //
                << crlf // End of headers
-               << quit_message;
-            return pstore::httpd::send (sender, io, os.str ()) >>= fix_return_type;
-        }
-
-
-        template <typename Sender, typename IO>
-        command_return_type<IO> handle_version (Sender sender, IO io, server_state state,
-                                                query_container const & query) {
-            std::string const version =
-                "{ \"version\": \"0.1\" }"; // TODO: compute a proper version string.
-
-            std::ostringstream os;
-            os << "HTTP/1.1 200 OK" << crlf                       //
-               << "Connection: close" << crlf                     //
-               << "Content-length: " << version.length () << crlf //
-               << "Content-type: application/json" << crlf        //
-               << "Server: pstore-httpd" << crlf                  //
-               << crlf                                            // End of headers
                << version;
-            auto fix_return_type = [&state](IO io2) {
-                return command_return_type<IO>{in_place, io2, state};
-            };
-            return pstore::httpd::send (sender, io, os.str ()) >>= fix_return_type;
-        };
+            return pstore::httpd::send (sender, io, os.str ());
+        }
 
 
         namespace details {
@@ -155,9 +126,9 @@ namespace pstore {
 
             template <typename Sender, typename IO>
             struct commands_helper {
-                using return_type = command_return_type<IO>;
+                using return_type = pstore::error_or<IO>;
                 using function_type =
-                    std::function<return_type (Sender, IO, server_state, query_container const &)>;
+                    std::function<return_type (Sender, IO, query_container const &)>;
 
                 // TODO: using unordered_map<> is lazy. The commands are known at compile-time so a
                 // pre-sorted std::array<> which we can binary-chop would suffice.
@@ -167,7 +138,6 @@ namespace pstore {
             template <typename Sender, typename IO>
             typename commands_helper<Sender, IO>::container const & get_commands () {
                 static typename commands_helper<Sender, IO>::container const commands = {
-                    {"quit", handle_quit<Sender, IO>},
                     {"version", handle_version<Sender, IO>},
                 };
                 return commands;
@@ -177,9 +147,7 @@ namespace pstore {
 
 
         template <typename Sender, typename IO>
-        error_or<std::pair<IO, server_state>>
-        serve_dynamic_content (Sender sender, IO io, std::string uri, server_state state) {
-            using return_type = error_or<std::pair<IO, server_state>>;
+        error_or<IO> serve_dynamic_content (Sender sender, IO io, std::string uri) {
 
             // Remove the common path prefix from the URI.
             assert (details::starts_with (uri, dynamic_path));
@@ -202,11 +170,11 @@ namespace pstore {
             auto const & commands = details::get_commands<Sender, IO> ();
             auto command_it = commands.find (uri.substr (0, pos));
             if (command_it == std::end (commands)) {
-                return return_type{error_code::bad_request};
+                return error_or<IO>{error_code::bad_request};
             }
 
             // Yep, this is a command we understand. Call it.
-            return command_it->second (sender, io, state, arguments);
+            return command_it->second (sender, io, arguments);
         }
 
     } // end namespace httpd

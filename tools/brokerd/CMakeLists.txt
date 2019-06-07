@@ -61,10 +61,13 @@ else ()
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
+    set (pstore_httpd_fs_source "${CMAKE_CURRENT_BINARY_DIR}/fs.cpp")
+
     add_pstore_tool (pstore-brokerd
         main.cpp
         switches.hpp
         switches.cpp
+        "${pstore_httpd_fs_source}"
     )
 
     set (LLVM_REQUIRES_EH ${old_llvm_requires_eh})
@@ -80,6 +83,16 @@ else ()
 
     add_clang_tidy_target (pstore-broker)
     run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
+
+    # Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
+    add_custom_command (
+        COMMENT "genromfs from ${CMAKE_CURRENT_SOURCE_DIR}/html to ${pstore_httpd_fs_source}"
+        COMMAND pstore-genromfs --var fs "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_httpd_fs_source}"
+        OUTPUT "${pstore_httpd_fs_source}"
+        DEPENDS pstore-genromfs
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+        VERBATIM
+    )
 
 
     #######################

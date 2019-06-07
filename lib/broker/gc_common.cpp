@@ -70,8 +70,7 @@ namespace pstore {
                 logging::log (logging::priority::info, "Starting GC process for ",
                               logging::quoted{db_path.c_str ()});
                 auto const exe_path = vacuumd_path ();
-                std::array<char const *, 4> argv = {
-                    {exe_path.c_str (), "--daemon", db_path.c_str (), nullptr}};
+                std::array<char const *, 3> argv = {{exe_path.c_str (), db_path.c_str (), nullptr}};
                 auto child_identifier = spawn (exe_path.c_str (), argv.data ());
                 processes_.set (db_path, child_identifier);
 

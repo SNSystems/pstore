@@ -45,18 +45,19 @@
 #ifndef PSTORE_HTTPD_SERVER_HPP
 #define PSTORE_HTTPD_SERVER_HPP
 
-#ifdef _WIN32
-using in_port_t = unsigned short;
-#else
-#    include <netinet/in.h>
-#endif
-
+#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
+#include "pstore/httpd/ws_server.hpp"
 #include "pstore/romfs/romfs.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {
 
-        int server (in_port_t port_number, romfs::romfs & file_system);
+        class server_status;
+
+        int server (romfs::romfs & file_system, gsl::not_null<server_status *> status,
+                    channel_container const & channels);
+
         void quit (in_port_t port_number = 8080);
 
     } // end namespace httpd

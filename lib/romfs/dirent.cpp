@@ -48,7 +48,7 @@
 #include "pstore/romfs/romfs.hpp"
 
 auto pstore::romfs::dirent::opendir () const -> error_or<class directory const * PSTORE_NONNULL> {
-    if (!is_directory () || stat_.st_size != sizeof (directory const *)) {
+    if (!is_directory () || stat_.size != sizeof (directory const *)) {
         return error_or<directory const *> (make_error_code (error_code::enotdir));
     }
     return error_or<directory const *> (reinterpret_cast<directory const *> (contents_));

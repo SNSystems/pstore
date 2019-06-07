@@ -79,7 +79,7 @@
 #include "pstore/httpd/send.hpp"
 #include "pstore/httpd/serve_dynamic_content.hpp"
 #include "pstore/httpd/serve_static_content.hpp"
-#include "pstore/httpd/uptime.hpp"
+#include "pstore/httpd/server_status.hpp"
 #include "pstore/httpd/ws_server.hpp"
 #include "pstore/httpd/wskey.hpp"
 #include "pstore/support/logging.hpp"
@@ -220,9 +220,10 @@ namespace {
                 // Required) and a |Sec-WebSocket-Version| header field indicating the version(s)
                 // the server is capable of understanding."
                 std::ostringstream os;
-                os << "HTTP/1.1 426 OK" << crlf
+                os << "HTTP/1.1 426 OK" << crlf //
                    << "Sec-WebSocket-Version: " << pstore::httpd::ws_version << crlf
-                   << "Server: pstore-httpd" << crlf << crlf;
+                   << "Server: pstore-httpd" << crlf //
+                   << crlf;
                 std::string const & reply = os.str ();
                 sender (socket, as_bytes (pstore::gsl::make_span (reply)));
             }
@@ -247,10 +248,12 @@ namespace {
         report (501, message.str ().c_str ());
     }
 
+
     template <typename Reader, typename IO>
     pstore::error_or<std::unique_ptr<std::thread>>
     upgrade_to_ws (Reader & reader, IO io, pstore::httpd::request_info const & request,
-                   pstore::httpd::header_info const & header_contents) {
+                   pstore::httpd::header_info const & header_contents,
+                   pstore::httpd::channel_container const & channels) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
         using pstore::logging::priority;
         assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
@@ -291,8 +294,8 @@ namespace {
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
-        auto server_loop_thread = [](Reader && reader2, socket_descriptor io2,
-                                     std::string const uri) {
+        auto server_loop_thread = [&channels](Reader && reader2, socket_descriptor io2,
+                                              std::string const uri) {
             PSTORE_TRY {
                 constexpr auto ident = "websocket";
                 pstore::threads::set_name (ident);
@@ -302,7 +305,7 @@ namespace {
 
                 assert (io2.valid ());
                 ws_server_loop (std::move (reader2), pstore::httpd::net::network_sender,
-                                std::ref (io2), uri);
+                                std::ref (io2), uri, channels);
 
                 log (priority::info, "Ended WebSockets session");
             }
@@ -354,9 +357,17 @@ namespace {
 namespace pstore {
     namespace httpd {
 
-        int server (in_port_t port_number, romfs::romfs & file_system) {
-            log (logging::priority::info, "initializing on port: ", port_number);
-            pstore::error_or<socket_descriptor> eparentfd = initialize_socket (port_number);
+        server_status::server_status (in_port_t port_)
+                : state{http_state::initializing}
+                , port{port_} {}
+
+        void server_status::shutdown () noexcept { state = http_state::closing; }
+
+
+        int server (romfs::romfs & file_system, gsl::not_null<server_status *> status,
+                    channel_container const & channels) {
+            log (logging::priority::info, "initializing on port: ", status->port);
+            pstore::error_or<socket_descriptor> eparentfd = initialize_socket (status->port);
             if (!eparentfd) {
                 log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
                 return 0;
@@ -367,12 +378,10 @@ namespace pstore {
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
 
+            auto expected = server_status::http_state::initializing;
+            while (status->state.compare_exchange_strong (expected,
+                                                          server_status::http_state::listening)) {
 
-            server_state state{};
-
-            std::thread uptime_thread{uptime, gsl::not_null<bool *> (&state.done)};
-
-            while (!state.done) {
                 // Wait for a connection request.
                 sockaddr_in client_addr{}; // client address.
                 auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
@@ -419,54 +428,47 @@ namespace pstore {
 
                 // Respond appropriately based on the request and headers.
                 auto const serve_reply =
-                    [&](socket_descriptor & io2, header_info const & header_contents) {
-                        if (header_contents.connection_upgrade &&
-                            header_contents.upgrade_to_websocket) {
+                    [&](socket_descriptor & io2,
+                        header_info const & header_contents) -> std::error_code {
+                    if (header_contents.connection_upgrade &&
+                        header_contents.upgrade_to_websocket) {
 
-                            return upgrade_to_ws (reader, std::ref (childfd), request,
-                                                  header_contents) >>=
-                                   [&](std::unique_ptr<std::thread> & worker) {
-                                       websockets_workers.emplace_back (std::move (worker));
-                                       return error_or<server_state> (state);
-                                   };
+                        pstore::error_or<std::unique_ptr<std::thread>> p = upgrade_to_ws (
+                            reader, std::ref (childfd), request, header_contents, channels);
+                        if (p) {
+                            websockets_workers.emplace_back (std::move (*p));
                         }
+                        return p.get_error ();
+                    }
 
-                        if (!details::starts_with (request.uri (), dynamic_path)) {
-                            return serve_static_content (pstore::httpd::net::network_sender,
-                                                         std::ref (io2), request.uri (),
-                                                         file_system) >>=
-                                   [&state](socket_descriptor &) {
-                                       return error_or<server_state> (state);
-                                   };
-                        }
+                    if (!details::starts_with (request.uri (), dynamic_path)) {
+                        return serve_static_content (pstore::httpd::net::network_sender,
+                                                     std::ref (io2), request.uri (), file_system)
+                            .get_error ();
+                    }
 
-                        return serve_dynamic_content (pstore::httpd::net::network_sender,
-                                                      std::ref (io2), request.uri (), state) >>=
-                               [&state](std::pair<socket_descriptor &, server_state> const & p) {
-                                   return error_or<server_state> (std::get<1> (p));
-                               };
-                    };
+                    return serve_dynamic_content (pstore::httpd::net::network_sender,
+                                                  std::ref (io2), request.uri ())
+                        .get_error ();
+                };
 
                 // Scan the HTTP headers.
                 assert (childfd.valid ());
-                error_or<server_state> const eo = read_headers (
+                std::error_code const err = read_headers (
                     reader, std::ref (childfd),
                     [](header_info io, std::string const & key, std::string const & value) {
                         return io.handler (key, value);
                     },
                     header_info ()) >>= serve_reply;
 
-                if (eo) {
-                    state = *eo;
-                } else {
+                if (err) {
                     // Report the error to the user as an HTTP error.
-                    report_error (eo.get_error (), request, childfd);
+                    report_error (err, request, childfd);
                 }
 
                 assert (input_is_empty (reader, childfd));
+                expected = server_status::http_state::listening;
             }
-
-            uptime_thread.join ();
 
             for (std::unique_ptr<std::thread> const & worker : websockets_workers) {
                 worker->join ();

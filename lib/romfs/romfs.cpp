@@ -144,7 +144,7 @@ namespace pstore {
                 return 0;
             }
             auto const file_size =
-                std::make_unsigned<off_t>::type (std::max (dir_.stat ().st_size, std::size_t{0}));
+                std::make_unsigned<off_t>::type (std::max (dir_.stat ().size, std::size_t{0}));
             auto num_read = std::size_t{0};
             auto start = reinterpret_cast<std::uint8_t const *> (dir_.contents ()) + pos_;
             for (; num_read < count; ++num_read) {
@@ -167,7 +167,7 @@ namespace pstore {
             };
             using uoff_type = std::make_unsigned<off_t>::type;
             std::size_t new_pos;
-            std::size_t const file_size = dir_.stat ().st_size;
+            std::size_t const file_size = dir_.stat ().size;
             switch (whence) {
             case SEEK_SET:
                 if (offset < 0) {

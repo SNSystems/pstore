@@ -58,6 +58,20 @@ add_pstore_library (pstore-romfs ${PSTORE_ROMFS_LIB_SRC})
 add_clang_tidy_target (pstore-romfs)
 target_link_libraries (pstore-romfs PUBLIC pstore-support)
 
+if (NOT PSTORE_EXCEPTIONS)
+    set (LLVM_REQUIRES_EH Yes)
+    set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
+
+    add_pstore_library (pstore-romfs-ex ${PSTORE_ROMFS_LIB_SRC})
+
+    set (LLVM_REQUIRES_EH No)
+    set (LLVM_REQUIRES_RTTI No)
+    set (PSTORE_EXCEPTIONS No)
+
+    target_link_libraries (pstore-httpd-lib-ex PUBLIC pstore-support-ex)
+endif ()
+
 if (PSTORE_BITCODE)
     add_pstore_library (pstore-romfs-bc STATIC ${PSTORE_ROMFS_LIB_SRC})
     target_compile_options (pstore-romfs-bc PRIVATE

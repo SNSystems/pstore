@@ -1,10 +1,10 @@
-//*              *
-//*   __ _  ___  *
-//*  / _` |/ __| *
-//* | (_| | (__  *
-//*  \__, |\___| *
-//*  |___/       *
-//===- include/pstore/broker/gc.hpp ---------------------------------------===//
+//*              _   _                 *
+//*  _   _ _ __ | |_(_)_ __ ___   ___  *
+//* | | | | '_ \| __| | '_ ` _ \ / _ \ *
+//* | |_| | |_) | |_| | | | | | |  __/ *
+//*  \__,_| .__/ \__|_|_| |_| |_|\___| *
+//*       |_|                          *
+//===- lib/broker/uptime.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,60 +41,44 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file gc.hpp
+#include "pstore/broker/uptime.hpp"
 
-#ifndef PSTORE_BROKER_GC_HPP
-#define PSTORE_BROKER_GC_HPP
+#include <sstream>
+#include <thread>
 
-#include <string>
-
-#include "pstore/broker/bimap.hpp"
-#include "pstore/broker/pointer_compare.hpp"
-#include "pstore/broker/spawn.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/json/utility.hpp"
+#include "pstore/support/logging.hpp"
+#include "pstore/support/thread.hpp"
 
 namespace pstore {
     namespace broker {
 
-        class gc_watch_thread {
-        public:
-            void watcher ();
+        descriptor_condition_variable uptime_cv;
+        channel<descriptor_condition_variable> uptime_channel (&uptime_cv);
 
-            void start_vacuum (std::string const & db_path);
+        void uptime (gsl::not_null<std::atomic<bool> *> done) {
+            log (logging::priority::info, "uptime 1 second tick starting");
 
-            /// Called when a shutdown request is received. This method wakes the watcher
-            /// thread and asks all child processes to exit.
-            void stop (int signum = -1);
+            auto seconds = std::uint64_t{0};
+            auto until = std::chrono::system_clock::now ();
+            while (!*done) {
+                until += std::chrono::seconds{1};
+                std::this_thread::sleep_until (until);
+                ++seconds;
 
-#ifndef _WIN32
-            /// POSIX signal handler.
-            void child_signal (int sig) noexcept;
+#if 1
+                uptime_channel.publish ([seconds]() {
+                    std::ostringstream os;
+                    os << "{ \"uptime\": " << seconds << " }";
+                    std::string const & str = os.str ();
+                    assert (json::is_valid (str));
+                    return str;
+                });
 #endif
+            }
 
-        private:
-            std::string vacuumd_path ();
-
-// FIXME: get this name from the cmake script. Don't hard-wire it here.
-#ifdef _WIN32
-            static constexpr auto vacuumd_name = "pstore-vacuumd.exe";
-            using process_bimap = bimap<std::string, broker::process_identifier,
-                                        std::less<std::string>, broker::pointer_compare<HANDLE>>;
-#else
-            static constexpr auto vacuumd_name = "pstore-vacuumd";
-            using process_bimap = bimap<std::string, pid_t>;
-#endif
-
-            std::mutex mut_;
-            signal_cv cv_;
-            process_bimap processes_;
-        };
-
-        void start_vacuum (std::string const & path);
-        void gc_sigint (int sig);
-
-        void gc_process_watch_thread ();
+            log (logging::priority::info, "uptime thread exiting");
+        }
 
     } // namespace broker
-} // namespace pstore
-
-#endif // PSTORE_BROKER_GC_HPP
+} // end namespace pstore

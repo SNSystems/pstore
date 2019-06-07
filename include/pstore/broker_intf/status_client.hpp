@@ -44,12 +44,6 @@
 #ifndef PSTORE_BROKER_INTF_STATUS_CLIENT_HPP
 #define PSTORE_BROKER_INTF_STATUS_CLIENT_HPP (1)
 
-#ifdef _WIN32
-using in_port_t = unsigned short;
-#else
-#include <netinet/in.h>
-#endif
-
 #include "pstore/broker_intf/descriptor.hpp"
 
 namespace pstore {

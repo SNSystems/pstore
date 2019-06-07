@@ -74,6 +74,8 @@
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/broker_intf/status_client.hpp"
 #include "pstore/broker_intf/status_path.hpp"
+#include "pstore/httpd/server.hpp"
+#include "pstore/httpd/quit.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/make_unique.hpp"
@@ -143,7 +145,9 @@ namespace pstore {
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
                        unsigned num_read_threads,
-                       pstore::broker::self_client_connection const * const status_client) {
+                       pstore::broker::self_client_connection const * const status_client,
+                       gsl::not_null<pstore::httpd::server_status *> http_status,
+                       gsl::not_null<std::atomic<bool> *> uptime_done) {
 
             // Set the global "done" flag unless we're already shutting down. The latter condition
             // happens if a "SUICIDE" command is received and the quit thread is woken in response.
@@ -169,6 +173,9 @@ namespace pstore {
                 }
 
                 ask_status_server_to_exit (status_client);
+                pstore::httpd::quit (http_status);
+                *uptime_done = true;
+
                 log (logging::priority::info, "shutdown requests complete");
             }
         }
@@ -241,7 +248,9 @@ namespace {
     //***************
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
                       std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads,
-                      std::weak_ptr<pstore::broker::self_client_connection> status_client) {
+                      std::weak_ptr<pstore::broker::self_client_connection> status_client,
+                      pstore::gsl::not_null<pstore::httpd::server_status *> http_status,
+                      pstore::gsl::not_null<std::atomic<bool> *> uptime_done) {
         using namespace pstore;
 
         try {
@@ -268,7 +277,7 @@ namespace {
             auto scav_sptr = scav.lock ();
             auto status_ptr = status_client.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
-                      status_ptr.get ());
+                      status_ptr.get (), http_status, uptime_done);
         } catch (std::exception const & ex) {
             log (logging::priority::error, "error:", ex.what ());
         } catch (...) {
@@ -300,12 +309,13 @@ namespace pstore {
 
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        std::thread
-        create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
-                            unsigned num_read_threads,
-                            std::weak_ptr<pstore::broker::self_client_connection> status_client) {
+        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
+                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads,
+                                        std::weak_ptr<broker::self_client_connection> status_client,
+                                        gsl::not_null<pstore::httpd::server_status *> http_status,
+                                        gsl::not_null<std::atomic<bool> *> uptime_done) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
-                              status_client);
+                              status_client, http_status, uptime_done);
 
             register_signal_handler (SIGINT, signal_handler);
             register_signal_handler (SIGTERM, signal_handler);

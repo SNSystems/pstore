@@ -46,19 +46,13 @@
 
 #include <string>
 
-// FIXME: this pattern is repeated elsewhere.
-#ifdef _WIN32
-using in_port_t = unsigned short;
-#else
-#    include <netinet/in.h>
-#endif // _WIN32
+#include "pstore/httpd/server_status.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {
 
-        std::string get_quit_magic ();
-
-        void quit (in_port_t port_number);
+        void quit (gsl::not_null<server_status *> http_status);
 
     } // end namespace httpd
 } // end namespace pstore

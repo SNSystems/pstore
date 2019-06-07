@@ -1,10 +1,10 @@
-//*              *
-//*   __ _  ___  *
-//*  / _` |/ __| *
-//* | (_| | (__  *
-//*  \__, |\___| *
-//*  |___/       *
-//===- include/pstore/broker/gc.hpp ---------------------------------------===//
+//*              _   _                 *
+//*  _   _ _ __ | |_(_)_ __ ___   ___  *
+//* | | | | '_ \| __| | '_ ` _ \ / _ \ *
+//* | |_| | |_) | |_| | | | | | |  __/ *
+//*  \__,_| .__/ \__|_|_| |_| |_|\___| *
+//*       |_|                          *
+//===- include/pstore/broker/uptime.hpp -----------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,60 +41,24 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file gc.hpp
+#ifndef PSTORE_BROKER_UPTIME_HPP
+#define PSTORE_BROKER_UPTIME_HPP
 
-#ifndef PSTORE_BROKER_GC_HPP
-#define PSTORE_BROKER_GC_HPP
+#include <atomic>
 
-#include <string>
-
-#include "pstore/broker/bimap.hpp"
-#include "pstore/broker/pointer_compare.hpp"
-#include "pstore/broker/spawn.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/support/pubsub.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace broker {
 
-        class gc_watch_thread {
-        public:
-            void watcher ();
+        extern descriptor_condition_variable uptime_cv;
+        extern channel<descriptor_condition_variable> uptime_channel;
 
-            void start_vacuum (std::string const & db_path);
-
-            /// Called when a shutdown request is received. This method wakes the watcher
-            /// thread and asks all child processes to exit.
-            void stop (int signum = -1);
-
-#ifndef _WIN32
-            /// POSIX signal handler.
-            void child_signal (int sig) noexcept;
-#endif
-
-        private:
-            std::string vacuumd_path ();
-
-// FIXME: get this name from the cmake script. Don't hard-wire it here.
-#ifdef _WIN32
-            static constexpr auto vacuumd_name = "pstore-vacuumd.exe";
-            using process_bimap = bimap<std::string, broker::process_identifier,
-                                        std::less<std::string>, broker::pointer_compare<HANDLE>>;
-#else
-            static constexpr auto vacuumd_name = "pstore-vacuumd";
-            using process_bimap = bimap<std::string, pid_t>;
-#endif
-
-            std::mutex mut_;
-            signal_cv cv_;
-            process_bimap processes_;
-        };
-
-        void start_vacuum (std::string const & path);
-        void gc_sigint (int sig);
-
-        void gc_process_watch_thread ();
+        void uptime (gsl::not_null<std::atomic<bool> *> done);
 
     } // namespace broker
-} // namespace pstore
+} // end namespace pstore
 
-#endif // PSTORE_BROKER_GC_HPP
+#endif // PSTORE_BROKER_UPTIME_HPP

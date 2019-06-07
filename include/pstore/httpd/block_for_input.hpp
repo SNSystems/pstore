@@ -76,7 +76,7 @@ namespace pstore {
         template <typename Reader>
         inputs_ready block_for_input (Reader const & reader,
                                       broker::socket_descriptor const & socket_fd,
-                                      broker::pipe_descriptor const & cv_fd) {
+                                      broker::pipe_descriptor const * const cv_fd) {
             // If the reader has data buffered, then we won't block.
             if (reader.available () > 0) {
                 return {true, false};
@@ -92,10 +92,16 @@ namespace pstore {
                 // WSAGetLastError ()
             }
 
-            std::array<WSAEVENT, 2> events{{event.get (), cv_fd.native_handle ()}};
+            std::array<WSAEVENT, 2> events;
+            auto size = DWORD{0};
+            events[size++] = event.get ();
+            if (cv_fd) {
+                events[size++] = cv_fd->native_handle ();
+            }
+
             for (;;) {
                 auto const cause =
-                    ::WSAWaitForMultipleEvents (static_cast<DWORD> (events.size ()), events.data (),
+                    ::WSAWaitForMultipleEvents (size, events.data (),
                                                 FALSE, // Wait for any event to be signaled
                                                 timeout_seconds * 1000, // The time-out interval
                                                 TRUE                    // Alertable?
@@ -117,13 +123,18 @@ namespace pstore {
             fd_set read_fds;
             FD_ZERO (&read_fds);
             FD_SET (socket_fd.native_handle (), &read_fds);
-            FD_SET (cv_fd.native_handle (), &read_fds);
+            if (cv_fd != nullptr) {
+                FD_SET (cv_fd->native_handle (), &read_fds);
+            }
 
             fd_set error_fds;
             FD_SET (socket_fd.native_handle (), &error_fds);
-            FD_SET (cv_fd.native_handle (), &error_fds);
+            if (cv_fd != nullptr) {
+                FD_SET (cv_fd->native_handle (), &error_fds);
+            }
 
-            int const maxfd = std::max (socket_fd.native_handle (), cv_fd.native_handle ());
+            int const maxfd = std::max (socket_fd.native_handle (),
+                                        (cv_fd != nullptr) ? cv_fd->native_handle () : 0);
             auto err = 0;
             while ((err = ::select (maxfd + 1, &read_fds, nullptr, &error_fds, &timeout)) == -1 &&
                    errno == EINTR) {
@@ -139,14 +150,15 @@ namespace pstore {
             auto const isset = [&read_fds, &error_fds](int fd) {
                 return FD_ISSET (fd, &read_fds) || FD_ISSET (fd, &error_fds);
             };
-            return {isset (socket_fd.native_handle ()), isset (cv_fd.native_handle ())};
+            return {isset (socket_fd.native_handle ()),
+                    cv_fd != nullptr ? isset (cv_fd->native_handle ()) : false};
 #endif
         } // namespace httpd
 
 
         // FIXME: this is only here for the unit tests. It shouldn't be.
         template <typename Reader>
-        inputs_ready block_for_input (Reader const &, int, broker::pipe_descriptor const &) {
+        inputs_ready block_for_input (Reader const &, int, broker::pipe_descriptor const *) {
             return {true, false};
         }
 

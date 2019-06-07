@@ -80,8 +80,7 @@ def get_tool_paths (exe_path):
 
     poker_path = os.path.join (exe_path, executable ('pstore-broker-poker'))
     if not os.path.exists (poker_path):
-        print ('Did not find broker-poker executable at "%s"' % poker_path, file=sys.stderr)
-        return 1
+        raise RuntimeError ('Did not find broker-poker executable at "%s"' % poker_path)
 
     return ToolPaths (broker=broker_path, poker=poker_path)
 

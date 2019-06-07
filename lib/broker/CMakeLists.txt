@@ -45,25 +45,25 @@
 if (NOT PSTORE_ENABLE_BROKER)
     message (STATUS "pstore broker library is excluded (PSTORE_ENABLE_BROKER)")
 else ()
+    set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker")
 
-    set (BROKER_PUBLIC_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore")
-
-    set (PSTORE_BROKER_LIB_SRC
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/bimap.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/command.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/gc.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/globals.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/intrusive_list.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_pool.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/message_queue.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/parser.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/pointer_compare.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/quit.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/read_loop.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/recorder.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/scavenger.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/spawn.hpp"
-        "${BROKER_PUBLIC_INCLUDES_DIR}/broker/status_server.hpp"
+    set (pstore_broker_lib_src
+        "${pstore_broker_include_dir}/bimap.hpp"
+        "${pstore_broker_include_dir}/command.hpp"
+        "${pstore_broker_include_dir}/gc.hpp"
+        "${pstore_broker_include_dir}/globals.hpp"
+        "${pstore_broker_include_dir}/intrusive_list.hpp"
+        "${pstore_broker_include_dir}/message_pool.hpp"
+        "${pstore_broker_include_dir}/message_queue.hpp"
+        "${pstore_broker_include_dir}/parser.hpp"
+        "${pstore_broker_include_dir}/pointer_compare.hpp"
+        "${pstore_broker_include_dir}/quit.hpp"
+        "${pstore_broker_include_dir}/read_loop.hpp"
+        "${pstore_broker_include_dir}/recorder.hpp"
+        "${pstore_broker_include_dir}/scavenger.hpp"
+        "${pstore_broker_include_dir}/spawn.hpp"
+        "${pstore_broker_include_dir}/status_server.hpp"
+        "${pstore_broker_include_dir}/uptime.hpp"
 
         command.cpp
         gc_common.cpp
@@ -80,6 +80,7 @@ else ()
         spawn_posix.cpp
         spawn_win32.cpp
         status_server.cpp
+        uptime.cpp
     )
 
     include (add_pstore)
@@ -87,9 +88,10 @@ else ()
         set (LLVM_REQUIRES_EH Yes)
         set (LLVM_REQUIRES_RTTI Yes)
         set (PSTORE_EXCEPTIONS Yes)
-        add_pstore_library (pstore-broker STATIC ${PSTORE_BROKER_LIB_SRC})
+        add_pstore_library (pstore-broker STATIC ${pstore_broker_lib_src})
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf-ex
+            pstore-httpd-lib-ex
             pstore-json-lib-ex
             pstore-support-ex
         )
@@ -97,7 +99,7 @@ else ()
         set (LLVM_REQUIRES_RTTI No)
         set (PSTORE_EXCEPTIONS No)
     else ()
-        add_pstore_library (pstore-broker ${PSTORE_BROKER_LIB_SRC})
+        add_pstore_library (pstore-broker ${pstore_broker_lib_src})
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf
             pstore-httpd-lib

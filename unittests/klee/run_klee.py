@@ -5,7 +5,7 @@
 #* | |  | |_| | | | | |   <| |  __/  __/ *
 #* |_|   \__,_|_| |_| |_|\_\_|\___|\___| *
 #*                                       *
-#===- unittests/support/klee/run_klee.py ----------------------------------===//
+#===- unittests/klee/run_klee.py ------------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #

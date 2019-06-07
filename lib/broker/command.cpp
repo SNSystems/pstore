@@ -51,6 +51,7 @@
 #include <iomanip>
 #include <mutex>
 #include <queue>
+#include <sstream>
 
 // platform includes
 #ifndef _WIN32
@@ -64,6 +65,7 @@
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/writer.hpp"
+#include "pstore/json/utility.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/time.hpp"
@@ -71,11 +73,19 @@
 namespace pstore {
     namespace broker {
 
+        descriptor_condition_variable commits_cv;
+        channel<descriptor_condition_variable> commits_channel (&commits_cv);
+
+
         // ctor
         // ~~~~
         command_processor::command_processor (unsigned const num_read_threads,
-                                              std::weak_ptr<self_client_connection> status_client)
+                                              std::weak_ptr<self_client_connection> status_client,
+                                              gsl::not_null<httpd::server_status *> http_status,
+                                              gsl::not_null<std::atomic<bool> *> uptime_done)
                 : status_client_{std::move (status_client)}
+                , http_status_{http_status}
+                , uptime_done_{uptime_done}
                 , num_read_threads_{num_read_threads} {
 
             assert (std::is_sorted (std::begin (commands_), std::end (commands_),
@@ -87,7 +97,8 @@ namespace pstore {
         void command_processor::suicide (fifo_path const &, broker_command const &) {
             std::shared_ptr<scavenger> scav = scavenger_.get ();
             std::shared_ptr<self_client_connection> conn = status_client_.lock ();
-            shutdown (this, scav.get (), sig_self_quit, num_read_threads_, conn.get ());
+            shutdown (this, scav.get (), sig_self_quit, num_read_threads_, conn.get (),
+                      http_status_, uptime_done_);
         }
 
         // quit
@@ -118,6 +129,15 @@ namespace pstore {
         // ~~
         void command_processor::gc (fifo_path const &, broker_command const & c) {
             start_vacuum (c.path);
+
+            ++commits_;
+            commits_channel.publish ([this]() {
+                std::ostringstream os;
+                os << "{ \"commits\": " << commits_ << " }";
+                std::string const & str = os.str ();
+                assert (json::is_valid (str));
+                return str;
+            });
         }
 
         // echo

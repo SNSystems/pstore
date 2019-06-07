@@ -1,10 +1,10 @@
-//*              _   _                 *
-//*  _   _ _ __ | |_(_)_ __ ___   ___  *
-//* | | | | '_ \| __| | '_ ` _ \ / _ \ *
-//* | |_| | |_) | |_| | | | | | |  __/ *
-//*  \__,_| .__/ \__|_|_| |_| |_|\___| *
-//*       |_|                          *
-//===- include/pstore/httpd/uptime.hpp ------------------------------------===//
+//*        _   _ _ _ _          *
+//*  _   _| |_(_) (_) |_ _   _  *
+//* | | | | __| | | | __| | | | *
+//* | |_| | |_| | | | |_| |_| | *
+//*  \__,_|\__|_|_|_|\__|\__, | *
+//*                      |___/  *
+//===- lib/json/utility.cpp -----------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,22 +41,20 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_HTTPD_UPTIME_HPP
-#define PSTORE_HTTPD_UPTIME_HPP
+#include "pstore/json/utility.hpp"
 
-#include "pstore/broker_intf/signal_cv.hpp"
-#include "pstore/support/pubsub.hpp"
-#include "pstore/support/gsl.hpp"
+#include "pstore/json/dom_types.hpp"
+#include "pstore/json/json.hpp"
 
 namespace pstore {
-    namespace httpd {
+    namespace json {
 
-        extern descriptor_condition_variable uptime_cv;
-        extern channel<descriptor_condition_variable> uptime_channel;
+        bool is_valid (std::string const & str) {
+            pstore::json::parser<pstore::json::null_output> p;
+            p.input (pstore::gsl::make_span (str));
+            p.eof ();
+            return !p.has_error ();
+        }
 
-        void uptime (gsl::not_null<bool *> done);
-
-    } // end namespace httpd
+    } // end namespace json
 } // end namespace pstore
-
-#endif // PSTORE_HTTPD_UPTIME_HPP

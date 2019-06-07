@@ -43,26 +43,26 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 
-set (PSTORE_HTTPD_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/httpd")
-set (PSTORE_HTTPD_LIB_SRC
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/block_for_input.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/buffered_reader.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/endian.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/error.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/headers.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/http_date.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/media_type.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/net_txrx.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/query_to_kvp.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/quit.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/request.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/send.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_dynamic_content.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/serve_static_content.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/server.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/uptime.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/ws_server.hpp"
-    "${PSTORE_HTTPD_PUBLIC_INCLUDE}/wskey.hpp"
+set (pstore_httpd_public_include "${PSTORE_ROOT_DIR}/include/pstore/httpd")
+set (pstore_httpd_lib_src
+    "${pstore_httpd_public_include}/block_for_input.hpp"
+    "${pstore_httpd_public_include}/buffered_reader.hpp"
+    "${pstore_httpd_public_include}/endian.hpp"
+    "${pstore_httpd_public_include}/error.hpp"
+    "${pstore_httpd_public_include}/headers.hpp"
+    "${pstore_httpd_public_include}/http_date.hpp"
+    "${pstore_httpd_public_include}/media_type.hpp"
+    "${pstore_httpd_public_include}/net_txrx.hpp"
+    "${pstore_httpd_public_include}/query_to_kvp.hpp"
+    "${pstore_httpd_public_include}/quit.hpp"
+    "${pstore_httpd_public_include}/request.hpp"
+    "${pstore_httpd_public_include}/send.hpp"
+    "${pstore_httpd_public_include}/serve_dynamic_content.hpp"
+    "${pstore_httpd_public_include}/serve_static_content.hpp"
+    "${pstore_httpd_public_include}/server.hpp"
+    "${pstore_httpd_public_include}/server_status.hpp"
+    "${pstore_httpd_public_include}/ws_server.hpp"
+    "${pstore_httpd_public_include}/wskey.hpp"
 
     error.cpp
     headers.cpp
@@ -71,11 +71,11 @@ set (PSTORE_HTTPD_LIB_SRC
     net_txrx.cpp
     quit.cpp
     server.cpp
-    uptime.cpp
     ws_server.cpp
     wskey.cpp
+    "${pstore_httpd_fs_source}"
 )
-add_pstore_library (pstore-httpd-lib ${PSTORE_HTTPD_LIB_SRC})
+add_pstore_library (pstore-httpd-lib ${pstore_httpd_lib_src})
 target_link_libraries (pstore-httpd-lib PUBLIC
     pstore-broker-intf
     pstore-json-lib
@@ -84,8 +84,30 @@ target_link_libraries (pstore-httpd-lib PUBLIC
 )
 add_clang_tidy_target (pstore-httpd-lib)
 
+if (NOT PSTORE_EXCEPTIONS)
+    set (LLVM_REQUIRES_EH Yes)
+    set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
+
+    add_pstore_library (pstore-httpd-lib-ex ${pstore_httpd_lib_src})
+
+    set (LLVM_REQUIRES_EH No)
+    set (LLVM_REQUIRES_RTTI No)
+    set (PSTORE_EXCEPTIONS No)
+
+    target_link_libraries (pstore-httpd-lib-ex PUBLIC
+        pstore-broker-intf-ex
+        pstore-json-lib-ex
+        pstore-romfs-ex
+        pstore-support-ex
+    )
+endif ()
+
+
+
+
 if (PSTORE_BITCODE)
-    add_pstore_library (pstore-httpd-lib-bc STATIC ${PSTORE_HTTPD_LIB_SRC})
+    add_pstore_library (pstore-httpd-lib-bc ${pstore_httpd_lib_src})
     target_compile_options (pstore-httpd-lib-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu

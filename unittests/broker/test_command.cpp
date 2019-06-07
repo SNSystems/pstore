@@ -43,17 +43,24 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/broker/command.hpp"
+
 #include <functional>
+
 #include "gmock/gmock.h"
+
 #include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/httpd/server_status.hpp"
 
 namespace {
 
     class mock_cp : public pstore::broker::command_processor {
     public:
-        explicit mock_cp (unsigned const num_read_threads)
+        explicit mock_cp (unsigned const num_read_threads,
+                          pstore::httpd::server_status * const status,
+                          std::atomic<bool> * const uptime_done)
                 : command_processor (num_read_threads,
-                                     std::weak_ptr<pstore::broker::self_client_connection>{}) {}
+                                     std::weak_ptr<pstore::broker::self_client_connection>{},
+                                     status, uptime_done) {}
 
         MOCK_METHOD2 (suicide, void(pstore::broker::fifo_path const &,
                                     pstore::broker::broker_command const &));
@@ -78,10 +85,15 @@ namespace {
     class Command : public ::testing::Test {
     public:
         Command ()
-                : cp_{1U}
+                : http_status_{8080}
+                , uptime_done_{false}
+                , cp_{1U, &http_status_, &uptime_done_}
                 , fifo_{nullptr} {}
 
     protected:
+        pstore::httpd::server_status http_status_;
+        std::atomic<bool> uptime_done_;
+
         mock_cp cp_;
         pstore::broker::fifo_path fifo_;
 

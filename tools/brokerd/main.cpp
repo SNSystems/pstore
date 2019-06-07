@@ -65,16 +65,22 @@
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker/status_server.hpp"
+#include "pstore/broker/uptime.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/httpd/server.hpp"
+#include "pstore/httpd/server_status.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/thread.hpp"
 #include "pstore/support/to_string.hpp"
 #include "pstore/support/utf.hpp"
 
 #include "switches.hpp"
+
+extern pstore::romfs::romfs fs;
 
 namespace {
 
@@ -108,10 +114,13 @@ namespace {
     }
 
 
-    std::vector<std::future<void>> create_worker_threads (
-        std::shared_ptr<pstore::broker::command_processor> const & commands,
-        pstore::broker::fifo_path & fifo, std::shared_ptr<pstore::broker::scavenger> const & scav,
-        std::shared_ptr<pstore::broker::self_client_connection> const & status_client) {
+    std::vector<std::future<void>>
+    create_worker_threads (std::shared_ptr<pstore::broker::command_processor> const & commands,
+                           pstore::broker::fifo_path & fifo,
+                           std::shared_ptr<pstore::broker::scavenger> const & scav,
+                           std::shared_ptr<pstore::broker::self_client_connection> && status_client,
+                           std::unique_ptr<pstore::httpd::server_status> const & http_status,
+                           std::atomic<bool> * const uptime_done) {
 
         using namespace pstore;
         std::vector<std::future<void>> futures;
@@ -135,6 +144,29 @@ namespace {
             thread_init ("status");
             broker::status_server (status_client);
         }));
+
+        futures.push_back (create_thread (
+            [](httpd::server_status * const status) {
+                thread_init ("http");
+                pstore::httpd::channel_container channels{
+                    {"commits",
+                     pstore::httpd::channel_container_entry{&pstore::broker::commits_channel,
+                                                            &pstore::broker::commits_cv}},
+                    {"uptime",
+                     pstore::httpd::channel_container_entry{&pstore::broker::uptime_channel,
+                                                            &pstore::broker::uptime_cv}},
+                };
+                httpd::server (fs, status, channels);
+            },
+            http_status.get ()));
+
+        futures.push_back (create_thread (
+            [](std::atomic<bool> * const done) {
+                thread_init ("uptime");
+                broker::uptime (done);
+            },
+            uptime_done));
+
         return futures;
     }
 
@@ -158,6 +190,15 @@ int main (int argc, char * argv[]) {
             return broker::exit_code;
         }
 
+#ifdef _WIN32
+        pstore::wsa_startup startup;
+        if (!startup.started ()) {
+            log (logging::priority::error, "WSAStartup() failed");
+            log (pstore::logging::priority::info, "broker exited");
+            return EXIT_FAILURE;
+        }
+#endif // _WIN32
+
         // If we're recording the messages we receive, then create the file in which they will be
         // stored.
         std::shared_ptr<broker::recorder> record_file;
@@ -173,19 +214,26 @@ int main (int argc, char * argv[]) {
 
         std::vector<std::future<void>> futures;
         std::thread quit;
+
+        constexpr in_port_t http_port = 8080;
+        auto http_status = std::unique_ptr<pstore::httpd::server_status> (
+            new pstore::httpd::server_status (http_port));
+        std::atomic<bool> uptime_done{false};
+
         {
             auto status_client = std::make_shared<pstore::broker::self_client_connection> ();
-            auto commands = std::make_shared<broker::command_processor> (opt.num_read_threads,
-                                                                         make_weak (status_client));
+            auto commands = std::make_shared<broker::command_processor> (
+                opt.num_read_threads, make_weak (status_client), http_status.get (), &uptime_done);
             auto scav = std::make_shared<broker::scavenger> (commands);
             commands->attach_scavenger (scav);
 
 
             logging::log (logging::priority::notice, "starting threads");
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
-                                       make_weak (status_client));
+                                       make_weak (status_client), http_status.get (), &uptime_done);
 
-            futures = create_worker_threads (commands, fifo, scav, std::move (status_client));
+            futures = create_worker_threads (commands, fifo, scav, std::move (status_client),
+                                             http_status, &uptime_done);
             status_client.reset ();
 
             if (opt.playback_path) {
@@ -194,7 +242,7 @@ int main (int argc, char * argv[]) {
                     commands->push_command (std::move (msg), record_file.get ());
                 }
                 shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/,
-                          status_client.get ());
+                          status_client.get (), http_status.get (), &uptime_done);
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                     futures.push_back (create_thread ([ctr, &fifo, &record_file, commands]() {

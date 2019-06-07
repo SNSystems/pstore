@@ -55,10 +55,17 @@
 // pstore includes
 #include "pstore/broker/message_queue.hpp"
 #include "pstore/broker/parser.hpp"
+#include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/pubsub.hpp"
 
 namespace pstore {
+    namespace httpd {
+        class server_status;
+    } // end namespace httpd
+
     namespace broker {
 
         class fifo_path;
@@ -71,7 +78,9 @@ namespace pstore {
         class command_processor {
         public:
             command_processor (unsigned const num_read_threads,
-                               std::weak_ptr<self_client_connection> status_client);
+                               std::weak_ptr<self_client_connection> status_client,
+                               gsl::not_null<httpd::server_status *> http_status,
+                               gsl::not_null<std::atomic<bool> *> uptime_done);
             virtual ~command_processor () = default;
 
             // No copying or assignment.
@@ -122,6 +131,9 @@ namespace pstore {
 
             std::atomic<bool> commands_done_{false};
             std::weak_ptr<self_client_connection> status_client_;
+            gsl::not_null<httpd::server_status *> http_status_;
+            gsl::not_null<std::atomic<bool> *> uptime_done_;
+
             atomic_weak_ptr<scavenger> scavenger_;
 
             message_queue<message_ptr> messages_;
@@ -132,6 +144,9 @@ namespace pstore {
             /// The number of read threads running. At shutdown time this is used to instruct each
             /// of them to exit safely.
             unsigned const num_read_threads_;
+
+            /// The nuber of commit ("GC") commands processed.
+            unsigned commits_ = 0;
 
             auto parse (message_type const & msg) -> std::unique_ptr<broker_command>;
 
@@ -181,6 +196,9 @@ namespace pstore {
             virtual void log (gsl::czstring str) const;
             ///@}
         };
+
+        extern descriptor_condition_variable commits_cv;
+        extern channel<descriptor_condition_variable> commits_channel;
 
     } // namespace broker
 } // namespace pstore

@@ -47,6 +47,7 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <unordered_map>
 
 #ifdef _WIN32
 #    include <winsock2.h>
@@ -60,7 +61,6 @@
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/endian.hpp"
 #include "pstore/httpd/send.hpp"
-#include "pstore/httpd/uptime.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/pubsub.hpp"
@@ -111,7 +111,6 @@ namespace std {
 
 namespace pstore {
     namespace httpd {
-
 
         // Frame format:
         //
@@ -609,29 +608,47 @@ namespace pstore {
             return std::tuple<IO, bool>{std::move (io), false};
         }
 
+
+        using channel_container_entry =
+            std::tuple<gsl::not_null<channel<descriptor_condition_variable> *>,
+                       gsl::not_null<descriptor_condition_variable *>>;
+        using channel_container = std::unordered_map<std::string, channel_container_entry>;
+
         // ws_server_loop
         // ~~~~~~~~~~~~~~
         template <typename Reader, typename Sender, typename IO>
-        void ws_server_loop (Reader && reader, Sender && sender, IO io, std::string const & uri) {
+        void ws_server_loop (Reader && reader, Sender && sender, IO io, std::string const & uri,
+                             channel_container const & channels) {
+
             ws_command command;
-            channel<descriptor_condition_variable>::subscriber_pointer uptime_sub;
-            if (uri == "/uptime") {
-                uptime_sub = uptime_channel.new_subscriber ();
+            channel<descriptor_condition_variable>::subscriber_pointer subscription;
+            descriptor_condition_variable * cv = nullptr;
+
+            if (uri.length () > 0 && uri[0] == '/') {
+                std::string const name = uri.substr (1);
+                auto const pos = channels.find (name);
+                if (pos != channels.end ()) {
+                    subscription = std::get<0> (pos->second)->new_subscriber ();
+                    cv = std::get<1> (pos->second);
+                } else {
+                    log (logging::priority::error, "No channel named: ", name);
+                }
             }
 
             bool done = false;
             while (!done) {
                 inputs_ready const avail =
-                    block_for_input (reader, io, uptime_cv.wait_descriptor ());
+                    block_for_input (reader, io, cv != nullptr ? &cv->wait_descriptor () : nullptr);
                 if (avail.socket) {
                     std::tie (io, done) = socket_read (reader, sender, io, &command);
                 }
                 if (avail.cv) {
                     // There's a message to push to our peer.
-                    uptime_cv.reset ();
-                    if (uptime_sub) {
-                        while (maybe<std::string> const message = uptime_sub->pop ()) {
-                            log (logging::priority::info, "sending \"uptime\": ", *message);
+                    assert (cv != nullptr);
+                    cv->reset ();
+                    if (subscription) {
+                        while (maybe<std::string> const message = subscription->pop ()) {
+                            log (logging::priority::info, "sending:", *message);
                             error_or<IO> const eo3 = send_message (
                                 sender, io, opcode::text, as_bytes (gsl::make_span (*message)));
                             if (!eo3) {

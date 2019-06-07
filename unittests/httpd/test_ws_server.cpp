@@ -69,7 +69,7 @@ TEST (WsServer, NothingFromClient) {
         return pstore::error_or<int>{pstore::in_place, io + 1};
     };
 
-    ws_server_loop (br, sender, io, "");
+    ws_server_loop (br, sender, io, "", pstore::httpd::channel_container{});
 
     // A close frame with error 0x3ee (1006: abnormal closure).
     EXPECT_THAT (output, ::testing::ElementsAre (std::uint8_t{0x88}, std::uint8_t{0x02},
@@ -154,7 +154,7 @@ TEST (WsServer, Ping) {
     };
 
 
-    ws_server_loop (br, sender, io, std::string{} /*uri*/);
+    ws_server_loop (br, sender, io, std::string{} /*uri*/, pstore::httpd::channel_container{});
 
     EXPECT_THAT (pstore::gsl::make_span (output),
                  ::testing::ContainerEq (make_span (expected_frames)));

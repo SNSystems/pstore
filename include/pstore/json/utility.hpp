@@ -1,10 +1,10 @@
-//*              *
-//*   __ _  ___  *
-//*  / _` |/ __| *
-//* | (_| | (__  *
-//*  \__, |\___| *
-//*  |___/       *
-//===- include/pstore/broker/gc.hpp ---------------------------------------===//
+//*        _   _ _ _ _          *
+//*  _   _| |_(_) (_) |_ _   _  *
+//* | | | | __| | | | __| | | | *
+//* | |_| | |_| | | | |_| |_| | *
+//*  \__,_|\__|_|_|_|\__|\__, | *
+//*                      |___/  *
+//===- include/pstore/json/utility.hpp ------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,60 +41,17 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file gc.hpp
-
-#ifndef PSTORE_BROKER_GC_HPP
-#define PSTORE_BROKER_GC_HPP
+#ifndef PSTORE_JSON_UTILITY_HPP
+#define PSTORE_JSON_UTILITY_HPP
 
 #include <string>
 
-#include "pstore/broker/bimap.hpp"
-#include "pstore/broker/pointer_compare.hpp"
-#include "pstore/broker/spawn.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
-
 namespace pstore {
-    namespace broker {
+    namespace json {
 
-        class gc_watch_thread {
-        public:
-            void watcher ();
+        bool is_valid (std::string const & str);
 
-            void start_vacuum (std::string const & db_path);
+    } // end namespace json
+} // end namespace pstore
 
-            /// Called when a shutdown request is received. This method wakes the watcher
-            /// thread and asks all child processes to exit.
-            void stop (int signum = -1);
-
-#ifndef _WIN32
-            /// POSIX signal handler.
-            void child_signal (int sig) noexcept;
-#endif
-
-        private:
-            std::string vacuumd_path ();
-
-// FIXME: get this name from the cmake script. Don't hard-wire it here.
-#ifdef _WIN32
-            static constexpr auto vacuumd_name = "pstore-vacuumd.exe";
-            using process_bimap = bimap<std::string, broker::process_identifier,
-                                        std::less<std::string>, broker::pointer_compare<HANDLE>>;
-#else
-            static constexpr auto vacuumd_name = "pstore-vacuumd";
-            using process_bimap = bimap<std::string, pid_t>;
-#endif
-
-            std::mutex mut_;
-            signal_cv cv_;
-            process_bimap processes_;
-        };
-
-        void start_vacuum (std::string const & path);
-        void gc_sigint (int sig);
-
-        void gc_process_watch_thread ();
-
-    } // namespace broker
-} // namespace pstore
-
-#endif // PSTORE_BROKER_GC_HPP
+#endif // PSTORE_JSON_UTILITY_HPP

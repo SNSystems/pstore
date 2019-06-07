@@ -60,18 +60,18 @@ namespace pstore {
         enum class mode_t { file, directory };
 
         struct stat {
-            constexpr stat (std::size_t size, std::time_t mtime, mode_t m) noexcept
-                    : st_size{size}
-                    , st_mtime{mtime}
+            constexpr stat (std::size_t size_, std::time_t mtime_, mode_t m) noexcept
+                    : size{size_}
+                    , mtime{mtime_}
                     , mode{m} {}
 
             bool operator== (stat const & rhs) const noexcept {
-                return st_size == rhs.st_size && st_mtime == rhs.st_mtime && mode == rhs.mode;
+                return size == rhs.size && mtime == rhs.mtime && mode == rhs.mode;
             }
             bool operator!= (stat const & rhs) const noexcept { return !operator== (rhs); }
 
-            std::size_t st_size;  ///< File size in bytes.
-            std::time_t st_mtime; ///< Time when file data was last modified.
+            std::size_t size;  ///< File size in bytes.
+            std::time_t mtime; ///< Time when file data was last modified.
             mode_t mode;
         };
 

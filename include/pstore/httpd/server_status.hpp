@@ -1,10 +1,10 @@
-//*              _   _                 *
-//*  _   _ _ __ | |_(_)_ __ ___   ___  *
-//* | | | | '_ \| __| | '_ ` _ \ / _ \ *
-//* | |_| | |_) | |_| | | | | | |  __/ *
-//*  \__,_| .__/ \__|_|_| |_| |_|\___| *
-//*       |_|                          *
-//===- lib/httpd/uptime.cpp -----------------------------------------------===//
+//*                                     _        _              *
+//*  ___  ___ _ ____   _____ _ __   ___| |_ __ _| |_ _   _ ___  *
+//* / __|/ _ \ '__\ \ / / _ \ '__| / __| __/ _` | __| | | / __| *
+//* \__ \  __/ |   \ V /  __/ |    \__ \ || (_| | |_| |_| \__ \ *
+//* |___/\___|_|    \_/ \___|_|    |___/\__\__,_|\__|\__,_|___/ *
+//*                                                             *
+//===- include/pstore/httpd/server_status.hpp -----------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,54 +41,33 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/httpd/uptime.hpp"
+#ifndef PSTORE_HTTPD_SERVER_STATUS_HPP
+#define PSTORE_HTTPD_SERVER_STATUS_HPP
 
-#include <sstream>
-#include <thread>
+#include <atomic>
 
-#include "pstore/json/json.hpp"
-#include "pstore/json/dom_types.hpp"
-#include "pstore/support/thread.hpp"
-
-namespace {
-
-#ifndef NDEBUG
-    bool is_valid_json (std::string const & str) {
-        pstore::json::parser<pstore::json::null_output> p;
-        p.input (pstore::gsl::make_span (str));
-        p.eof ();
-        return !p.has_error ();
-    }
-#endif
-
-} // end anonymous namespace
-
+#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
 
 namespace pstore {
     namespace httpd {
 
-        descriptor_condition_variable uptime_cv;
-        channel<descriptor_condition_variable> uptime_channel (&uptime_cv);
+        class server_status {
+        public:
+            explicit server_status (in_port_t port);
 
-        void uptime (gsl::not_null<bool *> done) {
-            threads::set_name ("uptime");
+            server_status (server_status const & rhs) = default;
+            server_status (server_status && rhs) = default;
+            server_status & operator= (server_status const & rhs) = delete;
+            server_status & operator= (server_status && rhs) = delete;
 
-            auto count = 0U;
-            auto until = std::chrono::system_clock::now ();
-            while (!*done) {
-                until += std::chrono::seconds{1};
-                std::this_thread::sleep_until (until);
-                ++count;
+            void shutdown () noexcept;
 
-                uptime_channel.publish ([count]() {
-                    std::ostringstream os;
-                    os << "{ \"uptime\": " << count << " }";
-                    std::string const & str = os.str ();
-                    assert (is_valid_json (str));
-                    return str;
-                });
-            }
-        }
+            enum class http_state { initializing, listening, closing };
+            std::atomic<http_state> state;
+            in_port_t const port;
+        };
 
     } // end namespace httpd
 } // end namespace pstore
+
+#endif // PSTORE_HTTPD_SERVER_STATUS_HPP

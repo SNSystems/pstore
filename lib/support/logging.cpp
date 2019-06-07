@@ -339,7 +339,7 @@ namespace pstore {
             enabled.set (handlers::standard_error);
 #endif
             // TODO: always enabled for the moment.
-            enabled.set (handlers::standard_error);
+            //enabled.set (handlers::standard_error);
 
             auto loggers = std::make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
