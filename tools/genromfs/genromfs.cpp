@@ -79,6 +79,7 @@ namespace {
 
     class error_category : public std::error_category {
     public:
+        error_category () {}
         char const * name () const noexcept { return "pstore genromfs category"; }
         std::string message (int error) const {
             static_assert (
