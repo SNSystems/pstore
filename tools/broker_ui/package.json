@@ -1,0 +1,16 @@
+{
+  "name": "fearful-respect-slap",
+  "productName": "fearful-respect-slap",
+  "description": "My Electron application description",
+  "keywords": [],
+  "main": "./main.js",
+  "version": "1.0.0",
+  "author": "paul",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "5.0.0-beta.7"
+  }
+}

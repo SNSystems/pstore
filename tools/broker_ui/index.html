@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>pstore Status</title>
+  </head>
+  <body>
+    <h1>pstore Status</h1>
+
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+    We are using Node.js <script>document.write(process.versions.node)</script>,
+    Chromium <script>document.write(process.versions.chrome)</script>,
+    and Electron <script>document.write(process.versions.electron)</script>.
+
+    <div>Server uptime (seconds):</div><div id="message">0</div>
+    <div>Completed transactions:</div><div id="commits">0</div>
+    <div>Transactions per second:</div><div id="tps">0</div>
+    <script>
+      // You can also require other files to run in this process
+      require('./renderer.js')                                              
+    </script>
+  </body>
+</html>
