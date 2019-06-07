@@ -69,7 +69,7 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-httpd-lib-ex PUBLIC pstore-support-ex)
+    target_link_libraries (pstore-romfs-ex PUBLIC pstore-support-ex)
 endif ()
 
 if (PSTORE_BITCODE)
