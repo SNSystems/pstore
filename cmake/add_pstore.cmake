@@ -70,18 +70,10 @@ function (disable_warning_if_possible target_name flag result_var)
 endfunction()
 
 
-#######################################
-# add_pstore_additional_compiler_flags #
-#######################################
-function (add_pstore_additional_compiler_flags target_name)
-    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        if (NOT PSTORE_EXCEPTIONS)
-           target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
-        endif ()
+function (pstore_enable_warnings target_name)
 
-        # For Clang, I enable all of the warnings and then disable some of
-        # the unwanted ones.
-        target_compile_options (${target_name} PRIVATE
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        set (options
             -Weverything
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
@@ -99,6 +91,29 @@ function (add_pstore_additional_compiler_flags target_name)
             -Wno-used-but-marked-unused
             -Wno-weak-vtables
         )
+    elseif (CMAKE_COMPILER_IS_GNUCXX)
+        set (options
+            -Wall
+            -Wextra
+            -pedantic
+        )
+    elseif (MSVC)
+        set (options -W4)
+    endif ()
+
+    target_compile_options (${target_name} PRIVATE ${options})
+
+endfunction (pstore_enable_warnings)
+
+#######################################
+# add_pstore_additional_compiler_flags #
+#######################################
+function (add_pstore_additional_compiler_flags target_name)
+    if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        if (NOT PSTORE_EXCEPTIONS)
+           target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
+        endif ()
+
 
         # TODO: this warning is far too pervasive in clang3.8 but much better in later
         # builds. Only disable for older versions.
@@ -251,6 +266,8 @@ function (add_pstore_library target_name)
 
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
         set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
+
+        pstore_enable_warnings (${target_name})
         add_pstore_additional_compiler_flags (${target_name})
 
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -282,6 +299,7 @@ function (add_pstore_executable target_name)
 
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD 11)
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD_REQUIRED Yes)
+        pstore_enable_warnings (${target_name})
         add_pstore_additional_compiler_flags (${target_name})
 
         # On Windows, we're a "Unicode" app.
@@ -362,40 +380,48 @@ endfunction (add_pstore_example)
 ##########################
 
 function (add_pstore_test_library target_name)
-    add_library (${target_name} STATIC ${ARGN})
-    set_target_properties (${target_name} PROPERTIES FOLDER "pstore test libraries")
-    set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
-    set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
-
-    target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-    add_pstore_additional_compiler_flags (${target_name})
-
     if (PSTORE_IS_INSIDE_LLVM)
+        add_library (${target_name} STATIC ${ARGN})
+        add_pstore_additional_compiler_flags (${target_name})
+
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
         target_link_libraries (${target_name} PUBLIC gtest)
     else ()
+        add_library (${target_name} STATIC ${ARGN})
+
+        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
+        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
+
+        pstore_enable_warnings (${target_name})
+        add_pstore_additional_compiler_flags (${target_name})
+
+        target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+
         target_link_libraries (${target_name} PUBLIC gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
-endfunction(add_pstore_test_library)
+
+    set_target_properties (${target_name} PROPERTIES FOLDER "pstore test libraries")
+endfunction (add_pstore_test_library)
 
 
 ######################
 # add_pstore_unit_test
 ######################
 
-function(add_pstore_unit_test test_dirname)
+function (add_pstore_unit_test target_name)
     if (PSTORE_IS_INSIDE_LLVM)
-        add_unittest (PstoreUnitTests ${test_dirname} ${ARGN})
-        add_pstore_additional_compiler_flags (${test_dirname})
+        add_unittest (PstoreUnitTests ${target_name} ${ARGN})
+        add_pstore_additional_compiler_flags (${target_name})
     else()
-        add_executable (${test_dirname} ${ARGN})
-        set_target_properties (${test_dirname} PROPERTIES FOLDER "pstore tests")
-        set_property (TARGET ${test_dirname} PROPERTY CXX_STANDARD 11)
-        set_property (TARGET ${test_dirname} PROPERTY CXX_STANDARD_REQUIRED Yes)
+        add_executable (${target_name} ${ARGN})
+        set_target_properties (${target_name} PROPERTIES FOLDER "pstore tests")
+        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
+        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
 
-        target_include_directories (${test_dirname} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-        add_pstore_additional_compiler_flags (${test_dirname})
-        target_link_libraries (${test_dirname} PRIVATE pstore-unit-test-harness gtest gmock)
-    endif(PSTORE_IS_INSIDE_LLVM)
-endfunction(add_pstore_unit_test)
+        target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+        pstore_enable_warnings (${target_name})
+        add_pstore_additional_compiler_flags (${target_name})
+        target_link_libraries (${target_name} PRIVATE pstore-unit-test-harness gtest gmock)
+    endif (PSTORE_IS_INSIDE_LLVM)
+endfunction (add_pstore_unit_test)
