@@ -71,14 +71,12 @@ namespace pstore {
         class fifo_path;
         class recorder;
         class scavenger;
-        class self_client_connection;
 
         /// A class which is responsible for managing the command queue and which provides the
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
             command_processor (unsigned const num_read_threads,
-                               std::weak_ptr<self_client_connection> status_client,
                                gsl::not_null<httpd::server_status *> http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done);
             virtual ~command_processor () = default;
@@ -130,7 +128,6 @@ namespace pstore {
             };
 
             std::atomic<bool> commands_done_{false};
-            std::weak_ptr<self_client_connection> status_client_;
             gsl::not_null<httpd::server_status *> http_status_;
             gsl::not_null<std::atomic<bool> *> uptime_done_;
 

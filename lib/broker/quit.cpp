@@ -104,38 +104,6 @@ namespace {
     }
 
 
-    void
-    ask_status_server_to_exit (pstore::broker::self_client_connection const * const status_client) {
-        using namespace pstore;
-        using namespace pstore::broker;
-        using get_port_result_type = self_client_connection::get_port_result_type;
-
-        // If we've got a status client then find out what port number it's using. The get_port()
-        // method returns the number and a lock which will prevent the server from shutting down.
-        // This enables us to send it a message without the risk that it will quit whilst we're
-        // talking to it.
-        maybe<get_port_result_type> const port = status_client != nullptr
-                                                     ? status_client->get_port ()
-                                                     : nothing<get_port_result_type> ();
-        if (!port) {
-            log (logging::priority::info, "status server has already exited");
-            return;
-        }
-
-        broker::socket_descriptor const status_fd = broker::connect_to_status_server (port->first);
-        if (status_fd.valid ()) {
-            char const json[] = "{\"quit\":true}\04";
-            log (logging::priority::info, "sending message to status server:", json);
-            if (::send (status_fd.native_handle (), json,
-                        static_cast<int> (array_elements (json)) - 1,
-                        0 /*flags*/) == broker::socket_descriptor::error) {
-                log (logging::priority::error, "send failed ", broker::get_last_error ());
-            }
-        } else {
-            log (logging::priority::error, "unable to connect to status server");
-        }
-    }
-
 } // end anonymous namespace
 
 namespace pstore {
@@ -145,7 +113,6 @@ namespace pstore {
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
                        unsigned num_read_threads,
-                       pstore::broker::self_client_connection const * const status_client,
                        gsl::not_null<pstore::httpd::server_status *> http_status,
                        gsl::not_null<std::atomic<bool> *> uptime_done) {
 
@@ -172,7 +139,6 @@ namespace pstore {
                     push (*cp, command_loop_quit_command);
                 }
 
-                ask_status_server_to_exit (status_client);
                 pstore::httpd::quit (http_status);
                 *uptime_done = true;
 
@@ -248,7 +214,6 @@ namespace {
     //***************
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
                       std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads,
-                      std::weak_ptr<pstore::broker::self_client_connection> status_client,
                       pstore::gsl::not_null<pstore::httpd::server_status *> http_status,
                       pstore::gsl::not_null<std::atomic<bool> *> uptime_done) {
         using namespace pstore;
@@ -275,9 +240,8 @@ namespace {
             }
 
             auto scav_sptr = scav.lock ();
-            auto status_ptr = status_client.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
-                      status_ptr.get (), http_status, uptime_done);
+                      http_status, uptime_done);
         } catch (std::exception const & ex) {
             log (logging::priority::error, "error:", ex.what ());
         } catch (...) {
@@ -311,11 +275,10 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        std::weak_ptr<broker::self_client_connection> status_client,
                                         gsl::not_null<pstore::httpd::server_status *> http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
-                              status_client, http_status, uptime_done);
+                              http_status, uptime_done);
 
             register_signal_handler (SIGINT, signal_handler);
             register_signal_handler (SIGTERM, signal_handler);

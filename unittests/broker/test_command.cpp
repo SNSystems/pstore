@@ -58,9 +58,7 @@ namespace {
         explicit mock_cp (unsigned const num_read_threads,
                           pstore::httpd::server_status * const status,
                           std::atomic<bool> * const uptime_done)
-                : command_processor (num_read_threads,
-                                     std::weak_ptr<pstore::broker::self_client_connection>{},
-                                     status, uptime_done) {}
+                : command_processor (num_read_threads, status, uptime_done) {}
 
         MOCK_METHOD2 (suicide, void(pstore::broker::fifo_path const &,
                                     pstore::broker::broker_command const &));

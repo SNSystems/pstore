@@ -64,7 +64,6 @@
 #include "pstore/broker/read_loop.hpp"
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker/scavenger.hpp"
-#include "pstore/broker/status_server.hpp"
 #include "pstore/broker/uptime.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
@@ -118,7 +117,6 @@ namespace {
     create_worker_threads (std::shared_ptr<pstore::broker::command_processor> const & commands,
                            pstore::broker::fifo_path & fifo,
                            std::shared_ptr<pstore::broker::scavenger> const & scav,
-                           std::shared_ptr<pstore::broker::self_client_connection> && status_client,
                            std::unique_ptr<pstore::httpd::server_status> const & http_status,
                            std::atomic<bool> * const uptime_done) {
 
@@ -138,11 +136,6 @@ namespace {
         futures.push_back (create_thread ([]() {
             thread_init ("gcwatch");
             broker::gc_process_watch_thread ();
-        }));
-
-        futures.push_back (create_thread ([status_client]() {
-            thread_init ("status");
-            broker::status_server (status_client);
         }));
 
         futures.push_back (create_thread (
@@ -221,20 +214,17 @@ int main (int argc, char * argv[]) {
         std::atomic<bool> uptime_done{false};
 
         {
-            auto status_client = std::make_shared<pstore::broker::self_client_connection> ();
             auto commands = std::make_shared<broker::command_processor> (
-                opt.num_read_threads, make_weak (status_client), http_status.get (), &uptime_done);
+                opt.num_read_threads, http_status.get (), &uptime_done);
             auto scav = std::make_shared<broker::scavenger> (commands);
             commands->attach_scavenger (scav);
 
 
             logging::log (logging::priority::notice, "starting threads");
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
-                                       make_weak (status_client), http_status.get (), &uptime_done);
+                                       http_status.get (), &uptime_done);
 
-            futures = create_worker_threads (commands, fifo, scav, std::move (status_client),
-                                             http_status, &uptime_done);
-            status_client.reset ();
+            futures = create_worker_threads (commands, fifo, scav, http_status, &uptime_done);
 
             if (opt.playback_path) {
                 broker::player playback_file (*opt.playback_path);
@@ -242,7 +232,7 @@ int main (int argc, char * argv[]) {
                     commands->push_command (std::move (msg), record_file.get ());
                 }
                 shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/,
-                          status_client.get (), http_status.get (), &uptime_done);
+                          http_status.get (), &uptime_done);
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                     futures.push_back (create_thread ([ctr, &fifo, &record_file, commands]() {

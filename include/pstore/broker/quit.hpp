@@ -46,11 +46,11 @@
 #ifndef PSTORE_BROKER_QUIT_HPP
 #define PSTORE_BROKER_QUIT_HPP
 
+#include <atomic>
 #include <cstdlib>
 #include <memory>
 #include <thread>
 
-#include "pstore/broker/status_server.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -71,7 +71,6 @@ namespace pstore {
 
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
                        unsigned num_read_threads,
-                       pstore::broker::self_client_connection const * const status_client,
                        gsl::not_null<pstore::httpd::server_status *> http_status,
                        gsl::not_null<std::atomic<bool> *> uptime_done);
 
@@ -80,7 +79,6 @@ namespace pstore {
 
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        std::weak_ptr<broker::self_client_connection> status_client,
                                         gsl::not_null<pstore::httpd::server_status *> http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done);
     } // namespace broker

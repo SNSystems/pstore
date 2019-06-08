@@ -80,11 +80,9 @@ namespace pstore {
         // ctor
         // ~~~~
         command_processor::command_processor (unsigned const num_read_threads,
-                                              std::weak_ptr<self_client_connection> status_client,
                                               gsl::not_null<httpd::server_status *> http_status,
                                               gsl::not_null<std::atomic<bool> *> uptime_done)
-                : status_client_{std::move (status_client)}
-                , http_status_{http_status}
+                : http_status_{http_status}
                 , uptime_done_{uptime_done}
                 , num_read_threads_{num_read_threads} {
 
@@ -96,9 +94,8 @@ namespace pstore {
         // ~~~~~~~
         void command_processor::suicide (fifo_path const &, broker_command const &) {
             std::shared_ptr<scavenger> scav = scavenger_.get ();
-            std::shared_ptr<self_client_connection> conn = status_client_.lock ();
-            shutdown (this, scav.get (), sig_self_quit, num_read_threads_, conn.get (),
-                      http_status_, uptime_done_);
+            shutdown (this, scav.get (), sig_self_quit, num_read_threads_, http_status_,
+                      uptime_done_);
         }
 
         // quit

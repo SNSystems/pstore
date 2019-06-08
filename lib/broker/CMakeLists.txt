@@ -62,7 +62,6 @@ else ()
         "${pstore_broker_include_dir}/recorder.hpp"
         "${pstore_broker_include_dir}/scavenger.hpp"
         "${pstore_broker_include_dir}/spawn.hpp"
-        "${pstore_broker_include_dir}/status_server.hpp"
         "${pstore_broker_include_dir}/uptime.hpp"
 
         command.cpp
@@ -79,7 +78,6 @@ else ()
         scavenger.cpp
         spawn_posix.cpp
         spawn_win32.cpp
-        status_server.cpp
         uptime.cpp
     )
 
