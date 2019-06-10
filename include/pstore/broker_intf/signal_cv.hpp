@@ -72,7 +72,7 @@ namespace pstore {
         ///
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify_all () noexcept;
+        virtual void notify_all () noexcept;
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when
         /// notify() is executed. When unblocked, lock is reacquired and wait exits.
