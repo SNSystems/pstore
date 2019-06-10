@@ -103,19 +103,6 @@ namespace pstore {
     // ~~~~~
     void descriptor_condition_variable::reset () { ::ResetEvent (event_.native_handle ()); }
 
-    //*     _                _           *
-    //*  __(_)__ _ _ _  __ _| |  ____ __ *
-    //* (_-< / _` | ' \/ _` | | / _\ V / *
-    //* /__/_\__, |_||_\__,_|_| \__|\_/  *
-    //*      |___/                       *
-
-    // notify
-    // ~~~~~~
-    void signal_cv::notify_all (int sig) noexcept {
-        signal_ = sig;
-        descriptor_condition_variable::notify_all ();
-    }
-
 } // end namespace pstore
 
 #endif //_WIN32

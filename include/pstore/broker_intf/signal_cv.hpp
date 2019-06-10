@@ -72,7 +72,7 @@ namespace pstore {
         ///
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        virtual void notify_all () noexcept;
+        void notify_all () noexcept;
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when
         /// notify() is executed. When unblocked, lock is reacquired and wait exits.
@@ -97,7 +97,7 @@ namespace pstore {
     };
 
 
-    class signal_cv : public descriptor_condition_variable {
+    class signal_cv {
     public:
         signal_cv () = default;
 
@@ -107,15 +107,34 @@ namespace pstore {
         signal_cv & operator= (signal_cv const &) = delete;
         signal_cv & operator= (signal_cv &&) = delete;
 
+        /// \brief Unblocks all threads currently waiting for *this.
+        ///
         /// \param signal  The signal number responsible for the "wake".
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify_all (int signal) noexcept;
+        void notify_all (int signal) noexcept {
+            signal_ = signal;
+            cv_.notify_all ();
+        }
+
+        /// Releases lock and blocks the current executing thread. The thread will be unblocked when
+        /// notify() is executed. When unblocked, lock is reacquired and wait exits.
+        ///
+        /// \param lock  An object of type std::unique_lock<std::mutex>, which must be locked by the
+        /// current thread
+        void wait (std::unique_lock<std::mutex> & lock) { cv_.wait (lock); }
+        void wait () { cv_.wait (); }
+
+        broker::pipe_descriptor const & wait_descriptor () const noexcept {
+            return cv_.wait_descriptor ();
+        }
+        void reset () { cv_.reset (); }
 
         int signal () const { return signal_.load (); }
 
     private:
         std::atomic<int> signal_{-1};
+        descriptor_condition_variable cv_;
     };
 
 } // namespace pstore

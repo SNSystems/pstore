@@ -88,8 +88,8 @@ namespace pstore {
         assert (write_fd_.valid ());
 
         // Make both pipe descriptors non-blocking.
-        signal_cv::make_non_blocking (read_fd_.native_handle ());
-        signal_cv::make_non_blocking (write_fd_.native_handle ());
+        descriptor_condition_variable::make_non_blocking (read_fd_.native_handle ());
+        descriptor_condition_variable::make_non_blocking (write_fd_.native_handle ());
     }
 
     // wait_descriptor
@@ -164,18 +164,6 @@ namespace pstore {
         if (bytes_read == -1) {
             raise (errno_erc{errno}, "read");
         }
-    }
-
-    //*     _                _           *
-    //*  __(_)__ _ _ _  __ _| |  ____ __ *
-    //* (_-< / _` | ' \/ _` | | / _\ V / *
-    //* /__/_\__, |_||_\__,_|_| \__|\_/  *
-    //*      |___/                       *
-    // notify
-    // ~~~~~~
-    void signal_cv::notify_all (int signal) noexcept {
-        signal_ = signal;
-        descriptor_condition_variable::notify_all ();
     }
 
 } // namespace pstore
