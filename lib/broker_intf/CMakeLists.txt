@@ -50,8 +50,6 @@ set (PSTORE_BROKER_INTF_SRC
     "${PSTORE_INCLUDE_DIR}/broker_intf/message_type.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/send_message.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/signal_cv.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/status_client.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/status_path.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/writer.hpp"
     "${PSTORE_INCLUDE_DIR}/broker_intf/wsa_startup.hpp"
 
@@ -63,8 +61,6 @@ set (PSTORE_BROKER_INTF_SRC
     send_message.cpp
     signal_cv_posix.cpp
     signal_cv_win32.cpp
-    status_client.cpp
-    status_path.cpp
     writer_common.cpp
     writer_posix.cpp
     writer_win32.cpp

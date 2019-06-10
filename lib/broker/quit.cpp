@@ -58,10 +58,10 @@
 // Platform includes
 #include <fcntl.h>
 #ifdef _WIN32
-#include <winsock2.h>
+#    include <winsock2.h>
 #else
-#include <sys/socket.h>
-#include <unistd.h>
+#    include <sys/socket.h>
+#    include <unistd.h>
 #endif
 #include <signal.h>
 
@@ -72,10 +72,8 @@
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
-#include "pstore/broker_intf/status_client.hpp"
-#include "pstore/broker_intf/status_path.hpp"
-#include "pstore/httpd/server.hpp"
 #include "pstore/httpd/quit.hpp"
+#include "pstore/httpd/server.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/logging.hpp"
 #include "pstore/support/make_unique.hpp"
