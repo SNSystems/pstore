@@ -134,15 +134,19 @@ namespace {
     std::string::size_type for_each_namespace (std::string const & s, Function function) {
         auto start = std::string::size_type{0};
         auto end = std::string::npos;
-        static char two_colons[] = "::";
+        static char const two_colons[] = "::";
+        auto part = 0U;
 
         while ((end = s.find (two_colons, start)) != std::string::npos) {
+            ++part;
             assert (end >= start);
             auto const length = end - start;
-            if (length == 0) {
+            if (length == 0 && part > 1U) {
                 pstore::raise (genromfs_erc::empty_name_component);
             }
-            function (s.substr (start, length));
+            if (length > 0) {
+                function (s.substr (start, length));
+            }
             start = end + pstore::array_elements (two_colons) - 1U;
         }
         return start;
@@ -193,7 +197,7 @@ int main (int argc, char * argv[]) {
               "} // end anonymous namespace\n"
               "\n";
 
-        write_definition (std::cout, root_var, directory_var (root_id).as_string ());
+        write_definition (os, root_var, directory_var (root_id).as_string ());
     }
     PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';
