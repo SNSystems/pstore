@@ -52,15 +52,10 @@ using testing::Invoke;
 
 using pstore::httpd::make_buffered_reader;
 
-namespace {}
-
-
 TEST (WsServer, NothingFromClient) {
     // Define what the client will send to the server (just EOF).
     refiller r;
     EXPECT_CALL (r, fill (_, _)).WillRepeatedly (Invoke (eof ()));
-    auto io = 0;
-    auto br = make_buffered_reader<decltype (io)> (r.refill_function ());
 
     // Record the server's response.
     std::vector<std::uint8_t> output;
@@ -69,6 +64,8 @@ TEST (WsServer, NothingFromClient) {
         return pstore::error_or<int>{pstore::in_place, io + 1};
     };
 
+    auto io = 0;
+    auto br = make_buffered_reader<decltype (io)> (r.refill_function ());
     ws_server_loop (br, sender, io, "", pstore::httpd::channel_container{});
 
     // A close frame with error 0x3ee (1006: abnormal closure).
