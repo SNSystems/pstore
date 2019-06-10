@@ -88,16 +88,19 @@ namespace {
                 , cp_{1U, &http_status_, &uptime_done_}
                 , fifo_{nullptr} {}
 
-    protected:
+        mock_cp & cp () { return cp_; }
+        pstore::broker::fifo_path & fifo () { return fifo_; }
+
+        static constexpr std::uint32_t message_id = 0;
+        static constexpr std::uint16_t part_no = 0;
+        static constexpr std::uint16_t num_parts = 1;
+
+    private:
         pstore::httpd::server_status http_status_;
         std::atomic<bool> uptime_done_;
 
         mock_cp cp_;
         pstore::broker::fifo_path fifo_;
-
-        static constexpr std::uint32_t message_id = 0;
-        static constexpr std::uint16_t part_no = 0;
-        static constexpr std::uint16_t num_parts = 1;
     };
 } // namespace
 
@@ -105,25 +108,25 @@ namespace {
 // functions in mock_cp.
 TEST_F (Command, NoCalls) {
     using ::testing::_;
-    EXPECT_CALL (cp_, suicide (_, _)).Times (0);
-    EXPECT_CALL (cp_, quit (_, _)).Times (0);
-    EXPECT_CALL (cp_, cquit (_, _)).Times (0);
-    EXPECT_CALL (cp_, gc (_, _)).Times (0);
-    EXPECT_CALL (cp_, echo (_, _)).Times (0);
-    EXPECT_CALL (cp_, nop (_, _)).Times (0);
+    EXPECT_CALL (cp (), suicide (_, _)).Times (0);
+    EXPECT_CALL (cp (), quit (_, _)).Times (0);
+    EXPECT_CALL (cp (), cquit (_, _)).Times (0);
+    EXPECT_CALL (cp (), gc (_, _)).Times (0);
+    EXPECT_CALL (cp (), echo (_, _)).Times (0);
+    EXPECT_CALL (cp (), nop (_, _)).Times (0);
 }
 
 TEST_F (Command, Nop) {
     using ::testing::_;
 
-    EXPECT_CALL (cp_, nop (_, _)).Times (1);
+    EXPECT_CALL (cp (), nop (_, _)).Times (1);
     pstore::broker::message_type msg{message_id, part_no, num_parts, "NOP"};
-    cp_.process_command (fifo_, msg);
+    cp ().process_command (fifo (), msg);
 }
 
 TEST_F (Command, Bad) {
-    EXPECT_CALL (cp_, unknown (pstore::broker::broker_command{"bad", "command"})).Times (1);
+    EXPECT_CALL (cp (), unknown (pstore::broker::broker_command{"bad", "command"})).Times (1);
 
     pstore::broker::message_type msg{message_id, part_no, num_parts, "bad command"};
-    cp_.process_command (fifo_, msg);
+    cp ().process_command (fifo (), msg);
 }
