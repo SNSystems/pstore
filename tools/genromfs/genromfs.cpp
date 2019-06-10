@@ -88,7 +88,7 @@ namespace {
             auto * result = "unknown value error";
             switch (static_cast<genromfs_erc> (error)) {
             case genromfs_erc::empty_name_component: result = "Name component is empty"; break;
-            };
+            }
             return result;
         }
     };
@@ -109,12 +109,12 @@ namespace std {
 
 } // end namespace std
 
+#define DEFAULT_VAR "fs"
+
 namespace {
 
     using namespace pstore::cmd_util;
     cl::opt<std::string> src_path (cl::Positional, ".", cl::desc ("source-path"));
-
-#define DEFAULT_VAR "fs"
 
     cl::opt<std::string> root_var (
         "var",
@@ -123,9 +123,9 @@ namespace {
                   "')"),
         cl::init (DEFAULT_VAR));
 
-#undef DEFAULT_VAR
-
 } // end anonymous namespace
+
+#undef DEFAULT_VAR
 
 
 namespace {
