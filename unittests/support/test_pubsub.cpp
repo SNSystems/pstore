@@ -122,7 +122,7 @@ TEST (PubSub, PubSub) {
 
     // Now post some messages to the channel.
     chan.publish ("message 1");
-    chan.publish ("message 2");
+    chan.publish ([](char const * s) { return std::string{s}; }, "message 2");
 
     received_counter.wait_for_value (2);
     sub->cancel ();
