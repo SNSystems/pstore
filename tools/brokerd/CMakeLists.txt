@@ -87,7 +87,7 @@ else ()
     # Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
     add_custom_command (
         COMMENT "genromfs from ${CMAKE_CURRENT_SOURCE_DIR}/html to ${pstore_httpd_fs_source}"
-        COMMAND pstore-genromfs --var fs "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_httpd_fs_source}"
+        COMMAND pstore-genromfs --var "::fs" "${CMAKE_CURRENT_SOURCE_DIR}/html" > "${pstore_httpd_fs_source}"
         OUTPUT "${pstore_httpd_fs_source}"
         DEPENDS pstore-genromfs
         WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
