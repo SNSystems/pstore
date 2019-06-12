@@ -26,8 +26,8 @@ function message_received (msg) {
     }
 }
 
-var uptime_socket = new_ws ('uptime', message_received);
-var commit_socket = new_ws ('commits', message_received);
+new_ws ('uptime', message_received);
+new_ws ('commits', message_received);
 
 var prev_commits = 0;
 setInterval (() => {
