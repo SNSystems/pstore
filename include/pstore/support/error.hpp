@@ -64,25 +64,26 @@
 
 namespace pstore {
 
-#    define PSTORE_ERROR_CODES                                                                     \
-        X (none)                                                                                   \
-        X (unknown_revision)                                                                       \
-        X (header_corrupt)                                                                         \
-        X (header_version_mismatch)                                                                \
-        X (footer_corrupt)                                                                         \
-        X (index_corrupt)                                                                          \
-        X (index_not_latest_revision)                                                              \
-        X (unknown_process_path) /* could not discover the path of the calling process image*/     \
-        X (store_closed)         /*an attempt to read or write from a store which is not open*/    \
-        X (cannot_allocate_after_commit) /*cannot allocate data after a transaction has been       \
-                                            committed*/                                            \
-        X (bad_address) /*an attempt to address an address outside of the allocated storage*/      \
-        X (read_only_address) /* an attempt to write to read-only storage*/                        \
-        X (did_not_read_number_of_bytes_requested)                                                 \
-        X (uuid_parse_error)                                                                       \
-        X (bad_message_part_number)                                                                \
-        X (unable_to_open_named_pipe)                                                              \
-        X (pipe_write_timeout)
+#define PSTORE_ERROR_CODES                                                                         \
+    X (none)                                                                                       \
+    X (unknown_revision)                                                                           \
+    X (header_corrupt)                                                                             \
+    X (header_version_mismatch)                                                                    \
+    X (footer_corrupt)                                                                             \
+    X (index_corrupt)                                                                              \
+    X (bad_alignment) /* an address was not correctly aligned for its pointee type */              \
+    X (index_not_latest_revision)                                                                  \
+    X (unknown_process_path) /* could not discover the path of the calling process image*/         \
+    X (store_closed)         /*an attempt to read or write from a store which is not open*/        \
+    X (cannot_allocate_after_commit) /*cannot allocate data after a transaction has been           \
+                                        committed*/                                                \
+    X (bad_address)       /*an attempt to address an address outside of the allocated storage*/    \
+    X (read_only_address) /* an attempt to write to read-only storage*/                            \
+    X (did_not_read_number_of_bytes_requested)                                                     \
+    X (uuid_parse_error)                                                                           \
+    X (bad_message_part_number)                                                                    \
+    X (unable_to_open_named_pipe)                                                                  \
+    X (pipe_write_timeout)
     // Add more error values here
 
     // **************

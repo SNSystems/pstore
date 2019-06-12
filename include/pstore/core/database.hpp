@@ -183,7 +183,9 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T const> getro (extent<T> const & ex) const {
-            assert (ex.addr.absolute () % alignof (T) == 0);
+            if (ex.addr.to_address ().absolute () % alignof (T) != 0) {
+                raise (error_code::bad_alignment);
+            }
             // Note that ex.size specifies the size in bytes of the data to be loaded, not the
             // number of elements of type T. For this reason we call the plain address version of
             // getro().
@@ -210,7 +212,9 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T const> getro (typed_address<T> addr, std::size_t elements) const {
-            assert (addr.to_address ().absolute () % alignof (T) == 0);
+            if (addr.to_address ().absolute () % alignof (T) != 0) {
+                raise (error_code::bad_alignment);
+            }
             return std::static_pointer_cast<T const> (
                 this->getro (addr.to_address (), sizeof (T) * elements));
         }
@@ -240,6 +244,9 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T> getrw (extent<T> const & ex) {
+            if (ex.addr.to_address ().absolute () % alignof (T) != 0) {
+                raise (error_code::bad_alignment);
+            }
             // Note that ex.size specifies the size in bytes of the data to be loaded, not the
             // number of elements of type T. For this reason we call the plain address version of
             // getro().
@@ -264,7 +271,9 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T> getrw (typed_address<T> addr, std::size_t elements) {
-            assert (addr.absolute () % alignof (T) == 0);
+            if (addr.to_address ().absolute () % alignof (T) != 0) {
+                raise (error_code::bad_alignment);
+            }
             return std::static_pointer_cast<T> (
                 this->getrw (addr.to_address (), sizeof (T) * elements));
         }
