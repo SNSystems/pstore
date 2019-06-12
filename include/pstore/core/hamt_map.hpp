@@ -593,11 +593,14 @@ namespace pstore {
                 , equal_ (KeyEqual ()) {
 
             if (pos != typed_address<header_block>::null ()) {
-                // 'pos' must point to the index header block which gives us the tree root and size.
+                // 'pos' points to the index header block which gives us the tree root and size.
                 std::shared_ptr<header_block const> hb = db.getro (pos);
+                // Check that this block appears to be sensible.
                 if (hb->signature != index_signature || index_pointer{hb->root}.is_heap ()) {
                     raise (pstore::error_code::index_corrupt);
                 }
+                // TODO: Could add additional checks: if size is 0, root must be null; if size is 1,
+                // root must be a leaf; if size > 1, root must be an internal node.
                 size_ = hb->size;
                 root_ = hb->root;
             }
