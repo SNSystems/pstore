@@ -188,6 +188,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     generic_section const & s = f->at<section_kind::text> ();
     EXPECT_EQ (16U, s.align ());
     EXPECT_EQ (4U, s.data ().size ());
+    EXPECT_EQ (4U, s.size ());
     EXPECT_EQ (2U, s.ifixups ().size ());
     EXPECT_EQ (3U, s.xfixups ().size ());
 

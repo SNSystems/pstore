@@ -216,6 +216,8 @@ namespace pstore {
             generic_section & operator= (generic_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_; }
+            /// The number of data bytes contained by this section.
+            std::uint64_t size () const noexcept { return data_size_; }
 
             container<std::uint8_t> data () const {
                 auto * begin = aligned_ptr<std::uint8_t> (this + 1);
@@ -464,7 +466,7 @@ namespace pstore {
 
             std::size_t size_bytes () const final { return s_.size_bytes (); }
             unsigned align () const final { return s_.align (); }
-            std::size_t size () const final { return s_.data ().size (); }
+            std::size_t size () const final { return s_.size (); }
             container<internal_fixup> ifixups () const final { return s_.ifixups (); }
             container<external_fixup> xfixups () const final { return s_.xfixups (); }
             container<std::uint8_t> data () const final { return s_.data (); }
