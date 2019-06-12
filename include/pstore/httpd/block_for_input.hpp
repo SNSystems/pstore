@@ -128,6 +128,7 @@ namespace pstore {
             }
 
             fd_set error_fds;
+            FD_ZERO (&error_fds);
             FD_SET (socket_fd.native_handle (), &error_fds);
             if (cv_fd != nullptr) {
                 FD_SET (cv_fd->native_handle (), &error_fds);
