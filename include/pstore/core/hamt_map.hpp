@@ -592,13 +592,10 @@ namespace pstore {
                 , hash_ (hash)
                 , equal_ (KeyEqual ()) {
 
-            if (index_pointer{pos.to_address ()}.is_heap ()) {
-                raise (pstore::error_code::index_corrupt);
-            }
             if (pos != typed_address<header_block>::null ()) {
                 // 'pos' must point to the index header block which gives us the tree root and size.
-                auto hb = db.getro (pos);
-                if (hb->signature != index_signature) {
+                std::shared_ptr<header_block const> hb = db.getro (pos);
+                if (hb->signature != index_signature || index_pointer{hb->root}.is_heap ()) {
                     raise (pstore::error_code::index_corrupt);
                 }
                 size_ = hb->size;
