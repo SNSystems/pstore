@@ -108,40 +108,50 @@ namespace {
     }
 
     void OpenCorruptStore::check_database_open (pstore::error_code err) const {
-        auto fn = [this]() { pstore::database{this->file ()}; };
-        check_for_error (fn, err);
+        check_for_error ([this]() { pstore::database{this->file ()}; }, err);
     }
 } // end anonymous namespace
 
 TEST_F (OpenCorruptStore, HeaderBadSignature1) {
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
     // Modify the signature1 field.
-    auto & s1 = this->get_header ()->a.signature1;
+    auto * const h = this->get_header ();
+    auto & s1 = h->a.signature1;
     s1[0] = !s1[0];
+    h->crc = h->get_crc ();
     this->check_database_open (pstore::error_code::header_corrupt);
+#endif // PSTORE_SIGNATURE_CHECKS_ENABLED
 }
 
 TEST_F (OpenCorruptStore, HeaderBadSignature2) {
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
     // Modify the signature2 field.
-    auto & s2 = this->get_header ()->a.signature2;
+    auto * const h = this->get_header ();
+    auto & s2 = h->a.signature2;
     s2 = !s2;
+    h->crc = h->get_crc ();
     this->check_database_open (pstore::error_code::header_corrupt);
+#endif // PSTORE_SIGNATURE_CHECKS_ENABLED
 }
 
 TEST_F (OpenCorruptStore, HeaderBadSize) {
-    auto h = this->get_header ();
+    auto * const h = this->get_header ();
     h->a.header_size = 0;
+    h->crc = h->get_crc ();
     this->check_database_open (pstore::error_code::header_version_mismatch);
 }
 
 TEST_F (OpenCorruptStore, HeaderBadMajorVersion) {
-    auto h = this->get_header ();
+    auto * const h = this->get_header ();
     h->a.version[0] = std::numeric_limits<std::uint16_t>::max ();
+    h->crc = h->get_crc ();
     this->check_database_open (pstore::error_code::header_version_mismatch);
 }
 
 TEST_F (OpenCorruptStore, HeaderBadMinorVersion) {
-    auto h = this->get_header ();
+    auto * const h = this->get_header ();
     h->a.version[1] = std::numeric_limits<std::uint16_t>::max ();
+    h->crc = h->get_crc ();
     this->check_database_open (pstore::error_code::header_version_mismatch);
 }
 

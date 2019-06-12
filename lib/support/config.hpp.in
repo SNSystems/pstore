@@ -49,25 +49,25 @@
 #cmakedefine PSTORE_IS_INSIDE_LLVM 1
 
 /// Is exception handling enabled?
-#cmakedefine PSTORE_EXCEPTIONS  1
+#cmakedefine PSTORE_EXCEPTIONS 1
 
 /// Is the host system big endian?
 #cmakedefine PSTORE_IS_BIG_ENDIAN 1
 
 /// Does the compiler support __uint128_t?
-#cmakedefine PSTORE_DISABLE_UINT128_T  1
+#cmakedefine PSTORE_DISABLE_UINT128_T 1
 #if !PSTORE_DISABLE_UINT128_T
-#cmakedefine PSTORE_HAVE_UINT128_T  1
+#    cmakedefine PSTORE_HAVE_UINT128_T 1
 #endif
 
 /// Does the compiler support __attribute__((noreturn))?
-#cmakedefine PSTORE_HAVE_ATTRIBUTE_NORETURN  1
+#cmakedefine PSTORE_HAVE_ATTRIBUTE_NORETURN 1
 
-#cmakedefine PSTORE_HAVE_NONNULL_KEYWORD  1
-#cmakedefine PSTORE_HAVE_NULLABLE_KEYWORD  1
+#cmakedefine PSTORE_HAVE_NONNULL_KEYWORD 1
+#cmakedefine PSTORE_HAVE_NULLABLE_KEYWORD 1
 
 /// If the compiler support __uint128_t, does the standard library include std::is_unsigned<>?
-#cmakedefine PSTORE_HAVE_UINT128_TRAITS_SUPPORT  1
+#cmakedefine PSTORE_HAVE_UINT128_TRAITS_SUPPORT 1
 
 #cmakedefine PSTORE_VENDOR_ID "@PSTORE_VENDOR_ID@"
 
@@ -79,10 +79,10 @@
 #cmakedefine PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H 1
 
 /// Defined if <byteswap.h> is available.
-#cmakedefine PSTORE_HAVE_BYTESWAP_H  1
+#cmakedefine PSTORE_HAVE_BYTESWAP_H 1
 
 /// Defined if <sys/endian.h> is available.
-#cmakedefine PSTORE_HAVE_SYS_ENDIAN_H  1
+#cmakedefine PSTORE_HAVE_SYS_ENDIAN_H 1
 
 /// Defined if the C11 localtime_s() API is available.
 #cmakedefine PSTORE_HAVE_LOCALTIME_S 1
@@ -91,10 +91,10 @@
 #cmakedefine PSTORE_HAVE_LOCALTIME_R 1
 
 /// Defined if the C11 gMtime_s() API is available
-#cmakedefine PSTORE_HAVE_GMTIME_S  1
+#cmakedefine PSTORE_HAVE_GMTIME_S 1
 
 /// Defined if the POSIX gmtime_r() API is available
-#cmakedefine PSTORE_HAVE_GMTIME_R  1
+#cmakedefine PSTORE_HAVE_GMTIME_R 1
 
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec)
 /// or st_Xtime (and be of type time_t). This macro is defined in the former situation.
@@ -112,7 +112,7 @@
 #cmakedefine PSTORE_HAVE_STD_QUOTED 1
 
 /// Defined if std::to_string<>() is available.
-#cmakedefine PSTORE_HAVE_STD_TO_STRING  1
+#cmakedefine PSTORE_HAVE_STD_TO_STRING 1
 
 /// Defined if std::map<> supports the insert_or_assign() member function. This was not officially
 /// introduced until C++17 but is available even when compiling for C++11 on some platforms.
@@ -131,11 +131,19 @@
 /// \brief Controls whether the library validates data header and footer structures
 ///        with a simple CRC value.
 ///
-/// The data store file header and footer objects normally contain CRC values to ensure the
-/// validity of the structures. However, fuzzing tools have more luck in finding exciting
-/// bugs if these sanity checks are disabled; that's done by definining this macro as 0.
-/// Naturally, the checks are enabled by default.
+/// The data store file header and footer objects normally contain CRC values to ensure the validity
+/// of the structures. However, fuzzing tools have more luck in finding exciting bugs if these
+/// sanity checks are disabled; that's done by making this macro false. Naturally, the checks are
+/// enabled by default.
 #cmakedefine PSTORE_CRC_CHECKS_ENABLED 1
+
+/// \brief Controls whether the library validates internal structure signatures.
+///
+/// The data store's internal structure normally contain magic "signature" values as a basic check
+/// of the file integrity. However, fuzzing tools have more luck in finding exciting bugs if these
+/// sanity checks are disabled; that's done by making this macro false. Naturally, the checks are
+/// enabled by default.
+#cmakedefine PSTORE_SIGNATURE_CHECKS_ENABLED 1
 
 /// \brief Controls the rate of data store file growth on POSIX systems.
 ///
@@ -162,7 +170,7 @@
 #if defined(_WIN32) && PSTORE_POSIX_SMALL_FILES
 // Sorry, but we can't do small files on Windows. They grow in increments of the
 // minimum allocation size, like it or not.
-#undef PSTORE_POSIX_SMALL_FILES
+#    undef PSTORE_POSIX_SMALL_FILES
 #endif
 
 /// \brief A debugging aid to make all data store requests "spanning".

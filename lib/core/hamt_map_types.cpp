@@ -161,9 +161,11 @@ namespace pstore {
                 // instances of linear_node.
                 ln = std::static_pointer_cast<linear_node const> (
                     db.getro (addr.to_address (), in_store_size));
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
                 if (ln->signature_ != signature) {
                     raise (pstore::error_code::index_corrupt);
                 }
+#endif
                 return {ln, ln.get ()};
             }
 
@@ -295,10 +297,11 @@ namespace pstore {
 
             bool internal_node::validate_after_load (internal_node const & internal,
                                                      address const addr) {
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
                 if (internal.signature_ != signature) {
                     return false;
                 }
-
+#endif
                 auto first = std::begin (internal);
                 auto last = std::end (internal);
                 while (first != last) {

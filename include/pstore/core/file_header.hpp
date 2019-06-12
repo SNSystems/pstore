@@ -268,6 +268,7 @@ namespace pstore {
         static std::array<std::uint8_t, 8> default_signature2;
 
         bool crc_is_valid () const;
+        bool signature_is_valid () const noexcept;
 
         /// Checks that the address given by 'pos' appears to point to a valid transaction trailer.
         /// Raises exception::footer_corrupt if not.

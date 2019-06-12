@@ -507,10 +507,12 @@ namespace pstore {
         auto dtor = [](header * p) { p->~header (); };
         std::unique_ptr<header, decltype (dtor)> deleter (h, dtor);
 
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
         if (h->a.signature1 != header::file_signature1 ||
             h->a.signature2 != header::file_signature2) {
             raise (error_code::header_corrupt, file.path ());
         }
+#endif
         if (h->a.header_size != sizeof (class header) || h->a.version[0] != header::major_version ||
             h->a.version[1] != header::minor_version) {
             raise (error_code::header_version_mismatch, file.path ());

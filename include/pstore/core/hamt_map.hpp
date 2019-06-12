@@ -596,10 +596,15 @@ namespace pstore {
                 // 'pos' points to the index header block which gives us the tree root and size.
                 std::shared_ptr<header_block const> hb = db.getro (pos);
                 // Check that this block appears to be sensible.
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
+                if (hb->signature != index_signature) {
+                    raise (pstore::error_code::index_corrupt);
+                }
+#endif
+
                 {
                     auto const root = index_pointer{hb->root};
-                    if (hb->signature != index_signature || root.is_heap () ||
-                        (hb->size == 0U && !root.is_empty ()) ||
+                    if (root.is_heap () || (hb->size == 0U && !root.is_empty ()) ||
                         (hb->size > 0U && root.is_empty ()) ||
                         (hb->size == 1U && !root.is_leaf ()) ||
                         (hb->size > 1U && !root.is_internal ())) {

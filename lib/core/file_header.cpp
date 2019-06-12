@@ -122,10 +122,21 @@ namespace pstore {
 #endif
     }
 
+    // signature_is_valid
+    // ~~~~~~~~~~~~~~~~~~
+    bool trailer::signature_is_valid () const noexcept {
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
+        return a.signature1 == trailer::default_signature1 ||
+               signature2 == trailer::default_signature2;
+#else
+        return true;
+#endif
+    }
+
     // get_crc
     // ~~~~~~~
     std::uint32_t trailer::get_crc () const noexcept {
-        return crc32 (::pstore::gsl::make_span (&this->a, 1));
+        return crc32 (gsl::make_span (&this->a, 1));
     }
 
     // validate [static]
@@ -146,9 +157,7 @@ namespace pstore {
             // Get the address of the previous generation.
             typed_address<trailer> prev_pos = footer->a.prev_generation;
 
-            if (!footer->crc_is_valid () || footer->a.signature1 != trailer::default_signature1 ||
-                footer->signature2 != trailer::default_signature2) {
-
+            if (!footer->crc_is_valid () || !footer->signature_is_valid ()) {
                 ok = false;
             } else if (pos >= typed_address<trailer>::make (sizeof (trailer)) &&
                        prev_pos > pos - 1U) {

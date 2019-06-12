@@ -49,23 +49,23 @@
 
 #include <gtest/gtest.h>
 
+#include "pstore/config/config.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 
 template <typename Function>
-void check_for_error (Function fn, int err, std::error_category const & category) {
+void check_for_error (Function test_fn, int err, std::error_category const & category) {
 #if PSTORE_EXCEPTIONS
-    EXPECT_THROW (
-        {
-            try {
-                fn ();
-            } catch (std::system_error const & ex) {
-                EXPECT_EQ (category, ex.code ().category ());
-                EXPECT_EQ (err, ex.code ().value ());
-                throw;
-            }
-        },
-        std::system_error);
+    auto f = [&]() {
+        try {
+            test_fn ();
+        } catch (std::system_error const & ex) {
+            EXPECT_EQ (category, ex.code ().category ());
+            EXPECT_EQ (err, ex.code ().value ());
+            throw;
+        }
+    };
+    EXPECT_THROW (f (), std::system_error);
 #else
     (void) fn;
     (void) err;

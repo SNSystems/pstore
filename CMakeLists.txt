@@ -104,6 +104,7 @@ endif ()
 # trusted. For this reason, it's possible to build with the CRC checks disabled to make
 # it quicker and easiesr for a fuzzer to find bugs in the library.
 option (PSTORE_CRC_CHECKS_ENABLED "Perform CRC checks on pstore header and footer records. Disable for fuzzing." Yes)
+option (PSTORE_SIGNATURE_CHECKS_ENABLED "Perform internal structure signature checks. Disable for fuzzing." Yes)
 
 option (PSTORE_POSIX_SMALL_FILES "On POSIX systems, keep pstore files as small as possible")
 option (PSTORE_ALWAYS_SPANNING "A debugging aid which forces all requests to behave as 'spanning' pointers")
@@ -114,8 +115,12 @@ option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")
 option (PSTORE_DISABLE_UINT128_T "Disable support for __uint128_t")
 
+
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")
+endif ()
+if (NOT PSTORE_SIGNATURE_CHECKS_ENABLED)
+    message (WARNING "Signature checks are disabled")
 endif ()
 
 
