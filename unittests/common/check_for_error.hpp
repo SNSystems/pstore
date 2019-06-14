@@ -67,7 +67,7 @@ void check_for_error (Function test_fn, int err, std::error_category const & cat
     };
     EXPECT_THROW (f (), std::system_error);
 #else
-    (void) fn;
+    (void) test_fn;
     (void) err;
     (void) category;
 #endif // PSTORE_EXCEPTIONS
