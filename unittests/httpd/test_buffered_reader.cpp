@@ -43,14 +43,18 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/httpd/buffered_reader.hpp"
 
+// Standard Library includes
+#include <algorithm>
 #include <cassert>
 #include <cerrno>
 #include <cstring>
 #include <string>
 #include <vector>
 
+// 3rd party includes
 #include "gmock/gmock.h"
 
+// Local includes
 #include "buffered_reader_mocks.hpp"
 
 using pstore::error_or;
@@ -65,7 +69,7 @@ using testing::Invoke;
 TEST (HttpdBufferedReader, Span) {
     using byte_span = pstore::gsl::span<std::uint8_t>;
     auto refill = [](int io, byte_span const & sp) {
-        std::memset (sp.data (), 0, sp.size ());
+        std::fill (std::begin (sp), std::end (sp), std::uint8_t{0});
         return pstore::error_or_n<int, byte_span::iterator>{pstore::in_place, io, sp.end ()};
     };
 
