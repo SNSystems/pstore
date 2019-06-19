@@ -53,7 +53,7 @@ endmacro()
 
 
 # disable_warning_if_possible
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # Adds a switch to the compile options if supported by the compiler.
 #
 # target_name: The name of the target to which the compile option should be
@@ -70,6 +70,8 @@ function (disable_warning_if_possible target_name flag result_var)
 endfunction()
 
 
+# pstore_enable_warnings
+# ~~~~~~~~~~~~~~~~~~~~~~
 function (pstore_enable_warnings target_name)
 
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -104,6 +106,7 @@ function (pstore_enable_warnings target_name)
     target_compile_options (${target_name} PRIVATE ${options})
 
 endfunction (pstore_enable_warnings)
+
 
 #######################################
 # add_pstore_additional_compiler_flags #
@@ -161,6 +164,11 @@ function (add_pstore_additional_compiler_flags target_name)
             -Wextra
             -pedantic
         )
+
+	# A warning telling us that the signature will change in C++17 isn't important right now.
+	disable_warning_if_possible (${target_name} -Wno-noexcept-type      PSTORE_GCC_SUPPORTS_EXCEPT_TYPE)
+        disable_warning_if_possible (${target_name} -Wno-ignored-attributes PSTORE_GCC_SUPPORTS_IGNORED_ATTRIBUTES)
+
         if (PSTORE_COVERAGE)
             target_compile_options (${target_name} PRIVATE -fprofile-arcs -ftest-coverage)
             target_link_libraries (${target_name} PUBLIC --coverage)
