@@ -145,9 +145,9 @@ TEST (WsServer, Ping) {
 
     // Record the server's response.
     std::vector<std::uint8_t> output;
-    auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
+    auto sender = [&output](int io2, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (s.begin (), s.end (), std::back_inserter (output));
-        return pstore::error_or<int>{pstore::in_place, io + 1};
+        return pstore::error_or<int>{pstore::in_place, io2 + 1};
     };
 
 
