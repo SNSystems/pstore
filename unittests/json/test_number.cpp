@@ -42,7 +42,9 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/json/json.hpp"
+
 #include <gtest/gtest.h>
+
 #include "pstore/json/dom_types.hpp"
 #include "pstore/support/to_string.hpp"
 #include "callbacks.hpp"
@@ -236,13 +238,9 @@ TEST_F (JsonNumber, IntegerNegativeOverflow) {
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
-// FIXME: is this test testing what it claims to?
 TEST_F (JsonNumber, IntegerNegativeOverflow2) {
-    constexpr auto min = std::numeric_limits<long>::min ();
-    auto const str = pstore::to_string (static_cast<unsigned long long> (min) + 1ULL);
-
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (str).eof ();
+    p.input (std::string{"-9223372036854775809"}).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
