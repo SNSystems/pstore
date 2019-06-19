@@ -46,13 +46,13 @@
 #include <iostream>
 
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#ifdef _MSC_VER
-#include <fcntl.h>
-#include <io.h>
-#endif
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
+#    ifdef _MSC_VER
+#        include <fcntl.h>
+#        include <io.h>
+#    endif
 #else
 // On Windows, the TCHAR type may be either char or whar_t depending on the selected
 // Unicode mode. Everywhere else, I need to add this type for compatibility.
@@ -70,6 +70,7 @@ using TCHAR = char;
 #include "pstore/support/utf.hpp"
 
 namespace {
+
 #if defined(_WIN32) && defined(_UNICODE)
     auto & error_stream = std::wcerr;
     auto & out_stream = std::wcout;
@@ -81,9 +82,9 @@ namespace {
     void set_output_stream_to_binary (FILE * const fd) {
         if (fd) {
 #ifdef _MSC_VER
-            // On Visual Studio, a stream I/O routine operates on a file that is open in text mode.
-            // Line feed characters are translated into CR-LF combinations on output. The text mode
-            // could be changed to binary mode, in which the translation is suppressed.
+            // In Visual Studio, stream I/O routines operate on a file that is open in text mode and
+            // where line-feed characters are translated into CR-LF combinations on output. Here,
+            // the stream is placed in binary mode, in which the translation is suppressed.
             int result = _setmode (_fileno (stdout), O_BINARY);
             if (result == -1) {
                 throw std::runtime_error ("Cannot set stream to binary mode");
@@ -111,7 +112,7 @@ namespace {
             } else {
                 pstore::shared_sstring_view owner;
                 out_stream << pstore::utf::to_native_string (
-                    it->as_string_view (&owner).to_string ());
+                    it->as_db_string_view (&owner).to_string ());
             }
         }
         return ok;
@@ -158,7 +159,8 @@ namespace {
         }
         return ok;
     }
-} // namespace
+
+} // end anonymous namespace
 
 #if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
 int _tmain (int argc, TCHAR * argv[]) {
@@ -166,8 +168,6 @@ int _tmain (int argc, TCHAR * argv[]) {
 int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
-    using pstore::utf::from_native_string;
-    using pstore::utf::to_native_string;
 
     PSTORE_TRY {
         switches opt;
@@ -176,20 +176,12 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
+        pstore::database db{opt.db_path, pstore::database::access_mode::read_only};
         db.sync (opt.revision);
 
-        bool const string_mode = opt.string_mode;
-        std::string const key = opt.key;
-        bool ok = true;
-        if (string_mode) {
-            ok = read_strings_index (db, key);
-        } else {
-            ok = read_names_index (db, key);
-        }
-        if (!ok) {
-            exit_code = EXIT_FAILURE;
-        }
+        bool const ok =
+            opt.string_mode ? read_strings_index (db, opt.key) : read_names_index (db, opt.key);
+        exit_code = ok ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {

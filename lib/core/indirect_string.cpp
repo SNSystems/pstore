@@ -131,7 +131,7 @@ namespace pstore {
         -> std::pair<shared_sstring_view, raw_sstring_view> {
         auto str = indirect_string::read (db, addr);
         shared_sstring_view owner;
-        return {owner, str.as_string_view (&owner)};
+        return {owner, str.as_db_string_view (&owner)};
     }
 
 } // namespace pstore

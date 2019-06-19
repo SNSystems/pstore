@@ -91,10 +91,22 @@ namespace pstore {
         bool operator< (indirect_string const & rhs) const;
 
         raw_sstring_view as_string_view (gsl::not_null<shared_sstring_view *> owner) const;
+
+        /// When it is known that the string body is a store address use this function to carry out
+        /// additional checks that the address is reasonable.
+        raw_sstring_view as_db_string_view (gsl::not_null<shared_sstring_view *> owner) const {
+            if (!is_in_store ()) {
+                raise (error_code::bad_address);
+            }
+            return this->as_string_view (owner);
+        }
+
         std::string to_string () const {
             shared_sstring_view owner;
             return this->as_string_view (&owner).to_string ();
         }
+
+        /// \returns True is the pointee is in the store rather than on the heap.
         bool is_in_store () const noexcept { return !is_pointer_ && !(address_ & in_heap_mask); }
 
         /// Write the body of a string and updates the indirect pointer so that it points to that

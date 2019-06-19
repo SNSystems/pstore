@@ -446,13 +446,13 @@ namespace pstore {
             flood (&uninit_buffer);
 
             // Deserialize into the uninitialized buffer.
-            auto & str = reinterpret_cast<T2 &> (uninit_buffer);
-            read_uninit (std::forward<Archive> (archive), str);
+            auto & t2 = reinterpret_cast<T2 &> (uninit_buffer);
+            read_uninit (std::forward<Archive> (archive), t2);
 
             // This object will destroy the remains of the T2 instance in uninit_buffer.
             auto dtor = [](T2 * p) { p->~T2 (); };
-            std::unique_ptr<T2, decltype (dtor)> d (&str, dtor);
-            return std::move (str);
+            std::unique_ptr<T2, decltype (dtor)> d (&t2, dtor);
+            return std::move (t2);
         }
 
         /// \brief Read a span containing a single value from an archive.

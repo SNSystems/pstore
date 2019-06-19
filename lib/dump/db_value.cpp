@@ -136,7 +136,7 @@ namespace pstore {
         value_ptr make_value (index::digest const & d) { return make_value (d.to_hex_string ()); }
         value_ptr make_value (indirect_string const & str) {
             pstore::shared_sstring_view owner;
-            return make_value (str.as_string_view (&owner));
+            return make_value (str.as_db_string_view (&owner));
         }
 
 

@@ -49,6 +49,7 @@
 #include "pstore/core/index_types.hpp"
 #include "pstore/serialize/types.hpp"
 
+#include "check_for_error.hpp"
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
 
@@ -90,7 +91,7 @@ TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
 
         // Construct the indirect string and write it to the store.
         pstore::indirect_string indirect{db_, &sstring};
-        auto const indirect_addr = pstore::serialize::write (
+        pstore::address const indirect_addr = pstore::serialize::write (
             pstore::serialize::archive::make_writer (transaction), indirect);
         EXPECT_EQ (transaction.size (), sizeof (pstore::address));
 
@@ -143,6 +144,52 @@ TEST_F (IndirectString, StoreRoundTrip) {
 
 namespace {
 
+    // Construct the string and the indirect string. Write the indirect pointer to the store.
+    /// \returns A pair of the indirect-object address and the string-body address.
+    template <typename Transaction>
+    std::pair<pstore::address, pstore::address>
+    write_indirected_string (Transaction & transaction, pstore::gsl::czstring str) {
+        using namespace pstore;
+
+        raw_sstring_view const sstring = make_sstring_view (str);
+
+        address const indirect_addr =
+            serialize::write (serialize::archive::make_writer (transaction),
+                              indirect_string{transaction.db (), &sstring});
+
+        address const body_addr = indirect_string::write_body_and_patch_address (
+            transaction, sstring, typed_address<pstore::address>{indirect_addr});
+
+        return {indirect_addr, body_addr};
+    }
+
+} // end anonymous namespace
+
+TEST_F (IndirectString, BadDatabaseAddress) {
+    using namespace pstore;
+
+    mock_mutex mutex;
+    auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
+
+    address indirect_addr;
+    address body_addr;
+    std::tie (indirect_addr, body_addr) = write_indirected_string (transaction, "string");
+
+    // Write a bogus string-body pointer over the indirect object.
+    *db_.getrw (typed_address<address> (indirect_addr)) = address::make (0x01);
+
+    check_for_error (
+        [this, indirect_addr]() {
+            get_sstring_view (db_, typed_address<indirect_string>{indirect_addr});
+        },
+        error_code::bad_address);
+
+    transaction.commit ();
+}
+
+
+namespace {
+
     class IndirectStringAdder : public EmptyStore {
     public:
         IndirectStringAdder ()
@@ -188,7 +235,7 @@ TEST_F (IndirectStringAdder, NewString) {
             }
             {
                 // adding the same string again should result in nothing being written.
-                std::pair<pstore::index::name_index::iterator, bool> res2 =
+                std::pair<pstore::index::name_index::iterator, bool> const res2 =
                     adder.add (transaction, name_index, &sstring2);
 
                 pstore::shared_sstring_view res2_owner;
@@ -203,7 +250,7 @@ TEST_F (IndirectStringAdder, NewString) {
     {
         auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db_);
         auto const sstring = pstore::make_sstring_view (str);
-        auto pos = name_index->find (db_, pstore::indirect_string{db_, &sstring});
+        auto const pos = name_index->find (db_, pstore::indirect_string{db_, &sstring});
         ASSERT_NE (pos, name_index->cend (db_));
 
         pstore::shared_sstring_view owner;
