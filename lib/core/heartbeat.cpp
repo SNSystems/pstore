@@ -62,7 +62,6 @@ namespace pstore {
 
     heartbeat::worker_thread::worker_thread ()
             : sleep_time_ (&max_time_) {
-        threads::set_name ("heartbeat");
     }
 
     void heartbeat::worker_thread::attach (heartbeat::key_type key, callback cb) {
@@ -131,7 +130,10 @@ namespace pstore {
         if (!state_) {
             state_ = std::make_unique<state> ();
             auto & w = state_->worker;
-            state_->thread = std::thread ([&w]() { w.run (); });
+            state_->thread = std::thread ([&w]() {
+                threads::set_name ("heartbeat");
+                w.run ();
+            });
         }
         state_->worker.attach (key, cb);
     }
