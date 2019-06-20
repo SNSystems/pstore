@@ -53,6 +53,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "pstore/config/config.hpp"
 #include "pstore/core/address.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
@@ -198,26 +199,26 @@ namespace pstore {
             /// Returns a const reference to the section data given the section kind. The section
             /// must exist in the fragment.
             template <section_kind Key>
-            auto at () const noexcept -> typename enum_to_section<Key>::type const & {
+            auto at () const -> typename enum_to_section<Key>::type const & {
                 return at_impl<Key> (*this);
             }
             /// Returns a reference to the section data given the section kind. The section must
             /// exist in the fragment.
             template <section_kind Key>
-            auto at () noexcept -> typename enum_to_section<Key>::type & {
+            auto at () -> typename enum_to_section<Key>::type & {
                 return at_impl<Key> (*this);
             }
 
             /// Returns a pointer to the section data given the section kind or nullptr if the
             /// section is not present.
             template <section_kind Key>
-            auto atp () const noexcept -> typename enum_to_section<Key>::type const * {
+            auto atp () const -> typename enum_to_section<Key>::type const * {
                 return atp_impl<Key> (*this);
             }
             /// Returns a pointer to the section data given the section kind or nullptr if the
             /// section is not present.
             template <section_kind Key>
-            auto atp () noexcept -> typename enum_to_section<Key>::type * {
+            auto atp () -> typename enum_to_section<Key>::type * {
                 return atp_impl<Key> (*this);
             }
             ///@}
@@ -282,7 +283,16 @@ namespace pstore {
         private:
             template <typename IteratorIdx>
             fragment (IteratorIdx first_index, IteratorIdx last_index)
-                    : arr_ (first_index, last_index) {
+                    : signature_{fragment_signature_}
+                    , arr_ (first_index, last_index) {
+
+                // Verify that the structure layout is the same regardless of the compiler and
+                // target platform.
+                PSTORE_STATIC_ASSERT (alignof (fragment) == 8);
+                PSTORE_STATIC_ASSERT (sizeof (fragment) == 24);
+                PSTORE_STATIC_ASSERT (offsetof (fragment, signature_) == 0);
+                PSTORE_STATIC_ASSERT (offsetof (fragment, arr_) == 8);
+
                 static_assert (
                     std::numeric_limits<member_array::bitmap_type>::radix == 2,
                     "expect numeric radix to be 2 (so that 'digits' is the number of bits)");
@@ -306,11 +316,11 @@ namespace pstore {
             /// \param offset The number of bytes from the start of the fragment at which
             ///   the data lies.
             template <typename InstanceType>
-            InstanceType const & offset_to_instance (std::uint64_t offset) const noexcept {
+            InstanceType const & offset_to_instance (std::uint64_t offset) const {
                 return offset_to_instance_impl<InstanceType const> (*this, offset);
             }
             template <typename InstanceType>
-            InstanceType & offset_to_instance (std::uint64_t offset) noexcept {
+            InstanceType & offset_to_instance (std::uint64_t offset) {
                 return offset_to_instance_impl<InstanceType> (*this, offset);
             }
             ///@}
@@ -319,8 +329,7 @@ namespace pstore {
             /// The implementation of offset_to_instance<>() (used by the const and non-const
             /// flavors).
             template <typename InstanceType, typename Fragment>
-            static InstanceType & offset_to_instance_impl (Fragment && f,
-                                                           std::uint64_t offset) noexcept;
+            static InstanceType & offset_to_instance_impl (Fragment && f, std::uint64_t offset);
 
             /// The implementation of at<>() (used by the const and non-const flavors).
             ///
@@ -369,7 +378,13 @@ namespace pstore {
             template <typename Iterator>
             static void populate (void * ptr, Iterator first, Iterator last);
 
-            /// A sparse array of offsets to each of the contained sections.
+            static constexpr std::array<char, 8> fragment_signature_ = {
+                {'F', 'r', 'a', 'g', 'm', 'e', 'n', 't'}};
+
+            std::array<char, 8> signature_;
+
+            /// A sparse array of offsets to each of the contained sections. (Must be the struct's
+            /// last member.)
             member_array arr_;
         };
 
@@ -397,8 +412,8 @@ case section_kind::k: name = #k; break;
             auto fragment_ptr = new (ptr) fragment (details::make_content_type_iterator (first),
                                                     details::make_content_type_iterator (last));
             // Point past the end of the sparse array.
-            auto out =
-                reinterpret_cast<std::uint8_t *> (fragment_ptr) + fragment_ptr->arr_.size_bytes ();
+            auto out = reinterpret_cast<std::uint8_t *> (fragment_ptr) + offsetof (fragment, arr_) +
+                       fragment_ptr->arr_.size_bytes ();
 
             // Copy the contents of each of the segments to the fragment.
             auto op = [&out, fragment_ptr](section_creation_dispatcher const & c) {
@@ -443,6 +458,14 @@ case section_kind::k: name = #k; break;
         auto fragment::load_impl (extent<fragment> const & location, GetOp get) -> ReturnType {
             if (location.size >= sizeof (fragment)) {
                 ReturnType f = get (location);
+
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
+                if (f->signature_ != fragment_signature_) {
+                    raise_error_code (make_error_code (error_code::bad_fragment_record),
+                                      "the fragment signature is invalid");
+                }
+#endif // PSTORE_SIGNATURE_CHECKS_ENABLED
+
                 auto const indices = f->members ().get_indices ();
 
                 auto is_valid_index = [](unsigned k) {
@@ -472,14 +495,15 @@ case section_kind::k: name = #k; break;
         // offset_to_instance
         // ~~~~~~~~~~~~~~~~~~
         template <typename InstanceType, typename Fragment>
-        InstanceType & fragment::offset_to_instance_impl (Fragment && f,
-                                                          std::uint64_t offset) noexcept {
+        InstanceType & fragment::offset_to_instance_impl (Fragment && f, std::uint64_t offset) {
             // This is the implementation used by both const and non-const flavors of
             // offset_to_instance().
             auto const ptr =
                 reinterpret_cast<typename inherit_const<decltype (f), std::uint8_t>::type *> (&f) +
                 offset;
-            assert (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) == 0);
+            if (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) != 0) {
+                raise (pstore::error_code::bad_alignment);
+            }
             return *reinterpret_cast<InstanceType *> (ptr);
         }
 
@@ -512,8 +536,9 @@ case section_kind::k: name = #k; break;
                 static_cast<typename std::make_unsigned<decltype (num_contents)>::type> (
                     num_contents);
 
-            // Space needed by the section offset array.
-            std::size_t size_bytes = decltype (fragment::arr_)::size_bytes (unum_contents);
+            // Space needed by the signature and section offset array.
+            std::size_t size_bytes =
+                offsetof (fragment, arr_) + decltype (fragment::arr_)::size_bytes (unum_contents);
             // Now the storage for each of the contents
             std::for_each (first, last, [&size_bytes](section_creation_dispatcher const & c) {
                 size_bytes = c.aligned (size_bytes);
