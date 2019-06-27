@@ -65,7 +65,7 @@ $ pip install decorator
 $ pip install pydot
 
 """
-from __future__ import print_function
+
 
 import argparse
 import logging
@@ -169,21 +169,21 @@ def dependencies_from_source(source_directory):
         """
 
         # We're include interested in includes with the pstore/ prefix.
-        pstore_includes = filter(lambda x: split_all(x)[0] == 'pstore', include_files(path))
+        pstore_includes = [x for x in include_files(path) if split_all(x)[0] == 'pstore']
 
         # The pstore component is the path component _after_ the initial pstore/. Target names use dashes to separate
         #  words, whereas paths use underscores.
-        includes_without_prefix = map(lambda x: split_all(x)[1].replace('_', '-'), pstore_includes)
+        includes_without_prefix = [split_all(x)[1].replace('_', '-') for x in pstore_includes]
 
         # Convert the include path to the cmake component name. This works around inconsistencies in the way that
         # targets and directories are named.
-        return frozenset(map(lambda x: {
+        return frozenset([{
             'config': 'support',  # config and support are the same library
             'diff': 'diff-lib',
             'dump': 'dump-lib',
             'json': 'json-lib',
             'vacuum': 'vacuum-lib',
-        }.get(x, x), includes_without_prefix))
+        }.get(x, x) for x in includes_without_prefix])
 
     return dict((path, includes(path)) for path in sources_in(source_directory, extensions=('.hpp', '.cpp')))
 
@@ -224,9 +224,7 @@ def reachability_dict(dag):
     GOOGLE_TEST = ('gtest', 'gtest_main', 'gmock', 'gmock_main')
 
     return dict((label(data),
-                 frozenset(filter(lambda x: x not in GOOGLE_TEST,
-                                  map(lambda x: label(nodes[x]),
-                                      nx.algorithms.descendants(dag, node)))))
+                 frozenset([x for x in [label(nodes[x]) for x in nx.algorithms.descendants(dag, node)] if x not in GOOGLE_TEST]))
                 for node, data in nodes if label(data) not in GOOGLE_TEST)
 
 
@@ -361,7 +359,7 @@ def main(args=sys.argv[1:]):
 
     # Check that the source code includes don't violate the constraints from the cmake dependency graph.
     logger.info("Checking dependencies")
-    for path, dependencies in includes.iteritems():
+    for path, dependencies in includes.items():
         logger.info('checking: "%s"', path)
         c = cmake_target_from_path(path)
         if c is None:
