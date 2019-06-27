@@ -315,6 +315,12 @@ namespace pstore {
                         return prev;
                     }
 
+                    const_iterator operator+ (unsigned x) const {
+                        auto result = *this;
+                        std::advance (result, x);
+                        return result;
+                    }
+
                 private:
                     void next () noexcept {
                         for (; bitmap_ != 0U && (bitmap_ & 1U) == 0U; bitmap_ >>= 1) {
@@ -330,10 +336,16 @@ namespace pstore {
                 const_iterator end () const { return const_iterator{0U}; }
 
                 constexpr bool empty () const noexcept { return bitmap_ == 0U; }
+                /// Returns the index of the first element in the container. This is the smallest
+                /// value that can be passed to operator[]. There must be at least one element in
+                /// the container.
                 unsigned front () const noexcept {
                     assert (!empty ());
                     return bit_count::ctz (bitmap_);
                 }
+                /// Returns the index of the last element in the container. This is the largest
+                /// value that can be passed to operator[]. There must be at least one element in
+                /// the container.
                 unsigned back () const noexcept {
                     assert (!empty ());
                     return sizeof (bitmap_) * 8U - bit_count::clz (bitmap_) - 1U;

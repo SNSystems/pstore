@@ -199,26 +199,26 @@ namespace pstore {
             /// Returns a const reference to the section data given the section kind. The section
             /// must exist in the fragment.
             template <section_kind Key>
-            auto at () const -> typename enum_to_section<Key>::type const & {
+            auto at () const noexcept -> typename enum_to_section<Key>::type const & {
                 return at_impl<Key> (*this);
             }
             /// Returns a reference to the section data given the section kind. The section must
             /// exist in the fragment.
             template <section_kind Key>
-            auto at () -> typename enum_to_section<Key>::type & {
+            auto at () noexcept -> typename enum_to_section<Key>::type & {
                 return at_impl<Key> (*this);
             }
 
             /// Returns a pointer to the section data given the section kind or nullptr if the
             /// section is not present.
             template <section_kind Key>
-            auto atp () const -> typename enum_to_section<Key>::type const * {
+            auto atp () const noexcept -> typename enum_to_section<Key>::type const * {
                 return atp_impl<Key> (*this);
             }
             /// Returns a pointer to the section data given the section kind or nullptr if the
             /// section is not present.
             template <section_kind Key>
-            auto atp () -> typename enum_to_section<Key>::type * {
+            auto atp () noexcept -> typename enum_to_section<Key>::type * {
                 return atp_impl<Key> (*this);
             }
             ///@}
@@ -316,11 +316,11 @@ namespace pstore {
             /// \param offset The number of bytes from the start of the fragment at which
             ///   the data lies.
             template <typename InstanceType>
-            InstanceType const & offset_to_instance (std::uint64_t offset) const {
+            InstanceType const & offset_to_instance (std::uint64_t offset) const noexcept {
                 return offset_to_instance_impl<InstanceType const> (*this, offset);
             }
             template <typename InstanceType>
-            InstanceType & offset_to_instance (std::uint64_t offset) {
+            InstanceType & offset_to_instance (std::uint64_t offset) noexcept {
                 return offset_to_instance_impl<InstanceType> (*this, offset);
             }
             ///@}
@@ -329,7 +329,17 @@ namespace pstore {
             /// The implementation of offset_to_instance<>() (used by the const and non-const
             /// flavors).
             template <typename InstanceType, typename Fragment>
-            static InstanceType & offset_to_instance_impl (Fragment && f, std::uint64_t offset);
+            static InstanceType & offset_to_instance_impl (Fragment && f,
+                                                           std::uint64_t offset) noexcept;
+
+            template <section_kind Key, typename InstanceType = typename enum_to_section<Key>::type>
+            static std::uint64_t section_offset_is_valid (fragment const & f,
+                                                          extent<fragment> const & fext,
+                                                          std::uint64_t min_offset,
+                                                          std::uint64_t offset, std::size_t size);
+
+
+            static bool fragment_appears_valid (fragment const & f, extent<fragment> const & fext);
 
             /// The implementation of at<>() (used by the const and non-const flavors).
             ///
@@ -343,7 +353,7 @@ namespace pstore {
             template <section_kind Key, typename Fragment,
                       typename ResultType = typename inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
-            static ResultType & at_impl (Fragment && f) {
+            static ResultType & at_impl (Fragment && f) noexcept {
                 assert (f.has_section (Key));
                 using utype = std::underlying_type<section_kind>::type;
                 return f.template offset_to_instance<ResultType> (f.arr_[static_cast<utype> (Key)]);
@@ -361,7 +371,7 @@ namespace pstore {
             template <section_kind Key, typename Fragment,
                       typename ResultType = typename inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
-            static ResultType * atp_impl (Fragment && f) {
+            static ResultType * atp_impl (Fragment && f) noexcept {
                 return f.has_section (Key) ? &f.template at<Key> () : nullptr;
             }
 
@@ -452,32 +462,20 @@ case section_kind::k: name = #k; break;
             return {typed_address<fragment> (storage.second), size};
         }
 
+
         // load_impl
         // ~~~~~~~~~
         template <typename ReturnType, typename GetOp>
-        auto fragment::load_impl (extent<fragment> const & location, GetOp get) -> ReturnType {
-            if (location.size >= sizeof (fragment)) {
-                ReturnType f = get (location);
-
-#if PSTORE_SIGNATURE_CHECKS_ENABLED
-                if (f->signature_ != fragment_signature_) {
-                    raise_error_code (make_error_code (error_code::bad_fragment_record),
-                                      "the fragment signature is invalid");
-                }
-#endif // PSTORE_SIGNATURE_CHECKS_ENABLED
-
-                auto const indices = f->members ().get_indices ();
-
-                auto is_valid_index = [](unsigned k) {
-                    return k < static_cast<unsigned> (section_kind::last);
-                };
-                if (!indices.empty () && is_valid_index (indices.back ()) &&
-                    f->size_bytes () == location.size) {
-                    return f;
-                }
+        auto fragment::load_impl (extent<fragment> const & fext, GetOp get) -> ReturnType {
+            if (fext.size < sizeof (fragment)) {
+                raise (error_code::bad_fragment_record);
             }
-            raise_error_code (make_error_code (error_code::bad_fragment_record),
-                              "the fragment extent is invalid");
+
+            ReturnType f = get (fext);
+            if (!fragment::fragment_appears_valid (*f, fext)) {
+                raise (error_code::bad_fragment_record);
+            }
+            return f;
         }
 
         // load
@@ -494,17 +492,14 @@ case section_kind::k: name = #k; break;
 
         // offset_to_instance
         // ~~~~~~~~~~~~~~~~~~
+        // This is the implementation used by both const and non-const flavors of
+        // offset_to_instance().
         template <typename InstanceType, typename Fragment>
-        InstanceType & fragment::offset_to_instance_impl (Fragment && f, std::uint64_t offset) {
-            // This is the implementation used by both const and non-const flavors of
-            // offset_to_instance().
-            auto const ptr =
+        inline InstanceType & fragment::offset_to_instance_impl (Fragment && f,
+                                                                 std::uint64_t offset) noexcept {
+            return *reinterpret_cast<InstanceType *> (
                 reinterpret_cast<typename inherit_const<decltype (f), std::uint8_t>::type *> (&f) +
-                offset;
-            if (reinterpret_cast<std::uintptr_t> (ptr) % alignof (InstanceType) != 0) {
-                raise (pstore::error_code::bad_alignment);
-            }
-            return *reinterpret_cast<InstanceType *> (ptr);
+                offset);
         }
 
         // check_range_is_sorted

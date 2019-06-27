@@ -44,6 +44,7 @@
 #include "pstore/mcrepo/fragment.hpp"
 
 #include <new>
+
 #include "pstore/config/config.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/support/gsl.hpp"
@@ -51,6 +52,7 @@
 using namespace pstore::repo;
 
 namespace {
+
     /// The size and alignment necessary for a buffer into which any of the dispatcher subclasses
     /// can be successfully constructed. This must list all of the dispatcher subclasses.
     using dispatcher_characteristics =
@@ -117,6 +119,70 @@ std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
                                                 pstore::extent<fragment> const & location) {
     return load_impl<std::shared_ptr<fragment const>> (
         location, [&db](extent<fragment> const & x) { return db.getro (x); });
+}
+
+// section_offset_is_valid [static]
+// ~~~~~~~~~~~~~~~~~~~~~~~
+template <section_kind Key, typename InstanceType>
+std::uint64_t fragment::section_offset_is_valid (fragment const & f,
+                                                 pstore::extent<fragment> const & fext,
+                                                 std::uint64_t min_offset, std::uint64_t offset,
+                                                 std::size_t size) {
+    PSTORE_STATIC_ASSERT (alignof (fragment) >= alignof (InstanceType));
+    return ((fext.addr.absolute () + offset) % alignof (InstanceType) != 0 ||
+            size < sizeof (InstanceType) || offset < min_offset || size > fext.size ||
+            offset > fext.size - size ||
+            f.offset_to_instance<InstanceType> (offset).size_bytes () > size)
+               ? 0
+               : offset + size;
+}
+
+// fragment_appears_valid [static]
+// ~~~~~~~~~~~~~~~~~~~~~~
+bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragment> const & fext) {
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
+    if (f.signature_ != fragment_signature_) {
+        return false;
+    }
+#endif // PSTORE_SIGNATURE_CHECKS_ENABLED
+
+    auto const indices = f.arr_.get_indices ();
+    using utype = std::underlying_type<section_kind>::type;
+    if (indices.empty () || indices.back () >= static_cast<utype> (section_kind::last)) {
+        return false;
+    }
+
+    std::uint64_t offset = sizeof (fragment);
+    for (auto index_it = std::begin (indices), index_end = std::end (indices);
+         index_it != index_end; ++index_it) {
+
+        std::size_t const index = *index_it;
+
+        auto const this_offset = f.arr_[index];
+        auto const next_offset = (index == indices.back ()) ? fext.size : f.arr_[*(index_it + 1)];
+        if (this_offset < offset || next_offset <= this_offset) {
+            return false;
+        }
+
+        section_kind const kind = static_cast<section_kind> (index);
+        assert (f.has_section (kind));
+#define X(k)                                                                                       \
+    case section_kind::k:                                                                          \
+        offset = fragment::section_offset_is_valid<section_kind::k> (f, fext, offset, this_offset, \
+                                                                     next_offset - this_offset);   \
+        break;
+
+        switch (kind) {
+            PSTORE_MCREPO_SECTION_KINDS
+        case repo::section_kind::last: assert (false); break;
+        }
+#undef X
+        if (offset == 0) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // size_bytes
