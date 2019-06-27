@@ -92,6 +92,17 @@ namespace pstore {
             std::uint64_t size_;
         };
 
+        template <>
+        inline std::uint8_t section_alignment<pstore::repo::bss_section> (
+            pstore::repo::bss_section const & s) noexcept {
+            return s.align ();
+        }
+        template <>
+        inline std::uint64_t
+        section_size<pstore::repo::bss_section> (pstore::repo::bss_section const & s) noexcept {
+            return s.size ();
+        }
+
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
         //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *

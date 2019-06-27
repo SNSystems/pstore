@@ -93,6 +93,11 @@ namespace pstore {
         struct section_base {};
 
 
+        template <typename T>
+        std::uint8_t section_alignment (T const &) noexcept;
+
+        template <typename T>
+        std::uint64_t section_size (T const &) noexcept;
 
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *

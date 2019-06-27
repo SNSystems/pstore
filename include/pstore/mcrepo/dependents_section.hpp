@@ -167,6 +167,17 @@ namespace pstore {
         }
 
 
+        template <>
+        inline std::uint8_t
+        section_alignment<pstore::repo::dependents> (pstore::repo::dependents const & s) noexcept {
+            return 1;
+        }
+        template <>
+        inline std::uint64_t
+        section_size<pstore::repo::dependents> (pstore::repo::dependents const & s) noexcept {
+            return 0;
+        }
+
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
         //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *

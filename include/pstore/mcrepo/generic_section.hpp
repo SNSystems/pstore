@@ -219,7 +219,7 @@ namespace pstore {
             /// The number of data bytes contained by this section.
             std::uint64_t size () const noexcept { return data_size_; }
 
-            container<std::uint8_t> data () const {
+            container<std::uint8_t> data () const noexcept {
                 auto * begin = aligned_ptr<std::uint8_t> (this + 1);
                 return {begin, begin + data_size_};
             }
@@ -429,6 +429,19 @@ namespace pstore {
                     make_range (std::begin (xfixups), std::end (xfixups)));
             }
         };
+
+
+        template <>
+        inline std::uint8_t section_alignment<pstore::repo::generic_section> (
+            pstore::repo::generic_section const & s) noexcept {
+            return s.align ();
+        }
+        template <>
+        inline std::uint64_t section_size<pstore::repo::generic_section> (
+            pstore::repo::generic_section const & s) noexcept {
+            return s.size ();
+        }
+
 
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *

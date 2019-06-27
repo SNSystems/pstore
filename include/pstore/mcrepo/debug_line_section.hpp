@@ -81,7 +81,7 @@ namespace pstore {
             // \returns The section's data payload.
             container<std::uint8_t> data () const { return g_.data (); }
             /// \returns The number of bytes in the section's data payload.
-            std::size_t size () const { return g_.data ().size (); }
+            std::size_t size () const noexcept { return g_.data ().size (); }
             container<internal_fixup> ifixups () const { return g_.ifixups (); }
             container<external_fixup> xfixups () const { return g_.xfixups (); }
 
@@ -103,6 +103,18 @@ namespace pstore {
         };
         static_assert (std::is_standard_layout<debug_line_section>::value,
                        "debug_line_section must be standard-layout");
+
+
+        template <>
+        inline std::uint8_t section_alignment<pstore::repo::debug_line_section> (
+            pstore::repo::debug_line_section const & s) noexcept {
+            return s.align ();
+        }
+        template <>
+        inline std::uint64_t section_size<pstore::repo::debug_line_section> (
+            pstore::repo::debug_line_section const & s) noexcept {
+            return s.size ();
+        }
 
 
         class debug_line_section_creation_dispatcher final : public section_creation_dispatcher {
