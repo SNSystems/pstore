@@ -66,7 +66,6 @@ $ pip install pydot
 
 """
 
-
 import argparse
 import logging
 import os
@@ -155,7 +154,6 @@ def dependencies_from_source(source_directory):
         :param extensions: A list of the file extensions to be included in the results.
         """
 
-
         for root, dirs, files in os.walk(directory):
             for name in files:
                 lower_name = name.lower()
@@ -180,13 +178,13 @@ def dependencies_from_source(source_directory):
         # Convert the include path to the cmake component name. This works around inconsistencies in the way that
         # targets and directories are named.
         return frozenset([{
-            'config': 'support',  # config and support are the same library
-            'diff': 'diff-lib',
-            'dump': 'dump-lib',
-            'httpd': 'httpd-lib',
-            'json': 'json-lib',
-            'vacuum': 'vacuum-lib',
-        }.get(x, x) for x in includes_without_prefix])
+                              'config': 'support',  # config and support are the same library
+                              'diff': 'diff-lib',
+                              'dump': 'dump-lib',
+                              'httpd': 'httpd-lib',
+                              'json': 'json-lib',
+                              'vacuum': 'vacuum-lib',
+                          }.get(x, x) for x in includes_without_prefix])
 
     return dict((path, includes(path)) for path in sources_in(source_directory, extensions=('.hpp', '.cpp')))
 
@@ -219,9 +217,8 @@ GOOGLE_TEST = ('gtest', 'gtest_main', 'gmock', 'gmock_main')
 
 def reachability_dict(dag):
     """
-    Scans through the DAG vertices. For each node, get the list of descendents (that is the collection of vertices
-    that are transitively reachable from that node). Nodes that name one of the google test/google mock components
-    are stripped.
+    Scans through the DAG vertices. For each node, get the list of descendants (that is the collection of vertices
+    that are transitively reachable from that node). Nodes that name one of the google-test/mock components are stripped.
 
     :param dag:
     :return: A dictionary whose keys are the target name and values are the set of targets that may be referenced
@@ -231,10 +228,9 @@ def reachability_dict(dag):
     nodes = dag.nodes(data=True)
 
     return dict((label(data),
-                 frozenset([x for x in [label(nodes[x]) for x in nx.algorithms.descendants(dag, node)] if x not in GOOGLE_TEST]))
+                 frozenset([x for x in [label(nodes[x]) for x in nx.algorithms.descendants(dag, node)] if
+                            x not in GOOGLE_TEST]))
                 for node, data in nodes if label(data) not in GOOGLE_TEST)
-
-
 
 
 def cmake_target_from_path(p):
@@ -246,6 +242,8 @@ def cmake_target_from_path(p):
     """
 
     class Group:
+        def __init__(self): pass
+
         lib = 1
         unit_test = 2
         tool = 3
@@ -259,14 +257,19 @@ def cmake_target_from_path(p):
         :return: A two-tuple: the first member is the base component name; the second member is the component group.
         """
         parts = split_all(path)
+
+        # Special handling for the unit test harness code.
+        if parts == ['unittests', 'harness.cpp']:
+            return 'unit-test-harness', Group.unit_test
+
         if parts[:1] == ['lib']:
-            return (parts[1], Group.lib)
+            return parts[1], Group.lib
         if parts[:2] == ['include', 'pstore']:
-            return (parts[2], Group.lib)
+            return parts[2], Group.lib
         if parts[:1] == ['unittests']:
-            return (parts[1], Group.unit_test)
+            return parts[1], Group.unit_test
         if parts[:1] == ['tools']:
-            return (parts[1], Group.tool)
+            return parts[1], Group.tool
         if parts[:1] == ['examples']:
             # Just skip the examples for the time being.
             # return (parts[1], Group.examples)
@@ -274,7 +277,7 @@ def cmake_target_from_path(p):
         # Skip paths that we don't know about.
         return None
 
-    def name_to_target (name):
+    def name_to_target(name):
         """
         Converts a two-tuple (component base name, component group) to its corresponding cmake target name.
 
@@ -298,11 +301,11 @@ def cmake_target_from_path(p):
         }.get(name, name[0])
 
     # Produce a component name from a path and convert '_' to '-' to match the convention used by the cmake targets.
-    return bind (bind (bind (
-            p,
-            name_from_path),
-            lambda x: (x[0].replace('_', '-'), x[1])),
-            name_to_target)
+    return bind(bind(bind(
+        p,
+        name_from_path),
+        lambda x: (x[0].replace('_', '-'), x[1])),
+        name_to_target)
 
 
 def logging_config():
@@ -359,7 +362,7 @@ def main(args=sys.argv[1:]):
     # For each target in the graph, build the set of targets against which it transitively links.
     logger.info('Building reachability dictionary')
     reachable = reachability_dict(dag)
-    logger.debug (pformat(reachable))
+    logger.debug(pformat(reachable))
 
     # Scan the source and header files discovering the files that they include.
     logger.info("Discovering source code dependencies")
@@ -373,8 +376,8 @@ def main(args=sys.argv[1:]):
         if c is None:
             logger.warning('skipping: "%s"', path)
             continue
-        if reachable.get (c) is None:
-            logger.error ('unknown target: "%s"', path)
+        if reachable.get(c) is None:
+            logger.error('unknown target: "%s"', path)
             exit_code = EXIT_FAILURE
             continue
 
