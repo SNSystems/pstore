@@ -133,6 +133,9 @@ def split_all(path):
     return allparts
 
 
+EXCLUSIONS = ('cmakecxxcompilerid.cpp',)
+
+
 def dependencies_from_source(source_directory):
     """
     Scans the source files contained within the directory hierarchy rooted at 'source_path' and returns a dictionary
@@ -152,7 +155,6 @@ def dependencies_from_source(source_directory):
         :param extensions: A list of the file extensions to be included in the results.
         """
 
-        EXCLUSIONS = ('cmakecxxcompilerid.cpp',)
 
         for root, dirs, files in os.walk(directory):
             for name in files:
@@ -181,6 +183,7 @@ def dependencies_from_source(source_directory):
             'config': 'support',  # config and support are the same library
             'diff': 'diff-lib',
             'dump': 'dump-lib',
+            'httpd': 'httpd-lib',
             'json': 'json-lib',
             'vacuum': 'vacuum-lib',
         }.get(x, x) for x in includes_without_prefix])
@@ -203,10 +206,15 @@ def cmake_dependency_graph(dot_path):
     return g.to_directed()
 
 
+PREFIX = 'pstore-'
+
+
 def label(node_data):
     s = node_data['label'].strip('"')
-    PREFIX = 'pstore-'
     return s[len(PREFIX):] if s.startswith(PREFIX) else s
+
+
+GOOGLE_TEST = ('gtest', 'gtest_main', 'gmock', 'gmock_main')
 
 
 def reachability_dict(dag):
@@ -221,7 +229,6 @@ def reachability_dict(dag):
     """
 
     nodes = dag.nodes(data=True)
-    GOOGLE_TEST = ('gtest', 'gtest_main', 'gmock', 'gmock_main')
 
     return dict((label(data),
                  frozenset([x for x in [label(nodes[x]) for x in nx.algorithms.descendants(dag, node)] if x not in GOOGLE_TEST]))
@@ -280,6 +287,7 @@ def cmake_target_from_path(p):
             ('core', Group.unit_test): 'core-unit-tests',
             ('diff', Group.unit_test): 'diff-unit-tests',
             ('dump', Group.unit_test): 'dump-unit-tests',
+            ('httpd', Group.unit_test): 'httpd-unit-tests',
             ('json', Group.unit_test): 'json-unit-tests',
             ('mcrepo', Group.unit_test): 'mcrepo-unit-tests',
             ('serialize', Group.unit_test): 'serialize-unit-tests',
