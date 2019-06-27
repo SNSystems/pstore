@@ -106,7 +106,7 @@ namespace pstore {
 
 
         template <>
-        inline std::uint8_t section_alignment<pstore::repo::debug_line_section> (
+        inline unsigned section_alignment<pstore::repo::debug_line_section> (
             pstore::repo::debug_line_section const & s) noexcept {
             return s.align ();
         }

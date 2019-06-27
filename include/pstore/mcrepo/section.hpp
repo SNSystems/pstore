@@ -94,7 +94,7 @@ namespace pstore {
 
 
         template <typename T>
-        std::uint8_t section_alignment (T const &) noexcept;
+        unsigned section_alignment (T const &) noexcept;
 
         template <typename T>
         std::uint64_t section_size (T const &) noexcept;

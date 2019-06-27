@@ -93,7 +93,7 @@ namespace pstore {
         };
 
         template <>
-        inline std::uint8_t section_alignment<pstore::repo::bss_section> (
+        inline unsigned section_alignment<pstore::repo::bss_section> (
             pstore::repo::bss_section const & s) noexcept {
             return s.align ();
         }

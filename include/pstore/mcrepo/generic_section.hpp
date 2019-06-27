@@ -432,7 +432,7 @@ namespace pstore {
 
 
         template <>
-        inline std::uint8_t section_alignment<pstore::repo::generic_section> (
+        inline unsigned section_alignment<pstore::repo::generic_section> (
             pstore::repo::generic_section const & s) noexcept {
             return s.align ();
         }

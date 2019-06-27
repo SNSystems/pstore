@@ -168,14 +168,14 @@ namespace pstore {
 
 
         template <>
-        inline std::uint8_t
-        section_alignment<pstore::repo::dependents> (pstore::repo::dependents const & s) noexcept {
-            return 1;
+        inline unsigned
+        section_alignment<pstore::repo::dependents> (pstore::repo::dependents const &) noexcept {
+            return 1U;
         }
         template <>
         inline std::uint64_t
-        section_size<pstore::repo::dependents> (pstore::repo::dependents const & s) noexcept {
-            return 0;
+        section_size<pstore::repo::dependents> (pstore::repo::dependents const &) noexcept {
+            return 0U;
         }
 
         //*                  _   _               _ _               _      _             *
