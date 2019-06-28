@@ -43,16 +43,21 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/mcrepo/fragment.hpp"
-#include "gmock/gmock.h"
+
+// Standard library includes
 #include <memory>
 #include <vector>
 
+// 3rd party
+#include <gmock/gmock.h>
+
+// Local includes
 #include "transaction.hpp"
 
 using namespace pstore::repo;
 
-
 namespace {
+
     class FragmentTest : public ::testing::Test {
     protected:
         transaction transaction_;
@@ -139,6 +144,10 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
 
     generic_section const & s = f->at<section_kind::read_only> ();
+
+    EXPECT_EQ (4U, section_alignment (s));
+    EXPECT_EQ (6U, section_size (s));
+
     auto data_begin = std::begin (s.data ());
     auto data_end = std::end (s.data ());
     auto rodata_begin = std::begin (rodata.data);
@@ -186,6 +195,10 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     generic_section const & s = f->at<section_kind::text> ();
+
+    EXPECT_EQ (16U, section_alignment (s));
+    EXPECT_EQ (4U, section_size (s));
+
     EXPECT_EQ (16U, s.align ());
     EXPECT_EQ (4U, s.data ().size ());
     EXPECT_EQ (4U, s.size ());
@@ -221,6 +234,10 @@ TEST_F (FragmentTest, MakeTextSectionWithDependents) {
 
     pstore::repo::dependents const * const dependent = f->atp<section_kind::dependent> ();
     ASSERT_NE (dependent, nullptr);
+
+    EXPECT_EQ (1U, section_alignment (*dependent));
+    EXPECT_EQ (0U, section_size (*dependent));
+
     EXPECT_EQ (1U, dependent->size ());
     EXPECT_EQ ((*dependent)[0], addr1);
 }
