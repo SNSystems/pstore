@@ -55,12 +55,21 @@
 #    endif
 #endif
 
-#include "pstore/support/portab.hpp"
+#include "pstore/config/config.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
 #    include "llvm/Support/Signals.h"
 #endif
 
+// (Don't be tempted to use portab.hpp to get these definitions because that would introduce a
+// layering violation.)
+#ifdef PSTORE_EXCEPTIONS
+#    define PSTORE_TRY try
+#    define PSTORE_CATCH(x, code) catch (x) code
+#else
+#    define PSTORE_TRY
+#    define PSTORE_CATCH(x, code)
+#endif
 
 class quiet_event_listener : public testing::TestEventListener {
 public:
