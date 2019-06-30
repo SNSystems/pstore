@@ -178,7 +178,6 @@ def dependencies_from_source(source_directory):
         # Convert the include path to the cmake component name. This works around inconsistencies in the way that
         # targets and directories are named.
         return frozenset([{
-                              'config': 'support',  # config and support are the same library
                               'diff': 'diff-lib',
                               'dump': 'dump-lib',
                               'httpd': 'httpd-lib',
@@ -385,6 +384,11 @@ def main(args=sys.argv[1:]):
         logger.debug('reachable (from cmake): %s', reachable[c])
         logger.debug('included (by source code): %s', dependencies)
         for dependent in dependencies:
+            # The "config" psuedo component is for the config.hpp file generated when running cmake. It's a pure header
+            # file so there is no library to link.
+            if dependent == 'config':
+                continue
+
             if dependent != c and dependent not in reachable[c]:
                 logger.error('cannot include from component "%s" from file "%s" (component "%s")', dependent, path, c)
                 exit_code = EXIT_FAILURE
