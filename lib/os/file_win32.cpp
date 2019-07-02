@@ -4,7 +4,7 @@
 //* |  _| | |  __/ *
 //* |_| |_|_|\___| *
 //*                *
-//===- lib/support/file_win32.cpp -----------------------------------------===//
+//===- lib/os/file_win32.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

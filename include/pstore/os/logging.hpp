@@ -4,7 +4,7 @@
 //* | | (_) | (_| | (_| | | | | | (_| | *
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
-//===- include/pstore/support/logging.hpp ---------------------------------===//
+//===- include/pstore/os/logging.hpp --------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

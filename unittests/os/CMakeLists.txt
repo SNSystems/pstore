@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/support/CMakeLists.txt ------------------------------------===//
+#===- unittests/os/CMakeLists.txt -----------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -49,4 +49,3 @@ set (PSTORE_OS_UNIT_TEST_SRC
 )
 add_pstore_unit_test (pstore-os-unit-tests ${PSTORE_OS_UNIT_TEST_SRC})
 target_link_libraries (pstore-os-unit-tests PRIVATE pstore-os pstore-common)
-

@@ -4,7 +4,7 @@
 //* | | | (_) | || (_| | |_| | | | | (_| | | | (_) | (_| | *
 //* |_|  \___/ \__\__,_|\__|_|_| |_|\__, | |_|\___/ \__, | *
 //*                                 |___/           |___/  *
-//===- include/pstore/support/rotating_log.hpp ----------------------------===//
+//===- include/pstore/os/rotating_log.hpp ---------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

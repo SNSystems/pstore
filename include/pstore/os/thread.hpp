@@ -4,7 +4,7 @@
 //* | |_| | | | | |  __/ (_| | (_| | *
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
-//===- include/pstore/support/thread.hpp ----------------------------------===//
+//===- include/pstore/os/thread.hpp ---------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

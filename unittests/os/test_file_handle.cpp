@@ -4,7 +4,7 @@
 //* |  _| | |  __/ | | | | (_| | | | | (_| | |  __/ *
 //* |_| |_|_|\___| |_| |_|\__,_|_| |_|\__,_|_|\___| *
 //*                                                 *
-//===- unittests/core/test_file_handle.cpp --------------------------------===//
+//===- unittests/os/test_file_handle.cpp ----------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
