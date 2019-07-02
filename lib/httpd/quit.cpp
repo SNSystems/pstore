@@ -54,7 +54,7 @@
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/send.hpp"
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/random.hpp"
 

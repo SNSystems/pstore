@@ -132,7 +132,7 @@ if (NEED_LIBRT)
 endif ()
 
 
-target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-serialize pstore-support)
+target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-os pstore-serialize pstore-support)
 add_clang_tidy_target (pstore-core)
 
 

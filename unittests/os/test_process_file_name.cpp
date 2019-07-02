@@ -44,8 +44,7 @@
 
 /// \file test_process_file_name.cpp
 
-
-#include "pstore/support/process_file_name.hpp"
+#include "pstore/os/process_file_name.hpp"
 
 #include <algorithm>
 #include <cstring>

@@ -91,6 +91,7 @@ else ()
             pstore-broker-intf-ex
             pstore-httpd-lib-ex
             pstore-json-lib-ex
+            pstore-os-ex
             pstore-support-ex
         )
         set (LLVM_REQUIRES_EH No)
@@ -102,6 +103,7 @@ else ()
             pstore-broker-intf
             pstore-httpd-lib
             pstore-json-lib
+            pstore-os
             pstore-support
         )
     endif (NOT PSTORE_EXCEPTIONS)

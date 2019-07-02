@@ -63,7 +63,7 @@
 #include <unistd.h>
 
 #include "pstore/broker/globals.hpp"
-#include "pstore/support/logging.hpp"
+#    include "pstore/os/logging.hpp"
 
 namespace {
 

@@ -1,10 +1,10 @@
-//*   __ _ _       *
-//*  / _(_) | ___  *
-//* | |_| | |/ _ \ *
-//* |  _| | |  __/ *
-//* |_| |_|_|\___| *
-//*                *
-//===- include/pstore/support/file_posix.hpp ------------------------------===//
+//*  _   _                        _  *
+//* | |_| |__  _ __ ___  __ _  __| | *
+//* | __| '_ \| '__/ _ \/ _` |/ _` | *
+//* | |_| | | | | |  __/ (_| | (_| | *
+//*  \__|_| |_|_|  \___|\__,_|\__,_| *
+//*                                  *
+//===- include/pstore/support/thread.hpp ----------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,48 +41,53 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file file_posix.hpp
-/// \brief Posix-specific implementations of file APIs.
+/// \file thread.hpp
 
-#ifndef PSTORE_SUPPORT_FILE_POSIX_HPP
-#define PSTORE_SUPPORT_FILE_POSIX_HPP
+#ifndef PSTORE_OS_THREAD_HPP
+#define PSTORE_OS_THREAD_HPP (1)
 
-#if !defined(_WIN32)
+#include <cstdint>
+#include <cstdlib>
+#include <string>
 
-#include <unistd.h>
+#ifdef _WIN32
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
+#    define PSTORE_THREAD_LOCAL __declspec(thread)
+#else
+#    define PSTORE_THREAD_LOCAL __thread
+#endif
+
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
-    namespace file {
+    namespace threads {
 
-        /// \brief A namespace to hold POSIX-specific file interfaces.
-        namespace posix {
-            class deleter final : public deleter_base {
-            public:
-                explicit deleter (std::string const & path)
-                        : deleter_base (path, &platform_unlink) {}
-                // No copying, moving, or assignment
-                deleter (deleter const &) = delete;
-                deleter (deleter &&) noexcept = delete;
-                deleter & operator= (deleter const &) = delete;
-                deleter & operator= (deleter &&) noexcept = delete;
+#ifdef _WIN32
+        typedef DWORD thread_id_type;
+#elif defined(__APPLE__)
+        using thread_id_type = std::uint64_t;
+#elif defined(__linux__)
+        using thread_id_type = int;
+#elif defined(__FreeBSD__)
+        using thread_id_type = int;
+#elif defined(__sun__)
+        using thread_id_type = std::uint32_t;
+        static_assert (sizeof (thread_id_type) == sizeof (pthread_t),
+                       "expected pthread_t to be 32-bits");
+#else
+#    error "Don't know how to represent a thread-id on this OS"
+#endif
 
-                ~deleter () noexcept override;
+        constexpr std::size_t name_size = 16;
+        void set_name (gsl::czstring name);
+        char const * get_name (gsl::span<char, name_size> name /*out*/);
+        std::string get_name ();
 
-            private:
-                /// The platform-specific file deletion function. file_deleter_base will
-                /// call this function when it wants to delete a file.
-                /// \param path The UTF-8 encoded path to the file to be deleted.
+        thread_id_type get_id ();
 
-                static void platform_unlink (std::string const & path);
-            };
-        } // namespace posix
+    } // end namespace threads
+} // end namespace pstore
 
-        /// \brief The cross-platform name for the deleter class.
-        /// This should always be preferred to the platform-specific variation.
-        using deleter = posix::deleter;
-
-    } // namespace file
-} // namespace pstore
-#endif //! defined (_WIN32)
-
-#endif // PSTORE_SUPPORT_FILE_POSIX_HPP
+#endif // PSTORE_OS_THREAD_HPP

@@ -49,7 +49,7 @@
 
 #include "pstore/broker/command.hpp"
 #include "pstore/broker/globals.hpp"
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 
 namespace pstore {
     namespace broker {

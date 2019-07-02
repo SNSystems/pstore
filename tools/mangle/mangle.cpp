@@ -98,7 +98,7 @@
 
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/memory_mapper.hpp"
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace {

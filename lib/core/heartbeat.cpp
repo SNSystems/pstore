@@ -45,9 +45,9 @@
 
 #include "heartbeat.hpp"
 
+#include "pstore/os/thread.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/thread.hpp"
 
 namespace pstore {
 

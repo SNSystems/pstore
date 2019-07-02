@@ -53,9 +53,9 @@
 #include <memory>
 #include <mutex>
 
-#include "pstore/support/file.hpp"
 #include "pstore/core/shared_memory.hpp"
 #include "pstore/core/vacuum_intf.hpp"
+#include "pstore/os/file.hpp"
 
 namespace pstore {
     class database;

@@ -43,20 +43,20 @@
 //===----------------------------------------------------------------------===//
 /// \file process_file_name_posix.cpp
 
-#include "pstore/support/process_file_name.hpp"
+#include "pstore/os/process_file_name.hpp"
 
 #if !defined(_WIN32)
 
-#include "pstore/config/config.hpp"
-#include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
-#include "pstore/support/small_vector.hpp"
+#    include "pstore/config/config.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/portab.hpp"
+#    include "pstore/support/small_vector.hpp"
 
-#if PSTORE_HAVE_NSGETEXECUTABLEPATH
+#    if PSTORE_HAVE_NSGETEXECUTABLEPATH
 
 // Include for _POSIX_PATH_MAX
-#include <limits.h>      // NOLINT
-#include <mach-o/dyld.h> // _NSGetExecutablePath
+#        include <limits.h>      // NOLINT
+#        include <mach-o/dyld.h> // _NSGetExecutablePath
 
 namespace pstore {
 
@@ -77,12 +77,12 @@ namespace pstore {
 
 } // namespace pstore
 
-#elif defined(__FreeBSD__)
+#    elif defined(__FreeBSD__)
 
 // System-specific includes
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
+#        include <sys/types.h>
+#        include <sys/sysctl.h>
+#        include <sys/param.h>
 
 namespace pstore {
 
@@ -96,33 +96,33 @@ namespace pstore {
 
 } // namespace pstore
 
-#elif defined(__linux__) || defined(__sun__)
+#    elif defined(__linux__) || defined(__sun__)
 
 // Standard includes
-#include <climits>
-#include <limits>
-#include <sstream>
+#        include <climits>
+#        include <limits>
+#        include <sstream>
 
 // OS-specific includes
-#include <sys/types.h>
-#include <unistd.h>
+#        include <sys/types.h>
+#        include <unistd.h>
 
 namespace {
-#ifdef __linux__
+#        ifdef __linux__
     std::string link_path () {
         std::ostringstream link_stream;
         link_stream << "/proc/" << ::getpid () << "/exe";
         return link_stream.str ();
     }
-#elif defined (__sun__)
+#        elif defined(__sun__)
     std::string link_path () {
         std::ostringstream link_stream;
         link_stream << "/proc/" << ::getpid () << "/path/a.out";
         return link_stream.str ();
     }
-#else
-#error "Don't know how to build link path for this system"
-#endif
+#        else
+#            error "Don't know how to build link path for this system"
+#        endif
 
     template <typename T>
     T clamp (T v, T low, T high) {
@@ -160,8 +160,8 @@ namespace pstore {
 
 } // namespace pstore
 
-#else // defined(__linux__)
-#error "Don't know how to implement process_file_name() on this system"
-#endif
+#    else // defined(__linux__)
+#        error "Don't know how to implement process_file_name() on this system"
+#    endif
 
 #endif // !defined(_WIN32)

@@ -58,8 +58,8 @@
 #include "pstore/httpd/server.hpp"
 #include "pstore/httpd/server_status.hpp"
 #include "pstore/httpd/ws_server.hpp"
+#include "pstore/os/logging.hpp"
 #include "pstore/romfs/romfs.hpp"
-#include "pstore/support/logging.hpp"
 
 extern pstore::romfs::romfs fs;
 

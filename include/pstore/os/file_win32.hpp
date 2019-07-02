@@ -44,21 +44,21 @@
 /// \file file_win32.hpp
 /// \brief Windows-specific implementations of file APIs.
 
-#ifndef PSTORE_SUPPORT_FILE_WIN32_HPP
-#define PSTORE_SUPPORT_FILE_WIN32_HPP
+#ifndef PSTORE_OS_FILE_WIN32_HPP
+#define PSTORE_OS_FILE_WIN32_HPP
 
 #ifdef _WIN32
 
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
-#include <limits>
+#    include <algorithm>
+#    include <cassert>
+#    include <cstdlib>
+#    include <limits>
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 
-#include "pstore/support/utf.hpp"
+#    include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace file {
@@ -86,4 +86,4 @@ namespace pstore {
 } // namespace pstore
 
 #endif //_WIN32
-#endif // PSTORE_SUPPORT_FILE_WIN32_HPP
+#endif // PSTORE_OS_FILE_WIN32_HPP

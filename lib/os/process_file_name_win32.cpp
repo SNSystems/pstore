@@ -43,19 +43,19 @@
 //===----------------------------------------------------------------------===//
 /// \file process_file_name_win32.cpp
 
-#include "pstore/support/process_file_name.hpp"
+#include "pstore/os/process_file_name.hpp"
 
 #if defined(_WIN32)
 
-#include <limits>
+#    include <limits>
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 
-#include "pstore/support/portab.hpp"
-#include "pstore/support/small_vector.hpp"
-#include "pstore/support/utf.hpp"
+#    include "pstore/support/portab.hpp"
+#    include "pstore/support/small_vector.hpp"
+#    include "pstore/support/utf.hpp"
 
 namespace {
 

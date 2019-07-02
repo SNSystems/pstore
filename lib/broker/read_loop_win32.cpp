@@ -73,8 +73,8 @@
 #    include "pstore/broker_intf/descriptor.hpp"
 #    include "pstore/broker_intf/fifo_path.hpp"
 #    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/os/logging.hpp"
 #    include "pstore/support/gsl.hpp"
-#    include "pstore/support/logging.hpp"
 #    include "pstore/support/utf.hpp"
 
 namespace {

@@ -80,6 +80,7 @@ target_link_libraries (pstore-httpd-lib PUBLIC
     pstore-broker-intf
     pstore-json-lib
     pstore-romfs
+    pstore-os
     pstore-support
 )
 add_clang_tidy_target (pstore-httpd-lib)
@@ -99,6 +100,7 @@ if (NOT PSTORE_EXCEPTIONS)
         pstore-broker-intf-ex
         pstore-json-lib-ex
         pstore-romfs-ex
+        pstore-os-ex
         pstore-support-ex
     )
 endif ()
@@ -118,6 +120,7 @@ if (PSTORE_BITCODE)
     target_link_libraries (pstore-httpd-lib-bc PUBLIC
         pstore-broker-intf-bc
         pstore-romfs-bc
+        pstore-os-bc
         pstore-support-bc
     )
 endif (PSTORE_BITCODE)

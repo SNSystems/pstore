@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/core/CMakeLists.txt ---------------------------------------===//
+#===- lib/os/CMakeLists.txt ------------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,37 +42,54 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-# The pstore unit test sources
-add_pstore_unit_test (pstore-core-unit-tests
-    leak_check_fixture.hpp
-    test_address.cpp
-    test_array_stack.cpp
-    test_base32.cpp
-    test_basic_logger.cpp
-    test_crc32.cpp
-    test_database.cpp
-    test_db_archive.cpp
-    test_file_header.cpp
-    test_generation_iterator.cpp
-    test_hamt_map.cpp
-    test_hamt_set.cpp
-    test_heartbeat.cpp
-    test_indirect_string.cpp
-    test_memory_mapper.cpp
-    test_path.cpp
-    test_protect.cpp
-    test_region.cpp
-    test_rotating_log.cpp
-    test_shared_memory.cpp
-    test_sstring_view_archive.cpp
-    test_sync.cpp
-    test_transaction.cpp
-    test_two_connections.cpp
-    test_uuid.cpp
+
+set (pstore_os_include_dir "${PSTORE_ROOT_DIR}/include/pstore/os")
+set (pstore_os_lib_src
+    "${pstore_os_include_dir}/file.hpp"
+    "${pstore_os_include_dir}/file_posix.hpp"
+    "${pstore_os_include_dir}/file_win32.hpp"
+    "${pstore_os_include_dir}/logging.hpp"
+    "${pstore_os_include_dir}/process_file_name.hpp"
+    "${pstore_os_include_dir}/rotating_log.hpp"
+    "${pstore_os_include_dir}/thread.hpp"
+
+    file.cpp
+    file_posix.cpp
+    file_win32.cpp
+    logging.cpp
+    process_file_name_posix.cpp
+    process_file_name_win32.cpp
+    thread.cpp
 )
-target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)
 
-# Access the library's private include directory.
-target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")
+include (add_pstore)
+include (clang_tidy)
 
-add_subdirectory (broker_intf)
+add_pstore_library (pstore-os STATIC ${pstore_os_lib_src})
+target_link_libraries (pstore-os PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support)
+add_clang_tidy_target (pstore-os)
+
+# Add the exception-handling-enabled pstore-os-ex
+if (NOT PSTORE_EXCEPTIONS)
+    set (LLVM_REQUIRES_EH Yes)
+    set (LLVM_REQUIRES_RTTI Yes)
+    set (PSTORE_EXCEPTIONS Yes)
+    add_pstore_library (pstore-os-ex STATIC ${pstore_os_lib_src})
+    set (LLVM_REQUIRES_EH No)
+    set (LLVM_REQUIRES_RTTI No)
+    set (PSTORE_EXCEPTIONS No)
+
+    target_link_libraries (pstore-os-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support-ex)
+endif (NOT PSTORE_EXCEPTIONS)
+
+if (PSTORE_BITCODE)
+    add_pstore_library (pstore-os-bc STATIC ${pstore_os_lib_src})
+    target_compile_options (pstore-os-bc PRIVATE
+        -emit-llvm
+        -target x86_64-pc-linux-gnu
+        -fsanitize=signed-integer-overflow
+        -fsanitize=unsigned-integer-overflow
+        -fno-threadsafe-statics
+    )
+    target_link_libraries (pstore-os-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-os-bc)
+endif (PSTORE_BITCODE)

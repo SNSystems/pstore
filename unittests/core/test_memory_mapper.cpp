@@ -57,8 +57,8 @@
 #include "gmock/gmock.h"
 
 /// pstore
+#include "pstore/os/file.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/file.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/make_unique.hpp"
 

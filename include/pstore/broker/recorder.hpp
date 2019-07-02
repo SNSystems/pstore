@@ -53,7 +53,7 @@
 #include <mutex>
 
 #include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
 
 namespace pstore {
     namespace broker {

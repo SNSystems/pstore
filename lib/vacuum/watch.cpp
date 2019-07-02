@@ -62,9 +62,9 @@
 #include "pstore/core/database.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/time.hpp"
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
+#include "pstore/os/thread.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/thread.hpp"
 #include "pstore/vacuum/status.hpp"
 
 namespace {

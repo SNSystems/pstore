@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/core/CMakeLists.txt ---------------------------------------===//
+#===- unittests/support/CMakeLists.txt ------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,38 +41,12 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-
-# The pstore unit test sources
-add_pstore_unit_test (pstore-core-unit-tests
-    leak_check_fixture.hpp
-    test_address.cpp
-    test_array_stack.cpp
-    test_base32.cpp
-    test_basic_logger.cpp
-    test_crc32.cpp
-    test_database.cpp
-    test_db_archive.cpp
-    test_file_header.cpp
-    test_generation_iterator.cpp
-    test_hamt_map.cpp
-    test_hamt_set.cpp
-    test_heartbeat.cpp
-    test_indirect_string.cpp
-    test_memory_mapper.cpp
-    test_path.cpp
-    test_protect.cpp
-    test_region.cpp
-    test_rotating_log.cpp
-    test_shared_memory.cpp
-    test_sstring_view_archive.cpp
-    test_sync.cpp
-    test_transaction.cpp
-    test_two_connections.cpp
-    test_uuid.cpp
+include (add_pstore)
+set (PSTORE_OS_UNIT_TEST_SRC
+    test_file.cpp
+    test_file_handle.cpp
+    test_process_file_name.cpp
 )
-target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)
+add_pstore_unit_test (pstore-os-unit-tests ${PSTORE_OS_UNIT_TEST_SRC})
+target_link_libraries (pstore-os-unit-tests PRIVATE pstore-os pstore-common)
 
-# Access the library's private include directory.
-target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")
-
-add_subdirectory (broker_intf)

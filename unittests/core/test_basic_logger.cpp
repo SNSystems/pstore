@@ -43,17 +43,17 @@
 //===----------------------------------------------------------------------===//
 /// \file test_basic_logger.cpp
 
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 
 #include <cstring>
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
-#include "pstore/support/thread.hpp"
 
 namespace {
     //***************************************

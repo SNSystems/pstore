@@ -46,7 +46,7 @@
 
 #include "gmock/gmock.h"
 
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
 
 namespace {
 

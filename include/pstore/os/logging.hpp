@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file logging.hpp
 
-#ifndef PSTORE_SUPPORT_LOGGING_HPP
-#define PSTORE_SUPPORT_LOGGING_HPP (1)
+#ifndef PSTORE_OS_LOGGING_HPP
+#define PSTORE_OS_LOGGING_HPP (1)
 
 #include <cassert>
 #include <ctime>
@@ -53,9 +53,9 @@
 #include <mutex>
 #include <string>
 
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
+#include "pstore/os/thread.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/thread.hpp"
 #include "pstore/support/to_string.hpp"
 
 namespace pstore {
@@ -189,7 +189,7 @@ namespace pstore {
         struct file_system_traits {
             bool exists (std::string const & path) { return pstore::file::exists (path); }
             void rename (std::string const & from, std::string const & to) {
-                pstore::file::file_handle f {from};
+                pstore::file::file_handle f{from};
                 f.rename (to);
             }
             void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
@@ -307,4 +307,4 @@ namespace pstore {
 
     } // end namespace logging
 } // end namespace pstore
-#endif // PSTORE_SUPPORT_LOGGING_HPP
+#endif // PSTORE_OS_LOGGING_HPP

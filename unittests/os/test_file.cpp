@@ -44,7 +44,7 @@
 /// \file test_file.cpp
 /// \brief Unit tests for the file.hpp (file management) interfaces.
 
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
 
 #include <algorithm>
 #include <cstring>

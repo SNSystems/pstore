@@ -54,7 +54,7 @@
 #endif
 
 #include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 
 namespace pstore {
     namespace httpd {

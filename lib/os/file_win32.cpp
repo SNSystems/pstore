@@ -46,26 +46,26 @@
 
 #ifdef _WIN32
 
-#include "pstore/support/file.hpp"
+#    include "pstore/os/file.hpp"
 
 // standard includes
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
-#include <iomanip>
-#include <limits>
-#include <sstream>
-#include <stdexcept>
-#include <system_error>
+#    include <algorithm>
+#    include <cassert>
+#    include <cstdlib>
+#    include <cstring>
+#    include <ctime>
+#    include <iomanip>
+#    include <limits>
+#    include <sstream>
+#    include <stdexcept>
+#    include <system_error>
 
-#include "pstore/support/error.hpp"
-#include "pstore/support/random.hpp"
-#include "pstore/support/small_vector.hpp"
-#include "pstore/support/utf.hpp"
-#include "pstore/support/path.hpp"
-#include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/random.hpp"
+#    include "pstore/support/small_vector.hpp"
+#    include "pstore/support/utf.hpp"
+#    include "pstore/support/path.hpp"
+#    include "pstore/support/quoted_string.hpp"
 
 namespace pstore {
     namespace file {
@@ -178,8 +178,7 @@ namespace pstore {
 
         // open
         // ~~~~
-        void file_handle::open (create_mode create,
-                                writable_mode writable, present_mode present) {
+        void file_handle::open (create_mode create, writable_mode writable, present_mode present) {
             this->close ();
             is_writable_ = writable == writable_mode::read_write;
 
@@ -386,7 +385,7 @@ namespace pstore {
             }
         }
 
-		// rename
+        // rename
         // ~~~~~~
         void file_handle::rename (std::string const & new_name) {
             std::wstring const pathw = pstore::utf::win32::to16 (path_);
@@ -477,7 +476,7 @@ namespace pstore {
         // latest_time
         // ~~~~~~~~~~~
         time_t file_handle::latest_time () const {
-			file_handle local_file{path_};
+            file_handle local_file{path_};
             HANDLE h = file_;
             if (!this->is_open ()) {
                 local_file.open (create_mode::open_existing, writable_mode::read_only,

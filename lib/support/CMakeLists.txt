@@ -249,30 +249,23 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/error.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/error_or.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/file.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/file_posix.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/file_win32.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/fnv.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/inherit_const.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/logging.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/process_file_name.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/rotating_log.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/thread.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/time.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/to_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
@@ -280,18 +273,11 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
 
     error.cpp
-    file.cpp
-    file_posix.cpp
-    file_win32.cpp
     fnv.cpp
     time.cpp
-    logging.cpp
     path.cpp
-    process_file_name_posix.cpp
-    process_file_name_win32.cpp
     signal_helpers.cpp
     sstring_view.cpp
-    thread.cpp
     uint128.cpp
     utf.cpp
     utf_win32.cpp

@@ -72,8 +72,8 @@
 #include "pstore/config/config.hpp"
 #include "pstore/httpd/server.hpp"
 #include "pstore/httpd/server_status.hpp"
-#include "pstore/support/logging.hpp"
-#include "pstore/support/thread.hpp"
+#include "pstore/os/logging.hpp"
+#include "pstore/os/thread.hpp"
 #include "pstore/support/to_string.hpp"
 #include "pstore/support/utf.hpp"
 

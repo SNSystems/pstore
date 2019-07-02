@@ -47,8 +47,8 @@
 #include <thread>
 
 #include "pstore/json/utility.hpp"
-#include "pstore/support/logging.hpp"
-#include "pstore/support/thread.hpp"
+#include "pstore/os/logging.hpp"
+#include "pstore/os/thread.hpp"
 
 namespace pstore {
     namespace broker {
@@ -66,7 +66,6 @@ namespace pstore {
                 std::this_thread::sleep_until (until);
                 ++seconds;
 
-#if 1
                 uptime_channel.publish ([seconds]() {
                     std::ostringstream os;
                     os << "{ \"uptime\": " << seconds << " }";
@@ -74,7 +73,6 @@ namespace pstore {
                     assert (json::is_valid (str));
                     return str;
                 });
-#endif
             }
 
             log (logging::priority::info, "uptime thread exiting");

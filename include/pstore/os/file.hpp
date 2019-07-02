@@ -44,8 +44,8 @@
 /// \file file.hpp
 /// \brief Cross platform file management functions and classes.
 
-#ifndef PSTORE_SUPPORT_FILE_HPP
-#define PSTORE_SUPPORT_FILE_HPP
+#ifndef PSTORE_OS_FILE_HPP
+#define PSTORE_OS_FILE_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -60,9 +60,9 @@
 #include <type_traits>
 
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #endif
 
 #include "pstore/config/config.hpp"
@@ -118,8 +118,9 @@ namespace pstore {
                 // Replace the sequence of 'X's with random characters.
                 auto num_x = std::distance (it.base (), tmpl.end ());
                 while (num_x--) {
-                    static char const alphabet [] = "abcdefghijklmnopqrstuvwxyz0123456789_";
-                    static constexpr auto length = static_cast <unsigned> (array_elements (alphabet)) - 1U;
+                    static char const alphabet[] = "abcdefghijklmnopqrstuvwxyz0123456789_";
+                    static constexpr auto length =
+                        static_cast<unsigned> (array_elements (alphabet)) - 1U;
                     auto const index = rng (length);
                     assert (index >= 0 && index < length);
                     path.push_back (alphabet[index]);
@@ -732,7 +733,6 @@ namespace pstore {
                            "is_writable_ is not trivially copyable: use std::move() in rvalue ref "
                            "ctor and assign");
 #endif // PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
-            
         };
 
         // ensure_open
@@ -815,9 +815,9 @@ namespace pstore {
 } // namespace pstore
 
 #if defined(_WIN32)
-#include "file_win32.hpp"
+#    include "file_win32.hpp"
 #else
-#include "file_posix.hpp"
+#    include "file_posix.hpp"
 #endif
 
-#endif // PSTORE_SUPPORT_FILE_HPP
+#endif // PSTORE_OS_FILE_HPP

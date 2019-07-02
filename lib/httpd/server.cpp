@@ -82,7 +82,7 @@
 #include "pstore/httpd/server_status.hpp"
 #include "pstore/httpd/ws_server.hpp"
 #include "pstore/httpd/wskey.hpp"
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 #include "pstore/support/pubsub.hpp"
 
 namespace {

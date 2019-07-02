@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file thread.cpp
 
-#include "pstore/support/thread.hpp"
+#include "pstore/os/thread.hpp"
 
 #include <array>
 #include <cerrno>
@@ -51,16 +51,16 @@
 #include <system_error>
 #ifdef _WIN32
 #else
-#include <pthread.h>
+#    include <pthread.h>
 #endif
 
 #ifdef __linux__
-#include <linux/unistd.h>
-#include <sys/syscall.h>
-#include <unistd.h>
+#    include <linux/unistd.h>
+#    include <sys/syscall.h>
+#    include <unistd.h>
 #endif
 #ifdef __FreeBSD__
-#include <pthread_np.h>
+#    include <pthread_np.h>
 #endif
 
 #include "pstore/config/config.hpp"
@@ -87,17 +87,17 @@ namespace pstore {
             } else {
                 std::strncpy (thread_name, name, name_size);
                 thread_name[name_size - 1] = '\0';
-#ifndef NDEBUG
+#    ifndef NDEBUG
                 DWORD const MS_VC_EXCEPTION = 0x406D1388;
 
-#pragma pack(push, 8)
+#        pragma pack(push, 8)
                 struct THREADNAME_INFO {
                     DWORD dwType;     // Must be 0x1000.
                     LPCSTR szName;    // Pointer to name (in user addr space).
                     DWORD dwThreadID; // Thread ID (-1=caller thread).
                     DWORD dwFlags;    // Reserved for future use, must be zero.
                 };
-#pragma pack(pop)
+#        pragma pack(pop)
 
                 THREADNAME_INFO info;
                 info.dwType = 0x1000;
@@ -110,7 +110,7 @@ namespace pstore {
                                     (ULONG_PTR *) &info);
                 } __except (EXCEPTION_EXECUTE_HANDLER) {
                 }
-#endif
+#    endif
             }
         }
 
@@ -127,8 +127,8 @@ namespace pstore {
 #else
 
         thread_id_type get_id () {
-	    auto id = thread_id_type{0};
-#ifdef __APPLE__
+            auto id = thread_id_type{0};
+#    ifdef __APPLE__
             // Looking at the source, this API has an extension which allows a NULL pthread_t to
             // mean "current thread". I'm being pedantically correct here, but we could take
             // advantage of that if it turns out that we're in a hurry.
@@ -136,22 +136,22 @@ namespace pstore {
             if (err != 0) {
                 raise (errno_erc{err});
             }
-#elif defined(__linux__)
-            id = static_cast <thread_id_type> (syscall (__NR_gettid));
-#elif defined(__FreeBSD__)
+#    elif defined(__linux__)
+            id = static_cast<thread_id_type> (syscall (__NR_gettid));
+#    elif defined(__FreeBSD__)
             id = pthread_getthreadid_np ();
-#elif defined(__sun__)
-	    id = static_cast <thread_id_type> (pthread_self ());
-#else
-#error "Don't know how to produce a thread-id for the target OS"
-#endif
-	    return id;
+#    elif defined(__sun__)
+            id = static_cast<thread_id_type> (pthread_self ());
+#    else
+#        error "Don't know how to produce a thread-id for the target OS"
+#    endif
+            return id;
         }
 
 
-#ifdef __FreeBSD__
+#    ifdef __FreeBSD__
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
-#endif
+#    endif
 
         // TODO: make this gsl::not_null<>
         void set_name (gsl::czstring name) {
@@ -164,23 +164,23 @@ namespace pstore {
             if (name == nullptr) {
                 raise (errno_erc{EINVAL});
             }
-#if PSTORE_PTHREAD_SETNAME_NP_1_ARG
+#    if PSTORE_PTHREAD_SETNAME_NP_1_ARG
             err = pthread_setname_np (name);
-#elif PSTORE_PTHREAD_SETNAME_NP_2_ARGS
+#    elif PSTORE_PTHREAD_SETNAME_NP_2_ARGS
             err = pthread_setname_np (pthread_self (), name);
-#elif PSTORE_PTHREAD_SET_NAME_NP
+#    elif PSTORE_PTHREAD_SET_NAME_NP
             pthread_set_name_np (pthread_self (), name);
-#else
-#error "pthread_setname was not available"
-#endif
+#    else
+#        error "pthread_setname was not available"
+#    endif
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_set_name_np");
             }
 
-#ifdef __FreeBSD__
+#    ifdef __FreeBSD__
             std::strncpy (thread_name, name, name_size);
             thread_name[name_size - 1] = '\0';
-#endif
+#    endif
         }
 
         char const * get_name (gsl::span<char, name_size> name /*out*/) {
@@ -188,16 +188,16 @@ namespace pstore {
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});
             }
-#ifdef __FreeBSD__
+#    ifdef __FreeBSD__
             std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
-#else
+#    else
             assert (length == name.size_bytes ());
             int err = pthread_getname_np (pthread_self (), name.data (),
                                           static_cast<std::size_t> (length));
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_getname_np");
             }
-#endif
+#    endif
             name[length - 1] = '\0';
             return name.data ();
         }

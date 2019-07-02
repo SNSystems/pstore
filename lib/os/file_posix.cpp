@@ -46,21 +46,21 @@
 
 #ifndef _WIN32
 
-#include "pstore/support/file.hpp"
+#    include "pstore/os/file.hpp"
 
 // standard includes
-#include <array>
-#include <cerrno>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-#include <limits>
-#include <sstream>
+#    include <array>
+#    include <cerrno>
+#    include <cstdio>
+#    include <cstdlib>
+#    include <cstring>
+#    include <limits>
+#    include <sstream>
 
 // platform includes
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/types.h>
+#    include <fcntl.h>
+#    include <sys/stat.h>
+#    include <sys/types.h>
 #    include <unistd.h>
 
 // local includes
@@ -90,8 +90,7 @@ namespace pstore {
         //*                                           *
         // open
         // ~~~~
-        void file_handle::open (create_mode create,
-                                writable_mode writable, present_mode present) {
+        void file_handle::open (create_mode create, writable_mode writable, present_mode present) {
             this->close ();
 
             is_writable_ = writable == writable_mode::read_write;
@@ -370,7 +369,7 @@ namespace pstore {
             }
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec) or
 /// st_Xtime (and be of type time_t). This macro is defined in the former situation.
-#ifdef PSTORE_STAT_TIMESPEC
+#    ifdef PSTORE_STAT_TIMESPEC
             auto compare = [](struct timespec const & lhs, struct timespec const & rhs) {
                 return std::make_pair (lhs.tv_sec, lhs.tv_nsec) <
                        std::make_pair (rhs.tv_sec, rhs.tv_nsec);
@@ -379,9 +378,9 @@ namespace pstore {
                 std::max ({buf.st_atimespec, buf.st_mtimespec, buf.st_ctimespec}, compare);
             constexpr auto nano = 1000000000;
             return t.tv_sec + (t.tv_nsec + (nano / 2)) / nano;
-#else
+#    else
             return std::max ({buf.st_atime, buf.st_mtime, buf.st_ctime});
-#endif
+#    endif
         }
 
         // get_temporary_directory

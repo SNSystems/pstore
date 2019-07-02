@@ -47,14 +47,16 @@
 
 #ifndef _WIN32
 
-// standard includes
-#include <cerrno>
-#include <cstdlib>
-// platform includes
-#include <unistd.h>
+// Standard includes
+#    include <cerrno>
+#    include <cstdlib>
 
-#include "pstore/support/error.hpp"
-#include "pstore/support/logging.hpp"
+// Platform includes
+#    include <unistd.h>
+
+// pstore includes
+#    include "pstore/os/logging.hpp"
+#    include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace broker {

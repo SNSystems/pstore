@@ -66,8 +66,8 @@
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/writer.hpp"
 #include "pstore/json/utility.hpp"
+#include "pstore/os/logging.hpp"
 #include "pstore/support/array_elements.hpp"
-#include "pstore/support/logging.hpp"
 #include "pstore/support/time.hpp"
 
 namespace pstore {

@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file file.cpp
 /// \brief Definitions of the cross platform file management functions and classes.
-#include "pstore/support/file.hpp"
+#include "pstore/os/file.hpp"
 
 #include <algorithm>
 #include <cassert>

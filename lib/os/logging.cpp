@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file logging.cpp
 
-#include "pstore/support/logging.hpp"
+#include "pstore/os/logging.hpp"
 
 #include <algorithm>
 #include <array>
@@ -55,18 +55,18 @@
 
 // pstore includes
 #include "pstore/config/config.hpp"
+#include "pstore/os/rotating_log.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/rotating_log.hpp"
 #include "pstore/support/time.hpp"
 
 #if PSTORE_HAVE_ASL_H
-#include <asl.h>
-#include <os/log.h>
+#    include <asl.h>
+#    include <os/log.h>
 #endif
 #if PSTORE_HAVE_SYS_LOG_H
-#include <syslog.h>
+#    include <syslog.h>
 #endif
 
 namespace pstore {
@@ -335,11 +335,12 @@ namespace pstore {
 #elif PSTORE_HAVE_SYS_LOG_H
             enabled.set (handlers::syslog);
 #else
-            // FIXME: temporarily disable the file-based logging. stderr makes life less bad on Windows.
+            // FIXME: temporarily disable the file-based logging. stderr makes life less bad on
+            // Windows.
             enabled.set (handlers::standard_error);
 #endif
             // TODO: always enabled for the moment.
-            //enabled.set (handlers::standard_error);
+            // enabled.set (handlers::standard_error);
 
             auto loggers = std::make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
@@ -359,7 +360,8 @@ namespace pstore {
             if (enabled.test (handlers::rotating_file)) {
                 constexpr auto max_size = std::ios_base::streamoff{1024 * 1024};
                 constexpr auto num_backups = 10U;
-                loggers->emplace_back (new logging::rotating_log (ident + ".log", max_size, num_backups));
+                loggers->emplace_back (
+                    new logging::rotating_log (ident + ".log", max_size, num_backups));
             }
 
             if (enabled.test (handlers::standard_error)) {

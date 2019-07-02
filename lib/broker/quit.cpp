@@ -65,6 +65,7 @@
 #endif
 #include <signal.h>
 
+// pstore includes
 #include "pstore/broker/command.hpp"
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
@@ -74,11 +75,11 @@
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/httpd/quit.hpp"
 #include "pstore/httpd/server.hpp"
+#include "pstore/os/logging.hpp"
+#include "pstore/os/thread.hpp"
 #include "pstore/support/array_elements.hpp"
-#include "pstore/support/logging.hpp"
 #include "pstore/support/make_unique.hpp"
 #include "pstore/support/signal_helpers.hpp"
-#include "pstore/support/thread.hpp"
 
 namespace {
 
