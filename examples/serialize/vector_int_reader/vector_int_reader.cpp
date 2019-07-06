@@ -45,17 +45,17 @@
 #include <iomanip>
 
 #include "pstore/serialize/archive.hpp"
-#include "pstore/serialize/ios_state.hpp"
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/serialize/types.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/ios_state.hpp"
 
 using namespace pstore;
 
 namespace {
     template <typename InputIterator>
     std::ostream & dump (std::ostream & os, InputIterator begin, InputIterator end) {
-        pstore::serialize::ios_flags_saver flags{os};
+        pstore::ios_flags_saver const _{os};
         auto separator = "";
         os << std::setfill ('0') << std::hex;
         std::for_each (begin, end, [&](unsigned v) {
