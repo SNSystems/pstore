@@ -312,7 +312,7 @@ namespace pstore {
                 : field32_{0} {
 
             align_ = bit_count::ctz (align);
-            num_ifixups_ = 0;
+            num_ifixups_ = std::uint32_t{0};
 
             PSTORE_STATIC_ASSERT (std::is_standard_layout<generic_section>::value);
 

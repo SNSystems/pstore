@@ -149,15 +149,10 @@ namespace pstore {
                 return (this->value_ >> Index) & this->mask_;
             }
 
-            template <typename T>
+            template <typename T,
+                      typename = typename std::enable_if<std::is_unsigned<T>::value &&
+                                                         sizeof (T) <= sizeof (value_type)>::type>
             void assign (T v) noexcept {
-                assert (std::is_unsigned<T>::value || v >= 0);
-                auto const uv = static_cast<typename std::make_unsigned<T>::type> (v);
-                assert (uv <= mask_);
-                this->assign (static_cast<value_type> (uv));
-            }
-
-            void assign (value_type v) noexcept {
                 value_ = static_cast<value_type> (value_ & ~(mask_ << Index)) |
                          static_cast<value_type> ((v & mask_) << Index);
             }
@@ -199,12 +194,12 @@ namespace pstore {
 
         template <typename T>
         bit_field & operator+= (T other) noexcept {
-            this->assign (this->value () + other);
+            this->assign (static_cast<value_type> (this->value () + other));
             return *this;
         }
         template <typename T>
         bit_field & operator-= (T other) noexcept {
-            this->assign (this->value () - other);
+            this->assign (static_cast<value_type> (this->value () - other));
             return *this;
         }
 

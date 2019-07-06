@@ -377,20 +377,20 @@ namespace pstore {
                                    gsl::span<std::uint8_t const> const & span) {
             frame_fixed_layout f{};
             f.fin = true;
-            f.rsv = 0;
+            f.rsv = std::uint16_t{0};
             f.opcode = static_cast<std::uint16_t> (op);
             f.mask = false;
 
             auto const length = span.size ();
             if (length < 126) {
-                f.payload_length = length;
+                f.payload_length = static_cast<std::uint16_t> (length);
                 return send (sender, io, f.raw) >>=
                        [sender, &span](IO io2) { return send (sender, io2, span); };
             }
 
             if (length <= std::numeric_limits<std::uint16_t>::max ()) {
                 // Length is sent as 16-bits.
-                f.payload_length = 126;
+                f.payload_length = std::uint16_t{126};
                 return details::send_extended_length_message<std::uint16_t> (sender, io, f, span);
             }
 
@@ -400,7 +400,7 @@ namespace pstore {
             }
 
             // Send the length as a full 64-bit value.
-            f.payload_length = 127;
+            f.payload_length = std::uint16_t{127};
             return details::send_extended_length_message<std::uint64_t> (sender, io, f, span);
         }
 

@@ -119,7 +119,8 @@ TEST (WsServer, Ping) {
     }
     {
         pstore::httpd::frame_fixed_layout xf2{};
-        xf2.payload_length = sizeof (std::uint16_t); // payload is the close status code.
+        xf2.payload_length =
+            std::uint16_t{sizeof (std::uint16_t)}; // payload is the close status code.
         xf2.mask = false;
         xf2.opcode = static_cast<std::uint16_t> (pstore::httpd::opcode::close);
         xf2.fin = true;

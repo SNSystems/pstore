@@ -94,10 +94,10 @@ TYPED_TEST (BitFieldAssignment, Assignment) {
     // set all of the bits to 1.
     vt = std::numeric_limits<value_type>::max ();
     // now blast values into f1.
-    f1 = 0;
+    f1 = value_type{0};
     using assign_type = typename decltype (f1)::assign_type;
     EXPECT_EQ (f1.value (), static_cast<assign_type> (0U));
-    f1 = 1;
+    f1 = value_type{1};
     EXPECT_EQ (f1.value (), static_cast<assign_type> (1U));
     constexpr auto v = decltype (f1)::max ();
     EXPECT_EQ (pstore::bit_count::pop_count (v), bits);
@@ -122,7 +122,7 @@ TEST (BitField, IsolationFromOtherBitfields) {
     EXPECT_EQ (f1, decltype (f1)::max ());
     EXPECT_EQ (f2, 0x00U);
 
-    f1 = 0U;
+    f1 = std::uint8_t{0};
     f2 = decltype (f2)::max ();
     EXPECT_EQ (f2, decltype (f2)::max ());
     EXPECT_EQ (f1, 0x00U);
@@ -142,7 +142,7 @@ TEST (BitField, Addition) {
     pstore::bit_field<std::uint8_t, 0, 2> const r2 = f1++;
     EXPECT_EQ (f1, 2U);
     EXPECT_EQ (r2, 1U);
-    f1 = 1;
+    f1 = std::uint8_t{1};
     f1.operator+= (2U);
     EXPECT_EQ (f1, 3U);
     EXPECT_EQ (v, 3U);
@@ -154,15 +154,15 @@ TEST (BitField, Subtraction) {
         pstore::bit_field<std::uint8_t, 0, 2> f1;
     };
     v = 0U;
-    f1 = 3U;
+    f1 = std::uint8_t{3};
     pstore::bit_field<std::uint8_t, 0, 2> const r1 = --f1;
     EXPECT_EQ (f1, 2U);
     EXPECT_EQ (r1, 2U);
     pstore::bit_field<std::uint8_t, 0, 2> const r2 = f1--;
     EXPECT_EQ (f1, 1U);
     EXPECT_EQ (r2, 2U);
-    f1 = 3U;
-    f1.operator-= (2U);
+    f1 = std::uint8_t{3};
+    f1.operator-=(std::uint8_t{2});
     EXPECT_EQ (f1, 1U);
     EXPECT_EQ (v, 1U);
 }
