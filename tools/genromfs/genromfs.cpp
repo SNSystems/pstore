@@ -188,7 +188,7 @@ int main (int argc, char * argv[]) {
               "using namespace pstore::romfs;\n"
               "namespace {\n"
               "\n";
-        auto root = std::make_unique<directory_container> ();
+        auto root = pstore::make_unique<directory_container> ();
         auto root_id = scan (*root, src_path, 0);
         std::unordered_set<unsigned> forwards;
         dump_tree (os, forwards, *root, root_id, root_id);

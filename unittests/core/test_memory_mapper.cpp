@@ -72,7 +72,7 @@ namespace {
     class MemoryMapperFixture : public ::testing::Test {
     public:
         MemoryMapperFixture ()
-                : file_{std::make_unique<pstore::file::file_handle> ()} {
+                : file_{pstore::make_unique<pstore::file::file_handle> ()} {
 
             file_->open (pstore::file::file_handle::temporary ());
         }

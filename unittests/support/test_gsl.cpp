@@ -535,7 +535,7 @@ TEST (GslSpan, FromStdArrayConstConstructor) {
 
 TEST (GslSpan, FromUniquePointerConstruction) {
     {
-        auto ptr = std::make_unique<int> (4);
+        auto ptr = pstore::make_unique<int> (4);
         {
             span<int> s{ptr};
             EXPECT_EQ (s.length (), 1);
@@ -563,7 +563,7 @@ TEST (GslSpan, FromUniquePointerConstruction) {
         }
     }
     {
-        auto arr = std::make_unique<int[]> (4U);
+        auto arr = pstore::make_unique<int[]> (4U);
         for (auto i = 0U; i < 4U; i++) {
             arr[i] = static_cast<int> (i) + 1;
         }

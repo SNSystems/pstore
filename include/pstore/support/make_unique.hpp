@@ -51,8 +51,21 @@
 #include <type_traits>
 #include <utility>
 
+#include "pstore/config/config.hpp"
+
 namespace pstore {
+
+#if PSTORE_HAVE_STD_MAKE_UNIQUE
+
+    template <typename T, typename... Args>
+    std::unique_ptr<T> make_unique (Args &&... args) {
+        return std::make_unique<T> (std::forward<Args> (args)...);
+    }
+
+#else
+
     namespace make_unique_helpers {
+
         template <typename T, typename... Args>
         std::unique_ptr<T> helper (std::false_type, Args &&... args) {
             return std::unique_ptr<T> (new T (std::forward<Args> (args)...));
@@ -63,24 +76,16 @@ namespace pstore {
             using U = typename std::remove_const<typename std::remove_extent<T>::type>::type;
             return std::unique_ptr<T> (new U[size]);
         }
-    } // namespace make_unique_helpers
+
+    } // end namespace make_unique_helpers
 
     template <typename T, typename... Args>
     std::unique_ptr<T> make_unique (Args &&... args) {
         return make_unique_helpers::helper<T> (std::is_array<T> (), std::forward<Args> (args)...);
     }
-} // namespace pstore
 
-// TODO: determine make_unique support at configure time.
-#if __cplusplus <= 201103L && !defined(_WIN32)
+#endif // PSTORE_HAVE_STD_MAKE_UNIQUE
 
-namespace std {
-    template <typename T, typename... Args>
-    std::unique_ptr<T> make_unique (Args &&... args) {
-        return pstore::make_unique<T> (std::forward<Args> (args)...);
-    }
-} // namespace std
-
-#endif
+} // end namespace pstore
 
 #endif // PSTORE_SUPPORT_MAKE_UNIQUE_HPP

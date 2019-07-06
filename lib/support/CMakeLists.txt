@@ -43,6 +43,20 @@
 #===----------------------------------------------------------------------===//
 
 
+#
+# -- The code setting up config.hpp
+#
+
+set (CMAKE_REQUIRED_LIBRARIES )
+
+# I need these tests to be performed with the compiler in C++11 mode. Unfortunately, there's no
+# simple way to tell cmake that so I manually enable the language by setting CMAKE_CXX_FLAGS and
+# restoring it at the end. See also <https://gitlab.kitware.com/cmake/cmake/issues/15361>.
+set (OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+if (NOT MSVC)
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif (NOT MSVC)
+
 include (CheckCXXSourceCompiles)
 include (CheckIncludeFiles)
 include (CheckIncludeFileCXX)
@@ -59,8 +73,6 @@ check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
 check_include_files ("sys/endian.h" PSTORE_HAVE_SYS_ENDIAN_H)
 check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
 check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
-
-set (CMAKE_REQUIRED_LIBRARIES )
 
 
 check_cxx_source_compiles (
@@ -105,6 +117,13 @@ check_cxx_source_compiles (
         ss << std::quoted (\"Hello World\");
     }"
     PSTORE_HAVE_STD_QUOTED)
+
+check_cxx_source_compiles (
+    "#include <memory>
+    int main () {
+        std::make_unique<int> ();
+    }"
+    PSTORE_HAVE_STD_MAKE_UNIQUE)
 
 check_cxx_source_compiles (
     "#include <map>
@@ -236,6 +255,14 @@ configure_file (
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
     ESCAPE_QUOTES
 )
+
+set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
+
+#
+# -- Thats's the end of the code setting up config.hpp
+#
+
+
 
 set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/support")
 set (PSTORE_SUPPORT_LIB_SRC

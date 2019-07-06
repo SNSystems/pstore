@@ -342,7 +342,7 @@ namespace pstore {
             // TODO: always enabled for the moment.
             // enabled.set (handlers::standard_error);
 
-            auto loggers = std::make_unique<details::logger_collection> ();
+            auto loggers = make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
 
 #if PSTORE_HAVE_ASL_H

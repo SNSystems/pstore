@@ -108,7 +108,7 @@ namespace pstore {
 
         template <typename File>
         explicit database (std::shared_ptr<File> file, bool access_tick_enabled = true)
-                : database (file, std::make_unique<system_page_size> (),
+                : database (file, make_unique<system_page_size> (),
                             region::get_factory (file, storage::full_region_size,
                                                  storage::min_region_size),
                             access_tick_enabled) {}

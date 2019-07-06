@@ -128,7 +128,7 @@ namespace pstore {
 
     void heartbeat::attach (key_type key, callback cb) {
         if (!state_) {
-            state_ = std::make_unique<state> ();
+            state_ = make_unique<state> ();
             auto & w = state_->worker;
             state_->thread = std::thread ([&w]() {
                 threads::set_name ("heartbeat");

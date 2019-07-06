@@ -74,7 +74,7 @@ namespace {
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
         if (path.length () > 0) {
-            result = std::make_unique<std::string> (path);
+            result = pstore::make_unique<std::string> (path);
         }
         return result;
     }

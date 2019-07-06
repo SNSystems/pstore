@@ -55,13 +55,13 @@ namespace {
     class value {
     public:
         explicit value (int v)
-                : v_{std::make_unique<int> (v)} {}
+                : v_{pstore::make_unique<int> (v)} {}
         value (value const & v)
-                : v_{std::make_unique<int> (v.get ())} {}
+                : v_{pstore::make_unique<int> (v.get ())} {}
 
         value & operator= (value const & rhs) {
             if (&rhs != this) {
-                v_ = std::make_unique<int> (rhs.get ());
+                v_ = pstore::make_unique<int> (rhs.get ());
             }
             return *this;
         }

@@ -92,7 +92,7 @@ namespace pstore {
             std::unique_lock<std::mutex> lock (mut_);
             if (queue_.size () == 0) {
                 lock.unlock ();
-                return std::make_unique<message_type> ();
+                return make_unique<message_type> ();
             }
 
             auto res = std::move (queue_.front ());

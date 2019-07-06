@@ -77,7 +77,7 @@ namespace {
     template <typename CharType>
     struct string_maker<std::unique_ptr<CharType[]>> {
         std::unique_ptr<CharType[]> operator() (std::string const & str) const {
-            auto result = std::make_unique<CharType[]> (str.length ());
+            auto result = pstore::make_unique<CharType[]> (str.length ());
             auto ptr = const_cast<typename std::remove_const<CharType>::type *> (result.get ());
             std::copy (std::begin (str), std::end (str), ptr);
             return result;

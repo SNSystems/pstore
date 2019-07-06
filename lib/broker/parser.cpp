@@ -89,7 +89,7 @@ namespace {
         -> std::unique_ptr<std::string> {
         auto it = std::find_if (msg.payload.rbegin (), msg.payload.rend (),
                                 [](char c) { return c != '\0'; });
-        return std::make_unique<std::string> (std::begin (msg.payload), it.base ());
+        return pstore::make_unique<std::string> (std::begin (msg.payload), it.base ());
     }
 } // end anonymous namespace
 
@@ -140,8 +140,8 @@ namespace pstore {
                     auto end = std::end (complete_command);
                     auto const verb_parts = extract_word (std::begin (complete_command), end);
                     auto const path_parts = std::make_pair (skip_ws (verb_parts.second, end), end);
-                    return std::make_unique<broker_command> (substr (verb_parts),
-                                                             substr (path_parts));
+                    return pstore::make_unique<broker_command> (substr (verb_parts),
+                                                                substr (path_parts));
                 }
             }
 

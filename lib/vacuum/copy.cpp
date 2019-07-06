@@ -132,7 +132,7 @@ namespace vacuum {
                 bool copy_aborted = false;
                 // TODO: a new constructor to make a uniquely named file in the same directory as
                 // 'from'
-                auto destination = std::make_unique<pstore::database> (
+                auto destination = pstore::make_unique<pstore::database> (
                     source->path () + ".gc", pstore::database::access_mode::writable);
 
                 // We don't want our pristine new store to be vacuumed; it doesn't need it.

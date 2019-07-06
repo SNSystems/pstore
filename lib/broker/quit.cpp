@@ -97,8 +97,8 @@ namespace {
                               pstore::logging::quoted (message.c_str ()));
 
         assert (message.length () <= pstore::broker::message_type::payload_chars);
-        auto msg = std::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},
-                                                                   std::uint16_t{1}, message);
+        auto msg = pstore::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},
+                                                                      std::uint16_t{1}, message);
         cp.push_command (std::move (msg), nullptr);
     }
 

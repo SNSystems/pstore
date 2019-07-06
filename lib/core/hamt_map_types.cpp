@@ -255,7 +255,7 @@ namespace pstore {
                     inode = node.untag_node<internal_node *> ();
                     assert (inode->signature_ == signature);
                 } else {
-                    new_node = std::make_unique<internal_node> (internal);
+                    new_node = make_unique<internal_node> (internal);
                     inode = new_node.get ();
                 }
                 return {std::move (new_node), inode};
