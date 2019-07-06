@@ -121,7 +121,7 @@ namespace pstore {
         this->protect (address::make (sizeof (header)), address::make (size_.logical_size ()));
 
         header_ = storage_.address_to_pointer (typed_address<header>::null ());
-        sync_name_ = this->build_sync_name (*header_);
+        sync_name_ = database::build_sync_name (*header_);
 
 #ifdef _WIN32
         shared_ = pstore::shared_memory<pstore::shared> (this->shared_memory_name ());
