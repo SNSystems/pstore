@@ -58,7 +58,7 @@
 #include <utility>
 #include <vector>
 
-#include "pstore/serialize/ios_state.hpp"
+#include "pstore/support/ios_state.hpp"
 
 namespace pstore {
     namespace dump {
@@ -176,7 +176,7 @@ namespace pstore {
             // ~~~~~~~~~~~~~
             template <typename T, typename OStream>
             OStream & write_decimal (T value, OStream & os) const {
-                serialize::ios_flags_saver old_flags (os);
+                ios_flags_saver const _{os};
                 switch (base_) {
                 case 16: os << "0x" << std::hex; break;
                 case 8:

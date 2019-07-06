@@ -4,7 +4,7 @@
 //* | | (_) \__ \ \__ \ || (_| | ||  __/ *
 //* |_|\___/|___/ |___/\__\__,_|\__\___| *
 //*                                      *
-//===- include/pstore/serialize/ios_state.hpp -----------------------------===//
+//===- include/pstore/support/ios_state.hpp -------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,45 +44,44 @@
 /// \file ios_state.hpp
 /// \brief Save and restore of stream flags.
 
-#ifndef PSTORE_SERIALIZE_IOS_STATE_HPP
-#define PSTORE_SERIALIZE_IOS_STATE_HPP
+#ifndef PSTORE_SUPPORT_IOS_STATE_HPP
+#define PSTORE_SUPPORT_IOS_STATE_HPP
 
 #include <iosfwd>
 
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    namespace serialize {
 
-        /// \brief A class used to save an iostream's formatting flags on construction
-        /// and restore them on destruction.
-        /// Normally used to manage the restoration of the flags on exit from a scope.
-        class ios_flags_saver {
-        public:
-            explicit ios_flags_saver (std::ios_base & stream)
-                    : ios_flags_saver (stream, stream.flags ()) {}
+    /// \brief A class used to save an iostream's formatting flags on construction
+    /// and restore them on destruction.
+    ///
+    /// Normally used to manage the restoration of the flags on exit from a scope.
+    class ios_flags_saver {
+    public:
+        explicit ios_flags_saver (std::ios_base & stream)
+                : ios_flags_saver (stream, stream.flags ()) {}
 
-            ios_flags_saver (std::ios_base & stream, std::ios_base::fmtflags const & flags) noexcept
-                    : stream_{stream}
-                    , flags_{flags} {}
-            // No copying, moving, or assignment.
-            ios_flags_saver (ios_flags_saver const &) = delete;
-            ios_flags_saver (ios_flags_saver && rhs) noexcept = delete;
+        ios_flags_saver (std::ios_base & stream, std::ios_base::fmtflags const & flags) noexcept
+                : stream_{stream}
+                , flags_{flags} {}
+        // No copying, moving, or assignment.
+        ios_flags_saver (ios_flags_saver const &) = delete;
+        ios_flags_saver (ios_flags_saver && rhs) noexcept = delete;
 
-            ~ios_flags_saver () noexcept {
-                PSTORE_NO_EX_ESCAPE ({ stream_.flags (flags_); });
-            }
+        ~ios_flags_saver () noexcept {
+            PSTORE_NO_EX_ESCAPE ({ stream_.flags (flags_); });
+        }
 
-            // No copying, moving, or assignment.
-            ios_flags_saver & operator= (ios_flags_saver const &) = delete;
-            ios_flags_saver & operator= (ios_flags_saver && rhs) = delete;
+        // No copying, moving, or assignment.
+        ios_flags_saver & operator= (ios_flags_saver const &) = delete;
+        ios_flags_saver & operator= (ios_flags_saver && rhs) = delete;
 
-        private:
-            std::ios_base & stream_;
-            std::ios_base::fmtflags flags_;
-        };
+    private:
+        std::ios_base & stream_;
+        std::ios_base::fmtflags flags_;
+    };
 
-    } // namespace serialize
 } // namespace pstore
 
-#endif // PSTORE_SERIALIZE_IOS_STATE_HPP
+#endif // PSTORE_SUPPORT_IOS_STATE_HPP

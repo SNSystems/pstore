@@ -45,7 +45,6 @@ set (PSTORE_SERIALIZE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/serialize")
 set (PSTORE_SERIALIZE_SRC
     "${PSTORE_SERIALIZE_INCLUDE_DIR}/archive.hpp"
     "${PSTORE_SERIALIZE_INCLUDE_DIR}/common.hpp"
-    "${PSTORE_SERIALIZE_INCLUDE_DIR}/ios_state.hpp"
     "${PSTORE_SERIALIZE_INCLUDE_DIR}/standard_types.hpp"
     "${PSTORE_SERIALIZE_INCLUDE_DIR}/types.hpp"
 

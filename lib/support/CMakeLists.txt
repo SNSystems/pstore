@@ -253,6 +253,7 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/inherit_const.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/ios_state.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"

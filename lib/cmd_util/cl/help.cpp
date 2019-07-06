@@ -50,6 +50,7 @@
 
 #include "pstore/cmd_util/cl/word_wrapper.hpp"
 #include "pstore/support/array_elements.hpp"
+#include "pstore/support/ios_state.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -130,6 +131,8 @@ namespace pstore {
 
                 int const max_opt_len = max_option_length ();
                 int const indent = prefix_len + max_opt_len + separator_len;
+
+                ios_flags_saver const _ {os};
 
                 for (option const * op : cl::option::all ()) {
                     if (op != this && !op->is_alias () && !op->is_positional ()) {
