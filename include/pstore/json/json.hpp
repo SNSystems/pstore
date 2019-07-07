@@ -1088,7 +1088,7 @@ namespace pstore {
                     object_state,
                     comma_state,
                 };
-                bool is_first_ = true; // FIXME: use an additional state instead.
+                bool is_first_ = true; // TODO: use an additional state instead.
             };
 
             template <typename Callbacks>
