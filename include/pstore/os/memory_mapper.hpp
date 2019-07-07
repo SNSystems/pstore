@@ -10,7 +10,7 @@
 //* | | | | | | (_| | |_) | |_) |  __/ |    *
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
-//===- include/pstore/core/memory_mapper.hpp ------------------------------===//
+//===- include/pstore/os/memory_mapper.hpp --------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

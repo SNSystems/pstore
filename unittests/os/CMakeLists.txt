@@ -45,6 +45,7 @@ include (add_pstore)
 set (PSTORE_OS_UNIT_TEST_SRC
     test_file.cpp
     test_file_handle.cpp
+    test_memory_mapper.cpp
     test_process_file_name.cpp
 )
 add_pstore_unit_test (pstore-os-unit-tests ${PSTORE_OS_UNIT_TEST_SRC})

@@ -10,7 +10,7 @@
 //* | | | | | | (_| | |_) | |_) |  __/ |    *
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
-//===- unittests/core/test_memory_mapper.cpp ------------------------------===//
+//===- unittests/os/test_memory_mapper.cpp --------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,7 +47,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/core/memory_mapper.hpp"
+#include "pstore/os/memory_mapper.hpp"
 
 #include <cstring>
 #include <memory>
@@ -63,8 +63,8 @@
 #include "pstore/support/make_unique.hpp"
 
 #ifndef _WIN32
-#include <errno.h>
-#include <unistd.h>
+#    include <errno.h>
+#    include <unistd.h>
 #endif
 
 

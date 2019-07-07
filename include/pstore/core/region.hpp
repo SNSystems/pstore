@@ -51,7 +51,7 @@
 #include <memory>
 #include <vector>
 
-#include "pstore/core/memory_mapper.hpp"
+#include "pstore/os/memory_mapper.hpp"
 
 namespace pstore {
     namespace region {

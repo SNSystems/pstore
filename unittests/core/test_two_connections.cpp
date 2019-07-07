@@ -48,9 +48,9 @@
 // 3rd party includes
 #include "gtest/gtest.h"
 
-// Data store includes
-#include "pstore/core/memory_mapper.hpp"
+// pstore includes
 #include "pstore/core/transaction.hpp"
+#include "pstore/os/memory_mapper.hpp"
 
 // Local private includes
 #include "empty_store.hpp"

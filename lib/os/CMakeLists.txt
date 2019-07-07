@@ -49,6 +49,7 @@ set (pstore_os_lib_src
     "${pstore_os_include_dir}/file_posix.hpp"
     "${pstore_os_include_dir}/file_win32.hpp"
     "${pstore_os_include_dir}/logging.hpp"
+    "${pstore_os_include_dir}/memory_mapper.hpp"
     "${pstore_os_include_dir}/process_file_name.hpp"
     "${pstore_os_include_dir}/rotating_log.hpp"
     "${pstore_os_include_dir}/thread.hpp"
@@ -58,6 +59,9 @@ set (pstore_os_lib_src
     file_posix.cpp
     file_win32.cpp
     logging.cpp
+    memory_mapper.cpp
+    memory_mapper_posix.cpp
+    memory_mapper_win32.cpp
     process_file_name_posix.cpp
     process_file_name_win32.cpp
     thread.cpp

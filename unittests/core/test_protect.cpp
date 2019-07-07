@@ -44,9 +44,13 @@
 
 #include "pstore/core/transaction.hpp"
 
+// 3rd party includes
 #include "gmock/gmock.h"
 
-#include "pstore/core/memory_mapper.hpp"
+// pstore includes
+#include "pstore/os/memory_mapper.hpp"
+
+// Local private includes
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
 

@@ -61,12 +61,12 @@
 
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
-#include "pstore/core/memory_mapper.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/core/shared_memory.hpp"
 #include "pstore/core/storage.hpp"
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/file.hpp"
+#include "pstore/os/memory_mapper.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/head_revision.hpp"

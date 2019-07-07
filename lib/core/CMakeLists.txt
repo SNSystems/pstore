@@ -96,13 +96,9 @@ source_group ("support" FILES ${PSTORE_SUPPORT_SRC})
 
 set (PSTORE_OS_SRC
     "${PSTORE_PUBLIC_INCLUDE_DIR}/errno_exception.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/memory_mapper.hpp"
     "${PSTORE_PUBLIC_INCLUDE_DIR}/shared_memory.hpp"
     
     errno_exception.cpp
-    memory_mapper.cpp
-    memory_mapper_posix.cpp
-    memory_mapper_win32.cpp
     shared_memory.cpp
 )
 list (APPEND PSTORE_SRC ${PSTORE_OS_SRC})

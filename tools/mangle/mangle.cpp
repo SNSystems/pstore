@@ -97,8 +97,8 @@
 #include <iostream>
 
 #include "pstore/core/file_header.hpp"
-#include "pstore/core/memory_mapper.hpp"
 #include "pstore/os/file.hpp"
+#include "pstore/os/memory_mapper.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace {
@@ -123,7 +123,8 @@ namespace {
         std::mt19937_64 generator_;
         std::uniform_int_distribution<Ty> distribution_;
     };
-} // namespace
+
+} // end anonymous namespace
 
 int main (int argc, char ** argv) {
     int exit_code = EXIT_SUCCESS;

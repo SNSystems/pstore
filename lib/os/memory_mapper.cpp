@@ -10,7 +10,7 @@
 //* | | | | | | (_| | |_) | |_) |  __/ |    *
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
-//===- lib/core/memory_mapper.cpp -----------------------------------------===//
+//===- lib/os/memory_mapper.cpp -------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -49,7 +49,7 @@
 //===----------------------------------------------------------------------===//
 /// \file memory_mapper.cpp
 
-#include "pstore/core/memory_mapper.hpp"
+#include "pstore/os/memory_mapper.hpp"
 #include <ostream>
 
 namespace pstore {
