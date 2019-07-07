@@ -52,8 +52,8 @@
 /// treating regions of memory as though they were memory-mapped files, which is useful for
 /// unit testing.
 
-#ifndef PSTORE_MEMORY_MAPPER_HPP
-#define PSTORE_MEMORY_MAPPER_HPP (1)
+#ifndef PSTORE_OS_MEMORY_MAPPER_HPP
+#define PSTORE_OS_MEMORY_MAPPER_HPP (1)
 
 #include <cstdint>
 #include <iosfwd>
@@ -220,4 +220,4 @@ namespace pstore {
     };
 
 } // namespace pstore
-#endif // PSTORE_MEMORY_MAPPER_HPP
+#endif // PSTORE_OS_MEMORY_MAPPER_HPP
