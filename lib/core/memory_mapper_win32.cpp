@@ -52,23 +52,17 @@
 #include "pstore/core/memory_mapper.hpp"
 
 #if defined(_WIN32)
+
 #include <cassert>
 #include <iomanip>
 #include <limits>
 #include <sstream>
 #include <system_error>
 
-#include "pstore/support/quoted_string.hpp"
+#    include "pstore/os/uint64.hpp"
+#    include "pstore/support/quoted_string.hpp"
 
 namespace {
-    constexpr unsigned dword_bits = sizeof (DWORD) * 8;
-
-    inline constexpr auto high4 (std::uint64_t v) -> DWORD {
-        return static_cast<DWORD> (v >> dword_bits);
-    }
-    inline constexpr auto low4 (std::uint64_t v) -> DWORD {
-        return v & ((std::uint64_t{1} << dword_bits) - 1U);
-    }
 
     /// A simple RAII-style class for managing a Win32 file mapping.
     class file_mapping {
@@ -92,7 +86,8 @@ namespace {
             : mapping_ (::CreateFileMapping (file.raw_handle (),
                                              nullptr, // security attributes
                                              write_enabled ? PAGE_READWRITE : PAGE_READONLY,
-                                             high4 (mapping_size), low4 (mapping_size),
+                                             pstore::uint64_high4 (mapping_size),
+                                             pstore::uint64_low4 (mapping_size),
                                              nullptr)) { // name
         if (mapping_ == nullptr) {
             DWORD const last_error = ::GetLastError ();
@@ -106,7 +101,8 @@ namespace {
         assert (mapping_ != nullptr);
         ::CloseHandle (mapping_);
     }
-} // namespace
+
+} // end anonymous namespace
 
 
 namespace pstore {
@@ -179,7 +175,7 @@ namespace pstore {
         file_mapping mapping (file, write_enabled, offset + length);
         void * mapped_ptr =
             ::MapViewOfFile (mapping.handle (), write_enabled ? FILE_MAP_WRITE : FILE_MAP_READ,
-                             high4 (offset), low4 (offset), length);
+                             uint64_high4 (offset), uint64_low4 (offset), length);
         if (mapped_ptr == nullptr) {
             DWORD const last_error = ::GetLastError ();
 

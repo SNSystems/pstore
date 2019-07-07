@@ -70,6 +70,7 @@
 #include <unistd.h>
 #endif // !_WIN32
 
+#include "pstore/os/uint64.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
@@ -206,17 +207,9 @@ namespace pstore {
 
 
 #ifdef _WIN32
-        typedef HANDLE os_file_handle;
-        // FIXME: these were copied from memory_mapper_win32.cpp
-        static constexpr unsigned dword_bits = sizeof (DWORD) * 8;
-        static inline constexpr auto high4 (std::uint64_t v) -> DWORD {
-            return static_cast<DWORD> (v >> dword_bits);
-        }
-        static inline constexpr auto low4 (std::uint64_t v) -> DWORD {
-            return v & ((std::uint64_t{1} << dword_bits) - 1U);
-        }
+        using os_file_handle = HANDLE;
 #else
-        typedef int os_file_handle;
+        using os_file_handle = int;
 #endif
 
         class file_mapping {
@@ -429,13 +422,13 @@ namespace pstore {
     template <typename Ty>
     auto shared_memory<Ty>::file_mapping::open (char const * name) -> os_file_handle {
 
-        HANDLE map_file =
-            ::CreateFileMappingW (INVALID_HANDLE_VALUE, // use paging file
-                                  nullptr,              // default security
-                                  PAGE_READWRITE,       // read/write access
-                                  high4 (sizeof (Ty)),  // maximum object size (high-order DWORD)
-                                  low4 (sizeof (Ty)),   // maximum object size (low-order DWORD)
-                                  utf::win32::to16 (name).c_str ()); // name of mapping object
+        HANDLE map_file = ::CreateFileMappingW (
+            INVALID_HANDLE_VALUE,              // use paging file
+            nullptr,                           // default security
+            PAGE_READWRITE,                    // read/write access
+            uint64_high4 (sizeof (Ty)),        // maximum object size (high-order DWORD)
+            uint64_low4 (sizeof (Ty)),         // maximum object size (low-order DWORD)
+            utf::win32::to16 (name).c_str ()); // name of mapping object
         if (map_file == nullptr) {
             std::ostringstream str;
             str << "Couldn't create a file mapping for " << ::pstore::quoted (name);

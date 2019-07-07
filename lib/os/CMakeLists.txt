@@ -52,6 +52,7 @@ set (pstore_os_lib_src
     "${pstore_os_include_dir}/process_file_name.hpp"
     "${pstore_os_include_dir}/rotating_log.hpp"
     "${pstore_os_include_dir}/thread.hpp"
+    "${pstore_os_include_dir}/uint64.hpp"
 
     file.cpp
     file_posix.cpp

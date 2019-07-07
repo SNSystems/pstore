@@ -60,6 +60,7 @@
 #    include <stdexcept>
 #    include <system_error>
 
+#    include "pstore/os/uint64.hpp"
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/random.hpp"
 #    include "pstore/support/small_vector.hpp"
@@ -87,14 +88,6 @@ namespace pstore {
 
 
 namespace {
-    // FIXME: this was copied from memory_mapper_win32.cpp
-    constexpr unsigned dword_bits = sizeof (DWORD) * 8;
-    inline constexpr auto high4 (std::uint64_t v) -> DWORD {
-        return static_cast<DWORD> (v >> dword_bits);
-    }
-    inline constexpr auto low4 (std::uint64_t v) -> DWORD {
-        return v & ((std::uint64_t{1} << dword_bits) - 1U);
-    }
 
     HANDLE create_new_file (std::string const & path, bool is_temporary) {
 
@@ -414,8 +407,8 @@ namespace pstore {
             OVERLAPPED overlapped;
             overlapped.Internal = 0;
             overlapped.InternalHigh = 0;
-            overlapped.Offset = low4 (offset);
-            overlapped.OffsetHigh = high4 (offset);
+            overlapped.Offset = uint64_low4 (offset);
+            overlapped.OffsetHigh = uint64_high4 (offset);
             overlapped.hEvent = static_cast<HANDLE> (0);
 
             DWORD flags = 0;
@@ -429,10 +422,10 @@ namespace pstore {
             }
             bool got_lock = true;
             BOOL ok = ::LockFileEx (file_, flags,
-                                    0,            // "reserved, must be 0"
-                                    low4 (size),  // number of bytes to lock (low)
-                                    high4 (size), // number of bytes to lock (high)
-                                    &overlapped); // "overlapped"
+                                    0,                   // "reserved, must be 0"
+                                    uint64_low4 (size),  // number of bytes to lock (low)
+                                    uint64_high4 (size), // number of bytes to lock (high)
+                                    &overlapped);        // "overlapped"
             if (!ok) {
                 // If the LOCKFILE_FAIL_IMMEDIATELY flag is specified and an exclusive lock is
                 // requested for a range of a file that already has a shared or exclusive lock, the
@@ -457,14 +450,14 @@ namespace pstore {
             OVERLAPPED overlapped;
             overlapped.Internal = 0;
             overlapped.InternalHigh = 0;
-            overlapped.Offset = low4 (offset);
-            overlapped.OffsetHigh = high4 (offset);
+            overlapped.Offset = uint64_low4 (offset);
+            overlapped.OffsetHigh = uint64_high4 (offset);
             overlapped.hEvent = static_cast<HANDLE> (0);
             BOOL ok = ::UnlockFileEx (file_,
-                                      0,            // "reserved, must be 0"
-                                      low4 (size),  // number of bytes to unlock (low)
-                                      high4 (size), // number of bytes to unlock (high)
-                                      &overlapped); // "overlapped"
+                                      0,                   // "reserved, must be 0"
+                                      uint64_low4 (size),  // number of bytes to unlock (low)
+                                      uint64_high4 (size), // number of bytes to unlock (high)
+                                      &overlapped);        // "overlapped"
             if (!ok) {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
