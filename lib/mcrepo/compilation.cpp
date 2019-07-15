@@ -58,6 +58,8 @@ std::ostream & pstore::repo::operator<< (std::ostream & os, linkage_type l) {
     return os << str;
 }
 
+constexpr std::array<char, 8> compilation::compilation_signature_;
+
 // operator new
 // ~~~~~~~~~~~~
 void * compilation::operator new (std::size_t s, nmembers size) {
@@ -67,11 +69,17 @@ void * compilation::operator new (std::size_t s, nmembers size) {
     return ::operator new (actual_bytes);
 }
 
+void * compilation::operator new (std::size_t s, void * ptr) {
+    return ::operator new (s, ptr);
+}
+
 // operator delete
 // ~~~~~~~~~~~~~~~
 void compilation::operator delete (void * p, nmembers /*size*/) {
     ::operator delete (p);
 }
+
+void compilation::operator delete (void * /*p*/, void * /*ptr*/) {}
 
 void compilation::operator delete (void * p) {
     ::operator delete (p);
@@ -82,6 +90,11 @@ void compilation::operator delete (void * p) {
 auto compilation::load (pstore::database const & db, pstore::extent<compilation> const & location)
     -> std::shared_ptr<compilation const> {
     std::shared_ptr<compilation const> t = db.getro (location);
+#if PSTORE_SIGNATURE_CHECKS_ENABLED
+    if (t->signature_ != compilation_signature_) {
+        raise_error_code (make_error_code (error_code::bad_compilation_record));
+    }
+#endif
     if (t->size_bytes () != location.size) {
         raise_error_code (make_error_code (error_code::bad_compilation_record));
     }

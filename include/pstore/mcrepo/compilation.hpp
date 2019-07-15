@@ -44,6 +44,8 @@
 #ifndef PSTORE_MCREPO_COMPILATION_HPP
 #define PSTORE_MCREPO_COMPILATION_HPP
 
+#include <new>
+
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
 
@@ -202,6 +204,7 @@ namespace pstore {
             /// Returns the number of bytes of storage required for a compilation with 'size'
             /// members.
             static std::size_t size_bytes (std::uint64_t size) {
+                size = std::max (size, std::uint64_t{1}); // Always at least enough for one member.
                 return sizeof (compilation) - sizeof (compilation::members_) +
                        sizeof (compilation::members_[0]) * size;
             }
@@ -216,7 +219,9 @@ namespace pstore {
             typed_address<indirect_string> triple () const { return triple_; }
 
         private:
-            compilation () noexcept;
+            template <typename Iterator>
+            compilation (typed_address<indirect_string> path, typed_address<indirect_string> triple,
+                         std::uint64_t size, Iterator first_member, Iterator last_member) noexcept;
 
             struct nmembers {
                 std::size_t n;
@@ -224,7 +229,15 @@ namespace pstore {
             /// A placement-new implementation which allocates sufficient storage for a
             /// compilation with the number of members given by the size parameter.
             void * operator new (std::size_t s, nmembers size);
+            /// A copy of the standard placement-new function.
+            void * operator new (std::size_t s, void * ptr);
             void operator delete (void * p, nmembers size);
+            void operator delete (void * p, void * ptr);
+
+            static constexpr std::array<char, 8> compilation_signature_ = {
+                {'C', 'm', 'p', 'l', '8', 'i', 'o', 'n'}};
+
+            std::array<char, 8> signature_;
 
             /// The path containing the ticket file when it was created. (Used to guide the garbage
             /// collector's ticket-file search.)
@@ -233,21 +246,39 @@ namespace pstore {
             typed_address<indirect_string> triple_;
             /// The number of entries in the members_ array.
             std::uint64_t size_ = 0;
-            std::uint64_t padding1_ = 0;
             compilation_member members_[1];
         };
 
         PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
+        PSTORE_STATIC_ASSERT (sizeof (compilation) == 32 + sizeof (compilation_member));
         PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
-        inline compilation::compilation () noexcept {
-            (void) padding1_; // silence warning about an unused private class member.
-            PSTORE_STATIC_ASSERT (offsetof (compilation, path_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 8);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 16);
-            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 24);
+        template <typename Iterator>
+        compilation::compilation (typed_address<indirect_string> path,
+                                  typed_address<indirect_string> triple, std::uint64_t size,
+                                  Iterator first_member, Iterator last_member) noexcept
+                : signature_{compilation_signature_}
+                , path_{path}
+                , triple_{triple}
+                , size_{size} {
+
+            PSTORE_STATIC_ASSERT (offsetof (compilation, signature_) == 0);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, path_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 16);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 24);
             PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
+
+#ifndef NDEBUG
+            {
+                auto const dist = std::distance (first_member, last_member);
+                assert (dist >= 0 &&
+                        static_cast<typename std::make_unsigned<decltype (dist)>::type> (dist) ==
+                            size);
+            }
+#endif
+            std::copy (first_member, last_member, this->begin ());
         }
+
 
         // alloc
         // ~~~~~
@@ -258,7 +289,8 @@ namespace pstore {
             // First work out its size.
             auto const dist = std::distance (first_member, last_member);
             assert (dist >= 0);
-            auto const num_members = static_cast<std::uint64_t> (dist);
+            auto const num_members =
+                static_cast<typename std::make_unsigned<decltype (dist)>::type> (dist);
             auto const size = size_bytes (num_members);
 
             // Allocate the storage.
@@ -266,10 +298,7 @@ namespace pstore {
             auto ptr = std::static_pointer_cast<compilation> (transaction.getrw (addr, size));
 
             // Write the data to the store.
-            ptr->path_ = path;
-            ptr->triple_ = triple;
-            ptr->size_ = num_members;
-            std::copy (first_member, last_member, ptr->begin ());
+            new (ptr.get ()) compilation{path, triple, num_members, first_member, last_member};
             return pstore::extent<compilation> (typed_address<compilation> (addr), size);
         }
 
