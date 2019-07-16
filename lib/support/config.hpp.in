@@ -97,7 +97,7 @@
 #cmakedefine PSTORE_HAVE_GMTIME_R 1
 
 /// Defined if the BSD getpagesize() API is available.
-#cmakedefine HAVE_GETPAGESIZE 1
+#cmakedefine PSTORE_HAVE_GETPAGESIZE 1
 
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec)
 /// or st_Xtime (and be of type time_t). This macro is defined in the former situation.

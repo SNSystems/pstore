@@ -191,7 +191,7 @@ check_cxx_source_compiles (
     int main () {
         getpagesize ();
     }"
-    HAVE_GETPAGESIZE)
+    PSTORE_HAVE_GETPAGESIZE)
 
 check_cxx_source_compiles (
     "int main () { int a; int * _Nonnull b = &a; return *b; }"
