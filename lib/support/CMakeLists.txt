@@ -187,6 +187,13 @@ check_cxx_source_compiles (
     PSTORE_HAVE_GMTIME_R)
 
 check_cxx_source_compiles (
+    "#include <unistd.h>
+    int main () {
+        getpagesize ();
+    }"
+    HAVE_GETPAGESIZE)
+
+check_cxx_source_compiles (
     "int main () { int a; int * _Nonnull b = &a; return *b; }"
     PSTORE_HAVE_NONNULL_KEYWORD
 )

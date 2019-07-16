@@ -64,6 +64,8 @@
 #    include <sys/mman.h>
 #    include <unistd.h>
 
+// pstore
+#    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
 
 namespace pstore {
@@ -98,11 +100,17 @@ namespace pstore {
     // sysconf [static]
     // ~~~~~~~
     unsigned system_page_size::sysconf () {
+#    if HAVE_GETPAGESIZE
+        int result = getpagesize ();
+        assert (result > 0 &&
+                static_cast<unsigned> (result) <= std::numeric_limits<unsigned>::max ());
+#    else
         long result = ::sysconf (_SC_PAGESIZE);
         if (result == -1) {
             raise (errno_erc{errno}, "sysconf(_SC_PAGESIZE)");
         }
         assert (result > 0 && result <= std::numeric_limits<unsigned>::max ());
+#    endif
         return static_cast<unsigned> (result);
     }
 

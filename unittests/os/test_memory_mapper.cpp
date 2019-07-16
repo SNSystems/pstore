@@ -49,96 +49,49 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/os/memory_mapper.hpp"
 
-#include <cstring>
-#include <memory>
+// Standard library
+#include <algorithm>
+#include <numeric>
 
 // 3rd party
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-/// pstore
+// pstore
 #include "pstore/os/file.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/support/make_unique.hpp"
 
-#ifndef _WIN32
-#    include <errno.h>
-#    include <unistd.h>
-#endif
+TEST (MemoryMapper, MemoryMapThenCheckFileContents) {
+    using ::testing::ContainerEq;
 
+    pstore::file::file_handle file;
+    file.open (pstore::file::file_handle::temporary ());
 
-namespace {
-    class MemoryMapperFixture : public ::testing::Test {
-    public:
-        MemoryMapperFixture ()
-                : file_{pstore::make_unique<pstore::file::file_handle> ()} {
+    std::size_t const size = pstore::system_page_size ().get ();
+    ASSERT_GT (size, 0U);
 
-            file_->open (pstore::file::file_handle::temporary ());
-        }
-
-    protected:
-        static std::size_t page_size ();
-
-        pstore::file::file_handle & file () { return *file_; }
-
-    private:
-        std::unique_ptr<pstore::file::file_handle> file_;
-    };
-
-    std::size_t MemoryMapperFixture::page_size () {
-#ifdef _WIN32
-        SYSTEM_INFO system_info;
-        ::GetSystemInfo (&system_info);
-        return static_cast<std::size_t> (system_info.dwPageSize);
-#else
-        long result = ::sysconf (_SC_PAGESIZE);
-        if (result == -1) {
-            raise (pstore::errno_erc{errno}, "sysconf(_SC_PAGESIZE)");
-        }
-        assert (result >= 0);
-        return static_cast<unsigned long> (result);
-#endif
-    }
-} // namespace
-
-TEST_F (MemoryMapperFixture, MemoryMapThenCheckFileContents) {
-
-    /// Linux: the 'offset' parameter must be a multiple of the value returned by
-    /// sysconf(_SC_PAGESIZE)
-    ///
-    /// Windows: the 'offset' parameter must be a multiple of the allocation granularity given by
-    /// SYSTEM_INFO structure filled in by a call to GetSystemInfo().
-
-    std::size_t const size = this->page_size ();
-    pstore::file::file_handle & backing_store = this->file ();
+    file.seek (size - 1U);
+    file.write (0);
     {
-        backing_store.seek (size);
-        backing_store.write (0);
-
-        pstore::memory_mapper mm (backing_store, // backing file
-                                  true,          // writable?
-                                  0,             // offset
-                                  size);         // number of bytes to map
+        pstore::memory_mapper mm{file,  // backing file
+                                 true,  // writable?
+                                 0U,    // offset
+                                 size}; // number of bytes to map
 
         EXPECT_EQ (size, mm.size ());
         EXPECT_EQ (0U, mm.offset ());
 
+        // Flood the memory mapped file with values.
         auto ptr = std::static_pointer_cast<std::uint8_t> (mm.data ());
-        auto ptr8 = ptr.get ();
-        std::memset (ptr8, 0, size);
-        ptr8[0] = 0xFF;
-        ptr8[size - 1] = 0xFF;
+        std::iota (ptr.get (), ptr.get () + size, std::uint8_t{0});
     }
 
-    backing_store.seek (0);
+    // Now read back the contents of the file.
+    file.seek (0);
     std::vector<std::uint8_t> contents (size);
-    backing_store.read_span (::pstore::gsl::make_span (contents));
+    file.read_span (pstore::gsl::make_span (contents));
 
+    // Now check that the file contains thevalues we wrote to it.
     std::vector<std::uint8_t> expected (size);
-    std::fill (expected.begin (), expected.end (), std::uint8_t{0});
-    expected[0] = 0xFF;
-    expected[size - 1] = 0xFF;
-
-    EXPECT_THAT (expected, ::testing::ContainerEq (contents));
+    std::iota (expected.begin (), expected.end (), std::uint8_t{0});
+    EXPECT_THAT (expected, ContainerEq (contents));
 }

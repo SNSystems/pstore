@@ -90,11 +90,14 @@
 /// Defined if the POSIX localtime_r() API is available.
 #cmakedefine PSTORE_HAVE_LOCALTIME_R 1
 
-/// Defined if the C11 gMtime_s() API is available
+/// Defined if the C11 gMtime_s() API is available.
 #cmakedefine PSTORE_HAVE_GMTIME_S 1
 
-/// Defined if the POSIX gmtime_r() API is available
+/// Defined if the POSIX gmtime_r() API is available.
 #cmakedefine PSTORE_HAVE_GMTIME_R 1
+
+/// Defined if the BSD getpagesize() API is available.
+#cmakedefine HAVE_GETPAGESIZE 1
 
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec)
 /// or st_Xtime (and be of type time_t). This macro is defined in the former situation.
