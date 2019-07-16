@@ -73,12 +73,7 @@ void sample_service::start_handler (DWORD /*argc*/, TCHAR * /*argv*/ []) {
 
 // worker
 // ~~~~~~
-//
-//   FUNCTION: sample_service::ServiceWorkerThread(void)
-//
-//   PURPOSE: The method performs the main function of the service. It runs
-//   on a thread pool worker thread.
-//
+/// The method performs the main function of the service. It runs on a thread pool worker thread.
 void sample_service::worker () {
     // Periodically check if the service is stopping.
     while (!is_stopping_) {

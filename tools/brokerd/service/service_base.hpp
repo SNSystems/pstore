@@ -54,11 +54,13 @@
 
 class service_base {
 public:
-    // Register the executable for a service with the Service Control Manager
-    // (SCM). After you call Run(ServiceBase), the SCM issues a Start command,
-    // which results in a call to the OnStart method in the service. This
-    // method blocks until the service has stopped.
-    static bool run (service_base & service);
+    /// Registers the executable for a service with the Service Control Manager (SCM). After you
+    /// call run(service_base), the SCM issues a Start command, which results in a call to the
+    /// OnStart method in the service. This method blocks until the service has stopped.
+    ///
+    /// \param service  A reference to a service_base object. It will become the singleton service
+    /// instance of this service application.
+    static void run (service_base & service);
 
     /// \param service_name  The name of the service.
     /// \param can_stop  Can the service be stopped?

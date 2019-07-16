@@ -57,6 +57,7 @@
 #include "./broker_service.hpp"
 
 namespace {
+
     constexpr auto service_name = TEXT ("pstore_broker");
     constexpr auto display_name = TEXT ("pstore broker");
     constexpr auto start_type = SERVICE_DEMAND_START;
@@ -64,39 +65,14 @@ namespace {
         TEXT (""); // List of service dependencies - "dep1\0dep2\0\0"
     constexpr auto account = TEXT ("NT AUTHORITY\\LocalService");
     constexpr auto account_password = nullptr;
-} // namespace
 
 
-namespace {
     using namespace pstore::cmd_util;
 
     cl::opt<bool> install_opt ("install", cl::desc ("Install the service"));
     cl::opt<bool> remove_opt ("remove", cl::desc ("Remove the service"));
 
-#if 0
-    enum option_index {
-        help_opt,
-        install_opt,
-        remove_opt,
-        unknown_opt,
-    };
-
-#define USAGE TEXT ("pstore_broker_serivce [options]")
-
-    option::Descriptor const usage[] = {
-        {unknown_opt, 0, TEXT (""), TEXT (""), option::Arg::None, USAGE "\n\nOptions:"},
-        {help_opt, 0, TEXT (""), TEXT ("help"), option::Arg::None,
-         TEXT ("  --help \tPrint usage and exit.")},
-
-        {install_opt, 0, TEXT ("i"), TEXT ("install"), option::Arg::None,
-         TEXT ("  --install, -i  \tInstall the service.")},
-        {install_opt, 0, TEXT ("r"), TEXT ("remove"), option::Arg::None,
-         TEXT ("  --remove, -r  \tRemovethe service.")},
-
-        {0, 0, 0, 0, 0, 0},
-    };
-#endif
-} // namespace
+} // end anonymous namespace
 
 
 int _tmain (int argc, TCHAR * argv[]) {
@@ -115,10 +91,8 @@ int _tmain (int argc, TCHAR * argv[]) {
         } else if (remove_opt) {
             uninstall_service (service_name);
         } else {
-            sample_service service (service_name);
-            if (!sample_service::run (service)) {
-                wprintf (TEXT ("Service failed to run w/err 0x%08lx\n"), ::GetLastError ());
-            }
+            sample_service service{service_name};
+            sample_service::run (service);
         }
     } catch (std::exception const & ex) {
         char const * what = ex.what ();

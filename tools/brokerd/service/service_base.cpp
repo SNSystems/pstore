@@ -45,21 +45,16 @@
 /// \file service_base.cpp
 
 #include "service_base.hpp"
+
 #include <array>
 #include <cassert>
 #include <cstdio>
 #include <cstring>
+#include <sstream>
 #include <vector>
 
-#if 0
-namespace {
-    template <typename T, std::ptrdiff_t n>
-    constexpr std::ptrdiff_t elements_of (T (&)[n]) {
-        return n;
-    }
-}
-#endif
-
+#include "pstore/support/error.hpp"
+#include "pstore/support/utf.hpp"
 
 // Initialize the singleton service instance.
 service_base * service_base::s_service = nullptr;
@@ -90,23 +85,9 @@ service_base::service_base (TCHAR const * service_name, bool can_stop, bool can_
 // ~~~~~~
 service_base::~service_base () {}
 
-//
-//   FUNCTION: service_base::Run(service_base &)
-//
-//   PURPOSE: Register the executable for a service with the Service Control
-//   Manager (SCM). After you call Run(ServiceBase), the SCM issues a Start
-//   command, which results in a call to the OnStart method in the service.
-//   This method blocks until the service has stopped.
-//
-//   PARAMETERS:
-//   * service - the reference to a service_base object. It will become the
-//     singleton service instance of this service application.
-//
-//   RETURN VALUE: If the function succeeds, the return value is TRUE. If the
-//   function fails, the return value is FALSE. To get extended error
-//   information, call GetLastError.
-//
-bool service_base::run (service_base & service) {
+// run
+// ~~~
+void service_base::run (service_base & service) {
     s_service = &service;
 
     /// Make a non-const copy of the servicd name as equired by the definition of
@@ -115,14 +96,16 @@ bool service_base::run (service_base & service) {
     std::vector<TCHAR> name (std::begin (n), std::end (n));
     name.push_back (L'\0');
 
-    SERVICE_TABLE_ENTRY const serviceTable[] = {{name.data (), service_base::main},
-                                                {nullptr, nullptr}};
+    std::array<SERVICE_TABLE_ENTRY const, 2> const service_table = {
+        {{name.data (), service_base::main}, {nullptr, nullptr}}};
 
     // Connects the main thread of a service process to the service control
     // manager, which causes the thread to be the service control dispatcher
     // thread for the calling process. This call returns when the service has
     // stopped. The process should simply terminate when the call returns.
-    return ::StartServiceCtrlDispatcher (serviceTable) != FALSE;
+    if (!::StartServiceCtrlDispatcher (service_table.data ())) {
+        raise (pstore::win32_erc{::GetLastError ()}, "StartServiceCtrlDispatcher failed");
+    }
 }
 
 
@@ -136,7 +119,7 @@ void WINAPI service_base::main (DWORD argc, TCHAR * argv[]) {
         service->status_handle_ =
             ::RegisterServiceCtrlHandlerW (service->name_.c_str (), control_handler);
         if (service->status_handle_ == nullptr) {
-            throw GetLastError (); // FIXME FFS
+            raise (pstore::win32_erc{::GetLastError ()}, "RegisterServiceCtrlHandler failed");
         }
 
         service->start (argc, argv);
@@ -202,8 +185,16 @@ void service_base::stop () {
         this->set_service_status (SERVICE_STOP_PENDING);
         this->stop_handler ();
         this->set_service_status (SERVICE_STOPPED);
-    } catch (DWORD dwError) {
-        this->write_error_log_entry ("Service Stop", dwError);
+    } catch (std::system_error const & sys_ex) {
+        std::ostringstream os;
+        std::error_code const & ec = sys_ex.code ();
+        os << "Service failed to stop (" << ec.category ().name () << ": " << sys_ex.what () << " ("
+           << ec.value () << ')';
+        this->write_event_log_entry (os.str ().c_str (), event_type::error);
+    } catch (std::exception const & ex) {
+        std::ostringstream os;
+        os << "Service failed to stop: " << ex.what ();
+        this->write_event_log_entry (os.str ().c_str (), event_type::error);
         this->set_service_status (original_state);
     } catch (...) {
         this->write_event_log_entry ("Service failed to stop.", event_type::error);
@@ -213,15 +204,10 @@ void service_base::stop () {
 
 // stop_handler
 // ~~~~~~~~~~~~
-//
-//   FUNCTION: service_base::stop_handler()
-//
-//   PURPOSE: When implemented in a derived class, executes when a Stop
-//   command is sent to the service by the SCM. Specifies actions to take
-//   when a service stops running. Be sure to periodically call
-//   service_base::set_service_status() with SERVICE_STOP_PENDING if the
-//   procedure is going to take long time.
-//
+/// When implemented in a derived class, executes when a Stop command is sent to the service by the
+/// SCM. Specifies actions to take when a service stops running. Be sure to periodically call
+/// service_base::set_service_status() with SERVICE_STOP_PENDING if the procedure is going to take
+/// long time.
 void service_base::stop_handler () {}
 
 
@@ -321,11 +307,11 @@ void service_base::set_service_status (DWORD current_state, DWORD win32_exit_cod
 /// \param message  The message to be logged.
 /// \param type  The type of event to be logged.
 void service_base::write_event_log_entry (char const * message, event_type type) {
-    std::array<TCHAR const *, 2> lpszStrings = {{nullptr}};
 
-    TCHAR const pszMessage[] = TEXT ("it happened"); // FIXME: Convert message to UTF16.
+    std::wstring const message16 = pstore::utf::win32::to16 (message);
+
     // TODO: shouldn't this be open for longer?
-    if (HANDLE event_source = ::RegisterEventSource (NULL, name_.c_str ())) {
+    if (HANDLE event_source = ::RegisterEventSourceW (NULL, name_.c_str ())) {
         auto t = WORD{0};
         switch (type) {
         case event_type::success: t = EVENTLOG_SUCCESS; break;
@@ -336,17 +322,18 @@ void service_base::write_event_log_entry (char const * message, event_type type)
         case event_type::warning: t = EVENTLOG_WARNING_TYPE; break;
         }
 
-        lpszStrings[0] = name_.c_str ();
-        lpszStrings[1] = pszMessage;
+        std::array<wchar_t const *, 2> strings = {{nullptr}};
+        strings[0] = name_.c_str ();
+        strings[1] = message16.c_str ();
 
-        ::ReportEvent (event_source, t,
-                       0,                                       // Event category
-                       0,                                       // Event identifier
-                       NULL,                                    // No security identifier
-                       static_cast<WORD> (lpszStrings.size ()), // TODO: narrow_cast
-                       0,                                       // No binary data
-                       lpszStrings.data (),
-                       NULL // No binary data
+        ::ReportEventW (event_source, t,
+                        0,       // Event category
+                        0,       // Event identifier
+                        nullptr, // No security identifier
+                        static_cast<WORD> (strings.size ()),
+                        0, // No binary data
+                        strings.data (),
+                        nullptr // No binary data
         );
         ::DeregisterEventSource (event_source);
     }

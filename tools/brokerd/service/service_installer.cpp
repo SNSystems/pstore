@@ -46,55 +46,78 @@
 
 #include "service_installer.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <cstdio>
 #include <thread>
+
+#include "pstore/support/array_elements.hpp"
+#include "pstore/support/error.hpp"
+#include "pstore/support/small_vector.hpp"
 
 namespace {
 
     class service_handle {
     public:
-        explicit service_handle (SC_HANDLE h);
-        ~service_handle ();
-        service_handle (service_handle const &) = delete;
-        service_handle & operator= (service_handle const &) = delete;
+        explicit service_handle (SC_HANDLE h) noexcept
+                : h_{h} {}
+        service_handle (service_handle const &) noexcept = delete;
+        service_handle (service_handle && other) noexcept
+                : h_{std::move (other.h_)} {}
+        ~service_handle () noexcept { this->reset (); }
 
+        service_handle & operator= (service_handle const &) noexcept = delete;
+        service_handle & operator= (service_handle && other) noexcept {
+            if (&other != this) {
+                this->reset ();
+                h_ = std::move (other.h_);
+            }
+            return *this;
+        }
+
+        operator bool () const noexcept { return h_ != nullptr; }
         SC_HANDLE get () const noexcept { return h_; }
+
+        void reset () noexcept {
+            if (h_) {
+                ::CloseServiceHandle (h_);
+                h_ = nullptr;
+            }
+        }
 
     private:
         SC_HANDLE h_;
     };
 
-    service_handle::service_handle (SC_HANDLE h)
-            : h_{h} {}
-
-    service_handle::~service_handle () {
-        if (h_) {
-            ::CloseServiceHandle (h_);
-            h_ = nullptr;
-        }
-    }
-
-} // namespace
+} // end anonymous namespace
 
 // install_service
 // ~~~~~~~~~~~~~~~
 void install_service (ctzstring service_name, ctzstring display_name, DWORD start_type,
                       ctzstring dependencies, ctzstring account, ctzstring password) {
-    TCHAR szPath[MAX_PATH]; // FIXME: eliminate MAX_PATH. Just because the OS is dumb, our code
-                            // doesn't have to be...
+    pstore::small_vector<TCHAR> path;
+    path.resize (path.capacity ());
 
-    if (::GetModuleFileName (NULL, szPath, ARRAYSIZE (szPath)) == 0) {
-        wprintf (TEXT ("GetModuleFileName failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+    DWORD erc = NO_ERROR;
+    for (;;) {
+        auto nsize = static_cast<DWORD> (path.size ());
+        ::GetModuleFileName (nullptr, path.data (), nsize);
+        erc = ::GetLastError ();
+        if (erc != ERROR_INSUFFICIENT_BUFFER) {
+            break;
+        }
+        nsize += nsize / 2;
+        path.resize (nsize);
+    }
+    if (erc != NO_ERROR) {
+        raise (pstore::win32_erc{::GetLastError ()}, "GetModuleFileName failed");
     }
 
     // Open the local default service control manager database
     service_handle scm{
-        ::OpenSCManager (NULL, NULL, SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE)};
-    if (scm.get () == NULL) {
-        wprintf (TEXT ("OpenSCManager failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+        ::OpenSCManager (nullptr, nullptr, SC_MANAGER_CONNECT | SC_MANAGER_CREATE_SERVICE)};
+    if (!scm) {
+        raise (pstore::win32_erc{::GetLastError ()}, "OpenSCManager failed");
     }
 
     // Install the service into SCM.
@@ -105,15 +128,14 @@ void install_service (ctzstring service_name, ctzstring display_name, DWORD star
                                             SERVICE_WIN32_OWN_PROCESS, // Service type
                                             start_type,                // Service start type
                                             SERVICE_ERROR_NORMAL,      // Error control type
-                                            szPath,                    // Service's binary
-                                            NULL,                      // No load ordering group
-                                            NULL,                      // No tag identifier
+                                            path.data (),              // Service's binary
+                                            nullptr,                   // No load ordering group
+                                            nullptr,                   // No tag identifier
                                             dependencies,              // Dependencies
                                             account,                   // Service running account
                                             password)};
-    if (service.get () == nullptr) {
-        wprintf (TEXT ("CreateService failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+    if (!service) {
+        raise (pstore::win32_erc{::GetLastError ()}, "CreateService failed");
     }
 
     wprintf (TEXT ("%s is installed.\n"), service_name);
@@ -127,17 +149,15 @@ void uninstall_service (TCHAR const * service_name) {
 
     // Open the local default service control manager database
     service_handle scm{::OpenSCManager (NULL, NULL, SC_MANAGER_CONNECT)};
-    if (scm.get () == nullptr) {
-        wprintf (TEXT ("OpenSCManager failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+    if (!scm) {
+        raise (pstore::win32_erc{::GetLastError ()}, "OpenSCManager failed");
     }
 
     // Open the service with delete, stop, and query status permissions
     service_handle service{
         ::OpenService (scm.get (), service_name, SERVICE_STOP | SERVICE_QUERY_STATUS | DELETE)};
-    if (service.get () == nullptr) {
-        wprintf (TEXT ("OpenService failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+    if (!service) {
+        raise (pstore::win32_erc{::GetLastError ()}, "OpenService failed");
     }
 
     // Try to stop the service
@@ -145,7 +165,7 @@ void uninstall_service (TCHAR const * service_name) {
     if (::ControlService (service.get (), SERVICE_CONTROL_STOP, &status)) {
         using namespace std::chrono_literals;
 
-        // FIXME: can I use a condition variable rather than polling?
+        // TODO: can I use a condition variable rather than polling?
         wprintf (TEXT ("Stopping %s."), service_name);
         std::this_thread::sleep_for (1s);
 
@@ -166,7 +186,6 @@ void uninstall_service (TCHAR const * service_name) {
     }
 
     if (!::DeleteService (service.get ())) {
-        wprintf (TEXT ("DeleteService failed w/err 0x%08lx\n"), GetLastError ());
-        throw "FIXME";
+        raise (pstore::win32_erc{::GetLastError ()}, "DeleteService failed");
     }
 }
