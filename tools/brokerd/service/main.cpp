@@ -81,7 +81,7 @@ int _tmain (int argc, TCHAR * argv[]) {
         cl::ParseCommandLineOptions (argc, argv, "pstore broker server");
 
         if (install_opt && remove_opt) {
-            std::cerr << "--install and --remove cannot be specified together!\n";
+            std::wcerr << L"--install and --remove cannot be specified together!\n";
             std::exit (EXIT_FAILURE);
         }
 
@@ -95,11 +95,10 @@ int _tmain (int argc, TCHAR * argv[]) {
             sample_service::run (service);
         }
     } catch (std::exception const & ex) {
-        char const * what = ex.what ();
-        std::cerr << "Error: " << what << std::endl; // FIXME: use wide characters
+        std::wcerr << L"Error: " << pstore::utf::to_native_string (ex.what ()) << std::endl;
         exit_code = EXIT_FAILURE;
     } catch (...) {
-        std::wcerr << TEXT ("Unknown error") << std::endl;
+        std::wcerr << L"Unknown error" << std::endl;
         exit_code = EXIT_FAILURE;
     }
 
