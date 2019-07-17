@@ -157,9 +157,12 @@ void service_base::start (DWORD argc, TCHAR * argv[]) {
         this->set_service_status (SERVICE_START_PENDING);
         this->start_handler (argc, argv);
         this->set_service_status (SERVICE_RUNNING);
-    } catch (DWORD dwError) { // FIXME: FFS
-        this->write_error_log_entry ("Service Start", dwError);
-        this->set_service_status (SERVICE_STOPPED, dwError);
+    } catch (std::system_error const & sys_ex) {
+        this->write_error_log_entry ("Service start", sys_ex);
+        this->set_service_status (SERVICE_STOPPED);
+    } catch (std::exception const & ex) {
+        this->write_error_log_entry ("Service start", ex);
+        this->set_service_status (SERVICE_STOPPED);
     } catch (...) {
         this->write_event_log_entry ("Service failed to start.", event_type::error);
         this->set_service_status (SERVICE_STOPPED);
@@ -186,15 +189,10 @@ void service_base::stop () {
         this->stop_handler ();
         this->set_service_status (SERVICE_STOPPED);
     } catch (std::system_error const & sys_ex) {
-        std::ostringstream os;
-        std::error_code const & ec = sys_ex.code ();
-        os << "Service failed to stop (" << ec.category ().name () << ": " << sys_ex.what () << " ("
-           << ec.value () << ')';
-        this->write_event_log_entry (os.str ().c_str (), event_type::error);
+        this->write_error_log_entry ("Service stop", sys_ex);
+        this->set_service_status (original_state);
     } catch (std::exception const & ex) {
-        std::ostringstream os;
-        os << "Service failed to stop: " << ex.what ();
-        this->write_event_log_entry (os.str ().c_str (), event_type::error);
+        this->write_error_log_entry ("Service stop", ex);
         this->set_service_status (original_state);
     } catch (...) {
         this->write_event_log_entry ("Service failed to stop.", event_type::error);
@@ -224,8 +222,11 @@ void service_base::pause () {
         this->set_service_status (SERVICE_PAUSE_PENDING);
         this->pause_handler ();
         this->set_service_status (SERVICE_PAUSED);
-    } catch (DWORD dwError) { // FIXME
-        this->write_error_log_entry ("Service Pause", dwError);
+    } catch (std::system_error const & sys_ex) {
+        this->write_error_log_entry ("Service pause", sys_ex);
+        this->set_service_status (SERVICE_RUNNING);
+    } catch (std::exception const & ex) {
+        this->write_error_log_entry ("Service pause", ex);
         this->set_service_status (SERVICE_RUNNING);
     } catch (...) {
         this->write_event_log_entry ("Service failed to pause.", event_type::error);
@@ -253,8 +254,11 @@ void service_base::resume () {
         this->set_service_status (SERVICE_CONTINUE_PENDING);
         this->resume_handler ();
         this->set_service_status (SERVICE_RUNNING);
-    } catch (DWORD dwError) { // FIXME: FFS
-        this->write_error_log_entry ("Service Continue", dwError);
+    } catch (std::system_error const & sys_ex) {
+        this->write_error_log_entry ("Service resume", sys_ex);
+        this->set_service_status (SERVICE_PAUSED);
+    } catch (std::exception const & ex) {
+        this->write_error_log_entry ("Service resume", ex);
         this->set_service_status (SERVICE_PAUSED);
     } catch (...) {
         this->write_event_log_entry ("Service failed to resume.", event_type::error);
@@ -278,8 +282,10 @@ void service_base::shutdown () {
         // Perform service-specific shutdown operations.
         this->shutdown_handler ();
         this->set_service_status (SERVICE_STOPPED);
-    } catch (DWORD dwError) {
-        this->write_error_log_entry ("Service Shutdown", dwError);
+    } catch (std::system_error const & sys_ex) {
+        this->write_error_log_entry ("Service shutdown", sys_ex);
+    } catch (std::exception const & ex) {
+        this->write_error_log_entry ("Service shutdown", ex);
     } catch (...) {
         this->write_event_log_entry ("Service failed to shut down.", event_type::error);
     }
@@ -303,9 +309,6 @@ void service_base::set_service_status (DWORD current_state, DWORD win32_exit_cod
 
 // write_event_log_entry
 // ~~~~~~~~~~~~~~~~~~~~~
-/// Logs a message to the application event log.
-/// \param message  The message to be logged.
-/// \param type  The type of event to be logged.
 void service_base::write_event_log_entry (char const * message, event_type type) {
 
     std::wstring const message16 = pstore::utf::win32::to16 (message);
@@ -341,12 +344,16 @@ void service_base::write_event_log_entry (char const * message, event_type type)
 
 // write_error_log_entry
 // ~~~~~~~~~~~~~~~~~~~~~
-/// Log an error message to the Application event log.
-/// \param func  The function responsible for the error.
-/// \param errcode  The error code.
-void service_base::write_error_log_entry (char const * func, DWORD errcode) {
-    char message[260];
-    (void) std::snprintf (message, sizeof (message), "%s failed w/err 0x%08lx", func, errcode);
-    message[sizeof (message) - 1] = '\0';
-    this->write_event_log_entry (message, event_type::error);
+void service_base::write_error_log_entry (char const * message, std::system_error const & sys_ex) {
+    std::ostringstream os;
+    std::error_code const & ec = sys_ex.code ();
+    os << message << " (" << ec.category ().name () << "): " << sys_ex.what () << " ("
+       << ec.value () << ')';
+    this->write_event_log_entry (os.str ().c_str (), event_type::error);
+}
+
+void service_base::write_error_log_entry (char const * message, std::exception const & ex) {
+    std::ostringstream os;
+    os << message << ": " << ex.what ();
+    this->write_event_log_entry (os.str ().c_str (), event_type::error);
 }

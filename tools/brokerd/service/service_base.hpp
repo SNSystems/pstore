@@ -44,8 +44,8 @@
 
 /// \file service_base.hpp
 
-#ifndef BROKER_SERVICE_BASE_HPP
-#define BROKER_SERVICE_BASE_HPP
+#ifndef PSTORE_BROKER_SERVICE_BASE_HPP
+#define PSTORE_BROKER_SERVICE_BASE_HPP
 
 #include <string>
 #define NOMINMAX
@@ -104,9 +104,20 @@ protected:
                              DWORD wait_hint = 0) noexcept;
 
     enum class event_type { success, audit_failure, audit_success, error, information, warning };
-    // Log a message to the Application event log.
+
+    /// Logs a message to the application event log.
+    /// \param message  The message to be logged.
+    /// \param type  The type of event to be logged.
     void write_event_log_entry (char const * message, event_type type);
-    void write_error_log_entry (char const * function, DWORD dwError);
+
+    /// Log an error message to the Application event log.
+    /// \param message  The message to be logged.
+    /// \param sys_ex  The error code.
+    void write_error_log_entry (char const * message, std::system_error const & sys_ex);
+    /// Log an error message to the Application event log.
+    /// \param message  The message to be logged.
+    /// \param ex  The error code.
+    void write_error_log_entry (char const * message, std::exception const & ex);
 
 private:
     // Entry point for the service. It registers the handler function for the
@@ -129,4 +140,4 @@ private:
     SERVICE_STATUS status_;                         ///< The status of the service.
     SERVICE_STATUS_HANDLE status_handle_ = nullptr; ///< The service status handle.
 };
-#endif // BROKER_SERVICE_BASE_HPP
+#endif // PSTORE_BROKER_SERVICE_BASE_HPP
