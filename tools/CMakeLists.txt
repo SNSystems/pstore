@@ -53,6 +53,7 @@ add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz D
 add_subdirectory (inserter)     # A utility to exercise the digest index
 add_subdirectory (json)         # A small wrapper for the JSON parser library.
 add_subdirectory (mangle)       # A simple file fuzzing utility
+add_subdirectory (mmap)
 add_subdirectory (read)         # A utility for reading the write or strings index. 
 add_subdirectory (sieve)        # A utility to generate data for the system tests
 add_subdirectory (vacuum)       # Data store garbage collector utility
