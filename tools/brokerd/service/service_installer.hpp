@@ -44,8 +44,8 @@
 
 /// \file service_installer.hpp
 
-#ifndef SERVICE_INSTALLER_HPP
-#define SERVICE_INSTALLER_HPP
+#ifndef PSTORE_BROKER_SERVICE_INSTALLER_HPP
+#define PSTORE_BROKER_SERVICE_INSTALLER_HPP
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -78,4 +78,4 @@ void install_service (ctzstring service_name, ctzstring display_name, DWORD star
 /// \param service_name  The name of the service to be removed.
 void uninstall_service (ctzstring service_name);
 
-#endif // SERVICE_INSTALLER_HPP
+#endif // PSTORE_BROKER_SERVICE_INSTALLER_HPP

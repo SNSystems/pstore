@@ -44,8 +44,8 @@
 
 /// \file service_installer.hpp
 
-#ifndef BROKER_SAMPLE_SERVICE_HPP
-#define BROKER_SAMPLE_SERVICE_HPP
+#ifndef PSTORE_BROKER_SERVICE_HPP
+#define PSTORE_BROKER_SERVICE_HPP
 
 #include <atomic>
 #include <thread>
@@ -69,4 +69,4 @@ private:
     std::thread thread_;
 };
 
-#endif // BROKER_SAMPLE_SERVICE_HPP
+#endif // PSTORE_BROKER_SERVICE_HPP
