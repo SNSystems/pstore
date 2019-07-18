@@ -43,17 +43,24 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
-set (PSTORE_JSON_INCLUDES_DIR "${PSTORE_ROOT_DIR}/include/pstore/json")
-set (PSTORE_JSON_SOURCES
-    "${PSTORE_JSON_INCLUDES_DIR}/dom_types.hpp"
-    "${PSTORE_JSON_INCLUDES_DIR}/json.hpp"
-    "${PSTORE_JSON_INCLUDES_DIR}/json_error.hpp"
-    "${PSTORE_JSON_INCLUDES_DIR}/utility.hpp"
-
+set (pstore_json_include_dir "${PSTORE_ROOT_DIR}/include/pstore/json/")
+set (pstore_json_includes
+    "${pstore_json_include_dir}/dom_types.hpp"
+    "${pstore_json_include_dir}/json.hpp"
+    "${pstore_json_include_dir}/json_error.hpp"
+    "${pstore_json_include_dir}/utility.hpp"
+)
+set (pstore_json_sources
     json_error.cpp
     utility.cpp
 )
-add_pstore_library (pstore-json-lib STATIC ${PSTORE_JSON_SOURCES})
+
+add_pstore_library (
+    TARGET pstore-json-lib
+    NAME json
+    SOURCES ${pstore_json_sources}
+    INCLUDES ${pstore_json_includes}
+)
 target_link_libraries (pstore-json-lib PUBLIC pstore-support)
 add_clang_tidy_target (pstore-json-lib)
 
@@ -62,7 +69,12 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
-    add_pstore_library (pstore-json-lib-ex STATIC ${PSTORE_JSON_SOURCES})
+    add_pstore_library (
+        TARGET pstore-json-lib-ex
+        NAME json
+        SOURCES ${pstore_json_sources}
+        INCLUDES ${pstore_json_includes}
+    )
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)

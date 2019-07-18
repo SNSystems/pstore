@@ -46,15 +46,17 @@
 # PStore Dump Core Library
 ##########################
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
-set (PSTORE_DIFF_LIB_SRC
-    "${PSTORE_INCLUDE_DIR}/diff/revision.hpp"
-    "${PSTORE_INCLUDE_DIR}/diff/diff.hpp"
-    "${PSTORE_INCLUDE_DIR}/diff/diff_value.hpp"
-	revision.cpp
-    diff_value.cpp
+set (pstore_diff_include_dir "${PSTORE_ROOT_DIR}/include/pstore/diff")
+add_pstore_library (
+    TARGET pstore-diff-lib
+    NAME diff
+    SOURCES
+        revision.cpp
+        diff_value.cpp
+    INCLUDES ${pstore_diff_includes}
+        "${pstore_diff_include_dir}/revision.hpp"
+        "${pstore_diff_include_dir}/diff.hpp"
+        "${pstore_diff_include_dir}/diff_value.hpp"
 )
-
-include (add_pstore)
-add_pstore_library (pstore-diff-lib ${PSTORE_DIFF_LIB_SRC})
 target_link_libraries (pstore-diff-lib PUBLIC pstore-core pstore-dump-lib)
+add_clang_tidy_target (pstore-diff-lib)

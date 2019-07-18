@@ -42,17 +42,19 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (PSTORE_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore")
+set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker_intf")
 
-set (PSTORE_BROKER_INTF_SRC
-    "${PSTORE_INCLUDE_DIR}/broker_intf/descriptor.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/fifo_path.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/message_type.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/send_message.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/signal_cv.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/writer.hpp"
-    "${PSTORE_INCLUDE_DIR}/broker_intf/wsa_startup.hpp"
+set (pstore_broker_intf_includes
+    "${pstore_broker_include_dir}/descriptor.hpp"
+    "${pstore_broker_include_dir}/fifo_path.hpp"
+    "${pstore_broker_include_dir}/message_type.hpp"
+    "${pstore_broker_include_dir}/send_message.hpp"
+    "${pstore_broker_include_dir}/signal_cv.hpp"
+    "${pstore_broker_include_dir}/writer.hpp"
+    "${pstore_broker_include_dir}/wsa_startup.hpp"
+)
 
+set (pstore_broker_intf_src
     descriptor.cpp
     fifo_path_common.cpp
     fifo_path_posix.cpp
@@ -68,7 +70,11 @@ set (PSTORE_BROKER_INTF_SRC
 )
 
 include (add_pstore)
-add_pstore_library (pstore-broker-intf STATIC ${PSTORE_BROKER_INTF_SRC})
+add_pstore_library (TARGET pstore-broker-intf
+    NAME broker-intf
+    SOURCES ${pstore_broker_intf_src}
+    INCLUDES ${pstore_broker_intf_includes}
+)
 target_link_libraries (pstore-broker-intf PUBLIC pstore-support)
 
 if (NOT PSTORE_EXCEPTIONS)
@@ -76,7 +82,11 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
-    add_pstore_library (pstore-broker-intf-ex STATIC ${PSTORE_BROKER_INTF_SRC})
+    add_pstore_library (TARGET pstore-broker-intf-ex
+        NAME broker-intf-ex
+        SOURCES ${pstore_broker_intf_src}
+        INCLUDES ${pstore_broker_intf_includes}
+    )
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)

@@ -44,7 +44,7 @@
 include (add_pstore)
 
 set (pstore_httpd_public_include "${PSTORE_ROOT_DIR}/include/pstore/httpd")
-set (pstore_httpd_lib_src
+set (pstore_httpd_includes
     "${pstore_httpd_public_include}/block_for_input.hpp"
     "${pstore_httpd_public_include}/buffered_reader.hpp"
     "${pstore_httpd_public_include}/endian.hpp"
@@ -63,7 +63,8 @@ set (pstore_httpd_lib_src
     "${pstore_httpd_public_include}/server_status.hpp"
     "${pstore_httpd_public_include}/ws_server.hpp"
     "${pstore_httpd_public_include}/wskey.hpp"
-
+)
+set (pstore_httpd_lib_src
     error.cpp
     headers.cpp
     http_date.cpp
@@ -75,7 +76,13 @@ set (pstore_httpd_lib_src
     wskey.cpp
     "${pstore_httpd_fs_source}"
 )
-add_pstore_library (pstore-httpd-lib ${pstore_httpd_lib_src})
+
+add_pstore_library (
+    TARGET pstore-httpd-lib
+    NAME httpd
+    SOURCES ${pstore_httpd_lib_src}
+    INCLUDES ${pstore_httpd_includes}
+)
 target_link_libraries (pstore-httpd-lib PUBLIC
     pstore-broker-intf
     pstore-json-lib
@@ -90,7 +97,12 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
-    add_pstore_library (pstore-httpd-lib-ex ${pstore_httpd_lib_src})
+    add_pstore_library (
+        TARGET pstore-httpd-lib-ex
+        NAME httpd
+        SOURCES ${pstore_httpd_lib_src}
+        INCLUDES ${pstore_httpd_includes}
+    )
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
@@ -109,7 +121,12 @@ endif ()
 
 
 if (PSTORE_BITCODE)
-    add_pstore_library (pstore-httpd-lib-bc ${pstore_httpd_lib_src})
+    add_pstore_library (
+        TARGET pstore-httpd-lib-bc
+        NAME httpd
+        SOURCES ${pstore_httpd_lib_src}
+        INCLUDES ${pstore_httpd_includes}
+    )
     target_compile_options (pstore-httpd-lib-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu

@@ -46,43 +46,43 @@
 # PStore Dump Core Library
 ##########################
 
-set (PSTORE_DUMP_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/dump")
-set (PSTORE_DUMP_LIB_SRC
-    "${PSTORE_DUMP_INCLUDE_DIR}/db_value.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/error.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/index_value.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/line_splitter.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/mcdebugline_value.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/mcdisassembler_value.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/mcrepo_value.hpp"
-    "${PSTORE_DUMP_INCLUDE_DIR}/value.hpp"
-
-    db_value.cpp
-    error.cpp
-    line_splitter.cpp
-    mcdebugline_value.cpp
-    mcdisassembler_value.cpp
-    mcrepo_value.cpp
-    value.cpp
+set (pstore_dump_include_dir "${PSTORE_ROOT_DIR}/include/pstore/dump")
+set (LLVM_LINK_COMPONENTS
+    AllTargetsAsmPrinters
+    AllTargetsDescs
+    AllTargetsDisassemblers
+    AllTargetsInfos
+    CodeGen
+    DebugInfoDWARF
+    DebugInfoPDB
+    Demangle
+    MC
+    MCDisassembler
+    Object
+    Support
+    Symbolize
 )
-
-include (add_pstore)
-set(LLVM_LINK_COMPONENTS
-  AllTargetsAsmPrinters
-  AllTargetsDescs
-  AllTargetsDisassemblers
-  AllTargetsInfos
-  CodeGen
-  DebugInfoDWARF
-  DebugInfoPDB
-  Demangle
-  MC
-  MCDisassembler
-  Object
-  Support
-  Symbolize
-  )
-add_pstore_library (pstore-dump-lib ${PSTORE_DUMP_LIB_SRC})
+add_pstore_library (
+    TARGET pstore-dump-lib
+    NAME dump
+    SOURCES
+        db_value.cpp
+        error.cpp
+        line_splitter.cpp
+        mcdebugline_value.cpp
+        mcdisassembler_value.cpp
+        mcrepo_value.cpp
+        value.cpp
+    INCLUDES
+        "${pstore_dump_include_dir}/db_value.hpp"
+        "${pstore_dump_include_dir}/error.hpp"
+        "${pstore_dump_include_dir}/index_value.hpp"
+        "${pstore_dump_include_dir}/line_splitter.hpp"
+        "${pstore_dump_include_dir}/mcdebugline_value.hpp"
+        "${pstore_dump_include_dir}/mcdisassembler_value.hpp"
+        "${pstore_dump_include_dir}/mcrepo_value.hpp"
+        "${pstore_dump_include_dir}/value.hpp"
+)
 target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)
 if (PSTORE_IS_INSIDE_LLVM)
     target_link_libraries (pstore-dump-lib PUBLIC LLVMSupport)

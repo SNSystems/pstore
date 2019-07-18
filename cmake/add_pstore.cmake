@@ -265,32 +265,67 @@ endfunction()
 # add_pstore_library
 ####################
 
-function (add_pstore_library target_name)
+# TARGET - The name of the target to be created.
+# NAME - The name of the directory containing the targets include files.
+# SOURCES - A list of the library's source files.
+# INCLUDES - A list of the library's include files.
+
+function (add_pstore_library)
+    cmake_parse_arguments (arg ""
+        "TARGET;NAME"
+        "SOURCES;INCLUDES"
+        ${ARGN}
+    )
+    if ("${arg_NAME}" STREQUAL "")
+        message (SEND_ERROR "NAME argument is empty")
+    endif ()
+    if ("${arg_TARGET}" STREQUAL "")
+       message (SEND_ERROR "add_pstore_library: TARGET argument was not supplied")
+    endif ()
+    if ("${arg_SOURCES}" STREQUAL "")
+        message (SEND_ERROR "add_pstore_library: no SOURCES were supplied")
+    endif ()
+
     if (PSTORE_IS_INSIDE_LLVM)
-        add_llvm_library (${target_name} STATIC ${ARGN})
-        add_pstore_additional_compiler_flags (${target_name})
+        add_llvm_library ("${arg_TARGET}" STATIC ${arg_SOURCES})
+        add_pstore_additional_compiler_flags (${arg_TARGET})
     else ()
-        add_library (${target_name} STATIC ${ARGN})
+        add_library ("${arg_TARGET}" STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
+        set_property (TARGET "${arg_TARGET}" PROPERTY CXX_STANDARD 11)
+        set_property (TARGET "${arg_TARGET}" PROPERTY CXX_STANDARD_REQUIRED Yes)
 
-        pstore_enable_warnings (${target_name})
-        add_pstore_additional_compiler_flags (${target_name})
+        pstore_enable_warnings ("${arg_TARGET}")
+        add_pstore_additional_compiler_flags ("${arg_TARGET}")
 
-        target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
+        target_include_directories ("${arg_TARGET}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
         # On Windows, we're a "Unicode" app.
         if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-            target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
+            target_compile_definitions ("${arg_TARGET}" PRIVATE -DUNICODE -D_UNICODE)
         endif ()
+
+        install (
+	    TARGETS "${arg_TARGET}"
+            ARCHIVE DESTINATION lib/pstore
+            PUBLIC_HEADER DESTINATION "pstore/${arg_NAME}"
+            COMPONENT pstore
+	)
+
+        add_pstore_install_target ("install-${arg_TARGET}"
+            DEPENDS "${arg_TARGET}"
+            COMPONENT pstore
+	)
+        add_dependencies (install-pstore "${arg_TARGET}")
+
     endif (PSTORE_IS_INSIDE_LLVM)
 
-    set_target_properties (${target_name} PROPERTIES FOLDER "pstore libraries")
-    target_include_directories (${target_name} PUBLIC
+    set_target_properties ("${arg_TARGET}" PROPERTIES FOLDER "pstore libraries")
+    target_include_directories ("${arg_TARGET}" PUBLIC
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
+
 endfunction (add_pstore_library)
 
 

@@ -272,8 +272,7 @@ set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 
 
 set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/support")
-set (PSTORE_SUPPORT_LIB_SRC
-    "${CMAKE_CURRENT_SOURCE_DIR}/config.hpp.in"
+set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
     "${PSTORE_SUPPORT_INCLUDE_DIR}/aligned.hpp"
@@ -306,6 +305,9 @@ set (PSTORE_SUPPORT_LIB_SRC
     "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
+)
+set (PSTORE_SUPPORT_LIB_SRC
+    config.hpp.in
 
     error.cpp
     fnv.cpp
@@ -322,7 +324,12 @@ include (add_pstore)
 include (clang_tidy)
 
 # pstore-support
-add_pstore_library (pstore-support STATIC ${PSTORE_SUPPORT_LIB_SRC})
+add_pstore_library (
+    TARGET pstore-support
+    NAME support
+    SOURCES ${PSTORE_SUPPORT_LIB_SRC}
+    INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+)
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 add_clang_tidy_target (pstore-support)
 
@@ -331,7 +338,12 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
-    add_pstore_library (pstore-support-ex STATIC ${PSTORE_SUPPORT_LIB_SRC})
+    add_pstore_library (
+        TARGET pstore-support-ex
+        NAME support
+        SOURCES ${PSTORE_SUPPORT_LIB_SRC}
+        INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+    )
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
@@ -340,7 +352,12 @@ if (NOT PSTORE_EXCEPTIONS)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
-    add_pstore_library (pstore-support-bc STATIC ${PSTORE_SUPPORT_LIB_SRC})
+    add_pstore_library (
+        TARGET pstore-support-bc
+        NAME support
+        SOURCES ${PSTORE_SUPPORT_LIB_SRC}
+        INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+    )
     target_compile_options (pstore-support-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu

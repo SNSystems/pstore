@@ -42,25 +42,28 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (PSTORE_MCREPO_PUBLIC_INCLUDE "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
-add_pstore_library (pstore-mcrepo
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/bss_section.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/compilation.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/debug_line_section.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/dependents_section.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/fragment.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/generic_section.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/repo_error.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/section.hpp"
-    "${PSTORE_MCREPO_PUBLIC_INCLUDE}/sparse_array.hpp"
-
-    bss_section.cpp
-    compilation.cpp
-    debug_line_section.cpp
-    dependents_section.cpp
-    fragment.cpp
-    generic_section.cpp
-    repo_error.cpp
-    section.cpp
+set (pstore_mcrepo_public_include "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
+add_pstore_library (
+    TARGET pstore-mcrepo
+    NAME mcrepo
+    SOURCES
+        bss_section.cpp
+        compilation.cpp
+        debug_line_section.cpp
+        dependents_section.cpp
+        fragment.cpp
+        generic_section.cpp
+        repo_error.cpp
+        section.cpp
+    INCLUDES
+        "${pstore_mcrepo_public_include}/bss_section.hpp"
+        "${pstore_mcrepo_public_include}/compilation.hpp"
+        "${pstore_mcrepo_public_include}/debug_line_section.hpp"
+        "${pstore_mcrepo_public_include}/dependents_section.hpp"
+        "${pstore_mcrepo_public_include}/fragment.hpp"
+        "${pstore_mcrepo_public_include}/generic_section.hpp"
+        "${pstore_mcrepo_public_include}/repo_error.hpp"
+        "${pstore_mcrepo_public_include}/section.hpp"
+        "${pstore_mcrepo_public_include}/sparse_array.hpp"
 )
 target_link_libraries (pstore-mcrepo PUBLIC pstore-core)

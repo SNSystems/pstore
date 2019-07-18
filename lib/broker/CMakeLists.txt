@@ -47,7 +47,7 @@ if (NOT PSTORE_ENABLE_BROKER)
 else ()
     set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker")
 
-    set (pstore_broker_lib_src
+    set (pstore_broker_includes
         "${pstore_broker_include_dir}/bimap.hpp"
         "${pstore_broker_include_dir}/command.hpp"
         "${pstore_broker_include_dir}/gc.hpp"
@@ -63,7 +63,9 @@ else ()
         "${pstore_broker_include_dir}/scavenger.hpp"
         "${pstore_broker_include_dir}/spawn.hpp"
         "${pstore_broker_include_dir}/uptime.hpp"
+    )
 
+    set (pstore_broker_lib_src
         command.cpp
         gc_common.cpp
         gc_posix.cpp
@@ -86,7 +88,7 @@ else ()
         set (LLVM_REQUIRES_EH Yes)
         set (LLVM_REQUIRES_RTTI Yes)
         set (PSTORE_EXCEPTIONS Yes)
-        add_pstore_library (pstore-broker STATIC ${pstore_broker_lib_src})
+        add_pstore_library (TARGET pstore-broker NAME broker SOURCES ${pstore_broker_lib_src} INCLUDES ${pstore_broker_includes})
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf-ex
             pstore-httpd-lib-ex
@@ -98,7 +100,7 @@ else ()
         set (LLVM_REQUIRES_RTTI No)
         set (PSTORE_EXCEPTIONS No)
     else ()
-        add_pstore_library (pstore-broker ${pstore_broker_lib_src})
+        add_pstore_library (TARGET pstore-broker NAME broker SOURCES ${pstore_broker_lib_src} INCLUDES ${pstore_broker_includes})
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf
             pstore-httpd-lib

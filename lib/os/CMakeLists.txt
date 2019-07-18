@@ -44,7 +44,7 @@
 
 
 set (pstore_os_include_dir "${PSTORE_ROOT_DIR}/include/pstore/os")
-set (pstore_os_lib_src
+set (pstore_os_includes
     "${pstore_os_include_dir}/file.hpp"
     "${pstore_os_include_dir}/file_posix.hpp"
     "${pstore_os_include_dir}/file_win32.hpp"
@@ -54,7 +54,8 @@ set (pstore_os_lib_src
     "${pstore_os_include_dir}/rotating_log.hpp"
     "${pstore_os_include_dir}/thread.hpp"
     "${pstore_os_include_dir}/uint64.hpp"
-
+)
+set (pstore_os_lib_src
     file.cpp
     file_posix.cpp
     file_win32.cpp
@@ -70,7 +71,12 @@ set (pstore_os_lib_src
 include (add_pstore)
 include (clang_tidy)
 
-add_pstore_library (pstore-os STATIC ${pstore_os_lib_src})
+add_pstore_library (
+    TARGET pstore-os
+    NAME os
+    SOURCES ${pstore_os_lib_src}
+    INCLUDES ${pstore_os_includes}
+)
 target_link_libraries (pstore-os PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support)
 add_clang_tidy_target (pstore-os)
 
@@ -79,7 +85,13 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
-    add_pstore_library (pstore-os-ex STATIC ${pstore_os_lib_src})
+
+    add_pstore_library (
+        TARGET pstore-os-ex
+        NAME os
+        SOURCES ${pstore_os_lib_src}
+        INCLUDES ${pstore_os_includes}
+    )
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
@@ -88,7 +100,12 @@ if (NOT PSTORE_EXCEPTIONS)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
-    add_pstore_library (pstore-os-bc STATIC ${pstore_os_lib_src})
+    add_pstore_library (
+        TARGET pstore-os-bc
+        NAME os
+        SOURCES ${pstore_os_lib_src}
+        INCLUDES ${pstore_os_includes}
+    )
     target_compile_options (pstore-os-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu

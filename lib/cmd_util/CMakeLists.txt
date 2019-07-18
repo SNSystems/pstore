@@ -44,8 +44,10 @@
 set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
 
 include (add_pstore)
-set (PSTORE_CMD_UTIL_SRC )
-set (PSTORE_CMD_UTIL_CL_SRC
+set (pstore_cmd_util_includes "")
+set (pstore_cmd_util_src "")
+
+set (pstore_cmd_util_cl_includes
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/category.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.hpp"
@@ -54,6 +56,8 @@ set (PSTORE_CMD_UTIL_CL_SRC
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/string_distance.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/word_wrapper.hpp"
+)
+set (PSTORE_CMD_UTIL_CL_SRC
     cl/category.cpp
     cl/command_line.cpp
     cl/help.cpp
@@ -63,24 +67,32 @@ set (PSTORE_CMD_UTIL_CL_SRC
     cl/string_distance.cpp
     cl/word_wrapper.cpp
 )
-list (APPEND PSTORE_CMD_UTIL_SRC ${PSTORE_CMD_UTIL_CL_SRC})
-source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC})
+list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_CL_SRC})
+list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_cl_includes})
+source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC} ${pstore_cmd_util_cl_includes})
 
-set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
+set (pstore_cmd_util_opt_helpers_includes
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/str_to_revision.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/revision_opt.hpp"
+)
+set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
     str_to_revision.cpp
     revision_opt.cpp
 )
-list (APPEND PSTORE_CMD_UTIL_SRC ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
-source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
+list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
+list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_opt_helpers_includes})
+source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC} ${pstore_cmd_util_opt_helpers_includes})
 
 
-list (APPEND PSTORE_CMD_UTIL_SRC
+list (APPEND pstore_cmd_util_includes
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/iota_generator.hpp"
     "${PSTORE_CMD_UTIL_INCLUDE_DIR}/parallel_for_each.hpp"
 )
-add_pstore_library (pstore-cmd-util STATIC ${PSTORE_CMD_UTIL_SRC})
+add_pstore_library (TARGET pstore-cmd-util
+    NAME cmd_util
+    SOURCES ${pstore_cmd_util_src}
+    INCLUDES ${pstore_cmd_util_includes}
+)
 target_link_libraries (pstore-cmd-util PUBLIC pstore-support)
 
 if (NOT PSTORE_EXCEPTIONS)
@@ -88,7 +100,11 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
-    add_pstore_library (pstore-cmd-util-ex STATIC ${PSTORE_CMD_UTIL_SRC})
+    add_pstore_library (TARGET pstore-cmd-util-ex
+        NAME pstore_cmd_util_ex
+        SOURCES ${pstore_cmd_util_src}
+        INCLUDES ${pstore_cmd_util_includes}
+    )
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)

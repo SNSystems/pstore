@@ -45,22 +45,29 @@
 include (add_pstore)
 include (clang_tidy)
 
-set (PSTORE_PUBLIC_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/core")
+set (pstore_core_include_dir "${PSTORE_ROOT_DIR}/include/pstore/core")
 set (PSTORE_SRC )
-set (PSTORE_CORE_SRC
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/address.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/database.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/db_archive.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/file_header.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/generation_iterator.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/index_types.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/indirect_string.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/region.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/start_vacuum.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/storage.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/transaction.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/vacuum_intf.hpp"
-    
+
+
+########
+# Core #
+########
+set (pstore_core_core_includes
+    "${pstore_core_include_dir}/address.hpp"
+    "${pstore_core_include_dir}/database.hpp"
+    "${pstore_core_include_dir}/db_archive.hpp"
+    "${pstore_core_include_dir}/file_header.hpp"
+    "${pstore_core_include_dir}/generation_iterator.hpp"
+    "${pstore_core_include_dir}/index_types.hpp"
+    "${pstore_core_include_dir}/indirect_string.hpp"
+    "${pstore_core_include_dir}/region.hpp"
+    "${pstore_core_include_dir}/start_vacuum.hpp"
+    "${pstore_core_include_dir}/storage.hpp"
+    "${pstore_core_include_dir}/transaction.hpp"
+    "${pstore_core_include_dir}/vacuum_intf.hpp"
+)
+list (APPEND pstore_core_includes ${pstore_core_core_includes})
+set (pstore_core_core_src
     address.cpp
     database.cpp
     file_header.cpp
@@ -75,49 +82,68 @@ set (PSTORE_CORE_SRC
     transaction.cpp
     vacuum_intf.cpp
 )
-list (APPEND PSTORE_SRC ${PSTORE_CORE_SRC})
-source_group ("core" FILES ${PSTORE_CORE_SRC})
+list (APPEND PSTORE_SRC ${pstore_core_core_src})
+source_group ("core" FILES ${pstore_core_core_src} ${pstore_core_core_includes})
 
-set (PSTORE_SUPPORT_SRC
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/array_stack.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/crc32.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/sstring_view_archive.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/time.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/uuid.hpp"
-    
+
+###########
+# Support #
+###########
+set (pstore_core_support_includes
+    "${pstore_core_include_dir}/array_stack.hpp"
+    "${pstore_core_include_dir}/crc32.hpp"
+    "${pstore_core_include_dir}/sstring_view_archive.hpp"
+    "${pstore_core_include_dir}/time.hpp"
+    "${pstore_core_include_dir}/uuid.hpp"
+)
+list (APPEND pstore_core_includes ${pstore_core_support_includes})
+set (pstore_core_support_src
     base32.cpp
     base32.hpp
     crc32.cpp
     time.cpp
     uuid.cpp
 )
-list (APPEND PSTORE_SRC ${PSTORE_SUPPORT_SRC})
-source_group ("support" FILES ${PSTORE_SUPPORT_SRC})
+list (APPEND PSTORE_SRC ${pstore_core_support_src})
+source_group ("support" FILES ${pstore_core_support_src} ${pstore_core_support_includes})
 
-set (PSTORE_OS_SRC
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/errno_exception.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/shared_memory.hpp"
-    
+
+######
+# OS #
+######
+set (pstore_core_os_includes
+    "${pstore_core_include_dir}/errno_exception.hpp"
+    "${pstore_core_include_dir}/shared_memory.hpp"
+)
+list (APPEND pstore_core_includes ${pstore_core_os_includes})
+set (pstore_core_os_src
     errno_exception.cpp
     shared_memory.cpp
 )
-list (APPEND PSTORE_SRC ${PSTORE_OS_SRC})
-source_group (os FILES ${PSTORE_OS_SRC})
+list (APPEND PSTORE_SRC ${pstore_core_os_src})
+source_group (os FILES ${pstore_core_os_src} ${pstore_core_os_includes})
 
+
+#########
+# Index #
+#########
+set (pstore_core_index_includes
+    "${pstore_core_include_dir}/hamt_map.hpp"
+    "${pstore_core_include_dir}/hamt_map_fwd.hpp"
+    "${pstore_core_include_dir}/hamt_map_types.hpp"
+    "${pstore_core_include_dir}/hamt_set.hpp"
+)
+list (APPEND pstore_core_includes ${pstore_core_index_includes})
 set (PSTORE_INDEX_SRC
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_map.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_map_fwd.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_map_types.hpp"
-    "${PSTORE_PUBLIC_INCLUDE_DIR}/hamt_set.hpp"
-    
     hamt_map_types.cpp
 )
 list (APPEND PSTORE_SRC ${PSTORE_INDEX_SRC})
-source_group (index FILES ${PSTORE_INDEX_SRC})
+source_group (index FILES ${PSTORE_INDEX_SRC} ${pstore_core_index_includes})
+
 
 
 include (add_pstore)
-add_pstore_library (pstore-core ${PSTORE_SRC})
+add_pstore_library (TARGET pstore-core NAME core SOURCES ${PSTORE_SRC} INCLUDES ${pstore_core_includes})
 
 
 # Our use of shared memory needs an extra library on a Linux system.
@@ -134,5 +160,5 @@ add_clang_tidy_target (pstore-core)
 
 include (check_atomic)
 if (NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB AND PSTORE_HAVE_CXX_ATOMICS_WITH_LIB)
-    target_link_libraries(pstore-core PRIVATE atomic)
+    target_link_libraries (pstore-core PRIVATE atomic)
 endif()
