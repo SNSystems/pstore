@@ -72,7 +72,6 @@ include (add_pstore)
 include (clang_tidy)
 
 add_pstore_library (
-    TARGET pstore-os
     NAME os
     SOURCES ${pstore_os_lib_src}
     INCLUDES ${pstore_os_includes}

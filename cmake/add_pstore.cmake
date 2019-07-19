@@ -265,8 +265,10 @@ endfunction()
 # add_pstore_library
 ####################
 
-# TARGET - The name of the target to be created.
 # NAME - The name of the directory containing the targets include files.
+# TARGET - The name of the target to be created. If omitted, defaults to the NAME value with a
+#          "pstore-" prefix. Underscores (_) are replaced with dash (-) to follow the pstore naming
+#          convention.
 # SOURCES - A list of the library's source files.
 # INCLUDES - A list of the library's include files.
 
@@ -279,11 +281,13 @@ function (add_pstore_library)
     if ("${arg_NAME}" STREQUAL "")
         message (SEND_ERROR "NAME argument is empty")
     endif ()
-    if ("${arg_TARGET}" STREQUAL "")
-       message (SEND_ERROR "add_pstore_library: TARGET argument was not supplied")
-    endif ()
     if ("${arg_SOURCES}" STREQUAL "")
         message (SEND_ERROR "add_pstore_library: no SOURCES were supplied")
+    endif ()
+
+    if ("${arg_TARGET}" STREQUAL "")
+       set (arg_TARGET "pstore-${arg_NAME}")
+       string (REPLACE "_" "-" arg_TARGET "${arg_TARGET}")
     endif ()
 
     if (PSTORE_IS_INSIDE_LLVM)
@@ -292,8 +296,11 @@ function (add_pstore_library)
     else ()
         add_library ("${arg_TARGET}" STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
-        set_property (TARGET "${arg_TARGET}" PROPERTY CXX_STANDARD 11)
-        set_property (TARGET "${arg_TARGET}" PROPERTY CXX_STANDARD_REQUIRED Yes)
+        set_target_properties ("${arg_TARGET}" PROPERTIES
+            CXX_STANDARD 11
+            CXX_STANDARD_REQUIRED Yes
+            PUBLIC_HEADER "${arg_INCLUDES}"
+        )
 
         pstore_enable_warnings ("${arg_TARGET}")
         add_pstore_additional_compiler_flags ("${arg_TARGET}")
@@ -308,7 +315,7 @@ function (add_pstore_library)
         install (
 	    TARGETS "${arg_TARGET}"
             ARCHIVE DESTINATION lib/pstore
-            PUBLIC_HEADER DESTINATION "pstore/${arg_NAME}"
+            PUBLIC_HEADER DESTINATION "include/pstore/${arg_NAME}"
             COMPONENT pstore
 	)
 

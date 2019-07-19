@@ -143,7 +143,11 @@ source_group (index FILES ${PSTORE_INDEX_SRC} ${pstore_core_index_includes})
 
 
 include (add_pstore)
-add_pstore_library (TARGET pstore-core NAME core SOURCES ${PSTORE_SRC} INCLUDES ${pstore_core_includes})
+add_pstore_library (
+    NAME core
+    SOURCES ${PSTORE_SRC}
+    INCLUDES ${pstore_core_includes}
+)
 
 
 # Our use of shared memory needs an extra library on a Linux system.

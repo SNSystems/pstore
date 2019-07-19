@@ -88,7 +88,12 @@ else ()
         set (LLVM_REQUIRES_EH Yes)
         set (LLVM_REQUIRES_RTTI Yes)
         set (PSTORE_EXCEPTIONS Yes)
-        add_pstore_library (TARGET pstore-broker NAME broker SOURCES ${pstore_broker_lib_src} INCLUDES ${pstore_broker_includes})
+        add_pstore_library (
+            TARGET pstore-broker
+            NAME broker
+            SOURCES ${pstore_broker_lib_src}
+            INCLUDES ${pstore_broker_includes}
+        )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf-ex
             pstore-httpd-lib-ex
@@ -100,7 +105,12 @@ else ()
         set (LLVM_REQUIRES_RTTI No)
         set (PSTORE_EXCEPTIONS No)
     else ()
-        add_pstore_library (TARGET pstore-broker NAME broker SOURCES ${pstore_broker_lib_src} INCLUDES ${pstore_broker_includes})
+        add_pstore_library (
+            TARGET pstore-broker
+            NAME broker
+            SOURCES ${pstore_broker_lib_src}
+            INCLUDES ${pstore_broker_includes}
+        )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf
             pstore-httpd-lib

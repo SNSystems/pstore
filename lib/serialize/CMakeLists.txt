@@ -43,7 +43,6 @@
 #===----------------------------------------------------------------------===//
 set (pstore_serialize_include_dir "${PSTORE_ROOT_DIR}/include/pstore/serialize")
 add_pstore_library (
-    TARGET pstore-serialize
     NAME serialize
     SOURCES
         archive.cpp

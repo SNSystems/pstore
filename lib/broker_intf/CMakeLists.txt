@@ -71,7 +71,7 @@ set (pstore_broker_intf_src
 
 include (add_pstore)
 add_pstore_library (TARGET pstore-broker-intf
-    NAME broker-intf
+    NAME broker_intf
     SOURCES ${pstore_broker_intf_src}
     INCLUDES ${pstore_broker_intf_includes}
 )

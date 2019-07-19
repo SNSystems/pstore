@@ -44,7 +44,6 @@
 
 set (pstore_mcrepo_public_include "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (
-    TARGET pstore-mcrepo
     NAME mcrepo
     SOURCES
         bss_section.cpp

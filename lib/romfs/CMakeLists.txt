@@ -55,7 +55,6 @@ set (pstore_romfs_lib_src
 )
 
 add_pstore_library (
-    TARGET pstore-romfs
     NAME romfs
     SOURCES ${pstore_romfs_lib_src}
     INCLUDES ${pstore_romfs_includes}

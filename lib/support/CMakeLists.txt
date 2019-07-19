@@ -325,7 +325,6 @@ include (clang_tidy)
 
 # pstore-support
 add_pstore_library (
-    TARGET pstore-support
     NAME support
     SOURCES ${PSTORE_SUPPORT_LIB_SRC}
     INCLUDES ${PSTORE_SUPPORT_INCLUDES}
