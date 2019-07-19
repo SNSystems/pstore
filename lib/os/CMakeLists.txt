@@ -66,16 +66,17 @@ set (pstore_os_lib_src
     process_file_name_posix.cpp
     process_file_name_win32.cpp
     thread.cpp
+    thread_posix.cpp
+    thread_win32.cpp
 )
-
-include (add_pstore)
-include (clang_tidy)
 
 add_pstore_library (
     NAME os
     SOURCES ${pstore_os_lib_src}
     INCLUDES ${pstore_os_includes}
 )
+set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
+find_package (Threads)
 target_link_libraries (pstore-os PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support)
 add_clang_tidy_target (pstore-os)
 
