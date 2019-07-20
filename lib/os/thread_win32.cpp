@@ -68,7 +68,7 @@ namespace pstore {
             // Sadly, threads don't actually have names in Win32. The process via
             // RaiseException is just a "Secret Handshake" with the VS Debugger, who
             // actually stores the thread -> name mapping. Windows itself has no
-            // notion of a thread "Name".
+            // notion of a thread "name".
             if (name == nullptr) {
                 raise (errno_erc{EINVAL});
             }
@@ -111,11 +111,7 @@ namespace pstore {
             return name.data ();
         }
 
-        std::string get_name () {
-            std::array<char, name_size> buffer;
-            return {get_name (gsl::make_span (buffer))};
-        }
-    } // namespace threads
-} // namespace pstore
+    } // end namespace threads
+} // end namespace pstore
 
 #endif //_WIN32
