@@ -141,7 +141,7 @@ int main (int argc, char ** argv) {
 
         auto const header_size = sizeof (pstore::header) + sizeof (pstore::trailer);
 
-        pstore::file::file_handle file {argv[1]};
+        pstore::file::file_handle file{argv[1]};
         file.open (pstore::file::file_handle::create_mode::open_existing,
                    pstore::file::file_handle::writable_mode::read_write);
         pstore::memory_mapper mapper (file,

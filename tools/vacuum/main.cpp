@@ -54,13 +54,13 @@
 #include <errno.h>
 
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #else
-#include <sys/resource.h>
-#include <sys/time.h>
-#include <syslog.h>
+#    include <sys/resource.h>
+#    include <sys/time.h>
+#    include <syslog.h>
 #endif
 
 #include <signal.h>
@@ -88,11 +88,11 @@ namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
 } // namespace
@@ -116,11 +116,11 @@ int main (int argc, char * argv[]) {
 
 #if 0
         if (user_opt.daemon_mode) {
-#ifdef _WIN32
+#    ifdef _WIN32
             if (::SetPriorityClass (::GetCurrentProcess (), PROCESS_MODE_BACKGROUND_BEGIN) == 0) {
                 throw pstore::win32::exception ("SetPriorityClass", ::GetLastError ());
             }
-#else
+#    else
             // Increase our "niceness" value to reduce the priority of the process.
             if (::setpriority (PRIO_PROCESS, 0, 7) == -1) {
                 raise (pstore::errno_erc {errno}, "setpriority");
@@ -128,7 +128,7 @@ int main (int argc, char * argv[]) {
             if (daemon (0 /*nochdir*/, 0 /*noclose*/) != 0) {
                 raise (pstore::errno_erc {errno}, "daemon");
             }
-#endif
+#    endif
         }
 #endif
 

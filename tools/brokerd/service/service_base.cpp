@@ -177,7 +177,7 @@ void service_base::start (DWORD argc, TCHAR * argv[]) {
 ///
 /// \param argc  Number of command line arguments.
 /// \param argv  Array of command line arguments.
-void service_base::start_handler (DWORD /*argc*/, TCHAR * /*argv*/ []) {}
+void service_base::start_handler (DWORD /*argc*/, TCHAR * /*argv*/[]) {}
 
 // stop
 // ~~~~

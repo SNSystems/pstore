@@ -49,7 +49,7 @@
 #include <string>
 
 #ifdef _WIN32
-#include <tchar.h>
+#    include <tchar.h>
 #else
 typedef char TCHAR;
 #endif

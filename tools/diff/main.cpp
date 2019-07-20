@@ -61,11 +61,11 @@ namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
 } // namespace

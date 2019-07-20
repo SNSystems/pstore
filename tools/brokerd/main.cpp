@@ -54,7 +54,7 @@
 
 // Platform includes
 #ifndef _WIN32
-#include <signal.h>
+#    include <signal.h>
 #endif
 
 #include "pstore/broker/command.hpp"

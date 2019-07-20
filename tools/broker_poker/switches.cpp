@@ -47,7 +47,7 @@
 #include <cstdlib>
 
 #if PSTORE_IS_INSIDE_LLVM
-#include "llvm/Support/CommandLine.h"
+#    include "llvm/Support/CommandLine.h"
 #else
 #    include "pstore/cmd_util/command_line.hpp"
 #endif

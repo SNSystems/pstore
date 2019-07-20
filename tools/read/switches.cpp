@@ -44,9 +44,9 @@
 #include "switches.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/Error.h"
-#include "llvm/Support/raw_ostream.h"
+#    include "llvm/Support/CommandLine.h"
+#    include "llvm/Support/Error.h"
+#    include "llvm/Support/raw_ostream.h"
 #else
 #    include "pstore/cmd_util/command_line.hpp"
 #endif
@@ -71,9 +71,7 @@ namespace {
     cl::opt<std::string> DbPath (cl::Positional,
                                  cl::desc ("<Path of the pstore repository to be read>"),
                                  cl::Required);
-    cl::opt<std::string> Key (cl::Positional,
-                              cl::desc ("key"),
-                              cl::Required);
+    cl::opt<std::string> Key (cl::Positional, cl::desc ("key"), cl::Required);
     cl::opt<bool>
         StringMode ("strings", cl::init (false),
                     cl::desc ("Reads from the 'strings' index rather than the 'names' index."));

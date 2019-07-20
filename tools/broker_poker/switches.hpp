@@ -50,7 +50,7 @@
 #include <utility>
 
 #ifdef _WIN32
-#include <tchar.h>
+#    include <tchar.h>
 #endif
 
 #include "pstore/config/config.hpp"

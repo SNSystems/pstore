@@ -63,11 +63,11 @@
 #include "pstore/dump/mcrepo_value.hpp"
 
 #if PSTORE_IS_INSIDE_LLVM
-#include "llvm/Support/Signals.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/PrettyStackTrace.h"
-#include "llvm/Support/ManagedStatic.h"
-#include "llvm/ADT/StringRef.h"
+#    include "llvm/Support/Signals.h"
+#    include "llvm/Support/TargetSelect.h"
+#    include "llvm/Support/PrettyStackTrace.h"
+#    include "llvm/Support/ManagedStatic.h"
+#    include "llvm/ADT/StringRef.h"
 #endif
 
 #include "pstore/core/database.hpp"
@@ -156,11 +156,11 @@ namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
     template <typename Index>
@@ -309,7 +309,7 @@ namespace {
     char const * index_to_string (pstore::trailer::indices kind) {
         char const * name = "*unknown*";
 #define X(k)                                                                                       \
-    case pstore::trailer::indices::k: name = #k"s"; break;
+    case pstore::trailer::indices::k: name = #k "s"; break;
 
         switch (kind) {
             PSTORE_INDICES
@@ -330,7 +330,7 @@ namespace {
                                pstore::dump::make_index<Index> (db, record_function));
         } else {
             if (items_to_show.size () > 0) {
-                if (auto const index = pstore::index::get_index<Index>(db, false)) {
+                if (auto const index = pstore::index::get_index<Index> (db, false)) {
                     file.emplace_back (index_to_string (Index),
                                        add_specified (db, *index, items_to_show, not_found_error,
                                                       string_to_digest, record_function));

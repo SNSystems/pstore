@@ -56,11 +56,11 @@
 
 // platform includes
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #else
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 
 #include "pstore/broker_intf/fifo_path.hpp"
@@ -81,9 +81,9 @@ namespace {
 
 
 #ifdef _WIN32
-#define NATIVE_TEXT(str) _TEXT (str)
+#    define NATIVE_TEXT(str) _TEXT (str)
 #else
-#define NATIVE_TEXT(str) str
+#    define NATIVE_TEXT(str) str
 #endif
 
 
@@ -91,11 +91,11 @@ namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
 } // namespace

@@ -50,9 +50,9 @@
 #include <memory>
 
 #ifdef _WIN32
-#include <tchar.h>
+#    include <tchar.h>
 #else
-#include <unistd.h>
+#    include <unistd.h>
 
 // On Windows, the TCHAR type may be either char or whar_t depending on the selected
 // Unicode mode. Everywhere else, I need to add this type for compatibility.
@@ -88,7 +88,7 @@ namespace {
 
         using namespace pstore::file;
         bool ok = true;
-        pstore::file::file_handle file {path};
+        pstore::file::file_handle file{path};
         file.open (pstore::file::file_handle::create_mode::open_existing,
                    pstore::file::file_handle::writable_mode::read_only);
         if (!file.is_open ()) {

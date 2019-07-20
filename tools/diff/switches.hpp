@@ -48,11 +48,11 @@
 #include <utility>
 
 #ifdef _WIN32
-#include <tchar.h>
-#define NATIVE_TEXT(str) _TEXT (str)
+#    include <tchar.h>
+#    define NATIVE_TEXT(str) _TEXT (str)
 #else
 typedef char TCHAR;
-#define NATIVE_TEXT(str) str
+#    define NATIVE_TEXT(str) str
 #endif
 
 #include "pstore/config/config.hpp"

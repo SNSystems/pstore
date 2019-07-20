@@ -54,7 +54,7 @@
 #include <vector>
 
 #ifdef _WIN32
-#include <tchar.h>
+#    include <tchar.h>
 #endif
 
 // Local includes
@@ -70,7 +70,7 @@ namespace {
     };
     template <typename T>
     struct check_range<T, T> {
-        void operator() (T ) const {}
+        void operator() (T) const {}
     };
 
 

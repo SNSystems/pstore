@@ -61,20 +61,20 @@
 #include "./print.hpp"
 
 #ifdef _WIN32
-#define NATIVE_TEXT(x) _TEXT (x)
+#    define NATIVE_TEXT(x) _TEXT (x)
 #else
-#define NATIVE_TEXT(x) x
+#    define NATIVE_TEXT(x) x
 #endif
 
 namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
     using namespace pstore::cmd_util;

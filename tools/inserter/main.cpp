@@ -56,16 +56,16 @@
 #include <unordered_set>
 
 #ifdef _WIN32
-#include <tchar.h>
-#define NATIVE_TEXT(x) _TEXT (x)
+#    include <tchar.h>
+#    define NATIVE_TEXT(x) _TEXT (x)
 #else
-#include <unistd.h>
+#    include <unistd.h>
 
 // On Windows, the TCHAR type may be either char or whar_t depending on the selected
 // Unicode mode. Everywhere else, I need to add this type for compatibility.
 using TCHAR = char;
 // Similarly NATIVE_TEXT turns a string into a wide string on Windows.
-#define NATIVE_TEXT(x) x
+#    define NATIVE_TEXT(x) x
 #endif
 
 #include "pstore/cmd_util/command_line.hpp"
@@ -80,7 +80,7 @@ using TCHAR = char;
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
 #if PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
-#include <sys/kdebug_signpost.h>
+#    include <sys/kdebug_signpost.h>
 #endif
 
 namespace {
@@ -117,11 +117,11 @@ namespace {
 
 #ifdef PSTORE_EXCEPTIONS
     auto & error_stream =
-#if defined(_WIN32) && defined(_UNICODE)
+#    if defined(_WIN32) && defined(_UNICODE)
         std::wcerr;
-#else
+#    else
         std::cerr;
-#endif
+#    endif
 #endif // PSTORE_EXCEPTIONS
 
 } // namespace

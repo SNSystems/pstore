@@ -47,6 +47,6 @@
 #define PSTORE_GENROMFS_INDENT "    "
 constexpr char indent[] = PSTORE_GENROMFS_INDENT;
 constexpr char crindent[] = "\n" PSTORE_GENROMFS_INDENT;
-#    undef PSTORE_GENROMFS_INDENT
+#undef PSTORE_GENROMFS_INDENT
 
 #endif // PSTORE_GENROMFS_INDENT_HPP
