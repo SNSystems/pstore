@@ -323,7 +323,7 @@ set (PSTORE_SUPPORT_LIB_SRC
 include (add_pstore)
 include (clang_tidy)
 
-# pstore-support
+
 add_pstore_library (
     NAME support
     SOURCES ${PSTORE_SUPPORT_LIB_SRC}
@@ -331,6 +331,14 @@ add_pstore_library (
 )
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 add_clang_tidy_target (pstore-support)
+
+if (NOT PSTORE_IS_INSIDE_LLVM)
+    install (
+        FILES "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
+        DESTINATION include/pstore/config
+        COMPONENT pstore
+)
+endif ()
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
 if (NOT PSTORE_EXCEPTIONS)
