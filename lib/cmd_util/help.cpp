@@ -4,7 +4,7 @@
 //* | | | |  __/ | |_) | *
 //* |_| |_|\___|_| .__/  *
 //*              |_|     *
-//===- lib/cmd_util/cl/help.cpp -------------------------------------------===//
+//===- lib/cmd_util/help.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,14 +41,14 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/help.hpp"
+#include "pstore/cmd_util/help.hpp"
 
 #include <iomanip>
 #include <iostream>
 #include <iterator>
 #include <string>
 
-#include "pstore/cmd_util/cl/word_wrapper.hpp"
+#include "pstore/cmd_util/word_wrapper.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/ios_state.hpp"
 
@@ -132,7 +132,7 @@ namespace pstore {
                 int const max_opt_len = max_option_length ();
                 int const indent = prefix_len + max_opt_len + separator_len;
 
-                ios_flags_saver const _ {os};
+                ios_flags_saver const _{os};
 
                 for (option const * op : cl::option::all ()) {
                     if (op != this && !op->is_alias () && !op->is_positional ()) {

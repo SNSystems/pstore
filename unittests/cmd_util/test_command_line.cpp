@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -50,6 +50,7 @@
 #include <vector>
 
 #include "gmock/gmock.h"
+
 using namespace pstore::cmd_util;
 
 namespace {
@@ -82,7 +83,7 @@ namespace {
         strings_.clear ();
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 TEST_F (ClCommandLine, StringOption) {

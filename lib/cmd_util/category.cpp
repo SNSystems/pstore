@@ -4,7 +4,7 @@
 //* | (_| (_| | ||  __/ (_| | (_) | |  | |_| | *
 //*  \___\__,_|\__\___|\__, |\___/|_|   \__, | *
 //*                    |___/            |___/  *
-//===- lib/cmd_util/cl/category.cpp ---------------------------------------===//
+//===- lib/cmd_util/category.cpp ------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/category.hpp"
+#include "pstore/cmd_util/category.hpp"
 
 namespace pstore {
     namespace cmd_util {

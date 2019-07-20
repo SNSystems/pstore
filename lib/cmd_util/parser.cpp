@@ -4,7 +4,7 @@
 //* | |_) | (_| | |  \__ \  __/ |    *
 //* | .__/ \__,_|_|  |___/\___|_|    *
 //* |_|                              *
-//===- lib/cmd_util/cl/parser.cpp -----------------------------------------===//
+//===- lib/cmd_util/parser.cpp --------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/parser.hpp"
+#include "pstore/cmd_util/parser.hpp"
 
 namespace pstore {
     namespace cmd_util {

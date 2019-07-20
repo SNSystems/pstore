@@ -48,7 +48,7 @@
 #include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/Error.h"
 #else
-#include "pstore/cmd_util/cl/command_line.hpp"
+#    include "pstore/cmd_util/command_line.hpp"
 #endif
 
 #include "pstore/support/utf.hpp"

@@ -4,7 +4,7 @@
 //* | | | | | | (_) | (_| | |  _| |  __/ |  \__ \ *
 //* |_| |_| |_|\___/ \__,_|_|_| |_|\___|_|  |___/ *
 //*                                               *
-//===- include/pstore/cmd_util/cl/modifiers.hpp ---------------------------===//
+//===- include/pstore/cmd_util/modifiers.hpp ------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,16 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_MODIFIERS_HPP
-#define PSTORE_CMD_UTIL_CL_MODIFIERS_HPP
+#ifndef PSTORE_CMD_UTIL_MODIFIERS_HPP
+#define PSTORE_CMD_UTIL_MODIFIERS_HPP
 
 #include <cassert>
 #include <string>
 #include <vector>
 
-#include "pstore/cmd_util/cl/category.hpp"
-#include "pstore/cmd_util/cl/option.hpp"
-#include "pstore/cmd_util/cl/parser.hpp"
+#include "pstore/cmd_util/category.hpp"
+#include "pstore/cmd_util/option.hpp"
+#include "pstore/cmd_util/parser.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -257,4 +257,4 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif // PSTORE_CMD_UTIL_CL_MODIFIERS_HPP
+#endif // PSTORE_CMD_UTIL_MODIFIERS_HPP

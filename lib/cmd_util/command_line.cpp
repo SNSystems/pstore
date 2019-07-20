@@ -4,7 +4,7 @@
 //* | (_| (_) | | | | | | | | | | | (_| | | | | (_| | | | | | | |  __/ *
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
-//===- lib/cmd_util/cl/command_line.cpp -----------------------------------===//
+//===- lib/cmd_util/command_line.cpp --------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,12 +41,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 
 #include <iostream>
 
-#include "pstore/cmd_util/cl/option.hpp"
-#include "pstore/cmd_util/cl/string_distance.hpp"
+#include "pstore/cmd_util/option.hpp"
+#include "pstore/cmd_util/string_distance.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {

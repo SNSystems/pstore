@@ -59,7 +59,7 @@
 #endif
 
 // pstore includes
-#include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/make_unique.hpp"

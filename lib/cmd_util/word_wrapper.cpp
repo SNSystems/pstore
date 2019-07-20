@@ -4,7 +4,7 @@
 //*  \ V  V / (_) | | | (_| |  \ V  V /| | | (_| | |_) | |_) |  __/ |    *
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
-//===- lib/cmd_util/cl/word_wrapper.cpp -----------------------------------===//
+//===- lib/cmd_util/word_wrapper.cpp --------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/word_wrapper.hpp"
+#include "pstore/cmd_util/word_wrapper.hpp"
+
 #include <algorithm>
 #include <cassert>
 

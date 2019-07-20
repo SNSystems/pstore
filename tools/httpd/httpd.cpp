@@ -52,7 +52,7 @@
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
-#include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/server.hpp"

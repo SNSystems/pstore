@@ -4,7 +4,7 @@
 //* | (_| (_) | | | | | | | | | | | (_| | | | | (_| | | | | | | |  __/ *
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| |_|_|_| |_|\___| *
 //*                                                                    *
-//===- include/pstore/cmd_util/cl/command_line.hpp ------------------------===//
+//===- include/pstore/cmd_util/command_line.hpp ---------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,16 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
-#define PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
+#ifndef PSTORE_CMD_UTIL_COMMAND_LINE_HPP
+#define PSTORE_CMD_UTIL_COMMAND_LINE_HPP
 
 #include <iostream>
 #include <string>
 #include <tuple>
 
-#include "pstore/cmd_util/cl/category.hpp"
-#include "pstore/cmd_util/cl/help.hpp"
-#include "pstore/cmd_util/cl/modifiers.hpp"
+#include "pstore/cmd_util/category.hpp"
+#include "pstore/cmd_util/help.hpp"
+#include "pstore/cmd_util/modifiers.hpp"
 #include "pstore/support/path.hpp"
 
 namespace pstore {
@@ -235,4 +235,4 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif // PSTORE_CMD_UTIL_CL_COMMAND_LINE_HPP
+#endif // PSTORE_CMD_UTIL_COMMAND_LINE_HPP

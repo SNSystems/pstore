@@ -68,7 +68,7 @@ using TCHAR = char;
 #define NATIVE_TEXT(x) x
 #endif
 
-#include "pstore/cmd_util/cl/command_line.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"

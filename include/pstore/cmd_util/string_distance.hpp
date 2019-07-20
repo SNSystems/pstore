@@ -4,7 +4,7 @@
 //* \__ \ |_| |  | | | | | (_| | | (_| | \__ \ || (_| | | | | (_|  __/ *
 //* |___/\__|_|  |_|_| |_|\__, |  \__,_|_|___/\__\__,_|_| |_|\___\___| *
 //*                       |___/                                        *
-//===- lib/cmd_util/cl/string_distance.cpp --------------------------------===//
+//===- include/pstore/cmd_util/string_distance.hpp ------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,45 +41,37 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/cmd_util/cl/string_distance.hpp"
-#include <algorithm>
-#include <numeric>
-#include "pstore/support/small_vector.hpp"
+
+#ifndef PSTORE_CMD_UTIL_STRING_DISTANCE_HPP
+#define PSTORE_CMD_UTIL_STRING_DISTANCE_HPP
+
+#include <string>
 
 namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            std::string::size_type string_distance (std::string const & from,
-                                                    std::string const & to,
-                                                    std::string::size_type max_edit_distance) {
-                using size_type = std::string::size_type;
-                size_type const m = from.size ();
-                size_type const n = to.size ();
-
-                small_vector<size_type, 64> column (m + 1U);
-                std::iota (std::begin (column), std::end (column), size_type{0});
-                auto column_start = size_type{1};
-
-                for (auto x = column_start; x <= n; x++) {
-                    column[0] = x;
-                    auto best_this_column = x;
-                    auto last_diagonal = x - column_start;
-                    for (auto y = column_start; y <= m; y++) {
-                        auto old_diagonal = column[y];
-                        column[y] =
-                            std::min ({column[y] + 1U, column[y - 1U] + 1U,
-                                       last_diagonal + (from[y - 1U] == to[x - 1U] ? 0U : 1U)});
-                        last_diagonal = old_diagonal;
-                        best_this_column = std::min (best_this_column, column[y]);
-                    }
-                    if (max_edit_distance && best_this_column > max_edit_distance) {
-                        return max_edit_distance + 1U;
-                    }
-                }
-                return column[m];
-            }
+            /// \brief Determine the edit distance between two sequences.
+            /// The algorithm implemented below is the "classic"
+            /// dynamic-programming algorithm for computing the Levenshtein distance, which is
+            /// described here:
+            ///   http://en.wikipedia.org/wiki/Levenshtein_distance
+            ///
+            /// \param from_array  The first sequence to compare.
+            /// \param to_array  The second sequence to compare.
+            /// \param max_edit_distance  If non-zero, the maximum edit distance that this
+            /// routine is allowed to compute. If the edit distance will exceed that
+            /// maximum, returns \c max_edit_distance+1.
+            ///
+            /// \returns The minimum number of element insertions, removals, or (if
+            /// \p allow_replacements is \c true) replacements needed to transform one of
+            /// the given sequences into the other. If zero, the sequences are identical.
+            std::string::size_type string_distance (std::string const & from_array,
+                                                    std::string const & to_array,
+                                                    std::string::size_type max_edit_distance = 0);
 
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
+
+#endif // PSTORE_CMD_UTIL_STRING_DISTANCE_HPP

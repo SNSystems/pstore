@@ -49,7 +49,7 @@
 #include "llvm/Support/Error.h"
 #include "llvm/Support/raw_ostream.h"
 #else
-#include "pstore/cmd_util/cl/command_line.hpp"
+#    include "pstore/cmd_util/command_line.hpp"
 #endif
 
 #include "pstore/cmd_util/str_to_revision.hpp"

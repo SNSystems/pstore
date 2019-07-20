@@ -41,39 +41,39 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-set (PSTORE_CMD_UTIL_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
+set (pstore_cmd_util_include_dir "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
 
 include (add_pstore)
 set (pstore_cmd_util_includes "")
 set (pstore_cmd_util_src "")
 
 set (pstore_cmd_util_cl_includes
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/category.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/command_line.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/help.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/modifiers.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/option.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/parser.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/string_distance.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/cl/word_wrapper.hpp"
+    "${pstore_cmd_util_include_dir}/category.hpp"
+    "${pstore_cmd_util_include_dir}/command_line.hpp"
+    "${pstore_cmd_util_include_dir}/help.hpp"
+    "${pstore_cmd_util_include_dir}/modifiers.hpp"
+    "${pstore_cmd_util_include_dir}/option.hpp"
+    "${pstore_cmd_util_include_dir}/parser.hpp"
+    "${pstore_cmd_util_include_dir}/string_distance.hpp"
+    "${pstore_cmd_util_include_dir}/word_wrapper.hpp"
 )
 set (PSTORE_CMD_UTIL_CL_SRC
-    cl/category.cpp
-    cl/command_line.cpp
-    cl/help.cpp
-    cl/modifiers.cpp
-    cl/option.cpp
-    cl/parser.cpp
-    cl/string_distance.cpp
-    cl/word_wrapper.cpp
+    category.cpp
+    command_line.cpp
+    help.cpp
+    modifiers.cpp
+    option.cpp
+    parser.cpp
+    string_distance.cpp
+    word_wrapper.cpp
 )
 list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_CL_SRC})
 list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_cl_includes})
 source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC} ${pstore_cmd_util_cl_includes})
 
 set (pstore_cmd_util_opt_helpers_includes
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/str_to_revision.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/revision_opt.hpp"
+    "${pstore_cmd_util_include_dir}/str_to_revision.hpp"
+    "${pstore_cmd_util_include_dir}/revision_opt.hpp"
 )
 set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
     str_to_revision.cpp
@@ -85,8 +85,8 @@ source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC} ${pstore_cm
 
 
 list (APPEND pstore_cmd_util_includes
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/iota_generator.hpp"
-    "${PSTORE_CMD_UTIL_INCLUDE_DIR}/parallel_for_each.hpp"
+    "${pstore_cmd_util_include_dir}/iota_generator.hpp"
+    "${pstore_cmd_util_include_dir}/parallel_for_each.hpp"
 )
 add_pstore_library (TARGET pstore-cmd-util
     NAME cmd_util

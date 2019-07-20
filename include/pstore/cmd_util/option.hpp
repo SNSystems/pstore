@@ -4,7 +4,7 @@
 //* | (_) | |_) | |_| | (_) | | | | *
 //*  \___/| .__/ \__|_|\___/|_| |_| *
 //*       |_|                       *
-//===- include/pstore/cmd_util/cl/option.hpp ------------------------------===//
+//===- include/pstore/cmd_util/option.hpp ---------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_CMD_UTIL_CL_OPTION_HPP
-#define PSTORE_CMD_UTIL_CL_OPTION_HPP
+#ifndef PSTORE_CMD_UTIL_OPTION_HPP
+#define PSTORE_CMD_UTIL_OPTION_HPP
 
 #include <cassert>
 #include <list>
@@ -306,4 +306,4 @@ namespace pstore {
     }     // namespace cmd_util
 } // namespace pstore
 
-#endif // PSTORE_CMD_UTIL_CL_OPTION_H
+#endif // PSTORE_CMD_UTIL_OPTION_H

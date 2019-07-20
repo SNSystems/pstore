@@ -1,10 +1,10 @@
-//*            _                               *
-//*   ___ __ _| |_ ___  __ _  ___  _ __ _   _  *
-//*  / __/ _` | __/ _ \/ _` |/ _ \| '__| | | | *
-//* | (_| (_| | ||  __/ (_| | (_) | |  | |_| | *
-//*  \___\__,_|\__\___|\__, |\___/|_|   \__, | *
-//*                    |___/            |___/  *
-//===- include/pstore/cmd_util/cl/category.hpp ----------------------------===//
+//*                      _ _  __ _                *
+//*  _ __ ___   ___   __| (_)/ _(_) ___ _ __ ___  *
+//* | '_ ` _ \ / _ \ / _` | | |_| |/ _ \ '__/ __| *
+//* | | | | | | (_) | (_| | |  _| |  __/ |  \__ \ *
+//* |_| |_| |_|\___/ \__,_|_|_| |_|\___|_|  |___/ *
+//*                                               *
+//===- lib/cmd_util/modifiers.cpp -----------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,27 +41,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
-#ifndef PSTORE_CMD_UTIL_CL_CATEGORY_HPP
-#define PSTORE_CMD_UTIL_CL_CATEGORY_HPP
-
-#include <string>
-#include <utility>
+#include "pstore/cmd_util/modifiers.hpp"
 
 namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            class OptionCategory {
-            public:
-                explicit OptionCategory (std::string const title);
+            details::values::values (std::initializer_list<OptionEnumValue> options)
+                    : values_ (options) {}
 
-            private:
-                std::string title_;
-            };
+            name::name (std::string const & name)
+                    : name_ (name) {}
+
+            desc::desc (std::string const & str)
+                    : desc_ (str) {}
+
+            aliasopt::aliasopt (option & o)
+                    : original_ (o) {}
+            void aliasopt::apply (alias & o) const { o.set_original (&original_); }
+
+            details::one_or_more const OneOrMore;
+            details::optional const Optional;
+            details::positional const Positional;
+            details::required const Required;
 
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore
-
-#endif // PSTORE_CMD_UTIL_CL_CATEGORY_HPP
