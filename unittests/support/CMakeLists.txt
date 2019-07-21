@@ -52,6 +52,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_gsl.cpp
     test_make_unique.cpp
     test_maybe.cpp
+    test_parallel_for_each.cpp
     test_pointee_adaptor.cpp
     test_pubsub.cpp
     test_small_vector.cpp

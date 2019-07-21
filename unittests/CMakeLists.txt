@@ -61,6 +61,7 @@ endif (PSTORE_IS_INSIDE_LLVM)
 add_subdirectory (klee EXCLUDE_FROM_ALL)
 
 add_subdirectory (broker)
+add_subdirectory (broker_poker)
 add_subdirectory (cmd_util)
 add_subdirectory (common)
 add_subdirectory (core)

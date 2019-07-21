@@ -290,6 +290,7 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/parallel_for_each.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"

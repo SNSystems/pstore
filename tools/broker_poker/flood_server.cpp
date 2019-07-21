@@ -49,8 +49,9 @@
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/send_message.hpp"
 #include "pstore/broker_intf/writer.hpp"
-#include "pstore/cmd_util/iota_generator.hpp"
-#include "pstore/cmd_util/parallel_for_each.hpp"
+#include "pstore/support/parallel_for_each.hpp"
+
+#include "iota_generator.hpp"
 
 void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds retry_timeout,
                    unsigned long num) {

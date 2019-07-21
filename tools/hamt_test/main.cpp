@@ -48,12 +48,12 @@
 #include <future>
 #include <vector>
 
-#include "pstore/core/database.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/parallel_for_each.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/hamt_map.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/core/transaction.hpp"
+#include "pstore/support/parallel_for_each.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 

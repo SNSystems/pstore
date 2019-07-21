@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/cmd_util/parallel_for_each.hpp"
+#include "pstore/support/parallel_for_each.hpp"
 
 #include <algorithm>
 #include <array>
@@ -144,7 +144,7 @@ TEST (ParallelForEachException, WorkerExceptionPropogates) {
     auto op = [&]() {
         std::array<int, 2> const src{{3, 5}};
         pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
-                                             [](int ) { throw custom_exception{}; });
+                                             [](int) { throw custom_exception{}; });
     };
     EXPECT_THROW (op (), custom_exception);
 #endif // PSTORE_EXCEPTIONS

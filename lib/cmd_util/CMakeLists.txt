@@ -84,10 +84,6 @@ list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_opt_helpers_includes})
 source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC} ${pstore_cmd_util_opt_helpers_includes})
 
 
-list (APPEND pstore_cmd_util_includes
-    "${pstore_cmd_util_include_dir}/iota_generator.hpp"
-    "${pstore_cmd_util_include_dir}/parallel_for_each.hpp"
-)
 add_pstore_library (TARGET pstore-cmd-util
     NAME cmd_util
     SOURCES ${pstore_cmd_util_src}
