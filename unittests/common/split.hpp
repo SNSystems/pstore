@@ -73,7 +73,7 @@ template <typename StringType>
 std::vector<StringType> split_tokens (StringType const & s) {
     std::vector<StringType> result;
 
-    typedef typename StringType::value_type char_type;
+    using char_type = typename StringType::value_type;
     auto is_space = [](char_type c) { return pstore::isspace (c); };
 
     auto it = std::begin (s);

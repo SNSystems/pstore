@@ -62,7 +62,7 @@ namespace {
 
 
     struct mock_string_stream_traits {
-        typedef std::ostringstream stream_type;
+        using stream_type = std::ostringstream;
 
         mock_string_stream_traits () {}
         mock_string_stream_traits (mock_string_stream_traits const &) {}

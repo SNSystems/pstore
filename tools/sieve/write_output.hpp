@@ -150,7 +150,7 @@ template <typename ContainerType>
 void write_output (ContainerType const & primes, switches::endian output_endian,
                    std::ostream * const out) {
 
-    typedef typename ContainerType::value_type int_type;
+    using int_type = typename ContainerType::value_type;
     std::vector<std::uint8_t> bytes;
     bytes.resize (primes.size () * sizeof (int_type));
     auto ptr = bytes.data ();

@@ -141,7 +141,7 @@ namespace pstore {
                                                 indent const & indent) const = 0;
         };
 
-        typedef std::shared_ptr<value> value_ptr;
+        using value_ptr = std::shared_ptr<value>;
 
         template <typename OStream>
         inline OStream & operator<< (OStream & os, value const & v) {

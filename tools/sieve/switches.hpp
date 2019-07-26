@@ -51,7 +51,7 @@
 #ifdef _WIN32
 #    include <tchar.h>
 #else
-typedef char TCHAR;
+using TCHAR = char;
 #endif
 
 #include "pstore/config/config.hpp"

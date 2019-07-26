@@ -313,9 +313,8 @@ namespace {
         map const & map_;
     };
 
-    typedef pstore::index::hamt_map<std::string, std::string, hash_function,
-                                    std::equal_to<std::string>>
-        test_trie;
+    using test_trie = pstore::index::hamt_map<std::string, std::string, hash_function,
+                                              std::equal_to<std::string>>;
 } // end anonymous namespace
 
 // *******************************************

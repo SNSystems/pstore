@@ -68,7 +68,7 @@ namespace pstore {
         int const old_;
     };
 
-    typedef void (*signal_function) (int);
+    using signal_function = void (*) (int);
     signal_function register_signal_handler (int signo, signal_function func);
 
 } // namespace pstore

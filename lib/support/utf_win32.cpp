@@ -83,8 +83,8 @@ namespace {
 
 namespace {
     struct from_8_to_16_traits {
-        typedef char input_char_type;
-        typedef wchar_t output_char_type;
+        using input_char_type = char;
+        using output_char_type = wchar_t;
 
         static std::size_t output_size (input_char_type const * wstr, std::size_t length);
         static void convert (input_char_type const * str, std::size_t str_length,
@@ -129,8 +129,8 @@ namespace {
 
 namespace {
     struct from_16_to_8_traits {
-        typedef wchar_t input_char_type;
-        typedef char output_char_type;
+        using input_char_type = wchar_t;
+        using output_char_type = char;
 
         static std::size_t output_size (input_char_type const * wstr, std::size_t length);
 
@@ -180,11 +180,11 @@ namespace {
 
     template <typename ConverterTraits>
     struct converter {
-        typedef typename ConverterTraits::input_char_type input_char_type;
-        typedef typename ConverterTraits::output_char_type output_char_type;
+        using input_char_type = typename ConverterTraits::input_char_type;
+        using output_char_type = typename ConverterTraits::output_char_type;
 
-        typedef std::basic_string<input_char_type> input_string_type;
-        typedef std::basic_string<output_char_type> output_string_type;
+        using input_string_type = std::basic_string<input_char_type>;
+        using output_string_type = std::basic_string<output_char_type>;
 
         output_string_type operator() (input_char_type const * str, std::size_t length);
     };

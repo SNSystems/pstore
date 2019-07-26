@@ -438,7 +438,7 @@ namespace {
         void SetUp () override {}
         void TearDown () override {}
 
-        typedef std::shared_ptr<std::uint8_t> buffer;
+        using buffer = std::shared_ptr<std::uint8_t>;
 
         static buffer make_buffer (std::size_t elements) {
             return buffer (new std::uint8_t[elements], [](std::uint8_t * p) { delete[] p; });

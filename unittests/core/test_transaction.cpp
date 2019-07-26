@@ -219,8 +219,7 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
 
     {
         mock_mutex mutex;
-        typedef std::unique_lock<mock_mutex> guard_type;
-        auto transaction = pstore::begin (db, guard_type{mutex});
+        auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
         transaction.commit ();
     }
 

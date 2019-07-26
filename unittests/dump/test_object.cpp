@@ -63,7 +63,7 @@ namespace {
     };
 } // namespace
 
-typedef ::testing::Types<char, wchar_t> CharacterTypes;
+using CharacterTypes = ::testing::Types<char, wchar_t>;
 TYPED_TEST_CASE (Object, CharacterTypes);
 
 TYPED_TEST (Object, Empty) {

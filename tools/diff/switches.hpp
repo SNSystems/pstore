@@ -51,7 +51,7 @@
 #    include <tchar.h>
 #    define NATIVE_TEXT(str) _TEXT (str)
 #else
-typedef char TCHAR;
+using TCHAR = char;
 #    define NATIVE_TEXT(str) str
 #endif
 

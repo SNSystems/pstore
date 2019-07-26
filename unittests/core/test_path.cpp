@@ -225,7 +225,7 @@ TEST (Path, PlatformJoin) {
 
 
 TEST (Path, PosixSplitDrive) {
-    typedef std::pair<std::string, std::string> pair;
+    using pair = std::pair<std::string, std::string>;
 
     EXPECT_EQ (pair ("", "bar"), pstore::path::posix::split_drive ("bar"));
     EXPECT_EQ (pair ("", "/foo/bar"), pstore::path::posix::split_drive ("/foo/bar"));
@@ -234,7 +234,7 @@ TEST (Path, PosixSplitDrive) {
 }
 
 TEST (Path, Win32SplitDrive) {
-    typedef std::pair<std::string, std::string> pair;
+    using pair = std::pair<std::string, std::string>;
 
     EXPECT_EQ (pair ("", "bar"), pstore::path::win32::split_drive ("bar"));
     EXPECT_EQ (pair ("", "/foo/bar"), pstore::path::win32::split_drive ("/foo/bar"));
@@ -250,12 +250,6 @@ TEST (Path, Win32SplitDrive) {
                pstore::path::win32::split_drive ("///server/share/foo/bar"));
     EXPECT_EQ (pair ("", "\\\\server\\\\share\\foo\\bar"),
                pstore::path::win32::split_drive ("\\\\server\\\\share\\foo\\bar"));
-
-#if 0
-#Issue #19911 : UNC part containing U + 0130
-    self.assertEqual(ntpath.splitdrive(u'//conky/MOUNTPOİNT/foo/bar'),
-                        (u'//conky/MOUNTPOİNT', '/foo/bar'))
-#endif
 }
 
 TEST (Path, PlatformSplitDrive) {

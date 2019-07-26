@@ -63,9 +63,9 @@
 namespace pstore {
 
 #if defined(_WIN32)
-    typedef DWORD pid_t;
+    using pid_t = DWORD;
 #else
-    typedef ::pid_t pid_t;
+    using pid_t = ::pid_t;
 #endif // !defined (_WIN32)
 
 

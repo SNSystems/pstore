@@ -60,7 +60,7 @@ namespace pstore {
             return (x + y - 1) / y * y;
         }
 
-        typedef std::shared_ptr<memory_mapper_base> memory_mapper_ptr;
+        using memory_mapper_ptr = std::shared_ptr<memory_mapper_base>;
 
 
         //*                  _               _           _ _     _             *
@@ -81,7 +81,7 @@ namespace pstore {
         template <typename File, typename MemoryMapper>
         struct region_builder {
         public:
-            typedef std::vector<pstore::region::memory_mapper_ptr> container_type;
+            using container_type = std::vector<pstore::region::memory_mapper_ptr>;
 
             /// \param file The file containing the data to be memory-mapped.
             /// \param full_size The number of bytes in a "full size" memory-mapped region.

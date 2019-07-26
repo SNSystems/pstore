@@ -65,7 +65,7 @@ namespace pstore {
     namespace threads {
 
 #ifdef _WIN32
-        typedef DWORD thread_id_type;
+        using thread_id_type = DWORD;
 #elif defined(__APPLE__)
         using thread_id_type = std::uint64_t;
 #elif defined(__linux__)

@@ -260,7 +260,7 @@ namespace pstore {
             this->ensure_open ();
 
             // Microsoft's LARGE_INTEGER type is signed.
-            typedef decltype (LARGE_INTEGER::QuadPart) quad_part_type;
+            using quad_part_type = decltype (LARGE_INTEGER::QuadPart);
             static_assert (sizeof (quad_part_type) == sizeof (LARGE_INTEGER),
                            "QuadPart may not be the largest member of LARGE_INTEGER");
             assert (position < static_cast<std::make_unsigned<quad_part_type>::type> (
