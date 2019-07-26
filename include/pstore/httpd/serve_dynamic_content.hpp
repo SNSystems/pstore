@@ -126,19 +126,17 @@ namespace pstore {
 
             template <typename Sender, typename IO>
             struct commands_helper {
-                using return_type = pstore::error_or<IO>;
+                using return_type = error_or<IO>;
                 using function_type =
                     std::function<return_type (Sender, IO, query_container const &)>;
 
-                // TODO: using unordered_map<> is lazy. The commands are known at compile-time so a
-                // pre-sorted std::array<> which we can binary-chop would suffice.
-                using container = std::unordered_map<std::string, function_type>;
+                using container = std::array<std::pair<std::string, function_type>, 1>;
             };
 
             template <typename Sender, typename IO>
             typename commands_helper<Sender, IO>::container const & get_commands () {
                 static typename commands_helper<Sender, IO>::container const commands = {
-                    {"version", handle_version<Sender, IO>},
+                    {{"version", handle_version<Sender, IO>}},
                 };
                 return commands;
             }
@@ -168,13 +166,23 @@ namespace pstore {
 
             // Do we know how to handle this command?
             auto const & commands = details::get_commands<Sender, IO> ();
-            auto command_it = commands.find (uri.substr (0, pos));
-            if (command_it == std::end (commands)) {
+            using value_type = typename details::commands_helper<Sender, IO>::container::value_type;
+            auto const compare = [](value_type const & a, value_type const & b) {
+                return std::get<0> (a) < std::get<0> (b);
+            };
+            assert (std::is_sorted (std::begin (commands), std::end (commands), compare));
+
+            auto const lb = std::lower_bound (
+                std::begin (commands), std::end (commands),
+                value_type{command,
+                           [](Sender, IO io, query_container const &) { return error_or<IO>{io}; }},
+                compare);
+            if (lb == std::end (commands) || std::get<0> (*lb) != command) {
                 return error_or<IO>{error_code::bad_request};
             }
 
             // Yep, this is a command we understand. Call it.
-            return command_it->second (sender, io, arguments);
+            return std::get<1> (*lb) (sender, io, arguments);
         }
 
     } // end namespace httpd
