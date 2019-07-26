@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_HEAD_REVISION_HPP
-#define PSTORE_HEAD_REVISION_HPP
+#ifndef PSTORE_SUPPORT_HEAD_REVISION_HPP
+#define PSTORE_SUPPORT_HEAD_REVISION_HPP
 
 #include <limits>
 
@@ -50,4 +50,4 @@ namespace pstore {
     constexpr unsigned head_revision = std::numeric_limits<unsigned>::max ();
 } // namespace pstore
 
-#endif // PSTORE_HEAD_REVISION_HPP
+#endif // PSTORE_SUPPORT_HEAD_REVISION_HPP
