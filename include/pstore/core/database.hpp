@@ -385,8 +385,6 @@ namespace pstore {
         /// the transaction's file footer. If a write transaction is active, then this becomes the
         /// point at which new data is written; when the transaction is complete, a new footer will
         /// be written at this location.
-
-        // TODO: should this be a member of 'transaction'?
         class sizes {
         public:
             sizes () noexcept
