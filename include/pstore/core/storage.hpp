@@ -197,9 +197,9 @@ namespace pstore {
         region_container const & regions () const { return regions_; }
 
     private:
-        static sat_iterator slice_region_into_segments (std::shared_ptr<memory_mapper_base> region,
-                                                        sat_iterator segment_it,
-                                                        sat_iterator segment_end);
+        static sat_iterator
+        slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
+                                    sat_iterator segment_it, sat_iterator segment_end);
 
         /// The Segment Address Table: an array of pointers to the base-address of each segment's
         /// memory-mapped storage and their corresponding region object.

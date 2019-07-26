@@ -364,10 +364,10 @@ namespace pstore {
 
 
 
-        std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> file,
+        std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size);
 
-        std::unique_ptr<factory> get_factory (std::shared_ptr<file::in_memory> file,
+        std::unique_ptr<factory> get_factory (std::shared_ptr<file::in_memory> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size);
     } // namespace region
 } // namespace pstore

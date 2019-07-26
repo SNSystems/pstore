@@ -155,7 +155,7 @@ namespace pstore {
 
     // slice_region_into_segments
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    auto storage::slice_region_into_segments (std::shared_ptr<memory_mapper_base> region,
+    auto storage::slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
                                               sat_iterator segment_it, sat_iterator segment_end)
         -> sat_iterator {
 
