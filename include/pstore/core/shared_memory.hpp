@@ -251,7 +251,7 @@ namespace pstore {
     };
 
     /// A function which returns the maximum length of a shared memory object name.
-    std::size_t get_pshmnamlen ();
+    std::size_t get_pshmnamlen () noexcept;
 
 //***************************
 //* shared_memory::shm_name *

@@ -48,31 +48,31 @@
 #include "pstore/config/config.hpp"
 
 #if PSTORE_HAVE_SYS_POSIX_SHM_H
-#include <sys/time.h>
-#include <sys/posix_shm.h>
-#include <sys/types.h>
+#    include <sys/posix_shm.h>
+#    include <sys/time.h>
+#    include <sys/types.h>
 #endif // PSTORE_HAVE_SYS_POSIX_SHM_H
 
 #if !defined(PSHMNAMLEN) && PSTORE_HAVE_LINUX_LIMITS_H
-#include <linux/limits.h>
-#if !defined(PSHMNAMLEN) && defined(NAME_MAX)
-#define PSHMNAMLEN NAME_MAX
-#endif
+#    include <linux/limits.h>
+#    if !defined(PSHMNAMLEN) && defined(NAME_MAX)
+#        define PSHMNAMLEN NAME_MAX
+#    endif
 #endif // PSTORE_HAVE_LINUX_LIMITS_H
 
 // Just in case no one has defined... we'll name up a reasonable value.
 #ifndef PSHMNAMLEN
-#ifdef __APPLE__
-#define PSHMNAMLEN (31) // taken from bsd/kern/posix_shm.c
-#else
-#define PSHMNAMLEN (100)
-#endif
+#    ifdef __APPLE__
+#        define PSHMNAMLEN (31) // taken from bsd/kern/posix_shm.c
+#    else
+#        define PSHMNAMLEN (100)
+#    endif
 #endif // PSHMNAMLEN
 
 
 namespace pstore {
 
-    std::size_t get_pshmnamlen () {
+    std::size_t get_pshmnamlen () noexcept {
 #ifdef _WIN32
         return MAX_PATH;
 #else
