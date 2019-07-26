@@ -46,6 +46,7 @@
 #include "pstore/core/transaction.hpp"
 
 #include <utility>
+
 #include "pstore/core/index_types.hpp"
 
 namespace pstore {
