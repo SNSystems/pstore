@@ -1328,7 +1328,7 @@ namespace pstore {
             template <typename Callbacks>
             class root_matcher final : public matcher<Callbacks> {
             public:
-                root_matcher (bool only_string = false) noexcept
+                explicit root_matcher (bool only_string = false) noexcept
                         : matcher<Callbacks> (start_state)
                         , only_string_{only_string} {}
 
