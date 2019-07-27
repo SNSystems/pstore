@@ -393,8 +393,8 @@ namespace pstore {
     template <typename Ty>
     auto shared_memory<Ty>::mmap (os_file_handle fd) -> pointer_type {
         auto ptr = static_cast<value_type *> (
-            ::mmap (nullptr, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0));
-        if (ptr == MAP_FAILED) {
+            ::mmap (nullptr, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)); // NOLINT
+        if (ptr == MAP_FAILED) {                                                       // NOLINT
             raise (errno_erc{errno}, "mmap");
         }
         return {ptr, &unmap};
@@ -451,7 +451,7 @@ namespace pstore {
     // ~~~~
     template <typename Ty>
     auto shared_memory<Ty>::file_mapping::open (char const * name) -> os_file_handle {
-        int const fd = ::shm_open (name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
+        int const fd = ::shm_open (name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR); // NOLINT
         if (fd == -1) {
             int const error = errno;
             if (error == ENAMETOOLONG) {
