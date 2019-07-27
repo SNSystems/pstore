@@ -89,8 +89,8 @@ namespace pstore {
 
     class storage {
     public:
-        static auto constexpr full_region_size = UINT64_C (1) << 32; // 4 Gigabytes
-        static auto constexpr min_region_size = UINT64_C (1) << 22;  // 4 Megabytes
+        static auto constexpr full_region_size = UINT64_C (1) << 32U; // 4 Gigabytes
+        static auto constexpr min_region_size = UINT64_C (1) << 22U;  // 4 Megabytes
         // Check that full_region_size is a multiple of min_region_size
         PSTORE_STATIC_ASSERT (full_region_size % min_region_size == 0);
 
