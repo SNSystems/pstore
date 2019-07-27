@@ -146,13 +146,13 @@ namespace pstore {
         constexpr std::uint64_t absolute () const noexcept { return a_; }
 
         address operator++ () noexcept { return (*this) += 1U; }
-        address const operator++ (int) noexcept {
+        address operator++ (int) noexcept {
             auto const old = *this;
             ++(*this);
             return old;
         }
         address operator-- () noexcept { return (*this) -= 1U; }
-        address const operator-- (int) noexcept {
+        address operator-- (int) noexcept {
             auto const old = *this;
             --(*this);
             return old;
@@ -294,13 +294,13 @@ namespace pstore {
         }
 
         typed_address operator++ () noexcept { return (*this) += 1U; }
-        typed_address const operator++ (int) noexcept {
+        typed_address operator++ (int) noexcept {
             auto const old = *this;
             ++(*this);
             return old;
         }
         typed_address operator-- () noexcept { return (*this) -= 1U; }
-        typed_address const operator-- (int) noexcept {
+        typed_address operator-- (int) noexcept {
             auto const old = *this;
             --(*this);
             return old;

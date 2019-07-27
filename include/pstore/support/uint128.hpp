@@ -172,11 +172,11 @@ namespace pstore {
         uint128 operator~ () const noexcept;
 
         uint128 & operator++ () noexcept;
-        uint128 const operator++ (int) noexcept;
+        uint128 operator++ (int) noexcept;
         uint128 & operator-- () noexcept;
-        uint128 const operator-- (int) noexcept;
+        uint128 operator-- (int) noexcept;
 
-        uint128 & operator+= (uint128 b);
+        uint128 & operator+= (uint128 rhs);
         uint128 & operator-= (uint128 b) { return *this += -b; }
 
         template <typename T>
@@ -249,7 +249,7 @@ namespace pstore {
 #endif
         return *this;
     }
-    inline uint128 const uint128::operator++ (int) noexcept {
+    inline uint128 uint128::operator++ (int) noexcept {
         auto const prev = *this;
         ++(*this);
         return prev;
@@ -271,7 +271,7 @@ namespace pstore {
         return *this;
     }
 
-    inline uint128 const uint128::operator-- (int) noexcept {
+    inline uint128 uint128::operator-- (int) noexcept {
         auto const prev = *this;
         --(*this);
         return prev;
