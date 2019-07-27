@@ -139,6 +139,7 @@ namespace pstore {
             static std::size_t time_string (std::time_t t,
                                             gsl::span<char, time_buffer_size> const & buffer);
 
+            using logger::log;
             void log (priority p, std::string const & message) final;
 
         private:
