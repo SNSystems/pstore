@@ -87,12 +87,16 @@ namespace pstore {
             /// \param full_size The number of bytes in a "full size" memory-mapped region.
             /// \param minimum_size The number of bytes in a "minimum size" memory-mapped
             /// region.
-            region_builder (std::shared_ptr<File> file, std::uint64_t const full_size,
-                            std::uint64_t const minimum_size) noexcept;
+            region_builder (std::shared_ptr<File> file, std::uint64_t full_size,
+                            std::uint64_t minimum_size) noexcept;
+
+            ~region_builder () noexcept = default;
 
             // No assignment or copying.
             region_builder (region_builder const &) = delete;
+            region_builder (region_builder &&) noexcept = delete;
             region_builder & operator= (region_builder const &) = delete;
+            region_builder & operator= (region_builder &&) = delete;
 
             /// \param bytes_to_map The number of bytes to be mapped.
             /// \returns A collection of memory-mapped regions.
