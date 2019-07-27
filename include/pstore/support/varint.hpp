@@ -97,16 +97,15 @@ namespace pstore {
         inline unsigned encoded_size (std::uint64_t x) {
             // Each additional byte that we emit steals one bit from the first byte. We therefore
             // manage 7 bits per byte.
-            auto const nine_byte_threshold = (UINT64_C (1) << (7U * 8U)) - 1U;
+            constexpr auto nine_byte_threshold = (UINT64_C (1) << (7U * 8U)) - 1U;
             if (x > nine_byte_threshold) {
                 return 9;
-            } else {
-                // The input to clz() is ORed with 1 to guarantee we don't pass 0 (which will
-                // require 1 byte to store anyway).
-                unsigned const bits = 64U - bit_count::clz (x | 1U);
-                unsigned const bytes = (bits - 1U) / 7U + 1U;
-                return bytes;
             }
+
+            // The input to clz() is ORed with 1 to guarantee we don't pass 0 (which will
+            // require 1 byte to store anyway).
+            unsigned const bits = 64U - bit_count::clz (x | 1U);
+            return (bits - 1U) / 7U + 1U;
         }
 
         template <typename OutputIterator>
