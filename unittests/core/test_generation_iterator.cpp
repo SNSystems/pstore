@@ -87,28 +87,31 @@ namespace {
 TEST_F (GenerationIterator, GenerationContainerBegin) {
     this->add_transaction ();
     pstore::generation_iterator actual = pstore::generation_container (*db_).begin ();
-    pstore::generation_iterator expected = pstore::generation_iterator (*db_, db_->footer_pos ());
+    pstore::generation_iterator expected =
+        pstore::generation_iterator (db_.get (), db_->footer_pos ());
     EXPECT_EQ (expected, actual);
 }
 TEST_F (GenerationIterator, GenerationContainerEnd) {
     this->add_transaction ();
     pstore::generation_iterator actual = pstore::generation_container (*db_).end ();
     pstore::generation_iterator expected =
-        pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
+        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (GenerationIterator, InitialStoreIterationHasDistance1) {
-    auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
-    auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
+    auto begin = pstore::generation_iterator (db_.get (), db_->footer_pos ());
+    auto end =
+        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (1U, std::distance (begin, end));
     EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (sizeof (pstore::header)), *begin);
 }
 
 TEST_F (GenerationIterator, AddTransactionoreIterationHasDistance2) {
     this->add_transaction ();
-    auto begin = pstore::generation_iterator (*db_, db_->footer_pos ());
-    auto end = pstore::generation_iterator (*db_, pstore::typed_address<pstore::trailer>::null ());
+    auto begin = pstore::generation_iterator (db_.get (), db_->footer_pos ());
+    auto end =
+        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (2U, std::distance (begin, end));
 }
 

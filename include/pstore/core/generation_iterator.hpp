@@ -64,7 +64,7 @@ namespace pstore {
     class generation_iterator : public std::iterator<std::input_iterator_tag, // category
                                                      typed_address<trailer>> {
     public:
-        generation_iterator (database const & db, typed_address<trailer> pos)
+        generation_iterator (gsl::not_null<database const *> db, typed_address<trailer> pos)
                 : db_ (db)
                 , pos_ (pos) {
 
@@ -75,10 +75,8 @@ namespace pstore {
         generation_iterator (generation_iterator const &) = default;
         generation_iterator & operator= (generation_iterator const &) = default;
 
-        bool operator== (generation_iterator const & rhs) const {
-            database const * const ldb = &db_;
-            database const * const rdb = &rhs.db_;
-            return std::tie (ldb, pos_) == std::tie (rdb, rhs.pos_);
+        bool operator== (generation_iterator const & rhs) const noexcept {
+            return std::tie (db_, pos_) == std::tie (rhs.db_, rhs.pos_);
         }
         bool operator!= (generation_iterator const & rhs) const { return !operator== (rhs); }
 
@@ -90,14 +88,14 @@ namespace pstore {
     private:
         bool validate () const;
 
-        database const & db_;
+        database const * db_;
         typed_address<trailer> pos_;
     };
 
 
     class generation_container {
     public:
-        explicit generation_container (database const & db)
+        constexpr explicit generation_container (database const & db) noexcept
                 : db_ (db) {}
         generation_iterator begin ();
         generation_iterator end ();

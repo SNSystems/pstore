@@ -61,7 +61,7 @@ namespace pstore {
     // (pre-increment)
     // ~~~~~~~~~~~~~~~
     generation_iterator & generation_iterator::operator++ () {
-        pos_ = db_.getro<pstore::trailer> (pos_)->a.prev_generation;
+        pos_ = db_->getro<pstore::trailer> (pos_)->a.prev_generation;
         this->validate ();
         return *this;
     }
@@ -76,15 +76,15 @@ namespace pstore {
 
     // validate
     // ~~~~~~~~
-    bool generation_iterator::validate () const { return trailer::validate (db_, pos_); }
+    bool generation_iterator::validate () const { return trailer::validate (*db_, pos_); }
 
 
     // ************************
     // * generation container *
     // ************************
-    generation_iterator generation_container::begin () { return {db_, db_.footer_pos ()}; }
+    generation_iterator generation_container::begin () { return {&db_, db_.footer_pos ()}; }
     generation_iterator generation_container::end () {
-        return {db_, pstore::typed_address<pstore::trailer>::null ()};
+        return {&db_, pstore::typed_address<pstore::trailer>::null ()};
     }
 
 } // namespace pstore

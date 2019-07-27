@@ -152,8 +152,8 @@ namespace pstore {
         value_ptr make_contents (database const & db, typed_address<trailer> footer_pos,
                                  bool no_times) {
             array::container array;
-            auto it = generation_iterator (db, footer_pos);
-            auto end = generation_iterator (db, typed_address<trailer>::null ());
+            auto it = generation_iterator (&db, footer_pos);
+            auto end = generation_iterator (&db, typed_address<trailer>::null ());
             for (; it != end; ++it) {
                 array.emplace_back (make_generation (db, *it, no_times));
             }
