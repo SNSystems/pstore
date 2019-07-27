@@ -109,12 +109,12 @@ namespace pstore {
             ///                 memory-mapped regions.
             /// \param bytes_to_map  The number of bytes in the file to be mapped by additional
             ///                      memory-mapped regions.
-            void append (container_type * const regions, std::uint64_t offset,
+            void append (container_type * regions, std::uint64_t offset,
                          std::uint64_t bytes_to_map);
 
         private:
-            void push (container_type * const regions, std::uint64_t file_size,
-                       std::uint64_t offset, std::uint64_t size);
+            void push (container_type * regions, std::uint64_t file_size, std::uint64_t offset,
+                       std::uint64_t size);
 
             /// Checks the region-builder's post-condition that all of the regions are sorted
             /// and contiguous starting at an offset of 0.
@@ -242,8 +242,8 @@ namespace pstore {
             /// \returns A container of memory mapper objects.
             virtual std::vector<memory_mapper_ptr> init () = 0;
 
-            virtual void add (std::vector<memory_mapper_ptr> * const regions,
-                              std::uint64_t original_size, std::uint64_t new_size) = 0;
+            virtual void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
+                              std::uint64_t new_size) = 0;
 
             virtual std::shared_ptr<file::file_base> file () = 0;
 
@@ -264,7 +264,7 @@ namespace pstore {
             auto create (std::shared_ptr<File> file) -> std::vector<memory_mapper_ptr>;
 
             template <typename File, typename MemoryMapper>
-            void append (std::shared_ptr<File> file, std::vector<memory_mapper_ptr> * const regions,
+            void append (std::shared_ptr<File> file, std::vector<memory_mapper_ptr> * regions,
                          std::uint64_t original_size, std::uint64_t new_size);
 
         private:
@@ -308,13 +308,11 @@ namespace pstore {
         }
 
 
-        /*   __ _ _        _                        _    __            _                    *
-         *  / _(_) | ___  | |__   __ _ ___  ___  __| |  / _| __ _  ___| |_ ___  _ __ _   _  *
-         * | |_| | |/ _ \ | '_ \ / _` / __|/ _ \/ _` | | |_ / _` |/ __| __/ _ \| '__| | | | *
-         * |  _| | |  __/ | |_) | (_| \__ \  __/ (_| | |  _| (_| | (__| || (_) | |  | |_| | *
-         * |_| |_|_|\___| |_.__/ \__,_|___/\___|\__,_| |_|  \__,_|\___|\__\___/|_|   \__, | *
-         *                                                                           |___/  *
-         */
+        //*   __ _ _       _                     _    __         _                 *
+        //*  / _(_) |___  | |__  __ _ ___ ___ __| |  / _|__ _ __| |_ ___ _ _ _  _  *
+        //* |  _| | / -_) | '_ \/ _` (_-</ -_) _` | |  _/ _` / _|  _/ _ \ '_| || | *
+        //* |_| |_|_\___| |_.__/\__,_/__/\___\__,_| |_| \__,_\__|\__\___/_|  \_, | *
+        //*                                                                  |__/  *
         class file_based_factory final : public factory {
         public:
             /// \param file An open file containing the data to be memory-mapped.
@@ -324,7 +322,7 @@ namespace pstore {
                                          std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * const regions, std::uint64_t original_size,
+            void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
                       std::uint64_t new_size) override;
 
             std::shared_ptr<file::file_base> file () override;
@@ -334,16 +332,11 @@ namespace pstore {
         };
 
 
-        /*                             _                        _    __            _ * _ __ ___
-         * ___ _ __ ___   | |__   __ _ ___  ___  __| |  / _| __ _  ___| |_ ___  _ __ _   _  * | '_ `
-         * _ \ / _ \ '_ ` _ \  | '_ \ / _` / __|/ _ \/ _` | | |_ / _` |/ __| __/ _ \| '__| | | | *
-         * | | | | | |  __/ | | | | | | |_) | (_| \__ \  __/ (_| | |  _| (_| | (__| || (_) | |  |
-         * |_| | *
-         * |_| |_| |_|\___|_| |_| |_| |_.__/ \__,_|___/\___|\__,_| |_|  \__,_|\___|\__\___/|_|
-         * \__, | *
-         *                                                                                       |___/
-         * *
-         */
+        //*                    _                     _    __         _                 *
+        //*  _ __  ___ _ __   | |__  __ _ ___ ___ __| |  / _|__ _ __| |_ ___ _ _ _  _  *
+        //* | '  \/ -_) '  \  | '_ \/ _` (_-</ -_) _` | |  _/ _` / _|  _/ _ \ '_| || | *
+        //* |_|_|_\___|_|_|_| |_.__/\__,_/__/\___\__,_| |_| \__,_\__|\__\___/_|  \_, | *
+        //*                                                                      |__/  *
         class mem_based_factory final : public factory {
         public:
             /// \param file An open file containing the data to be memory-mapped.
@@ -353,7 +346,7 @@ namespace pstore {
                                         std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * const regions, std::uint64_t original_size,
+            void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
                       std::uint64_t new_size) override;
 
             std::shared_ptr<file::file_base> file () override;
@@ -361,7 +354,6 @@ namespace pstore {
         private:
             std::shared_ptr<file::in_memory> file_;
         };
-
 
 
         std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> const & file,
