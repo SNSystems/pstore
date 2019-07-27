@@ -49,8 +49,8 @@
 //===----------------------------------------------------------------------===//
 /// \file sstring_view_archive.hpp
 
-#ifndef PSTORE_SSTRING_VIEW_ARCHIVE_HPP
-#define PSTORE_SSTRING_VIEW_ARCHIVE_HPP
+#ifndef PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
+#define PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP (1)
 
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/transaction.hpp"
@@ -151,4 +151,4 @@ namespace pstore {
     } // namespace serialize
 } // namespace pstore
 
-#endif // PSTORE_SSTRING_VIEW_ARCHIVE_HPP
+#endif // PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP

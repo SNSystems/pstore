@@ -44,8 +44,8 @@
 /// \file uuid.hpp
 /// \brief Defines the uuid class which supports RFC4122 UUIDs.
 
-#ifndef PSTORE_UUID_HPP
-#define PSTORE_UUID_HPP
+#ifndef PSTORE_CORE_UUID_HPP
+#define PSTORE_CORE_UUID_HPP (1)
 
 #include <array>
 #include <cassert>
@@ -176,4 +176,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_UUID_HPP
+#endif // PSTORE_CORE_UUID_HPP

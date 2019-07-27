@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file shared_memory.hpp
 
-#ifndef PSTORE_SHARED_MEMORY_HPP
-#define PSTORE_SHARED_MEMORY_HPP (1)
+#ifndef PSTORE_CORE_SHARED_MEMORY_HPP
+#define PSTORE_CORE_SHARED_MEMORY_HPP (1)
 
 #include <algorithm>
 #include <atomic>
@@ -479,4 +479,4 @@ namespace pstore {
 
 #endif // !_WIN32
 } // namespace pstore
-#endif // PSTORE_SHARED_MEMORY_HPP
+#endif // PSTORE_CORE_SHARED_MEMORY_HPP

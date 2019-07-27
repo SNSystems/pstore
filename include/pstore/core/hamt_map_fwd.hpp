@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file hamt_map_fwd.hpp
 
-#ifndef PSTORE_HAMT_MAP_FWD_HPP
-#define PSTORE_HAMT_MAP_FWD_HPP
+#ifndef PSTORE_CORE_HAMT_MAP_FWD_HPP
+#define PSTORE_CORE_HAMT_MAP_FWD_HPP (1)
 
 #include <functional>
 
@@ -90,4 +90,4 @@ namespace pstore {
 
     } // namespace index
 } // namespace pstore
-#endif // PSTORE_HAMT_MAP_FWD_HPP
+#endif // PSTORE_CORE_HAMT_MAP_FWD_HPP

@@ -45,8 +45,8 @@
 /// \brief The pstore::errno_exception class provides a wrapper for std::system error which provides
 /// additional context for the associated error message.
 
-#ifndef PSTORE_ERRNO_EXCEPTION_HPP
-#define PSTORE_ERRNO_EXCEPTION_HPP
+#ifndef PSTORE_CORE_ERRNO_EXCEPTION_HPP
+#define PSTORE_CORE_ERRNO_EXCEPTION_HPP (1)
 
 #include <exception>
 #include <string>
@@ -68,4 +68,4 @@ namespace pstore {
         ~errno_exception () override;
     };
 } // namespace pstore
-#endif // PSTORE_ERRNO_EXCEPTION_HPP
+#endif // PSTORE_CORE_ERRNO_EXCEPTION_HPP

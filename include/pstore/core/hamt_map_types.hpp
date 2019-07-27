@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file hamt_map_types.hpp
 
-#ifndef PSTORE_HAMT_MAP_TYPES_HPP
-#define PSTORE_HAMT_MAP_TYPES_HPP
+#ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
+#define PSTORE_CORE_HAMT_MAP_TYPES_HPP
 
 #include <array>
 #include <vector>
@@ -638,4 +638,4 @@ namespace pstore {
     }     // namespace index
 } // namespace pstore
 
-#endif // PSTORE_HAMT_MAP_TYPES_HPP
+#endif // PSTORE_CORE_HAMT_MAP_TYPES_HPP

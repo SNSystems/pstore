@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file region.hpp
 
-#ifndef PSTORE_REGION_HPP
-#define PSTORE_REGION_HPP
+#ifndef PSTORE_CORE_REGION_HPP
+#define PSTORE_CORE_REGION_HPP (1)
 
 #include <cassert>
 #include <cstdint>
@@ -371,4 +371,4 @@ namespace pstore {
                                               std::uint64_t full_size, std::uint64_t min_size);
     } // namespace region
 } // namespace pstore
-#endif // PSTORE_REGION_HPP
+#endif // PSTORE_CORE_REGION_HPP

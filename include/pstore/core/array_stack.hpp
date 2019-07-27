@@ -45,8 +45,8 @@
 /// \brief array_stack is a simple container which provides an interface very
 /// similar to std::stack, but based on std::array.
 
-#ifndef PSTORE_ARRAY_STACK_HPP
-#define PSTORE_ARRAY_STACK_HPP
+#ifndef PSTORE_CORE_ARRAY_STACK_HPP
+#define PSTORE_CORE_ARRAY_STACK_HPP (1)
 
 #include <array>
 #include <cassert>
@@ -146,4 +146,4 @@ namespace pstore {
     };
 } // namespace pstore
 
-#endif // PSTORE_ARRAY_STACK_HPP
+#endif // PSTORE_CORE_ARRAY_STACK_HPP

@@ -64,8 +64,8 @@
 /// recent completed transaction; this is an instance of pstore::trailer and marks the _end_ of the
 /// data associated with that transaction.
 
-#ifndef PSTORE_FILE_HEADER_HPP
-#define PSTORE_FILE_HEADER_HPP (1)
+#ifndef PSTORE_CORE_FILE_HEADER_HPP
+#define PSTORE_CORE_FILE_HEADER_HPP (1)
 
 #include <array>
 #include <atomic>
@@ -342,4 +342,4 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (sizeof (trailer) == 104);
 
 } // namespace pstore
-#endif // PSTORE_FILE_HEADER_HPP
+#endif // PSTORE_CORE_FILE_HEADER_HPP

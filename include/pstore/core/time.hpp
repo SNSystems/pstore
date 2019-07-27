@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file time.hpp
 
-#ifndef PSTORE_TIME_HPP
-#define PSTORE_TIME_HPP
+#ifndef PSTORE_CORE_TIME_HPP
+#define PSTORE_CORE_TIME_HPP (1)
 
 #include <cstdint>
 
@@ -52,4 +52,4 @@ namespace pstore {
     std::uint64_t milliseconds_since_epoch ();
 } // namespace pstore
 
-#endif // PSTORE_TIME_HPP
+#endif // PSTORE_CORE_TIME_HPP

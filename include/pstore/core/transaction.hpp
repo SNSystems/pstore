@@ -44,8 +44,8 @@
 /// \file transaction.hpp
 /// \brief The data store transaction class.
 
-#ifndef PSTORE_TRANSACTION_HPP
-#define PSTORE_TRANSACTION_HPP
+#ifndef PSTORE_CORE_TRANSACTION_HPP
+#define PSTORE_CORE_TRANSACTION_HPP (1)
 
 #include <mutex>
 #include <type_traits>
@@ -339,4 +339,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_TRANSACTION_HPP
+#endif // PSTORE_CORE_TRANSACTION_HPP

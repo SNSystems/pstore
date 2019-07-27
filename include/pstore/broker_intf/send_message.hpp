@@ -45,8 +45,8 @@
 /// \brief  Implements the send_message function which is the means by which the library sends
 /// messages to a running pstore broker instance.
 
-#ifndef PSTORE_BROKER_SEND_MESSAGE_HPP
-#define PSTORE_BROKER_SEND_MESSAGE_HPP (1)
+#ifndef PSTORE_BROKER_INTF_SEND_MESSAGE_HPP
+#define PSTORE_BROKER_INTF_SEND_MESSAGE_HPP (1)
 
 #include <cstdint>
 #include <string>
@@ -78,4 +78,4 @@ namespace pstore {
 
     } // namespace broker
 } // namespace pstore
-#endif // PSTORE_BROKER_SEND_MESSAGE_HPP
+#endif // PSTORE_BROKER_INTF_SEND_MESSAGE_HPP

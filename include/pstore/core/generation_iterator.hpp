@@ -49,8 +49,8 @@
 //===----------------------------------------------------------------------===//
 /// \file generation_iterator.hpp
 
-#ifndef PSTORE_GENERATION_ITERATOR_HPP
-#define PSTORE_GENERATION_ITERATOR_HPP (1)
+#ifndef PSTORE_CORE_GENERATION_ITERATOR_HPP
+#define PSTORE_CORE_GENERATION_ITERATOR_HPP (1)
 
 #include <iterator>
 #include <tuple>
@@ -107,4 +107,4 @@ namespace pstore {
     };
 
 } // end namespace pstore
-#endif // PSTORE_GENERATION_ITERATOR_HPP
+#endif // PSTORE_CORE_GENERATION_ITERATOR_HPP

@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file vacuum_intf.hpp
 
-#ifndef PSTORE_VACUUM_INTF_HPP
-#define PSTORE_VACUUM_INTF_HPP (1)
+#ifndef PSTORE_CORE_VACUUM_INTF_HPP
+#define PSTORE_CORE_VACUUM_INTF_HPP (1)
 
 #include <atomic>
 #include <cstdint>
@@ -68,8 +68,6 @@ namespace pstore {
     using pid_t = ::pid_t;
 #endif // !defined (_WIN32)
 
-
-
     struct shared {
         static constexpr auto not_running = pid_t{0};
         static constexpr auto starting = static_cast<pid_t> (-1);
@@ -88,4 +86,4 @@ namespace pstore {
     };
 
 } // namespace pstore
-#endif // PSTORE_VACUUM_INTF_HPP
+#endif // PSTORE_CORE_VACUUM_INTF_HPP

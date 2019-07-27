@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file crc32.hpp
 
-#ifndef PSTORE_CRC32_HPP
-#define PSTORE_CRC32_HPP (1)
+#ifndef PSTORE_CORE_CRC32_HPP
+#define PSTORE_CORE_CRC32_HPP (1)
 
 #include <array>
 #include <cstdint>
@@ -68,4 +68,4 @@ namespace pstore {
     }
 
 } // end namespace pstore
-#endif // PSTORE_CRC32_HPP
+#endif // PSTORE_CORE_CRC32_HPP
