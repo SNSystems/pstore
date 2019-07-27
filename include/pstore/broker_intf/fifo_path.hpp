@@ -96,7 +96,7 @@ namespace pstore {
 
             /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default
             /// path (as defined at configure time) is used.
-            fifo_path (gsl::czstring pipe_path, update_callback cb = default_update_cb);
+            explicit fifo_path (gsl::czstring pipe_path, update_callback cb = default_update_cb);
 
             /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default
             /// path (as defined at configure time) is used.
@@ -106,7 +106,7 @@ namespace pstore {
 
             fifo_path (fifo_path && rhs) = default;
             fifo_path (fifo_path const & rhs) = delete;
-            fifo_path & operator= (fifo_path && rhs) = default;
+            fifo_path & operator= (fifo_path && rhs) = delete;
             fifo_path & operator= (fifo_path const & rhs) = delete;
 
 #ifndef _WIN32
