@@ -153,7 +153,7 @@ TEST_F (DbArchive, WriteAUint64Span) {
     // Write the 'original' array span to the store using a serializer.
     mock_mutex mutex;
     auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
-    auto where = pstore::address::make (db.size ());
+    auto where = pstore::address{db.size ()};
     pstore::serialize::write (pstore::serialize::archive::make_writer (transaction),
                               pstore::gsl::make_span (original));
 

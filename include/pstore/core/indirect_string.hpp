@@ -242,8 +242,7 @@ namespace pstore {
             constexpr auto mask = indirect_string::in_heap_mask;
             assert (!(reinterpret_cast<std::uintptr_t> (value.str_) & mask));
 
-            return archive.put (
-                address::make (reinterpret_cast<std::uintptr_t> (value.str_) | mask));
+            return archive.put (address{reinterpret_cast<std::uintptr_t> (value.str_) | mask});
         }
 
     } // end namespace serialize

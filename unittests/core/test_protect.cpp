@@ -151,7 +151,7 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
             .Times (1);
     }
 
-    db.protect (pstore::address::null (), pstore::address::make (this->file ()->size ()));
+    db.protect (pstore::address::null (), pstore::address{this->file ()->size ()});
 }
 
 TEST_F (EmptyStore, ProtectAllOfTwoRegions) {

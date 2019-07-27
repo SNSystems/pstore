@@ -53,7 +53,6 @@ namespace pstore {
 
     constexpr address::offset_type const address::max_offset;
     constexpr address::segment_type const address::max_segment;
-    constexpr std::uint64_t const address::max_address;
 
     constexpr std::uint64_t const address::segment_size;
 

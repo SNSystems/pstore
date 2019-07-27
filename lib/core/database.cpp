@@ -118,7 +118,7 @@ namespace pstore {
         storage_.update_master_pointers (0);
 
         trailer::validate (*this, size_.footer_pos ());
-        this->protect (address::make (sizeof (header)), address::make (size_.logical_size ()));
+        this->protect (address{sizeof (header)}, address{size_.logical_size ()});
 
         header_ = storage_.address_to_pointer (typed_address<header>::null ());
         sync_name_ = database::build_sync_name (*header_);
@@ -488,7 +488,7 @@ namespace pstore {
 
         // Bump 'result' up by the number of alignment bytes that we're adding to ensure
         // that it's properly aligned.
-        return address::make (result + extra_for_alignment);
+        return address{result + extra_for_alignment};
     }
 
     // truncate

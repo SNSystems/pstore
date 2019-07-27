@@ -67,7 +67,7 @@ namespace {
     /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
     /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0
     pstore::address round_down (pstore::address x, std::uint64_t b) {
-        return {round_down (x.absolute (), b)};
+        return pstore::address{round_down (x.absolute (), b)};
     }
     ///@}
 
@@ -204,7 +204,7 @@ namespace pstore {
         assert (page_size > 0 && is_power_of_two (page_size));
 
         first = std::max (round_down (first, page_size),
-                          address::make (round_down (sizeof (header) + page_size - 1U, page_size)));
+                          address{round_down (sizeof (header) + page_size - 1U, page_size)});
         last = round_down (last, page_size);
 
         for (auto region_it = regions_.rbegin (), end = regions_.rend (); region_it != end;

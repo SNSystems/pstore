@@ -176,7 +176,7 @@ TEST_F (IndirectString, BadDatabaseAddress) {
     std::tie (indirect_addr, body_addr) = write_indirected_string (transaction, "string");
 
     // Write a bogus string-body pointer over the indirect object.
-    *db_.getrw (typed_address<address> (indirect_addr)) = address::make (0x01);
+    *db_.getrw (typed_address<address> (indirect_addr)) = address{0x01};
 
     check_for_error (
         [this, indirect_addr]() {

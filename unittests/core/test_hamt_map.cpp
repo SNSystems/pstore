@@ -98,7 +98,7 @@ namespace {
 
 // Test initial address index pointer.
 TEST_F (IndexFixture, InitAddress) {
-    auto addr = pstore::address::make (1);
+    constexpr auto addr = pstore::address{1};
     index_pointer index{addr};
     EXPECT_EQ (0U, index.addr.segment ());
     EXPECT_EQ (1U, index.addr.offset ());

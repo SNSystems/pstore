@@ -235,8 +235,8 @@ TEST_F (Database, GetStartPastLogicalEOF) {
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-    auto const addr = pstore::address::make (db.size () + 1);
-    std::size_t size = 1;
+    auto const addr = pstore::address{db.size () + 1};
+    constexpr std::size_t size = 1;
     check_for_error ([&db, addr, size]() { db.getro (addr, size); },
                      pstore::error_code::bad_address);
 }

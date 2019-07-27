@@ -169,7 +169,7 @@ namespace pstore {
                 ok = false;
             } else {
                 address const transaction_first_byte = prev_pos == typed_address<trailer>::null ()
-                                                           ? address::make (sizeof (header))
+                                                           ? address{sizeof (header)}
                                                            : (prev_pos + 1U).to_address ();
 
                 if (pos.to_address () - footer->a.size != transaction_first_byte) {

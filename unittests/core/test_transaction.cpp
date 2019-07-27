@@ -512,9 +512,9 @@ TEST_F (Transaction, GetRwInt) {
 
         // A call to get(). First argument (address) must lie beyond the initial transaction
         // and must request a writable int.
-        EXPECT_CALL (*database, get (Ge (pstore::address::make (sizeof (pstore::header) +
-                                                                sizeof (pstore::trailer))),
-                                     sizeof (int), false, true))
+        EXPECT_CALL (*database,
+                     get (Ge (pstore::address{sizeof (pstore::header) + sizeof (pstore::trailer)}),
+                          sizeof (int), false, true))
             .After (allocate_int)
             .WillOnce (Invoke (database, &mock_database::base_get));
     }

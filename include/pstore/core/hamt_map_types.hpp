@@ -222,7 +222,7 @@ namespace pstore {
                 }
 
                 address untag_internal_address () const noexcept {
-                    return address::make (addr.absolute () & ~internal_node_bit);
+                    return address{addr.absolute () & ~internal_node_bit};
                 }
 
                 address addr;

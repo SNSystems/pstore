@@ -121,35 +121,29 @@ namespace pstore {
         using offset_type = std::uint_least32_t;
         using segment_type = std::uint_least16_t;
 
-        static constexpr std::uint64_t as_absolute (segment_type segment,
-                                                    offset_type offset) noexcept {
-            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
-            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
-            return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
-        }
-
         /// The largest legal offset value.
         static constexpr offset_type const max_offset =
             (UINT64_C (1) << offset_number_bits) - UINT64_C (1);
         /// The largest legal segment value
         static constexpr segment_type const max_segment = (1U << segment_number_bits) - 1U;
-        /// The largest legal absolute address.
-        static constexpr std::uint64_t const max_address =
-            (std::uint64_t{max_segment} << offset_number_bits) | std::uint64_t{max_offset};
-
         /// The number of bytes in a segment.
         static constexpr std::uint64_t const segment_size =
             std::uint64_t{max_offset} + UINT64_C (1);
 
-        static constexpr address make (std::uint64_t absolute) noexcept { return {absolute}; }
-        static constexpr address make (segment_type segment, offset_type offset) noexcept {
-            return {as_absolute (segment, offset)};
+        constexpr address () noexcept
+                : a_{0} {}
+        explicit constexpr address (std::uint64_t absolute) noexcept
+                : a_{absolute} {}
+        constexpr address (segment_type segment, offset_type offset) noexcept
+                : a_{as_absolute (segment, offset)} {}
+
+        static constexpr address null () noexcept { return address{0}; }
+        /// The largest legal absolute address.
+        static constexpr address max () noexcept {
+            return address{(std::uint64_t{max_segment} << offset_number_bits) | std::uint64_t{max_offset}};
         }
-        static constexpr address null () noexcept { return {0}; }
-        static constexpr address max () noexcept { return {max_address}; }
 
-
-        constexpr std::uint64_t absolute () const noexcept { return whole; }
+        constexpr std::uint64_t absolute () const noexcept { return a_; }
 
         address operator++ () noexcept { return (*this) += 1U; }
         address const operator++ (int) noexcept {
@@ -165,37 +159,45 @@ namespace pstore {
         }
 
         address operator+= (std::uint64_t distance) noexcept {
-            assert (whole <= std::numeric_limits<std::uint64_t>::max () - distance);
-            whole += distance;
+            assert (a_ <= std::numeric_limits<std::uint64_t>::max () - distance);
+            a_ += distance;
             return *this;
         }
 
         address operator-= (std::uint64_t distance) noexcept {
-            assert (whole >= distance);
-            whole -= distance;
+            assert (a_ >= distance);
+            a_ -= distance;
             return *this;
         }
 
         address operator|= (std::uint64_t mask) noexcept {
-            whole |= mask;
+            a_ |= mask;
             return *this;
         }
 
         address operator&= (std::uint64_t mask) noexcept {
-            whole &= mask;
+            a_ &= mask;
             return *this;
         }
 
         segment_type segment () const noexcept {
             constexpr auto const segment_mask = std::uint64_t{max_segment} << offset_number_bits;
-            return static_cast<segment_type> ((whole & segment_mask) >> offset_number_bits);
+            return static_cast<segment_type> ((a_ & segment_mask) >> offset_number_bits);
         }
 
         offset_type offset () const noexcept {
-            return static_cast<offset_type> (whole & max_offset);
+            return static_cast<offset_type> (a_ & max_offset);
         }
 
-        std::uint64_t whole;
+    private:
+        std::uint64_t a_;
+
+        static constexpr std::uint64_t as_absolute (segment_type segment,
+                                                    offset_type offset) noexcept {
+            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
+            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
+            return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
+        }
     };
 
     static_assert (sizeof (address) == 8, "address should be 8 bytes wide");
@@ -231,25 +233,25 @@ namespace pstore {
 
     inline address operator- (address const lhs, std::uint64_t rhs) noexcept {
         assert (lhs.absolute () >= rhs);
-        return address::make (lhs.absolute () - rhs);
+        return address{lhs.absolute () - rhs};
     }
     inline address operator- (address const lhs, address const rhs) noexcept {
         assert (lhs.absolute () >= rhs.absolute ());
-        return address::make (lhs.absolute () - rhs.absolute ());
+        return address{lhs.absolute () - rhs.absolute ()};
     }
 
     inline address operator+ (address const lhs, std::uint64_t rhs) noexcept {
-        return address::make (lhs.absolute () + rhs);
+        return address{lhs.absolute () + rhs};
     }
     inline address operator+ (address const lhs, address rhs) noexcept {
-        return address::make (lhs.absolute () + rhs.absolute ());
+        return address{lhs.absolute () + rhs.absolute ()};
     }
 
 
     // bitwise
 
     inline address operator| (address const lhs, std::uint64_t rhs) noexcept {
-        return address::make (lhs.absolute () | rhs);
+        return address{lhs.absolute () | rhs};
     }
 
     std::ostream & operator<< (std::ostream & os, address const & addr);
@@ -272,13 +274,13 @@ namespace pstore {
 
         template <typename Other>
         static constexpr typed_address cast (typed_address<Other> other) noexcept {
-            return make (other.to_address ());
+            return typed_address{other.to_address ()};
         }
 
-        static constexpr typed_address null () noexcept { return make (address::null ()); }
-        static constexpr typed_address make (address a) noexcept { return typed_address (a); }
+        static constexpr typed_address null () noexcept { return typed_address{address::null ()}; }
+        static constexpr typed_address make (address a) noexcept { return typed_address{a}; }
         static constexpr typed_address make (std::uint64_t absolute) noexcept {
-            return typed_address (address::make (absolute));
+            return typed_address{address{absolute}};
         }
 
         typed_address & operator= (typed_address const & rhs) noexcept = default;
@@ -349,7 +351,7 @@ namespace pstore {
 
     template <typename T>
     inline typed_address<T> operator+ (typed_address<T> const lhs, std::uint64_t rhs) noexcept {
-        return typed_address<T> (address::make (lhs.absolute () + rhs * sizeof (T)));
+        return typed_address<T>{address{lhs.absolute () + rhs * sizeof (T)}};
     }
 
     template <typename T>
@@ -379,7 +381,7 @@ namespace std {
         static constexpr const bool is_specialized = base::is_specialized;
         static constexpr type min () noexcept { return pstore::address::null (); }
         static constexpr type max () noexcept { return pstore::address::max (); }
-        static constexpr type lowest () noexcept { return pstore::address::make (base::lowest ()); }
+        static constexpr type lowest () noexcept { return pstore::address{base::lowest ()}; }
 
         static constexpr const int digits = base::digits;
         static constexpr const int digits10 = base::digits10;
@@ -388,11 +390,9 @@ namespace std {
         static constexpr const bool is_integer = base::is_integer;
         static constexpr const bool is_exact = base::is_exact;
         static constexpr const int radix = base::radix;
-        static constexpr type epsilon () noexcept {
-            return pstore::address::make (base::epsilon ());
-        }
+        static constexpr type epsilon () noexcept { return pstore::address{base::epsilon ()}; }
         static constexpr type round_error () noexcept {
-            return pstore::address::make (base::round_error ());
+            return pstore::address{base::round_error ()};
         }
 
         static constexpr const int min_exponent = base::min_exponent;
@@ -405,21 +405,19 @@ namespace std {
         static constexpr const bool has_signaling_NaN = base::has_signaling_NaN; // NOLINT
         static constexpr const float_denorm_style has_denorm = base::has_denorm;
         static constexpr const bool has_denorm_loss = base::has_denorm_loss;
-        static constexpr type infinity () noexcept {
-            return pstore::address::make (base::infinity ());
-        }
+        static constexpr type infinity () noexcept { return pstore::address{base::infinity ()}; }
         // NOLINTNEXTLINE(readability-identifier-naming)
         static constexpr type quiet_NaN () noexcept {
             // NOLINTNEXTLINE(readability-identifier-naming)
-            return pstore::address::make (base::quiet_NaN ());
+            return pstore::address{base::quiet_NaN ()};
         }
         // NOLINTNEXTLINE(readability-identifier-naming)
         static constexpr type signaling_NaN () noexcept {
             // NOLINTNEXTLINE(readability-identifier-naming)
-            return pstore::address::make (base::signaling_NaN ());
+            return pstore::address{base::signaling_NaN ()};
         }
         static constexpr type denorm_min () noexcept {
-            return pstore::address::make (base::denorm_min ());
+            return pstore::address{base::denorm_min ()};
         }
 
         static constexpr const bool is_iec559 = base::is_iec559;
