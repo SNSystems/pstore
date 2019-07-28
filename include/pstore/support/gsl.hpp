@@ -131,7 +131,7 @@ namespace pstore {
                     return *this;
                 }
 
-                span_iterator const operator++ (int) noexcept {
+                span_iterator operator++ (int) noexcept {
                     auto ret = *this;
                     ++(*this);
                     return ret;
@@ -143,7 +143,7 @@ namespace pstore {
                     return *this;
                 }
 
-                span_iterator const operator-- (int) const noexcept {
+                span_iterator operator-- (int) const noexcept {
                     auto ret = *this;
                     --(*this);
                     return ret;
@@ -646,8 +646,8 @@ namespace pstore {
             // TODO ensure all arithmetic ops on this type are unavailable
             not_null<T> & operator++ () = delete;
             not_null<T> & operator-- () = delete;
-            not_null<T> const operator++ (int) = delete;
-            not_null<T> const operator-- (int) = delete;
+            not_null<T> operator++ (int) = delete;
+            not_null<T> operator-- (int) = delete;
             not_null<T> & operator+ (size_t) = delete;
             not_null<T> & operator+= (size_t) = delete;
             not_null<T> & operator- (size_t) = delete;
