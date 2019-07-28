@@ -65,10 +65,10 @@ namespace pstore {
 #endif
 
     inline constexpr auto uint64_high4 (std::uint64_t v) noexcept -> std::uint32_t {
-        return static_cast<std::uint32_t> (v >> 32);
+        return static_cast<std::uint32_t> (v >> 32U);
     }
     inline constexpr auto uint64_low4 (std::uint64_t v) noexcept -> std::uint32_t {
-        return static_cast<std::uint32_t> (v & ((std::uint64_t{1} << 32) - 1U));
+        return static_cast<std::uint32_t> (v & ((std::uint64_t{1} << 32U) - 1U));
     }
 
 } // end namespace pstore
