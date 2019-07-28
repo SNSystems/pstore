@@ -45,7 +45,6 @@
 #ifndef PSTORE_CORE_INDEX_TYPES_HPP
 #define PSTORE_CORE_INDEX_TYPES_HPP (1)
 
-#include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/core/uuid.hpp"

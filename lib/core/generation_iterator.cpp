@@ -52,7 +52,6 @@
 #include "pstore/core/generation_iterator.hpp"
 
 #include "pstore/core/database.hpp"
-#include "pstore/core/file_header.hpp"
 
 namespace pstore {
     // ***********************

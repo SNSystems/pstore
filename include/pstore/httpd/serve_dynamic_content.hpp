@@ -48,7 +48,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_HTTPD_SERVE_DYNAMIC_CONTENT_HPP
-#define PSTORE_HTTPD_SERVE_DYNAMIC_CONTENT_HPP
+#define PSTORE_HTTPD_SERVE_DYNAMIC_CONTENT_HPP (1)
 
 #include <cassert>
 #include <functional>

@@ -258,3 +258,63 @@ TEST (TypedAddress, Increment) {
         EXPECT_EQ (pstore::typed_address<std::uint64_t>::null (), r2);
     }
 }
+
+TEST (Extent, ComparisonOperators) {
+    {
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+
+        EXPECT_TRUE (extent1 == extent2);
+        EXPECT_TRUE (!(extent1 != extent2));
+        EXPECT_TRUE (!(extent1 < extent2));
+        EXPECT_TRUE (extent1 <= extent2);
+        EXPECT_TRUE (!(extent1 > extent2));
+        EXPECT_TRUE (extent1 >= extent2);
+        EXPECT_TRUE (extent1 == extent1);
+        EXPECT_TRUE (!(extent2 != extent1));
+        EXPECT_TRUE (!(extent2 < extent1));
+        EXPECT_TRUE (extent2 <= extent1);
+        EXPECT_TRUE (!(extent2 > extent1));
+        EXPECT_TRUE (extent2 >= extent1);
+    }
+    {
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (5), UINT64_C (4)); // bigger
+
+        EXPECT_TRUE (extent1 != extent2);
+        EXPECT_TRUE (extent2 != extent1);
+        EXPECT_FALSE (extent1 == extent2);
+        EXPECT_FALSE (extent2 == extent1);
+        EXPECT_TRUE (extent1 < extent2);
+        EXPECT_FALSE (extent2 < extent1);
+        EXPECT_TRUE (extent1 <= extent2);
+        EXPECT_TRUE (!(extent2 <= extent1));
+        EXPECT_TRUE (extent2 > extent1);
+        EXPECT_TRUE (!(extent1 > extent2));
+        EXPECT_TRUE (extent2 >= extent1);
+        EXPECT_TRUE (!(extent1 >= extent2));
+    }
+    {
+        auto const extent1 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (4));
+        auto const extent2 =
+            make_extent (pstore::typed_address<std::uint8_t>::make (2), UINT64_C (5)); // bigger
+
+        EXPECT_TRUE (extent1 != extent2);
+        EXPECT_TRUE (extent2 != extent1);
+        EXPECT_FALSE (extent1 == extent2);
+        EXPECT_FALSE (extent2 == extent1);
+        EXPECT_TRUE (extent1 < extent2);
+        EXPECT_FALSE (extent2 < extent1);
+        EXPECT_TRUE (extent1 <= extent2);
+        EXPECT_TRUE (!(extent2 <= extent1));
+        EXPECT_TRUE (extent2 > extent1);
+        EXPECT_TRUE (!(extent1 > extent2));
+        EXPECT_TRUE (extent2 >= extent1);
+        EXPECT_TRUE (!(extent1 >= extent2));
+    }
+}

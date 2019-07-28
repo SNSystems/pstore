@@ -44,7 +44,7 @@
 /// \file hamt_map_types.hpp
 
 #ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
-#define PSTORE_CORE_HAMT_MAP_TYPES_HPP
+#define PSTORE_CORE_HAMT_MAP_TYPES_HPP (1)
 
 #include <array>
 #include <vector>
@@ -52,7 +52,6 @@
 #include "pstore/core/array_stack.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
-#include "pstore/core/file_header.hpp"
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/gsl.hpp"
 

@@ -50,8 +50,8 @@
 #ifndef PSTORE_MCREPO_DEBUG_LINE_SECTION_HPP
 #define PSTORE_MCREPO_DEBUG_LINE_SECTION_HPP
 
+#include "pstore/core/address.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/core/file_header.hpp" // TODO: extent shouldn't be in file_header.hpp!
 
 namespace pstore {
     namespace repo {

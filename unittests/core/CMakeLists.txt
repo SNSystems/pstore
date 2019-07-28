@@ -52,7 +52,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_crc32.cpp
     test_database.cpp
     test_db_archive.cpp
-    test_file_header.cpp
     test_generation_iterator.cpp
     test_hamt_map.cpp
     test_hamt_set.cpp

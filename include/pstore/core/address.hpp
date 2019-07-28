@@ -92,7 +92,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <iosfwd>
+#include <ostream>
 #include <limits>
 #include <type_traits>
 
@@ -458,5 +458,82 @@ namespace std {
     };
 
 } // namespace std
+
+
+namespace pstore {
+
+    /// \brief An extent is a contiguous area of storage reserved for a data BLOB, represented as a
+    /// range.
+    /// This type is used to represent a BLOB of data: be it either an index key or an associated
+    /// value.
+    template <typename T>
+    struct extent {
+        constexpr extent () noexcept;
+        constexpr extent (typed_address<T> addr_, std::uint64_t size_) noexcept
+                : addr (addr_)
+                , size (size_) {}
+        extent (extent const & rhs) noexcept = default;
+        extent (extent && rhs) noexcept = default;
+        ~extent () noexcept = default;
+
+        extent & operator= (extent const &) noexcept = default;
+        extent & operator= (extent &&) noexcept = default;
+
+        /// The address of the data associated with this extent.
+        typed_address<T> addr = typed_address<T>::null ();
+        /// The size of the data associated with this extent.
+        /// \note This value gives a number of bytes, *not* a number of instances of type T. This is
+        /// because extents are often used to represent variable-length data structures where the
+        /// actual size can't be statically determined from the size of T.
+        std::uint64_t size = UINT64_C (0);
+    };
+
+    template <typename T>
+    static inline extent<T> make_extent (typed_address<T> a, std::uint64_t s) noexcept {
+        return {a, s};
+    }
+
+    template <typename T>
+    constexpr extent<T>::extent () noexcept {
+        PSTORE_STATIC_ASSERT (offsetof (extent, addr) == 0);
+        PSTORE_STATIC_ASSERT (offsetof (extent, size) == 8);
+        PSTORE_STATIC_ASSERT (sizeof (extent) == 16);
+    }
+
+    // comparison
+    template <typename T>
+    inline bool operator== (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return lhs.addr == rhs.addr && lhs.size == rhs.size;
+    }
+    template <typename T>
+    inline bool operator!= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return !(lhs == rhs);
+    }
+
+    // ordering
+    template <typename T>
+    inline bool operator< (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return lhs.addr < rhs.addr || (lhs.addr == rhs.addr && lhs.size < rhs.size);
+    }
+    template <typename T>
+    inline bool operator>= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return !(lhs < rhs);
+    }
+    template <typename T>
+    inline bool operator> (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return rhs < lhs;
+    }
+    template <typename T>
+    inline bool operator<= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+        return !(lhs > rhs);
+    }
+
+    // output
+    template <typename T>
+    inline std::ostream & operator<< (std::ostream & os, extent<T> const & r) {
+        return os << "{addr:" << r.addr << ",size:" << r.size << "}";
+    }
+
+} // end namespace pstore
 
 #endif // PSTORE_CORE_ADDRESS_HPP

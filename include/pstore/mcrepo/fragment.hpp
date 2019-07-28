@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_MCREPO_FRAGMENT_HPP
-#define PSTORE_MCREPO_FRAGMENT_HPP
+#define PSTORE_MCREPO_FRAGMENT_HPP (1)
 
 #include <algorithm>
 #include <cassert>
@@ -55,7 +55,6 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/core/address.hpp"
-#include "pstore/core/file_header.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
