@@ -89,6 +89,7 @@
 #define PSTORE_CORE_ADDRESS_HPP
 
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
