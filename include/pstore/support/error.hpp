@@ -51,11 +51,13 @@
 #include <string>
 #include <system_error>
 #include <type_traits>
+
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #endif
+
 #include "pstore/support/portab.hpp"
 
 #if !PSTORE_EXCEPTIONS
@@ -89,7 +91,7 @@ namespace pstore {
     // **************
     // * error code *
     // **************
-#    define X(a) a,
+#define X(a) a,
     enum class error_code : int { PSTORE_ERROR_CODES };
 #undef X
 
@@ -197,7 +199,8 @@ namespace pstore {
         raise_error_code (make_error_code (e), what);
     }
 
-    template <typename Exception>
+    template <typename Exception, typename = typename std::enable_if<
+                                      std::is_base_of<std::exception, Exception>::value>::type>
     PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
 #if PSTORE_EXCEPTIONS
         throw ex;
