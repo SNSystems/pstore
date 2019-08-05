@@ -399,7 +399,7 @@ namespace pstore {
             // store_node
             // ~~~~~~~~~~
             address internal_node::store_node (transaction_base & transaction) const {
-                std::size_t const num_bytes = this->size_bytes (this->size ());
+                std::size_t const num_bytes = internal_node::size_bytes (this->size ());
 
                 std::shared_ptr<void> ptr;
                 address result;

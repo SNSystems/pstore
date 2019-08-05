@@ -549,13 +549,14 @@ namespace pstore {
                 /// computing the number of bytes occupied.
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
-                static std::size_t size_bytes (unsigned num_children) {
+                static std::size_t size_bytes (unsigned num_children) noexcept {
                     assert (num_children > 0 && num_children < max_hash_bits);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_)::value_type) * num_children;
                 }
 
-                unsigned size () const {
+                /// Returns the number of children contained by this node.
+                unsigned size () const noexcept {
                     assert (this->bitmap_ != hash_type{0});
                     unsigned const result = bit_count::pop_count (this->bitmap_);
                     assert (result <= children_.size ());
