@@ -45,6 +45,7 @@
 #define PSTORE_HTTPD_BLOCK_FOR_INPUT_HPP
 
 #include <algorithm>
+#include <cstring>
 #include <memory>
 
 #ifdef _WIN32
