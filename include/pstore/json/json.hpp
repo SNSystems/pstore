@@ -218,6 +218,10 @@ namespace pstore {
             /// Preallocated storage for "singleton" matcher. These are the matchers, such as
             /// numbers of strings, which are "terminal" and can't have child objects.
             std::unique_ptr<details::singleton_storage<Callbacks>> singletons_;
+            /// The maximum depth to which we allow the parse stack to grow. This value should be
+            /// sufficient for any reasonable input: its intention is to prevent bogus (attack)
+            /// inputs from taking the parser down.
+            static constexpr std::size_t max_stack_depth_ = 200;
             /// The parse stack.
             std::stack<pointer> stack_;
             error_code error_ = error_code::none;
@@ -1552,6 +1556,14 @@ namespace pstore {
                 }
 
                 if (res.first != nullptr) {
+                    if (stack_.size () > max_stack_depth_) {
+                        // We've already hit the maximum allowed parse stack depth. Reject this new
+                        // matcher.
+                        assert (error_ == error_code::none);
+                        error_ = error_code::nesting_too_deep;
+                        break;
+                    }
+
                     stack_.push (std::move (res.first));
                 }
                 // If we're matching this character, advance the column number and increment the

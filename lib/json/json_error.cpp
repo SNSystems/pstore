@@ -69,6 +69,7 @@ std::string pstore::json::error_category::message (int error) const {
     case error_code::number_out_of_range: result = "number out of range"; break;
     case error_code::unexpected_extra_input: result = "unexpected extra input"; break;
     case error_code::unrecognized_token: result = "unrecognized token"; break;
+    case error_code::nesting_too_deep: result = "objects are too deeply nested"; break;
     }
     return result;
 }

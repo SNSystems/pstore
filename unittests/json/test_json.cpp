@@ -570,6 +570,12 @@ TEST_F (JsonArray, Nested2) {
     EXPECT_FALSE (p.has_error ());
 }
 
+TEST_F (JsonArray, TooDeeplyNested) {
+    json::parser<json_out_callbacks> p;
+    p.input (std::string (std::string::size_type{200}, '[')).eof ();
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::nesting_too_deep));
+}
+
 
 //*     _              ___  _     _        _    *
 //*  _ | |___ ___ _ _ / _ \| |__ (_)___ __| |_  *
@@ -706,4 +712,15 @@ TEST_F (JsonObject, BadNestedObject) {
     p.input (std::string{"{\"a\":nu}"});
     p.eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
+}
+
+TEST_F (JsonObject, TooDeeplyNested) {
+    json::parser<json_out_callbacks> p;
+
+    std::string input;
+    for (auto ctr = 0U; ctr < 200U; ++ctr) {
+        input += "{\"a\":";
+    }
+    p.input (input).eof ();
+    EXPECT_EQ (p.last_error (), make_error_code (json::error_code::nesting_too_deep));
 }

@@ -64,6 +64,7 @@ namespace pstore {
             unrecognized_token,
             unexpected_extra_input,
             bad_unicode_code_point,
+            nesting_too_deep,
         };
 
         // ******************
