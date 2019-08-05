@@ -286,8 +286,6 @@ namespace pstore {
                 log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
 #endif // PSTORE_LOG_FRAME_INFO
 
-                // FIXME: check that opcode is valid!
-
                 // "The rsv[n] fields MUST be 0 unless an extension is negotiated that defines
                 // meanings for non-zero values. If a nonzero value is received and none of the
                 // negotiated extensions defines the meaning of such a nonzero value, the receiving
