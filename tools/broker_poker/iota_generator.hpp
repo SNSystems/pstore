@@ -4,7 +4,7 @@
 //* | | (_) | || (_| | | (_| |  __/ | | |  __/ | | (_| | || (_) | |    *
 //* |_|\___/ \__\__,_|  \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|    *
 //*                     |___/                                          *
-//===- include/pstore/cmd_util/iota_generator.hpp -------------------------===//
+//===- tools/broker_poker/iota_generator.hpp ------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
