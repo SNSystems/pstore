@@ -1402,9 +1402,6 @@ namespace pstore {
                             this->template make_terminal_matcher<null_token_matcher<Callbacks>> (
                                 parser, "null"),
                             false};
-
-                        // TODO: limit the maximum nesting to some large number of objects (avoids a
-                        // DOS attack on the listening socket).
                     case '[':
                         return {
                             typename matcher<Callbacks>::pointer (new array_matcher<Callbacks> ()),
