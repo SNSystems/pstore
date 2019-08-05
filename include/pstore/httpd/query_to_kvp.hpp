@@ -181,7 +181,8 @@ namespace pstore {
                     value = static_cast<value_type> (value * 16 + hex_digit (hex_char));
                 }
 
-                return std::make_tuple (value, --it);
+                --it;
+                return std::make_tuple (value, it);
             }
 
         } // end namespace details
