@@ -44,72 +44,77 @@
 
 #include "pstore/cmd_util/str_to_revision.hpp"
 
+// Standard Library
 #include <utility>
-#include "gmock/gmock.h"
+
+// 3rd party
+#include <gmock/gmock.h>
+
+// pstore
 #include "pstore/support/head_revision.hpp"
 
 TEST (StrToRevision, SingleCharacterNumber) {
-    EXPECT_THAT (pstore::str_to_revision ("1"), ::testing::Pair (1U, true));
+    EXPECT_EQ (pstore::str_to_revision ("1"), pstore::just (1U));
 }
 
 TEST (StrToRevision, MultiCharacterNumber) {
-    EXPECT_THAT (pstore::str_to_revision ("200000"), ::testing::Pair (200000U, true));
+    EXPECT_EQ (pstore::str_to_revision ("200000"), pstore::just (200000U));
 }
 
 TEST (StrToRevision, NumberLeadingWS) {
-    EXPECT_THAT (pstore::str_to_revision ("    200000"), ::testing::Pair (200000U, true));
+    EXPECT_EQ (pstore::str_to_revision ("    200000"), pstore::just (200000U));
 }
 
 TEST (StrToRevision, NumberTrailingWS) {
-    EXPECT_THAT (pstore::str_to_revision ("12345   "), ::testing::Pair (12345U, true));
+    EXPECT_EQ (pstore::str_to_revision ("12345   "), pstore::just (12345U));
 }
 
 TEST (StrToRevision, Empty) {
-    EXPECT_THAT (pstore::str_to_revision (""), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision (""), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, JustWhitespace) {
-    EXPECT_THAT (pstore::str_to_revision ("  \t"), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision ("  \t"), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, Zero) {
-    EXPECT_THAT (pstore::str_to_revision ("0"), ::testing::Pair (0U, true));
+    EXPECT_EQ (pstore::str_to_revision ("0"), pstore::just (0U));
 }
 
 TEST (StrToRevision, HeadLowerCase) {
-    EXPECT_THAT (pstore::str_to_revision ("head"), ::testing::Pair (pstore::head_revision, true));
+    EXPECT_EQ (pstore::str_to_revision ("head"), pstore::just (pstore::head_revision));
 }
 
 TEST (StrToRevision, HeadMixedCase) {
-    EXPECT_THAT (pstore::str_to_revision ("HeAd"), ::testing::Pair (pstore::head_revision, true));
+    EXPECT_EQ (pstore::str_to_revision ("HeAd"), pstore::just (pstore::head_revision));
 }
 
 TEST (StrToRevision, HeadLeadingWhitespace) {
-    EXPECT_THAT (pstore::str_to_revision ("  HEAD"), ::testing::Pair (pstore::head_revision, true));
+    EXPECT_EQ (pstore::str_to_revision ("  HEAD"), pstore::just (pstore::head_revision));
 }
 
 TEST (StrToRevision, HeadTraingWhitespace) {
-    EXPECT_THAT (pstore::str_to_revision ("HEAD  "), ::testing::Pair (pstore::head_revision, true));
+    EXPECT_EQ (pstore::str_to_revision ("HEAD  "), pstore::just (pstore::head_revision));
 }
 
 TEST (StrToRevision, BadString) {
-    EXPECT_THAT (pstore::str_to_revision ("bad"), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision ("bad"), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, NumberFollowedByString) {
-    EXPECT_THAT (pstore::str_to_revision ("123Bad"), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision ("123Bad"), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, PositiveOverflow) {
     std::ostringstream str;
     str << std::numeric_limits<unsigned>::max () + 1ULL;
-    EXPECT_THAT (pstore::str_to_revision (str.str ()), ::testing::Pair (0, false));
+    EXPECT_EQ (pstore::str_to_revision (str.str ()), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, Negative) {
-    EXPECT_THAT (pstore::str_to_revision ("-2"), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision ("-2"), pstore::nothing<unsigned> ());
 }
 
 TEST (StrToRevision, Hex) {
-    EXPECT_THAT (pstore::str_to_revision ("0x23"), ::testing::Pair (0U, false));
+    EXPECT_EQ (pstore::str_to_revision ("0x23"), pstore::nothing<unsigned> ());
 }

@@ -42,24 +42,26 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/revision_opt.hpp"
+
 #include <cstdlib>
 #include <iostream>
+
 #include "pstore/cmd_util/str_to_revision.hpp"
 
 namespace pstore {
     namespace cmd_util {
 
-        revision_opt & revision_opt::operator= (std::string const & Val) {
-            if (!Val.empty ()) {
-                auto rp = pstore::str_to_revision (Val);
-                r = rp.first;
-                if (!rp.second) {
+        revision_opt & revision_opt::operator= (std::string const & val) {
+            if (!val.empty ()) {
+                auto rp = pstore::str_to_revision (val);
+                if (!rp) {
                     std::cerr << "error: revision must be a revision number or 'HEAD'\n";
                     std::exit (EXIT_FAILURE);
                 }
+                r = *rp;
             }
             return *this;
         }
 
-    } // namespace cmd_util
-} // namespace pstore
+    } // end namespace cmd_util
+} // end namespace pstore

@@ -52,7 +52,7 @@ namespace pstore {
 
         struct revision_opt {
             unsigned r = pstore::head_revision;
-            revision_opt & operator= (std::string const & Val);
+            revision_opt & operator= (std::string const & val);
         };
 
     } // namespace cmd_util

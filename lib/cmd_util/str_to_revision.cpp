@@ -55,10 +55,12 @@
 #include <iterator>
 #include <type_traits>
 
-#include "pstore/support/head_revision.hpp"
 #include "pstore/support/ctype.hpp"
+#include "pstore/support/head_revision.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace {
+
     /// Returns a copy of the input string with any leading or trailing whitespace removed and all
     /// characters converted to lower-case.
     std::string trim_and_lowercase (std::string const & str) {
@@ -77,31 +79,32 @@ namespace {
                         [](char c) { return static_cast<char> (std::tolower (c)); });
         return result;
     }
-} // namespace
+
+} // end anonymousnamespace
 
 namespace pstore {
-    std::pair<unsigned, bool> str_to_revision (std::string const & str_) {
 
-        static constexpr unsigned const head = pstore::head_revision;
-        std::string const arg = trim_and_lowercase (str_);
+    maybe<unsigned> str_to_revision (std::string const & str) {
+        std::string const arg = trim_and_lowercase (str);
         if (arg == "head") {
-            return {head, true};
+            return just (head_revision);
         }
 
-        char const * str = arg.c_str ();
+        char const * cstr = arg.c_str ();
         char * endptr = nullptr;
-        long revision = std::strtol (str, &endptr, 10);
-        // strtol() returns LONG_MAX or LONG_MIN to indicate an overflow. endptr must point to
-        // the terminating null character to ensure that the entire string was consumed.
-        if (endptr != str && *endptr == '\0' && revision != LONG_MAX && revision != LONG_MIN) {
-            // Does revision lie within the range of numbers that we can safely represent?
-            if (revision >= 0 && revision != head &&
-                static_cast<unsigned long> (revision) < std::numeric_limits<unsigned>::max ()) {
+        long revision = std::strtol (cstr, &endptr, 10);
 
-                return {static_cast<unsigned> (revision), true};
-            }
+        // strtol() returns LONG_MAX or LONG_MIN to indicate an overflow. endptr must point to
+        // the terminating null character to ensure that the entire string was consumed. We also
+        // check that revision lies within the range of numbers that we can safely represent.
+        if (endptr != cstr && *endptr == '\0' && revision != LONG_MAX && revision != LONG_MIN &&
+            revision >= 0 && revision != head_revision &&
+            static_cast<unsigned long> (revision) < std::numeric_limits<unsigned>::max ()) {
+
+            return just (static_cast<unsigned> (revision));
         }
 
-        return {0U, false};
+        return nothing<unsigned> ();
     }
-} // namespace pstore
+
+} // end namespace pstore

@@ -45,20 +45,24 @@
 /// \brief Converts a string to a pair containing a revision number and boolean indicating whether
 /// the conversion was successful.
 
-#ifndef PSTORE_STR_TO_REVISION_HPP
-#define PSTORE_STR_TO_REVISION_HPP
+#ifndef PSTORE_CMD_UTIL_STR_TO_REVISION_HPP
+#define PSTORE_CMD_UTIL_STR_TO_REVISION_HPP (1)
 
 #include <string>
 #include <utility>
+
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
 
     /// Converts a string to a revision number. Leading and trailing whitespace is ignored, the text
     /// "head" (regardless of case) will become pstore::database::head_revision.
-    /// \returns A pair containing the converted revision number (or 0 if the input was not valid).
-    /// The boolean value in the pair result is true for valid input, false otherwise.
+    ///
+    /// \param str  The string to be converted to a revision number.
+    /// \returns Either the converted revision number or nothing.
 
-    std::pair<unsigned, bool> str_to_revision (std::string const & str);
-} // namespace pstore
+    maybe<unsigned> str_to_revision (std::string const & str);
 
-#endif // PSTORE_STR_TO_REVISION_HPP
+} // end namespace pstore
+
+#endif // PSTORE_CMD_UTIL_STR_TO_REVISION_HPP
