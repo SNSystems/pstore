@@ -52,6 +52,21 @@ using testing::Invoke;
 
 using pstore::httpd::make_buffered_reader;
 
+
+namespace pstore {
+    namespace httpd {
+
+        /// A specialization of block_for_input() which always returns a result indicating that
+        /// data is available on the input socket.
+        template <typename Reader>
+        inputs_ready block_for_input (Reader const &, int, broker::pipe_descriptor const *) {
+            return {true, false};
+        }
+
+    } // end namespace httpd
+} // end namespace pstore
+
+
 TEST (WsServer, NothingFromClient) {
     // Define what the client will send to the server (just EOF).
     refiller r;

@@ -69,7 +69,9 @@ namespace pstore {
             inputs_ready & operator= (inputs_ready const &) = default;
             inputs_ready & operator= (inputs_ready &&) = default;
 
+            /// True if data is available on the input socket.
             bool socket;
+            /// True if a condition variable has been signalled.
             bool cv;
         };
 
@@ -156,14 +158,6 @@ namespace pstore {
                     cv_fd != nullptr ? isset (cv_fd->native_handle ()) : false};
 #endif
         } // namespace httpd
-
-
-        // FIXME: this is only here for the unit tests. It shouldn't be.
-        template <typename Reader>
-        inputs_ready block_for_input (Reader const &, int, broker::pipe_descriptor const *) {
-            return {true, false};
-        }
-
 
 
     } // namespace httpd
