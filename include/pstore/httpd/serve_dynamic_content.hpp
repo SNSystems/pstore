@@ -174,8 +174,8 @@ namespace pstore {
 
             auto const lb = std::lower_bound (
                 std::begin (commands), std::end (commands),
-                value_type{command,
-                           [](Sender, IO io, query_container const &) { return error_or<IO>{io}; }},
+                value_type{command, [](Sender, IO io2,
+                                       query_container const &) { return error_or<IO>{io2}; }},
                 compare);
             if (lb == std::end (commands) || std::get<0> (*lb) != command) {
                 return error_or<IO>{error_code::bad_request};
