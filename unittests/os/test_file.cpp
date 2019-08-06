@@ -95,6 +95,7 @@ TEST_F (FileNameTemplate, CharacterWithLeadingAndMultipleTrailingX) {
 
 
 namespace {
+
     // A file class which is used to mock the lock() and unlock() methods.
     class mock_file final : public pstore::file::file_base {
     public:
@@ -120,7 +121,8 @@ namespace {
         MOCK_METHOD4 (lock, bool(std::uint64_t, std::size_t, lock_kind, blocking_mode));
         MOCK_METHOD2 (unlock, void(std::uint64_t, std::size_t));
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST (RangeLock, InitialState) {
     pstore::file::range_lock lock;
@@ -378,7 +380,8 @@ namespace {
             return [=](std::string const & name) -> void { fixture->unlink (name); };
         }
     };
-} // namespace
+
+} // end anonymous namespace
 
 
 TEST_F (DeleterFixture, UnlinkCallsPlatformUnlinkWithOriginalPath) {
@@ -413,6 +416,7 @@ TEST_F (DeleterFixture, DestructorDoesNotCallPlatformUnlinkAfterRelease) {
 
 
 namespace {
+
     class TemporaryFileFixture : public ::testing::Test {
     protected:
         TemporaryFileFixture ()
@@ -423,7 +427,8 @@ namespace {
     protected:
         std::shared_ptr<pstore::file::file_handle> deleter_;
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (TemporaryFileFixture, CheckTemporaryFileIsDeleted) {
     std::string path = deleter_->path ();
@@ -433,6 +438,7 @@ TEST_F (TemporaryFileFixture, CheckTemporaryFileIsDeleted) {
 
 
 namespace {
+
     class MemoryFile : public ::testing::Test {
     public:
         void SetUp () override {}
@@ -449,11 +455,12 @@ namespace {
             return result;
         }
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (MemoryFile, FileIsInitiallyEmpty) {
     constexpr std::size_t elements = 13;
-    pstore::file::in_memory mf (this->make_buffer (elements), elements);
+    pstore::file::in_memory mf (MemoryFile::make_buffer (elements), elements);
     EXPECT_EQ (0U, mf.tell ()) << "Expected the initial file offset to be 0";
     EXPECT_EQ (0U, mf.size ()) << "Expected the file to be initially empty";
 }
@@ -463,12 +470,12 @@ TEST_F (MemoryFile, ReadFileWithInitialContents) {
     char const source_string[elements + 1]{"Hello World"};
     ASSERT_EQ (elements, std::strlen (source_string))
         << "Expected buffer length to be " << elements;
-    pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
+    pstore::file::in_memory mf (MemoryFile::make_buffer (source_string), elements, elements);
 
     EXPECT_EQ (0U, mf.tell ()) << "Expected the initial file offset to be 0";
     EXPECT_EQ (elements, mf.size ()) << "Expected the file to be the same size as the string";
 
-    auto out = this->make_buffer (elements);
+    auto out = MemoryFile::make_buffer (elements);
     std::size_t const actual_read = mf.read_buffer (out.get (), elements);
     ASSERT_EQ (elements, actual_read);
     EXPECT_TRUE (std::equal (out.get (), out.get () + elements, source_string));
@@ -480,10 +487,10 @@ TEST_F (MemoryFile, ReadPastEndOfFileWithInitialContents) {
     char const source_string[elements + 1]{"Hello"};
     ASSERT_EQ (elements, std::strlen (source_string))
         << "Expected source length to be " << elements;
-    pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
+    pstore::file::in_memory mf (MemoryFile::make_buffer (source_string), elements, elements);
 
     constexpr auto out_elements = std::size_t{7};
-    auto out = this->make_buffer (out_elements);
+    auto out = MemoryFile::make_buffer (out_elements);
     std::size_t const actual_read = mf.read_buffer (out.get (), out_elements);
     ASSERT_EQ (elements, actual_read);
     EXPECT_TRUE (std::equal (out.get (), out.get () + elements, "Hello\0"));
@@ -492,7 +499,7 @@ TEST_F (MemoryFile, ReadPastEndOfFileWithInitialContents) {
 
 TEST_F (MemoryFile, WriteToInitiallyEmptyFile) {
     constexpr std::size_t elements = 5;
-    auto buffer = this->make_buffer (elements);
+    auto buffer = MemoryFile::make_buffer (elements);
     std::fill (buffer.get (), buffer.get () + elements, std::uint8_t{0});
     pstore::file::in_memory mf (buffer, elements);
 
@@ -507,7 +514,7 @@ TEST_F (MemoryFile, WriteToInitiallyEmptyFile) {
 
 TEST_F (MemoryFile, CrazyWriteSize) {
     constexpr std::size_t elements = 10;
-    auto buffer = this->make_buffer (elements);
+    auto buffer = MemoryFile::make_buffer (elements);
     std::fill (buffer.get (), buffer.get () + elements, std::uint8_t{0});
     pstore::file::in_memory mf (buffer, elements);
 
@@ -523,14 +530,14 @@ TEST_F (MemoryFile, Seek) {
     char const source_string[elements + 1]{"abcde"};
     ASSERT_EQ (elements, std::strlen (source_string))
         << "Expected source length to be " << elements;
-    pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
+    pstore::file::in_memory mf (MemoryFile::make_buffer (source_string), elements, elements);
 
     // Seek to position 1. Check tell() and read ().
     mf.seek (1);
     EXPECT_EQ (1U, mf.tell ());
 
     {
-        auto out1 = this->make_buffer (4);
+        auto out1 = MemoryFile::make_buffer (4);
         std::fill (out1.get (), out1.get () + 4, std::uint8_t{0});
         std::size_t const actual_read = mf.read_buffer (out1.get (), 4);
         ASSERT_EQ (4U, actual_read);
@@ -541,7 +548,7 @@ TEST_F (MemoryFile, Seek) {
     EXPECT_EQ (4U, mf.tell ());
     {
 
-        auto out2 = this->make_buffer (2);
+        auto out2 = MemoryFile::make_buffer (2);
         std::fill (out2.get (), out2.get () + 2, '\x7F');
         std::size_t const actual_read = mf.read_buffer (out2.get (), 2);
         ASSERT_EQ (1U, actual_read);
@@ -558,7 +565,7 @@ TEST_F (MemoryFile, Truncate) {
     char const source_string[elements + 1]{"abcde"};
     ASSERT_EQ (elements, std::strlen (source_string))
         << "Expected source length to be " << elements;
-    pstore::file::in_memory mf (this->make_buffer (source_string), elements, elements);
+    pstore::file::in_memory mf (MemoryFile::make_buffer (source_string), elements, elements);
 
     mf.truncate (0);
     EXPECT_EQ (0U, mf.size ());
@@ -653,6 +660,7 @@ TEST_F (NativeFile, ReadTinyFile) {
 #ifdef _WIN32
 
 namespace {
+
     class EnvironmentSaveFixture : public ::testing::Test {
     public:
         // Save the environment variables tht the test may replace.
@@ -719,7 +727,8 @@ namespace {
         assert (buffer.data ()[sz] == L'\0');
         return {buffer.data (), sz};
     }
-} // namespace
+
+} // end anonymous namespace
 
 #    ifdef PSTORE_EXCEPTIONS
 
