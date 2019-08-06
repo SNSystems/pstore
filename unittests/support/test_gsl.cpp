@@ -70,12 +70,14 @@
 
 #include "pstore/support/make_unique.hpp"
 
-using namespace ::pstore::gsl;
+using namespace pstore::gsl;
 
 namespace {
+
     struct BaseClass {};
     struct DerivedClass : BaseClass {};
-} // namespace
+
+} // end anonymous namespace
 
 TEST (GslSpan, DefaultCtor) {
     {
@@ -865,26 +867,21 @@ TEST (GslSpan, Subspan) {
         span<int, 5> av = arr;
         EXPECT_EQ ((av.subspan<0, 5> ().length ()), 5);
         EXPECT_EQ ((av.subspan (0, 5).length ()), 5);
-        //        CHECK_THROW(av.subspan(0, 6).length(), fail_fast);
-        //        CHECK_THROW(av.subspan(1, 5).length(), fail_fast);
     }
     {
         span<int, 5> av = arr;
         EXPECT_EQ ((av.subspan<4, 0> ().length ()), 0);
         EXPECT_EQ (av.subspan (4, 0).length (), 0);
         EXPECT_EQ (av.subspan (5, 0).length (), 0);
-        //        CHECK_THROW(av.subspan(6, 0).length(), fail_fast);
     }
     {
         span<int> av;
         EXPECT_EQ ((av.subspan<0, 0> ().length ()), 0);
         EXPECT_EQ (av.subspan (0, 0).length (), 0);
-        //        CHECK_THROW((av.subspan<1, 0>().length()), fail_fast);
     }
     {
         span<int> av;
         EXPECT_EQ (av.subspan (0).length (), 0);
-        //        CHECK_THROW(av.subspan(1).length(), fail_fast);
     }
     {
         span<int> av = arr;
@@ -892,7 +889,6 @@ TEST (GslSpan, Subspan) {
         EXPECT_EQ (av.subspan (1).length (), 4);
         EXPECT_EQ (av.subspan (4).length (), 1);
         EXPECT_EQ (av.subspan (5).length (), 0);
-        //        CHECK_THROW(av.subspan(6).length(), fail_fast);
         auto av2 = av.subspan (1);
         for (int i = 0; i < 4; ++i) {
             EXPECT_EQ (av2[i], i + 2);
@@ -904,7 +900,6 @@ TEST (GslSpan, Subspan) {
         EXPECT_EQ (av.subspan (1).length (), 4);
         EXPECT_EQ (av.subspan (4).length (), 1);
         EXPECT_EQ (av.subspan (5).length (), 0);
-        //        CHECK_THROW(av.subspan(6).length(), fail_fast);
         auto av2 = av.subspan (1);
         for (int i = 0; i < 4; ++i) {
             EXPECT_EQ (av2[i], i + 2);
@@ -918,14 +913,12 @@ TEST (GslSpan, At) {
     {
         span<int> s = arr;
         EXPECT_EQ (s.at (0), 1);
-        //        CHECK_THROW(s.at(5), fail_fast);
     }
     {
         int arr2d[2] = {1, 6};
         span<int, 2> s = arr2d;
         EXPECT_EQ (s.at (0), 1);
         EXPECT_EQ (s.at (1), 6);
-        //        CHECK_THROW(s.at(2) ,fail_fast);
     }
 }
 
@@ -935,14 +928,12 @@ TEST (GslSpan, OperatorFunctionCall) {
     {
         span<int> s = arr;
         EXPECT_EQ (s (0), 1);
-        //        CHECK_THROW(s(5), fail_fast);
     }
     {
         int arr2d[2] = {1, 6};
         span<int, 2> s = arr2d;
         EXPECT_EQ (s (0), 1);
         EXPECT_EQ (s (1), 6);
-        //        CHECK_THROW(s(2) ,fail_fast);
     }
 }
 
@@ -1049,7 +1040,6 @@ TEST (GslSpan, BeginEnd) {
 
         auto beyond = s.end ();
         EXPECT_NE (it, beyond);
-        // CHECK_THROW(*beyond, fail_fast);
 
         EXPECT_EQ (beyond - first, 4);
         EXPECT_EQ (first - first, 0);
@@ -1102,7 +1092,6 @@ TEST (GslSpan, CbeginCend) {
 
         auto beyond = s.cend ();
         EXPECT_NE (it, beyond);
-        // CHECK_THROW(*beyond, fail_fast);
 
         EXPECT_EQ (beyond - first, 4);
         EXPECT_EQ (first - first, 0);
@@ -1140,7 +1129,6 @@ TEST (GslSpan, RbeginRend) {
 
         auto beyond = s.rend ();
         EXPECT_NE (it, beyond);
-        // CHECK_THROW(*beyond, fail_fast);
 
         EXPECT_EQ (beyond - first, 4);
         EXPECT_EQ (first - first, 0);
@@ -1181,7 +1169,6 @@ TEST (GslSpan, CrbeginCrend) {
 
         auto beyond = s.crend ();
         EXPECT_NE (it, beyond);
-        // CHECK_THROW(*beyond, fail_fast);
 
         EXPECT_EQ (beyond - first, 4);
         EXPECT_EQ (first - first, 0);
