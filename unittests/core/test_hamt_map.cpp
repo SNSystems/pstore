@@ -154,7 +154,8 @@ TEST_F (DefaultIndexFixture, EmptyBeginEqualsEnd) {
 // test insert: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("a", "c");
+    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
+    auto const second = std::make_pair (std::string{"a"}, std::string{"c"});
     std::pair<default_index::iterator, bool> itp = index_->insert (t1, first);
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("a", key);
@@ -168,7 +169,8 @@ TEST_F (DefaultIndexFixture, InsertSingle) {
 // test insert_or_assign: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, UpsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("a", "c");
+    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
+    auto const second = std::make_pair (std::string{"a"}, std::string{"c"});
     std::pair<default_index::iterator, bool> itp = index_->insert_or_assign (t1, first);
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("a", key);
@@ -182,7 +184,7 @@ TEST_F (DefaultIndexFixture, UpsertSingle) {
 // test iterator: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b");
+    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
     index_->insert_or_assign (t1, first);
 
     default_index::iterator begin = index_->begin (*db_);
@@ -197,7 +199,8 @@ TEST_F (DefaultIndexFixture, InsertSingleIterator) {
 // test iterator: index contains an internal heap node.
 TEST_F (DefaultIndexFixture, InsertHeap) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
+    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
+    auto const second = std::make_pair (std::string{"c"}, std::string{"d"});
     index_->insert_or_assign (t1, first);
     index_->insert_or_assign (t1, second);
 
@@ -213,7 +216,7 @@ TEST_F (DefaultIndexFixture, InsertHeap) {
 // test iterator: index only contains a leaf store node.
 TEST_F (DefaultIndexFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b");
+    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
     index_->insert_or_assign (t1, first);
     index_->flush (t1, db_->get_current_revision ());
 
@@ -229,26 +232,26 @@ TEST_F (DefaultIndexFixture, InsertLeafStore) {
 // test iterator: index contains an internal store node.
 TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
-    index_->insert_or_assign (t1, first);
-    index_->insert_or_assign (t1, second);
-	index_->flush(t1, db_->get_current_revision());
+    index_->insert_or_assign (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
+    index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
+    index_->flush (t1, db_->get_current_revision ());
 
-        default_index::const_iterator begin = index_->cbegin (*db_);
-        default_index::const_iterator end = index_->cend (*db_);
-        EXPECT_NE (begin, end);
-        begin++;
-        EXPECT_NE (begin, end);
-        begin++;
-        EXPECT_EQ (begin, end);
+    default_index::const_iterator begin = index_->cbegin (*db_);
+    default_index::const_iterator end = index_->cend (*db_);
+    EXPECT_NE (begin, end);
+    begin++;
+    EXPECT_NE (begin, end);
+    begin++;
+    EXPECT_EQ (begin, end);
 }
 
 // test insert: index contains an internal store node.
 TEST_F (DefaultIndexFixture, InsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
-    std::pair<default_index::iterator, bool> itp1 = index_->insert (t1, first);
-    std::pair<default_index::iterator, bool> itp2 = index_->insert (t1, second);
+    std::pair<default_index::iterator, bool> itp1 =
+        index_->insert (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
+    std::pair<default_index::iterator, bool> itp2 =
+        index_->insert (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
 
     std::string const & key1 = (*itp1.first).first;
     EXPECT_EQ ("a", key1);
@@ -259,8 +262,8 @@ TEST_F (DefaultIndexFixture, InsertInternalStore) {
 
     index_->flush (t1, db_->get_current_revision ());
 
-    std::pair<std::string, std::string> third ("c", "f");
-    std::pair<default_index::iterator, bool> itp3 = index_->insert (t1, third);
+    std::pair<default_index::iterator, bool> itp3 =
+        index_->insert (t1, std::make_pair (std::string{"c"}, std::string{"f"}));
     std::string & value = (*itp3.first).second;
     EXPECT_EQ ("d", value);
     EXPECT_FALSE (itp3.second);
@@ -269,9 +272,10 @@ TEST_F (DefaultIndexFixture, InsertInternalStore) {
 // test insert_or_assign: index contains an internal store node.
 TEST_F (DefaultIndexFixture, UpsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<std::string, std::string> first ("a", "b"), second ("c", "d");
-    std::pair<default_index::iterator, bool> itp1 = index_->insert_or_assign (t1, first);
-    std::pair<default_index::iterator, bool> itp2 = index_->insert_or_assign (t1, second);
+    std::pair<default_index::iterator, bool> itp1 =
+        index_->insert_or_assign (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
+    std::pair<default_index::iterator, bool> itp2 =
+        index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
 
     std::string const & key1 = (*itp1.first).first;
     EXPECT_EQ ("a", key1);
@@ -282,8 +286,8 @@ TEST_F (DefaultIndexFixture, UpsertInternalStore) {
 
     index_->flush (t1, db_->get_current_revision());
 
-    std::pair<std::string, std::string> third ("c", "f");
-    std::pair<default_index::iterator, bool> itp3 = index_->insert_or_assign (t1, third);
+    std::pair<default_index::iterator, bool> itp3 =
+        index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"f"}));
     std::string & value = (*itp3.first).second;
     EXPECT_EQ ("f", value);
     EXPECT_FALSE (itp3.second);
@@ -1387,7 +1391,6 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearInsertIterator) {
 
 namespace {
     class FourNodesOnTwoLevels : public GenericIndexFixture {
-    protected:
     protected:
         FourNodesOnTwoLevels ()
                 : hash_ (hashes_) {}
