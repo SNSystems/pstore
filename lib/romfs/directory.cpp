@@ -44,24 +44,48 @@
 #include "pstore/romfs/directory.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cstring>
 #include <string>
 
 #include "pstore/romfs/dirent.hpp"
+#include "pstore/support/gsl.hpp"
 
+namespace {
+
+    // Returns true if the directory entry given by 'd' is a directory which references the
+    // directory structure 'expected'.
+    bool is_expected_dir (pstore::romfs::dirent const * const PSTORE_NULLABLE d,
+                          pstore::romfs::directory const * const PSTORE_NONNULL expected) {
+        if (d == nullptr) {
+            return false;
+        }
+        auto const od = d->opendir ();
+        return od && *od == expected;
+    }
+
+} // end anonymous namespace
+
+
+// end
+// ~~~
 auto pstore::romfs::directory::end () const -> dirent const * {
     return begin () + size ();
 }
 
+// operator[]
+// ~~~~~~~~~~
 auto pstore::romfs::directory::operator[] (std::size_t pos) const noexcept -> dirent const & {
     assert (pos < size ());
     return members_[pos];
 }
 
+// find
+// ~~~~
 auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) const
     -> dirent const * PSTORE_NULLABLE {
 
-    // TODO: this is a straightfoward linear search. Could this be a performance problem?
+    // This is a straightfoward linear search. Could be a performance problem in the future.
     auto pos = std::find_if (begin (), end (), [d](dirent const & de) {
         auto const od = de.opendir ();
         return od && od.get () == d;
@@ -72,6 +96,7 @@ auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) c
 auto pstore::romfs::directory::find (char const * PSTORE_NONNULL name, std::size_t length) const
     -> dirent const * PSTORE_NULLABLE {
 
+    // Directories are sorted by name: we can use a binary search here.
     auto end = this->end ();
     auto it = std::lower_bound (
         this->begin (), end, std::make_pair (name, length),
@@ -87,38 +112,49 @@ auto pstore::romfs::directory::find (char const * PSTORE_NONNULL name, std::size
     return nullptr;
 }
 
-bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL parent) const {
-    auto comp = [](dirent const & a, dirent const & b) {
-        return std::strcmp (a.name (), b.name ()) < 0;
-    };
-    if (!std::is_sorted (begin (), end (), comp)) {
-        return false;
-    }
+// check
+// ~~~~~
+bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL parent,
+                                      check_stack_entry const * const PSTORE_NULLABLE
+                                          visited) const {
 
-    auto isdir = [](dirent const * const PSTORE_NULLABLE d,
-                    directory const * const PSTORE_NONNULL expected) {
-        if (d == nullptr) {
-            return false;
+    // This stops us from looping forever if we follow a directory pointer to a directory that we
+    // have already visited.
+    for (auto v = visited; v != nullptr; v = v->prev) {
+        if (v->d == parent) {
+            return true;
         }
-        error_or<directory const * PSTORE_NONNULL> od = d->opendir ();
-        return od && od.get () == expected;
-    };
-    if (!isdir (this->find (".", 1), this) && isdir (this->find ("..", 2), parent)) {
+    }
+
+    // CHeck that the directory entries are sorted by name.
+    if (!std::is_sorted (begin (), end (), [](dirent const & a, dirent const & b) {
+            return std::strcmp (a.name (), b.name ()) < 0;
+        })) {
         return false;
     }
 
+    // Look for the '.' and '..' entries and check that they point where we expect.
+    if (!is_expected_dir (this->find ("."), this) || !is_expected_dir (this->find (".."), parent)) {
+        return false;
+    }
+
+    // Recursively check any directories contained by this one.
     for (dirent const & de : *this) {
-        char const * name = de.name ();
-        if (name[0] == '.' && (name[1] == '\0' || (name[1] == '.' && name[2] == '\0'))) {
-            continue;
-        }
         if (de.is_directory ()) {
-            error_or<directory const * PSTORE_NONNULL> od = de.opendir ();
-            if (!od || !od.get ()->check (this)) {
+            if (error_or<directory const * PSTORE_NONNULL> const od = de.opendir ()) {
+                check_stack_entry const me{*od, visited};
+                if (!(*od)->check (this, &me)) {
+                    return false;
+                }
+            } else {
                 return false;
             }
         }
     }
 
     return true;
+}
+
+bool pstore::romfs::directory::check () const {
+    return this->check (this, nullptr);
 }

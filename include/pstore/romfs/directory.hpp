@@ -44,10 +44,8 @@
 #ifndef PSTORE_ROMFS_DIRECTORY_HPP
 #define PSTORE_ROMFS_DIRECTORY_HPP
 
-#include <cassert>
 #include <cstdlib>
 
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -68,10 +66,11 @@ namespace pstore {
             explicit constexpr directory (Container const & c) noexcept
                     : directory (c.size (), c.data ()) {}
 
-            directory (directory const &) = delete;
-            directory (directory &&) = delete;
             ~directory () noexcept = default;
 
+            // No copying or assignment.
+            directory (directory const &) = delete;
+            directory (directory &&) = delete;
             directory & operator= (directory const &) = delete;
             directory & operator= (directory &&) = delete;
 
@@ -80,7 +79,15 @@ namespace pstore {
             std::size_t size () const noexcept { return size_; }
             dirent const & operator[] (std::size_t pos) const noexcept;
 
-            // note that name is not necessarily nul terminated!
+            /// Search the directory for a member whose name equals the string described by \p name
+            /// and \p length.
+            ///
+            /// \note \p name is not a nul terminated string.
+            ///
+            /// \param name  The name of the entry to be found.
+            /// \param length  The number of code units in \p name.
+            /// \returns A pointer to the relevant directory entry, if the name was found or nullptr
+            ///          if it was not.
             dirent const * PSTORE_NULLABLE find (char const * PSTORE_NONNULL name,
                                                  std::size_t length) const;
 
@@ -89,12 +96,26 @@ namespace pstore {
                 return this->find (&name[0], Size - 1U);
             }
 
+            /// Searchs the directory for a member which references the directory structure \p d.
+            ///
+            /// \param d  The directory to be found.
+            /// \returns  A pointer to the directory entry if found, or nullptr if not.
             dirent const * PSTORE_NULLABLE find (directory const * PSTORE_NONNULL d) const;
 
-            bool check (directory const * const PSTORE_NONNULL parent) const;
+            /// Performs basic validity checks on a directory hierarchy.
+            bool check () const;
 
         private:
+            struct check_stack_entry {
+                directory const * PSTORE_NONNULL d;
+                check_stack_entry const * PSTORE_NULLABLE prev;
+            };
+            bool check (directory const * const PSTORE_NONNULL parent,
+                        check_stack_entry const * PSTORE_NULLABLE visited) const;
+
+            /// The number of entries in the members_ array.
             std::size_t const size_;
+            /// An array of directory members.
             dirent const * PSTORE_NONNULL members_;
         };
 

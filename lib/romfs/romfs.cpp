@@ -408,7 +408,7 @@ namespace pstore {
 
         // fsck
         // ~~~~
-        bool romfs::fsck () const { return root_->check (root_); }
+        bool romfs::fsck () const { return root_->check (); }
 
     } // end namespace romfs
 } // end namespace pstore
