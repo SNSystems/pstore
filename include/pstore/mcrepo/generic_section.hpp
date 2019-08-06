@@ -91,7 +91,7 @@ namespace pstore {
 
             section_kind section;
             relocation_type type;
-            // FIXME: much padding here.
+            // TODO: much padding here.
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
             std::uint64_t offset;
@@ -144,7 +144,7 @@ namespace pstore {
 
             typed_address<indirect_string> name;
             relocation_type type;
-            // FIXME: much padding here.
+            // TODO: much padding here.
             std::uint8_t padding1 = 0;
             std::uint16_t padding2 = 0;
             std::uint32_t padding3 = 0;
