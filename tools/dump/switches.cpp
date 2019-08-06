@@ -52,6 +52,7 @@
 using namespace pstore::cmd_util;
 
 namespace {
+
     cl::OptionCategory what_cat ("Options controlling what is dumped");
 
     cl::opt<bool> contents ("contents", cl::desc ("Emit a raw dump of the transaction contents"),
@@ -88,8 +89,8 @@ namespace {
     cl::opt<bool> indices ("indices", cl::desc ("Dump the indices"), cl::cat (what_cat));
     cl::alias indices2 ("i", cl::desc ("Alias for --indices"), cl::aliasopt (indices));
 
-    cl::opt<bool> log ("log", cl::desc ("List the generations"), cl::cat (what_cat));
-    cl::alias log2 ("l", cl::desc ("Alias for --log"), cl::aliasopt (log));
+    cl::opt<bool> log_opt ("log", cl::desc ("List the generations"), cl::cat (what_cat));
+    cl::alias log2 ("l", cl::desc ("Alias for --log"), cl::aliasopt (log_opt));
 
     cl::opt<bool> all (
         "all",
@@ -128,7 +129,7 @@ namespace {
 
     cl::list<std::string> paths (cl::Positional, cl::desc ("<filename>..."));
 
-} // anonymous namespace
+} // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore dump utility\n");
@@ -146,7 +147,7 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
 
     result.show_header = header.get ();
     result.show_indices = indices.get ();
-    result.show_log = log.get ();
+    result.show_log = log_opt.get ();
     result.show_shared = shared_memory.get ();
     result.show_all = all.get ();
     result.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
