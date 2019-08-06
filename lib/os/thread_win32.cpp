@@ -45,12 +45,12 @@
 
 #include "pstore/os/thread.hpp"
 
-#include <array>
-#include <cerrno>
-#include <cstring>
-#include <system_error>
-
 #ifdef _WIN32
+
+#    include <array>
+#    include <cerrno>
+#    include <cstring>
+#    include <system_error>
 
 #    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
@@ -63,15 +63,12 @@ namespace pstore {
 
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
 
-        void set_name (gsl::czstring name) {
+        void set_name (gsl::not_null<gsl::czstring> name) {
             // This code taken from http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx
             // Sadly, threads don't actually have names in Win32. The process via
             // RaiseException is just a "Secret Handshake" with the VS Debugger, who
             // actually stores the thread -> name mapping. Windows itself has no
             // notion of a thread "name".
-            if (name == nullptr) {
-                raise (errno_erc{EINVAL});
-            }
 
             std::strncpy (thread_name, name, name_size);
             thread_name[name_size - 1] = '\0';
@@ -101,7 +98,7 @@ namespace pstore {
 #    endif // NDEBUG
         }
 
-        char const * get_name (gsl::span<char, name_size> name /*out*/) {
+        gsl::czstring get_name (gsl::span<char, name_size> name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});

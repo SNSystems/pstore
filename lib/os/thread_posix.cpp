@@ -45,13 +45,16 @@
 
 #include "pstore/os/thread.hpp"
 
-#include <array>
-#include <cerrno>
-#include <cstring>
-#include <system_error>
 
 #ifndef _WIN32
 
+// Standard library includes
+#    include <array>
+#    include <cerrno>
+#    include <cstring>
+#    include <system_error>
+
+// OS-specific includes
 #    include <pthread.h>
 
 #    ifdef __linux__
@@ -63,6 +66,7 @@
 #        include <pthread_np.h>
 #    endif
 
+// pstore includes
 #    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
 
@@ -96,37 +100,33 @@ namespace pstore {
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
 #    endif
 
-        // TODO: make this gsl::not_null<>
-        void set_name (gsl::czstring name) {
+        void set_name (gsl::not_null<gsl::czstring> name) {
             // pthread support for setting thread names comes in various non-portable forms.
             // Here I'm supporting three versions:
             // - the single argument version used by Mac OS X
             // - two argument form supported by Linux
             // - the slightly differently named form used in FreeBSD.
-            int err = 0;
-            if (name == nullptr) {
-                raise (errno_erc{EINVAL});
-            }
-#    if PSTORE_PTHREAD_SETNAME_NP_1_ARG
-            err = pthread_setname_np (name);
-#    elif PSTORE_PTHREAD_SETNAME_NP_2_ARGS
-            err = pthread_setname_np (pthread_self (), name);
-#    elif PSTORE_PTHREAD_SET_NAME_NP
-            pthread_set_name_np (pthread_self (), name);
-#    else
-#        error "pthread_setname was not available"
-#    endif
-            if (err != 0) {
-                raise (errno_erc{err}, "pthread_set_name_np");
-            }
-
 #    ifdef __FreeBSD__
             std::strncpy (thread_name, name, name_size);
             thread_name[name_size - 1] = '\0';
-#    endif
+#    else
+            int err = 0;
+#        if PSTORE_PTHREAD_SETNAME_NP_1_ARG
+            err = pthread_setname_np (name);
+#        elif PSTORE_PTHREAD_SETNAME_NP_2_ARGS
+            err = pthread_setname_np (pthread_self (), name);
+#        elif PSTORE_PTHREAD_SET_NAME_NP
+            pthread_set_name_np (pthread_self (), name);
+#        else
+#            error "pthread_setname was not available"
+#        endif
+            if (err != 0) {
+                raise (errno_erc{err}, "pthread_set_name_np");
+            }
+#    endif // __FreeBSD__
         }
 
-        char const * get_name (gsl::span<char, name_size> name /*out*/) {
+        gsl::czstring get_name (gsl::span<char, name_size> name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});
