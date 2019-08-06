@@ -162,7 +162,7 @@ TEST_F (ProcessFileNameFreeBSD, CommandContents) {
         .WillRepeatedly (DoAll (Invoke (copy_string), Return (0)));
 
     std::vector<char> buffer;
-    pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
+    pstore::freebsd::process_file_name (command_, ProcessFileNameFreeBSD::bind (&callback), buffer);
 }
 
 TEST_F (ProcessFileNameFreeBSD, RaisesError) {
@@ -177,7 +177,8 @@ TEST_F (ProcessFileNameFreeBSD, RaisesError) {
     using namespace std::placeholders;
     auto fn = [this, &callback]() {
         std::vector<char> buffer;
-        ::pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
+        ::pstore::freebsd::process_file_name (command_, ProcessFileNameFreeBSD::bind (&callback),
+                                              buffer);
     };
     check_for_error (fn, ::pstore::errno_erc{EPERM});
 #endif // PSTORE_EXCEPTIONS
@@ -194,7 +195,10 @@ TEST_F (ProcessFileNameFreeBSD, AlwaysRaisesNoMem) {
 
     std::vector<char> buffer;
     check_for_error (
-        [&]() { pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer); },
+        [&]() {
+            pstore::freebsd::process_file_name (command_, ProcessFileNameFreeBSD::bind (&callback),
+                                                buffer);
+        },
         pstore::error_code::unknown_process_path);
 }
 
@@ -219,8 +223,8 @@ TEST_F (ProcessFileNameFreeBSD, BufferContents) {
         .WillRepeatedly (DoAll (Invoke (copy_string), Return (0)));
 
     pstore::small_vector<char> buffer;
-    std::size_t const length =
-        pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
+    std::size_t const length = pstore::freebsd::process_file_name (
+        command_, ProcessFileNameFreeBSD::bind (&callback), buffer);
     EXPECT_EQ (length, 12U);
     buffer.resize (12U); // lose any additional buffer bytes.
     EXPECT_THAT (buffer, ::testing::ElementsAreArray (
@@ -256,8 +260,8 @@ TEST_F (ProcessFileNameFreeBSD, LengthIncreasesOnEachIteration) {
         .WillRepeatedly (DoAll (Invoke (record_length), Invoke (two_maxchars), Return (0)));
 
     std::vector<char> buffer (2);
-    std::size_t const result =
-        pstore::freebsd::process_file_name (command_, this->bind (&callback), buffer);
+    std::size_t const result = pstore::freebsd::process_file_name (
+        command_, ProcessFileNameFreeBSD::bind (&callback), buffer);
 
     EXPECT_THAT (lengths.size (), Ge (2U));
     EXPECT_THAT (lengths[1], Gt (lengths[0]));

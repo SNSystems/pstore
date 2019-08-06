@@ -66,7 +66,7 @@ namespace {
 
     private:
         std::unique_ptr<std::string> tz_value () const;
-        void set (char const * tz);
+        static void set_tz (char const * tz);
         static void setenv (char const * var, char const * value);
         std::unique_ptr<std::string> old_;
     };
@@ -75,7 +75,7 @@ namespace {
     // ~~~~~~
     time_zone_setter::time_zone_setter (char const * tz)
             : old_ (tz_value ()) {
-        this->set (tz);
+        time_zone_setter::set_tz (tz);
     }
 
     // (dtor)
@@ -104,9 +104,9 @@ namespace {
 
     // set
     // ~~~
-    void time_zone_setter::set (char const * tz) {
+    void time_zone_setter::set_tz (char const * tz) {
         assert (tz != nullptr);
-        this->setenv ("TZ", tz);
+        time_zone_setter::setenv ("TZ", tz);
     }
 
     // setenv
