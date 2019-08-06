@@ -44,16 +44,10 @@
 
 #include "switches.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-using namespace llvm;
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-using namespace pstore::cmd_util;
-#endif
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/utf.hpp"
 
-#undef output
+using namespace pstore::cmd_util;
 
 namespace {
 
@@ -79,19 +73,19 @@ namespace {
                                      cl::init ("-"));
     cl::alias output2_opt ("o", cl::desc ("Alias for --output"), cl::aliasopt (output_opt));
 
-} // anonymous namespace
+} // end anonymous namespace
 
 namespace switches {
 
     user_options user_options::get (int argc, pstore_tchar * argv[]) {
         cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
 
-        user_options Result;
-        Result.output =
-            std::make_shared<std::string> (pstore::utf::from_native_string (output_opt));
-        Result.endianness = endian_opt;
-        Result.maximum = maximum_opt;
-        return Result;
+        user_options result;
+        result.output =
+            std::make_shared<std::string> (pstore::utf::from_native_string (output_opt.get ()));
+        result.endianness = endian_opt.get ();
+        result.maximum = maximum_opt.get ();
+        return result;
     }
 
 } // namespace switches

@@ -47,6 +47,3 @@ target_link_libraries (pstore-mangle PRIVATE
     pstore-core
     pstore-os
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-mangle PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)

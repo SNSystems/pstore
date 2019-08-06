@@ -50,9 +50,6 @@ add_pstore_executable (pstore-broker-poker
     switches.cpp
     switches.hpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-broker-poker PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-broker-poker PRIVATE pstore-broker-intf pstore-cmd-util)
 
 run_pstore_unit_test (pstore-broker-poker pstore-broker-poker-unit-tests)

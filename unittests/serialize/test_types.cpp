@@ -55,12 +55,14 @@ namespace {
     class NonIntrusiveSerializer : public ::testing::Test {
     public:
         struct non_standard_layout_type {
-            non_standard_layout_type (int a_)
+            explicit non_standard_layout_type (int a_) noexcept
                     : a (a_) {}
-            non_standard_layout_type (non_standard_layout_type const &) = default;
-            virtual ~non_standard_layout_type () {}
+            non_standard_layout_type (non_standard_layout_type const &) noexcept = default;
+            virtual ~non_standard_layout_type () noexcept = default;
 
-            bool operator== (non_standard_layout_type const & rhs) const { return a == rhs.a; }
+            bool operator== (non_standard_layout_type const & rhs) const noexcept {
+                return a == rhs.a;
+            }
 
             int a;
         };

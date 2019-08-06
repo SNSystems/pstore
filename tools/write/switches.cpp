@@ -43,14 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-#    include "llvm/Support/raw_ostream.h"
-#    include "llvm/Support/Error.h"
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-#endif
-
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/utf.hpp"
@@ -58,40 +51,36 @@
 #include "error.hpp"
 #include "to_value_pair.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-using namespace llvm;
-#else
 using namespace pstore::cmd_util;
-#endif
 
 namespace {
 
     cl::list<std::string>
-        Add ("add", cl::desc ("Add key with corresponding string value. Specified as 'key,value'."
+        add ("add", cl::desc ("Add key with corresponding string value. Specified as 'key,value'."
                               " May be repeated to add several keys."));
-    cl::alias Add2 ("a", cl::desc ("Alias for --add"), cl::aliasopt (Add));
+    cl::alias add2 ("a", cl::desc ("Alias for --add"), cl::aliasopt (add));
 
     cl::list<std::string>
-        AddString ("add-string",
-                   cl::desc ("Add key to string set. May be repeated to add several strings."));
-    cl::alias AddString2 ("s", cl::desc ("Alias for --add-string"), cl::aliasopt (AddString));
+        add_string ("add-string",
+                    cl::desc ("Add key to string set. May be repeated to add several strings."));
+    cl::alias add_string2 ("s", cl::desc ("Alias for --add-string"), cl::aliasopt (add_string));
 
     cl::list<std::string>
-        AddFile ("add-file",
-                 cl::desc ("Add key with the named file's contents as the corresponding value."
-                           " Specified as 'key,filename'. May be repeated to add several files."));
-    cl::alias AddFile2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (AddString));
+        add_file ("add-file",
+                  cl::desc ("Add key with the named file's contents as the corresponding value."
+                            " Specified as 'key,filename'. May be repeated to add several files."));
+    cl::alias add_file2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (add_file));
 
 
-    cl::opt<std::string> DbPath (cl::Positional,
-                                 cl::desc ("<Path of the pstore repository to be written>"),
-                                 cl::Required);
-    cl::list<std::string> Files (cl::Positional, cl::desc ("<filename>..."));
+    cl::opt<std::string> db_path (cl::Positional,
+                                  cl::desc ("<Path of the pstore repository to be written>"),
+                                  cl::Required);
+    cl::list<std::string> files (cl::Positional, cl::desc ("<filename>..."));
 
-    cl::opt<std::string> VacuumMode ("compact", cl::Optional,
-                                     cl::desc ("Set the compaction mode. Argument must one of: "
-                                               "'disabled', 'immediate', 'background'."));
-    cl::alias VacuumMode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (VacuumMode));
+    cl::opt<std::string> vacuum_mode ("compact", cl::Optional,
+                                      cl::desc ("Set the compaction mode. Argument must one of: "
+                                                "'disabled', 'immediate', 'background'."));
+    cl::alias vacuum_mode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (vacuum_mode));
 
     pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
         if (opt == "disabled") {
@@ -116,22 +105,22 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
 
     switches result;
 
-    result.db_path = pstore::utf::from_native_string (DbPath);
-    if (!VacuumMode.empty ()) {
-        result.vmode = to_vacuum_mode (pstore::utf::from_native_string (VacuumMode));
+    result.db_path = pstore::utf::from_native_string (db_path.get ());
+    if (!vacuum_mode.empty ()) {
+        result.vmode = to_vacuum_mode (pstore::utf::from_native_string (vacuum_mode.get ()));
     }
 
-    std::transform (std::begin (Add), std::end (Add), std::back_inserter (result.add),
+    std::transform (std::begin (add), std::end (add), std::back_inserter (result.add),
                     make_value_pair);
 
-    std::transform (std::begin (AddString), std::end (AddString),
+    std::transform (std::begin (add_string), std::end (add_string),
                     std::back_inserter (result.strings),
                     [](std::string const & str) { return pstore::utf::from_native_string (str); });
 
-    std::transform (std::begin (AddFile), std::end (AddFile), std::back_inserter (result.files),
+    std::transform (std::begin (add_file), std::end (add_file), std::back_inserter (result.files),
                     make_value_pair);
 
-    std::transform (std::begin (Files), std::end (Files), std::back_inserter (result.files),
+    std::transform (std::begin (files), std::end (files), std::back_inserter (result.files),
                     [](std::string const & path) {
                         return std::make_pair (pstore::utf::from_native_string (path),
                                                pstore::utf::from_native_string (path));

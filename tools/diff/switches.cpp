@@ -44,42 +44,31 @@
 
 #include "switches.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-#    include "llvm/Support/Error.h"
-#    include "llvm/Support/raw_ostream.h"
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-#endif
-
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
 #include "pstore/support/utf.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-using namespace llvm;
-#else
 using namespace pstore::cmd_util;
-#endif
 
 namespace {
-    cl::opt<std::string> DbPath (cl::Positional,
-                                 cl::desc ("Path of the pstore repository to be read."),
-                                 cl::Required);
+    cl::opt<std::string> db_path (cl::Positional,
+                                  cl::desc ("Path of the pstore repository to be read."),
+                                  cl::Required);
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        FirstRevision (cl::Positional, cl::desc ("The first revision number (or 'HEAD')"),
-                       cl::Optional);
-
-    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        SecondRevision (cl::Positional, cl::desc ("The second revision number (or 'HEAD')"),
+        first_revision (cl::Positional, cl::desc ("The first revision number (or 'HEAD')"),
                         cl::Optional);
 
-    cl::OptionCategory HowCat ("Options controlling how fields are emitted");
+    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+        second_revision (cl::Positional, cl::desc ("The second revision number (or 'HEAD')"),
+                         cl::Optional);
 
-    cl::opt<bool> Hex ("hex", cl::desc ("Emit number values in hexadecimal notation"),
-                       cl::cat (HowCat));
-    cl::alias Hex2 ("x", cl::desc ("Alias for --hex"), cl::aliasopt (Hex));
+    cl::OptionCategory how_cat ("Options controlling how fields are emitted");
+
+    cl::opt<bool> hex ("hex", cl::desc ("Emit number values in hexadecimal notation"),
+                       cl::cat (how_cat));
+    cl::alias hex2 ("x", cl::desc ("Alias for --hex"), cl::aliasopt (hex));
 
 } // anonymous namespace
 
@@ -88,13 +77,13 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore diff utility\n");
 
     switches result;
-    result.db_path = utf::from_native_string (DbPath);
-    result.first_revision = static_cast<cmd_util::revision_opt> (FirstRevision).r;
-    result.second_revision = SecondRevision.getNumOccurrences () > 0
-                                 ? just (static_cast<cmd_util::revision_opt> (SecondRevision).r)
+    result.db_path = utf::from_native_string (db_path.get ());
+    result.first_revision = static_cast<cmd_util::revision_opt> (first_revision).r;
+    result.second_revision = second_revision.getNumOccurrences () > 0
+                                 ? just (static_cast<cmd_util::revision_opt> (second_revision).r)
                                  : nothing<diff::revision_number> ();
 
-    result.hex = Hex;
+    result.hex = hex.get ();
 
     return {result, EXIT_SUCCESS};
 }

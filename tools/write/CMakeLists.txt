@@ -52,9 +52,6 @@ add_pstore_tool (pstore-write
     to_value_pair.cpp
     to_value_pair.hpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-write PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-write PRIVATE pstore-core pstore-cmd-util)
 
 run_pstore_unit_test (pstore-write pstore-cmd-util-unit-tests)

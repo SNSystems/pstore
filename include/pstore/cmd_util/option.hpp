@@ -158,8 +158,8 @@ namespace pstore {
                     value_ = u;
                 }
 
-                operator T () const { return get (); }
-                T get () const { return value_; }
+                explicit operator T () const { return get (); }
+                T const & get () const noexcept { return value_; }
 
                 bool empty () const { return value_.empty (); }
                 bool value (std::string const & v) override;
@@ -204,7 +204,9 @@ namespace pstore {
                 opt (opt const &) = delete;
                 opt & operator= (opt const &) = delete;
 
-                operator bool () const { return value_; }
+                explicit operator bool () const noexcept { return get (); }
+                bool get () const noexcept { return value_; }
+
                 bool takes_argument () const override { return false; }
                 bool value (std::string const & v) override;
                 void add_occurrence () override;

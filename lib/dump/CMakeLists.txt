@@ -84,6 +84,3 @@ add_pstore_library (
         "${pstore_dump_include_dir}/value.hpp"
 )
 target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-dump-lib PUBLIC LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)

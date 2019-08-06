@@ -55,7 +55,6 @@ target_include_directories (pstore-unit-test-harness PRIVATE ../include)
 if (PSTORE_IS_INSIDE_LLVM)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
-    target_link_libraries (pstore-unit-test-harness PUBLIC LLVMSupport)
 endif (PSTORE_IS_INSIDE_LLVM)
 
 add_subdirectory (klee EXCLUDE_FROM_ALL)

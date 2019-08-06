@@ -48,7 +48,4 @@ add_pstore_executable (pstore-sieve
     switches.hpp
     write_output.hpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-sieve PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-sieve PRIVATE pstore-support pstore-cmd-util)

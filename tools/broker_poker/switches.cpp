@@ -46,42 +46,33 @@
 
 #include <cstdlib>
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-#endif
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/utf.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-using namespace llvm;
-#else
 using namespace pstore::cmd_util;
-#endif
 
 namespace {
 
-
     cl::opt<std::string>
-        PipePath ("pipe-path", cl::desc ("Overrides the FIFO path to which messages are written."),
-                  cl::init (""));
+        pipe_path ("pipe-path", cl::desc ("Overrides the FIFO path to which messages are written."),
+                   cl::init (""));
 
-    cl::opt<unsigned> Flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
+    cl::opt<unsigned> flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
                              cl::init (0U));
-    cl::alias Flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (Flood));
+    cl::alias flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (flood));
 
     cl::opt<std::chrono::milliseconds::rep>
-        RetryTimeout ("retry-timeout",
-                      cl::desc ("The timeout for connection retries to the broker (ms)."),
-                      cl::init (switches{}.retry_timeout.count ()));
+        retry_timeout ("retry-timeout",
+                       cl::desc ("The timeout for connection retries to the broker (ms)."),
+                       cl::init (switches{}.retry_timeout.count ()));
 
-    cl::opt<bool> Kill ("kill",
+    cl::opt<bool> kill ("kill",
                         cl::desc ("Ask the broker to quit after commands have been processed."));
-    cl::alias Kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (Kill));
+    cl::alias kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (kill));
 
-    cl::opt<std::string> Verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
-    cl::opt<std::string> Path (cl::Positional, cl::Optional, cl::desc ("<path>"));
+    cl::opt<std::string> verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
+    cl::opt<std::string> path (cl::Positional, cl::Optional, cl::desc ("<path>"));
 
     pstore::maybe<std::string> pathOption (std::string const & path) {
         if (path.length () > 0) {
@@ -96,11 +87,11 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
     switches Result;
-    Result.verb = pstore::utf::from_native_string (Verb);
-    Result.path = pstore::utf::from_native_string (Path);
-    Result.retry_timeout = std::chrono::milliseconds (RetryTimeout);
-    Result.flood = Flood;
-    Result.kill = Kill;
-    Result.pipe_path = pathOption (PipePath);
+    Result.verb = pstore::utf::from_native_string (verb.get ());
+    Result.path = pstore::utf::from_native_string (path.get ());
+    Result.retry_timeout = std::chrono::milliseconds (retry_timeout.get ());
+    Result.flood = flood.get ();
+    Result.kill = kill.get ();
+    Result.pipe_path = pathOption (pipe_path.get ());
     return {Result, EXIT_SUCCESS};
 }

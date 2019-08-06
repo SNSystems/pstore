@@ -43,14 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-#    include "llvm/Support/Error.h"
-#    include "llvm/Support/raw_ostream.h"
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-#endif
-
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
 #include "pstore/support/error.hpp"
@@ -58,24 +51,20 @@
 
 namespace {
 
-#if PSTORE_IS_INSIDE_LLVM
-    using namespace llvm;
-#else
     using namespace pstore::cmd_util;
-#endif
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
-    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
+        revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
+    cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> DbPath (cl::Positional,
-                                 cl::desc ("<Path of the pstore repository to be read>"),
-                                 cl::Required);
-    cl::opt<std::string> Key (cl::Positional, cl::desc ("key"), cl::Required);
+    cl::opt<std::string> db_path (cl::Positional,
+                                  cl::desc ("<Path of the pstore repository to be read>"),
+                                  cl::Required);
+    cl::opt<std::string> key (cl::Positional, cl::desc ("key"), cl::Required);
     cl::opt<bool>
-        StringMode ("strings", cl::init (false),
-                    cl::desc ("Reads from the 'strings' index rather than the 'names' index."));
-    cl::alias StringMode2 ("s", cl::desc ("Alias for --strings"), cl::aliasopt (StringMode));
+        string_mode ("strings", cl::init (false),
+                     cl::desc ("Reads from the 'strings' index rather than the 'names' index."));
+    cl::alias string_mode2 ("s", cl::desc ("Alias for --strings"), cl::aliasopt (string_mode));
 
 } // end anonymous namespace
 
@@ -83,10 +72,10 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore read utility\n");
 
     switches result;
-    result.revision = static_cast<pstore::cmd_util::revision_opt> (Revision).r;
-    result.db_path = pstore::utf::from_native_string (DbPath);
-    result.key = pstore::utf::from_native_string (Key);
-    result.string_mode = StringMode;
+    result.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
+    result.db_path = pstore::utf::from_native_string (db_path.get ());
+    result.key = pstore::utf::from_native_string (key.get ());
+    result.string_mode = string_mode.get ();
 
     return {result, EXIT_SUCCESS};
 }

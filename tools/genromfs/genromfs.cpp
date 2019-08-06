@@ -189,7 +189,7 @@ int main (int argc, char * argv[]) {
               "namespace {\n"
               "\n";
         auto root = pstore::make_unique<directory_container> ();
-        auto root_id = scan (*root, src_path, 0);
+        auto root_id = scan (*root, src_path.get (), 0);
         std::unordered_set<unsigned> forwards;
         dump_tree (os, forwards, *root, root_id, root_id);
 
@@ -197,7 +197,7 @@ int main (int argc, char * argv[]) {
               "} // end anonymous namespace\n"
               "\n";
 
-        write_definition (os, root_var, directory_var (root_id).as_string ());
+        write_definition (os, root_var.get (), directory_var (root_id).as_string ());
     }
     PSTORE_CATCH (std::exception const & ex, {
         std::cerr << "Error: " << ex.what () << '\n';

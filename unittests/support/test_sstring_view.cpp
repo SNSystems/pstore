@@ -43,11 +43,18 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/support/sstring_view.hpp"
+
+// Standard library includes
 #include <cstring>
+
+// 3rd party
 #include <gmock/gmock.h>
+
+// pstore
 #include "pstore/support/make_unique.hpp"
 
 namespace {
+
     std::shared_ptr<char> new_shared (std::string const & s) {
         auto result = std::shared_ptr<char> (new char[s.size ()], [](char * p) { delete[] p; });
         std::copy (std::begin (s), std::end (s), result.get ());
@@ -57,9 +64,7 @@ namespace {
     class SStringView : public ::testing::Test {
     protected:
     };
-} // anonymous namespace
 
-namespace {
     template <typename T>
     struct string_maker {};
 
@@ -90,6 +95,7 @@ namespace {
 
     template <typename StringType>
     class SStringViewInit : public ::testing::Test {};
+
     using SStringViewInitTypes =
         ::testing::Types<string_maker<std::shared_ptr<char>>,
                          string_maker<std::shared_ptr<char const>>,
@@ -112,7 +118,7 @@ namespace {
         return pstore::make_unique_sstring_view (std::move (ptr), length);
     }
 
-} // anonymous namespace
+} // end anonymous namespace
 
 TYPED_TEST_CASE (SStringViewInit, SStringViewInitTypes);
 
@@ -341,13 +347,15 @@ TEST_F (SStringView, Substr) {
 }
 
 namespace {
+
     template <typename StringType>
     class SStringViewRelational : public SStringView {};
 
     class sstringview_maker {
     public:
-        sstringview_maker (char const * s)
+        explicit sstringview_maker (char const * s)
                 : view_ (pstore::make_sstring_view (s, std::strlen (s))) {}
+
         operator pstore::sstring_view<char const *> () const noexcept { return view_; }
 
     private:
@@ -355,9 +363,11 @@ namespace {
     };
 
     using StringTypes = ::testing::Types<sstringview_maker, sstringview_maker const, char const *>;
-} // anonymous namespace
+
+} // end anonymous namespace
 
 namespace pstore {
+
     template <>
     struct string_traits<sstringview_maker> {
         static std::size_t length (sstring_view<char const *> const & s) noexcept {
@@ -367,14 +377,15 @@ namespace pstore {
             return string_traits<sstring_view<char const *>>::data (s);
         }
     };
-} // namespace pstore
+
+} // end namespace pstore
 
 TYPED_TEST_CASE (SStringViewRelational, StringTypes);
 
 TYPED_TEST (SStringViewRelational, Eq) {
 #define EQ(lhs, rhs, x)                                                                            \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view == (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) == lhs_view, (x));                                                        \
     }
@@ -400,7 +411,7 @@ TYPED_TEST (SStringViewRelational, Eq) {
 TYPED_TEST (SStringViewRelational, Ne) {
 #define NE(lhs, rhs, x)                                                                            \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view != (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) != lhs_view, (x));                                                        \
     }
@@ -420,12 +431,13 @@ TYPED_TEST (SStringViewRelational, Ne) {
     NE ("abcdefghijklmnopqrst", TypeParam ("abcde"), true);
     NE ("abcdefghijklmnopqrst", TypeParam ("abcdefghij"), true);
     NE ("abcdefghijklmnopqrst", TypeParam ("abcdefghijklmnopqrst"), false);
+#undef NE
 }
 
 TYPED_TEST (SStringViewRelational, Ge) {
 #define GE(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view >= (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) >= lhs_view, (y));                                                        \
     }
@@ -451,7 +463,7 @@ TYPED_TEST (SStringViewRelational, Ge) {
 TYPED_TEST (SStringViewRelational, Gt) {
 #define GT(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view > (rhs), (x));                                                         \
         EXPECT_EQ ((rhs) > lhs_view, (y));                                                         \
     }
@@ -477,7 +489,7 @@ TYPED_TEST (SStringViewRelational, Gt) {
 TYPED_TEST (SStringViewRelational, Le) {
 #define LE(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view <= (rhs), bool{(x)});                                                  \
         EXPECT_EQ ((rhs) <= lhs_view, bool{(y)});                                                  \
     }
@@ -503,7 +515,7 @@ TYPED_TEST (SStringViewRelational, Le) {
 TYPED_TEST (SStringViewRelational, Lt) {
 #define LT(lhs, rhs, x, y)                                                                         \
     {                                                                                              \
-        auto lhs_view = pstore::make_sstring_view (lhs, std::strlen (lhs));                        \
+        auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ ((lhs_view < rhs), bool{(x)});                                                   \
         EXPECT_EQ ((rhs < lhs_view), bool{(y)});                                                   \
     }

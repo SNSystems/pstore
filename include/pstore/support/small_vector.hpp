@@ -87,7 +87,7 @@ namespace pstore {
         /// Constructs the buffer with the given initial numbe of elements.
         explicit small_vector (std::size_t required_elements);
 
-        small_vector (std::initializer_list<ElementType> init);
+        explicit small_vector (std::initializer_list<ElementType> init);
 
         // Move construct and assign.
         small_vector (small_vector && other);

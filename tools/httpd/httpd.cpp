@@ -96,7 +96,7 @@ int main (int argc, char * argv[]) {
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);
         pstore::logging::create_log_stream (ident);
-        pstore::httpd::server_status status{port};
+        pstore::httpd::server_status status{port.get ()};
 
         std::thread ([&status]() {
             static constexpr auto name = "http";

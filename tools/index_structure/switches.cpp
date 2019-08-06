@@ -42,21 +42,18 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
+
+// Standard library
 #include <cstdlib>
 #include <iostream>
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-using namespace llvm;
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-using namespace pstore::cmd_util;
-#endif
-
 // pstore
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
 #include "pstore/support/utf.hpp"
+
+using namespace pstore::cmd_util;
 
 namespace {
 
@@ -67,12 +64,12 @@ namespace {
 #endif
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        Revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
-    cl::alias Revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (Revision));
+        revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
+    cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> DbPath (cl::Positional, cl::desc ("database-path"));
-    cl::list<std::string> IndexNames (cl::Positional, cl::Optional, cl::OneOrMore,
-                                      cl::desc ("<index-name>..."));
+    cl::opt<std::string> db_path (cl::Positional, cl::desc ("database-path"));
+    cl::list<std::string> index_names_opt (cl::Positional, cl::Optional, cl::OneOrMore,
+                                           cl::desc ("<index-name>..."));
 
 
     std::string usage_help () {
@@ -82,7 +79,7 @@ namespace {
         usage << "Dumps the internal structure of one of more pstore indexes. index-name may be "
                  "any of: ";
         char const * separator = "";
-        for (auto const & in : index_names) {
+        for (auto const & in : index_names_opt) {
             usage << separator << '\'' << in << '\'';
             separator = ", ";
         }
@@ -96,12 +93,12 @@ std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, usage_help ());
 
     switches sw;
-    sw.revision = static_cast<pstore::cmd_util::revision_opt> (Revision).r;
-    sw.db_path = DbPath;
+    sw.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
+    sw.db_path = db_path.get ();
 
-    for (auto const & Name : IndexNames) {
-        if (!set_from_name (&sw.selected, Name)) {
-            error_stream << NATIVE_TEXT ("Unknown index ") << pstore::utf::to_native_string (Name)
+    for (auto const & name : index_names_opt) {
+        if (!set_from_name (&sw.selected, name)) {
+            error_stream << NATIVE_TEXT ("Unknown index ") << pstore::utf::to_native_string (name)
                          << NATIVE_TEXT ("\n");
             return {sw, EXIT_FAILURE};
         }

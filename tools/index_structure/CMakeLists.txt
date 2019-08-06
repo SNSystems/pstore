@@ -49,7 +49,4 @@ add_pstore_tool (pstore-index-structure
     switches.cpp
     switches.hpp
 )
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-index-structure PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
 target_link_libraries (pstore-index-structure PRIVATE pstore-core pstore-cmd-util)

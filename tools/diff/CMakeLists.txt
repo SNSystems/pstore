@@ -48,8 +48,4 @@ add_pstore_tool (pstore-diff
     switches.hpp
 )
 target_link_libraries (pstore-diff PRIVATE pstore-diff-lib pstore-cmd-util)
-if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-diff PRIVATE LLVMSupport)
-endif (PSTORE_IS_INSIDE_LLVM)
-
 run_pstore_unit_test (pstore-diff pstore-diff-unit-tests)

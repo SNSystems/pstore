@@ -43,25 +43,14 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-#    include "llvm/Support/CommandLine.h"
-#    include "llvm/Support/raw_ostream.h"
-#    include "llvm/Support/Error.h"
-#else
-#    include "pstore/cmd_util/command_line.hpp"
-#endif
-
+#include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/utf.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
-using namespace llvm;
-#else
 using namespace pstore::cmd_util;
-#endif
 
 namespace {
 
-    cl::opt<std::string> Path (cl::Positional,
+    cl::opt<std::string> path (cl::Positional,
                                cl::desc ("Path of the pstore repository to be vacuumed."));
 
 } // end anonymous namespace
@@ -70,7 +59,7 @@ std::pair<vacuum::user_options, int> get_switches (int argc, pstore_tchar * argv
     cl::ParseCommandLineOptions (argc, argv, "pstore vacuum utility\n");
 
     vacuum::user_options opt;
-    opt.src_path = pstore::utf::from_native_string (Path);
+    opt.src_path = pstore::utf::from_native_string (path.get ());
 
     return {opt, EXIT_SUCCESS};
 }
