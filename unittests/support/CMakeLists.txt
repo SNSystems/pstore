@@ -41,8 +41,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-include (add_pstore)
-set (PSTORE_SUPPORT_UNIT_TEST_SRC
+
+add_pstore_unit_test (pstore-support-unit-tests
     test_aligned.cpp
     test_bit_count.cpp
     test_bit_field.cpp
@@ -53,6 +53,7 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_make_unique.cpp
     test_maybe.cpp
     test_parallel_for_each.cpp
+    test_path.cpp
     test_pointee_adaptor.cpp
     test_pubsub.cpp
     test_small_vector.cpp
@@ -62,7 +63,6 @@ set (PSTORE_SUPPORT_UNIT_TEST_SRC
     test_utf_win32.cpp
     test_varint.cpp
 )
-add_pstore_unit_test (pstore-support-unit-tests ${PSTORE_SUPPORT_UNIT_TEST_SRC})
 target_link_libraries (pstore-support-unit-tests PRIVATE pstore-support pstore-common)
 
 add_subdirectory (klee EXCLUDE_FROM_ALL)

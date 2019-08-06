@@ -57,7 +57,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_hamt_set.cpp
     test_heartbeat.cpp
     test_indirect_string.cpp
-    test_path.cpp
     test_protect.cpp
     test_region.cpp
     test_rotating_log.cpp

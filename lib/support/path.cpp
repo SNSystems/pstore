@@ -106,7 +106,6 @@ namespace pstore {
                     normp.reserve (p.length ());
                     std::transform (std::begin (p), std::end (p), std::back_inserter (normp),
                                     [](char c) { return c == '\\' ? '/' : c; });
-                    // std::replace (std::begin (normp), std::end (normp), altsep, sep);
 
                     if ((normp.length () > 2 && normp[0] == '/' && normp[1] == '/') &&
                         (normp.length () > 3 && normp[2] != '/')) {
@@ -114,7 +113,7 @@ namespace pstore {
                         // vvvvvvvvvvvvvvvvvvvv drive letter or UNC path
                         // \\machine\mountpoint\directory\etc\...
                         //           directory ^^^^^^^^^^^^^^^
-                        std::string::size_type index = normp.find ('/', 2);
+                        std::string::size_type const index = normp.find ('/', 2);
                         if (index == std::string::npos) {
                             return {"", p};
                         }
@@ -142,11 +141,13 @@ namespace pstore {
                               std::initializer_list<std::string> const & paths) {
                 auto is_path_sep = [](char c) { return c == '/' || c == '\\'; };
 
-                std::string result_drive, result_path;
+                std::string result_drive;
+                std::string result_path;
                 std::tie (result_drive, result_path) = split_drive (path);
 
                 for (auto const & p : paths) {
-                    std::string p_drive, p_path;
+                    std::string p_drive;
+                    std::string p_path;
                     std::tie (p_drive, p_path) = split_drive (p);
 
                     if (!p_path.empty () && is_path_sep (p_path[0])) {
@@ -157,7 +158,9 @@ namespace pstore {
 
                         result_path = p_path;
                         continue;
-                    } else if (!p_drive.empty () && p_drive != result_drive) {
+                    }
+
+                    if (!p_drive.empty () && p_drive != result_drive) {
                         assert (p_drive.length () == 2 && p_drive[1] == ':');
                         assert (result_drive.length () == 0 ||
                                 (result_drive.length () == 2 && result_drive[1] == ':'));
