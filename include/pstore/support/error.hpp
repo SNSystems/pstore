@@ -59,6 +59,7 @@
 #endif
 
 #include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 #if !PSTORE_EXCEPTIONS
 #    include <iostream>
@@ -147,12 +148,12 @@ namespace pstore {
         DWORD err_;
     };
 
-    inline std::error_code make_error_code (pstore::win32_erc e) noexcept {
+    inline std::error_code make_error_code (win32_erc e) noexcept {
         return {e.get (), std::system_category ()};
     }
 #endif //_WIN32
 
-} // namespace pstore
+} // end namespace pstore
 
 namespace std {
 
@@ -166,28 +167,32 @@ namespace std {
     struct is_error_code_enum<pstore::win32_erc> : std::true_type {};
 #endif //_WIN32
 
-} // namespace std
-
+} // end namespace std
 
 namespace pstore {
 
-    template <typename ErrorCode>
-    PSTORE_NO_RETURN void raise_error_code (ErrorCode e) {
+    template <typename Exception, typename = typename std::enable_if<
+                                      std::is_base_of<std::exception, Exception>::value>::type>
+    PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
 #if PSTORE_EXCEPTIONS
-        throw std::system_error{e};
+        throw ex;
 #else
-        std::cerr << "Error: " << e.message () << '\n';
+#    ifdef _WIN32
+        std::wcerr << L"Error: " << utf::win32::to16 (ex.what ()) << L'\n';
+#    else
+        std::cerr << "Error: " << ex.what () << '\n';
+#    endif
         std::exit (EXIT_FAILURE);
 #endif
     }
+
+    template <typename ErrorCode>
+    PSTORE_NO_RETURN void raise_error_code (ErrorCode e) {
+        raise_exception (std::system_error{e});
+    }
     template <typename ErrorCode, typename StrType>
     PSTORE_NO_RETURN void raise_error_code (ErrorCode e, StrType const & what) {
-#if PSTORE_EXCEPTIONS
-        throw std::system_error{e, what};
-#else
-        std::cerr << "Error: " << e.message () << " : " << what << '\n';
-        std::exit (EXIT_FAILURE);
-#endif
+        raise_exception (std::system_error{e, what});
     }
 
     template <typename ErrorType>
@@ -197,17 +202,6 @@ namespace pstore {
     template <typename ErrorType, typename StrType>
     PSTORE_NO_RETURN void raise (ErrorType e, StrType const & what) {
         raise_error_code (make_error_code (e), what);
-    }
-
-    template <typename Exception, typename = typename std::enable_if<
-                                      std::is_base_of<std::exception, Exception>::value>::type>
-    PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
-#if PSTORE_EXCEPTIONS
-        throw ex;
-#else
-        std::cerr << "Error: " << ex.message () << '\n';
-        std::exit (EXIT_FAILURE);
-#endif
     }
 
 } // end namespace pstore
