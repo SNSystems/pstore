@@ -78,6 +78,7 @@
 #include "pstore/core/shared_memory.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/core/vacuum_intf.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
@@ -146,22 +147,6 @@ namespace std {
 } // end namespace std
 
 namespace {
-
-    auto & out_stream =
-#if defined(_WIN32) && defined(_UNICODE)
-        std::wcout;
-#else
-        std::cout;
-#endif
-
-#ifdef PSTORE_EXCEPTIONS
-    auto & error_stream =
-#    if defined(_WIN32) && defined(_UNICODE)
-        std::wcerr;
-#    else
-        std::cerr;
-#    endif
-#endif // PSTORE_EXCEPTIONS
 
     template <typename Index>
     auto make_index (char const * name, pstore::database const & db, Index const & index)
@@ -341,9 +326,27 @@ namespace {
         }
     }
 
+#if defined(PSTORE_IS_INSIDE_LLVM) && defined(_WIN32) && defined(_UNICODE)
+    std::pair<std::vector<std::string>, std::vector<char const *>> make_mbcs_argv (int argc,
+                                                                                   TCHAR * argv[]) {
+        std::vector<std::string> argv_strings;
+        std::vector<char const *> argv2;
+        argv_strings.reserve (argc);
+        std::transform (argv, argv + argc, std::back_inserter (argv_strings), [](TCHAR * arg) {
+            return pstore::utf::win32::to_mbcs (arg, std::wcslen (arg));
+        });
+        argv2.reserve (argc + 1);
+        std::transform (std::begin (argv_strings), std::end (argv_strings),
+                        std::back_inserter (argv2),
+                        [](std::string const & s) { return s.data (); });
+        argv2.emplace_back (nullptr);
+        return {std::move (argv_strings), std::move (argv2)};
+    }
+#endif // PSTORE_IS_INSIDE_LLVM && _WIN32 && _UNICODE
+
 } // end anonymous namespace
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
@@ -352,8 +355,18 @@ int main (int argc, char * argv[]) {
 
     PSTORE_TRY {
 #if PSTORE_IS_INSIDE_LLVM
+#    if defined(_WIN32) && defined(_UNICODE)
+        // Windows will present our _tmain function with its arguments encoded as UTF-16. The LLVM
+        // APIs, are expecting multi-byte characters instead. That means that we
+        // need to convert the encoding.
+        auto const mbcs_argv = make_mbcs_argv (argc, argv);
+        llvm::sys::PrintStackTraceOnErrorSignal (std::get<1> (mbcs_argv).front ());
+        llvm::PrettyStackTraceProgram X (argc, std::get<1> (mbcs_argv).data ());
+#    else
         llvm::sys::PrintStackTraceOnErrorSignal (argv[0]);
         llvm::PrettyStackTraceProgram X (argc, argv);
+#    endif // defined(_WIN32) && defined(_UNICODE)
+
         llvm::llvm_shutdown_obj Y; // Call llvm_shutdown() on exit.
 
         // Initialize targets and assembly printers/parsers.
@@ -448,16 +461,16 @@ int main (int argc, char * argv[]) {
         }
 
         pstore::dump::value_ptr v = make_value (output);
-        out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
+        pstore::cmd_util::out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

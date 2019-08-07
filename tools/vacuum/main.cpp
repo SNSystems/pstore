@@ -98,7 +98,7 @@ namespace {
 } // namespace
 
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {

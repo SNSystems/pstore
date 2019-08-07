@@ -53,6 +53,7 @@
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/wsa_startup.hpp"
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/server.hpp"
@@ -63,11 +64,10 @@
 
 extern pstore::romfs::romfs fs;
 
-
+using namespace pstore::cmd_util;
 
 namespace {
 
-    using namespace pstore::cmd_util;
     cl::opt<in_port_t> port ("port", cl::desc ("The port number on which the server will listen"),
                              cl::init (in_port_t{8080}));
 
@@ -75,7 +75,11 @@ namespace {
 
 } // end anonymous namespace
 
+#ifdef _WIN32
+int _tmain (int argc, TCHAR * argv[]) {
+#else
 int main (int argc, char * argv[]) {
+#endif
     int exit_code = EXIT_SUCCESS;
 
 #ifdef _WIN32
@@ -107,11 +111,11 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        std::cerr << "Error: " << ex.what () << '\n';
+        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ()) << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "Unknown exception.\n";
+        error_stream << NATIVE_TEXT ("Unknown exception.\n");
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

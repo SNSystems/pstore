@@ -49,10 +49,7 @@
 #include <string>
 #include <utility>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#endif
-
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/support/maybe.hpp"
 
@@ -67,12 +64,6 @@ struct switches {
     bool kill = false;
 };
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
-
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
 
 #endif // PSTORE_BROKER_POKER_SWITCHES_HPP

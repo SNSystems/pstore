@@ -77,7 +77,7 @@ namespace {
 
 namespace switches {
 
-    user_options user_options::get (int argc, pstore_tchar * argv[]) {
+    user_options user_options::get (int argc, tchar * argv[]) {
         cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
 
         user_options result;

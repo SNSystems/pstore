@@ -1,10 +1,10 @@
-//*               _ _       _                *
-//*  _____      _(_) |_ ___| |__   ___  ___  *
-//* / __\ \ /\ / / | __/ __| '_ \ / _ \/ __| *
-//* \__ \\ V  V /| | || (__| | | |  __/\__ \ *
-//* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
-//*                                          *
-//===- tools/index_structure/switches.hpp ---------------------------------===//
+//*  _       _                 *
+//* | |_ ___| |__   __ _ _ __  *
+//* | __/ __| '_ \ / _` | '__| *
+//* | || (__| | | | (_| | |    *
+//*  \__\___|_| |_|\__,_|_|    *
+//*                            *
+//===- include/pstore/cmd_util/tchar.hpp ----------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,33 +41,36 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
-#define PSTORE_INDEX_STRUCTURE_SWITCHES_HPP 1
+#ifndef PSTORE_CMD_UTIL_TCHAR_HPP
+#define PSTORE_CMD_UTIL_TCHAR_HPP (1)
 
-#include <bitset>
-#include <string>
+#include <iostream>
 
-#include "pstore/cmd_util/tchar.hpp"
-#include "pstore/core/database.hpp"
-#include "pstore/config/config.hpp"
+#ifdef _WIN32
+#    include <tchar.h>
+#endif
 
-#include "indices.hpp"
+namespace pstore {
+    namespace cmd_util {
 
-struct switches {
-    std::bitset<static_cast<std::underlying_type<pstore::trailer::indices>::type> (
-        pstore::trailer::indices::last)>
-        selected;
-    unsigned revision = pstore::head_revision;
-    std::string db_path;
+#ifdef _WIN32
+#    define NATIVE_TEXT(str) _TEXT (str)
+        using tchar = TCHAR;
+#else
+        using tchar = char;
+#    define NATIVE_TEXT(str) str
+#endif
 
-    bool test (pstore::trailer::indices idx) const {
-        auto const position =
-            static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
-        assert (idx < pstore::trailer::indices::last);
-        return selected.test (position);
-    }
-};
+#if defined(_WIN32) && defined(_UNICODE)
+        extern std::wostream & error_stream;
+        extern std::wostream & out_stream;
+#else
+        extern std::ostream & error_stream;
+        extern std::ostream & out_stream;
+#endif
 
-std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+    } // end namespace cmd_util
 
-#endif // PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
+} // end namespace pstore
+
+#endif // PSTORE_CMD_UTIL_TCHAR_HPP

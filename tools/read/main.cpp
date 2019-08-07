@@ -53,10 +53,6 @@
 #        include <fcntl.h>
 #        include <io.h>
 #    endif
-#else
-// On Windows, the TCHAR type may be either char or whar_t depending on the selected
-// Unicode mode. Everywhere else, I need to add this type for compatibility.
-using TCHAR = char;
 #endif
 
 #include "switches.hpp"
@@ -69,15 +65,10 @@ using TCHAR = char;
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
-namespace {
+using pstore::cmd_util::error_stream;
+using pstore::cmd_util::out_stream;
 
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-    auto & out_stream = std::wcout;
-#else
-    auto & error_stream = std::cerr;
-    auto & out_stream = std::cout;
-#endif
+namespace {
 
     void set_output_stream_to_binary (FILE * const fd) {
         if (fd) {
@@ -100,7 +91,7 @@ namespace {
         std::shared_ptr<pstore::index::name_index const> const strings =
             pstore::index::get_index<pstore::trailer::indices::name> (db);
         if (strings == nullptr) {
-            error_stream << NATIVE_TEXT ("Error: Strings index was not found\n");
+            error_stream << NATIVE_TEXT ("Error: Strings index was not found") << std::endl;
             ok = false;
         } else {
             auto str = pstore::make_sstring_view (key);
@@ -125,7 +116,7 @@ namespace {
         std::shared_ptr<pstore::index::write_index const> const names =
             pstore::index::get_index<pstore::trailer::indices::write> (db);
         if (names == nullptr) {
-            error_stream << NATIVE_TEXT ("Error: Names index was not found\n");
+            error_stream << NATIVE_TEXT ("Error: Names index was not found") << std::endl;
             ok = false;
         } else {
             auto const it = names->find (db, key);
@@ -162,7 +153,7 @@ namespace {
 
 } // end anonymous namespace
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {

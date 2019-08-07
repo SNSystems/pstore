@@ -47,6 +47,7 @@
 #include <iostream>
 
 #include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -55,7 +56,8 @@ namespace pstore {
             if (!val.empty ()) {
                 auto rp = pstore::str_to_revision (val);
                 if (!rp) {
-                    std::cerr << "error: revision must be a revision number or 'HEAD'\n";
+                    error_stream << NATIVE_TEXT (
+                        "Error: revision must be a revision number or 'HEAD'\n");
                     std::exit (EXIT_FAILURE);
                 }
                 r = *rp;

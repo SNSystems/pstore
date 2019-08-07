@@ -86,7 +86,7 @@ namespace {
 } // end anonymous namespace
 
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
+std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker agent");
 
     switches result;

@@ -48,21 +48,9 @@
 #include <stdexcept>
 #include <string>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#else
-using TCHAR = char;
-#endif
-
-#include "pstore/config/config.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 
 namespace switches {
-
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-    using pstore_tchar = TCHAR;
-#else
-    using pstore_tchar = char;
-#endif
 
     struct bad_number : std::runtime_error {
         bad_number ();
@@ -86,7 +74,7 @@ namespace switches {
         endian endianness;
         unsigned long maximum;
 
-        static user_options get (int argc, pstore_tchar * argv[]);
+        static user_options get (int argc, pstore::cmd_util::tchar * argv[]);
     };
 } // namespace switches
 

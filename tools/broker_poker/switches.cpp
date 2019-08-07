@@ -83,15 +83,15 @@ namespace {
 
 } // anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
+std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
-    switches Result;
-    Result.verb = pstore::utf::from_native_string (verb.get ());
-    Result.path = pstore::utf::from_native_string (path.get ());
-    Result.retry_timeout = std::chrono::milliseconds (retry_timeout.get ());
-    Result.flood = flood.get ();
-    Result.kill = kill.get ();
-    Result.pipe_path = pathOption (pipe_path.get ());
-    return {Result, EXIT_SUCCESS};
+    switches result;
+    result.verb = pstore::utf::from_native_string (verb.get ());
+    result.path = pstore::utf::from_native_string (path.get ());
+    result.retry_timeout = std::chrono::milliseconds (retry_timeout.get ());
+    result.flood = flood.get ();
+    result.kill = kill.get ();
+    result.pipe_path = pathOption (pipe_path.get ());
+    return {result, EXIT_SUCCESS};
 }

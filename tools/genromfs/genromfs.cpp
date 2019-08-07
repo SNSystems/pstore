@@ -60,6 +60,7 @@
 
 // pstore includes
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/make_unique.hpp"
@@ -200,11 +201,13 @@ int main (int argc, char * argv[]) {
         write_definition (os, root_var.get (), directory_var (root_id).as_string ());
     }
     PSTORE_CATCH (std::exception const & ex, {
-        std::cerr << "Error: " << ex.what () << '\n';
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ")
+                                       << pstore::utf::to_native_string (ex.what ())
+                                       << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "An unknown error occurred\n";
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred\n");
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

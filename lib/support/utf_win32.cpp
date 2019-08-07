@@ -48,18 +48,18 @@
 #ifdef _WIN32
 
 // Standard Library includes
-#include <cassert>
-#include <cwchar>
+#    include <cassert>
+#    include <cwchar>
 
 // System includes
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 
 // Local includes
-#include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
-#include "pstore/support/small_vector.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/portab.hpp"
+#    include "pstore/support/small_vector.hpp"
 
 namespace {
     int conversion_result (char const * api, int result) {
@@ -245,28 +245,33 @@ namespace pstore {
                 return converted;
             }
 
-            std::string to_mbcs (char const * str, std::size_t length) {
-                if (length == 0) {
-                    return std::string ();
+            // to_mbcs
+            // ~~~~~~~
+            std::string to_mbcs (wchar_t const * utf16, std::size_t length) {
+                if (length == std::size_t{0}) {
+                    return {};
                 }
-
-                std::wstring const utf16 = to16 (str, length);
-                assert (utf16.length () <= std::numeric_limits<int>::max ());
-                auto const input_length =
-                    std::max (static_cast<int> (utf16.length ()), std::numeric_limits<int>::max ());
-
+                auto const input_length = static_cast<int> (
+                    std::min (length, static_cast<std::size_t> (std::numeric_limits<int>::max ())));
                 int size_needed = ::WideCharToMultiByte (CP_ACP, 0, &utf16[0], input_length,
                                                          nullptr, 0, nullptr, nullptr);
                 if (size_needed == 0) {
-                    raise (::pstore::win32_erc (::GetLastError ()), "WideCharToMultiByte");
+                    raise (win32_erc{::GetLastError ()}, "WideCharToMultiByte");
                 }
                 std::string str_to (size_needed, '\0');
                 size_needed = ::WideCharToMultiByte (CP_ACP, 0, &utf16[0], input_length, &str_to[0],
                                                      size_needed, nullptr, nullptr);
                 if (size_needed == 0) {
-                    raise (::pstore::win32_erc (::GetLastError ()), "WideCharToMultiByte");
+                    raise (win32_erc{::GetLastError ()}, "WideCharToMultiByte");
                 }
                 return str_to;
+            }
+
+            std::string to_mbcs (char const * str, std::size_t length) {
+                if (length == std::size_t{0}) {
+                    return {};
+                }
+                return to_mbcs (to16 (str, length));
             }
 
             /// Unfortunately, the Windows API forces us to do this conversion in two phases.
@@ -274,7 +279,7 @@ namespace pstore {
             /// can convert the UTF-16 string to UTF-8.
             std::string mbcs_to8 (char const * mbcs, std::size_t length) {
                 if (length == 0) {
-                    return std::string ();
+                    return {};
                 }
 
                 // Find out the number of wchars that the conversion will produce.

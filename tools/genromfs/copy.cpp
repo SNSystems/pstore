@@ -62,19 +62,22 @@
 
 namespace {
 
-#ifdef _WIN32
 
     FILE * file_open (std::string const & filename) {
+#ifdef _WIN32
         return _wfopen (pstore::utf::win32::to16 (filename).c_str (), L"r");
+#else
+        return std::fopen (filename.c_str (), "r");
+#endif
     }
 
-#else
+    void file_close (FILE * f) {
+        if (f != nullptr) {
+            std::fclose (f);
+        }
+    }
 
-    FILE * file_open (std::string const & filename) { return std::fopen (filename.c_str (), "r"); }
-
-#endif
-
-    PSTORE_NO_RETURN void open_failed (int erc, std::string const & path) {
+    void open_failed (int erc, std::string const & path) {
         std::stringstream str;
         str << "fopen " << pstore::quoted (path);
         raise (pstore::errno_erc{erc}, str.str ());
@@ -92,7 +95,7 @@ namespace {
                 : std::runtime_error (message) {}
     };
 
-    PSTORE_NO_RETURN void read_failed (std::string const & path) {
+    void read_failed (std::string const & path) {
         std::stringstream str;
         str << "read of file " << pstore::quoted (path) << " failed";
         pstore::raise_exception (read_failed_error{str.str ()});
@@ -116,7 +119,7 @@ void copy (std::string const & path, unsigned file_no) {
 
     constexpr auto buffer_size = std::size_t{1024};
     std::uint8_t buffer[buffer_size] = {0};
-    std::unique_ptr<FILE, decltype (&std::fclose)> file (file_open (path), &std::fclose);
+    std::unique_ptr<FILE, decltype (&file_close)> file (file_open (path), &file_close);
     if (!file) {
         open_failed (errno, path);
     }
@@ -134,7 +137,7 @@ void copy (std::string const & path, unsigned file_no) {
             char const * cr;
             std::tie (width, cr) = getcr (width);
 
-            assert (std::strlen (separator) <= 1);
+            assert (std::strlen (separator) <= separator_size);
             std::array<char, separator_size + crindent_size + byte_value_size + 1> vbuf{{0}};
             int written = std::snprintf (vbuf.data (), vbuf.size (), "%s%s%u", separator, cr,
                                          static_cast<unsigned> (buffer[n]));

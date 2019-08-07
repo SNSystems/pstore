@@ -43,5 +43,5 @@
 #===----------------------------------------------------------------------===//
 
 add_pstore_tool (pstore-json json.cpp)
-target_link_libraries (pstore-json PRIVATE pstore-json-lib pstore-dump-lib)
+target_link_libraries (pstore-json PRIVATE pstore-cmd-util pstore-json-lib pstore-dump-lib)
 run_pstore_unit_test (pstore-json pstore-json-unit-tests)

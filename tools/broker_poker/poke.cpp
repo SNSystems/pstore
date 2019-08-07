@@ -66,6 +66,7 @@
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/send_message.hpp"
 #include "pstore/broker_intf/writer.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
@@ -80,35 +81,13 @@ namespace {
 } // namespace
 
 
-#ifdef _WIN32
-#    define NATIVE_TEXT(str) _TEXT (str)
-#else
-#    define NATIVE_TEXT(str) str
-#endif
-
-
-namespace {
-
-#ifdef PSTORE_EXCEPTIONS
-    auto & error_stream =
-#    if defined(_WIN32) && defined(_UNICODE)
-        std::wcerr;
-#    else
-        std::cerr;
-#    endif
-#endif // PSTORE_EXCEPTIONS
-
-} // namespace
-
-
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    // TODO:Make sure that the broker is running?
     PSTORE_TRY {
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
@@ -140,12 +119,12 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ")
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
                     << pstore::utf::to_native_string (what) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

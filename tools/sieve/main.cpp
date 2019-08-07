@@ -53,14 +53,13 @@
 #include <string>
 #include <vector>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#endif
+// pstore includes
+#include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
 
 // Local includes
 #include "switches.hpp"
 #include "write_output.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace {
 
@@ -101,7 +100,7 @@ namespace {
 } // anonymous namespace
 
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
@@ -139,11 +138,11 @@ int main (int argc, char * argv[]) {
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (std::exception const & ex, {
-        std::cerr << "An error occurred: " << ex.what () << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (ex.what ()) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "Unknown exception" << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown exception") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

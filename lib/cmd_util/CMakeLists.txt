@@ -55,6 +55,7 @@ set (pstore_cmd_util_cl_includes
     "${pstore_cmd_util_include_dir}/option.hpp"
     "${pstore_cmd_util_include_dir}/parser.hpp"
     "${pstore_cmd_util_include_dir}/string_distance.hpp"
+    "${pstore_cmd_util_include_dir}/tchar.hpp"
     "${pstore_cmd_util_include_dir}/word_wrapper.hpp"
 )
 set (PSTORE_CMD_UTIL_CL_SRC
@@ -65,6 +66,7 @@ set (PSTORE_CMD_UTIL_CL_SRC
     option.cpp
     parser.cpp
     string_distance.cpp
+    tchar.cpp
     word_wrapper.cpp
 )
 list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_CL_SRC})

@@ -49,9 +49,9 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/utf.hpp"
 
-namespace {
+using namespace pstore::cmd_util;
 
-    using namespace pstore::cmd_util;
+namespace {
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
@@ -68,7 +68,7 @@ namespace {
 
 } // end anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
+std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore read utility\n");
 
     switches result;

@@ -46,7 +46,7 @@
 /// additional set of functions to convert UTF-8 strings to and from UTF-16.
 
 #ifndef PSTORE_SUPPORT_UTF_HPP
-#define PSTORE_SUPPORT_UTF_HPP
+#define PSTORE_SUPPORT_UTF_HPP (1)
 
 #include <algorithm>
 #include <cassert>
@@ -100,7 +100,7 @@ namespace pstore {
             }
 
             ///@{
-            /// Converts a UTF-8 encoded chars to a "multi-byte" string using
+            /// Converts a UTF-8 encoded char sequence to a "multi-byte" string using
             /// the system default Windows ANSI code page.
             /// \param length The number of bytes in the 'str' buffer.
             std::string to_mbcs (char const * str, std::size_t length);
@@ -109,6 +109,10 @@ namespace pstore {
                 return to_mbcs (str, std::strlen (str));
             }
             inline std::string to_mbcs (std::string const & str) {
+                return to_mbcs (str.data (), str.length ());
+            }
+            std::string to_mbcs (wchar_t const * wstr, std::size_t length);
+            inline std::string to_mbcs (std::wstring const & str) {
                 return to_mbcs (str.data (), str.length ());
             }
             ///@}

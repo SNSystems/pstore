@@ -46,6 +46,7 @@
 #include <iostream>
 
 #include "pstore/config/config.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_map_types.hpp"
@@ -196,7 +197,7 @@ namespace {
 } // anonymous namespace
 
 
-#if defined(_WIN32) && !PSTORE_IS_INSIDE_LLVM
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
@@ -219,11 +220,11 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        std::cerr << "Error: " << ex.what () << '\n';
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ()) << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-       std::cerr << "Unknown exception\n";
+       pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown exception\n");
        exit_code = EXIT_FAILURE;
     })
     // clang-format on

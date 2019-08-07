@@ -47,25 +47,9 @@
 #include <string>
 #include <utility>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#    define NATIVE_TEXT(str) _TEXT (str)
-#else
-using TCHAR = char;
-#    define NATIVE_TEXT(str) str
-#endif
-
-#include "pstore/config/config.hpp"
-
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/diff/diff_value.hpp"
 #include "pstore/diff/revision.hpp"
-
-
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
 
 struct switches {
     std::string db_path;
@@ -74,6 +58,6 @@ struct switches {
     bool hex = false;
 };
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
 
 #endif // PSTORE_DIFF_SWITCHES_HPP

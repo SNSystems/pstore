@@ -49,17 +49,7 @@
 #include <string>
 #include <tuple>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#endif
-
-#include "pstore/config/config.hpp"
-
-#if defined(_WIN32)
-using pstore_tchar = TCHAR;
-#else
-using pstore_tchar = char;
-#endif
+#include "pstore/cmd_util/tchar.hpp"
 
 struct switches {
     std::unique_ptr<std::string> playback_path;
@@ -68,6 +58,6 @@ struct switches {
     unsigned num_read_threads = 2U;
 };
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
 
 #endif // SWITCHES_HPP

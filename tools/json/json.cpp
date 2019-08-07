@@ -45,9 +45,14 @@
 #include <fstream>
 #include <iostream>
 
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/json/json.hpp"
 #include "pstore/support/portab.hpp"
+#include "pstore/support/utf.hpp"
+
+using pstore::cmd_util::error_stream;
+using pstore::cmd_util::out_stream;
 
 namespace {
 
@@ -138,13 +143,17 @@ namespace {
         }
 
         auto obj = p.callbacks ().result ();
-        std::cout << "\n----\n" << *obj << '\n';
+        out_stream << NATIVE_TEXT ("\n----\n") << *obj << NATIVE_TEXT ('\n');
         return EXIT_SUCCESS;
     }
 
 } // end anonymous namespace
 
-int main (int argc, const char * argv[]) {
+#ifdef _WIN32
+int _tmain (int argc, TCHAR const * argv[]) {
+#else
+int main (int argc, char const * argv[]) {
+#endif
     int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
         if (argc < 2) {
@@ -156,11 +165,11 @@ int main (int argc, const char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        std::cerr << "Error: " << ex.what () << '\n';
+        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ()) << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "Unknown exception.\n";
+        error_stream << NATIVE_TEXT ("Unknown exception.\n");
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

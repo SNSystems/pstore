@@ -49,16 +49,6 @@
 #include <iostream>
 #include <memory>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#else
-#    include <unistd.h>
-
-// On Windows, the TCHAR type may be either char or whar_t depending on the selected
-// Unicode mode. Everywhere else, I need to add this type for compatibility.
-using TCHAR = char;
-#endif
-
 // pstore includes.
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map.hpp"
@@ -74,13 +64,9 @@ using TCHAR = char;
 // Local includes
 #include "switches.hpp"
 
-namespace {
+using pstore::cmd_util::error_stream;
 
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-#else
-    auto & error_stream = std::cerr;
-#endif
+namespace {
 
     bool add_file (pstore::transaction<pstore::transaction_lock> & transaction,
                    pstore::index::write_index & names, std::string const & key,
@@ -144,7 +130,7 @@ namespace {
 } // namespace
 
 
-#if defined(_WIN32) && !defined(PSTORE_IS_INSIDE_LLVM)
+#if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
@@ -213,7 +199,7 @@ int main (int argc, char * argv[]) {
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
+        error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

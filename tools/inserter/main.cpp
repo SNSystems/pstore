@@ -55,20 +55,8 @@
 #include <thread>
 #include <unordered_set>
 
-#ifdef _WIN32
-#    include <tchar.h>
-#    define NATIVE_TEXT(x) _TEXT (x)
-#else
-#    include <unistd.h>
-
-// On Windows, the TCHAR type may be either char or whar_t depending on the selected
-// Unicode mode. Everywhere else, I need to add this type for compatibility.
-using TCHAR = char;
-// Similarly NATIVE_TEXT turns a string into a wide string on Windows.
-#    define NATIVE_TEXT(x) x
-#endif
-
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
@@ -115,16 +103,7 @@ namespace {
 
 #endif // PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
 
-#ifdef PSTORE_EXCEPTIONS
-    auto & error_stream =
-#    if defined(_WIN32) && defined(_UNICODE)
-        std::wcerr;
-#    else
-        std::cerr;
-#    endif
-#endif // PSTORE_EXCEPTIONS
-
-} // namespace
+} // end anonymous namespace
 
 
 namespace {
@@ -148,7 +127,7 @@ namespace {
         unsigned seed_;
     };
 
-} // namespace
+} // end anonymous namespace
 
 namespace {
 
@@ -197,7 +176,7 @@ namespace {
             [&database, &index](pstore::index::digest key) { index.find (database, key); });
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 namespace {
@@ -208,7 +187,8 @@ namespace {
         data_file (cl::Positional,
                    cl::desc ("Path of the pstore repository to use for index exercise."),
                    cl::Required);
-} // namespace
+
+} // end anonymous namespace
 
 
 #ifdef _WIN32
@@ -287,12 +267,11 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what)
-                    << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

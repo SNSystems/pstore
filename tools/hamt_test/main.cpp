@@ -49,6 +49,7 @@
 #include <vector>
 
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
@@ -60,30 +61,15 @@
 // Local includes
 #include "./print.hpp"
 
-#ifdef _WIN32
-#    define NATIVE_TEXT(x) _TEXT (x)
-#else
-#    define NATIVE_TEXT(x) x
-#endif
+using namespace pstore::cmd_util;
 
 namespace {
-
-#ifdef PSTORE_EXCEPTIONS
-    auto & error_stream =
-#    if defined(_WIN32) && defined(_UNICODE)
-        std::wcerr;
-#    else
-        std::cerr;
-#    endif
-#endif // PSTORE_EXCEPTIONS
-
-    using namespace pstore::cmd_util;
 
     cl::opt<std::string>
         data_file (cl::Positional,
                    cl::desc ("Path of the pstore repository to use for index test."), cl::Required);
 
-} // namespace
+} // end anonymous namespace
 
 namespace {
 
@@ -109,9 +95,10 @@ namespace {
         unsigned seed_;
     };
 
-} // namespace
+} // end anonymous namespace
 
 namespace {
+
     using random_list = std::vector<std::pair<pstore::index::digest, pstore::address>>;
     using less_map =
         std::map<pstore::index::digest, pstore::address, std::less<pstore::index::digest>>;
@@ -222,7 +209,8 @@ namespace {
                                              std::end (expected_results), check_key);
         return is_found.load ();
     }
-} // namespace
+
+} // end anonymous namespace
 
 #ifdef _WIN32
 int _tmain (int argc, TCHAR * argv[]) {
@@ -233,7 +221,6 @@ int main (int argc, char * argv[]) {
 
     PSTORE_TRY {
         cl::ParseCommandLineOptions (argc, argv, "Tests the pstore index code");
-
 
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
@@ -279,13 +266,12 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        auto what = ex.what ();
-        error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (what)
+        error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (ex.what ())
                      << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        std::cerr << "An unknown error occurred." << std::endl;
+        error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

@@ -49,19 +49,14 @@
 
 // pstore
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/tchar.hpp"
 #include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
 namespace {
-
-#if defined(_WIN32) && defined(_UNICODE)
-    auto & error_stream = std::wcerr;
-#else
-    auto & error_stream = std::cerr;
-#endif
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
@@ -89,7 +84,7 @@ namespace {
 
 } // end anonymous namespace
 
-std::pair<switches, int> get_switches (int argc, pstore_tchar * argv[]) {
+std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, usage_help ());
 
     switches sw;
