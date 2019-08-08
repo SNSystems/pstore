@@ -1262,7 +1262,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         std::shared_ptr<linear_node const> sptr;
         linear_node const * level11_linear = nullptr;
         std::tie (sptr, level11_linear) =
-            linear_node::get_node (*db_, index_pointer{level11.untag_internal_address ()});
+            linear_node::get_node (*db_, index_pointer{level11.untag_linear_address ()});
 
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_TRUE (this->is_found ("g")) << "key \"g\" should be present in the index (store) ";
@@ -1749,7 +1749,8 @@ namespace {
     std::shared_ptr<internal_node> CorruptInternalNodes::load_inode (index_pointer ptr) {
         assert (ptr.is_internal ());
         return std::static_pointer_cast<internal_node> (
-            db_->getrw (ptr.untag_internal_address (), internal_node::size_bytes (internal_node_children)));
+            db_->getrw (ptr.untag_internal_address ().to_address (),
+                        internal_node::size_bytes (internal_node_children)));
     }
 
 } // end anonymous namespace

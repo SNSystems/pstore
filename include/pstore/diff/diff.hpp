@@ -92,7 +92,8 @@ namespace pstore {
                                          gsl::not_null<result_type *> result) const;
 
                 bool is_new (index_pointer node) const noexcept {
-                    return node.is_heap () || node.untag_internal_address () >= threshold_;
+                    return node.is_heap () ||
+                           node.untag_internal_address ().to_address () >= threshold_;
                 }
 
                 database const & db_;
@@ -137,12 +138,10 @@ namespace pstore {
             void traverser<Index>::visit_intermediate (index::details::index_pointer node,
                                                        unsigned shifts,
                                                        gsl::not_null<result_type *> result) const {
-                std::shared_ptr<void const> store_ptr;
-                Node const * ptr = nullptr;
-                std::tie (store_ptr, ptr) = Node::get_node (db_, node);
-                assert (ptr != nullptr);
-
-                for (auto child : *ptr) {
+                std::pair<std::shared_ptr<void const>, Node const *> const p =
+                    Node::get_node (db_, node);
+                assert (std::get<1> (p) != nullptr);
+                for (auto child : *std::get<1> (p)) {
                     if (this->is_new (node)) {
                         this->visit_node (index_pointer{child},
                                           shifts + index::details::hash_index_bits, result);

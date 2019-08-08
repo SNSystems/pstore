@@ -150,23 +150,22 @@ namespace pstore {
                 }
 
                 // Read an existing node. First work out its size.
-                auto const addr = typed_address<linear_node> (node.untag_internal_address ());
-                std::shared_ptr<linear_node const> ln = db.getro (addr);
-                std::size_t const orig_size = ln->size ();
-
-                std::size_t const in_store_size = linear_node::size_bytes (orig_size);
+                auto const addr = node.untag_linear_address ();
+                std::size_t const in_store_size =
+                    linear_node::size_bytes (db.getro (addr)->size ());
 
                 // Now access the data block for this linear node. We need to use the "raw address"
                 // version of getro() because in_store_size is a number of bytes, not a number of
                 // instances of linear_node.
-                ln = std::static_pointer_cast<linear_node const> (
+                auto const ln = std::static_pointer_cast<linear_node const> (
                     db.getro (addr.to_address (), in_store_size));
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
                 if (ln->signature_ != signature) {
                     raise (pstore::error_code::index_corrupt);
                 }
 #endif
-                return {ln, ln.get ()};
+                auto * const p = ln.get ();
+                return {std::move (ln), p};
             }
 
             // flush
@@ -296,7 +295,7 @@ namespace pstore {
             /// \return  A boolean indicating whether the validation was successful.
 
             bool internal_node::validate_after_load (internal_node const & internal,
-                                                     address const addr) {
+                                                     typed_address<internal_node> const addr) {
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
                 if (internal.signature_ != signature) {
                     return false;
@@ -319,16 +318,18 @@ namespace pstore {
                 return true;
             }
 
-            // read_node
+            // read_node [static]
             // ~~~~~~~~~
-            auto internal_node::read_node (database const & db, address const addr)
+            auto internal_node::read_node (database const & db,
+                                           typed_address<internal_node> const addr)
                 -> std::shared_ptr<internal_node const> {
                 /// Sadly, loading an internal_node needs to done in three stages:
                 /// 1. Load the basic structure
                 /// 2. Calculate the actual size of the child pointer array
                 /// 3. Load the complete structure along with its child pointer array
                 auto base = std::static_pointer_cast<internal_node const> (
-                    db.getro (addr, sizeof (internal_node) - sizeof (internal_node::children_)));
+                    db.getro (addr.to_address (),
+                              sizeof (internal_node) - sizeof (internal_node::children_)));
 
                 if (base->get_bitmap () == 0) {
                     raise (error_code::index_corrupt, db.path ());
@@ -337,8 +338,8 @@ namespace pstore {
                 base.reset ();
 
                 assert (actual_size > sizeof (internal_node) - sizeof (internal_node::children_));
-                auto resl =
-                    std::static_pointer_cast<internal_node const> (db.getro (addr, actual_size));
+                auto resl = std::static_pointer_cast<internal_node const> (
+                    db.getro (addr.to_address (), actual_size));
 
                 if (!validate_after_load (*resl, addr)) {
                     raise (error_code::index_corrupt, db.path ());
@@ -347,9 +348,8 @@ namespace pstore {
                 return resl;
             }
 
-            // get_node
+            // get_node [static]
             // ~~~~~~~~
-            // TODO: for consistency with linear nodes, shouldn't this be called load_node()?
             auto internal_node::get_node (database const & db, index_pointer const node)
                 -> std::pair<std::shared_ptr<internal_node const>, internal_node const *> {
 
@@ -357,9 +357,10 @@ namespace pstore {
                     return {nullptr, node.untag_node<internal_node *> ()};
                 }
 
-                address const addr = node.untag_internal_address ();
-                std::shared_ptr<internal_node const> store_internal = read_node (db, addr);
-                return {store_internal, store_internal.get ()};
+                std::shared_ptr<internal_node const> store_internal =
+                    internal_node::read_node (db, node.untag_internal_address ());
+                auto const * const p = store_internal.get ();
+                return {std::move (store_internal), p};
             }
 
             // insert_child
@@ -417,11 +418,11 @@ namespace pstore {
                     if (p.is_heap ()) {
                         if (child_shifts < max_hash_bits) { // internal node
                             auto internal = p.untag_node<internal_node *> ();
-                            p.addr = internal->flush (transaction, child_shifts);
+                            p = internal->flush (transaction, child_shifts);
                             delete internal;
                         } else { // linear node
                             auto linear = p.untag_node<linear_node *> ();
-                            p.addr = linear->flush (transaction) | internal_node_bit;
+                            p = linear->flush (transaction) | internal_node_bit;
                             delete linear;
                         }
                     }

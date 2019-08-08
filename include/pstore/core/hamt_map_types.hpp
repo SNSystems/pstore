@@ -151,35 +151,51 @@ namespace pstore {
             /// An index pointer is either a database address or a pointer to volatile RAM.
             /// The type information (which of the two fields applies) is carried externally.
             union index_pointer {
-                index_pointer ()
+                index_pointer () noexcept
                         : internal{nullptr} {}
-                explicit index_pointer (address const a)
+                explicit index_pointer (address const a) noexcept
                         : addr (a) {}
-                explicit index_pointer (internal_node * p)
+                explicit index_pointer (typed_address<internal_node> const a) noexcept
+                        : addr (a.to_address ()) {}
+                explicit index_pointer (typed_address<linear_node> const a) noexcept
+                        : addr (a.to_address ()) {}
+                explicit index_pointer (internal_node * p) noexcept
                         : internal{tag_node (p)} {}
-                explicit index_pointer (linear_node * p)
+                explicit index_pointer (linear_node * p) noexcept
                         : linear{tag_node (p)} {}
-                index_pointer (index_pointer const &) = default;
+                index_pointer (index_pointer const &) noexcept = default;
                 index_pointer (index_pointer &&) noexcept = default;
 
                 index_pointer & operator= (index_pointer const &) = default;
                 index_pointer & operator= (index_pointer &&) noexcept = default;
-                index_pointer & operator= (address const & a) {
+                index_pointer & operator= (address const & a) noexcept {
                     addr = a;
                     return *this;
                 }
-                index_pointer & operator= (internal_node * p) {
+                index_pointer & operator= (typed_address<internal_node> const & a) noexcept {
+                    addr = a.to_address ();
+                    return *this;
+                }
+                index_pointer & operator= (typed_address<linear_node> const & a) noexcept {
+                    addr = a.to_address ();
+                    return *this;
+                }
+                index_pointer & operator= (internal_node * const p) noexcept {
                     internal = tag_node (p);
                     return *this;
                 }
-                index_pointer & operator= (linear_node * l) {
+                index_pointer & operator= (linear_node * const l) noexcept {
                     linear = tag_node (l);
                     return *this;
                 }
 
 
-                bool operator== (index_pointer const & other) const { return addr == other.addr; }
-                bool operator!= (index_pointer const & other) const { return !operator== (other); }
+                bool operator== (index_pointer const & other) const noexcept {
+                    return addr == other.addr;
+                }
+                bool operator!= (index_pointer const & other) const noexcept {
+                    return !operator== (other);
+                }
 
                 explicit operator bool () const noexcept { return !this->is_empty (); }
 
@@ -220,8 +236,12 @@ namespace pstore {
                     return reinterpret_cast<T> (untag ());
                 }
 
-                address untag_internal_address () const noexcept {
-                    return address{addr.absolute () & ~internal_node_bit};
+                typed_address<internal_node> untag_internal_address () const noexcept {
+                    return typed_address<internal_node>::make (addr.absolute () &
+                                                               ~internal_node_bit);
+                }
+                typed_address<linear_node> untag_linear_address () const noexcept {
+                    return typed_address<linear_node>::make (addr.absolute () & ~internal_node_bit);
                 }
 
                 address addr;
@@ -521,8 +541,8 @@ namespace pstore {
                 /// node or the result of calling .get() on the store-pointer.
                 static auto get_node (database const & db, index_pointer const node)
                     -> std::pair<std::shared_ptr<internal_node const>, internal_node const *>;
-                /// Return the internal store node pointer.
-                static auto read_node (database const & db, address const addr)
+                /// Load an internal node from the store.
+                static auto read_node (database const & db, typed_address<internal_node> const addr)
                     -> std::shared_ptr<internal_node const>;
 
                 /// Returns a writable reference to an internal node. If the \p node parameter
@@ -609,7 +629,7 @@ namespace pstore {
 
             private:
                 static bool validate_after_load (internal_node const & internal,
-                                                 address const addr);
+                                                 typed_address<internal_node> const addr);
 
                 /// Appends the internal node (which refers to a node in heap memory) to the
                 /// store. Returns a new (in-store) internal store address.
