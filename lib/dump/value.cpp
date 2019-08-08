@@ -301,8 +301,7 @@ namespace pstore {
             std::tm const tm = gm_time (t);
             char time_str[100];
             // strftime() returns 0 if the result doesn't fit in the provided buffer;
-            // the contents are undefined.
-            // TODO: use small_vector? 100 characters should be plenty for an ISO8601 date.
+            // the contents are undefined. 100 characters should be plenty for an ISO8601 date.
             if (std::strftime (time_str, sizeof (time_str), "%FT%TZ", &tm) != 0) {
                 // Guarantee that the string is null terminated.
                 time_str[array_elements (time_str) - 1] = '\0';
