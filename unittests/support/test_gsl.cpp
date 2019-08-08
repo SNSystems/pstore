@@ -411,7 +411,7 @@ TEST (GslSpan, FromStdArrayConstructor) {
         EXPECT_EQ (s.size (), static_cast<std::ptrdiff_t> (arr.size ()));
         EXPECT_EQ (s.data (), arr.data ());
 
-        span<const int> cs{arr};
+        span<int, 4> cs{arr};
         EXPECT_EQ (cs.size (), static_cast<std::ptrdiff_t> (arr.size ()));
         EXPECT_EQ (cs.data (), arr.data ());
     }
@@ -420,7 +420,7 @@ TEST (GslSpan, FromStdArrayConstructor) {
         EXPECT_EQ (s.size (), static_cast<std::ptrdiff_t> (arr.size ()));
         EXPECT_EQ (s.data (), arr.data ());
 
-        span<const int, 4> cs{arr};
+        span<int const, 4> cs{arr};
         EXPECT_EQ (cs.size (), static_cast<std::ptrdiff_t> (arr.size ()));
         EXPECT_EQ (cs.data (), arr.data ());
     }
@@ -453,7 +453,7 @@ TEST (GslSpan, FromStdArrayConstructor) {
         auto get_an_array = []() -> std::array<int, 4> { return {{1, 2, 3, 4}}; };
         auto take_a_span = [](span<int const> s) { static_cast<void> (s); };
         // try to take a temporary std::array
-        take_a_span (get_an_array ());
+        take_a_span (span<int const, 4>{get_an_array ()});
     }
     {
         auto s = make_span (arr);
@@ -490,9 +490,9 @@ TEST (GslSpan, FromConstStdArrayConstructor) {
 
     {
         auto get_an_array = []() -> const std::array<int, 4> { return {{1, 2, 3, 4}}; };
-        auto take_a_span = [](span<const int> s) { static_cast<void> (s); };
+        auto take_a_span = [](span<int const> s) { static_cast<void> (s); };
         // try to take a temporary std::array
-        take_a_span (get_an_array ());
+        take_a_span (span<int const, 4>{get_an_array ()});
     }
     {
         auto s = make_span (arr);
@@ -678,8 +678,8 @@ TEST (GslSpan, FromContainerConstructor) {
     }
     {
         auto get_temp_vector = []() -> std::vector<int> { return {}; };
-        auto use_span = [](span<const int> s) { static_cast<void> (s); };
-        use_span (get_temp_vector ());
+        auto use_span = [](span<int const> s) { static_cast<void> (s); };
+        use_span (span<int const> (get_temp_vector ()));
     }
     {
 #ifdef CONFIRM_COMPILATION_ERRORS
@@ -794,20 +794,10 @@ TEST (GslSpan, First) {
         EXPECT_EQ (av.first (0).length (), 0);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ (av.first<5> ().length (), 5);
         EXPECT_EQ (av.first (5).length (), 5);
     }
-#if 0
-    {
-        span<int, 5> av = arr;
-#ifdef CONFIRM_COMPILATION_ERRORS
-        EXPECT_EQ(av.first<6>().length(), 6);
-        EXPECT_EQ(av.first<-1>().length(), -1);
-#endif
-        CHECK_THROW(av.first(6).length(), fail_fast);
-    }
-#endif
     {
         span<int> av;
         EXPECT_EQ (av.first<0> ().length (), 0);
@@ -819,29 +809,20 @@ TEST (GslSpan, Last) {
     int arr[5] = {1, 2, 3, 4, 5};
 
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ (av.last<2> ().length (), 2);
         EXPECT_EQ (av.last (2).length (), 2);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ (av.last<0> ().length (), 0);
         EXPECT_EQ (av.last (0).length (), 0);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ (av.last<5> ().length (), 5);
         EXPECT_EQ (av.last (5).length (), 5);
     }
-#if 0
-    {
-        span<int, 5> av = arr;
-#ifdef CONFIRM_COMPILATION_ERRORS
-        EXPECT_EQ (av.last<6>().length(), 6);
-#endif    
-        CHECK_THROW(av.last(6).length(), fail_fast);
-    }
-#endif
     {
         span<int> av;
         EXPECT_EQ (av.last<0> ().length (), 0);
@@ -853,23 +834,23 @@ TEST (GslSpan, Subspan) {
     int arr[5] = {1, 2, 3, 4, 5};
 
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ ((av.subspan<2, 2> ().length ()), 2);
         EXPECT_EQ (av.subspan (2, 2).length (), 2);
         EXPECT_EQ (av.subspan (2, 3).length (), 3);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ ((av.subspan<0, 0> ().length ()), 0);
         EXPECT_EQ (av.subspan (0, 0).length (), 0);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ ((av.subspan<0, 5> ().length ()), 5);
         EXPECT_EQ ((av.subspan (0, 5).length ()), 5);
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ ((av.subspan<4, 0> ().length ()), 0);
         EXPECT_EQ (av.subspan (4, 0).length (), 0);
         EXPECT_EQ (av.subspan (5, 0).length (), 0);
@@ -884,7 +865,7 @@ TEST (GslSpan, Subspan) {
         EXPECT_EQ (av.subspan (0).length (), 0);
     }
     {
-        span<int> av = arr;
+        span<int> av = make_span (arr);
         EXPECT_EQ (av.subspan (0).length (), 5);
         EXPECT_EQ (av.subspan (1).length (), 4);
         EXPECT_EQ (av.subspan (4).length (), 1);
@@ -895,7 +876,7 @@ TEST (GslSpan, Subspan) {
         }
     }
     {
-        span<int, 5> av = arr;
+        span<int, 5> av = make_span (arr);
         EXPECT_EQ (av.subspan (0).length (), 5);
         EXPECT_EQ (av.subspan (1).length (), 4);
         EXPECT_EQ (av.subspan (4).length (), 1);
@@ -911,12 +892,12 @@ TEST (GslSpan, At) {
     int arr[4] = {1, 2, 3, 4};
 
     {
-        span<int> s = arr;
+        span<int> s = make_span (arr);
         EXPECT_EQ (s.at (0), 1);
     }
     {
         int arr2d[2] = {1, 6};
-        span<int, 2> s = arr2d;
+        span<int, 2> s = make_span (arr2d);
         EXPECT_EQ (s.at (0), 1);
         EXPECT_EQ (s.at (1), 6);
     }
@@ -926,12 +907,12 @@ TEST (GslSpan, OperatorFunctionCall) {
     int arr[4] = {1, 2, 3, 4};
 
     {
-        span<int> s = arr;
+        span<int> s = make_span (arr);
         EXPECT_EQ (s (0), 1);
     }
     {
         int arr2d[2] = {1, 6};
-        span<int, 2> s = arr2d;
+        span<int, 2> s = make_span (arr2d);
         EXPECT_EQ (s (0), 1);
         EXPECT_EQ (s (1), 6);
     }
@@ -955,7 +936,7 @@ TEST (GslSpan, IteratorConversions) {
     EXPECT_EQ (badIt, badConstIt);
 
     int a[] = {1, 2, 3, 4};
-    span<int> s = a;
+    span<int> s = make_span (a);
 
     auto it = s.begin ();
     auto cit = s.cbegin ();
@@ -973,7 +954,7 @@ TEST (GslSpan, IteratorConversions) {
 TEST (GslSpan, IteratorComparisons) {
     int a[] = {1, 2, 3, 4};
     {
-        span<int> s = a;
+        span<int> s = make_span (a);
         span<int>::iterator it = s.begin ();
         auto it2 = it + 1;
         span<int>::const_iterator cit = s.cbegin ();
@@ -1019,7 +1000,7 @@ TEST (GslSpan, IteratorComparisons) {
 TEST (GslSpan, BeginEnd) {
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         span<int>::iterator it = s.begin ();
         span<int>::iterator it2 = std::begin (s);
@@ -1031,7 +1012,7 @@ TEST (GslSpan, BeginEnd) {
     }
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         auto it = s.begin ();
         auto first = it;
@@ -1071,7 +1052,7 @@ TEST (GslSpan, BeginEnd) {
 TEST (GslSpan, CbeginCend) {
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         span<int>::const_iterator cit = s.begin ();
         span<int>::const_iterator cit2 = std::begin (s);
@@ -1083,7 +1064,7 @@ TEST (GslSpan, CbeginCend) {
     }
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         auto it = s.cbegin ();
         auto first = it;
@@ -1120,7 +1101,7 @@ TEST (GslSpan, CbeginCend) {
 TEST (GslSpan, RbeginRend) {
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         auto it = s.rbegin ();
         auto first = it;
@@ -1160,7 +1141,7 @@ TEST (GslSpan, RbeginRend) {
 TEST (GslSpan, CrbeginCrend) {
     {
         int a[] = {1, 2, 3, 4};
-        span<int> s = a;
+        span<int> s = make_span (a);
 
         auto it = s.crbegin ();
         auto first = it;
@@ -1195,8 +1176,8 @@ TEST (GslSpan, CrbeginCrend) {
 
 TEST (GslSpan, ComparisonOperators) {
     {
-        span<int> s1 = nullptr;
-        span<int> s2 = nullptr;
+        span<int> s1{nullptr};
+        span<int> s2{nullptr};
         EXPECT_EQ (s1, s2);
         EXPECT_TRUE (!(s1 != s2));
         EXPECT_TRUE (!(s1 < s2));
@@ -1212,8 +1193,8 @@ TEST (GslSpan, ComparisonOperators) {
     }
     {
         int arr[] = {2, 1};
-        span<int> s1 = arr;
-        span<int> s2 = arr;
+        span<int> s1 = make_span (arr);
+        span<int> s2 = make_span (arr);
 
         EXPECT_TRUE (s1 == s2);
         EXPECT_TRUE (!(s1 != s2));
@@ -1231,8 +1212,8 @@ TEST (GslSpan, ComparisonOperators) {
     {
         int arr[] = {2, 1}; // bigger
 
-        span<int> s1 = nullptr;
-        span<int> s2 = arr;
+        span<int> s1{nullptr};
+        span<int> s2 = make_span (arr);
 
         EXPECT_TRUE (s1 != s2);
         EXPECT_TRUE (s2 != s1);
@@ -1250,8 +1231,8 @@ TEST (GslSpan, ComparisonOperators) {
     {
         int arr1[] = {1, 2};
         int arr2[] = {1, 2};
-        span<int> s1 = arr1;
-        span<int> s2 = arr2;
+        span<int> s1 = make_span (arr1);
+        span<int> s2 = make_span (arr2);
 
         EXPECT_TRUE (s1 == s2);
         EXPECT_TRUE (!(s1 != s2));
@@ -1270,7 +1251,7 @@ TEST (GslSpan, ComparisonOperators) {
         int arr[] = {1, 2, 3};
 
         span<int> s1 = {&arr[0], 2}; // shorter
-        span<int> s2 = arr;          // longer
+        span<int> s2 = make_span (arr); // longer
 
         EXPECT_TRUE (s1 != s2);
         EXPECT_TRUE (s2 != s1);
@@ -1289,8 +1270,8 @@ TEST (GslSpan, ComparisonOperators) {
         int arr1[] = {1, 2}; // smaller
         int arr2[] = {2, 1}; // bigger
 
-        span<int> s1 = arr1;
-        span<int> s2 = arr2;
+        span<int> s1 = make_span (arr1);
+        span<int> s2 = make_span (arr2);
 
         EXPECT_TRUE (s1 != s2);
         EXPECT_TRUE (s2 != s1);
@@ -1310,15 +1291,6 @@ TEST (GslSpan, ComparisonOperators) {
 TEST (GslSpan, AsBytes) {
     int a[] = {1, 2, 3, 4};
 
-#if 0
-    {
-        span<const int> s = a;
-        EXPECT_EQ (s.length(), 4);
-        span<const byte> bs = as_bytes(s);
-        EXPECT_EQ (static_cast<const void*>(bs.data()), static_cast<const void*>(s.data()));
-        EXPECT_EQ (bs.length(), s.length_bytes());
-    }
-#endif
     {
         span<int> s;
         auto bs = as_bytes (s);
@@ -1330,7 +1302,7 @@ TEST (GslSpan, AsBytes) {
     }
 
     {
-        span<int> s = a;
+        span<int> s = make_span (a);
         auto bs = as_bytes (s);
         EXPECT_EQ (static_cast<const void *> (bs.data ()), static_cast<const void *> (s.data ()));
         EXPECT_EQ (bs.length (), s.length_bytes ());
@@ -1362,7 +1334,7 @@ TEST (GslSpan, AsWriteableBytes) {
     }
 
     {
-        span<int> s = a;
+        span<int> s = make_span (a);
         auto bs = as_writeable_bytes (s);
         EXPECT_EQ (static_cast<void *> (bs.data ()), static_cast<void *> (s.data ()));
         EXPECT_EQ (bs.length (), s.length_bytes ());
@@ -1373,7 +1345,7 @@ TEST (GslSpan, FixedSizeConversions) {
     int arr[] = {1, 2, 3, 4};
 
     // converting to an span from an equal size array is ok
-    span<int, 4> s4 = arr;
+    span<int, 4> s4 = make_span (arr);
     EXPECT_EQ (s4.length (), 4);
 
     // converting to dynamic_range is always ok
@@ -1395,7 +1367,7 @@ TEST (GslSpan, FixedSizeConversions) {
 // even when done dynamically
 #if 0
     {
-        span<int> s = arr;
+        span<int> s = make_span (arr);
         auto f = [&]() {
             span<int, 2> s2 = s;
             static_cast<void>(s2);

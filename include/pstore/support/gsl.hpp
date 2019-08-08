@@ -296,10 +296,7 @@ namespace pstore {
             // [span.cons], span constructors, copy, assignment, and destructor
             constexpr span () noexcept
                     : storage_ (nullptr, details::extent_type<0> ()) {}
-            // Disable the clang-tidy check for explicit single-argument constructors. We actively
-            // want to allow implicit conversions to span<>.
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            constexpr span (std::nullptr_t) noexcept
+            constexpr explicit span (std::nullptr_t) noexcept
                     : span () {}
             constexpr span (pointer ptr, index_type count)
                     : storage_ (ptr, count) {}
@@ -309,40 +306,33 @@ namespace pstore {
 
 
             template <size_t N>
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            constexpr span (element_type (&arr)[N]) noexcept
+            constexpr explicit span (element_type (&arr)[N]) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <size_t N, class ArrayElementType = element_type>
-            constexpr span (std::array<ArrayElementType, N> & arr) noexcept
+            constexpr explicit span (std::array<ArrayElementType, N> & arr) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <size_t N, class ArrayElementType = element_type>
-            constexpr span (std::array<ArrayElementType, N> const & arr) noexcept
+            constexpr explicit span (std::array<ArrayElementType, N> const & arr) noexcept
                     : storage_ (&arr[0], details::extent_type<N> ()) {}
 
 
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename MemberType>
-            constexpr span (std::vector<MemberType> & cont)
+            constexpr explicit span (std::vector<MemberType> & cont)
                     : span (cont.data (), static_cast<index_type> (cont.size ())) {}
 
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
             template <typename MemberType>
-            constexpr span (std::vector<MemberType> const & cont)
+            constexpr explicit span (std::vector<MemberType> const & cont)
                     : span (cont.data (), static_cast<index_type> (cont.size ())) {}
 
 
             template <typename ArrayElementType = std::add_pointer<element_type>>
             constexpr span (std::unique_ptr<ArrayElementType> const & ptr, index_type count)
                     : storage_ (ptr.get (), count) {}
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            constexpr span (std::unique_ptr<element_type> const & ptr)
+            constexpr explicit span (std::unique_ptr<element_type> const & ptr)
                     : storage_ (ptr.get (), ptr.get () ? 1 : 0) {}
-            // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            constexpr span (std::shared_ptr<element_type> const & ptr)
+            constexpr explicit span (std::shared_ptr<element_type> const & ptr)
                     : storage_ (ptr.get (), ptr.get () ? 1 : 0) {}
 
 
@@ -549,17 +539,17 @@ namespace pstore {
 
         template <typename ElementType, std::size_t N>
         span<ElementType, N> make_span (ElementType (&arr)[N]) {
-            return {arr};
+            return span<ElementType, N>{arr};
         }
 
 
         template <typename ValueType, std::size_t N>
         span<ValueType, N> make_span (std::array<ValueType, N> & cont) {
-            return {cont};
+            return span<ValueType, N>{cont};
         }
         template <typename ValueType, std::size_t N>
         span<ValueType const, N> make_span (std::array<ValueType, N> const & cont) {
-            return {cont};
+            return span<ValueType const, N>{cont};
         }
 
 
@@ -582,7 +572,7 @@ namespace pstore {
 
         template <typename SmartPtr>
         span<typename SmartPtr::element_type> make_span (SmartPtr & cont) {
-            return {cont};
+            return span<typename SmartPtr::element_type>{cont};
         }
 
 
