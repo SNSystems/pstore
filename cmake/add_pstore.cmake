@@ -210,6 +210,12 @@ function (add_pstore_additional_compiler_flags target_name)
         endif (PSTORE_COVERAGE)
 
     endif ()
+
+    # On Windows, we're a "Unicode" app.
+    if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+        target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
+    endif ()
+
 endfunction(add_pstore_additional_compiler_flags)
 
 
@@ -307,11 +313,6 @@ function (add_pstore_library)
 
         target_include_directories ("${arg_TARGET}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
-        # On Windows, we're a "Unicode" app.
-        if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-            target_compile_definitions ("${arg_TARGET}" PRIVATE -DUNICODE -D_UNICODE)
-        endif ()
-
         install (
 	    TARGETS "${arg_TARGET}"
             ARCHIVE DESTINATION lib/pstore
@@ -351,11 +352,6 @@ function (add_pstore_executable target_name)
         set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD_REQUIRED Yes)
         pstore_enable_warnings (${target_name})
         add_pstore_additional_compiler_flags (${target_name})
-
-        # On Windows, we're a "Unicode" app.
-        if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-            target_compile_definitions ("${target_name}" PRIVATE -DUNICODE -D_UNICODE)
-        endif ()
     endif (PSTORE_IS_INSIDE_LLVM)
 
     set_target_properties ("${target_name}" PROPERTIES FOLDER "pstore executables")

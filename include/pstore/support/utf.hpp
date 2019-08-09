@@ -457,10 +457,12 @@ namespace pstore {
         }
         inline std::string from_native_string (char const * str) { return win32::mbcs_to8 (str); }
 #else //_WIN32
-        inline std::string to_native_string (std::string const & str) { return str; }
-        inline std::string to_native_string (char const * str) { return str; }
-        inline std::string from_native_string (std::string const & str) { return str; }
-        inline std::string from_native_string (char const * str) { return str; }
+        inline constexpr std::string const & to_native_string (std::string const & str) noexcept {
+            return str;
+        }
+        inline constexpr std::string const & from_native_string (std::string const & str) noexcept {
+            return str;
+        }
 #endif
     } // namespace utf
 } // namespace pstore
