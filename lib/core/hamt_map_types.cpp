@@ -198,6 +198,28 @@ namespace pstore {
             internal_node::signature_type const internal_node::signature = {
                 {'I', 'n', 't', 'e', 'r', 'n', 'a', 'l'}};
 
+            // operator new
+            // ~~~~~~~~~~~~
+            void * internal_node::operator new (std::size_t s, nchildren size) {
+                (void) s;
+                // TODO: we currently allocate in-heap nodes at their maximum size to avoid
+                // reallocations. This is acceptable for 64-bit hashes, but will become expensive
+                // once the hash size increases to 128 bits.
+                assert (size.n == hash_size);
+                std::size_t const actual_bytes = internal_node::size_bytes (size.n);
+                assert (actual_bytes >= s);
+                return ::operator new (actual_bytes);
+            }
+
+            // operator delete
+            // ~~~~~~~~~~~~~~~
+            void internal_node::operator delete (void * p, nchildren /*size*/) {
+                ::operator delete (p);
+            }
+            void internal_node::operator delete (void * p) { ::operator delete (p); }
+
+            // ctor
+            // ~~~~
             internal_node::internal_node ()
                     : signature_ (signature)
                     , bitmap_{0} {
@@ -249,9 +271,34 @@ namespace pstore {
                     , bitmap_{rhs.bitmap_} {
 
                 auto first = std::begin (rhs.children_);
-                auto out = std::copy (first, first + rhs.size (), std::begin (children_));
-                std::fill (out, std::end (children_), address::null ());
+                std::copy (first, first + rhs.size (), std::begin (children_));
             }
+
+            // allocate
+            // ~~~~~~~~
+            std::unique_ptr<internal_node> internal_node::allocate () {
+                return std::unique_ptr<internal_node>{new (nchildren{hash_size}) internal_node ()};
+            }
+
+            std::unique_ptr<internal_node> internal_node::allocate (internal_node const & other) {
+                return std::unique_ptr<internal_node>{new (nchildren{hash_size})
+                                                          internal_node (other)};
+            }
+
+            std::unique_ptr<internal_node> internal_node::allocate (index_pointer const & leaf,
+                                                                    hash_type hash) {
+                return std::unique_ptr<internal_node>{new (nchildren{hash_size})
+                                                          internal_node (leaf, hash)};
+            }
+
+            std::unique_ptr<internal_node>
+            internal_node::allocate (index_pointer const & existing_leaf,
+                                     index_pointer const & new_leaf, hash_type existing_hash,
+                                     hash_type new_hash) {
+                return std::unique_ptr<internal_node>{new (nchildren{hash_size}) internal_node (
+                    existing_leaf, new_leaf, existing_hash, new_hash)};
+            }
+
 
             // make_writable
             // ~~~~~~~~~~~~~
@@ -263,7 +310,7 @@ namespace pstore {
                     inode = node.untag_node<internal_node *> ();
                     assert (inode->signature_ == signature);
                 } else {
-                    new_node = make_unique<internal_node> (internal);
+                    new_node = internal_node::allocate (internal);
                     inode = new_node.get ();
                 }
                 return {std::move (new_node), inode};
@@ -389,7 +436,7 @@ namespace pstore {
 
                 // Move elements from [index..old_size) to [index+1..old_size+1)
                 {
-                    auto const children_span = ::pstore::gsl::make_span (children_);
+                    auto const children_span = gsl::make_span (&children_[0], hash_size);
                     auto const num_to_move = old_size - index;
 
                     auto const span = children_span.subspan (index, num_to_move);

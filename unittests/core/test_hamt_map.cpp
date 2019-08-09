@@ -107,7 +107,7 @@ TEST_F (IndexFixture, InitAddress) {
 
 // Test initial pointer index pointer.
 TEST_F (IndexFixture, InitPointer) {
-    auto internal = pstore::make_unique<pstore::index::details::internal_node> ();
+    std::unique_ptr<internal_node> internal = pstore::index::details::internal_node::allocate ();
     index_pointer index{internal.get ()};
     EXPECT_TRUE (index.is_heap ());
     EXPECT_TRUE (index.is_internal ());

@@ -695,11 +695,13 @@ namespace pstore {
                 auto old_hash = existing_hash & details::hash_index_mask;
                 if (new_hash != old_hash) {
                     address leaf_addr = this->store_leaf_node (transaction, new_leaf, parents);
-                    auto internal_ptr = new internal_node (existing_leaf, index_pointer{leaf_addr},
-                                                           old_hash, new_hash);
-                    auto new_leaf_index = internal_node::get_new_index (new_hash, old_hash);
-                    parents->push ({index_pointer{internal_ptr}, new_leaf_index});
-                    return index_pointer{internal_ptr};
+                    auto const internal_ptr = index_pointer{
+                        internal_node::allocate (existing_leaf, index_pointer{leaf_addr}, old_hash,
+                                                 new_hash)
+                            .release ()};
+                    parents->push (
+                        {internal_ptr, internal_node::get_new_index (new_hash, old_hash)});
+                    return internal_ptr;
                 }
 
                 // We've found a (partial) hash collision. Replace this leaf node with an internal
@@ -716,17 +718,19 @@ namespace pstore {
 
                 index_pointer leaf_ptr = this->insert_into_leaf (
                     transaction, existing_leaf, new_leaf, existing_hash, hash, shifts, parents);
-                auto internal_ptr =
-                    std::unique_ptr<internal_node> (new internal_node (leaf_ptr, old_hash));
-                parents->push ({index_pointer{internal_ptr.get ()}, 0});
-                return index_pointer{internal_ptr.release ()};
+                auto const internal_ptr =
+                    index_pointer{internal_node::allocate (leaf_ptr, old_hash).release ()};
+                parents->push ({internal_ptr, 0U});
+                return internal_ptr;
             }
 
             // We ran out of hash bits: create a new linear node.
-            std::unique_ptr<linear_node> linear_ptr = linear_node::allocate (
-                existing_leaf.addr, this->store_leaf_node (transaction, new_leaf, parents));
-            parents->push ({index_pointer{linear_ptr.get ()}, 1});
-            return index_pointer{linear_ptr.release ()};
+            auto const linear_ptr = index_pointer{
+                linear_node::allocate (existing_leaf.addr,
+                                       this->store_leaf_node (transaction, new_leaf, parents))
+                    .release ()};
+            parents->push ({linear_ptr, 1U});
+            return linear_ptr;
         }
 
         // hamt_map::delete_node

@@ -44,7 +44,7 @@
 /// \file hamt_map_types.hpp
 
 #ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
-#define PSTORE_CORE_HAMT_MAP_TYPES_HPP (1)
+#define PSTORE_CORE_HAMT_MAP_TYPES_HPP
 
 #include <array>
 #include <vector>
@@ -142,6 +142,10 @@ namespace pstore {
                 return shift < details::max_hash_bits;
             }
 
+
+            struct nchildren {
+                std::size_t n;
+            };
 
             //*  _         _                     _     _            *
             //* (_)_ _  __| |_____ __  _ __  ___(_)_ _| |_ ___ _ _  *
@@ -461,9 +465,6 @@ namespace pstore {
                 using signature_type = std::array<std::uint8_t, 8>;
                 static signature_type const signature;
 
-                struct nchildren {
-                    std::size_t n;
-                };
                 /// A placement-new implementation which allocates sufficient storage for a linear
                 /// node with the number of children given by the size parameter.
                 void * operator new (std::size_t s, nchildren size);
@@ -525,32 +526,44 @@ namespace pstore {
             //*                                                      *
             /// An internal trie node.
             class internal_node {
-                using children_container = std::array<index_pointer, hash_size>;
-
             public:
-                internal_node ();
-                /// Construct an internal node with a child.
-                internal_node (index_pointer const & leaf, hash_type hash);
+                using iterator = index_pointer *;
+                using const_iterator = index_pointer const *;
 
-                /// Construct the internal node with two children.
-                internal_node (index_pointer const & existing_leaf, index_pointer const & new_leaf,
-                               hash_type existing_hash, hash_type new_hash);
-                internal_node (internal_node const & rhs);
-                internal_node (internal_node && rhs) = delete;
-                ~internal_node () = default;
+                void * operator new (std::size_t) = delete;
+                void operator delete (void * p);
+
+                ~internal_node () noexcept = default;
 
                 internal_node & operator= (internal_node const & rhs) = delete;
                 internal_node & operator= (internal_node && rhs) = delete;
 
-                /// Return the internal heap node pointer if node is a heap internal node. Otherwise
-                /// return the pointer which is pointed to the store node.
+                static std::unique_ptr<internal_node> allocate ();
+                /// Construct an internal node with a child.
+                static std::unique_ptr<internal_node> allocate (internal_node const & other);
+                /// Construct an internal node with a child.
+                static std::unique_ptr<internal_node> allocate (index_pointer const & leaf,
+                                                                hash_type hash);
+                /// Construct the internal node with two children.
+                static std::unique_ptr<internal_node> allocate (index_pointer const & existing_leaf,
+                                                                index_pointer const & new_leaf,
+                                                                hash_type existing_hash,
+                                                                hash_type new_hash);
+
+
+                /// Return a pointer to an internal node. If the node is in-store, it is loaded and
+                /// the internal heap node pointer if \p node is a heap internal node.
+                /// Otherwise return the pointer which is pointed to the store node.
                 ///
-                /// \return A pair of which the first element is a store-pointer to the node body
-                /// with the store address space. This may be null if called on a heap-resident
-                /// node. The second element is the raw node pointer, that is, the address of a heap
-                /// node or the result of calling .get() on the store-pointer.
+                /// \param db  The database containing the node.
+                /// \param node  The node's location: either in-store or in-heap.
+                /// \return A pair of which the first element is a in-store pointer to the node
+                /// body. This may be null if called on a heap-resident node. The second element is
+                /// the raw node pointer, that is, the address of a heap node or the result of
+                /// calling .get() on the store-pointer.
                 static auto get_node (database const & db, index_pointer const node)
                     -> std::pair<std::shared_ptr<internal_node const>, internal_node const *>;
+
                 /// Load an internal node from the store.
                 static auto read_node (database const & db, typed_address<internal_node> const addr)
                     -> std::shared_ptr<internal_node const>;
@@ -581,19 +594,18 @@ namespace pstore {
                 static std::size_t size_bytes (unsigned num_children) noexcept {
                     assert (num_children > 0 && num_children < max_hash_bits);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
-                           sizeof (decltype (internal_node::children_)::value_type) * num_children;
+                           sizeof (decltype (internal_node::children_[0])) * num_children;
                 }
 
                 /// Returns the number of children contained by this node.
                 unsigned size () const noexcept {
                     assert (this->bitmap_ != hash_type{0});
-                    unsigned const result = bit_count::pop_count (this->bitmap_);
-                    assert (result <= children_.size ());
-                    return result;
+                    return bit_count::pop_count (this->bitmap_);
                 }
 
                 /// Return the new leaf child index number.
-                static unsigned get_new_index (hash_type new_hash, hash_type existing_hash) {
+                static unsigned get_new_index (hash_type new_hash,
+                                               hash_type existing_hash) noexcept {
                     return static_cast<unsigned> (new_hash >= existing_hash);
                 }
 
@@ -622,23 +634,43 @@ namespace pstore {
                 /// NOT USE except for that purpose!
                 void set_bitmap (hash_type bm) { bitmap_ = bm; }
 
-                using iterator = children_container::iterator;
-                using const_iterator = children_container::const_iterator;
-
                 /// \name Iterators
                 ///@{
 
-                iterator begin () { return std::begin (children_); }
-                iterator end () { return this->begin () + this->size (); }
-                const_iterator begin () const { return std::begin (children_); }
+                iterator begin () noexcept { return &children_[0]; }
+                iterator end () noexcept { return this->begin () + this->size (); }
+                const_iterator begin () const { return &children_[0]; }
                 const_iterator end () const { return this->begin () + this->size (); }
-                const_iterator cbegin () const { return std::begin (children_); }
+                const_iterator cbegin () const { return &children_[0]; }
                 const_iterator cend () const { return this->cbegin () + this->size (); }
                 ///@}
 
             private:
                 static bool validate_after_load (internal_node const & internal,
                                                  typed_address<internal_node> const addr);
+
+                /// A placement-new implementation which allocates sufficient storage for an
+                /// internal node with the number of children given by the size parameter.
+                void * operator new (std::size_t s, nchildren size);
+                void operator delete (void * p, nchildren size);
+
+                // Non-allocating placement allocation functions.
+                void * operator new (std::size_t size, void * ptr) noexcept {
+                    return ::operator new (size, ptr);
+                }
+                void operator delete (void * p, void * ptr) noexcept { ::operator delete (p, ptr); }
+
+
+                internal_node ();
+                /// Construct an internal node with a child.
+                internal_node (index_pointer const & leaf, hash_type hash);
+                /// Construct the internal node with two children.
+                internal_node (index_pointer const & existing_leaf, index_pointer const & new_leaf,
+                               hash_type existing_hash, hash_type new_hash);
+
+                internal_node (internal_node const & rhs);
+                internal_node (internal_node && rhs) = delete;
+
 
                 /// Appends the internal node (which refers to a node in heap memory) to the
                 /// store. Returns a new (in-store) internal store address.
@@ -657,10 +689,8 @@ namespace pstore {
                 hash_type bitmap_;
 
                 /// \brief The array of child node references.
-                /// Each child may be in-memory or in-store. This array is declared as though it is
-                /// fully populated with children, but the in-store representation only uses the
-                /// number of elements that are actually in use.
-                children_container children_;
+                /// Each child may be in-memory or in-store.
+                index_pointer children_[1];
             };
 
         } // namespace details
