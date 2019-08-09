@@ -323,8 +323,9 @@ namespace pstore {
                 void * operator new (std::size_t) = delete;
                 void operator delete (void * p);
 
-                ~linear_node () = default;
+                ~linear_node () noexcept = default;
                 linear_node & operator= (linear_node const & rhs) = delete;
+                linear_node & operator= (linear_node && rhs) = delete;
 
                 /// \name Construction
                 ///@{
@@ -468,8 +469,16 @@ namespace pstore {
                 void * operator new (std::size_t s, nchildren size);
                 void operator delete (void * p, nchildren size);
 
+                // Non-allocating placement allocation functions.
+                void * operator new (std::size_t size, void * ptr) noexcept {
+                    return ::operator new (size, ptr);
+                }
+                void operator delete (void * p, void * ptr) noexcept { ::operator delete (p, ptr); }
+
                 /// \param size The capacity of this linear node.
                 explicit linear_node (std::size_t size);
+                linear_node (linear_node const & rhs);
+                linear_node (linear_node && rhs) = delete;
 
                 /// Allocates a new linear node in memory.
                 ///
@@ -526,11 +535,12 @@ namespace pstore {
                 /// Construct the internal node with two children.
                 internal_node (index_pointer const & existing_leaf, index_pointer const & new_leaf,
                                hash_type existing_hash, hash_type new_hash);
-
                 internal_node (internal_node const & rhs);
-
+                internal_node (internal_node && rhs) = delete;
                 ~internal_node () = default;
+
                 internal_node & operator= (internal_node const & rhs) = delete;
+                internal_node & operator= (internal_node && rhs) = delete;
 
                 /// Return the internal heap node pointer if node is a heap internal node. Otherwise
                 /// return the pointer which is pointed to the store node.
@@ -560,7 +570,6 @@ namespace pstore {
 
                 static std::pair<std::unique_ptr<internal_node>, internal_node *>
                 make_writable (index_pointer node, internal_node const & internal);
-
 
                 /// Computes the number of bytes occupied by the in-store representation of an
                 /// internal node with the given number of children.

@@ -1205,9 +1205,9 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
     this->insert_or_assign (t1, "g");
     this->insert_or_assign (t1, "h");
     this->insert_or_assign (t1, "i");
-    EXPECT_TRUE (this->is_found ("g")) << "key \"g\" should be present in the index (heap)";
-    EXPECT_TRUE (this->is_found ("h")) << "key \"h\" should be present in the index (heap)";
-    EXPECT_TRUE (this->is_found ("i")) << "key \"i\" should be present in the index (heap)";
+    EXPECT_TRUE (this->is_found ("g")) << "key 'g' should be present in the index (heap)";
+    EXPECT_TRUE (this->is_found ("h")) << "key 'h' should be present in the index (heap)";
+    EXPECT_TRUE (this->is_found ("i")) << "key 'i' should be present in the index (heap)";
     {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
@@ -1265,9 +1265,9 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
             linear_node::get_node (*db_, index_pointer{level11.untag_linear_address ()});
 
         EXPECT_EQ (level11_linear->size (), 3U);
-        EXPECT_TRUE (this->is_found ("g")) << "key \"g\" should be present in the index (store) ";
-        EXPECT_TRUE (this->is_found ("h")) << "key \"h\" should be present in the index (store) ";
-        EXPECT_TRUE (this->is_found ("i")) << "key \"i\" should be present in the index (store) ";
+        EXPECT_TRUE (this->is_found ("g")) << "key 'g' should be present in the index (store)";
+        EXPECT_TRUE (this->is_found ("h")) << "key 'h' should be present in the index (store)";
+        EXPECT_TRUE (this->is_found ("i")) << "key 'i' should be present in the index (store)";
     }
 }
 

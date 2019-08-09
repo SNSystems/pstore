@@ -43,6 +43,9 @@
 //===----------------------------------------------------------------------===//
 /// \file hamt_map_types.cpp
 #include "pstore/core/hamt_map_types.hpp"
+
+#include <new>
+
 #include "pstore/core/transaction.hpp"
 
 namespace pstore {
@@ -96,6 +99,12 @@ namespace pstore {
                 std::fill_n (&leaves_[0], size, address::null ());
             }
 
+            linear_node::linear_node (linear_node const & rhs)
+                    : signature_{signature}
+                    , size_{rhs.size ()} {
+
+                std::copy (rhs.begin (), rhs.end (), &leaves_[0]);
+            }
 
             // allocate
             // ~~~~~~~~
@@ -176,7 +185,7 @@ namespace pstore {
                 std::shared_ptr<void> ptr;
                 address result;
                 std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (linear_node));
-                std::memcpy (ptr.get (), this, num_bytes);
+                new (ptr.get ()) linear_node (*this);
                 return result;
             }
 
@@ -405,22 +414,24 @@ namespace pstore {
                 std::shared_ptr<void> ptr;
                 address result;
                 std::tie (ptr, result) = transaction.alloc_rw (num_bytes, alignof (internal_node));
-                std::memcpy (ptr.get (), this, num_bytes);
+                new (ptr.get ()) internal_node (*this);
                 return result;
             }
 
             // flush
             // ~~~~~
             address internal_node::flush (transaction_base & transaction, unsigned shifts) {
-                auto const child_shifts = shifts + hash_index_bits;
+                shifts += hash_index_bits;
                 for (auto & p : *this) {
                     // If it is a heap node, flush its children first (depth-first search).
                     if (p.is_heap ()) {
-                        if (child_shifts < max_hash_bits) { // internal node
+                        if (shifts < max_hash_bits) { // internal node
+                            assert (p.is_internal ());
                             auto internal = p.untag_node<internal_node *> ();
-                            p = internal->flush (transaction, child_shifts);
+                            p = internal->flush (transaction, shifts);
                             delete internal;
                         } else { // linear node
+                            assert (p.is_linear ());
                             auto linear = p.untag_node<linear_node *> ();
                             p = linear->flush (transaction) | internal_node_bit;
                             delete linear;
@@ -428,9 +439,7 @@ namespace pstore {
                     }
                 }
                 // Flush itself.
-                auto addr = this->store_node (transaction);
-                addr |= internal_node_bit;
-                return addr;
+                return this->store_node (transaction) | internal_node_bit;
             }
 
         } // namespace details
