@@ -74,14 +74,14 @@ namespace {
     cl::opt<std::string> verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
     cl::opt<std::string> path (cl::Positional, cl::Optional, cl::desc ("<path>"));
 
-    pstore::maybe<std::string> pathOption (std::string const & path) {
-        if (path.length () > 0) {
-            return pstore::just (path);
+    pstore::maybe<std::string> path_option (std::string const & p) {
+        if (p.length () > 0) {
+            return pstore::just (p);
         }
         return pstore::nothing<std::string> ();
     }
 
-} // anonymous namespace
+} // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
@@ -92,6 +92,6 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.retry_timeout = std::chrono::milliseconds (retry_timeout.get ());
     result.flood = flood.get ();
     result.kill = kill.get ();
-    result.pipe_path = pathOption (pipe_path.get ());
+    result.pipe_path = path_option (pipe_path.get ());
     return {result, EXIT_SUCCESS};
 }
