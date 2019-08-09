@@ -46,6 +46,7 @@
 #include <cstdint>
 #include <exception>
 #include <fstream>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <memory>
@@ -54,7 +55,9 @@
 #include <vector>
 
 // pstore includes
+#include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
+#include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 
 // Local includes
@@ -97,6 +100,21 @@ namespace {
         return result;
     }
 
+    std::function<std::ostream &()> open_output_file (std::string const & path) {
+        if (path == "-") {
+            return []() { return std::ref (std::cout); };
+        }
+
+        auto file = std::make_shared<std::ofstream> (
+            path, std::ios_base::binary | std::ios_base::out | std::ios_base::trunc);
+        if (!file->is_open ()) {
+            std::ostringstream str;
+            str << "Could not open " << pstore::quoted (path);
+            pstore::raise (std::errc::no_such_file_or_directory, str.str ());
+        }
+        return [file]() { return std::ref (*file); };
+    }
+
 } // anonymous namespace
 
 
@@ -108,23 +126,10 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {
-        switches::user_options const opt = switches::user_options::get (argc, argv);
+        user_options const opt = user_options::get (argc, argv);
 
-        std::unique_ptr<std::ostream> out_ptr;
-        std::ostream * out = &std::cout;
-        if (opt.output != nullptr && *(opt.output) != "-") {
-            std::string const & path = *opt.output;
-            auto constexpr mode = std::ios_base::binary | std::ios_base::out | std::ios_base::trunc;
-            auto file = std::unique_ptr<std::ofstream> (new std::ofstream (path, mode));
-            if (!file->is_open ()) {
-                std::ostringstream str;
-                str << "Could not open '" << path << "'";
-                return EXIT_FAILURE;
-            }
-            out_ptr.reset (file.release ());
-            out = out_ptr.get ();
-        }
-
+        std::shared_ptr<std::ostream> out_ptr;
+        auto out = open_output_file (opt.output);
         if (opt.maximum <= std::numeric_limits<std::uint16_t>::max ()) {
             write_output (sieve<std::uint16_t> (opt.maximum), opt.endianness, out);
         } else if (opt.maximum <= std::numeric_limits<std::uint32_t>::max ()) {
@@ -134,11 +139,10 @@ int main (int argc, char * argv[]) {
         }
     }
     // clang-format off
-    PSTORE_CATCH (switches::parse_failure const &, {
-        exit_code = EXIT_FAILURE;
-    })
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ") << pstore::utf::to_native_string (ex.what ()) << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
+                                       << pstore::utf::to_native_string (ex.what ())
+                                       << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {

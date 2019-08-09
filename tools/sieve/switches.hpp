@@ -50,32 +50,18 @@
 
 #include "pstore/cmd_util/tchar.hpp"
 
-namespace switches {
+enum class endian {
+    native,
+    big,
+    little,
+};
 
-    struct bad_number : std::runtime_error {
-        bad_number ();
-    };
-    struct bad_endian : std::runtime_error {
-        bad_endian ();
-    };
-    struct parse_failure : std::runtime_error {
-        parse_failure ();
-    };
+struct user_options {
+    std::string output;
+    endian endianness;
+    unsigned long maximum;
 
-
-    enum class endian {
-        native,
-        big,
-        little,
-    };
-
-    struct user_options {
-        std::shared_ptr<std::string> output;
-        endian endianness;
-        unsigned long maximum;
-
-        static user_options get (int argc, pstore::cmd_util::tchar * argv[]);
-    };
-} // namespace switches
+    static user_options get (int argc, pstore::cmd_util::tchar * argv[]);
+};
 
 #endif // SIEVE_SWITCHES_HPP

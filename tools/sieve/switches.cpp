@@ -45,21 +45,19 @@
 #include "switches.hpp"
 
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::opt<switches::endian> endian_opt (
+    cl::opt<endian> endian_opt (
         "endian", cl::desc ("The endian-ness of the output data"),
-        cl::values (cl::OptionEnumValue{"big", static_cast<int> (switches::endian::big),
-                                        "Big-endian"},
-                    cl::OptionEnumValue{"little", static_cast<int> (switches::endian::little),
+        cl::values (cl::OptionEnumValue{"big", static_cast<int> (endian::big), "Big-endian"},
+                    cl::OptionEnumValue{"little", static_cast<int> (endian::little),
                                         "Little-endian"},
-                    cl::OptionEnumValue{"native", static_cast<int> (switches::endian::native),
+                    cl::OptionEnumValue{"native", static_cast<int> (endian::native),
                                         "The endian-ness of the host machine"}),
-        cl::init (switches::endian::native));
+        cl::init (endian::native));
     cl::alias endian2_opt ("e", cl::desc ("Alias for --endian"), cl::aliasopt (endian_opt));
 
 
@@ -75,17 +73,12 @@ namespace {
 
 } // end anonymous namespace
 
-namespace switches {
+user_options user_options::get (int argc, tchar * argv[]) {
+    cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
 
-    user_options user_options::get (int argc, tchar * argv[]) {
-        cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
-
-        user_options result;
-        result.output =
-            std::make_shared<std::string> (pstore::utf::from_native_string (output_opt.get ()));
-        result.endianness = endian_opt.get ();
-        result.maximum = maximum_opt.get ();
-        return result;
-    }
-
-} // namespace switches
+    user_options result;
+    result.output = output_opt.get ();
+    result.endianness = endian_opt.get ();
+    result.maximum = maximum_opt.get ();
+    return result;
+}
