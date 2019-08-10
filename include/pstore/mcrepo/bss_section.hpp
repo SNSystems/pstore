@@ -141,7 +141,7 @@ namespace pstore {
             std::size_t size () const final { return b_.size (); }
             container<internal_fixup> ifixups () const final { return {}; }
             container<external_fixup> xfixups () const final { return {}; }
-            container<std::uint8_t> data () const final { return {}; }
+            container<std::uint8_t> payload () const final { return {}; }
 
         private:
             bss_section const & b_;

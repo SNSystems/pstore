@@ -219,12 +219,12 @@ namespace pstore {
             /// The number of data bytes contained by this section.
             std::uint64_t size () const noexcept { return data_size_; }
 
-            container<std::uint8_t> data () const noexcept {
+            container<std::uint8_t> payload () const noexcept {
                 auto * begin = aligned_ptr<std::uint8_t> (this + 1);
                 return {begin, begin + data_size_};
             }
             container<internal_fixup> ifixups () const {
-                auto * begin = aligned_ptr<internal_fixup> (data ().end ());
+                auto * begin = aligned_ptr<internal_fixup> (payload ().end ());
                 return {begin, begin + this->num_ifixups ()};
             }
             container<external_fixup> xfixups () const {
@@ -482,7 +482,7 @@ namespace pstore {
             std::size_t size () const final { return s_.size (); }
             container<internal_fixup> ifixups () const final { return s_.ifixups (); }
             container<external_fixup> xfixups () const final { return s_.xfixups (); }
-            container<std::uint8_t> data () const final { return s_.data (); }
+            container<std::uint8_t> payload () const final { return s_.payload (); }
 
         private:
             generic_section const & s_;

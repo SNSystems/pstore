@@ -225,7 +225,7 @@ namespace pstore {
             std::size_t size () const final { error (); }
             container<internal_fixup> ifixups () const final { error (); }
             container<external_fixup> xfixups () const final { error (); }
-            container<std::uint8_t> data () const final { error (); }
+            container<std::uint8_t> payload () const final { error (); }
 
         private:
             PSTORE_NO_RETURN void error () const;

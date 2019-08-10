@@ -218,7 +218,7 @@ namespace pstore {
             virtual container<external_fixup> xfixups () const = 0;
             /// Return the data section stored in the object file. For example, the bss section has
             /// empty data section.
-            virtual container<std::uint8_t> data () const = 0;
+            virtual container<std::uint8_t> payload () const = 0;
         };
 
 

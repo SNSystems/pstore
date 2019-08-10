@@ -148,8 +148,8 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     EXPECT_EQ (4U, section_alignment (s));
     EXPECT_EQ (6U, section_size (s));
 
-    auto data_begin = std::begin (s.data ());
-    auto data_end = std::end (s.data ());
+    auto data_begin = std::begin (s.payload ());
+    auto data_end = std::end (s.payload ());
     auto rodata_begin = std::begin (rodata.data);
     auto rodata_end = std::end (rodata.data);
     ASSERT_EQ (std::distance (data_begin, data_end), std::distance (rodata_begin, rodata_end));
@@ -200,12 +200,12 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
     EXPECT_EQ (4U, section_size (s));
 
     EXPECT_EQ (16U, s.align ());
-    EXPECT_EQ (4U, s.data ().size ());
+    EXPECT_EQ (4U, s.payload ().size ());
     EXPECT_EQ (4U, s.size ());
     EXPECT_EQ (2U, s.ifixups ().size ());
     EXPECT_EQ (3U, s.xfixups ().size ());
 
-    EXPECT_THAT (s.data (), ElementsAreArray (original));
+    EXPECT_THAT (s.payload (), ElementsAreArray (original));
     EXPECT_THAT (s.ifixups (), ElementsAre (internal_fixup{section_kind::text, 1, 1, 1},
                                             internal_fixup{section_kind::data, 2, 2, 2}));
     EXPECT_THAT (s.xfixups (), ElementsAre (external_fixup{indirect_string_address (3), 3, 3, 3},
@@ -291,7 +291,7 @@ TEST_F (FragmentTest, TwoSections) {
 
     generic_section const & rodata = f->at<section_kind::read_only> ();
     generic_section const & tls = f->at<section_kind::thread_data> ();
-    EXPECT_LT (rodata.data ().begin (), tls.data ().begin ());
+    EXPECT_LT (rodata.payload ().begin (), tls.payload ().begin ());
 }
 
 TEST_F (FragmentTest, Iterator) {

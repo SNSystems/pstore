@@ -79,9 +79,9 @@ namespace pstore {
 
             unsigned align () const noexcept { return g_.align (); }
             // \returns The section's data payload.
-            container<std::uint8_t> data () const { return g_.data (); }
+            container<std::uint8_t> payload () const { return g_.payload (); }
             /// \returns The number of bytes in the section's data payload.
-            std::size_t size () const noexcept { return g_.data ().size (); }
+            std::size_t size () const noexcept { return this->payload ().size (); }
             container<internal_fixup> ifixups () const { return g_.ifixups (); }
             container<external_fixup> xfixups () const { return g_.xfixups (); }
 
@@ -153,7 +153,7 @@ namespace pstore {
             std::size_t size () const final { return d_.size (); }
             container<internal_fixup> ifixups () const final { return d_.ifixups (); }
             container<external_fixup> xfixups () const final { return d_.xfixups (); }
-            container<std::uint8_t> data () const final { return d_.data (); }
+            container<std::uint8_t> payload () const final { return d_.payload (); }
 
         private:
             debug_line_section const & d_;

@@ -235,5 +235,5 @@ container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
 container<std::uint8_t> pstore::repo::section_value (fragment const & f,
                                                      section_kind kind) {
     dispatcher_buffer buffer;
-    return make_dispatcher (f, kind, &buffer)->data ();
+    return make_dispatcher (f, kind, &buffer)->payload ();
 }

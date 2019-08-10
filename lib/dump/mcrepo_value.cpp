@@ -96,7 +96,7 @@ namespace pstore {
 
             (void) sk;
             (void) triple;
-            auto const & data = section.data ();
+            auto const & payload = section.payload ();
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
             if (sk == repo::section_kind::text) {
@@ -107,9 +107,11 @@ namespace pstore {
 #endif
             if (!data_value) {
                 if (hex_mode) {
-                    data_value = std::make_shared<binary16> (std::begin (data), std::end (data));
+                    data_value =
+                        std::make_shared<binary16> (std::begin (payload), std::end (payload));
                 } else {
-                    data_value = std::make_shared<binary> (std::begin (data), std::end (data));
+                    data_value =
+                        std::make_shared<binary> (std::begin (payload), std::end (payload));
                 }
             }
             return make_value (object::container{

@@ -65,7 +65,7 @@ namespace pstore {
         }
 
         std::size_t generic_section::size_bytes () const {
-            return generic_section::size_bytes (data ().size (), ifixups ().size (),
+            return generic_section::size_bytes (payload ().size (), ifixups ().size (),
                                                 xfixups ().size ());
         }
 
