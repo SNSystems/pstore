@@ -172,25 +172,9 @@ def _split_search_path_windows (search_path):
 
 
 def _split_search_path_generic (search_path):
-    """Splits the search path into a list of the component paths.'''
+    """Splits the search path into a list of the component paths."""
 
-    Arguments:
-        The search path to be split.
-
-    Returns:
-        A list containing each individual path in the search path.
-    """
-
-    # On Unix-based systems, the path separator character cannot be escaped
-    # even if it is part of the filename.
-    result = search_path.split (os.pathsep)
-    #FIXME: what's the reason for these lines?
-    if result [-1] == '':
-        result = result [:-1]
-    return result
-
-
-
+    return search_path.split (os.pathsep)
 
 
 def _find_on_path (file_name):
