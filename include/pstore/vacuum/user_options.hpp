@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef PSTORE_VACUUM_OPTIONS_HPP
-#define PSTORE_VACUUM_OPTIONS_HPP (1)
+#define PSTORE_VACUUM_OPTIONS_HPP
 
 #include <string>
 

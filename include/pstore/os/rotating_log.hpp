@@ -44,7 +44,7 @@
 /// \file rotating_log.hpp
 
 #ifndef PSTORE_OS_ROTATING_LOG_HPP
-#define PSTORE_OS_ROTATING_LOG_HPP (1)
+#define PSTORE_OS_ROTATING_LOG_HPP
 
 #include <iostream>
 #include <limits>

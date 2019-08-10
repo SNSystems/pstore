@@ -44,7 +44,7 @@
 /// \file hamt_map.hpp
 
 #ifndef PSTORE_CORE_HAMT_MAP_HPP
-#define PSTORE_CORE_HAMT_MAP_HPP (1)
+#define PSTORE_CORE_HAMT_MAP_HPP
 
 #include <iterator>
 #include <type_traits>

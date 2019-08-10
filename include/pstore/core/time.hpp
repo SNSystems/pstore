@@ -44,7 +44,7 @@
 /// \file time.hpp
 
 #ifndef PSTORE_CORE_TIME_HPP
-#define PSTORE_CORE_TIME_HPP (1)
+#define PSTORE_CORE_TIME_HPP
 
 #include <cstdint>
 

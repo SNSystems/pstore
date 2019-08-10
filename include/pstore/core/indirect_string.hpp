@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef PSTORE_CORE_INDIRECT_STRING_HPP
-#define PSTORE_CORE_INDIRECT_STRING_HPP (1)
+#define PSTORE_CORE_INDIRECT_STRING_HPP
 
 #include <memory>
 

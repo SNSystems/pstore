@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_BROKER_INTRUSIVE_LIST_HPP
-#define PSTORE_BROKER_INTRUSIVE_LIST_HPP (1)
+#define PSTORE_BROKER_INTRUSIVE_LIST_HPP
 
 #include <cassert>
 #include <iterator>

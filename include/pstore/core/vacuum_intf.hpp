@@ -44,7 +44,7 @@
 /// \file vacuum_intf.hpp
 
 #ifndef PSTORE_CORE_VACUUM_INTF_HPP
-#define PSTORE_CORE_VACUUM_INTF_HPP (1)
+#define PSTORE_CORE_VACUUM_INTF_HPP
 
 #include <atomic>
 #include <cstdint>

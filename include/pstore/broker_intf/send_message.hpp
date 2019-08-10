@@ -46,7 +46,7 @@
 /// messages to a running pstore broker instance.
 
 #ifndef PSTORE_BROKER_INTF_SEND_MESSAGE_HPP
-#define PSTORE_BROKER_INTF_SEND_MESSAGE_HPP (1)
+#define PSTORE_BROKER_INTF_SEND_MESSAGE_HPP
 
 #include <cstdint>
 #include <string>

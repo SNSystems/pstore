@@ -44,7 +44,7 @@
 /// \file shared_memory.hpp
 
 #ifndef PSTORE_CORE_SHARED_MEMORY_HPP
-#define PSTORE_CORE_SHARED_MEMORY_HPP (1)
+#define PSTORE_CORE_SHARED_MEMORY_HPP
 
 #include <algorithm>
 #include <atomic>

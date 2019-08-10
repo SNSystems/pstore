@@ -65,7 +65,7 @@
 /// data associated with that transaction.
 
 #ifndef PSTORE_CORE_FILE_HEADER_HPP
-#define PSTORE_CORE_FILE_HEADER_HPP (1)
+#define PSTORE_CORE_FILE_HEADER_HPP
 
 #include <array>
 #include <atomic>

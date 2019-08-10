@@ -44,7 +44,7 @@
 /// \file hamt_set.hpp
 
 #ifndef PSTORE_CORE_HAMT_SET_HPP
-#define PSTORE_CORE_HAMT_SET_HPP (1)
+#define PSTORE_CORE_HAMT_SET_HPP
 
 // standard library
 #include <iterator>

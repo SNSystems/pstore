@@ -53,7 +53,7 @@
 /// unit testing.
 
 #ifndef PSTORE_OS_MEMORY_MAPPER_HPP
-#define PSTORE_OS_MEMORY_MAPPER_HPP (1)
+#define PSTORE_OS_MEMORY_MAPPER_HPP
 
 #include <cstdint>
 #include <iosfwd>

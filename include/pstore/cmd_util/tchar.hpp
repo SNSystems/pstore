@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_CMD_UTIL_TCHAR_HPP
-#define PSTORE_CMD_UTIL_TCHAR_HPP (1)
+#define PSTORE_CMD_UTIL_TCHAR_HPP
 
 #include <iostream>
 

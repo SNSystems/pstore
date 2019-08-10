@@ -45,7 +45,7 @@
 /// \brief The data store transaction class.
 
 #ifndef PSTORE_CORE_TRANSACTION_HPP
-#define PSTORE_CORE_TRANSACTION_HPP (1)
+#define PSTORE_CORE_TRANSACTION_HPP
 
 #include <mutex>
 #include <type_traits>

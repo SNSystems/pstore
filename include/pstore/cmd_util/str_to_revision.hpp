@@ -46,7 +46,7 @@
 /// the conversion was successful.
 
 #ifndef PSTORE_CMD_UTIL_STR_TO_REVISION_HPP
-#define PSTORE_CMD_UTIL_STR_TO_REVISION_HPP (1)
+#define PSTORE_CMD_UTIL_STR_TO_REVISION_HPP
 
 #include <string>
 #include <utility>

@@ -45,7 +45,7 @@
 /// \brief An implementation of std::make_unique<>() for platforms that do not provide it natively.
 
 #ifndef PSTORE_SUPPORT_MAKE_UNIQUE_HPP
-#define PSTORE_SUPPORT_MAKE_UNIQUE_HPP (1)
+#define PSTORE_SUPPORT_MAKE_UNIQUE_HPP
 
 #include <memory>
 #include <type_traits>

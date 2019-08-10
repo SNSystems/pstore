@@ -46,7 +46,7 @@
 /// similar to std::stack, but based on std::array.
 
 #ifndef PSTORE_CORE_ARRAY_STACK_HPP
-#define PSTORE_CORE_ARRAY_STACK_HPP (1)
+#define PSTORE_CORE_ARRAY_STACK_HPP
 
 #include <array>
 #include <cassert>

@@ -44,7 +44,7 @@
 /// \file region.hpp
 
 #ifndef PSTORE_CORE_REGION_HPP
-#define PSTORE_CORE_REGION_HPP (1)
+#define PSTORE_CORE_REGION_HPP
 
 #include <cassert>
 #include <cstdint>

@@ -46,7 +46,7 @@
 /// additional context for the associated error message.
 
 #ifndef PSTORE_CORE_ERRNO_EXCEPTION_HPP
-#define PSTORE_CORE_ERRNO_EXCEPTION_HPP (1)
+#define PSTORE_CORE_ERRNO_EXCEPTION_HPP
 
 #include <exception>
 #include <string>

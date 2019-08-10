@@ -50,7 +50,7 @@
 /// in-memory string values to be used interchangably.
 
 #ifndef PSTORE_SUPPORT_SSTRING_VIEW_HPP
-#define PSTORE_SUPPORT_SSTRING_VIEW_HPP (1)
+#define PSTORE_SUPPORT_SSTRING_VIEW_HPP
 
 #include <array>
 #include <cassert>

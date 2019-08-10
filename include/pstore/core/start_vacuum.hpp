@@ -44,7 +44,7 @@
 /// \file start_vacuum.hpp
 
 #ifndef PSTORE_CORE_START_VACUUM_HPP
-#define PSTORE_CORE_START_VACUUM_HPP (1)
+#define PSTORE_CORE_START_VACUUM_HPP
 
 namespace pstore {
 

@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_DUMP_SWITCHES_HPP
-#define PSTORE_DUMP_SWITCHES_HPP (1)
+#define PSTORE_DUMP_SWITCHES_HPP
 
 #include <list>
 #include <string>

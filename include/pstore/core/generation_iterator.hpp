@@ -50,7 +50,7 @@
 /// \file generation_iterator.hpp
 
 #ifndef PSTORE_CORE_GENERATION_ITERATOR_HPP
-#define PSTORE_CORE_GENERATION_ITERATOR_HPP (1)
+#define PSTORE_CORE_GENERATION_ITERATOR_HPP
 
 #include <iterator>
 #include <tuple>

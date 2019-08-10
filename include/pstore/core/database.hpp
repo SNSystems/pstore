@@ -44,7 +44,7 @@
 /// \file database.hpp
 
 #ifndef PSTORE_CORE_DATABASE_HPP
-#define PSTORE_CORE_DATABASE_HPP (1)
+#define PSTORE_CORE_DATABASE_HPP
 
 #include <array>
 #include <atomic>

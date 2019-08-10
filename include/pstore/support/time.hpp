@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef PSTORE_SUPPORT_TIME_HPP
-#define PSTORE_SUPPORT_TIME_HPP (1)
+#define PSTORE_SUPPORT_TIME_HPP
 
 #include <ctime>
 

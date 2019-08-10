@@ -45,7 +45,7 @@
 /// \brief Functions to return the path of the current process image.
 
 #ifndef PSTORE_OS_PROCESS_FILE_NAME_HPP
-#define PSTORE_OS_PROCESS_FILE_NAME_HPP (1)
+#define PSTORE_OS_PROCESS_FILE_NAME_HPP
 
 #include <algorithm>
 #include <cassert>

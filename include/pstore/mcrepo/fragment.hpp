@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_MCREPO_FRAGMENT_HPP
-#define PSTORE_MCREPO_FRAGMENT_HPP (1)
+#define PSTORE_MCREPO_FRAGMENT_HPP
 
 #include <algorithm>
 #include <cassert>

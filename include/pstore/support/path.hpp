@@ -45,7 +45,7 @@
 /// \brief Functions to operate on native file paths.
 
 #ifndef PSTORE_SUPPORT_PATH_HPP
-#define PSTORE_SUPPORT_PATH_HPP (1)
+#define PSTORE_SUPPORT_PATH_HPP
 
 #include <initializer_list>
 #include <string>

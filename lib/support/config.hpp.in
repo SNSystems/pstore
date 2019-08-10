@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef PSTORE_CONFIG_HPP
-#define PSTORE_CONFIG_HPP 1
+#define PSTORE_CONFIG_HPP
 
 /// Is pstore being compiled inside the larger LLVM framework?
 #cmakedefine PSTORE_IS_INSIDE_LLVM 1

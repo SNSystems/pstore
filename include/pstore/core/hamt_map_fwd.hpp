@@ -44,7 +44,7 @@
 /// \file hamt_map_fwd.hpp
 
 #ifndef PSTORE_CORE_HAMT_MAP_FWD_HPP
-#define PSTORE_CORE_HAMT_MAP_FWD_HPP (1)
+#define PSTORE_CORE_HAMT_MAP_FWD_HPP
 
 #include <functional>
 

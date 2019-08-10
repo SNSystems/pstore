@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #ifndef PSTORE_INDEX_STRUCTURE_INDICES_HPP
-#define PSTORE_INDEX_STRUCTURE_INDICES_HPP 1
+#define PSTORE_INDEX_STRUCTURE_INDICES_HPP
 
 #include <bitset>
 #include <type_traits>

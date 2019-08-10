@@ -46,7 +46,7 @@
 /// the serializer to read and write types in a pstore instance.
 
 #ifndef PSTORE_CORE_DB_ARCHIVE_HPP
-#define PSTORE_CORE_DB_ARCHIVE_HPP (1)
+#define PSTORE_CORE_DB_ARCHIVE_HPP
 
 #include "pstore/core/address.hpp"
 #include "pstore/core/database.hpp"

@@ -46,7 +46,7 @@
 /// additional set of functions to convert UTF-8 strings to and from UTF-16.
 
 #ifndef PSTORE_SUPPORT_UTF_HPP
-#define PSTORE_SUPPORT_UTF_HPP (1)
+#define PSTORE_SUPPORT_UTF_HPP
 
 #include <algorithm>
 #include <cassert>

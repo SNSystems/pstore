@@ -50,7 +50,7 @@
 /// \file sstring_view_archive.hpp
 
 #ifndef PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
-#define PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP (1)
+#define PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
 
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/transaction.hpp"

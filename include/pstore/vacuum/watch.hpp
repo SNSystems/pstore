@@ -46,7 +46,7 @@
 /// \file watch.hpp
 
 #ifndef PSTORE_VACUUM_WATCH_HPP
-#define PSTORE_VACUUM_WATCH_HPP (1)
+#define PSTORE_VACUUM_WATCH_HPP
 
 #include <atomic>
 #include <condition_variable>

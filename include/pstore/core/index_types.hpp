@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 
 #ifndef PSTORE_CORE_INDEX_TYPES_HPP
-#define PSTORE_CORE_INDEX_TYPES_HPP (1)
+#define PSTORE_CORE_INDEX_TYPES_HPP
 
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/indirect_string.hpp"

@@ -44,7 +44,7 @@
 /// \file crc32.hpp
 
 #ifndef PSTORE_CORE_CRC32_HPP
-#define PSTORE_CORE_CRC32_HPP (1)
+#define PSTORE_CORE_CRC32_HPP
 
 #include <array>
 #include <cstdint>

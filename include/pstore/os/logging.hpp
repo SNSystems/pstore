@@ -44,7 +44,7 @@
 /// \file logging.hpp
 
 #ifndef PSTORE_OS_LOGGING_HPP
-#define PSTORE_OS_LOGGING_HPP (1)
+#define PSTORE_OS_LOGGING_HPP
 
 #include <cassert>
 #include <ctime>

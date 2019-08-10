@@ -44,7 +44,7 @@
 /// \file thread.hpp
 
 #ifndef PSTORE_OS_THREAD_HPP
-#define PSTORE_OS_THREAD_HPP (1)
+#define PSTORE_OS_THREAD_HPP
 
 #include <cstdint>
 #include <cstdlib>
