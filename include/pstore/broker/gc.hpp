@@ -52,6 +52,7 @@
 #include "pstore/broker/pointer_compare.hpp"
 #include "pstore/broker/spawn.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/config/config.hpp"
 
 namespace pstore {
     namespace broker {
@@ -74,13 +75,12 @@ namespace pstore {
         private:
             std::string vacuumd_path ();
 
-// FIXME: get this name from the cmake script. Don't hard-wire it here.
 #ifdef _WIN32
-            static constexpr auto vacuumd_name = "pstore-vacuumd.exe";
+            static constexpr auto vacuumd_name = PSTORE_VACUUM_TOOL_NAME ".exe";
             using process_bimap = bimap<std::string, broker::process_identifier,
                                         std::less<std::string>, broker::pointer_compare<HANDLE>>;
 #else
-            static constexpr auto vacuumd_name = "pstore-vacuumd";
+            static constexpr auto vacuumd_name = PSTORE_VACUUM_TOOL_NAME;
             using process_bimap = bimap<std::string, pid_t>;
 #endif
 

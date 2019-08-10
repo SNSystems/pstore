@@ -193,4 +193,6 @@
 /// in persistent file-backed virtual memory.
 #cmakedefine PSTORE_ALWAYS_SPANNING 1
 
+#cmakedefine PSTORE_VACUUM_TOOL_NAME "@PSTORE_VACUUM_TOOL_NAME@"
+
 #endif // PSTORE_CONFIG_HPP

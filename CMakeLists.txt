@@ -115,6 +115,9 @@ option (PSTORE_VALGRIND "Run unit tests using Valgrind (if available).")
 option (PSTORE_COVERAGE "Enable generation of coverage reports.")
 option (PSTORE_DISABLE_UINT128_T "Disable support for __uint128_t")
 
+# The name of the vacuum (GC) executable.
+set (PSTORE_VACUUM_TOOL_NAME "pstore-vacuumd")
+
 
 if (NOT PSTORE_CRC_CHECKS_ENABLED)
     message (WARNING "CRC checks are disabled")

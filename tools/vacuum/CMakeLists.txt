@@ -46,11 +46,11 @@
 # vacuumd Executable
 ################
 
-add_pstore_tool (pstore-vacuumd
+add_pstore_tool ("${PSTORE_VACUUM_TOOL_NAME}"
     main.cpp
     switches.cpp
     switches.hpp
 )
 
-target_link_libraries (pstore-vacuumd PRIVATE pstore-vacuum-lib pstore-cmd-util)
-run_pstore_unit_test (pstore-vacuumd pstore-vacuum-unit-tests)
+target_link_libraries ("${PSTORE_VACUUM_TOOL_NAME}" PRIVATE pstore-vacuum-lib pstore-cmd-util)
+run_pstore_unit_test ("${PSTORE_VACUUM_TOOL_NAME}" pstore-vacuum-unit-tests)
