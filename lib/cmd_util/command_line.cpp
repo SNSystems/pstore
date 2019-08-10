@@ -53,28 +53,25 @@ namespace pstore {
 
                 // lookup_nearest_option
                 // ~~~~~~~~~~~~~~~~~~~~~
-                std::pair<option *, std::string>
+                maybe<option *>
                 lookup_nearest_option (std::string const & arg,
                                        option::options_container const & all_options) {
                     if (arg.empty ()) {
-                        return {nullptr, std::string{}};
+                        return nothing<option *> ();
                     }
 
                     // Find the closest match.
-                    option * best_option = nullptr;
-                    std::string nearest_string;
+                    maybe<option *> best_option;
                     auto best_distance = std::string::size_type{0};
                     for (auto const & opt : all_options) {
-                        auto const name = opt->name ();
-                        auto const distance = string_distance (name, arg, best_distance);
-                        if (best_option == nullptr || distance < best_distance) {
+                        auto const distance = string_distance (opt->name (), arg, best_distance);
+                        if (!best_option || distance < best_distance) {
                             best_option = opt;
                             best_distance = distance;
-                            nearest_string = name;
                         }
                     }
 
-                    return {best_option, nearest_string};
+                    return best_option;
                 }
 
                 // starts_with
@@ -92,14 +89,15 @@ namespace pstore {
 
                 // find_handler
                 // ~~~~~~~~~~~~
-                pstore::cmd_util::cl::option * find_handler (std::string const & name) {
+                maybe<option *> find_handler (std::string const & name) {
                     using pstore::cmd_util::cl::option;
 
                     auto const & all_options = option::all ();
-                    auto predicate = [&name](option * const opt) { return opt->name () == name; };
                     auto end = std::end (all_options);
-                    auto it = std::find_if (std::begin (all_options), end, predicate);
-                    return it != end ? *it : nullptr;
+                    auto it =
+                        std::find_if (std::begin (all_options), end,
+                                      [&name](option * const opt) { return opt->name () == name; });
+                    return it != end ? just (*it) : nothing<option *> ();
                 }
 
             } // end namespace details

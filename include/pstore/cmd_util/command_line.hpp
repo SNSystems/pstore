@@ -52,6 +52,7 @@
 #include "pstore/cmd_util/help.hpp"
 #include "pstore/cmd_util/modifiers.hpp"
 #include "pstore/cmd_util/tchar.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/path.hpp"
 #include "pstore/support/utf.hpp"
 
@@ -86,14 +87,16 @@ namespace pstore {
                 };
 #endif // _WIN32
 
-                std::pair<option *, std::string>
+                maybe<option *>
                 lookup_nearest_option (std::string const & arg,
                                        option::options_container const & all_options);
 
                 bool starts_with (std::string const & s, char const * prefix);
-                option * find_handler (std::string const & name);
+                maybe<option *> find_handler (std::string const & name);
 
-                // Make sure all of the required args have been specified.
+                // check_for_missing
+                // ~~~~~~~~~~~~~~~~~
+                /// Makes sure that all of the required args have been specified.
                 template <typename ErrorStream>
                 bool check_for_missing (std::string const & program_name, ErrorStream & errs) {
                     using str = stream_trait<typename ErrorStream::char_type>;
@@ -124,8 +127,7 @@ namespace pstore {
                         }
                     }
 
-                    if (positional_missing == 0U) {
-                    } else if (positional_missing == 1U) {
+                    if (positional_missing == 1U) {
                         errs << str::out_string (program_name)
                              << str::out_text (": a positional argument was missing\n");
                     } else if (positional_missing > 1U) {
@@ -136,25 +138,48 @@ namespace pstore {
                     return ok;
                 }
 
+                // report_unknown_option
+                // ~~~~~~~~~~~~~~~~~~~~~
+                template <typename ErrorStream>
+                void report_unknown_option (std::string const & program_name,
+                                            std::string const & arg_name, std::string const & value,
+                                            ErrorStream & errs) {
+                    using str = stream_trait<typename ErrorStream::char_type>;
+                    errs << str::out_string (program_name)
+                         << str::out_text (": Unknown command line argument '")
+                         << str::out_string (arg_name) << str::out_text ("'\n");
 
+                    if (maybe<option *> const best_option =
+                            lookup_nearest_option (arg_name, option::all ())) {
+                        std::string nearest_string = (*best_option)->name ();
+                        if (!value.empty ()) {
+                            nearest_string += '=';
+                            nearest_string += value;
+                        }
+                        errs << str::out_text ("Did you mean '--")
+                             << str::out_string (nearest_string) << str::out_text ("'?\n");
+                    }
+                }
 
+                // parse_option_arguments
+                // ~~~~~~~~~~~~~~~~~~~~~~
                 template <typename InputIterator, typename ErrorStream>
                 std::tuple<InputIterator, bool>
                 parse_option_arguments (InputIterator first_arg, InputIterator last_arg,
                                         std::string const & program_name, ErrorStream & errs) {
                     using str = stream_trait<typename ErrorStream::char_type>;
                     std::string value;
-                    option * handler = nullptr;
+                    maybe<option *> handler;
                     bool ok = true;
 
                     for (; first_arg != last_arg; ++first_arg) {
                         std::string arg_name = *first_arg;
                         // Is this the argument for the preceeding switch?
-                        if (handler != nullptr && handler->takes_argument ()) {
-                            if (!handler->value (arg_name)) {
+                        if (handler && (*handler)->takes_argument ()) {
+                            if (!(*handler)->value (arg_name)) {
                                 ok = false;
                             }
-                            handler = nullptr;
+                            handler.reset ();
                         } else {
                             // A double-dash argument on its own indicates that the following are
                             // positional arguments.
@@ -184,45 +209,29 @@ namespace pstore {
                             }
 
                             handler = find_handler (arg_name);
-                            if (handler == nullptr || handler->is_positional ()) {
-                                errs << str::out_string (program_name)
-                                     << str::out_text (": Unknown command line argument '")
-                                     << str::out_string (*first_arg) << str::out_text ("'\n");
-
-                                option * best_option = nullptr;
-                                std::string nearest_string;
-                                std::tie (best_option, nearest_string) =
-                                    lookup_nearest_option (arg_name, option::all ());
-                                if (best_option) {
-                                    if (!value.empty ()) {
-                                        nearest_string += '=';
-                                        nearest_string += value;
-                                    }
-                                    errs << str::out_text ("Did you mean '--")
-                                         << str::out_string (nearest_string)
-                                         << str::out_text ("'?\n");
-                                }
+                            if (!handler || (*handler)->is_positional ()) {
+                                report_unknown_option (program_name, arg_name, value, errs);
                                 ok = false;
                             } else {
-                                bool const takes_argument = handler->takes_argument ();
+                                bool const takes_argument = (*handler)->takes_argument ();
                                 bool has_value = equal_pos != std::string::npos;
                                 if (takes_argument && has_value) {
-                                    handler->add_occurrence ();
-                                    if (!handler->value (value)) {
+                                    (*handler)->add_occurrence ();
+                                    if (!(*handler)->value (value)) {
                                         ok = false;
                                     }
-                                    handler = nullptr;
+                                    handler.reset ();
                                 } else if (!takes_argument && !has_value) {
-                                    handler->add_occurrence ();
-                                    handler = nullptr;
+                                    (*handler)->add_occurrence ();
+                                    handler.reset ();
                                 }
                             }
                         }
                     }
 
-                    if (handler != nullptr && handler->takes_argument ()) {
+                    if (handler && (*handler)->takes_argument ()) {
                         errs << str::out_string (program_name) << str::out_text (": Argument '")
-                             << str::out_string (handler->name ())
+                             << str::out_string ((*handler)->name ())
                              << str::out_text ("' requires a value\n");
                         ok = false;
                     }
