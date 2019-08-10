@@ -181,12 +181,12 @@ namespace pstore {
             return *this;
         }
 
-        segment_type segment () const noexcept {
-            constexpr auto const segment_mask = std::uint64_t{max_segment} << offset_number_bits;
-            return static_cast<segment_type> ((a_ & segment_mask) >> offset_number_bits);
+        constexpr segment_type segment () const noexcept {
+            return static_cast<segment_type> ((a_ >> offset_number_bits) &
+                                              std::uint64_t{max_segment});
         }
 
-        offset_type offset () const noexcept {
+        constexpr offset_type offset () const noexcept {
             return static_cast<offset_type> (a_ & max_offset);
         }
 
@@ -206,26 +206,26 @@ namespace pstore {
 
     // comparison
 
-    inline bool operator== (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator== (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () == rhs.absolute ();
     }
-    inline bool operator!= (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator!= (address const & lhs, address const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
 
 
     // ordering
 
-    inline bool operator> (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator> (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () > rhs.absolute ();
     }
-    inline bool operator>= (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator>= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () >= rhs.absolute ();
     }
-    inline bool operator< (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator< (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () < rhs.absolute ();
     }
-    inline bool operator<= (address const & lhs, address const & rhs) noexcept {
+    inline constexpr bool operator<= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () <= rhs.absolute ();
     }
 
@@ -241,17 +241,17 @@ namespace pstore {
         return address{lhs.absolute () - rhs.absolute ()};
     }
 
-    inline address operator+ (address const lhs, std::uint64_t rhs) noexcept {
+    inline constexpr address operator+ (address const lhs, std::uint64_t rhs) noexcept {
         return address{lhs.absolute () + rhs};
     }
-    inline address operator+ (address const lhs, address rhs) noexcept {
+    inline constexpr address operator+ (address const lhs, address rhs) noexcept {
         return address{lhs.absolute () + rhs.absolute ()};
     }
 
 
     // bitwise
 
-    inline address operator| (address const lhs, std::uint64_t rhs) noexcept {
+    inline constexpr address operator| (address const lhs, std::uint64_t rhs) noexcept {
         return address{lhs.absolute () | rhs};
     }
 

@@ -82,7 +82,7 @@ namespace pstore {
     };
 
     /// \brief The number of entries in the \ref segment_address_table.
-    static auto constexpr sat_elements = 1U << address::segment_number_bits;
+    static auto constexpr sat_elements = address::max_segment + 1U;
     using segment_address_table = std::array<sat_entry, sat_elements>;
     using sat_iterator = segment_address_table::iterator;
     using file_ptr = std::shared_ptr<file::file_base>;

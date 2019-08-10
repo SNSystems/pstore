@@ -189,8 +189,9 @@ namespace pstore {
         bool resl = false;
         if (addr.offset () + size > UINT64_C (1) << address::offset_number_bits) {
             address::segment_type const segment = addr.segment ();
-            // FIXME: might be max segment number!
-            resl = (*sat_)[segment].region != (*sat_)[segment + 1].region;
+            assert (sat_->size () == address::max_segment + 1U);
+            // The sat_ is over-allocated by one entry making this test always safe.
+            resl = (*sat_)[segment].region != (*sat_)[segment + 1U].region;
         }
         return resl;
 #endif
