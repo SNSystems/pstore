@@ -68,8 +68,6 @@ namespace pstore {
 
         namespace details {
 
-            // TODO: this needs to implement all of the members required of a
-            // RandomAccessIterator.
             /// \tparam Iterator  An iterator type whose value_type is a std::pair<>.
             /// \tparam Accessor  The type of a function which will be called to yield the
             /// values from the pair. It should accept a single parameter of type Iterator
