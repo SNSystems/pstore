@@ -66,11 +66,12 @@
 #include "pstore/support/pubsub.hpp"
 #include "pstore/support/utf.hpp"
 
-#define PSTORE_LOG_FRAME_INFO 0        // Define as 1 to log the frame header as it is received.
-#define PSTORE_LOG_RECEIVED_MESSAGES 0 // Define as 1 to log the text of received messages.
 
 namespace pstore {
     namespace httpd {
+
+        constexpr bool log_frame_info = false;        // Log the frame header as it is received?
+        constexpr bool log_received_messages = false; // Log the text of received messages?
 
         // The version of the WebSockets protocol that we support.
         constexpr unsigned ws_version = 13;
@@ -170,9 +171,7 @@ namespace pstore {
             unknown = 0xFF,
         };
 
-#if PSTORE_LOG_FRAME_INFO
         char const * opcode_name (opcode op) noexcept;
-#endif
 
         inline bool is_control_frame_opcode (opcode c) noexcept {
             return (static_cast<unsigned> (c) & 0x08U) != 0U;
@@ -275,16 +274,14 @@ namespace pstore {
                 frame_fixed_layout & part1 = p1.at (0);
                 part1.raw = network_to_host (part1.raw);
 
-#if PSTORE_LOG_FRAME_INFO
-                log (pstore::logging::priority::info, "fin: ", part1.fin);
-                log (pstore::logging::priority::info, "rsv1: ", part1.rsv1);
-                log (pstore::logging::priority::info, "rsv2: ", part1.rsv2);
-                log (pstore::logging::priority::info, "rsv3: ", part1.rsv3);
-                log (pstore::logging::priority::info,
-                     "opcode: ", opcode_name (static_cast<opcode> (part1.opcode.value ())));
-                log (pstore::logging::priority::info, "mask: ", part1.mask);
-                log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
-#endif // PSTORE_LOG_FRAME_INFO
+                if (log_frame_info) {
+                    log (pstore::logging::priority::info, "fin: ", part1.fin);
+                    log (pstore::logging::priority::info, "rsv: ", part1.rsv);
+                    log (pstore::logging::priority::info,
+                         "opcode: ", opcode_name (static_cast<opcode> (part1.opcode.value ())));
+                    log (pstore::logging::priority::info, "mask: ", part1.mask);
+                    log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
+                }
 
                 // "The rsv[n] fields MUST be 0 unless an extension is negotiated that defines
                 // meanings for non-zero values. If a nonzero value is received and none of the
@@ -490,18 +487,15 @@ namespace pstore {
                     return false;
                 }
 
-                // Just log the message received for the time being.
-                {
-#if PSTORE_LOG_RECEIVED_MESSAGES
+                if (log_received_messages) {
                     std::string str;
                     std::transform (std::begin (payload), std::end (payload),
                                     std::back_inserter (str),
                                     [](std::uint8_t v) { return static_cast<char> (v); });
                     log (logging::priority::info, "Received: ", str);
-#endif // PSTORE_LOG_RECEIVED_MESSAGES
                 }
 
-                // TODO: this implements a simple echo server ATM. Need something more useful...
+                // This implements a simple echo server ATM.
                 error_or<IO> const eo3 = send_message (sender, io, op, gsl::make_span (payload));
                 if (!eo3) {
                     log (logging::priority::error, "Send error: ", eo3.get_error ().message ());

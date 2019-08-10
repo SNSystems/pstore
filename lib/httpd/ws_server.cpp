@@ -68,7 +68,6 @@ namespace pstore {
         }
 
 
-#if PSTORE_LOG_FRAME_INFO
         char const * opcode_name (opcode op) noexcept {
             switch (op) {
             case opcode::continuation: return "continuation";
@@ -91,7 +90,6 @@ namespace pstore {
             }
             return "unknown";
         }
-#endif // PSTORE_LOG_FRAME_INFO
 
         bool is_valid_close_status_code (std::uint16_t code) {
             switch (static_cast<close_status_code> (code)) {
