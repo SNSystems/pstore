@@ -180,52 +180,58 @@ namespace pstore {
                                 ok = false;
                             }
                             handler.reset ();
-                        } else {
-                            // A double-dash argument on its own indicates that the following are
-                            // positional arguments.
-                            if (arg_name == "--") {
-                                ++first_arg; // swallow this argument.
-                                break;
-                            }
-                            // If this argument has no leading dash, this and the following are
-                            // positional arguments.
-                            if (arg_name.empty () || arg_name.front () != '-') {
-                                break;
-                            }
+                            continue;
+                        }
 
-                            // TODO: We treat '--' the same as '-'. Single '-' shouldn't need (or
-                            // support) the '=' notation.
-                            if (starts_with (arg_name, "--")) {
-                                arg_name.erase (0U, 2U);
-                            } else if (starts_with (arg_name, "-")) {
-                                arg_name.erase (0U, 1U);
-                            }
+                        // A double-dash argument on its own indicates that the following are
+                        // positional arguments.
+                        if (arg_name == "--") {
+                            ++first_arg; // swallow this argument.
+                            break;
+                        }
+                        // If this argument has no leading dash, this and the following are
+                        // positional arguments.
+                        if (arg_name.empty () || arg_name.front () != '-') {
+                            break;
+                        }
+
+                        bool has_value = false;
+                        if (starts_with (arg_name, "--")) {
+                            arg_name.erase (0U, 2U);
 
                             std::size_t const equal_pos = arg_name.find ('=');
-                            if (equal_pos != std::string::npos) {
+                            has_value = equal_pos != std::string::npos;
+                            if (has_value) {
                                 value = arg_name.substr (equal_pos + 1, std::string::npos);
                                 arg_name = arg_name.substr (0, equal_pos);
-                                // TODO: check for empty ArgName[
                             }
+                        } else {
+                            assert (starts_with (arg_name, "-"));
+                            arg_name.erase (0U, 1U);
+                        }
 
-                            handler = find_handler (arg_name);
-                            if (!handler || (*handler)->is_positional ()) {
-                                report_unknown_option (program_name, arg_name, value, errs);
+                        handler = find_handler (arg_name);
+                        if (!handler || (*handler)->is_positional ()) {
+                            report_unknown_option (program_name, arg_name, value, errs);
+                            ok = false;
+                            continue;
+                        }
+
+                        bool const takes_argument = (*handler)->takes_argument ();
+                        if (takes_argument && has_value) {
+                            (*handler)->add_occurrence ();
+                            if (!(*handler)->value (value)) {
                                 ok = false;
-                            } else {
-                                bool const takes_argument = (*handler)->takes_argument ();
-                                bool has_value = equal_pos != std::string::npos;
-                                if (takes_argument && has_value) {
-                                    (*handler)->add_occurrence ();
-                                    if (!(*handler)->value (value)) {
-                                        ok = false;
-                                    }
-                                    handler.reset ();
-                                } else if (!takes_argument && !has_value) {
-                                    (*handler)->add_occurrence ();
-                                    handler.reset ();
-                                }
                             }
+                            handler.reset ();
+                        } else if (!takes_argument && !has_value) {
+                            (*handler)->add_occurrence ();
+                            handler.reset ();
+                        } else if (!takes_argument && has_value) {
+                            errs << str::out_string (program_name) << str::out_text (": Argument '")
+                                 << str::out_string ((*handler)->name ())
+                                 << str::out_text ("' does not take a value\n");
+                            ok = false;
                         }
                     }
 

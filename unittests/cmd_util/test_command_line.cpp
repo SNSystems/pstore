@@ -94,23 +94,36 @@ namespace {
 
 TEST_F (ClCommandLine, StringOption) {
     cl::opt<std::string> option ("arg");
-    this->add ("progname", "-arg", "hello");
+    this->add ("progname", "-arg", "value");
 
     string_stream errors;
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str ().length (), 0U);
-    EXPECT_EQ (option.get (), "hello");
+    EXPECT_EQ (option.get (), "value");
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
     cl::opt<std::string> option ("arg");
-    this->add ("progname", "-arg=hello");
+    this->add ("progname", "--arg=value");
     string_stream errors;
-    bool res = this->parse_command_line_options (errors);
-    EXPECT_TRUE (res);
+    EXPECT_TRUE (this->parse_command_line_options (errors));
     EXPECT_EQ (errors.str ().length (), 0U);
-    EXPECT_EQ (option.get (), "hello");
+    EXPECT_EQ (option.get (), "value");
+}
+
+TEST_F (ClCommandLine, UnknownArgument) {
+    this->add ("progname", "--arg");
+    string_stream errors;
+    EXPECT_FALSE (this->parse_command_line_options (errors));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
+}
+
+TEST_F (ClCommandLine, MissingOptionName) {
+    this->add ("progname", "--=a");
+    string_stream errors;
+    EXPECT_FALSE (this->parse_command_line_options (errors));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
 }
 
 TEST_F (ClCommandLine, StringPositional) {
@@ -194,6 +207,16 @@ TEST_F (ClCommandLine, MissingValue) {
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (), ::testing::HasSubstr (NATIVE_TEXT ("requires a value")));
     EXPECT_EQ (opt.get (), "");
+}
+
+TEST_F (ClCommandLine, UnwantedValue) {
+    cl::opt<bool> opt ("opt");
+
+    this->add ("progname", "--opt=true");
+    string_stream errors;
+    EXPECT_FALSE (this->parse_command_line_options (errors));
+    EXPECT_THAT (errors.str (), ::testing::HasSubstr (NATIVE_TEXT ("does not take a value")));
+    EXPECT_FALSE (opt.get ());
 }
 
 TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
