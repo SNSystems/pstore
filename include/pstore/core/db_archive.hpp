@@ -134,7 +134,6 @@ namespace pstore {
             /// \brief An archive-reader which reads data from a database.
             class database_reader {
             public:
-                // FIXME: construct with typed_address?
                 /// Constructs the reader using an input database and an address.
                 ///
                 /// \param db The database from which data is read.
