@@ -60,6 +60,10 @@ TEST (BitCount, CountLeadingZeros) {
     EXPECT_EQ (15U, pstore::bit_count::clz (std::uint16_t{1}));
     EXPECT_EQ (14U, pstore::bit_count::clz (std::uint16_t{2}));
     EXPECT_EQ (0U, pstore::bit_count::clz (std::numeric_limits<std::uint16_t>::max ()));
+
+    EXPECT_EQ (7U, pstore::bit_count::clz (std::uint8_t{1}));
+    EXPECT_EQ (6U, pstore::bit_count::clz (std::uint8_t{2}));
+    EXPECT_EQ (0U, pstore::bit_count::clz (std::numeric_limits<std::uint8_t>::max ()));
 }
 
 TEST (BitCount, CountTrailingZeros) {

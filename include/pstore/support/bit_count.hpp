@@ -104,14 +104,19 @@ namespace pstore {
             return static_cast<unsigned> (__builtin_clzll (x));
         }
 #endif
-        // TODO: haven't bothered to implement clz(uint8_t).
-        unsigned clz (std::uint8_t x) noexcept;
 
         inline unsigned clz (std::uint16_t x) noexcept {
-            unsigned r = clz (static_cast<std::uint32_t> (x));
+            unsigned const r = clz (static_cast<std::uint32_t> (x));
             assert (r >= 16U);
             return r - 16U;
         }
+
+        inline unsigned clz (std::uint8_t x) noexcept {
+            unsigned const r = clz (static_cast<std::uint32_t> (x));
+            assert (r >= 24U);
+            return r - 24U;
+        }
+
         inline unsigned clz (uint128 x) noexcept {
             return x.high () != 0U ? clz (x.high ()) : 64U + clz (x.low ());
         }
