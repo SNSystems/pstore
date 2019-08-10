@@ -137,8 +137,8 @@
 #elif __has_cpp_attribute(gnu::fallthrough)
 #    define PSTORE_FALLTHROUGH [[gnu::fallthrough]]
 #elif defined(_MSC_VER)
-    // MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
-    // https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
+// MSVC's __fallthrough annotations are checked by /analyze (Code Analysis):
+// https://msdn.microsoft.com/en-us/library/ms235402%28VS.80%29.aspx
 #    include <sal.h>
 #    define PSTORE_FALLTHROUGH __fallthrough
 #elif !__cplusplus

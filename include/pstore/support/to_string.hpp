@@ -47,7 +47,7 @@
 #include "pstore/config/config.hpp"
 
 #if !PSTORE_HAVE_STD_TO_STRING
-#include <sstream>
+#    include <sstream>
 #endif
 #include <string>
 

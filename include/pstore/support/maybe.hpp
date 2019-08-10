@@ -133,8 +133,9 @@ namespace pstore {
             }
         }
 
-        maybe & operator= (maybe const & other) noexcept (std::is_nothrow_copy_assignable<T>::value &&
-                                                             std::is_nothrow_copy_constructible<T>::value) {
+        maybe & operator= (maybe const & other) noexcept (
+            std::is_nothrow_copy_assignable<T>::value &&
+                std::is_nothrow_copy_constructible<T>::value) {
             if (&other != this) {
                 if (!other.has_value ()) {
                     this->reset ();

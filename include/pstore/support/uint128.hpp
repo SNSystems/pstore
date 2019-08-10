@@ -507,13 +507,9 @@ namespace std {
         static constexpr const bool has_denorm_loss = false;
         static constexpr type infinity () noexcept { return {0U}; }
         // NOLINTNEXTLINE(readability-identifier-naming)
-        static constexpr type quiet_NaN () noexcept {
-            return {0U};
-        }
+        static constexpr type quiet_NaN () noexcept { return {0U}; }
         // NOLINTNEXTLINE(readability-identifier-naming)
-        static constexpr type signaling_NaN () noexcept {
-            return {0U};
-        }
+        static constexpr type signaling_NaN () noexcept { return {0U}; }
         static constexpr type denorm_min () noexcept { return {0U}; }
 
         static constexpr const bool is_iec559 = false;

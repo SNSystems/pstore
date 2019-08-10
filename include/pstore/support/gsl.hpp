@@ -433,8 +433,7 @@ namespace pstore {
                 template <typename OtherExtentType>
                 constexpr storage_type (pointer data, OtherExtentType ext)
                         : ExtentType (ext)
-                        , data_ (data) {
-                }
+                        , data_ (data) {}
 
                 constexpr pointer data () const noexcept { return data_; }
 
@@ -446,7 +445,8 @@ namespace pstore {
         };
 
         template <typename ElementType, std::ptrdiff_t Extent>
-        constexpr typename span<ElementType, Extent>::index_type const span<ElementType, Extent>::extent;
+        constexpr
+            typename span<ElementType, Extent>::index_type const span<ElementType, Extent>::extent;
 
 
         // [span.comparison], span comparison operators
@@ -615,8 +615,8 @@ namespace pstore {
                 return *this;
             }
             not_null (not_null const &) noexcept = default;
-            not_null (not_null && ) noexcept = default;
-            not_null & operator= (not_null const &) noexcept= default;
+            not_null (not_null &&) noexcept = default;
+            not_null & operator= (not_null const &) noexcept = default;
             not_null & operator= (not_null &&) noexcept = default;
 
             // prevents compilation when someone attempts to assign a nullptr

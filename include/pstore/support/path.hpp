@@ -52,9 +52,9 @@
 #include <utility>
 
 #if defined(_WIN32)
-#define PSTORE_PLATFORM_NS win32
+#    define PSTORE_PLATFORM_NS win32
 #else
-#define PSTORE_PLATFORM_NS posix
+#    define PSTORE_PLATFORM_NS posix
 #endif
 
 namespace pstore {

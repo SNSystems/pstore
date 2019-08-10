@@ -51,7 +51,7 @@
 #include <cassert>
 #include <cstdint>
 #ifdef _MSC_VER
-#include <intrin.h>
+#    include <intrin.h>
 #endif
 
 #include "pstore/support/uint128.hpp"
