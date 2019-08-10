@@ -51,7 +51,6 @@ namespace {
 
     template <typename T>
     class BitFieldAssignment : public ::testing::Test {
-    public:
     };
 
     template <typename Type, unsigned Index, unsigned Bits>

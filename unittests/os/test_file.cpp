@@ -424,7 +424,6 @@ namespace {
             deleter_->open (pstore::file::file_handle::temporary{});
         }
 
-    protected:
         std::shared_ptr<pstore::file::file_handle> deleter_;
     };
 

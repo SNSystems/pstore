@@ -72,7 +72,6 @@ namespace {
     }
 
     class DbArchive : public EmptyStore {
-    protected:
     };
 
 } // end anonymous namespace
