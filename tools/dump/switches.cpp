@@ -47,7 +47,6 @@
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -156,10 +155,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.no_times = no_times.get ();
     result.expanded_addresses = expanded_addresses.get ();
     result.triple = triple.get ();
-
-    std::transform (
-        std::begin (paths), std::end (paths), std::back_inserter (result.paths),
-        [](std::string const & path) { return pstore::utf::from_native_string (path); });
+    result.paths = paths.get ();
 
     return {result, EXIT_SUCCESS};
 }

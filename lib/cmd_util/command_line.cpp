@@ -43,11 +43,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/command_line.hpp"
 
-#include <iostream>
-
 #include "pstore/cmd_util/option.hpp"
 #include "pstore/cmd_util/string_distance.hpp"
-#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -80,7 +77,8 @@ namespace pstore {
                     return {best_option, nearest_string};
                 }
 
-
+                // starts_with
+                // ~~~~~~~~~~~
                 bool starts_with (std::string const & s, char const * prefix) {
                     auto it = std::begin (s);
                     auto end = std::end (s);
@@ -92,6 +90,8 @@ namespace pstore {
                     return *prefix == '\0';
                 }
 
+                // find_handler
+                // ~~~~~~~~~~~~
                 pstore::cmd_util::cl::option * find_handler (std::string const & name) {
                     using pstore::cmd_util::cl::option;
 
@@ -102,21 +102,7 @@ namespace pstore {
                     return it != end ? *it : nullptr;
                 }
 
-            } // namespace details
-
-
-#ifdef _WIN32
-            void ParseCommandLineOptions (int argc, wchar_t * argv[],
-                                          std::string const & overview) {
-                std::vector<std::string> args;
-                args.reserve (argc);
-                std::transform (
-                    argv, argv + argc, std::back_inserter (args),
-                    [](wchar_t const * str) { return pstore::utf::from_native_string (str); });
-                cl::ParseCommandLineOptions (std::begin (args), std::end (args), overview);
-            }
-#endif
-
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+            } // end namespace details
+        }     // end namespace cl
+    }         // end namespace cmd_util
+} // end namespace pstore

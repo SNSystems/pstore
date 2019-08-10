@@ -99,32 +99,22 @@ namespace {
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
 
-    auto make_value_pair = [](std::string const & arg) {
-        return to_value_pair (pstore::utf::from_native_string (arg));
-    };
+    auto const make_value_pair = [](std::string const & arg) { return to_value_pair (arg); };
 
     switches result;
 
-    result.db_path = pstore::utf::from_native_string (db_path.get ());
+    result.db_path = db_path.get ();
     if (!vacuum_mode.empty ()) {
-        result.vmode = to_vacuum_mode (pstore::utf::from_native_string (vacuum_mode.get ()));
+        result.vmode = to_vacuum_mode (vacuum_mode.get ());
     }
 
     std::transform (std::begin (add), std::end (add), std::back_inserter (result.add),
                     make_value_pair);
-
-    std::transform (std::begin (add_string), std::end (add_string),
-                    std::back_inserter (result.strings),
-                    [](std::string const & str) { return pstore::utf::from_native_string (str); });
-
+    result.strings = add_string.get ();
     std::transform (std::begin (add_file), std::end (add_file), std::back_inserter (result.files),
                     make_value_pair);
-
     std::transform (std::begin (files), std::end (files), std::back_inserter (result.files),
-                    [](std::string const & path) {
-                        return std::make_pair (pstore::utf::from_native_string (path),
-                                               pstore::utf::from_native_string (path));
-                    });
+                    [](std::string const & path) { return std::make_pair (path, path); });
 
     return {result, EXIT_SUCCESS};
 }

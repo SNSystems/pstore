@@ -198,7 +198,6 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
 
-    using pstore::utf::from_native_string;
     using pstore::utf::to_native_string;
 
     PSTORE_TRY {
@@ -267,7 +266,9 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ") << to_native_string (what) << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
+                                       << to_native_string (what)
+                                       << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {

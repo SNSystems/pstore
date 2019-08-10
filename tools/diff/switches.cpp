@@ -47,7 +47,6 @@
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -77,7 +76,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore diff utility\n");
 
     switches result;
-    result.db_path = utf::from_native_string (db_path.get ());
+    result.db_path = db_path.get ();
     result.first_revision = static_cast<cmd_util::revision_opt> (first_revision).r;
     result.second_revision = second_revision.getNumOccurrences () > 0
                                  ? just (static_cast<cmd_util::revision_opt> (second_revision).r)

@@ -44,7 +44,6 @@
 #include "switches.hpp"
 
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -59,7 +58,6 @@ std::pair<vacuum::user_options, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore vacuum utility\n");
 
     vacuum::user_options opt;
-    opt.src_path = pstore::utf::from_native_string (path.get ());
-
+    opt.src_path = path.get ();
     return {opt, EXIT_SUCCESS};
 }

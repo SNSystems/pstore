@@ -48,7 +48,6 @@
 
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/support/maybe.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -87,8 +86,8 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
 
     switches result;
-    result.verb = pstore::utf::from_native_string (verb.get ());
-    result.path = pstore::utf::from_native_string (path.get ());
+    result.verb = verb.get ();
+    result.path = path.get ();
     result.retry_timeout = std::chrono::milliseconds (retry_timeout.get ());
     result.flood = flood.get ();
     result.kill = kill.get ();

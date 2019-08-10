@@ -55,13 +55,6 @@
 #include <system_error>
 #include <vector>
 
-#include "pstore/config/config.hpp"
-#include "pstore/dump/db_value.hpp"
-#include "pstore/dump/index_value.hpp"
-#include "pstore/dump/value.hpp"
-#include "pstore/dump/mcdebugline_value.hpp"
-#include "pstore/dump/mcrepo_value.hpp"
-
 #if PSTORE_IS_INSIDE_LLVM
 #    include "llvm/Support/Signals.h"
 #    include "llvm/Support/TargetSelect.h"
@@ -70,19 +63,15 @@
 #    include "llvm/ADT/StringRef.h"
 #endif
 
-#include "pstore/core/database.hpp"
-#include "pstore/core/generation_iterator.hpp"
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/hamt_set.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/core/shared_memory.hpp"
-#include "pstore/core/sstring_view_archive.hpp"
-#include "pstore/core/vacuum_intf.hpp"
 #include "pstore/cmd_util/tchar.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
-#include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
-#include "pstore/support/utf.hpp"
+#include "pstore/config/config.hpp"
+#include "pstore/core/generation_iterator.hpp"
+#include "pstore/core/hamt_set.hpp"
+#include "pstore/dump/db_value.hpp"
+#include "pstore/dump/index_value.hpp"
+#include "pstore/dump/mcdebugline_value.hpp"
+#include "pstore/dump/mcrepo_value.hpp"
+#include "pstore/dump/value.hpp"
 
 #include "switches.hpp"
 
@@ -354,6 +343,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {
+
 #if PSTORE_IS_INSIDE_LLVM
 #    if defined(_WIN32) && defined(_UNICODE)
         // Windows will present our _tmain function with its arguments encoded as UTF-16. The LLVM
@@ -373,7 +363,7 @@ int main (int argc, char * argv[]) {
         llvm::InitializeAllTargetInfos ();
         llvm::InitializeAllTargetMCs ();
         llvm::InitializeAllDisassemblers ();
-#endif
+#endif // PSTORE_IS_INSIDE_LLVM
 
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
@@ -465,8 +455,9 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
-                     << std::endl;
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ") 
+                                       << pstore::utf::to_native_string (ex.what ())
+                                       << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {

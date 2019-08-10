@@ -277,32 +277,33 @@ namespace pstore {
             } // namespace details
 
 
-            template <typename InputIterator, typename ErrorStream>
-            void ParseCommandLineOptions (InputIterator first_arg, InputIterator last_arg,
-                                          std::string const & overview, ErrorStream & errs) {
-                if (!details::parse_command_line_options (first_arg, last_arg, overview, errs)) {
+#ifdef _WIN32
+            /// For Windows, a variation on the ParseCommandLineOptions functions which takes the
+            /// arguments as either UTF-16 or MBCS strings and converts them to UTF-8 as expected
+            /// by the rest of the code.
+            template <typename CharType>
+            void ParseCommandLineOptions (int argc, CharType * argv[],
+                                          std::string const & overview) {
+                std::vector<std::string> args;
+                args.reserve (argc);
+                std::transform (
+                    argv, argv + argc, std::back_inserter (args),
+                    [](CharType const * str) { return pstore::utf::from_native_string (str); });
+                if (!details::parse_command_line_options (std::begin (args), std::end (args),
+                                                          overview, error_stream)) {
                     std::exit (EXIT_FAILURE);
                 }
             }
-
-            template <typename InputIterator>
-            void ParseCommandLineOptions (InputIterator first_arg, InputIterator last_arg,
-                                          std::string const & overview) {
-                ParseCommandLineOptions (first_arg, last_arg, overview, error_stream);
-            }
-
-
+#else
             inline void ParseCommandLineOptions (int argc, char * argv[],
                                                  std::string const & overview) {
-                ParseCommandLineOptions (argv, argv + argc, overview);
+                if (!details::parse_command_line_options (argv, argv + argc, overview,
+                                                          error_stream)) {
+                    std::exit (EXIT_FAILURE);
+                }
             }
+#endif // _WIN32
 
-#ifdef _WIN32
-            /// For Windows, a variation on the ParseCommandLineOptions functions which takes the
-            /// arguments as UTF-16 strings and converts them to UTF-8 as expected by the rest of
-            /// the code.
-            void ParseCommandLineOptions (int argc, wchar_t * argv[], std::string const & overview);
-#endif
         } // namespace cl
     }     // namespace cmd_util
 } // namespace pstore

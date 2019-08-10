@@ -64,7 +64,7 @@
 
 #if defined(_WIN32)
 
-#include <tchar.h>
+#    include <tchar.h>
 
 namespace pstore {
     namespace utf {
@@ -434,7 +434,7 @@ namespace pstore {
         using native_ostringstream = std::basic_ostringstream<TCHAR>;
 
 #if defined(_WIN32)
-#if defined(_UNICODE)
+#    if defined(_UNICODE)
         inline std::wstring to_native_string (std::string const & str) {
             return utf::win32::to16 (str);
         }
@@ -445,13 +445,13 @@ namespace pstore {
         inline std::string from_native_string (wchar_t const * str) {
             return utf::win32::to8 (str);
         }
-#else
+#    else
         // This is Windows in "Multibyte character set" mode.
         inline std::string to_native_string (std::string const & str) {
             return win32::to_mbcs (str);
         }
         inline std::string to_native_string (char const * str) { return win32::to_mbcs (str); }
-#endif //_UNICODE
+#    endif //_UNICODE
         inline std::string from_native_string (std::string const & str) {
             return win32::mbcs_to8 (str);
         }

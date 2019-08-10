@@ -249,6 +249,8 @@ namespace pstore {
                 using iterator = typename container::const_iterator;
                 using const_iterator = iterator;
 
+                std::list<T> const & get () const noexcept { return values_; }
+
                 const_iterator begin () const { return std::begin (values_); }
                 const_iterator end () const { return std::end (values_); }
                 std::size_t size () const { return values_.size (); }

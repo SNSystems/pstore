@@ -47,7 +47,6 @@
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -73,8 +72,8 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
 
     switches result;
     result.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
-    result.db_path = pstore::utf::from_native_string (db_path.get ());
-    result.key = pstore::utf::from_native_string (key.get ());
+    result.db_path = db_path.get ();
+    result.key = key.get ();
     result.string_mode = string_mode.get ();
 
     return {result, EXIT_SUCCESS};
