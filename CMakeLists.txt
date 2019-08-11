@@ -249,7 +249,11 @@ endif ()
 
 # Add a target to the build which will run the system tests.
 add_custom_target (pstore-system-tests
-    COMMAND "${PYTHON_EXECUTABLE}" "${LIT_EXECUTABLE}" ${LIT_PARAMS} -s -v "$<TARGET_FILE_DIR:pstore-write>"
+    COMMAND "${PYTHON_EXECUTABLE}"
+        "${LIT_EXECUTABLE}"
+        ${LIT_PARAMS}
+        --echo-all-commands
+        "$<TARGET_FILE_DIR:pstore-write>"
     WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     COMMENT "Running system tests with LIT"
     VERBATIM
