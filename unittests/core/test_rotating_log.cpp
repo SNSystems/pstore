@@ -152,14 +152,16 @@ TEST (RotatingLog, TwoRotations) {
     // feeds).
     std::vector<std::string> messages;
     {
-        std::ios_base::streamoff size = 0;
-        unsigned int index = 0;
+        auto size = std::ios_base::streamoff{0};
+        auto index = 1U;
         while (size < max_size * num_backups) {
             std::ostringstream str;
-            str << "message " << ++index;
+            str << "message " << index;
             std::string const & message = str.str ();
             messages.push_back (message);
+
             size += message.size ();
+            ++index;
         }
     }
     // Now log each of the strings.
