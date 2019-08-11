@@ -52,70 +52,93 @@ import platform
 import signal
 import subprocess
 import sys
+import time
 
-PLATFORM_NAME = platform.system ()
+import timed_process
+
+PLATFORM_NAME = platform.system()
 IS_WINDOWS = PLATFORM_NAME == 'Windows'
-IS_CYGWIN = PLATFORM_NAME.startswith ('CYGWIN_NT-')
+IS_CYGWIN = PLATFORM_NAME.startswith('CYGWIN_NT-')
 
 
 # TODO: shared with broker1.py
-def executable (path):
+def executable(path):
     if IS_WINDOWS or IS_CYGWIN:
         path += '.exe'
     return path
 
 
 # TODO: shared with broker1.py
-def pipe_root_dir ():
+def pipe_root_dir():
     return r'\\.\pipe' if IS_WINDOWS or IS_CYGWIN else '/tmp'
 
 
-ToolPaths = collections.namedtuple ('ToolPaths', ['broker', 'poker'])
+# TODO: shared with broker1.py
+def report_error(tool_name, timed_process):
+    ok = True
+    if timed_process.did_timeout():
+        print("%s: %s timeout" % (argv0, tool_name,), file=sys.stderr)
+        ok = False
+    ex = timed_process.exception()
+    if ex is not None:
+        print("%s: %s exception: %s" % (argv0, tool_name, ex), file=sys.stderr)
+        ok = False
+    return ok
 
 
-def get_tool_paths (exe_path):
-    broker_path = os.path.join (exe_path, executable ('pstore-brokerd'))
-    if not os.path.exists (broker_path):
-        raise RuntimeError ('Did not find broker executable at "%s"' % broker_path)
-
-    poker_path = os.path.join (exe_path, executable ('pstore-broker-poker'))
-    if not os.path.exists (poker_path):
-        raise RuntimeError ('Did not find broker-poker executable at "%s"' % poker_path)
-
-    return ToolPaths (broker=broker_path, poker=poker_path)
+ToolPaths = collections.namedtuple('ToolPaths', ['broker', 'poker'])
 
 
-def main (argv):
+def get_tool_paths(exe_path):
+    broker_path = os.path.join(exe_path, executable('pstore-brokerd'))
+    if not os.path.exists(broker_path):
+        raise RuntimeError('Did not find broker executable at "%s"' % broker_path)
+
+    poker_path = os.path.join(exe_path, executable('pstore-broker-poker'))
+    if not os.path.exists(poker_path):
+        raise RuntimeError('Did not find broker-poker executable at "%s"' % poker_path)
+
+    return ToolPaths(broker=broker_path, poker=poker_path)
+
+
+def main(argv):
     exit_code = 0
-    argv0 = sys.argv [0]
-    parser = argparse.ArgumentParser (description='Test the broker by using the poker to fire messages at it.')
-    parser.add_argument ('exe_path', help='The path of the pstore binaries')
-    # parser.add_argument ('--timeout', help='Process timeout in seconds', type=float, default=DEFAULT_PROCESS_TIMEOUT)
-    args = parser.parse_args (args=argv)
+    argv0 = sys.argv[0]
+    parser = argparse.ArgumentParser(description='Test the broker by using the poker to fire messages at it.')
+    parser.add_argument('exe_path', help='The path of the pstore binaries')
+    parser.add_argument('--timeout', help='Process timeout in seconds', type=float,
+                        default=timed_process.DEFAULT_PROCESS_TIMEOUT)
+    args = parser.parse_args(args=argv)
 
-    paths = get_tool_paths (args.exe_path)
+    paths = get_tool_paths(args.exe_path)
 
-    pipe_path = os.path.join (pipe_root_dir (), 'pstore_broker_kill')
+    pipe_path = os.path.join(pipe_root_dir(), 'pstore_broker_kill')
     broker_command = [paths.broker, '--pipe-path', pipe_path]
-    print ("Popen: ", ' '.join (broker_command))
-    broker_process = subprocess.Popen (args=broker_command, stdout=subprocess.PIPE, universal_newlines=True, bufsize=1,
-                                       creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if IS_WINDOWS else 0)
+    print("Popen: ", ' '.join(broker_command), file=sys.stderr)
 
-    poker_command = [paths.poker, '--pipe-path', pipe_path, "ECHO", "ready"]
-    print ("Popen: ", ' '.join (poker_command))
-    poker_process = subprocess.Popen (args=poker_command)
+    broker_process = timed_process.TimedProcess(args=broker_command,
+                                                timeout=args.timeout,
+                                                name='broker',
+                                                creation_flags=subprocess.CREATE_NEW_PROCESS_GROUP if IS_WINDOWS else 0)
+    broker_process.start()
 
-    poker_process.wait ()
-    print ("done initial wait: broker is up")
+    # TODO: this is a crude way to know whether the broker is up: we don't know how long the system
+    # will take to start the process before it actually gets to do any work.
+    time.sleep(2)  # Wait until the broker is alive.
 
-    broker_process.send_signal (signal.CTRL_BREAK_EVENT if IS_WINDOWS else signal.SIGTERM)
-    print ("Sent SIGTERM. Waiting for broker to exit.")
+    broker_process.send_signal(signal.CTRL_BREAK_EVENT if IS_WINDOWS else signal.SIGTERM)
+    print("Sent SIGTERM. Waiting for broker to exit.", file=sys.stderr)
 
-    broker_process.wait ()
-    print ("Broker exited. Done.")
+    broker_process.join()
+    print("Broker exited. Done.", file=sys.stderr)
+
+    report_error('broker', broker_process)
+    print(broker_process.output())
 
     return exit_code
 
 
 if __name__ == '__main__':
-    sys.exit (main (sys.argv [1:]))
+    global argv0
+    argv0 = sys.argv[0]
+    sys.exit(main(sys.argv[1:]))
