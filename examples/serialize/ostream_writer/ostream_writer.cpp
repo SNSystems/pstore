@@ -52,12 +52,13 @@
 #include "pstore/support/gsl.hpp"
 
 namespace {
+
     class osw_policy {
     public:
         using result_type = pstore::serialize::archive::void_type;
 
-        osw_policy (std::ostream & os)
-                : os_ (os) {}
+        explicit osw_policy (std::ostream & os) noexcept
+                : os_{os} {}
 
         // Writes an object of standard-layout type Ty to the output stream.
         // A return type of 'void_type' is used in the case that the archive writer policy does not
@@ -79,9 +80,10 @@ namespace {
     class ostream_writer final : public pstore::serialize::archive::writer_base<osw_policy> {
     public:
         explicit ostream_writer (std::ostream & os)
-                : writer_base<osw_policy> (os) {}
+                : writer_base<osw_policy> (osw_policy{os}) {}
     };
-} // namespace
+
+} // end anonymous namespace
 
 int main () {
     // A simple function which will write a series of integer values to an instance ostream_writer.
