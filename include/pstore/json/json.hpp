@@ -1089,10 +1089,12 @@ namespace pstore {
                 enum state {
                     done_state = matcher<Callbacks>::done,
                     start_state,
+                    first_object_state,
                     object_state,
                     comma_state,
                 };
-                bool is_first_ = true; // TODO: use an additional state instead.
+
+                void end_array (parser<Callbacks> & parser);
             };
 
             template <typename Callbacks>
@@ -1107,20 +1109,20 @@ namespace pstore {
                 case start_state:
                     assert (c == '[');
                     parser.callbacks ().begin_array ();
-                    this->set_state (object_state);
+                    this->set_state (first_object_state);
                     // Match this character and consume whitespace before the object (or close
                     // bracket).
                     return {this->make_whitespace_matcher (parser), true};
 
-                case object_state:
-                    if (c == ']' && is_first_) {
-                        parser.callbacks ().end_array ();
-                        this->set_state (done_state);
-                    } else {
-                        is_first_ = false;
-                        this->set_state (comma_state);
-                        return {this->make_root_matcher (parser), false};
+                case first_object_state:
+                    if (c == ']') {
+                        this->end_array (parser);
+                        break;
                     }
+                    PSTORE_FALLTHROUGH;
+                case object_state:
+                    this->set_state (comma_state);
+                    return {this->make_root_matcher (parser), false};
                     break;
                 case comma_state:
                     if (isspace (c)) {
@@ -1129,16 +1131,19 @@ namespace pstore {
                     }
                     switch (c) {
                     case ',': this->set_state (object_state); break;
-                    case ']':
-                        parser.callbacks ().end_array ();
-                        this->set_state (done_state);
-                        break;
+                    case ']': this->end_array (parser); break;
                     default: this->set_error (parser, error_code::expected_array_member); break;
                     }
                     break;
                 case done_state: assert (false); break;
                 }
                 return {nullptr, true};
+            }
+
+            template <typename Callbacks>
+            void array_matcher<Callbacks>::end_array (parser<Callbacks> & parser) {
+                parser.callbacks ().end_array ();
+                this->set_state (done_state);
             }
 
             //*      _     _        _    *
