@@ -119,6 +119,14 @@ TEST_F (ClCommandLine, UnknownArgument) {
     EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Unknown command line argument")));
 }
 
+TEST_F (ClCommandLine, NearestName) {
+    cl::opt<std::string> option ("arg");
+    this->add ("progname", "--argx=value");
+    string_stream errors;
+    EXPECT_FALSE (this->parse_command_line_options (errors));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Did you mean '--arg=value'")));
+}
+
 TEST_F (ClCommandLine, MissingOptionName) {
     this->add ("progname", "--=a");
     string_stream errors;
