@@ -52,8 +52,12 @@ namespace pstore {
             //* \___/ .__/\__|_\___/_||_| *
             //*     |_|                   *
             option::option () { all ().push_back (this); }
+            option::option (num_occurrences_flag occurrences)
+                    : option () {
+                occurrences_ = occurrences;
+            }
 
-            option::~option () {}
+            option::~option () = default;
 
             void option::set_num_occurrences_flag (num_occurrences_flag n) { occurrences_ = n; }
             num_occurrences_flag option::get_num_occurrences_flag () const { return occurrences_; }

@@ -69,7 +69,9 @@ namespace pstore {
             class option {
             public:
                 option (option const &) = delete;
+                option (option &&) = delete;
                 option & operator= (option const &) = delete;
+                option & operator= (option &&) = delete;
                 virtual ~option ();
 
                 virtual void set_num_occurrences_flag (num_occurrences_flag n);
@@ -104,7 +106,8 @@ namespace pstore {
                 static options_container & reset_container ();
 
             protected:
-                explicit option ();
+                option ();
+                explicit option (num_occurrences_flag occurrences);
 
             private:
                 std::string name_;
@@ -151,7 +154,9 @@ namespace pstore {
                     apply (*this, mods...);
                 }
                 opt (opt const &) = delete;
+                opt (opt &&) = delete;
                 opt & operator= (opt const &) = delete;
+                opt & operator= (opt &&) = delete;
 
                 template <typename U>
                 void set_initial_value (U const & u) {
@@ -202,7 +207,9 @@ namespace pstore {
                     apply (*this, mods...);
                 }
                 opt (opt const &) = delete;
+                opt (opt &&) = delete;
                 opt & operator= (opt const &) = delete;
+                opt & operator= (opt &&) = delete;
 
                 explicit operator bool () const noexcept { return get (); }
                 bool get () const noexcept { return value_; }
@@ -234,13 +241,15 @@ namespace pstore {
                 using value_type = T;
 
                 template <class... Mods>
-                explicit list (Mods const &... mods) {
-                    set_num_occurrences_flag (num_occurrences_flag::zero_or_more);
+                explicit list (Mods const &... mods)
+                        : option (num_occurrences_flag::zero_or_more) {
                     apply (*this, mods...);
                 }
 
                 list (list const &) = delete;
+                list (list &&) = delete;
                 list & operator= (list const &) = delete;
+                list & operator= (list &&) = delete;
 
                 bool takes_argument () const override { return true; }
                 bool value (std::string const & v) override;
@@ -288,7 +297,9 @@ namespace pstore {
                 }
 
                 alias (alias const &) = delete;
+                alias (alias &&) = delete;
                 alias & operator= (alias const &) = delete;
+                alias & operator= (alias &&) = delete;
 
                 void set_num_occurrences_flag (num_occurrences_flag n) override;
                 num_occurrences_flag get_num_occurrences_flag () const override;
@@ -306,8 +317,8 @@ namespace pstore {
                 option * original_ = nullptr;
             };
 
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore
 
 #endif // PSTORE_CMD_UTIL_OPTION_H
