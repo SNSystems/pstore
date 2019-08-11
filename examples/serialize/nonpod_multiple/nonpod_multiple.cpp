@@ -49,12 +49,13 @@
 #include "pstore/support/gsl.hpp"
 
 namespace {
+
     class foo {
         friend struct pstore::serialize::serializer<foo>;
 
     public:
-        foo () {}
-        foo (int a)
+        foo () = default;
+        explicit foo (int a)
                 : a_ (a) {}
         std::ostream & write (std::ostream & os) const;
 
@@ -65,7 +66,8 @@ namespace {
     std::ostream & foo::write (std::ostream & os) const { return os << "foo(" << a_ << ')'; }
 
     std::ostream & operator<< (std::ostream & os, foo const & f) { return f.write (os); }
-} // namespace
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace serialize {
@@ -90,8 +92,8 @@ namespace pstore {
             }
         };
 
-    } // namespace serialize
-} // namespace pstore
+    } // end namespace serialize
+} // end namespace pstore
 
 int main () {
     // This is the container into which the vector_writer will place the serialized data.
@@ -100,7 +102,7 @@ int main () {
     // First write an array of "foo" instance to the "bytes" container.
     {
         pstore::serialize::archive::vector_writer writer (bytes);
-        std::array<foo, 2> src{{37, 42}};
+        std::array<foo, 2> src{{foo{37}, foo{42}}};
 
         std::cout << "Writing: ";
         std::copy (std::begin (src), std::end (src), std::ostream_iterator<foo> (std::cout, " "));
