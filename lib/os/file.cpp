@@ -292,8 +292,7 @@ namespace pstore {
             }
             if (size > eof_) {
                 // Fill from the current end of file to the end of the newly available region.
-                std::uint8_t * const base = buffer_.get ();
-                std::fill (base + eof_, base + size, std::uint8_t{0});
+                std::memset (buffer_.get () + eof_, 0, size - eof_);
             }
             eof_ = size;
             // Clamp pos inside the new file extent
