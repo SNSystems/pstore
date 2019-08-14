@@ -2,6 +2,9 @@
 
 #include <gtest/gtest.h>
 
+// In "always spanning" mode request_spans_regions() ALWAYS returns true!
+#if !PSTORE_ALWAYS_SPANNING
+
 namespace {
 
     class RequestSpansRegions : public testing::Test {
@@ -130,3 +133,5 @@ TEST_F (RequestSpansRegions, FullRegionSize) {
         EXPECT_TRUE (st2.request_spans_regions (pstore::address::null (), full_region_size + 1U));
     }
 }
+
+#endif //! PSTORE_ALWAYS_SPANNING
