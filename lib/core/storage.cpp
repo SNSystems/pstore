@@ -82,7 +82,8 @@ namespace pstore {
     // ~~~~~~~~~
     void storage::map_bytes (std::uint64_t new_size) {
         // Get the file offset of the end of the last memory mapped region.
-        std::uint64_t const old_size = regions_.size () == 0 ? 0 : regions_.back ()->end ();
+        std::uint64_t const old_size =
+            regions_.size () == 0 ? std::uint64_t{0} : regions_.back ()->end ();
         // if growing the storage
         if (new_size > old_size) { 
             auto const old_num_regions = regions_.size ();
@@ -176,25 +177,6 @@ namespace pstore {
             ++segment_it;
         }
         return segment_it;
-    }
-
-    // request_spans_regions
-    // ~~~~~~~~~~~~~~~~~~~~~
-    bool storage::request_spans_regions (address const & addr, std::size_t size) const {
-        (void) addr;
-        (void) size;
-#if PSTORE_ALWAYS_SPANNING
-        return true;
-#else
-        bool resl = false;
-        if (addr.offset () + size > UINT64_C (1) << address::offset_number_bits) {
-            address::segment_type const segment = addr.segment ();
-            assert (sat_->size () == address::max_segment + 1U);
-            // The sat_ is over-allocated by one entry making this test always safe.
-            resl = (*sat_)[segment].region != (*sat_)[segment + 1U].region;
-        }
-        return resl;
-#endif
     }
 
     // protect

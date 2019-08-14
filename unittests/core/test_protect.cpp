@@ -55,6 +55,7 @@
 #include "mock_mutex.hpp"
 
 namespace {
+
     class fixed_page_size final : public pstore::system_page_size_interface {
     public:
         MOCK_CONST_METHOD0 (get, unsigned());
@@ -87,9 +88,8 @@ namespace {
             return this->create<pstore::file::in_memory, mock_mapper> (file_);
         }
 
-        void add (std::vector<pstore::region::memory_mapper_ptr> * const regions,
+        void add (pstore::gsl::not_null<std::vector<pstore::region::memory_mapper_ptr> *> regions,
                   std::uint64_t original_size, std::uint64_t new_size) override {
-
             this->append<pstore::file::in_memory, mock_mapper> (file_, regions, original_size,
                                                                 new_size);
         }
@@ -99,7 +99,8 @@ namespace {
     private:
         std::shared_ptr<pstore::file::in_memory> file_;
     };
-} // namespace
+
+} // end anonymous namespace
 
 
 namespace {

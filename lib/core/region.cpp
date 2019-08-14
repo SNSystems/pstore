@@ -103,7 +103,7 @@ namespace pstore {
 
         // add
         // ~~~
-        void file_based_factory::add (std::vector<memory_mapper_ptr> * const regions,
+        void file_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
                                       std::uint64_t original_size, std::uint64_t new_size) {
 
             this->append<file::file_handle, memory_mapper> (file_, regions, original_size,
@@ -137,7 +137,7 @@ namespace pstore {
 
         // add
         // ~~~
-        void mem_based_factory::add (std::vector<memory_mapper_ptr> * regions,
+        void mem_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
                                      std::uint64_t original_size, std::uint64_t new_size) {
 
             this->append<file::in_memory, in_memory_mapper> (file_, regions, original_size,
@@ -150,5 +150,5 @@ namespace pstore {
             return std::static_pointer_cast<file::file_base> (file_);
         }
 
-    } // namespace region
-} // namespace pstore
+    } // end namespace region
+} // end namespace pstore

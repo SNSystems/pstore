@@ -113,12 +113,12 @@ namespace pstore {
             ///                 memory-mapped regions.
             /// \param bytes_to_map  The number of bytes in the file to be mapped by additional
             ///                      memory-mapped regions.
-            void append (container_type * regions, std::uint64_t offset,
+            void append (gsl::not_null<container_type *> regions, std::uint64_t offset,
                          std::uint64_t bytes_to_map);
 
         private:
-            void push (container_type * regions, std::uint64_t file_size, std::uint64_t offset,
-                       std::uint64_t size);
+            void push (gsl::not_null<container_type *> regions, std::uint64_t file_size,
+                       std::uint64_t offset, std::uint64_t size);
 
             /// Checks the region-builder's post-condition that all of the regions are sorted
             /// and contiguous starting at an offset of 0.
@@ -128,10 +128,10 @@ namespace pstore {
             /// created.
             std::shared_ptr<File> file_;
 
-            std::uint64_t const
-                full_size_; ///< The number of bytes in a "full size" memory-mapped region.
-            std::uint64_t const
-                minimum_size_; ///< The number of bytes in a "minimum size" memory-mapped region.
+            /// The number of bytes in a "full size" memory-mapped region.
+            std::uint64_t const full_size_;
+            ///< The number of bytes in a "minimum size" memory-mapped region.
+            std::uint64_t const minimum_size_;
         };
 
         // region_builder
@@ -150,7 +150,7 @@ namespace pstore {
         // append
         // ~~~~~~
         template <typename File, typename MemoryMapper>
-        void region_builder<File, MemoryMapper>::append (container_type * const regions,
+        void region_builder<File, MemoryMapper>::append (gsl::not_null<container_type *> regions,
                                                          std::uint64_t offset,
                                                          std::uint64_t bytes_to_map) {
             assert (regions != nullptr);
@@ -186,18 +186,15 @@ namespace pstore {
         // push
         // ~~~~
         template <typename File, typename MemoryMapper>
-        void region_builder<File, MemoryMapper>::push (container_type * const regions,
+        void region_builder<File, MemoryMapper>::push (gsl::not_null<container_type *> regions,
                                                        std::uint64_t /*file_size*/,
                                                        std::uint64_t offset, std::uint64_t size) {
-
             assert (regions != nullptr);
             assert (size >= minimum_size_);
-
             // (Note that we separately make pages read-only to guard against writing to committed
             // transactions: that's done by database::protect() rather than here.)
-            bool const is_write_enabled = file_->is_writable ();
-            auto mapper = std::make_shared<MemoryMapper> (*file_, is_write_enabled, offset, size);
-            regions->push_back (mapper);
+            regions->push_back (
+                std::make_shared<MemoryMapper> (*file_, file_->is_writable (), offset, size));
         }
 
         // check_regions_are_contiguous
@@ -246,13 +243,13 @@ namespace pstore {
             /// \returns A container of memory mapper objects.
             virtual std::vector<memory_mapper_ptr> init () = 0;
 
-            virtual void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
-                              std::uint64_t new_size) = 0;
+            virtual void add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
+                              std::uint64_t original_size, std::uint64_t new_size) = 0;
 
             virtual std::shared_ptr<file::file_base> file () = 0;
 
-            std::uint64_t full_size () const { return full_size_; }
-            std::uint64_t min_size () const { return min_size_; }
+            std::uint64_t full_size () const noexcept { return full_size_; }
+            std::uint64_t min_size () const noexcept { return min_size_; }
 
         protected:
             /// \note full_size modulo minimum_size must be 0.
@@ -268,7 +265,8 @@ namespace pstore {
             auto create (std::shared_ptr<File> file) -> std::vector<memory_mapper_ptr>;
 
             template <typename File, typename MemoryMapper>
-            void append (std::shared_ptr<File> file, std::vector<memory_mapper_ptr> * regions,
+            void append (std::shared_ptr<File> file,
+                         gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
                          std::uint64_t original_size, std::uint64_t new_size);
 
         private:
@@ -295,11 +293,10 @@ namespace pstore {
         // ~~~~~~
         template <typename File, typename MemoryMapper>
         void factory::append (std::shared_ptr<File> file,
-                              std::vector<memory_mapper_ptr> * const regions,
+                              gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
                               std::uint64_t original_size, std::uint64_t new_size) {
 
             assert (new_size >= original_size);
-            assert (regions != nullptr);
 
             auto const min_size = this->min_size ();
             region_builder<File, MemoryMapper> builder (file, this->full_size (), min_size);
@@ -308,7 +305,7 @@ namespace pstore {
             if (!small_files_enabled ()) {
                 file->truncate (new_size);
             }
-            builder.append (regions, original_size, round_up (new_size - original_size, min_size));
+            builder.append (regions, original_size, new_size - original_size);
         }
 
 
@@ -326,8 +323,8 @@ namespace pstore {
                                          std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
-                      std::uint64_t new_size) override;
+            void add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
+                      std::uint64_t original_size, std::uint64_t new_size) override;
 
             std::shared_ptr<file::file_base> file () override;
 
@@ -350,8 +347,8 @@ namespace pstore {
                                         std::uint64_t full_size, std::uint64_t min_size);
 
             std::vector<memory_mapper_ptr> init () override;
-            void add (std::vector<memory_mapper_ptr> * regions, std::uint64_t original_size,
-                      std::uint64_t new_size) override;
+            void add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
+                      std::uint64_t original_size, std::uint64_t new_size) override;
 
             std::shared_ptr<file::file_base> file () override;
 
@@ -365,6 +362,6 @@ namespace pstore {
 
         std::unique_ptr<factory> get_factory (std::shared_ptr<file::in_memory> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size);
-    } // namespace region
-} // namespace pstore
+    } // end namespace region
+} // end namespace pstore
 #endif // PSTORE_CORE_REGION_HPP

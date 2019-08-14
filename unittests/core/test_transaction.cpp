@@ -420,37 +420,49 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
 }
 
 TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
+    static constexpr auto elements = std::size_t{32};
+    using element_type = int;
+
+    // A collection of "initial" values which will fill the first region except for (elements/2)
+    // integers.
     static constexpr std::size_t initial_elements =
         (pstore::address::segment_size - (sizeof (pstore::header) + sizeof (pstore::trailer)) -
-         16 * sizeof (int)) /
-        sizeof (int);
-    static std::size_t const elements = 32;
+         (elements / 2U) * sizeof (element_type)) /
+        sizeof (element_type);
 
     pstore::database db{this->file ()};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
-    auto addr = pstore::typed_address<int>::null ();
+    auto addr = pstore::typed_address<element_type>::null ();
     {
         mock_mutex mutex;
         auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
         {
-            transaction.allocate (initial_elements * sizeof (int), alignof (int));
-            addr = pstore::typed_address<int>::make (
-                transaction.allocate (elements * sizeof (int), alignof (int)));
-            std::shared_ptr<int> ptr = transaction.getrw (addr, elements);
+            // A first allocation to fill up most of the first segment.
+            transaction.allocate (initial_elements * sizeof (element_type), alignof (element_type));
+
+            // The second allocation should span the end of the first and the start of the second
+            // segment.
+            addr = pstore::typed_address<element_type>::make (
+                transaction.allocate (elements * sizeof (element_type), alignof (element_type)));
+
+            // Fill the second allocation with values,
+            std::shared_ptr<element_type> ptr = transaction.getrw (addr, elements);
             std::iota (ptr.get (), ptr.get () + elements, 0);
         }
         transaction.commit ();
     }
     {
-        std::shared_ptr<int const> v = db.getro (addr, elements);
         std::vector<int> expected (elements);
         std::iota (std::begin (expected), std::end (expected), 0);
+
+        std::shared_ptr<int const> v = db.getro (addr, elements);
         std::vector<int> actual (v.get (), v.get () + elements);
 
         EXPECT_THAT (actual, ::testing::ContainerEq (expected));
     }
 }
+
 
 
 namespace {

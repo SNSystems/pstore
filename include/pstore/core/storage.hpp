@@ -163,6 +163,8 @@ namespace pstore {
         /// \note The PSTORE_ALWAYS_SPANNING configure-time setting can cause this function to
         /// always return true.
         ///
+        /// \note We expect \p addr and \p size to have been checked for sanity by the caller.
+        ///
         /// \param addr The start of the address range to be considered.
         /// \param size The size of the address range to be considered.
         /// \returns true if the given address range "spans" more than one region.
@@ -240,6 +242,21 @@ namespace pstore {
     inline auto storage::address_to_pointer (address addr) noexcept -> std::shared_ptr<void> {
         auto const * cthis = this;
         return std::const_pointer_cast<void> (cthis->address_to_pointer (addr));
+    }
+
+    // request_spans_regions
+    // ~~~~~~~~~~~~~~~~~~~~~
+    inline bool storage::request_spans_regions (address const & addr, std::size_t size) const {
+        (void) addr;
+        (void) size;
+#if PSTORE_ALWAYS_SPANNING
+        return true;
+#else
+        if (size == 0) {
+            return false;
+        }
+        return (*sat_)[addr.segment ()].region != (*sat_)[(addr + size - 1U).segment ()].region;
+#endif
     }
 
     // copy

@@ -475,8 +475,7 @@ namespace pstore {
 
         // Increase the number of bytes being requested by enough to ensure that result is
         // properly aligned.
-        bytes += extra_for_alignment;
-        std::uint64_t const new_logical_size = result + bytes;
+        std::uint64_t const new_logical_size = result + bytes + extra_for_alignment;
 
         // Memory map additional space if necessary.
         storage_.map_bytes (new_logical_size);
