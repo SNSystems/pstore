@@ -52,8 +52,8 @@
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 #include "check_for_error.hpp"
 
@@ -356,62 +356,51 @@ TEST (RangeLock, ErrorWithLockHeld) {
 
 namespace {
 
-    class DeleterFixture : public ::testing::Test {
+    class unlinker {
     public:
-        void unlink (std::string const & name);
-
-    protected:
-        using path_list = std::vector<std::string>;
-        // TODO: surely I could do this with Google Mock?
-        path_list unlinked_files_;
+        virtual ~unlinker () noexcept = default;
+        virtual void unlink (std::string const & p) = 0;
     };
-
-    void DeleterFixture::unlink (std::string const & name) { unlinked_files_.push_back (name); }
-
+    class mock_unlinker : public unlinker {
+    public:
+        MOCK_METHOD1 (unlink, void(std::string const &));
+    };
 
     class test_file_deleter final : public pstore::file::deleter_base {
     public:
-        test_file_deleter (std::string const & path, DeleterFixture * const fixture)
-                : deleter_base (path, unlinker (fixture)) {}
-
-    private:
-        static auto unlinker (DeleterFixture * const fixture) -> deleter_base::unlink_proc {
-
-            return [=](std::string const & name) -> void { fixture->unlink (name); };
-        }
+        test_file_deleter (std::string const & path, mock_unlinker & u)
+                : deleter_base{path, [&u](std::string const & p) { u.unlink (p); }} {}
     };
 
 } // end anonymous namespace
 
 
-TEST_F (DeleterFixture, UnlinkCallsPlatformUnlinkWithOriginalPath) {
-    {
-        test_file_deleter d ("path", this);
-        d.unlink ();
-    }
-    EXPECT_THAT (path_list{{"path"}}, ::testing::ContainerEq (unlinked_files_));
+TEST (Deleter, UnlinkCallsPlatformUnlinkWithOriginalPath) {
+    mock_unlinker mu;
+    EXPECT_CALL (mu, unlink (std::string{"path"}));
+    test_file_deleter d ("path", mu);
+    d.unlink ();
 }
 
-TEST_F (DeleterFixture, UnlinkDoesNotCallPlatformUnlinkAfterRelease) {
+TEST (Deleter, UnlinkDoesNotCallPlatformUnlinkAfterRelease) {
+    mock_unlinker mu;
+    test_file_deleter d ("path", mu);
+    d.release ();
+    d.unlink ();
+}
+
+TEST (Deleter, DestructorCallsPlatformUnlinkWithOriginalPath) {
+    mock_unlinker mu;
+    EXPECT_CALL (mu, unlink (std::string{"path"}));
+    { test_file_deleter d ("path", mu); }
+}
+
+TEST (Deleter, DestructorDoesNotCallPlatformUnlinkAfterRelease) {
+    mock_unlinker mu;
     {
-        test_file_deleter d ("path", this);
+        test_file_deleter d ("path", mu);
         d.release ();
-        d.unlink ();
     }
-    EXPECT_THAT (path_list{}, ::testing::ContainerEq (unlinked_files_));
-}
-
-TEST_F (DeleterFixture, DestructorCallsPlatformUnlinkWithOriginalPath) {
-    { test_file_deleter d ("path", this); }
-    EXPECT_THAT (path_list{{"path"}}, ::testing::ContainerEq (unlinked_files_));
-}
-
-TEST_F (DeleterFixture, DestructorDoesNotCallPlatformUnlinkAfterRelease) {
-    {
-        test_file_deleter d ("path", this);
-        d.release ();
-    }
-    EXPECT_THAT (path_list{}, ::testing::ContainerEq (unlinked_files_));
 }
 
 
