@@ -240,7 +240,6 @@ namespace pstore {
 
         // size
         // ~~~~
-        // FIXME: does this function need to be aware of symbolic links?
         std::uint64_t file_handle::size () {
             this->ensure_open ();
             struct stat buf {};
