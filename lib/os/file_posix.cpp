@@ -179,17 +179,25 @@ namespace pstore {
         // seek
         // ~~~~
         void file_handle::seek (std::uint64_t position) {
-            static_assert (std::numeric_limits<off_t>::max () >=
-                               std::numeric_limits<std::int64_t>::max (),
-                           "off_t cannot represent all file positions");
             this->ensure_open ();
 
-            // FIXME: if position > std::numeric_limits <off_t>?
-            off_t r = ::lseek (file_, static_cast<off_t> (position), SEEK_SET);
-            if (r == off_t{-1}) {
-                int const err = errno;
-                raise_file_error (err, "lseek/SEEK_SET failed", this->path ());
-            }
+            using common_type =
+                std::common_type<std::make_unsigned<off_t>::type, std::uint64_t>::type;
+            static constexpr auto max =
+                static_cast<common_type> (std::numeric_limits<off_t>::max ());
+
+            int mode = SEEK_SET;
+            do {
+                auto const offset = std::min (static_cast<common_type> (position), max);
+
+                if (::lseek (file_, static_cast<off_t> (offset), mode) == off_t{-1}) {
+                    int const err = errno;
+                    raise_file_error (err, "lseek/SEEK_SET failed", this->path ());
+                }
+
+                position -= offset;
+                mode = SEEK_CUR;
+            } while (position > 0);
         }
 
         // tell
