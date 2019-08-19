@@ -100,9 +100,9 @@ namespace pstore {
             value_ptr data_value;
 #if PSTORE_IS_INSIDE_LLVM
             if (sk == repo::section_kind::text) {
-                std::uint8_t const * const first = data.data ();
-                std::uint8_t const * const last = first + data.size ();
-                data_value = make_disassembled_value (first, last, triple, hex_mode);
+                std::uint8_t const * const first = payload.data ();
+                data_value =
+                    make_disassembled_value (first, first + payload.size (), triple, hex_mode);
             }
 #endif
             if (!data_value) {

@@ -55,6 +55,8 @@
 #include <system_error>
 #include <vector>
 
+#include "pstore/config/config.hpp"
+
 #if PSTORE_IS_INSIDE_LLVM
 #    include "llvm/Support/Signals.h"
 #    include "llvm/Support/TargetSelect.h"
@@ -64,7 +66,6 @@
 #endif
 
 #include "pstore/cmd_util/tchar.hpp"
-#include "pstore/config/config.hpp"
 #include "pstore/core/generation_iterator.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/dump/db_value.hpp"
