@@ -49,7 +49,7 @@
 #    include <sys/socket.h>
 #endif // _WIN32
 
-#include "pstore/support/error.hpp"
+#include "pstore/httpd/error.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace {
@@ -62,16 +62,6 @@ namespace {
         return nread == SOCKET_ERROR;
 #else
         return nread < 0;
-#endif // !_WIN32
-    }
-
-    // get_last_error
-    // ~~~~~~~~~~~~~~
-    inline std::error_code get_last_error () noexcept {
-#ifdef _WIN32
-        return make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
-#else
-        return make_error_code (std::errc (errno));
 #endif // !_WIN32
     }
 

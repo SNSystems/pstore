@@ -71,6 +71,7 @@
 // Local includes
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
+#include "pstore/httpd/error.hpp"
 #include "pstore/httpd/headers.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/query_to_kvp.hpp"
@@ -88,17 +89,6 @@
 namespace {
 
     using socket_descriptor = pstore::broker::socket_descriptor;
-
-    // get_last_error
-    // ~~~~~~~~~~~~~~
-    inline std::error_code get_last_error () noexcept {
-#ifdef _WIN32
-        return make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
-#else
-        return make_error_code (std::errc (errno));
-#endif // !_WIN32
-    }
-
 
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, char const * cause, unsigned error_no,
@@ -149,13 +139,13 @@ namespace {
 
         socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, 0)};
         if (!fd.valid ()) {
-            return eo{get_last_error ()};
+            return eo{pstore::httpd::get_last_error ()};
         }
 
         int const optval = 1;
         if (::setsockopt (fd.native_handle (), SOL_SOCKET, SO_REUSEADDR,
                           reinterpret_cast<char const *> (&optval), sizeof (optval))) {
-            return eo{get_last_error ()};
+            return eo{pstore::httpd::get_last_error ()};
         }
 
         sockaddr_in server_addr{}; // server's addr.
@@ -164,12 +154,12 @@ namespace {
         server_addr.sin_port = htons (port_number);       // NOLINT
         if (::bind (fd.native_handle (), reinterpret_cast<sockaddr *> (&server_addr),
                     sizeof (server_addr)) < 0) {
-            return eo{get_last_error ()};
+            return eo{pstore::httpd::get_last_error ()};
         }
 
         // Get ready to accept connection requests.
         if (::listen (fd.native_handle (), 5) < 0) { // allow 5 requests to queue up.
-            return eo{get_last_error ()};
+            return eo{pstore::httpd::get_last_error ()};
         }
 
         return eo{std::move (fd)};
@@ -188,7 +178,7 @@ namespace {
             reinterpret_cast<sockaddr const *> (&client_addr), sizeof (client_addr),
             host_name.data (), static_cast<size_type> (size), nullptr, socklen_t{0}, 0 /*flags*/);
         if (gni_err != 0) {
-            return pstore::error_or<std::string>{get_last_error ()};
+            return pstore::error_or<std::string>{pstore::httpd::get_last_error ()};
         }
         host_name.back () = '\0'; // guarantee nul termination.
         return pstore::error_or<std::string>{std::string{host_name.data ()}};

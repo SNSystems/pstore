@@ -52,25 +52,12 @@
 
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/httpd/buffered_reader.hpp"
+#include "pstore/httpd/error.hpp"
 #include "pstore/httpd/net_txrx.hpp"
 #include "pstore/httpd/send.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/random.hpp"
-
-namespace {
-
-    // get_last_error
-    // ~~~~~~~~~~~~~~
-    inline std::error_code get_last_error () noexcept {
-#ifdef _WIN32
-        return make_error_code (pstore::win32_erc{static_cast<DWORD> (WSAGetLastError ())});
-#else
-        return make_error_code (std::errc (errno));
-#endif // !_WIN32
-    }
-
-} // end anonymous namespace
 
 namespace pstore {
     namespace httpd {
@@ -83,8 +70,8 @@ namespace pstore {
             if (old_state == server_status::http_state::listening) {
                 socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
                 if (!fd.valid ()) {
-                    log (logging::priority::error, "Could not open socket ",
-                         get_last_error ().message ());
+                    log (logging::priority::error,
+                         "Could not open socket: ", get_last_error ().message ());
                     return;
                 }
 
@@ -95,11 +82,11 @@ namespace pstore {
 
                 log (logging::priority::info, "Connecting");
 
-                // FIXME: timeout!
                 if (::connect (fd.native_handle (),
                                reinterpret_cast<struct sockaddr *> (&sock_addr),
                                sizeof (sock_addr)) != 0) {
-                    log (logging::priority::error, "Could not connect to localhost");
+                    log (logging::priority::error,
+                         "Could not connect to localhost: ", get_last_error ().message ());
                     return;
                 }
 

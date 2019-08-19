@@ -47,6 +47,13 @@
 #include <string>
 #include <system_error>
 
+#ifdef _WIN32
+#    include <winsock2.h>
+#endif // _WIN32
+
+#include "pstore/support/error.hpp"
+
+
 namespace pstore {
     namespace httpd {
         // **************
@@ -79,6 +86,17 @@ namespace pstore {
                 std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                 "base type of pstore::httpd::error_code must be int to permit safe static cast");
             return {static_cast<int> (e), get_error_category ()};
+        }
+
+
+        // get_last_error
+        // ~~~~~~~~~~~~~~
+        inline std::error_code get_last_error () noexcept {
+#ifdef _WIN32
+            return make_error_code (win32_erc{static_cast<DWORD> (WSAGetLastError ())});
+#else
+            return make_error_code (std::errc (errno));
+#endif // !_WIN32
         }
 
     } // namespace httpd
