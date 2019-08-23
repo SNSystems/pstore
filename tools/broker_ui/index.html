@@ -3,6 +3,13 @@
   <head>
     <meta charset="UTF-8">
     <title>pstore Status</title>
+    <style>
+        .line {
+            fill: none;
+            stroke: #000;
+            stroke-width: 1.5px;
+        }
+    </style>
   </head>
   <body>
     <h1>pstore Status</h1>
@@ -15,6 +22,9 @@
     <div>Server uptime (seconds):</div><div id="uptime">0</div>
     <div>Completed transactions:</div><div id="commits">0</div>
     <div>Transactions per second:</div><div id="tps">0</div>
+
+    <svg width="520" height="250"></svg>
+
     <script>
       // You can also require other files to run in this process
       require('./renderer.js')                                              
