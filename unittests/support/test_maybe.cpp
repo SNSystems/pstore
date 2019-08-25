@@ -43,10 +43,13 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/support/maybe.hpp"
+
+// Standard library
 #include <memory>
 #include <utility>
+
+// 3rd party
 #include <gtest/gtest.h>
-#include "pstore/support/make_unique.hpp"
 
 using pstore::maybe;
 
@@ -55,23 +58,12 @@ namespace {
     class value {
     public:
         explicit value (int v)
-                : v_{pstore::make_unique<int> (v)} {}
-        value (value const & v)
-                : v_{pstore::make_unique<int> (v.get ())} {}
-
-        value & operator= (value const & rhs) {
-            if (&rhs != this) {
-                v_ = pstore::make_unique<int> (rhs.get ());
-            }
-            return *this;
-        }
-
-        bool operator== (value const & rhs) const { return this->get () == rhs.get (); }
-
-        int get () const { return *v_; }
+                : v_{std::make_shared<int> (v)} {}
+        bool operator== (value const & rhs) const noexcept { return this->get () == rhs.get (); }
+        int get () const noexcept { return *v_; }
 
     private:
-        std::unique_ptr<int> v_;
+        std::shared_ptr<int> v_;
     };
 
 } // end anonymous namespace
