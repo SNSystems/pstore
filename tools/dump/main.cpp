@@ -246,7 +246,7 @@ namespace {
 
     pstore::index::digest string_to_digest (std::string const & str) {
         if (str.length () != 32) {
-            pstore::raise_error_code (make_error_code (dump_error_code::bad_digest));
+            pstore::raise_error_code (make_error_code (dump_error_code::bad_digest), str);
         }
         auto get64 = [&str](unsigned index) {
             assert (index < str.length ());
