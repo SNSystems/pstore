@@ -545,4 +545,3 @@ TYPED_TEST (SStringViewRelational, Lt) {
     LT ("abcdefghijklmnopqrst", TypeParam ("abcdefghijklmnopqrst"), false, false);
 #undef LE
 }
-
