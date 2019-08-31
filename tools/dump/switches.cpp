@@ -44,7 +44,10 @@
 
 #include "switches.hpp"
 
+#include <iterator>
+
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/csv.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
 
@@ -135,13 +138,14 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
 
     switches result;
     result.show_contents = contents.get ();
-    std::copy (std::begin (fragment), std::end (fragment), std::back_inserter (result.fragments));
+    result.fragments = pstore::cmd_util::csv (std::begin (fragment), std::end (fragment));
     result.show_all_fragments = all_fragments.get ();
-    std::copy (std::begin (compilation), std::end (compilation),
-               std::back_inserter (result.compilations));
+
+    result.compilations = pstore::cmd_util::csv (std::begin (compilation), std::end (compilation));
     result.show_all_compilations = all_compilations.get ();
-    std::copy (std::begin (debug_line_header), std::end (debug_line_header),
-               std::back_inserter (result.debug_line_headers));
+
+    result.debug_line_headers =
+        pstore::cmd_util::csv (std::begin (debug_line_header), std::end (debug_line_header));
     result.show_all_debug_line_headers = all_debug_line_headers.get ();
 
     result.show_header = header.get ();

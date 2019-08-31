@@ -74,10 +74,12 @@ list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_cl_includes})
 source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC} ${pstore_cmd_util_cl_includes})
 
 set (pstore_cmd_util_opt_helpers_includes
+    "${pstore_cmd_util_include_dir}/csv.hpp"
     "${pstore_cmd_util_include_dir}/str_to_revision.hpp"
     "${pstore_cmd_util_include_dir}/revision_opt.hpp"
 )
 set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
+    csv.cpp
     str_to_revision.cpp
     revision_opt.cpp
 )
