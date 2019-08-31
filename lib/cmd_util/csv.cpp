@@ -43,6 +43,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/csv.hpp"
 
+#include <cassert>
+
 std::list<std::string> pstore::cmd_util::csv (std::string const & s) {
     std::list<std::string> result;
     auto spos = std::string::size_type{0};
