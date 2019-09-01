@@ -58,9 +58,9 @@
 #include <cstdlib>
 #include <string>
 
-#define PSTORE_FNV_VERSION "5.0.2" /* @(#) FNV Version */
-
 namespace pstore {
+
+    constexpr char const * fnv_version = "5.0.2";
 
     /// \brief 64 bit FNV-1 non-zero initial basis
     /// \note The FNV-1a initial basis is the same value as FNV-1 by definition.
