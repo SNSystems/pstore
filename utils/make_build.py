@@ -73,6 +73,7 @@ def _select_generator(system):
         return 'Visual Studio 15 2017 Win64'
     return 'Unix Makefiles'
 
+
 def _options (args):
     platform_name = sys.platform
     # Prior to python 3.3, Linux included a version number in its name.
@@ -188,7 +189,8 @@ def _find_on_path (file_name):
 
 
 def _use_build_type (generator):
-    """Returns True if the named cmake generator may be a single-configuration generator.
+    """
+    Returns True if the named cmake generator may be a single-configuration generator.
     A return value of False means that an explicit CMAKE_BUILD_TYPE variable will only result
     in a warning, so should not be added.
 
@@ -205,12 +207,40 @@ def _use_build_type (generator):
 
 
 
+def find_cmake ():
+    """
+    Searches for the cmake executable, returning its path if found or None otherwise.
+    """
+
+    cmake_exe = _add_executable_extension ('cmake')
+    cmake_path = _find_on_path (cmake_exe)
+    if not cmake_path:
+        _logger.error ('Could not find %s on the path', cmake_exe)
+        return None
+    return cmake_path
+
+
 def rmtree_error (function, path, excinfo):
-    '''Called from shutil.rmtree() if the file removal fails. Makes the file 
-    writable before retrying the operation.'''
+    """
+    Called from shutil.rmtree() if the file removal fails. Makes the file 
+    writable before retrying the operation.
+    """
 
     os.chmod (path, stat.S_IWRITE)
     function (path)
+
+
+def create_build_directory (options):
+    if os.path.exists (options.directory):
+        if options.clean:
+            _logger.info ('rmtree "%s"', options.directory)
+            if not options.dry_run:
+                shutil.rmtree (options.directory, onerror=rmtree_error)
+
+    if not os.path.exists (options.directory):
+        _logger.info ('mkdir:%s', options.directory)
+        if not options.dry_run:
+            os.mkdir (options.directory)
 
 
 def main (args = sys.argv [1:]):
@@ -227,24 +257,11 @@ def main (args = sys.argv [1:]):
 
     cmake_path = None
     if exit_code == EXIT_SUCCESS:
-        cmake_exe = _add_executable_extension ('cmake')
-        cmake_path = _find_on_path (cmake_exe)
-        if not cmake_path:
-            _logger.error ('Could not find %s on the path', cmake_exe)
-            exit_code = EXIT_FAILURE
+        cmake_path = find_cmake ()
+        exit_code = EXIT_FAILURE if cmake_path is None else EXIT_SUCCESS
 
     if exit_code == EXIT_SUCCESS:
-        _logger.info ('Build directory is "%s"', options.directory)
-        if os.path.exists (options.directory):
-            if options.clean:
-                _logger.info ('rmtree "%s"', options.directory)
-                if not options.dry_run:
-                    shutil.rmtree (options.directory, onerror=rmtree_error)
-
-        if not os.path.exists (options.directory):
-            _logger.info ('mkdir:%s', options.directory)
-            if not options.dry_run:
-                os.mkdir (options.directory)
+        create_build_directory (options)
 
         cmd = [
             cmake_path,
