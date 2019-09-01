@@ -43,8 +43,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/httpd/ws_server.hpp"
 
+// 3rd part includes
 #include <gmock/gmock.h>
-
+// pstore includes
+#include "pstore/httpd/block_for_input.hpp"
+// local includes
 #include "buffered_reader_mocks.hpp"
 
 using testing::_;
