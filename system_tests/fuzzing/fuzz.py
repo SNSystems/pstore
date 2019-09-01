@@ -99,8 +99,6 @@ def run_tests (name, binary_dir, temp_dir, iterations, args):
 
         # Fuzz the file
         mangle_exe = os.path.join (binary_dir, 'pstore-mangle' + xtension)
-        #print ('mangle_exe = {0}'.format (mangle_exe))
-        #print ('fuzz_file = {0}'.format (fuzz_file))
 
         try:
             subprocess.check_call ([ mangle_exe, fuzz_file ],
