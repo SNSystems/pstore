@@ -55,12 +55,6 @@ namespace {
         return static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
     }
 
-} // end anonymous namespace
-
-namespace pstore {
-    namespace index {
-
-        namespace details {
             template <pstore::trailer::indices Index>
             void flush_index (pstore::transaction_base & transaction,
                               pstore::trailer::index_records_array * const locations,
@@ -70,7 +64,11 @@ namespace pstore {
                     (*locations)[index_integral (Index)] = index->flush (transaction, generation);
                 }
             }
-        } // namespace details
+
+} // end anonymous namespace
+
+namespace pstore {
+    namespace index {
 
         // flush_indices
         // ~~~~~~~~~~~~~
@@ -79,7 +77,7 @@ namespace pstore {
 
 #define X(k)                                                                                       \
     case trailer::indices::k:                                                                      \
-        details::flush_index<trailer::indices::k> (transaction, locations, generation);            \
+        flush_index<trailer::indices::k> (transaction, locations, generation);                     \
         break;
 
             for (auto ctr = std::underlying_type<pstore::trailer::indices>::type{0};
