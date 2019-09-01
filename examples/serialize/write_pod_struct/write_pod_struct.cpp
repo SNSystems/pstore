@@ -46,13 +46,16 @@
 #include "pstore/serialize/archive.hpp"
 #include "pstore/serialize/types.hpp"
 
+struct pod_type {
+    int a;
+    int b;
+};
+
 int main () {
     using namespace pstore::serialize;
     std::vector<std::uint8_t> bytes;
     archive::vector_writer writer{bytes};
-    struct pod_type {
-        int a, b;
-    } pt{30, 40};
+    pod_type pt{30, 40};
     write (writer, pt);
     std::cout << "Wrote these bytes:\n" << writer << '\n';
 }
