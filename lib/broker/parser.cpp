@@ -100,7 +100,7 @@ namespace pstore {
         std::unique_ptr<broker_command> parse (message_type const & msg, partial_cmds & cmds) {
 
             if (msg.part_no >= msg.num_parts) {
-                throw std::runtime_error ("part number must be less than number of parts");
+                throw part_number_too_large ();
             }
 
             auto const now = std::chrono::system_clock::now ();
@@ -118,7 +118,7 @@ namespace pstore {
             it->second.arrive_time_ = now;
             auto & value = it->second.s_;
             if (value.size () != msg.num_parts) {
-                throw std::runtime_error ("total number of parts mismatch");
+                throw number_of_parts_mismatch ();
             }
 
             bool const was_missing = value[msg.part_no].get () == nullptr;

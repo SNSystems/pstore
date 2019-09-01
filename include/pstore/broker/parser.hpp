@@ -49,6 +49,7 @@
 #include <chrono>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -58,6 +59,20 @@ namespace pstore {
     namespace broker {
 
         class message_type;
+
+        class part_number_too_large : public std::runtime_error {
+        public:
+            part_number_too_large ()
+                    : std::runtime_error (
+                          "message part number must be less than the number of parts") {}
+        };
+
+        class number_of_parts_mismatch : public std::runtime_error {
+        public:
+            number_of_parts_mismatch ()
+                    : std::runtime_error ("total number of parts mismatch") {}
+        };
+
 
         class broker_command {
         public:
