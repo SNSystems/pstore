@@ -53,6 +53,7 @@
 // pstore includes
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/portab.hpp"
 #include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 
@@ -77,7 +78,7 @@ namespace {
         }
     }
 
-    void open_failed (int erc, std::string const & path) {
+    PSTORE_NO_RETURN void open_failed (int erc, std::string const & path) {
         std::stringstream str;
         str << "fopen " << pstore::quoted (path);
         raise (pstore::errno_erc{erc}, str.str ());
@@ -95,7 +96,7 @@ namespace {
                 : std::runtime_error (message) {}
     };
 
-    void read_failed (std::string const & path) {
+    PSTORE_NO_RETURN void read_failed (std::string const & path) {
         std::stringstream str;
         str << "read of file " << pstore::quoted (path) << " failed";
         pstore::raise_exception (read_failed_error{str.str ()});
