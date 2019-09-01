@@ -84,7 +84,7 @@ namespace {
 
         double operator() () {
             seed_ = (IA * seed_ + IC) % IM;
-            return seed_ / double(IM);
+            return seed_ / static_cast<double> (IM);
         }
 
     private:
