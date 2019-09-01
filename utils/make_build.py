@@ -243,6 +243,29 @@ def create_build_directory (options):
             os.mkdir (options.directory)
 
 
+def build_cmake_command_line (cmake_path, options):
+    cmd = [ cmake_path, '-G', options.generator ]
+
+    # Don't add CMAKE_BUILD_TYPE for the multi-configuration generators that
+    # we know about. It avoids an unecessary warning from cmake.
+    if _use_build_type (options.generator):
+        cmd.extend (('-D', 'CMAKE_BUILD_TYPE:STRING=' + options.configuration))
+    else:
+        _logger.warning ('Build configuration was ignored for a multi-configuration generator')
+
+    # Add the user variable definitions.
+    for d in options.define if options.define else []:
+        cmd.extend (( '-D', d ))
+
+    vs = 'Visual Studio '
+    if options.generator [:len (vs)] == vs:
+        cmd.extend (('-T', 'host=x64'))
+
+    # Finally add the build root directory.
+    cmd.append (_as_native_path (os.path.abspath (options.build_dir)))
+    return cmd
+
+
 def main (args = sys.argv [1:]):
     exit_code = EXIT_SUCCESS
     logging.basicConfig (level=logging.DEBUG)
@@ -262,30 +285,7 @@ def main (args = sys.argv [1:]):
 
     if exit_code == EXIT_SUCCESS:
         create_build_directory (options)
-
-        cmd = [
-            cmake_path,
-            '-G', options.generator,
-        ]
-
-        # Don't add CMAKE_BUILD_TYPE for the multi-configuration generators that
-        # we know about. It avoids an unecessary warning from cmake.
-        if _use_build_type (options.generator):
-            cmd.extend (('-D', 'CMAKE_BUILD_TYPE:STRING=' + options.configuration))
-        else:
-            _logger.warning ('Build configuration was ignored for a multi-configuration generator')
-
-        # Add the user variable definitions.
-        if options.define:
-            for d in options.define:
-                cmd.extend (( '-D', d ))
-
-        vs = 'Visual Studio '
-        if options.generator [:len (vs)] == vs:
-            cmd.extend (('-T', 'host=x64'))
-
-        # Finally add the build root directory.
-        cmd.append (_as_native_path (os.path.abspath (options.build_dir)))
+        cmd = build_cmake_command_line (cmake_path, options)
 
         _logger.info ('cwd "%s"', options.directory)
         _logger.info ('Running: %s', _as_command_line (cmd))
