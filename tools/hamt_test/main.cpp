@@ -202,8 +202,6 @@ namespace {
                             " is not correct, the expected address: ", value.second);
                 is_found = false;
             }
-            // For debugging.
-            // print_cout (it->first, ", ", it->second);
         };
         pstore::cmd_util::parallel_for_each (std::begin (expected_results),
                                              std::end (expected_results), check_key);
