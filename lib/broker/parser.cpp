@@ -91,6 +91,7 @@ namespace {
                                 [](char c) { return c != '\0'; });
         return pstore::make_unique<std::string> (std::begin (msg.payload), it.base ());
     }
+
 } // end anonymous namespace
 
 
