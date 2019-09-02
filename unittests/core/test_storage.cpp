@@ -125,7 +125,6 @@ TEST_F (RequestSpansRegions, FullRegionSize) {
     static constexpr auto min_region_size = pstore::storage::min_region_size;
     static constexpr auto full_region_size = pstore::storage::full_region_size;
 
-    //    constexpr auto region_size = pstore::address{pstore::storage::full_region_size};
     auto file = this->build_new_store (min_region_size + full_region_size);
 
     {
