@@ -59,8 +59,10 @@
 #include "mock_mutex.hpp"
 
 namespace {
+
     class Database : public EmptyStore {};
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (Database, CheckInitialState) {
     pstore::database db{this->file ()};
@@ -88,8 +90,6 @@ TEST_F (Database, CheckInitialState) {
         EXPECT_EQ (0U, footer->a.generation);
         EXPECT_EQ (0U, footer->a.size);
         EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), footer->a.prev_generation);
-        // std::atomic<std::uint64_t> time{0};
-        // index_records_array index_records;
         EXPECT_THAT (pstore::trailer::default_signature2,
                      ::testing::ContainerEq (footer->signature2));
     }
@@ -97,6 +97,7 @@ TEST_F (Database, CheckInitialState) {
 
 
 namespace {
+
     class OpenCorruptStore : public EmptyStore {
     protected:
         pstore::header * get_header ();
@@ -110,6 +111,7 @@ namespace {
     void OpenCorruptStore::check_database_open (pstore::error_code err) const {
         check_for_error ([this]() { pstore::database{this->file ()}; }, err);
     }
+
 } // end anonymous namespace
 
 TEST_F (OpenCorruptStore, HeaderBadSignature1) {
@@ -253,8 +255,6 @@ TEST_F (Database, GetLocationOverflows) {
     check_for_error ([&db, addr, size]() { db.getro (addr, size); },
                      pstore::error_code::bad_address);
 }
-
-
 
 TEST_F (Database, Allocate16Bytes) {
     pstore::database db{this->file ()};
