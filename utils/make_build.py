@@ -198,12 +198,7 @@ def _use_build_type (generator):
     utility only knows about the common multi-configuration generators.
     """
 
-    result = True
-    if generator == 'Xcode':
-        result = False
-    elif generator.startswith ('Visual Studio'):
-        result = False
-    return result
+    return not (generator == 'Xcode' or generator.startswith ('Visual Studio'))
 
 
 
