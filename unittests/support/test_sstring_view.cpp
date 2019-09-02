@@ -67,23 +67,23 @@ namespace {
     template <typename CharType>
     struct string_maker<std::shared_ptr<CharType>> {
         std::shared_ptr<CharType> operator() (std::string const & str) const {
-            auto result =
+            auto ptr =
                 std::shared_ptr<char> (new char[str.length ()], [](char * p) { delete[] p; });
-            auto ptr = const_cast<typename std::remove_const<CharType>::type *> (result.get ());
-            std::copy (std::begin (str), std::end (str), ptr);
-            return std::static_pointer_cast<CharType> (result);
+            std::copy (std::begin (str), std::end (str), ptr.get ());
+            return std::static_pointer_cast<CharType> (ptr);
         }
     };
 
     template <typename CharType>
     struct string_maker<std::unique_ptr<CharType[]>> {
         std::unique_ptr<CharType[]> operator() (std::string const & str) const {
-            auto result = pstore::make_unique<CharType[]> (str.length ());
-            auto ptr = const_cast<typename std::remove_const<CharType>::type *> (result.get ());
-            std::copy (std::begin (str), std::end (str), ptr);
-            return result;
+            auto ptr =
+                pstore::make_unique<typename std::remove_const<CharType>::type[]> (str.length ());
+            std::copy (std::begin (str), std::end (str), ptr.get ());
+            return std::unique_ptr<CharType[]>{ptr.release ()};
         }
     };
+
     template <>
     struct string_maker<char const *> {
         char const * operator() (std::string const & str) const noexcept { return str.data (); }
