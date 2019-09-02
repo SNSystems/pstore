@@ -226,11 +226,10 @@ def rmtree_error (function, path, excinfo):
 
 
 def create_build_directory (options):
-    if os.path.exists (options.directory):
-        if options.clean:
-            _logger.info ('rmtree "%s"', options.directory)
-            if not options.dry_run:
-                shutil.rmtree (options.directory, onerror=rmtree_error)
+    if options.clean and os.path.exists (options.directory):
+        _logger.info ('rmtree "%s"', options.directory)
+        if not options.dry_run:
+            shutil.rmtree (options.directory, onerror=rmtree_error)
 
     if not os.path.exists (options.directory):
         _logger.info ('mkdir:%s', options.directory)
