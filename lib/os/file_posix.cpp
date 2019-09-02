@@ -134,7 +134,6 @@ namespace pstore {
         void file_handle::open (unique, std::string const & directory) {
             this->close ();
 
-            // assert (path::is_directory (directory));
             // TODO: path::join should be able to write to a back_inserter so that we can avoid this
             // intermediate string object.
             std::string const path = path::join (directory, "pst-XXXXXX");
