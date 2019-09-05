@@ -113,12 +113,10 @@ source_group ("support" FILES ${pstore_core_support_src} ${pstore_core_support_i
 ######
 set (pstore_core_os_includes
     "${pstore_core_include_dir}/errno_exception.hpp"
-    "${pstore_core_include_dir}/shared_memory.hpp"
 )
 list (APPEND pstore_core_includes ${pstore_core_os_includes})
 set (pstore_core_os_src
     errno_exception.cpp
-    shared_memory.cpp
 )
 list (APPEND PSTORE_SRC ${pstore_core_os_src})
 source_group (os FILES ${pstore_core_os_src} ${pstore_core_os_includes})

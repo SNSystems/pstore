@@ -66,10 +66,10 @@
 #include <signal.h>
 
 #include "pstore/core/database.hpp"
-#include "pstore/core/shared_memory.hpp"
 #include "pstore/core/time.hpp"
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/shared_memory.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/path.hpp"

@@ -52,6 +52,7 @@ set (pstore_os_includes
     "${pstore_os_include_dir}/memory_mapper.hpp"
     "${pstore_os_include_dir}/process_file_name.hpp"
     "${pstore_os_include_dir}/rotating_log.hpp"
+    "${pstore_os_include_dir}/shared_memory.hpp"
     "${pstore_os_include_dir}/thread.hpp"
     "${pstore_os_include_dir}/uint64.hpp"
 )
@@ -65,6 +66,7 @@ set (pstore_os_lib_src
     memory_mapper_win32.cpp
     process_file_name_posix.cpp
     process_file_name_win32.cpp
+    shared_memory.cpp
     thread.cpp
     thread_posix.cpp
     thread_win32.cpp

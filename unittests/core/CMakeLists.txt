@@ -60,7 +60,6 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_protect.cpp
     test_region.cpp
     test_rotating_log.cpp
-    test_shared_memory.cpp
     test_sstring_view_archive.cpp
     test_storage.cpp
     test_sync.cpp

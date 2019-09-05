@@ -4,7 +4,7 @@
 //* \__ \ | | | (_| | | |  __/ (_| | | | | | | |  __/ | | | | | (_) | |  | |_| | *
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
-//===- lib/core/shared_memory.cpp -----------------------------------------===//
+//===- lib/os/shared_memory.cpp -------------------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 /// \file shared_memory.cpp
 
-#include "pstore/core/shared_memory.hpp"
+#include "pstore/os/shared_memory.hpp"
 
 #include "pstore/config/config.hpp"
 

@@ -41,8 +41,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
-// Copyright (c) 2015-2017 by Sony Interactive Entertainment, Inc.
 /// \file watch.hpp
 
 #ifndef PSTORE_VACUUM_WATCH_HPP
@@ -53,9 +51,9 @@
 #include <memory>
 #include <mutex>
 
-#include "pstore/core/shared_memory.hpp"
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/file.hpp"
+#include "pstore/os/shared_memory.hpp"
 
 namespace pstore {
     class database;

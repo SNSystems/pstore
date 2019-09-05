@@ -4,7 +4,7 @@
 //* \__ \ | | | (_| | | |  __/ (_| | | | | | | |  __/ | | | | | (_) | |  | |_| | *
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
-//===- include/pstore/core/shared_memory.hpp ------------------------------===//
+//===- include/pstore/os/shared_memory.hpp --------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
