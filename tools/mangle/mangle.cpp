@@ -139,7 +139,7 @@ int main (int argc, char ** argv) {
     PSTORE_TRY {
         random_generator<std::size_t> rand;
 
-        auto const header_size = sizeof (pstore::header) + sizeof (pstore::trailer);
+        auto const header_size = pstore::leader_size + sizeof (pstore::trailer);
 
         pstore::file::file_handle file{argv[1]};
         file.open (pstore::file::file_handle::create_mode::open_existing,

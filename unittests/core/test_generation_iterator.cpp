@@ -47,20 +47,22 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/core/crc32.hpp"
+
 #include "pstore/core/generation_iterator.hpp"
-#include "pstore/core/transaction.hpp"
-
+// Standard library includes
 #include <iterator>
-
 // 3rd party includes
-#include "gtest/gtest.h"
-
+#include <gtest/gtest.h>
+// pstore includes
+#include "pstore/core/crc32.hpp"
+#include "pstore/core/transaction.hpp"
 // Local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 
+
 namespace {
+
     class GenerationIterator : public EmptyStore {
     public:
         void SetUp () override {
@@ -82,7 +84,8 @@ namespace {
 
         std::unique_ptr<pstore::database> db_;
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (GenerationIterator, GenerationContainerBegin) {
     this->add_transaction ();
@@ -104,7 +107,7 @@ TEST_F (GenerationIterator, InitialStoreIterationHasDistance1) {
     auto end =
         pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
     EXPECT_EQ (1U, std::distance (begin, end));
-    EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (sizeof (pstore::header)), *begin);
+    EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (pstore::leader_size), *begin);
 }
 
 TEST_F (GenerationIterator, AddTransactionoreIterationHasDistance2) {

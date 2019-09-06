@@ -215,7 +215,7 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
 
     // A quick check of the initial state.
     auto header = this->get_header ();
-    ASSERT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ());
+    ASSERT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ());
 
     {
         mock_mutex mutex;
@@ -223,7 +223,7 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
         transaction.commit ();
     }
 
-    EXPECT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ());
+    EXPECT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ());
 }
 
 TEST_F (Transaction, CommitInt) {
@@ -254,7 +254,7 @@ TEST_F (Transaction, CommitInt) {
         transaction.commit ();
     }
 
-    std::uint64_t new_header_offset = sizeof (pstore::header);
+    std::uint64_t new_header_offset = pstore::leader_size;
     new_header_offset += sizeof (pstore::trailer);
     new_header_offset += pstore::calc_alignment (new_header_offset, alignof (int));
     std::uint64_t const r1contents_offset = new_header_offset;
@@ -293,7 +293,7 @@ TEST_F (Transaction, CommitInt) {
             << "Did not find the r1 footer signature1";
         EXPECT_EQ (1U, r1footer->a.generation) << "r1 footer generation number must be 1";
         EXPECT_GE (r1footer->a.size, sizeof (int)) << "r1 footer size must be at least sizeof (int";
-        EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (sizeof (pstore::header)),
+        EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (pstore::leader_size),
                    r1footer->a.prev_generation)
             << "r1 previous pointer must point to r0 footer";
         EXPECT_THAT (pstore::trailer::default_signature2,
@@ -317,7 +317,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
 
     // A quick check of the initial state.
     auto header = this->get_header ();
-    ASSERT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ());
+    ASSERT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ());
 
     {
         mock_mutex mutex;
@@ -334,12 +334,12 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
     // Header checks
     EXPECT_THAT (pstore::header::file_signature1, ::testing::ContainerEq (header->a.signature1))
         << "File header was missing";
-    EXPECT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ())
+    EXPECT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ())
         << "Expected the file header footer_pos to point to r0 header";
 
     {
         auto r0footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
-                                                                   sizeof (pstore::header));
+                                                                   pstore::leader_size);
         EXPECT_THAT (pstore::trailer::default_signature1,
                      ::testing::ContainerEq (r0footer->a.signature1))
             << "Did not find r0 footer signature1";
@@ -426,7 +426,7 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
     // A collection of "initial" values which will fill the first region except for (elements/2)
     // integers.
     static constexpr std::size_t initial_elements =
-        (pstore::address::segment_size - (sizeof (pstore::header) + sizeof (pstore::trailer)) -
+        (pstore::address::segment_size - (pstore::leader_size + sizeof (pstore::trailer)) -
          (elements / 2U) * sizeof (element_type)) /
         sizeof (element_type);
 
@@ -491,7 +491,7 @@ TEST_F (Transaction, CommitTwoSeparateTransactions) {
         }
     }
 
-    std::size_t footer2 = sizeof (pstore::header);
+    std::size_t footer2 = pstore::leader_size;
     footer2 += pstore::calc_alignment (footer2, alignof (pstore::trailer));
     footer2 += sizeof (pstore::trailer);
 
@@ -525,7 +525,7 @@ TEST_F (Transaction, GetRwInt) {
         // A call to get(). First argument (address) must lie beyond the initial transaction
         // and must request a writable int.
         EXPECT_CALL (*database,
-                     get (Ge (pstore::address{sizeof (pstore::header) + sizeof (pstore::trailer)}),
+                     get (Ge (pstore::address{pstore::leader_size + sizeof (pstore::trailer)}),
                           sizeof (int), false, true))
             .After (allocate_int)
             .WillOnce (Invoke (database, &mock_database::base_get));

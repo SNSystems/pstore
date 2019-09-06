@@ -182,12 +182,11 @@ namespace pstore {
     // protect
     // ~~~~~~~
     void storage::protect (address first, address last) {
-
         std::uint64_t const page_size = memory_mapper::page_size (*page_size_);
         assert (page_size > 0 && is_power_of_two (page_size));
 
         first = std::max (round_down (first, page_size),
-                          address{round_down (sizeof (header) + page_size - 1U, page_size)});
+                          address{round_down (leader_size + page_size - 1U, page_size)});
         last = round_down (last, page_size);
 
         for (auto region_it = regions_.rbegin (), end = regions_.rend (); region_it != end;
@@ -216,4 +215,4 @@ namespace pstore {
         }
     }
 
-} // namespace pstore
+} // end namespace pstore

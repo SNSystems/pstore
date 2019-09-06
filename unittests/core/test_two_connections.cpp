@@ -58,6 +58,7 @@
 
 
 namespace {
+
     class db_file {
     public:
         static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
@@ -96,24 +97,23 @@ namespace {
         pstore::database second;
     };
 
-    namespace {
-        template <typename Transaction>
-        void append_int (Transaction & transaction, int v) {
-            *(transaction.template alloc_rw<int> ().first) = v;
-        }
-    } // namespace
-} // namespace
+    template <typename Transaction>
+    void append_int (Transaction & transaction, int v) {
+        *(transaction.template alloc_rw<int> ().first) = v;
+    }
+
+} // end anonymous namespace
 
 TEST_F (TwoConnections, CommitToFirstConnectionDoesNotAffectFooterPosForSecond) {
-    ASSERT_EQ (sizeof (pstore::header), second.footer_pos ().absolute ());
+    ASSERT_EQ (pstore::leader_size, second.footer_pos ().absolute ());
     {
         auto transaction = pstore::begin (first);
         append_int (transaction, 1);
         transaction.commit ();
     }
     EXPECT_GE (first.footer_pos ().absolute (),
-               sizeof (pstore::header) + sizeof (int) + sizeof (pstore::trailer));
-    EXPECT_EQ (second.footer_pos ().absolute (), sizeof (pstore::header));
+               pstore::leader_size + sizeof (int) + sizeof (pstore::trailer));
+    EXPECT_EQ (second.footer_pos ().absolute (), pstore::leader_size);
 }
 
 TEST_F (TwoConnections, SyncOnSecondConnectionUpdatesFooterPos) {
@@ -125,11 +125,11 @@ TEST_F (TwoConnections, SyncOnSecondConnectionUpdatesFooterPos) {
     second.sync ();
     EXPECT_EQ (first.footer_pos (), second.footer_pos ());
     second.sync (0U);
-    EXPECT_EQ (sizeof (pstore::header), second.footer_pos ().absolute ());
+    EXPECT_EQ (pstore::leader_size, second.footer_pos ().absolute ());
     second.sync (1U);
     EXPECT_EQ (first.footer_pos (), second.footer_pos ());
     second.sync (0U);
-    EXPECT_EQ (sizeof (pstore::header), second.footer_pos ().absolute ());
+    EXPECT_EQ (pstore::leader_size, second.footer_pos ().absolute ());
 }
 
 TEST_F (TwoConnections, SyncOnSecondConnectionMapsAdditionalSpace) {

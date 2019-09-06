@@ -51,6 +51,7 @@
 #include <memory>
 #include <vector>
 
+#include "pstore/config/config.hpp"
 #include "pstore/os/memory_mapper.hpp"
 
 namespace pstore {
@@ -215,10 +216,15 @@ namespace pstore {
         }
 
 
-
         // small_files_enabled
         // ~~~~~~~~~~~~~~~~~~~
-        bool small_files_enabled ();
+        inline constexpr bool small_files_enabled () noexcept {
+#if PSTORE_POSIX_SMALL_FILES
+            return true;
+#else
+            return false;
+#endif
+        }
 
 
         /*   __            _                    *

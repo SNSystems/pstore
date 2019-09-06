@@ -302,8 +302,12 @@ namespace pstore {
     class transaction_mutex {
     public:
         explicit transaction_mutex (database & db)
-                : rl_{db.file (), offsetof (header, footer_pos), sizeof (header::footer_pos),
-                      pstore::file::file_base::lock_kind::exclusive_write} {}
+                : rl_{
+                      db.file (),                                                // file
+                      sizeof (header) + offsetof (lock_block, transaction_lock), // offset
+                      sizeof (lock_block::transaction_lock),                     // size
+                      pstore::file::file_base::lock_kind::exclusive_write        // kind
+                  } {}
 
         // Move.
         transaction_mutex (transaction_mutex &&) noexcept = default;

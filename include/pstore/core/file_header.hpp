@@ -117,7 +117,7 @@ namespace pstore {
         std::uint32_t get_crc () const noexcept;
 
         static std::uint16_t const major_version = 1;
-        static std::uint16_t const minor_version = 2;
+        static std::uint16_t const minor_version = 3;
 
         static std::array<std::uint8_t, 4> const file_signature1;
         static std::uint32_t const file_signature2 = 0x0507FFFF;
@@ -139,7 +139,9 @@ namespace pstore {
             std::array<std::uint16_t, 2> version;
             std::uint32_t header_size = sizeof (header);
             class uuid uuid;
-        } a;
+        };
+
+        body a;
 
         /// The fields of the header, up to and including this one, are not modified as the
         /// code interacts with the data store; they're effectively read-only. Unfortunately, we
@@ -170,6 +172,37 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (alignof (header) == 8);
     PSTORE_STATIC_ASSERT (sizeof (header) == 48);
 
+    inline constexpr std::uint64_t chars_to_uint64 (char c1, char c2, char c3, char c4, char c5,
+                                                    char c6, char c7, char c8) noexcept {
+        return static_cast<std::uint64_t> (c1) | static_cast<std::uint64_t> (c2) << 8U |
+               static_cast<std::uint64_t> (c3) << 16U | static_cast<std::uint64_t> (c4) << 24U |
+               static_cast<std::uint64_t> (c5) << 32U | static_cast<std::uint64_t> (c6) << 40U |
+               static_cast<std::uint64_t> (c7) << 48U | static_cast<std::uint64_t> (c8) << 56U;
+    }
+
+    /// \brief The lock block is a small struct placed immediately after the file header which is
+    /// used by the transaction lock.
+    ///
+    /// This value is not read or written but a file range lock is placed on it as part of the
+    /// implementation of the transaction lock. Its value is a small magic number which is intended
+    /// to resemble "LOCKBLOC" in a hex dump.
+    struct lock_block {
+        lock_block ()
+                : vacuum_lock{chars_to_uint64 ('V', 'a', 'c', 'u', 'u', 'm', 'L', 'k')}
+                , transaction_lock{chars_to_uint64 ('T', 'r', 'n', 's', 'a', 'c', 't', 'L')} {}
+
+        std::uint64_t vacuum_lock;
+        std::uint64_t transaction_lock;
+
+        static constexpr auto file_offset = std::uint64_t{sizeof (header)};
+    };
+
+    PSTORE_STATIC_ASSERT (offsetof (lock_block, vacuum_lock) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (lock_block, transaction_lock) == 8);
+    PSTORE_STATIC_ASSERT (alignof (lock_block) == 8);
+    PSTORE_STATIC_ASSERT (sizeof (lock_block) == 16);
+
+    constexpr auto leader_size = sizeof (header) + sizeof (lock_block);
 
     class database;
 

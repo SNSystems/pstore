@@ -149,13 +149,13 @@ namespace pstore {
 
         // A basic validity check of footer_pos and prev before we go and
         // access them.
-        if (pos < typed_address<trailer>::make (sizeof (header)) ||
+        if (pos < typed_address<trailer>::make (leader_size) ||
             pos.absolute () % alignof (trailer) != 0) {
             ok = false;
         } else {
             auto const footer = db.getro<trailer> (pos);
             // Get the address of the previous generation.
-            typed_address<trailer> prev_pos = footer->a.prev_generation;
+            typed_address<trailer> const prev_pos = footer->a.prev_generation;
 
             if (!footer->crc_is_valid () || !footer->signature_is_valid ()) {
                 ok = false;
@@ -169,9 +169,8 @@ namespace pstore {
                 ok = false;
             } else {
                 address const transaction_first_byte = prev_pos == typed_address<trailer>::null ()
-                                                           ? address{sizeof (header)}
+                                                           ? address{leader_size}
                                                            : (prev_pos + 1U).to_address ();
-
                 if (pos.to_address () - footer->a.size != transaction_first_byte) {
                     ok = false;
                 }

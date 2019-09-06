@@ -155,7 +155,9 @@ namespace pstore {
         /// the old currently synced because to do so may require additional space to be mapped.
         typed_address<trailer> older_revision_footer_pos (unsigned revision) const;
 
-        static bool small_files_enabled () { return region::small_files_enabled (); }
+        static constexpr bool small_files_enabled () noexcept {
+            return region::small_files_enabled ();
+        }
 
         std::unique_lock<file::range_lock> * upgrade_to_write_lock ();
         std::time_t latest_time () const {
@@ -398,7 +400,7 @@ namespace pstore {
             std::uint64_t logical_size () const noexcept { return logical_; }
 
             void update_footer_pos (typed_address<trailer> new_footer_pos) noexcept {
-                assert (new_footer_pos.absolute () >= sizeof (header));
+                assert (new_footer_pos.absolute () >= leader_size);
                 footer_pos_ = new_footer_pos;
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
             }
@@ -522,7 +524,7 @@ namespace pstore {
         typed_address<trailer> const result = h->footer_pos.load ();
         std::uint64_t const footer_offset = result.absolute ();
         std::uint64_t const file_size = file.size ();
-        if (footer_offset < sizeof (header) || file_size < sizeof (header) + sizeof (trailer) ||
+        if (footer_offset < leader_size || file_size < leader_size + sizeof (trailer) ||
             footer_offset > file_size - sizeof (trailer)) {
             raise (error_code::header_corrupt, file.path ());
         }

@@ -49,21 +49,10 @@
 
 #include "pstore/core/region.hpp"
 
-#include "pstore/config/config.hpp"
 #include "pstore/support/make_unique.hpp"
 
 namespace pstore {
     namespace region {
-
-        // small_files_enabled
-        // ~~~~~~~~~~~~~~~~~~~
-        bool small_files_enabled () {
-#if PSTORE_POSIX_SMALL_FILES
-            return true;
-#else
-            return false;
-#endif
-        }
 
         std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size) {

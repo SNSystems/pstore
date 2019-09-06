@@ -64,6 +64,16 @@
 #include "base32.hpp"
 #include "heartbeat.hpp"
 
+namespace {
+
+    pstore::file::range_lock get_vacuum_range_lock (pstore::file::file_base * const file,
+                                                    pstore::file::file_base::lock_kind kind) {
+        return {file, sizeof (pstore::header) + offsetof (pstore::lock_block, vacuum_lock),
+                sizeof (pstore::lock_block::vacuum_lock), kind};
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
 
     // crc_checks_enabled
@@ -87,11 +97,6 @@ namespace pstore {
         return shared_.get ();
     }
 
-} // namespace pstore
-
-
-
-namespace pstore {
     constexpr std::size_t const database::sync_name_length;
 
     database::database (std::string const & path, access_mode am, bool access_tick_enabled)
@@ -126,14 +131,12 @@ namespace pstore {
 #ifdef _WIN32
         shared_ = pstore::shared_memory<pstore::shared> (this->shared_memory_name ());
 #endif
-        // Put a shared-read lock on the first few bytes of the file. We're not going to modify
-        // these bytes (it's the file signature)
-        {
-            range_lock_ = file::range_lock (this->file (), offsetof (header, a), // offset
-                                            sizeof (header::a),                  // size
-                                            file::file_handle::lock_kind::shared_read);
-            lock_ = std::unique_lock<file::range_lock> (range_lock_);
-        }
+
+        // Put a shared-read lock on the lock_block strcut in the file. We're not going to modify
+        // these bytes.
+        range_lock_ =
+            get_vacuum_range_lock (this->file (), file::file_handle::lock_kind::shared_read);
+        lock_ = std::unique_lock<file::range_lock> (range_lock_);
 
 #ifdef _WIN32
         if (access_tick_enabled) {
@@ -162,15 +165,14 @@ namespace pstore {
     // upgrade_to_write_lock
     // ~~~~~~~~~~~~~~~~~~~~~
     std::unique_lock<file::range_lock> * database::upgrade_to_write_lock () {
+        // TODO: look at exception-safety in this function.
         lock_.unlock ();
         lock_.release ();
-        range_lock_ = file::range_lock (this->file (), offsetof (header, a), // offset
-                                        sizeof (header::a),                  // size
-                                        file::file_handle::lock_kind::exclusive_write);
+        range_lock_ =
+            get_vacuum_range_lock (this->file (), file::file_handle::lock_kind::exclusive_write);
         lock_ = std::unique_lock<file::range_lock> (range_lock_, std::defer_lock);
         return &lock_;
     }
-
 
     // clear_index_cache
     // ~~~~~~~~~~~~~~~~~
@@ -284,13 +286,16 @@ namespace pstore {
     // build_new_store [static]
     // ~~~~~~~~~~~~~~~
     void database::build_new_store (file::file_base & file) {
-        // Write the inital head and footer to the file.
+        // Write the inital header, lock block, and footer to the file.
         {
             file.seek (0);
 
             header header{};
-            header.footer_pos = typed_address<trailer>::make (sizeof (header));
+            header.footer_pos = typed_address<trailer>::make (leader_size);
             file.write (header);
+
+            lock_block lb{};
+            file.write (lb);
 
             assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
 
@@ -303,7 +308,7 @@ namespace pstore {
         }
         // Make sure that the file is at least large enough for the minimum region size.
         {
-            assert (file.size () == sizeof (header) + sizeof (trailer));
+            assert (file.size () == leader_size + sizeof (trailer));
             // TODO: ask the region factory what the min region size is.
             if (file.size () < storage::min_region_size && !database::small_files_enabled ()) {
                 file.truncate (storage::min_region_size);
@@ -382,11 +387,6 @@ namespace pstore {
         assert (file->is_open ());
         return file;
     }
-} // namespace pstore
-
-
-
-namespace pstore {
 
     // first_writable_address
     // ~~~~~~~~~~~~~~~~~~~~~~
@@ -507,8 +507,6 @@ namespace pstore {
         }
     }
 
-
-
     // set_new_footer
     // ~~~~~~~~~~~~~~
     void database::set_new_footer (typed_address<trailer> new_footer_pos) {
@@ -521,4 +519,4 @@ namespace pstore {
         header_->footer_pos = new_footer_pos;
     }
 
-} // namespace pstore
+} // end namespace pstore

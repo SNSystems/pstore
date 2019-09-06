@@ -112,7 +112,7 @@ namespace {
             if (last_error != ERROR_FILE_EXISTS) {
                 std::ostringstream str;
                 str << "Could not open temporary file " << pstore::quoted (path);
-                raise (pstore::win32_erc (last_error), str.str ());
+                raise (pstore::win32_erc{last_error}, str.str ());
             }
         }
         return handle;
@@ -205,7 +205,7 @@ namespace pstore {
                 } else {
                     std::ostringstream str;
                     str << "Unable to open " << pstore::quoted (path_);
-                    raise (::pstore::win32_erc (last_error), str.str ());
+                    raise (win32_erc{last_error}, str.str ());
                 }
             }
         }
@@ -247,7 +247,7 @@ namespace pstore {
                     DWORD const last_error = ::GetLastError ();
                     std::ostringstream str;
                     str << "Unable to close " << pstore::quoted (path_);
-                    ::pstore::raise (::pstore::win32_erc (last_error), str.str ());
+                    raise (win32_erc{last_error}, str.str ());
                 }
             }
 
@@ -274,7 +274,7 @@ namespace pstore {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
                 str << "Unable to seek to " << position << " in file " << pstore::quoted (path_);
-                raise (::pstore::win32_erc (last_error), str.str ());
+                raise (win32_erc{last_error}, str.str ());
             }
         }
 
@@ -289,15 +289,14 @@ namespace pstore {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
                 str << "Unable to get position of file " << pstore::quoted (path_);
-                raise (::pstore::win32_erc (last_error), str.str ());
+                raise (win32_erc{last_error}, str.str ());
             }
             return new_pos.QuadPart;
         }
 
         // read
         // ~~~~
-        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer,
-                                              std::size_t size) {
+        std::size_t file_handle::read_buffer (gsl::not_null<void *> buffer, std::size_t size) {
             this->ensure_open ();
 
             auto reader = [this](void * ptr, DWORD num_to_read) -> DWORD {
@@ -307,7 +306,7 @@ namespace pstore {
                     DWORD const last_error = ::GetLastError ();
                     std::ostringstream str;
                     str << "Unable to read " << pstore::quoted (path_);
-                    raise (::pstore::win32_erc (last_error), str.str ());
+                    raise (win32_erc{last_error}, str.str ());
                 }
                 return num_read;
             };
@@ -317,8 +316,7 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer,
-                                        std::size_t size) {
+        void file_handle::write_buffer (gsl::not_null<void const *> buffer, std::size_t size) {
             this->ensure_open ();
 
             auto writer = [this](std::uint8_t const * ptr, DWORD num_to_write) -> DWORD {
@@ -329,7 +327,7 @@ namespace pstore {
                     DWORD const last_error = ::GetLastError ();
                     std::ostringstream str;
                     str << "Unable to write " << pstore::quoted (path_);
-                    raise (::pstore::win32_erc (last_error), str.str ());
+                    raise (win32_erc{last_error}, str.str ());
                 }
                 return num_written;
             };
@@ -354,7 +352,7 @@ namespace pstore {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
                 str << "Unable to get file size of " << pstore::quoted (path_);
-                raise (::pstore::win32_erc (last_error), str.str ());
+                raise (win32_erc{last_error}, str.str ());
             }
             return result.QuadPart;
         }
@@ -374,7 +372,7 @@ namespace pstore {
             } else {
                 std::ostringstream str;
                 str << "Unable to set file size of " << pstore::quoted (path_);
-                raise (::pstore::win32_erc (set_eof_error_code), str.str ());
+                raise (win32_erc (set_eof_error_code), str.str ());
             }
         }
 
@@ -404,14 +402,11 @@ namespace pstore {
                                 blocking_mode block) {
             this->ensure_open ();
 
-            OVERLAPPED overlapped;
-            overlapped.Internal = 0;
-            overlapped.InternalHigh = 0;
+            OVERLAPPED overlapped{};
             overlapped.Offset = uint64_low4 (offset);
             overlapped.OffsetHigh = uint64_high4 (offset);
-            overlapped.hEvent = static_cast<HANDLE> (0);
 
-            DWORD flags = 0;
+            auto flags = DWORD{0};
             switch (block) {
             case blocking_mode::non_blocking: flags |= LOCKFILE_FAIL_IMMEDIATELY; break;
             case blocking_mode::blocking: break;
@@ -435,8 +430,8 @@ namespace pstore {
                     got_lock = false;
                 } else {
                     std::ostringstream str;
-                    str << "Unable to lock range of " << pstore::quoted (path_);
-                    raise (::pstore::win32_erc (last_error), str.str ());
+                    str << "Unable to lock range of " << quoted (path_);
+                    raise (win32_erc{last_error}, str.str ());
                 }
             }
             return got_lock;
@@ -447,12 +442,9 @@ namespace pstore {
         void file_handle::unlock (std::uint64_t offset, std::size_t size) {
             this->ensure_open ();
 
-            OVERLAPPED overlapped;
-            overlapped.Internal = 0;
-            overlapped.InternalHigh = 0;
+            OVERLAPPED overlapped{};
             overlapped.Offset = uint64_low4 (offset);
             overlapped.OffsetHigh = uint64_high4 (offset);
-            overlapped.hEvent = static_cast<HANDLE> (0);
             BOOL ok = ::UnlockFileEx (file_,
                                       0,                   // "reserved, must be 0"
                                       uint64_low4 (size),  // number of bytes to unlock (low)
@@ -461,8 +453,8 @@ namespace pstore {
             if (!ok) {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
-                str << "Unable to unlock range of " << pstore::quoted (path_);
-                raise (win32_erc (last_error), str.str ());
+                str << "Unable to unlock range of " << quoted (path_);
+                raise (win32_erc{last_error}, str.str ());
             }
         }
 
@@ -484,7 +476,7 @@ namespace pstore {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
                 str << "Unable to get file time for " << pstore::quoted (path_);
-                raise (win32_erc (last_error), str.str ());
+                raise (win32_erc{last_error}, str.str ());
             }
 
             auto compare = [](FILETIME const & lhs, FILETIME const & rhs) {
@@ -505,7 +497,7 @@ namespace pstore {
                 ::GetTempPathW (static_cast<DWORD> (temp_path.size ()), temp_path.data ());
             if (num_code_units == 0) {
                 DWORD const last_error = ::GetLastError ();
-                raise (win32_erc (last_error), "GetTempPathW");
+                raise (win32_erc{last_error}, "GetTempPathW");
             } else if (num_code_units > temp_path.size ()) {
                 // Increase the buffer size and try again.
                 temp_path.resize (num_code_units);
@@ -513,7 +505,7 @@ namespace pstore {
                     ::GetTempPathW (static_cast<DWORD> (temp_path.size ()), temp_path.data ());
                 if (num_code_units == 0) {
                     DWORD const last_error = ::GetLastError ();
-                    raise (win32_erc (last_error), "GetTempPathW");
+                    raise (win32_erc{last_error}, "GetTempPathW");
                 } else if (num_code_units != temp_path.size ()) {
                     raise (std::errc::no_buffer_space, "GetTempPathW");
                 }
@@ -522,32 +514,28 @@ namespace pstore {
             return utf::win32::to8 (temp_path.data (), num_code_units);
         }
 
-
-
         namespace win32 {
 
             // An out-of-line virtual destructor to avoid a vtable in every file that includes
             // deleter.
             deleter::~deleter () noexcept = default;
 
-            void deleter::platform_unlink (std::string const & path) {
-                pstore::file::unlink (path, true);
-            }
+            void deleter::platform_unlink (std::string const & path) { file::unlink (path, true); }
 
         } // namespace win32
 
         void unlink (std::string const & path, bool allow_noent) {
             // Delete the file at the path given by the (UTF-8-encoded) parameter string.
-            if (::DeleteFileW (pstore::utf::win32::to16 (path).c_str ()) == 0) {
+            if (::DeleteFileW (utf::win32::to16 (path).c_str ()) == 0) {
                 DWORD const last_error = ::GetLastError ();
                 if (!allow_noent || last_error != ERROR_FILE_NOT_FOUND) {
                     std::ostringstream str;
-                    str << "Unable to delete file " << pstore::quoted (path);
+                    str << "Unable to delete file " << quoted (path);
                     raise (win32_erc{last_error}, str.str ());
                 }
             }
         }
 
-    } // namespace file
-} // namespace pstore
+    } // end namespace file
+} // end namespace pstore
 #endif // #ifdef _WIN32

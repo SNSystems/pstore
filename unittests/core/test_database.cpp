@@ -70,28 +70,27 @@ TEST_F (Database, CheckInitialState) {
 
     {
         auto header = reinterpret_cast<pstore::header const *> (this->buffer ().get ());
-        EXPECT_THAT (pstore::header::file_signature1,
-                     ::testing::ContainerEq (header->a.signature1));
+        EXPECT_THAT (pstore::header::file_signature1, testing::ContainerEq (header->a.signature1));
         EXPECT_EQ (pstore::header::file_signature2, header->a.signature2);
 
         auto const expected = std::array<std::uint16_t, 2>{
             {pstore::header::major_version, pstore::header::minor_version}};
-        EXPECT_THAT (expected, ::testing::ContainerEq (header->a.version));
+        EXPECT_THAT (expected, testing::ContainerEq (header->a.version));
         EXPECT_EQ (sizeof (pstore::header), header->a.header_size);
         // std::uint8_t sync_name[sync_name_length];
-        EXPECT_EQ (sizeof (pstore::header), header->footer_pos.load ().absolute ());
+        EXPECT_EQ (pstore::leader_size, header->footer_pos.load ().absolute ());
     }
     {
-        std::uint64_t const offset = sizeof (pstore::header);
-        auto footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () + offset);
+        auto footer = reinterpret_cast<pstore::trailer const *> (this->buffer ().get () +
+                                                                 pstore::leader_size);
 
         EXPECT_THAT (pstore::trailer::default_signature1,
-                     ::testing::ContainerEq (footer->a.signature1));
+                     testing::ContainerEq (footer->a.signature1));
         EXPECT_EQ (0U, footer->a.generation);
         EXPECT_EQ (0U, footer->a.size);
         EXPECT_EQ (pstore::typed_address<pstore::trailer>::null (), footer->a.prev_generation);
         EXPECT_THAT (pstore::trailer::default_signature2,
-                     ::testing::ContainerEq (footer->signature2));
+                     testing::ContainerEq (footer->signature2));
     }
 }
 
@@ -264,7 +263,7 @@ TEST_F (Database, Allocate16Bytes) {
     constexpr auto size = 16U;
     constexpr auto align = 1U;
     pstore::address addr = db.allocate (size, align);
-    EXPECT_EQ (sizeof (pstore::header) + sizeof (pstore::trailer), addr.absolute ());
+    EXPECT_EQ (pstore::leader_size + sizeof (pstore::trailer), addr.absolute ());
 
     // Subsequent allocation.
     pstore::address addr2 = db.allocate (size, align);
@@ -277,7 +276,7 @@ TEST_F (Database, Allocate16BytesAligned1024) {
 
     constexpr unsigned size = 16;
     constexpr unsigned align = 1024;
-    PSTORE_STATIC_ASSERT (align > sizeof (pstore::header) + sizeof (pstore::trailer));
+    PSTORE_STATIC_ASSERT (align > pstore::leader_size + sizeof (pstore::trailer));
 
     pstore::address addr = db.allocate (size, align);
     EXPECT_EQ (0U, addr.absolute () % align);
