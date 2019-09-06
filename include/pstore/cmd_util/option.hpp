@@ -321,4 +321,4 @@ namespace pstore {
     }     // end namespace cmd_util
 } // end namespace pstore
 
-#endif // PSTORE_CMD_UTIL_OPTION_H
+#endif // PSTORE_CMD_UTIL_OPTION_HPP

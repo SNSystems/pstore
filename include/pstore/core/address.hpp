@@ -93,8 +93,8 @@
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
-#include <ostream>
 #include <limits>
+#include <ostream>
 #include <type_traits>
 
 #include "pstore/support/portab.hpp"

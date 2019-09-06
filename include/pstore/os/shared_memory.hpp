@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file shared_memory.hpp
 
-#ifndef PSTORE_CORE_SHARED_MEMORY_HPP
-#define PSTORE_CORE_SHARED_MEMORY_HPP
+#ifndef PSTORE_OS_SHARED_MEMORY_HPP
+#define PSTORE_OS_SHARED_MEMORY_HPP
 
 #include <algorithm>
 #include <atomic>
@@ -57,17 +57,17 @@
 #include <string>
 
 #ifdef _WIN32
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#include "pstore/support/utf.hpp"
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
+#    include "pstore/support/utf.hpp"
 #else // !_WIN32
-#include <cerrno>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <system_error>
-#include <unistd.h>
+#    include <cerrno>
+#    include <fcntl.h>
+#    include <sys/mman.h>
+#    include <sys/stat.h>
+#    include <system_error>
+#    include <unistd.h>
 #endif // !_WIN32
 
 #include "pstore/os/uint64.hpp"
@@ -479,4 +479,4 @@ namespace pstore {
 
 #endif // !_WIN32
 } // namespace pstore
-#endif // PSTORE_CORE_SHARED_MEMORY_HPP
+#endif // PSTORE_OS_SHARED_MEMORY_HPP

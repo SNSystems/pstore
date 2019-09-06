@@ -51,12 +51,12 @@
 /// We then run this program twice and step them through in sequence to ensure that one successfully
 /// acquires the transaction lock and the other blocks.
 
+#include <chrono>
+#include <condition_variable>
 #include <cstdlib>
 #include <iostream>
 #include <mutex>
 #include <thread>
-#include <condition_variable>
-#include <chrono>
 
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/tchar.hpp"
