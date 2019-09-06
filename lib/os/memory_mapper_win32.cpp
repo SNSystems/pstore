@@ -49,6 +49,7 @@
 //===----------------------------------------------------------------------===//
 /// \file memory_mapper_win32.cpp
 /// \brief Win32 implementation of the platform-independent memory-mapped file
+
 #include "pstore/os/memory_mapper.hpp"
 
 #if defined(_WIN32)
@@ -93,7 +94,7 @@ namespace {
             DWORD const last_error = ::GetLastError ();
             std::ostringstream message;
             message << "CreateFileMapping failed for " << std::quoted (file.path ());
-            raise (::pstore::win32_erc (last_error), message.str ());
+            raise (pstore::win32_erc{last_error}, message.str ());
         }
     }
 
@@ -114,7 +115,7 @@ namespace pstore {
             ::VirtualAlloc (nullptr, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE));
         if (ptr == nullptr) {
             DWORD const last_error = ::GetLastError ();
-            raise (pstore::win32_erc (last_error), "VirtualAlloc");
+            raise (win32_erc{last_error}, "VirtualAlloc");
         }
 
         auto deleter = [ptr](std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
@@ -153,7 +154,7 @@ namespace pstore {
         DWORD old_protect = 0;
         if (::VirtualProtect (addr, len, PAGE_READONLY, &old_protect) == 0) {
             DWORD const last_error = ::GetLastError ();
-            raise (::pstore::win32_erc (last_error), "VirtualProtect");
+            raise (win32_erc{last_error}, "VirtualProtect");
         }
     }
 
@@ -181,13 +182,13 @@ namespace pstore {
 
             std::ostringstream message;
             message << "Could not map view of file " << std::quoted (file.path ());
-            raise (::pstore::win32_erc (last_error), message.str ());
+            raise (win32_erc{last_error}, message.str ());
         }
 
         auto unmap_deleter = [](void * p) {
             if (::UnmapViewOfFile (p) == 0) {
                 DWORD const last_error = ::GetLastError ();
-                raise (::pstore::win32_erc (last_error), "UnmapViewOfFile");
+                raise (win32_erc{last_error}, "UnmapViewOfFile");
             }
         };
 
