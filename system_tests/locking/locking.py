@@ -145,11 +145,10 @@ def kill(state, process):
 
 def wait(state, event):
     state.check_companion_thread()
-    with state.cv:
-        while not event.is_set() and state.exit_code == EXIT_SUCCESS:
-            event.wait(TIMEOUT)
-            logging.debug('iterate')
-            state.check_companion_thread()
+    while not event.is_set() and state.exit_code == EXIT_SUCCESS:
+        event.wait(TIMEOUT)
+        logging.debug('iterate')
+        state.check_companion_thread()
     state.check_companion_thread()
 
 
