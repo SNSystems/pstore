@@ -49,81 +49,84 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/generation_iterator.hpp"
-// Standard library includes
-#include <iterator>
 // 3rd party includes
 #include <gtest/gtest.h>
 // pstore includes
-#include "pstore/core/crc32.hpp"
 #include "pstore/core/transaction.hpp"
 // Local includes
-#include "check_for_error.hpp"
 #include "empty_store.hpp"
 
+using pstore::generation_container;
+using pstore::generation_iterator;
 
 namespace {
 
     class GenerationIterator : public EmptyStore {
     public:
-        void SetUp () override {
-            EmptyStore::SetUp ();
-            db_.reset (new pstore::database (this->file ()));
-            db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        GenerationIterator ()
+                : EmptyStore{}
+                , db_{this->file ()} {
+            db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
-        void TearDown () override {
-            db_.reset ();
-            EmptyStore::TearDown ();
-        }
-
+    protected:
         void add_transaction () {
-            auto transaction = pstore::begin (*db_.get ());
+            auto transaction = pstore::begin (db_);
             *(transaction.alloc_rw<int> ().first) = 37;
             transaction.commit ();
         }
 
-        std::unique_ptr<pstore::database> db_;
+        pstore::database & db () noexcept { return db_; }
+
+        using trailer_address = pstore::typed_address<pstore::trailer>;
+
+    private:
+        pstore::database db_;
     };
 
 } // end anonymous namespace
 
 TEST_F (GenerationIterator, GenerationContainerBegin) {
     this->add_transaction ();
-    pstore::generation_iterator actual = pstore::generation_container (*db_).begin ();
-    pstore::generation_iterator expected =
-        pstore::generation_iterator (db_.get (), db_->footer_pos ());
+
+    auto & d = this->db ();
+    generation_iterator const actual = generation_container{d}.begin ();
+    generation_iterator const expected = generation_iterator{&d, d.footer_pos ()};
     EXPECT_EQ (expected, actual);
 }
 TEST_F (GenerationIterator, GenerationContainerEnd) {
     this->add_transaction ();
-    pstore::generation_iterator actual = pstore::generation_container (*db_).end ();
-    pstore::generation_iterator expected =
-        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
+
+    auto & d = this->db ();
+    generation_iterator const actual = generation_container{d}.end ();
+    generation_iterator const expected = generation_iterator{&d, trailer_address::null ()};
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (GenerationIterator, InitialStoreIterationHasDistance1) {
-    auto begin = pstore::generation_iterator (db_.get (), db_->footer_pos ());
-    auto end =
-        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
+    auto & d = this->db ();
+    auto const begin = generation_iterator{&d, d.footer_pos ()};
+    auto const end = generation_iterator{&d, trailer_address::null ()};
     EXPECT_EQ (1U, std::distance (begin, end));
-    EXPECT_EQ (pstore::typed_address<pstore::trailer>::make (pstore::leader_size), *begin);
+    EXPECT_EQ (trailer_address::make (pstore::leader_size), *begin);
 }
 
 TEST_F (GenerationIterator, AddTransactionoreIterationHasDistance2) {
     this->add_transaction ();
-    auto begin = pstore::generation_iterator (db_.get (), db_->footer_pos ());
-    auto end =
-        pstore::generation_iterator (db_.get (), pstore::typed_address<pstore::trailer>::null ());
+
+    auto & d = this->db ();
+    auto const begin = generation_iterator{&d, d.footer_pos ()};
+    auto const end = generation_iterator{&d, trailer_address::null ()};
     EXPECT_EQ (2U, std::distance (begin, end));
 }
 
 TEST_F (GenerationIterator, PostIncrement) {
-    pstore::generation_container generations (*db_);
-    pstore::generation_iterator begin = generations.begin ();
-    pstore::generation_iterator end = generations.end ();
-    pstore::generation_iterator it = begin;
-    pstore::generation_iterator old = it++;
+    auto & d = this->db ();
+    generation_container generations (d);
+    generation_iterator const begin = generations.begin ();
+    generation_iterator const end = generations.end ();
+    generation_iterator it = begin;
+    generation_iterator const old = it++;
     EXPECT_EQ (begin, old);
     EXPECT_EQ (end, it);
 }
