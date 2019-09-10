@@ -4,7 +4,11 @@ A small collection of useful utilities which simplify some common tasks or perfo
 
 ## layering
 
+See [the notes](layering/) in the layering directory.
+
 ## boilerplate
+
+See [the notes](boilerplate/) in the boilerplate directory.
 
 ## make build
 
@@ -16,11 +20,9 @@ Some of the common switches are described in the following table. For a complete
 
 | Switch | Description |
 | ------ | ----------- |
-| `--define`,`-D` | <p>Used to create or update CMake cache entries. This can be used to pass options into the build.</p><p>**Example:** `$ make_build.py -D PSTORE_EXAMPLES=Yes` will enable the pstore example programs.</p>
-| `--directory`,`-o` | <p>The directory in which the CMake build will be created. By default this is a path inside the current directory with the prefix `build_` and a suffix which is derived from the name of the host operating system.</p><p>For example, running `make_build.py` on macOS would place the build in a directory called `./build_mac`; when running it on Linux then name is `./build_linux`;  Windows is `./build_win32`. This approach allows build for different systems to coexist in the same build tree.If you prefer true out-of-tree builds, then use this switch to specific a particular directory for the build.</p><p>**Warning:** that unless you specify `--no-clean` this directory **will be deleted** before CMake is run.</p><p>**Example:** `$ make_build.py -o ~/build` will place the build in a directory named `~/build`, creating if it does not exist and removing anything that was at that location.</p> |
-| `--generator`,`-g` | <p>The name of the build system generator that is passed to CMake. This is normally automatically determined from the host operating system, but you make explicitly override that choice using this switch.</p><p>**Example:** `$ make_build.py -g "Unix Makefiles"` will use CMake's makefile generator regardless of the host operating system.</p> |
-
-
+| `‑‑define`,`‑D` | <p>Used to create or update CMake cache entries. This can be used to pass options into the build.</p><p>**Example:** `$ make_build.py -D PSTORE_EXAMPLES=Yes` will enable the pstore example programs.</p>
+| `‑‑directory`,`‑o` | <p>The directory in which the CMake build will be created. By default this is a path inside the current directory with the prefix `build_` and a suffix which is derived from the name of the host operating system.</p><p>For example, running `make_build.py` on macOS would place the build in a directory called `./build_mac`; when running it on Linux then name is `./build_linux`;  Windows is `./build_win32`. This approach allows build for different systems to coexist in the same build tree.If you prefer true out-of-tree builds, then use this switch to specific a particular directory for the build.</p><p>**Warning:** that unless you specify `--no-clean` this directory **will be deleted** before CMake is run.</p><p>**Example:** `$ make_build.py -o ~/build` will place the build in a directory named `~/build`, creating if it does not exist and removing anything that was at that location.</p> |
+| `‑‑generator`,`‑g` | <p>The name of the build system generator that is passed to CMake. This is normally automatically determined from the host operating system, but you make explicitly override that choice using this switch.</p><p>**Example:** `$ make_build.py -g "Unix Makefiles"` will use CMake's makefile generator regardless of the host operating system.</p> |
 
 ## write travis yml
 
