@@ -378,22 +378,25 @@ namespace pstore {
 
         // rename
         // ~~~~~~
-        void file_handle::rename (std::string const & new_name) {
-            std::wstring const pathw = pstore::utf::win32::to16 (path_);
-            std::wstring const new_namew = pstore::utf::win32::to16 (new_name);
-
+        bool file_handle::rename (std::string const & new_name) {
+            bool result = true;
             // Deliberately do not pass the MOVEFILE_COPY_ALLOWED to MoveFileExW() because this
-            // could mean that the copy is anything but atomic. Do pass MOVEILE_REPLACE_EXISTING
-            // to slightly more closely mirror the POSIX rename() behavior.
-            BOOL ok = ::MoveFileExW (pathw.c_str (), new_namew.c_str (), MOVEFILE_REPLACE_EXISTING);
-            if (!ok) {
-                DWORD const last_error = ::GetLastError ();
-                std::ostringstream message;
-                message << "Unable to rename " << pstore::quoted (path_) << " to "
-                        << pstore::quoted (new_name);
-                raise (win32_erc{last_error}, message.str ());
+            // could mean that the copy is anything but atomic.
+            if (!::MoveFileExW (pstore::utf::win32::to16 (path_).c_str (),    // original file name
+                                pstore::utf::win32::to16 (new_name).c_str (), // new name
+                                0)) {                                         // flags
+                auto const last_error = ::GetLastError ();
+                if (last_error == ERROR_ALREADY_EXISTS) {
+                    result = false;
+                } else {
+                    std::ostringstream message;
+                    message << "Unable to rename " << pstore::quoted (path_) << " to "
+                            << pstore::quoted (new_name);
+                    raise (win32_erc{last_error}, message.str ());
+                }
             }
             path_ = new_name;
+            return result;
         }
 
         // lock

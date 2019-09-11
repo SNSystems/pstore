@@ -693,7 +693,9 @@ namespace pstore {
             std::uint64_t size () override;
             void truncate (std::uint64_t size) override;
             /// Renames a file from one UTF-8 encoded path to another.
-            void rename (std::string const & new_name);
+            /// \returns True on success, false if the rename failed because the target file already
+            /// existed.
+            bool rename (std::string const & new_name);
 
             std::time_t latest_time () const override;
 

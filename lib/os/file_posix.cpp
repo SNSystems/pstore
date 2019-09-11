@@ -68,6 +68,14 @@
 #    include "pstore/support/quoted_string.hpp"
 #    include "pstore/support/small_vector.hpp"
 
+// includes which depend on values in config.hpp
+#    if PSTORE_HAVE_SYS_SYSCALL_H
+#        include <sys/syscall.h> // For SYS_xxx definitions.
+#    endif
+#    if PSTORE_HAVE_LINUX_FS_H
+#        include <linux/fs.h> // For RENAME_NOREPLACE
+#    endif
+
 namespace {
 
     template <typename MessageStr, typename PathStr>
@@ -75,6 +83,72 @@ namespace {
         std::ostringstream str;
         str << message << ' ' << pstore::quoted (path);
         raise (pstore::errno_erc{err}, str.str ());
+    }
+
+    int rename_noreplace (char const * old_path, char const * new_path) {
+        auto const is_unavailable = [](int e) {
+            return e == EINVAL || errno == ENOSYS || errno == ENOTTY;
+        };
+
+        int ret_val = -1;
+        int err = EINVAL;
+        // Try the preferred function first which could come in any one of three forms:
+        // - The macOS renamex_np() function.
+        // - If available, the glibc wrapper around the Linux renameat2() function.
+        // - A direct call to the Linux renameat2 syscall.
+#    if PSTORE_HAVE_RENAMEX_NP
+        ret_val = ::renamex_np (old_path, new_path, RENAME_EXCL);
+        err = errno;
+#    elif PSTORE_HAVE_RENAMEAT2
+        ret_val = ::renameat2 (AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
+        err = errno;
+#    elif PSTORE_HAVE_SYS_renameat2
+        // Support for renameat2() was added in glibc 2.28. If we have an older version, we have
+        // just invoke the syscall dfirectly.
+        ret_val = ::syscall (SYS_renameat2, AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
+        err = errno;
+#    else
+        // A platform with no renameat2() equivalent that we know about.
+        ret_val = -1;
+        err = EINVAL;
+#    endif
+        if (ret_val >= 0) {
+            return 0;
+        }
+        // Apple added renamex_np() for APFS; renameat2() was added in Linux 3.15, but some file
+        // systems added support later. If our first try involved an unsupported API, we need to use
+        // a fall-back implementation.
+        if (!is_unavailable (err)) {
+            return -err;
+        }
+
+        // Use linkat()/unlinkat() as our first fallback. This doesn't work on directories and on
+        // some file systems that do not support hard links (such as FAT).
+        if (::linkat (AT_FDCWD, old_path, AT_FDCWD, new_path, 0) >= 0) {
+            if (::unlinkat (AT_FDCWD, old_path, 0) < 0) {
+                err = errno; // Save errno before unlinkat() clobbers it.
+                (void) ::unlinkat (AT_FDCWD, new_path, 0);
+                return -err;
+            }
+            return 0;
+        }
+        err = errno;
+        if (!is_unavailable (err) && err != EPERM) { // FAT returns EPERM on link()
+            return -err;
+        }
+
+        // Neither renameat2() nor linkat()/unlinkat() worked. Fallback to the TOCTOU vulnerable
+        // accessat(F_OK) check followed by classic, replacing renameat(), we have nothing better.
+        if (::faccessat (AT_FDCWD, new_path, F_OK, AT_SYMLINK_NOFOLLOW) >= 0) {
+            return -EEXIST;
+        }
+        if (errno != ENOENT) {
+            return -errno;
+        }
+        if (::renameat (AT_FDCWD, old_path, AT_FDCWD, new_path) < 0) {
+            return -errno;
+        }
+        return 0;
     }
 
 } // end anonymous namespace
@@ -279,16 +353,23 @@ namespace pstore {
 
         // rename
         // ~~~~~~
-        void file_handle::rename (std::string const & new_name) {
-            int erc = ::rename (path_.c_str (), new_name.c_str ());
-            if (erc == -1) {
-                int const last_error = errno;
-
-                std::ostringstream message;
-                message << "Unable to rename " << quoted (path_) << " to " << quoted (new_name);
-                raise (errno_erc{last_error}, message.str ());
+        bool file_handle::rename (std::string const & new_name) {
+            bool result = true;
+            auto const & p = this->path ();
+            int err = rename_noreplace (p.c_str (), new_name.c_str ());
+            if (err >= 0) {
+                path_ = new_name;
+            } else {
+                err = -err;
+                if (err == EEXIST) {
+                    result = false;
+                } else {
+                    std::ostringstream message;
+                    message << "Unable to rename " << quoted (p);
+                    raise (errno_erc{err}, message.str ());
+                }
             }
-            path_ = new_name;
+            return result;
         }
 
         // lock_reg

@@ -83,6 +83,8 @@
 
 /// Defined if <sys/endian.h> is available.
 #cmakedefine PSTORE_HAVE_SYS_ENDIAN_H 1
+/// Defined if <sys/syscall.h> is available.
+#cmakedefine PSTORE_HAVE_SYS_SYSCALL_H 1
 
 /// Defined if the C11 localtime_s() API is available.
 #cmakedefine PSTORE_HAVE_LOCALTIME_S 1
@@ -110,6 +112,13 @@
 /// Is the macOS _NSGetExecutablePath() function available?
 #cmakedefine PSTORE_HAVE_NSGETEXECUTABLEPATH 1
 
+/// Is the macOS renamex_np function available?
+#cmakedefine PSTORE_HAVE_RENAMEX_NP 1
+/// Is the Linux-only renameat2() call available in glibc?
+#cmakedefine PSTORE_HAVE_RENAMEAT2 1
+/// Is the Linux-only SYS_renameat2 system call number known?
+#cmakedefine PSTORE_HAVE_SYS_renameat2 1
+
 /// Defined if std::quoted<>() is available. This was not officially introduced until C++14 but is
 /// available even when compiling for C++11 on some platforms.
 #cmakedefine PSTORE_HAVE_STD_QUOTED 1
@@ -133,6 +142,9 @@
 #cmakedefine PSTORE_HAVE_IS_TRIVIALLY_COPYABLE 1
 
 #cmakedefine PSTORE_HAVE_SYS_POSIX_SHM_H 1
+/// Is the <linux/fs.h> header file available?
+#cmakedefine PSTORE_HAVE_LINUX_FS_H 1
+/// Id the <linux/limits.h> header file available?
 #cmakedefine PSTORE_HAVE_LINUX_LIMITS_H 1
 
 /// \brief Controls whether the library validates data header and footer structures

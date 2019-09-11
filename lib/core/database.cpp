@@ -330,7 +330,6 @@ namespace pstore {
         -> std::shared_ptr<file::file_handle> {
 
         using present_mode = file::file_handle::present_mode;
-
         auto const create_mode = file::file_handle::create_mode::open_existing;
         auto const write_mode = (am == access_mode::writable)
                                     ? file::file_handle::writable_mode::read_write
@@ -341,7 +340,6 @@ namespace pstore {
         if (file->is_open ()) {
             return file;
         }
-
 
         if (am != access_mode::writable) {
             raise (std::errc::no_such_file_or_directory, path);
@@ -354,37 +352,19 @@ namespace pstore {
         // chosen because this directory most likely has the same permissions and is on the same
         // physical volume as the final file). We then populate that file with the basic data
         // structures and rename it to the final destination.
-        //
-        // That way, any other processes will see an empty database pop into existence. There is,
-        // however, a clear race condition (someone else may have created that file in the meantime)
-        // so we must be prepared for the rename to fail.
-        //
-        // TODO: on a POSIX system, we could prefix the name with '.' to make hide its brief
-        // existance from the user.
-
-        auto temporary_file = std::make_shared<file::file_handle> ();
-        temporary_file->open (file::file_handle::unique{}, path::dir_name (path));
-        file::deleter temp_file_deleter (temporary_file->path ());
-        file = std::move (temporary_file);
-
-        // Fill the file with its initial contents.
-        database::build_new_store (*file);
-
-        // Now swizzle the new file into the location given by the 'path' parameter. There's a
-        // short time between the rename() and the construction of the file_handle instance
-        // below where something terrible could happen to the file, but it's a _very_ short time
-        // so I'll live with it.
-
-        file->close ();
-
-        // TODO: Assert that path and file->path() are on the same drive?
-        file->rename (path);
-
-        // The temporary file will no longer be found anyway (we just renamed it).
-        temp_file_deleter.release ();
-
+        {
+            auto temporary_file = std::make_shared<file::file_handle> ();
+            temporary_file->open (file::file_handle::unique{}, path::dir_name (path));
+            file::deleter temp_file_deleter (temporary_file->path ());
+            // Fill the file with its initial contents.
+            database::build_new_store (*temporary_file);
+            temporary_file->close ();
+            temporary_file->rename (path);
+            // The temporary file will no longer be found anyway (we just renamed it).
+            temp_file_deleter.release ();
+        }
         file->open (create_mode, write_mode, file::file_handle::present_mode::must_exist);
-        assert (file->is_open ());
+        assert (file->is_open () && file->path () == path);
         return file;
     }
 

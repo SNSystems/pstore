@@ -68,12 +68,14 @@ if (APPLE)
     check_include_files ("asl.h" PSTORE_HAVE_ASL_H)
     check_include_file_cxx (sys/kdebug_signpost.h PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H)
 endif ()
+
 check_include_files ("byteswap.h" PSTORE_HAVE_BYTESWAP_H)
+check_include_files ("linux/fs.h" PSTORE_HAVE_LINUX_FS_H)
 check_include_files ("linux/limits.h" PSTORE_HAVE_LINUX_LIMITS_H)
 check_include_files ("sys/endian.h" PSTORE_HAVE_SYS_ENDIAN_H)
+check_include_files ("sys/syscall.h" PSTORE_HAVE_SYS_SYSCALL_H)
 check_include_files ("sys/time.h;sys/types.h;sys/posix_shm.h" PSTORE_HAVE_SYS_POSIX_SHM_H)
 check_include_files ("syslog.h" PSTORE_HAVE_SYS_LOG_H)
-
 
 check_cxx_source_compiles (
     "#include <cstdlib>
@@ -166,7 +168,6 @@ check_cxx_source_compiles (
     }"
     PSTORE_HAVE_LOCALTIME_R)
 
-
 check_cxx_source_compiles (
     "#define __STDC_WANT_LIB_EXT1__  1
     #include <time.h>
@@ -188,9 +189,7 @@ check_cxx_source_compiles (
 
 check_cxx_source_compiles (
     "#include <unistd.h>
-    int main () {
-        getpagesize ();
-    }"
+    int main () { getpagesize (); }"
     PSTORE_HAVE_GETPAGESIZE)
 
 check_cxx_source_compiles (
@@ -200,6 +199,24 @@ check_cxx_source_compiles (
 check_cxx_source_compiles (
     "int main () { int a; int * _Nullable b = &a; return *b; }"
     PSTORE_HAVE_NULLABLE_KEYWORD
+)
+
+check_cxx_source_compiles (
+    "#include <cstdio>
+    int main () { renamex_np (\"old\", \"new\", RENAME_EXCL); }"
+    PSTORE_HAVE_RENAMEX_NP
+)
+check_cxx_source_compiles (
+    "#include <linux/fs.h>
+    #include <fcntl.h>
+    #include <cstdio>
+    int main () { renameat2 (0, \"old\", 0, \"new\", RENAME_EXCL); }"
+    PSTORE_HAVE_RENAMEAT2
+)
+check_cxx_source_compiles (
+    "#include <sys/syscall.h>
+    int main () { return SYS_renameat2; }"
+    PSTORE_HAVE_SYS_renameat2
 )
 
 
