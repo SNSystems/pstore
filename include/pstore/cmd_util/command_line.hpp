@@ -169,7 +169,7 @@ namespace pstore {
                                         std::string const & program_name, ErrorStream & errs) {
                     using str = stream_trait<typename ErrorStream::char_type>;
                     std::string value;
-                    maybe<option *> handler;
+                    auto handler = nothing<option *> ();
                     bool ok = true;
 
                     for (; first_arg != last_arg; ++first_arg) {
