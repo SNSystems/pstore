@@ -159,8 +159,8 @@ namespace pstore {
             assert (!this->is_open ());
             // if we grew the db, truncate it back
             if (db_.size () > dbsize_) {
-              db_.truncate(dbsize_);
-              assert (db_.size () == dbsize_);
+                db_.truncate (dbsize_);
+                assert (db_.size () == dbsize_);
             }
         }
         return *this;
