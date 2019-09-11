@@ -56,21 +56,19 @@ namespace pstore {
                 maybe<option *>
                 lookup_nearest_option (std::string const & arg,
                                        option::options_container const & all_options) {
+                    auto best_option = nothing<option *> ();
                     if (arg.empty ()) {
-                        return nothing<option *> ();
+                        return best_option;
                     }
-
                     // Find the closest match.
-                    maybe<option *> best_option;
-                    auto best_distance = std::string::size_type{0};
+                    auto best_distance = std::numeric_limits<std::string::size_type>::max ();
                     for (auto const & opt : all_options) {
                         auto const distance = string_distance (opt->name (), arg, best_distance);
-                        if (!best_option || distance < best_distance) {
+                        if (distance < best_distance) {
                             best_option = opt;
                             best_distance = distance;
                         }
                     }
-
                     return best_option;
                 }
 

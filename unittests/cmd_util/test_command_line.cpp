@@ -120,11 +120,13 @@ TEST_F (ClCommandLine, UnknownArgument) {
 }
 
 TEST_F (ClCommandLine, NearestName) {
-    cl::opt<std::string> option ("arg");
-    this->add ("progname", "--argx=value");
+    cl::opt<std::string> option1 ("aa");
+    cl::opt<std::string> option2 ("xx");
+    cl::opt<std::string> option3 ("yy");
+    this->add ("progname", "--xxx=value");
     string_stream errors;
     EXPECT_FALSE (this->parse_command_line_options (errors));
-    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Did you mean '--arg=value'")));
+    EXPECT_THAT (errors.str (), testing::HasSubstr (NATIVE_TEXT ("Did you mean '--xx=value'")));
 }
 
 TEST_F (ClCommandLine, MissingOptionName) {
