@@ -76,6 +76,11 @@
 #        include <linux/fs.h> // For RENAME_NOREPLACE
 #    endif
 
+// Not all versions of linux/fs.h include the definition of RENAME_NOREPLACE.
+#    ifndef RENAME_NOREPLACE
+#        define RENAME_NOREPLACE (1 << 0) // Don't overwrite target.
+#    endif
+
 namespace {
 
     template <typename MessageStr, typename PathStr>
