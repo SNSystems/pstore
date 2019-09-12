@@ -101,6 +101,19 @@ TEST_F (ClCommandLine, StringOption) {
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str ().length (), 0U);
     EXPECT_EQ (option.get (), "value");
+    EXPECT_EQ (option.getNumOccurrences (), 1U);
+}
+
+TEST_F (ClCommandLine, DoubleDashStringOption) {
+    cl::opt<std::string> option ("arg");
+    this->add ("progname", "--arg", "value");
+
+    string_stream errors;
+    bool res = this->parse_command_line_options (errors);
+    EXPECT_TRUE (res);
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (option.get (), "value");
+    EXPECT_EQ (option.getNumOccurrences (), 1U);
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
@@ -110,6 +123,7 @@ TEST_F (ClCommandLine, StringOptionEquals) {
     EXPECT_TRUE (this->parse_command_line_options (errors));
     EXPECT_EQ (errors.str ().length (), 0U);
     EXPECT_EQ (option.get (), "value");
+    EXPECT_EQ (option.getNumOccurrences (), 1U);
 }
 
 TEST_F (ClCommandLine, UnknownArgument) {

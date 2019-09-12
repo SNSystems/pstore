@@ -44,7 +44,6 @@
 #ifndef PSTORE_CMD_UTIL_COMMAND_LINE_HPP
 #define PSTORE_CMD_UTIL_COMMAND_LINE_HPP
 
-#include <iostream>
 #include <string>
 #include <tuple>
 
@@ -161,6 +160,58 @@ namespace pstore {
                     }
                 }
 
+                template <typename ErrorStream>
+                void report_unknown_option (std::string const & program_name,
+                                            std::string const & arg_name,
+                                            maybe<std::string> const & value, ErrorStream & errs) {
+                    report_unknown_option (program_name, arg_name, value ? *value : "", errs);
+                }
+
+
+                bool argument_is_positional (std::string const & arg_name);
+                bool handler_takes_argument (maybe<option *> handler);
+                bool handler_set_value (maybe<option *> handler, std::string const & value);
+
+                /// Splits the name and possible argument values from an argument string.
+                ///
+                /// A string prefixed with a double-dash may include an optional value preceeded
+                /// by an equals sign. This function splits out the leading dash or double dash and
+                /// the optional value to yield the option name and value.
+                ///
+                /// \param arg A command-line argument string.
+                /// \returns A tuple containing the argument name (shorn or leading dashes) and a
+                ///          value string if one was present.
+                std::tuple<std::string, maybe<std::string>> get_option_and_value (std::string arg);
+
+                /// A simple wrapper for a bool where as soon as StickTo is assigned, subsequent
+                /// assignments are ignored.
+                template <bool StickTo = false>
+                class sticky_bool {
+                public:
+                    static constexpr auto stick_to = StickTo;
+
+                    explicit sticky_bool (bool v) noexcept
+                            : v_{v} {}
+                    sticky_bool (sticky_bool const &) noexcept = default;
+                    sticky_bool (sticky_bool &&) noexcept = default;
+                    sticky_bool & operator= (sticky_bool const & other) = default;
+                    sticky_bool & operator= (sticky_bool && other) = default;
+
+                    sticky_bool & operator= (bool b) noexcept {
+                        if (v_ != stick_to) {
+                            v_ = b;
+                        }
+                        return *this;
+                    }
+
+                    bool get () const noexcept { return v_; }
+                    explicit operator bool () const noexcept { return get (); }
+
+                private:
+                    bool v_;
+                };
+
+
                 // parse_option_arguments
                 // ~~~~~~~~~~~~~~~~~~~~~~
                 template <typename InputIterator, typename ErrorStream>
@@ -168,17 +219,15 @@ namespace pstore {
                 parse_option_arguments (InputIterator first_arg, InputIterator last_arg,
                                         std::string const & program_name, ErrorStream & errs) {
                     using str = stream_trait<typename ErrorStream::char_type>;
-                    std::string value;
+                    auto value = nothing<std::string> ();
                     auto handler = nothing<option *> ();
-                    bool ok = true;
+                    sticky_bool<false> ok{true};
 
                     for (; first_arg != last_arg; ++first_arg) {
                         std::string arg_name = *first_arg;
                         // Is this the argument for the preceeding switch?
-                        if (handler && (*handler)->takes_argument ()) {
-                            if (!(*handler)->value (arg_name)) {
-                                ok = false;
-                            }
+                        if (handler_takes_argument (handler)) {
+                            ok = handler_set_value (handler, arg_name);
                             handler.reset ();
                             continue;
                         }
@@ -191,24 +240,11 @@ namespace pstore {
                         }
                         // If this argument has no leading dash, this and the following are
                         // positional arguments.
-                        if (arg_name.empty () || arg_name.front () != '-') {
+                        if (argument_is_positional (arg_name)) {
                             break;
                         }
 
-                        bool has_value = false;
-                        if (starts_with (arg_name, "--")) {
-                            arg_name.erase (0U, 2U);
-
-                            std::size_t const equal_pos = arg_name.find ('=');
-                            has_value = equal_pos != std::string::npos;
-                            if (has_value) {
-                                value = arg_name.substr (equal_pos + 1, std::string::npos);
-                                arg_name = arg_name.substr (0, equal_pos);
-                            }
-                        } else {
-                            assert (starts_with (arg_name, "-"));
-                            arg_name.erase (0U, 1U);
-                        }
+                        std::tie (arg_name, value) = get_option_and_value (arg_name);
 
                         handler = find_handler (arg_name);
                         if (!handler || (*handler)->is_positional ()) {
@@ -217,21 +253,26 @@ namespace pstore {
                             continue;
                         }
 
-                        bool const takes_argument = (*handler)->takes_argument ();
-                        if (takes_argument && has_value) {
-                            (*handler)->add_occurrence ();
-                            if (!(*handler)->value (value)) {
-                                ok = false;
+                        if ((*handler)->takes_argument ()) {
+                            if (value) {
+                                ok = handler_set_value (handler, *value);
+                                handler.reset ();
+                            } else {
+                                // The option takes an argument but we haven't yet seen the value
+                                // string.
                             }
-                            handler.reset ();
-                        } else if (!takes_argument && !has_value) {
-                            (*handler)->add_occurrence ();
-                            handler.reset ();
-                        } else if (!takes_argument && has_value) {
-                            errs << str::out_string (program_name) << str::out_text (": Argument '")
-                                 << str::out_string ((*handler)->name ())
-                                 << str::out_text ("' does not take a value\n");
-                            ok = false;
+                        } else {
+                            if (value) {
+                                // We got a value but don't want one.
+                                errs << str::out_string (program_name)
+                                     << str::out_text (": Argument '")
+                                     << str::out_string ((*handler)->name ())
+                                     << str::out_text ("' does not take a value\n");
+                                ok = false;
+                            } else {
+                                (*handler)->add_occurrence ();
+                                handler.reset ();
+                            }
                         }
                     }
 
@@ -241,7 +282,7 @@ namespace pstore {
                              << str::out_text ("' requires a value\n");
                         ok = false;
                     }
-                    return std::make_tuple (first_arg, ok);
+                    return std::make_tuple (first_arg, static_cast<bool> (ok));
                 }
 
                 template <typename InputIterator>
@@ -290,7 +331,6 @@ namespace pstore {
                 }
 
             } // namespace details
-
 
 #ifdef _WIN32
             /// For Windows, a variation on the ParseCommandLineOptions functions which takes the

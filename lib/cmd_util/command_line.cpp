@@ -98,6 +98,49 @@ namespace pstore {
                     return it != end ? just (*it) : nothing<option *> ();
                 }
 
+                // argument_is_positional
+                // ~~~~~~~~~~~~~~~~~~~~~~
+                bool argument_is_positional (std::string const & arg_name) {
+                    return arg_name.empty () || arg_name.front () != '-';
+                }
+
+                // handler_takes_argument
+                // ~~~~~~~~~~~~~~~~~~~~~~
+                bool handler_takes_argument (maybe<option *> handler) {
+                    return handler && (*handler)->takes_argument ();
+                }
+
+                // handler_set_value
+                // ~~~~~~~~~~~~~~~~~
+                bool handler_set_value (maybe<option *> handler, std::string const & value) {
+                    assert (handler_takes_argument (handler));
+                    (*handler)->add_occurrence ();
+                    return (*handler)->value (value);
+                }
+
+                // get_option_and_value
+                // ~~~~~~~~~~~~~~~~~~~~
+                std::tuple<std::string, maybe<std::string>> get_option_and_value (std::string arg) {
+                    static constexpr char double_dash[] = "--";
+                    static constexpr auto double_dash_len = std::string::size_type{2};
+
+                    auto value = nothing<std::string> ();
+                    if (starts_with (arg, double_dash)) {
+                        std::size_t const equal_pos = arg.find ('=', double_dash_len);
+                        if (equal_pos == std::string::npos) {
+                            arg.erase (0U, double_dash_len);
+                        } else {
+                            value = just (arg.substr (equal_pos + 1, std::string::npos));
+                            assert (equal_pos >= double_dash_len);
+                            arg = arg.substr (double_dash_len, equal_pos - double_dash_len);
+                        }
+                    } else {
+                        assert (starts_with (arg, "-"));
+                        arg.erase (0U, 1U);
+                    }
+                    return std::make_tuple (arg, value);
+                }
+
             } // end namespace details
         }     // end namespace cl
     }         // end namespace cmd_util
