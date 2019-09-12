@@ -326,7 +326,8 @@ namespace pstore {
                                                                        payload_span) {
                             auto const payload_size = payload_span.size ();
                             if (payload_size < 0 ||
-                                static_cast<std::make_unsigned<decltype (payload_size)>::type> (
+                                static_cast<std::make_unsigned<
+                                        std::remove_const<decltype (payload_size)>::type>::type> (
                                     payload_size) != payload_length) {
                                 return return_type{ws_error::insufficient_data};
                             }
@@ -353,8 +354,11 @@ namespace pstore {
                                                        gsl::span<std::uint8_t const> const & span) {
                 auto send_length = [&](IO io2) {
                     auto const size = span.size ();
-                    assert (size >= 0 && static_cast<std::make_unsigned<decltype (size)>::type> (
-                                             size) <= std::numeric_limits<LengthType>::max ());
+                    assert (
+                        size >= 0 &&
+                        static_cast<
+                            std::make_unsigned<std::remove_const<decltype (size)>::type>::type> (
+                            size) <= std::numeric_limits<LengthType>::max ());
                     return send (sender, io2, static_cast<LengthType> (size));
                 };
                 auto send_payload = [&](IO io3) { return send (sender, io3, span); };

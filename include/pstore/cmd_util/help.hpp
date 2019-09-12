@@ -81,7 +81,8 @@ namespace pstore {
 
             private:
                 static constexpr std::size_t overlong_opt_max = 20;
-                static_assert (overlong_opt_max <= std::numeric_limits<int>::max (),
+                static_assert (overlong_opt_max <=
+                                   static_cast<unsigned> (std::numeric_limits<int>::max ()),
                                "overlong_opt_max is too huge!");
                 static constexpr std::size_t max_width = 78;
 

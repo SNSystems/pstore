@@ -58,8 +58,8 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        void send_message (writer & wr, bool error_on_timeout, ::pstore::gsl::czstring verb,
-                           ::pstore::gsl::czstring path) {
+        void send_message (writer & wr, bool error_on_timeout, gsl::czstring verb,
+                           gsl::czstring path) {
             assert (verb != nullptr);
 
             auto payload = std::string{verb};
@@ -69,7 +69,7 @@ namespace pstore {
             }
 
             // Work out the number of pieces into which we need to break this payload.
-            using num_parts_type = decltype (message_type::num_parts);
+            using num_parts_type = std::remove_const<decltype (message_type::num_parts)>::type;
             auto const num_parts =
                 static_cast<num_parts_type> ((payload.length () + message_type::payload_chars - 1) /
                                              message_type::payload_chars);
@@ -81,7 +81,8 @@ namespace pstore {
 
             using difference_type = std::iterator_traits<decltype (first)>::difference_type;
             static_assert (message_type::payload_chars <=
-                               std::numeric_limits<difference_type>::max (),
+                               static_cast<std::make_unsigned<difference_type>::type> (
+                                   std::numeric_limits<difference_type>::max ()),
                            "payload_chars is too large to be represented as "
                            "string::iterator::difference_type");
 

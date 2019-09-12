@@ -71,7 +71,7 @@ namespace {
         auto begin = std::find_if_not (str.begin (), end, is_ws);
 
         std::string result;
-        auto const new_length = std::distance (begin, end);
+        auto new_length = std::distance (begin, end);
         assert (new_length >= 0);
 
         result.reserve (static_cast<std::make_unsigned<decltype (new_length)>::type> (new_length));
@@ -80,7 +80,7 @@ namespace {
         return result;
     }
 
-} // end anonymousnamespace
+} // end anonymous namespace
 
 namespace pstore {
 

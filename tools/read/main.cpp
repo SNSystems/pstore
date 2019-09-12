@@ -143,8 +143,8 @@ namespace {
                                                               : static_cast<std::streamsize> (size);
                     assert (size_to_write > 0);
                     out.write (reinterpret_cast<char const *> (ptr.get ()), size_to_write);
-                    size -= static_cast<std::make_unsigned<decltype (size_to_write)>::type> (
-                        size_to_write);
+                    size -= static_cast<std::make_unsigned<
+                        std::remove_const<decltype (size_to_write)>::type>::type> (size_to_write);
                 }
             }
         }

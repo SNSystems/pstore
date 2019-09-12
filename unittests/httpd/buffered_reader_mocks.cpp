@@ -82,8 +82,8 @@ refiller_function yield_string (std::string const & str) {
     return [str](int io, pstore::gsl::span<std::uint8_t> const & s) {
 #ifndef NDEBUG
         auto const size = s.size ();
-        assert (size > 0 && str.length () <=
-                                static_cast<std::make_unsigned<decltype (size)>::type> (s.size ()));
+        using uindex_type = std::make_unsigned<std::remove_const<decltype (size)>::type>::type;
+        assert (size > 0 && str.length () <= static_cast<uindex_type> (size));
 #endif
         return refiller_result_type{
             pstore::in_place, io + 1,

@@ -66,7 +66,8 @@ bool set_from_name (indices_bitset * const bs, std::string const & name) {
         }
 
         auto const position = std::distance (begin, it);
-        using udifference_type = std::make_unsigned<decltype (position)>::type;
+        using udifference_type =
+            std::make_unsigned<std::remove_const<decltype (position)>::type>::type;
         assert (position >= 0 && static_cast<udifference_type> (position) < index_names.size ());
 
         bs->set (static_cast<udifference_type> (position));

@@ -75,7 +75,7 @@ namespace pstore {
         return {buffer.data ()};
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #    elif defined(__FreeBSD__)
 
@@ -94,7 +94,7 @@ namespace pstore {
         return {buffer.data (), length};
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #    elif defined(__linux__) || defined(__sun__)
 
@@ -108,6 +108,7 @@ namespace pstore {
 #        include <unistd.h>
 
 namespace {
+
 #        ifdef __linux__
     std::string link_path () {
         std::ostringstream link_stream;
@@ -129,7 +130,7 @@ namespace {
         return std::min (std::max (v, low), high);
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 namespace pstore {
@@ -149,7 +150,8 @@ namespace pstore {
                 raise (errno_erc{error}, str.str ());
             }
             PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
-                                  std::numeric_limits<ssize_t>::max ());
+                                  static_cast<std::make_unsigned<ssize_t>::type> (
+                                      std::numeric_limits<ssize_t>::max ()));
             return static_cast<std::size_t> (num_chars);
         };
 
@@ -158,7 +160,7 @@ namespace pstore {
         return {buffer.data (), length};
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #    else // defined(__linux__)
 #        error "Don't know how to implement process_file_name() on this system"

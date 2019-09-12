@@ -90,12 +90,14 @@ namespace {
             // Copy from the source file to the data store. The destination for the read_span() is
             // the memory that we just allocated in the data store.
             auto span = pstore::gsl::make_span (ptr.get (), static_cast<std::ptrdiff_t> (size));
-            std::size_t bytes_read = file.read_span (span);
+            std::size_t const bytes_read = file.read_span (span);
 
             auto const expected_size = span.size_bytes ();
             assert (expected_size >= 0);
             if (bytes_read !=
-                static_cast<std::make_unsigned<decltype (expected_size)>::type> (expected_size)) {
+                static_cast<
+                    std::make_unsigned<std::remove_const<decltype (expected_size)>::type>::type> (
+                    expected_size)) {
                 error_stream << NATIVE_TEXT ("Did not read the number of bytes requested");
                 std::exit (EXIT_FAILURE);
             }
@@ -127,7 +129,7 @@ namespace {
         return {addr, size};
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 #if defined(_WIN32)

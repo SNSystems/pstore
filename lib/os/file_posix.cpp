@@ -294,8 +294,7 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t file_handle::read_buffer (::pstore::gsl::not_null<void *> buffer,
-                                              std::size_t nbytes) {
+        std::size_t file_handle::read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) {
             // TODO: handle the case where nbytes > ssize_t max.
             assert (nbytes <= std::numeric_limits<ssize_t>::max ());
             this->ensure_open ();
@@ -310,12 +309,10 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (::pstore::gsl::not_null<void const *> buffer,
-                                        std::size_t nbytes) {
+        void file_handle::write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) {
             this->ensure_open ();
 
-            ssize_t r = ::write (file_, buffer.get (), nbytes);
-            if (r == -1) {
+            if (::write (file_, buffer.get (), nbytes) == -1) {
                 int const err = errno;
                 raise_file_error (err, "write failed", this->path ());
             }
@@ -329,14 +326,14 @@ namespace pstore {
         std::uint64_t file_handle::size () {
             this->ensure_open ();
             struct stat buf {};
-            int erc = fstat (file_, &buf);
-            if (erc == -1) {
+            if (::fstat (file_, &buf) == -1) {
                 int const err = errno;
                 raise_file_error (err, "fstat failed", this->path ());
             }
 
             static_assert (std::numeric_limits<std::uint64_t>::max () >=
-                               std::numeric_limits<decltype (buf.st_size)>::max (),
+                               static_cast<std::make_unsigned<decltype (buf.st_size)>::type> (
+                                   std::numeric_limits<decltype (buf.st_size)>::max ()),
                            "stat.st_size is too large for uint64_t");
             assert (buf.st_size >= 0);
             return static_cast<std::uint64_t> (buf.st_size);
@@ -349,8 +346,7 @@ namespace pstore {
             // TODO: should this function (and other, similar, functions) throw here rather than
             // assert?
             assert (size < std::numeric_limits<off_t>::max ());
-            int erc = ftruncate (file_, static_cast<off_t> (size));
-            if (erc == -1) {
+            if (::ftruncate (file_, static_cast<off_t> (size)) == -1) {
                 int const err = errno;
                 raise_file_error (err, "ftruncate failed", this->path ());
             }
