@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- unittests/http/CMakeLists.txt ---------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,18 +41,20 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (support)
+add_pstore_unit_test (pstore-http-unit-tests
+    buffered_reader_mocks.cpp
+    buffered_reader_mocks.hpp
 
-add_subdirectory (broker)
-add_subdirectory (broker_intf)
-add_subdirectory (cmd_util)
-add_subdirectory (core)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (http)
-add_subdirectory (json)
-add_subdirectory (mcrepo)
-add_subdirectory (os)
-add_subdirectory (romfs)
-add_subdirectory (serialize)
-add_subdirectory (vacuum)
+    test_buffered_reader.cpp
+    test_headers.cpp
+    test_media_type.cpp
+    test_query_to_kvp.cpp
+    test_request.cpp
+    test_serve_dynamic_content.cpp
+    test_serve_static_content.cpp
+    test_wskey.cpp
+    test_ws_server.cpp
+)
+target_link_libraries (pstore-http-unit-tests PRIVATE pstore-http)
+
+add_subdirectory (klee EXCLUDE_FROM_ALL)

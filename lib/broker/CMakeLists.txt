@@ -96,7 +96,7 @@ else ()
         )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf-ex
-            pstore-httpd-lib-ex
+            pstore-http-ex
             pstore-json-lib-ex
             pstore-os-ex
             pstore-support-ex
@@ -113,7 +113,7 @@ else ()
         )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf
-            pstore-httpd-lib
+            pstore-http
             pstore-json-lib
             pstore-os
             pstore-support

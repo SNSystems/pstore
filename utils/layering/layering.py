@@ -180,7 +180,6 @@ def dependencies_from_source(source_directory):
         return frozenset([{
                               'diff': 'diff-lib',
                               'dump': 'dump-lib',
-                              'httpd': 'httpd-lib',
                               'json': 'json-lib',
                               'vacuum': 'vacuum-lib',
                           }.get(x, x) for x in includes_without_prefix])

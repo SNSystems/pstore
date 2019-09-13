@@ -49,7 +49,7 @@
 #include "gmock/gmock.h"
 
 #include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/httpd/server_status.hpp"
+#include "pstore/http/server_status.hpp"
 
 namespace {
 

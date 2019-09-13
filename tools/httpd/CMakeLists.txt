@@ -54,5 +54,5 @@ add_pstore_executable (pstore-httpd
     httpd.cpp
     "${pstore_http_fs_source}"
 )
-target_link_libraries (pstore-httpd PRIVATE pstore-httpd-lib pstore-cmd-util)
-run_pstore_unit_test  (pstore-httpd pstore-httpd-unit-tests)
+target_link_libraries (pstore-httpd PRIVATE pstore-http pstore-cmd-util)
+run_pstore_unit_test  (pstore-httpd pstore-http-unit-tests)

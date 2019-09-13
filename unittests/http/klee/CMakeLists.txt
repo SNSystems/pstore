@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/CMakeLists.txt --------------------------------------------------===//
+#===- unittests/http/klee/CMakeLists.txt ----------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,18 +41,4 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (support)
-
-add_subdirectory (broker)
-add_subdirectory (broker_intf)
-add_subdirectory (cmd_util)
-add_subdirectory (core)
-add_subdirectory (diff)
-add_subdirectory (dump)
-add_subdirectory (http)
-add_subdirectory (json)
-add_subdirectory (mcrepo)
-add_subdirectory (os)
-add_subdirectory (romfs)
-add_subdirectory (serialize)
-add_subdirectory (vacuum)
+pstore_add_klee_test (CATEGORY buffered_reader NAME get_span DEPENDS pstore-http)
