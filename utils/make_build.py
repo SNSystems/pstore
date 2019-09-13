@@ -92,7 +92,7 @@ def _select_vs_generator():
     # Ask vswhere to disclose all of the vs installations.
     installations = json.loads(subprocess.check_output([vswhere, '-format', 'json'], stderr=subprocess.STDOUT))
     # Reduce the installations list to just the integer major version numbers.
-    installations = (int(install['installationVersion'].split('.')[0]) for install in installations)
+    installations = [int(install['installationVersion'].split('.')[0]) for install in installations]
     _logger.debug('Installations are: %s', ','.join((str(inst) for inst in installations)))
     return {
         16: 'Visual Studio 16 2019',
@@ -295,7 +295,7 @@ def build_cmake_command_line (cmake_path, options):
     for d in options.define if options.define else []:
         cmd.extend (( '-D', d ))
 
-    if options.generator is not None and options.startswith('Visual Studio'):
+    if options.generator is not None and options.generator.startswith('Visual Studio'):
         cmd.extend (('-T', 'host=x64'))
 
     # Finally add the build root directory.
