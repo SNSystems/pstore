@@ -56,8 +56,12 @@ namespace pstore {
     X (append)                                                                                     \
     X (common)                                                                                     \
     X (external)                                                                                   \
+    X (internal_no_symbol)                                                                         \
     X (internal)                                                                                   \
-    X (linkonce)
+    X (link_once_any)                                                                              \
+    X (link_once_odr)                                                                              \
+    X (weak_any)                                                                                   \
+    X (weak_odr)
 
 #define X(a) a,
         enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
