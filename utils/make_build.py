@@ -43,6 +43,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 import argparse
+import json
 import logging
 import os
 import pipes
@@ -61,16 +62,53 @@ PLATFORM_TO_DIR_MAP = {
     'darwin': 'mac',
 }
 
-_logger = logging.getLogger (__name__)
+_logger = logging.getLogger(__name__)
+
+
+def _select_vs_generator():
+    """
+    On Windows, discover the correct generator to request from cmake.
+
+    We must first run the vswhere.exe utility to discover all of the Visual Studio installations
+    on the host. From this we then find the latest version and map this to the corresponding
+    cmake generator name.
+
+    :return: The name of a cmake generator or None if we were not able to determine the latest
+     installed version of Visual Studio.
+    """
+
+    env_name = 'ProgramFiles(x86)'
+    program_files = os.getenv(env_name)
+    if program_files is None:
+        _logger.warning('Environment variable "%s" is not defined. Cannot find Visual Studio', env_name)
+        return None
+
+    vswhere = os.path.join(program_files, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
+    if not os.path.exists(vswhere):
+        _logger.warning('vswhere.exe is not found at "%s"', vswhere)
+        return None
+
+    _logger.info('Running vswhere at "%s"', vswhere)
+    # Ask vswhere to disclose all of the vs installations.
+    installations = json.loads(subprocess.check_output([vswhere, '-format', 'json'], stderr=subprocess.STDOUT))
+    # Reduce the installations list to just the integer major version numbers.
+    installations = (int(install['installationVersion'].split('.')[0]) for install in installations)
+    _logger.debug('Installations are: %s', ','.join((str(inst) for inst in installations)))
+    return {
+        16: 'Visual Studio 16 2019',
+        15: 'Visual Studio 15 2017'
+    }.get(max(installations))
+
 
 def _select_generator(system):
     """Select the most appropriate generator based on system"""
+
     if system == 'darwin':
         return 'Xcode'
-    elif system == 'linux' and _find_on_path('ninja'):
+    if system == 'linux' and _find_on_path('ninja'):
         return 'Ninja'
-    elif system == 'win32':
-        return 'Visual Studio 15 2017 Win64'
+    if system == 'win32':
+        return _select_vs_generator()
     return 'Unix Makefiles'
 
 
@@ -95,6 +133,10 @@ def _options (args):
         options.directory = 'build_' + PLATFORM_TO_DIR_MAP.get (options.system, options.system)
     if options.generator is None:
         options.generator = _select_generator(options.system)
+        if options.generator is None:
+            _logger.debug('Selecting default generator')
+        else:
+            _logger.debug('Selecting generator "%s"', options.generator)
     return options
 
 
@@ -198,7 +240,7 @@ def _use_build_type (generator):
     utility only knows about the common multi-configuration generators.
     """
 
-    return not (generator == 'Xcode' or generator.startswith ('Visual Studio'))
+    return generator is None or (generator != 'Xcode' and not generator.startswith ('Visual Studio'))
 
 
 
@@ -238,7 +280,9 @@ def create_build_directory (options):
 
 
 def build_cmake_command_line (cmake_path, options):
-    cmd = [ cmake_path, '-G', options.generator ]
+    cmd = [ cmake_path ]
+    if options.generator is not None:
+        cmd.extend(['-G', options.generator])
 
     # Don't add CMAKE_BUILD_TYPE for the multi-configuration generators that
     # we know about. It avoids an unecessary warning from cmake.
@@ -251,8 +295,7 @@ def build_cmake_command_line (cmake_path, options):
     for d in options.define if options.define else []:
         cmd.extend (( '-D', d ))
 
-    vs = 'Visual Studio '
-    if options.generator [:len (vs)] == vs:
+    if options.generator is not None and options.startswith('Visual Studio'):
         cmd.extend (('-T', 'host=x64'))
 
     # Finally add the build root directory.
