@@ -58,10 +58,6 @@ if sys.platform == 'win32':
 EXIT_SUCCESS = 0
 EXIT_FAILURE = 1
 
-PLATFORM_TO_DIR_MAP = {
-    'darwin': 'mac',
-}
-
 _logger = logging.getLogger(__name__)
 
 
@@ -94,29 +90,50 @@ def _select_vs_generator():
     # Reduce the installations list to just the integer major version numbers.
     installations = [int(install['installationVersion'].split('.')[0]) for install in installations]
     _logger.debug('Installations are: %s', ','.join((str(inst) for inst in installations)))
-    return {
+    return ['-G', {
         16: 'Visual Studio 16 2019',
         15: 'Visual Studio 15 2017'
-    }.get(max(installations))
+    }.get(max(installations)), '-A', 'x64', '-T', 'host=x64']
 
 
 def _select_generator(system):
-    """Select the most appropriate generator based on system"""
+    """
+    Select the most appropriate generator based on system.
 
-    if system == 'darwin':
-        return 'Xcode'
-    if system == 'linux' and _find_on_path('ninja'):
-        return 'Ninja'
-    if system == 'win32':
-        return _select_vs_generator()
-    return 'Unix Makefiles'
+    Will either return None if the default generator is to be used, a real cmake generator name, or a "psuedo"
+    generator name. The latter is turned into a collection of cmake switches by _get_real_generator().
+
+    :param system: The name of the target system.
+    :return: The name of a cmake generator, a "psuedo" generator, or None if the default generator is preferred.
+    """
+
+    return {
+        'win32': lambda: 'vs',
+        'mac': lambda: 'Xcode',
+        'linux': lambda: 'Ninja' if _find_on_path(_add_executable_extension('ninja')) is not None else 'make'
+    }.get(system.lower(), lambda: None)()
+
+
+def _get_real_generator(system, generator):
+    if generator is None:
+        generator = _select_generator(system)
+    if generator is None:
+        return None
+    return {
+        'make': lambda: ['-G', 'Unix Makefiles'],
+        'vs': _select_vs_generator,
+        'ninja': lambda: ['-G', 'Ninja'],
+        'xcode': lambda: ['-G', 'Xcode'],
+    }.get (generator.lower(), lambda: ['-G', generator])()
 
 
 def _options (args):
-    platform_name = sys.platform
+    platform_name = sys.platform.lower ()
     # Prior to python 3.3, Linux included a version number in its name.
     if platform_name.startswith ('linux'):
         platform_name = 'linux'
+    elif platform_name == 'darwin':
+        platform_name = 'mac'
 
     parser = argparse.ArgumentParser (description='Generate a build using cmake')
     parser.add_argument ('build_dir', nargs='?', default=os.getcwd ())
@@ -130,13 +147,9 @@ def _options (args):
     options = parser.parse_args (args)
 
     if options.directory is None:
-        options.directory = 'build_' + PLATFORM_TO_DIR_MAP.get (options.system, options.system)
-    if options.generator is None:
-        options.generator = _select_generator(options.system)
-        if options.generator is None:
-            _logger.debug('Selecting default generator')
-        else:
-            _logger.debug('Selecting generator "%s"', options.generator)
+        options.directory = 'build_' + options.system
+    options.generator = _get_real_generator(options.system, options.generator)
+    _logger.debug('Selecting generator %s', str(options.generator))
     return options
 
 
@@ -230,20 +243,6 @@ def _find_on_path (file_name):
     return None
 
 
-def _use_build_type (generator):
-    """
-    Returns True if the named cmake generator may be a single-configuration generator.
-    A return value of False means that an explicit CMAKE_BUILD_TYPE variable will only result
-    in a warning, so should not be added.
-
-    Not that a True return doesn't definitively mean that the warning will not be issued. This
-    utility only knows about the common multi-configuration generators.
-    """
-
-    return generator is None or (generator != 'Xcode' and not generator.startswith ('Visual Studio'))
-
-
-
 def find_cmake ():
     """
     Searches for the cmake executable, returning its path if found or None otherwise.
@@ -282,21 +281,11 @@ def create_build_directory (options):
 def build_cmake_command_line (cmake_path, options):
     cmd = [ cmake_path ]
     if options.generator is not None:
-        cmd.extend(['-G', options.generator])
-
-    # Don't add CMAKE_BUILD_TYPE for the multi-configuration generators that
-    # we know about. It avoids an unecessary warning from cmake.
-    if _use_build_type (options.generator):
-        cmd.extend (('-D', 'CMAKE_BUILD_TYPE:STRING=' + options.configuration))
-    else:
-        _logger.warning ('Build configuration was ignored for a multi-configuration generator')
+        cmd.extend(options.generator)
 
     # Add the user variable definitions.
     for d in options.define if options.define else []:
         cmd.extend (( '-D', d ))
-
-    if options.generator is not None and options.generator.startswith('Visual Studio'):
-        cmd.extend (('-T', 'host=x64'))
 
     # Finally add the build root directory.
     cmd.append (_as_native_path (os.path.abspath (options.build_dir)))
