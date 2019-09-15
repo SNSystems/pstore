@@ -65,9 +65,7 @@ new_ws ('commits', message_received);
   const g = svg.append('g')
       .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-  const x = d3.scaleLinear()
-      .domain(xDomain(Date.now()))
-      .range([0, width]);
+  const x = d3.scaleTime().domain(xDomain (Date.now())).range([ 0, width ]);
 
   const y = d3.scaleLinear()
       .domain([0, 1])
@@ -90,11 +88,9 @@ new_ws ('commits', message_received);
       .attr('height', height);
 
   const xAxis = g.append('g')
-      .attr('class', 'axis axis--x')
-      .attr('transform', 'translate(0,' + y(0) + ')')
-      .call(d3.axisBottom(x)
-          .tickFormat(d3.timeFormat(timeFormat))
-      );
+                    .attr('class', 'axis axis--x')
+                    .attr('transform', 'translate(0,' + y (0) + ')')
+                    .call(d3.axisBottom(x));
 
   const yAxis = g.append('g')
       .attr('class', 'axis axis--y')
@@ -138,13 +134,7 @@ function tick() {
         .transition()
         .on('start', tick);
 
-    xAxis
-        .transition()
-        .duration(duration)
-        .ease(d3.easeLinear)
-        .call(d3.axisBottom(x)
-            .tickFormat(d3.timeFormat(timeFormat))
-        );
+    xAxis.transition().duration(duration).ease(d3.easeLinear).call(d3.axisBottom(x));
 
     yAxis
         .transition()

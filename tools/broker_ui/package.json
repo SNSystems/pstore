@@ -1,7 +1,7 @@
 {
-  "name": "fearful-respect-slap",
-  "productName": "fearful-respect-slap",
-  "description": "My Electron application description",
+  "name": "pstore-broker-ui",
+  "productName": "pstore Broker UI",
+  "description": "A pstore dashboard",
   "keywords": [],
   "main": "./main.js",
   "version": "1.0.0",
@@ -13,6 +13,6 @@
     "d3": "^5.11.0"
   },
   "devDependencies": {
-    "electron": "5.0.0-beta.7"
+    "electron": "6.0.4"
   }
 }
