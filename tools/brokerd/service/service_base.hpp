@@ -48,6 +48,8 @@
 #define PSTORE_BROKER_SERVICE_BASE_HPP
 
 #include <string>
+#include <system_error>
+
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
