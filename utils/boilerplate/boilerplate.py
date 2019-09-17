@@ -109,6 +109,19 @@ def strip_lines (lines, index, comment_str):
     return lines
 
 
+def strip_leading_and_trailing_lines(lines, comment):
+    """
+    Removes and leading and trailing blank lines and comments.
+
+    :param lines: An array of strings containing the lines to be stripped.
+    :param comment: The block comment character string.
+    :return: An updated array of lines.
+    """
+
+    comment = comment.strip()
+    return strip_lines(strip_lines(lines, 0, comment), -1, comment)
+
+
 def remove_string_prefix (s, prefix):
     if s.startswith (prefix):
         s = s [len (prefix):]
@@ -171,7 +184,7 @@ COMMENT_MAPPING = {
     '.txt': '#',  # for CMake!
     '.h': '//',
     '.hpp': '//',
-    '.py': '#',
+    '.py': '# ',
 }
 
 
@@ -204,8 +217,7 @@ def boilerplate (path, base_path, comment_char=None, figlet_enabled=True):
         del lines [0]
 
     # Remove any leading and trailing blank lines and comments
-    lines = strip_lines (lines, 0, comment_char)
-    lines = strip_lines (lines, -1, comment_char)
+    lines = strip_leading_and_trailing_lines(lines, comment_char)
 
     tu_name = tu_name_from_path (subpath)
     prolog = []
