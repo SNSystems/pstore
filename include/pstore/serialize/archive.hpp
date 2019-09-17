@@ -132,6 +132,7 @@
 #ifndef PSTORE_SERIALIZE_ARCHIVE_HPP
 #define PSTORE_SERIALIZE_ARCHIVE_HPP
 
+#include <algorithm>
 #include <cassert>
 #include <cstdlib>
 #include <cstring>
@@ -249,7 +250,7 @@ namespace pstore {
 
             protected:
                 explicit writer_base (WriterPolicy policy = WriterPolicy ())
-                        : policy_ (policy) {}
+                        : policy_{std::move (policy)} {}
 
             private:
                 /// A wrapper class which is used to call either policy.bytes_produced() if it is
