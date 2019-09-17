@@ -95,17 +95,17 @@ SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 '''
 
 
-def strip_lines (lines, index, comment_str):
+def strip_lines(lines, index, comment_str):
     """Removes leading and trailing comment lines from the file."""
 
     # Remove blank lines
-    while len (lines) > 0 and (lines [index] == '' or lines[index] == '\n'):
-        del lines [index]
+    while len(lines) > 0 and (lines[index] == '' or lines[index] == '\n'):
+        del lines[index]
 
     # Remove comment lines.
-    stop_str = comment_str + comment_str [0]
-    while len (lines) > 0 and lines [index].startswith (comment_str) and not lines [index].startswith (stop_str):
-        del lines [index]
+    stop_str = comment_str + comment_str[0]
+    while len(lines) > 0 and lines[index].startswith(comment_str) and not lines[index].startswith(stop_str):
+        del lines[index]
     return lines
 
 
@@ -122,57 +122,57 @@ def strip_leading_and_trailing_lines(lines, comment):
     return strip_lines(strip_lines(lines, 0, comment), -1, comment)
 
 
-def remove_string_prefix (s, prefix):
-    if s.startswith (prefix):
-        s = s [len (prefix):]
+def remove_string_prefix(s, prefix):
+    if s.startswith(prefix):
+        s = s[len(prefix):]
     return s
 
 
-def remove_string_suffix (s, suffix):
-    if s.endswith (suffix):
-        s = s [:-len (suffix)]
+def remove_string_suffix(s, suffix):
+    if s.endswith(suffix):
+        s = s[:-len(suffix)]
     return s
 
 
-def split_extension (path):
+def split_extension(path):
     """A wrapped around splitext() which will delete a '.in' extension. This convention is used for files
     being fed as the template file to cmake's configure_file() command; the resulting file has the same
     name but without the .in part."""
 
-    result = os.path.splitext (path)
-    if result [1] == '.in':
-        result = os.path.splitext (result [0])
+    result = os.path.splitext(path)
+    if result[1] == '.in':
+        result = os.path.splitext(result[0])
     return result
 
 
-def tu_name_from_path (path):
-    name = split_extension (os.path.basename (path)) [0]
-    name = remove_string_prefix (name, 'test_')
-    name = remove_string_suffix (name, '_win32')
-    name = remove_string_suffix (name, '_posix')
-    return name.replace ('_', ' ')
+def tu_name_from_path(path):
+    name = split_extension(os.path.basename(path))[0]
+    name = remove_string_prefix(name, 'test_')
+    name = remove_string_suffix(name, '_win32')
+    name = remove_string_suffix(name, '_posix')
+    return name.replace('_', ' ')
 
 
-def figlet (name, comment_char):
+def figlet(name, comment_char):
     command = 'figlet "' + name + '"'
-    if sys.version_info [0] >= 3:
-        out = subprocess.getoutput (command)
+    if sys.version_info[0] >= 3:
+        out = subprocess.getoutput(command)
     else:
-        out = subprocess.check_output (command, shell=True)
-    comments = [comment_char + '* ' + l + ' *' + '\n' for l in out.splitlines (False)]
+        out = subprocess.check_output(command, shell=True)
+    comments = [comment_char + '* ' + l + ' *' + '\n' for l in out.splitlines(False)]
     return comments
 
 
-def get_path_line (path, comment_char):
+def get_path_line(path, comment_char):
     path_line_suffix = '===//'
     path_line = comment_char + '===- ' + path + ' '
-    path_line += '-' * (80 - len (path_line) - len (path_line_suffix)) + path_line_suffix
-    return [ path_line + '\n' ]
+    path_line += '-' * (80 - len(path_line) - len(path_line_suffix)) + path_line_suffix
+    return [path_line + '\n']
 
 
-def get_license (comment_char):
-    license = [comment_char + ' ' + l for l in license_text.splitlines (False)]
-    license = [l.rstrip (' ') + '\n' for l in license]
+def get_license(comment_char):
+    license = [comment_char + ' ' + l for l in license_text.splitlines(False)]
+    license = [l.rstrip(' ') + '\n' for l in license]
     return license
 
 
@@ -188,73 +188,73 @@ COMMENT_MAPPING = {
 }
 
 
-def boilerplate (path, base_path, comment_char=None, figlet_enabled=True):
-    path = os.path.abspath (path)
-    base_path = os.path.abspath (base_path)
+def boilerplate(path, base_path, comment_char=None, figlet_enabled=True):
+    path = os.path.abspath(path)
+    base_path = os.path.abspath(base_path)
 
     if comment_char is None:
-        ext = split_extension (path) [1]
-        comment_char = COMMENT_MAPPING.get (ext, '#')
+        ext = split_extension(path)[1]
+        comment_char = COMMENT_MAPPING.get(ext, '#')
 
-    if not os.path.isdir (base_path):
-        raise RuntimeError ('base path must be a directory')
+    if not os.path.isdir(base_path):
+        raise RuntimeError('base path must be a directory')
 
-    if base_path [-1] != os.sep and base_path [-1] != os.altsep:
+    if base_path[-1] != os.sep and base_path[-1] != os.altsep:
         base_path += os.sep
 
-    if path [:len (base_path)] != base_path:
-        raise RuntimeError ('path (%s) was not inside base-path (%s)' % (path, base_path))
+    if path[:len(base_path)] != base_path:
+        raise RuntimeError('path (%s) was not inside base-path (%s)' % (path, base_path))
 
-    subpath = path [len (base_path):]
-    if subpath.endswith ('.in'):
-        subpath = subpath [:-len ('.in')]
+    subpath = path[len(base_path):]
+    if subpath.endswith('.in'):
+        subpath = subpath[:-len('.in')]
 
-    with open (path) as f:
-        lines = f.readlines ()
+    with open(path) as f:
+        lines = f.readlines()
 
-    shebang = lines [0] if len (lines) > 0 and lines [0] [:2] == '#!' else None
+    shebang = lines[0] if len(lines) > 0 and lines[0][:2] == '#!' else None
     if shebang is not None:
-        del lines [0]
+        del lines[0]
 
     # Remove any leading and trailing blank lines and comments
     lines = strip_leading_and_trailing_lines(lines, comment_char)
 
-    tu_name = tu_name_from_path (subpath)
+    tu_name = tu_name_from_path(subpath)
     prolog = []
     if shebang is not None:
-        prolog += [ shebang ]
+        prolog += [shebang]
 
     if figlet_enabled:
-        prolog += figlet (tu_name, comment_char)
+        prolog += figlet(tu_name, comment_char)
 
-    prolog += get_path_line (subpath, comment_char)
-    prolog += get_license (comment_char)
-    prolog += [ comment_char + '===----------------------------------------------------------------------===//\n' ]
+    prolog += get_path_line(subpath, comment_char)
+    prolog += get_license(comment_char)
+    prolog += [comment_char + '===----------------------------------------------------------------------===//\n']
     return prolog + lines
 
 
-def boilerplate_out (path, base_path, comment_char=None, inplace=False, figlet_enabled=True):
-    lines = boilerplate (path, base_path, comment_char, figlet_enabled)
-    outfile = open (path, 'w') if inplace else sys.stdout
+def boilerplate_out(path, base_path, comment_char=None, inplace=False, figlet_enabled=True):
+    lines = boilerplate(path, base_path, comment_char, figlet_enabled)
+    outfile = open(path, 'w') if inplace else sys.stdout
     for l in lines:
-        print (l, end='', file=outfile)
+        print(l, end='', file=outfile)
 
 
-def main (args=sys.argv [1:]):
-    parser = argparse.ArgumentParser (description='Generate source file license boilerplate')
-    parser.add_argument ('source_file', help='The source file to be processed')
-    parser.add_argument ('--base-path', help='The base path to which path names are relative', default=os.getcwd ())
-    parser.add_argument ('--comment-char', help='The character(s) used to begin a comment.')
-    parser.add_argument ('--no-figlet',
-                         help='Disables generation of the TU banner name (using the external "figlet" utility',
-                         dest='figlet_enabled', action='store_false')
-    parser.add_argument ('-i', dest='inplace', action='store_true', help='Inplace edit file.')
-    options = parser.parse_args (args)
+def main(args=sys.argv[1:]):
+    parser = argparse.ArgumentParser(description='Generate source file license boilerplate')
+    parser.add_argument('source_file', help='The source file to be processed')
+    parser.add_argument('--base-path', help='The base path to which path names are relative', default=os.getcwd())
+    parser.add_argument('--comment-char', help='The character(s) used to begin a comment.')
+    parser.add_argument('--no-figlet',
+                        help='Disables generation of the TU banner name (using the external "figlet" utility',
+                        dest='figlet_enabled', action='store_false')
+    parser.add_argument('-i', dest='inplace', action='store_true', help='Inplace edit file.')
+    options = parser.parse_args(args)
 
-    boilerplate_out (options.source_file, options.base_path, options.comment_char, options.inplace,
-                     options.figlet_enabled)
+    boilerplate_out(options.source_file, options.base_path, options.comment_char, options.inplace,
+                    options.figlet_enabled)
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit (main ())
+    sys.exit(main())

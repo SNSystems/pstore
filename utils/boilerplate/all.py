@@ -58,25 +58,25 @@ import sys
 import boilerplate
 
 
-def main ():
-    base_path = os.getcwd ()
+def main():
+    base_path = os.getcwd()
     patterns = ["*.h", "*.hpp", "*.hpp.in", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py", "Doxyfile.in"]
 
     # The collection of directories into which this utility will not descend.
-    exclude_dirs = frozenset (itertools.chain ([".git", "3rd_party", "lit"], glob.iglob ("build_*")))
-    exclude_files = frozenset (["fnv.hpp", "fnv.cpp", "test_fnv.cpp"])
+    exclude_dirs = frozenset(itertools.chain([".git", "3rd_party", "lit"], glob.iglob("build_*")))
+    exclude_files = frozenset(["fnv.hpp", "fnv.cpp", "test_fnv.cpp"])
 
     all_paths = []
-    for root, dirs, files in os.walk (base_path, topdown=True):
-        dirs [:] = [d for d in dirs if d not in exclude_dirs]
+    for root, dirs, files in os.walk(base_path, topdown=True):
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
         for pattern in patterns:
-            all_paths += [os.path.join (root, file_name) for file_name in files if
-                          fnmatch.fnmatch (file_name, pattern) and not file_name in exclude_files]
+            all_paths += [os.path.join(root, file_name) for file_name in files if
+                          fnmatch.fnmatch(file_name, pattern) and file_name not in exclude_files]
 
     for path in all_paths:
-        boilerplate.boilerplate_out (path=path, base_path=base_path, inplace=True)
+        boilerplate.boilerplate_out(path=path, base_path=base_path, inplace=True)
     return 0
 
 
 if __name__ == '__main__':
-    sys.exit (main ())
+    sys.exit(main())
