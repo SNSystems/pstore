@@ -61,20 +61,20 @@ import boilerplate
 def main():
     base_path = os.getcwd()
     patterns = [
-        "*.cmake",
-        "*.cpp",
-        "*.h",
-        "*.hpp",
-        "*.hpp.in",
-        "*.js",
-        "*.py",
-        "CMakeLists.txt",
-        "Doxyfile.in"
+        '*.cmake',
+        '*.cpp',
+        '*.h',
+        '*.hpp',
+        '*.hpp.in',
+        '*.js',
+        '*.py',
+        'CMakeLists.txt',
+        'Doxyfile.in'
     ]
 
     # The collection of directories into which this utility will not descend.
-    exclude_dirs = frozenset(itertools.chain([".git", "3rd_party", "lit"], glob.iglob("build_*")))
-    exclude_files = frozenset(["fnv.hpp", "fnv.cpp", "test_fnv.cpp"])
+    exclude_dirs = frozenset(itertools.chain(['.git', '3rd_party', 'lit'], glob.iglob('build_*')))
+    exclude_files = frozenset(['fnv.hpp', 'fnv.cpp', 'test_fnv.cpp'])
 
     all_paths = []
     for root, dirs, files in os.walk(base_path, topdown=True):
