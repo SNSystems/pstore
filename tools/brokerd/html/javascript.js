@@ -2,29 +2,35 @@
     'use strict';
 
     //var localhost = 'localhost:8080';
-    var localhost = window.location.host;
-    var new_ws = function (channel, on_message) {
+    const localhost = window.location.host;
+    function new_ws (channel, on_message) {
         var socket = new WebSocket ('ws://' + localhost + '/' + channel);
         socket.onerror = (error) => { console.error (error); };
         socket.onopen = () => { console.log ('connection open'); };
-        socket.onclose = () => { console.log ('connection closed.') };
+        socket.onclose = () => { console.log ('connection closed') };
         socket.onmessage = on_message;
         return socket;
+    }
+
+    window.onload = () => {
+        const el = document.getElementById ('message');
+        if (el !== null) {
+            new_ws ('uptime', (msg) => {
+                try {
+                    const obj = JSON.parse (msg.data);
+                    if (obj.hasOwnProperty ('uptime')) {
+                        el.textContent = obj.uptime;
+                    } else {
+                        el.textContent = 'Unknown';
+                    }
+                } catch (e) {
+                    if (e instanceof SyntaxError) {
+                        el.textContent = 'Bad JSON';
+                    } else {
+                        throw e;
+                    }
+                }
+            });
+        }
     };
-
-    var uptime_socket = new_ws ('uptime', (msg) => {
-        var obj = JSON.parse (msg.data);
-        var el = document.getElementById ('message');
-        console.log (obj.uptime);
-        el.textContent = obj.uptime;
-    });
-
-    var commit_socket = new_ws ('commits', (msg) => {
-        var obj = JSON.parse (msg.data);
-        var el = document.getElementById ('commits');
-        
-        console.log (obj.commits);
-        el.textContent = obj.commits;
-    });
-
 } ());
