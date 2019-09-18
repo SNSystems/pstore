@@ -51,14 +51,9 @@ produced.
 from __future__ import print_function
 
 import argparse
-import errno
 import os.path
 import platform
-import subprocess
 import sys
-import threading
-import time
-
 import timed_process
 
 IS_WINDOWS = platform.system() == 'Windows'
