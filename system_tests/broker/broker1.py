@@ -49,22 +49,16 @@ produced.
 """
 
 from __future__ import print_function
-
 import argparse
 import os.path
 import platform
 import sys
+
+# Local imports
+import common
 import timed_process
 
-IS_WINDOWS = platform.system() == 'Windows'
-
-
-# TODO: shared with broker_kill.py
-def pipe_root_dir():
-    return r"\\.\pipe" if IS_WINDOWS else '/tmp'
-
-
-PIPE_PATH = os.path.join(pipe_root_dir(), 'broker1.pipe')
+PIPE_PATH = os.path.join(common.pipe_root_dir(), 'broker1.pipe')
 
 # Arguments which will cause the broker-poker to tell the broker to echo 100
 # sequentially numbered messages to stdout before exiting.
@@ -72,32 +66,8 @@ POKER_ARGS = ['--flood', '100', '--kill', '--pipe-path', PIPE_PATH]
 
 BROKER_ARGS = ['--pipe-path', PIPE_PATH]
 
-
-# TODO: shared with broker_kill.py
-def executable(path):
-    if IS_WINDOWS:
-        path += '.exe'
-    return path
-
-
-argv0 = None
-
-
-def report_error(tool_name, timed_process):
-    ok = True
-    if timed_process.did_timeout():
-        print("%s: %s timeout" % (argv0, tool_name,), file=sys.stderr)
-        ok = False
-    ex = timed_process.exception()
-    if ex is not None:
-        print("%s: %s exception: %s" % (argv0, tool_name, ex), file=sys.stderr)
-        ok = False
-    return ok
-
-
 def main(argv):
     exit_code = 0
-    global argv0
     argv0 = sys.argv[0]
 
     parser = argparse.ArgumentParser(description='Test the broker by using the poker to fire messages at it.')
@@ -109,8 +79,8 @@ def main(argv):
     # Before starting the broker and the broker-poker I need to check that both binaries are available.
     # This is to minimize the risk that the broker is started, but the poker cannot be found. If this
     # happens, the broker will never receive the command telling it to quit, and the test will hang.
-    broker_path = os.path.join(args.exe_path, executable('pstore-brokerd'))
-    poker_path = os.path.join(args.exe_path, executable('pstore-broker-poker'))
+    broker_path = os.path.join(args.exe_path, common.executable('pstore-brokerd'))
+    poker_path = os.path.join(args.exe_path, common.executable('pstore-broker-poker'))
     if not os.path.exists(broker_path):
         print('did not find broker executable at "%s"' % broker_path, file=sys.stderr)
         return 1
@@ -141,12 +111,12 @@ def main(argv):
 
     print("%s: done" % (argv0,), file=sys.stderr)
 
-    if not report_error("broker", broker):
+    if not common.report_error(argv0, "broker", broker):
         exit_code = 1
     else:
         print("broker exited successfully")
 
-    if not report_error("poker", poker):
+    if not common.report_error(argv0, "poker", poker):
         exit_code = 1
     else:
         print("poker exited successfully")
