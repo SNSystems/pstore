@@ -177,14 +177,15 @@ def get_license(comment_char):
 
 
 COMMENT_MAPPING = {
-    '.cpp': '//',
-    '.c': '//',
-    '.C': '//',
-    '.cxx': '//',
-    '.txt': '#',  # for CMake!
-    '.h': '//',
-    '.hpp': '//',
-    '.py': '# ',
+    '.cpp': '//',  # C++
+    '.c': '//',    # C
+    '.C': '//',    # C++
+    '.cxx': '//',  # C++
+    '.js': '//',   # JavaScript
+    '.txt': '#',   # for CMake!
+    '.h': '//',    # C/C++
+    '.hpp': '//',  # C++
+    '.py': '# ',   # Python
 }
 
 

@@ -60,7 +60,17 @@ import boilerplate
 
 def main():
     base_path = os.getcwd()
-    patterns = ["*.h", "*.hpp", "*.hpp.in", "*.cpp", "CMakeLists.txt", "*.cmake", "*.py", "Doxyfile.in"]
+    patterns = [
+        "*.cmake",
+        "*.cpp",
+        "*.h",
+        "*.hpp",
+        "*.hpp.in",
+        "*.js",
+        "*.py",
+        "CMakeLists.txt",
+        "Doxyfile.in"
+    ]
 
     # The collection of directories into which this utility will not descend.
     exclude_dirs = frozenset(itertools.chain([".git", "3rd_party", "lit"], glob.iglob("build_*")))
