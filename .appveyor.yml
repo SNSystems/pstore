@@ -4,7 +4,6 @@ configuration:
 - Debug
 - Release
 platform: x64
-clone_depth: 3
 before_build:
 - cmd: python .\utils\make_build.py -o build -D PSTORE_EXAMPLES=Yes
 build:
