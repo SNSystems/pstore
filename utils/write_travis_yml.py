@@ -51,9 +51,9 @@ import sys
 import yaml
 
 
-def add_build_type(d, type):
-    d.setdefault('env', []).append('CMAKE_BUILD_TYPE=' + type)
-    d['env'].append('PSTORE_ALWAYS_SPANNING={0}'.format('Yes' if type.lower() == 'debug' else 'No'))
+def add_build_type(d, build_type):
+    d.setdefault('env', []).append('CMAKE_BUILD_TYPE=' + build_type)
+    d['env'].append('PSTORE_ALWAYS_SPANNING={0}'.format('Yes' if build_type.lower() == 'debug' else 'No'))
     return d
 
 
@@ -114,8 +114,14 @@ def main():
         },
         'before_install': ['eval "${MATRIX_EVAL}"'],
         'script': [
-            './utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes -D '
-            'PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}',
+            ' '.join([
+                './utils/make_build.py',
+                '-o build',
+                '-D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
+                '-D PSTORE_EXAMPLES=Yes',
+                '-D PSTORE_VALGRIND=Yes',
+                '-D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}'
+            ]),
             'cmake --build build --config ${CMAKE_BUILD_TYPE}',
             'cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests',
         ]
@@ -126,4 +132,4 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    main()
