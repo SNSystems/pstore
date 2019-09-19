@@ -335,12 +335,11 @@ namespace pstore {
 #elif PSTORE_HAVE_SYS_LOG_H
             enabled.set (handlers::syslog);
 #else
-            // FIXME: temporarily disable the file-based logging. stderr makes life less bad on
-            // Windows.
+            // TODO: At the moment, I just log to stderr unless syslog() or ASK are available.
+            // Consider offering an option to the user to control the logging destination and
+            // whether to use file-base logging.
             enabled.set (handlers::standard_error);
 #endif
-            // TODO: always enabled for the moment.
-            // enabled.set (handlers::standard_error);
 
             auto loggers = make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
