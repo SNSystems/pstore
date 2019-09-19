@@ -107,12 +107,8 @@ const y = d3.scaleLinear ()
     .range ([height, 0]);
 
 const line = d3.line ()
-    .x ((d, i) => {
-        return x (d.time);
-    })
-    .y ((d, i) => {
-        return y (d.value);
-    })
+    .x ((d) => { return x (d.time); })
+    .y ((d) => { return y (d.value); })
     .curve (curve);
 
 g.append ('defs')
