@@ -54,7 +54,6 @@
 
 namespace {
 
-    // FIXME: the following two functions were copied from the broker.
     // is_recv_error
     // ~~~~~~~~~~~~~
     constexpr bool is_recv_error (ssize_t nread) noexcept {
