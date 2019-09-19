@@ -49,19 +49,19 @@
 
 #ifdef _WIN32
 
-#include <mutex>
-#include <vector>
+#    include <mutex>
+#    include <vector>
 
 // Platform includes
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 
-#include "pstore/broker/bimap.hpp"
-#include "pstore/broker/globals.hpp"
-#include "pstore/broker/pointer_compare.hpp"
-#include "pstore/broker/spawn.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
+#    include "pstore/broker/bimap.hpp"
+#    include "pstore/broker/globals.hpp"
+#    include "pstore/broker/pointer_compare.hpp"
+#    include "pstore/broker/spawn.hpp"
+#    include "pstore/broker_intf/signal_cv.hpp"
 #    include "pstore/os/logging.hpp"
 #    include "pstore/os/thread.hpp"
 
@@ -182,7 +182,7 @@ namespace pstore {
                 }
             }
 
-#if 0 // FIXME: no idea how to do this on Windows yet.
+#    if 0 // FIXME: no idea how to do this on Windows yet.
     // Tell any child GC processes to quit.
     logging::log (logging::priority::info, "cleaning up");
     for (auto it = garbage_collection_processes.right_begin(), end = garbage_collection_processes.right_end (); it != end; ++it) {
@@ -190,7 +190,7 @@ namespace pstore {
         logging::log (logging::priority::info, "sending SIGINT to ", pid);
         ::kill (pid, SIGINT);
     }
-#endif
+#    endif
         }
 
     } // namespace broker
