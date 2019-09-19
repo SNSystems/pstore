@@ -49,6 +49,7 @@
 
 #ifdef _WIN32
 
+// Standard library
 #    include <mutex>
 #    include <vector>
 
@@ -57,6 +58,7 @@
 #    define WIN32_LEAN_AND_MEAN
 #    include <Windows.h>
 
+// pstore includes
 #    include "pstore/broker/bimap.hpp"
 #    include "pstore/broker/globals.hpp"
 #    include "pstore/broker/pointer_compare.hpp"
@@ -73,18 +75,15 @@ namespace {
 
         auto child_exit_code = DWORD{0};
         if (::GetExitCodeProcess (process, &child_exit_code) == 0) {
-            raise (::pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
+            raise (pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
         }
 
-        pstore::logging::log (pstore::logging::priority::info, "GC process exited pid ", pid);
-        bool const is_normal_termination =
-            (child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE);
-        if (is_normal_termination) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Normal termination, exit status = ", child_exit_code);
+        using pstore::logging::priority;
+        log (priority::info, "GC process exited pid ", pid);
+        if ((child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE)) {
+            log (priority::info, "Normal termination, exit status = ", child_exit_code);
         } else {
-            pstore::logging::log (pstore::logging::priority::error,
-                                  "Abnormal termination, exit status = ", child_exit_code);
+            log (priority::error, "Abnormal termination, exit status = ", child_exit_code);
         }
     }
 
@@ -105,12 +104,12 @@ namespace {
     /// destroyed.
     template <typename ProcessBimap>
     void build_object_vector (ProcessBimap const & processes, pstore::signal_cv const & cv,
-                              ::pstore::gsl::not_null<std::vector<HANDLE> *> v) {
+                              pstore::gsl::not_null<std::vector<HANDLE> *> v) {
         // The size of the vector is rounded up in order to reduce the probability of a memory
         // allocation being required when the vector is resized. In typical use, the number of
         // elements in the output vector will likely be small (less than round_to?)
         constexpr auto round_to = std::size_t{8};
-        auto roundup = [](std::size_t v, std::size_t m) { return v + (m - v % m); };
+        auto const roundup = [](std::size_t v, std::size_t m) { return v + (m - v % m); };
 
         v->clear ();
         v->reserve (roundup (processes.size () + 1U, round_to));
@@ -120,7 +119,7 @@ namespace {
             [](pstore::broker::process_identifier const & process) { return process.get (); });
     }
 
-} // namespace
+} // end anonymous namespace
 
 namespace pstore {
     namespace broker {
@@ -128,14 +127,15 @@ namespace pstore {
         // watcher
         // ~~~~~~~
         void gc_watch_thread::watcher () {
-            logging::log (logging::priority::info, "starting gc process watch thread");
+            using logging::priority;
+            log (priority::info, "starting gc process watch thread");
 
             std::vector<HANDLE> object_vector;
             std::unique_lock<decltype (mut_)> lock (mut_);
 
             while (!done) {
                 try {
-                    logging::log (logging::priority::info, "waiting for a GC process to complete");
+                    log (priority::info, "waiting for a GC process to complete");
 
                     build_object_vector (processes_, cv_, &object_vector);
                     // FIXME: handle the (highly unlikely) case where this assertion would fire.
@@ -155,10 +155,9 @@ namespace pstore {
 
                     if (wmo_res == WAIT_FAILED) {
                         auto errcode = ::GetLastError ();
-                        logging::log (logging::priority::error, "WaitForMultipleObjects error ",
-                                      errcode); // FIXME: exception
+                        log (priority::error, "WaitForMultipleObjects error ", errcode); // FIXME: exception
                     } else if (wmo_res == WAIT_TIMEOUT) {
-                        logging::log (logging::priority::info, "WaitForMultipleObjects timeout");
+                        log (priority::info, "WaitForMultipleObjects timeout");
                     } else if (wmo_res >= WAIT_OBJECT_0) {
                         // Extract the handle that caused us to wake.
                         HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
@@ -174,26 +173,26 @@ namespace pstore {
                         // TODO: more conditions here?
                     }
                 } catch (std::exception const & ex) {
-                    logging::log (logging::priority::error, "An error occurred: ", ex.what ());
+                    log (priority::error, "An error occurred: ", ex.what ());
                     // TODO: delay before restarting. Don't restart after e.g. bad_alloc?
                 } catch (...) {
-                    logging::log (logging::priority::error, "Unknown error");
+                    log (priority::error, "Unknown error");
                     // TODO: delay before restarting
                 }
             }
 
-#    if 0 // FIXME: no idea how to do this on Windows yet.
-    // Tell any child GC processes to quit.
-    logging::log (logging::priority::info, "cleaning up");
-    for (auto it = garbage_collection_processes.right_begin(), end = garbage_collection_processes.right_end (); it != end; ++it) {
-        auto pid = *it;
-        logging::log (logging::priority::info, "sending SIGINT to ", pid);
-        ::kill (pid, SIGINT);
-    }
-#    endif
+            // Tell any child GC processes to quit.
+            log (priority::info, "cleaning up");
+            auto const kill = [](broker::process_identifier const & pid) {
+                log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group);
+                if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group)) {
+                    log (priority::error, "An error occurred: ", ::GetLastError ());
+                }
+            };
+            std::for_each (processes_.right_begin (), processes_.right_end (), kill);
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // _WIN32

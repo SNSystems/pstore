@@ -51,7 +51,15 @@
 #include <string>
 #include <type_traits>
 
-#include "pstore/broker_intf/descriptor.hpp"
+// platform includes
+#ifdef _WIN32
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
+#else
+#    include <sys/types.h>
+#endif // _WIN32
+
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -59,6 +67,7 @@ namespace pstore {
 
 #ifdef _WIN32
         namespace win32 {
+
             /// This routine appends the given argument to a command line such
             /// that CommandLineToArgvW will return the argument string unchanged.
             /// Arguments in a command line should be separated by spaces; this
@@ -72,20 +81,40 @@ namespace pstore {
             ///
             /// \param arg  The argument to encode.
             /// \param force  Supplies an indication of whether we should quote the argument even if
-            /// it does not contain any characters that would ordinarily require quoting. \return
-            /// The quoted argument string.
-
+            /// it does not contain any characters that would ordinarily require quoting.
+            /// \return  The quoted argument string.
             std::string argv_quote (std::string const & arg, bool force = false);
 
             /// Takes an array of command-line argument strings and converts them
             /// to a single string
+            ///
             /// \note This function is exposed to enable it to be unit tested.
             std::string build_command_line (gsl::czstring * argv);
-        } // namespace win32
+
+            struct process_pair {
+                constexpr process_pair (HANDLE p, DWORD g) noexcept
+                        : process{p}
+                        , group{g} {}
+                ~process_pair () noexcept {
+                    if (process != nullptr) {
+                        ::CloseHandle (process);
+                    }
+                }
+
+                process_pair (process_pair const &) = delete;
+                process_pair (process_pair &&) noexcept = delete;
+                process_pair & operator= (process_pair const &) = delete;
+                process_pair & operator= (process_pair &&) noexcept = delete;
+
+                HANDLE const process;
+                DWORD const group;
+            };
+
+        } // end namespace win32
 #endif
 
 #ifdef _WIN32
-        using process_identifier = std::shared_ptr<std::remove_pointer<HANDLE>::type>;
+        using process_identifier = std::shared_ptr<win32::process_pair>;
 #else
         using process_identifier = pid_t;
 #endif

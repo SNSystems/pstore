@@ -50,11 +50,6 @@
 // standard includes
 #include <cstring>
 
-// platform includes
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-
 // pstore includes
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/support/error.hpp"
@@ -111,7 +106,7 @@ namespace pstore {
                 return res;
             }
 
-            std::string build_command_line (::pstore::gsl::czstring * argv) {
+            std::string build_command_line (gsl::czstring * argv) {
                 std::string command_line;
                 auto separator = "";
                 for (char const ** arg = argv; *arg != nullptr; ++arg) {
@@ -122,12 +117,11 @@ namespace pstore {
                 return command_line;
             }
 
-        } // namespace win32
+        } // end namespace win32
 
-        process_identifier spawn (::pstore::gsl::czstring exe_path,
-                                  ::pstore::gsl::czstring * argv) {
-            auto const exe_path_utf16 = pstore::utf::win32::to16 (exe_path);
-            auto const command_line = pstore::utf::win32::to16 (win32::build_command_line (argv));
+        process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv) {
+            auto const exe_path_utf16 = utf::win32::to16 (exe_path);
+            auto const command_line = utf::win32::to16 (win32::build_command_line (argv));
 
             STARTUPINFOW startup_info;
             std::memset (&startup_info, 0, sizeof (startup_info));
@@ -142,23 +136,25 @@ namespace pstore {
                     static_cast<SECURITY_ATTRIBUTES *> (nullptr), // process attributes
                     static_cast<SECURITY_ATTRIBUTES *> (nullptr), // thread attributes
                     false,                                        // inherit handles
-                    BELOW_NORMAL_PRIORITY_CLASS,                  // creation flags
-                    nullptr,                                      // environment
-                    nullptr, // working directory for the new process
+                    BELOW_NORMAL_PRIORITY_CLASS | CREATE_NEW_PROCESS_GROUP |
+                        CREATE_NO_WINDOW, // creation flags
+                    nullptr,              // environment
+                    nullptr,              // working directory for the new process
                     &startup_info, &process_information)) {
 
-                raise (::pstore::win32_erc (::GetLastError ()), "CreateProcessW");
+                raise (win32_erc (::GetLastError ()), "CreateProcessW");
             }
 
             // Close the main-thread handle. The process handle is needed to provide a robust
-            // reference
-            // to the process later on.
+            // reference to the process later on.
             ::CloseHandle (process_information.hThread);
+            process_information.hThread = nullptr;
 
-            return std::shared_ptr<void> (process_information.hProcess, ::CloseHandle);
+            return std::make_shared<process_identifier::element_type> (
+                process_information.hProcess, process_information.dwProcessId);
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif //_WIN32
