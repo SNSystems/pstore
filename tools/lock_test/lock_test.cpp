@@ -88,13 +88,13 @@ namespace {
         say_impl (os, args...);
     }
 
-    std::mutex io_mut;
 
     // A wrapper around ostream operator<< which takes a lock to prevent output from different
     // threads from being interleaved.
     template <typename OStream, typename... Args>
     void say (OStream & os, Args... args) {
-        std::lock_guard<std::mutex>{io_mut};
+        static std::mutex io_mut;
+        std::lock_guard<std::mutex> lock{io_mut};
         say_impl (os, args...);
         os << std::endl;
     }
