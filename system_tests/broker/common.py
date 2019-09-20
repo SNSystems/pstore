@@ -19,10 +19,9 @@ def executable(path):
 
     if IS_WINDOWS or IS_CYGWIN:
         root, extension = os.path.splitext(path)
-        if extension != '.exe':
-            if extension != '.':
-                extension += '.exe'
-                path = root + extension
+        if extension != '.exe' and extension != '.':
+            extension += '.exe'
+            path = root + extension
     return path
 
 
