@@ -126,15 +126,34 @@ TEST (UtfStrings, BadUtf16Input) {
         0xD800, // first character of surrogate pair (second pair missing!)
         0x0041, // LATIN CAPITAL LETTER A
     };
-
     std::uint8_t const expected_bytes[]{
         0xEF, 0xBF, 0xBD, // REPLACEMENT CHARACTER U+FFFD
         0x41,             // LATIN CAPITAL LETTER A
         0x00,             // NULL
     };
-    auto expected = reinterpret_cast<char const *> (expected_bytes);
 
     std::string const reply = pstore::utf::win32::to8 (bad);
+    EXPECT_EQ (reinterpret_cast<char const *> (expected_bytes), reply);
+}
+
+TEST (UtfStrings, BadUtf8Input) {
+    // From the Unicode FAQ:
+    // "Unpaired surrogates are invalid in UTFs. These include any value in
+    // the range D80016 to DBFF16 not followed by a value in the range DC0016
+    // to DFFF16, or any value in the range DC0016 to DFFF16 not preceded by
+    // a value in the range D80016 to DBFF16."
+
+    std::uint8_t const bad[]{
+        0xFE,
+        0x41, // LATIN CAPITAL A
+        0x00, // NULL
+    };
+    std::wstring const expected{
+        0xFFFD, // REPLACEMENT CHARACTER U+FFFD
+        0x0041, // LATIN CAPITAL LETTER A
+    };
+    std::wstring const reply =
+        pstore::utf::win32::to16 (reinterpret_cast<pstore::gsl::czstring> (bad));
     EXPECT_EQ (expected, reply);
 }
 

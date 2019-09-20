@@ -62,26 +62,30 @@
 #    include "pstore/support/small_vector.hpp"
 
 namespace {
+
+
     int conversion_result (char const * api, int result) {
         if (result == 0) {
-            raise (::pstore::win32_erc (::GetLastError ()), api);
-        } else if (result == 0xFFFD) {
-            // the input string was not valid.
-            // FIXME: what to do?
-            result = 0;
-        } else {
-            // The Win32 conversion function (MultiByteToWideChar() and
-            // WideCharToMultiByte()] both return a signed type, but MS
-            // don't document any other legal negative return value. If
-            // that happens, I'll just assume an empty string.
-            result = std::max (result, 0);
+            raise (pstore::win32_erc (::GetLastError ()), api);
         }
-        return result;
+        // The Win32 conversion functions [MultiByteToWideChar() and WideCharToMultiByte()] both
+        // return a signed type, but MS don't document any legal negative return value. If that
+        // happens, I'll just assume an empty string.
+        return std::max (result, 0);
     }
-} // namespace
 
+    inline int length_as_int (std::size_t length) {
+        if (length > static_cast<unsigned> (std::numeric_limits<int>::max ())) {
+            raise (pstore::errno_erc{EINVAL}, "string was too long for conversion");
+        }
+        return static_cast<int> (length);
+    }
 
-namespace {
+    //*  ___     __    _  __  *
+    //* ( _ )  __\ \  / |/ /  *
+    //* / _ \ |___> > | / _ \ *
+    //* \___/    /_/  |_\___/ *
+    //*                       *
     struct from_8_to_16_traits {
         using input_char_type = char;
         using output_char_type = wchar_t;
@@ -92,16 +96,15 @@ namespace {
     };
 
     std::size_t from_8_to_16_traits::output_size (input_char_type const * str, std::size_t length) {
-        assert (length < std::numeric_limits<int>::max ());
         return conversion_result (
             "MultiByteToWideChar",
             ::MultiByteToWideChar (
-                CP_UTF8,                   // the input string encoding
-                0,                         // flags
-                str,                       // the UTF-8 encoded input string
-                static_cast<int> (length), // number of UTF-8 code units (bytes) in the input string
-                nullptr,                   // no output buffer
-                0)                         // no output buffer
+                CP_UTF8,                // the input string encoding
+                0,                      // flags
+                str,                    // the UTF-8 encoded input string
+                length_as_int (length), // number of UTF-8 code units (bytes) in the input string
+                nullptr,                // no output buffer
+                0)                      // no output buffer
         );
     }
 
@@ -109,25 +112,27 @@ namespace {
                                        pstore::small_vector<output_char_type> * const output) {
 
         std::size_t const wstr_size = wstr_length * sizeof (input_char_type);
-        assert (wstr_size <= std::numeric_limits<int>::max ());
         std::size_t const output_size = output->size ();
-        assert (output_size <= std::numeric_limits<int>::max ());
 
         int const wchars_written = conversion_result (
             "MultiByteToWideChar",
             ::MultiByteToWideChar (
                 CP_UTF8, 0,
-                wstr,                           // input
-                static_cast<int> (wstr_size),   // length (in bytes) of wstr
-                output->data (),                // output buffer
-                static_cast<int> (output_size)) // size (in code units) of the output buffer
+                wstr,                        // input
+                length_as_int (wstr_size),   // length (in bytes) of wstr
+                output->data (),             // output buffer
+                length_as_int (output_size)) // size (in code units) of the output buffer
         );
         assert (wchars_written <= output->size_bytes ());
         assert (wchars_written == from_8_to_16_traits::output_size (wstr, wstr_length));
     }
-} // namespace
 
-namespace {
+
+    //*  _  __     __    ___  *
+    //* / |/ /   __\ \  ( _ ) *
+    //* | / _ \ |___> > / _ \ *
+    //* |_\___/    /_/  \___/ *
+    //*                       *
     struct from_16_to_8_traits {
         using input_char_type = wchar_t;
         using output_char_type = char;
@@ -140,15 +145,14 @@ namespace {
 
     std::size_t from_16_to_8_traits::output_size (input_char_type const * wstr,
                                                   std::size_t length) {
-        assert (length <= std::numeric_limits<int>::max ());
         return conversion_result (
             "WideCharToMultiByte",
-            ::WideCharToMultiByte (CP_UTF8,                   // output encoding
-                                   0,                         // flags
-                                   wstr,                      // input UTF-16 string
-                                   static_cast<int> (length), // number of UTF-16 elements
-                                   nullptr,                   // no output buffer
-                                   0,                         // output buffer length
+            ::WideCharToMultiByte (CP_UTF8,                // output encoding
+                                   0,                      // flags
+                                   wstr,                   // input UTF-16 string
+                                   length_as_int (length), // number of UTF-16 elements
+                                   nullptr,                // no output buffer
+                                   0,                      // output buffer length
                                    nullptr, // missing character (must be NULL for UTF8)
                                    nullptr) // missing character was used? (must be NULL for UTF8)
         );
@@ -156,25 +160,23 @@ namespace {
 
     void from_16_to_8_traits::convert (input_char_type const * wstr, std::size_t wstr_length,
                                        pstore::small_vector<output_char_type> * const output) {
-        assert (wstr_length <= std::numeric_limits<int>::max ());
-        std::size_t const output_size = output->size_bytes ();
-        assert (output_size <= std::numeric_limits<int>::max ());
         int const bytes_written = conversion_result (
             "WideCharToMultiByte",
             ::WideCharToMultiByte (
-                CP_UTF8,                        // output encoding
-                0,                              // flags
-                wstr,                           // input UTF-16 string
-                static_cast<int> (wstr_length), // number of UTF-16 code-units
-                output->data (),                // output buffer
-                static_cast<int> (output_size), // output buffer length (in bytes)
-                nullptr,                        // missing character (must be NULL for UTF8)
+                CP_UTF8,                               // output encoding
+                0,                                     // flags
+                wstr,                                  // input UTF-16 string
+                length_as_int (wstr_length),           // number of UTF-16 code-units
+                output->data (),                       // output buffer
+                length_as_int (output->size_bytes ()), // output buffer length (in bytes)
+                nullptr,                               // missing character (must be NULL for UTF8)
                 nullptr) // missing character was used? (must be NULL for UTF8)
         );
         assert (bytes_written <= output->size_bytes ());
         assert (bytes_written == from_16_to_8_traits::output_size (wstr, wstr_length));
     }
-} // namespace
+
+} // end anonymous namespace
 
 namespace {
 
@@ -291,7 +293,7 @@ namespace pstore {
                     ::MultiByteToWideChar (CP_ACP, MB_ERR_INVALID_CHARS, mbcs,
                                            static_cast<int> (input_length), nullptr, 0);
                 if (size_needed == 0) {
-                    raise (::pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
+                    raise (pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
                 }
 
                 // Now allocate a wstring string with enough capacity to hold the UTF-16 output
@@ -301,7 +303,7 @@ namespace pstore {
                                                      static_cast<int> (input_length), &wstr_to[0],
                                                      size_needed);
                 if (size_needed == 0) {
-                    raise (::pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
+                    raise (pstore::win32_erc (::GetLastError ()), "MultiByteToWideChar");
                 }
 
                 // Finally, convert the UTF-16 string to UTF-8.
