@@ -5,4 +5,4 @@
 
 # Delete an existing data store.
 RUN: rm -f "%stores/locking.db"
-RUN: python "%S/locking.py" "%binaries" "%stores/locking.db"
+RUN: %python "%S/locking.py" "%binaries" "%stores/locking.db"

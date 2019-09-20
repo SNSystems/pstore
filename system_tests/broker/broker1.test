@@ -7,7 +7,7 @@
 # %S = the test source directory
 
 REQUIRES: broker
-RUN: python "%S/broker1.py" "%binaries" > "%T/broker1_actual.txt"
+RUN: %python "%S/broker1.py" "%binaries" > "%T/broker1_actual.txt"
 RUN: diff "%T/broker1_actual.txt" "%S/broker1_expected.txt"
 
 #eof broker1.test

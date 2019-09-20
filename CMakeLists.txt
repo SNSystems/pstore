@@ -264,6 +264,7 @@ add_dependencies (pstore-system-tests
     pstore-broker-poker
     pstore-dump
     pstore-hamt-test
+    pstore-lock-test
     pstore-mangle
     pstore-read
     pstore-sieve

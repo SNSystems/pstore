@@ -157,97 +157,95 @@ PAUSE = 2
 
 
 def run_p1(state, binaries, database):
-    process = start_lock_test_process(binaries, database)
-    watchdog = WatchdogTimer(timeout=TIMEOUT, callback=kill, args=(state, process,), name='p1-watchdog')
     try:
-        watchdog.start()
+        process = start_lock_test_process(binaries, database)
+        watchdog = WatchdogTimer(timeout=TIMEOUT, callback=kill, args=(state, process,), name='p1-watchdog')
+        try:
+            watchdog.start()
 
-        l1 = get_process_output(state, process, watchdog)
-        if l1 != 'start':
-            raise RuntimeError('process stdout should have been "start"')
+            l1 = get_process_output(state, process, watchdog)
+            if l1 != 'start':
+                raise RuntimeError('process stdout should have been "start"')
 
-        out1 = get_process_output(state, process, watchdog)
-        if out1 != 'pre-lock':
-            raise RuntimeError('process stdout should have been "pre-lock", got "{0}"'.format(out1))
-        send(process)
+            out1 = get_process_output(state, process, watchdog)
+            if out1 != 'pre-lock':
+                raise RuntimeError('process stdout should have been "pre-lock", got "{0}"'.format(out1))
+            send(process)
 
-        out2 = get_process_output(state, process, watchdog)
-        while out2 == 'blocked':
             out2 = get_process_output(state, process, watchdog)
-        if out2 != 'holding-lock':
-            raise RuntimeError('process stdout should have been "holding-lock", got "{0}"'.format(out2))
+            while out2 == 'blocked':
+                out2 = get_process_output(state, process, watchdog)
+            if out2 != 'holding-lock':
+                raise RuntimeError('process stdout should have been "holding-lock", got "{0}"'.format(out2))
 
-        logging.info('notifying that we saw "holding-lock"')
-        state.p1_holding_lock.set()
+            logging.info('notifying that we saw "holding-lock"')
+            state.p1_holding_lock.set()
 
-        # Wait for the other process to say "blocked"
-        logging.info('wait for p2 to see "blocked"')
-        wait(state, state.p2_was_blocked)
+            # Wait for the other process to say "blocked"
+            logging.info('wait for p2 to see "blocked"')
+            wait(state, state.p2_was_blocked)
 
-        (stdout, stderr) = process.communicate("a\n")
-        if stdout != 'done\n':
-            raise RuntimeError('process stdout should have been "done", got "{0}"'.format(stdout))
-        if stderr is not None:
-            raise RuntimeError('stderr contained: "{0}"'.format(stderr))
+            (stdout, stderr) = process.communicate("a\n")
+            if stdout != 'done\n':
+                raise RuntimeError('process stdout should have been "done", got "{0}"'.format(stdout))
+            if stderr is not None:
+                raise RuntimeError('stderr contained: "{0}"'.format(stderr))
 
-        logging.info('done')
-        state.p1_released_lock.set()
-
+            logging.info('done')
+            state.p1_released_lock.set()
+        finally:
+            watchdog.cancel()
     except Exception as ex:
         logging.error(str(ex))
         state.exit_code = EXIT_FAILURE
-        raise
-    finally:
-        watchdog.cancel()
 
 
 def run_p2(state, binaries, database):
-    time.sleep(1)
-    process = start_lock_test_process(binaries, database)
-    watchdog = WatchdogTimer(timeout=TIMEOUT, callback=kill, args=(state, process,), name='p2-watchdog')
     try:
-        watchdog.start()
+        time.sleep(1)
+        process = start_lock_test_process(binaries, database)
+        watchdog = WatchdogTimer(timeout=TIMEOUT, callback=kill, args=(state, process,), name='p2-watchdog')
+        try:
+            watchdog.start()
 
-        l1 = get_process_output(state, process, watchdog)
-        if l1 != 'start':
-            raise RuntimeError('process stdout should have been "start"')
+            l1 = get_process_output(state, process, watchdog)
+            if l1 != 'start':
+                raise RuntimeError('process stdout should have been "start"')
 
-        l1 = get_process_output(state, process, watchdog)
-        if l1 != 'pre-lock':
-            raise RuntimeError('process stdout should have been "pre-lock"')
+            l1 = get_process_output(state, process, watchdog)
+            if l1 != 'pre-lock':
+                raise RuntimeError('process stdout should have been "pre-lock"')
 
-        # wait for the companion thread to see "holding lock"
-        logging.info('waiting for p1 to see "holding-lock"')
-        wait(state, state.p1_holding_lock)
+            # wait for the companion thread to see "holding lock"
+            logging.info('waiting for p1 to see "holding-lock"')
+            wait(state, state.p1_holding_lock)
 
-        logging.info('got it.')
-        send(process)
+            logging.info('got it.')
+            send(process)
 
-        # We need to "blocked" indicating that another process has the lock.
-        out2 = get_process_output(state, process, watchdog)
-        while out2 == 'blocked':
-            state.p2_was_blocked.set()
+            # We need to "blocked" indicating that another process has the lock.
             out2 = get_process_output(state, process, watchdog)
+            while out2 == 'blocked':
+                state.p2_was_blocked.set()
+                out2 = get_process_output(state, process, watchdog)
 
-        logging.info('waiting for p1 to release the lock')
-        wait(state, state.p1_released_lock)
+            logging.info('waiting for p1 to release the lock')
+            wait(state, state.p1_released_lock)
 
-        if out2 != 'holding-lock':
-            raise RuntimeError('process stdout should have been "holding-lock", got "{0}"'.format(out2))
+            if out2 != 'holding-lock':
+                raise RuntimeError('process stdout should have been "holding-lock", got "{0}"'.format(out2))
 
-        (stdout, stderr) = process.communicate("a\n")
-        if stdout != 'done\n':
-            raise RuntimeError('process stdout should have been "done", got "{0}"'.format(stdout))
-        if stderr is not None:
-            raise RuntimeError('stderr contained: "{0}"'.format(stderr))
-        logging.info('done')
-
+            (stdout, stderr) = process.communicate("a\n")
+            if stdout != 'done\n':
+                raise RuntimeError('process stdout should have been "done", got "{0}"'.format(stdout))
+            if stderr is not None:
+                raise RuntimeError('stderr contained: "{0}"'.format(stderr))
+            logging.info('done')
+        finally:
+            watchdog.cancel()
     except Exception as ex:
         logging.error(str(ex))
         state.exit_code = EXIT_FAILURE
-        raise
-    finally:
-        watchdog.cancel()
 
 
 def test(binaries, database):
