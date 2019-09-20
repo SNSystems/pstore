@@ -51,7 +51,6 @@ produced.
 from __future__ import print_function
 import argparse
 import os.path
-import platform
 import sys
 
 # Local imports
@@ -65,6 +64,7 @@ PIPE_PATH = os.path.join(common.pipe_root_dir(), 'broker1.pipe')
 POKER_ARGS = ['--flood', '100', '--kill', '--pipe-path', PIPE_PATH]
 
 BROKER_ARGS = ['--pipe-path', PIPE_PATH]
+
 
 def main(argv):
     exit_code = 0
