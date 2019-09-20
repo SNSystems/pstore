@@ -65,7 +65,7 @@ namespace vacuum {
         std::mutex start_watch_mutex;
         std::condition_variable start_watch_cv;
     };
-    // FIXME: this shouldn't be a global variable.
+    // TODO: this shouldn't be a global variable.
     extern watch_state wst;
 
     struct status;

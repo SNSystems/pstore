@@ -95,7 +95,7 @@ namespace {
         auto const wait_until = std::chrono::system_clock::now () + vacuum::initial_delay;
         for (auto now = std::chrono::system_clock::now (); now < wait_until && !st->done;
              now = std::chrono::system_clock::now ()) {
-            // FIXME: watch the file for modification. If it is touched, reset wait_until.
+            // TODO: watch the file for modification. If it is touched, reset wait_until.
             auto remaining = wait_until - now;
             log (pstore::logging::priority::notice, "Pre-copy delay. Remaining (ms): ",
                  std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count ());
@@ -157,7 +157,6 @@ namespace vacuum {
                         std::string const & key = kvp.first;
                         pstore::extent<char> const & extent = kvp.second;
 
-                        // FIXME: need to know the data's original alignment!
                         pstore::address const addr =
                             transaction.allocate (extent.size, 1 /*align*/);
                         // Copy from the source file to the data store.
@@ -193,30 +192,27 @@ namespace vacuum {
                         std::this_thread::sleep_for (std::chrono::microseconds (10));
                     }
 
-                    // FIXME: wait for the watch thread to close its connection to the source store.
+                    // TODO: wait for the watch thread to close its connection to the source store.
 
-                    // FIXME: take the source global store mutex.
-                    // FIXME: take the exclusive write lock.
                     pstore::file::file_handle destination_file {destination->path ()};
                     std::string const source_path = source->path ();
                     destination.reset (); // Close the target data store
                     // assert that there's a single reference to the source pointer.
                     source.reset ();
 
-                    // TODO: need to have some sort of lock on the stores here.
-                    // FIXME: use file.h/rename()!
                     destination_file.rename (source_path);
                 }
             }
         }
         // clang-format off
-        PSTORE_CATCH (std::exception const & ex, {
+        PSTORE_CATCH (std::exception const & ex, { // clang-format on
             log (pstore::logging::priority::error, "An error occurred: ", ex.what ());
         })
-        PSTORE_CATCH (..., {
+        // clang-format off
+        PSTORE_CATCH (..., { // clang-format on
             log (pstore::logging::priority::error, "Unknown error");
         })
-        // clang-format on
+
         log (pstore::logging::priority::notice, "Copy thread exiting");
     }
 
