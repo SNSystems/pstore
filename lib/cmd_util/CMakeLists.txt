@@ -94,6 +94,7 @@ add_pstore_library (TARGET pstore-cmd-util
     INCLUDES ${pstore_cmd_util_includes}
 )
 target_link_libraries (pstore-cmd-util PUBLIC pstore-support)
+add_clang_tidy_target (pstore-cmd-util)
 
 if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
