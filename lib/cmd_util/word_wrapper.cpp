@@ -92,29 +92,29 @@ namespace pstore {
             // ~~~~
             void word_wrapper::next () {
                 auto const length = text_.length ();
-                std::size_t end_pos_ = std::min (start_pos_ + max_width_, length);
-                if (end_pos_ < length) {
-                    while (end_pos_ > 0 && text_[end_pos_] != ' ') {
-                        --end_pos_;
+                std::size_t end_pos = std::min (start_pos_ + max_width_, length);
+                if (end_pos < length) {
+                    while (end_pos > 0 && text_[end_pos] != ' ') {
+                        --end_pos;
                     }
-                    if (end_pos_ == start_pos_) {
+                    if (end_pos == start_pos_) {
                         // We got back to the start without finding a separator! We can't allow the
                         // next() operation to produce nothing (unless start_pos_ is at the end
                         // already). Try searching forward. This line will be too long, but that's
                         // better than looping forever.
-                        while (end_pos_ < length && text_[end_pos_] != ' ') {
-                            ++end_pos_;
+                        while (end_pos < length && text_[end_pos] != ' ') {
+                            ++end_pos;
                         }
                     }
                 }
 
-                assert (end_pos_ >= start_pos_);
-                substr_ = text_.substr (start_pos_, end_pos_ - start_pos_);
+                assert (end_pos >= start_pos_);
+                substr_ = text_.substr (start_pos_, end_pos - start_pos_);
 
-                while (end_pos_ < length && text_[end_pos_] == ' ') {
-                    ++end_pos_;
+                while (end_pos < length && text_[end_pos] == ' ') {
+                    ++end_pos;
                 }
-                start_pos_ = end_pos_;
+                start_pos_ = end_pos;
             }
 
         } // namespace cl
