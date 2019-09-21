@@ -62,8 +62,8 @@ namespace {
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::Positional, cl::desc ("database-path"));
-    cl::list<std::string> index_names_opt (cl::Positional, cl::Optional, cl::OneOrMore,
+    cl::opt<std::string> db_path (cl::positional, cl::desc ("database-path"));
+    cl::list<std::string> index_names_opt (cl::positional, cl::optional, cl::one_or_more,
                                            cl::desc ("<index-name>..."));
 
 

@@ -72,12 +72,12 @@ namespace {
     cl::alias add_file2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (add_file));
 
 
-    cl::opt<std::string> db_path (cl::Positional,
+    cl::opt<std::string> db_path (cl::positional,
                                   cl::desc ("<Path of the pstore repository to be written>"),
-                                  cl::Required);
-    cl::list<std::string> files (cl::Positional, cl::desc ("<filename>..."));
+                                  cl::required);
+    cl::list<std::string> files (cl::positional, cl::desc ("<filename>..."));
 
-    cl::opt<std::string> vacuum_mode ("compact", cl::Optional,
+    cl::opt<std::string> vacuum_mode ("compact", cl::optional,
                                       cl::desc ("Set the compaction mode. Argument must one of: "
                                                 "'disabled', 'immediate', 'background'."));
     cl::alias vacuum_mode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (vacuum_mode));

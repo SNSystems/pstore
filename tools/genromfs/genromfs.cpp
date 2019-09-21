@@ -115,7 +115,7 @@ namespace std {
 namespace {
 
     using namespace pstore::cmd_util;
-    cl::opt<std::string> src_path (cl::Positional, ".", cl::desc ("source-path"));
+    cl::opt<std::string> src_path (cl::positional, ".", cl::desc ("source-path"));
 
     cl::opt<std::string> root_var (
         "var",

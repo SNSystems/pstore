@@ -49,7 +49,7 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::opt<std::string> path (cl::Positional,
+    cl::opt<std::string> path (cl::positional,
                                cl::desc ("Path of the pstore repository to be vacuumed."));
 
 } // end anonymous namespace

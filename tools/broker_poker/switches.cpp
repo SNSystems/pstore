@@ -70,8 +70,8 @@ namespace {
                         cl::desc ("Ask the broker to quit after commands have been processed."));
     cl::alias kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (kill));
 
-    cl::opt<std::string> verb (cl::Positional, cl::Optional, cl::desc ("<verb>"));
-    cl::opt<std::string> path (cl::Positional, cl::Optional, cl::desc ("<path>"));
+    cl::opt<std::string> verb (cl::positional, cl::optional, cl::desc ("<verb>"));
+    cl::opt<std::string> path (cl::positional, cl::optional, cl::desc ("<path>"));
 
     pstore::maybe<std::string> path_option (std::string const & p) {
         if (p.length () > 0) {

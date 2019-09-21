@@ -55,7 +55,7 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::OptionCategory what_cat ("Options controlling what is dumped");
+    cl::option_category what_cat ("Options controlling what is dumped");
 
     cl::opt<bool> contents ("contents", cl::desc ("Emit a raw dump of the transaction contents"),
                             cl::cat (what_cat));
@@ -111,7 +111,7 @@ namespace {
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
 
-    cl::OptionCategory how_cat ("Options controlling how fields are emitted");
+    cl::option_category how_cat ("Options controlling how fields are emitted");
 
     cl::opt<bool> no_times ("no-times",
                             cl::desc ("Times are displayed as a fixed value (for testing)"),
@@ -129,7 +129,7 @@ namespace {
         triple ("triple", cl::desc ("The target triple to use for disassembly if one is not known"),
                 cl::init ("x86_64-pc-linux-gnu-repo"), cl::cat (how_cat));
 
-    cl::list<std::string> paths (cl::Positional, cl::desc ("<filename>..."));
+    cl::list<std::string> paths (cl::positional, cl::desc ("<filename>..."));
 
 } // end anonymous namespace
 

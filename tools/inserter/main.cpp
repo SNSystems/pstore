@@ -184,9 +184,9 @@ namespace {
     using namespace pstore::cmd_util;
 
     cl::opt<std::string>
-        data_file (cl::Positional,
+        data_file (cl::positional,
                    cl::desc ("Path of the pstore repository to use for index exercise."),
-                   cl::Required);
+                   cl::required);
 
 } // end anonymous namespace
 

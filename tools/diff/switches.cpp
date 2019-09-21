@@ -51,19 +51,19 @@
 using namespace pstore::cmd_util;
 
 namespace {
-    cl::opt<std::string> db_path (cl::Positional,
+    cl::opt<std::string> db_path (cl::positional,
                                   cl::desc ("Path of the pstore repository to be read."),
-                                  cl::Required);
+                                  cl::required);
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        first_revision (cl::Positional, cl::desc ("The first revision number (or 'HEAD')"),
-                        cl::Optional);
+        first_revision (cl::positional, cl::desc ("The first revision number (or 'HEAD')"),
+                        cl::optional);
 
     cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
-        second_revision (cl::Positional, cl::desc ("The second revision number (or 'HEAD')"),
-                         cl::Optional);
+        second_revision (cl::positional, cl::desc ("The second revision number (or 'HEAD')"),
+                         cl::optional);
 
-    cl::OptionCategory how_cat ("Options controlling how fields are emitted");
+    cl::option_category how_cat ("Options controlling how fields are emitted");
 
     cl::opt<bool> hex ("hex", cl::desc ("Emit number values in hexadecimal notation"),
                        cl::cat (how_cat));

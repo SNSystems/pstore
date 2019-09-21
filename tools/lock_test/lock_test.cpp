@@ -68,8 +68,8 @@ using pstore::cmd_util::out_stream;
 
 namespace {
 
-    pstore::cmd_util::cl::opt<std::string> path (pstore::cmd_util::cl::Positional,
-                                                 pstore::cmd_util::cl::Required,
+    pstore::cmd_util::cl::opt<std::string> path (pstore::cmd_util::cl::positional,
+                                                 pstore::cmd_util::cl::required,
                                                  pstore::cmd_util::cl::desc ("<database-path>"));
 
     //*                 *

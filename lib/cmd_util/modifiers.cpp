@@ -43,27 +43,29 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/modifiers.hpp"
 
+#include <algorithm>
+
 namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            details::values::values (std::initializer_list<OptionEnumValue> options)
-                    : values_ (options) {}
+            details::values::values (std::initializer_list<option_enum_value> options)
+                    : values_{std::move (options)} {}
 
-            name::name (std::string const & name)
-                    : name_ (name) {}
+            name::name (std::string name)
+                    : name_{std::move (name)} {}
 
-            desc::desc (std::string const & str)
-                    : desc_ (str) {}
+            desc::desc (std::string str)
+                    : desc_{std::move (str)} {}
 
             aliasopt::aliasopt (option & o)
                     : original_ (o) {}
             void aliasopt::apply (alias & o) const { o.set_original (&original_); }
 
-            details::one_or_more const OneOrMore;
-            details::optional const Optional;
-            details::positional const Positional;
-            details::required const Required;
+            details::one_or_more const one_or_more;
+            details::optional const optional;
+            details::positional const positional;
+            details::required const required;
 
         } // namespace cl
     }     // namespace cmd_util

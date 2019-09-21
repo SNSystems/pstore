@@ -52,9 +52,9 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            class OptionCategory {
+            class option_category {
             public:
-                explicit OptionCategory (std::string const title);
+                explicit option_category (std::string const title);
 
             private:
                 std::string title_;

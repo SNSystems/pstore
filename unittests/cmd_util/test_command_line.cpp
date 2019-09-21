@@ -151,7 +151,7 @@ TEST_F (ClCommandLine, MissingOptionName) {
 }
 
 TEST_F (ClCommandLine, StringPositional) {
-    cl::opt<std::string> option ("arg", cl::Positional);
+    cl::opt<std::string> option ("arg", cl::positional);
     EXPECT_EQ (option.get (), "") << "Expected inital string value to be empty";
 
     this->add ("progname", "hello");
@@ -163,7 +163,7 @@ TEST_F (ClCommandLine, StringPositional) {
 }
 
 TEST_F (ClCommandLine, RequiredStringPositional) {
-    cl::opt<std::string> option ("arg", cl::Positional, cl::Required);
+    cl::opt<std::string> option ("arg", cl::positional, cl::required);
 
     this->add ("progname");
     string_stream errors;
@@ -175,8 +175,8 @@ TEST_F (ClCommandLine, RequiredStringPositional) {
 }
 
 TEST_F (ClCommandLine, TwoPositionals) {
-    cl::opt<std::string> opt1 ("opt1", cl::Positional);
-    cl::opt<std::string> opt2 ("opt2", cl::Positional);
+    cl::opt<std::string> opt1 ("opt1", cl::positional);
+    cl::opt<std::string> opt2 ("opt2", cl::positional);
 
     this->add ("progname", "arg1", "arg2");
     string_stream errors;
@@ -199,7 +199,7 @@ TEST_F (ClCommandLine, List) {
 }
 
 TEST_F (ClCommandLine, ListPositional) {
-    cl::list<std::string> opt ("opt", cl::Positional);
+    cl::list<std::string> opt ("opt", cl::positional);
 
     this->add ("progname", "foo", "bar");
     string_stream errors;
@@ -210,7 +210,7 @@ TEST_F (ClCommandLine, ListPositional) {
 }
 
 TEST_F (ClCommandLine, MissingRequired) {
-    cl::opt<std::string> opt ("opt", cl::Required);
+    cl::opt<std::string> opt ("opt", cl::required);
 
     this->add ("progname");
     string_stream errors;
@@ -223,7 +223,7 @@ TEST_F (ClCommandLine, MissingRequired) {
 }
 
 TEST_F (ClCommandLine, MissingValue) {
-    cl::opt<std::string> opt ("opt", cl::Required);
+    cl::opt<std::string> opt ("opt", cl::required);
 
     this->add ("progname", "-opt");
     string_stream errors;
@@ -243,9 +243,9 @@ TEST_F (ClCommandLine, UnwantedValue) {
     EXPECT_FALSE (opt.get ());
 }
 
-TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
+TEST_F (ClCommandLine, DoubleDashSwitchTopositional) {
     cl::opt<std::string> opt ("opt");
-    cl::list<std::string> positional ("names", cl::Positional);
+    cl::list<std::string> positional ("names", cl::positional);
 
     this->add ("progname", "--", "-opt", "foo");
     string_stream errors;

@@ -66,7 +66,7 @@ namespace pstore {
             //
 
             // This represents a single enum value, using "int" as the underlying type.
-            struct OptionEnumValue {
+            struct option_enum_value {
                 std::string name;
                 int value;
                 std::string description;
@@ -77,7 +77,7 @@ namespace pstore {
             namespace details {
                 class values {
                 public:
-                    explicit values (std::initializer_list<OptionEnumValue> options);
+                    explicit values (std::initializer_list<option_enum_value> options);
 
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -89,7 +89,7 @@ namespace pstore {
                     }
 
                 private:
-                    std::vector<OptionEnumValue> values_;
+                    std::vector<option_enum_value> values_;
                 };
             } // namespace details
 
@@ -102,7 +102,7 @@ namespace pstore {
 
             class name {
             public:
-                explicit name (std::string const & name);
+                explicit name (std::string name);
 
                 template <typename Opt>
                 void apply (Opt & o) const {
@@ -124,7 +124,7 @@ namespace pstore {
             /// A modifier to set the description shown in the -help output...
             class desc {
             public:
-                explicit desc (std::string const & str);
+                explicit desc (std::string str);
 
                 template <typename Opt>
                 void apply (Opt & o) const {
@@ -230,15 +230,15 @@ namespace pstore {
                 };
             } // namespace details
 
-            extern details::one_or_more const OneOrMore;
-            extern details::optional const Optional;
-            extern details::positional const Positional;
-            extern details::required const Required;
+            extern details::one_or_more const one_or_more;
+            extern details::optional const optional;
+            extern details::positional const positional;
+            extern details::required const required;
 
             namespace details {
                 class category {
                 public:
-                    explicit category (OptionCategory const & cat)
+                    explicit category (option_category const & cat)
                             : cat_{cat} {}
 
                     template <typename Opt>
@@ -247,11 +247,13 @@ namespace pstore {
                     }
 
                 private:
-                    OptionCategory const & cat_;
+                    option_category const & cat_;
                 };
             } // namespace details
 
-            inline details::category cat (OptionCategory const & c) { return details::category{c}; }
+            inline details::category cat (option_category const & c) {
+                return details::category{c};
+            }
 
         } // namespace cl
     }     // namespace cmd_util
