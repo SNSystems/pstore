@@ -42,8 +42,10 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/string_distance.hpp"
+
 #include <algorithm>
 #include <numeric>
+
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
