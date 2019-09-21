@@ -153,7 +153,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.show_log = log_opt.get ();
     result.show_shared = shared_memory.get ();
     result.show_all = all.get ();
-    result.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
+    result.revision = static_cast<unsigned> (revision.get ());
 
     result.hex = hex.get ();
     result.no_times = no_times.get ();

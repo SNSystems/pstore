@@ -45,17 +45,22 @@
 #define PSTORE_CMD_UTIL_REVISION_OPT_HPP
 
 #include <string>
+
 #include "pstore/support/head_revision.hpp"
 
 namespace pstore {
     namespace cmd_util {
 
-        struct revision_opt {
-            unsigned r = pstore::head_revision;
+        class revision_opt {
+        public:
             revision_opt & operator= (std::string const & val);
+            explicit constexpr operator unsigned () const noexcept { return r_; }
+
+        private:
+            unsigned r_ = pstore::head_revision;
         };
 
-    } // namespace cmd_util
-} // namespace pstore
+    } // end namespace cmd_util
+} // end namespace pstore
 
 #endif // PSTORE_CMD_UTIL_REVISION_OPT_HPP

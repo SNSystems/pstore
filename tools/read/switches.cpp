@@ -71,7 +71,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, "pstore read utility\n");
 
     switches result;
-    result.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
+    result.revision = static_cast<unsigned> (revision.get ());
     result.db_path = db_path.get ();
     result.key = key.get ();
     result.string_mode = string_mode.get ();

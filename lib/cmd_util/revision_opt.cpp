@@ -60,7 +60,7 @@ namespace pstore {
                         "Error: revision must be a revision number or 'HEAD'\n");
                     std::exit (EXIT_FAILURE);
                 }
-                r = *rp;
+                r_ = *rp;
             }
             return *this;
         }

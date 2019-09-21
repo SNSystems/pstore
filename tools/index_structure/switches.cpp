@@ -88,7 +88,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::ParseCommandLineOptions (argc, argv, usage_help ());
 
     switches sw;
-    sw.revision = static_cast<pstore::cmd_util::revision_opt> (revision.get ()).r;
+    sw.revision = static_cast<unsigned> (revision.get ());
     sw.db_path = db_path.get ();
 
     for (auto const & name : index_names_opt) {
