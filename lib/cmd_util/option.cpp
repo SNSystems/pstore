@@ -61,7 +61,7 @@ namespace pstore {
 
             void option::set_num_occurrences_flag (num_occurrences_flag n) { occurrences_ = n; }
             num_occurrences_flag option::get_num_occurrences_flag () const { return occurrences_; }
-            unsigned option::getNumOccurrences () const { return num_occurrences_; }
+            unsigned option::get_num_occurrences () const { return num_occurrences_; }
 
             void option::set_description (std::string const & d) { description_ = d; }
             void option::set_positional () { positional_ = true; }
@@ -117,7 +117,7 @@ namespace pstore {
             bool opt<bool>::value (std::string const &) { return false; }
             void opt<bool>::add_occurrence () {
                 option::add_occurrence ();
-                if (this->getNumOccurrences () == 1U) {
+                if (this->get_num_occurrences () == 1U) {
                     value_ = !value_;
                 }
             }
@@ -141,7 +141,9 @@ namespace pstore {
             void alias::set_positional () { original_->set_positional (); }
             bool alias::is_positional () const { return original_->is_positional (); }
             bool alias::is_alias () const { return true; }
-            unsigned alias::getNumOccurrences () const { return original_->getNumOccurrences (); }
+            unsigned alias::get_num_occurrences () const {
+                return original_->get_num_occurrences ();
+            }
             parser_base * alias::get_parser () { return original_->get_parser (); }
             bool alias::takes_argument () const { return original_->takes_argument (); }
             bool alias::value (std::string const & v) { return original_->value (v); }

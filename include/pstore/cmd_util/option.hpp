@@ -77,7 +77,7 @@ namespace pstore {
                 virtual void set_num_occurrences_flag (num_occurrences_flag n);
                 virtual num_occurrences_flag get_num_occurrences_flag () const;
 
-                virtual unsigned getNumOccurrences () const;
+                virtual unsigned get_num_occurrences () const;
                 bool is_satisfied () const;
                 bool can_accept_another_occurrence () const;
 
@@ -306,7 +306,7 @@ namespace pstore {
                 void set_positional () override;
                 bool is_positional () const override;
                 bool is_alias () const override;
-                unsigned getNumOccurrences () const override;
+                unsigned get_num_occurrences () const override;
                 parser_base * get_parser () override;
                 bool takes_argument () const override;
                 bool value (std::string const & v) override;

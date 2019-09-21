@@ -109,7 +109,7 @@ namespace pstore {
                         switch (opt->get_num_occurrences_flag ()) {
                         case num_occurrences_flag::required:
                         case num_occurrences_flag::one_or_more:
-                            if (opt->getNumOccurrences () == 0U) {
+                            if (opt->get_num_occurrences () == 0U) {
                                 if (opt->is_positional ()) {
                                     ++positional_missing;
                                 } else {

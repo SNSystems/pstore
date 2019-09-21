@@ -78,7 +78,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     switches result;
     result.db_path = db_path.get ();
     result.first_revision = static_cast<unsigned> (first_revision.get ());
-    result.second_revision = second_revision.getNumOccurrences () > 0
+    result.second_revision = second_revision.get_num_occurrences () > 0
                                  ? just (static_cast<unsigned> (second_revision.get ()))
                                  : nothing<diff::revision_number> ();
 

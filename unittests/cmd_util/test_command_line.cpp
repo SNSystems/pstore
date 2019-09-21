@@ -101,7 +101,7 @@ TEST_F (ClCommandLine, StringOption) {
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str ().length (), 0U);
     EXPECT_EQ (option.get (), "value");
-    EXPECT_EQ (option.getNumOccurrences (), 1U);
+    EXPECT_EQ (option.get_num_occurrences (), 1U);
 }
 
 TEST_F (ClCommandLine, DoubleDashStringOption) {
@@ -113,7 +113,7 @@ TEST_F (ClCommandLine, DoubleDashStringOption) {
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str ().length (), 0U);
     EXPECT_EQ (option.get (), "value");
-    EXPECT_EQ (option.getNumOccurrences (), 1U);
+    EXPECT_EQ (option.get_num_occurrences (), 1U);
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
@@ -123,7 +123,7 @@ TEST_F (ClCommandLine, StringOptionEquals) {
     EXPECT_TRUE (this->parse_command_line_options (errors));
     EXPECT_EQ (errors.str ().length (), 0U);
     EXPECT_EQ (option.get (), "value");
-    EXPECT_EQ (option.getNumOccurrences (), 1U);
+    EXPECT_EQ (option.get_num_occurrences (), 1U);
 }
 
 TEST_F (ClCommandLine, UnknownArgument) {
@@ -218,7 +218,7 @@ TEST_F (ClCommandLine, MissingRequired) {
     EXPECT_FALSE (res);
     EXPECT_THAT (errors.str (),
                  ::testing::HasSubstr (NATIVE_TEXT ("must be specified at least once")));
-    EXPECT_EQ (opt.getNumOccurrences (), 0U);
+    EXPECT_EQ (opt.get_num_occurrences (), 0U);
     EXPECT_EQ (opt.get (), "");
 }
 
@@ -252,7 +252,7 @@ TEST_F (ClCommandLine, DoubleDashSwitchTopositional) {
     bool res = this->parse_command_line_options (errors);
     EXPECT_TRUE (res);
     EXPECT_EQ (errors.str ().length (), 0U);
-    EXPECT_EQ (opt.getNumOccurrences (), 0U);
+    EXPECT_EQ (opt.get_num_occurrences (), 0U);
     EXPECT_EQ (opt.get (), "");
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
