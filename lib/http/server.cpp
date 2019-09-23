@@ -137,6 +137,7 @@ namespace {
     pstore::error_or<socket_descriptor> initialize_socket (in_port_t port_number) {
         using eo = pstore::error_or<socket_descriptor>;
 
+        log (pstore::logging::priority::info, "initializing on port: ", port_number);
         socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, 0)};
         if (!fd.valid ()) {
             return eo{pstore::httpd::get_last_error ()};
@@ -299,9 +300,14 @@ namespace {
 
                 log (priority::info, "Ended WebSockets session");
             }
-            PSTORE_CATCH (std::exception const & ex,
-                          { log (priority::error, "Error: ", ex.what ()); })
-            PSTORE_CATCH (..., { log (priority::error, "Unknown exception"); })
+            // clang-format off
+            PSTORE_CATCH (std::exception const & ex, { //clang-format on
+                log (priority::error, "Error: ", ex.what ());
+            })
+            // clang-format off
+            PSTORE_CATCH (..., { // clang-format on
+                log (priority::error, "Unknown exception");
+            })
         };
 
         // Spawn a thread to manage this WebSockets session.
@@ -347,17 +353,9 @@ namespace {
 namespace pstore {
     namespace httpd {
 
-        server_status::server_status (in_port_t port_)
-                : state{http_state::initializing}
-                , port{port_} {}
-
-        void server_status::shutdown () noexcept { state = http_state::closing; }
-
-
         int server (romfs::romfs & file_system, gsl::not_null<server_status *> status,
                     channel_container const & channels) {
-            log (logging::priority::info, "initializing on port: ", status->port);
-            pstore::error_or<socket_descriptor> eparentfd = initialize_socket (status->port);
+            pstore::error_or<socket_descriptor> eparentfd = initialize_socket (status->port ());
             if (!eparentfd) {
                 log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
                 return 0;
@@ -368,9 +366,9 @@ namespace pstore {
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
 
-            auto expected = server_status::http_state::initializing;
-            while (status->state.compare_exchange_strong (expected,
-                                                          server_status::http_state::listening)) {
+            for (auto expected_state = server_status::http_state::initializing;
+                 status->listening (expected_state);
+                 expected_state = server_status::http_state::listening) {
 
                 // Wait for a connection request.
                 sockaddr_in client_addr{}; // client address.
@@ -457,7 +455,6 @@ namespace pstore {
                 }
 
                 assert (input_is_empty (reader, childfd));
-                expected = server_status::http_state::listening;
             }
 
             for (std::unique_ptr<std::thread> const & worker : websockets_workers) {

@@ -53,18 +53,32 @@ namespace pstore {
 
         class server_status {
         public:
-            explicit server_status (in_port_t port);
+            constexpr explicit server_status (in_port_t port) noexcept
+                    : state_{http_state::initializing}
+                    , port_{port} {}
 
-            server_status (server_status const & rhs) = default;
-            server_status (server_status && rhs) = default;
+            server_status (server_status const & rhs) = delete;
+            server_status (server_status && rhs) = delete;
             server_status & operator= (server_status const & rhs) = delete;
             server_status & operator= (server_status && rhs) = delete;
 
-            void shutdown () noexcept;
-
             enum class http_state { initializing, listening, closing };
-            std::atomic<http_state> state;
-            in_port_t const port;
+
+            /// Sets the server's state to "closing" and returns the old state.
+            http_state shutdown () noexcept { return state_.exchange (http_state::closing); }
+
+            /// Sets the current server state to "listening" and return true if it is currently \p
+            /// expected. Otherwise, false is returned.
+            bool listening (http_state expected) {
+                return state_.compare_exchange_strong (expected,
+                                                       server_status::http_state::listening);
+            }
+
+            constexpr in_port_t port () const noexcept { return port_; }
+
+        private:
+            std::atomic<http_state> state_;
+            in_port_t const port_;
         };
 
     } // end namespace httpd

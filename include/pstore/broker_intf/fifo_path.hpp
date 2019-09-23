@@ -104,7 +104,7 @@ namespace pstore {
                        update_callback cb = default_update_cb);
             ~fifo_path ();
 
-            fifo_path (fifo_path && rhs) = default;
+            fifo_path (fifo_path && rhs) = delete;
             fifo_path (fifo_path const & rhs) = delete;
             fifo_path & operator= (fifo_path && rhs) = delete;
             fifo_path & operator= (fifo_path const & rhs) = delete;

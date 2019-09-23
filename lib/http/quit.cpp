@@ -63,12 +63,9 @@ namespace pstore {
     namespace httpd {
 
         void quit (gsl::not_null<server_status *> http_status) {
-            using broker::socket_descriptor;
-
-            auto old_state = http_status->state.load ();
-            http_status->shutdown ();
-            if (old_state == server_status::http_state::listening) {
-                socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
+            if (http_status->shutdown () == server_status::http_state::listening) {
+                // Wake up the server by connecting to it.
+                broker::socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
                 if (!fd.valid ()) {
                     log (logging::priority::error,
                          "Could not open socket: ", get_last_error ().message ());
@@ -76,7 +73,7 @@ namespace pstore {
                 }
 
                 struct sockaddr_in sock_addr {};
-                sock_addr.sin_port = htons (http_status->port); // NOLINT
+                sock_addr.sin_port = htons (http_status->port ()); // NOLINT
                 sock_addr.sin_family = AF_INET;
                 sock_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK); // NOLINT
 
