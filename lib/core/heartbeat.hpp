@@ -94,13 +94,11 @@ namespace pstore {
             worker_thread ();
             ~worker_thread () = default;
 
-            // Move.
-            worker_thread (worker_thread &&) = default;
-            worker_thread & operator= (worker_thread &&) = default;
-
             // No copying or assignment
             worker_thread (worker_thread const &) = delete;
+            worker_thread (worker_thread &&) = delete;
             worker_thread & operator= (worker_thread const &) = delete;
+            worker_thread & operator= (worker_thread &&) = delete;
 
             void attach (heartbeat::key_type key, callback cb);
             void detach (heartbeat::key_type key);
