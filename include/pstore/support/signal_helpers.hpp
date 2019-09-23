@@ -47,8 +47,8 @@
 #ifndef PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
 #define PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
 
-#include <errno.h>
-#include <signal.h>
+#include <cerrno>
+#include <csignal>
 
 namespace pstore {
 
