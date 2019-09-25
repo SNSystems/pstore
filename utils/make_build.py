@@ -114,6 +114,9 @@ def _get_real_generator_args(system, generator):
             'win32': lambda: 'vs',
         }.get(system.lower(), lambda: None)()
 
+    if generator is None:
+        return None
+
     # Turn a generator or "pseudo generator" name into a collection of one or more cmake switches.
     return {
         'make': lambda: ['-G', 'Unix Makefiles'],
@@ -157,7 +160,7 @@ def _options(args):
         options.define = configuration
 
     options.generator = _get_real_generator_args(options.system, options.generator)
-    _logger.debug('Selecting generator %s', str(options.generator))
+    _logger.debug('Selecting generator %s', str(options.generator) if options.generator is not None else "(default)")
     return options
 
 
