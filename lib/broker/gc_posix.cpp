@@ -146,22 +146,16 @@ namespace pstore {
                         int const err = errno;
                         // If the error was "no child processes", we shouldn't report it.
                         if (err != ECHILD) {
-                            static constexpr std::size_t buffer_size = 256;
-                            char msgbuf[buffer_size];
-                            std::snprintf (msgbuf, buffer_size, "waitpid error %d: ", err);
-                            msgbuf[buffer_size - 1U] = '\0';
-
-                            logging::log (logging::priority::error, msgbuf, string_error (err));
+                            logging::log (logging::priority::error,
+                                          "waitpid error: ", string_error (err));
                         }
                         break;
-                    } else {
-                        pr_exit (pid, status);
-                        processes_.eraser (pid);
                     }
+
+                    pr_exit (pid, status);   // Log the process exit.
+                    processes_.eraser (pid); // Forget about the process.
                 }
             }
-
-            // FIXME: if an exception is thrown we should probably still clean up proceses.
 
             // Ask any child GC processes to quit.
             logging::log (logging::priority::info, "cleaning up");
