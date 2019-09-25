@@ -255,7 +255,12 @@ namespace pstore {
 
                         if ((*handler)->takes_argument ()) {
                             if (value) {
-                                ok = handler_set_value (handler, *value);
+                                if (!handler_set_value (handler, *value)) {
+                                    errs << str::out_string (program_name)
+                                         << str::out_text (": Unknown value '")
+                                         << str::out_string (*value) << str::out_text ("'");
+                                    ok = false;
+                                }
                                 handler.reset ();
                             } else {
                                 // The option takes an argument but we haven't yet seen the value

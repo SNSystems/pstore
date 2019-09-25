@@ -46,6 +46,7 @@
 
 #include <cassert>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "pstore/cmd_util/category.hpp"
@@ -75,6 +76,7 @@ namespace pstore {
             // values - For custom data types, allow specifying a group of values together
             // as the values that go into the mapping that the option handler uses.
             namespace details {
+
                 class values {
                 public:
                     explicit values (std::initializer_list<option_enum_value> options);
@@ -91,13 +93,14 @@ namespace pstore {
                 private:
                     std::vector<option_enum_value> values_;
                 };
-            } // namespace details
 
-            /// Helper to build a ValuesClass by forwarding a variable number of arguments
-            /// as an initializer list to the ValuesClass constructor.
+            } // end namespace details
+
+            /// Helper to build a details::values by forwarding a variable number of arguments
+            /// as an initializer list to the details::values constructor.
             template <typename... OptsTy>
             details::values values (OptsTy... options) {
-                return details::values{options...};
+                return details::values{std::forward<OptsTy> (options)...};
             }
 
             class name {
@@ -155,6 +158,7 @@ namespace pstore {
             //* |_|_||_|_|\__| *
             //*                *
             namespace details {
+
                 template <typename T>
                 class initializer {
                 public:
@@ -168,7 +172,8 @@ namespace pstore {
                 private:
                     T const & init_;
                 };
-            } // namespace details
+
+            } // end namespace details
 
             template <typename T>
             details::initializer<T> init (T const & t) {
@@ -181,6 +186,7 @@ namespace pstore {
             //* \___/\__\__|\_,_|_| |_| \___|_||_\__\___/__/ *
             //*                                              *
             namespace details {
+
                 struct positional {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
@@ -228,7 +234,8 @@ namespace pstore {
                                                         : num_occurrences_flag::one_or_more);
                     }
                 };
-            } // namespace details
+
+            } // end namespace details
 
             extern details::one_or_more const one_or_more;
             extern details::optional const optional;
@@ -236,6 +243,7 @@ namespace pstore {
             extern details::required const required;
 
             namespace details {
+
                 class category {
                 public:
                     explicit category (option_category const & cat)
@@ -249,7 +257,8 @@ namespace pstore {
                 private:
                     option_category const & cat_;
                 };
-            } // namespace details
+
+            } // end namespace details
 
             inline details::category cat (option_category const & c) {
                 return details::category{c};
