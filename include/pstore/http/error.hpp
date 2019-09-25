@@ -95,7 +95,7 @@ namespace pstore {
 #ifdef _WIN32
             return make_error_code (win32_erc{static_cast<DWORD> (WSAGetLastError ())});
 #else
-            return make_error_code (std::errc (errno));
+            return make_error_code (errno_erc{errno});
 #endif // !_WIN32
         }
 
