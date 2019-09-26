@@ -88,7 +88,7 @@ namespace pstore {
             inline std::error_code out_of_data_error () {
                 // TODO: we're returning that we ran out of data. Is there a more suitable
                 // error?
-                return std::make_error_code (std::errc (ENOTCONN));
+                return std::make_error_code (std::errc::not_connected);
             }
 
         } // end namespace details
