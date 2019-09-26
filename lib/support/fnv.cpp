@@ -49,10 +49,10 @@
  * PERFORMANCE OF THIS SOFTWARE.
  *
  * By:
- *	chongo <Landon Curt Noll> /\oo/\
+ *      chongo <Landon Curt Noll> /\oo/\
  *      http://www.isthe.com/chongo/
  *
- * Share and Enjoy!	:-)
+ * Share and Enjoy! :-)
  */
 
 #include "pstore/support/fnv.hpp"

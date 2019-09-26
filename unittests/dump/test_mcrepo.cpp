@@ -132,7 +132,7 @@ namespace {
         std::shared_ptr<std::uint8_t> ptr;
         std::tie (ptr, addr) = transaction.alloc_rw<std::uint8_t> (size);
         std::copy (first, first + size, ptr.get ());
-		return { addr, size };
+        return {addr, size};
     }
 
 } // end anonymous namespace

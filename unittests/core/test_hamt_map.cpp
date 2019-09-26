@@ -856,7 +856,7 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
     // level1 -> | 000000 | 000001 | 000010 |       (hash bits 6-11)
     //           +--------+--------+--------+
     //                |       |        |
-    //                v       |		   |
+    //                v       |        |
     //               "a"      v        |            (0b 000000 000000)
     //                       "b"       v            (0b 000001 000000)
     //                                "c"           (0b 000010 000000)

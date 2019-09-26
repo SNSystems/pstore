@@ -51,10 +51,10 @@ namespace pstore {
     namespace repo {
 
         //*  _                       _   _           *
-        //* | |__ ______  ___ ___ __| |_(_)___ _ _	 *
-        //* | '_ (_-<_-< (_-</ -_) _|  _| / _ \ ' \	 *
+        //* | |__ ______  ___ ___ __| |_(_)___ _ _   *
+        //* | '_ (_-<_-< (_-</ -_) _|  _| / _ \ ' \  *
         //* |_.__/__/__/ /__/\___\__|\__|_\___/_||_| *
-        //* 										 *
+        //*                                          *
         class bss_section : public section_base {
         public:
             bss_section (std::uint8_t align, std::uint64_t size)
