@@ -44,6 +44,7 @@ Optionally:
 
 - [Doxygen](http://doxygen.org) for building the documentation
 - [GraphViz](http://graphviz.org) for graph rendering
+- [nodejs](https://nodejs.org/) for the [ElectronJS](https://electronjs.org)-based broker dashboard
 - [Python](https://www.python.org) 2.7 or later for running the system tests as well as a few utilities
 - [Valgrind](http://valgrind.org) for extra validation of the executables (enabled by passing the `-D PSTORE_VALGRIND=Yes` argument when running `cmake` to generate the build)
 
