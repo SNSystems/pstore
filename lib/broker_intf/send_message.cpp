@@ -52,8 +52,10 @@
 #include "pstore/broker_intf/writer.hpp"
 
 namespace {
-    static std::atomic<std::uint32_t> message_id{0};
-}
+
+    std::atomic<std::uint32_t> message_id{0};
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace broker {
@@ -101,5 +103,5 @@ namespace pstore {
 
         std::uint32_t next_message_id () { return message_id.load (); }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
