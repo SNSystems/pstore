@@ -89,7 +89,7 @@ namespace pstore {
             process_bimap processes_;
         };
 
-        void start_vacuum (std::string const & path);
+        void start_vacuum (std::string path);
         void gc_sigint (int sig);
 
         void gc_process_watch_thread ();

@@ -59,12 +59,31 @@
 namespace pstore {
     namespace broker {
         namespace win32 {
+            //*                                          _      *
+            //*  _ __ _ _ ___  __ ___ ______  _ __  __ _(_)_ _  *
+            //* | '_ \ '_/ _ \/ _/ -_|_-<_-< | '_ \/ _` | | '_| *
+            //* | .__/_| \___/\__\___/__/__/ | .__/\__,_|_|_|   *
+            //* |_|                          |_|                *
+            process_pair::process_pair (HANDLE p, DWORD g) noexcept
+                    : process_{p, &close_handle}
+                    , group_{g} {}
 
+            void process_pair::close_handle (HANDLE h) noexcept {
+                if (h != nullptr) {
+                    ::CloseHandle (h);
+                }
+            }
+
+            // argv_quote
+            // ~~~~~~~~~~
+            /// Given an individual command-line argument, returns it with all necessary quoting and
+            /// escaping for use on the Windows command-line.
+            /// \param in_arg  The argument string to be quoted.
+            /// \param force  If true, the resulting string will always be quoted; otherwise it is
+            ///  quoted when necessary. Setting to true may avoid problems with process that don't
+            ///  parse quotes properly.
+            /// \returns The quoted command-line string.
             std::string argv_quote (std::string const & in_arg, bool force) {
-                // Unless we're told otherwise, don't quote unless we actually
-                // need to do so. That will avoid problems if programs don't
-                // parse quotes properly
-
                 if (!force && !in_arg.empty () &&
                     in_arg.find_first_of (" \t\n\v\"\\") == in_arg.npos) {
                     return in_arg;
@@ -106,10 +125,14 @@ namespace pstore {
                 return res;
             }
 
-            std::string build_command_line (gsl::czstring * argv) {
+            // build_command_line
+            // ~~~~~~~~~~~~~~~~~~
+            /// Given a null-terminated array of strings, returns a quoted Windows command-line
+            /// string.
+            std::string build_command_line (gsl::not_null<gsl::czstring const *> argv) {
                 std::string command_line;
                 auto separator = "";
-                for (char const ** arg = argv; *arg != nullptr; ++arg) {
+                for (auto arg = argv.get (); *arg != nullptr; ++arg) {
                     command_line.append (separator);
                     command_line.append (argv_quote (*arg, false));
                     separator = " ";
@@ -119,7 +142,8 @@ namespace pstore {
 
         } // end namespace win32
 
-        process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv) {
+        process_identifier spawn (gsl::czstring exe_path,
+                                  gsl::not_null<gsl::czstring const *> argv) {
             auto const exe_path_utf16 = utf::win32::to16 (exe_path);
             auto const command_line = utf::win32::to16 (win32::build_command_line (argv));
 
