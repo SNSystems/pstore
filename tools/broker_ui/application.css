@@ -1,0 +1,40 @@
+/* Default variables */
+:root {
+    --background-color: white;
+    --color: black;
+    --line-color: black;
+}
+
+[data-theme^="light"],
+[data-theme] [data-theme^="light"] {
+    --background-color: #ececec;
+    --color: black;
+    --line-color: #012169;
+}
+
+[data-theme^="dark"],
+[data-theme] [data-theme^="dark"] {
+    --background-color: #323232;
+    --color: white;
+    --line-color: #4E84FD;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--color);
+    font: caption;
+    margin: auto;
+    max-width: 38rem;
+    padding: 2rem;
+}
+
+.line {
+    fill: none;
+    stroke: var(--line-color);
+    stroke-width: 1.5px;
+}
+
+.ui-text {
+    -webkit-user-select: none;
+}
+

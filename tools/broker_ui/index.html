@@ -2,32 +2,72 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>pstore Status</title>
-    <style>
-      body {
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-          margin: auto;
-          max-width: 38rem;
-          padding: 2rem;
-      }
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-      .line {
-          fill: none;
-          stroke: #012169;
-          stroke-width: 1.5px;
+    <style>
+      .svg-container {
+        display: inline-block;
+        position: relative;
+        width: 100%;
+        padding-bottom: 100%;
+        vertical-align: middle;
+        overflow: hidden;
+      }
+      .svg-content {
+        display: inline-block;
+        position: absolute;
+        top: 0;
+        left: 0;
       }
     </style>
+    <title>pstore Status</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="application.css">
   </head>
-  <body>
-    <div>Server uptime (seconds):</div><div id="uptime">0</div>
-    <div>Completed transactions:</div><div id="commits">0</div>
-    <div>Transactions per second:</div><div id="tps">0</div>
 
-    <svg width="520" height="250"></svg>
+  <body>
+
+    <div class="container">
+      <div class="row">
+        <div class="col-12 col-md">
+          <h1>Hello, world!</h1>
+          <div class="svg-container">
+            <!-- width="350" height="250" -->
+
+            <svg class="ui-text svg-content"
+                 xmlns="http://www.w3.org/2000/svg"
+                 preserveAspectRatio="xMinYMin"
+                 viewBox="0 0 1 1"
+            ></svg>
+          </div>
+        </div>
+
+        <div class="col-12 col-md-auto">
+          <div>
+            <div style="display:inline;" class="ui-text">Server uptime:</div>
+            <div style="display:inline;" id="uptime">0</div>
+            <div style="display:inline;" class="ui-text"> (seconds)</div>
+          </div>
+
+          <div>
+            <div style="display:inline;" class="ui-text">Completed transactions:</div>
+            <div style="display:inline;" id="commits">0</div>
+          </div>
+
+          <div>
+            <div style="display:inline;" class="ui-text">Transactions per second:</div>
+            <div style="display:inline;" id="tps">0</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <script>
       // You can also require other files to run in this process
       require('./renderer.js')                                              
     </script>
+    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="./node_modules/popper.js/dist/popper.min.js"></script>
+    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
   </body>
 </html>

@@ -1,18 +1,21 @@
 {
-  "name": "pstore-broker-ui",
-  "productName": "pstore Broker UI",
+  "author": "paul",
   "description": "A pstore dashboard",
   "keywords": [],
+  "name": "pstore-broker-ui",
+  "productName": "pstore Broker UI",
   "main": "./main.js",
   "version": "1.0.0",
-  "author": "paul",
+  "repository": "github:SNSystems/pstore",
   "scripts": {
     "start": "electron ."
   },
   "dependencies": {
-    "d3": "^5.11.0"
+    "bootstrap": "^4.3.1",
+    "d3": "^5.11.0",
+    "electron": "6.0.10",
+    "jquery": "^3.3.1",
+    "popper.js": "^1.14.7"
   },
-  "devDependencies": {
-    "electron": "6.0.4"
-  }
+  "devDependencies": {}
 }

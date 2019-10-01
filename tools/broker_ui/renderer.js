@@ -42,15 +42,16 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 let d3 = require ('d3');
+const {ipcRenderer} = require ('electron');
 
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 
-var localhost = 'localhost:8080';
+const localhost = 'localhost:8080';
 // var localhost = window.location.host;
 function new_ws (channel, on_message) {
-    var socket = new WebSocket ('ws://' + localhost + '/' + channel);
+    const socket = new WebSocket ('ws://' + localhost + '/' + channel);
     socket.onerror = error => { console.error (error); };
     socket.onopen = () => { console.log ('connection open (' + channel + ')'); };
     socket.onclose = () => { console.log ('connection closed (' + channel + ')'); };
@@ -58,15 +59,15 @@ function new_ws (channel, on_message) {
     return socket;
 }
 
-var prev_commits = 0;
-var commits = 0;
+let prev_commits = 0;
+let commits = 0;
 
 function message_received (msg) {
-    var obj = JSON.parse (msg.data);
-    if (obj.uptime != undefined) {
+    const obj = JSON.parse(msg.data);
+    if (obj.hasOwnProperty('uptime')) {
         document.getElementById ('uptime').textContent = obj.uptime;
     }
-    if (obj.commits != undefined) {
+    if (obj.hasOwnProperty('commits')) {
         commits = obj.commits;
         document.getElementById ('commits').textContent = obj.commits;
     }
@@ -168,3 +169,7 @@ function tick () {
     xAxis.transition ().duration (duration).ease (d3.easeLinear).call (d3.axisBottom (x));
     yAxis.transition ().duration (duration).ease (d3.easeLinear).call (d3.axisLeft (y));
 }
+
+ipcRenderer.on('dark-mode', (event, message) => {
+    document.documentElement.setAttribute('data-theme', message ? 'dark' : 'light');
+});
