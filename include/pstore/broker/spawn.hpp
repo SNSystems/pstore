@@ -47,6 +47,7 @@
 #define PSTORE_BROKER_SPAWN_HPP
 
 #include <functional>
+#include <initializer_list>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -89,25 +90,27 @@ namespace pstore {
             /// to a single string
             ///
             /// \note This function is exposed to enable it to be unit tested.
-            std::string build_command_line (gsl::czstring * argv);
+            std::string build_command_line (gsl::not_null<gsl::czstring const *> argv);
 
-            struct process_pair {
-                constexpr process_pair (HANDLE p, DWORD g) noexcept
-                        : process{p}
-                        , group{g} {}
-                ~process_pair () noexcept {
-                    if (process != nullptr) {
-                        ::CloseHandle (process);
-                    }
-                }
+            class process_pair {
+            public:
+                process_pair (HANDLE p, DWORD g) noexcept;
+                ~process_pair () noexcept = default;
 
                 process_pair (process_pair const &) = delete;
                 process_pair (process_pair &&) noexcept = delete;
                 process_pair & operator= (process_pair const &) = delete;
                 process_pair & operator= (process_pair &&) noexcept = delete;
 
-                HANDLE const process;
-                DWORD const group;
+                HANDLE process () const noexcept { return process_.get (); }
+                DWORD group () const noexcept { return group_; }
+
+            private:
+                static void close_handle (HANDLE h) noexcept;
+
+                std::unique_ptr<std::remove_pointer<HANDLE>::type, decltype (&close_handle)> const
+                    process_;
+                DWORD const group_;
             };
 
         } // end namespace win32
@@ -121,7 +124,17 @@ namespace pstore {
 
         /// Starts the process at the location given by `exe_path` and with the arguments
         /// supplied in a null-terminated array of czstrings.
-        process_identifier spawn (gsl::czstring exe_path, gsl::czstring * argv);
+        process_identifier spawn (gsl::czstring exe_path,
+                                  gsl::not_null<gsl::czstring const *> argv);
+
+        inline process_identifier spawn (std::initializer_list<gsl::czstring> argv) {
+            // There must be at least two entries (the process path and terminating null).
+            assert (argv.size () >= 2);
+            gsl::czstring const * begin = std::begin (argv);
+            // The last array element must be null.
+            assert (*(begin + argv.size () - 1) == nullptr);
+            return spawn (*begin, begin);
+        }
 
     } // namespace broker
 } // namespace pstore

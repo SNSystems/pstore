@@ -45,9 +45,7 @@
 
 #include "pstore/broker/gc.hpp"
 
-#ifndef _WIN32
-#include <signal.h>
-#endif
+#include <algorithm>
 
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker/spawn.hpp"
@@ -57,6 +55,9 @@
 #include "pstore/support/signal_helpers.hpp"
 
 namespace pstore {
+
+    using logging::priority;
+
     namespace broker {
 
         // start_vacuum
@@ -64,28 +65,24 @@ namespace pstore {
         void gc_watch_thread::start_vacuum (std::string const & db_path) {
             std::unique_lock<decltype (mut_)> lock (mut_);
             if (processes_.presentl (db_path)) {
-                logging::log (logging::priority::info, "GC process is already running for ",
-                              logging::quoted (db_path.c_str ()));
-            } else {
-                logging::log (logging::priority::info, "Starting GC process for ",
-                              logging::quoted{db_path.c_str ()});
-                auto const exe_path = vacuumd_path ();
-                std::array<char const *, 3> argv = {{exe_path.c_str (), db_path.c_str (), nullptr}};
-                auto child_identifier = spawn (exe_path.c_str (), argv.data ());
-                processes_.set (db_path, child_identifier);
-
-                // An initial wakeup of the GC-watcher thread in case the child process exited
-                // before we
-                // had time to install the SIGCHLD signal handler.
-                cv_.notify_all (-1);
+                log (priority::info, "GC process is already running for ",
+                     logging::quoted (db_path.c_str ()));
+                return;
             }
+
+            log (priority::info, "Starting GC process for ", logging::quoted{db_path.c_str ()});
+            processes_.set (db_path, spawn ({vacuumd_path ().c_str (), db_path.c_str (), nullptr}));
+
+            // An initial wakeup of the GC-watcher thread in case the child process exited
+            // before we had time to install the SIGCHLD signal handler.
+            cv_.notify_all (-1);
         }
 
         // stop
         // ~~~~
         void gc_watch_thread::stop (int signum) {
             assert (done);
-            logging::log (logging::priority::info, "asking gc process watch thread to exit");
+            log (priority::info, "asking gc process watch thread to exit");
             cv_.notify_all (signum);
         }
 
@@ -132,7 +129,7 @@ namespace pstore {
             getgc ().watcher ();
         }
 
-        void start_vacuum (std::string const & db_path) { getgc ().start_vacuum (db_path); }
+        void start_vacuum (std::string db_path) { getgc ().start_vacuum (std::move (db_path)); }
 
         /// Called when a signal has been recieved which should result in the process shutting.
         /// \note This function is called from the quit-thread rather than directly from a signal

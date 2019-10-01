@@ -61,8 +61,8 @@
 namespace pstore {
     namespace broker {
 
-        pid_t spawn (gsl::czstring exe_path, gsl::czstring * argv) {
-
+        process_identifier spawn (gsl::czstring exe_path,
+                                  gsl::not_null<gsl::czstring const *> argv) {
             auto const child_pid = ::fork ();
             switch (child_pid) {
             // When fork() returns -1, an error happened.
@@ -72,11 +72,8 @@ namespace pstore {
                 try {
                     logging::log (logging::priority::info, "starting vacuum ",
                                   logging::quoted (exe_path));
-                    // TODO: nice the child process?
-                    ::execv (exe_path, const_cast<char **> (argv));
-
-                    // If execv returns, it must have failed.
-                    raise (pstore::errno_erc{errno}, "execv");
+                    ::execv (exe_path, const_cast<char **> (argv.get ()));
+                    raise (errno_erc{errno}, "execv"); // If execv returns, it must have failed.
                 } catch (std::exception const & ex) {
                     logging::log (logging::priority::error, "fork error: ", ex.what ());
                 } catch (...) {

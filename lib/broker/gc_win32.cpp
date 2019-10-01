@@ -184,8 +184,8 @@ namespace pstore {
             // Tell any child GC processes to quit.
             log (priority::info, "cleaning up");
             auto const kill = [](broker::process_identifier const & pid) {
-                log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group);
-                if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group)) {
+                log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group ());
+                if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group ())) {
                     log (priority::error, "An error occurred: ", ::GetLastError ());
                 }
             };
