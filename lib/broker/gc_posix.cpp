@@ -49,36 +49,37 @@
 
 #ifndef _WIN32
 
-#include <atomic>
-#include <cassert>
-#include <chrono>
-#include <condition_variable>
-#include <memory>
-#include <mutex>
-#include <thread>
+#    include <atomic>
+#    include <cassert>
+#    include <chrono>
+#    include <condition_variable>
+#    include <memory>
+#    include <mutex>
+#    include <thread>
 
-#include <signal.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#    include <signal.h>
+#    include <string.h>
+#    include <sys/wait.h>
+#    include <unistd.h>
 
-#include "pstore/broker/globals.hpp"
+#    include "pstore/broker/globals.hpp"
 #    include "pstore/os/logging.hpp"
+#    include "pstore/support/signal_helpers.hpp"
+
+using pstore::logging::priority;
 
 namespace {
 
     char const * core_dump_string (int status) {
-#ifdef WCOREDUMP
+#    ifdef WCOREDUMP
         if (WCOREDUMP (status)) {
             return "(core file generated)";
         }
-#endif
+#    endif
         return "(no core file available)";
     }
 
     void pr_exit (pid_t pid, int status) {
-        using namespace pstore::logging;
-
         log (priority::info, "GC process exited pid ", pid);
         if (WIFEXITED (status)) {
             log (priority::info, "Normal termination, exit status = ", WEXITSTATUS (status));
@@ -125,16 +126,30 @@ namespace {
 namespace pstore {
     namespace broker {
 
+        // child_signal
+        // ~~~~~~~~~~~~
+        /// \note This function is called from a signal handler so must restrict itself to
+        /// signal-safe functions.
+        void gc_watch_thread::child_signal (int sig) {
+            errno_saver old_errno;
+            getgc ().cv_.notify_all (sig);
+        }
+
         // watcher
         // ~~~~~~~
         void gc_watch_thread::watcher () {
-            logging::log (logging::priority::info, "starting gc process watch thread");
+            log (priority::info, "starting gc process watch thread");
+
+            // TODO: unregister on exit from this function
+            register_signal_handler (SIGCHLD, &child_signal);
 
             std::unique_lock<decltype (mut_)> lock (mut_);
             while (!done) {
-                logging::log (logging::priority::info, "waiting for a GC process to complete");
+                log (priority::info, "waiting for a GC process to complete");
                 cv_.wait (lock);
-                // We may have been woken up because the program is exiting.
+                // There are two reasons that we may have been woken:
+                // - One (or more) of our child processes may have exited.
+                // - The program is exiting.
                 if (done) {
                     continue;
                 }
@@ -146,34 +161,32 @@ namespace pstore {
                         int const err = errno;
                         // If the error was "no child processes", we shouldn't report it.
                         if (err != ECHILD) {
-                            logging::log (logging::priority::error,
-                                          "waitpid error: ", string_error (err));
+                            log (priority::error, "waitpid error: ", string_error (err));
                         }
                         break;
                     }
 
-                    pr_exit (pid, status);   // Log the process exit.
+
+                    std::string const & db_path = processes_.getl (pid);
+                    log (priority::info, "GC exited for ", db_path);
+                    // TODO: push a message to a channel which will tell a listener that this GC
+                    // process has exited (and why)
+
+                    pr_exit (pid, status); // Log the process exit.
+
                     processes_.eraser (pid); // Forget about the process.
                 }
             }
 
             // Ask any child GC processes to quit.
-            logging::log (logging::priority::info, "cleaning up");
-            for (auto it = processes_.right_begin (), end = processes_.right_end (); it != end;
-                 ++it) {
-                auto pid = *it;
-                logging::log (logging::priority::info, "sending SIGINT to ", pid);
+            log (priority::info, "cleaning up");
+            std::for_each (processes_.right_begin (), processes_.right_end (), [](pid_t pid) {
+                log (priority::info, "sending SIGINT to ", pid);
                 ::kill (pid, SIGINT);
-            }
+            });
         }
 
-        // child_signal
-        // ~~~~~~~~~~~~
-        /// \note This function is called from a signal handler so muyst restrict itself to
-        /// signal-safe functions.
-        void gc_watch_thread::child_signal (int sig) noexcept { cv_.notify_all (sig); }
-
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // _!WIN32

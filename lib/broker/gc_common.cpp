@@ -94,38 +94,14 @@ namespace pstore {
             return join (dir_name (process_file_name ()), vacuumd_name);
         }
 
-    } // end namespace broker
-} // end namespace pstore
 
-namespace {
-
-    /// Manages the sole local gc_watch_thread
-    pstore::broker::gc_watch_thread & getgc () {
-        static pstore::broker::gc_watch_thread gc;
-        return gc;
-    }
-
-#ifndef _WIN32
-
-    // child_signal
-    // ~~~~~~~~~~~~
-    void child_signal (int sig) {
-        pstore::errno_saver old_errno;
-        getgc ().child_signal (sig);
-    }
-
-#endif // !_WIN32
-
-} // end anonymous namespace
-
-
-namespace pstore {
-    namespace broker {
+        /// Manages the sole local gc_watch_thread
+        gc_watch_thread & getgc () {
+            static pstore::broker::gc_watch_thread gc;
+            return gc;
+        }
 
         void gc_process_watch_thread () {
-#ifndef _WIN32
-            register_signal_handler (SIGCHLD, child_signal);
-#endif
             getgc ().watcher ();
         }
 
