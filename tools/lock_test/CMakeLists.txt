@@ -41,6 +41,6 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_tool (pstore-lock-test lock_test.cpp)
+add_pstore_executable (pstore-lock-test lock_test.cpp)
 target_link_libraries (pstore-lock-test PUBLIC pstore-core pstore-cmd-util)
 add_clang_tidy_target (pstore-lock-test)
