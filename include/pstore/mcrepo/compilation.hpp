@@ -94,14 +94,15 @@ namespace pstore {
             /// \param l  The symbol linkage.
             /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
-                                typed_address<indirect_string> n, linkage_type l, visibility_type v)
+                                typed_address<indirect_string> n, linkage_type l,
+                                visibility_type v = visibility_type::default_visibility)
                     : digest{d}
                     , fext{x}
                     , name{n}
                     , linkage{l}
                     , visibility{v} {}
 
-            /// The digest of the fragment reference by this compilation symbol.
+            /// The digest of the fragment referenced by this compilation symbol.
             index::digest digest;
             /// The extent of the fragment referenced by this compilation symbol.
             extent<fragment> fext;
