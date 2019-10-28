@@ -29,20 +29,16 @@
 
     <div class="container">
       <div class="row">
-        <div class="col-12 col-md">
-          <h1>Hello, world!</h1>
-          <div class="svg-container">
-            <!-- width="350" height="250" -->
-
+        <div class="col">
             <svg class="ui-text svg-content"
                  xmlns="http://www.w3.org/2000/svg"
                  preserveAspectRatio="xMinYMin"
-                 viewBox="0 0 1 1"
+                 viewBox="0 0 520 250"
+                 width="520" height="250"
             ></svg>
-          </div>
         </div>
 
-        <div class="col-12 col-md-auto">
+        <div class="col">
           <div>
             <div style="display:inline;" class="ui-text">Server uptime:</div>
             <div style="display:inline;" id="uptime">0</div>
@@ -62,12 +58,18 @@
       </div>
     </div>
 
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+
+    <!-- Bootstrap Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script>let $ = require('jquery');</script>
+    <script>require('popper.js');</script>
+    <script>require('bootstrap');</script>
     <script>
       // You can also require other files to run in this process
-      require('./renderer.js')                                              
+      var r = require('./renderer.js');
     </script>
-    <script src="./node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="./node_modules/popper.js/dist/popper.min.js"></script>
-    <script src="./node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
   </body>
 </html>
