@@ -167,9 +167,12 @@ endif (PSTORE_IS_INSIDE_LLVM)
 
 
 # A custom target from which the installs will hang.
-add_custom_target (install-pstore)
-set_target_properties (install-pstore PROPERTIES FOLDER "pstore install")
-
+add_custom_target (install-pstore
+    COMMAND "${CMAKE_COMMAND}"
+            -D CMAKE_INSTALL_COMPONENT=pstore
+            -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
+    USES_TERMINAL
+)
 
 
 add_subdirectory (3rd_party)

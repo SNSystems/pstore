@@ -69,6 +69,15 @@ namespace pstore {
 
         std::ostream & operator<< (std::ostream & os, linkage_type l);
 
+#define PSTORE_REPO_VISIBILITY_TYPES                                                               \
+    X (default_visibility)                                                                         \
+    X (hidden_visibility)                                                                          \
+    X (protected_visibility)
+
+#define X(a) a,
+        enum class visibility_type : std::uint8_t { PSTORE_REPO_VISIBILITY_TYPES };
+#undef X
+
         //*                    _ _      _   _                            _              *
         //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
         //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
@@ -83,23 +92,25 @@ namespace pstore {
             /// \param x  The fragment extent for this compilation symbol.
             /// \param n  Symbol name address.
             /// \param l  The symbol linkage.
+            /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
-                                typed_address<indirect_string> n, linkage_type l)
+                                typed_address<indirect_string> n, linkage_type l,
+                                visibility_type v = visibility_type::default_visibility)
                     : digest{d}
                     , fext{x}
                     , name{n}
-                    , linkage{l} {}
+                    , linkage{l}
+                    , visibility{v} {}
 
-            /// The digest of the fragment reference by this compilation symbol.
+            /// The digest of the fragment referenced by this compilation symbol.
             index::digest digest;
             /// The extent of the fragment referenced by this compilation symbol.
             extent<fragment> fext;
             typed_address<indirect_string> name;
             linkage_type linkage;
-            // TODO: eliminate this padding.
-            std::uint8_t padding1 = 0;
-            std::uint16_t padding2 = 0;
-            std::uint32_t padding3 = 0;
+            visibility_type visibility;
+            std::uint16_t padding1 = 0;
+            std::uint32_t padding2 = 0;
 
             /// \brief Returns a pointer to an in-store compilation member instance.
             ///
@@ -123,8 +134,9 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (offsetof (compilation_member, fext) == 16);
         PSTORE_STATIC_ASSERT (offsetof (compilation_member, name) == 32);
         PSTORE_STATIC_ASSERT (offsetof (compilation_member, linkage) == 40);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 41);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, visibility) == 41);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 42);
+        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 44);
 
         //*                    _ _      _   _           *
         //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *

@@ -58,6 +58,8 @@ namespace pstore {
     namespace broker {
 
         class gc_watch_thread {
+            friend gc_watch_thread & getgc ();
+
         public:
             void watcher ();
 
@@ -67,12 +69,9 @@ namespace pstore {
             /// thread and asks all child processes to exit.
             void stop (int signum = -1);
 
-#ifndef _WIN32
-            /// POSIX signal handler.
-            void child_signal (int sig) noexcept;
-#endif
-
         private:
+            gc_watch_thread () = default;
+
             std::string vacuumd_path ();
 
 #ifdef _WIN32
@@ -82,12 +81,17 @@ namespace pstore {
 #else
             static constexpr auto vacuumd_name = PSTORE_VACUUM_TOOL_NAME;
             using process_bimap = bimap<std::string, pid_t>;
+
+            /// POSIX signal handler.
+            static void child_signal (int sig);
 #endif
 
             std::mutex mut_;
             signal_cv cv_;
             process_bimap processes_;
         };
+
+        gc_watch_thread & getgc ();
 
         void start_vacuum (std::string path);
         void gc_sigint (int sig);

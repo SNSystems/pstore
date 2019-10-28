@@ -4,7 +4,7 @@
 #* | (_| | (_| | (_| | | |_) \__ \ || (_) | | |  __/ *
 #*  \__,_|\__,_|\__,_| | .__/|___/\__\___/|_|  \___| *
 #*                     |_|                           *
-#===- cmake/add_pstore.cmake ----------------------------------------------===//
+
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -297,43 +297,36 @@ function (add_pstore_library)
     endif ()
 
     if (PSTORE_IS_INSIDE_LLVM)
-        add_llvm_library ("${arg_TARGET}" STATIC ${arg_SOURCES})
+        add_llvm_library (${arg_TARGET} STATIC ${arg_SOURCES})
         add_pstore_additional_compiler_flags (${arg_TARGET})
     else ()
-        add_library ("${arg_TARGET}" STATIC ${arg_SOURCES} ${arg_INCLUDES})
+        add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
-        set_target_properties ("${arg_TARGET}" PROPERTIES
+        set_target_properties (${arg_TARGET} PROPERTIES
             CXX_STANDARD 11
             CXX_STANDARD_REQUIRED Yes
             PUBLIC_HEADER "${arg_INCLUDES}"
         )
 
-        pstore_enable_warnings ("${arg_TARGET}")
-        add_pstore_additional_compiler_flags ("${arg_TARGET}")
+        pstore_enable_warnings (${arg_TARGET})
+        add_pstore_additional_compiler_flags (${arg_TARGET})
 
-        target_include_directories ("${arg_TARGET}" PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-
-        install (
-	    TARGETS "${arg_TARGET}"
-            ARCHIVE DESTINATION lib/pstore
-            PUBLIC_HEADER DESTINATION "include/pstore/${arg_NAME}"
-            COMPONENT pstore
-	)
-
-        add_pstore_install_target ("install-${arg_TARGET}"
-            DEPENDS "${arg_TARGET}"
-            COMPONENT pstore
-	)
-        add_dependencies (install-pstore "${arg_TARGET}")
-
+        target_include_directories (${arg_TARGET} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
     endif (PSTORE_IS_INSIDE_LLVM)
 
-    set_target_properties ("${arg_TARGET}" PROPERTIES FOLDER "pstore libraries")
-    target_include_directories ("${arg_TARGET}" PUBLIC
+    install (
+        TARGETS ${arg_TARGET}
+        ARCHIVE DESTINATION lib/pstore
+        PUBLIC_HEADER DESTINATION "include/pstore/${arg_NAME}"
+        COMPONENT pstore
+    )
+    add_dependencies (install-pstore ${arg_TARGET})
+
+    set_target_properties (${arg_TARGET} PROPERTIES FOLDER "pstore libraries")
+    target_include_directories (${arg_TARGET} PUBLIC
         $<BUILD_INTERFACE:${PSTORE_ROOT_DIR}/include>
         $<INSTALL_INTERFACE:include>
     )
-
 endfunction (add_pstore_library)
 
 
@@ -341,70 +334,38 @@ endfunction (add_pstore_library)
 # add_pstore_executable
 #######################
 
-function (add_pstore_executable target_name)
+function (add_pstore_executable target)
     if (PSTORE_IS_INSIDE_LLVM)
-        add_llvm_executable ("${target_name}" ${ARGN})
-        add_pstore_additional_compiler_flags (${target_name})
+        add_llvm_executable (${target} ${ARGN})
+        add_pstore_additional_compiler_flags (${target})
     else ()
-        add_executable ("${target_name}" ${ARGN})
+        add_executable (${target} ${ARGN})
 
-        set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD 11)
-        set_property (TARGET "${target_name}" PROPERTY CXX_STANDARD_REQUIRED Yes)
-        pstore_enable_warnings (${target_name})
-        add_pstore_additional_compiler_flags (${target_name})
+        set_property (TARGET ${target} PROPERTY CXX_STANDARD 11)
+        set_property (TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED Yes)
+        pstore_enable_warnings (${target})
+        add_pstore_additional_compiler_flags (${target})
     endif (PSTORE_IS_INSIDE_LLVM)
 
-    set_target_properties ("${target_name}" PROPERTIES FOLDER "pstore executables")
+    set_target_properties (${target} PROPERTIES FOLDER "pstore executables")
     # On MSVC, link setargv.obj to support the two wildcards (? and *) on the command line.
     if (MSVC)
-        set_target_properties ("${target_name}" PROPERTIES LINK_FLAGS "setargv.obj")
+        set_target_properties (${target} PROPERTIES LINK_FLAGS "setargv.obj")
     endif ()
 endfunction (add_pstore_executable)
-
-
-###########################
-# add_pstore_install_target
-###########################
-
-function (add_pstore_install_target target)
-    cmake_parse_arguments (ARG "" "COMPONENT;PREFIX" "DEPENDS" ${ARGN})
-    if (ARG_COMPONENT)
-        set (component_option -DCMAKE_INSTALL_COMPONENT="${ARG_COMPONENT}")
-    endif()
-    if (ARG_PREFIX)
-        set (prefix_option -DCMAKE_INSTALL_PREFIX="${ARG_PREFIX}")
-    endif ()
-
-
-    add_custom_target (${target}
-        DEPENDS ${ARG_DEPENDS}
-        COMMAND "${CMAKE_COMMAND}"
-                ${component_option}
-                ${prefix_option}
-                -P "${CMAKE_BINARY_DIR}/cmake_install.cmake"
-        USES_TERMINAL
-    )
-    set_target_properties ("${target}" PROPERTIES FOLDER "pstore install")
-endfunction (add_pstore_install_target)
 
 
 #################
 # add_pstore_tool
 #################
 # add_pstore_tool is a wrapper for add_pstore_executable which also creates an
-# install target. Call this instead of add_pstore_executable to create a target for an executable
-# that is to be installed.
+# install target. Call this instead of add_pstore_executable to create a target
+# for an executable that is to be installed.
 
 function (add_pstore_tool name)
     add_pstore_executable (${name} ${ARGN})
 
-    install (TARGETS ${name}
-             RUNTIME DESTINATION bin
-             COMPONENT pstore)
-
-    add_pstore_install_target (install-${name}
-                               DEPENDS ${name}
-                               COMPONENT pstore)
+    install (TARGETS ${name} RUNTIME DESTINATION bin COMPONENT pstore)
     add_dependencies (install-pstore ${name})
 endfunction (add_pstore_tool)
 
@@ -415,7 +376,7 @@ endfunction (add_pstore_tool)
 
 function (add_pstore_example name)
     add_pstore_executable (example-${name} ${ARGN})
-    set_target_properties (example-${name} PROPERTIES EXCLUDE_FROM_ALL 1)
+    set_target_properties (example-${name} PROPERTIES EXCLUDE_FROM_ALL Yes)
     set_target_properties (example-${name} PROPERTIES FOLDER "pstore examples")
     target_link_libraries (example-${name} PRIVATE pstore-core)
 endfunction (add_pstore_example)

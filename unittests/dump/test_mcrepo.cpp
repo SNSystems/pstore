@@ -163,7 +163,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
             compilation_member{pstore::index::digest{28U},
                                pstore::extent<pstore::repo::fragment> (
                                    pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-                               name, linkage_type::internal};
+                               name, linkage_type::internal, visibility_type::default_visibility};
     }
 
     std::array<pstore::typed_address<compilation_member>, 1> dependents{{addr}};
@@ -184,7 +184,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     value->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (19U, lines.size ());
+    ASSERT_EQ (20U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -211,6 +211,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
                  ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "foo"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "internal"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("visibility", ":", "default"));
 }
 
 TEST_F (MCRepoFixture, DumpCompilation) {
@@ -223,7 +225,8 @@ TEST_F (MCRepoFixture, DumpCompilation) {
         {pstore::index::digest{28U},
          pstore::extent<pstore::repo::fragment> (
              pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-         this->store_str (transaction, "main"), linkage_type::external}};
+         this->store_str (transaction, "main"), linkage_type::external,
+         visibility_type::hidden_visibility}};
     auto compilation = compilation::load (
         *db_, compilation::alloc (transaction, this->store_str (transaction, "/home/user/"),
                                   this->store_str (transaction, "machine-vendor-os"),
@@ -234,7 +237,7 @@ TEST_F (MCRepoFixture, DumpCompilation) {
     addr->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (7U, lines.size ());
+    ASSERT_EQ (8U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("members", ":"));
@@ -244,6 +247,7 @@ TEST_F (MCRepoFixture, DumpCompilation) {
                  ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "main"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "external"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("visibility", ":", "hidden"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("path", ":", "/home/user/"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("triple", ":", "machine-vendor-os"));
