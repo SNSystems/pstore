@@ -68,7 +68,7 @@ namespace pstore {
         value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
                                        gsl::czstring triple, bool hex_mode);
 
-        value_ptr make_value (repo::linkage_type t);
+        value_ptr make_value (repo::linkage l);
         value_ptr make_value (repo::visibility_type t);
         value_ptr make_value (database const & db, repo::compilation_member const & member);
         value_ptr make_value (database const & db,

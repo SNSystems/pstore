@@ -52,7 +52,7 @@
 namespace pstore {
     namespace repo {
 
-#define PSTORE_REPO_LINKAGE_TYPES                                                                  \
+#define PSTORE_REPO_LINKAGES                                                                       \
     X (append)                                                                                     \
     X (common)                                                                                     \
     X (external)                                                                                   \
@@ -64,10 +64,10 @@ namespace pstore {
     X (weak_odr)
 
 #define X(a) a,
-        enum class linkage_type : std::uint8_t { PSTORE_REPO_LINKAGE_TYPES };
+        enum class linkage : std::uint8_t { PSTORE_REPO_LINKAGES };
 #undef X
 
-        std::ostream & operator<< (std::ostream & os, linkage_type l);
+        std::ostream & operator<< (std::ostream & os, linkage l);
 
 #define PSTORE_REPO_VISIBILITY_TYPES                                                               \
     X (default_visibility)                                                                         \
@@ -94,7 +94,7 @@ namespace pstore {
             /// \param l  The symbol linkage.
             /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
-                                typed_address<indirect_string> n, linkage_type l,
+                                typed_address<indirect_string> n, linkage l,
                                 visibility_type v = visibility_type::default_visibility)
                     : digest{d}
                     , fext{x}
@@ -107,7 +107,7 @@ namespace pstore {
             /// The extent of the fragment referenced by this compilation symbol.
             extent<fragment> fext;
             typed_address<indirect_string> name;
-            linkage_type linkage;
+            repo::linkage linkage;
             visibility_type visibility;
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;

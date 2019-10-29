@@ -47,12 +47,12 @@
 
 using namespace pstore::repo;
 
-std::ostream & pstore::repo::operator<< (std::ostream & os, linkage_type l) {
+std::ostream & pstore::repo::operator<< (std::ostream & os, linkage l) {
     char const * str = "unknown";
     switch (l) {
 #define X(a)                                                                                       \
-    case linkage_type::a: str = #a; break;
-        PSTORE_REPO_LINKAGE_TYPES
+    case linkage::a: str = #a; break;
+        PSTORE_REPO_LINKAGES
 #undef X
     }
     return os << str;
