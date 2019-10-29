@@ -177,12 +177,12 @@ namespace pstore {
 #undef X
         }
 
-        value_ptr make_value (repo::linkage_type t) {
+        value_ptr make_value (repo::linkage l) {
 #define X(a)                                                                                       \
-    case (repo::linkage_type::a): name = #a; break;
+    case (repo::linkage::a): name = #a; break;
 
             char const * name = "*unknown*";
-            switch (t) { PSTORE_REPO_LINKAGE_TYPES }
+            switch (l) { PSTORE_REPO_LINKAGES }
             return make_value (name);
 #undef X
         }
