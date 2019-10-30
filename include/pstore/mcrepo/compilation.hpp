@@ -95,7 +95,7 @@ namespace pstore {
             /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
                                 typed_address<indirect_string> n, linkage l,
-                                visibility v = visibility::default_vis)
+                                visibility v = repo::visibility::default_vis)
                     : digest{d}
                     , fext{x}
                     , name{n}
