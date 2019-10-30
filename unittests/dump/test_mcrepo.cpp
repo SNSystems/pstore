@@ -163,7 +163,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
             compilation_member{pstore::index::digest{28U},
                                pstore::extent<pstore::repo::fragment> (
                                    pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-                               name, linkage::internal, visibility_type::default_visibility};
+                               name, linkage::internal, visibility::default_vis};
     }
 
     std::array<pstore::typed_address<compilation_member>, 1> dependents{{addr}};
@@ -225,8 +225,7 @@ TEST_F (MCRepoFixture, DumpCompilation) {
         {pstore::index::digest{28U},
          pstore::extent<pstore::repo::fragment> (
              pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-         this->store_str (transaction, "main"), linkage::external,
-         visibility_type::hidden_visibility}};
+         this->store_str (transaction, "main"), linkage::external, visibility::hidden_vis}};
     auto compilation = compilation::load (
         *db_, compilation::alloc (transaction, this->store_str (transaction, "/home/user/"),
                                   this->store_str (transaction, "machine-vendor-os"),

@@ -84,7 +84,7 @@ TEST_F (CompilationTest, SingleMember) {
         pstore::typed_address<pstore::repo::fragment>::make (3), 5U);
     constexpr auto name = indirect_string_address (32U);
     constexpr auto linkage = pstore::repo::linkage::external;
-    constexpr auto visibility = pstore::repo::visibility_type::protected_visibility;
+    constexpr auto visibility = pstore::repo::visibility::protected_vis;
 
     compilation_member sm{digest, extent, name, linkage, visibility};
 
@@ -116,7 +116,7 @@ TEST_F (CompilationTest, MultipleMembers) {
         pstore::typed_address<pstore::repo::fragment>::make (2), 2U);
     constexpr auto name = indirect_string_address (16U);
     constexpr auto linkage = pstore::repo::linkage::external;
-    constexpr auto visibility = pstore::repo::visibility_type::default_visibility;
+    constexpr auto visibility = pstore::repo::visibility::default_vis;
 
     compilation_member mm1{digest1, extent1, name, linkage, visibility};
     compilation_member mm2{digest2, extent2, name + 24U, linkage, visibility};

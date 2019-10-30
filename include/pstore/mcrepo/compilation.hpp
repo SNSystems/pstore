@@ -70,12 +70,12 @@ namespace pstore {
         std::ostream & operator<< (std::ostream & os, linkage l);
 
 #define PSTORE_REPO_VISIBILITY_TYPES                                                               \
-    X (default_visibility)                                                                         \
-    X (hidden_visibility)                                                                          \
-    X (protected_visibility)
+    X (default_vis)                                                                                \
+    X (hidden_vis)                                                                                 \
+    X (protected_vis)
 
 #define X(a) a,
-        enum class visibility_type : std::uint8_t { PSTORE_REPO_VISIBILITY_TYPES };
+        enum class visibility : std::uint8_t { PSTORE_REPO_VISIBILITY_TYPES };
 #undef X
 
         //*                    _ _      _   _                            _              *
@@ -95,7 +95,7 @@ namespace pstore {
             /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
                                 typed_address<indirect_string> n, linkage l,
-                                visibility_type v = visibility_type::default_visibility)
+                                visibility v = visibility::default_vis)
                     : digest{d}
                     , fext{x}
                     , name{n}
@@ -108,7 +108,7 @@ namespace pstore {
             extent<fragment> fext;
             typed_address<indirect_string> name;
             repo::linkage linkage;
-            visibility_type visibility;
+            repo::visibility visibility;
             std::uint16_t padding1 = 0;
             std::uint32_t padding2 = 0;
 

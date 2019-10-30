@@ -187,12 +187,12 @@ namespace pstore {
 #undef X
         }
 
-        value_ptr make_value (repo::visibility_type v) {
+        value_ptr make_value (repo::visibility v) {
             char const * name = "*unknown*";
             switch (v) {
-            case repo::visibility_type::default_visibility: name = "default"; break;
-            case repo::visibility_type::hidden_visibility: name = "hidden"; break;
-            case repo::visibility_type::protected_visibility: name = "protected"; break;
+            case repo::visibility::default_vis: name = "default"; break;
+            case repo::visibility::hidden_vis: name = "hidden"; break;
+            case repo::visibility::protected_vis: name = "protected"; break;
             }
             return make_value (name);
         }

@@ -69,7 +69,7 @@ namespace pstore {
                                        gsl::czstring triple, bool hex_mode);
 
         value_ptr make_value (repo::linkage l);
-        value_ptr make_value (repo::visibility_type t);
+        value_ptr make_value (repo::visibility v);
         value_ptr make_value (database const & db, repo::compilation_member const & member);
         value_ptr make_value (database const & db,
                               std::shared_ptr<repo::compilation const> const & compilation);
