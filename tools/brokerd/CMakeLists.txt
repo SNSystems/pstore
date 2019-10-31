@@ -99,7 +99,7 @@ else ()
     # pstore_broker_service
     #######################
     if (WIN32)
-        add_subdirectory (service)
+        add_subdirectory (win32)
     endif ()
 
 endif ()
