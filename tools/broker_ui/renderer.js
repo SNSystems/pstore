@@ -68,6 +68,8 @@ function message_received (msg) {
     const obj = JSON.parse(msg.data);
     if (obj.hasOwnProperty('uptime')) {
         document.getElementById ('uptime').textContent = obj.uptime;
+        let d = moment.duration(obj.uptime, 'seconds').humanize();
+        $('#uptime').text (d);
     }
     if (obj.hasOwnProperty('commits')) {
         commits = obj.commits;
