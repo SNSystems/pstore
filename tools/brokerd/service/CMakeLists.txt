@@ -1,0 +1,5 @@
+if (WIN32)
+    add_subdirectory (win32)
+else ()
+    add_subdirectory (init)
+endif ()
