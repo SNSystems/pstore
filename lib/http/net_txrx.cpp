@@ -113,7 +113,7 @@ namespace pstore {
                         static_cast<size_type> (size) < std::numeric_limits<size_type>::max ());
 
                 if (::send (socket.native_handle (), reinterpret_cast<data_type> (s.data ()),
-                            static_cast<size_type> (s.size ()), 0 /*flags*/) < 0) {
+                            static_cast<size_type> (size), 0 /*flags*/) < 0) {
                     return result_type{get_last_error ()};
                 }
                 return result_type{socket};
