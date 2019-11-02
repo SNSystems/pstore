@@ -4,22 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <style>
-      .svg-container {
-        display: inline-block;
-        position: relative;
-        width: 100%;
-        padding-bottom: 100%;
-        vertical-align: middle;
-        overflow: hidden;
-      }
-      .svg-content {
-        display: inline-block;
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
-    </style>
     <title>pstore Status</title>
     <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="application.css">
@@ -30,10 +14,9 @@
     <div class="container">
       <div class="row">
         <div class="col">
-            <svg class="ui-text svg-content"
+            <svg class="ui-text"
                  xmlns="http://www.w3.org/2000/svg"
                  preserveAspectRatio="xMinYMin"
-                 viewBox="0 0 520 250"
                  width="520" height="250"
             ></svg>
         </div>
@@ -59,14 +42,16 @@
 
 
     <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css" /> -->
 
     <!-- Bootstrap Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script>let $ = require('jquery');</script>
     <script>let moment = require('moment');</script>
+
     <script>require('popper.js');</script>
     <script>require('bootstrap');</script>
+
     <script>
       // You can also require other files to run in this process
       var r = require('./renderer.js');

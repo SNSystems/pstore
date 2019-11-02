@@ -41,17 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-const {app, BrowserWindow, systemPreferences} = require ('electron');
+const {app, BrowserWindow, nativeTheme} = require ('electron');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let main_window;
 
 function dark_side () {
-    if (systemPreferences.isDarkMode !== undefined) {
-        main_window.webContents.send('dark-mode', systemPreferences.isDarkMode());
-    }
+    main_window.webContents.send('dark-mode', nativeTheme.shouldUseDarkColors);
 }
+nativeTheme.on('updated', dark_side);
 
 function createWindow () {
     // Create the browser window.
@@ -103,7 +102,3 @@ app.on('activate', function () {
         createWindow ()
     }
 });
-
-if (systemPreferences.subscribeNotification !== undefined) {
-    systemPreferences.subscribeNotification('AppleInterfaceThemeChangedNotification', dark_side);
-}

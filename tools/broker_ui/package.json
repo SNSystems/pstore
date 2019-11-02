@@ -6,14 +6,17 @@
   "productName": "pstore Broker UI",
   "main": "./main.js",
   "version": "1.0.0",
-  "repository": "github:SNSystems/pstore",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/SNSystems/pstore"
+  },
   "scripts": {
     "start": "electron ."
   },
   "dependencies": {
     "bootstrap": "^4.3.1",
     "d3": "^5.11.0",
-    "electron": "6.0.10",
+    "electron": "^7.0.0",
     "jquery": "^3.3.1",
     "moment": "^2.24.0",
     "popper.js": "^1.12.3"
