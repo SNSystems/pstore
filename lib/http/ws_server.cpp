@@ -46,9 +46,9 @@
 namespace pstore {
     namespace httpd {
 
-        char const * ws_error_category::name () const noexcept { return "ws-error"; }
+        auto ws_error_category::name () const noexcept -> char const * { return "ws-error"; }
 
-        std::string ws_error_category::message (int error) const {
+        auto ws_error_category::message (int error) const -> std::string {
             switch (static_cast<ws_error> (error)) {
             case ws_error::reserved_bit_set:
                 return "One of a client frame's reserved bits was unexpectedly set";
@@ -60,7 +60,7 @@ namespace pstore {
             return "Unknown error";
         }
 
-        std::error_code make_error_code (ws_error e) {
+        auto make_error_code (ws_error e) -> std::error_code {
             static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                            "base type of ws_error must be int to permit safe static cast");
             static ws_error_category category;
@@ -68,7 +68,7 @@ namespace pstore {
         }
 
 
-        char const * opcode_name (opcode op) noexcept {
+        auto opcode_name (opcode op) noexcept -> char const * {
             switch (op) {
             case opcode::continuation: return "continuation";
             case opcode::text: return "text";
@@ -91,7 +91,7 @@ namespace pstore {
             return "unknown";
         }
 
-        bool is_valid_close_status_code (std::uint16_t code) noexcept {
+        auto is_valid_close_status_code (std::uint16_t code) noexcept -> bool {
             switch (static_cast<close_status_code> (code)) {
             case close_status_code::going_away:
             case close_status_code::internal_error:

@@ -92,12 +92,12 @@ namespace pstore {
             // The need for this constructor was removed by CWG defect 253 but Clang (prior
             // to 3.9.0) and GCC (before 4.6.4) require its presence.
             ws_error_category () noexcept {} // NOLINT
-            char const * name () const noexcept override;
-            std::string message (int error) const override;
+            auto name () const noexcept -> char const * override;
+            auto message (int error) const -> std::string override;
         };
 
 
-        std::error_code make_error_code (ws_error e);
+        auto make_error_code (ws_error e) -> std::error_code;
 
     } // end namespace httpd
 } // end namespace pstore
@@ -171,9 +171,9 @@ namespace pstore {
             unknown = 0xFF,
         };
 
-        char const * opcode_name (opcode op) noexcept;
+        auto opcode_name (opcode op) noexcept -> char const *;
 
-        inline bool is_control_frame_opcode (opcode c) noexcept {
+        inline auto is_control_frame_opcode (opcode c) noexcept -> bool {
             return (static_cast<unsigned> (c) & 0x08U) != 0U;
         }
 
@@ -199,7 +199,7 @@ namespace pstore {
             tls_handshake = 1015,    // TLS handshake
         };
 
-        bool is_valid_close_status_code (std::uint16_t code) noexcept;
+        auto is_valid_close_status_code (std::uint16_t code) noexcept -> bool;
 
 
         struct frame {
