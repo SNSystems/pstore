@@ -91,7 +91,7 @@ namespace pstore {
             return "unknown";
         }
 
-        bool is_valid_close_status_code (std::uint16_t code) {
+        bool is_valid_close_status_code (std::uint16_t code) noexcept {
             switch (static_cast<close_status_code> (code)) {
             case close_status_code::going_away:
             case close_status_code::internal_error:
@@ -111,11 +111,7 @@ namespace pstore {
             case close_status_code::tls_handshake:
             case close_status_code::try_again: return false;
             }
-
-            if (code >= 3000 && code < 5000) {
-                return true;
-            }
-            return false;
+            return code >= 3000 && code < 5000;
         }
 
     } // end namespace httpd

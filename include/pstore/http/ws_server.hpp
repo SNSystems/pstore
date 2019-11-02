@@ -199,7 +199,7 @@ namespace pstore {
             tls_handshake = 1015,    // TLS handshake
         };
 
-        bool is_valid_close_status_code (std::uint16_t code);
+        bool is_valid_close_status_code (std::uint16_t code) noexcept;
 
 
         struct frame {
