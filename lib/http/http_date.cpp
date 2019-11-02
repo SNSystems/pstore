@@ -45,8 +45,8 @@
 
 #include <algorithm>
 #include <array>
-#include <sstream>
 #include <iomanip>
+#include <sstream>
 
 #include "pstore/support/time.hpp"
 
