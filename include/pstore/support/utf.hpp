@@ -193,24 +193,21 @@ namespace pstore {
         auto code_point_to_utf8 (char32_t c, OutputIt out) -> OutputIt {
             if (c < 0x80) {
                 *(out++) = static_cast<CharType> (c);
+            } else if (c < 0x800) {
+                *(out++) = static_cast<CharType> (c / 64U + 0xC0U);
+                *(out++) = static_cast<CharType> (c % 64U + 0x80U);
+            } else if ((c >= 0xD800 && c < 0xE000) || c >= 0x110000) {
+                out = replacement_char<CharType> (out);
+            } else if (c < 0x10000) {
+                *(out++) = static_cast<CharType> ((c / 0x1000U) | 0xE0U);
+                *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
+                *(out++) = static_cast<CharType> ((c % 64U) | 0x80U);
             } else {
-                if (c < 0x800) {
-                    *(out++) = static_cast<CharType> (c / 64U + 0xC0U);
-                    *(out++) = static_cast<CharType> (c % 64U + 0x80U);
-                } else if (c >= 0xD800 && c < 0xE000) {
-                    out = replacement_char<CharType> (out);
-                } else if (c < 0x10000) {
-                    *(out++) = static_cast<CharType> ((c / 0x1000U) | 0xE0U);
-                    *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
-                    *(out++) = static_cast<CharType> ((c % 64U) | 0x80U);
-                } else if (c < 0x110000) {
-                    *(out++) = static_cast<CharType> ((c / 0x40000U) | 0xF0U);
-                    *(out++) = static_cast<CharType> ((c / 0x1000U % 64U) | 0x80U);
-                    *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
-                    *(out++) = static_cast<CharType> ((c % 64U) | 0x80U);
-                } else {
-                    out = replacement_char<CharType> (out);
-                }
+                assert (c < 0x110000);
+                *(out++) = static_cast<CharType> ((c / 0x40000U) | 0xF0U);
+                *(out++) = static_cast<CharType> ((c / 0x1000U % 64U) | 0x80U);
+                *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
+                *(out++) = static_cast<CharType> ((c % 64U) | 0x80U);
             }
             return out;
         }
