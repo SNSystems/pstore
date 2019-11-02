@@ -55,14 +55,14 @@
 namespace pstore {
     namespace utf {
 
-        std::size_t length (char const * str, std::size_t nbytes) {
+        auto length (char const * str, std::size_t nbytes) -> std::size_t {
             if (str == nullptr) {
                 return 0;
             }
             return length (str, str + nbytes);
         }
 
-        std::size_t length (::pstore::gsl::czstring str) {
+        auto length (gsl::czstring str) -> std::size_t {
             if (str == nullptr) {
                 return 0;
             }
@@ -74,7 +74,7 @@ namespace pstore {
         // ~~~~~
         // returns a pointer to the beginning of the pos'th utf8 codepoint
         // in the buffer at s
-        char const * index (::pstore::gsl::czstring str, std::size_t pos) {
+        auto index (gsl::czstring str, std::size_t pos) -> char const * {
             if (str == nullptr) {
                 return nullptr;
             }
@@ -86,8 +86,8 @@ namespace pstore {
         // slice
         // ~~~~~
         // converts codepoint indices start and end to byte offsets in the buffer at s
-        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (::pstore::gsl::czstring s,
-                                                         std::ptrdiff_t start, std::ptrdiff_t end) {
+        auto slice (gsl::czstring s, std::ptrdiff_t start, std::ptrdiff_t end)
+            -> std::pair<std::ptrdiff_t, std::ptrdiff_t> {
             if (s == nullptr) {
                 return std::make_pair (-1, -1);
             }
@@ -173,16 +173,16 @@ namespace pstore {
                     1,   1,   1,   1,   1,   1,   1,   1,   1,   1, // s7..s8
         };
 
-        std::uint8_t utf8_decoder::decode (gsl::not_null<std::uint8_t *> state,
-                                           gsl::not_null<char32_t *> codep,
-                                           std::uint32_t const byte) noexcept {
+        auto utf8_decoder::decode (gsl::not_null<std::uint8_t *> state,
+                                   gsl::not_null<char32_t *> codep, std::uint32_t byte) noexcept
+            -> std::uint8_t {
             auto const type = utf8d_[byte];
             *codep = (*state != accept) ? (byte & 0x3FU) | (*codep << 6U) : (0xFFU >> type) & byte;
             *state = utf8d_[256 + *state * 16 + type];
             return *state;
         }
 
-        maybe<char32_t> utf8_decoder::get (std::uint8_t byte) noexcept {
+        auto utf8_decoder::get (std::uint8_t byte) noexcept -> maybe<char32_t> {
             if (decode (&state_, &codepoint_, byte)) {
                 well_formed_ = false;
                 return nothing<char32_t> ();

@@ -157,19 +157,19 @@ namespace pstore {
         using utf8_string = std::basic_string<std::uint8_t>;
         using utf16_string = std::basic_string<char16_t>;
 
-        std::ostream & operator<< (std::ostream & os, utf8_string const & s);
+        auto operator<< (std::ostream & os, utf8_string const & s) -> std::ostream &;
 
         class utf8_decoder {
         public:
-            maybe<char32_t> get (std::uint8_t c) noexcept;
-            bool is_well_formed () const noexcept { return well_formed_; }
+            auto get (std::uint8_t c) noexcept -> maybe<char32_t>;
+            auto is_well_formed () const noexcept -> bool { return well_formed_; }
 
         private:
             enum state { accept, reject };
 
-            static std::uint8_t decode (gsl::not_null<std::uint8_t *> state,
-                                        gsl::not_null<char32_t *> codep,
-                                        std::uint32_t const byte) noexcept;
+            static auto decode (gsl::not_null<std::uint8_t *> state,
+                                gsl::not_null<char32_t *> codep, std::uint32_t byte) noexcept
+                -> std::uint8_t;
 
             static std::uint8_t const utf8d_[];
             char32_t codepoint_ = 0;
@@ -181,16 +181,16 @@ namespace pstore {
         constexpr char32_t replacement_char_code_point = 0xFFFD;
 
         template <typename CharType = char, typename OutputIt>
-        OutputIt code_point_to_utf8 (char32_t c, OutputIt out);
+        auto code_point_to_utf8 (char32_t c, OutputIt out) -> OutputIt;
 
 
         template <typename CharType = char, typename OutputIt>
-        OutputIt replacement_char (OutputIt out) {
+        auto replacement_char (OutputIt out) -> OutputIt {
             return code_point_to_utf8<CharType> (replacement_char_code_point, out);
         }
 
         template <typename CharType, typename OutputIt>
-        OutputIt code_point_to_utf8 (char32_t c, OutputIt out) {
+        auto code_point_to_utf8 (char32_t c, OutputIt out) -> OutputIt {
             if (c < 0x80) {
                 *(out++) = static_cast<CharType> (c);
             } else {
@@ -216,32 +216,32 @@ namespace pstore {
         }
 
         template <typename ResultType>
-        ResultType code_point_to_utf8 (char32_t c) {
+        auto code_point_to_utf8 (char32_t c) -> ResultType {
             ResultType result;
             code_point_to_utf8<typename ResultType::value_type> (c, std::back_inserter (result));
             return result;
         }
 
-        inline constexpr std::uint16_t nop_swapper (std::uint16_t v) noexcept { return v; }
-        inline constexpr std::uint16_t byte_swapper (std::uint16_t v) noexcept {
+        inline constexpr auto nop_swapper (std::uint16_t v) noexcept -> std::uint16_t { return v; }
+        inline constexpr auto byte_swapper (std::uint16_t v) noexcept -> std::uint16_t {
             return static_cast<std::uint16_t> (((v & 0x00FFU) << 8U) | ((v & 0xFF00U) >> 8U));
         }
 
-        inline constexpr bool is_utf16_high_surrogate (std::uint16_t code_unit) noexcept {
+        inline constexpr auto is_utf16_high_surrogate (std::uint16_t code_unit) noexcept -> bool {
             return code_unit >= 0xD800 && code_unit <= 0xDBFF;
         }
 
         // is_utf16_low_surrogate
         // ~~~~~~~~~~~~~~~~~~~~~~
-        inline constexpr bool is_utf16_low_surrogate (std::uint16_t code_unit) noexcept {
+        inline constexpr auto is_utf16_low_surrogate (std::uint16_t code_unit) noexcept -> bool {
             return code_unit >= 0xDC00 && code_unit <= 0xDFFF;
         }
 
         // utf16_to_code_point
         // ~~~~~~~~~~~~~~~~~~~
         template <typename InputIterator, typename SwapperFunction>
-        std::pair<InputIterator, char32_t>
-        utf16_to_code_point (InputIterator first, InputIterator last, SwapperFunction swapper) {
+        auto utf16_to_code_point (InputIterator first, InputIterator last, SwapperFunction swapper)
+            -> std::pair<InputIterator, char32_t> {
 
             using value_type = typename std::remove_cv<
                 typename std::iterator_traits<InputIterator>::value_type>::type;
@@ -275,7 +275,8 @@ namespace pstore {
         // utf16_to_code_points
         // ~~~~~~~~~~~~~~~~~~~~
         template <typename InputIt, typename OutputIt, typename Swapper>
-        OutputIt utf16_to_code_points (InputIt first, InputIt last, OutputIt out, Swapper swapper) {
+        auto utf16_to_code_points (InputIt first, InputIt last, OutputIt out, Swapper swapper)
+            -> OutputIt {
             while (first != last) {
                 char32_t code_point;
                 std::tie (first, code_point) = utf16_to_code_point (first, last, swapper);
@@ -285,14 +286,14 @@ namespace pstore {
         }
 
         template <typename ResultType, typename InputIt, typename Swapper>
-        ResultType utf16_to_code_points (InputIt first, InputIt last, Swapper swapper) {
+        auto utf16_to_code_points (InputIt first, InputIt last, Swapper swapper) -> ResultType {
             ResultType result;
             utf16_to_code_points (first, last, std::back_inserter (result), swapper);
             return result;
         }
 
         template <typename ResultType, typename InputType, typename Swapper>
-        ResultType utf16_to_code_points (InputType const & src, Swapper swapper) {
+        auto utf16_to_code_points (InputType const & src, Swapper swapper) -> ResultType {
             return utf16_to_code_points<ResultType> (std::begin (src), std::end (src), swapper);
         }
 
@@ -300,7 +301,7 @@ namespace pstore {
         // utf16_to_code_point
         // ~~~~~~~~~~~~~~~~~~~
         template <typename InputType, typename Swapper>
-        char32_t utf16_to_code_point (InputType const & src, Swapper swapper) {
+        auto utf16_to_code_point (InputType const & src, Swapper swapper) -> char32_t {
             auto end = std::end (src);
             char32_t cp;
             std::tie (end, cp) = utf16_to_code_point (std::begin (src), end, swapper);
@@ -312,7 +313,8 @@ namespace pstore {
         // utf16_to_utf8
         // ~~~~~~~~~~~~~
         template <typename InputIt, typename OutputIt, typename Swapper>
-        OutputIt utf16_to_utf8 (InputIt first, InputIt last, OutputIt out, Swapper swapper) {
+        auto utf16_to_utf8 (InputIt first, InputIt last, OutputIt out, Swapper swapper)
+            -> OutputIt {
             while (first != last) {
                 char32_t code_point;
                 std::tie (first, code_point) = utf16_to_code_point (first, last, swapper);
@@ -322,14 +324,14 @@ namespace pstore {
         }
 
         template <typename ResultType, typename InputIt, typename Swapper>
-        ResultType utf16_to_utf8 (InputIt first, InputIt last, Swapper swapper) {
+        auto utf16_to_utf8 (InputIt first, InputIt last, Swapper swapper) -> ResultType {
             ResultType result;
             utf16_to_utf8 (first, last, std::back_inserter (result), swapper);
             return result;
         }
 
         template <typename ResultType, typename InputType, typename Swapper>
-        ResultType utf16_to_utf8 (InputType const & src, Swapper swapper) {
+        auto utf16_to_utf8 (InputType const & src, Swapper swapper) -> ResultType {
             return utf16_to_utf8<ResultType> (std::begin (src), std::end (src), swapper);
         }
 
@@ -344,7 +346,7 @@ namespace pstore {
         /// and is skipped; other patterns in these top two bits represent the
         /// start of a character.
         template <typename CharType>
-        inline constexpr bool is_utf_char_start (CharType c) {
+        inline constexpr auto is_utf_char_start (CharType c) noexcept -> bool {
             using uchar_type = typename std::make_unsigned<CharType>::type;
             return (static_cast<uchar_type> (c) & 0xC0U) != 0x80U;
         }
@@ -353,7 +355,7 @@ namespace pstore {
         /// Returns the number of UTF-8 code-points in a sequence.
 
         template <typename Iterator>
-        std::size_t length (Iterator first, Iterator last) {
+        auto length (Iterator first, Iterator last) -> std::size_t {
             auto const result =
                 std::count_if (first, last, [](char c) { return is_utf_char_start (c); });
             assert (result >= 0);
@@ -365,7 +367,7 @@ namespace pstore {
         }
 
         template <typename SpanType>
-        std::size_t length (SpanType span) {
+        auto length (SpanType span) -> std::size_t {
             return length (span.begin (), span.end ());
         }
 
@@ -374,12 +376,12 @@ namespace pstore {
         /// \param str  The buffer start address.
         /// \param nbytes The number of bytes in the buffer.
         /// \return The number of UTF-8 code points in the buffer given by 'str' and 'nbytes'.
-        std::size_t length (char const * str, std::size_t nbytes);
+        auto length (char const * str, std::size_t nbytes) -> std::size_t;
 
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
-        std::size_t length (gsl::czstring str);
+        auto length (gsl::czstring str) -> std::size_t;
 
-        inline std::size_t length (std::nullptr_t) noexcept { return 0; }
+        inline auto length (std::nullptr_t) noexcept -> std::size_t { return 0; }
         ///@}
 
         ///@{
@@ -387,7 +389,7 @@ namespace pstore {
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the buffer at str
-        char const * index (gsl::czstring str, std::size_t pos);
+        auto index (gsl::czstring str, std::size_t pos) -> char const *;
 
         /// Returns an iterator to the beginning of the pos'th UTF-8 codepoint
         /// in the range given by first and last.
@@ -398,7 +400,7 @@ namespace pstore {
         /// \returns  An iterator that is 'pos' codepoints after the start of the range or
         ///           'last' if the end of the range was encountered.
         template <typename InputIterator>
-        InputIterator index (InputIterator first, InputIterator last, std::size_t pos) {
+        auto index (InputIterator first, InputIterator last, std::size_t pos) -> InputIterator {
             auto start_count = std::size_t{0};
             return std::find_if (first, last, [&start_count, pos](char c) {
                 return is_utf_char_start (c) ? (start_count++ == pos) : false;
@@ -408,7 +410,7 @@ namespace pstore {
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the supplied span.
         template <typename SpanType>
-        typename SpanType::element_type * index (SpanType span, std::size_t pos) {
+        auto index (SpanType span, std::size_t pos) -> typename SpanType::element_type * {
             auto end = span.end ();
             auto it = index (span.begin (), end, pos);
             return it == end ? nullptr : &*it;
@@ -417,7 +419,7 @@ namespace pstore {
         ///@}
 
 
-        /// Converts codepoint indices start and end to byte offsets in the buffer at str
+        /// Converts codepoint indices start and end to byte offsets in the buffer at \p str.
         ///
         /// \param str    A UTF-8 encoded character string.
         /// \param start  The code-point index of the start of a character range within the string
@@ -426,8 +428,8 @@ namespace pstore {
         /// 'str'.
         /// \return A pair containing the the byte offset of the start UTF-8 code-unit and the byte
         /// offset of the end UTF-8 code-unit. Either value may be -1 if they were out-of-range.
-        std::pair<std::ptrdiff_t, std::ptrdiff_t> slice (char const * str, std::ptrdiff_t start,
-                                                         std::ptrdiff_t end);
+        auto slice (char const * str, std::ptrdiff_t start, std::ptrdiff_t end)
+            -> std::pair<std::ptrdiff_t, std::ptrdiff_t>;
 
 
         using native_string = std::basic_string<TCHAR>;
@@ -435,32 +437,40 @@ namespace pstore {
 
 #if defined(_WIN32)
 #    if defined(_UNICODE)
-        inline std::wstring to_native_string (std::string const & str) {
+        inline auto to_native_string (std::string const & str) -> std::wstring {
             return utf::win32::to16 (str);
         }
-        inline std::wstring to_native_string (char const * str) { return utf::win32::to16 (str); }
-        inline std::string from_native_string (std::wstring const & str) {
+        inline auto to_native_string (char const * str) -> std::wstring {
+            return utf::win32::to16 (str);
+        }
+        inline auto from_native_string (std::wstring const & str) -> std::string {
             return utf::win32::to8 (str);
         }
-        inline std::string from_native_string (wchar_t const * str) {
+        inline auto from_native_string (wchar_t const * str) -> std::string {
             return utf::win32::to8 (str);
         }
 #    else
         // This is Windows in "Multibyte character set" mode.
-        inline std::string to_native_string (std::string const & str) {
+        inline auto to_native_string (std::string const & str) -> std::string {
             return win32::to_mbcs (str);
         }
-        inline std::string to_native_string (char const * str) { return win32::to_mbcs (str); }
+        inline auto to_native_string (char const * str) -> std::string {
+            return win32::to_mbcs (str);
+        }
 #    endif //_UNICODE
-        inline std::string from_native_string (std::string const & str) {
+        inline auto from_native_string (std::string const & str) -> std::string {
             return win32::mbcs_to8 (str);
         }
-        inline std::string from_native_string (char const * str) { return win32::mbcs_to8 (str); }
+        inline auto from_native_string (char const * str) -> std::string {
+            return win32::mbcs_to8 (str);
+        }
 #else //_WIN32
-        inline constexpr std::string const & to_native_string (std::string const & str) noexcept {
+        inline constexpr auto to_native_string (std::string const & str) noexcept
+            -> std::string const & {
             return str;
         }
-        inline constexpr std::string const & from_native_string (std::string const & str) noexcept {
+        inline constexpr auto from_native_string (std::string const & str) noexcept
+            -> std::string const & {
             return str;
         }
 #endif
