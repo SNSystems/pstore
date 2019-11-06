@@ -103,7 +103,8 @@ TEST (HttpdBufferedReader, GetcThenEOF) {
     {
         getc_result_type const c2 = br.getc (io);
         ASSERT_TRUE (static_cast<bool> (c2));
-        io = std::get<0> (*c2);
+        // Uncomment the next line if adding further blocks to this test!
+        //io = std::get<0> (*c2);
         maybe<char> const char2 = std::get<1> (*c2);
         ASSERT_FALSE (char2.has_value ());
     }
