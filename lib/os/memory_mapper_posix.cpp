@@ -67,6 +67,24 @@
 // pstore
 #    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
+#    include "pstore/support/quoted_string.hpp"
+
+namespace {
+
+    // 'offset' must be a multiple of the system page size and be safely castable to off_t.
+    off_t checked_offset (std::uint64_t offset) {
+        using namespace pstore;
+
+        if (offset % system_page_size ().get () != 0 ||
+            offset >
+                static_cast<std::make_unsigned<off_t>::type> (std::numeric_limits<off_t>::max ())) {
+            raise (std::errc::invalid_argument, "mmap");
+        }
+        return static_cast<off_t> (offset);
+    }
+
+} // end anonymous namespace
+
 
 namespace pstore {
     // MAP_ANONYMOUS isn't defined by POSIX, but both macOS and Linux support it.
@@ -144,19 +162,15 @@ namespace pstore {
     // ~~~~
     std::shared_ptr<void> memory_mapper::mmap (file::file_handle & file, bool write_enabled,
                                                std::uint64_t offset, std::uint64_t length) {
-
-        assert (offset % system_page_size ().get () == 0);
-        // TODO: should this function throw here rather than assert?
-        assert (offset < std::numeric_limits<off_t>::max ());
         void * ptr = ::mmap (nullptr, // base address
                              length,
                              PROT_READ | (write_enabled ? PROT_WRITE : 0), // protection flags
-                             MAP_SHARED, file.raw_handle (), static_cast<off_t> (offset));
+                             MAP_SHARED, file.raw_handle (), checked_offset (offset));
         void * map_failed = MAP_FAILED; // NOLINT
         if (ptr == map_failed) {
             int const last_error = errno;
             std::ostringstream message;
-            message << R"(Could not memory map file )" << file.path () << '\"';
+            message << "Could not memory map file " << quoted (file.path ());
             raise (errno_erc{last_error}, message.str ());
         }
 
