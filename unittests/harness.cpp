@@ -44,6 +44,7 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include <cstring>
 #include <memory>
 
 #if defined(_WIN32)
@@ -73,7 +74,7 @@
 
 namespace {
 
-    bool const loud_mode_enabled (int argc, char ** argv) {
+    bool loud_mode_enabled (int argc, char ** argv) {
         if (argc < 2) {
             return false;
         }
