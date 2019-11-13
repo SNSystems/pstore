@@ -83,6 +83,9 @@
 
 namespace {
 
+    using uoff_type = std::make_unsigned<off_t>::type;
+    static constexpr auto uoff_max = static_cast<uoff_type> (std::numeric_limits<off_t>::max ());
+
     template <typename MessageStr, typename PathStr>
     PSTORE_NO_RETURN void raise_file_error (int err, MessageStr message, PathStr path) {
         std::ostringstream str;
@@ -259,8 +262,7 @@ namespace pstore {
         void file_handle::seek (std::uint64_t position) {
             this->ensure_open ();
 
-            using common_type =
-                std::common_type<std::make_unsigned<off_t>::type, std::uint64_t>::type;
+            using common_type = std::common_type<uoff_type, std::uint64_t>::type;
             static constexpr auto max =
                 static_cast<common_type> (std::numeric_limits<off_t>::max ());
 
@@ -295,8 +297,10 @@ namespace pstore {
         // read_buffer
         // ~~~~~~~~~~~
         std::size_t file_handle::read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) {
-            // TODO: handle the case where nbytes > ssize_t max.
-            assert (nbytes <= std::numeric_limits<ssize_t>::max ());
+            if (nbytes > static_cast<std::make_unsigned<ssize_t>::type> (
+                             std::numeric_limits<ssize_t>::max ())) {
+                raise (std::errc::invalid_argument, "read_buffer");
+            }
             this->ensure_open ();
 
             ssize_t const r = ::read (file_, buffer.get (), nbytes);
@@ -343,9 +347,9 @@ namespace pstore {
         // ~~~~~~~~
         void file_handle::truncate (std::uint64_t size) {
             this->ensure_open ();
-            // TODO: should this function (and other, similar, functions) throw here rather than
-            // assert?
-            assert (size < std::numeric_limits<off_t>::max ());
+            if (size > uoff_max) {
+                raise (std::errc::invalid_argument, "truncate");
+            }
             if (::ftruncate (file_, static_cast<off_t> (size)) == -1) {
                 int const err = errno;
                 raise_file_error (err, "ftruncate failed", this->path ());
@@ -393,10 +397,10 @@ namespace pstore {
         // ~~~~
         bool file_handle::lock (std::uint64_t offset, std::size_t size, lock_kind kind,
                                 blocking_mode block) {
+            if (offset > uoff_max || size > uoff_max) {
+                raise (std::errc::invalid_argument, "lock");
+            }
             this->ensure_open ();
-
-            assert (offset < std::numeric_limits<off_t>::max ());
-            assert (size < std::numeric_limits<off_t>::max ());
 
             int cmd = 0;
             switch (block) {
@@ -433,11 +437,10 @@ namespace pstore {
         // unlock
         // ~~~~~~
         void file_handle::unlock (std::uint64_t offset, std::size_t size) {
+            if (offset > uoff_max || size > uoff_max) {
+                raise (std::errc::invalid_argument, "lock");
+            }
             this->ensure_open ();
-
-            assert (offset < std::numeric_limits<off_t>::max ());
-            assert (size < std::numeric_limits<off_t>::max ());
-
             if (file_handle::lock_reg (file_, F_SETLK,
                                        F_UNLCK, // release an existing lock
                                        static_cast<off_t> (offset), SEEK_SET,
