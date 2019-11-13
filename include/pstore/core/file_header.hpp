@@ -224,10 +224,10 @@ namespace pstore {
     /// updated once a transaction has been completely written to memory. Once written it is
     /// read-only.
     struct trailer {
-        static std::array<std::uint8_t, 8> default_signature1;
-        static std::array<std::uint8_t, 8> default_signature2;
+        static std::array<std::uint8_t, 8> const default_signature1;
+        static std::array<std::uint8_t, 8> const default_signature2;
 
-        bool crc_is_valid () const;
+        bool crc_is_valid () const noexcept;
         bool signature_is_valid () const noexcept;
 
         /// Checks that the address given by 'pos' appears to point to a valid transaction trailer.

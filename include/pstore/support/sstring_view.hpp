@@ -169,7 +169,7 @@ namespace pstore {
         using reverse_iterator = const_reverse_iterator;
         using size_type = std::size_t;
         using difference_type = std::ptrdiff_t;
-        static constexpr size_type const npos = size_type (-1);
+        static constexpr auto const npos = static_cast<size_type> (-1);
 
         // 7.3, sstring_view constructors and assignment operators
         constexpr sstring_view () noexcept

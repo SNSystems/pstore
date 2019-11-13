@@ -62,19 +62,18 @@
 
 namespace pstore {
 
+    //*  _                _          *
+    //* | |_  ___ __ _ __| |___ _ _  *
+    //* | ' \/ -_) _` / _` / -_) '_| *
+    //* |_||_\___\__,_\__,_\___|_|   *
+    //*                              *
     std::uint16_t const header::major_version;
     std::uint16_t const header::minor_version;
-    std::array<std::uint8_t, 4> const header::file_signature1{{
-        std::uint8_t ('p'),
-        std::uint8_t ('S'),
-        std::uint8_t ('t'),
-        std::uint8_t ('r'),
-    }};
+    std::array<std::uint8_t, 4> const header::file_signature1{{'p', 'S', 't', 'r'}};
     std::uint32_t const header::file_signature2;
 
-
-    // header
-    // ~~~~~~
+    // ctor
+    // ~~~~
     header::header ()
             : footer_pos () {
 
@@ -104,17 +103,21 @@ namespace pstore {
     std::uint32_t header::get_crc () const noexcept {
         return crc32 (::pstore::gsl::make_span (&this->a, 1));
     }
-} // namespace pstore
 
-namespace pstore {
-    std::array<std::uint8_t, 8> trailer::default_signature1{
+
+    //*  _            _ _          *
+    //* | |_ _ _ __ _(_) |___ _ _  *
+    //* |  _| '_/ _` | | / -_) '_| *
+    //*  \__|_| \__,_|_|_\___|_|   *
+    //*                            *
+    std::array<std::uint8_t, 8> const trailer::default_signature1{
         {'h', 'P', 'P', 'y', 'f', 'o', 'o', 'T'}};
-    std::array<std::uint8_t, 8> trailer::default_signature2{
+    std::array<std::uint8_t, 8> const trailer::default_signature2{
         {'h', 'P', 'P', 'y', 'T', 'a', 'i', 'l'}};
 
     // crc_is_valid
     // ~~~~~~~~~~~~
-    bool trailer::crc_is_valid () const {
+    bool trailer::crc_is_valid () const noexcept {
 #if PSTORE_CRC_CHECKS_ENABLED
         return crc == this->get_crc ();
 #else
@@ -182,4 +185,5 @@ namespace pstore {
         }
         return ok;
     }
-} // namespace pstore
+
+} // end namespace pstore
