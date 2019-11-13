@@ -84,7 +84,7 @@
 namespace {
 
     using uoff_type = std::make_unsigned<off_t>::type;
-    static constexpr auto uoff_max = static_cast<uoff_type> (std::numeric_limits<off_t>::max ());
+    constexpr auto uoff_max = static_cast<uoff_type> (std::numeric_limits<off_t>::max ());
 
     template <typename MessageStr, typename PathStr>
     PSTORE_NO_RETURN void raise_file_error (int err, MessageStr message, PathStr path) {
