@@ -17,12 +17,15 @@ Its design goals are:
 
 # Table of Contents
 
+* [Table of Contents](#table-of-contents)
 * [Building pstore](#building-pstore)
-  * [Prerequisites](#prerequisites)
-  * [Building](#building)
-    * [Installing](#installing)
+    * [Prerequisites](#prerequisites)
+    * [Building](#building)
+        * [Standalone](#standalone)
+            * [Installing](#installing)
+        * [Inside LLVM](#inside-llvm)
 * [Getting started](#getting-started)
-  * [Using the read and write utilities](#using-the-read-and-write-utilities)
+    * [Using the read and write utilities](#using-the-read-and-write-utilities)
 
 # Building pstore
 
@@ -50,20 +53,52 @@ Optionally:
 
 ## Building
 
+pstore may be built either as a standalone collection of libraries, header files, and utilities or as a project within the LLVM framework.
+
+### Standalone
+
 The pstore build system uses cmake. If you’re not very familiar with cmake, there’s a small utility (found in `utils/make_build.py`) which will create an out-of-tree directory in which to build the project and run cmake with the correct arguments for your platform.
 
-    $ python ./utils/make_build.py
-    $ cmake ‑‑build build_linux
+~~~bash
+$ python ./utils/make_build.py
+$ cmake ‑‑build build_linux
+~~~
 
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
 
-### Installing
+#### Installing
 
 After pstore has finished building, install it from the build directory:
 
-    $ cmake --build build_linux --target install-pstore
+~~~bash
+$ cmake --build build_linux --target install-pstore
+~~~
 
 The `‑‑target install-pstore` option in addition to the `‑‑build` option tells cmake to build the install-pstore target. Note that the `CMAKE_INSTALL_PREFIX` variable can be used to change the installation path.
+
+### Inside LLVM
+
+Make sure that pstore is located within the llvm-project directory tree. For example, to build pstore inside the LLVM with Program Repository Support
+
+~~~bash
+$ git clone http://github.com/SNSystems/llvm-project-prepo.git
+$ cd llvm
+$ git clone http://github.com/SNSystems/pstore.git
+$ cd -
+~~~
+
+Build LLVM as [normal](https://llvm.org/docs/CMake.html) enabling the pstore subproject in addition to any others. For example:
+
+~~~~bash
+$ mkdir build
+$ cd build
+$ cmake -G Ninja \
+        -D LLVM_ENABLE_PROJECTS="clang;pstore" \
+        -D LLVM_TARGETS_TO_BUILD=X86 \
+        -D LLVM_TOOL_CLANG_TOOLS_EXTRA_BUILD=Off \
+        ../llvm
+$ ninja
+~~~~
 
 # Getting started
 ## Using the read and write utilities
