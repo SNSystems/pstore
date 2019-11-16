@@ -115,5 +115,5 @@ if (PSTORE_BITCODE)
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
-    target_link_libraries (pstore-os-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-os-bc)
+    target_link_libraries (pstore-os-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_BITCODE)
