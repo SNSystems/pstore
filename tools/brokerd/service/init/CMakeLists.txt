@@ -7,8 +7,9 @@ configure_file (
     @ONLY
 )
 install (
-    PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/pstore-brokerd.init"
+    FILES "${CMAKE_CURRENT_BINARY_DIR}/pstore-brokerd.init"
     RENAME pstore-brokerd
-    DESTINATION /etc/init.d/
+    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    DESTINATION etc/init.d
     COMPONENT pstore
 )
