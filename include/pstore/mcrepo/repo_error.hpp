@@ -73,7 +73,11 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-template <>
-struct std::is_error_code_enum<pstore::repo::error_code> : std::true_type {};
+namespace std {
+
+    template <>
+    struct is_error_code_enum<pstore::repo::error_code> : true_type {};
+
+} // end namespace std
 
 #endif // PSTORE_MCREPO_ERROR_HPP
