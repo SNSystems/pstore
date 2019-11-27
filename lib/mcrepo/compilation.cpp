@@ -58,6 +58,61 @@ std::ostream & pstore::repo::operator<< (std::ostream & os, linkage l) {
     return os << str;
 }
 
+//*                    _ _      _   _                            _              *
+//*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
+//* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
+//* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| |_|_|_\___|_|_|_|_.__/\___|_|   *
+//*              |_|                                                            *
+
+// ctor
+// ~~~~
+compilation_member::compilation_member (pstore::index::digest d, pstore::extent<fragment> x,
+                                        pstore::typed_address<pstore::indirect_string> n,
+                                        enum linkage l, enum visibility v) noexcept
+        : digest{d}
+        , fext{x}
+        , name{n}
+        , bf{} {
+
+    PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation_member>::value);
+    PSTORE_STATIC_ASSERT (alignof (compilation_member) == 16);
+    PSTORE_STATIC_ASSERT (sizeof (compilation_member) == 48);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, digest) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, fext) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, name) == 32);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, bf) == 40);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 41);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
+    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding3) == 44);
+
+    using linkage_ut = std::underlying_type<enum linkage>::type;
+    using visibility_ut = std::underlying_type<enum visibility>::type;
+    {
+// Check that the linkage_ field can represent all of the linkage enum's values.
+#define X(a) a,
+        enum class max_linkage : linkage_ut { PSTORE_REPO_LINKAGES last };
+#undef X
+        PSTORE_STATIC_ASSERT (static_cast<linkage_ut> (max_linkage::last) <=
+                              decltype (linkage_)::max ());
+    }
+    {
+// Check that the visibility_ field can represent all of the visibility enum's values.
+#define X(a) a,
+        enum class max_visibility : visibility_ut { PSTORE_REPO_VISIBILITIES last };
+#undef X
+        PSTORE_STATIC_ASSERT (static_cast<linkage_ut> (max_visibility::last) <=
+                              decltype (linkage_)::max ());
+    }
+    linkage_ = static_cast<linkage_ut> (l);
+    visibility_ = static_cast<visibility_ut> (v);
+}
+
+
+//*                    _ _      _   _           *
+//*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
+//* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
+//* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
+//*              |_|                            *
 constexpr std::array<char, 8> compilation::compilation_signature_;
 
 // operator new

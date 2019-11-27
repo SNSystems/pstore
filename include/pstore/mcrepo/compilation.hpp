@@ -48,6 +48,8 @@
 
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/mcrepo/repo_error.hpp"
+#include "pstore/support/bit_field.hpp"
 
 namespace pstore {
     namespace repo {
@@ -69,13 +71,13 @@ namespace pstore {
 
         std::ostream & operator<< (std::ostream & os, linkage l);
 
-#define PSTORE_REPO_VISIBILITY_TYPES                                                               \
+#define PSTORE_REPO_VISIBILITIES                                                                   \
     X (default_vis)                                                                                \
     X (hidden_vis)                                                                                 \
     X (protected_vis)
 
 #define X(a) a,
-        enum class visibility : std::uint8_t { PSTORE_REPO_VISIBILITY_TYPES };
+        enum class visibility : std::uint8_t { PSTORE_REPO_VISIBILITIES };
 #undef X
 
         //*                    _ _      _   _                            _              *
@@ -95,48 +97,52 @@ namespace pstore {
             /// \param v  The symbol visibility.
             compilation_member (index::digest d, extent<fragment> x,
                                 typed_address<indirect_string> n, linkage l,
-                                visibility v = repo::visibility::default_vis)
-                    : digest{d}
-                    , fext{x}
-                    , name{n}
-                    , linkage{l}
-                    , visibility{v} {}
-
+                                visibility v = repo::visibility::default_vis) noexcept;
             /// The digest of the fragment referenced by this compilation symbol.
             index::digest digest;
             /// The extent of the fragment referenced by this compilation symbol.
             extent<fragment> fext;
+            //  TODO: it looks tempting to use some of the bits of this address for the
+            //  linkage/visibility fields. We know that they're not all used and it would eliminate
+            //  all of the padding bits from the structure. Unfortunately, repo-object-writer is
+            //  currently stashing host pointers in this field and although the same may be true for
+            //  those, it's difficult to be certain.
             typed_address<indirect_string> name;
-            repo::linkage linkage;
-            repo::visibility visibility;
-            std::uint16_t padding1 = 0;
-            std::uint32_t padding2 = 0;
+            union {
+                std::uint8_t bf;
+                pstore::bit_field<std::uint8_t, 0, 4> linkage_;
+                pstore::bit_field<std::uint8_t, 4, 2> visibility_;
+            };
+            std::uint8_t padding1 = 0;
+            std::uint16_t padding2 = 0;
+            std::uint32_t padding3 = 0;
+
+            auto linkage () const noexcept -> enum linkage {
+                return static_cast<enum linkage> (linkage_.value ());
+            }
+            auto visibility () const noexcept -> enum visibility {
+                return static_cast<enum visibility> (visibility_.value ());
+            }
 
             /// \brief Returns a pointer to an in-store compilation member instance.
             ///
             /// \param db  The database from which the ticket_member should be loaded.
             /// \param addr  Address of the compilation member.
             /// \result  A pointer to the in-store compilation member.
-            static std::shared_ptr<compilation_member const>
-            load (pstore::database const & db, pstore::typed_address<compilation_member> addr) {
-                return db.getro (addr);
-            }
+            static auto load (database const & db, typed_address<compilation_member> addr)
+                -> std::shared_ptr<compilation_member const>;
 
         private:
             friend class compilation;
             compilation_member () noexcept = default;
         };
-
-        PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation_member>::value);
-        PSTORE_STATIC_ASSERT (alignof (compilation_member) == 16);
-        PSTORE_STATIC_ASSERT (sizeof (compilation_member) == 48);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, digest) == 0);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, fext) == 16);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, name) == 32);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, linkage) == 40);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, visibility) == 41);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 42);
-        PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 44);
+        // load
+        // ~~~~
+        inline auto compilation_member::load (database const & db,
+                                              typed_address<compilation_member> addr)
+            -> std::shared_ptr<compilation_member const> {
+            return db.getro (addr);
+        }
 
         //*                    _ _      _   _           *
         //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
@@ -150,6 +156,7 @@ namespace pstore {
         public:
             using iterator = compilation_member *;
             using const_iterator = compilation_member const *;
+            using size_type = std::uint32_t;
 
             void operator delete (void * p);
 
@@ -209,9 +216,9 @@ namespace pstore {
             ///@{
 
             /// Checks whether the container is empty.
-            bool empty () const { return size_ == 0; }
+            bool empty () const noexcept { return size_ == 0; }
             /// Returns the number of elements.
-            std::size_t size () const { return size_; }
+            size_type size () const noexcept { return size_; }
             ///@}
 
             /// \name Storage
@@ -219,8 +226,8 @@ namespace pstore {
 
             /// Returns the number of bytes of storage required for a compilation with 'size'
             /// members.
-            static std::size_t size_bytes (std::uint64_t size) {
-                size = std::max (size, std::uint64_t{1}); // Always at least enough for one member.
+            static std::size_t size_bytes (size_type size) {
+                size = std::max (size, size_type{1}); // Always at least enough for one member.
                 return sizeof (compilation) - sizeof (compilation::members_) +
                        sizeof (compilation::members_[0]) * size;
             }
@@ -237,10 +244,10 @@ namespace pstore {
         private:
             template <typename Iterator>
             compilation (typed_address<indirect_string> path, typed_address<indirect_string> triple,
-                         std::uint64_t size, Iterator first_member, Iterator last_member) noexcept;
+                         size_type size, Iterator first_member, Iterator last_member) noexcept;
 
             struct nmembers {
-                std::size_t n;
+                size_type n;
             };
             /// A placement-new implementation which allocates sufficient storage for a
             /// compilation with the number of members given by the size parameter.
@@ -261,31 +268,35 @@ namespace pstore {
             /// The target triple for this compilation.
             typed_address<indirect_string> triple_;
             /// The number of entries in the members_ array.
-            std::uint64_t size_ = 0;
+            size_type size_ = 0;
+            std::uint32_t padding1_ = 0;
             compilation_member members_[1];
         };
-
         PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
         PSTORE_STATIC_ASSERT (sizeof (compilation) == 32 + sizeof (compilation_member));
         PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
         template <typename Iterator>
         compilation::compilation (typed_address<indirect_string> path,
-                                  typed_address<indirect_string> triple, std::uint64_t size,
+                                  typed_address<indirect_string> triple, size_type size,
                                   Iterator first_member, Iterator last_member) noexcept
                 : signature_{compilation_signature_}
                 , path_{path}
                 , triple_{triple}
                 , size_{size} {
-
+            // An assignment to suppress a warning from clang that the field is not used.
+            padding1_ = 0;
             PSTORE_STATIC_ASSERT (offsetof (compilation, signature_) == 0);
             PSTORE_STATIC_ASSERT (offsetof (compilation, path_) == 8);
             PSTORE_STATIC_ASSERT (offsetof (compilation, triple_) == 16);
             PSTORE_STATIC_ASSERT (offsetof (compilation, size_) == 24);
+            PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 28);
             PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
 
 #ifndef NDEBUG
             {
+                // This check can safely be an assertion because the method is private and alloc(),
+                // the sole caller, performs a full run-time check of the size.
                 auto const dist = std::distance (first_member, last_member);
                 assert (dist >= 0 &&
                         static_cast<typename std::make_unsigned<decltype (dist)>::type> (dist) ==
@@ -294,7 +305,6 @@ namespace pstore {
 #endif
             std::copy (first_member, last_member, this->begin ());
         }
-
 
         // alloc
         // ~~~~~
@@ -305,8 +315,12 @@ namespace pstore {
             // First work out its size.
             auto const dist = std::distance (first_member, last_member);
             assert (dist >= 0);
-            auto const num_members =
-                static_cast<typename std::make_unsigned<decltype (dist)>::type> (dist);
+
+            if (dist > std::numeric_limits<size_type>::max ()) {
+                raise (error_code::too_many_members_in_compilation);
+            }
+
+            auto const num_members = static_cast<size_type> (dist);
             auto const size = size_bytes (num_members);
 
             // Allocate the storage.

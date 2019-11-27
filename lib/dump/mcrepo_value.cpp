@@ -204,8 +204,8 @@ namespace pstore {
                 {"digest", make_value (member.digest)},
                 {"fext", make_value (member.fext)},
                 {"name", make_value (indirect_string::read (db, member.name))},
-                {"linkage", make_value (member.linkage)},
-                {"visibility", make_value (member.visibility)},
+                {"linkage", make_value (member.linkage ())},
+                {"visibility", make_value (member.visibility ())},
             });
         }
 

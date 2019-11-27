@@ -54,6 +54,9 @@ namespace pstore {
             case error_code::bad_fragment_record: result = "bad fragment record"; break;
             case error_code::bad_fragment_type: result = "bad fragment type"; break;
             case error_code::bad_compilation_record: result = "bad compilation record"; break;
+            case error_code::too_many_members_in_compilation:
+                result = "too many members in a compilation";
+                break;
             }
             return result;
         }

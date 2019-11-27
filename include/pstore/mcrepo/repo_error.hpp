@@ -55,7 +55,8 @@ namespace pstore {
         enum class error_code : int {
             bad_fragment_record = 1,
             bad_fragment_type, // an attempt to get an unavailable fragment type
-            bad_compilation_record
+            bad_compilation_record,
+            too_many_members_in_compilation,
         };
 
         class error_category : public std::error_category {
@@ -72,11 +73,7 @@ namespace pstore {
     } // end namespace repo
 } // end namespace pstore
 
-namespace std {
-
-    template <>
-    struct is_error_code_enum<pstore::repo::error_code> : std::true_type {};
-
-} // end namespace std
+template <>
+struct std::is_error_code_enum<pstore::repo::error_code> : std::true_type {};
 
 #endif // PSTORE_MCREPO_ERROR_HPP

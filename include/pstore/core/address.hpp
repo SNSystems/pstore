@@ -102,9 +102,9 @@
 namespace pstore {
 
 #if defined(__cpp_constexpr) && __cpp_constexpr >= 201304
-#define PSTORE_CONST_EXPR_ASSERT(cond) assert (cond)
+#    define PSTORE_CONST_EXPR_ASSERT(cond) assert (cond)
 #else
-#define PSTORE_CONST_EXPR_ASSERT(cond)
+#    define PSTORE_CONST_EXPR_ASSERT(cond)
 #endif
 
     //*            _     _                    *
@@ -141,7 +141,8 @@ namespace pstore {
         static constexpr address null () noexcept { return address{0}; }
         /// The largest legal absolute address.
         static constexpr address max () noexcept {
-            return address{(std::uint64_t{max_segment} << offset_number_bits) | std::uint64_t{max_offset}};
+            return address{(std::uint64_t{max_segment} << offset_number_bits) |
+                           std::uint64_t{max_offset}};
         }
 
         constexpr std::uint64_t absolute () const noexcept { return a_; }

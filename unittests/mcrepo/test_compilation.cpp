@@ -83,7 +83,7 @@ TEST_F (CompilationTest, SingleMember) {
     constexpr auto extent = pstore::extent<pstore::repo::fragment> (
         pstore::typed_address<pstore::repo::fragment>::make (3), 5U);
     constexpr auto name = indirect_string_address (32U);
-    constexpr auto linkage = pstore::repo::linkage::external;
+    constexpr auto linkage = pstore::repo::linkage::weak_odr;
     constexpr auto visibility = pstore::repo::visibility::protected_vis;
 
     compilation_member sm{digest, extent, name, linkage, visibility};
@@ -101,8 +101,8 @@ TEST_F (CompilationTest, SingleMember) {
     EXPECT_EQ (digest, (*t)[0].digest);
     EXPECT_EQ (extent, (*t)[0].fext);
     EXPECT_EQ (name, (*t)[0].name);
-    EXPECT_EQ (linkage, (*t)[0].linkage);
-    EXPECT_EQ (visibility, (*t)[0].visibility);
+    EXPECT_EQ (linkage, (*t)[0].linkage ());
+    EXPECT_EQ (visibility, (*t)[0].visibility ());
 }
 
 TEST_F (CompilationTest, MultipleMembers) {
@@ -130,7 +130,7 @@ TEST_F (CompilationTest, MultipleMembers) {
     EXPECT_FALSE (t->empty ());
     EXPECT_EQ (128U, t->size_bytes ());
     for (auto const & m : *t) {
-        EXPECT_EQ (linkage, m.linkage);
-        EXPECT_EQ (visibility, m.visibility);
+        EXPECT_EQ (linkage, m.linkage ());
+        EXPECT_EQ (visibility, m.visibility ());
     }
 }

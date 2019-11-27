@@ -203,6 +203,7 @@ function (add_pstore_additional_compiler_flags target_name)
             -D_CRT_SECURE_NO_WARNINGS
             -D_SCL_SECURE_NO_WARNINGS
             -D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING
+            -D_ENABLE_ATOMIC_ALIGNMENT_FIX
         )
 
         if (PSTORE_COVERAGE)
