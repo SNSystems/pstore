@@ -45,6 +45,7 @@
 #define PSTORE_MCREPO_BSS_SECTION_HPP
 
 #include "pstore/mcrepo/generic_section.hpp"
+#include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -57,14 +58,22 @@ namespace pstore {
         //*                                          *
         class bss_section : public section_base {
         public:
-            bss_section (std::uint8_t align, std::uint64_t size)
-                    : align_{static_cast<std::uint8_t> (bit_count::ctz (align))}
-                    , size_{size} {
-                (void) padding_;
+            using size_type = std::uint32_t;
+
+            ///
+            bss_section (unsigned align, size_type size)
+                    : field64_{0} {
+
                 PSTORE_STATIC_ASSERT (std::is_standard_layout<bss_section>::value);
-                PSTORE_STATIC_ASSERT (offsetof (bss_section, align_) == 0);
-                PSTORE_STATIC_ASSERT (offsetof (bss_section, size_) == 8);
+                PSTORE_STATIC_ASSERT (offsetof (bss_section, field64_) == 0);
+                PSTORE_STATIC_ASSERT (sizeof (bss_section) == 8);
                 PSTORE_STATIC_ASSERT (alignof (bss_section) == 8);
+
+                assert (bit_count::pop_count (align) == 1);
+                align_ = bit_count::ctz (align);
+                PSTORE_STATIC_ASSERT (decltype (size_)::last_bit - decltype (size_)::first_bit ==
+                                      sizeof (size_type) * 8);
+                size_ = size;
             }
 
             bss_section (bss_section const &) = delete;
@@ -72,8 +81,8 @@ namespace pstore {
             bss_section (bss_section &&) = delete;
             bss_section & operator= (bss_section &&) = delete;
 
-            unsigned align () const noexcept { return 1U << align_; }
-            std::uint64_t size () const noexcept { return size_; }
+            unsigned align () const noexcept { return 1U << align_.value (); }
+            size_type size () const noexcept { return static_cast<size_type> (size_.value ()); }
 
             container<internal_fixup> ifixups () const { return {}; }
             container<external_fixup> xfixups () const { return {}; }
@@ -82,14 +91,15 @@ namespace pstore {
             std::size_t size_bytes () const noexcept { return sizeof (bss_section); }
 
         private:
-            /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
-            /// expressed as an align_ value of 3).
-            std::uint8_t align_;
-
-            std::uint8_t padding_[3] = {0, 0, 0};
-
-            /// The number of bytes in the BSS section's data payload.
-            std::uint64_t size_;
+            union {
+                std::uint64_t field64_;
+                /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment
+                /// is expressed as an align_ value of 3). (Allowing for as many as 8 bits here is
+                /// probably a little excessive.)
+                bit_field<std::uint64_t, 0, 8> align_;
+                /// The number of bytes in the BSS section's data payload.
+                bit_field<std::uint64_t, 8, 32> size_;
+            };
         };
 
         template <>
@@ -114,6 +124,9 @@ namespace pstore {
                     : section_creation_dispatcher (section_kind::bss)
                     , section_ (sec) {
                 assert (sec->ifixups.empty () && sec->xfixups.empty ());
+                if (sec->data.size () > std::numeric_limits<bss_section::size_type>::max ()) {
+                    raise (error_code::bss_section_too_large);
+                }
             }
 
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;

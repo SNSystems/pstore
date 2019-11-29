@@ -57,6 +57,7 @@ namespace pstore {
             bad_fragment_type, // an attempt to get an unavailable fragment type
             bad_compilation_record,
             too_many_members_in_compilation,
+            bss_section_too_large,
         };
 
         class error_category : public std::error_category {

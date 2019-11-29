@@ -57,6 +57,7 @@ namespace pstore {
             case error_code::too_many_members_in_compilation:
                 result = "too many members in a compilation";
                 break;
+            case error_code::bss_section_too_large: result = "bss section too large";
             }
             return result;
         }
