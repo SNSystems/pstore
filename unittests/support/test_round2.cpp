@@ -65,7 +65,7 @@ namespace {
     template <typename T>
     struct checkn<T, 0U> {
         void operator() () const {
-            EXPECT_EQ (pstore::round_to_power_of_2 (T{1}), 1) << "1 should become 1";
+            EXPECT_EQ (pstore::round_to_power_of_2 (T{1}), 1U) << "1 should become 1";
         }
     };
 
@@ -88,9 +88,9 @@ namespace {
             << "(1<<" << shift << ")-1 should become 1<<" << shift;
         EXPECT_EQ (pstore::round_to_power_of_2 (T{v + 0}), v)
             << "(1<<" << shift << ") should become 1<<" << shift;
-        EXPECT_EQ (pstore::round_to_power_of_2 (T{v + 1}), 0)
+        EXPECT_EQ (pstore::round_to_power_of_2 (T{v + 1}), 0U)
             << "(1<<" << shift << ")+1 should become 0";
-        EXPECT_EQ (pstore::round_to_power_of_2 (std::numeric_limits<T>::max ()), 0)
+        EXPECT_EQ (pstore::round_to_power_of_2 (std::numeric_limits<T>::max ()), 0U)
             << "max should become 0";
     }
 
