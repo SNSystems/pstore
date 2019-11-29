@@ -64,7 +64,7 @@ namespace {
         pstore::ios_flags_saver const _{os};
         auto separator = "";
         os << std::setfill ('0') << std::hex;
-        std::for_each (begin, end, [&](unsigned v) {
+        std::for_each (begin, end, [&] (unsigned const v) {
             os << separator << std::setw (2) << v;
             separator = " ";
         });
@@ -75,8 +75,8 @@ namespace {
 
     void read_one_string_at_a_time (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
-        auto v1 = serialize::read<std::string> (reader);
-        auto v2 = serialize::read<std::string> (reader);
+        auto const v1 = serialize::read<std::string> (reader);
+        auto const v2 = serialize::read<std::string> (reader);
         std::cout << "Reading one string at a time produced \"" << v1 << "\" and \"" << v2
                   << "\"\n";
     }
@@ -91,8 +91,8 @@ namespace {
 
     void read_a_series_of_strings (container_type const & bytes) {
         auto reader = serialize::archive::make_reader (std::begin (bytes));
-        auto v0 = serialize::read<std::string> (reader);
-        auto v1 = serialize::read<std::string> (reader);
+        auto const v0 = serialize::read<std::string> (reader);
+        auto const v1 = serialize::read<std::string> (reader);
         std::cout << "Reading a series of strings produced \"" << v0 << "\" and \"" << v1 << "\"\n";
     }
 } // namespace
