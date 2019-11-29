@@ -104,10 +104,10 @@ compilation_member::compilation_member (pstore::index::digest d, pstore::extent<
     PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
     PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding3) == 44);
 
-#define X(a) linkage::a,
+#define X(a) repo::linkage::a,
     assert_enum_field_width<enum linkage, decltype (linkage_)> ({PSTORE_REPO_LINKAGES});
 #undef X
-#define X(a) visibility::a,
+#define X(a) repo::visibility::a,
     assert_enum_field_width<enum visibility, decltype (visibility_)> ({PSTORE_REPO_VISIBILITIES});
 #undef X
     linkage_ = static_cast<std::underlying_type<enum linkage>::type> (l);
