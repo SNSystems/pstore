@@ -314,6 +314,7 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/round2.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"

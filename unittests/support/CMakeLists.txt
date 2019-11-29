@@ -56,6 +56,7 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_path.cpp
     test_pointee_adaptor.cpp
     test_pubsub.cpp
+    test_round2.cpp
     test_small_vector.cpp
     test_sstring_view.cpp
     test_uint128.cpp

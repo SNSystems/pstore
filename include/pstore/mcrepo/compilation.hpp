@@ -110,8 +110,8 @@ namespace pstore {
             typed_address<indirect_string> name;
             union {
                 std::uint8_t bf;
-                pstore::bit_field<std::uint8_t, 0, 4> linkage_;
-                pstore::bit_field<std::uint8_t, 4, 2> visibility_;
+                bit_field<std::uint8_t, 0, 4> linkage_;
+                bit_field<std::uint8_t, 4, 2> visibility_;
             };
             std::uint8_t padding1 = 0;
             std::uint16_t padding2 = 0;
@@ -189,7 +189,6 @@ namespace pstore {
             /// \result  A pointer to the compilation in-store memory.
             static std::shared_ptr<compilation const> load (database const & db,
                                                             extent<compilation> const & extent);
-
             ///@}
 
             /// \name Element access
@@ -329,7 +328,7 @@ namespace pstore {
 
             // Write the data to the store.
             new (ptr.get ()) compilation{path, triple, num_members, first_member, last_member};
-            return pstore::extent<compilation> (typed_address<compilation> (addr), size);
+            return extent<compilation> (typed_address<compilation> (addr), size);
         }
 
     } // end namespace repo

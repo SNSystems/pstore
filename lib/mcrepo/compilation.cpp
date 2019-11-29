@@ -44,6 +44,7 @@
 #include "pstore/mcrepo/compilation.hpp"
 
 #include "pstore/mcrepo/repo_error.hpp"
+#include "pstore/support/round2.hpp"
 
 using namespace pstore::repo;
 
@@ -57,6 +58,24 @@ std::ostream & pstore::repo::operator<< (std::ostream & os, linkage l) {
     }
     return os << str;
 }
+
+namespace {
+
+    /// Checks that a bitfield<> instance BitField has the correct number of bits to store the
+    /// values of the enumeration type Enum.
+    ///
+    /// \tparam Enum  An enumeration type.
+    /// \tparam Bitfield  A bitfield<> instance.
+    /// \param init  The member values of the enumeration.
+    template <typename Enum, typename Bitfield>
+    void assert_enum_field_width (std::initializer_list<Enum> init) noexcept {
+        (void) init;
+        assert (pstore::round_to_power_of_2 (
+                    static_cast<typename std::underlying_type<Enum>::type> (std::max (init)) +
+                    1U) == Bitfield::max () + 1U);
+    }
+
+} // end anonymous namespace
 
 //*                    _ _      _   _                            _              *
 //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
@@ -85,26 +104,14 @@ compilation_member::compilation_member (pstore::index::digest d, pstore::extent<
     PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
     PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding3) == 44);
 
-    using linkage_ut = std::underlying_type<enum linkage>::type;
-    using visibility_ut = std::underlying_type<enum visibility>::type;
-    {
-// Check that the linkage_ field can represent all of the linkage enum's values.
-#define X(a) a,
-        enum class max_linkage : linkage_ut { PSTORE_REPO_LINKAGES last };
+#define X(a) linkage::a,
+    assert_enum_field_width<enum linkage, decltype (linkage_)> ({PSTORE_REPO_LINKAGES});
 #undef X
-        PSTORE_STATIC_ASSERT (static_cast<linkage_ut> (max_linkage::last) <=
-                              decltype (linkage_)::max ());
-    }
-    {
-// Check that the visibility_ field can represent all of the visibility enum's values.
-#define X(a) a,
-        enum class max_visibility : visibility_ut { PSTORE_REPO_VISIBILITIES last };
+#define X(a) visibility::a,
+    assert_enum_field_width<enum visibility, decltype (visibility_)> ({PSTORE_REPO_VISIBILITIES});
 #undef X
-        PSTORE_STATIC_ASSERT (static_cast<linkage_ut> (max_visibility::last) <=
-                              decltype (linkage_)::max ());
-    }
-    linkage_ = static_cast<linkage_ut> (l);
-    visibility_ = static_cast<visibility_ut> (v);
+    linkage_ = static_cast<std::underlying_type<enum linkage>::type> (l);
+    visibility_ = static_cast<std::underlying_type<enum visibility>::type> (v);
 }
 
 
