@@ -188,6 +188,10 @@ namespace pstore {
             namespace details {
 
                 struct positional {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    positional () noexcept {} // NOLINT
+
                     template <typename Opt>
                     void apply (Opt & o) const {
                         o.set_positional ();
@@ -195,6 +199,10 @@ namespace pstore {
                 };
 
                 struct required {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    required () noexcept {} // NOLINT
+
                     template <typename Opt>
                     void apply (Opt & o) const {
                         o.set_num_occurrences_flag (num_occurrences_flag::required);
@@ -202,6 +210,10 @@ namespace pstore {
                 };
 
                 struct optional {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    optional () noexcept {} // NOLINT
+
                     template <typename Opt>
                     void apply (Opt & o) const {
                         o.set_num_occurrences_flag (num_occurrences_flag::optional);
@@ -209,6 +221,10 @@ namespace pstore {
                 };
 
                 struct one_or_more {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    one_or_more () noexcept {}
+
                     template <typename Opt>
                     void apply (Opt & o) const {
                         bool is_optional =
