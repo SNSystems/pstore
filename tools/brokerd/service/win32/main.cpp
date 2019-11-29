@@ -4,7 +4,7 @@
 //* | | | | | | (_| | | | | | *
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
-//===- tools/brokerd/service/main.cpp -------------------------------------===//
+//===- tools/brokerd/service/win32/main.cpp -------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

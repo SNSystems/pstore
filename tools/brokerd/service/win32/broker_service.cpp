@@ -4,7 +4,7 @@
 //* | |_) | | | (_) |   <  __/ |    \__ \  __/ |   \ V /| | (_|  __/ *
 //* |_.__/|_|  \___/|_|\_\___|_|    |___/\___|_|    \_/ |_|\___\___| *
 //*                                                                  *
-//===- tools/brokerd/service/broker_service.cpp ---------------------------===//
+//===- tools/brokerd/service/win32/broker_service.cpp ---------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- tools/brokerd/service/CMakeLists.txt --------------------------------===//
+#===- tools/brokerd/service/win32/CMakeLists.txt --------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #

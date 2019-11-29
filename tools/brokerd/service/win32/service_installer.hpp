@@ -4,7 +4,7 @@
 //* \__ \  __/ |   \ V /| | (_|  __/ | | | | \__ \ || (_| | | |  __/ |    *
 //* |___/\___|_|    \_/ |_|\___\___| |_|_| |_|___/\__\__,_|_|_|\___|_|    *
 //*                                                                       *
-//===- tools/brokerd/service/service_installer.hpp ------------------------===//
+//===- tools/brokerd/service/win32/service_installer.hpp ------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

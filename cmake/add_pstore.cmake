@@ -4,7 +4,7 @@
 #* | (_| | (_| | (_| | | |_) \__ \ || (_) | | |  __/ *
 #*  \__,_|\__,_|\__,_| | .__/|___/\__\___/|_|  \___| *
 #*                     |_|                           *
-
+#===- cmake/add_pstore.cmake ----------------------------------------------===//
 # Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,7 +41,6 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-
 include (CheckCSourceCompiles)
 include (CheckCXXCompilerFlag)
 
