@@ -133,9 +133,9 @@ namespace pstore {
 
         constexpr address () noexcept
                 : a_{0} {}
-        explicit constexpr address (std::uint64_t absolute) noexcept
+        explicit constexpr address (std::uint64_t const absolute) noexcept
                 : a_{absolute} {}
-        constexpr address (segment_type segment, offset_type offset) noexcept
+        constexpr address (segment_type const segment, offset_type const offset) noexcept
                 : a_{as_absolute (segment, offset)} {}
 
         static constexpr address null () noexcept { return address{0}; }
@@ -160,24 +160,24 @@ namespace pstore {
             return old;
         }
 
-        address operator+= (std::uint64_t distance) noexcept {
+        address operator+= (std::uint64_t const distance) noexcept {
             assert (a_ <= std::numeric_limits<std::uint64_t>::max () - distance);
             a_ += distance;
             return *this;
         }
 
-        address operator-= (std::uint64_t distance) noexcept {
+        address operator-= (std::uint64_t const distance) noexcept {
             assert (a_ >= distance);
             a_ -= distance;
             return *this;
         }
 
-        address operator|= (std::uint64_t mask) noexcept {
+        address operator|= (std::uint64_t const mask) noexcept {
             a_ |= mask;
             return *this;
         }
 
-        address operator&= (std::uint64_t mask) noexcept {
+        address operator&= (std::uint64_t const mask) noexcept {
             a_ &= mask;
             return *this;
         }
@@ -194,8 +194,8 @@ namespace pstore {
     private:
         std::uint64_t a_;
 
-        static constexpr std::uint64_t as_absolute (segment_type segment,
-                                                    offset_type offset) noexcept {
+        static constexpr std::uint64_t as_absolute (segment_type const segment,
+                                                    offset_type const offset) noexcept {
             PSTORE_CONST_EXPR_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
             PSTORE_CONST_EXPR_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
             return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
@@ -233,7 +233,7 @@ namespace pstore {
 
     // arithmetic
 
-    inline address operator- (address const lhs, std::uint64_t rhs) noexcept {
+    inline address operator- (address const lhs, std::uint64_t const rhs) noexcept {
         assert (lhs.absolute () >= rhs);
         return address{lhs.absolute () - rhs};
     }
@@ -242,17 +242,17 @@ namespace pstore {
         return address{lhs.absolute () - rhs.absolute ()};
     }
 
-    inline constexpr address operator+ (address const lhs, std::uint64_t rhs) noexcept {
+    inline constexpr address operator+ (address const lhs, std::uint64_t const rhs) noexcept {
         return address{lhs.absolute () + rhs};
     }
-    inline constexpr address operator+ (address const lhs, address rhs) noexcept {
+    inline constexpr address operator+ (address const lhs, address const rhs) noexcept {
         return address{lhs.absolute () + rhs.absolute ()};
     }
 
 
     // bitwise
 
-    inline constexpr address operator| (address const lhs, std::uint64_t rhs) noexcept {
+    inline constexpr address operator| (address const lhs, std::uint64_t const rhs) noexcept {
         return address{lhs.absolute () | rhs};
     }
 
@@ -267,8 +267,8 @@ namespace pstore {
     public:
         using type = T;
 
-        typed_address () = default;
-        explicit constexpr typed_address (address a) noexcept
+        constexpr typed_address () = default;
+        explicit constexpr typed_address (address const a) noexcept
                 : a_ (a) {}
         typed_address (typed_address const & addr) noexcept = default;
         typed_address (typed_address && addr) noexcept = default;
@@ -281,7 +281,7 @@ namespace pstore {
 
         static constexpr typed_address null () noexcept { return typed_address{address::null ()}; }
         static constexpr typed_address make (address a) noexcept { return typed_address{a}; }
-        static constexpr typed_address make (std::uint64_t absolute) noexcept {
+        static constexpr typed_address make (std::uint64_t const absolute) noexcept {
             return typed_address{address{absolute}};
         }
 
@@ -308,11 +308,11 @@ namespace pstore {
             return old;
         }
 
-        typed_address operator+= (std::uint64_t distance) noexcept {
+        typed_address operator+= (std::uint64_t const distance) noexcept {
             a_ += distance * sizeof (T);
             return *this;
         }
-        typed_address operator-= (std::uint64_t distance) noexcept {
+        typed_address operator-= (std::uint64_t const distance) noexcept {
             a_ -= distance * sizeof (T);
             return *this;
         }
@@ -345,14 +345,16 @@ namespace pstore {
     // arithmetic
 
     template <typename T>
-    inline typed_address<T> operator- (typed_address<T> const lhs, std::uint64_t rhs) noexcept {
+    inline typed_address<T> operator- (typed_address<T> const lhs,
+                                       std::uint64_t const rhs) noexcept {
         auto const delta = rhs * sizeof (T);
         assert (lhs.absolute () >= delta);
         return typed_address<T> (lhs.to_address () - delta);
     }
 
     template <typename T>
-    inline typed_address<T> operator+ (typed_address<T> const lhs, std::uint64_t rhs) noexcept {
+    inline typed_address<T> operator+ (typed_address<T> const lhs,
+                                       std::uint64_t const rhs) noexcept {
         return typed_address<T>{address{lhs.absolute () + rhs * sizeof (T)}};
     }
 
@@ -442,9 +444,9 @@ namespace std {
         using argument_type = pstore::address;
         using result_type = std::size_t;
 
-        result_type operator() (argument_type s) const {
-            auto abs = s.absolute ();
-            return std::hash<decltype (abs)>{}(abs);
+        result_type operator() (argument_type const s) const {
+            auto const abs = s.absolute ();
+            return std::hash<std::remove_const<decltype (abs)>::type>{}(abs);
         }
     };
 
@@ -453,9 +455,9 @@ namespace std {
         using argument_type = pstore::typed_address<T>;
         using result_type = std::size_t;
 
-        result_type operator() (argument_type s) const {
-            auto addr = s.to_address ();
-            return std::hash<decltype (addr)>{}(addr);
+        result_type operator() (argument_type const s) const {
+            auto const addr = s.to_address ();
+            return std::hash<typename std::remove_const<decltype (addr)>::type>{}(addr);
         }
     };
 
@@ -471,7 +473,7 @@ namespace pstore {
     template <typename T>
     struct extent {
         constexpr extent () noexcept;
-        constexpr extent (typed_address<T> addr_, std::uint64_t size_) noexcept
+        constexpr extent (typed_address<T> const addr_, std::uint64_t const size_) noexcept
                 : addr (addr_)
                 , size (size_) {}
         extent (extent const & rhs) noexcept = default;
