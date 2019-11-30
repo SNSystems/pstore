@@ -229,7 +229,7 @@ namespace pstore {
                       typed_address<header_block> ip = typed_address<header_block>::null (),
                       Hash const & hash = Hash ());
 
-            ~hamt_map () { this->clear (); }
+            ~hamt_map () override { this->clear (); }
 
             /// \name Iterators
             ///@{
@@ -585,16 +585,15 @@ namespace pstore {
             hamt_map<KeyType, ValueType, Hash, KeyEqual>::index_signature;
 
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (database const & db,
-                                                                typed_address<header_block> pos,
-                                                                Hash const & hash)
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (
+            database const & db, typed_address<header_block> const pos, Hash const & hash)
                 : revision_ (db.get_current_revision ())
                 , hash_ (hash)
                 , equal_ (KeyEqual ()) {
 
             if (pos != typed_address<header_block>::null ()) {
                 // 'pos' points to the index header block which gives us the tree root and size.
-                std::shared_ptr<header_block const> hb = db.getro (pos);
+                std::shared_ptr<header_block const> const hb = db.getro (pos);
                 // Check that this block appears to be sensible.
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
                 if (hb->signature != index_signature) {
@@ -663,7 +662,7 @@ namespace pstore {
         template <typename OtherValueType>
         address hamt_map<KeyType, ValueType, Hash, KeyEqual>::store_leaf_node (
             transaction_base & transaction, OtherValueType const & v,
-            gsl::not_null<parent_stack *> parents) {
+            gsl::not_null<parent_stack *> const parents) {
 
             // Make sure the alignment of leaf node is 4 to ensure that the two LSB are guaranteed
             // 0. If 'v' has greater alignment, serialize::write() will add additional padding.
@@ -691,10 +690,11 @@ namespace pstore {
             unsigned shifts, gsl::not_null<parent_stack *> parents) -> index_pointer {
 
             if (details::depth_is_internal_node (shifts)) {
-                auto new_hash = hash & details::hash_index_mask;
-                auto old_hash = existing_hash & details::hash_index_mask;
+                auto const new_hash = hash & details::hash_index_mask;
+                auto const old_hash = existing_hash & details::hash_index_mask;
                 if (new_hash != old_hash) {
-                    address leaf_addr = this->store_leaf_node (transaction, new_leaf, parents);
+                    address const leaf_addr =
+                        this->store_leaf_node (transaction, new_leaf, parents);
                     auto const internal_ptr = index_pointer{
                         internal_node::allocate (existing_leaf, index_pointer{leaf_addr}, old_hash,
                                                  new_hash)
@@ -716,7 +716,7 @@ namespace pstore {
                 hash >>= details::hash_index_bits;
                 existing_hash >>= details::hash_index_bits;
 
-                index_pointer leaf_ptr = this->insert_into_leaf (
+                index_pointer const leaf_ptr = this->insert_into_leaf (
                     transaction, existing_leaf, new_leaf, existing_hash, hash, shifts, parents);
                 auto const internal_ptr =
                     index_pointer{internal_node::allocate (leaf_ptr, old_hash).release ()};
@@ -736,8 +736,8 @@ namespace pstore {
         // hamt_map::delete_node
         // ~~~~~~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
-        void hamt_map<KeyType, ValueType, Hash, KeyEqual>::delete_node (index_pointer node,
-                                                                        unsigned shifts) {
+        void hamt_map<KeyType, ValueType, Hash, KeyEqual>::delete_node (index_pointer const node,
+                                                                        unsigned const shifts) {
             if (node.is_heap ()) {
                 assert (!node.is_leaf ());
                 if (details::depth_is_internal_node (shifts)) {
@@ -817,7 +817,7 @@ namespace pstore {
         template <typename OtherValueType>
         auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::insert_into_linear (
             transaction_base & transaction, index_pointer const node, OtherValueType const & value,
-            gsl::not_null<parent_stack *> parents, bool is_upsert)
+            gsl::not_null<parent_stack *> parents, bool const is_upsert)
             -> std::pair<index_pointer, bool> {
 
             index_pointer result;
@@ -987,7 +987,7 @@ namespace pstore {
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         typed_address<header_block>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::flush (transaction_base & transaction,
-                                                             unsigned generation) {
+                                                             unsigned const generation) {
             if (revision_ != transaction.db ().get_current_revision ()) {
                 raise (error_code::index_not_latest_revision);
             }
@@ -1003,7 +1003,7 @@ namespace pstore {
 
             // Write the index header. This simply holds a check signature, the tree root, and
             // remembers the tree size for us on restore.
-            auto pos = transaction.alloc_rw<header_block> ();
+            auto const pos = transaction.alloc_rw<header_block> ();
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
             pos.first->root = root_.addr;
