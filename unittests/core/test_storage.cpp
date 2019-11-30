@@ -121,6 +121,10 @@ TEST_F (RequestSpansRegions, MinRegionSize) {
     }
 }
 
+// The FullRegionSize test is slow and can exhaust memory on some systems with tightly
+// constrained memory limits (e.g. inside a docker container).
+#    if PSTORE_FULL_REGION_SIZE_TEST_ENABLED
+
 TEST_F (RequestSpansRegions, FullRegionSize) {
     static constexpr auto min_region_size = pstore::storage::min_region_size;
     static constexpr auto full_region_size = pstore::storage::full_region_size;
@@ -175,5 +179,6 @@ TEST_F (RequestSpansRegions, FullRegionSize) {
         EXPECT_TRUE (st2.request_spans_regions (pstore::address::null (), full_region_size + 1U));
     }
 }
+#    endif // PSTORE_FULL_REGION_SIZE_TEST_ENABLED
 
 #endif //! PSTORE_ALWAYS_SPANNING
