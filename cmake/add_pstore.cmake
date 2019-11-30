@@ -188,8 +188,8 @@ function (add_pstore_additional_compiler_flags target_name)
             target_compile_definitions (${target_name} PRIVATE -D_HAS_EXCEPTIONS=0)
         endif (NOT PSTORE_EXCEPTIONS)
 
-        # 4127: conditional expression is constant. We're using C++11 therefore if constexpr is
-        #       not available.
+        # 4127: conditional expression is constant. We're not yet using C++17
+        #       therefore if constexpr is not available.
         # 4146: unary minus applied to unsigned, result still unsigned.
         # 4512: assignment operator could not be generated.
         target_compile_options (${target_name} PRIVATE
@@ -303,7 +303,7 @@ function (add_pstore_library)
         add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
         set_target_properties (${arg_TARGET} PROPERTIES
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
             PUBLIC_HEADER "${arg_INCLUDES}"
         )
@@ -341,8 +341,10 @@ function (add_pstore_executable target)
     else ()
         add_executable (${target} ${ARGN})
 
-        set_property (TARGET ${target} PROPERTY CXX_STANDARD 11)
-        set_property (TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED Yes)
+        set_target_properties (${target} PROPERTIES
+            CXX_STANDARD 14
+            CXX_STANDARD_REQUIRED Yes
+        )
         pstore_enable_warnings (${target})
         add_pstore_additional_compiler_flags (${target})
     endif (PSTORE_IS_INSIDE_LLVM)
@@ -376,8 +378,10 @@ endfunction (add_pstore_tool)
 
 function (add_pstore_example name)
     add_pstore_executable (example-${name} ${ARGN})
-    set_target_properties (example-${name} PROPERTIES EXCLUDE_FROM_ALL Yes)
-    set_target_properties (example-${name} PROPERTIES FOLDER "pstore examples")
+    set_target_properties (example-${name} PROPERTIES
+        EXCLUDE_FROM_ALL Yes
+        FOLDER "pstore examples"
+    )
     target_link_libraries (example-${name} PRIVATE pstore-core)
 endfunction (add_pstore_example)
 
@@ -396,15 +400,13 @@ function (add_pstore_test_library target_name)
         target_link_libraries (${target_name} PUBLIC gtest)
     else ()
         add_library (${target_name} STATIC ${ARGN})
-
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
-
+        set_target_properties (${target_name} PROPERTIES
+            CXX_STANDARD 14
+            CXX_STANDARD_REQUIRED Yes
+        )
         pstore_enable_warnings (${target_name})
         add_pstore_additional_compiler_flags (${target_name})
-
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-
         target_link_libraries (${target_name} PUBLIC gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)
 
@@ -422,10 +424,11 @@ function (add_pstore_unit_test target_name)
         add_pstore_additional_compiler_flags (${target_name})
     else()
         add_executable (${target_name} ${ARGN})
-        set_target_properties (${target_name} PROPERTIES FOLDER "pstore tests")
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD 11)
-        set_property (TARGET ${target_name} PROPERTY CXX_STANDARD_REQUIRED Yes)
-
+        set_target_properties (${target_name} PROPERTIES
+            FOLDER "pstore tests"
+            CXX_STANDARD 14
+            CXX_STANDARD_REQUIRED Yes
+        )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
         pstore_enable_warnings (${target_name})
         add_pstore_additional_compiler_flags (${target_name})
