@@ -58,7 +58,7 @@ namespace pstore {
 
         class scavenger {
         public:
-            explicit scavenger (std::weak_ptr<command_processor> cp)
+            explicit scavenger (std::weak_ptr<command_processor> const & cp)
                     : cp_{cp} {}
 
             // no copying or deletion.

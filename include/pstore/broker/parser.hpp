@@ -110,7 +110,7 @@ namespace std {
     template <>
     struct hash<pstore::broker::size_pair> {
         std::size_t operator() (pstore::broker::size_pair const & p) const {
-            auto h = std::hash<std::size_t>{};
+            auto const h = std::hash<std::size_t>{};
             return h (p.first) ^ h (p.second);
         }
     };

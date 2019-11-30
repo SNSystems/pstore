@@ -55,7 +55,7 @@ namespace {
 
     public:
         foo () = default;
-        explicit foo (int a)
+        constexpr explicit foo (int const a) noexcept
                 : a_ (a) {}
         std::ostream & write (std::ostream & os) const;
 

@@ -51,7 +51,7 @@ namespace {
         friend struct pstore::serialize::serializer<foo>;
 
     public:
-        explicit foo (int a)
+        constexpr explicit foo (int const a) noexcept
                 : a_ (a) {}
         std::ostream & write (std::ostream & os) const;
 
@@ -62,7 +62,8 @@ namespace {
     std::ostream & foo::write (std::ostream & os) const { return os << "foo(" << a_ << ')'; }
 
     std::ostream & operator<< (std::ostream & os, foo const & f) { return f.write (os); }
-} // namespace
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace serialize {
@@ -86,8 +87,8 @@ namespace pstore {
                 new (&sp) foo (serialize::read<int> (archive));
             }
         };
-    } // namespace serialize
-} // namespace pstore
+    } // end namespace serialize
+} // end namespace pstore
 
 int main () {
     std::vector<std::uint8_t> bytes;

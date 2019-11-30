@@ -130,7 +130,7 @@ namespace pstore {
         inline process_identifier spawn (std::initializer_list<gsl::czstring> argv) {
             // There must be at least two entries (the process path and terminating null).
             assert (argv.size () >= 2);
-            gsl::czstring const * begin = std::begin (argv);
+            gsl::czstring const * const begin = std::begin (argv);
             // The last array element must be null.
             assert (*(begin + argv.size () - 1) == nullptr);
             return spawn (*begin, begin);
