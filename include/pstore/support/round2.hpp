@@ -48,6 +48,12 @@
 
 namespace pstore {
 
+    // The implementation of these functions is based on code published in the "Bit Twiddling Hacks"
+    // web page by Sean Eron Anderson (seander@cs.stanford.edu) found at
+    // <https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2>. The original code is
+    // public domain.
+
+
     inline std::uint8_t round_to_power_of_2 (std::uint8_t v) noexcept {
         --v;
         v |= v >> 1;
