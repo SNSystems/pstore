@@ -174,7 +174,7 @@ namespace pstore {
         /// \param addr The starting address of the data block to be loaded.
         /// \param size The size of the data block to be loaded.
         /// \return A read-only pointer to the loaded data.
-        std::shared_ptr<void const> getro (address addr, std::size_t size) const {
+        std::shared_ptr<void const> getro (address const addr, std::size_t const size) const {
             return this->get (addr, size, true /*initialized*/, false /*writable*/);
         }
 
@@ -201,7 +201,7 @@ namespace pstore {
         /// \return A read-only pointer to the loaded data.
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T const> getro (typed_address<T> addr) const {
+        std::shared_ptr<T const> getro (typed_address<T> const addr) const {
             return this->getro (addr, std::size_t{1});
         }
 
@@ -234,7 +234,7 @@ namespace pstore {
         /// \param addr The starting address of the data block to be loaded.
         /// \param size The size of the data block to be loaded.
         /// \return A mutable pointer to the loaded data.
-        std::shared_ptr<void> getrw (address addr, std::size_t size) {
+        std::shared_ptr<void> getrw (address const addr, std::size_t const size) {
             return std::const_pointer_cast<void> (
                 this->get (addr, size, true /*initialized*/, true /*writable*/));
         }
@@ -272,7 +272,7 @@ namespace pstore {
         /// \return A mutable pointer to the loaded data.
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T> getrw (typed_address<T> addr, std::size_t elements) {
+        std::shared_ptr<T> getrw (typed_address<T> const addr, std::size_t const elements) {
             if (addr.to_address ().absolute () % alignof (T) != 0) {
                 raise (error_code::bad_alignment);
             }
@@ -291,7 +291,7 @@ namespace pstore {
             immediate,
             background,
         };
-        void set_vacuum_mode (vacuum_mode mode) noexcept { vacuum_mode_ = mode; }
+        void set_vacuum_mode (vacuum_mode const mode) noexcept { vacuum_mode_ = mode; }
         vacuum_mode get_vacuum_mode () const noexcept { return vacuum_mode_; }
         ///@}
 
@@ -343,7 +343,7 @@ namespace pstore {
         /// the new footer is recorded.
         void set_new_footer (typed_address<trailer> new_footer_pos);
 
-        void protect (address first, address last) { storage_.protect (first, last); }
+        void protect (address const first, address const last) { storage_.protect (first, last); }
 
         /// \brief Returns true if CRC checks are enabled.
         ///
@@ -362,7 +362,7 @@ namespace pstore {
         //  \warning This function is dangerous. It returns a non-const index from a const
         //  database.
         std::shared_ptr<index::index_base> &
-        get_mutable_index (enum pstore::trailer::indices which) const {
+        get_mutable_index (enum pstore::trailer::indices const which) const {
             return indices_[static_cast<std::underlying_type<decltype (which)>::type> (which)];
         }
         std::shared_ptr<trailer const> get_footer () const {
@@ -392,7 +392,7 @@ namespace pstore {
             sizes () noexcept
                     : footer_pos_{typed_address<trailer>::null ()}
                     , logical_{0} {}
-            explicit sizes (typed_address<trailer> footer_pos) noexcept
+            explicit sizes (typed_address<trailer> const footer_pos) noexcept
                     : footer_pos_ (footer_pos)
                     , logical_ (footer_pos_.absolute () + sizeof (trailer)) {}
 
@@ -405,12 +405,12 @@ namespace pstore {
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
             }
 
-            void update_logical_size (std::uint64_t new_logical_size) noexcept {
+            void update_logical_size (std::uint64_t const new_logical_size) noexcept {
                 assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = std::max (logical_, new_logical_size);
             }
 
-            void truncate_logical_size (std::uint64_t new_logical_size) noexcept {
+            void truncate_logical_size (std::uint64_t const new_logical_size) noexcept {
                 assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = new_logical_size;
             }
@@ -483,7 +483,7 @@ namespace pstore {
     database::database (std::shared_ptr<File> file,
                         std::unique_ptr<system_page_size_interface> && page_size,
                         std::unique_ptr<region::factory> && region_factory,
-                        bool access_tick_enabled)
+                        bool const access_tick_enabled)
             : storage_{std::move (file), std::move (page_size), std::move (region_factory)}
             , size_{database::get_footer_pos (*file)} {
 
@@ -504,7 +504,7 @@ namespace pstore {
         file.seek (0);
         file.read (h);
 
-        auto dtor = [](header * p) { p->~header (); };
+        auto const dtor = [](header * const p) { p->~header (); };
         std::unique_ptr<header, decltype (dtor)> deleter (h, dtor);
 
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
