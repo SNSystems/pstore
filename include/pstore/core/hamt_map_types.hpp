@@ -138,7 +138,7 @@ namespace pstore {
             class internal_node;
             class linear_node;
 
-            inline bool depth_is_internal_node (unsigned shift) {
+            constexpr bool depth_is_internal_node (unsigned const shift) noexcept {
                 return shift < details::max_hash_bits;
             }
 
@@ -163,9 +163,9 @@ namespace pstore {
                         : addr (a.to_address ()) {}
                 explicit index_pointer (typed_address<linear_node> const a) noexcept
                         : addr (a.to_address ()) {}
-                explicit index_pointer (internal_node * p) noexcept
+                explicit index_pointer (internal_node * const p) noexcept
                         : internal{tag_node (p)} {}
-                explicit index_pointer (linear_node * p) noexcept
+                explicit index_pointer (linear_node * const p) noexcept
                         : linear{tag_node (p)} {}
                 index_pointer (index_pointer const &) noexcept = default;
                 index_pointer (index_pointer &&) noexcept = default;
@@ -253,13 +253,13 @@ namespace pstore {
                 linear_node * linear;
 
             private:
-                static std::uintptr_t tag (void * p) noexcept {
+                static std::uintptr_t tag (void * const p) noexcept {
                     return reinterpret_cast<std::uintptr_t> (p) | internal_node_bit | heap_node_bit;
                 }
-                static internal_node * tag_node (internal_node * p) noexcept {
+                static internal_node * tag_node (internal_node * const p) noexcept {
                     return reinterpret_cast<internal_node *> (tag (p));
                 }
-                static linear_node * tag_node (linear_node * p) noexcept {
+                static linear_node * tag_node (linear_node * const p) noexcept {
                     return reinterpret_cast<linear_node *> (tag (p));
                 }
 
@@ -295,7 +295,7 @@ namespace pstore {
                 /// \param idx  The pointer to either the parent node or a leaf node.
                 /// \param pos  If idx is a leaf node address, pos is set to the default value
                 ///             (not_found). Otherwise, pos refers to the child slot.
-                parent_type (index_pointer const idx, std::size_t pos = not_found)
+                parent_type (index_pointer const idx, std::size_t const pos = not_found) noexcept
                         : node (idx)
                         , position (pos) {}
 
@@ -389,11 +389,11 @@ namespace pstore {
 
                 /// \name Element access
                 ///@{
-                address operator[] (std::size_t i) const {
+                address operator[] (std::size_t const i) const noexcept {
                     assert (i < size_);
                     return leaves_[i];
                 }
-                address & operator[] (std::size_t i) {
+                address & operator[] (std::size_t const i) noexcept {
                     assert (i < size_);
                     return leaves_[i];
                 }
@@ -429,7 +429,7 @@ namespace pstore {
 
                 /// Returns the number of bytes of storage required for a linear node with 'size'
                 /// children.
-                static std::size_t size_bytes (std::uint64_t size) {
+                static constexpr std::size_t size_bytes (std::uint64_t const size) {
                     return sizeof (linear_node) - sizeof (linear_node::leaves_) +
                            sizeof (linear_node::leaves_[0]) * size;
                 }
@@ -471,10 +471,12 @@ namespace pstore {
                 void operator delete (void * p, nchildren size);
 
                 // Non-allocating placement allocation functions.
-                void * operator new (std::size_t size, void * ptr) noexcept {
+                void * operator new (std::size_t const size, void * const ptr) noexcept {
                     return ::operator new (size, ptr);
                 }
-                void operator delete (void * p, void * ptr) noexcept { ::operator delete (p, ptr); }
+                void operator delete (void * const p, void * const ptr) noexcept {
+                    ::operator delete (p, ptr);
+                }
 
                 /// \param size The capacity of this linear node.
                 explicit linear_node (std::size_t size);
@@ -591,7 +593,7 @@ namespace pstore {
                 /// computing the number of bytes occupied.
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
-                static std::size_t size_bytes (std::size_t num_children) noexcept {
+                static std::size_t size_bytes (std::size_t const num_children) noexcept {
                     assert (num_children > 0 && num_children < max_hash_bits);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_[0])) * num_children;
@@ -604,8 +606,8 @@ namespace pstore {
                 }
 
                 /// Return the new leaf child index number.
-                static unsigned get_new_index (hash_type new_hash,
-                                               hash_type existing_hash) noexcept {
+                static unsigned get_new_index (hash_type const new_hash,
+                                               hash_type const existing_hash) noexcept {
                     return static_cast<unsigned> (new_hash >= existing_hash);
                 }
 
@@ -619,12 +621,12 @@ namespace pstore {
                 address flush (transaction_base & transaction, unsigned shifts);
 
 
-                index_pointer const & operator[] (std::size_t i) const {
+                index_pointer const & operator[] (std::size_t const i) const {
                     assert (i < size ());
                     return children_[i];
                 }
 
-                index_pointer & operator[] (std::size_t i) {
+                index_pointer & operator[] (std::size_t const i) {
                     assert (i < size ());
                     return children_[i];
                 }
@@ -655,10 +657,12 @@ namespace pstore {
                 void operator delete (void * p, nchildren size);
 
                 // Non-allocating placement allocation functions.
-                void * operator new (std::size_t size, void * ptr) noexcept {
+                void * operator new (std::size_t const size, void * const ptr) noexcept {
                     return ::operator new (size, ptr);
                 }
-                void operator delete (void * p, void * ptr) noexcept { ::operator delete (p, ptr); }
+                void operator delete (void * const p, void * const ptr) noexcept {
+                    ::operator delete (p, ptr);
+                }
 
 
                 internal_node ();
