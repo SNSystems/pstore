@@ -74,7 +74,7 @@ namespace pstore {
 
                 // starts_with
                 // ~~~~~~~~~~~
-                bool starts_with (std::string const & s, char const * prefix) {
+                bool starts_with (std::string const & s, gsl::czstring prefix) {
                     auto it = std::begin (s);
                     auto end = std::end (s);
                     for (; *prefix != '\0' && it != end; ++it, ++prefix) {

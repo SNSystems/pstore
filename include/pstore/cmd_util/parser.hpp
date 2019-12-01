@@ -50,6 +50,7 @@
 #include <string>
 #include <vector>
 
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
@@ -69,7 +70,7 @@ namespace pstore {
 
             protected:
                 struct literal {
-                    literal (std::string const & name_, int value_,
+                    literal (std::string const & name_, int const value_,
                              std::string const & description_)
                             : name{name_}
                             , value{value_}
@@ -110,8 +111,8 @@ namespace pstore {
                     if (v.length () == 0) {
                         return nothing<T> ();
                     }
-                    char * str_end = nullptr;
-                    char const * str = v.c_str ();
+                    gsl::zstring str_end = nullptr;
+                    gsl::czstring str = v.c_str ();
                     errno = 0;
                     long const res = std::strtol (str, &str_end, 10);
                     if (str_end != str + v.length () || errno != 0 ||

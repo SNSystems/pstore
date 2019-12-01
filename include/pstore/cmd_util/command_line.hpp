@@ -51,6 +51,7 @@
 #include "pstore/cmd_util/help.hpp"
 #include "pstore/cmd_util/modifiers.hpp"
 #include "pstore/cmd_util/tchar.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/path.hpp"
 #include "pstore/support/utf.hpp"
@@ -70,7 +71,7 @@ namespace pstore {
                     out_string (std::string const & str) noexcept {
                         return str;
                     }
-                    static constexpr char const * out_text (char const * const str) noexcept {
+                    static constexpr gsl::czstring out_text (gsl::czstring const str) noexcept {
                         return str;
                     }
                 };
@@ -80,7 +81,7 @@ namespace pstore {
                     static std::wstring out_string (std::string const & str) {
                         return utf::to_native_string (str);
                     }
-                    static std::wstring out_text (char const * str) {
+                    static std::wstring out_text (gsl::czstring const str) {
                         return utf::to_native_string (str);
                     }
                 };
@@ -90,7 +91,7 @@ namespace pstore {
                 lookup_nearest_option (std::string const & arg,
                                        option::options_container const & all_options);
 
-                bool starts_with (std::string const & s, char const * prefix);
+                bool starts_with (std::string const & s, gsl::czstring const prefix);
                 maybe<option *> find_handler (std::string const & name);
 
                 // check_for_missing

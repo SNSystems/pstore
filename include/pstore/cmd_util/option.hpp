@@ -85,7 +85,7 @@ namespace pstore {
                 virtual void set_description (std::string const & d);
                 std::string const & description () const;
 
-                void set_category (option_category const * cat) { category_ = cat; }
+                void set_category (option_category const * const cat) { category_ = cat; }
 
                 virtual void set_positional ();
                 virtual bool is_positional () const;

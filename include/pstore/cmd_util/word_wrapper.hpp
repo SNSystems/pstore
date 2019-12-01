@@ -57,7 +57,7 @@ namespace pstore {
                 static constexpr std::size_t default_width = 79;
 
                 explicit word_wrapper (std::string const & text,
-                                       std::size_t max_width = default_width)
+                                       std::size_t const max_width = default_width)
                         : word_wrapper (text, max_width, 0U) {}
                 static word_wrapper end (std::string const & text,
                                          std::size_t max_width = default_width);

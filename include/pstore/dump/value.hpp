@@ -66,7 +66,9 @@ namespace pstore {
         class indent {
         public:
             indent () = default;
-            indent next (unsigned distance) const { return indent{count_ + distance}; }
+            indent next (unsigned const distance) const noexcept {
+                return indent{count_ + distance};
+            }
 
             template <typename OStream>
             OStream & write (OStream & os, typename OStream::char_type c) const;
@@ -77,8 +79,8 @@ namespace pstore {
             unsigned size () const { return count_; }
 
         private:
-            explicit indent (unsigned count)
-                    : count_ (count) {}
+            explicit constexpr indent (unsigned const count) noexcept
+                    : count_{count} {}
             unsigned count_ = 0U;
         };
 
@@ -157,17 +159,17 @@ namespace pstore {
 
             bool is_number_like () const override { return true; }
 
-            static void hex () { default_base_ = 16U; }
-            static void dec () { default_base_ = 10U; }
-            static void oct () { default_base_ = 8U; }
+            static void hex () noexcept { default_base_ = 16U; }
+            static void dec () noexcept { default_base_ = 10U; }
+            static void oct () noexcept { default_base_ = 8U; }
 
             static unsigned default_base () { return default_base_; }
 
         protected:
-            number_base ()
-                    : base_ (default_base_) {}
-            explicit number_base (unsigned base)
-                    : base_ (base) {}
+            number_base () noexcept
+                    : base_{default_base_} {}
+            explicit constexpr number_base (unsigned const base) noexcept
+                    : base_{base} {}
 
             static unsigned default_base_;
             unsigned const base_;
@@ -197,7 +199,7 @@ namespace pstore {
         //*********************************
         class number_double final : public number_base {
         public:
-            explicit number_double (double v) noexcept
+            explicit number_double (double const v) noexcept
                     : number_base ()
                     , v_{v} {}
             double get () const noexcept { return v_; }
@@ -208,8 +210,8 @@ namespace pstore {
             }
 
         private:
-            std::ostream & write_impl (std::ostream & os, indent const &) const override;
-            std::wostream & write_impl (std::wostream & os, indent const &) const override;
+            std::ostream & write_impl (std::ostream & os, indent const & i) const override;
+            std::wostream & write_impl (std::wostream & os, indent const & i) const override;
 
             double v_;
         };
@@ -219,7 +221,7 @@ namespace pstore {
         //*****************************
         class number_long final : public number_base {
         public:
-            explicit number_long (long long v) noexcept
+            explicit number_long (long long const v) noexcept
                     : number_base ()
                     , v_{v} {}
             number_long (long long v, unsigned base)
@@ -231,8 +233,8 @@ namespace pstore {
             number_long const * dynamic_cast_number_long () const noexcept override { return this; }
 
         private:
-            std::ostream & write_impl (std::ostream & os, indent const &) const override;
-            std::wostream & write_impl (std::wostream & os, indent const &) const override;
+            std::ostream & write_impl (std::ostream & os, indent const & i) const override;
+            std::wostream & write_impl (std::wostream & os, indent const & i) const override;
 
             long long v_;
         };
@@ -242,7 +244,7 @@ namespace pstore {
         //*******************************
         class number_ulong final : public number_base {
         public:
-            explicit number_ulong (unsigned long long v) noexcept
+            explicit number_ulong (unsigned long long const v) noexcept
                     : number_base ()
                     , v_{v} {}
             number_ulong (unsigned long long v, unsigned base)
@@ -256,8 +258,8 @@ namespace pstore {
             }
 
         private:
-            std::ostream & write_impl (std::ostream & os, indent const &) const override;
-            std::wostream & write_impl (std::wostream & os, indent const &) const override;
+            std::ostream & write_impl (std::ostream & os, indent const & i) const override;
+            std::wostream & write_impl (std::wostream & os, indent const & i) const override;
 
             unsigned long long v_;
         };
@@ -269,8 +271,8 @@ namespace pstore {
         /// \brief A class used to write a boolean values to an ostream.
         class boolean final : public value {
         public:
-            explicit boolean (bool v)
-                    : v_ (v) {}
+            explicit boolean (bool const v) noexcept
+                    : v_{v} {}
 
             boolean * dynamic_cast_boolean () noexcept override { return this; }
             boolean const * dynamic_cast_boolean () const noexcept override { return this; }
@@ -309,7 +311,7 @@ namespace pstore {
             /// Constructs a value string object.
             /// \param v The string represented by this value object.
             /// \param force_quoted  If true, forces the output string to be quoted.
-            explicit string (std::string v, bool force_quoted = false) noexcept
+            explicit string (std::string v, bool const force_quoted = false) noexcept
                     : v_ (std::move (v))
                     , force_quoted_ (force_quoted) {}
 
@@ -400,7 +402,7 @@ namespace pstore {
         /// Given the time as a number of milliseconds since the epoch.
         class time final : public value {
         public:
-            explicit time (std::uint64_t ms)
+            explicit time (std::uint64_t const ms)
                     : ms_ (ms) {}
 
         private:
@@ -437,10 +439,10 @@ namespace pstore {
             array * dynamic_cast_array () noexcept override { return this; }
             array const * dynamic_cast_array () const noexcept override { return this; }
 
-            void push_back (value_ptr v) { values_.push_back (v); }
+            void push_back (value_ptr const & v) { values_.push_back (v); }
 
             std::size_t size () const noexcept { return values_.size (); }
-            value_ptr operator[] (std::size_t index) noexcept { return values_[index]; }
+            value_ptr operator[] (std::size_t const index) noexcept { return values_[index]; }
 
         private:
             template <typename OStream>
@@ -515,8 +517,8 @@ namespace pstore {
                 members_.emplace_back (std::move (name), std::move (value));
             }
 
-            void compact (bool enabled = true) { compact_ = enabled; }
-            bool is_compact () const { return compact_; }
+            void compact (bool const enabled = true) noexcept { compact_ = enabled; }
+            bool is_compact () const noexcept { return compact_; }
 
         private:
             template <typename OStream, typename ObjectCharacterTraits>
@@ -608,7 +610,7 @@ namespace pstore {
         }
 
 
-        inline value_ptr make_time (std::uint64_t ms, bool no_times) {
+        inline value_ptr make_time (std::uint64_t ms, bool const no_times) {
             if (no_times) {
                 ms = 0;
             }
@@ -652,23 +654,21 @@ namespace pstore {
         /// key/value
         ///         pairs).
         inline value_ptr make_value (object::container && members) {
-            auto v = std::make_shared<object> (std::move (members));
-            return std::static_pointer_cast<value, object> (v);
+            return std::static_pointer_cast<value, object> (
+                std::make_shared<object> (std::move (members)));
         }
         inline value_ptr make_value (object::container const & members) {
-            auto v = std::make_shared<object> (members);
-            return std::static_pointer_cast<value, object> (v);
+            return std::static_pointer_cast<value, object> (std::make_shared<object> (members));
         }
 
         /// \brief  Makes a value object which represents a heterogeneous array from a collection of
         /// value objects.
         inline value_ptr make_value (array::container && members) {
-            auto v = std::make_shared<array> (std::move (members));
-            return std::static_pointer_cast<value, array> (v);
+            return std::static_pointer_cast<value, array> (
+                std::make_shared<array> (std::move (members)));
         }
         inline value_ptr make_value (array::container const & members) {
-            auto v = std::make_shared<array> (members);
-            return std::static_pointer_cast<value, array> (v);
+            return std::static_pointer_cast<value, array> (std::make_shared<array> (members));
         }
 
         template <typename T, size_t Size>
