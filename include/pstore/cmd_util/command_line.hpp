@@ -70,7 +70,7 @@ namespace pstore {
                     out_string (std::string const & str) noexcept {
                         return str;
                     }
-                    static constexpr char const * out_text (char const * str) noexcept {
+                    static constexpr char const * out_text (char const * const str) noexcept {
                         return str;
                     }
                 };
@@ -105,7 +105,7 @@ namespace pstore {
                     bool ok = true;
                     auto positional_missing = 0U;
 
-                    for (option const * opt : option::all ()) {
+                    for (option const * const opt : option::all ()) {
                         switch (opt->get_num_occurrences_flag ()) {
                         case num_occurrences_flag::required:
                         case num_occurrences_flag::one_or_more:
@@ -190,22 +190,22 @@ namespace pstore {
                 public:
                     static constexpr auto stick_to = StickTo;
 
-                    explicit sticky_bool (bool v) noexcept
+                    explicit constexpr sticky_bool (bool const v) noexcept
                             : v_{v} {}
                     sticky_bool (sticky_bool const &) noexcept = default;
                     sticky_bool (sticky_bool &&) noexcept = default;
                     sticky_bool & operator= (sticky_bool const & other) = default;
                     sticky_bool & operator= (sticky_bool && other) = default;
 
-                    sticky_bool & operator= (bool b) noexcept {
+                    sticky_bool & operator= (bool const b) noexcept {
                         if (v_ != stick_to) {
                             v_ = b;
                         }
                         return *this;
                     }
 
-                    bool get () const noexcept { return v_; }
-                    explicit operator bool () const noexcept { return get (); }
+                    constexpr bool get () const noexcept { return v_; }
+                    explicit constexpr operator bool () const noexcept { return get (); }
 
                 private:
                     bool v_;
@@ -319,7 +319,7 @@ namespace pstore {
                 bool parse_command_line_options (InputIterator first_arg, InputIterator last_arg,
                                                  std::string const & overview, ErrorStream & errs) {
                     std::string const program_name = pstore::path::base_name (*(first_arg++));
-                    help help (program_name, overview, name ("help"));
+                    help const help (program_name, overview, name ("help"));
 
                     bool ok = true;
                     std::tie (first_arg, ok) =
@@ -342,7 +342,7 @@ namespace pstore {
             /// arguments as either UTF-16 or MBCS strings and converts them to UTF-8 as expected
             /// by the rest of the code.
             template <typename CharType>
-            void ParseCommandLineOptions (int argc, CharType * argv[],
+            void ParseCommandLineOptions (int const argc, CharType * const argv[],
                                           std::string const & overview) {
                 std::vector<std::string> args;
                 args.reserve (argc);
@@ -355,7 +355,7 @@ namespace pstore {
                 }
             }
 #else
-            inline void ParseCommandLineOptions (int argc, char * argv[],
+            inline void ParseCommandLineOptions (int const argc, char * const argv[],
                                                  std::string const & overview) {
                 if (!details::parse_command_line_options (argv, argv + argc, overview,
                                                           error_stream)) {

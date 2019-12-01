@@ -116,7 +116,7 @@ namespace pstore {
                 std::string const name_;
             };
 
-            inline name make_modifier (char const * n) { return name (n); }
+            inline name make_modifier (char const * const n) { return name (n); }
 
 
             //*     _             *
@@ -190,7 +190,7 @@ namespace pstore {
                 struct positional {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    positional () noexcept {} // NOLINT
+                    constexpr positional () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -201,7 +201,7 @@ namespace pstore {
                 struct required {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    required () noexcept {} // NOLINT
+                    constexpr required () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -212,7 +212,7 @@ namespace pstore {
                 struct optional {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    optional () noexcept {} // NOLINT
+                    constexpr optional () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {
@@ -223,11 +223,11 @@ namespace pstore {
                 struct one_or_more {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    one_or_more () noexcept {}
+                    constexpr one_or_more () noexcept {}
 
                     template <typename Opt>
                     void apply (Opt & o) const {
-                        bool is_optional =
+                        bool const is_optional =
                             o.get_num_occurrences_flag () == num_occurrences_flag::optional;
                         o.set_num_occurrences_flag (is_optional
                                                         ? num_occurrences_flag::zero_or_more
@@ -246,7 +246,7 @@ namespace pstore {
 
                 class category {
                 public:
-                    explicit category (option_category const & cat)
+                    explicit constexpr category (option_category const & cat) noexcept
                             : cat_{cat} {}
 
                     template <typename Opt>
