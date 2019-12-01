@@ -57,10 +57,10 @@ def add_build_type(d, build_type):
 BUILDS = [
     {
         'os': 'linux',
-        'dist': 'trusty',
+        'dist': 'xenial',
         'addons': {
             'apt': {
-                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-precise-3.8'],
+                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-3.8'],
                 'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
             }
         },
