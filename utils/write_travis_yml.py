@@ -65,7 +65,10 @@ BUILDS = [
             }
         },
         'env': [
-            'MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"'
+            'MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"',
+            # Disable valgrind because the standard library is using instructions that
+            # Valgrind 3.11.0 does not support.
+            'PSTORE_VALGRIND=No',
         ]
     },
     {
@@ -78,7 +81,8 @@ BUILDS = [
             },
         },
         'env': [
-            'MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"'
+            'MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"',
+            'PSTORE_VALGRIND=Yes',
         ]
     },
     {
@@ -91,7 +95,8 @@ BUILDS = [
             },
         },
         'env': [
-            'MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"'
+            'MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"',
+            'PSTORE_VALGRIND=Yes',
         ]
     },
     {
@@ -116,7 +121,7 @@ def main():
                 '-o build',
                 '-D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
                 '-D PSTORE_EXAMPLES=Yes',
-                '-D PSTORE_VALGRIND=Yes',
+                '-D PSTORE_VALGRIND=${PSTORE_VALGRIND}',
                 '-D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}'
             ]),
             'cmake --build build --config ${CMAKE_BUILD_TYPE}',

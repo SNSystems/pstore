@@ -16,6 +16,7 @@ matrix:
         dist: xenial
         env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+        - PSTORE_VALGRIND=No
         - CMAKE_BUILD_TYPE=Debug
         - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
@@ -31,6 +32,7 @@ matrix:
         dist: xenial
         env:
         - MATRIX_EVAL="CC=clang-3.8 && CXX=clang++-3.8"
+        - PSTORE_VALGRIND=No
         - CMAKE_BUILD_TYPE=Release
         - PSTORE_ALWAYS_SPANNING=No
         os: linux
@@ -45,6 +47,7 @@ matrix:
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - PSTORE_VALGRIND=Yes
         - CMAKE_BUILD_TYPE=Debug
         - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
@@ -59,6 +62,7 @@ matrix:
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+        - PSTORE_VALGRIND=Yes
         - CMAKE_BUILD_TYPE=Release
         - PSTORE_ALWAYS_SPANNING=No
         os: linux
@@ -73,6 +77,7 @@ matrix:
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - PSTORE_VALGRIND=Yes
         - CMAKE_BUILD_TYPE=Debug
         - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
@@ -87,6 +92,7 @@ matrix:
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
+        - PSTORE_VALGRIND=Yes
         - CMAKE_BUILD_TYPE=Release
         - PSTORE_ALWAYS_SPANNING=No
         os: linux
@@ -102,7 +108,7 @@ matrix:
         osx_image: xcode9.3
 script:
 - ./utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes
-    -D PSTORE_VALGRIND=Yes -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}
+    -D PSTORE_VALGRIND=${PSTORE_VALGRIND} -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}
 - cmake --build build --config ${CMAKE_BUILD_TYPE}
 - cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests
 sudo: 'false'
