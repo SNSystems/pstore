@@ -303,7 +303,7 @@ function (add_pstore_library)
         add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
         set_target_properties (${arg_TARGET} PROPERTIES
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
             PUBLIC_HEADER "${arg_INCLUDES}"
         )
@@ -342,7 +342,7 @@ function (add_pstore_executable target)
         add_executable (${target} ${ARGN})
 
         set_target_properties (${target} PROPERTIES
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
         )
         pstore_enable_warnings (${target})
@@ -401,7 +401,7 @@ function (add_pstore_test_library target_name)
     else ()
         add_library (${target_name} STATIC ${ARGN})
         set_target_properties (${target_name} PROPERTIES
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
         )
         pstore_enable_warnings (${target_name})
@@ -426,7 +426,7 @@ function (add_pstore_unit_test target_name)
         add_executable (${target_name} ${ARGN})
         set_target_properties (${target_name} PROPERTIES
             FOLDER "pstore tests"
-            CXX_STANDARD 11
+            CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
         )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
