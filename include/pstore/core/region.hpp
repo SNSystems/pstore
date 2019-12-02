@@ -57,7 +57,7 @@
 namespace pstore {
     namespace region {
 
-        inline std::uint64_t round_up (std::uint64_t x, std::uint64_t y) {
+        constexpr std::uint64_t round_up (std::uint64_t const x, std::uint64_t const y) noexcept {
             return (x + y - 1) / y * y;
         }
 
@@ -187,9 +187,10 @@ namespace pstore {
         // push
         // ~~~~
         template <typename File, typename MemoryMapper>
-        void region_builder<File, MemoryMapper>::push (gsl::not_null<container_type *> regions,
-                                                       std::uint64_t /*file_size*/,
-                                                       std::uint64_t offset, std::uint64_t size) {
+        void
+        region_builder<File, MemoryMapper>::push (gsl::not_null<container_type *> const regions,
+                                                  std::uint64_t const /*file_size*/,
+                                                  std::uint64_t offset, std::uint64_t size) {
             assert (regions != nullptr);
             assert (size >= minimum_size_);
             // (Note that we separately make pages read-only to guard against writing to committed
@@ -208,7 +209,7 @@ namespace pstore {
 #else
             // Check that the regions are contiguous and sorted.
             std::uint64_t p = 0;
-            for (pstore::region::memory_mapper_ptr region : regions) {
+            for (pstore::region::memory_mapper_ptr const region : regions) {
                 assert (region->offset () == p);
                 p += region->size ();
             }
@@ -254,14 +255,14 @@ namespace pstore {
 
             virtual std::shared_ptr<file::file_base> file () = 0;
 
-            std::uint64_t full_size () const noexcept { return full_size_; }
-            std::uint64_t min_size () const noexcept { return min_size_; }
+            constexpr std::uint64_t full_size () const noexcept { return full_size_; }
+            constexpr std::uint64_t min_size () const noexcept { return min_size_; }
 
         protected:
             /// \note full_size modulo minimum_size must be 0.
             /// \param full_size  The size of the largest memory-mapped file region.
             /// \param min_size  The size of the smallest memory-mapped file region.
-            factory (std::uint64_t full_size, std::uint64_t min_size)
+            constexpr factory (std::uint64_t const full_size, std::uint64_t const min_size) noexcept
                     : full_size_{full_size}
                     , min_size_{min_size} {
                 assert (full_size_ % min_size_ == 0);
@@ -276,8 +277,8 @@ namespace pstore {
                          std::uint64_t original_size, std::uint64_t new_size);
 
         private:
-            std::uint64_t full_size_;
-            std::uint64_t min_size_;
+            std::uint64_t const full_size_;
+            std::uint64_t const min_size_;
         };
 
         // create

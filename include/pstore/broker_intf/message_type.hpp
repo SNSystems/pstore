@@ -91,8 +91,8 @@ namespace pstore {
                           std::string const & content);
 
             template <typename InputIterator>
-            message_type (std::uint32_t mid, std::uint16_t pno, std::uint16_t nump,
-                          InputIterator first, InputIterator last)
+            message_type (std::uint32_t const mid, std::uint16_t const pno,
+                          std::uint16_t const nump, InputIterator first, InputIterator last)
                     : sender_id{process_id}
                     , message_id{mid}
                     , part_no{pno}

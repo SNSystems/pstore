@@ -172,8 +172,9 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (alignof (header) == 8);
     PSTORE_STATIC_ASSERT (sizeof (header) == 48);
 
-    inline constexpr std::uint64_t chars_to_uint64 (char c1, char c2, char c3, char c4, char c5,
-                                                    char c6, char c7, char c8) noexcept {
+    inline constexpr std::uint64_t chars_to_uint64 (char const c1, char const c2, char const c3,
+                                                    char const c4, char const c5, char const c6,
+                                                    char const c7, char const c8) noexcept {
         return static_cast<std::uint64_t> (c1) | static_cast<std::uint64_t> (c2) << 8U |
                static_cast<std::uint64_t> (c3) << 16U | static_cast<std::uint64_t> (c4) << 24U |
                static_cast<std::uint64_t> (c5) << 32U | static_cast<std::uint64_t> (c6) << 40U |

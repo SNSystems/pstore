@@ -49,7 +49,7 @@
 namespace {
     class foo {
     public:
-        explicit foo (int a)
+        explicit constexpr foo (int const a) noexcept
                 : a_ (a) {}
         foo (foo const &) = default;
 

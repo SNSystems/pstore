@@ -47,7 +47,6 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file generation_iterator.hpp
 
 #ifndef PSTORE_CORE_GENERATION_ITERATOR_HPP
 #define PSTORE_CORE_GENERATION_ITERATOR_HPP
@@ -64,9 +63,10 @@ namespace pstore {
     class generation_iterator : public std::iterator<std::input_iterator_tag, // category
                                                      typed_address<trailer>> {
     public:
-        generation_iterator (gsl::not_null<database const *> db, typed_address<trailer> pos)
-                : db_ (db)
-                , pos_ (pos) {
+        generation_iterator (gsl::not_null<database const *> const db,
+                             typed_address<trailer> const pos)
+                : db_{db}
+                , pos_{pos} {
 
             this->validate ();
         }

@@ -144,7 +144,7 @@ namespace pstore {
 
                 pstore::database const & get_db () const noexcept { return db_; }
                 pstore::address get_address () const noexcept { return addr_; }
-                void skip (std::size_t distance) noexcept { addr_ += distance; }
+                void skip (std::size_t const distance) noexcept { addr_ += distance; }
 
                 /// Reads a single instance of a standard-layout type Ty from the current store
                 /// address.

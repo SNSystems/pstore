@@ -213,7 +213,8 @@ namespace pstore {
         /// \return A read-only pointer to the loaded data.
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T const> getro (typed_address<T> addr, std::size_t elements) const {
+        std::shared_ptr<T const> getro (typed_address<T> const addr,
+                                        std::size_t const elements) const {
             if (addr.to_address ().absolute () % alignof (T) != 0) {
                 raise (error_code::bad_alignment);
             }
@@ -399,7 +400,7 @@ namespace pstore {
             typed_address<trailer> footer_pos () const noexcept { return footer_pos_; }
             std::uint64_t logical_size () const noexcept { return logical_; }
 
-            void update_footer_pos (typed_address<trailer> new_footer_pos) noexcept {
+            void update_footer_pos (typed_address<trailer> const new_footer_pos) noexcept {
                 assert (new_footer_pos.absolute () >= leader_size);
                 footer_pos_ = new_footer_pos;
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
