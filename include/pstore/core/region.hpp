@@ -241,11 +241,11 @@ namespace pstore {
 
             /// \brief Creates the memory mapping objects for the given database file.
             ///
-            /// Memory map the file regions. Creates an array of memory-mapped regions this will
-            /// consist of a number whose size is equal to full_region_size followed by a number
-            /// of min_size bytes each up to the size of the file. A file whose size is not an
-            /// exact multiple of min_size will have a single mapped region which extends beyond
-            /// the (original) end of the file.
+            /// Memory map the file regions. Creates an array of memory-mapped regions. This will
+            /// consist of a number of entries whose size is equal to full_region_size followed by a
+            /// number of entries of min_size bytes each up to the size of the file. A file whose
+            /// size is not an exact multiple of min_size will have a single mapped region which
+            /// extends beyond the (original) end of the file.
             ///
             /// \returns A container of memory mapper objects.
             virtual std::vector<memory_mapper_ptr> init () = 0;
@@ -255,8 +255,8 @@ namespace pstore {
 
             virtual std::shared_ptr<file::file_base> file () = 0;
 
-            constexpr std::uint64_t full_size () const noexcept { return full_size_; }
-            constexpr std::uint64_t min_size () const noexcept { return min_size_; }
+            std::uint64_t full_size () const noexcept { return full_size_; }
+            std::uint64_t min_size () const noexcept { return min_size_; }
 
         protected:
             /// \note full_size modulo minimum_size must be 0.
