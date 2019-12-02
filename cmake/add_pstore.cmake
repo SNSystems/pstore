@@ -76,9 +76,10 @@ function (pstore_enable_warnings target_name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set (options
             -Weverything
+            -Wno-c99-extensions
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
-            -Wno-c99-extensions
+            -Wno-c++14-extensions
             -Wno-deprecated
             -Wno-disabled-macro-expansion
             -Wno-exit-time-destructors
