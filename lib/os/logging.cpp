@@ -79,31 +79,32 @@ namespace pstore {
         //*        |___/|___/          *
         // log
         // ~~~
-        void logger::log (priority p, gsl::czstring message, int d) {
+        void logger::log (priority const p, gsl::czstring const message, int const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message, unsigned d) {
+        void logger::log (priority const p, gsl::czstring const message, unsigned const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message, long d) {
+        void logger::log (priority const p, gsl::czstring const message, long const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message, unsigned long d) {
+        void logger::log (priority const p, gsl::czstring const message, unsigned long const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message, long long d) {
+        void logger::log (priority const p, gsl::czstring const message, long long const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message, unsigned long long d) {
+        void logger::log (priority const p, gsl::czstring const message,
+                          unsigned long long const d) {
             this->log (p, to_string (message, d));
         }
-        void logger::log (priority p, gsl::czstring message) {
+        void logger::log (priority const p, gsl::czstring const message) {
             this->log (p, std::string{message});
         }
-        void logger::log (priority p, gsl::czstring part1, gsl::czstring part2) {
+        void logger::log (priority const p, gsl::czstring const part1, gsl::czstring const part2) {
             this->log (p, std::string{part1} + part2);
         }
-        void logger::log (priority p, gsl::czstring part1, quoted part2) {
+        void logger::log (priority const p, gsl::czstring const part1, quoted const part2) {
             auto message = std::string{part1};
             message += '"';
             message += static_cast<gsl::czstring> (part2);
@@ -118,11 +119,11 @@ namespace pstore {
         //*                             |___/|___/          *
         // time_string
         // ~~~~~~~~~~~
-        std::size_t basic_logger::time_string (std::time_t t,
+        std::size_t basic_logger::time_string (std::time_t const t,
                                                gsl::span<char, time_buffer_size> const & buffer) {
             static_assert (time_buffer_size > 1, "time_buffer_size is too small");
 
-            struct tm tm_time = local_time (t);
+            struct tm const tm_time = local_time (t);
             static constexpr char const * iso8601_format = "%FT%T%z";
             std::size_t const r =
                 std::strftime (buffer.data (), time_buffer_size, iso8601_format, &tm_time);
@@ -171,7 +172,7 @@ namespace {
 
     private:
         os_log_t log_;
-        static os_log_type_t priority_code (logging::priority p);
+        static os_log_type_t priority_code (logging::priority p) noexcept;
     };
 
     // (ctor)
@@ -189,43 +190,47 @@ namespace {
 
     // log
     // ~~~
-    void asl_logger::log (logging::priority p, std::string const & message) {
+    void asl_logger::log (logging::priority const p, std::string const & message) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ());
     }
-    void asl_logger::log (logging::priority p, char const * message, int d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring message, int const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%d", message, d);
     }
-    void asl_logger::log (logging::priority p, char const * message, unsigned d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%u", message, d);
     }
-    void asl_logger::log (logging::priority p, char const * message, long d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring message, long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%ld", message, d);
     }
-    void asl_logger::log (logging::priority p, char const * message, unsigned long d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lu", message, d);
     }
-    void asl_logger::log (logging::priority p, char const * message, long long d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring const message,
+                          long long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lld", message, d);
     }
-    void asl_logger::log (logging::priority p, char const * message, unsigned long long d) {
+    void asl_logger::log (logging::priority const p, gsl::czstring const message,
+                          unsigned long long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%llu", message, d);
     }
-    void asl_logger::log (logging::priority p, gsl::czstring message) {
+    void asl_logger::log (logging::priority p, gsl::czstring const message) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s", message);
     }
-    void asl_logger::log (logging::priority p, gsl::czstring part1, gsl::czstring part2) {
+    void asl_logger::log (logging::priority const p, gsl::czstring const part1,
+                          gsl::czstring const part2) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%s", part1, part2);
     }
-    void asl_logger::log (logging::priority p, gsl::czstring part1, logging::quoted part2) {
+    void asl_logger::log (logging::priority const p, gsl::czstring const part1,
+                          logging::quoted const part2) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s\"%s\"", part1,
                           static_cast<gsl::czstring> (part2));
@@ -233,7 +238,7 @@ namespace {
 
     // priority_code
     // ~~~~~~~~~~~~~
-    os_log_type_t asl_logger::priority_code (logging::priority p) {
+    os_log_type_t asl_logger::priority_code (logging::priority const p) noexcept {
         using logging::priority;
         switch (p) {
         case priority::emergency:
@@ -263,7 +268,7 @@ namespace {
 
     private:
         void log (logging::priority p, std::string const & message) override;
-        static int priority_code (logging::priority p);
+        static int priority_code (logging::priority p) noexcept;
 
         int facility_;
         std::array<char, 50> ident_;
@@ -271,7 +276,7 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    syslog_logger::syslog_logger (std::string const & ident, int facility)
+    syslog_logger::syslog_logger (std::string const & ident, int const facility)
             : facility_ (facility)
             , ident_{{0}} {
 
@@ -283,14 +288,14 @@ namespace {
 
     // log
     // ~~~
-    void syslog_logger::log (logging::priority p, std::string const & message) {
+    void syslog_logger::log (logging::priority const p, std::string const & message) {
         // NOLINTNEXTLINE
         syslog (priority_code (p), "%s", message.c_str ());
     }
 
     // priority_code
     // ~~~~~~~~~~~~~
-    int syslog_logger::priority_code (logging::priority p) {
+    int syslog_logger::priority_code (logging::priority const p) noexcept {
         switch (p) {
         case logging::priority::emergency: return LOG_EMERG;
         case logging::priority::alert: return LOG_ALERT;
@@ -387,7 +392,7 @@ namespace pstore {
 
         // log
         // ~~~
-        void basic_logger::log (priority p, std::string const & message) {
+        void basic_logger::log (priority const p, std::string const & message) {
             std::array<char, time_buffer_size> time_buffer;
             std::size_t const r = time_string (std::time (nullptr), ::gsl::make_span (time_buffer));
             (void) r;
@@ -397,13 +402,13 @@ namespace pstore {
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
                 << message << '\n';
 
-            std::lock_guard<std::mutex> lock (mutex_);
+            std::lock_guard<std::mutex> const lock (mutex_);
             this->log_impl (str.str ());
         }
 
         // priority_string
         // ~~~~~~~~~~~~~~~
-        gsl::czstring basic_logger::priority_string (priority p) {
+        gsl::czstring basic_logger::priority_string (priority const p) noexcept {
             switch (p) {
             case priority::emergency: return "emergency";
             case priority::alert: return "alert";

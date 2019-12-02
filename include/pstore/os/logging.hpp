@@ -132,7 +132,7 @@ namespace pstore {
         public:
             basic_logger ();
 
-            static ::pstore::gsl::czstring priority_string (priority p);
+            static gsl::czstring priority_string (priority p) noexcept;
             static std::string get_current_thread_name ();
 
             static constexpr std::size_t const time_buffer_size = sizeof "YYYY-MM-DDTHH:mm:SS+ZZZZ";
@@ -155,7 +155,7 @@ namespace pstore {
         //*               _| _|       *
         class file_logger : public basic_logger {
         protected:
-            explicit file_logger (FILE * file)
+            explicit file_logger (FILE * const file)
                     : file_{file} {}
 
         private:
