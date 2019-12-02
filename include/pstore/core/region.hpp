@@ -209,7 +209,7 @@ namespace pstore {
 #else
             // Check that the regions are contiguous and sorted.
             std::uint64_t p = 0;
-            for (pstore::region::memory_mapper_ptr const region : regions) {
+            for (pstore::region::memory_mapper_ptr const & region : regions) {
                 assert (region->offset () == p);
                 p += region->size ();
             }
