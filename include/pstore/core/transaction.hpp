@@ -93,7 +93,7 @@ namespace pstore {
 
 
         ///@{
-        std::shared_ptr<void const> getro (address addr, std::size_t size) {
+        std::shared_ptr<void const> getro (address const addr, std::size_t const size) {
             assert (addr >= first_ && addr + size <= first_ + size_);
             return db ().getro (addr, size);
         }
@@ -106,7 +106,8 @@ namespace pstore {
 
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T const> getro (typed_address<T> addr, std::size_t elements = 1) {
+        std::shared_ptr<T const> getro (typed_address<T> const addr,
+                                        std::size_t const elements = 1) {
             assert (addr.to_address () >= first_ &&
                     (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getro (addr, elements);
@@ -115,7 +116,7 @@ namespace pstore {
 
 
         ///@{
-        std::shared_ptr<void> getrw (address addr, std::size_t size) {
+        std::shared_ptr<void> getrw (address const addr, std::size_t const size) {
             assert (addr >= first_ && addr + size <= first_ + size_);
             return db_.getrw (addr, size);
         }
@@ -128,7 +129,7 @@ namespace pstore {
 
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
-        std::shared_ptr<T> getrw (typed_address<T> addr, std::size_t elements = 1) {
+        std::shared_ptr<T> getrw (typed_address<T> const addr, std::size_t const elements = 1) {
             assert (addr.to_address () >= first_ &&
                     (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getrw (addr, elements);
@@ -181,7 +182,8 @@ namespace pstore {
         /// \note     The newly allocated space it not initialized.
         template <typename Ty,
                   typename = typename std::enable_if<std::is_standard_layout<Ty>::value>::type>
-        auto alloc_rw (std::size_t num = 1) -> std::pair<std::shared_ptr<Ty>, typed_address<Ty>> {
+        auto alloc_rw (std::size_t const num = 1)
+            -> std::pair<std::shared_ptr<Ty>, typed_address<Ty>> {
             auto result = this->alloc_rw (sizeof (Ty) * num, alignof (Ty));
             return {std::static_pointer_cast<Ty> (result.first), typed_address<Ty> (result.second)};
         }
@@ -213,6 +215,11 @@ namespace pstore {
     };
 
 
+    //*  _                             _   _           *
+    //* | |_ _ _ __ _ _ _  ___ __ _ __| |_(_)___ _ _   *
+    //* |  _| '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  *
+    //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| *
+    //*                                                *
     template <typename LockGuard>
     class transaction : public transaction_base {
     public:
@@ -247,11 +254,12 @@ namespace pstore {
         static_assert (noexcept (rollback ()), "rollback must be noexcept");
         this->rollback ();
     }
-} // namespace pstore
 
-
-namespace pstore {
-
+    //*  _         _                           _  *
+    //* | |___  __| |__  __ _ _  _ __ _ _ _ __| | *
+    //* | / _ \/ _| / / / _` | || / _` | '_/ _` | *
+    //* |_\___/\__|_\_\ \__, |\_,_\__,_|_| \__,_| *
+    //*                 |___/                     *
     /// lock_guard fills a similar role as a type such as std::scoped_lock<> in that it provides
     /// convenient RAII-style mechanism for owning a mutex for the duration of a scoped block. The
     /// major differences are that it manages only a single mutex, and that it assumes ownership of
@@ -297,6 +305,11 @@ namespace pstore {
     };
 
 
+    //*  _                             _   _                      _            *
+    //* | |_ _ _ __ _ _ _  ___ __ _ __| |_(_)___ _ _    _ __ _  _| |_ _____ __ *
+    //* |  _| '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  | '  \ || |  _/ -_) \ / *
+    //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| |_|_|_\_,_|\__\___/_\_\ *
+    //*                                                                        *
     /// A mutex which is used to protect a pstore file from being simultaneously written by multiple
     /// threads or processes.
     class transaction_mutex {
