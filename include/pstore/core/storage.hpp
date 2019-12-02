@@ -73,9 +73,9 @@ namespace pstore {
                 return true;
             }
 
-            auto * ptr = static_cast<std::uint8_t const *> (value.get ());
-            auto * region_base = static_cast<std::uint8_t const *> (region->data ().get ());
-            auto * region_end = region_base + region->size ();
+            auto * const ptr = static_cast<std::uint8_t const *> (value.get ());
+            auto * const region_base = static_cast<std::uint8_t const *> (region->data ().get ());
+            auto * const region_end = region_base + region->size ();
             return ptr >= region_base && ptr + address::segment_size <= region_end;
         }
 #endif
@@ -168,7 +168,7 @@ namespace pstore {
         /// \param addr The start of the address range to be considered.
         /// \param size The size of the address range to be considered.
         /// \returns true if the given address range "spans" more than one region.
-        bool request_spans_regions (address const & addr, std::size_t size) const;
+        bool request_spans_regions (address const & addr, std::size_t size) const noexcept;
 
         /// Marks the address range [first, last) as read-only.
         void protect (address first, address last);
@@ -216,37 +216,38 @@ namespace pstore {
 
     // segment_base
     // ~~~~~~~~~~~~
-    inline auto storage::segment_base (address::segment_type segment) const noexcept
+    inline auto storage::segment_base (address::segment_type const segment) const noexcept
         -> std::shared_ptr<void const> {
         assert (segment < sat_->size ());
         sat_entry const & e = (*sat_)[segment];
         assert (e.is_valid ());
         return e.value;
     }
-    inline auto storage::segment_base (address::segment_type segment) noexcept
+    inline auto storage::segment_base (address::segment_type const segment) noexcept
         -> std::shared_ptr<void> {
-        auto const * cthis = this;
+        auto const * const cthis = this;
         return std::const_pointer_cast<void> (cthis->segment_base (segment));
     }
 
     // address_to_pointer
     // ~~~~~~~~~~~~~~~~~~
-    inline auto storage::address_to_pointer (address addr) const noexcept
+    inline auto storage::address_to_pointer (address const addr) const noexcept
         -> std::shared_ptr<void const> {
-        std::shared_ptr<void const> segment_base = this->segment_base (addr.segment ());
-        auto * ptr =
+        auto const segment_base = this->segment_base (addr.segment ());
+        auto * const ptr =
             std::static_pointer_cast<std::uint8_t const> (segment_base).get () + addr.offset ();
         return std::shared_ptr<void const> (segment_base, ptr);
     }
 
-    inline auto storage::address_to_pointer (address addr) noexcept -> std::shared_ptr<void> {
-        auto const * cthis = this;
+    inline auto storage::address_to_pointer (address const addr) noexcept -> std::shared_ptr<void> {
+        auto const * const cthis = this;
         return std::const_pointer_cast<void> (cthis->address_to_pointer (addr));
     }
 
     // request_spans_regions
     // ~~~~~~~~~~~~~~~~~~~~~
-    inline bool storage::request_spans_regions (address const & addr, std::size_t size) const {
+    inline bool storage::request_spans_regions (address const & addr, std::size_t const size) const
+        noexcept {
         (void) addr;
         (void) size;
 #if PSTORE_ALWAYS_SPANNING
@@ -262,7 +263,7 @@ namespace pstore {
     // copy
     // ~~~~
     template <typename Traits, typename Function>
-    void storage::copy (address addr, std::size_t size, typename Traits::temp_pointer p,
+    void storage::copy (address const addr, std::size_t size, typename Traits::temp_pointer p,
                         Function copier) const {
 
         PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () <=
@@ -301,7 +302,7 @@ namespace pstore {
             assert (segment + inc < sat_elements);
             segment += static_cast<address::segment_type> (inc);
 
-            region::memory_mapper_ptr region = (*sat_)[segment].region;
+            region::memory_mapper_ptr const & region = (*sat_)[segment].region;
             assert (region != nullptr);
 
             copy_size = std::min (static_cast<std::uint64_t> (size), region->size ());
