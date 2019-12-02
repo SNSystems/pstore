@@ -49,6 +49,7 @@
 
 namespace pstore {
     namespace json {
+
         enum class error_code : int {
             none,
             expected_array_member,
@@ -79,9 +80,10 @@ namespace pstore {
 
         std::error_category const & get_error_category () noexcept;
 
-        inline std::error_code make_error_code (error_code e) noexcept {
+        inline std::error_code make_error_code (error_code const e) noexcept {
             return {static_cast<int> (e), get_error_category ()};
         }
+
     } // end namespace json
 } // end namespace pstore
 

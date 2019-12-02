@@ -83,7 +83,7 @@ namespace pstore {
             public:
                 /// \param d True if the managed object should be deleted; false, if it only the
                 /// detructor should be called.
-                constexpr explicit deleter (bool d = true) noexcept
+                constexpr explicit deleter (bool const d = true) noexcept
                         : delete_{d} {}
                 void operator() (T * const p) const noexcept {
                     if (delete_) {
@@ -201,7 +201,7 @@ namespace pstore {
             /// subsequent text is ignored.
             ///
             /// \param err  The json error code to be stored in the parser.
-            void set_error (error_code err) noexcept {
+            void set_error (error_code const err) noexcept {
                 assert (error_ == error_code::none || err != error_code::none);
                 error_ = err;
             }
@@ -239,7 +239,7 @@ namespace pstore {
 
         namespace details {
             enum char_set : char { tab = '\x09', lf = '\x0A', cr = '\x0D', space = '\x20' };
-            inline bool isspace (char c) noexcept {
+            constexpr bool isspace (char const c) noexcept {
                 return c == char_set::tab || c == char_set::lf || c == char_set::cr ||
                        c == char_set::space;
             }
@@ -271,11 +271,11 @@ namespace pstore {
                 bool is_done () const noexcept { return state_ == done; }
 
             protected:
-                explicit matcher (int initial_state) noexcept
+                explicit constexpr matcher (int const initial_state) noexcept
                         : state_{initial_state} {}
 
-                int get_state () const noexcept { return state_; }
-                void set_state (int s) noexcept { state_ = s; }
+                constexpr int get_state () const noexcept { return state_; }
+                void set_state (int const s) noexcept { state_ = s; }
 
                 ///@{
                 /// \brief Errors
@@ -324,7 +324,7 @@ namespace pstore {
             public:
                 /// \param text  The string to be matched.
                 /// \param done_fn  The function called when the source string is matched.
-                explicit token_matcher (gsl::czstring text,
+                explicit token_matcher (gsl::czstring const text,
                                         DoneFunction done_fn = DoneFunction ()) noexcept
                         : matcher<Callbacks> (start_state)
                         , text_ (text)
@@ -546,7 +546,8 @@ namespace pstore {
             // frac_state
             // ~~~~~~~~~~
             template <typename Callbacks>
-            bool number_matcher<Callbacks>::do_frac_state (parser<Callbacks> & parser, char c) {
+            bool number_matcher<Callbacks>::do_frac_state (parser<Callbacks> & parser,
+                                                           char const c) {
                 bool match = true;
                 if (c == '.') {
                     this->set_state (frac_initial_digit_state);
@@ -568,7 +569,7 @@ namespace pstore {
             // ~~~~~~~~~~
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_frac_digit_state (parser<Callbacks> & parser,
-                                                                 char c) {
+                                                                 char const c) {
                 assert (this->get_state () == frac_initial_digit_state ||
                         this->get_state () == frac_digit_state);
 
@@ -625,7 +626,7 @@ namespace pstore {
             // ~~~~~~~~~~~~~~
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_exponent_digit_state (parser<Callbacks> & parser,
-                                                                     char c) {
+                                                                     char const c) {
                 assert (this->get_state () == exponent_digit_state ||
                         this->get_state () == exponent_initial_digit_state);
                 assert (!is_integer_);
@@ -650,7 +651,7 @@ namespace pstore {
             template <typename Callbacks>
             bool
             number_matcher<Callbacks>::do_integer_initial_digit_state (parser<Callbacks> & parser,
-                                                                       char c) {
+                                                                       char const c) {
                 assert (this->get_state () == integer_initial_digit_state);
                 assert (is_integer_);
                 if (c == '0') {
@@ -669,7 +670,7 @@ namespace pstore {
             // ~~~~~~~~~~~~~~~~~~~~~~
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_integer_digit_state (parser<Callbacks> & parser,
-                                                                    char c) {
+                                                                    char const c) {
                 assert (this->get_state () == integer_digit_state);
                 assert (is_integer_);
 
@@ -922,7 +923,8 @@ namespace pstore {
 
             // [static]
             template <typename Callbacks>
-            maybe<unsigned> string_matcher<Callbacks>::hex_value (char32_t c, unsigned value) {
+            maybe<unsigned> string_matcher<Callbacks>::hex_value (char32_t const c,
+                                                                  unsigned const value) {
                 auto digit = 0U;
                 if (c >= '0' && c <= '9') {
                     digit = static_cast<unsigned> (c) - '0';
@@ -938,8 +940,9 @@ namespace pstore {
 
             // [static]
             template <typename Callbacks>
-            auto string_matcher<Callbacks>::consume_hex_state (unsigned hex, enum state state,
-                                                               char32_t code_point)
+            auto string_matcher<Callbacks>::consume_hex_state (unsigned const hex,
+                                                               enum state const state,
+                                                               char32_t const code_point)
                 -> maybe<std::tuple<unsigned, enum state>> {
 
                     return hex_value (code_point, hex) >>=
@@ -1183,7 +1186,7 @@ namespace pstore {
                     this->set_error (parser, error_code::expected_object_member);
                     return {nullptr, true};
                 }
-                char c = *ch;
+                char const c = *ch;
                 switch (this->get_state ()) {
                 case start_state:
                     assert (c == '{');
@@ -1320,7 +1323,7 @@ namespace pstore {
 
             template <typename Callbacks>
             std::pair<typename matcher<Callbacks>::pointer, bool>
-            eof_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch) {
+            eof_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> const ch) {
                 if (ch) {
                     this->set_error (parser, error_code::unexpected_extra_input);
                 } else {
@@ -1337,7 +1340,7 @@ namespace pstore {
             template <typename Callbacks>
             class root_matcher final : public matcher<Callbacks> {
             public:
-                explicit root_matcher (bool only_string = false) noexcept
+                explicit constexpr root_matcher (bool const only_string = false) noexcept
                         : matcher<Callbacks> (start_state)
                         , only_string_{only_string} {}
 
