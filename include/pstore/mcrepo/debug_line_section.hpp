@@ -120,7 +120,7 @@ namespace pstore {
         class debug_line_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
             debug_line_section_creation_dispatcher (extent<std::uint8_t> const & header,
-                                                    section_content const * sec)
+                                                    section_content const * const sec)
                     : section_creation_dispatcher (section_kind::debug_line)
                     , header_{header}
                     , section_ (sec) {}
@@ -144,9 +144,9 @@ namespace pstore {
 
         class debug_line_dispatcher final : public dispatcher {
         public:
-            explicit debug_line_dispatcher (debug_line_section const & d) noexcept
+            explicit constexpr debug_line_dispatcher (debug_line_section const & d) noexcept
                     : d_{d} {}
-            ~debug_line_dispatcher () noexcept;
+            ~debug_line_dispatcher () noexcept final;
 
             std::size_t size_bytes () const final { return d_.size_bytes (); }
             unsigned align () const final { return d_.align (); }
