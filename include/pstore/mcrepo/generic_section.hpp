@@ -70,8 +70,9 @@ namespace pstore {
         //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                |_|    *
         struct internal_fixup {
-            internal_fixup (section_kind section_, relocation_type type_, std::uint64_t offset_,
-                            std::uint64_t addend_) noexcept
+            constexpr internal_fixup (section_kind const section_, relocation_type const type_,
+                                      std::uint64_t const offset_,
+                                      std::uint64_t const addend_) noexcept
                     : section{section_}
                     , type{type_}
                     , offset{offset_}
@@ -123,8 +124,9 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         struct external_fixup {
-            external_fixup (typed_address<indirect_string> name_, relocation_type type_,
-                            std::uint64_t offset_, std::uint64_t addend_) noexcept
+            constexpr external_fixup (typed_address<indirect_string> const name_,
+                                      relocation_type const type_, std::uint64_t const offset_,
+                                      std::uint64_t const addend_) noexcept
                     : name{name_}
                     , type{type_}
                     , offset{offset_}
@@ -179,10 +181,10 @@ namespace pstore {
         //* |___/                                                    *
         class generic_section : public section_base {
         public:
-            void * operator new (std::size_t size, void * ptr) {
+            void * operator new (std::size_t const size, void * const ptr) {
                 return ::operator new (size, ptr);
             }
-            void operator delete (void * ptr, void * p) { ::operator delete (ptr, p); }
+            void operator delete (void * const ptr, void * const p) { ::operator delete (ptr, p); }
 
             /// Describes the three members of a section as three pairs of iterators: one
             /// each for the data, internal fixups, and external fixups ranges.
@@ -220,15 +222,15 @@ namespace pstore {
             std::uint64_t size () const noexcept { return data_size_; }
 
             container<std::uint8_t> payload () const noexcept {
-                auto * begin = aligned_ptr<std::uint8_t> (this + 1);
+                auto * const begin = aligned_ptr<std::uint8_t> (this + 1);
                 return {begin, begin + data_size_};
             }
             container<internal_fixup> ifixups () const {
-                auto * begin = aligned_ptr<internal_fixup> (payload ().end ());
+                auto * const begin = aligned_ptr<internal_fixup> (payload ().end ());
                 return {begin, begin + this->num_ifixups ()};
             }
             container<external_fixup> xfixups () const {
-                auto * begin = aligned_ptr<external_fixup> (ifixups ().end ());
+                auto * const begin = aligned_ptr<external_fixup> (ifixups ().end ());
                 return {begin, begin + num_xfixups_};
             }
 
@@ -296,7 +298,7 @@ namespace pstore {
             /// \param num  The number of instance of type Ty.
             /// \returns Number of bytes occupied by the elements.
             template <typename Ty>
-            static inline std::size_t part_size_bytes (std::size_t pos, std::size_t num) {
+            static inline std::size_t part_size_bytes (std::size_t pos, std::size_t const num) {
                 if (num > 0) {
                     pos = aligned<Ty> (pos) + num * sizeof (Ty);
                 }
@@ -308,7 +310,7 @@ namespace pstore {
         // ~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
         generic_section::generic_section (DataRange const & d, IFixupRange const & i,
-                                          XFixupRange const & x, std::uint8_t align)
+                                          XFixupRange const & x, std::uint8_t const align)
                 : field32_{0} {
 
             align_ = bit_count::ctz (align);
@@ -396,7 +398,7 @@ namespace pstore {
         }
 
         struct section_content {
-            section_content (section_kind kind_, std::uint8_t align_) noexcept
+            section_content (section_kind const kind_, std::uint8_t const align_) noexcept
                     : kind{kind_}
                     , align{align_} {}
             section_content (section_content const &) = delete;
@@ -451,9 +453,9 @@ namespace pstore {
         class generic_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
             generic_section_creation_dispatcher (section_kind const kind,
-                                                 section_content const * sec)
+                                                 section_content const * const sec)
                     : section_creation_dispatcher (kind)
-                    , section_ (sec) {}
+                    , section_{sec} {}
 
             generic_section_creation_dispatcher (generic_section_creation_dispatcher const &) =
                 delete;
