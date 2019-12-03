@@ -86,7 +86,7 @@ namespace pstore {
         //*                                       |___/         |__/  *
         char const * error_category::name () const noexcept { return "pstore-romfs category"; }
 
-        std::string error_category::message (int error) const {
+        std::string error_category::message (int const error) const {
             auto * result = "unknown error";
             switch (static_cast<error_code> (error)) {
             case error_code::einval: result = "There was an invalid operation"; break;
@@ -103,7 +103,7 @@ namespace pstore {
             return cat;
         }
 
-        std::error_code make_error_code (error_code e) {
+        std::error_code make_error_code (error_code const e) {
             static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                            "base type of error_code must be int to permit safe static cast");
             return {static_cast<int> (e), get_romfs_error_category ()};
@@ -138,8 +138,8 @@ namespace pstore {
 
         // read
         // ~~~~
-        std::size_t open_file::read (void * PSTORE_NONNULL buffer, std::size_t size,
-                                     std::size_t count) {
+        std::size_t open_file::read (void * PSTORE_NONNULL buffer, std::size_t const size,
+                                     std::size_t const count) {
             if (size == 0 || count == 0) {
                 return 0;
             }
@@ -161,8 +161,8 @@ namespace pstore {
 
         // seek
         // ~~~~
-        error_or<std::size_t> open_file::seek (off_t offset, int whence) {
-            auto make_error = [](error_code erc) {
+        error_or<std::size_t> open_file::seek (off_t const offset, int const whence) {
+            auto make_error = [](error_code const erc) {
                 return error_or<std::size_t> (make_error_code (erc));
             };
             using uoff_type = std::make_unsigned<off_t>::type;
@@ -240,11 +240,11 @@ namespace pstore {
         //* / _` / -_|_-</ _| '_| | '_ \  _/ _ \ '_| *
         //* \__,_\___/__/\__|_| |_| .__/\__\___/_|   *
         //*                       |_|                *
-        std::size_t descriptor::read (void * PSTORE_NONNULL buffer, std::size_t size,
-                                      std::size_t count) {
+        std::size_t descriptor::read (void * PSTORE_NONNULL const buffer, std::size_t const size,
+                                      std::size_t const count) {
             return f_->read (buffer, size, count);
         }
-        error_or<std::size_t> descriptor::seek (off_t offset, int whence) {
+        error_or<std::size_t> descriptor::seek (off_t const offset, int const whence) {
             return f_->seek (offset, whence);
         }
         auto descriptor::stat () const -> struct stat {
@@ -271,7 +271,7 @@ namespace pstore {
         //*                        *
         // ctor
         // ~~~~
-        romfs::romfs (directory const * PSTORE_NONNULL root)
+        romfs::romfs (directory const * PSTORE_NONNULL const root)
                 : root_{root}
                 , cwd_{root} {
             assert (this->fsck ());
@@ -279,32 +279,33 @@ namespace pstore {
 
         // open
         // ~~~~
-        auto romfs::open (gsl::czstring PSTORE_NONNULL path) const -> error_or<descriptor> {
-            return this->parse_path (path) >>= [](dirent_ptr de) {
-                auto file = std::make_shared<open_file> (*de);
+        auto romfs::open (gsl::czstring PSTORE_NONNULL const path) const -> error_or<descriptor> {
+            return this->parse_path (path) >>= [](dirent_ptr const de) {
+                auto const file = std::make_shared<open_file> (*de);
                 return error_or<descriptor>{descriptor{file}};
             };
         }
 
         // opendir
         // ~~~~~~~
-        auto romfs::opendir (gsl::czstring path) -> error_or<dirent_descriptor> {
-            auto get_directory = [](dirent_ptr de) {
+        auto romfs::opendir (gsl::czstring const path) -> error_or<dirent_descriptor> {
+            auto get_directory = [](dirent_ptr const de) {
                 using rett = error_or<directory const * PSTORE_NONNULL>;
                 return de->is_directory () ? rett{de->opendir ()}
                                            : rett{make_error_code (error_code::enotdir)};
             };
 
-            auto create_descriptor = [](directory const * PSTORE_NONNULL d) {
-                auto directory = std::make_shared<open_directory> (*d);
+            auto create_descriptor = [](directory const * PSTORE_NONNULL const d) {
+                auto const directory = std::make_shared<open_directory> (*d);
                 return error_or<dirent_descriptor>{dirent_descriptor{directory}};
             };
 
             return (this->parse_path (path) >>= get_directory) >>= create_descriptor;
         }
 
-        error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL path) const {
-            return this->parse_path (path) >>= [] (dirent_ptr de) { return error_or <struct stat> {de->stat ()}; };
+        error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL const path) const {
+            return this->parse_path (path) >>=
+                   [](dirent_ptr const de) { return error_or<struct stat>{de->stat ()}; };
         }
 
         // getcwd
@@ -313,8 +314,8 @@ namespace pstore {
 
         // chdir
         // ~~~~~
-        std::error_code romfs::chdir (gsl::czstring path) {
-            auto dirent_to_directory = [](dirent_ptr de) { return de->opendir (); };
+        std::error_code romfs::chdir (gsl::czstring const path) {
+            auto dirent_to_directory = [](dirent_ptr const de) { return de->opendir (); };
 
             auto set_cwd = [this](directory const * const d) {
                 cwd_ = d; // Warning: side-effect!
@@ -336,7 +337,7 @@ namespace pstore {
 
         // parse_path
         // ~~~~~~~~~~
-        auto romfs::parse_path (gsl::czstring path, directory const * dir) const
+        auto romfs::parse_path (gsl::czstring const path, directory const * dir) const
             -> error_or<dirent const *> {
 
             if (!path || !dir) {

@@ -67,7 +67,7 @@
 namespace {
 
     pstore::file::range_lock get_vacuum_range_lock (pstore::file::file_base * const file,
-                                                    pstore::file::file_base::lock_kind kind) {
+                                                    pstore::file::file_base::lock_kind const kind) {
         return {file, sizeof (pstore::header) + offsetof (pstore::lock_block, vacuum_lock),
                 sizeof (pstore::lock_block::vacuum_lock), kind};
     }
@@ -99,7 +99,8 @@ namespace pstore {
 
     constexpr std::size_t const database::sync_name_length;
 
-    database::database (std::string const & path, access_mode am, bool access_tick_enabled)
+    database::database (std::string const & path, access_mode const am,
+                        bool const access_tick_enabled)
             : storage_{database::open (path, am)}
             , size_{database::get_footer_pos (*this->file ())} {
 
@@ -184,7 +185,7 @@ namespace pstore {
 
     // older_revision_footer_pos
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    typed_address<trailer> database::older_revision_footer_pos (unsigned revision) const {
+    typed_address<trailer> database::older_revision_footer_pos (unsigned const revision) const {
         if (revision == pstore::head_revision || revision > this->get_current_revision ()) {
             raise (pstore::error_code::unknown_revision);
         }
@@ -192,7 +193,7 @@ namespace pstore {
         // Walk backwards down the linked list of revisions to find it.
         typed_address<trailer> footer_pos = size_.footer_pos ();
         for (;;) {
-            auto tail = this->getro (footer_pos);
+            auto const tail = this->getro (footer_pos);
             unsigned int const tail_revision = tail->a.generation;
             if (revision > tail_revision) {
                 raise (pstore::error_code::unknown_revision);
@@ -213,7 +214,7 @@ namespace pstore {
 
     // sync
     // ~~~~
-    void database::sync (unsigned revision) {
+    void database::sync (unsigned const revision) {
         // If revision <= current revision then we don't need to start at head! We do so if the
         // revision is later than the current region (that's what is_newer is about with footer_pos
         // tracking the current footer as it moves backwards).
@@ -294,7 +295,7 @@ namespace pstore {
             header.footer_pos = typed_address<trailer>::make (leader_size);
             file.write (header);
 
-            lock_block lb{};
+            lock_block const lb{};
             file.write (lb);
 
             assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
@@ -326,7 +327,7 @@ namespace pstore {
 
     // open [static]
     // ~~~~
-    auto database::open (std::string const & path, access_mode am)
+    auto database::open (std::string const & path, access_mode const am)
         -> std::shared_ptr<file::file_handle> {
 
         using present_mode = file::file_handle::present_mode;
@@ -353,7 +354,7 @@ namespace pstore {
         // physical volume as the final file). We then populate that file with the basic data
         // structures and rename it to the final destination.
         {
-            auto temporary_file = std::make_shared<file::file_handle> ();
+            auto const temporary_file = std::make_shared<file::file_handle> ();
             temporary_file->open (file::file_handle::unique{}, path::dir_name (path));
             file::deleter temp_file_deleter (temporary_file->path ());
             // Fill the file with its initial contents.
@@ -376,11 +377,11 @@ namespace pstore {
 
     // get_spanning
     // ~~~~~~~~~~~~
-    auto database::get_spanning (address addr, std::size_t size, bool initialized,
-                                 bool writable) const -> std::shared_ptr<void const> {
+    auto database::get_spanning (address const addr, std::size_t const size, bool const initialized,
+                                 bool const writable) const -> std::shared_ptr<void const> {
         // The deleter is called when the shared pointer that we're about to return is
         // released.
-        auto deleter = [this, addr, size, writable](std::uint8_t * p) {
+        auto deleter = [this, addr, size, writable](std::uint8_t * const p) {
             if (writable) {
                 // Check that this code is not trying to write back to read-only storage. This error
                 // can occur if a non-const pointer is being destroyed after the containing
@@ -391,9 +392,8 @@ namespace pstore {
                 // modified) contents back to the data store.
                 storage_.copy<storage::copy_to_store_traits> (
                     addr, size, p,
-                    [](std::uint8_t * dest, std::uint8_t const * src, std::size_t n) {
-                        std::memcpy (dest, src, n);
-                    });
+                    [](std::uint8_t * const dest, std::uint8_t const * const src,
+                       std::size_t const n) { std::memcpy (dest, src, n); });
             }
             delete[](p);
         };
@@ -401,13 +401,13 @@ namespace pstore {
         // Create the memory block that we'll be returning, attaching a suitable deleter
         // which will be responsible for copying the data back to the store (if we're providing
         // a writable pointer).
-        std::shared_ptr<std::uint8_t> result{new std::uint8_t[size], deleter};
+        std::shared_ptr<std::uint8_t> const result{new std::uint8_t[size], deleter};
 
         if (initialized) {
             // Copy from the data store's regions to the newly allocated memory block.
             storage_.copy<storage::copy_from_store_traits> (
                 addr, size, result.get (),
-                [](std::uint8_t const * src, std::uint8_t * dest, std::size_t n) {
+                [](std::uint8_t const * const src, std::uint8_t * const dest, std::size_t const n) {
                     std::memcpy (dest, src, n);
                 });
         }
@@ -416,8 +416,8 @@ namespace pstore {
 
     // get
     // ~~~
-    auto database::get (address addr, std::size_t size, bool initialized, bool writable) const
-        -> std::shared_ptr<void const> {
+    auto database::get (address const addr, std::size_t const size, bool const initialized,
+                        bool const writable) const -> std::shared_ptr<void const> {
         if (closed_) {
             raise (pstore::error_code::store_closed);
         }
@@ -440,7 +440,7 @@ namespace pstore {
 
     // allocate
     // ~~~~~~~~
-    pstore::address database::allocate (std::uint64_t bytes, unsigned align) {
+    pstore::address database::allocate (std::uint64_t const bytes, unsigned const align) {
         assert (is_power_of_two (align));
         if (closed_) {
             raise (error_code::store_closed);
@@ -472,7 +472,7 @@ namespace pstore {
 
     // truncate
     // ~~~~~~~~
-    void database::truncate (std::uint64_t size) {
+    void database::truncate (std::uint64_t const size) {
         if (closed_) {
             raise (error_code::store_closed);
         }
@@ -489,7 +489,7 @@ namespace pstore {
 
     // set_new_footer
     // ~~~~~~~~~~~~~~
-    void database::set_new_footer (typed_address<trailer> new_footer_pos) {
+    void database::set_new_footer (typed_address<trailer> const new_footer_pos) {
         size_.update_footer_pos (new_footer_pos);
 
         // Finally (this should be the last thing we do), point the file header at the new

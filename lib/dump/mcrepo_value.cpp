@@ -55,7 +55,7 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (pstore::repo::section_kind t) {
+        value_ptr make_value (pstore::repo::section_kind const t) {
             char const * name = "*unknown*";
 #define X(k)                                                                                       \
     case pstore::repo::section_kind::k: name = #k; break;
@@ -69,7 +69,7 @@ namespace pstore {
         }
 
         value_ptr make_value (repo::internal_fixup const & ifx) {
-            auto v = std::make_shared<object> (object::container{
+            auto const v = std::make_shared<object> (object::container{
                 {"section", make_value (ifx.section)},
                 {"type", make_value (static_cast<std::uint64_t> (ifx.type))},
                 {"offset", make_value (ifx.offset)},
@@ -92,7 +92,8 @@ namespace pstore {
         }
 
         value_ptr make_section_value (database const & db, repo::generic_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
+                                      repo::section_kind const sk, gsl::czstring const triple,
+                                      bool const hex_mode) {
 
             (void) sk;
             (void) triple;
@@ -127,7 +128,8 @@ namespace pstore {
         }
 
         value_ptr make_section_value (database const & db, repo::dependents const & dependents,
-                                      repo::section_kind /*sk*/, gsl::czstring /*triple*/, bool /*hex_mode*/) {
+                                      repo::section_kind const /*sk*/,
+                                      gsl::czstring const /*triple*/, bool const /*hex_mode*/) {
             return make_value (std::begin (dependents), std::end (dependents),
                                [&db](typed_address<repo::compilation_member> const & member) {
                                    return make_value (db, *db.getro (member));
@@ -135,7 +137,8 @@ namespace pstore {
         }
 
         value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
-                                      repo::section_kind sk, gsl::czstring triple, bool hex_mode) {
+                                      repo::section_kind const sk, gsl::czstring const triple,
+                                      bool const hex_mode) {
             assert (sk == repo::section_kind::debug_line);
             return make_value (object::container{
                 {"header", make_value (section.header_extent ())},
@@ -144,7 +147,8 @@ namespace pstore {
         }
 
         value_ptr make_section_value (database const & /*db*/, repo::bss_section const & section,
-                                      repo::section_kind sk, gsl::czstring /*triple*/, bool /*hex_mode*/) {
+                                      repo::section_kind const sk, gsl::czstring const /*triple*/,
+                                      bool const /*hex_mode*/) {
             (void) sk;
             assert (sk == repo::section_kind::bss);
             return make_value (object::container{
@@ -154,7 +158,7 @@ namespace pstore {
         }
 
         value_ptr make_fragment_value (database const & db, repo::fragment const & fragment,
-                                       gsl::czstring triple, bool hex_mode) {
+                                       gsl::czstring const triple, bool const hex_mode) {
 
 #define X(k)                                                                                       \
     case repo::section_kind::k:                                                                    \
@@ -177,7 +181,7 @@ namespace pstore {
 #undef X
         }
 
-        value_ptr make_value (repo::linkage l) {
+        value_ptr make_value (repo::linkage const l) {
 #define X(a)                                                                                       \
     case (repo::linkage::a): name = #a; break;
 
@@ -187,7 +191,7 @@ namespace pstore {
 #undef X
         }
 
-        value_ptr make_value (repo::visibility v) {
+        value_ptr make_value (repo::visibility const v) {
             char const * name = "*unknown*";
             switch (v) {
             case repo::visibility::default_vis: name = "default"; break;
@@ -228,7 +232,7 @@ namespace pstore {
 
         value_ptr make_value (database const & db,
                               pstore::index::fragment_index::value_type const & value,
-                              pstore::gsl::czstring triple, bool hex_mode) {
+                              pstore::gsl::czstring const triple, bool const hex_mode) {
             auto fragment = pstore::repo::fragment::load (db, value.second);
             return make_value (object::container{
                 {"digest", make_value (value.first)},
@@ -244,7 +248,7 @@ namespace pstore {
 
         value_ptr make_value (database const & db,
                               pstore::index::debug_line_header_index::value_type const & value,
-                              bool hex_mode) {
+                              bool const hex_mode) {
             auto const debug_line_header = db.getro (value.second);
             return make_value (object::container{
                 {"digest", make_value (value.first)},
