@@ -86,7 +86,9 @@ def _select_vs_generator():
 
     _logger.info('Running vswhere at "%s"', vswhere)
     # Ask vswhere to disclose all of the vs installations.
-    installations = json.loads(subprocess.check_output([vswhere, '-format', 'json'], stderr=subprocess.STDOUT))
+    output = subprocess.check_output([vswhere, '-format', 'json'], stderr=subprocess.STDOUT)
+    _logger.info('vswhere said: %s', output)
+    installations = json.loads(output)
     # Reduce the installations list to just the integer major version numbers.
     installations = [int(install['installationVersion'].split('.')[0]) for install in installations]
     _logger.debug('Installations are: %s', ','.join((str(inst) for inst in installations)))
@@ -118,6 +120,7 @@ def _get_real_generator_args(system, generator):
         return None
 
     # Turn a generator or "pseudo generator" name into a collection of one or more cmake switches.
+    _logger.debug('Turning psuedo generator "%s" into cmake switches')
     return {
         'make': lambda: ['-G', 'Unix Makefiles'],
         'ninja': lambda: ['-G', 'Ninja'],
@@ -148,8 +151,10 @@ def _options(args):
                         action='store_true', help='Previews the operation without performing any action.')
     parser.add_argument('-v', '--verbose', action='store_true', help='Produce verbose output.')
     parser.add_argument('--no-clean', dest='clean', action='store_false')
-    options = parser.parse_args(args)
+    return parser.parse_args(args)
 
+
+def _process_options(options):
     if options.directory is None:
         options.directory = 'build_' + options.system
 
@@ -162,7 +167,6 @@ def _options(args):
     options.generator = _get_real_generator_args(options.system, options.generator)
     _logger.debug('Selecting generator %s', str(options.generator) if options.generator is not None else "(default)")
     return options
-
 
 def _as_command_line(cmd):
     """
@@ -348,6 +352,7 @@ def bind(x, f):
 def main(args=sys.argv[1:]):
     options = _options(args)
     logging.basicConfig(level=logging.DEBUG if options.verbose else logging.INFO)
+    options = _process_options (options)
     _logger.debug('Defines are: %s', str(options.define))
 
     return bind(check_for_cmakelists(options),
