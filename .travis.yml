@@ -106,6 +106,14 @@ matrix:
         - PSTORE_ALWAYS_SPANNING=No
         os: osx
         osx_image: xcode9.3
+    -   env:
+        - CMAKE_BUILD_TYPE=Debug
+        - PSTORE_ALWAYS_SPANNING=Yes
+        os: windows
+    -   env:
+        - CMAKE_BUILD_TYPE=Release
+        - PSTORE_ALWAYS_SPANNING=No
+        os: windows
 script:
 - ./utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes
     -D PSTORE_VALGRIND=${PSTORE_VALGRIND} -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}

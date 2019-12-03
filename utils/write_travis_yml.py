@@ -102,6 +102,9 @@ BUILDS = [
     {
         'os': 'osx',
         'osx_image': 'xcode9.3',
+    },
+    {
+        'os': 'windows',
     }
 ]
 
