@@ -63,7 +63,7 @@ namespace pstore {
 
             // operator new
             // ~~~~~~~~~~~~
-            void * linear_node::operator new (std::size_t s, nchildren size) {
+            void * linear_node::operator new (std::size_t const s, nchildren const size) {
                 (void) s;
                 std::size_t const actual_bytes = linear_node::size_bytes (size.n);
                 assert (actual_bytes >= s);
@@ -72,16 +72,16 @@ namespace pstore {
 
             // operator delete
             // ~~~~~~~~~~~~~~~
-            void linear_node::operator delete (void * p, nchildren /*size*/) {
+            void linear_node::operator delete (void * const p, nchildren const /*size*/) {
                 ::operator delete (p);
             }
-            void linear_node::operator delete (void * p) { ::operator delete (p); }
+            void linear_node::operator delete (void * const p) { ::operator delete (p); }
 
             // (ctor)
             // ~~~~~~
-            linear_node::linear_node (std::size_t size)
-                    : signature_ (signature)
-                    , size_ (size) {
+            linear_node::linear_node (std::size_t const size)
+                    : signature_{signature}
+                    , size_{size} {
 
                 static_assert (std::is_standard_layout<linear_node>::value,
                                "linear_node must be standard-layout");
@@ -108,23 +108,22 @@ namespace pstore {
 
             // allocate
             // ~~~~~~~~
-            std::unique_ptr<linear_node> linear_node::allocate (std::size_t num_children,
+            std::unique_ptr<linear_node> linear_node::allocate (std::size_t const num_children,
                                                                 linear_node const & from_node) {
                 // Allocate the new node and fill in the basic fields.
                 auto new_node = std::unique_ptr<linear_node> (new (nchildren{num_children})
                                                                   linear_node (num_children));
 
                 std::size_t const num_to_copy = std::min (num_children, from_node.size ());
-                auto src_begin = from_node.leaves_;
-                auto src_end = src_begin + num_to_copy;
+                auto * const src_begin = from_node.leaves_;
                 // Note that the last argument is '&leaves[0]' rather than just 'leaves' to defeat
                 // an MSVC debug assertion that thinks it knows how big the leaves_ array is...
-                std::copy (src_begin, src_end, &new_node->leaves_[0]);
+                std::copy (src_begin, src_begin + num_to_copy, &new_node->leaves_[0]);
 
                 return new_node;
             }
 
-            std::unique_ptr<linear_node> linear_node::allocate (address a, address b) {
+            std::unique_ptr<linear_node> linear_node::allocate (address const a, address const b) {
                 auto result = std::unique_ptr<linear_node> (new (nchildren{2U}) linear_node (2U));
                 (*result)[0] = a;
                 (*result)[1] = b;
@@ -133,15 +132,16 @@ namespace pstore {
 
             // allocate_from
             // ~~~~~~~~~~~~~
-            std::unique_ptr<linear_node> linear_node::allocate_from (linear_node const & orig_node,
-                                                                     std::size_t extra_children) {
+            std::unique_ptr<linear_node>
+            linear_node::allocate_from (linear_node const & orig_node,
+                                        std::size_t const extra_children) {
                 return linear_node::allocate (orig_node.size () + extra_children, orig_node);
             }
 
-            std::unique_ptr<linear_node> linear_node::allocate_from (database const & db,
-                                                                     index_pointer const node,
-                                                                     std::size_t extra_children) {
-                std::pair<std::shared_ptr<linear_node const>, linear_node const *> p =
+            std::unique_ptr<linear_node>
+            linear_node::allocate_from (database const & db, index_pointer const node,
+                                        std::size_t const extra_children) {
+                std::pair<std::shared_ptr<linear_node const>, linear_node const *> const p =
                     linear_node::get_node (db, node);
                 assert (p.second != nullptr);
                 return linear_node::allocate_from (*p.second, extra_children);
@@ -200,7 +200,7 @@ namespace pstore {
 
             // operator new
             // ~~~~~~~~~~~~
-            void * internal_node::operator new (std::size_t s, nchildren size) {
+            void * internal_node::operator new (std::size_t const s, nchildren const size) {
                 (void) s;
                 // TODO: we currently allocate in-heap nodes at their maximum size to avoid
                 // reallocations. This is acceptable for 64-bit hashes, but will become expensive
@@ -213,10 +213,10 @@ namespace pstore {
 
             // operator delete
             // ~~~~~~~~~~~~~~~
-            void internal_node::operator delete (void * p, nchildren /*size*/) {
+            void internal_node::operator delete (void * const p, nchildren const /*size*/) {
                 ::operator delete (p);
             }
-            void internal_node::operator delete (void * p) { ::operator delete (p); }
+            void internal_node::operator delete (void * const p) { ::operator delete (p); }
 
             // ctor
             // ~~~~
@@ -240,7 +240,7 @@ namespace pstore {
 
             // ctor (one child)
             // ~~~~~~~~~~~~~~~~
-            internal_node::internal_node (index_pointer const & leaf, hash_type hash)
+            internal_node::internal_node (index_pointer const & leaf, hash_type const hash)
                     : signature_ (signature)
                     , bitmap_{hash_type{1} << hash}
                     , children_{{leaf}} {}
@@ -248,8 +248,8 @@ namespace pstore {
             // ctor (two children)
             // ~~~~~~~~~~~~~~~~~~~
             internal_node::internal_node (index_pointer const & existing_leaf,
-                                          index_pointer const & new_leaf, hash_type existing_hash,
-                                          hash_type new_hash)
+                                          index_pointer const & new_leaf,
+                                          hash_type const existing_hash, hash_type const new_hash)
                     : signature_ (signature)
                     , bitmap_ (hash_type{1} << existing_hash | hash_type{1} << new_hash) {
 
@@ -270,7 +270,7 @@ namespace pstore {
                     : signature_ (signature)
                     , bitmap_{rhs.bitmap_} {
 
-                auto first = std::begin (rhs.children_);
+                auto const first = std::begin (rhs.children_);
                 std::copy (first, first + rhs.size (), std::begin (children_));
             }
 
@@ -286,15 +286,15 @@ namespace pstore {
             }
 
             std::unique_ptr<internal_node> internal_node::allocate (index_pointer const & leaf,
-                                                                    hash_type hash) {
+                                                                    hash_type const hash) {
                 return std::unique_ptr<internal_node>{new (nchildren{hash_size})
                                                           internal_node (leaf, hash)};
             }
 
             std::unique_ptr<internal_node>
             internal_node::allocate (index_pointer const & existing_leaf,
-                                     index_pointer const & new_leaf, hash_type existing_hash,
-                                     hash_type new_hash) {
+                                     index_pointer const & new_leaf, hash_type const existing_hash,
+                                     hash_type const new_hash) {
                 return std::unique_ptr<internal_node>{new (nchildren{hash_size}) internal_node (
                     existing_leaf, new_leaf, existing_hash, new_hash)};
             }
@@ -303,7 +303,8 @@ namespace pstore {
             // make_writable
             // ~~~~~~~~~~~~~
             std::pair<std::unique_ptr<internal_node>, internal_node *>
-            internal_node::make_writable (index_pointer node, internal_node const & internal) {
+            internal_node::make_writable (index_pointer const node,
+                                          internal_node const & internal) {
                 std::unique_ptr<internal_node> new_node;
                 internal_node * inode = nullptr;
                 if (node.is_heap ()) {
@@ -318,7 +319,7 @@ namespace pstore {
 
             // lookup
             // ~~~~~~
-            auto internal_node::lookup (hash_type hash_index) const
+            auto internal_node::lookup (hash_type const hash_index) const
                 -> std::pair<index_pointer, std::size_t> {
 
                 assert (hash_index < (hash_type{1} << hash_index_bits));
@@ -358,9 +359,9 @@ namespace pstore {
                 }
 #endif
                 auto first = std::begin (internal);
-                auto last = std::end (internal);
+                auto const last = std::end (internal);
                 while (first != last) {
-                    index_pointer child = *(first++);
+                    index_pointer const child = *(first++);
                     if (child.is_heap () || child.untag_internal_address () >= addr) {
                         return false;
                     }
@@ -422,7 +423,7 @@ namespace pstore {
             // insert_child
             // ~~~~~~~~~~~~
             void internal_node::insert_child (hash_type const hash, index_pointer const leaf,
-                                              ::pstore::gsl::not_null<parent_stack *> parents) {
+                                              gsl::not_null<parent_stack *> const parents) {
                 auto const hash_index = hash & details::hash_index_mask;
                 auto const bit_pos = hash_type{1} << hash_index;
                 assert (bit_pos != 0); // guarantee that we didn't shift the bit to oblivion
@@ -474,12 +475,12 @@ namespace pstore {
                     if (p.is_heap ()) {
                         if (shifts < max_hash_bits) { // internal node
                             assert (p.is_internal ());
-                            auto internal = p.untag_node<internal_node *> ();
+                            auto const internal = p.untag_node<internal_node *> ();
                             p = internal->flush (transaction, shifts);
                             delete internal;
                         } else { // linear node
                             assert (p.is_linear ());
-                            auto linear = p.untag_node<linear_node *> ();
+                            auto const linear = p.untag_node<linear_node *> ();
                             p = linear->flush (transaction) | internal_node_bit;
                             delete linear;
                         }
