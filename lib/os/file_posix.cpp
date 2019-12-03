@@ -101,8 +101,8 @@ namespace {
             return e == EINVAL || errno == ENOSYS || errno == ENOTTY;
         };
 
-        int ret_val = -1;
-        int err = EINVAL;
+        auto ret_val = -1L;
+        auto err = EINVAL;
         // Try the preferred function first which could come in any one of three forms:
         // - The macOS renamex_np() function.
         // - If available, the glibc wrapper around the Linux renameat2() function.
@@ -220,14 +220,12 @@ namespace pstore {
         void file_handle::open (unique const, std::string const & directory) {
             this->close ();
 
-            // TODO: path::join should be able to write to a back_inserter so that we can avoid this
-            // intermediate string object.
             std::string const path = path::join (directory, "pst-XXXXXX");
 
             // mkstemp() modifies its input parameter so that on return it contains
             // the actual name of the temporary file that was created.
             small_vector<char> buffer (path.length () + 1);
-            auto out = std::copy (std::begin (path), std::end (path), std::begin (buffer));
+            char * const out = std::copy (std::begin (path), std::end (path), std::begin (buffer));
             *out = '\0';
 
             file_ = ::mkstemp (buffer.data ());
@@ -251,7 +249,7 @@ namespace pstore {
         // ~~~~~
         void file_handle::close () {
             if (file_ != invalid_oshandle) {
-                bool ok = ::close (file_) != -1;
+                bool const ok = ::close (file_) != -1;
                 file_ = invalid_oshandle;
                 if (!ok) {
                     int const err = errno;
@@ -486,18 +484,17 @@ namespace pstore {
         std::string file_handle::get_temporary_directory () {
             // Following boost filesystem, we check some select environment variables
             // for user temporary directories before resorting to /tmp.
-            static constexpr std::array<char const *, 4> env_var_names{{
+            static constexpr std::array<gsl::czstring, 4> env_var_names{{
                 "TMPDIR",
                 "TMP",
                 "TEMP",
                 "TEMPDIR",
             }};
-            for (auto name : env_var_names) {
+            for (gsl::czstring const name : env_var_names) {
                 if (gsl::czstring const val = std::getenv (name)) {
                     return val;
                 }
             }
-
             return "/tmp";
         }
 
