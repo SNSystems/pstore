@@ -121,6 +121,7 @@ def main():
         'script': [
             ' '.join([
                 './utils/make_build.py',
+                '--verbose',
                 '-o build',
                 '-D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}',
                 '-D PSTORE_EXAMPLES=Yes',

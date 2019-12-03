@@ -115,8 +115,8 @@ matrix:
         - PSTORE_ALWAYS_SPANNING=No
         os: windows
 script:
-- ./utils/make_build.py -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE} -D PSTORE_EXAMPLES=Yes
-    -D PSTORE_VALGRIND=${PSTORE_VALGRIND} -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}
+- ./utils/make_build.py --verbose -o build -D CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+    -D PSTORE_EXAMPLES=Yes -D PSTORE_VALGRIND=${PSTORE_VALGRIND} -D PSTORE_ALWAYS_SPANNING=${PSTORE_ALWAYS_SPANNING}
 - cmake --build build --config ${CMAKE_BUILD_TYPE}
 - cmake --build build --config ${CMAKE_BUILD_TYPE} --target pstore-system-tests
 sudo: 'false'
