@@ -76,19 +76,23 @@ def _select_vs_generator():
     env_name = 'ProgramFiles(x86)'
     program_files = os.getenv(env_name)
     if program_files is None:
-        _logger.warning('Environment variable "%s" is not defined. Cannot find Visual Studio', env_name)
+        _logger.error('Environment variable "%s" is not defined. Cannot find Visual Studio', env_name)
         return None
 
     vswhere = os.path.join(program_files, 'Microsoft Visual Studio', 'Installer', 'vswhere.exe')
     if not os.path.exists(vswhere):
-        _logger.warning('vswhere.exe is not found at "%s"', vswhere)
+        _logger.error('vswhere.exe is not found at "%s"', vswhere)
         return None
 
     _logger.info('Running vswhere at "%s"', vswhere)
     # Ask vswhere to disclose all of the vs installations.
-    output = subprocess.check_output([vswhere, '-format', 'json'], stderr=subprocess.STDOUT)
+    output = subprocess.check_output([vswhere, '-products', '*', '-format', 'json', '-utf8'], stderr=subprocess.STDOUT)
     _logger.info('vswhere said: %s', output)
     installations = json.loads(output)
+    if len (installations) == 0:
+        _logger.error ('vswhere listed no Visual Studio installations')
+        return None
+
     # Reduce the installations list to just the integer major version numbers.
     installations = [int(install['installationVersion'].split('.')[0]) for install in installations]
     _logger.debug('Installations are: %s', ','.join((str(inst) for inst in installations)))
@@ -117,10 +121,11 @@ def _get_real_generator_args(system, generator):
         }.get(system.lower(), lambda: None)()
 
     if generator is None:
+        _logger.debug('System is unknown ("%s"), no special generator', system)
         return None
 
     # Turn a generator or "pseudo generator" name into a collection of one or more cmake switches.
-    _logger.debug('Turning psuedo generator "%s" into cmake switches')
+    _logger.debug('Turning psuedo generator "%s" into cmake switches', generator)
     return {
         'make': lambda: ['-G', 'Unix Makefiles'],
         'ninja': lambda: ['-G', 'Ninja'],
