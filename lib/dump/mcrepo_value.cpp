@@ -55,16 +55,16 @@
 namespace pstore {
     namespace dump {
 
-        value_ptr make_value (pstore::repo::section_kind const t) {
+        value_ptr make_value (repo::section_kind const t) {
             char const * name = "*unknown*";
 #define X(k)                                                                                       \
-    case pstore::repo::section_kind::k: name = #k; break;
+    case repo::section_kind::k: name = #k; break;
 
             switch (t) {
                 PSTORE_MCREPO_SECTION_KINDS
-            case pstore::repo::section_kind::last: break;
+            case repo::section_kind::last: break;
             }
-            return pstore::dump::make_value (name);
+            return dump::make_value (name);
 #undef X
         }
 
@@ -230,24 +230,23 @@ namespace pstore {
             });
         }
 
-        value_ptr make_value (database const & db,
-                              pstore::index::fragment_index::value_type const & value,
-                              pstore::gsl::czstring const triple, bool const hex_mode) {
-            auto fragment = pstore::repo::fragment::load (db, value.second);
+        value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
+                              gsl::czstring const triple, bool const hex_mode) {
+            auto fragment = repo::fragment::load (db, value.second);
             return make_value (object::container{
                 {"digest", make_value (value.first)},
                 {"fragment", make_fragment_value (db, *fragment, triple, hex_mode)}});
         }
 
         value_ptr make_value (database const & db,
-                              pstore::index::compilation_index::value_type const & value) {
-            auto const compilation = pstore::repo::compilation::load (db, value.second);
+                              index::compilation_index::value_type const & value) {
+            auto const compilation = repo::compilation::load (db, value.second);
             return make_value (object::container{{"digest", make_value (value.first)},
                                                  {"compilation", make_value (db, compilation)}});
         }
 
         value_ptr make_value (database const & db,
-                              pstore::index::debug_line_header_index::value_type const & value,
+                              index::debug_line_header_index::value_type const & value,
                               bool const hex_mode) {
             auto const debug_line_header = db.getro (value.second);
             return make_value (object::container{
