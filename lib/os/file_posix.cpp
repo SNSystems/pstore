@@ -64,6 +64,7 @@
 #    include <unistd.h>
 
 // local includes
+#    include "pstore/support/gsl.hpp"
 #    include "pstore/support/path.hpp"
 #    include "pstore/support/quoted_string.hpp"
 #    include "pstore/support/small_vector.hpp"
@@ -87,14 +88,16 @@ namespace {
     constexpr auto uoff_max = static_cast<uoff_type> (std::numeric_limits<off_t>::max ());
 
     template <typename MessageStr, typename PathStr>
-    PSTORE_NO_RETURN void raise_file_error (int err, MessageStr message, PathStr path) {
+    PSTORE_NO_RETURN void raise_file_error (int const err, MessageStr const message,
+                                            PathStr const path) {
         std::ostringstream str;
         str << message << ' ' << pstore::quoted (path);
         raise (pstore::errno_erc{err}, str.str ());
     }
 
-    int rename_noreplace (char const * old_path, char const * new_path) {
-        auto const is_unavailable = [](int e) {
+    int rename_noreplace (pstore::gsl::czstring const old_path,
+                          pstore::gsl::czstring const new_path) {
+        auto const is_unavailable = [](int const e) noexcept {
             return e == EINVAL || errno == ENOSYS || errno == ENOTTY;
         };
 
@@ -112,7 +115,7 @@ namespace {
         err = errno;
 #    elif PSTORE_HAVE_SYS_renameat2
         // Support for renameat2() was added in glibc 2.28. If we have an older version, we have
-        // just invoke the syscall dfirectly.
+        // to invoke the syscall dfirectly.
         ret_val = ::syscall (SYS_renameat2, AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
         err = errno;
 #    else
@@ -172,7 +175,8 @@ namespace pstore {
         //*                                           *
         // open
         // ~~~~
-        void file_handle::open (create_mode create, writable_mode writable, present_mode present) {
+        void file_handle::open (create_mode const create, writable_mode const writable,
+                                present_mode const present) {
             this->close ();
 
             is_writable_ = writable == writable_mode::read_write;
@@ -213,7 +217,7 @@ namespace pstore {
             }
         }
 
-        void file_handle::open (unique, std::string const & directory) {
+        void file_handle::open (unique const, std::string const & directory) {
             this->close ();
 
             // TODO: path::join should be able to write to a back_inserter so that we can avoid this
@@ -235,7 +239,7 @@ namespace pstore {
             }
         }
 
-        void file_handle::open (temporary, std::string const & directory) {
+        void file_handle::open (temporary const, std::string const & directory) {
             this->open (unique{}, directory);
             if (::unlink (this->path ().c_str ()) == -1) {
                 int const err = errno;
@@ -285,7 +289,7 @@ namespace pstore {
         std::uint64_t file_handle::tell () {
             this->ensure_open ();
 
-            off_t r = ::lseek (file_, off_t{0}, SEEK_CUR);
+            off_t const r = ::lseek (file_, off_t{0}, SEEK_CUR);
             if (r == off_t{-1}) {
                 int const err = errno;
                 raise_file_error (err, "lseek/SEEK_CUR failed", this->path ());
@@ -296,7 +300,8 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t file_handle::read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) {
+        std::size_t file_handle::read_buffer (gsl::not_null<void *> const buffer,
+                                              std::size_t const nbytes) {
             if (nbytes > static_cast<std::make_unsigned<ssize_t>::type> (
                              std::numeric_limits<ssize_t>::max ())) {
                 raise (std::errc::invalid_argument, "read_buffer");
@@ -313,7 +318,8 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void file_handle::write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) {
+        void file_handle::write_buffer (gsl::not_null<void const *> const buffer,
+                                        std::size_t const nbytes) {
             this->ensure_open ();
 
             if (::write (file_, buffer.get (), nbytes) == -1) {
@@ -345,7 +351,7 @@ namespace pstore {
 
         // truncate
         // ~~~~~~~~
-        void file_handle::truncate (std::uint64_t size) {
+        void file_handle::truncate (std::uint64_t const size) {
             this->ensure_open ();
             if (size > uoff_max) {
                 raise (std::errc::invalid_argument, "truncate");
@@ -382,8 +388,8 @@ namespace pstore {
         /// A helper function for the lock() and unlock() methods. It is a simple wrapper for the
         /// fcntl() system call which fills in all of the fields of the flock struct as necessary.
         //[static]
-        int file_handle::lock_reg (int fd, int cmd, short type, off_t offset, short whence,
-                                   off_t len) {
+        int file_handle::lock_reg (int const fd, int const cmd, short const type,
+                                   off_t const offset, short const whence, off_t const len) {
             struct flock lock {};
             lock.l_type = type;     // type of lock: F_RDLCK, F_WRLCK, F_UNLCK
             lock.l_whence = whence; // how to interpret l_start (SEEK_SET/SEEK_CUR/SEEK_END)
@@ -395,8 +401,8 @@ namespace pstore {
 
         // lock
         // ~~~~
-        bool file_handle::lock (std::uint64_t offset, std::size_t size, lock_kind kind,
-                                blocking_mode block) {
+        bool file_handle::lock (std::uint64_t const offset, std::size_t const size,
+                                lock_kind const kind, blocking_mode const block) {
             if (offset > uoff_max || size > uoff_max) {
                 raise (std::errc::invalid_argument, "lock");
             }
@@ -436,7 +442,7 @@ namespace pstore {
 
         // unlock
         // ~~~~~~
-        void file_handle::unlock (std::uint64_t offset, std::size_t size) {
+        void file_handle::unlock (std::uint64_t const offset, std::size_t const size) {
             if (offset > uoff_max || size > uoff_max) {
                 raise (std::errc::invalid_argument, "lock");
             }
@@ -487,7 +493,7 @@ namespace pstore {
                 "TEMPDIR",
             }};
             for (auto name : env_var_names) {
-                if (char const * val = std::getenv (name)) {
+                if (gsl::czstring const val = std::getenv (name)) {
                     return val;
                 }
             }
@@ -511,7 +517,7 @@ namespace pstore {
 
         bool exists (std::string const & path) { return ::access (path.c_str (), F_OK) != -1; }
 
-        void unlink (std::string const & path, bool allow_noent) {
+        void unlink (std::string const & path, bool const allow_noent) {
             if (::unlink (path.c_str ()) == -1) {
                 int const err = errno;
                 if (!allow_noent || err != ENOENT) {
