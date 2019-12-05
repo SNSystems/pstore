@@ -48,7 +48,7 @@
 
 using namespace pstore::repo;
 
-std::ostream & pstore::repo::operator<< (std::ostream & os, linkage l) {
+std::ostream & pstore::repo::operator<< (std::ostream & os, linkage const l) {
     char const * str = "unknown";
     switch (l) {
 #define X(a)                                                                                       \
@@ -85,9 +85,10 @@ namespace {
 
 // ctor
 // ~~~~
-compilation_member::compilation_member (pstore::index::digest d, pstore::extent<fragment> x,
-                                        pstore::typed_address<pstore::indirect_string> n,
-                                        enum linkage l, enum visibility v) noexcept
+compilation_member::compilation_member (pstore::index::digest const d,
+                                        pstore::extent<fragment> const x,
+                                        pstore::typed_address<pstore::indirect_string> const n,
+                                        enum linkage const l, enum visibility const v) noexcept
         : digest{d}
         , fext{x}
         , name{n}
@@ -124,26 +125,26 @@ constexpr std::array<char, 8> compilation::compilation_signature_;
 
 // operator new
 // ~~~~~~~~~~~~
-void * compilation::operator new (std::size_t s, nmembers size) {
+void * compilation::operator new (std::size_t const s, nmembers const size) {
     (void) s;
     std::size_t const actual_bytes = compilation::size_bytes (size.n);
     assert (actual_bytes >= s);
     return ::operator new (actual_bytes);
 }
 
-void * compilation::operator new (std::size_t s, void * ptr) {
+void * compilation::operator new (std::size_t const s, void * const ptr) {
     return ::operator new (s, ptr);
 }
 
 // operator delete
 // ~~~~~~~~~~~~~~~
-void compilation::operator delete (void * p, nmembers /*size*/) {
+void compilation::operator delete (void * const p, nmembers const /*size*/) {
     ::operator delete (p);
 }
 
-void compilation::operator delete (void * /*p*/, void * /*ptr*/) {}
+void compilation::operator delete (void * const /*p*/, void * const /*ptr*/) {}
 
-void compilation::operator delete (void * p) {
+void compilation::operator delete (void * const p) {
     ::operator delete (p);
 }
 
