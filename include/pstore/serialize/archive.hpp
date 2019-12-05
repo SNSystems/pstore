@@ -323,19 +323,17 @@ namespace pstore {
 
                     template <typename Ty>
                     auto put (Ty const & t) -> result_type {
-                        auto old_size = bytes_.size ();
-                        auto first = reinterpret_cast<std::uint8_t const *> (&t);
-                        auto last = first + sizeof (Ty);
-                        std::copy (first, last, std::back_inserter (bytes_));
+                        auto const old_size = bytes_.size ();
+                        auto const first = reinterpret_cast<std::uint8_t const *> (&t);
+                        std::copy (first, first + sizeof (Ty), std::back_inserter (bytes_));
                         return old_size;
                     }
 
                     template <typename SpanType>
                     auto putn (SpanType sp) -> result_type {
-                        auto old_size = bytes_.size ();
-                        auto first = reinterpret_cast<std::uint8_t const *> (sp.data ());
-                        auto last = first + sp.size_bytes ();
-                        std::copy (first, last, std::back_inserter (bytes_));
+                        auto const old_size = bytes_.size ();
+                        auto const first = reinterpret_cast<std::uint8_t const *> (sp.data ());
+                        std::copy (first, first + sp.size_bytes (), std::back_inserter (bytes_));
                         return old_size;
                     }
 
@@ -407,7 +405,7 @@ namespace pstore {
                 public:
                     using result_type = void *;
 
-                    buffer_writer_policy (void * first, void * last) noexcept
+                    buffer_writer_policy (void * const first, void * const last) noexcept
                             : begin_ (static_cast<std::uint8_t *> (first))
 #ifndef NDEBUG
                             , end_ (static_cast<std::uint8_t *> (last))
@@ -424,7 +422,7 @@ namespace pstore {
                     auto put (Ty const & v) -> result_type {
                         auto const size = sizeof (v);
                         assert (it_ + size <= end_);
-                        auto result = it_;
+                        auto const result = it_;
                         std::memcpy (it_, &v, size);
                         it_ += size;
                         assert (it_ <= end_);
@@ -469,7 +467,7 @@ namespace pstore {
                 ///              write data.
                 /// \param last  The end of the range of address to which the buffer_writer will
                 ///              write data.
-                buffer_writer (void * first, void * last)
+                buffer_writer (void * const first, void * const last)
                         : writer_base<policy_type> (policy_type{first, last}) {}
                 buffer_writer (buffer_writer const &) = delete;
                 buffer_writer (buffer_writer &&) = delete;
@@ -479,7 +477,7 @@ namespace pstore {
                 /// \param first  The start address of the buffer to which buffer_writer will write
                 ///               data.
                 /// \param size   The size, in bytes, of the buffer pointed to by 'first'.
-                buffer_writer (void * first, std::size_t size)
+                buffer_writer (void * const first, std::size_t const size)
                         : buffer_writer (static_cast<std::uint8_t *> (first),
                                          static_cast<std::uint8_t *> (first) + size) {}
 
@@ -518,9 +516,8 @@ namespace pstore {
             // *   n u l l   *
             // ***************
 
-            /// \brief An archive-writer which simply discards any data that it writes.
-            /// write.
             namespace details {
+
                 class null_policy {
                 public:
                     using result_type = void_type;
@@ -535,8 +532,11 @@ namespace pstore {
 
                     void flush () noexcept {}
                 };
-            } // namespace details
 
+            } // end namespace details
+
+            /// \brief An archive-writer which simply discards any data that it writes.
+            /// write.
             class null final : public writer_base<details::null_policy> {
             public:
                 null () = default;
@@ -575,7 +575,7 @@ namespace pstore {
                     static_assert (std::is_standard_layout<Ty>::value,
                                    "range_reader can only read standard-layout types");
                     auto ptr = reinterpret_cast<std::uint8_t *> (&v);
-                    auto last = ptr + sizeof (Ty);
+                    auto const last = ptr + sizeof (Ty);
                     while (ptr != last) {
                         *(ptr++) = *(first_++);
                     }
@@ -617,20 +617,20 @@ namespace pstore {
             class buffer_reader {
             public:
                 /// Constructs the writer using a pair of pointer to define the range [first, last).
-                buffer_reader (void const * first, void const * last) noexcept
+                constexpr buffer_reader (void const * const first, void const * const last) noexcept
                         : first_ (static_cast<std::uint8_t const *> (first))
                         , last_ (static_cast<std::uint8_t const *> (last)) {}
 
                 /// Constructs the writer using a pointer and size to define the range [first,
                 /// first+size).
-                buffer_reader (void const * first, std::size_t size) noexcept
+                constexpr buffer_reader (void const * const first, std::size_t const size) noexcept
                         : first_ (static_cast<std::uint8_t const *> (first))
                         , last_ (static_cast<std::uint8_t const *> (first) + size) {}
 
                 /// Constructs the writer using a pointer and size to define the range [first,
                 /// first+size).
                 template <typename SpanType>
-                explicit buffer_reader (SpanType span) noexcept
+                explicit buffer_reader (SpanType const span) noexcept
                         : first_ (reinterpret_cast<std::uint8_t const *> (span.data ()))
                         , last_ (first_ + span.size_bytes ()) {}
 
@@ -655,8 +655,8 @@ namespace pstore {
                 std::uint8_t const * last_;  ///< The end of the range from which data is read.
             };
 
-        } // namespace archive
-    }     // namespace serialize
-} // namespace pstore
+        } // end namespace archive
+    }     // end namespace serialize
+} // end namespace pstore
 
 #endif // PSTORE_SERIALIZE_ARCHIVE_HPP
