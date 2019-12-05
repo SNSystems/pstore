@@ -117,10 +117,10 @@ function (add_pstore_additional_compiler_flags target_name)
            target_compile_options (${target_name} PRIVATE -fno-exceptions -fno-rtti)
         endif ()
 
+        target_compile_options (${target_name} PRIVATE -Wno-c++14-extensions)
 
         # TODO: this warning is far too pervasive in clang3.8 but much better in later
         # builds. Only disable for older versions.
-
         disable_warning_if_possible (${target_name}
             -Wno-nullability-completeness
             PSTORE_CLANG_SUPPORTS_NX
