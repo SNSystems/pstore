@@ -70,56 +70,63 @@ namespace pstore {
         /// It is undefined behavior if x is 0.
 
 #ifdef _MSC_VER
-        inline unsigned clz (std::uint32_t x) noexcept {
+        inline unsigned clz (std::uint32_t const x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
             _BitScanReverse (&bit_position, x);
             assert (bit_position < 32);
             return 31 - bit_position;
         }
-
-        inline unsigned clz (std::uint64_t x) noexcept {
+        inline unsigned clz (std::uint64_t const x) noexcept {
             assert (x != 0);
             unsigned long bit_position = 0;
             _BitScanReverse64 (&bit_position, x);
             assert (bit_position < 64);
             return 63 - bit_position;
         }
-#else
-        inline unsigned clz (std::uint32_t x) noexcept {
-            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (unsigned int));
-            assert (x != 0);
-            return static_cast<unsigned> (__builtin_clz (x));
-        }
-
-        inline unsigned clz (unsigned long x) noexcept {
-            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
-            assert (x != 0);
-            return static_cast<unsigned> (__builtin_clzl (x));
-        }
-
-        inline unsigned clz (unsigned long long x) noexcept {
-            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
-            assert (x != 0);
-            return static_cast<unsigned> (__builtin_clzll (x));
-        }
-#endif
-
-        inline unsigned clz (std::uint16_t x) noexcept {
-            unsigned const r = clz (static_cast<std::uint32_t> (x));
-            assert (r >= 16U);
-            return r - 16U;
-        }
-
-        inline unsigned clz (std::uint8_t x) noexcept {
+        inline unsigned clz (std::uint8_t const x) noexcept {
             unsigned const r = clz (static_cast<std::uint32_t> (x));
             assert (r >= 24U);
             return r - 24U;
         }
-
-        inline unsigned clz (uint128 x) noexcept {
+        inline unsigned clz (std::uint16_t const x) noexcept {
+            unsigned const r = clz (static_cast<std::uint32_t> (x));
+            assert (r >= 16U);
+            return r - 16U;
+        }
+        inline unsigned clz (uint128 const x) noexcept {
             return x.high () != 0U ? clz (x.high ()) : 64U + clz (x.low ());
         }
+#else
+        constexpr unsigned clz (unsigned const x) noexcept {
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint32_t));
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clz (x));
+        }
+        constexpr unsigned clz (unsigned long const x) noexcept {
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clzl (x));
+        }
+        constexpr unsigned clz (unsigned long long const x) noexcept {
+            PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
+            assert (x != 0);
+            return static_cast<unsigned> (__builtin_clzll (x));
+        }
+        constexpr unsigned clz (std::uint8_t const x) noexcept {
+            unsigned const r = clz (static_cast<std::uint32_t> (x));
+            assert (r >= 24U);
+            return r - 24U;
+        }
+        constexpr unsigned clz (std::uint16_t const x) noexcept {
+            unsigned const r = clz (static_cast<std::uint32_t> (x));
+            assert (r >= 16U);
+            return r - 16U;
+        }
+        constexpr unsigned clz (uint128 const x) noexcept {
+            return x.high () != 0U ? clz (x.high ()) : 64U + clz (x.low ());
+        }
+#endif //_MSC_VER
         ///@}
 
         //*         _          *
@@ -139,23 +146,27 @@ namespace pstore {
             assert (bit_position < 64);
             return bit_position;
         }
+        inline unsigned ctz (uint128 x) noexcept {
+            assert (x != 0U);
+            return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
+        }
 #else
-        inline unsigned ctz (unsigned long long x) noexcept {
+        constexpr unsigned ctz (unsigned long long x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
                            "use of ctzll requires unsigned long long to be 64 bits");
             assert (x != 0);
             return static_cast<unsigned> (__builtin_ctzll (x));
         }
-#endif
-        inline unsigned ctz (uint128 x) noexcept {
+        constexpr unsigned ctz (uint128 x) noexcept {
             assert (x != 0U);
             return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
         }
+#endif //_MSC_VER
         ///@}
 
 
 #ifdef _MSC_VER
-        // TODO: VC2015RC won't allow pop_count to be constexpr. Sigh.
+        // Unfortunately VC2017 won't allow pop_count to be constexpr.
         inline unsigned pop_count (unsigned char x) noexcept {
             static_assert (sizeof (unsigned char) <= sizeof (unsigned __int16),
                            "unsigned char > unsigned __int16");
@@ -181,26 +192,25 @@ namespace pstore {
             return pop_count (x.high ()) + pop_count (x.low ());
         }
 #else
-        inline constexpr unsigned pop_count (unsigned char x) noexcept {
+        constexpr unsigned pop_count (unsigned char x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned short x) noexcept {
+        constexpr unsigned pop_count (unsigned short x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned x) noexcept {
+        constexpr unsigned pop_count (unsigned x) noexcept {
             return static_cast<unsigned> (__builtin_popcount (x));
         }
-        inline constexpr unsigned pop_count (unsigned long x) noexcept {
+        constexpr unsigned pop_count (unsigned long x) noexcept {
             return static_cast<unsigned> (__builtin_popcountl (x));
         }
-        inline constexpr unsigned pop_count (unsigned long long x) noexcept {
+        constexpr unsigned pop_count (unsigned long long x) noexcept {
             return static_cast<unsigned> (__builtin_popcountll (x));
         }
-        inline constexpr unsigned pop_count (uint128 x) noexcept {
+        constexpr unsigned pop_count (uint128 x) noexcept {
             return pop_count (x.high ()) + pop_count (x.low ());
         }
-#endif
-
+#endif //_MSC_VER
 
     } // namespace bit_count
 } // namespace pstore
