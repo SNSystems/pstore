@@ -72,7 +72,7 @@
 namespace {
 
     // 'offset' must be a multiple of the system page size and be safely castable to off_t.
-    off_t checked_offset (std::uint64_t offset) {
+    off_t checked_offset (std::uint64_t const offset) {
         using namespace pstore;
 
         if (offset % system_page_size ().get () != 0 ||
@@ -93,18 +93,18 @@ namespace pstore {
 #        define MAP_ANONYMOUS MAP_ANON
 #    endif
 
-    std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned align) {
+    std::shared_ptr<std::uint8_t> aligned_valloc (std::size_t size, unsigned const align) {
         size += align - 1U;
 
-        auto ptr =
+        void * const ptr =
             ::mmap (nullptr, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (ptr == nullptr) {
             raise (pstore::errno_erc{errno}, "mmap");
         }
 
-        auto deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
+        auto const deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
         auto const mask = ~(std::uintptr_t{align} - 1);
-        auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
+        auto * const ptr_aligned = reinterpret_cast<std::uint8_t *> (
             (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
         return std::shared_ptr<std::uint8_t> (ptr_aligned, deleter);
     }
@@ -135,7 +135,7 @@ namespace pstore {
 
     // read_only
     // ~~~~~~~~~
-    void memory_mapper_base::read_only_impl (void * addr, std::size_t len) {
+    void memory_mapper_base::read_only_impl (void * const addr, std::size_t const len) {
         if (::mprotect (addr, len, PROT_READ) == -1) {
             raise (errno_erc{errno}, "mprotect");
         }
@@ -149,8 +149,8 @@ namespace pstore {
     //*                                       |___/                   |_|   |_|                *
     // (ctor)
     // ~~~~~~
-    memory_mapper::memory_mapper (file::file_handle & file, bool write_enabled,
-                                  std::uint64_t offset, std::uint64_t length)
+    memory_mapper::memory_mapper (file::file_handle & file, bool const write_enabled,
+                                  std::uint64_t const offset, std::uint64_t const length)
             : memory_mapper_base (mmap (file, write_enabled, offset, length), write_enabled, offset,
                                   length) {}
 
@@ -160,13 +160,14 @@ namespace pstore {
 
     // mmap
     // ~~~~
-    std::shared_ptr<void> memory_mapper::mmap (file::file_handle & file, bool write_enabled,
-                                               std::uint64_t offset, std::uint64_t length) {
-        void * ptr = ::mmap (nullptr, // base address
-                             length,
-                             PROT_READ | (write_enabled ? PROT_WRITE : 0), // protection flags
-                             MAP_SHARED, file.raw_handle (), checked_offset (offset));
-        void * map_failed = MAP_FAILED; // NOLINT
+    std::shared_ptr<void> memory_mapper::mmap (file::file_handle & file, bool const write_enabled,
+                                               std::uint64_t const offset,
+                                               std::uint64_t const length) {
+        void * const ptr = ::mmap (nullptr, // base address
+                                   length,
+                                   PROT_READ | (write_enabled ? PROT_WRITE : 0), // protection flags
+                                   MAP_SHARED, file.raw_handle (), checked_offset (offset));
+        void const * const map_failed = MAP_FAILED; // NOLINT
         if (ptr == map_failed) {
             int const last_error = errno;
             std::ostringstream message;
@@ -174,13 +175,12 @@ namespace pstore {
             raise (errno_erc{last_error}, message.str ());
         }
 
-        auto deleter = [length](void * p) {
+        return std::shared_ptr<void> (ptr, [length](void * const p) {
             if (::munmap (p, length) == -1) {
                 raise (errno_erc{errno}, "munmap");
             }
-        };
-        return std::shared_ptr<void> (ptr, deleter);
+        });
     }
 
-} // namespace pstore
+} // end namespace pstore
 #endif //! defined (_WIN32)

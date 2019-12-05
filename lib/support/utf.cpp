@@ -55,50 +55,52 @@
 namespace pstore {
     namespace utf {
 
-        auto length (char const * str, std::size_t nbytes) -> std::size_t {
+        // length
+        // ~~~~~~
+        auto length (gsl::czstring const str, std::size_t const nbytes) -> std::size_t {
             if (str == nullptr) {
                 return 0;
             }
             return length (str, str + nbytes);
         }
 
-        auto length (gsl::czstring str) -> std::size_t {
+        auto length (gsl::czstring const str) -> std::size_t {
             if (str == nullptr) {
                 return 0;
             }
             return length (str, str + std::strlen (str));
         }
 
-
         // index
         // ~~~~~
         // returns a pointer to the beginning of the pos'th utf8 codepoint
         // in the buffer at s
-        auto index (gsl::czstring str, std::size_t pos) -> char const * {
+        auto index (gsl::czstring const str, std::size_t const pos) -> gsl::czstring {
             if (str == nullptr) {
                 return nullptr;
             }
-            char const * end = str + std::strlen (str);
-            char const * result = index (str, end, pos);
+            gsl::czstring const end = str + std::strlen (str);
+            gsl::czstring const result = index (str, end, pos);
             return result != end ? result : nullptr;
         }
 
         // slice
         // ~~~~~
         // converts codepoint indices start and end to byte offsets in the buffer at s
-        auto slice (gsl::czstring s, std::ptrdiff_t start, std::ptrdiff_t end)
+        auto slice (gsl::czstring const str, std::ptrdiff_t const start, std::ptrdiff_t const end)
             -> std::pair<std::ptrdiff_t, std::ptrdiff_t> {
-            if (s == nullptr) {
+
+            if (str == nullptr) {
                 return std::make_pair (-1, -1);
             }
 
-            auto const first = s;
-            auto const last = s + strlen (s);
-            auto p1 =
+            auto const first = str;
+            auto const last = str + strlen (str);
+            auto const p1 =
                 index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, start)));
-            auto p2 =
+            auto const p2 =
                 index (first, last, static_cast<std::size_t> (std::max (std::ptrdiff_t{0}, end)));
-            return std::make_pair ((p1 != last) ? p1 - s : -1, (p2 != last) ? p2 - s : -1);
+            return std::make_pair ((p1 != last) ? p1 - str : -1, (p2 != last) ? p2 - str : -1);
         }
 
 
@@ -173,16 +175,16 @@ namespace pstore {
                     1,   1,   1,   1,   1,   1,   1,   1,   1,   1, // s7..s8
         };
 
-        auto utf8_decoder::decode (gsl::not_null<std::uint8_t *> state,
-                                   gsl::not_null<char32_t *> codep, std::uint32_t byte) noexcept
-            -> std::uint8_t {
+        auto utf8_decoder::decode (gsl::not_null<std::uint8_t *> const state,
+                                   gsl::not_null<char32_t *> const codep,
+                                   std::uint32_t const byte) noexcept -> std::uint8_t {
             auto const type = utf8d_[byte];
             *codep = (*state != accept) ? (byte & 0x3FU) | (*codep << 6U) : (0xFFU >> type) & byte;
             *state = utf8d_[256 + *state * 16 + type];
             return *state;
         }
 
-        auto utf8_decoder::get (std::uint8_t byte) noexcept -> maybe<char32_t> {
+        auto utf8_decoder::get (std::uint8_t const byte) noexcept -> maybe<char32_t> {
             if (decode (&state_, &codepoint_, byte)) {
                 well_formed_ = false;
                 return nothing<char32_t> ();
@@ -193,5 +195,5 @@ namespace pstore {
             return just (res);
         }
 
-    } // namespace utf
-} // namespace pstore
+    } // end namespace utf
+} // end namespace pstore

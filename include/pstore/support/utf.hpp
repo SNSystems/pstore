@@ -140,9 +140,9 @@ namespace pstore {
                 return mbcs_to8 (str.data (), str.length ());
             }
             ///@}
-        } // namespace win32
-    }     // namespace utf
-} // namespace pstore
+        } // end namespace win32
+    }     // end namespace utf
+} // end namespace pstore
 
 #else //_WIN32
 
@@ -294,7 +294,6 @@ namespace pstore {
             return utf16_to_code_points<ResultType> (std::begin (src), std::end (src), swapper);
         }
 
-
         // utf16_to_code_point
         // ~~~~~~~~~~~~~~~~~~~
         template <typename InputType, typename Swapper>
@@ -305,7 +304,6 @@ namespace pstore {
             assert (end == std::end (src));
             return cp;
         }
-
 
         // utf16_to_utf8
         // ~~~~~~~~~~~~~
@@ -332,13 +330,14 @@ namespace pstore {
             return utf16_to_utf8<ResultType> (std::begin (src), std::end (src), swapper);
         }
 
-    } // namespace utf
-} // namespace pstore
+    } // end namespace utf
+} // end namespace pstore
 
 
 
 namespace pstore {
     namespace utf {
+
         /// If the top two bits are 0b10, then this is a UTF-8 continuation byte
         /// and is skipped; other patterns in these top two bits represent the
         /// start of a character.
@@ -385,8 +384,9 @@ namespace pstore {
         /// Returns a reference to the beginning of the pos'th UTF-8 code-point in a sequence.
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
-        /// in the buffer at str
-        auto index (gsl::czstring str, std::size_t pos) -> char const *;
+        /// in the buffer at \p str or nullptr if either \p str is nullptr or if \p index was too
+        /// large.
+        auto index (gsl::czstring str, std::size_t pos) -> gsl::czstring;
 
         /// Returns an iterator to the beginning of the pos'th UTF-8 codepoint
         /// in the range given by first and last.
@@ -471,7 +471,7 @@ namespace pstore {
             return str;
         }
 #endif
-    } // namespace utf
-} // namespace pstore
+    } // end namespace utf
+} // end namespace pstore
 
 #endif // PSTORE_SUPPORT_UTF_HPP
