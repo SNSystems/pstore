@@ -56,7 +56,7 @@ namespace {
     /// \param x  The value to be rounded.
     /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
     /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0
-    std::uint64_t round_down (std::uint64_t x, std::uint64_t b) {
+    constexpr std::uint64_t round_down (std::uint64_t const x, std::uint64_t const b) noexcept {
         assert (pstore::is_power_of_two (b));
         std::uint64_t const r = x & ~(b - 1U);
         assert (r <= x && r % b == 0);
@@ -66,7 +66,7 @@ namespace {
     /// \param x  The value to be rounded.
     /// \param b  The boundary to which 'x' is to be rounded. It must be a power of 2.
     /// \return  The value x2 such as x2 <= x and x2 `mod` b == 0
-    pstore::address round_down (pstore::address x, std::uint64_t b) {
+    constexpr pstore::address round_down (pstore::address const x, std::uint64_t const b) noexcept {
         return pstore::address{round_down (x.absolute (), b)};
     }
     ///@}
@@ -80,7 +80,7 @@ namespace pstore {
 
     // map_bytes
     // ~~~~~~~~~
-    void storage::map_bytes (std::uint64_t new_size) {
+    void storage::map_bytes (std::uint64_t const new_size) {
         // Get the file offset of the end of the last memory mapped region.
         std::uint64_t const old_size =
             regions_.size () == 0 ? std::uint64_t{0} : regions_.back ()->end ();
@@ -98,7 +98,7 @@ namespace pstore {
                     done = true;
                 } else {
                     // destroy our use of the shared ptr
-                    auto region = regions_.back ();
+                    auto const region = regions_.back ();
                     // remove segments
                     for (auto sat_segment : *sat_) {
                         if (sat_segment.region && sat_segment.region->data () == region->data ()) {
@@ -115,7 +115,7 @@ namespace pstore {
 
     // update_master_pointers
     // ~~~~~~~~~~~~~~~~~~~~~~
-    void storage::update_master_pointers (std::size_t old_length) {
+    void storage::update_master_pointers (std::size_t const old_length) {
 
         std::uint64_t last_sat_entry = 0;
         if (old_length > 0) {
@@ -126,7 +126,7 @@ namespace pstore {
         }
 
         auto segment_it = std::begin (*sat_);
-        auto segment_end = std::end (*sat_);
+        auto const segment_end = std::end (*sat_);
         using segment_difference_type =
             std::iterator_traits<decltype (segment_it)>::difference_type;
 
@@ -135,7 +135,7 @@ namespace pstore {
         std::advance (segment_it, static_cast<segment_difference_type> (last_sat_entry));
 
         auto region_it = std::begin (regions_);
-        auto region_end = std::end (regions_);
+        auto const region_end = std::end (regions_);
 
         using region_difference_type = std::iterator_traits<decltype (region_it)>::difference_type;
         assert (old_length <= static_cast<std::make_unsigned<region_difference_type>::type> (
@@ -157,8 +157,8 @@ namespace pstore {
     // slice_region_into_segments
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     auto storage::slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
-                                              sat_iterator segment_it, sat_iterator segment_end)
-        -> sat_iterator {
+                                              sat_iterator segment_it,
+                                              sat_iterator const segment_end) -> sat_iterator {
 
         (void) segment_end; // silence unused argument warning in release build.
         std::shared_ptr<void> data = region->data ();
@@ -189,9 +189,8 @@ namespace pstore {
                           address{round_down (leader_size + page_size - 1U, page_size)});
         last = round_down (last, page_size);
 
-        for (auto region_it = regions_.rbegin (), end = regions_.rend (); region_it != end;
-             ++region_it) {
-
+        auto const end = regions_.rend ();
+        for (auto region_it = regions_.rbegin (); region_it != end; ++region_it) {
             std::shared_ptr<memory_mapper_base> & region = *region_it;
 
             assert (region->offset () % page_size == 0);
