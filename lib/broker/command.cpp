@@ -71,22 +71,46 @@
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/time.hpp"
 
+namespace {
+
+    /// Converts a time point to a string.
+    ///
+    /// \param time  The time point whose string equivalent is to be returned.
+    /// \param buffer  A buffer into which the string is written.
+    /// \returns  A null terminated string. Will always be a pointer to the buffer base address.
+    auto time_to_string (std::chrono::system_clock::time_point const time,
+                         std::array<char, 100> * const buffer) -> pstore::gsl::zstring {
+        std::tm const tm = pstore::gm_time (std::chrono::system_clock::to_time_t (time));
+        // strftime() returns 0 if the result doesn't fit in the provided buffer;
+        // the contents are undefined.
+        if (std::strftime (buffer->data (), buffer->size (), "%FT%TZ", &tm) == 0) {
+            std::strncpy (buffer->data (), "(unknown)", buffer->size ());
+        }
+        // Guarantee that the string is null terminated.
+        assert (buffer->size () > 0);
+        (*buffer)[buffer->size () - 1] = '\0';
+        return buffer->data ();
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
     namespace broker {
 
         descriptor_condition_variable commits_cv;
         channel<descriptor_condition_variable> commits_channel (&commits_cv);
 
-
         // ctor
         // ~~~~
-        command_processor::command_processor (unsigned const num_read_threads,
-                                              gsl::not_null<httpd::server_status *> http_status,
-                                              gsl::not_null<std::atomic<bool> *> uptime_done)
+        command_processor::command_processor (
+            unsigned const num_read_threads,
+            gsl::not_null<httpd::server_status *> const http_status,
+            gsl::not_null<std::atomic<bool> *> const uptime_done,
+            std::chrono::seconds const delete_threshold)
                 : http_status_{http_status}
                 , uptime_done_{uptime_done}
+                , delete_threshold_{delete_threshold}
                 , num_read_threads_{num_read_threads} {
-
             assert (std::is_sorted (std::begin (commands_), std::end (commands_),
                                     command_entry_compare));
         }
@@ -157,19 +181,22 @@ namespace pstore {
         // log
         // ~~~
         void command_processor::log (broker_command const & c) const {
-            constexpr char const verb[] = "verb:";
-            constexpr auto verb_length = array_elements (verb) - 1;
-            constexpr char const path[] = " path:";
-            constexpr auto path_length = array_elements (path) - 1;
-            constexpr auto max_path_length = std::size_t{32};
+            static constexpr char const verb[] = "verb:";
+            static constexpr auto verb_length = array_elements (verb) - 1;
+            static constexpr char const path[] = " path:";
+            static constexpr auto path_length = array_elements (path) - 1;
+            static constexpr auto max_path_length = std::size_t{32};
+            static constexpr char const ellipsis[] = "...";
+            static constexpr auto ellipsis_length = array_elements (ellipsis) - 1;
 
             std::string message;
-            message.reserve (verb_length + c.verb.length () + path_length + max_path_length + 3);
+            message.reserve (verb_length + c.verb.length () + path_length + max_path_length +
+                             ellipsis_length);
 
             message = verb + c.verb + path;
             message += (c.path.length () < max_path_length)
                            ? c.path
-                           : (c.path.substr (0, max_path_length) + "...");
+                           : (c.path.substr (0, max_path_length) + ellipsis);
             logging::log (logging::priority::info, message.c_str ());
         }
 
@@ -255,42 +282,20 @@ namespace pstore {
         void command_processor::scavenge () {
             logging::log (logging::priority::info, "Scavenging zombie commands");
 
-            // TODO: make this time threshold user configurable
-            constexpr auto delete_threshold = std::chrono::seconds (4 * 60 * 60);
-
             // After this function is complete, no partial messages older than 'earliest time' will
             // be in the partial command map (cmds_).
-            auto const earliest_time = std::chrono::system_clock::now () - delete_threshold;
+            auto const earliest_time = std::chrono::system_clock::now () - delete_threshold_;
 
             // Remove all partial messages where the last piece of the message arrived before
-            // earliest_time.
-            // It's most likely that the sending process gave up/crashed/lost interest before
-            // sending the complete message.
+            // earliest_time. It's most likely that the sending process gave up/crashed/lost
+            // interest before sending the complete message.
             std::lock_guard<decltype (cmds_mut_)> lock{cmds_mut_};
-            for (auto it = std::begin (cmds_); it != std::end (cmds_);) {
+            for (auto it = std::begin (cmds_), end = std::end (cmds_); it != end;) {
                 auto const arrival_time = it->second.arrive_time_;
                 if (arrival_time < earliest_time) {
-                    auto const t = std::chrono::system_clock::to_time_t (arrival_time);
-
-                    static constexpr auto time_size = std::size_t{100};
-                    char time_str[time_size];
-                    bool got_time = false;
-
-                    std::tm const tm = gm_time (t);
-                    // strftime() returns 0 if the result doesn't fit in the provided buffer;
-                    // the contents are undefined.
-                    if (std::strftime (time_str, time_size, "%FT%TZ", &tm) != 0) {
-                        got_time = true;
-                    }
-                    if (!got_time) {
-                        std::strncpy (time_str, "(unknown)", time_size);
-                    }
-
-                    // Guarantee that the string is null terminated.
-                    time_str[time_size - 1] = '\0';
-
+                    std::array<char, 100> buffer;
                     logging::log (logging::priority::info, "Deleted old partial message. Arrived ",
-                                  time_str);
+                                  time_to_string (arrival_time, &buffer));
                     it = cmds_.erase (it);
                 } else {
                     ++it;
@@ -298,5 +303,5 @@ namespace pstore {
             }
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore

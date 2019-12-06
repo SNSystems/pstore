@@ -76,9 +76,18 @@ namespace pstore {
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
-            command_processor (unsigned const num_read_threads,
-                               gsl::not_null<httpd::server_status *> http_status,
-                               gsl::not_null<std::atomic<bool> *> uptime_done);
+            // TODO: make this scanvenger threshold user configurable
+            /// \param num_read_threads  The number of threads listening to the command pipe.
+            /// \param http_status  A pointer to an object which can be used to tell the http server
+            ///   to exit.
+            /// \param uptime_done  A pointer to a bool which, when set, will tell the
+            ///   uptime thread to exit.
+            /// \param scavenge_threshold  The time for which messages are
+            ///   allowed to wait in the message queue before the scavenger will delete them.
+            command_processor (
+                unsigned const num_read_threads, gsl::not_null<httpd::server_status *> http_status,
+                gsl::not_null<std::atomic<bool> *> uptime_done,
+                std::chrono::seconds scavenge_threshold = std::chrono::seconds (4 * 60 * 60));
             virtual ~command_processor () = default;
 
             // No copying or assignment.
@@ -128,8 +137,14 @@ namespace pstore {
             };
 
             std::atomic<bool> commands_done_{false};
+
+            /// A pointer to an object which can be used to tell the http server to exit.
             gsl::not_null<httpd::server_status *> http_status_;
+            /// A pointer to a bool which, when set, will tell the uptime thread to exit.
             gsl::not_null<std::atomic<bool> *> uptime_done_;
+            /// The time for which messages are allowed to wait in the message queue before the
+            /// scavenger will delete them.
+            std::chrono::seconds delete_threshold_;
 
             atomic_weak_ptr<scavenger> scavenger_;
 
@@ -197,7 +212,7 @@ namespace pstore {
         extern descriptor_condition_variable commits_cv;
         extern channel<descriptor_condition_variable> commits_channel;
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_COMMAND_HPP
