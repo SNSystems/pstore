@@ -49,5 +49,11 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/broker/internal_commands.hpp"
 
-std::string const read_loop_quit_command{"_QUIT"};
-std::string const command_loop_quit_command{"_CQUIT"};
+namespace pstore {
+    namespace broker {
+
+        gsl::czstring const read_loop_quit_command = "_QUIT";
+        gsl::czstring const command_loop_quit_command = "_CQUIT";
+
+    } // end namespace broker
+} // end namespace pstore

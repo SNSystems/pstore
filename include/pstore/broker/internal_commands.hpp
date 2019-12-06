@@ -50,9 +50,15 @@
 #ifndef PSTORE_BROKER_INTERNAL_COMMANDS_HPP
 #define PSTORE_BROKER_INTERNAL_COMMANDS_HPP
 
-#include <string>
+#include "pstore/support/gsl.hpp"
 
-extern std::string const read_loop_quit_command;
-extern std::string const command_loop_quit_command;
+namespace pstore {
+    namespace broker {
+
+        extern gsl::czstring const read_loop_quit_command;
+        extern gsl::czstring const command_loop_quit_command;
+
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_INTERNAL_COMMANDS_HPP

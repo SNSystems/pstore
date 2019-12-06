@@ -186,10 +186,10 @@ namespace pstore {
 
             // Internal commands.
             command_processor::command_entry (
-                command_loop_quit_command.c_str (),
+                command_loop_quit_command,
                 &command_processor::cquit), // exit this command processor thread.
             command_processor::command_entry (
-                read_loop_quit_command.c_str (),
+                read_loop_quit_command,
                 &command_processor::quit), //  shut down a single pipe-reader thread.
         }};
 
