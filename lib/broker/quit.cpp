@@ -107,10 +107,10 @@ namespace pstore {
 
         // shutdown
         // ~~~~~~~~
-        void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_threads,
-                       gsl::not_null<pstore::httpd::server_status *> http_status,
-                       gsl::not_null<std::atomic<bool> *> uptime_done) {
+        void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
+                       unsigned const num_read_threads,
+                       gsl::not_null<pstore::httpd::server_status *> const http_status,
+                       gsl::not_null<std::atomic<bool> *> const uptime_done) {
 
             // Set the global "done" flag unless we're already shutting down. The latter condition
             // happens if a "SUICIDE" command is received and the quit thread is woken in response.
@@ -208,10 +208,11 @@ namespace {
     //***************
     //* quit thread *
     //***************
-    void quit_thread (std::weak_ptr<pstore::broker::command_processor> cp,
-                      std::weak_ptr<pstore::broker::scavenger> scav, unsigned num_read_threads,
-                      pstore::gsl::not_null<pstore::httpd::server_status *> http_status,
-                      pstore::gsl::not_null<std::atomic<bool> *> uptime_done) {
+    void quit_thread (std::weak_ptr<pstore::broker::command_processor> const cp,
+                      std::weak_ptr<pstore::broker::scavenger> const scav,
+                      unsigned const num_read_threads,
+                      pstore::gsl::not_null<pstore::httpd::server_status *> const http_status,
+                      pstore::gsl::not_null<std::atomic<bool> *> const uptime_done) {
         using namespace pstore;
 
         try {
@@ -227,7 +228,7 @@ namespace {
             log (logging::priority::info, "Signal received: shutting down. Signal: ",
                  signal_name (quit_info.signal (), pstore::gsl::make_span (buffer)));
 
-            auto cp_sptr = cp.lock ();
+            auto const cp_sptr = cp.lock ();
             // If the command processor is alive, clear the queue.
             // TODO: prevent the queue from accepting commands other than the ones we're about
             // to send?
@@ -235,7 +236,7 @@ namespace {
                 cp_sptr->clear_queue ();
             }
 
-            auto scav_sptr = scav.lock ();
+            auto const scav_sptr = scav.lock ();
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
                       http_status, uptime_done);
         } catch (std::exception const & ex) {
@@ -251,9 +252,9 @@ namespace {
     // signal_handler
     // ~~~~~~~~~~~~~~
     /// A signal handler entry point.
-    void signal_handler (int sig) {
+    void signal_handler (int const sig) {
         pstore::broker::exit_code = sig;
-        pstore::errno_saver saver;
+        pstore::errno_saver const saver;
         quit_info.notify_all (sig);
     }
 
