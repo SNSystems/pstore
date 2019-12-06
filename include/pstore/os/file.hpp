@@ -71,14 +71,15 @@
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
+
     class memory_mapper;
     class in_memory_mapper;
 
     /// \brief The 'file' namespace contains all of the database file management functions
     /// and classes .
     namespace file {
-
         namespace details {
+
             // name_from_template
             // ~~~~~~~~~~~~~~~~~~
             /// \brief The name_from_template() function takes the given file name template and
@@ -108,8 +109,8 @@ namespace pstore {
             std::string name_from_template (std::string const & tmpl, RandomGenerator rng) {
                 // Walk backwards looking for the start of the sequence of 'X'
                 // characters that form the end of the template string.
-                auto const it =
-                    std::find_if (tmpl.rbegin (), tmpl.rend (), [](char c) { return c != 'X'; });
+                auto const it = std::find_if (tmpl.rbegin (), tmpl.rend (),
+                                              [](char const c) { return c != 'X'; });
                 // Build the result string starting from the non-template characters.
                 std::string path;
                 path.reserve (tmpl.length ());
@@ -170,15 +171,18 @@ namespace pstore {
             }
 
             template <typename WidthType, typename Function>
-            std::size_t split (void * buffer, std::size_t size, Function const & function) {
+            std::size_t split (void * const buffer, std::size_t const size,
+                               Function const & function) {
                 return split<WidthType> (static_cast<std::uint8_t *> (buffer), size, function);
             }
             template <typename WidthType, typename Function>
-            std::size_t split (void const * buffer, std::size_t size, Function const & function) {
+            std::size_t split (void const * const buffer, std::size_t const size,
+                               Function const & function) {
                 return split<WidthType> (static_cast<std::uint8_t const *> (buffer), size,
                                          function);
             }
-        } // namespace details
+
+        } // end namespace details
 
 
         class system_error : public std::system_error {
@@ -261,9 +265,8 @@ namespace pstore {
                       typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
             void read (T * const t) {
                 assert (t != nullptr);
-                std::size_t bytes_read = this->read_buffer (t, sizeof (T));
-                if (bytes_read != sizeof (T)) {
-                    raise (::pstore::error_code::did_not_read_number_of_bytes_requested);
+                if (this->read_buffer (t, sizeof (T)) != sizeof (T)) {
+                    raise (error_code::did_not_read_number_of_bytes_requested);
                 }
             }
             ///@}
@@ -370,8 +373,7 @@ namespace pstore {
             /// There must be at least nbytes available.
             /// \param nbytes  The number of bytes that are to be read.
             /// \returns The number of bytes actually read.
-            virtual std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
-                                             std::size_t nbytes) = 0;
+            virtual std::size_t read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) = 0;
 
             /// \brief Writes nbytes to the file, reading them from the location given by buffer.
             ///
@@ -381,8 +383,7 @@ namespace pstore {
             /// \param buffer  A pointer to the memory containing the data to be written. At least
             /// 'nbytes' must be available.
             /// \param nbytes  The number of bytes that are to be written.
-            virtual void write_buffer (::pstore::gsl::not_null<void const *> buffer,
-                                       std::size_t nbytes) = 0;
+            virtual void write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) = 0;
 
             ///@}
         };
@@ -522,8 +523,8 @@ namespace pstore {
             /// The type which can be used to memory-map instances of in_memory files.
             using memory_mapper = pstore::in_memory_mapper;
 
-            in_memory (std::shared_ptr<void> const & buffer, std::uint64_t length,
-                       std::uint64_t eof = 0, bool writable = true) noexcept
+            in_memory (std::shared_ptr<void> const & buffer, std::uint64_t const length,
+                       std::uint64_t const eof = 0, bool const writable = true) noexcept
                     : buffer_ (std::static_pointer_cast<std::uint8_t> (buffer))
                     , length_ (length)
                     , eof_ (eof)
@@ -546,11 +547,11 @@ namespace pstore {
             std::time_t latest_time () const override;
 
 
-            bool lock (std::uint64_t /*offset*/, std::size_t /*size*/, lock_kind /*lt*/,
-                       blocking_mode /*bl*/) override {
+            bool lock (std::uint64_t const /*offset*/, std::size_t const /*size*/,
+                       lock_kind const /*lt*/, blocking_mode const /*bl*/) override {
                 return true;
             }
-            void unlock (std::uint64_t /*offset*/, std::size_t /*size*/) override {}
+            void unlock (std::uint64_t const /*offset*/, std::size_t const /*size*/) override {}
 
             /// Returns the underlying memory managed by the file object.
             std::shared_ptr<void> data () { return buffer_; }
@@ -561,16 +562,14 @@ namespace pstore {
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
-                                     std::size_t nbytes) override;
+            std::size_t read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) override;
 
             /// Writes writes nbytes to the file, reading them from the location given by ptr. The
             /// file position indicator for the file is incremented by the number of bytes written.
             ///
             /// \note This member function is protected in the base class. I make it public here for
             /// unit testing.
-            void write_buffer (::pstore::gsl::not_null<void const *> ptr,
-                               std::size_t nbytes) override;
+            void write_buffer (gsl::not_null<void const *> ptr, std::size_t nbytes) override;
 
         private:
             /// The buffer used by the in-memory file.
@@ -650,7 +649,9 @@ namespace pstore {
             /// file.
             struct temporary {};
             /// Creates a temporary file in the system temporary directory
-            void open (temporary t) { return open (t, file_handle::get_temporary_directory ()); }
+            void open (temporary const t) {
+                return open (t, file_handle::get_temporary_directory ());
+            }
 
             /// Creates a temporary file in the specified directory.
             void open (temporary, std::string const & directory);
@@ -682,14 +683,6 @@ namespace pstore {
 
             void seek (std::uint64_t position) override;
             std::uint64_t tell () override;
-
-        private:
-            std::size_t read_buffer (::pstore::gsl::not_null<void *> buffer,
-                                     std::size_t nbytes) override;
-            void write_buffer (::pstore::gsl::not_null<void const *> buffer,
-                               std::size_t nbytes) override;
-
-        public:
             std::uint64_t size () override;
             void truncate (std::uint64_t size) override;
             /// Renames a file from one UTF-8 encoded path to another.
@@ -716,6 +709,8 @@ namespace pstore {
             oshandle raw_handle () noexcept { return file_; }
 
         private:
+            std::size_t read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) override;
+            void write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) override;
             void ensure_open ();
 
 #ifdef _WIN32
@@ -813,8 +808,8 @@ namespace pstore {
         /// \param allow_noent  If true, do not raise an error if the file did not exist.
         void unlink (std::string const & path, bool allow_noent = false);
 
-    } // namespace file
-} // namespace pstore
+    } // end namespace file
+} // end namespace pstore
 
 #if defined(_WIN32)
 #    include "file_win32.hpp"
