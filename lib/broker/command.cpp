@@ -60,6 +60,7 @@
 
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
+#include "pstore/broker/internal_commands.hpp"
 #include "pstore/broker/message_pool.hpp"
 #include "pstore/broker/quit.hpp"
 #include "pstore/broker/recorder.hpp"
@@ -181,12 +182,15 @@ namespace pstore {
             command_processor::command_entry ("GC", &command_processor::gc),
             command_processor::command_entry ("NOP", &command_processor::nop),
             command_processor::command_entry (
-                "SUICIDE",
-                &command_processor::suicide), // initiate the broker shutdown.
+                "SUICIDE", &command_processor::suicide), // initiate the broker shutdown.
+
+            // Internal commands.
             command_processor::command_entry (
-                "_CQUIT", &command_processor::cquit), // exit this command processor thread.
+                command_loop_quit_command.c_str (),
+                &command_processor::cquit), // exit this command processor thread.
             command_processor::command_entry (
-                "_QUIT", &command_processor::quit), //  shut down a single pipe-reader thread.
+                read_loop_quit_command.c_str (),
+                &command_processor::quit), //  shut down a single pipe-reader thread.
         }};
 
         // process_command

@@ -149,7 +149,7 @@ namespace pstore {
 
             using handler = std::function<void(command_processor *, fifo_path const & fifo,
                                                broker_command const &)>;
-            using command_entry = std::tuple<char const *, handler>;
+            using command_entry = std::tuple<gsl::czstring, handler>;
             /// A predicate function used to sort and search a container of command_entry instances.
             static bool command_entry_compare (command_entry const & a, command_entry const & b) {
                 return std::strcmp (std::get<0> (a), std::get<0> (b)) < 0;

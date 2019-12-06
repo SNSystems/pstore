@@ -69,6 +69,7 @@
 #include "pstore/broker/command.hpp"
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
+#include "pstore/broker/internal_commands.hpp"
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker_intf/fifo_path.hpp"
 #include "pstore/broker_intf/message_type.hpp"
@@ -82,10 +83,6 @@
 #include "pstore/support/signal_helpers.hpp"
 
 namespace {
-
-    // TODO: these are shared with the command processor and should be somewhere common.
-    std::string const read_loop_quit_command{"_QUIT"};
-    std::string const command_loop_quit_command{"_CQUIT"};
 
     // push
     // ~~~~

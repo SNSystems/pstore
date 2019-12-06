@@ -52,6 +52,7 @@ else ()
         "${pstore_broker_include_dir}/command.hpp"
         "${pstore_broker_include_dir}/gc.hpp"
         "${pstore_broker_include_dir}/globals.hpp"
+        "${pstore_broker_include_dir}/internal_commands.hpp"
         "${pstore_broker_include_dir}/intrusive_list.hpp"
         "${pstore_broker_include_dir}/message_pool.hpp"
         "${pstore_broker_include_dir}/message_queue.hpp"
@@ -71,6 +72,7 @@ else ()
         gc_posix.cpp
         gc_win32.cpp
         globals.cpp
+        internal_commands.cpp
         message_pool.cpp
         parser.cpp
         quit.cpp
