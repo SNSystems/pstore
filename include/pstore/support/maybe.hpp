@@ -230,14 +230,14 @@ namespace pstore {
     // just
     // ~~~~
     template <typename T>
-    inline constexpr maybe<typename details::remove_cvref_t<T>> just (T && value) {
+    constexpr maybe<typename details::remove_cvref_t<T>> just (T && value) {
         return maybe<typename details::remove_cvref_t<T>>{std::forward<T> (value)};
     }
 
     // nothing
     // ~~~~~~~
     template <typename T>
-    inline constexpr maybe<typename details::remove_cvref_t<T>> nothing () noexcept {
+    constexpr maybe<typename details::remove_cvref_t<T>> nothing () noexcept {
         return maybe<typename details::remove_cvref_t<T>>{};
     }
 

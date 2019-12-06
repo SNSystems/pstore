@@ -362,7 +362,7 @@ namespace pstore {
 
         // TODO: enable when we're able to switch to C++1z.
         // template <typename T1, typename T2>
-        // inline constexpr bool is_compatible_v = is_compatible<T1, T2>::value;
+        // constexpr bool is_compatible_v = is_compatible<T1, T2>::value;
 
         template <typename Archive, typename ElementType>
         void read_uninit (Archive && archive, ElementType & uninit) {

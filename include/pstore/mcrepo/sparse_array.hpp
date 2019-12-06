@@ -659,15 +659,14 @@ namespace pstore {
 namespace std {
 
     template <std::size_t Ip, typename ValueType, typename BitmapType>
-    inline constexpr ValueType &
-    get (pstore::repo::sparse_array<ValueType, BitmapType> & arr) noexcept {
+    constexpr ValueType & get (pstore::repo::sparse_array<ValueType, BitmapType> & arr) noexcept {
         static_assert (Ip < pstore::repo::sparse_array<ValueType, BitmapType>::max_size (),
                        "Index out of bounds in std::get<> (sparse_array)");
         return arr[Ip];
     }
 
     template <std::size_t Ip, typename ValueType, typename BitmapType>
-    inline constexpr ValueType const &
+    constexpr ValueType const &
     get (pstore::repo::sparse_array<ValueType, BitmapType> const & arr) noexcept {
         static_assert (Ip < pstore::repo::sparse_array<ValueType, BitmapType>::max_size (),
                        "Index out of bounds in std::get<> (const sparse_array)");

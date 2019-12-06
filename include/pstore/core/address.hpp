@@ -207,26 +207,26 @@ namespace pstore {
 
     // comparison
 
-    inline constexpr bool operator== (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator== (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () == rhs.absolute ();
     }
-    inline constexpr bool operator!= (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator!= (address const & lhs, address const & rhs) noexcept {
         return !operator== (lhs, rhs);
     }
 
 
     // ordering
 
-    inline constexpr bool operator> (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator> (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () > rhs.absolute ();
     }
-    inline constexpr bool operator>= (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator>= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () >= rhs.absolute ();
     }
-    inline constexpr bool operator< (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator< (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () < rhs.absolute ();
     }
-    inline constexpr bool operator<= (address const & lhs, address const & rhs) noexcept {
+    constexpr bool operator<= (address const & lhs, address const & rhs) noexcept {
         return lhs.absolute () <= rhs.absolute ();
     }
 
@@ -242,17 +242,17 @@ namespace pstore {
         return address{lhs.absolute () - rhs.absolute ()};
     }
 
-    inline constexpr address operator+ (address const lhs, std::uint64_t const rhs) noexcept {
+    constexpr address operator+ (address const lhs, std::uint64_t const rhs) noexcept {
         return address{lhs.absolute () + rhs};
     }
-    inline constexpr address operator+ (address const lhs, address const rhs) noexcept {
+    constexpr address operator+ (address const lhs, address const rhs) noexcept {
         return address{lhs.absolute () + rhs.absolute ()};
     }
 
 
     // bitwise
 
-    inline constexpr address operator| (address const lhs, std::uint64_t const rhs) noexcept {
+    constexpr address operator| (address const lhs, std::uint64_t const rhs) noexcept {
         return address{lhs.absolute () | rhs};
     }
 

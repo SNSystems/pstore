@@ -219,18 +219,18 @@ namespace pstore {
             return result;
         }
 
-        inline constexpr auto nop_swapper (std::uint16_t v) noexcept -> std::uint16_t { return v; }
-        inline constexpr auto byte_swapper (std::uint16_t v) noexcept -> std::uint16_t {
+        constexpr auto nop_swapper (std::uint16_t v) noexcept -> std::uint16_t { return v; }
+        constexpr auto byte_swapper (std::uint16_t v) noexcept -> std::uint16_t {
             return static_cast<std::uint16_t> (((v & 0x00FFU) << 8U) | ((v & 0xFF00U) >> 8U));
         }
 
-        inline constexpr auto is_utf16_high_surrogate (std::uint16_t code_unit) noexcept -> bool {
+        constexpr auto is_utf16_high_surrogate (std::uint16_t code_unit) noexcept -> bool {
             return code_unit >= 0xD800 && code_unit <= 0xDBFF;
         }
 
         // is_utf16_low_surrogate
         // ~~~~~~~~~~~~~~~~~~~~~~
-        inline constexpr auto is_utf16_low_surrogate (std::uint16_t code_unit) noexcept -> bool {
+        constexpr auto is_utf16_low_surrogate (std::uint16_t code_unit) noexcept -> bool {
             return code_unit >= 0xDC00 && code_unit <= 0xDFFF;
         }
 
@@ -342,7 +342,7 @@ namespace pstore {
         /// and is skipped; other patterns in these top two bits represent the
         /// start of a character.
         template <typename CharType>
-        inline constexpr auto is_utf_char_start (CharType c) noexcept -> bool {
+        constexpr auto is_utf_char_start (CharType c) noexcept -> bool {
             using uchar_type = typename std::make_unsigned<CharType>::type;
             return (static_cast<uchar_type> (c) & 0xC0U) != 0x80U;
         }
@@ -462,11 +462,10 @@ namespace pstore {
             return win32::mbcs_to8 (str);
         }
 #else //_WIN32
-        inline constexpr auto to_native_string (std::string const & str) noexcept
-            -> std::string const & {
+        constexpr auto to_native_string (std::string const & str) noexcept -> std::string const & {
             return str;
         }
-        inline constexpr auto from_native_string (std::string const & str) noexcept
+        constexpr auto from_native_string (std::string const & str) noexcept
             -> std::string const & {
             return str;
         }

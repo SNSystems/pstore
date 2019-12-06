@@ -219,7 +219,7 @@ namespace pstore {
 
         // small_files_enabled
         // ~~~~~~~~~~~~~~~~~~~
-        inline constexpr bool small_files_enabled () noexcept {
+        constexpr bool small_files_enabled () noexcept {
 #if PSTORE_POSIX_SMALL_FILES
             return true;
 #else
