@@ -631,10 +631,10 @@ namespace pstore {
                     return children_[i];
                 }
 
-                hash_type get_bitmap () const { return bitmap_; }
+                hash_type get_bitmap () const noexcept { return bitmap_; }
                 /// A function for deliberately creating illegal internal nodes in the unit test. DO
                 /// NOT USE except for that purpose!
-                void set_bitmap (hash_type bm) { bitmap_ = bm; }
+                void set_bitmap (hash_type const bm) noexcept { bitmap_ = bm; }
 
                 /// \name Iterators
                 ///@{

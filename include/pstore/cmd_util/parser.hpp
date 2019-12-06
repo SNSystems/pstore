@@ -112,7 +112,7 @@ namespace pstore {
                         return nothing<T> ();
                     }
                     gsl::zstring str_end = nullptr;
-                    gsl::czstring str = v.c_str ();
+                    gsl::czstring const str = v.c_str ();
                     errno = 0;
                     long const res = std::strtol (str, &str_end, 10);
                     if (str_end != str + v.length () || errno != 0 ||

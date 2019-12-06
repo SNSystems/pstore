@@ -598,8 +598,8 @@ namespace pstore {
 
         public:
             // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            not_null (T t) noexcept
-                    : ptr_ (t) {
+            constexpr not_null (T t) noexcept
+                    : ptr_{t} {
                 ensure_invariant ();
             }
 
@@ -623,11 +623,11 @@ namespace pstore {
             not_null<T> & operator= (std::nullptr_t) = delete;
             not_null<T> & operator= (int) = delete;
 
-            T get () const noexcept { return ptr_; }
+            constexpr T get () const noexcept { return ptr_; }
 
             // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            operator T () const noexcept { return get (); }
-            T operator-> () const noexcept { return get (); }
+            constexpr operator T () const noexcept { return get (); }
+            constexpr T operator-> () const noexcept { return get (); }
 
             bool operator== (T const & rhs) const noexcept { return ptr_ == rhs; }
             bool operator!= (T const & rhs) const noexcept { return !(*this == rhs); }
@@ -648,7 +648,7 @@ namespace pstore {
 
             // We assume that the compiler can hoist/prove away most of the checks inlined from this
             // function. If not, we could make them optional via conditional compilation.
-            void ensure_invariant () const noexcept { assert (ptr_ != nullptr); }
+            constexpr void ensure_invariant () const noexcept { assert (ptr_ != nullptr); }
         };
 
 

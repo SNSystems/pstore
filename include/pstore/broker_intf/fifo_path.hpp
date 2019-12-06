@@ -91,7 +91,7 @@ namespace pstore {
 #endif
             enum class operation { open, wait };
             using update_callback = std::function<void(operation)>;
-            static void default_update_cb (operation) {}
+            static constexpr void default_update_cb (operation const) noexcept {}
             static constexpr unsigned infinite_retries = std::numeric_limits<unsigned>::max ();
 
             /// \param pipe_path  The name of the pipe to use for the FIFO. If nullptr, the default

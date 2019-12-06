@@ -154,12 +154,12 @@ namespace pstore {
         template <pstore::trailer::indices Index, typename Database = pstore::database,
                   typename Return =
                       typename inherit_const<Database, typename enum_to_index<Index>::type>::type>
-        std::shared_ptr<Return> get_index (Database & db, bool create = true) {
+        std::shared_ptr<Return> get_index (Database & db, bool const create = true) {
             auto & dx = db.get_mutable_index (Index);
 
             // Have we already loaded this index?
             if (dx.get () == nullptr) {
-                std::shared_ptr<trailer const> footer = db.get_footer ();
+                std::shared_ptr<trailer const> const footer = db.get_footer ();
                 typed_address<index::header_block> const location = footer->a.index_records.at (
                     static_cast<typename std::underlying_type<decltype (Index)>::type> (Index));
                 if (location == decltype (location)::null ()) {

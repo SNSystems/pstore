@@ -75,11 +75,12 @@ namespace pstore {
         friend struct serialize::serializer<indirect_string>;
 
     public:
-        indirect_string (database const & db, address addr)
+        constexpr indirect_string (database const & db, address const addr) noexcept
                 : db_{db}
                 , is_pointer_{false}
                 , address_{addr.absolute ()} {}
-        indirect_string (database const & db, gsl::not_null<raw_sstring_view const *> str)
+        constexpr indirect_string (database const & db,
+                                   gsl::not_null<raw_sstring_view const *> const str) noexcept
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
@@ -94,7 +95,8 @@ namespace pstore {
 
         /// When it is known that the string body is a store address use this function to carry out
         /// additional checks that the address is reasonable.
-        raw_sstring_view as_db_string_view (gsl::not_null<shared_sstring_view *> owner) const {
+        raw_sstring_view
+        as_db_string_view (gsl::not_null<shared_sstring_view *> const owner) const {
             if (!is_in_store ()) {
                 raise (error_code::bad_address);
             }

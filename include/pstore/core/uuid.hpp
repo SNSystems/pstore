@@ -68,12 +68,12 @@ namespace pstore {
     /// by RFC 4122. Specifically, it will generate version 4 (random) UUIDs but can be used to
     /// record all versions and variants.
     class uuid {
-        friend bool operator== (uuid const & lhs, uuid const & rhs);
-        friend bool operator!= (uuid const & lhs, uuid const & rhs);
-        friend bool operator< (uuid const & lhs, uuid const & rhs);
-        friend bool operator<= (uuid const & lhs, uuid const & rhs);
-        friend bool operator> (uuid const & lhs, uuid const & rhs);
-        friend bool operator>= (uuid const & lhs, uuid const & rhs);
+        friend bool operator== (uuid const & lhs, uuid const & rhs) noexcept;
+        friend bool operator!= (uuid const & lhs, uuid const & rhs) noexcept;
+        friend bool operator< (uuid const & lhs, uuid const & rhs) noexcept;
+        friend bool operator<= (uuid const & lhs, uuid const & rhs) noexcept;
+        friend bool operator> (uuid const & lhs, uuid const & rhs) noexcept;
+        friend bool operator>= (uuid const & lhs, uuid const & rhs) noexcept;
 
     public:
         static constexpr auto elements = std::size_t{16};
@@ -155,7 +155,7 @@ namespace pstore {
         /// are numbered with 0 being the least significant and N the most significant (where
         /// N is the number of bytes in Ty).
         template <typename Ty>
-        static std::uint8_t get_byte (Ty t, unsigned num) noexcept {
+        static std::uint8_t get_byte (Ty const t, unsigned const num) noexcept {
             assert (num < sizeof (Ty));
             return static_cast<std::uint8_t> ((t >> (num * 8)) & 0xff);
         }
@@ -167,12 +167,24 @@ namespace pstore {
     std::ostream & operator<< (std::ostream & os, uuid::variant_type v);
     std::ostream & operator<< (std::ostream & os, uuid const & m);
 
-    inline bool operator== (uuid const & lhs, uuid const & rhs) { return lhs.data_ == rhs.data_; }
-    inline bool operator< (uuid const & lhs, uuid const & rhs) { return lhs.data_ < rhs.data_; }
-    inline bool operator!= (uuid const & lhs, uuid const & rhs) { return lhs.data_ != rhs.data_; }
-    inline bool operator> (uuid const & lhs, uuid const & rhs) { return lhs.data_ > rhs.data_; }
-    inline bool operator<= (uuid const & lhs, uuid const & rhs) { return lhs.data_ <= rhs.data_; }
-    inline bool operator>= (uuid const & lhs, uuid const & rhs) { return lhs.data_ >= rhs.data_; }
+    inline bool operator== (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ == rhs.data_;
+    }
+    inline bool operator< (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ < rhs.data_;
+    }
+    inline bool operator!= (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ != rhs.data_;
+    }
+    inline bool operator> (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ > rhs.data_;
+    }
+    inline bool operator<= (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ <= rhs.data_;
+    }
+    inline bool operator>= (uuid const & lhs, uuid const & rhs) noexcept {
+        return lhs.data_ >= rhs.data_;
+    }
 
 } // namespace pstore
 

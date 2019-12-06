@@ -112,7 +112,7 @@ namespace pstore {
         /// \param signal  The signal number responsible for the "wake".
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify_all (int signal) noexcept {
+        void notify_all (int const signal) noexcept {
             signal_ = signal;
             cv_.notify_all ();
         }
