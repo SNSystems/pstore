@@ -76,7 +76,7 @@ namespace pstore {
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
-            // TODO: make this scanvenger threshold user configurable
+            // TODO: make this scavenger threshold user configurable
             /// \param num_read_threads  The number of threads listening to the command pipe.
             /// \param http_status  A pointer to an object which can be used to tell the http server
             ///   to exit.
