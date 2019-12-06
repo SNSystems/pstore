@@ -60,7 +60,7 @@ BUILDS = [
         'dist': 'xenial',
         'addons': {
             'apt': {
-                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-xenial-3.8'],
+                'sources': ['ubuntu-toolchain-r-test'],
                 'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
             }
         },
@@ -112,8 +112,7 @@ BUILDS = [
 def main():
     travis = {
         'language': 'cpp',
-        'sudo': 'false',
-        'matrix': {
+        'jobs': {
             'include': [add_build_type(copy.deepcopy(build), t) for build in BUILDS for t in
                         ['Debug', 'Release']],
         },
