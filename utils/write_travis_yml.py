@@ -91,6 +91,20 @@ BUILDS = [
         'addons': {
             'apt': {
                 'sources': ['ubuntu-toolchain-r-test'],
+                'packages': ['g++-9', 'ninja-build', 'valgrind'],
+            },
+        },
+        'env': [
+            'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
+            'PSTORE_VALGRIND=Yes',
+        ]
+    },
+    {
+        'os': 'linux',
+        'dist': 'trusty',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test'],
                 'packages': ['g++-5', 'ninja-build', 'valgrind'],
             },
         },

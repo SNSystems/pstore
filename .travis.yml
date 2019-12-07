@@ -66,6 +66,36 @@ jobs:
     -   addons:
             apt:
                 packages:
+                - g++-9
+                - ninja-build
+                - valgrind
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        - PSTORE_VALGRIND=Yes
+        - CMAKE_BUILD_TYPE=Debug
+        - PSTORE_ALWAYS_SPANNING=Yes
+        os: linux
+    -   addons:
+            apt:
+                packages:
+                - g++-9
+                - ninja-build
+                - valgrind
+                sources:
+                - ubuntu-toolchain-r-test
+        dist: trusty
+        env:
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        - PSTORE_VALGRIND=Yes
+        - CMAKE_BUILD_TYPE=Release
+        - PSTORE_ALWAYS_SPANNING=No
+        os: linux
+    -   addons:
+            apt:
+                packages:
                 - g++-5
                 - ninja-build
                 - valgrind
