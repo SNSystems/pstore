@@ -173,7 +173,7 @@ namespace pstore {
 
         auto opcode_name (opcode op) noexcept -> char const *;
 
-        inline auto is_control_frame_opcode (opcode c) noexcept -> bool {
+        constexpr auto is_control_frame_opcode (opcode const c) noexcept -> bool {
             return (static_cast<unsigned> (c) & 0x08U) != 0U;
         }
 
@@ -203,7 +203,7 @@ namespace pstore {
 
 
         struct frame {
-            frame (std::uint16_t op_, bool fin_, std::vector<std::uint8_t> && p)
+            frame (std::uint16_t const op_, bool const fin_, std::vector<std::uint8_t> && p)
                     : op{static_cast<opcode> (static_cast<std::uint16_t> (op_))}
                     , fin{fin_}
                     , payload{std::move (p)} {}
@@ -369,7 +369,7 @@ namespace pstore {
         // send_message
         // ~~~~~~~~~~~~
         template <typename Sender, typename IO>
-        error_or<IO> send_message (Sender sender, IO io, opcode op,
+        error_or<IO> send_message (Sender const sender, IO const io, opcode const op,
                                    gsl::span<std::uint8_t const> const & span) {
             frame_fixed_layout f{};
             f.fin = true;
@@ -404,7 +404,7 @@ namespace pstore {
         // pong
         // ~~~~
         template <typename Sender, typename IO>
-        error_or<IO> pong (Sender sender, IO io, gsl::span<std::uint8_t const> const & payload) {
+        error_or<IO> pong (Sender const sender, IO const io, gsl::span<std::uint8_t const> const & payload) {
             log (logging::priority::info, "Sending pong. Length=", payload.size ());
             return send_message (sender, io, opcode::pong, payload);
         }
@@ -413,7 +413,7 @@ namespace pstore {
         // send_close_frame
         // ~~~~~~~~~~~~~~~~
         template <typename Sender, typename IO>
-        error_or<IO> send_close_frame (Sender sender, IO io, close_status_code status) {
+        error_or<IO> send_close_frame (Sender const sender, IO const io, close_status_code const status) {
             log (logging::priority::info,
                  "Sending close frame code=", static_cast<std::uint16_t> (status));
             PSTORE_STATIC_ASSERT ((
@@ -426,9 +426,9 @@ namespace pstore {
         // is_valid_utf8
         // ~~~~~~~~~~~~~
         template <typename Iterator>
-        bool is_valid_utf8 (Iterator first, Iterator last) {
+        bool is_valid_utf8 (Iterator const first, Iterator const last) {
             utf::utf8_decoder decoder;
-            std::for_each (first, last, [&decoder](std::uint8_t cu) { decoder.get (cu); });
+            std::for_each (first, last, [&decoder](std::uint8_t const cu) { decoder.get (cu); });
             return decoder.is_well_formed ();
         }
 
@@ -436,7 +436,7 @@ namespace pstore {
         // close_message
         // ~~~~~~~~~~~~~
         template <typename Sender, typename IO>
-        error_or<IO> close_message (Sender sender, IO io, frame const & wsp) {
+        error_or<IO> close_message (Sender const sender, IO const io, frame const & wsp) {
             auto state = close_status_code::normal;
             auto payload_size = wsp.payload.size ();
 
@@ -472,7 +472,7 @@ namespace pstore {
         }
 
         template <typename Sender, typename IO>
-        bool check_message_complete (Sender sender, IO io, frame const & wsp, opcode & op,
+        bool check_message_complete (Sender const sender, IO const io, frame const & wsp, opcode & op,
                                      std::vector<std::uint8_t> & payload) {
             if (wsp.fin) {
                 // We've got the complete message. If this was a text message, we need to
@@ -492,7 +492,7 @@ namespace pstore {
                     std::string str;
                     std::transform (std::begin (payload), std::end (payload),
                                     std::back_inserter (str),
-                                    [](std::uint8_t v) { return static_cast<char> (v); });
+                                    [](std::uint8_t const v) { return static_cast<char> (v); });
                     log (logging::priority::info, "Received: ", str);
                 }
 
@@ -516,7 +516,7 @@ namespace pstore {
 
         template <typename Reader, typename Sender, typename IO>
         std::tuple<IO, bool> socket_read (Reader && reader, Sender && sender, IO io,
-                                          gsl::not_null<ws_command *> command) {
+                                          gsl::not_null<ws_command *> const command) {
             error_or_n<IO, frame> const eo = read_frame (reader, io);
             if (!eo) {
                 log (logging::priority::error, "Error: ", eo.get_error ().message ());
