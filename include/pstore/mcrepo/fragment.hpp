@@ -187,7 +187,7 @@ namespace pstore {
             /// \param kind  The section kind to check.
             /// \returns Returns true if the fragment contains a section of the kind given by
             ///   \p kind, false otherwise.
-            bool has_section (section_kind kind) const noexcept {
+            bool has_section (section_kind const kind) const noexcept {
                 return arr_.has_index (
                     static_cast<std::underlying_type<section_kind>::type> (kind));
             }
@@ -239,8 +239,15 @@ namespace pstore {
                 using pointer = value_type const *;
                 using reference = value_type const &;
 
-                const_iterator (section_kind kind, wrapped_iterator it) noexcept;
-                explicit const_iterator (wrapped_iterator it) noexcept;
+                constexpr const_iterator (section_kind const kind,
+                                          wrapped_iterator const & it) noexcept
+                        : section_kind_{kind}
+                        , it_{it} {}
+                constexpr const_iterator (wrapped_iterator const & it) noexcept
+                        : const_iterator (static_cast<section_kind> (*it), it) {
+                    assert (*it < static_cast<std::uint64_t> (section_kind::last));
+                }
+
                 bool operator== (const_iterator const & rhs) const noexcept {
                     return it_ == rhs.it_;
                 }
@@ -281,7 +288,7 @@ namespace pstore {
 
         private:
             template <typename IteratorIdx>
-            fragment (IteratorIdx first_index, IteratorIdx last_index)
+            constexpr fragment (IteratorIdx const first_index, IteratorIdx const last_index)
                     : signature_{fragment_signature_}
                     , arr_ (first_index, last_index) {
 
@@ -400,7 +407,7 @@ namespace pstore {
         // operator<<
         // ~~~~~~~~~~
         template <typename OStream>
-        OStream & operator<< (OStream & os, section_kind kind) {
+        OStream & operator<< (OStream & os, section_kind const kind) {
             char const * name = "*unknown*";
 #define X(k)                                                                                       \
 case section_kind::k: name = #k; break;
@@ -416,23 +423,24 @@ case section_kind::k: name = #k; break;
         // populate [private, static]
         // ~~~~~~~~
         template <typename Iterator>
-        void fragment::populate (void * ptr, Iterator first, Iterator last) {
+        void fragment::populate (void * const ptr, Iterator const first, Iterator const last) {
             // Construct the basic fragment structure into this memory.
-            auto fragment_ptr = new (ptr) fragment (details::make_content_type_iterator (first),
-                                                    details::make_content_type_iterator (last));
+            auto * const fragment_ptr =
+                new (ptr) fragment (details::make_content_type_iterator (first),
+                                    details::make_content_type_iterator (last));
             // Point past the end of the sparse array.
-            auto out = reinterpret_cast<std::uint8_t *> (fragment_ptr) + offsetof (fragment, arr_) +
-                       fragment_ptr->arr_.size_bytes ();
+            auto * out = reinterpret_cast<std::uint8_t *> (fragment_ptr) +
+                         offsetof (fragment, arr_) + fragment_ptr->arr_.size_bytes ();
 
             // Copy the contents of each of the segments to the fragment.
-            auto op = [&out, fragment_ptr](section_creation_dispatcher const & c) {
-                auto const index = static_cast<unsigned> (c.kind ());
-                out = reinterpret_cast<std::uint8_t *> (c.aligned (out));
-                fragment_ptr->arr_[index] = reinterpret_cast<std::uintptr_t> (out) -
-                                            reinterpret_cast<std::uintptr_t> (fragment_ptr);
-                out = c.write (out);
-            };
-            std::for_each (first, last, op);
+            std::for_each (
+                first, last, [&out, &fragment_ptr](section_creation_dispatcher const & c) {
+                    auto const index = static_cast<unsigned> (c.kind ());
+                    out = reinterpret_cast<std::uint8_t *> (c.aligned (out));
+                    fragment_ptr->arr_[index] = reinterpret_cast<std::uintptr_t> (out) -
+                                                reinterpret_cast<std::uintptr_t> (fragment_ptr);
+                    out = c.write (out);
+                });
 #ifndef NDEBUG
             {
                 auto const size = fragment::size_bytes (first, last);
@@ -446,7 +454,7 @@ case section_kind::k: name = #k; break;
         // alloc
         // ~~~~~
         template <typename Transaction, typename Iterator>
-        auto fragment::alloc (Transaction & transaction, Iterator first, Iterator last)
+        auto fragment::alloc (Transaction & transaction, Iterator const first, Iterator const last)
             -> pstore::extent<fragment> {
             fragment::check_range_is_sorted (first, last);
             // Compute the number of bytes of storage that we'll need for this fragment.
@@ -455,7 +463,7 @@ case section_kind::k: name = #k; break;
             // Allocate storage for the fragment including its three arrays.
             // We can't use the version of alloc_rw() which returns typed_address<> since we need
             // an explicit number of bytes allocated for the fragment.
-            std::pair<std::shared_ptr<void>, pstore::address> storage =
+            std::pair<std::shared_ptr<void>, pstore::address> const storage =
                 transaction.alloc_rw (size, alignof (fragment));
             fragment::populate (storage.first.get (), first, last);
             return {typed_address<fragment> (storage.second), size};
@@ -542,18 +550,8 @@ case section_kind::k: name = #k; break;
         }
 
 
-        // fragment::iterator
-        // ~~~~~~~~~~~~~~~~~~
-        inline fragment::const_iterator::const_iterator (section_kind kind,
-                                                         wrapped_iterator it) noexcept
-                : section_kind_{kind}
-                , it_{it} {}
-
-        inline fragment::const_iterator::const_iterator (wrapped_iterator it) noexcept
-                : const_iterator (static_cast<section_kind> (*it), it) {
-            assert (*it < static_cast<std::uint64_t> (section_kind::last));
-        }
-
+        // fragment::const_iterator
+        // ~~~~~~~~~~~~~~~~~~~~~~~~
         inline fragment::const_iterator & fragment::const_iterator::operator++ () noexcept {
             ++it_;
             section_kind_ = static_cast<section_kind> (*it_);

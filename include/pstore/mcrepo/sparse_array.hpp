@@ -290,15 +290,15 @@ namespace pstore {
                         next ();
                     }
 
-                    bool operator== (const_iterator const & rhs) const noexcept {
+                    constexpr bool operator== (const_iterator const & rhs) const noexcept {
                         return bitmap_ == rhs.bitmap_;
                     }
-                    bool operator!= (const_iterator const & rhs) const noexcept {
+                    constexpr bool operator!= (const_iterator const & rhs) const noexcept {
                         return !operator== (rhs);
                     }
 
-                    reference operator* () const noexcept { return pos_; }
-                    pointer operator-> () const noexcept { return pos_; }
+                    constexpr reference operator* () const noexcept { return pos_; }
+                    constexpr pointer operator-> () const noexcept { return pos_; }
 
                     const_iterator & operator++ () noexcept {
                         bitmap_ >>= 1;
