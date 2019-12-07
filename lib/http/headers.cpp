@@ -56,16 +56,16 @@ using pstore::httpd::header_info;
 
 namespace {
 
-    bool case_insensitive_equal (std::string::const_iterator lhs_first,
-                                 std::string::const_iterator lhs_last,
-                                 std::string::const_iterator rhs_first,
-                                 std::string::const_iterator rhs_last) noexcept {
+    bool case_insensitive_equal (std::string::const_iterator const lhs_first,
+                                 std::string::const_iterator const lhs_last,
+                                 std::string::const_iterator const rhs_first,
+                                 std::string::const_iterator const rhs_last) noexcept {
         if (std::distance (lhs_first, lhs_last) != std::distance (rhs_first, rhs_last)) {
             return false;
         }
         return std::equal (
-            lhs_first, lhs_last, rhs_first, [](char a, char b) noexcept {
-                auto lower = [](char c) noexcept {
+            lhs_first, lhs_last, rhs_first, [](char const a, char const b) noexcept {
+                auto const lower = [](char const c) noexcept {
                     return static_cast<char> (std::tolower (static_cast<unsigned char> (c)));
                 };
                 return lower (a) == lower (b);
@@ -73,8 +73,9 @@ namespace {
     }
 
 
-    bool case_insensitive_equal (std::string const & lhs, std::string::const_iterator rhs_first,
-                                 std::string::const_iterator rhs_last) noexcept {
+    bool case_insensitive_equal (std::string const & lhs,
+                                 std::string::const_iterator const rhs_first,
+                                 std::string::const_iterator const rhs_last) noexcept {
         return case_insensitive_equal (std::begin (lhs), std::end (lhs), rhs_first, rhs_last);
     }
 
@@ -122,11 +123,11 @@ namespace {
         split (value, std::back_inserter (strings), ',');
 
         for (auto const & str : strings) {
-            auto is_ws = [](char c) { return pstore::isspace (c); };
+            auto is_ws = [](char const c) { return pstore::isspace (c); };
             // Remove trailing whitespace.
-            auto end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
+            auto const end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
             // Skip leading whitespace.
-            auto begin = std::find_if_not (str.begin (), end, is_ws);
+            auto const begin = std::find_if_not (str.begin (), end, is_ws);
 
             if (case_insensitive_equal (upgrade, begin, end)) {
                 hi.connection_upgrade = true;
