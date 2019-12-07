@@ -284,7 +284,7 @@ namespace pstore {
                     using pointer = value_type const *;
                     using reference = value_type const &;
 
-                    explicit const_iterator (BitmapType bitmap) noexcept
+                    explicit constexpr const_iterator (BitmapType bitmap) noexcept
                             : bitmap_{bitmap}
                             , pos_{0} {
                         next ();
