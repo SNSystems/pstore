@@ -91,8 +91,9 @@ namespace {
     using socket_descriptor = pstore::broker::socket_descriptor;
 
     template <typename Sender, typename IO>
-    pstore::error_or<IO> cerror (Sender sender, IO io, char const * cause, unsigned error_no,
-                                 char const * shortmsg, char const * longmsg) {
+    pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
+                                 unsigned error_no, pstore::gsl::czstring const shortmsg,
+                                 pstore::gsl::czstring const longmsg) {
         static auto const & crlf = pstore::httpd::crlf;
 
         std::ostringstream content;
@@ -134,7 +135,7 @@ namespace {
 
     // initialize_socket
     // ~~~~~~~~~~~~~~~~~
-    pstore::error_or<socket_descriptor> initialize_socket (in_port_t port_number) {
+    pstore::error_or<socket_descriptor> initialize_socket (in_port_t const port_number) {
         using eo = pstore::error_or<socket_descriptor>;
 
         log (pstore::logging::priority::info, "initializing on port: ", port_number);
@@ -192,7 +193,8 @@ namespace {
         static constexpr auto crlf = pstore::httpd::crlf;
         static constexpr auto sender = pstore::httpd::net::network_sender;
 
-        auto report = [&error, &request, &socket](unsigned code, char const * message) {
+        auto report = [&error, &request, &socket](unsigned const code,
+                                                  pstore::gsl::czstring const message) {
             cerror (sender, std::ref (socket), request.uri ().c_str (), code, message,
                     error.message ().c_str ());
         };
@@ -339,7 +341,7 @@ namespace {
         std::array<std::uint8_t, 256> buf;
         ssize_t const nread = recv (fd.native_handle (), buf.data (),
                                     static_cast<int> (buf.size ()), MSG_PEEK /*flags*/);
-        int err = errno;
+        int const err = errno;
         if (nread == -1) {
             log (pstore::logging::priority::error, "error:", err);
         }
@@ -353,7 +355,7 @@ namespace {
 namespace pstore {
     namespace httpd {
 
-        int server (romfs::romfs & file_system, gsl::not_null<server_status *> status,
+        int server (romfs::romfs & file_system, gsl::not_null<server_status *> const status,
                     channel_container const & channels) {
             pstore::error_or<socket_descriptor> eparentfd = initialize_socket (status->port ());
             if (!eparentfd) {
