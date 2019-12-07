@@ -397,7 +397,7 @@ namespace pstore {
             std::size_t const r = time_string (std::time (nullptr), ::gsl::make_span (time_buffer));
             (void) r;
             assert (r == sizeof (time_buffer) - 1);
-            auto time_str = time_buffer.data ();
+            gsl::czstring const time_str = time_buffer.data ();
             std::ostringstream str;
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
                 << message << '\n';

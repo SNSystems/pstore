@@ -55,7 +55,7 @@ namespace pstore {
             return sizeof (bss_section);
         }
 
-        std::uint8_t * bss_section_creation_dispatcher::write (std::uint8_t * out) const {
+        std::uint8_t * bss_section_creation_dispatcher::write (std::uint8_t * const out) const {
             assert (this->aligned (out) == out);
             assert (section_->data.size () <= std::numeric_limits<bss_section::size_type>::max ());
             auto * const scn = new (out) bss_section (
@@ -63,7 +63,8 @@ namespace pstore {
             return out + scn->size_bytes ();
         }
 
-        std::uintptr_t bss_section_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
+        std::uintptr_t
+        bss_section_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
             return pstore::aligned<bss_section> (in);
         }
 

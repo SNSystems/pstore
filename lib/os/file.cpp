@@ -237,7 +237,8 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void in_memory::write_buffer (gsl::not_null<void const *> const ptr, std::size_t nbytes) {
+        void in_memory::write_buffer (gsl::not_null<void const *> const ptr,
+                                      std::size_t const nbytes) {
             this->check_writable ();
             assert (length_ > pos_);
             if (nbytes > length_ - pos_) {

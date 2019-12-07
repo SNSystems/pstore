@@ -75,7 +75,7 @@ namespace pstore {
     namespace httpd {
 
         gsl::czstring PSTORE_NONNULL
-        media_type_from_extension (gsl::czstring PSTORE_NONNULL extension) {
+        media_type_from_extension (gsl::czstring const PSTORE_NONNULL extension) {
             static auto const begin = std::begin (media_types);
             static auto const end = std::end (media_types);
 
@@ -86,7 +86,8 @@ namespace pstore {
                 }));
 
             auto const pos = std::lower_bound (
-                begin, end, extension, [](media_type_entry const & mte, char const * ext) noexcept {
+                begin, end, extension,
+                [](media_type_entry const & mte, gsl::czstring const ext) noexcept {
                     return std::strcmp (mte.name, ext) < 0;
                 });
             return pos != end && std::strcmp (extension, pos->name) == 0

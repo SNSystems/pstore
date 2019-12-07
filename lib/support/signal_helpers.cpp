@@ -52,7 +52,7 @@ namespace pstore {
 
     // register_signal_handler
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    signal_function register_signal_handler (int signo, signal_function func) {
+    signal_function register_signal_handler (int const signo, signal_function const func) {
         return signal (signo, func);
     }
 
@@ -64,7 +64,7 @@ namespace pstore {
 
     // register_signal_handler
     // ~~~~~~~~~~~~~~~~~~~~~~~
-    signal_function register_signal_handler (int signo, signal_function func) {
+    signal_function register_signal_handler (int const signo, signal_function const func) {
         struct sigaction act;
         act.sa_handler = func;
         sigemptyset (&act.sa_mask);

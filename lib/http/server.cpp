@@ -92,7 +92,7 @@ namespace {
 
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
-                                 unsigned error_no, pstore::gsl::czstring const shortmsg,
+                                 unsigned const error_no, pstore::gsl::czstring const shortmsg,
                                  pstore::gsl::czstring const longmsg) {
         static auto const & crlf = pstore::httpd::crlf;
 

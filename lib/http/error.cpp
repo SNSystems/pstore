@@ -51,12 +51,11 @@ namespace pstore {
         // ******************
         // name
         // ~~~~
-        char const * error_category::name () const noexcept { return "pstore httpd category"; }
+        gsl::czstring error_category::name () const noexcept { return "pstore httpd category"; }
 
         // message
         // ~~~~~~~
-        std::string error_category::message (int error) const {
-            auto * result = "unknown pstore::category error";
+        std::string error_category::message (int const error) const {
             switch (static_cast<error_code> (error)) {
             case error_code::bad_request: return "Bad request";
             case error_code::bad_websocket_version: return "Bad WebSocket version requested";
@@ -64,7 +63,7 @@ namespace pstore {
             case error_code::string_too_long: return "String too long";
             case error_code::refill_out_of_range: return "Refill result out of range";
             }
-            return result;
+            return "unknown pstore::category error";
         }
 
         // **********************

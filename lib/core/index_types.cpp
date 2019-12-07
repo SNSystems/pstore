@@ -50,20 +50,20 @@
 
 namespace {
 
-    constexpr auto index_integral (pstore::trailer::indices idx)
+    constexpr auto index_integral (pstore::trailer::indices const idx) noexcept
         -> std::underlying_type<pstore::trailer::indices>::type {
         return static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
     }
 
-            template <pstore::trailer::indices Index>
-            void flush_index (pstore::transaction_base & transaction,
-                              pstore::trailer::index_records_array * const locations,
-                              unsigned generation) {
-                pstore::database & db = transaction.db ();
-                if (auto const index = pstore::index::get_index<Index> (db, false /*create*/)) {
-                    (*locations)[index_integral (Index)] = index->flush (transaction, generation);
-                }
-            }
+    template <pstore::trailer::indices Index>
+    void flush_index (pstore::transaction_base & transaction,
+                      pstore::trailer::index_records_array * const locations,
+                      unsigned const generation) {
+        pstore::database & db = transaction.db ();
+        if (auto const index = pstore::index::get_index<Index> (db, false /*create*/)) {
+            (*locations)[index_integral (Index)] = index->flush (transaction, generation);
+        }
+    }
 
 } // end anonymous namespace
 
@@ -72,15 +72,15 @@ namespace pstore {
 
         // flush_indices
         // ~~~~~~~~~~~~~
-        void flush_indices (::pstore::transaction_base & transaction,
-                            trailer::index_records_array * const locations, unsigned generation) {
-
+        void flush_indices (transaction_base & transaction,
+                            trailer::index_records_array * const locations,
+                            unsigned const generation) {
 #define X(k)                                                                                       \
     case trailer::indices::k:                                                                      \
         flush_index<trailer::indices::k> (transaction, locations, generation);                     \
         break;
 
-            for (auto ctr = std::underlying_type<pstore::trailer::indices>::type{0};
+            for (auto ctr = std::underlying_type<trailer::indices>::type{0};
                  ctr <= index_integral (trailer::indices::last); ++ctr) {
                 switch (static_cast<trailer::indices> (ctr)) {
                     PSTORE_INDICES
@@ -90,5 +90,6 @@ namespace pstore {
 #undef X
             assert (locations->size () == index_integral (trailer::indices::last));
         }
-    } // namespace index
-} // namespace pstore
+
+    } // end namespace index
+} // end namespace pstore
