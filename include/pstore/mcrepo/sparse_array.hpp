@@ -406,7 +406,7 @@ namespace pstore {
             constexpr std::size_t size_bytes () const {
                 return sparse_array::size_bytes (this->size ());
             }
-            static constexpr std::size_t size_bytes (std::size_t num_entries) {
+            static constexpr std::size_t size_bytes (std::size_t const num_entries) noexcept {
                 static_assert (sizeof (elements_) / sizeof (ValueType) == 1U,
                                "Expected elements_ to be an array of 1 ValueType");
                 return sizeof (sparse_array) +
@@ -414,8 +414,8 @@ namespace pstore {
             }
 
             template <typename InputIterator>
-            static std::size_t allocate_bytes (std::size_t count, InputIterator first,
-                                               InputIterator last) {
+            static std::size_t allocate_bytes (std::size_t const count, InputIterator const first,
+                                               InputIterator const last) {
                 // There will always be sufficient storage for at least 1 instance of
                 // ValueType (this comes from the built-in array).
                 static_assert (sizeof (elements_) / sizeof (ValueType) == 1U,
@@ -424,9 +424,9 @@ namespace pstore {
                 return count - sizeof (elements_) + elements * sizeof (ValueType);
             }
 
-            void * operator new (std::size_t /*count*/, void * ptr) { return ptr; }
-            void operator delete (void * /*ptr*/, void * /*place*/) {}
-            void operator delete (void * p) { ::operator delete (p); }
+            void * operator new (std::size_t const /*count*/, void * const ptr) { return ptr; }
+            void operator delete (void * const /*ptr*/, void * const /*place*/) {}
+            void operator delete (void * const p) { ::operator delete (p); }
 
             /// Constructs a sparse array whose available indices are defined by the
             /// iterator range from [first_index,last_index) and the values assigned to
@@ -459,7 +459,8 @@ namespace pstore {
             /// Placement delete member function to match the placement new member
             /// function which takes two input iterators.
             template <typename InputIterator>
-            void operator delete (void * p, InputIterator /*indices_first*/, InputIterator /*indices_last*/) {
+            void operator delete (void * const p, InputIterator const /*indices_first*/,
+                                  InputIterator const /*indices_last*/) {
                 return ::operator delete (p);
             }
 

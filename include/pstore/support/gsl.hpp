@@ -102,7 +102,8 @@ namespace pstore {
                 constexpr span_iterator () noexcept
                         : span_iterator (nullptr, 0) {}
 
-                span_iterator (Span const * span, typename Span::index_type index) noexcept
+                constexpr span_iterator (Span const * span,
+                                         typename Span::index_type index) noexcept
                         : span_ (span)
                         , index_ (index) {
                     assert (span == nullptr || (index_ >= 0 && index <= span_->length ()));
@@ -240,7 +241,7 @@ namespace pstore {
                 constexpr extent_type () noexcept = default;
 
                 template <index_type Other>
-                explicit extent_type (extent_type<Other> ext) {
+                constexpr explicit extent_type (extent_type<Other> ext) {
                     static_assert (
                         Other == Extent || Other == dynamic_extent,
                         "Mismatch between fixed-size extent and size of initializing data.");
@@ -248,7 +249,7 @@ namespace pstore {
                     assert (ext.size () == Extent);
                 }
 
-                explicit extent_type (index_type size) noexcept {
+                constexpr explicit extent_type (index_type const size) noexcept {
                     (void) size;
                     assert (size == Extent);
                 }
@@ -262,13 +263,13 @@ namespace pstore {
                 using index_type = std::ptrdiff_t;
 
                 template <index_type Other>
-                explicit extent_type (extent_type<Other> ext) noexcept
+                constexpr explicit extent_type (extent_type<Other> ext) noexcept
                         : size_ (ext.size ()) {}
-                explicit extent_type (index_type size) noexcept
+                constexpr explicit extent_type (index_type size) noexcept
                         : size_ (size) {
                     assert (size >= 0);
                 }
-                index_type size () const noexcept { return size_; }
+                constexpr index_type size () const noexcept { return size_; }
 
             private:
                 index_type size_;
@@ -296,7 +297,7 @@ namespace pstore {
             // [span.cons], span constructors, copy, assignment, and destructor
             constexpr span () noexcept
                     : storage_ (nullptr, details::extent_type<0> ()) {}
-            constexpr explicit span (std::nullptr_t) noexcept
+            constexpr explicit span (std::nullptr_t const) noexcept
                     : span () {}
             constexpr span (pointer ptr, index_type count)
                     : storage_ (ptr, count) {}
@@ -379,8 +380,8 @@ namespace pstore {
                 return {data () + (size () - count), count};
             }
 
-            span<element_type, dynamic_extent> subspan (index_type offset,
-                                                        index_type count = dynamic_extent) const
+            span<element_type, dynamic_extent>
+            subspan (index_type const offset, index_type const count = dynamic_extent) const
                 noexcept {
                 assert ((offset == 0 || (offset > 0 && offset <= size ())) &&
                         (count == dynamic_extent || (count >= 0 && offset + count <= size ())));
@@ -576,7 +577,6 @@ namespace pstore {
         }
 
 
-
         //
         // not_null
         //
@@ -598,7 +598,7 @@ namespace pstore {
 
         public:
             // NOLINTNEXTLINE(hicpp-explicit-conversions)
-            constexpr not_null (T t) noexcept
+            constexpr not_null (T const t) noexcept
                     : ptr_{t} {
                 ensure_invariant ();
             }
@@ -652,30 +652,29 @@ namespace pstore {
         };
 
 
-
         //
         // at() - Bounds-checked way of accessing static arrays, std::array, std::vector
         //
         template <typename T, size_t N>
-        T & at (T (&arr)[N], std::ptrdiff_t index) {
+        constexpr T & at (T (&arr)[N], std::ptrdiff_t const index) {
             assert (index >= 0 && index < static_cast<std::ptrdiff_t> (N));
             return arr[static_cast<size_t> (index)];
         }
 
         template <typename T, size_t N>
-        T & at (std::array<T, N> & arr, std::ptrdiff_t index) {
+        constexpr T & at (std::array<T, N> & arr, std::ptrdiff_t const index) {
             assert (index >= 0 && index < static_cast<std::ptrdiff_t> (N));
             return arr[static_cast<size_t> (index)];
         }
 
         template <typename Cont>
-        typename Cont::value_type & at (Cont & cont, std::ptrdiff_t index) {
+        constexpr typename Cont::value_type & at (Cont & cont, std::ptrdiff_t const index) {
             assert (index >= 0 && index < static_cast<std::ptrdiff_t> (cont.size ()));
             return cont[static_cast<typename Cont::size_type> (index)];
         }
 
         template <typename T>
-        T const & at (std::initializer_list<T> cont, std::ptrdiff_t index) {
+        constexpr T const & at (std::initializer_list<T> cont, std::ptrdiff_t const index) {
             assert (index >= 0 && index < static_cast<std::ptrdiff_t> (cont.size ()));
             return *(cont.begin () + index);
         }

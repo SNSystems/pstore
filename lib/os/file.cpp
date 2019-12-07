@@ -66,12 +66,12 @@ namespace pstore {
         //*       |___/                                                    *
         // (ctor)
         // ~~~~~~
-        system_error::system_error (std::error_code code, std::string const & user_message,
+        system_error::system_error (std::error_code const code, std::string const & user_message,
                                     std::string path)
                 : std::system_error (code, message (user_message, path))
                 , path_ (std::move (path)) {}
 
-        system_error::system_error (std::error_code code, gsl::czstring user_message,
+        system_error::system_error (std::error_code const code, gsl::czstring const user_message,
                                     std::string path)
                 : std::system_error (
                       code, message (user_message != nullptr ? user_message : "File", path))
@@ -105,8 +105,8 @@ namespace pstore {
         range_lock::range_lock () noexcept
                 : range_lock (nullptr, 0U, 0U, file_base::lock_kind::shared_read) {}
 
-        range_lock::range_lock (file_base * const file, std::uint64_t offset, std::size_t size,
-                                file_base::lock_kind kind) noexcept
+        range_lock::range_lock (file_base * const file, std::uint64_t const offset,
+                                std::size_t const size, file_base::lock_kind const kind) noexcept
                 : file_{file}
                 , offset_{offset}
                 , size_{size}
@@ -157,7 +157,7 @@ namespace pstore {
 
         // lock_impl
         // ~~~~~~~~~
-        bool range_lock::lock_impl (file_base::blocking_mode mode) {
+        bool range_lock::lock_impl (file_base::blocking_mode const mode) {
             if (locked_) {
                 return false;
             }
@@ -208,7 +208,7 @@ namespace pstore {
 
         // read_buffer
         // ~~~~~~~~~~~
-        std::size_t in_memory::read_buffer (gsl::not_null<void *> ptr, std::size_t nbytes) {
+        std::size_t in_memory::read_buffer (gsl::not_null<void *> const ptr, std::size_t nbytes) {
             // The second half of this check is to catch integer overflows.
             if (pos_ + nbytes > eof_ || pos_ + nbytes < pos_) {
                 nbytes = eof_ - pos_;
@@ -237,7 +237,7 @@ namespace pstore {
 
         // write_buffer
         // ~~~~~~~~~~~~
-        void in_memory::write_buffer (gsl::not_null<void const *> ptr, std::size_t nbytes) {
+        void in_memory::write_buffer (gsl::not_null<void const *> const ptr, std::size_t nbytes) {
             this->check_writable ();
             assert (length_ > pos_);
             if (nbytes > length_ - pos_) {
@@ -273,7 +273,7 @@ namespace pstore {
 
         // seek
         // ~~~~
-        void in_memory::seek (std::uint64_t position) {
+        void in_memory::seek (std::uint64_t const position) {
             if (position > eof_) {
                 raise (std::errc::invalid_argument);
             }
@@ -282,7 +282,7 @@ namespace pstore {
 
         // truncate
         // ~~~~~~~~
-        void in_memory::truncate (std::uint64_t size) {
+        void in_memory::truncate (std::uint64_t const size) {
             assert (eof_ <= length_);
             assert (pos_ <= eof_);
             this->check_writable ();
@@ -301,10 +301,7 @@ namespace pstore {
 
         // latest_time
         // ~~~~~~~~~~~
-        std::time_t in_memory::latest_time () const {
-            return 0; // TODO: could return the creation time. Does that make more sense?
-        }
-
+        std::time_t in_memory::latest_time () const { return 0; }
 
 
         //*    __ _ _        _                     _ _        *
