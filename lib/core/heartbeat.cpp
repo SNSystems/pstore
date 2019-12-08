@@ -64,19 +64,19 @@ namespace pstore {
             : sleep_time_ (&max_time_) {
     }
 
-    void heartbeat::worker_thread::attach (heartbeat::key_type key, callback cb) {
+    void heartbeat::worker_thread::attach (heartbeat::key_type const key, callback const cb) {
         // Pre-emptively invoke the callback. This ensures that it is called at least once
         // even if the worker thread is not sheduled before it exits.
         cb (key);
 
-        std::lock_guard<std::mutex> lock (mut_);
+        std::lock_guard<std::mutex> const lock{mut_};
         callbacks_[key] = cb;
         sleep_time_ = &delay_time_;
         cv_.notify_all ();
     }
 
-    void heartbeat::worker_thread::detach (heartbeat::key_type key) {
-        std::lock_guard<std::mutex> lock (mut_);
+    void heartbeat::worker_thread::detach (heartbeat::key_type const key) {
+        std::lock_guard<std::mutex> const lock{mut_};
         callbacks_.erase (key);
         if (callbacks_.empty ()) {
             sleep_time_ = &max_time_;
@@ -91,7 +91,7 @@ namespace pstore {
 
     void heartbeat::worker_thread::run () noexcept {
         PSTORE_TRY {
-            std::unique_lock<std::mutex> lock (mut_);
+            std::unique_lock<std::mutex> lock{mut_};
             while (!done_) {
                 this->step ();
                 cv_.wait_for (lock, *sleep_time_);
@@ -105,7 +105,7 @@ namespace pstore {
     }
 
     void heartbeat::worker_thread::stop () noexcept {
-        std::lock_guard<std::mutex> lock (mut_);
+        std::lock_guard<std::mutex> const lock (mut_);
         done_ = true;
         cv_.notify_all ();
     }
@@ -115,7 +115,7 @@ namespace pstore {
     //* heartbeat *
     //*************
     std::shared_ptr<heartbeat> heartbeat::get () {
-        static std::shared_ptr<heartbeat> t (new heartbeat);
+        static std::shared_ptr<heartbeat> const t (new heartbeat);
         return t;
     }
 
@@ -126,7 +126,7 @@ namespace pstore {
         }
     }
 
-    void heartbeat::attach (key_type key, callback cb) {
+    void heartbeat::attach (key_type const key, callback const cb) {
         if (!state_) {
             state_ = make_unique<state> ();
             auto & w = state_->worker;
@@ -138,7 +138,7 @@ namespace pstore {
         state_->worker.attach (key, cb);
     }
 
-    void heartbeat::detach (key_type key) {
+    void heartbeat::detach (key_type const key) {
         if (state_) {
             state_->worker.detach (key);
         }

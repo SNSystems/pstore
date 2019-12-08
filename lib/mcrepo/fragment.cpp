@@ -70,8 +70,9 @@ namespace {
     /// The enum is mapped to the data type stored, and this type is mapped to a dispatcher
     /// subclass which provides a virtual interface to the underlying data.
     template <section_kind Kind>
-    dispatcher_ptr make_dispatcher_for_kind (fragment const & f,
-                                             pstore::gsl::not_null<dispatcher_buffer *> buffer) {
+    dispatcher_ptr
+    make_dispatcher_for_kind (fragment const & f,
+                              pstore::gsl::not_null<dispatcher_buffer *> const buffer) {
         using dispatcher_type =
             typename section_to_dispatcher<typename enum_to_section<Kind>::type>::type;
         static_assert (sizeof (dispatcher_type) <= sizeof (dispatcher_buffer),
@@ -88,8 +89,8 @@ namespace {
     /// kind. \param buffer A non-null pointer to a buffer into which the object will be
     /// constructed. In other words, on return the result will be a unique_ptr<> to an object inside
     /// this buffer. The lifetime of this buffer must be greater than that of the result pointer.
-    dispatcher_ptr make_dispatcher (fragment const & f, section_kind kind,
-                                    pstore::gsl::not_null<dispatcher_buffer *> buffer) {
+    dispatcher_ptr make_dispatcher (fragment const & f, section_kind const kind,
+                                    pstore::gsl::not_null<dispatcher_buffer *> const buffer) {
         assert (f.has_section (kind));
 
 #define X(k)                                                                                       \
@@ -124,10 +125,10 @@ std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
 // section_offset_is_valid [static]
 // ~~~~~~~~~~~~~~~~~~~~~~~
 template <section_kind Key, typename InstanceType>
-std::uint64_t fragment::section_offset_is_valid (fragment const & f,
-                                                 pstore::extent<fragment> const & fext,
-                                                 std::uint64_t min_offset, std::uint64_t offset,
-                                                 std::size_t size) {
+std::uint64_t
+fragment::section_offset_is_valid (fragment const & f, pstore::extent<fragment> const & fext,
+                                   std::uint64_t const min_offset, std::uint64_t const offset,
+                                   std::size_t const size) {
     PSTORE_STATIC_ASSERT (alignof (fragment) >= alignof (InstanceType));
     return ((fext.addr.absolute () + offset) % alignof (InstanceType) != 0 ||
             size < sizeof (InstanceType) || offset < min_offset || size > fext.size ||
@@ -153,9 +154,8 @@ bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragme
     }
 
     std::uint64_t offset = sizeof (fragment);
-    for (auto index_it = std::begin (indices), index_end = std::end (indices);
-         index_it != index_end; ++index_it) {
-
+    auto const index_end = std::end (indices);
+    for (auto index_it = std::begin (indices); index_it != index_end; ++index_it) {
         std::size_t const index = *index_it;
 
         auto const this_offset = f.arr_[index];
@@ -202,14 +202,14 @@ std::size_t fragment::size_bytes () const {
 
 // section_align
 // ~~~~~~~~~~~~~
-unsigned pstore::repo::section_align (fragment const & f, section_kind kind) {
+unsigned pstore::repo::section_align (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->align ();
 }
 
 // section_size
 // ~~~~~~~~~~~~~
-std::size_t pstore::repo::section_size (fragment const & f, section_kind kind) {
+std::size_t pstore::repo::section_size (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->size ();
 }
@@ -217,7 +217,7 @@ std::size_t pstore::repo::section_size (fragment const & f, section_kind kind) {
 // section_ifixups
 // ~~~~~~~~~~~~~~~
 container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
-                                                         section_kind kind) {
+                                                         section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->ifixups ();
 }
@@ -225,15 +225,14 @@ container<internal_fixup> pstore::repo::section_ifixups (fragment const & f,
 // section_xfixups
 // ~~~~~~~~~~~~~~~
 container<external_fixup> pstore::repo::section_xfixups (fragment const & f,
-                                                         section_kind kind) {
+                                                         section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->xfixups ();
 }
 
 // section_data
 // ~~~~~~~~~~~~
-container<std::uint8_t> pstore::repo::section_value (fragment const & f,
-                                                     section_kind kind) {
+container<std::uint8_t> pstore::repo::section_value (fragment const & f, section_kind const kind) {
     dispatcher_buffer buffer;
     return make_dispatcher (f, kind, &buffer)->payload ();
 }

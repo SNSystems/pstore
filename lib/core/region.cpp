@@ -80,7 +80,8 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         file_based_factory::file_based_factory (std::shared_ptr<file::file_handle> file,
-                                                std::uint64_t full_size, std::uint64_t min_size)
+                                                std::uint64_t const full_size,
+                                                std::uint64_t const min_size)
                 : factory{full_size, min_size}
                 , file_{std::move (file)} {}
 
@@ -92,9 +93,9 @@ namespace pstore {
 
         // add
         // ~~~
-        void file_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
-                                      std::uint64_t original_size, std::uint64_t new_size) {
-
+        void file_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> const regions,
+                                      std::uint64_t const original_size,
+                                      std::uint64_t const new_size) {
             this->append<file::file_handle, memory_mapper> (file_, regions, original_size,
                                                             new_size);
         }
@@ -114,7 +115,8 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         mem_based_factory::mem_based_factory (std::shared_ptr<file::in_memory> file,
-                                              std::uint64_t full_size, std::uint64_t min_size)
+                                              std::uint64_t const full_size,
+                                              std::uint64_t const min_size)
                 : factory{full_size, min_size}
                 , file_{std::move (file)} {}
 
@@ -126,8 +128,9 @@ namespace pstore {
 
         // add
         // ~~~
-        void mem_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
-                                     std::uint64_t original_size, std::uint64_t new_size) {
+        void mem_based_factory::add (gsl::not_null<std::vector<memory_mapper_ptr> *> const regions,
+                                     std::uint64_t const original_size,
+                                     std::uint64_t const new_size) {
 
             this->append<file::in_memory, in_memory_mapper> (file_, regions, original_size,
                                                              new_size);
