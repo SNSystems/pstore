@@ -84,22 +84,22 @@ namespace pstore {
     template <>
     struct string_traits<std::string> {
         static std::size_t length (std::string const & s) noexcept { return s.length (); }
-        static char const * data (std::string const & s) noexcept { return s.data (); }
+        static gsl::czstring data (std::string const & s) noexcept { return s.data (); }
     };
     template <>
-    struct string_traits<char const *> {
-        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
-        static char const * data (char const * s) noexcept { return s; }
+    struct string_traits<gsl::czstring> {
+        static std::size_t length (gsl::czstring const s) noexcept { return std::strlen (s); }
+        static gsl::czstring data (gsl::czstring const s) noexcept { return s; }
     };
     template <std::size_t Size>
     struct string_traits<char const[Size]> {
-        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
-        static char const * data (char const * s) noexcept { return s; }
+        static std::size_t length (gsl::czstring const s) noexcept { return std::strlen (s); }
+        static gsl::czstring data (gsl::czstring const s) noexcept { return s; }
     };
     template <std::size_t Size>
     struct string_traits<char[Size]> {
-        static std::size_t length (char const * s) noexcept { return std::strlen (s); }
-        static char const * data (char const * s) noexcept { return s; }
+        static std::size_t length (gsl::czstring const s) noexcept { return std::strlen (s); }
+        static gsl::czstring data (gsl::czstring const s) noexcept { return s; }
     };
 
     //*            _     _             _            _ _       *
@@ -115,7 +115,7 @@ namespace pstore {
     struct pointer_traits<char const *> {
         static constexpr bool is_pointer = true;
         using value_type = char const;
-        static char const * as_raw (char const * p) noexcept { return p; }
+        static char const * as_raw (char const * const p) noexcept { return p; }
     };
 
     namespace details {
@@ -174,7 +174,7 @@ namespace pstore {
         // 7.3, sstring_view constructors and assignment operators
         constexpr sstring_view () noexcept
                 : ptr_{nullptr} {}
-        sstring_view (PointerType ptr, size_type size) noexcept
+        sstring_view (PointerType ptr, size_type const size) noexcept
                 : ptr_{std::move (ptr)}
                 , size_{size} {}
         sstring_view (sstring_view const &) = default;
@@ -243,7 +243,7 @@ namespace pstore {
         /// of \p n and size() - \p pos.
         /// \param pos position of the first character
         /// \param n requested length
-        sstring_view<char const *> substr (size_type pos = 0, size_type n = npos) const {
+        sstring_view<gsl::czstring> substr (size_type pos = 0, size_type n = npos) const {
             pos = std::min (pos, size_);
             return {data () + pos, std::min (n, size_ - pos)};
         }
@@ -271,7 +271,7 @@ namespace pstore {
         static std::size_t length (sstring_view<PointerType> const & s) noexcept {
             return s.length ();
         }
-        static char const * data (sstring_view<PointerType> const & s) noexcept {
+        static gsl::czstring data (sstring_view<PointerType> const & s) noexcept {
             return s.data ();
         }
     };
@@ -422,7 +422,7 @@ namespace pstore {
 
     using shared_sstring_view = sstring_view<std::shared_ptr<char const>>;
     using unique_sstring_view = sstring_view<std::unique_ptr<char const>>;
-    using raw_sstring_view = sstring_view<char const *>;
+    using raw_sstring_view = sstring_view<gsl::czstring>;
 
     //*             _               _       _                 _             *
     //*  _ __  __ _| |_____   _____| |_ _ _(_)_ _  __ _  __ _(_)_____ __ __ *
@@ -444,7 +444,7 @@ namespace pstore {
         return {std::move (ptr), length};
     }
 
-    inline raw_sstring_view make_sstring_view (char const * ptr, std::size_t length) {
+    inline raw_sstring_view make_sstring_view (char const * const ptr, std::size_t const length) {
         return {ptr, length};
     }
     raw_sstring_view make_sstring_view (gsl::czstring str);

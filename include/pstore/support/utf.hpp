@@ -190,7 +190,7 @@ namespace pstore {
         }
 
         template <typename CharType, typename OutputIt>
-        auto code_point_to_utf8 (char32_t c, OutputIt out) -> OutputIt {
+        auto code_point_to_utf8 (char32_t const c, OutputIt out) -> OutputIt {
             if (c < 0x80) {
                 *(out++) = static_cast<CharType> (c);
             } else if (c < 0x800) {
@@ -219,18 +219,18 @@ namespace pstore {
             return result;
         }
 
-        constexpr auto nop_swapper (std::uint16_t v) noexcept -> std::uint16_t { return v; }
-        constexpr auto byte_swapper (std::uint16_t v) noexcept -> std::uint16_t {
+        constexpr auto nop_swapper (std::uint16_t const v) noexcept -> std::uint16_t { return v; }
+        constexpr auto byte_swapper (std::uint16_t const v) noexcept -> std::uint16_t {
             return static_cast<std::uint16_t> (((v & 0x00FFU) << 8U) | ((v & 0xFF00U) >> 8U));
         }
 
-        constexpr auto is_utf16_high_surrogate (std::uint16_t code_unit) noexcept -> bool {
+        constexpr auto is_utf16_high_surrogate (std::uint16_t const code_unit) noexcept -> bool {
             return code_unit >= 0xD800 && code_unit <= 0xDBFF;
         }
 
         // is_utf16_low_surrogate
         // ~~~~~~~~~~~~~~~~~~~~~~
-        constexpr auto is_utf16_low_surrogate (std::uint16_t code_unit) noexcept -> bool {
+        constexpr auto is_utf16_low_surrogate (std::uint16_t const code_unit) noexcept -> bool {
             return code_unit >= 0xDC00 && code_unit <= 0xDFFF;
         }
 
@@ -247,7 +247,7 @@ namespace pstore {
 
             assert (first != last);
             char32_t code_point = 0;
-            char16_t code_unit = swapper (*(first++));
+            char16_t const code_unit = swapper (*(first++));
             if (!is_utf16_high_surrogate (code_unit)) {
                 code_point = code_unit;
             } else {
@@ -353,7 +353,7 @@ namespace pstore {
         template <typename Iterator>
         auto length (Iterator first, Iterator last) -> std::size_t {
             auto const result =
-                std::count_if (first, last, [](char c) { return is_utf_char_start (c); });
+                std::count_if (first, last, [](char const c) { return is_utf_char_start (c); });
             assert (result >= 0);
             using utype = typename std::make_unsigned<decltype (result)>::type;
             static_assert (std::numeric_limits<utype>::max () <=
@@ -397,19 +397,26 @@ namespace pstore {
         /// \returns  An iterator that is 'pos' codepoints after the start of the range or
         ///           'last' if the end of the range was encountered.
         template <typename InputIterator>
-        auto index (InputIterator first, InputIterator last, std::size_t pos) -> InputIterator {
+        auto index (InputIterator const first, InputIterator const last, std::size_t const pos)
+            -> InputIterator {
             auto start_count = std::size_t{0};
-            return std::find_if (first, last, [&start_count, pos](char c) {
+            return std::find_if (first, last, [&start_count, pos](char const c) {
                 return is_utf_char_start (c) ? (start_count++ == pos) : false;
             });
         }
 
         /// Returns a pointer to the beginning of the pos'th UTF-8 codepoint
         /// in the supplied span.
+        ///
+        /// \param span  A span of memory containing a sequence of UTF-8 codepoints.
+        /// \param pos  The number of code points to move
+        /// \returns  A pointer that is 'pos' codepoints after the start of \p span or
+        ///           nullptr if the end of the range was encountered.
         template <typename SpanType>
-        auto index (SpanType span, std::size_t pos) -> typename SpanType::element_type * {
-            auto end = span.end ();
-            auto it = index (span.begin (), end, pos);
+        auto index (SpanType const span, std::size_t const pos) ->
+            typename SpanType::element_type * {
+            auto const end = span.end ();
+            auto const it = index (span.begin (), end, pos);
             return it == end ? nullptr : &*it;
         }
 
@@ -425,7 +432,7 @@ namespace pstore {
         /// 'str'.
         /// \return A pair containing the the byte offset of the start UTF-8 code-unit and the byte
         /// offset of the end UTF-8 code-unit. Either value may be -1 if they were out-of-range.
-        auto slice (char const * str, std::ptrdiff_t start, std::ptrdiff_t end)
+        auto slice (gsl::czstring str, std::ptrdiff_t start, std::ptrdiff_t end)
             -> std::pair<std::ptrdiff_t, std::ptrdiff_t>;
 
 
@@ -437,13 +444,13 @@ namespace pstore {
         inline auto to_native_string (std::string const & str) -> std::wstring {
             return utf::win32::to16 (str);
         }
-        inline auto to_native_string (char const * str) -> std::wstring {
+        inline auto to_native_string (gsl::czstring const str) -> std::wstring {
             return utf::win32::to16 (str);
         }
         inline auto from_native_string (std::wstring const & str) -> std::string {
             return utf::win32::to8 (str);
         }
-        inline auto from_native_string (wchar_t const * str) -> std::string {
+        inline auto from_native_string (gsl::cwzstring const str) -> std::string {
             return utf::win32::to8 (str);
         }
 #    else
@@ -451,14 +458,14 @@ namespace pstore {
         inline auto to_native_string (std::string const & str) -> std::string {
             return win32::to_mbcs (str);
         }
-        inline auto to_native_string (char const * str) -> std::string {
+        inline auto to_native_string (gsl::czstring const str) -> std::string {
             return win32::to_mbcs (str);
         }
 #    endif //_UNICODE
         inline auto from_native_string (std::string const & str) -> std::string {
             return win32::mbcs_to8 (str);
         }
-        inline auto from_native_string (char const * str) -> std::string {
+        inline auto from_native_string (gsl::czstring const str) -> std::string {
             return win32::mbcs_to8 (str);
         }
 #else //_WIN32
