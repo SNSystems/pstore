@@ -64,10 +64,10 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (std::is_unsigned<DWORD>::value);
 #endif
 
-    constexpr auto uint64_high4 (std::uint64_t v) noexcept -> std::uint32_t {
+    constexpr auto uint64_high4 (std::uint64_t const v) noexcept -> std::uint32_t {
         return static_cast<std::uint32_t> (v >> 32U);
     }
-    constexpr auto uint64_low4 (std::uint64_t v) noexcept -> std::uint32_t {
+    constexpr auto uint64_low4 (std::uint64_t const v) noexcept -> std::uint32_t {
         return static_cast<std::uint32_t> (v & ((std::uint64_t{1} << 32U) - 1U));
     }
 

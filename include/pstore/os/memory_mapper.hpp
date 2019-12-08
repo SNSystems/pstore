@@ -147,8 +147,8 @@ namespace pstore {
         /// as given by the 'file' parameters, must be writable.
         /// \param offset       The starting offset within the container for the mapped region.
         /// \param size         The number of mapped bytes.
-        memory_mapper_base (std::shared_ptr<void> ptr, bool is_writable, std::uint64_t offset,
-                            std::uint64_t size)
+        memory_mapper_base (std::shared_ptr<void> ptr, bool const is_writable,
+                            std::uint64_t const offset, std::uint64_t const size)
                 : ptr_{std::move (ptr)}
                 , is_writable_{is_writable}
                 , offset_{offset}
@@ -208,8 +208,8 @@ namespace pstore {
 
     class in_memory_mapper : public memory_mapper_base {
     public:
-        in_memory_mapper (file::in_memory & file, bool write_enabled, std::uint64_t offset,
-                          std::uint64_t length)
+        in_memory_mapper (file::in_memory & file, bool const write_enabled,
+                          std::uint64_t const offset, std::uint64_t const length)
                 : memory_mapper_base (pointer (file, offset), write_enabled, offset, length) {}
         ~in_memory_mapper () noexcept override;
         static std::shared_ptr<std::uint8_t> pointer (pstore::file::in_memory & file,

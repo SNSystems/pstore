@@ -214,14 +214,14 @@ namespace pstore {
 
         class file_mapping {
         public:
-            explicit file_mapping (char const * name)
+            explicit file_mapping (gsl::czstring const name)
                     : descriptor_ (open (name)) {}
             ~file_mapping () noexcept;
             void set_size ();
             os_file_handle get () { return descriptor_; }
 
         private:
-            static os_file_handle open (char const * name);
+            static os_file_handle open (gsl::czstring name);
             os_file_handle descriptor_;
         };
 
@@ -355,7 +355,7 @@ namespace pstore {
     // unmap
     // ~~~~~
     template <typename Ty>
-    void shared_memory<Ty>::unmap (value_type * p) {
+    void shared_memory<Ty>::unmap (value_type * const p) {
         if (::UnmapViewOfFile (p) == 0) {
             auto const error = ::GetLastError ();
             raise (win32_erc (error), "UnmapViewOfFile");
@@ -365,7 +365,7 @@ namespace pstore {
     // mmap
     // ~~~~
     template <typename Ty>
-    auto shared_memory<Ty>::mmap (os_file_handle map_file) -> pointer_type {
+    auto shared_memory<Ty>::mmap (os_file_handle const map_file) -> pointer_type {
         auto mapped_ptr = static_cast<value_type *> (::MapViewOfFile (map_file, FILE_MAP_ALL_ACCESS,
                                                                       0, // file offset (high)
                                                                       0, // file offset (low)
@@ -382,7 +382,7 @@ namespace pstore {
     // unmap
     // ~~~~~
     template <typename Ty>
-    void shared_memory<Ty>::unmap (value_type * p) {
+    void shared_memory<Ty>::unmap (value_type * const p) {
         if (::munmap (p, sizeof (Ty)) == -1) {
             raise (errno_erc{errno}, "munmap");
         }
@@ -391,7 +391,7 @@ namespace pstore {
     // mmap
     // ~~~~
     template <typename Ty>
-    auto shared_memory<Ty>::mmap (os_file_handle fd) -> pointer_type {
+    auto shared_memory<Ty>::mmap (os_file_handle const fd) -> pointer_type {
         auto ptr = static_cast<value_type *> (
             ::mmap (nullptr, sizeof (Ty), PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0)); // NOLINT
         if (ptr == MAP_FAILED) {                                                       // NOLINT
@@ -420,7 +420,7 @@ namespace pstore {
     // open
     // ~~~~
     template <typename Ty>
-    auto shared_memory<Ty>::file_mapping::open (char const * name) -> os_file_handle {
+    auto shared_memory<Ty>::file_mapping::open (gsl::czstring const name) -> os_file_handle {
 
         HANDLE map_file = ::CreateFileMappingW (
             INVALID_HANDLE_VALUE,              // use paging file
@@ -450,7 +450,7 @@ namespace pstore {
     // open
     // ~~~~
     template <typename Ty>
-    auto shared_memory<Ty>::file_mapping::open (char const * name) -> os_file_handle {
+    auto shared_memory<Ty>::file_mapping::open (gsl::czstring const name) -> os_file_handle {
         int const fd = ::shm_open (name, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR); // NOLINT
         if (fd == -1) {
             int const error = errno;

@@ -55,7 +55,8 @@ namespace pstore {
 
         class directory {
         public:
-            constexpr directory (std::size_t size, dirent const * PSTORE_NONNULL members) noexcept
+            constexpr directory (std::size_t const size,
+                                 dirent const * const PSTORE_NONNULL members) noexcept
                     : size_{size}
                     , members_{members} {}
             template <std::size_t N>

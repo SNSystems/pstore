@@ -133,8 +133,9 @@ namespace pstore {
         // ~~~~~~
         template <typename StreamTraits, typename FileSystemTraits>
         basic_rotating_log<StreamTraits, FileSystemTraits>::basic_rotating_log (
-            std::string base_name, std::ios_base::streamoff max_size, unsigned num_backups,
-            StreamTraits const & stream_traits, FileSystemTraits const & fs_traits)
+            std::string base_name, std::ios_base::streamoff const max_size,
+            unsigned const num_backups, StreamTraits const & stream_traits,
+            FileSystemTraits const & fs_traits)
                 : max_size_ (std::max (max_size, std::ios_base::streamoff{0}))
                 , base_name_{std::move (base_name)}
                 , num_backups_ (num_backups)
@@ -165,8 +166,8 @@ namespace pstore {
         // make_file_name
         // ~~~~~~~~~~~~~~
         template <typename StreamTraits, typename FileSystemTraits>
-        std::string
-        basic_rotating_log<StreamTraits, FileSystemTraits>::make_file_name (unsigned index) const {
+        std::string basic_rotating_log<StreamTraits, FileSystemTraits>::make_file_name (
+            unsigned const index) const {
             std::ostringstream str;
             str << base_name_;
             if (index > 0) {

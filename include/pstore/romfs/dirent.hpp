@@ -60,15 +60,18 @@ namespace pstore {
         enum class mode_t { file, directory };
 
         struct stat {
-            constexpr stat (std::size_t size_, std::time_t mtime_, mode_t m) noexcept
+            constexpr stat (std::size_t const size_, std::time_t const mtime_,
+                            mode_t const m) noexcept
                     : size{size_}
                     , mtime{mtime_}
                     , mode{m} {}
 
-            bool operator== (stat const & rhs) const noexcept {
+            constexpr bool operator== (stat const & rhs) const noexcept {
                 return size == rhs.size && mtime == rhs.mtime && mode == rhs.mode;
             }
-            bool operator!= (stat const & rhs) const noexcept { return !operator== (rhs); }
+            constexpr bool operator!= (stat const & rhs) const noexcept {
+                return !operator== (rhs);
+            }
 
             std::size_t size;  ///< File size in bytes.
             std::time_t mtime; ///< Time when file data was last modified.
@@ -79,8 +82,8 @@ namespace pstore {
 
         class dirent {
         public:
-            constexpr dirent (gsl::czstring PSTORE_NONNULL name,
-                              void const * PSTORE_NONNULL contents, stat s) noexcept
+            constexpr dirent (gsl::czstring const PSTORE_NONNULL name,
+                              void const * const PSTORE_NONNULL contents, stat const s) noexcept
                     : name_{name}
                     , contents_{contents}
                     , stat_{s} {}
@@ -91,14 +94,13 @@ namespace pstore {
                     , stat_{sizeof (dir), 0 /*time*/, mode_t::directory} {}
 
             constexpr gsl::czstring PSTORE_NONNULL name () const noexcept { return name_; }
-            constexpr bool is_directory () const noexcept {
-                return stat_.mode == mode_t::directory;
-            }
             constexpr void const * PSTORE_NONNULL contents () const noexcept { return contents_; }
 
             error_or<class directory const * PSTORE_NONNULL> opendir () const;
-            struct stat stat () const noexcept {
-                return stat_;
+
+            constexpr struct stat const & stat () const noexcept { return stat_; }
+            constexpr bool is_directory () const noexcept {
+                return stat_.mode == mode_t::directory;
             }
 
         private:
