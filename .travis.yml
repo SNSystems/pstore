@@ -36,6 +36,36 @@ jobs:
     -   addons:
             apt:
                 packages:
+                - clang-9
+                - ninja-build
+                sources:
+                - ubuntu-toolchain-r-test
+                - llvm-toolchain-trusty-9
+            env:
+            - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        dist: xenial
+        env:
+        - CMAKE_BUILD_TYPE=Debug
+        - PSTORE_ALWAYS_SPANNING=Yes
+        os: linux
+    -   addons:
+            apt:
+                packages:
+                - clang-9
+                - ninja-build
+                sources:
+                - ubuntu-toolchain-r-test
+                - llvm-toolchain-trusty-9
+            env:
+            - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+        dist: xenial
+        env:
+        - CMAKE_BUILD_TYPE=Release
+        - PSTORE_ALWAYS_SPANNING=No
+        os: linux
+    -   addons:
+            apt:
+                packages:
                 - g++-9
                 - ninja-build
                 - valgrind

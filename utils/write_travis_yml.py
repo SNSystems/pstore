@@ -73,6 +73,22 @@ BUILDS = [
     },
     {
         'os': 'linux',
+        'dist': 'xenial',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-9'],
+                'packages': [
+                    'clang-9',
+                    'ninja-build'
+                ]
+            },
+            'env': [
+                'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
+            ]
+        }
+    },
+    {
+        'os': 'linux',
         'dist': 'trusty',
         'addons': {
             'apt': {
