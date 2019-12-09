@@ -40,9 +40,11 @@ jobs:
                 - ninja-build
                 sources:
                 - ubuntu-toolchain-r-test
-                - llvm-toolchain-trusty-9
+                -   key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+                    sourceline: deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9
+                        main
             env:
-            - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+            - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         dist: xenial
         env:
         - CMAKE_BUILD_TYPE=Debug
@@ -55,9 +57,11 @@ jobs:
                 - ninja-build
                 sources:
                 - ubuntu-toolchain-r-test
-                - llvm-toolchain-trusty-9
+                -   key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
+                    sourceline: deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9
+                        main
             env:
-            - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
+            - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         dist: xenial
         env:
         - CMAKE_BUILD_TYPE=Release

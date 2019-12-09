@@ -76,14 +76,20 @@ BUILDS = [
         'dist': 'xenial',
         'addons': {
             'apt': {
-                'sources': ['ubuntu-toolchain-r-test', 'llvm-toolchain-trusty-9'],
+                'sources': [
+                    'ubuntu-toolchain-r-test',
+                    {
+                        'sourceline': 'deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9 main',
+                        'key_url': 'https://apt.llvm.org/llvm-snapshot.gpg.key',
+                    }
+                ],
                 'packages': [
                     'clang-9',
                     'ninja-build'
                 ]
             },
             'env': [
-                'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
+                'MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"',
             ]
         }
     },
