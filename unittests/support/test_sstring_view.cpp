@@ -392,11 +392,11 @@ TYPED_TEST_CASE (SStringViewRelational, StringTypes);
 
 TYPED_TEST (SStringViewRelational, Eq) {
 #define EQ(lhs, rhs, x)                                                                            \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view == (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) == lhs_view, (x));                                                        \
-    }
+    } while (0)
     EQ ("", TypeParam (""), true);
     EQ ("", TypeParam ("abcde"), false);
     EQ ("", TypeParam ("abcdefghij"), false);
@@ -418,11 +418,11 @@ TYPED_TEST (SStringViewRelational, Eq) {
 
 TYPED_TEST (SStringViewRelational, Ne) {
 #define NE(lhs, rhs, x)                                                                            \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view != (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) != lhs_view, (x));                                                        \
-    }
+    } while (0)
     NE ("", TypeParam (""), false);
     NE ("", TypeParam ("abcde"), true);
     NE ("", TypeParam ("abcdefghij"), true);
@@ -444,11 +444,11 @@ TYPED_TEST (SStringViewRelational, Ne) {
 
 TYPED_TEST (SStringViewRelational, Ge) {
 #define GE(lhs, rhs, x, y)                                                                         \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view >= (rhs), (x));                                                        \
         EXPECT_EQ ((rhs) >= lhs_view, (y));                                                        \
-    }
+    } while (0)
     GE ("", TypeParam (""), true, true);
     GE ("", TypeParam ("abcde"), false, true);
     GE ("", TypeParam ("abcdefghij"), false, true);
@@ -470,11 +470,11 @@ TYPED_TEST (SStringViewRelational, Ge) {
 
 TYPED_TEST (SStringViewRelational, Gt) {
 #define GT(lhs, rhs, x, y)                                                                         \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view > (rhs), (x));                                                         \
         EXPECT_EQ ((rhs) > lhs_view, (y));                                                         \
-    }
+    } while (0)
     GT ("", TypeParam (""), false, false);
     GT ("", TypeParam ("abcde"), false, true);
     GT ("", TypeParam ("abcdefghij"), false, true);
@@ -496,11 +496,11 @@ TYPED_TEST (SStringViewRelational, Gt) {
 
 TYPED_TEST (SStringViewRelational, Le) {
 #define LE(lhs, rhs, x, y)                                                                         \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ (lhs_view <= (rhs), bool{(x)});                                                  \
         EXPECT_EQ ((rhs) <= lhs_view, bool{(y)});                                                  \
-    }
+    } while (0)
     LE ("", TypeParam (""), true, true);
     LE ("", TypeParam ("abcde"), true, false);
     LE ("", TypeParam ("abcdefghij"), true, false);
@@ -522,11 +522,11 @@ TYPED_TEST (SStringViewRelational, Le) {
 
 TYPED_TEST (SStringViewRelational, Lt) {
 #define LT(lhs, rhs, x, y)                                                                         \
-    {                                                                                              \
+    do {                                                                                           \
         auto const lhs_view = pstore::make_sstring_view ((lhs), std::strlen (lhs));                \
         EXPECT_EQ ((lhs_view < rhs), bool{(x)});                                                   \
         EXPECT_EQ ((rhs < lhs_view), bool{(y)});                                                   \
-    }
+    } while (0)
     LT ("", TypeParam (""), false, false);
     LT ("", TypeParam ("abcde"), true, false);
     LT ("", TypeParam ("abcdefghij"), true, false);
