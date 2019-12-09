@@ -58,7 +58,7 @@ namespace pstore {
 
         template <typename InputIterator, typename OutputIterator>
         void expand_tabs (InputIterator first, InputIterator last, OutputIterator out,
-                          std::size_t tab_size = 4) {
+                          std::size_t const tab_size = 4) {
             auto position = std::size_t{0};
             for (; first != last; ++first) {
                 auto const c = *first;
@@ -76,12 +76,12 @@ namespace pstore {
 
         class line_splitter {
         public:
-            explicit line_splitter (gsl::not_null<dump::array::container *> arr)
+            explicit line_splitter (gsl::not_null<dump::array::container *> const arr)
                     : arr_{arr} {}
 
             void append (std::string const & s) { this->append (gsl::make_span (s)); }
 
-            void append (gsl::span<char const> chars) {
+            void append (gsl::span<char const> const chars) {
                 this->append (chars, [](std::string const & s) { return s; });
             }
             template <typename OperationFunc>
@@ -93,18 +93,19 @@ namespace pstore {
         };
 
         template <typename OperationFunc>
-        void line_splitter::append (gsl::span<char const> chars, OperationFunc operation) {
+        void line_splitter::append (gsl::span<char const> const chars,
+                                    OperationFunc const operation) {
             assert (chars.size () >= 0);
             sstring_view<char const *> sv (
                 chars.data (), static_cast<sstring_view<char const *>::size_type> (chars.size ()));
             for (;;) {
-                auto cr_pos = sv.find ('\n', 0);
+                auto const cr_pos = sv.find ('\n', 0);
                 if (cr_pos == std::string::npos) {
                     str_.append (std::begin (sv), std::end (sv));
                     break;
                 }
 
-                auto * first = std::begin (sv);
+                auto * const first = std::begin (sv);
                 str_.append (first, first + cr_pos);
                 arr_->emplace_back (make_value (operation (str_)));
                 // Reset the accumulation buffer.

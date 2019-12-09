@@ -75,7 +75,7 @@ auto pstore::romfs::directory::end () const -> dirent const * {
 
 // operator[]
 // ~~~~~~~~~~
-auto pstore::romfs::directory::operator[] (std::size_t pos) const noexcept -> dirent const & {
+auto pstore::romfs::directory::operator[] (std::size_t const pos) const noexcept -> dirent const & {
     assert (pos < size ());
     return members_[pos];
 }
@@ -86,7 +86,7 @@ auto pstore::romfs::directory::find (directory const * const PSTORE_NONNULL d) c
     -> dirent const * PSTORE_NULLABLE {
 
     // This is a straightfoward linear search. Could be a performance problem in the future.
-    auto pos = std::find_if (begin (), end (), [d](dirent const & de) {
+    auto const pos = std::find_if (begin (), end (), [d] (dirent const & de) {
         auto const od = de.opendir ();
         return od && od.get () == d;
     });
@@ -97,14 +97,14 @@ auto pstore::romfs::directory::find (char const * PSTORE_NONNULL name, std::size
     -> dirent const * PSTORE_NULLABLE {
 
     // Directories are sorted by name: we can use a binary search here.
-    auto end = this->end ();
-    auto it = std::lower_bound (
+    auto const end = this->end ();
+    auto const it = std::lower_bound (
         this->begin (), end, std::make_pair (name, length),
-        [](dirent const & a, std::pair<char const * PSTORE_NONNULL, std::size_t> const & b) {
+        [] (dirent const & a, std::pair<char const * PSTORE_NONNULL, std::size_t> const & b) {
             return std::strncmp (a.name (), b.first, b.second) < 0;
         });
     if (it != end) {
-        gsl::czstring n = it->name ();
+        gsl::czstring const n = it->name ();
         if (std::strncmp (n, name, length) == 0 && n[length] == '\0') {
             return it;
         }

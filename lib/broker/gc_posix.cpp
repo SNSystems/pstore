@@ -70,6 +70,8 @@ using pstore::logging::priority;
 
 namespace {
 
+    // (Making 'status' const here would introduce warnings because of the way that WCOREDUMP is
+    // implemented on some platforms.)
     char const * core_dump_string (int status) {
 #    ifdef WCOREDUMP
         if (WCOREDUMP (status)) {
@@ -79,7 +81,9 @@ namespace {
         return "(no core file available)";
     }
 
-    void pr_exit (pid_t pid, int status) {
+    // (Making 'status' const here would introduce warnings because of the way that WIFEXITED and
+    // friend are implemented on some platforms.)
+    void pr_exit (pid_t const pid, int status) {
         log (priority::info, "GC process exited pid ", pid);
         if (WIFEXITED (status)) {
             log (priority::info, "Normal termination, exit status = ", WEXITSTATUS (status));
@@ -91,7 +95,7 @@ namespace {
         }
     }
 
-    std::string string_error (int errnum) {
+    std::string string_error (int const errnum) {
         static constexpr std::size_t buffer_size = 256U;
         char errbuf[buffer_size];
         errbuf[0] = '\0';
@@ -101,7 +105,7 @@ namespace {
 
         // There are two variants of strerror_r(). The POSIX version returns an int and the GNU
         // version returns 'char *'. When _GNU_SOURCE is defined, glibc provides the char * version.
-        // The GNU function doesn't usually modify the provided buffer-- it only modifies it
+        // The GNU function doesn't usually modify the provided buffer -- it only modifies it
         // sometimes. If you end up with the GNU version, you must use the return value of the
         // function as the string to print.
 #    if defined(_GNU_SOURCE)
@@ -130,8 +134,8 @@ namespace pstore {
         // ~~~~~~~~~~~~
         /// \note This function is called from a signal handler so must restrict itself to
         /// signal-safe functions.
-        void gc_watch_thread::child_signal (int sig) {
-            errno_saver old_errno;
+        void gc_watch_thread::child_signal (int const sig) {
+            errno_saver const old_errno;
             getgc ().cv_.notify_all (sig);
         }
 
@@ -180,10 +184,11 @@ namespace pstore {
 
             // Ask any child GC processes to quit.
             log (priority::info, "cleaning up");
-            std::for_each (processes_.right_begin (), processes_.right_end (), [](pid_t pid) {
-                log (priority::info, "sending SIGINT to ", pid);
-                ::kill (pid, SIGINT);
-            });
+            std::for_each (processes_.right_begin (), processes_.right_end (),
+                           [] (pid_t const pid) {
+                               log (priority::info, "sending SIGINT to ", pid);
+                               ::kill (pid, SIGINT);
+                           });
         }
 
     } // end namespace broker
