@@ -399,8 +399,8 @@ namespace pstore {
                 pstore::error_or_n<socket_descriptor &, request_info> eri =
                     read_request (reader, std::ref (childfd));
                 if (!eri) {
-                    log (logging::priority::error, "reading HTTP request",
-                         eri.get_error ().message ());
+                    log (logging::priority::error,
+                         "Failed reading HTTP request: ", eri.get_error ().message ());
                     continue;
                 }
                 childfd = std::move (std::get<0> (eri));
