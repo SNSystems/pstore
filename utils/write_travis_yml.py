@@ -83,15 +83,12 @@ BUILDS = [
                         'key_url': 'https://apt.llvm.org/llvm-snapshot.gpg.key',
                     }
                 ],
-                'packages': [
-                    'clang-9',
-                    'ninja-build'
-                ]
+                'packages': ['clang-9', 'ninja-build'],
             },
-            'env': [
-                'MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"',
-            ]
-        }
+        },
+        'env': [
+            'MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"',
+        ]
     },
     {
         'os': 'linux',

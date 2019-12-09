@@ -43,10 +43,9 @@ jobs:
                 -   key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
                     sourceline: deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9
                         main
-            env:
-            - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         dist: xenial
         env:
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         - CMAKE_BUILD_TYPE=Debug
         - PSTORE_ALWAYS_SPANNING=Yes
         os: linux
@@ -60,10 +59,9 @@ jobs:
                 -   key_url: https://apt.llvm.org/llvm-snapshot.gpg.key
                     sourceline: deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-9
                         main
-            env:
-            - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         dist: xenial
         env:
+        - MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"
         - CMAKE_BUILD_TYPE=Release
         - PSTORE_ALWAYS_SPANNING=No
         os: linux
