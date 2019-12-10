@@ -300,6 +300,11 @@ function (add_pstore_library)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_library (${arg_TARGET} STATIC ${arg_SOURCES})
         add_pstore_additional_compiler_flags (${arg_TARGET})
+
+        # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
+        if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+            target_compile_options (${arg_TARGET} PUBLIC -std=c++14)
+        endif ()
     else ()
         add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${arg_INCLUDES})
 
@@ -339,9 +344,13 @@ function (add_pstore_executable target)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_executable (${target} ${ARGN})
         add_pstore_additional_compiler_flags (${target})
+
+        # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
+        if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+            target_compile_options (${target} PUBLIC -std=c++14)
+        endif ()
     else ()
         add_executable (${target} ${ARGN})
-
         set_target_properties (${target} PROPERTIES
             CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
@@ -396,6 +405,11 @@ function (add_pstore_test_library target_name)
         add_library (${target_name} STATIC ${ARGN})
         add_pstore_additional_compiler_flags (${target_name})
 
+        # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
+        if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+            target_compile_options (${target_name} PUBLIC -std=c++14)
+        endif ()
+
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
         include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
         target_link_libraries (${target_name} PUBLIC gtest)
@@ -423,6 +437,11 @@ function (add_pstore_unit_test target_name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_unittest (PstoreUnitTests ${target_name} ${ARGN})
         add_pstore_additional_compiler_flags (${target_name})
+
+        # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
+        if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+            target_compile_options (${target_name} PUBLIC -std=c++14)
+        endif ()
     else()
         add_executable (${target_name} ${ARGN})
         set_target_properties (${target_name} PROPERTIES
