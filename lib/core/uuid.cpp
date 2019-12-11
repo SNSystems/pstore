@@ -59,7 +59,8 @@
 #include "pstore/support/random.hpp"
 
 namespace {
-    char digit_to_hex (unsigned v) {
+
+    constexpr char digit_to_hex (unsigned const v) noexcept {
         assert (v < 0x10);
         return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
     }
@@ -68,10 +69,10 @@ namespace {
     template <typename OutputIterator>
     class hex_decoder {
     public:
-        explicit hex_decoder (OutputIterator out)
+        constexpr explicit hex_decoder (OutputIterator out) noexcept
                 : out_{out} {}
 
-        OutputIterator append (unsigned value) {
+        OutputIterator append (unsigned const value) noexcept {
             assert (value < 16U);
             if (is_high_) {
                 *out_ = static_cast<std::uint8_t> (value << 4);
@@ -82,7 +83,7 @@ namespace {
             return out_;
         }
 
-        bool is_high () const { return is_high_; }
+        bool is_high () const noexcept { return is_high_; }
 
     private:
         OutputIterator out_;
@@ -90,9 +91,10 @@ namespace {
     };
 
     template <typename OutputIterator>
-    auto make_hex_decoder (OutputIterator out) -> hex_decoder<OutputIterator> {
+    constexpr auto make_hex_decoder (OutputIterator out) -> hex_decoder<OutputIterator> {
         return hex_decoder<OutputIterator> (out);
     }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -101,7 +103,7 @@ namespace pstore {
     // ~~~~~~
     uuid::uuid () {
         static random_generator<unsigned> random;
-        auto generator = []() {
+        auto const generator = [] () {
             constexpr auto max = std::numeric_limits<std::uint8_t>::max ();
             return static_cast<std::uint8_t> (random.get (max));
         };
@@ -170,7 +172,7 @@ namespace pstore {
         container_type data;
         auto out = make_hex_decoder (std::begin (data));
         auto count = 0U;
-        for (auto digit : str) {
+        for (auto const digit : str) {
             switch (count++) {
             case 8:
             case 13:
@@ -231,12 +233,7 @@ namespace pstore {
     // is_null
     // ~~~~~~~
     bool uuid::is_null () const noexcept {
-        for (auto v : data_) {
-            if (v) {
-                return false;
-            }
-        }
-        return true;
+        return std::all_of (std::begin (data_), std::end (data_), [] (auto const v) { return !v; });
     }
 
     // str
@@ -259,7 +256,7 @@ namespace pstore {
 
     // operator<<
     // ~~~~~~~~~~
-    std::ostream & operator<< (std::ostream & stream, uuid::version_type version) {
+    std::ostream & operator<< (std::ostream & stream, uuid::version_type const version) {
         char const * str = "";
         switch (version) {
         case uuid::version_type::time_based: str = "time_based"; break;
@@ -272,7 +269,7 @@ namespace pstore {
         return stream << str;
     }
 
-    std::ostream & operator<< (std::ostream & stream, uuid::variant_type variant) {
+    std::ostream & operator<< (std::ostream & stream, uuid::variant_type const variant) {
         char const * str = "";
         switch (variant) {
         case uuid::variant_type::ncs: str = "ncs"; break;

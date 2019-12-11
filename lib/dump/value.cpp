@@ -62,7 +62,7 @@
 namespace {
 
     template <typename CharType>
-    CharType to_hex (unsigned v) {
+    constexpr CharType to_hex (unsigned const v) noexcept {
         assert (v < 0x10);
         return static_cast<CharType> (v + ((v < 10) ? '0' : 'A' - 10));
     }
@@ -123,11 +123,11 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         bool string::should_be_quoted (std::string const & v) {
             using uchar_type = typename std::make_unsigned<std::string::value_type>::type;
-
-            auto predicate = [](char c) { return !std::isprint (static_cast<uchar_type> (c)); };
             return v.length () == 0 || std::isspace (static_cast<uchar_type> (v.front ())) ||
                    std::isspace (static_cast<uchar_type> (v.back ())) ||
-                   std::find_if (std::begin (v), std::end (v), predicate) != std::end (v);
+                   std::find_if (std::begin (v), std::end (v), [] (char const c) {
+                       return !std::isprint (static_cast<uchar_type> (c));
+                   }) != std::end (v);
         }
 
         // write_unquoted
@@ -287,8 +287,8 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~~~
         std::time_t time::milliseconds_to_time () const {
             using clock = std::chrono::system_clock;
-            clock::duration dur = std::chrono::milliseconds (ms_);
-            std::chrono::time_point<clock> tp (dur);
+            clock::duration const dur = std::chrono::milliseconds (ms_);
+            std::chrono::time_point<clock> const tp (dur);
             return std::chrono::system_clock::to_time_t (tp);
         }
 
@@ -297,8 +297,7 @@ namespace pstore {
         template <typename OStream>
         OStream & time::writer (OStream & os) const {
             bool fallback = true;
-            std::time_t t = this->milliseconds_to_time ();
-            std::tm const tm = gm_time (t);
+            std::tm const tm = gm_time (this->milliseconds_to_time ());
             char time_str[100];
             // strftime() returns 0 if the result doesn't fit in the provided buffer;
             // the contents are undefined. 100 characters should be plenty for an ISO8601 date.
@@ -340,10 +339,7 @@ namespace pstore {
                 sep = " ";
                 for (value_ptr const & value : values_) {
                     os << sep;
-
-                    auto v = value.get ();
-                    v->write_impl (os, indent ());
-
+                    value->write_impl (os, indent ());
                     sep = ", ";
                 }
                 os << " ]";
@@ -498,8 +494,9 @@ namespace pstore {
         // get
         // ~~~
         value_ptr object::get (std::string const & name) {
-            auto predicate = [&name](object::member const & mem) { return mem.property == name; };
-            auto it = std::find_if (std::begin (members_), std::end (members_), predicate);
+            auto const it = std::find_if (
+                std::begin (members_), std::end (members_),
+                [&name] (object::member const & mem) { return mem.property == name; });
             return (it != members_.end ()) ? it->val : value_ptr (nullptr);
         }
 
@@ -524,10 +521,11 @@ namespace pstore {
                 : property (std::move (rhs.property))
                 , val (std::move (rhs.val)) {}
 
-    } // namespace dump
-} // namespace pstore
+    } // end namespace dump
+} // end namespace pstore
 
 namespace {
+
     // We accumulate a number of lines of encoded binary in a single string object
     // rather than writing individual characters to the output stream one at a time.
     template <typename OStream>
@@ -563,7 +561,7 @@ namespace {
     }
 
     template <typename OStream>
-    void accumulator<OStream>::write (char c) {
+    void accumulator<OStream>::write (char const c) {
         if (width_ == 0) {
             lines_ += indent_string_;
         }
@@ -589,7 +587,8 @@ namespace {
         line_count_ = 0U;
         lines_.clear ();
     }
-} // namespace
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace dump {
@@ -664,12 +663,6 @@ namespace pstore {
             return this->writer (os, ind);
         }
 
-    } // namespace dump
-} // namespace pstore
-
-namespace pstore {
-    namespace dump {
-
         //**********************
         //*   b i n a r y 1 6  *
         //**********************
@@ -684,7 +677,7 @@ namespace pstore {
                 using char_type = typename OStream::char_type;
                 constexpr auto number_of_bytes_per_row = 8U * 2U;
                 auto ctr = 0U;
-                for (std::uint8_t b : v_) {
+                for (std::uint8_t const b : v_) {
                     if (ctr == 0U || ctr >= number_of_bytes_per_row) {
                         // Line wrap and indent on the first iteration or when we run out of width.
                         os << '\n' << ind;
@@ -693,9 +686,9 @@ namespace pstore {
                         // Values grouped into two-byte pairs.
                         os << ' ';
                     }
-                    char_type const hex[3] = {to_hex<char_type> ((b >> 4U) & 0x0FU),
-                                              to_hex<char_type> (b & 0x0FU), '\0'};
-                    os << hex;
+                    std::array<char_type, 3> const hex{{to_hex<char_type> ((b >> 4U) & 0x0FU),
+                                                        to_hex<char_type> (b & 0x0FU), '\0'}};
+                    os << hex.data ();
                     ++ctr;
                 }
             }
@@ -711,5 +704,5 @@ namespace pstore {
             return this->writer (os, ind);
         }
 
-    } // namespace dump
-} // namespace pstore
+    } // end namespace dump
+} // end namespace pstore

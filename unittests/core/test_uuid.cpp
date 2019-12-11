@@ -48,17 +48,20 @@
 #include "check_for_error.hpp"
 
 namespace {
+
     class BasicUUID : public ::testing::Test {
     protected:
         pstore::uuid id_{
             pstore::uuid::container_type{{0x84, 0x94, 0x9c, 0xc5, 0x47, 0x01, 0x4a, 0x84, 0x89,
                                           0x5b, 0x35, 0x4c, 0x58, 0x4a, 0x98, 0x1b}}};
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (BasicUUID, Parse) {
     pstore::uuid const t1 ("84949cc5-4701-4a84-895b-354c584a981b");
     EXPECT_EQ (t1, id_);
+    EXPECT_FALSE (t1.is_null ());
 }
 
 TEST_F (BasicUUID, Version) {
