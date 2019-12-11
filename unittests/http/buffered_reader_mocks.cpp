@@ -54,6 +54,11 @@
 #include <cassert>
 #include <vector>
 
+mock_refiller::~mock_refiller () noexcept = default;
+
+refiller::~refiller () noexcept = default;
+
+
 refiller_function refiller::refill_function () const {
     return [this](int io, pstore::gsl::span<std::uint8_t> const & s) { return this->fill (io, s); };
 }

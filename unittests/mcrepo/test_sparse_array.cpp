@@ -61,7 +61,7 @@ namespace {
 } // end anonymous namespace
 
 
-TYPED_TEST_CASE (RepoSparseArray, bitmap_test_types);
+TYPED_TEST_SUITE (RepoSparseArray, bitmap_test_types, );
 
 TYPED_TEST (RepoSparseArray, InitializerListIndicesHasIndex) {
     auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4});

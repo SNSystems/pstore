@@ -116,7 +116,7 @@ namespace {
 
 } // end anonymous namespace
 
-TYPED_TEST_CASE (SStringViewInit, SStringViewInitTypes);
+TYPED_TEST_SUITE (SStringViewInit, SStringViewInitTypes, );
 
 TYPED_TEST (SStringViewInit, Empty) {
     using namespace pstore;
@@ -388,7 +388,7 @@ namespace pstore {
 
 } // end namespace pstore
 
-TYPED_TEST_CASE (SStringViewRelational, StringTypes);
+TYPED_TEST_SUITE (SStringViewRelational, StringTypes, );
 
 TYPED_TEST (SStringViewRelational, Eq) {
 #define EQ(lhs, rhs, x)                                                                            \

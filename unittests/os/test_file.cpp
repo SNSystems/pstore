@@ -361,6 +361,7 @@ namespace {
         virtual ~unlinker () noexcept = default;
         virtual void unlink (std::string const & p) = 0;
     };
+
     class mock_unlinker : public unlinker {
     public:
         MOCK_METHOD1 (unlink, void(std::string const &));

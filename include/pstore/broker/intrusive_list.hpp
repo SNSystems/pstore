@@ -66,10 +66,9 @@ namespace pstore {
             /// The list does not own the pointers.
             class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
             public:
-                iterator () = default;
-                explicit iterator (T * ptr)
+                constexpr iterator () noexcept = default;
+                explicit constexpr iterator (T * ptr) noexcept
                         : ptr_{ptr} {}
-                iterator & operator= (iterator const & rhs) = default;
 
                 bool operator== (iterator const & rhs) const noexcept { return ptr_ == rhs.ptr_; }
                 bool operator!= (iterator const & rhs) const noexcept { return !operator== (rhs); }

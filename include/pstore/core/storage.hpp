@@ -250,14 +250,14 @@ namespace pstore {
         noexcept {
         (void) addr;
         (void) size;
-#if PSTORE_ALWAYS_SPANNING
+#ifdef PSTORE_ALWAYS_SPANNING
         return true;
 #else
         if (size == 0) {
             return false;
         }
         return (*sat_)[addr.segment ()].region != (*sat_)[(addr + size - 1U).segment ()].region;
-#endif
+#endif // PSTORE_ALWAYS_SPANNING
     }
 
     // copy

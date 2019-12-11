@@ -64,7 +64,7 @@ namespace {
 } // namespace
 
 using CharacterTypes = ::testing::Types<char, wchar_t>;
-TYPED_TEST_CASE (Object, CharacterTypes);
+TYPED_TEST_SUITE (Object, CharacterTypes, );
 
 TYPED_TEST (Object, Empty) {
     pstore::dump::object v;

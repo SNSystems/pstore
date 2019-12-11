@@ -71,8 +71,13 @@ endfunction()
 
 # pstore_enable_warnings
 # ~~~~~~~~~~~~~~~~~~~~~~
-function (pstore_enable_warnings target_name)
-
+function (pstore_enable_warnings)
+    cmake_parse_arguments (arg #prefix
+        "IS_UNIT_TEST" #options
+        "TARGET" # one-value-keywords
+        "" # multi-value-keywords
+        ${ARGN}
+    )
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         set (options
             -Weverything
@@ -80,19 +85,27 @@ function (pstore_enable_warnings target_name)
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
             -Wno-c++14-extensions
-            -Wno-deprecated
-            -Wno-disabled-macro-expansion
             -Wno-exit-time-destructors
             -Wno-global-constructors
-            -Wno-missing-noreturn
-            -Wno-missing-variable-declarations
             -Wno-padded
-            -Wno-shift-sign-overflow
-            -Wno-undef
-            -Wno-unused-macros
-            -Wno-used-but-marked-unused
             -Wno-weak-vtables
         )
+        if (${arg_IS_UNIT_TEST})
+            list (APPEND options
+                -Wno-unused-member-function
+                -Wno-used-but-marked-unused
+            )
+        endif ()
+#    -Wno-deprecated
+#    -Wno-disabled-macro-expansion
+#    -Wno-missing-noreturn
+#    -Wno-missing-variable-declarations
+#    -Wno-shift-sign-overflow
+#    -Wno-undef
+#    -Wno-unused-macros
+#    -Wno-used-but-marked-unused
+
+
     elseif (CMAKE_COMPILER_IS_GNUCXX)
         set (options
             -Wall
@@ -103,14 +116,14 @@ function (pstore_enable_warnings target_name)
         set (options -W4)
     endif ()
 
-    target_compile_options (${target_name} PRIVATE ${options})
+    target_compile_options (${arg_TARGET} PRIVATE ${options})
 
 endfunction (pstore_enable_warnings)
 
 
-#######################################
+########################################
 # add_pstore_additional_compiler_flags #
-#######################################
+########################################
 function (add_pstore_additional_compiler_flags target_name)
     if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
         if (NOT PSTORE_EXCEPTIONS)
@@ -314,7 +327,7 @@ function (add_pstore_library)
             PUBLIC_HEADER "${arg_INCLUDES}"
         )
 
-        pstore_enable_warnings (${arg_TARGET})
+        pstore_enable_warnings (TARGET ${arg_TARGET})
         add_pstore_additional_compiler_flags (${arg_TARGET})
 
         target_include_directories (${arg_TARGET} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -355,7 +368,7 @@ function (add_pstore_executable target)
             CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
         )
-        pstore_enable_warnings (${target})
+        pstore_enable_warnings (TARGET ${target})
         add_pstore_additional_compiler_flags (${target})
     endif (PSTORE_IS_INSIDE_LLVM)
 
@@ -419,7 +432,7 @@ function (add_pstore_test_library target_name)
             CXX_STANDARD 14
             CXX_STANDARD_REQUIRED Yes
         )
-        pstore_enable_warnings (${target_name})
+        pstore_enable_warnings (TARGET ${target_name})
         add_pstore_additional_compiler_flags (${target_name})
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
         target_link_libraries (${target_name} PUBLIC gtest gmock)
@@ -450,7 +463,7 @@ function (add_pstore_unit_test target_name)
             CXX_STANDARD_REQUIRED Yes
         )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
-        pstore_enable_warnings (${target_name})
+        pstore_enable_warnings (TARGET ${target_name} IS_UNIT_TEST)
         add_pstore_additional_compiler_flags (${target_name})
         target_link_libraries (${target_name} PRIVATE pstore-unit-test-harness gtest gmock)
     endif (PSTORE_IS_INSIDE_LLVM)

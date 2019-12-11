@@ -46,7 +46,7 @@
 #include <gtest/gtest.h>
 
 // In "always spanning" mode request_spans_regions() ALWAYS returns true!
-#if !PSTORE_ALWAYS_SPANNING
+#ifndef PSTORE_ALWAYS_SPANNING
 
 namespace {
 
@@ -123,7 +123,7 @@ TEST_F (RequestSpansRegions, MinRegionSize) {
 
 // The FullRegionSize test is slow and can exhaust memory on some systems with tightly
 // constrained memory limits (e.g. inside a docker container).
-#    if PSTORE_FULL_REGION_SIZE_TEST_ENABLED
+#    ifdef PSTORE_FULL_REGION_SIZE_TEST_ENABLED
 
 TEST_F (RequestSpansRegions, FullRegionSize) {
     static constexpr auto min_region_size = pstore::storage::min_region_size;
@@ -181,4 +181,4 @@ TEST_F (RequestSpansRegions, FullRegionSize) {
 }
 #    endif // PSTORE_FULL_REGION_SIZE_TEST_ENABLED
 
-#endif //! PSTORE_ALWAYS_SPANNING
+#endif // PSTORE_ALWAYS_SPANNING

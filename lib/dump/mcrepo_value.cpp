@@ -99,13 +99,13 @@ namespace pstore {
             (void) triple;
             auto const & payload = section.payload ();
             value_ptr data_value;
-#if PSTORE_IS_INSIDE_LLVM
+#ifdef PSTORE_IS_INSIDE_LLVM
             if (sk == repo::section_kind::text) {
                 std::uint8_t const * const first = payload.data ();
                 data_value =
                     make_disassembled_value (first, first + payload.size (), triple, hex_mode);
             }
-#endif
+#endif // PSTORE_IS_INSIDE_LLVM
             if (!data_value) {
                 if (hex_mode) {
                     data_value =

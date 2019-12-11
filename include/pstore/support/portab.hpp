@@ -152,12 +152,12 @@
 #endif
 
 
-#if PSTORE_HAVE_NONNULL_KEYWORD
+#ifdef PSTORE_HAVE_NONNULL_KEYWORD
 #    define PSTORE_NONNULL _Nonnull
 #else
 #    define PSTORE_NONNULL
 #endif
-#if PSTORE_HAVE_NULLABLE_KEYWORD
+#ifdef PSTORE_HAVE_NULLABLE_KEYWORD
 #    define PSTORE_NULLABLE _Nullable
 #else
 #    define PSTORE_NULLABLE

@@ -129,6 +129,7 @@ namespace {
     //* | '  \/ _ \/ _| / / / _` / _` |  _/ _` | '_ \/ _` (_-</ -_) |  _| | / -_) *
     //* |_|_|_\___/\__|_\_\ \__,_\__,_|\__\__,_|_.__/\__,_/__/\___| |_| |_|_\___| *
     //*                                                                           *
+
     class mock_database_file : public pstore::database {
     public:
         explicit mock_database_file (std::shared_ptr<pstore::file::file_handle> const & file)

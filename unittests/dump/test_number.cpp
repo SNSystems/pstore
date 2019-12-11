@@ -77,7 +77,7 @@ namespace {
 } // namespace
 
 using CharacterTypes = ::testing::Types<char, wchar_t>;
-TYPED_TEST_CASE (Number, CharacterTypes);
+TYPED_TEST_SUITE (Number, CharacterTypes, );
 
 TYPED_TEST (Number, N0ExplicitBase8) {
     pstore::dump::number_long v (0, 8);

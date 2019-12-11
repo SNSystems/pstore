@@ -53,7 +53,7 @@
 
 namespace pstore {
 
-#if PSTORE_HAVE_STD_TO_STRING
+#ifdef PSTORE_HAVE_STD_TO_STRING
 
     template <typename T>
     inline std::string to_string (T && t) {

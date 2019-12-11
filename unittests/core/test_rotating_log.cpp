@@ -50,6 +50,7 @@
 #include "pstore/support/path.hpp"
 
 namespace {
+
     struct mock_file_system_traits {
         mock_file_system_traits () {}
         mock_file_system_traits (mock_file_system_traits const &) {}
@@ -59,7 +60,6 @@ namespace {
         MOCK_METHOD1 (unlink, void(std::string const &));
         MOCK_METHOD2 (rename, void(std::string const &, std::string const &));
     };
-
 
     struct mock_string_stream_traits {
         using stream_type = std::ostringstream;
@@ -72,7 +72,8 @@ namespace {
         MOCK_METHOD1 (close, void(stream_type &));
         MOCK_METHOD1 (clear, void(stream_type &));
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST (RotatingLog, NothingIsLogged) {
     using log_type =

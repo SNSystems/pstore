@@ -51,7 +51,7 @@
 
 namespace pstore {
 
-#if PSTORE_HAVE_LOCALTIME_S
+#ifdef PSTORE_HAVE_LOCALTIME_S
     struct std::tm local_time (std::time_t const clock) {
         struct tm result;
         if (errno_t const err = localtime_s (&result, &clock)) {
@@ -60,7 +60,7 @@ namespace pstore {
         return result;
     }
 
-#elif PSTORE_HAVE_LOCALTIME_R
+#elif defined(PSTORE_HAVE_LOCALTIME_R)
     struct std::tm local_time (std::time_t const clock) {
         errno = 0;
         struct tm result {};
@@ -75,7 +75,7 @@ namespace pstore {
 #    error "Need localtime_r() or localtime_s()"
 #endif
 
-#if PSTORE_HAVE_GMTIME_S
+#ifdef PSTORE_HAVE_GMTIME_S
     struct std::tm gm_time (std::time_t const clock) {
         struct tm result;
         if (errno_t const err = gmtime_s (&result, &clock)) {
@@ -83,7 +83,7 @@ namespace pstore {
         }
         return result;
     }
-#elif PSTORE_HAVE_GMTIME_R
+#elif defined(PSTORE_HAVE_GMTIME_R)
     struct std::tm gm_time (std::time_t const clock) {
         errno = 0;
         struct tm result {};

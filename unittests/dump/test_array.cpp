@@ -45,7 +45,9 @@
 #include <memory>
 #include "gtest/gtest.h"
 #include "convert.hpp"
+
 namespace {
+
     template <typename CharType>
     class Array : public ::testing::Test {
     public:
@@ -55,10 +57,11 @@ namespace {
     protected:
         std::basic_ostringstream<CharType> out;
     };
-} // namespace
+
+} // end anonymous namespace
 
 using CharacterTypes = ::testing::Types<char, wchar_t>;
-TYPED_TEST_CASE (Array, CharacterTypes);
+TYPED_TEST_SUITE (Array, CharacterTypes, );
 
 
 TYPED_TEST (Array, Empty) {

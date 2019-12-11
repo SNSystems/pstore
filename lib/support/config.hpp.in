@@ -56,7 +56,7 @@
 
 /// Does the compiler support __uint128_t?
 #cmakedefine PSTORE_DISABLE_UINT128_T 1
-#if !PSTORE_DISABLE_UINT128_T
+#ifndef PSTORE_DISABLE_UINT128_T
 #cmakedefine PSTORE_HAVE_UINT128_T 1
 #endif
 

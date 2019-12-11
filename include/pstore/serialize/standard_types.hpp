@@ -164,7 +164,7 @@ namespace pstore {
                 auto const length = string_helper::read_length (std::forward<Archive> (archive));
                 str.resize (length);
 
-#if PSTORE_HAVE_NON_CONST_STD_STRING_DATA
+#ifdef PSTORE_HAVE_NON_CONST_STD_STRING_DATA
                 char * data = str.data ();
 #else
                 // TODO: this is technically undefined behaviour. Remove once we've got access to

@@ -99,22 +99,37 @@ namespace pstore {
                     typename std::conditional<IsConst, element_type_ const, element_type_>::type &;
                 using pointer = typename std::add_pointer<reference>::type;
 
-                constexpr span_iterator () noexcept
-                        : span_iterator (nullptr, 0) {}
-
+                constexpr span_iterator () noexcept = default;
                 constexpr span_iterator (Span const * span,
                                          typename Span::index_type index) noexcept
                         : span_ (span)
                         , index_ (index) {
                     assert (span == nullptr || (index_ >= 0 && index <= span_->length ()));
                 }
-
                 friend class span_iterator<Span, true>;
+
+                // Note that we allow non-const iterators to be assigned and constructed from
+                // const iterators, but not the other way round.
                 constexpr span_iterator (span_iterator<Span, false> const & other) noexcept
                         : span_iterator (other.span_, other.index_) {}
 
-                span_iterator<Span, IsConst> &
-                operator= (span_iterator<Span, IsConst> const &) noexcept = default;
+                template <bool OtherIsConst = IsConst,
+                          typename = typename std::enable_if<OtherIsConst>::type>
+                constexpr span_iterator (span_iterator<Span, true> const & other) noexcept
+                        : span_iterator (other.span_, other.index_) {}
+
+                span_iterator & operator= (span_iterator<Span, false> const & rhs) noexcept {
+                    span_ = rhs.span_;
+                    index_ = rhs.index_;
+                    return *this;
+                }
+                template <bool OtherIsConst = IsConst,
+                          typename = typename std::enable_if<OtherIsConst>::type>
+                span_iterator & operator= (span_iterator<Span, true> const & rhs) noexcept {
+                    span_ = rhs.span_;
+                    index_ = rhs.index_;
+                    return *this;
+                }
 
                 reference operator* () const {
                     assert (span_);
@@ -213,8 +228,8 @@ namespace pstore {
                 }
 
             private:
-                Span const * span_;
-                std::ptrdiff_t index_;
+                Span const * span_ = nullptr;
+                std::ptrdiff_t index_ = 0;
             };
 
             template <typename Span, bool IsConst>

@@ -72,7 +72,7 @@ namespace std {
 
     // Provide the is_(un)signed<__uint128_t> if we have support for the type in the compiler but
     // not in the standard library.
-#if PSTORE_HAVE_UINT128_T && !PSTORE_HAVE_UINT128_TRAITS_SUPPORT
+#if defined(PSTORE_HAVE_UINT128_T) && !defined(PSTORE_HAVE_UINT128_TRAITS_SUPPORT)
     template <>
     struct is_unsigned<__uint128_t> : true_type {};
     template <>
@@ -112,7 +112,7 @@ namespace pstore {
     public:
         constexpr uint128 () noexcept = default;
         constexpr uint128 (std::nullptr_t) noexcept = delete;
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         constexpr uint128 (std::uint64_t const high, std::uint64_t const low) noexcept
                 : v_{__uint128_t{high} << 64U | __uint128_t{low}} {}
 
@@ -142,7 +142,7 @@ namespace pstore {
         explicit constexpr uint128 (std::uint8_t const * const bytes) noexcept
                 : low_{bytes_to_uint64 (&bytes[8])}
                 , high_{bytes_to_uint64 (&bytes[0])} {}
-#endif
+#endif // PSTORE_HAVE_UINT128_T
 
         explicit uint128 (std::array<std::uint8_t, 16> const & bytes) noexcept
                 : uint128 (bytes.data ()) {}
@@ -161,7 +161,7 @@ namespace pstore {
             return !operator== (rhs);
         }
 
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         constexpr std::uint64_t high () const noexcept {
             return static_cast<std::uint64_t> (v_ >> 64U);
         }
@@ -171,7 +171,7 @@ namespace pstore {
 #else
         constexpr std::uint64_t high () const noexcept { return high_; }
         constexpr std::uint64_t low () const noexcept { return low_; }
-#endif
+#endif // PSTORE_HAVE_UINT128_T
 
         uint128 operator- () const noexcept;
         constexpr bool operator! () const noexcept;
@@ -198,7 +198,7 @@ namespace pstore {
 
     private:
         static constexpr std::uint64_t max64 = std::numeric_limits<std::uint64_t>::max ();
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         __uint128_t v_ = 0U;
         static constexpr __uint128_t bytes_to_uint128 (std::uint8_t const * bytes) noexcept;
 #else
@@ -216,7 +216,7 @@ namespace pstore {
     // ~~~~~~~~~~
     template <typename T>
     constexpr inline bool uint128::operator== (T rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return v_ == rhs;
 #else
         return this->high () == details::high<T>{}(rhs) && this->low () == (rhs & max64);
@@ -225,7 +225,7 @@ namespace pstore {
 
     template <>
     constexpr inline bool uint128::operator==<uint128> (uint128 const rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return v_ == rhs.v_;
 #else
         return this->high () == rhs.high () && this->low () == rhs.low ();
@@ -235,7 +235,7 @@ namespace pstore {
     // operator++
     // ~~~~~~~~~~
     inline uint128 & uint128::operator++ () noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         ++v_;
 #else
         if (++low_ == 0U) {
@@ -253,7 +253,7 @@ namespace pstore {
     // operator--
     // ~~~~~~~~~~
     inline uint128 & uint128::operator-- () noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         --v_;
 #else
         if (low_ == 0U) {
@@ -275,7 +275,7 @@ namespace pstore {
     // operator+=
     // ~~~~~~~~~~
     inline uint128 & uint128::operator+= (uint128 const rhs) noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         v_ += rhs.v_;
 #else
         auto const old_low = low_;
@@ -291,7 +291,7 @@ namespace pstore {
     // operator-() (unary negation)
     // ~~~~~~~~~~~
     inline uint128 uint128::operator- () const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {-v_};
 #else
         auto r = ~(*this);
@@ -302,7 +302,7 @@ namespace pstore {
     // operator!
     // ~~~~~~~~~
     constexpr bool uint128::operator! () const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return !v_;
 #else
         return !(high_ != 0 || low_ != 0);
@@ -312,7 +312,7 @@ namespace pstore {
     // operator~ (binary ones complement)
     // ~~~~~~~~~
     inline uint128 uint128::operator~ () const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {~v_};
 #else
         auto t = *this;
@@ -326,7 +326,7 @@ namespace pstore {
     // ~~~~~~~~~
     template <typename T>
     constexpr uint128 uint128::operator& (T const rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {v_ & rhs};
 #else
         return {0U, low () & rhs};
@@ -335,7 +335,7 @@ namespace pstore {
 
     template <>
     constexpr uint128 uint128::operator&<uint128> (uint128 const rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {v_ & rhs.v_};
 #else
         return {high () & rhs.high (), low () & rhs.low ()};
@@ -346,7 +346,7 @@ namespace pstore {
     // ~~~~~~~~~
     template <typename T>
     constexpr uint128 uint128::operator| (T const rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {v_ | rhs};
 #else
         return {0U, low () | rhs};
@@ -355,7 +355,7 @@ namespace pstore {
 
     template <>
     constexpr uint128 uint128::operator|<uint128> (uint128 const rhs) const noexcept {
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {v_ | rhs.v_};
 #else
         return {high () | rhs.high (), low () | rhs.low ()};
@@ -367,7 +367,7 @@ namespace pstore {
     template <typename Other>
     uint128 uint128::operator<< (Other const n) const noexcept {
         assert (n <= 128);
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         return {v_ << n};
 #else
         if (n >= 64U) {
@@ -381,14 +381,14 @@ namespace pstore {
         std::uint64_t const top_of_low_mask = mask << dist;
         std::uint64_t const bottom_of_high = (low () & top_of_low_mask) >> dist;
         return {(high () << n) | bottom_of_high, low () << n};
-#endif
+#endif // PSTORE_HAVE_UINT128_T
     }
 
     // operator>>=
     // ~~~~~~~~~~~
     inline uint128 & uint128::operator>>= (unsigned const n) noexcept {
         assert (n <= 128);
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
         v_ >>= n;
 #else
         if (n >= 64) {
@@ -399,13 +399,13 @@ namespace pstore {
             low_ = (low_ >> n) | ((high_ & mask) << (64U - n));
             high_ >>= n;
         }
-#endif
+#endif // PSTORE_HAVE_UINT128_T
         return *this;
     }
 
     // bytes_to_uintXX
     // ~~~~~~~~~~~~~~~
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
     constexpr __uint128_t uint128::bytes_to_uint128 (std::uint8_t const * const bytes) noexcept {
         return __uint128_t{bytes[0]} << 120U | __uint128_t{bytes[1]} << 112U |
                __uint128_t{bytes[2]} << 104U | __uint128_t{bytes[3]} << 96U |
@@ -423,7 +423,7 @@ namespace pstore {
                std::uint64_t{bytes[4]} << 24 | std::uint64_t{bytes[5]} << 16 |
                std::uint64_t{bytes[6]} << 8 | std::uint64_t{bytes[7]};
     }
-#endif
+#endif // PSTORE_HAVE_UINT128_T
 
     inline std::ostream & operator<< (std::ostream & os, uint128 const & value) {
         return os << '{' << value.high () << ',' << value.low () << '}';

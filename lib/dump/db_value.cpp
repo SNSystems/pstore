@@ -138,7 +138,6 @@ namespace pstore {
             return make_value (str.as_db_string_view (&owner));
         }
 
-
         value_ptr make_blob (database const & db, pstore::address const begin,
                              std::uint64_t const size) {
             auto const bytes = db.getro (pstore::typed_address<std::uint8_t> (begin), size);
@@ -148,15 +147,14 @@ namespace pstore {
             });
         }
 
-
         value_ptr make_contents (database const & db, typed_address<trailer> const footer_pos,
                                  bool const no_times) {
             array::container array;
             std::for_each (
                 generation_iterator (&db, footer_pos),
                 generation_iterator (&db, typed_address<trailer>::null ()),
-                [&db, &array, no_times](pstore::typed_address<pstore::trailer> const footer_pos) {
-                    array.emplace_back (make_generation (db, footer_pos, no_times));
+                [&db, &array, no_times] (pstore::typed_address<pstore::trailer> const fp) {
+                    array.emplace_back (make_generation (db, fp, no_times));
                 });
             return make_value (std::move (array));
         }

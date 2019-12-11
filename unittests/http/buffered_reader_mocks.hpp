@@ -69,12 +69,14 @@ using refiller_function =
 
 class mock_refiller {
 public:
-    virtual ~mock_refiller () = default;
+    virtual ~mock_refiller () noexcept;
     virtual refiller_result_type fill (int c, pstore::gsl::span<std::uint8_t> const &) const = 0;
 };
 
 class refiller : public mock_refiller {
 public:
+    ~refiller () noexcept override;
+
     MOCK_CONST_METHOD2 (fill, refiller_result_type (int, pstore::gsl::span<std::uint8_t> const &));
     refiller_function refill_function () const;
 };

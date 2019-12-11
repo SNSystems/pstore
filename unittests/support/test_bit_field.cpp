@@ -79,7 +79,7 @@ namespace {
 
 } // end anonymous namespace
 
-TYPED_TEST_CASE (BitFieldAssignment, assign_test_types);
+TYPED_TEST_SUITE (BitFieldAssignment, assign_test_types, );
 
 TYPED_TEST (BitFieldAssignment, Assignment) {
     using value_type = typename TypeParam::value_type;

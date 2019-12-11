@@ -53,32 +53,32 @@
 
 #include "pstore/config/config.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
+#ifdef PSTORE_IS_INSIDE_LLVM
 
-#include "pstore/dump/error.hpp"
-#include "pstore/dump/line_splitter.hpp"
+#    include "pstore/dump/error.hpp"
+#    include "pstore/dump/line_splitter.hpp"
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/ADT/Triple.h"
-#include "llvm/MC/MCAsmBackend.h"
-#include "llvm/MC/MCAsmInfo.h"
-#include "llvm/MC/MCCodeEmitter.h"
-#include "llvm/MC/MCContext.h"
-#include "llvm/MC/MCDisassembler/MCDisassembler.h"
-#include "llvm/MC/MCInst.h"
-#include "llvm/MC/MCInstPrinter.h"
-#include "llvm/MC/MCRegisterInfo.h"
-#include "llvm/MC/MCObjectFileInfo.h"
-#include "llvm/MC/MCStreamer.h"
-#include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/Support/Format.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/TargetRegistry.h"
-#include "llvm/MC/MCInstrInfo.h"
+#    include "llvm/ADT/ArrayRef.h"
+#    include "llvm/ADT/Triple.h"
+#    include "llvm/MC/MCAsmBackend.h"
+#    include "llvm/MC/MCAsmInfo.h"
+#    include "llvm/MC/MCCodeEmitter.h"
+#    include "llvm/MC/MCContext.h"
+#    include "llvm/MC/MCDisassembler/MCDisassembler.h"
+#    include "llvm/MC/MCInst.h"
+#    include "llvm/MC/MCInstPrinter.h"
+#    include "llvm/MC/MCRegisterInfo.h"
+#    include "llvm/MC/MCObjectFileInfo.h"
+#    include "llvm/MC/MCStreamer.h"
+#    include "llvm/MC/MCSubtargetInfo.h"
+#    include "llvm/Support/Format.h"
+#    include "llvm/Support/MemoryBuffer.h"
+#    include "llvm/Support/SourceMgr.h"
+#    include "llvm/Support/TargetRegistry.h"
+#    include "llvm/MC/MCInstrInfo.h"
 
-#include "pstore/support/bit_count.hpp"
-#include "pstore/support/error.hpp"
+#    include "pstore/support/bit_count.hpp"
+#    include "pstore/support/error.hpp"
 
 namespace {
 
@@ -241,7 +241,7 @@ namespace {
 
 } // end anonymous namespace
 
-#if PSTORE_IS_INSIDE_LLVM
+#ifdef PSTORE_IS_INSIDE_LLVM
 
 namespace pstore {
     namespace dump {

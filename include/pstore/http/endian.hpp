@@ -51,10 +51,10 @@
 #else
 #    include <arpa/inet.h>
 
-#    if PSTORE_HAVE_BYTESWAP_H
+#    ifdef PSTORE_HAVE_BYTESWAP_H
 #        include <byteswap.h>
 #    endif
-#    if PSTORE_HAVE_SYS_ENDIAN_H
+#    ifdef PSTORE_HAVE_SYS_ENDIAN_H
 #        include <sys/endian.h>
 #    endif
 
@@ -75,12 +75,12 @@ namespace pstore {
         }
         template <>
         inline std::uint64_t network_to_host<std::uint64_t> (std::uint64_t x) noexcept {
-#if PSTORE_IS_BIG_ENDIAN
+#ifdef PSTORE_IS_BIG_ENDIAN
             return x;
 #else
-#    if PSTORE_HAVE_BYTESWAP_H
+#    ifdef PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
-#    elif PSTORE_HAVE_SYS_ENDIAN_H
+#    elif defined(PSTORE_HAVE_SYS_ENDIAN_H)
             return bswap64 (x);
 #    else
             return ntohll (x); // NOLINT
@@ -102,12 +102,12 @@ namespace pstore {
         }
         template <>
         inline std::uint64_t host_to_network<std::uint64_t> (std::uint64_t x) noexcept {
-#if PSTORE_IS_BIG_ENDIAN
+#ifdef PSTORE_IS_BIG_ENDIAN
             return x;
 #else
-#    if PSTORE_HAVE_BYTESWAP_H
+#    ifdef PSTORE_HAVE_BYTESWAP_H
             return bswap_64 (x);
-#    elif PSTORE_HAVE_SYS_ENDIAN_H
+#    elif defined(PSTORE_HAVE_SYS_ENDIAN_H)
             return bswap64 (x);
 #    else
             return ntohll (x); // NOLINT

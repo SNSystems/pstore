@@ -51,6 +51,7 @@
 #include "gtest/gtest.h"
 
 namespace {
+
     template <typename BufferType>
     class SplitFixture : public ::testing::Test {
     protected:
@@ -62,11 +63,13 @@ namespace {
         };
         mock_callback callback;
     };
-} // namespace
 
-TYPED_TEST_CASE_P (SplitFixture);
+} // end anonymous namespace
 
-TYPED_TEST_P (SplitFixture, Empty) {
+using MyTypes = ::testing::Types<std::uint8_t const, std::uint8_t>;
+TYPED_TEST_SUITE (SplitFixture, MyTypes, );
+
+TYPED_TEST (SplitFixture, Empty) {
     TypeParam buffer{};
     constexpr std::size_t size{0};
     EXPECT_CALL (this->callback, call (&buffer, size)).Times (0);
@@ -76,7 +79,7 @@ TYPED_TEST_P (SplitFixture, Empty) {
     EXPECT_EQ (size, total);
 }
 
-TYPED_TEST_P (SplitFixture, Small) {
+TYPED_TEST (SplitFixture, Small) {
     constexpr std::size_t size{10};
     TypeParam buffer[size] = {};
 
@@ -88,7 +91,7 @@ TYPED_TEST_P (SplitFixture, Small) {
     EXPECT_EQ (size, total);
 }
 
-TYPED_TEST_P (SplitFixture, Uint8Max) {
+TYPED_TEST (SplitFixture, Uint8Max) {
     TypeParam * ptr = nullptr;
     constexpr std::size_t size = std::numeric_limits<std::uint8_t>::max ();
     using ::testing::Return;
@@ -99,7 +102,7 @@ TYPED_TEST_P (SplitFixture, Uint8Max) {
     EXPECT_EQ (size, total);
 }
 
-TYPED_TEST_P (SplitFixture, Uint16Max) {
+TYPED_TEST (SplitFixture, Uint16Max) {
     TypeParam * ptr = nullptr;
     constexpr std::size_t size = std::numeric_limits<std::uint16_t>::max ();
     using ::testing::Return;
@@ -110,7 +113,7 @@ TYPED_TEST_P (SplitFixture, Uint16Max) {
     EXPECT_EQ (size, total);
 }
 
-TYPED_TEST_P (SplitFixture, SplitUint16MaxPlus1) {
+TYPED_TEST (SplitFixture, SplitUint16MaxPlus1) {
     struct params {
         TypeParam * ptr;
         std::size_t size;
@@ -132,7 +135,7 @@ TYPED_TEST_P (SplitFixture, SplitUint16MaxPlus1) {
     EXPECT_EQ (total_size, total);
 }
 
-TYPED_TEST_P (SplitFixture, SplitUint8TwiceMaxPlus1) {
+TYPED_TEST (SplitFixture, SplitUint8TwiceMaxPlus1) {
     struct params {
         TypeParam * ptr;
         std::size_t size;
@@ -156,8 +159,3 @@ TYPED_TEST_P (SplitFixture, SplitUint8TwiceMaxPlus1) {
     EXPECT_EQ (total_size, total);
 }
 
-REGISTER_TYPED_TEST_CASE_P (SplitFixture, Empty, Small, Uint8Max, Uint16Max, SplitUint16MaxPlus1,
-                            SplitUint8TwiceMaxPlus1);
-
-INSTANTIATE_TYPED_TEST_CASE_P (Const, SplitFixture, std::uint8_t const);
-INSTANTIATE_TYPED_TEST_CASE_P (NonConst, SplitFixture, std::uint8_t);

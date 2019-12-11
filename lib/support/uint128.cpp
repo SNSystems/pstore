@@ -56,7 +56,7 @@ namespace {
 
 namespace pstore {
 
-#if PSTORE_HAVE_UINT128_T
+#ifdef PSTORE_HAVE_UINT128_T
 
     std::string uint128::to_hex_string () const {
         std::string str;

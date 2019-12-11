@@ -104,6 +104,7 @@ namespace {
         virtual ~header_handler () noexcept = default;
         virtual int call (int io, std::string const & key, std::string const & value) const = 0;
     };
+
     class mocked_header_handler : public header_handler {
     public:
         MOCK_CONST_METHOD3 (call, int(int, std::string const &, std::string const &));

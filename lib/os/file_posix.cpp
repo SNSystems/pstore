@@ -70,16 +70,18 @@
 #    include "pstore/support/small_vector.hpp"
 
 // includes which depend on values in config.hpp
-#    if PSTORE_HAVE_SYS_SYSCALL_H
+#    ifdef PSTORE_HAVE_SYS_SYSCALL_H
 #        include <sys/syscall.h> // For SYS_xxx definitions.
 #    endif
-#    if PSTORE_HAVE_LINUX_FS_H
+#    ifdef PSTORE_HAVE_LINUX_FS_H
 #        include <linux/fs.h> // For RENAME_NOREPLACE
 #    endif
 
 // Not all versions of linux/fs.h include the definition of RENAME_NOREPLACE.
-#    ifndef RENAME_NOREPLACE
-#        define RENAME_NOREPLACE (1 << 0) // Don't overwrite target.
+#    if defined(PSTORE_HAVE_RENAMEAT2) || defined(PSTORE_HAVE_SYS_renameat2)
+#        ifndef RENAME_NOREPLACE
+#            define RENAME_NOREPLACE (1 << 0) // Don't overwrite target.
+#        endif
 #    endif
 
 namespace {
@@ -107,13 +109,13 @@ namespace {
         // - The macOS renamex_np() function.
         // - If available, the glibc wrapper around the Linux renameat2() function.
         // - A direct call to the Linux renameat2 syscall.
-#    if PSTORE_HAVE_RENAMEX_NP
+#    if defined(PSTORE_HAVE_RENAMEX_NP)
         ret_val = ::renamex_np (old_path, new_path, RENAME_EXCL);
         err = errno;
-#    elif PSTORE_HAVE_RENAMEAT2
+#    elif defined(PSTORE_HAVE_RENAMEAT2)
         ret_val = ::renameat2 (AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
         err = errno;
-#    elif PSTORE_HAVE_SYS_renameat2
+#    elif defined(PSTORE_HAVE_SYS_renameat2)
         // Support for renameat2() was added in glibc 2.28. If we have an older version, we have
         // to invoke the syscall dfirectly.
         ret_val = ::syscall (SYS_renameat2, AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);

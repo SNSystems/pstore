@@ -55,7 +55,7 @@
 
 namespace pstore {
 
-#if PSTORE_HAVE_STD_MAKE_UNIQUE
+#ifdef PSTORE_HAVE_STD_MAKE_UNIQUE
 
     template <typename T, typename... Args>
     std::unique_ptr<T> make_unique (Args &&... args) {

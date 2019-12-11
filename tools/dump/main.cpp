@@ -57,7 +57,7 @@
 
 #include "pstore/config/config.hpp"
 
-#if PSTORE_IS_INSIDE_LLVM
+#ifdef PSTORE_IS_INSIDE_LLVM
 #    include "llvm/Support/Signals.h"
 #    include "llvm/Support/TargetSelect.h"
 #    include "llvm/Support/PrettyStackTrace.h"
@@ -345,7 +345,7 @@ int main (int argc, char * argv[]) {
 
     PSTORE_TRY {
 
-#if PSTORE_IS_INSIDE_LLVM
+#ifdef PSTORE_IS_INSIDE_LLVM
 #    if defined(_WIN32) && defined(_UNICODE)
         // Windows will present our _tmain function with its arguments encoded as UTF-16. The LLVM
         // APIs, are expecting multi-byte characters instead. That means that we
