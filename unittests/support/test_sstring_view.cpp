@@ -116,7 +116,11 @@ namespace {
 
 } // end anonymous namespace
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (SStringViewInit, SStringViewInitTypes);
+#else
 TYPED_TEST_SUITE (SStringViewInit, SStringViewInitTypes, );
+#endif // PSTORE_IS_INSIDE_LLVM
 
 TYPED_TEST (SStringViewInit, Empty) {
     using namespace pstore;
@@ -388,7 +392,11 @@ namespace pstore {
 
 } // end namespace pstore
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (SStringViewRelational, StringTypes);
+#else
 TYPED_TEST_SUITE (SStringViewRelational, StringTypes, );
+#endif
 
 TYPED_TEST (SStringViewRelational, Eq) {
 #define EQ(lhs, rhs, x)                                                                            \

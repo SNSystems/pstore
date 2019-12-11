@@ -53,6 +53,7 @@
 #include "convert.hpp"
 
 namespace {
+
     template <typename CharType>
     class Number : public testing::Test {
     public:
@@ -74,10 +75,16 @@ namespace {
     private:
         unsigned const base_ = 0;
     };
-} // namespace
 
-using CharacterTypes = ::testing::Types<char, wchar_t>;
+    using CharacterTypes = ::testing::Types<char, wchar_t>;
+
+} // end anonymous namespace
+
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (Number, CharacterTypes);
+#else
 TYPED_TEST_SUITE (Number, CharacterTypes, );
+#endif // PSTORE_IS_INSIDE_LLVM
 
 TYPED_TEST (Number, N0ExplicitBase8) {
     pstore::dump::number_long v (0, 8);

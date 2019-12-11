@@ -58,10 +58,15 @@ namespace {
         std::basic_ostringstream<CharType> out;
     };
 
+    using CharacterTypes = ::testing::Types<char, wchar_t>;
+
 } // end anonymous namespace
 
-using CharacterTypes = ::testing::Types<char, wchar_t>;
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (Array, CharacterTypes);
+#else
 TYPED_TEST_SUITE (Array, CharacterTypes, );
+#endif
 
 
 TYPED_TEST (Array, Empty) {

@@ -64,10 +64,15 @@ namespace {
         mock_callback callback;
     };
 
+    using split_types = ::testing::Types<std::uint8_t const, std::uint8_t>;
+
 } // end anonymous namespace
 
-using MyTypes = ::testing::Types<std::uint8_t const, std::uint8_t>;
-TYPED_TEST_SUITE (SplitFixture, MyTypes, );
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (SplitFixture, split_types);
+#else
+TYPED_TEST_SUITE (SplitFixture, split_types, );
+#endif // PSTORE_IS_INSIDE_LLVM
 
 TYPED_TEST (SplitFixture, Empty) {
     TypeParam buffer{};

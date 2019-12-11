@@ -60,8 +60,11 @@ namespace {
 
 } // end anonymous namespace
 
-
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (RepoSparseArray, bitmap_test_types);
+#else
 TYPED_TEST_SUITE (RepoSparseArray, bitmap_test_types, );
+#endif
 
 TYPED_TEST (RepoSparseArray, InitializerListIndicesHasIndex) {
     auto arrp = sparse_array<int, TypeParam>::make_unique ({0, 2, 4});

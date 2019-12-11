@@ -52,6 +52,7 @@
 #include "convert.hpp"
 
 namespace {
+
     template <typename CharType>
     class Object : public ::testing::Test {
     public:
@@ -61,10 +62,16 @@ namespace {
     protected:
         std::basic_ostringstream<CharType> out;
     };
-} // namespace
 
-using CharacterTypes = ::testing::Types<char, wchar_t>;
+    using CharacterTypes = ::testing::Types<char, wchar_t>;
+
+} // end anonymous namespace
+
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (Object, CharacterTypes);
+#else
 TYPED_TEST_SUITE (Object, CharacterTypes, );
+#endif // PSTORE_IS_INSIDE_LLVM
 
 TYPED_TEST (Object, Empty) {
     pstore::dump::object v;

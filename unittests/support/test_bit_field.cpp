@@ -79,7 +79,11 @@ namespace {
 
 } // end anonymous namespace
 
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE (BitFieldAssignment, assign_test_types);
+#else
 TYPED_TEST_SUITE (BitFieldAssignment, assign_test_types, );
+#endif // PSTORE_IS_INSIDE_LLVM
 
 TYPED_TEST (BitFieldAssignment, Assignment) {
     using value_type = typename TypeParam::value_type;
