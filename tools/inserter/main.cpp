@@ -67,13 +67,13 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
-#if PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
+#ifdef PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
 #    include <sys/kdebug_signpost.h>
 #endif
 
 namespace {
 
-#ifdef PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
+#ifdef PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
 
     class profile_marker {
     public:
@@ -101,7 +101,7 @@ namespace {
         ~profile_marker () {}
     };
 
-#endif // PSTORE_HAS_SYS_KDEBUG_SIGNPOST_H
+#endif // PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
 
 } // end anonymous namespace
 
