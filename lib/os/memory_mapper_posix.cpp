@@ -118,7 +118,7 @@ namespace pstore {
     // sysconf [static]
     // ~~~~~~~
     unsigned system_page_size::sysconf () {
-#    if PSTORE_HAVE_GETPAGESIZE
+#    ifdef PSTORE_HAVE_GETPAGESIZE
         int const result = getpagesize ();
         assert (result > 0);
 #    else

@@ -52,7 +52,7 @@
 #    include "pstore/support/portab.hpp"
 #    include "pstore/support/small_vector.hpp"
 
-#    if PSTORE_HAVE_NSGETEXECUTABLEPATH
+#    ifdef PSTORE_HAVE_NSGETEXECUTABLEPATH
 
 // Include for _POSIX_PATH_MAX
 #        include <limits.h>      // NOLINT

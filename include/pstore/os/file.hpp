@@ -489,7 +489,7 @@ namespace pstore {
 
             bool lock_impl (file_base::blocking_mode mode);
 
-#if PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
+#ifdef PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
             static_assert (
                 std::is_trivially_copyable<decltype (file_)>::value,
                 "file_ is not trivially copyable: use std::move() in move ctor and assign");
@@ -722,7 +722,7 @@ namespace pstore {
             oshandle file_ = invalid_oshandle;
             bool is_writable_ = false;
 
-#if PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
+#ifdef PSTORE_HAVE_IS_TRIVIALLY_COPYABLE
             static_assert (
                 std::is_trivially_copyable<decltype (file_)>::value,
                 "file_ is not trivially copyable: use std::move() in rvalue ref ctor and assign");

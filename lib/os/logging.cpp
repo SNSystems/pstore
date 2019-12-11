@@ -61,11 +61,11 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/time.hpp"
 
-#if PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_ASL_H
 #    include <asl.h>
 #    include <os/log.h>
 #endif
-#if PSTORE_HAVE_SYS_LOG_H
+#ifdef PSTORE_HAVE_SYS_LOG_H
 #    include <syslog.h>
 #endif
 
@@ -140,7 +140,7 @@ namespace {
 
     using namespace pstore;
 
-#if PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_ASL_H
 
     //*                         *
     //*  _. _| | _  _  _  _ ._  *
@@ -256,7 +256,7 @@ namespace {
 
 #endif // PSTORE_HAVE_ASL_H
 
-#if PSTORE_HAVE_SYS_LOG_H
+#ifdef PSTORE_HAVE_SYS_LOG_H
 
     //*                                *
     //*  _   _| _  _  | _  _  _  _ ._  *
@@ -335,9 +335,9 @@ namespace pstore {
         void create_log_stream (std::string const & ident) {
             std::bitset<handlers::last> enabled;
 
-#if PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_ASL_H
             enabled.set (handlers::asl);
-#elif PSTORE_HAVE_SYS_LOG_H
+#elif defined(PSTORE_HAVE_SYS_LOG_H)
             enabled.set (handlers::syslog);
 #else
             // TODO: At the moment, I just log to stderr unless syslog() or ASK are available.
@@ -349,12 +349,12 @@ namespace pstore {
             auto loggers = make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
 
-#if PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_ASL_H
             if (enabled.test (handlers::asl)) {
                 loggers->emplace_back (new asl_logger (ident));
             }
 #endif
-#if PSTORE_HAVE_SYS_LOG_H
+#ifdef PSTORE_HAVE_SYS_LOG_H
             if (enabled.test (handlers::syslog)) {
                 // NOLINTNEXTLINE(hicpp-signed-bitwise)
                 loggers->emplace_back (new syslog_logger (ident, LOG_USER));

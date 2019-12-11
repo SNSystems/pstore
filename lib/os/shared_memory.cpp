@@ -47,13 +47,13 @@
 
 #include "pstore/config/config.hpp"
 
-#if PSTORE_HAVE_SYS_POSIX_SHM_H
+#ifdef PSTORE_HAVE_SYS_POSIX_SHM_H
 #    include <sys/posix_shm.h>
 #    include <sys/time.h>
 #    include <sys/types.h>
 #endif // PSTORE_HAVE_SYS_POSIX_SHM_H
 
-#if !defined(PSHMNAMLEN) && PSTORE_HAVE_LINUX_LIMITS_H
+#if !defined(PSHMNAMLEN) && defined(PSTORE_HAVE_LINUX_LIMITS_H)
 #    include <linux/limits.h>
 #    if !defined(PSHMNAMLEN) && defined(NAME_MAX)
 #        define PSHMNAMLEN NAME_MAX
