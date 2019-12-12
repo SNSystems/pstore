@@ -74,9 +74,9 @@ namespace pstore {
 
         class quoted {
         public:
-            explicit quoted (gsl::czstring str) noexcept
+            constexpr explicit quoted (gsl::not_null<gsl::czstring> const str) noexcept
                     : str_{str} {}
-            explicit operator gsl::czstring () const noexcept { return str_; }
+            constexpr explicit operator gsl::czstring () const noexcept { return str_; }
 
         private:
             gsl::czstring str_;
@@ -93,7 +93,7 @@ namespace pstore {
             logger () = default;
             virtual ~logger () = default;
 
-            void set_priority (priority p) noexcept { priority_ = p; }
+            void set_priority (priority const p) noexcept { priority_ = p; }
             priority get_priority () const noexcept { return priority_; }
 
             virtual void log (priority p, std::string const & message) = 0;
@@ -109,13 +109,13 @@ namespace pstore {
             virtual void log (priority p, gsl::czstring part1, gsl::czstring part2);
             virtual void log (priority p, gsl::czstring part1, quoted part2);
 
-            void log (priority p, gsl::czstring message, std::string const & d) {
+            void log (priority const p, gsl::czstring const message, std::string const & d) {
                 this->log (p, message, d.c_str ());
             }
 
         private:
             template <typename T>
-            static std::string to_string (char const * message, T t) {
+            static std::string to_string (gsl::czstring const message, T const t) {
                 return message + pstore::to_string (t);
             }
 
@@ -198,7 +198,8 @@ namespace pstore {
         struct fstream_traits {
             using stream_type = std::ofstream;
 
-            void open (stream_type & s, std::string const & name, std::ios_base::openmode mode) {
+            void open (stream_type & s, std::string const & name,
+                       std::ios_base::openmode const mode) {
                 s.open (name, mode);
             }
             void close (stream_type & s) { s.close (); }
@@ -215,7 +216,7 @@ namespace pstore {
         } // end namespace details
 
 
-        inline void log (priority p, gsl::czstring message) {
+        inline void log (priority const p, gsl::not_null<gsl::czstring> const message) {
             if (details::log_destinations != nullptr) {
                 for (std::unique_ptr<logger> & destination : *details::log_destinations) {
                     destination->log (p, message);

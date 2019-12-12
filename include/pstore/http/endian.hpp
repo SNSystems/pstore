@@ -64,17 +64,17 @@ namespace pstore {
     namespace httpd {
 
         template <typename T>
-        T network_to_host (T) noexcept;
+        T network_to_host (T x) noexcept;
         template <>
-        inline std::uint16_t network_to_host<std::uint16_t> (std::uint16_t x) noexcept {
+        inline std::uint16_t network_to_host<std::uint16_t> (std::uint16_t const x) noexcept {
             return ntohs (x); // NOLINT
         }
         template <>
-        inline std::uint32_t network_to_host<std::uint32_t> (std::uint32_t x) noexcept {
+        inline std::uint32_t network_to_host<std::uint32_t> (std::uint32_t const x) noexcept {
             return ntohl (x); // NOLINT
         }
         template <>
-        inline std::uint64_t network_to_host<std::uint64_t> (std::uint64_t x) noexcept {
+        inline std::uint64_t network_to_host<std::uint64_t> (std::uint64_t const x) noexcept {
 #ifdef PSTORE_IS_BIG_ENDIAN
             return x;
 #else
@@ -91,17 +91,17 @@ namespace pstore {
 
 
         template <typename T>
-        T host_to_network (T) noexcept;
+        T host_to_network (T x) noexcept;
         template <>
-        inline std::uint16_t host_to_network<std::uint16_t> (std::uint16_t x) noexcept {
+        inline std::uint16_t host_to_network<std::uint16_t> (std::uint16_t const x) noexcept {
             return htons (x); // NOLINT
         }
         template <>
-        inline std::uint32_t host_to_network<std::uint32_t> (std::uint32_t x) noexcept {
+        inline std::uint32_t host_to_network<std::uint32_t> (std::uint32_t const x) noexcept {
             return htonl (x); // NOLINT
         }
         template <>
-        inline std::uint64_t host_to_network<std::uint64_t> (std::uint64_t x) noexcept {
+        inline std::uint64_t host_to_network<std::uint64_t> (std::uint64_t const x) noexcept {
 #ifdef PSTORE_IS_BIG_ENDIAN
             return x;
 #else
