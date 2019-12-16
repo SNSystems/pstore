@@ -245,7 +245,7 @@ namespace pstore {
                             handler.reset ();
                         }
                     }
-                    return {handler, ok};
+                    return std::tuple<maybe<option *>, bool>{handler, ok};
                 }
 
                 // parse_option_arguments
