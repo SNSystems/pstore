@@ -94,7 +94,7 @@ namespace {
     // call_params
     // ~~~~~~~~~~~
     auto Gc::call_params (int count) -> spawn_params {
-        return {"path" + std::to_string (count), make_process_id (count)};
+        return spawn_params{"path" + std::to_string (count), make_process_id (count)};
     }
 
     // expect_call
