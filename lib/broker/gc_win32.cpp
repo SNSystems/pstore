@@ -60,7 +60,6 @@
 
 // pstore includes
 #    include "pstore/broker/bimap.hpp"
-#    include "pstore/broker/globals.hpp"
 #    include "pstore/broker/pointer_compare.hpp"
 #    include "pstore/broker/spawn.hpp"
 #    include "pstore/broker_intf/signal_cv.hpp"
@@ -124,6 +123,17 @@ namespace {
 namespace pstore {
     namespace broker {
 
+        // kill
+        // ~~~~
+        void gc_watch_thread::kill (process_identifier const & pid) {
+            using logging::priority;
+
+            log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group ());
+            if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group ())) {
+                log (priority::error, "An error occurred: ", ::GetLastError ());
+            }
+        }
+
         // watcher
         // ~~~~~~~
         void gc_watch_thread::watcher () {
@@ -133,13 +143,12 @@ namespace pstore {
             std::vector<HANDLE> object_vector;
             std::unique_lock<decltype (mut_)> lock (mut_);
 
-            while (!done) {
+            for (;;) {
                 try {
                     log (priority::info, "waiting for a GC process to complete");
 
                     build_object_vector (processes_, cv_, &object_vector);
-                    // FIXME: handle the (highly unlikely) case where this assertion would fire.
-                    assert (object_vector.size () < MAXIMUM_WAIT_OBJECTS);
+                    assert (object_vector.size () <= MAXIMUM_WAIT_OBJECTS);
 
                     lock.unlock ();
                     DWORD const wmo_timeout = 60 * 1000; // 60 second timeout.
@@ -149,18 +158,18 @@ namespace pstore {
                     lock.lock ();
 
                     // We may have been woken up because the program is exiting.
-                    if (done) {
-                        continue;
+                    if (done_) {
+                        break;
                     }
 
                     if (wmo_res == WAIT_FAILED) {
-                        auto errcode = ::GetLastError ();
-                        log (priority::error, "WaitForMultipleObjects error ", errcode); // FIXME: exception
+                        raise (pstore::win32_erc{::GetLastError ()},
+                               "WaitForMultipleObjects failed");
                     } else if (wmo_res == WAIT_TIMEOUT) {
                         log (priority::info, "WaitForMultipleObjects timeout");
                     } else if (wmo_res >= WAIT_OBJECT_0) {
                         // Extract the handle that caused us to wake.
-                        HANDLE h = object_vector.at (wmo_res - WAIT_OBJECT_0);
+                        HANDLE const h = object_vector.at (wmo_res - WAIT_OBJECT_0);
                         // We may have been woken by the notify condition variable rather than as a
                         // result of a process exiting.
                         if (h != cv_.wait_descriptor ().native_handle ()) {
@@ -170,7 +179,8 @@ namespace pstore {
                             processes_.eraser (h);
                         }
                     } else {
-                        // TODO: more conditions here?
+                        log (priority::error, "Unknown WaitForMultipleObjects return value ",
+                             wmo_res);
                     }
                 } catch (std::exception const & ex) {
                     log (priority::error, "An error occurred: ", ex.what ());
@@ -183,13 +193,8 @@ namespace pstore {
 
             // Tell any child GC processes to quit.
             log (priority::info, "cleaning up");
-            auto const kill = [](broker::process_identifier const & pid) {
-                log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group ());
-                if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group ())) {
-                    log (priority::error, "An error occurred: ", ::GetLastError ());
-                }
-            };
-            std::for_each (processes_.right_begin (), processes_.right_end (), kill);
+            std::for_each (processes_.right_begin (), processes_.right_end (),
+                           [this] (broker::process_identifier const & pid) { this->kill (pid); });
         }
 
     } // end namespace broker

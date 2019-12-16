@@ -46,6 +46,8 @@
 
 #include "pstore/support/signal_helpers.hpp"
 
+#include "pstore/support/error.hpp"
+
 #ifdef _WIN32
 
 namespace pstore {
@@ -53,10 +55,14 @@ namespace pstore {
     // register_signal_handler
     // ~~~~~~~~~~~~~~~~~~~~~~~
     signal_function register_signal_handler (int const signo, signal_function const func) {
-        return signal (signo, func);
+        auto res = signal (signo, func);
+        if (signal (signo, func) == SIG_ERR) {
+            raise (std::errc::invalid_argument, "sigaction error");
+        }
+        return res;
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #else
 
@@ -74,11 +80,11 @@ namespace pstore {
 #endif
         struct sigaction oact;
         if (sigaction (signo, &act, &oact) < 0) {
-            return SIG_ERR;
+            raise (std::errc::invalid_argument, "sigaction error");
         }
         return oact.sa_handler;
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #endif // _WIN32

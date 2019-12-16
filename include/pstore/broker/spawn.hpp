@@ -102,6 +102,13 @@ namespace pstore {
                 process_pair & operator= (process_pair const &) = delete;
                 process_pair & operator= (process_pair &&) noexcept = delete;
 
+                bool operator== (process_pair const & other) const noexcept {
+                    return process_.get () == other.process_.get () && group_ == other.group_;
+                }
+                bool operator!= (process_pair const & other) const noexcept {
+                    return !operator== (other);
+                }
+
                 HANDLE process () const noexcept { return process_.get (); }
                 DWORD group () const noexcept { return group_; }
 

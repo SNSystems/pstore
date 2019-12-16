@@ -50,6 +50,7 @@ else ()
     add_pstore_unit_test (pstore-broker-unit-tests
         test_bimap.cpp
         test_command.cpp
+        test_gc.cpp
         test_intrusive_list.cpp
         test_parser.cpp
         test_spawn.cpp

@@ -61,6 +61,10 @@ namespace pstore {
             friend gc_watch_thread & getgc ();
 
         public:
+            // The gc-watch thread is normally managed by makind calls to
+            // start_vacuum(). It is exposed here for unit testing.
+            gc_watch_thread () = default;
+            virtual ~gc_watch_thread () noexcept;
             void watcher ();
 
             void start_vacuum (std::string const & db_path);
@@ -69,10 +73,17 @@ namespace pstore {
             /// thread and asks all child processes to exit.
             void stop (int signum = -1);
 
-        private:
-            gc_watch_thread () = default;
+            static std::string vacuumd_path ();
 
-            std::string vacuumd_path ();
+#ifdef _WIN32
+            static constexpr DWORD max_gc_processes = MAXIMUM_WAIT_OBJECTS - 1U;
+#else
+            static constexpr int max_gc_processes = 50;
+#endif
+
+        private:
+            virtual process_identifier spawn (std::initializer_list<gsl::czstring> argv);
+            virtual void kill (process_identifier const & pid);
 
 #ifdef _WIN32
             static constexpr auto vacuumd_name = PSTORE_VACUUM_TOOL_NAME ".exe";
@@ -89,6 +100,7 @@ namespace pstore {
             std::mutex mut_;
             signal_cv cv_;
             process_bimap processes_;
+            bool done_ = false;
         };
 
         gc_watch_thread & getgc ();
