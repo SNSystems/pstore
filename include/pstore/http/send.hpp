@@ -64,7 +64,7 @@ namespace pstore {
         }
         template <typename Sender, typename IO>
         error_or<IO> send (Sender sender, IO io, std::string const & str) {
-            auto data = reinterpret_cast<std::uint8_t const *> (str.data ());
+            auto * const data = reinterpret_cast<std::uint8_t const *> (str.data ());
             return send (sender, io, gsl::span<std::uint8_t const> (data, data + str.length ()));
         }
         template <typename Sender, typename IO>

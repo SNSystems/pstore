@@ -56,6 +56,7 @@
 #include <type_traits>
 
 #include "pstore/support/ctype.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/head_revision.hpp"
 #include "pstore/support/maybe.hpp"
 
@@ -64,19 +65,19 @@ namespace {
     /// Returns a copy of the input string with any leading or trailing whitespace removed and all
     /// characters converted to lower-case.
     std::string trim_and_lowercase (std::string const & str) {
-        auto is_ws = [](char c) { return pstore::isspace (c); };
+        auto const is_ws = [] (char const c) { return pstore::isspace (c); };
         // Remove trailing whitespace.
-        auto end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
+        auto const end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
         // Skip leading whitespace.
-        auto begin = std::find_if_not (str.begin (), end, is_ws);
+        auto const begin = std::find_if_not (str.begin (), end, is_ws);
 
-        std::string result;
-        auto new_length = std::distance (begin, end);
+        auto const new_length = std::distance (begin, end);
         assert (new_length >= 0);
 
+        std::string result;
         result.reserve (static_cast<std::make_unsigned<decltype (new_length)>::type> (new_length));
         std::transform (begin, end, std::back_inserter (result),
-                        [](char c) { return static_cast<char> (std::tolower (c)); });
+                        [] (char const c) { return static_cast<char> (std::tolower (c)); });
         return result;
     }
 
@@ -90,9 +91,9 @@ namespace pstore {
             return just (head_revision);
         }
 
-        char const * cstr = arg.c_str ();
+        gsl::czstring const cstr = arg.c_str ();
         char * endptr = nullptr;
-        long revision = std::strtol (cstr, &endptr, 10);
+        long const revision = std::strtol (cstr, &endptr, 10);
 
         // strtol() returns LONG_MAX or LONG_MIN to indicate an overflow. endptr must point to
         // the terminating null character to ensure that the entire string was consumed. We also

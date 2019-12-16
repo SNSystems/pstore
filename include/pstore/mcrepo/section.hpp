@@ -83,7 +83,7 @@ namespace pstore {
 
         constexpr auto first_repo_metadata_section = section_kind::dependent;
 
-        inline bool is_target_section (section_kind t) noexcept {
+        constexpr bool is_target_section (section_kind const t) noexcept {
             using utype = std::underlying_type<section_kind>::type;
             return static_cast<utype> (t) < static_cast<utype> (first_repo_metadata_section);
         }
@@ -94,10 +94,10 @@ namespace pstore {
 
 
         template <typename T>
-        unsigned section_alignment (T const &) noexcept;
+        unsigned section_alignment (T const & t) noexcept;
 
         template <typename T>
-        std::uint64_t section_size (T const &) noexcept;
+        std::uint64_t section_size (T const & t) noexcept;
 
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
@@ -114,7 +114,7 @@ namespace pstore {
         /// hierarchy used to provide dynamic behavior for existing section instances.
         class section_creation_dispatcher {
         public:
-            explicit section_creation_dispatcher (section_kind kind) noexcept
+            explicit section_creation_dispatcher (section_kind const kind) noexcept
                     : kind_{kind} {}
             virtual ~section_creation_dispatcher () noexcept;
             section_creation_dispatcher (section_creation_dispatcher const &) = delete;
@@ -135,7 +135,7 @@ namespace pstore {
             /// \param a  The value to be aligned.
             /// \returns The value closest to but greater than or equal to \p a which is correctly
             /// aligned for an instance of the type used for an instance of this section kind.
-            std::uint8_t * aligned (std::uint8_t * a) const {
+            std::uint8_t * aligned (std::uint8_t * const a) const {
                 return reinterpret_cast<std::uint8_t *> (
                     this->aligned_impl (reinterpret_cast<std::uintptr_t> (a)));
             }

@@ -52,17 +52,19 @@
 
 namespace {
 
-    inline bool starts_with (std::string const & s, char c) {
+    inline bool starts_with (std::string const & s, char const c) {
         return !s.empty () && s.front () == c;
     }
-    inline bool ends_with (std::string const & s, char c) { return !s.empty () && s.back () == c; }
-} // namespace
+    inline bool ends_with (std::string const & s, char const c) {
+        return !s.empty () && s.back () == c;
+    }
+
+} // end anonymous namespace
 
 namespace pstore {
     namespace path {
-
-
         namespace posix {
+
             std::pair<std::string, std::string> split_drive (std::string const & p) {
                 return {"", p};
             }
@@ -81,11 +83,11 @@ namespace pstore {
                 }
                 return path;
             }
-        } // namespace posix
 
-
+        } // end namespace posix
 
         namespace win32 {
+
             // Split a path in a drive specification (a drive letter followed by a
             // colon) and the path specification.
             // It is always true that drivespec + pathspec == p
@@ -105,7 +107,7 @@ namespace pstore {
                     std::string normp;
                     normp.reserve (p.length ());
                     std::transform (std::begin (p), std::end (p), std::back_inserter (normp),
-                                    [](char c) { return c == '\\' ? '/' : c; });
+                                    [] (char const c) { return c == '\\' ? '/' : c; });
 
                     if ((normp.length () > 2 && normp[0] == '/' && normp[1] == '/') &&
                         (normp.length () > 3 && normp[2] != '/')) {
@@ -139,7 +141,7 @@ namespace pstore {
 
             std::string join (std::string const & path,
                               std::initializer_list<std::string> const & paths) {
-                auto is_path_sep = [](char c) { return c == '/' || c == '\\'; };
+                auto is_path_sep = [] (char const c) { return c == '/' || c == '\\'; };
 
                 std::string result_drive;
                 std::string result_path;
@@ -193,28 +195,31 @@ namespace pstore {
 
                 return result_drive + result_path;
             }
-        } // namespace win32
 
+        } // end namespace win32
 
         namespace posix {
+
             std::string dir_name (std::string const & path) {
-                std::string::size_type pos = path.find_last_of ('/');
+                std::string::size_type const pos = path.find_last_of ('/');
                 return path.substr (0, (pos == std::string::npos) ? 0 : pos + 1);
             }
 
             std::string base_name (std::string const & path) {
-                std::string::size_type pos = path.find_last_of ('/');
+                std::string::size_type const pos = path.find_last_of ('/');
                 return path.substr ((pos == std::string::npos) ? 0 : pos + 1);
             }
-        } // namespace posix
+
+        } // end namespace posix
 
         namespace win32 {
+
             std::string dir_name (std::string const & src_path) {
                 std::string drive;
                 std::string p;
                 std::tie (drive, p) = path::win32::split_drive (src_path);
 
-                std::string::size_type pos = p.find_last_of (R"(/\)");
+                std::string::size_type const pos = p.find_last_of (R"(/\)");
                 p = p.substr (0, (pos == std::string::npos) ? 0 : pos + 1);
                 return path::win32::join (drive, p);
             }
@@ -224,9 +229,9 @@ namespace pstore {
                 std::string p;
                 std::tie (drive, p) = path::win32::split_drive (path);
 
-                std::string::size_type pos = p.find_last_of (R"(/\)");
+                std::string::size_type const pos = p.find_last_of (R"(/\)");
                 return p.substr ((pos == std::string::npos) ? 0 : pos + 1);
             }
-        } // namespace win32
-    }     // namespace path
-} // namespace pstore
+        } // end namespace win32
+    }     // end namespace path
+} // end namespace pstore
