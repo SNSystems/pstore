@@ -60,25 +60,25 @@ namespace {
     using iterator = std::string::const_iterator;
     using range = std::pair<iterator, iterator>;
 
-    auto is_space = [](char c) {
+    auto is_space = [] (char const c) {
         // std::isspace() has undefined behavior if the input value is not representable as unsigned
         // char and not not equal to EOF.
         auto const uc = static_cast<unsigned char> (c);
         return std::isspace (static_cast<int> (uc)) != 0;
     };
 
-    iterator skip_ws (iterator first, iterator last) {
+    iterator skip_ws (iterator first, iterator const last) {
         if (first != last && is_space (*first)) {
             ++first;
         }
         return first;
     }
 
-    auto extract_word_no_ws (iterator first, iterator last) -> range {
+    auto extract_word_no_ws (iterator const first, iterator const last) -> range {
         return {first, std::find_if (first, last, is_space)};
     }
 
-    auto extract_word (iterator first, iterator last) -> range {
+    auto extract_word (iterator const first, iterator const last) -> range {
         return extract_word_no_ws (skip_ws (first, last), last);
     }
 
@@ -87,9 +87,9 @@ namespace {
 
     auto extract_payload (pstore::broker::message_type const & msg)
         -> std::unique_ptr<std::string> {
-        auto it = std::find_if (msg.payload.rbegin (), msg.payload.rend (),
-                                [](char c) { return c != '\0'; });
-        return pstore::make_unique<std::string> (std::begin (msg.payload), it.base ());
+        auto const pos = std::find_if (msg.payload.rbegin (), msg.payload.rend (),
+                                       [] (char const c) { return c != '\0'; });
+        return pstore::make_unique<std::string> (std::begin (msg.payload), pos.base ());
     }
 
 } // end anonymous namespace
