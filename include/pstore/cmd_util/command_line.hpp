@@ -212,6 +212,41 @@ namespace pstore {
                     bool v_;
                 };
 
+                template <typename ErrorStream>
+                auto record_value_if_available (maybe<option *> handler,
+                                                maybe<std::string> const & value,
+                                                std::string const & program_name,
+                                                ErrorStream & errs)
+                    -> std::tuple<maybe<option *>, bool> {
+                    using str = stream_trait<typename ErrorStream::char_type>;
+                    bool ok = true;
+                    if ((*handler)->takes_argument ()) {
+                        if (value) {
+                            if (!handler_set_value (handler, *value)) {
+                                errs << str::out_string (program_name)
+                                     << str::out_text (": Unknown value '")
+                                     << str::out_string (*value) << str::out_text ("'");
+                                ok = false;
+                            }
+                            handler.reset ();
+                        } else {
+                            // The option takes an argument but we haven't yet seen the value
+                            // string.
+                        }
+                    } else {
+                        if (value) {
+                            // We got a value but don't want one.
+                            errs << str::out_string (program_name) << str::out_text (": Argument '")
+                                 << str::out_string ((*handler)->name ())
+                                 << str::out_text ("' does not take a value\n");
+                            ok = false;
+                        } else {
+                            (*handler)->add_occurrence ();
+                            handler.reset ();
+                        }
+                    }
+                    return {handler, ok};
+                }
 
                 // parse_option_arguments
                 // ~~~~~~~~~~~~~~~~~~~~~~
@@ -254,32 +289,8 @@ namespace pstore {
                             continue;
                         }
 
-                        if ((*handler)->takes_argument ()) {
-                            if (value) {
-                                if (!handler_set_value (handler, *value)) {
-                                    errs << str::out_string (program_name)
-                                         << str::out_text (": Unknown value '")
-                                         << str::out_string (*value) << str::out_text ("'");
-                                    ok = false;
-                                }
-                                handler.reset ();
-                            } else {
-                                // The option takes an argument but we haven't yet seen the value
-                                // string.
-                            }
-                        } else {
-                            if (value) {
-                                // We got a value but don't want one.
-                                errs << str::out_string (program_name)
-                                     << str::out_text (": Argument '")
-                                     << str::out_string ((*handler)->name ())
-                                     << str::out_text ("' does not take a value\n");
-                                ok = false;
-                            } else {
-                                (*handler)->add_occurrence ();
-                                handler.reset ();
-                            }
-                        }
+                        std::tie (handler, ok) =
+                            record_value_if_available (handler, value, program_name, errs);
                     }
 
                     if (handler && (*handler)->takes_argument ()) {
@@ -296,7 +307,7 @@ namespace pstore {
                     bool ok = true;
 
                     auto const & all_options = option::all ();
-                    auto is_positional = [](option const * const opt) {
+                    auto const is_positional = [] (option const * const opt) {
                         return opt->is_positional ();
                     };
 

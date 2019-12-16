@@ -104,6 +104,20 @@ TEST_F (ClCommandLine, StringOption) {
     EXPECT_EQ (option.get_num_occurrences (), 1U);
 }
 
+TEST_F (ClCommandLine, BooleanOption) {
+    cl::opt<bool> option ("arg");
+    EXPECT_EQ (option.get (), false);
+
+    this->add ("progname", "--arg");
+
+    string_stream errors;
+    bool res = this->parse_command_line_options (errors);
+    EXPECT_TRUE (res);
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (option.get (), true);
+    EXPECT_EQ (option.get_num_occurrences (), 1U);
+}
+
 TEST_F (ClCommandLine, DoubleDashStringOption) {
     cl::opt<std::string> option ("arg");
     this->add ("progname", "--arg", "value");
