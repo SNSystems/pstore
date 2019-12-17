@@ -243,7 +243,7 @@ namespace pstore {
                                           wrapped_iterator const & it) noexcept
                         : section_kind_{kind}
                         , it_{it} {}
-                constexpr const_iterator (wrapped_iterator const & it) noexcept
+                constexpr explicit const_iterator (wrapped_iterator const & it) noexcept
                         : const_iterator (static_cast<section_kind> (*it), it) {
                     assert (*it < static_cast<std::uint64_t> (section_kind::last));
                 }
