@@ -221,7 +221,7 @@ namespace pstore {
     // ~~~
     template <typename ConditionVariable>
     maybe<std::string> subscriber<ConditionVariable>::pop () {
-        std::unique_lock<std::mutex> lock{this->owner ().mut_};
+        std::unique_lock<std::mutex> const lock{this->owner ().mut_};
         if (queue_.size () == 0) {
             return {};
         }
@@ -266,14 +266,14 @@ namespace pstore {
     void channel<ConditionVariable>::publish (MessageFunction f, Args... args) {
         bool render = false;
         {
-            std::lock_guard<std::mutex> lock{mut_};
+            std::lock_guard<std::mutex> const lock{mut_};
             render = subscribers_.size () > 0;
         }
         if (render) {
             // Note that f() is called without the lock held.
             std::string const message = f (std::forward<Args> (args)...);
 
-            std::lock_guard<std::mutex> lock{mut_};
+            std::lock_guard<std::mutex> const lock{mut_};
             for (auto & sub : subscribers_) {
                 sub->queue_.push (message);
             }
@@ -286,7 +286,7 @@ namespace pstore {
     template <typename ConditionVariable>
     void channel<ConditionVariable>::cancel (subscriber_type & sub) const {
         if (&sub.owner () == this) {
-            std::unique_lock<std::mutex> lock{mut_};
+            std::unique_lock<std::mutex> const lock{mut_};
             sub.active_ = false;
             cv_->notify_all ();
         }
@@ -313,7 +313,7 @@ namespace pstore {
     // ~~~~~~~~~~~~~~
     template <typename ConditionVariable>
     auto channel<ConditionVariable>::new_subscriber () -> subscriber_pointer {
-        std::lock_guard<std::mutex> lock{mut_};
+        std::lock_guard<std::mutex> const lock{mut_};
         auto resl = subscriber_pointer{new subscriber_type (this)};
         subscribers_.insert (resl.get ());
         return resl;
@@ -323,7 +323,7 @@ namespace pstore {
     // ~~~~~~
     template <typename ConditionVariable>
     void channel<ConditionVariable>::remove (subscriber_type * sub) noexcept {
-        std::lock_guard<std::mutex> lock{mut_};
+        std::lock_guard<std::mutex> const lock{mut_};
         assert (subscribers_.find (sub) != subscribers_.end ());
         subscribers_.erase (sub);
     }

@@ -118,7 +118,7 @@ namespace pstore {
         // suicide
         // ~~~~~~~
         void command_processor::suicide (fifo_path const &, broker_command const &) {
-            std::shared_ptr<scavenger> scav = scavenger_.get ();
+            std::shared_ptr<scavenger> const scav = scavenger_.get ();
             shutdown (this, scav.get (), sig_self_quit, num_read_threads_, http_status_,
                       uptime_done_);
         }
@@ -200,7 +200,7 @@ namespace pstore {
             logging::log (logging::priority::info, message.c_str ());
         }
 
-        void command_processor::log (gsl::czstring str) const {
+        void command_processor::log (gsl::czstring const str) const {
             logging::log (logging::priority::info, str);
         }
 
@@ -226,11 +226,11 @@ namespace pstore {
             auto const command = this->parse (msg);
             if (broker_command const * const c = command.get ()) {
                 this->log (*c);
-                auto it = std::lower_bound (std::begin (commands_), std::end (commands_),
-                                            command_entry (c->verb.c_str (), nullptr),
-                                            command_entry_compare);
-                if (it != std::end (commands_) && c->verb == std::get<0> (*it)) {
-                    std::get<1> (*it) (this, fifo, *c);
+                auto const pos = std::lower_bound (std::begin (commands_), std::end (commands_),
+                                                   command_entry (c->verb.c_str (), nullptr),
+                                                   command_entry_compare);
+                if (pos != std::end (commands_) && c->verb == std::get<gsl::czstring> (*pos)) {
+                    std::get<handler> (*pos) (this, fifo, *c);
                 } else {
                     this->unknown (*c);
                 }
@@ -241,7 +241,7 @@ namespace pstore {
         // ~~~~~
         auto command_processor::parse (message_type const & msg)
             -> std::unique_ptr<broker_command> {
-            std::lock_guard<decltype (cmds_mut_)> lock{cmds_mut_};
+            std::lock_guard<decltype (cmds_mut_)> const lock{cmds_mut_};
             return ::pstore::broker::parse (msg, cmds_);
         }
 
@@ -289,8 +289,10 @@ namespace pstore {
             // Remove all partial messages where the last piece of the message arrived before
             // earliest_time. It's most likely that the sending process gave up/crashed/lost
             // interest before sending the complete message.
-            std::lock_guard<decltype (cmds_mut_)> lock{cmds_mut_};
-            for (auto it = std::begin (cmds_), end = std::end (cmds_); it != end;) {
+            std::lock_guard<decltype (cmds_mut_)> const lock{cmds_mut_};
+            auto const end = std::end (cmds_);
+            auto it = std::begin (cmds_);
+            while (it != end) {
                 auto const arrival_time = it->second.arrive_time_;
                 if (arrival_time < earliest_time) {
                     std::array<char, 100> buffer;
