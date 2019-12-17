@@ -67,12 +67,12 @@ namespace pstore {
     namespace make_unique_helpers {
 
         template <typename T, typename... Args>
-        std::unique_ptr<T> helper (std::false_type, Args &&... args) {
+        std::unique_ptr<T> helper (std::false_type const, Args &&... args) {
             return std::unique_ptr<T> (new T (std::forward<Args> (args)...));
         }
 
         template <typename T, typename = typename std::enable_if<std::extent<T>::value == 0>::type>
-        std::unique_ptr<T> helper (std::true_type, std::size_t size) {
+        std::unique_ptr<T> helper (std::true_type const, std::size_t const size) {
             using U = typename std::remove_const<typename std::remove_extent<T>::type>::type;
             return std::unique_ptr<T> (new U[size]);
         }

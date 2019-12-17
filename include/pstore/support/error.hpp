@@ -112,7 +112,7 @@ namespace pstore {
 
     std::error_category const & get_error_category ();
 
-    inline std::error_code make_error_code (error_code e) {
+    inline std::error_code make_error_code (error_code const e) {
         static_assert (std::is_same<std::underlying_type<decltype (e)>::type, int>::value,
                        "base type of pstore::error_code must be int to permit safe static cast");
         return {static_cast<int> (e), get_error_category ()};
@@ -125,30 +125,30 @@ namespace pstore {
     /// std::make_error_code().
     class errno_erc {
     public:
-        explicit errno_erc (int err) noexcept
+        constexpr explicit errno_erc (int const err) noexcept
                 : err_{err} {}
-        int get () const noexcept { return err_; }
+        constexpr int get () const noexcept { return err_; }
 
     private:
         int err_;
     };
 
-    inline std::error_code make_error_code (errno_erc e) noexcept {
+    inline std::error_code make_error_code (errno_erc const e) noexcept {
         return {e.get (), std::generic_category ()};
     }
 
 #ifdef _WIN32
     class win32_erc {
     public:
-        explicit win32_erc (DWORD err) noexcept
+        constexpr explicit win32_erc (DWORD err) noexcept
                 : err_{err} {}
-        int get () const noexcept { return err_; }
+        constexpr int get () const noexcept { return err_; }
 
     private:
         DWORD err_;
     };
 
-    inline std::error_code make_error_code (win32_erc e) noexcept {
+    inline std::error_code make_error_code (win32_erc const e) noexcept {
         return {e.get (), std::system_category ()};
     }
 #endif //_WIN32

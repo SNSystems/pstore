@@ -94,7 +94,7 @@ namespace pstore {
         /// The maximum number of bytes that encode() will produce.
         constexpr std::size_t const max_output_length = 9;
 
-        inline unsigned encoded_size (std::uint64_t x) {
+        constexpr unsigned encoded_size (std::uint64_t const x) noexcept {
             // Each additional byte that we emit steals one bit from the first byte. We therefore
             // manage 7 bits per byte.
             constexpr auto nine_byte_threshold = (UINT64_C (1) << (7U * 8U)) - 1U;
@@ -110,7 +110,7 @@ namespace pstore {
 
         template <typename OutputIterator>
         OutputIterator encode (std::uint64_t x, OutputIterator out) {
-            unsigned bits = 64U - bit_count::clz (x | 1U);
+            unsigned const bits = 64U - bit_count::clz (x | 1U);
             unsigned bytes;
             if (bits > 56U) {
                 bytes = 8U;
@@ -157,7 +157,7 @@ namespace pstore {
                 return result;
             }
 
-        } // namespace details
+        } // end namespace details
 
         template <typename InputIterator>
         std::uint64_t decode (InputIterator in, unsigned size) {
@@ -189,7 +189,7 @@ namespace pstore {
             return decode (in, decode_size (in));
         }
 
-    } // namespace varint
-} // namespace pstore
+    } // end namespace varint
+} // end namespace pstore
 
 #endif // PSTORE_SUPPORT_VARINT_HPP

@@ -105,7 +105,7 @@ namespace pstore {
         }
 
         template <typename... Args>
-        error_or (in_place_t, Args &&... args)
+        error_or (in_place_t const, Args &&... args)
                 : has_error_{false} {
             new (get_storage ()) storage_type (std::forward<Args> (args)...);
         }
@@ -170,8 +170,8 @@ namespace pstore {
             return !operator== (rhs);
         }
 
-        bool operator== (std::error_code rhs) const { return get_error () == rhs; }
-        bool operator!= (std::error_code rhs) const { return !operator== (rhs); }
+        bool operator== (std::error_code const rhs) const { return get_error () == rhs; }
+        bool operator!= (std::error_code const rhs) const { return !operator== (rhs); }
 
         bool operator== (error_or const & rhs);
         bool operator!= (error_or const & rhs) { return !operator== (rhs); }

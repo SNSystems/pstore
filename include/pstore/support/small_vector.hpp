@@ -214,11 +214,11 @@ namespace pstore {
 
         /// Returns true if the given number of elements will fit in the space
         /// allocated for the "small" in-object buffer.
-        static constexpr bool is_small (std::size_t elements) noexcept {
+        static constexpr bool is_small (std::size_t const elements) noexcept {
             return elements <= BodyElements;
         }
 
-        ElementType * set_buffer_ptr (std::size_t required_elements) noexcept {
+        ElementType * set_buffer_ptr (std::size_t const required_elements) noexcept {
             buffer_ = is_small (required_elements) ? small_buffer_.data () : big_buffer_.data ();
             return buffer_;
         }
@@ -227,7 +227,7 @@ namespace pstore {
     // (ctor)
     // ~~~~~~
     template <typename ElementType, std::size_t BodyElements>
-    small_vector<ElementType, BodyElements>::small_vector (std::size_t required_elements)
+    small_vector<ElementType, BodyElements>::small_vector (std::size_t const required_elements)
             : elements_{required_elements}
             , small_buffer_{} {
 

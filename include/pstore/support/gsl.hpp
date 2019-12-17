@@ -278,9 +278,9 @@ namespace pstore {
                 using index_type = std::ptrdiff_t;
 
                 template <index_type Other>
-                constexpr explicit extent_type (extent_type<Other> ext) noexcept
+                constexpr explicit extent_type (extent_type<Other> const ext) noexcept
                         : size_ (ext.size ()) {}
-                constexpr explicit extent_type (index_type size) noexcept
+                constexpr explicit extent_type (index_type const size) noexcept
                         : size_ (size) {
                     assert (size >= 0);
                 }

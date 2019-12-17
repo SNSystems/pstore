@@ -80,23 +80,23 @@ namespace pstore {
     }
 
     template <typename PointeeType>
-    constexpr PointeeType const * aligned (void const * p) noexcept {
+    constexpr PointeeType const * aligned (void const * const p) noexcept {
         return reinterpret_cast<PointeeType const *> (
             aligned (reinterpret_cast<std::uintptr_t> (p), alignof (PointeeType)));
     }
     template <typename PointeeType>
-    constexpr PointeeType * aligned (void * p) noexcept {
+    constexpr PointeeType * aligned (void * const p) noexcept {
         return reinterpret_cast<PointeeType *> (
             aligned (reinterpret_cast<std::uintptr_t> (p), alignof (PointeeType)));
     }
 
     template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-    constexpr DestPointeeType * aligned_ptr (SrcPointeeType * p) noexcept {
-        return aligned<DestPointeeType> (reinterpret_cast<void *> (p));
+    constexpr DestPointeeType const * aligned_ptr (SrcPointeeType const * const p) noexcept {
+        return aligned<DestPointeeType> (reinterpret_cast<void const *> (p));
     }
     template <typename DestPointeeType, typename SrcPointeeType = DestPointeeType>
-    constexpr DestPointeeType const * aligned_ptr (SrcPointeeType const * p) noexcept {
-        return aligned<DestPointeeType> (reinterpret_cast<void const *> (p));
+    constexpr DestPointeeType * aligned_ptr (SrcPointeeType * const p) noexcept {
+        return aligned<DestPointeeType> (reinterpret_cast<void *> (p));
     }
 
     /// Calculate the value that must be added to p v in order that it has the alignment

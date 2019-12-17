@@ -232,7 +232,7 @@ namespace pstore {
         using assign_type = bool;
 
         /// assigns a value to the bit-field
-        bit_field & operator= (bool v) noexcept {
+        bit_field & operator= (bool const v) noexcept {
             this->assign (static_cast<value_type> (v));
             return *this;
         }
