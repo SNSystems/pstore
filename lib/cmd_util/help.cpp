@@ -147,7 +147,7 @@ namespace pstore {
                                                op->name ().length () > overlong_opt_max) {
                                                os << '\n' << std::setw (indent) << ' ';
                                            }
-                                           os << op;
+                                           os << str;
                                            is_first = false;
                                        });
                         os << '\n';
