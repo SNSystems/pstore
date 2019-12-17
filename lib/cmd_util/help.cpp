@@ -81,7 +81,7 @@ namespace pstore {
             // ~~~~~~~~~~~~~~~~~
             int help::max_option_length () const {
                 auto max_opt_len = std::size_t{0};
-                for (option const * op : cl::option::all ()) {
+                for (option const * const op : cl::option::all ()) {
                     if (op != this && !op->is_alias ()) {
                         max_opt_len = std::max (max_opt_len, op->name ().length ());
                     }
@@ -92,7 +92,7 @@ namespace pstore {
             // has_switches
             // ~~~~~~~~~~~~
             bool help::has_switches () const {
-                for (option const * op : cl::option::all ()) {
+                for (option const * const op : cl::option::all ()) {
                     if (op != this && !op->is_alias () && !op->is_positional ()) {
                         return true;
                     }
@@ -134,21 +134,22 @@ namespace pstore {
 
                 ios_flags_saver const _{os};
 
-                for (option const * op : cl::option::all ()) {
+                for (option const * const op : cl::option::all ()) {
                     if (op != this && !op->is_alias () && !op->is_positional ()) {
                         os << prefix << std::left << std::setw (max_opt_len) << op->name ()
                            << separator;
                         std::string const & description = op->description ();
                         auto is_first = true;
-                        for (auto it = word_wrapper (description, max_width),
-                                  end = word_wrapper::end (description, max_width);
-                             it != end; ++it) {
-                            if (!is_first || op->name ().length () > overlong_opt_max) {
-                                os << '\n' << std::setw (indent) << ' ';
-                            }
-                            os << *it;
-                            is_first = false;
-                        }
+                        std::for_each (word_wrapper (description, max_width),
+                                       word_wrapper::end (description, max_width),
+                                       [&] (std::string const & str) {
+                                           if (!is_first ||
+                                               op->name ().length () > overlong_opt_max) {
+                                               os << '\n' << std::setw (indent) << ' ';
+                                           }
+                                           os << op;
+                                           is_first = false;
+                                       });
                         os << '\n';
                     }
                 }
@@ -160,6 +161,7 @@ namespace pstore {
                 this->show (std::cout);
                 std::exit (EXIT_FAILURE);
             }
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore

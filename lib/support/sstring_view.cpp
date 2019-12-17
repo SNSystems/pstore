@@ -49,21 +49,23 @@ namespace pstore {
 
     sstring_view<std::shared_ptr<char const>> make_shared_sstring_view (std::string const & str) {
         auto const length = str.length ();
-        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
+        auto const ptr =
+            std::shared_ptr<char> (new char[length], [] (gsl::czstring const p) { delete[] p; });
         std::copy (std::begin (str), std::end (str), ptr.get ());
         return pstore::make_shared_sstring_view (std::static_pointer_cast<char const> (ptr),
                                                  length);
     }
 
-    sstring_view<std::shared_ptr<char const>> make_shared_sstring_view (gsl::czstring str) {
+    sstring_view<std::shared_ptr<char const>> make_shared_sstring_view (gsl::czstring const str) {
         auto const length = std::strlen (str);
-        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
+        auto const ptr =
+            std::shared_ptr<char> (new char[length], [] (gsl::czstring const p) { delete[] p; });
         std::copy (str, str + length, ptr.get ());
         return pstore::make_shared_sstring_view (std::static_pointer_cast<char const> (ptr),
                                                  length);
     }
 
-    sstring_view<char const *> make_sstring_view (gsl::czstring str) {
+    sstring_view<char const *> make_sstring_view (gsl::czstring const str) {
         return {str, std::strlen (str)};
     }
 
