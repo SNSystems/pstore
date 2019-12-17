@@ -222,14 +222,14 @@ namespace {
         return true;
     }
 
-} // anonymous namespace
+} // end anonymous namespace
 
 #endif // PSTORE_IS_INSIDE_LLVM
 
 namespace {
 
     pstore::dump::value_ptr make_hex_dump_value (std::uint8_t const * first,
-                                                 std::uint8_t const * last, bool hex_mode) {
+                                                 std::uint8_t const * last, bool const hex_mode) {
         pstore::dump::value_ptr v;
         if (hex_mode) {
             v = std::make_shared<pstore::dump::binary16> (first, last);
@@ -246,8 +246,9 @@ namespace {
 namespace pstore {
     namespace dump {
 
-        value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           gsl::czstring triple, bool hex_mode) {
+        value_ptr make_disassembled_value (std::uint8_t const * const first,
+                                           std::uint8_t const * const last,
+                                           gsl::czstring const triple, bool const hex_mode) {
 
             array::container arr;
             if (disasm_block (first, last, arr, triple, hex_mode)) {
@@ -256,20 +257,21 @@ namespace pstore {
             return make_hex_dump_value (first, last, hex_mode);
         }
 
-    } // namespace dump
-} // namespace pstore
+    } // end namespace dump
+} // end namespace pstore
 
 #else // PSTORE_IS_INSIDE_LLVM
 
 namespace pstore {
     namespace dump {
 
-        value_ptr make_disassembled_value (std::uint8_t const * first, std::uint8_t const * last,
-                                           gsl::czstring /*triple*/, bool hex_mode) {
+        value_ptr make_disassembled_value (std::uint8_t const * const first,
+                                           std::uint8_t const * const last,
+                                           gsl::czstring const /*triple*/, bool const hex_mode) {
             return make_hex_dump_value (first, last, hex_mode);
         }
 
-    } // namespace dump
-} // namespace pstore
+    } // end namespace dump
+} // end namespace pstore
 
 #endif // PSTORE_IS_INSIDE_LLVM

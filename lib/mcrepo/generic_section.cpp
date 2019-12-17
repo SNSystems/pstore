@@ -55,8 +55,9 @@ namespace pstore {
         //* |___/                                                    *
         // size_bytes
         // ~~~~~~~~~~
-        std::size_t generic_section::size_bytes (std::size_t data_size, std::size_t num_ifixups,
-                                                 std::size_t num_xfixups) {
+        std::size_t generic_section::size_bytes (std::size_t const data_size,
+                                                 std::size_t const num_ifixups,
+                                                 std::size_t const num_xfixups) {
             auto result = sizeof (generic_section);
             result = generic_section::part_size_bytes<std::uint8_t> (result, data_size);
             result = generic_section::part_size_bytes<internal_fixup> (result, num_ifixups);
@@ -79,13 +80,14 @@ namespace pstore {
             return generic_section::size_bytes (section_->make_sources ());
         }
 
-        std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * out) const {
+        std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * const out) const {
             assert (this->aligned (out) == out);
             auto * const scn = new (out) generic_section (section_->make_sources (), section_->align);
             return out + scn->size_bytes ();
         }
 
-        std::uintptr_t generic_section_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
+        std::uintptr_t
+        generic_section_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
             return pstore::aligned<generic_section> (in);
         }
 
