@@ -101,9 +101,9 @@ namespace pstore {
         public:
             virtual ~value () = 0;
 
-            value () = default;
-            value (value const &) = default;
-            value & operator= (value const &) = default;
+            value () noexcept = default;
+            value (value const &) noexcept = default;
+            value & operator= (value const &) noexcept = default;
 
             ///@{
             virtual object * dynamic_cast_object () noexcept { return nullptr; }
@@ -224,7 +224,7 @@ namespace pstore {
             explicit number_long (long long const v) noexcept
                     : number_base ()
                     , v_{v} {}
-            number_long (long long v, unsigned base)
+            number_long (long long const v, unsigned const base)
                     : number_base (base)
                     , v_ (v) {}
             long long get () const noexcept { return v_; }
@@ -247,7 +247,7 @@ namespace pstore {
             explicit number_ulong (unsigned long long const v) noexcept
                     : number_base ()
                     , v_{v} {}
-            number_ulong (unsigned long long v, unsigned base)
+            number_ulong (unsigned long long const v, unsigned const base)
                     : number_base (base)
                     , v_ (v) {}
             unsigned long long get () const noexcept { return v_; }

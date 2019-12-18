@@ -46,7 +46,7 @@
 namespace pstore {
 
     raw_sstring_view
-    indirect_string::as_string_view (gsl::not_null<shared_sstring_view *> owner) const {
+    indirect_string::as_string_view (gsl::not_null<shared_sstring_view *> const owner) const {
         if (is_pointer_) {
             return *str_;
         }
@@ -108,14 +108,14 @@ namespace pstore {
     //*                                                  |___/                           *
     // ctor
     // ~~~~
-    indirect_string_adder::indirect_string_adder (std::size_t expected_size) {
+    indirect_string_adder::indirect_string_adder (std::size_t const expected_size) {
         views_.reserve (expected_size);
     }
 
     // read
     // ~~~~
     indirect_string indirect_string::read (database const & db,
-                                           typed_address<indirect_string> addr) {
+                                           typed_address<indirect_string> const addr) {
         return serialize::read<indirect_string> (
             serialize::archive::make_reader (db, addr.to_address ()));
     }
@@ -129,7 +129,7 @@ namespace pstore {
     // ~~~~~~~~~~~~~~~~
     auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
         -> std::pair<shared_sstring_view, raw_sstring_view> {
-        auto str = indirect_string::read (db, addr);
+        auto const str = indirect_string::read (db, addr);
         shared_sstring_view owner;
         return {owner, str.as_db_string_view (&owner)};
     }

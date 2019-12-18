@@ -54,8 +54,8 @@ namespace pstore {
 
             // (ctor)
             // ~~~~~~
-            word_wrapper::word_wrapper (std::string const & text, std::size_t max_width,
-                                        std::size_t pos)
+            word_wrapper::word_wrapper (std::string const & text, std::size_t const max_width,
+                                        std::size_t const pos)
                     : text_{text}
                     , max_width_{max_width}
                     , start_pos_{pos} {
@@ -64,7 +64,7 @@ namespace pstore {
 
             // end
             // ~~~
-            word_wrapper word_wrapper::end (std::string const & text, std::size_t max_width) {
+            word_wrapper word_wrapper::end (std::string const & text, std::size_t const max_width) {
                 return {text, max_width, text.length ()};
             }
 

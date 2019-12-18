@@ -139,7 +139,7 @@ namespace pstore {
         // load
         // ~~~~
         inline auto compilation_member::load (database const & db,
-                                              typed_address<compilation_member> addr)
+                                              typed_address<compilation_member> const addr)
             -> std::shared_ptr<compilation_member const> {
             return db.getro (addr);
         }
@@ -193,7 +193,7 @@ namespace pstore {
 
             /// \name Element access
             ///@{
-            compilation_member const & operator[] (std::size_t i) const {
+            compilation_member const & operator[] (std::size_t const i) const {
                 assert (i < size_);
                 return members_[i];
             }
@@ -276,9 +276,9 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
         template <typename Iterator>
-        compilation::compilation (typed_address<indirect_string> path,
-                                  typed_address<indirect_string> triple, size_type size,
-                                  Iterator first_member, Iterator last_member) noexcept
+        compilation::compilation (typed_address<indirect_string> const path,
+                                  typed_address<indirect_string> const triple, size_type const size,
+                                  Iterator const first_member, Iterator const last_member) noexcept
                 : signature_{compilation_signature_}
                 , path_{path}
                 , triple_{triple}

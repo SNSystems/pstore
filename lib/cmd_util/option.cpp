@@ -46,20 +46,23 @@
 namespace pstore {
     namespace cmd_util {
         namespace cl {
+
             //*           _   _           *
             //*  ___ _ __| |_(_)___ _ _   *
             //* / _ \ '_ \  _| / _ \ ' \  *
             //* \___/ .__/\__|_\___/_||_| *
             //*     |_|                   *
             option::option () { all ().push_back (this); }
-            option::option (num_occurrences_flag occurrences)
+            option::option (num_occurrences_flag const occurrences)
                     : option () {
                 occurrences_ = occurrences;
             }
 
             option::~option () = default;
 
-            void option::set_num_occurrences_flag (num_occurrences_flag n) { occurrences_ = n; }
+            void option::set_num_occurrences_flag (num_occurrences_flag const n) {
+                occurrences_ = n;
+            }
             num_occurrences_flag option::get_num_occurrences_flag () const { return occurrences_; }
             unsigned option::get_num_occurrences () const { return num_occurrences_; }
 
@@ -128,11 +131,11 @@ namespace pstore {
             //* / _` | | / _` (_-< *
             //* \__,_|_|_\__,_/__/ *
             //*                    *
-            void alias::set_original (option * o) {
+            void alias::set_original (option * const o) {
                 assert (o != nullptr);
                 original_ = o;
             }
-            void alias::set_num_occurrences_flag (num_occurrences_flag n) {
+            void alias::set_num_occurrences_flag (num_occurrences_flag const n) {
                 original_->set_num_occurrences_flag (n);
             }
             num_occurrences_flag alias::get_num_occurrences_flag () const {
@@ -147,6 +150,7 @@ namespace pstore {
             parser_base * alias::get_parser () { return original_->get_parser (); }
             bool alias::takes_argument () const { return original_->takes_argument (); }
             bool alias::value (std::string const & v) { return original_->value (v); }
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore

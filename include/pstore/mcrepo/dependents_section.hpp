@@ -92,10 +92,10 @@ namespace pstore {
             /// \name Element access
             ///@{
 
-            typed_address<compilation_member> const & operator[] (std::size_t i) const {
+            typed_address<compilation_member> const & operator[] (std::size_t const i) const {
                 return index_impl (*this, i);
             }
-            typed_address<compilation_member> & operator[] (std::size_t i) {
+            typed_address<compilation_member> & operator[] (std::size_t const i) {
                 return index_impl (*this, i);
             }
             ///@}
@@ -187,7 +187,7 @@ namespace pstore {
         public:
             using const_iterator = typed_address<compilation_member> const *;
 
-            dependents_creation_dispatcher (const_iterator begin, const_iterator end)
+            dependents_creation_dispatcher (const_iterator const begin, const_iterator const end)
                     : section_creation_dispatcher (section_kind::dependent)
                     , begin_ (begin)
                     , end_ (end) {

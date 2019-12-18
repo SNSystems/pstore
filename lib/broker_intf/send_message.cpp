@@ -60,8 +60,8 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        void send_message (writer & wr, bool error_on_timeout, gsl::czstring verb,
-                           gsl::czstring path) {
+        void send_message (writer & wr, bool const error_on_timeout, gsl::czstring const verb,
+                           gsl::czstring const path) {
             assert (verb != nullptr);
 
             auto payload = std::string{verb};
@@ -89,7 +89,7 @@ namespace pstore {
                            "string::iterator::difference_type");
 
             for (auto part = num_parts_type{0}; part < num_parts; ++part) {
-                auto remaining = std::distance (first, std::end (payload));
+                auto const remaining = std::distance (first, std::end (payload));
                 assert (remaining > 0);
 
                 auto last = first;
