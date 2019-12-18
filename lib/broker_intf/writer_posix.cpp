@@ -57,7 +57,7 @@ namespace pstore {
     namespace broker {
 
         bool writer::write_impl (message_type const & msg) {
-            bool ok = ::write (fd_.native_handle (), &msg, sizeof (msg)) == sizeof (msg);
+            bool const ok = ::write (fd_.native_handle (), &msg, sizeof (msg)) == sizeof (msg);
             if (!ok) {
                 int const err = errno;
                 if (err != EAGAIN && err != EWOULDBLOCK && err != EPIPE) {

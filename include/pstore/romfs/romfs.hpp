@@ -182,7 +182,7 @@ namespace pstore {
             static directory const * PSTORE_NONNULL
             dirent_to_directory (dirent const * PSTORE_NONNULL de);
 
-            error_or<dirent_ptr> parse_path (gsl::czstring PSTORE_NONNULL path) const {
+            error_or<dirent_ptr> parse_path (gsl::czstring const PSTORE_NONNULL path) const {
                 return parse_path (path, cwd_);
             }
 

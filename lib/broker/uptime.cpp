@@ -56,7 +56,7 @@ namespace pstore {
         descriptor_condition_variable uptime_cv;
         channel<descriptor_condition_variable> uptime_channel (&uptime_cv);
 
-        void uptime (gsl::not_null<std::atomic<bool> *> done) {
+        void uptime (gsl::not_null<std::atomic<bool> *> const done) {
             log (logging::priority::info, "uptime 1 second tick starting");
 
             auto seconds = std::uint64_t{0};

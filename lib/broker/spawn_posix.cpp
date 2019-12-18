@@ -61,8 +61,8 @@
 namespace pstore {
     namespace broker {
 
-        process_identifier spawn (gsl::czstring exe_path,
-                                  gsl::not_null<gsl::czstring const *> argv) {
+        process_identifier spawn (gsl::czstring const exe_path,
+                                  gsl::not_null<gsl::czstring const *> const argv) {
             auto const child_pid = ::fork ();
             switch (child_pid) {
             // When fork() returns -1, an error happened.

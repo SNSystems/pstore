@@ -108,13 +108,13 @@ namespace pstore {
         auto const write_fd = write_fd_.native_handle ();
         pipe_content_type const buffer{};
         if (::write (write_fd, &buffer, sizeof (buffer)) == -1 && errno != EAGAIN) {
-            ; // TODO: Can I report this error somehow?
+            // TODO: Can I report this error somehow?
         }
     }
 
     // make_non_blocking
     // ~~~~~~~~~~~~~~~~~
-    void descriptor_condition_variable::make_non_blocking (int fd) {
+    void descriptor_condition_variable::make_non_blocking (int const fd) {
         int flags = ::fcntl (fd, F_GETFL); // NOLINT
         if (flags == -1) {
             raise (errno_erc{errno}, "fcntl");
@@ -133,7 +133,7 @@ namespace pstore {
         FD_ZERO (&readfds);
         // Add the read end of pipe to 'readfds'.
         FD_SET (read_fd, &readfds); // NOLINT
-        int nfds = read_fd + 1;
+        int const nfds = read_fd + 1;
 
         do {
             int err = 0;
@@ -151,7 +151,7 @@ namespace pstore {
 
     void descriptor_condition_variable::wait (std::unique_lock<std::mutex> & lock) {
         lock.unlock ();
-        auto _ = make_scope_guard ([&lock]() { lock.lock (); });
+        auto const _ = make_scope_guard ([&lock] () { lock.lock (); });
         this->wait ();
     }
 

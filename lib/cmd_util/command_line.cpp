@@ -75,9 +75,8 @@ namespace pstore {
                 // starts_with
                 // ~~~~~~~~~~~
                 bool starts_with (std::string const & s, gsl::czstring prefix) {
-                    auto it = std::begin (s);
-                    auto end = std::end (s);
-                    for (; *prefix != '\0' && it != end; ++it, ++prefix) {
+                    auto const end = std::end (s);
+                    for (auto it = std::begin (s); *prefix != '\0' && it != end; ++it, ++prefix) {
                         if (*it != *prefix) {
                             return false;
                         }
@@ -91,10 +90,11 @@ namespace pstore {
                     using pstore::cmd_util::cl::option;
 
                     auto const & all_options = option::all ();
-                    auto end = std::end (all_options);
-                    auto it =
-                        std::find_if (std::begin (all_options), end,
-                                      [&name](option * const opt) { return opt->name () == name; });
+                    auto const end = std::end (all_options);
+                    auto const it =
+                        std::find_if (std::begin (all_options), end, [&name] (option * const opt) {
+                            return opt->name () == name;
+                        });
                     return it != end ? just (*it) : nothing<option *> ();
                 }
 

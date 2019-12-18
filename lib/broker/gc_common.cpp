@@ -94,7 +94,7 @@ namespace pstore {
 
         // stop
         // ~~~~
-        void gc_watch_thread::stop (int signum) {
+        void gc_watch_thread::stop (int const signum) {
             {
                 std::unique_lock<decltype (mut_)> const lock{mut_};
                 done_ = true;
@@ -127,7 +127,7 @@ namespace pstore {
         /// Called when a signal has been recieved which should result in the process shutting.
         /// \note This function is called from the quit-thread rather than directly from a signal
         /// handler so it doesn't need to restrict itself to signal-safe functions.
-        void gc_sigint (int sig = -1) { getgc ().stop (sig); }
+        void gc_sigint (int const sig = -1) { getgc ().stop (sig); }
 
     } // end namespace broker
 } // end namespace pstore

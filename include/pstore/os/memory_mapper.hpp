@@ -212,9 +212,10 @@ namespace pstore {
                           std::uint64_t const offset, std::uint64_t const length)
                 : memory_mapper_base (pointer (file, offset), write_enabled, offset, length) {}
         ~in_memory_mapper () noexcept override;
+
         static std::shared_ptr<std::uint8_t> pointer (pstore::file::in_memory & file,
-                                                      std::uint64_t offset) {
-            auto p = std::static_pointer_cast<std::uint8_t> (file.data ());
+                                                      std::uint64_t const offset) {
+            auto const p = std::static_pointer_cast<std::uint8_t> (file.data ());
             return std::shared_ptr<std::uint8_t> (p, p.get () + offset);
         }
     };

@@ -117,7 +117,7 @@ namespace pstore {
             static_assert (std::is_same<typename SpanType::element_type, int>::value,
                            "mib must be a span of integers");
 
-            auto read_link = [&mib, &ctl](::pstore::gsl::span<char> b) {
+            auto read_link = [&mib, &ctl] (gsl::span<char> const b) {
                 assert (b.size () >= 0);
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;

@@ -91,7 +91,7 @@ namespace pstore {
                 void visit_intermediate (index_pointer node, unsigned shifts,
                                          gsl::not_null<result_type *> result) const;
 
-                bool is_new (index_pointer node) const noexcept {
+                bool is_new (index_pointer const node) const noexcept {
                     return node.is_heap () ||
                            node.untag_internal_address ().to_address () >= threshold_;
                 }
@@ -135,9 +135,10 @@ namespace pstore {
             // ~~~~~~~~~~~~~~~~~~
             template <typename Index>
             template <typename Node>
-            void traverser<Index>::visit_intermediate (index::details::index_pointer node,
-                                                       unsigned shifts,
-                                                       gsl::not_null<result_type *> result) const {
+            void
+            traverser<Index>::visit_intermediate (index::details::index_pointer const node,
+                                                  unsigned const shifts,
+                                                  gsl::not_null<result_type *> const result) const {
                 std::pair<std::shared_ptr<void const>, Node const *> const p =
                     Node::get_node (db_, node);
                 assert (std::get<1> (p) != nullptr);
@@ -153,7 +154,7 @@ namespace pstore {
 
 
         template <typename Index>
-        result_type diff (database const & db, Index const & index, revision_number old) {
+        result_type diff (database const & db, Index const & index, revision_number const old) {
             if (old == pstore::head_revision || old > db.get_current_revision ()) {
                 return {};
             }

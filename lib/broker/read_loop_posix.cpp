@@ -73,7 +73,7 @@
 namespace {
 
     // Watch fd to be notified when it has input.
-    void block_for_input (int fd) {
+    void block_for_input (int const fd) {
         timeval timeout{pstore::broker::details::timeout_seconds, 0};
         fd_set rfds;
         FD_ZERO (&rfds);
@@ -83,7 +83,7 @@ namespace {
         FD_ZERO (&efds);
         FD_SET (fd, &efds);
 
-        int retval = select (fd + 1, &rfds, nullptr, &efds, &timeout);
+        int const retval = select (fd + 1, &rfds, nullptr, &efds, &timeout);
         if (retval == -1) {
             raise (pstore::errno_erc{errno}, "select");
         } else if (retval == 0) {
@@ -100,7 +100,7 @@ namespace pstore {
         // read_loop
         // ~~~~~~~~~
         void read_loop (fifo_path & fifo, std::shared_ptr<recorder> & record_file,
-                        std::shared_ptr<command_processor> cp) {
+                        std::shared_ptr<command_processor> const cp) {
             try {
                 log (logging::priority::notice, "listening to FIFO ",
                      logging::quoted{fifo.get ().c_str ()});

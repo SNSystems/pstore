@@ -69,7 +69,7 @@ namespace pstore {
                     }
 
                     // If the command processor still exists, ask it to scavenge any stale records.
-                    if (auto scp = cp_.lock ()) {
+                    if (auto const scp = cp_.lock ()) {
                         scp->scavenge ();
                     }
 
@@ -86,7 +86,7 @@ namespace pstore {
         // shutdown
         // ~~~~~~~~
         void scavenger::shutdown () {
-            std::lock_guard<decltype (mut_)> lock (mut_);
+            std::lock_guard<decltype (mut_)> const lock{mut_};
             cv_.notify_all ();
         }
 

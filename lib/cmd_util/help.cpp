@@ -108,7 +108,7 @@ namespace pstore {
                     os << " [options]";
                 }
 
-                for (option const * op : cl::option::all ()) {
+                for (option const * const op : cl::option::all ()) {
                     if (op != this && op->is_positional ()) {
                         os << ' ' << op->description ();
                     }

@@ -63,7 +63,7 @@ namespace pstore {
             }
 
             static bool get_expanded () noexcept { return default_expanded_; }
-            static void set_expanded (bool t) noexcept { default_expanded_ = t; }
+            static void set_expanded (bool const t) noexcept { default_expanded_ = t; }
 
         private:
             std::ostream & write_impl (std::ostream & os, indent const & indent) const override;
@@ -99,7 +99,7 @@ namespace pstore {
 
         template <typename T>
         value_ptr make_value (extent<T> ex) {
-            auto v = std::make_shared<object> (object::container{
+            auto const v = std::make_shared<object> (object::container{
                 {"addr", make_value (ex.addr)},
                 {"size", make_value (ex.size)},
             });

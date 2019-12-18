@@ -68,12 +68,12 @@ namespace pstore {
             parser<std::string>::~parser () {}
 
             maybe<std::string> parser<std::string>::operator() (std::string const & v) const {
-                auto begin = this->begin ();
-                auto end = this->end ();
+                auto const begin = this->begin ();
+                auto const end = this->end ();
                 if (std::distance (begin, end) != 0) {
-                    auto it = std::find_if (begin, end,
-                                            [&v](literal const & lit) { return v == lit.name; });
-                    if (it == this->end ()) {
+                    auto const it = std::find_if (
+                        begin, end, [&v] (literal const & lit) { return v == lit.name; });
+                    if (it == end) {
                         return nothing<std::string> ();
                     }
                 }

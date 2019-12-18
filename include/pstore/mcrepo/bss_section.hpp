@@ -61,7 +61,7 @@ namespace pstore {
             using size_type = std::uint32_t;
 
             ///
-            bss_section (unsigned align, size_type size)
+            bss_section (unsigned const align, size_type const size)
                     : field64_{0} {
 
                 PSTORE_STATIC_ASSERT (std::is_standard_layout<bss_section>::value);
@@ -120,7 +120,8 @@ namespace pstore {
         //*                                            |_|                              *
         class bss_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
-            explicit bss_section_creation_dispatcher (gsl::not_null<section_content const *> sec)
+            explicit bss_section_creation_dispatcher (
+                gsl::not_null<section_content const *> const sec)
                     : section_creation_dispatcher (section_kind::bss)
                     , section_ (sec) {
                 assert (sec->ifixups.empty () && sec->xfixups.empty ());

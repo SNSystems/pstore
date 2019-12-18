@@ -63,9 +63,9 @@ namespace pstore {
             using result_type = void;
 
             void string_value (std::string const &) const noexcept {}
-            void integer_value (long ) const noexcept {}
-            void float_value (double ) const noexcept {}
-            void boolean_value (bool) const noexcept {}
+            void integer_value (long const) const noexcept {}
+            void float_value (double const) const noexcept {}
+            void boolean_value (bool const) const noexcept {}
             void null_value () const noexcept {}
 
             void begin_array () const noexcept {}
@@ -77,7 +77,7 @@ namespace pstore {
             result_type result () const noexcept {}
         };
 
-    } // namespace json
-} // namespace pstore
+    } // end namespace json
+} // end namespace pstore
 
 #endif // PSTORE_JSON_DOM_TYPES_HPP

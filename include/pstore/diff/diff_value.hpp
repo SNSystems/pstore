@@ -127,8 +127,7 @@ namespace pstore {
         }
 
         /// Make a value pointer which contains all different keys between two revisions for a
-        /// specific
-        /// index.
+        /// specific index.
         ///
         /// \pre new_revision >= old_revision
         ///
@@ -141,12 +140,13 @@ namespace pstore {
         /// \returns  A value pointer which contains a given index name and all different keys
         ///           between two revisions.
         template <typename Index, typename GetIndexFunction>
-        dump::value_ptr
-        make_index_diff (char const * name, database & db, revision_number const new_revision,
-                         revision_number const old_revision, GetIndexFunction get_index) {
+        dump::value_ptr make_index_diff (gsl::czstring const name, database & db,
+                                         revision_number const new_revision,
+                                         revision_number const old_revision,
+                                         GetIndexFunction get_index) {
             assert (new_revision >= old_revision);
 
-            details::revision_restorer _(db);
+            details::revision_restorer const _{db};
             db.sync (new_revision);
 
             return dump::make_value (dump::object::container{

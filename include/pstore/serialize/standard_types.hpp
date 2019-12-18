@@ -155,7 +155,7 @@ namespace pstore {
 
                 // Deleter will ensure that the string is destroyed on exit if an exception is
                 // raised here.
-                auto dtor = [](value_type * p) {
+                auto dtor = [] (value_type * const p) {
                     using string = std::string;
                     p->~string ();
                 };
@@ -165,11 +165,11 @@ namespace pstore {
                 str.resize (length);
 
 #ifdef PSTORE_HAVE_NON_CONST_STD_STRING_DATA
-                char * data = str.data ();
+                char * const data = str.data ();
 #else
                 // TODO: this is technically undefined behaviour. Remove once we've got access to
                 // the C++17 library on our platforms.
-                auto data = const_cast<char *> (str.data ());
+                auto * const data = const_cast<char *> (str.data ());
 #endif
                 // Now read the body of the string.
                 serialize::read_uninit (

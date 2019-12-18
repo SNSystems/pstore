@@ -87,8 +87,8 @@ namespace pstore {
                     : name_{name}
                     , contents_{contents}
                     , stat_{s} {}
-            constexpr dirent (gsl::czstring PSTORE_NONNULL name,
-                              directory const * PSTORE_NONNULL dir) noexcept
+            constexpr dirent (gsl::czstring const PSTORE_NONNULL name,
+                              directory const * const PSTORE_NONNULL dir) noexcept
                     : name_{name}
                     , contents_{dir}
                     , stat_{sizeof (dir), 0 /*time*/, mode_t::directory} {}
