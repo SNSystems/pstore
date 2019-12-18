@@ -68,6 +68,7 @@
 #    include "pstore/support/path.hpp"
 #    include "pstore/support/quoted_string.hpp"
 #    include "pstore/support/small_vector.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 
 // includes which depend on values in config.hpp
 #    ifdef PSTORE_HAVE_SYS_SYSCALL_H
@@ -87,7 +88,7 @@
 namespace {
 
     using uoff_type = std::make_unsigned<off_t>::type;
-    constexpr auto uoff_max = static_cast<uoff_type> (std::numeric_limits<off_t>::max ());
+    constexpr auto uoff_max = pstore::unsigned_cast (std::numeric_limits<off_t>::max ());
 
     template <typename MessageStr, typename PathStr>
     PSTORE_NO_RETURN void raise_file_error (int const err, MessageStr const message,
@@ -302,8 +303,7 @@ namespace pstore {
         // ~~~~~~~~~~~
         std::size_t file_handle::read_buffer (gsl::not_null<void *> const buffer,
                                               std::size_t const nbytes) {
-            if (nbytes > static_cast<std::make_unsigned<ssize_t>::type> (
-                             std::numeric_limits<ssize_t>::max ())) {
+            if (nbytes > unsigned_cast (std::numeric_limits<ssize_t>::max ())) {
                 raise (std::errc::invalid_argument, "read_buffer");
             }
             this->ensure_open ();
@@ -342,8 +342,7 @@ namespace pstore {
             }
 
             static_assert (std::numeric_limits<std::uint64_t>::max () >=
-                               static_cast<std::make_unsigned<decltype (buf.st_size)>::type> (
-                                   std::numeric_limits<decltype (buf.st_size)>::max ()),
+                               unsigned_cast (std::numeric_limits<decltype (buf.st_size)>::max ()),
                            "stat.st_size is too large for uint64_t");
             assert (buf.st_size >= 0);
             return static_cast<std::uint64_t> (buf.st_size);

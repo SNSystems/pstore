@@ -60,6 +60,7 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_small_vector.cpp
     test_sstring_view.cpp
     test_uint128.cpp
+    test_unsigned_cast.cpp
     test_utf.cpp
     test_utf_win32.cpp
     test_varint.cpp

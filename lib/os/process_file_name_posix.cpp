@@ -51,6 +51,7 @@
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/portab.hpp"
 #    include "pstore/support/small_vector.hpp"
+#    include "pstore/support/unsigned_cast.hpp"
 
 #    ifdef PSTORE_HAVE_NSGETEXECUTABLEPATH
 
@@ -150,8 +151,7 @@ namespace pstore {
                 raise (errno_erc{error}, str.str ());
             }
             PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () >=
-                                  static_cast<std::make_unsigned<ssize_t>::type> (
-                                      std::numeric_limits<ssize_t>::max ()));
+                                  unsigned_cast (std::numeric_limits<ssize_t>::max ()));
             return static_cast<std::size_t> (num_chars);
         };
 

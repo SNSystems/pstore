@@ -59,6 +59,7 @@
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/head_revision.hpp"
 #include "pstore/support/maybe.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 
 namespace {
 
@@ -71,11 +72,8 @@ namespace {
         // Skip leading whitespace.
         auto const begin = std::find_if_not (str.begin (), end, is_ws);
 
-        auto const new_length = std::distance (begin, end);
-        assert (new_length >= 0);
-
         std::string result;
-        result.reserve (static_cast<std::make_unsigned<decltype (new_length)>::type> (new_length));
+        result.reserve (pstore::unsigned_cast (std::distance (begin, end)));
         std::transform (begin, end, std::back_inserter (result),
                         [] (char const c) { return static_cast<char> (std::tolower (c)); });
         return result;

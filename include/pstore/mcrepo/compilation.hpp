@@ -50,6 +50,7 @@
 #include "pstore/core/transaction.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/support/bit_field.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 
 namespace pstore {
     namespace repo {
@@ -292,16 +293,10 @@ namespace pstore {
             PSTORE_STATIC_ASSERT (offsetof (compilation, padding1_) == 28);
             PSTORE_STATIC_ASSERT (offsetof (compilation, members_) == 32);
 
-#ifndef NDEBUG
-            {
-                // This check can safely be an assertion because the method is private and alloc(),
-                // the sole caller, performs a full run-time check of the size.
-                auto const dist = std::distance (first_member, last_member);
-                assert (dist >= 0 &&
-                        static_cast<typename std::make_unsigned<decltype (dist)>::type> (dist) ==
-                            size);
-            }
-#endif
+            // This check can safely be an assertion because the method is private and alloc(),
+            // the sole caller, performs a full run-time check of the size.
+            assert (unsigned_cast (std::distance (first_member, last_member)) == size);
+
             std::copy (first_member, last_member, this->begin ());
         }
 

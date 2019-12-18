@@ -322,6 +322,7 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/time.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/to_string.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/unsigned_cast.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
 )

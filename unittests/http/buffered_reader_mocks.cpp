@@ -54,6 +54,8 @@
 #include <cassert>
 #include <vector>
 
+#include "pstore/support/unsigned_cast.hpp"
+
 mock_refiller::~mock_refiller () noexcept = default;
 
 refiller::~refiller () noexcept = default;
@@ -73,10 +75,7 @@ refiller_function eof () {
 /// Returns a function which will yield the bytes as its argument.
 refiller_function yield_bytes (pstore::gsl::span<std::uint8_t const> const & v) {
     return [v](int io, pstore::gsl::span<std::uint8_t> const & s) {
-#ifndef NDEBUG
-        auto const size = s.size ();
-        assert (size > 0 && v.size () <= s.size ());
-#endif
+        assert (s.size () > 0 && v.size () <= s.size ());
         return refiller_result_type{pstore::in_place, io + 1,
                                     std::copy (v.begin (), v.end (), s.begin ())};
     };
@@ -85,11 +84,7 @@ refiller_function yield_bytes (pstore::gsl::span<std::uint8_t const> const & v) 
 /// Returns a function which will yield the string passed as its argument.
 refiller_function yield_string (std::string const & str) {
     return [str](int io, pstore::gsl::span<std::uint8_t> const & s) {
-#ifndef NDEBUG
-        auto const size = s.size ();
-        using uindex_type = std::make_unsigned<std::remove_const<decltype (size)>::type>::type;
-        assert (size > 0 && str.length () <= static_cast<uindex_type> (size));
-#endif
+        assert (str.length () <= pstore::unsigned_cast (s.size ()));
         return refiller_result_type{
             pstore::in_place, io + 1,
             std::transform (str.begin (), str.end (), s.begin (), [](std::uint8_t v) {
