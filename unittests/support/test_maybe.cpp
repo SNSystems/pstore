@@ -179,7 +179,11 @@ TEST (Maybe, MoveAssign) {
 
         m2 = std::move (m3);
         EXPECT_TRUE (m2.has_value ());
+        // Clang SA (correctly) warns that this is (strictly) undefined behavior. However, the
+        // moved-from type is defined here and so is its behaviour that I would like to test.
+#ifndef __clang_analyzer__
         EXPECT_TRUE (m3.has_value ()); // a moved-from maybe still contains a value.
+#endif
         EXPECT_EQ (m2.value (), std::string{"after"});
     }
 }

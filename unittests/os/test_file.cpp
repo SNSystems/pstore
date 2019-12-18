@@ -179,9 +179,13 @@ TEST (RangeLock, MoveConstruct) {
                                     mock_file::lock_kind::exclusive_write);
     pstore::file::range_lock lock2 = std::move (lock1);
 
+// Clang SA (correctly) warns that this is (strictly) undefined behavior. However, the
+// moved-from type is defined here and so is its behaviour that I would like to test.
+#ifndef __clang_analyzer__
     // Check that lock1 was "destroyed" by the move
     EXPECT_EQ (nullptr, lock1.file ());
     EXPECT_FALSE (lock1.is_locked ());
+#endif
 
     // Check that lock2 matches the state of lock1 before the move
     EXPECT_EQ (&file, lock2.file ());
@@ -235,11 +239,15 @@ TEST (RangeLock, MoveAssign) {
     target_lock.lock ();
     target_lock = std::move (source_lock);
 
+// Clang SA (correctly) warns that this is (strictly) undefined behavior. However, the
+// moved-from type is defined here and so is its behaviour that I would like to test.
+#ifndef __clang_analyzer__
     // Check that lock1 was "destroyed" by the move
     EXPECT_EQ (nullptr, source_lock.file ())
         << "The file associated with the source of a move assignment should be null";
     EXPECT_FALSE (source_lock.is_locked ())
         << "The source of a move assignment should not be locked";
+#endif
 
     // Check that lock2 matches the state of lock1 before the move
     EXPECT_EQ (&file1, target_lock.file ())
