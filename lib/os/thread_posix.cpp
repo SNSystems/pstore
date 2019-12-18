@@ -98,7 +98,7 @@ namespace pstore {
 
 #    ifdef __FreeBSD__
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
-#    endif
+#    endif // __FreeBSD__
 
         void set_name (gsl::not_null<gsl::czstring> name) {
             // pthread support for setting thread names comes in various non-portable forms.
@@ -111,11 +111,11 @@ namespace pstore {
             thread_name[name_size - 1] = '\0';
 #    else
             int err = 0;
-#        if PSTORE_PTHREAD_SETNAME_NP_1_ARG
+#        if defined(PSTORE_PTHREAD_SETNAME_NP_1_ARG)
             err = pthread_setname_np (name);
-#        elif PSTORE_PTHREAD_SETNAME_NP_2_ARGS
+#        elif defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS)
             err = pthread_setname_np (pthread_self (), name);
-#        elif PSTORE_PTHREAD_SET_NAME_NP
+#        elif defined(PSTORE_PTHREAD_SET_NAME_NP)
             pthread_set_name_np (pthread_self (), name);
 #        else
 #            error "pthread_setname was not available"
@@ -140,7 +140,7 @@ namespace pstore {
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_getname_np");
             }
-#    endif
+#    endif // __FreeBSD__
             name[length - 1] = '\0';
             return name.data ();
         }
