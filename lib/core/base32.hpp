@@ -79,7 +79,7 @@ namespace pstore {
         }
 
         template <typename OutputIterator>
-        OutputIterator convert (uint128 wide, OutputIterator out) {
+        OutputIterator convert (uint128 const wide, OutputIterator out) {
             auto high = wide.high ();
             auto low = wide.low ();
             constexpr auto mask = (1U << 5) - 1U;

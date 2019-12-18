@@ -161,11 +161,11 @@ namespace pstore {
                                               sat_iterator const segment_end) -> sat_iterator {
 
         (void) segment_end; // silence unused argument warning in release build.
-        std::shared_ptr<void> data = region->data ();
-        for (auto ptr = std::static_pointer_cast<std::uint8_t> (data).get (),
-                  end = ptr + region->size ();
-             ptr < end; ptr += address::segment_size) {
+        std::shared_ptr<void> const data = region->data ();
 
+        auto ptr = std::static_pointer_cast<std::uint8_t> (data).get ();
+        auto const end = ptr + region->size ();
+        for (; ptr < end; ptr += address::segment_size) {
             assert (segment_it != segment_end);
             sat_entry & segment = *segment_it;
             assert (segment.value == nullptr && segment.region == nullptr);
@@ -203,7 +203,7 @@ namespace pstore {
             }
 
             if (first_offset >= first.absolute () && last_offset > first_offset) {
-                auto pfirst =
+                auto const pfirst =
                     this->address_to_pointer (typed_address<std::uint8_t>::make (first_offset));
 
                 assert (pfirst >= region->data ());

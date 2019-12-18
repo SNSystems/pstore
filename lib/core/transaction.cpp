@@ -50,6 +50,7 @@
 #include "pstore/core/index_types.hpp"
 
 namespace pstore {
+
     transaction_base::transaction_base (transaction_base && rhs) noexcept
             : db_{rhs.db_}
             , size_{rhs.size_}
@@ -61,7 +62,7 @@ namespace pstore {
 
     // allocate
     // ~~~~~~~~
-    address transaction_base::allocate (std::uint64_t size, unsigned align) {
+    address transaction_base::allocate (std::uint64_t const size, unsigned const align) {
         database & db = this->db ();
         auto const old_size = db.size ();
         address const result = db.allocate (size, align);
@@ -84,8 +85,8 @@ namespace pstore {
 
     // alloc_rw
     // ~~~~~~~~
-    std::pair<std::shared_ptr<void>, address> transaction_base::alloc_rw (std::size_t size,
-                                                                          unsigned align) {
+    std::pair<std::shared_ptr<void>, address> transaction_base::alloc_rw (std::size_t const size,
+                                                                          unsigned const align) {
         address const addr = this->allocate (size, align);
         // We call database::get() with the initialized parameter set to false because this
         // is new storage: there's no need to copy its existing contents if the block spans
@@ -166,4 +167,4 @@ namespace pstore {
         return *this;
     }
 
-} // namespace pstore
+} // end namespace pstore

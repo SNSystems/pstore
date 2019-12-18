@@ -144,7 +144,7 @@ namespace pstore {
 
     // validate [static]
     // ~~~~~~~~
-    bool trailer::validate (database const & db, typed_address<trailer> pos) {
+    bool trailer::validate (database const & db, typed_address<trailer> const pos) {
         if (pos == typed_address<trailer>::null ()) {
             return true;
         }

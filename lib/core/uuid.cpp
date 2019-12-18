@@ -242,7 +242,7 @@ namespace pstore {
         std::string resl;
         resl.reserve (string_length);
         auto index = 0U;
-        std::for_each (std::begin (data_), std::end (data_), [&](unsigned c) {
+        std::for_each (std::begin (data_), std::end (data_), [&] (unsigned const c) {
             switch (index++) {
             case 4:
             case 6:

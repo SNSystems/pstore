@@ -53,7 +53,7 @@
 namespace pstore {
 
     void start_vacuum (database const & db) {
-        broker::fifo_path fifo (nullptr);
+        broker::fifo_path const fifo (nullptr);
         broker::writer wr (fifo);
         broker::send_message (wr, false /*error on timeout*/, "GC", db.path ().c_str ());
     }

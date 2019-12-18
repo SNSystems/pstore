@@ -60,7 +60,7 @@ namespace pstore {
 
     std::uint64_t milliseconds_since_epoch () {
         using namespace std::chrono;
-        system_clock::duration dur = system_clock::now ().time_since_epoch ();
+        system_clock::duration const dur = system_clock::now ().time_since_epoch ();
         auto const ms = duration_cast<milliseconds> (dur);
 
         using rep = milliseconds::rep;

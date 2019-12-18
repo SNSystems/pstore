@@ -45,10 +45,10 @@
 #include "pstore/core/errno_exception.hpp"
 
 namespace pstore {
-    errno_exception::errno_exception (int errcode, char const * message)
+    errno_exception::errno_exception (int const errcode, char const * const message)
             : std::system_error (std::error_code (errcode, std::generic_category ()), message) {}
 
-    errno_exception::errno_exception (int errcode, std::string const & message)
+    errno_exception::errno_exception (int const errcode, std::string const & message)
             : std::system_error (std::error_code (errcode, std::generic_category ()), message) {}
 
     errno_exception::~errno_exception () = default;
