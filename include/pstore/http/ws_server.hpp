@@ -438,7 +438,7 @@ namespace pstore {
         template <typename Sender, typename IO>
         error_or<IO> close_message (Sender const sender, IO const io, frame const & wsp) {
             auto state = close_status_code::normal;
-            auto payload_size = wsp.payload.size ();
+            auto const payload_size = wsp.payload.size ();
 
             // "If there is a body, the first two bytes of the body MUST be a 2-byte unsigned
             // integer (in network byte order) representing a status code with value /code/ defined

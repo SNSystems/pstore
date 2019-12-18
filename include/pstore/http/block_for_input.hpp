@@ -61,7 +61,7 @@ namespace pstore {
     namespace httpd {
 
         struct inputs_ready {
-            inputs_ready (bool s, bool c)
+            constexpr inputs_ready (bool const s, bool const c) noexcept
                     : socket{s}
                     , cv{c} {}
             inputs_ready (inputs_ready const &) = default;
@@ -151,7 +151,7 @@ namespace pstore {
                 log (logging::priority::notice, "no data within timeout");
             }
 
-            auto const isset = [&read_fds, &error_fds](int fd) {
+            auto const isset = [&read_fds, &error_fds] (int const fd) {
                 return FD_ISSET (fd, &read_fds) || FD_ISSET (fd, &error_fds);
             };
             return {isset (socket_fd.native_handle ()),

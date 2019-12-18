@@ -64,13 +64,13 @@ namespace pstore {
 
             template <typename InputIt, typename OutputIt>
             OutputIt escape (InputIt first, InputIt last, OutputIt out) {
-                std::for_each (first, last, [&out](char c) {
-                    auto const is_unreserved_char = [](char c2) {
+                std::for_each (first, last, [&out] (char c) {
+                    auto const is_unreserved_char = [] (char const c2) {
                         return (c2 >= 'A' && c2 <= 'Z') || (c2 >= 'a' && c2 <= 'z') ||
                                (c2 >= '0' && c2 <= '9') || c2 == '-' || c2 == '.' || c2 == '_' ||
                                c2 == '~';
                     };
-                    auto const nibble_to_hex_char = [](unsigned n) {
+                    auto const nibble_to_hex_char = [] (unsigned const n) {
                         auto const c2 = n & 0x0FU;
                         return static_cast<char> (c2 < 10 ? c2 + '0' : c2 - 10 + 'A');
                     };

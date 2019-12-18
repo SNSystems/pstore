@@ -168,9 +168,10 @@ namespace pstore {
                 } else {
                     key = ms->substr (0, pos);
                     // HTTP header names are case-insensitive so convert to lower-case here.
-                    std::transform (key.begin (), key.end (), key.begin (), [](unsigned char c) {
-                        return static_cast<char> (std::tolower (c));
-                    });
+                    std::transform (key.begin (), key.end (), key.begin (),
+                                    [] (unsigned char const c) {
+                                        return static_cast<char> (std::tolower (c));
+                                    });
 
                     ++pos; // skip the colon
                     // skip optional whitespace before the value string.

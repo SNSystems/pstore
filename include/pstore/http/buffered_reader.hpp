@@ -182,8 +182,8 @@ namespace pstore {
         // ctor
         // ~~~~
         template <typename IO, typename RefillFunction>
-        buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction refill,
-                                                              std::size_t buffer_size)
+        buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction const refill,
+                                                              std::size_t const buffer_size)
                 : refill_ (refill)
                 , buf_ (std::max (buffer_size, std::size_t{1}), std::uint8_t{0})
                 , span_ (gsl::make_span (buf_))

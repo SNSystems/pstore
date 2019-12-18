@@ -64,7 +64,7 @@ namespace pstore {
             pstore::error_or<IO> read_and_send (Sender sender, IO io,
                                                 pstore::romfs::descriptor fd) {
                 std::array<std::uint8_t, 1024> buffer{{0}};
-                auto data = buffer.data ();
+                auto * const data = buffer.data ();
                 std::size_t const num_read =
                     fd.read (data, sizeof (decltype (buffer)::value_type), buffer.size ());
                 if (num_read == 0) {

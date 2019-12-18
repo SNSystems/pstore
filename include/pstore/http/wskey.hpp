@@ -100,8 +100,8 @@ namespace pstore {
             void pad_message () noexcept;
 
             // The SHA1 circular left shift.
-            static constexpr std::uint32_t circular_shift (unsigned bits,
-                                                           std::uint32_t word) noexcept {
+            static constexpr std::uint32_t circular_shift (unsigned const bits,
+                                                           std::uint32_t const word) noexcept {
                 return (word << bits) | (word >> (32U - bits));
             }
 

@@ -53,7 +53,7 @@ namespace pstore {
 
         class server_status {
         public:
-            constexpr explicit server_status (in_port_t port) noexcept
+            constexpr explicit server_status (in_port_t const port) noexcept
                     : state_{http_state::initializing}
                     , port_{port} {}
 
