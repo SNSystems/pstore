@@ -79,6 +79,8 @@ namespace {
         if (_setmode (_fileno (file), O_BINARY) == -1) {
             throw std::runtime_error ("Cannot set stream to binary mode");
         }
+#else
+        (void) file; // Avoid an unused argument warning.
 #endif
     }
 
