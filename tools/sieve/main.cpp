@@ -128,7 +128,6 @@ int main (int argc, char * argv[]) {
     PSTORE_TRY {
         user_options const opt = user_options::get (argc, argv);
 
-        std::shared_ptr<std::ostream> out_ptr;
         auto out = open_output_file (opt.output);
         if (opt.maximum <= std::numeric_limits<std::uint16_t>::max ()) {
             write_output (sieve<std::uint16_t> (opt.maximum), opt.endianness, out);
