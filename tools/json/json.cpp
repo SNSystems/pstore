@@ -164,14 +164,15 @@ int main (int argc, char const * argv[]) {
         }
     }
     // clang-format off
-    PSTORE_CATCH (std::exception const & ex, {
-        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ()) << NATIVE_TEXT ('\n');
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
+        error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
+                     << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
-    PSTORE_CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
         error_stream << NATIVE_TEXT ("Unknown exception.\n");
         exit_code = EXIT_FAILURE;
     })
-    // clang-format on
     return exit_code;
 }
