@@ -236,6 +236,8 @@ TEST (Path, PosixSplitDrive) {
 TEST (Path, Win32SplitDrive) {
     using pair = std::pair<std::string, std::string>;
 
+    EXPECT_EQ (pair ("", ""), pstore::path::win32::split_drive (""));
+    EXPECT_EQ (pair ("", "a"), pstore::path::win32::split_drive ("a"));
     EXPECT_EQ (pair ("", "bar"), pstore::path::win32::split_drive ("bar"));
     EXPECT_EQ (pair ("", "/foo/bar"), pstore::path::win32::split_drive ("/foo/bar"));
     EXPECT_EQ (pair ("", "foo/bar"), pstore::path::win32::split_drive ("foo/bar"));

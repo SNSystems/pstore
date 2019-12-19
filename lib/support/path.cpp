@@ -90,52 +90,53 @@ namespace pstore {
 
             // Split a path in a drive specification (a drive letter followed by a
             // colon) and the path specification.
-            // It is always true that drivespec + pathspec == p
+            // It is always true that drivespec + pathspec == path
             //
-            //    If the path contained a drive letter, drive_or_unc will contain everything
-            //    up to and including the colon.  e.g. splitdrive("c:/dir") returns ("c:", "/dir")
+            // If the path contained a drive letter, drivespec will contain everything
+            // up to and including the colon.  e.g. split_drive("c:/dir") returns ("c:", "/dir")
             //
-            //    If the path contained a UNC path, the drive_or_unc will contain the host name
-            //    and share up to but not including the fourth directory separator character.
-            //    e.g. splitdrive("//host/computer/dir") returns ("//host/computer", "/dir")
+            // If the path contained a UNC path, the drivespec will contain the host name
+            // and share up to but not including the fourth directory separator character.
+            // e.g. split_drive("//host/computer/dir") returns ("//host/computer", "/dir")
             //
-            //    Paths cannot contain both a drive letter and a UNC path.
+            // Paths cannot contain both a drive letter and a UNC path.
 
-            std::pair<std::string, std::string> split_drive (std::string const & p) {
-                if (p.length () > 1) {
-                    // Normalize the slash direction.
-                    std::string normp;
-                    normp.reserve (p.length ());
-                    std::transform (std::begin (p), std::end (p), std::back_inserter (normp),
-                                    [] (char const c) { return c == '\\' ? '/' : c; });
-
-                    if ((normp.length () > 2 && normp[0] == '/' && normp[1] == '/') &&
-                        (normp.length () > 3 && normp[2] != '/')) {
-                        // is a UNC path:
-                        // vvvvvvvvvvvvvvvvvvvv drive letter or UNC path
-                        // \\machine\mountpoint\directory\etc\...
-                        //           directory ^^^^^^^^^^^^^^^
-                        std::string::size_type const index = normp.find ('/', 2);
-                        if (index == std::string::npos) {
-                            return {"", p};
-                        }
-
-                        std::string::size_type index2 = normp.find ('/', index + 1);
-                        // a UNC path can't have two slashes in a row
-                        // (after the initial two)
-                        if (index2 == index + 1) {
-                            return {"", p};
-                        }
-                        if (index2 == std::string::npos) {
-                            index2 = p.length ();
-                        }
-                        return {p.substr (0, index2), p.substr (index2, std::string::npos)};
-                    }
-                    if (normp.length () > 1 && normp[1] == ':') {
-                        return {p.substr (0, 2), p.substr (2, std::string::npos)};
-                    }
+            std::pair<std::string, std::string> split_drive (std::string const & path) {
+                if (path.length () <= 1) {
+                    return {"", path};
                 }
-                return {"", p};
+
+                // Normalize the slash direction.
+                std::string normp;
+                normp.reserve (path.length ());
+                std::transform (std::begin (path), std::end (path), std::back_inserter (normp),
+                                [] (char const c) { return c == '\\' ? '/' : c; });
+
+                if ((normp.length () > 2 && normp[0] == '/' && normp[1] == '/') &&
+                    (normp.length () > 3 && normp[2] != '/')) {
+                    // This is is a UNC path:
+                    // vvvvvvvvvvvvvvvvvvvv drive letter or UNC path
+                    // \\machine\mountpoint\directory\etc\...
+                    //           directory ^^^^^^^^^^^^^^^
+                    std::string::size_type const index = normp.find ('/', 2);
+                    if (index == std::string::npos) {
+                        return {"", path};
+                    }
+
+                    std::string::size_type index2 = normp.find ('/', index + 1);
+                    // An UNC path can't have two slashes in a row (after the initial two)
+                    if (index2 == index + 1) {
+                        return {"", path};
+                    }
+                    if (index2 == std::string::npos) {
+                        index2 = path.length ();
+                    }
+                    return {path.substr (0, index2), path.substr (index2, std::string::npos)};
+                }
+                if (normp.length () > 1 && normp[1] == ':') {
+                    return {path.substr (0, 2), path.substr (2, std::string::npos)};
+                }
+                return {"", path};
             }
 
 
