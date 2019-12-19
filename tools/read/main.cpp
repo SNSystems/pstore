@@ -70,85 +70,79 @@ using pstore::cmd_util::out_stream;
 
 namespace {
 
-    void set_output_stream_to_binary (FILE * const fd) {
-        if (fd) {
+    void set_output_stream_to_binary (pstore::gsl::not_null<FILE *> const file) {
 #ifdef _MSC_VER
-            // In Visual Studio, stream I/O routines operate on a file that is open in text mode and
-            // where line-feed characters are translated into CR-LF combinations on output. Here,
-            // the stream is placed in binary mode, in which the translation is suppressed.
-            int result = _setmode (_fileno (stdout), O_BINARY);
-            if (result == -1) {
-                throw std::runtime_error ("Cannot set stream to binary mode");
-            }
-#endif
+        // In Visual Studio, stream I/O routines operate on a file that is open in text mode and
+        // where line-feed characters are translated into CR-LF combinations on output. Here,
+        // the stream is placed in binary mode, in which the translation is suppressed.
+
+        if (_setmode (_fileno (file), O_BINARY) == -1) {
+            throw std::runtime_error ("Cannot set stream to binary mode");
         }
+#endif
     }
 
-
     bool read_strings_index (pstore::database const & db, std::string const & key) {
-        bool ok = true;
-
         std::shared_ptr<pstore::index::name_index const> const strings =
             pstore::index::get_index<pstore::trailer::indices::name> (db);
         if (strings == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Strings index was not found") << std::endl;
-            ok = false;
-        } else {
-            auto str = pstore::make_sstring_view (key);
-            auto const it = strings->find (db, pstore::indirect_string{db, &str});
-            if (it == strings->cend (db)) {
-                error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
-                             << std::endl;
-                // note that the program does not signal failure if the key is missing.
-            } else {
-                pstore::shared_sstring_view owner;
-                out_stream << pstore::utf::to_native_string (
-                    it->as_db_string_view (&owner).to_string ());
-            }
+            return false;
         }
-        return ok;
+
+        auto str = pstore::make_sstring_view (key);
+        auto const it = strings->find (db, pstore::indirect_string{db, &str});
+        if (it == strings->cend (db)) {
+            error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
+                         << std::endl;
+            // note that the program does not signal failure if the key is missing.
+        } else {
+            pstore::shared_sstring_view owner;
+            out_stream << pstore::utf::to_native_string (
+                it->as_db_string_view (&owner).to_string ());
+        }
+        return true;
     }
 
 
     bool read_names_index (pstore::database const & db, std::string const & key) {
-        bool ok = true;
-
         std::shared_ptr<pstore::index::write_index const> const names =
             pstore::index::get_index<pstore::trailer::indices::write> (db);
         if (names == nullptr) {
             error_stream << NATIVE_TEXT ("Error: Names index was not found") << std::endl;
-            ok = false;
+            return false;
+        }
+
+        auto const it = names->find (db, key);
+        if (it == names->cend (db)) {
+            error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
+                         << std::endl;
+            // note that the program does not signal failure if the key is missing.
         } else {
-            auto const it = names->find (db, key);
-            if (it == names->cend (db)) {
-                error_stream << pstore::utf::to_native_string (key) << NATIVE_TEXT (": not found")
-                             << std::endl;
-                // note that the program does not signal failure if the key is missing.
-            } else {
-                pstore::extent<char> const & r = it->second;
-                std::shared_ptr<char const> ptr = db.getro (r);
+            pstore::extent<char> const & r = it->second;
+            std::shared_ptr<char const> ptr = db.getro (r);
 
-                std::ostream & out = std::cout;
-                out.exceptions (std::ofstream::failbit | std::ofstream::badbit);
+            std::ostream & out = std::cout;
+            out.exceptions (std::ofstream::failbit | std::ofstream::badbit);
 
-                std::uint64_t size = r.size;
-                constexpr auto const stream_size_max = std::numeric_limits<std::streamsize>::max ();
-                static_assert (stream_size_max > 0,
-                               "streamsize must be able to hold positive values");
-                set_output_stream_to_binary (stdout);
+            std::uint64_t size = r.size;
+            constexpr auto stream_size_max = std::numeric_limits<std::streamsize>::max ();
+            static_assert (stream_size_max > 0,
+                           "streamsize must be able to hold positive values");
+            set_output_stream_to_binary (stdout);
 
-                while (size > 0) {
-                    std::streamsize const size_to_write = size > stream_size_max
-                                                              ? stream_size_max
-                                                              : static_cast<std::streamsize> (size);
-                    assert (size_to_write > 0);
-                    out.write (reinterpret_cast<char const *> (ptr.get ()), size_to_write);
-                    size -= static_cast<std::make_unsigned<
-                        std::remove_const<decltype (size_to_write)>::type>::type> (size_to_write);
-                }
+            while (size > 0) {
+                std::streamsize const size_to_write = size > stream_size_max
+                                                          ? stream_size_max
+                                                          : static_cast<std::streamsize> (size);
+                assert (size_to_write > 0);
+                out.write (reinterpret_cast<char const *> (ptr.get ()), size_to_write);
+                size -= static_cast<std::make_unsigned<
+                    std::remove_const<decltype (size_to_write)>::type>::type> (size_to_write);
             }
         }
-        return ok;
+
+        return true;
     }
 
 } // end anonymous namespace
@@ -175,16 +169,16 @@ int main (int argc, char * argv[]) {
         exit_code = ok ? EXIT_SUCCESS : EXIT_FAILURE;
     }
     // clang-format off
-    PSTORE_CATCH (std::exception const & ex, {
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
         error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ())
                     << std::endl;
         exit_code = EXIT_FAILURE;
     })
-    PSTORE_CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
         error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
-    // clang-format on
 
     return exit_code;
 }
