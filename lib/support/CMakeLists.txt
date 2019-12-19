@@ -49,12 +49,12 @@
 
 set (CMAKE_REQUIRED_LIBRARIES )
 
-# I need these tests to be performed with the compiler in C++11 mode. Unfortunately, there's no
+# I need these tests to be performed with the compiler in C++14 mode. Unfortunately, there's no
 # simple way to tell cmake that so I manually enable the language by setting CMAKE_CXX_FLAGS and
 # restoring it at the end. See also <https://gitlab.kitware.com/cmake/cmake/issues/15361>.
 set (OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 if (NOT MSVC)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif (NOT MSVC)
 
 include (CheckCXXSourceCompiles)
