@@ -162,7 +162,7 @@ namespace {
     // not_blocked
     // ~~~~~~~~~~~
     void blocked_notifier::not_blocked () {
-        std::lock_guard<std::mutex> _{mut_};
+        std::lock_guard<std::mutex> _{mut_}; //!OCLint(PH - meant to be unused)
         is_blocked_ = false;
         cv_.notify_all ();
     }

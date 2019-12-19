@@ -169,7 +169,7 @@ namespace {
 
     void find (pstore::database const & database, pstore::index::fragment_index const & index,
                digest_set const & keys) {
-        profile_marker sgn (2);
+        profile_marker sgn (2); //!OCLint(PH - meant to be unused)
 
         parallel_for_each (
             std::begin (keys), std::end (keys),
@@ -213,7 +213,7 @@ int main (int argc, char * argv[]) {
         std::vector<std::uint8_t> value{0, 1};
 
         {
-            profile_marker sgn (1);
+            profile_marker sgn (1); //!OCLint(PH - meant to be unused)
 
             auto const num_keys = std::size_t{300000};
             rng random;
@@ -238,7 +238,7 @@ int main (int argc, char * argv[]) {
         find (database, *index, keys);
 
         {
-            profile_marker sgn (3);
+            profile_marker sgn (3); //!OCLint(PH - meant to be unused)
             // Start a transaction...
             auto transaction = pstore::begin (database);
 
