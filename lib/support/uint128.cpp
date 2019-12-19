@@ -46,8 +46,9 @@
 
 namespace {
 
-    constexpr std::size_t expected_length = 32;
-    inline char digit_to_hex (unsigned v) {
+    constexpr auto expected_length = std::size_t{32};
+
+    constexpr char digit_to_hex (unsigned const v) noexcept {
         assert (v < 0x10);
         return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
     }

@@ -56,7 +56,7 @@
 namespace {
     template <typename InputIterator>
     std::ostream & hex_dump (std::ostream & os, InputIterator first, InputIterator last) {
-        pstore::ios_flags_saver flags (os);
+        pstore::ios_flags_saver const flags{os};
         os << std::setfill ('0') << std::hex;
 
         using value_type = typename std::iterator_traits<InputIterator>::value_type;

@@ -109,7 +109,7 @@ namespace vacuum {
                     ++count;
 
                     auto const current_time = from->latest_time ();
-                    bool file_modified = current_time > start_time;
+                    bool const file_modified = current_time > start_time;
                     start_time = current_time;
 
                     if (file_modified || !can_lock (lock)) {

@@ -55,14 +55,11 @@ namespace pstore {
     namespace dump {
 
         value_ptr make_debuglineheader_value (std::uint8_t const * first, std::uint8_t const * last,
-                                              bool hex_mode) {
-            value_ptr v;
+                                              bool const hex_mode) {
             if (hex_mode) {
-                v = std::make_shared<binary16> (first, last);
-            } else {
-                v = std::make_shared<binary> (first, last);
+                return std::make_shared<binary16> (first, last);
             }
-            return v;
+            return std::make_shared<binary> (first, last);
         }
 
     } // namespace dump

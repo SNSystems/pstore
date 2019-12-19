@@ -232,7 +232,7 @@ namespace pstore {
 
         value_ptr make_value (database const & db, index::fragment_index::value_type const & value,
                               gsl::czstring const triple, bool const hex_mode) {
-            auto fragment = repo::fragment::load (db, value.second);
+            auto const fragment = repo::fragment::load (db, value.second);
             return make_value (object::container{
                 {"digest", make_value (value.first)},
                 {"fragment", make_fragment_value (db, *fragment, triple, hex_mode)}});

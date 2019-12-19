@@ -102,7 +102,7 @@ namespace pstore {
             raise (pstore::errno_erc{errno}, "mmap");
         }
 
-        auto const deleter = [ptr, size](std::uint8_t *) { ::munmap (ptr, size); };
+        auto const deleter = [ptr, size] (std::uint8_t * const) { ::munmap (ptr, size); };
         auto const mask = ~(std::uintptr_t{align} - 1);
         auto * const ptr_aligned = reinterpret_cast<std::uint8_t *> (
             (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);

@@ -52,23 +52,23 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            std::string::size_type string_distance (std::string const & from,
-                                                    std::string const & to,
-                                                    std::string::size_type max_edit_distance) {
+            std::string::size_type
+            string_distance (std::string const & from, std::string const & to,
+                             std::string::size_type const max_edit_distance) {
                 using size_type = std::string::size_type;
                 size_type const m = from.size ();
                 size_type const n = to.size ();
 
                 small_vector<size_type, 64> column (m + 1U);
                 std::iota (std::begin (column), std::end (column), size_type{0});
-                auto column_start = size_type{1};
+                constexpr auto column_start = size_type{1};
 
                 for (auto x = column_start; x <= n; x++) {
                     column[0] = x;
                     auto best_this_column = x;
                     auto last_diagonal = x - column_start;
                     for (auto y = column_start; y <= m; y++) {
-                        auto old_diagonal = column[y];
+                        auto const old_diagonal = column[y];
                         column[y] =
                             std::min ({column[y] + 1U, column[y - 1U] + 1U,
                                        last_diagonal + (from[y - 1U] == to[x - 1U] ? 0U : 1U)});
@@ -82,6 +82,6 @@ namespace pstore {
                 return column[m];
             }
 
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore

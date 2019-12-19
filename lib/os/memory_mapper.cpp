@@ -57,11 +57,11 @@ namespace pstore {
     system_page_size_interface::~system_page_size_interface () noexcept = default;
     system_page_size::~system_page_size () noexcept = default;
 
-    void memory_mapper_base::read_only (void * addr, std::size_t len) {
+    void memory_mapper_base::read_only (void * const addr, std::size_t const len) {
 #ifndef NDEBUG
         {
-            auto addr8 = static_cast<std::uint8_t *> (addr);
-            auto data8 = static_cast<std::uint8_t *> (this->data ().get ());
+            auto * const addr8 = static_cast<std::uint8_t *> (addr);
+            auto * const data8 = static_cast<std::uint8_t *> (this->data ().get ());
             assert (addr8 >= data8 && addr8 + len <= data8 + this->size ());
         }
 #endif

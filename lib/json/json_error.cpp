@@ -52,7 +52,7 @@ char const * pstore::json::error_category::name () const noexcept {
     return "json parser category";
 }
 
-std::string pstore::json::error_category::message (int error) const {
+std::string pstore::json::error_category::message (int const error) const {
     auto * result = "unknown json::error_category error";
     switch (static_cast<error_code> (error)) {
     case error_code::none: result = "none"; break;

@@ -59,7 +59,7 @@ namespace pstore {
         //*          |_|                                   *
         // size_bytes
         // ~~~~~~~~~~
-        std::size_t dependents::size_bytes (std::uint64_t size) noexcept {
+        std::size_t dependents::size_bytes (std::uint64_t const size) noexcept {
             if (size == 0) {
                 return 0;
             }
@@ -77,7 +77,7 @@ namespace pstore {
         std::shared_ptr<dependents const>
         dependents::load (database const & db, typed_address<dependents> const dependent) {
             // First work out its size, then read the full-size of the object.
-            std::shared_ptr<dependents const> ln = db.getro (dependent);
+            std::shared_ptr<dependents const> const ln = db.getro (dependent);
             return db.getro (dependent, dependents::size_bytes (ln->size ()));
         }
 
@@ -93,7 +93,7 @@ namespace pstore {
             return dependents::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
         }
 
-        std::uint8_t * dependents_creation_dispatcher::write (std::uint8_t * out) const {
+        std::uint8_t * dependents_creation_dispatcher::write (std::uint8_t * const out) const {
             assert (this->aligned (out) == out);
             if (begin_ == end_) {
                 return out;
@@ -102,7 +102,8 @@ namespace pstore {
             return out + dependent->size_bytes ();
         }
 
-        std::uintptr_t dependents_creation_dispatcher::aligned_impl (std::uintptr_t in) const {
+        std::uintptr_t
+        dependents_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
             return pstore::aligned<dependents> (in);
         }
 

@@ -69,7 +69,7 @@ namespace {
 
         // Wake up the watch thread immediately.
         auto & wst = vacuum::wst;
-        std::lock_guard<decltype (wst.start_watch_mutex)> lock (wst.start_watch_mutex);
+        std::lock_guard<decltype (wst.start_watch_mutex)> const lock{wst.start_watch_mutex};
         wst.start_watch_cv.notify_one ();
     }
 
@@ -78,7 +78,7 @@ namespace {
     void start_watching (std::shared_ptr<pstore::database> const & source,
                          vacuum::status * const st) {
         auto & wst = vacuum::wst;
-        std::lock_guard<decltype (wst.start_watch_mutex)> lock (wst.start_watch_mutex);
+        std::lock_guard<decltype (wst.start_watch_mutex)> const lock{wst.start_watch_mutex};
         source->sync ();
         wst.start_watch = true;
         st->modified = false;
@@ -96,7 +96,7 @@ namespace {
         for (auto now = std::chrono::system_clock::now (); now < wait_until && !st->done;
              now = std::chrono::system_clock::now ()) {
             // TODO: watch the file for modification. If it is touched, reset wait_until.
-            auto remaining = wait_until - now;
+            auto const remaining = wait_until - now;
             log (pstore::logging::priority::notice, "Pre-copy delay. Remaining (ms): ",
                  std::chrono::duration_cast<std::chrono::milliseconds> (remaining).count ());
             wst.start_watch_cv.wait_for (lock, vacuum::watch_interval);

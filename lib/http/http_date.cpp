@@ -53,7 +53,7 @@
 namespace {
 
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    constexpr std::size_t as_index (T v, std::size_t size) noexcept {
+    constexpr std::size_t as_index (T const v, std::size_t const size) noexcept {
         return std::min (static_cast<std::size_t> (std::max (v, T{0})), size - std::size_t{1});
     }
 
@@ -63,7 +63,7 @@ namespace pstore {
     namespace httpd {
 
         // Produce a date in http-date format (https://tools.ietf.org/html/rfc7231#page-65)
-        std::string http_date (time_t time) {
+        std::string http_date (time_t const time) {
             std::tm const t = gm_time (time);
 
             // day-name = %x4D.6F.6E ; "Mon", case-sensitive
@@ -112,7 +112,7 @@ namespace pstore {
             return fixdate.str ();
         }
 
-        std::string http_date (std::chrono::system_clock::time_point time) {
+        std::string http_date (std::chrono::system_clock::time_point const time) {
             return http_date (std::chrono::system_clock::to_time_t (time));
         }
 

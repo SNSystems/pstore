@@ -243,7 +243,7 @@ namespace pstore {
         // digest_to_base64 [static]
         // ~~~~~~~~~~~~~~~~
         std::string sha1::digest_to_base64 (sha1::result_type const & digest) {
-            char const * alphabet =
+            constexpr gsl::czstring alphabet =
                 "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             std::string result;
             for (auto ctr = 0U; ctr < 18U; ctr += 3U) {

@@ -100,7 +100,7 @@ namespace pstore {
         static PSTORE_THREAD_LOCAL char thread_name[name_size];
 #    endif // __FreeBSD__
 
-        void set_name (gsl::not_null<gsl::czstring> name) {
+        void set_name (gsl::not_null<gsl::czstring> const name) {
             // pthread support for setting thread names comes in various non-portable forms.
             // Here I'm supporting three versions:
             // - the single argument version used by Mac OS X
@@ -126,7 +126,7 @@ namespace pstore {
 #    endif // __FreeBSD__
         }
 
-        gsl::czstring get_name (gsl::span<char, name_size> name /*out*/) {
+        gsl::czstring get_name (gsl::span<char, name_size> const name /*out*/) {
             auto const length = name.size ();
             if (name.data () == nullptr || length < 1) {
                 raise (errno_erc{EINVAL});
@@ -135,8 +135,8 @@ namespace pstore {
             std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
 #    else
             assert (length == name.size_bytes ());
-            int err = pthread_getname_np (pthread_self (), name.data (),
-                                          static_cast<std::size_t> (length));
+            int const err = pthread_getname_np (pthread_self (), name.data (),
+                                                static_cast<std::size_t> (length));
             if (err != 0) {
                 raise (errno_erc{err}, "pthread_getname_np");
             }

@@ -76,7 +76,7 @@ namespace {
     //***************
     //* quit thread *
     //***************
-    void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> /*src_db*/) {
+    void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> const /*src_db*/) {
         PSTORE_TRY {
             pstore::threads::set_name ("quit");
             pstore::logging::create_log_stream ("vacuum.quit");
@@ -111,8 +111,8 @@ namespace {
     // signal_handler
     // ~~~~~~~~~~~~~~
     /// A signal handler entry point.
-    void signal_handler (int sig) {
-        pstore::errno_saver saver;
+    void signal_handler (int const sig) {
+        pstore::errno_saver const saver;
         quit_info.notify_all (sig);
     }
 
