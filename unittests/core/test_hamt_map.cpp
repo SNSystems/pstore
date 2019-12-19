@@ -50,7 +50,6 @@
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
 
-#include "binary.hpp"
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
@@ -500,10 +499,10 @@ namespace {
     };
 
     std::map<std::string, std::uint64_t> const OneLevel::hashes_{
-        {"a", binary<std::uint64_t, 0, 0, 0, 0, 1, 1>::value},
-        {"b", binary<std::uint64_t, 0, 0, 0, 0, 0, 1>::value},
-        {"c", binary<std::uint64_t, 0, 0, 0, 1, 1, 1>::value},
-        {"d", binary<std::uint64_t, 0, 0, 1, 1, 1, 1>::value},
+        {"a", 0b000011},
+        {"b", 0b000001},
+        {"c", 0b000111},
+        {"d", 0b001111},
     };
 } // end anonymous namespace
 
@@ -534,7 +533,7 @@ TEST_F (OneLevel, InsertSecondNode) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1, 0, 1, 0>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1010U);
         this->check_is_leaf_node ((*root_internal)[0]);
         this->check_is_leaf_node ((*root_internal)[1]);
         EXPECT_GT ((*root_internal)[0].addr.absolute (), (*root_internal)[1].addr.absolute ());
@@ -576,7 +575,7 @@ TEST_F (OneLevel, InsertThirdNode) {
         auto root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1, 0, 0, 0, 1, 0, 1, 0>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b10001010U);
         this->check_is_leaf_node ((*root_internal)[2]);
         EXPECT_GT ((*root_internal)[2].addr.absolute (), (*root_internal)[1].addr.absolute ());
         EXPECT_GT ((*root_internal)[2].addr.absolute (), (*root_internal)[0].addr.absolute ());
@@ -605,8 +604,7 @@ TEST_F (OneLevel, InsertFourthNode) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (),
-                   (binary<unsigned, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b10000000'10001010);
         EXPECT_EQ (4U, pstore::bit_count::pop_count (root_internal->get_bitmap ()));
         this->check_is_leaf_node ((*root_internal)[3]);
         EXPECT_GT ((*root_internal)[3].addr.absolute (), (*root_internal)[2].addr.absolute ());
@@ -723,7 +721,7 @@ namespace {
     class TwoValuesWithHashCollision : public GenericIndexFixture {
     protected:
         TwoValuesWithHashCollision ()
-                : hash_ (hashes_) {}
+                : hash_{hashes_} {}
 
         virtual void SetUp () final {
             GenericIndexFixture::SetUp ();
@@ -741,22 +739,18 @@ namespace {
                               unsigned collision_level);
     };
 
-    using lower6 = binary<std::uint64_t, 0, 0, 0, 0, 0, 0>;
-    static_assert (lower6::length == 6, "a 6 bit value shold have length 6");
-
-    using lower60 = binary<std::uint64_t, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
-                           0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0,
-                           0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0>;
-    static_assert (lower60::length == 60, "a 60 bit value should have length 60");
+    constexpr auto lower6 = UINT64_C (0b000000);
+    constexpr auto lower60 =
+        UINT64_C (0b0010'01001000'00011100'01100001'01000100'00001100'00100000'01000000);
 
     std::map<std::string, std::uint64_t> const TwoValuesWithHashCollision::hashes_{
         //"a" and "b" collide in the lower 6 bits.
-        {"a", binary<std::uint64_t, 0, 0, 0, 0, 0, 0>::value << 6 | lower6::value},
-        {"b", binary<std::uint64_t, 0, 0, 0, 0, 0, 1>::value << 6 | lower6::value},
-        {"c", binary<std::uint64_t, 0, 0, 0, 0, 1, 0>::value << 6 | lower6::value},
+        {"a", UINT64_C (0b000000) << 6 | lower6},
+        {"b", UINT64_C (0b000001) << 6 | lower6},
+        {"c", UINT64_C (0b000010) << 6 | lower6},
         // "e" and "f" collide in lower 60 bits.
-        {"e", binary<std::uint64_t, 1, 1, 0, 0>::value << 60 | lower60::value},
-        {"f", binary<std::uint64_t, 1, 1, 1, 1>::value << 60 | lower60::value},
+        {"e", UINT64_C (0b1100) << 60 | lower60},
+        {"f", UINT64_C (0b1111) << 60 | lower60},
         // "g" and "h" collide in all hash bits.
         {"g", 0},
         {"h", 0},
@@ -809,13 +803,13 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_heap_internal_node (level1);
 
         auto level1_internal = level1.untag_node<internal_node *> ();
-        EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1>::value));
+        EXPECT_EQ (level1_internal->get_bitmap (), 0b11U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
         index_->flush (t1, db_->get_current_revision());
@@ -826,13 +820,13 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         this->check_is_store_internal_node (root);
         auto root_address = root.untag_internal_address ();
         auto root_internal = internal_node::read_node (*db_, root_address);
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
         auto level1_address = level1.untag_internal_address ();
         auto level1_internal = internal_node::read_node (*db_, level1_address);
-        EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1>::value));
+        EXPECT_EQ (level1_internal->get_bitmap (), 0b11U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
         EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
@@ -871,13 +865,13 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_heap_internal_node (level1);
 
         auto level1_internal = level1.untag_node<internal_node *> ();
-        EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1, 1>::value));
+        EXPECT_EQ (level1_internal->get_bitmap (), 0b111);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
         this->check_is_leaf_node ((*level1_internal)[2]);
@@ -889,13 +883,13 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         this->check_is_store_internal_node (root);
         auto root_address = root.untag_internal_address ();
         auto root_internal = internal_node::read_node (*db_, root_address);
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1 = (*root_internal)[0];
         this->check_is_store_internal_node (level1);
         auto level1_address = level1.untag_internal_address ();
         auto level1_internal = internal_node::read_node (*db_, level1_address);
-        EXPECT_EQ (level1_internal->get_bitmap (), (binary<unsigned, 1, 1, 1>::value));
+        EXPECT_EQ (level1_internal->get_bitmap (), 0b111U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
         EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
@@ -1035,22 +1029,21 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), (binary<unsigned, 1>::value));
+        EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
         auto level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
         auto level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
         auto level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
         auto level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
         auto level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
-        EXPECT_EQ (level5_internal->get_bitmap (), (binary<unsigned, 1, 0, 0, 0, 0, 0>::value));
+        EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
 
         auto level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
         auto level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
         auto level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
         auto level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
         auto level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
-        EXPECT_EQ (level10_internal->get_bitmap (),
-                   (binary<unsigned, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value));
+        EXPECT_EQ (level10_internal->get_bitmap (), 0b1001000000000000U);
 
         this->check_is_leaf_node ((*level10_internal)[0]);
         this->check_is_leaf_node ((*level10_internal)[1]);
@@ -1072,7 +1065,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         auto level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
         auto level5 = (*level4_internal)[0];
         auto level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
-        EXPECT_EQ (level5_internal->get_bitmap (), (binary<unsigned, 1, 0, 0, 0, 0, 0>::value));
+        EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
         auto level6 = (*level5_internal)[0];
         auto level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
         auto level7 = (*level6_internal)[0];
@@ -1083,8 +1076,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         auto level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
         auto level10 = (*level9_internal)[0];
         auto level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
-        EXPECT_EQ (level10_internal->get_bitmap (),
-                   (binary<unsigned, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value));
+        EXPECT_EQ (level10_internal->get_bitmap (), 0b10010000'00000000U);
         this->check_is_leaf_node ((*level10_internal)[0]);
         this->check_is_leaf_node ((*level10_internal)[1]);
         EXPECT_TRUE (this->is_found ("e")) << "key \"e\" should be present in the index";
@@ -1426,12 +1418,10 @@ namespace {
 
 
     std::map<std::string, std::uint64_t> const FourNodesOnTwoLevels::hashes_{
-        {"a", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     0>::value}, // "a" and "b" collide in the lower 6 bits
-        {"b", binary<std::uint64_t, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0>::value},
-        {"c", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                     1>::value}, // ... as do "c" and "d".
-        {"d", binary<std::uint64_t, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1>::value},
+        {"a", UINT64_C (0b000000000000)}, // "a" and "b" collide in the lower 6 bits
+        {"b", UINT64_C (0b000001000000)},
+        {"c", UINT64_C (0b000000000001)}, // ... as do "c" and "d".
+        {"d", UINT64_C (0b000001000001)},
     };
 } // namespace
 
@@ -1574,10 +1564,10 @@ namespace {
     };
 
     std::map<std::string, std::uint64_t> const LeavesAtDifferentLevels::hashes_{
-        {"a", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value},
-        {"b", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1>::value},
-        {"c", binary<std::uint64_t, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1>::value},
-        {"d", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0>::value},
+        {"a", UINT64_C (0b0000'00000000)},
+        {"b", UINT64_C (0b0000'00000001)},
+        {"c", UINT64_C (0b0000'01000001)},
+        {"d", UINT64_C (0b0000'00000010)},
     };
 } // namespace
 
@@ -1702,8 +1692,8 @@ namespace {
     constexpr unsigned CorruptInternalNodes::internal_node_children;
 
     std::map<std::string, std::uint64_t> const CorruptInternalNodes::hashes_{
-        {"a", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0>::value},
-        {"b", binary<std::uint64_t, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1>::value},
+        {"a", UINT64_C (0b0000'00000000)},
+        {"b", UINT64_C (0b0000'00000001)},
     };
 
     // SetUp

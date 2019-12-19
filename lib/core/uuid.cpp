@@ -110,8 +110,8 @@ namespace pstore {
         std::generate (std::begin (data_), std::end (data_), generator);
 
         // Set variant: must be 0b10xxxxxx
-        data_[variant_octet] &= 0xBF; // 0b10111111;
-        data_[variant_octet] |= 0x80; // 0b10000000;
+        data_[variant_octet] &= 0b10111111;
+        data_[variant_octet] |= 0b10000000;
 
         // Set version: must be 0b0100xxxx
         data_[version_octet] &= 0x4F; // 0b01001111;
@@ -204,16 +204,16 @@ namespace pstore {
     // ~~~~~~~
     auto uuid::variant () const noexcept -> variant_type {
         auto const octet = data_[variant_octet];
-        if ((octet & 0x80 /*0b10000000*/) == 0x00 /*0b00000000*/) { // 0b0xxxxxxx
+        if ((octet & 0b10000000) == 0b00000000) { // 0b0xxxxxxx
             return variant_type::ncs;
         }
-        if ((octet & 0xC0 /*0b11000000*/) == 0x80 /*0b10000000*/) { // 0b10xxxxxx
+        if ((octet & 0b11000000) == 0b10000000) { // 0b10xxxxxx
             return variant_type::rfc_4122;
         }
-        if ((octet & 0xE0 /*0b11100000*/) == 0xC0 /*0b11000000*/) { // 0b110xxxxx
+        if ((octet & 0b11100000) == 0b11000000) { // 0b110xxxxx
             return variant_type::microsoft;
         }
-        assert ((octet & 0xE0 /*0b11100000*/) == 0xE0 /*0b11100000*/); // 0b111xxxx
+        assert ((octet & 0b11100000) == 0b11100000); // 0b111xxxx
         return variant_type::future;
     }
 

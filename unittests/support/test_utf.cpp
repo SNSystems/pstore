@@ -331,8 +331,8 @@ TEST (CuToUtf8, All) {
     EXPECT_EQ (code_point_to_utf8<utf8_string> (0x00A2), utf8_string ({0xC2, 0xA2}));
 
     EXPECT_EQ (code_point_to_utf8<utf8_string> (0x007F), utf8_string ({0x7F}));
-    EXPECT_EQ (code_point_to_utf8<utf8_string> (0x0080), utf8_string ({0xC2 /*0b11000010*/, 0x80}));
-    EXPECT_EQ (code_point_to_utf8<utf8_string> (0x07FF), utf8_string ({0xDF /*0b11011111*/, 0xBF}));
+    EXPECT_EQ (code_point_to_utf8<utf8_string> (0x0080), utf8_string ({0b11000010, 0x80}));
+    EXPECT_EQ (code_point_to_utf8<utf8_string> (0x07FF), utf8_string ({0b11011111, 0xBF}));
     EXPECT_EQ (code_point_to_utf8<utf8_string> (0x0800), utf8_string ({0xE0, 0xA0, 0x80}));
 
     EXPECT_EQ (code_point_to_utf8<utf8_string> (0xD7FF), utf8_string ({0xED, 0x9F, 0xBF}));

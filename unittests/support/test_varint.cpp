@@ -42,10 +42,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/support/varint.hpp"
+
 #include <cstdint>
 #include <vector>
-#include "gmock/gmock.h"
-#include "binary.hpp"
+
+#include <gmock/gmock.h>
 
 namespace {
 
@@ -83,7 +84,7 @@ namespace {
 //         +---------------------------+-----+
 // (*) "1 byte"
 TEST_F (VarInt, Zero) {
-    check (UINT64_C (0), {binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 0, 1>::value});
+    check (UINT64_C (0), {0b00000001});
 }
 
 //         +---------------------------+-----+
@@ -95,7 +96,7 @@ TEST_F (VarInt, Zero) {
 //         +---------------------------+-----+
 // (*) "1 byte"
 TEST_F (VarInt, One) {
-    check (UINT64_C (1), {binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 1>::value});
+    check (UINT64_C (1), {0b00000011});
 }
 
 //         +---------------------------+-----+
@@ -120,8 +121,7 @@ TEST_F (VarInt, 7Bits) {
 // value   | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 | | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |
 //         +-----------------------+-------+ +-------------------------------+
 TEST_F (VarInt, 2pow8) {
-    check (power (8), {binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value,
-                       binary<std::uint8_t, 0, 0, 0, 0, 0, 1, 0, 0>::value});
+    check (power (8), {0b00000010, 0b00000100});
 }
 
 //                      byte 0                            byte 1
@@ -134,7 +134,7 @@ TEST_F (VarInt, 2pow8) {
 // value   | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 0 | | 1 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
 //         +-----------------------+-------+ +-------------------------------+
 TEST_F (VarInt, 14Bits) {
-    check (all_ones (14), {binary<std::uint8_t, 1, 1, 1, 1, 1, 1, 1, 0>::value, 0xFF});
+    check (all_ones (14), {0b11111110, 0b11111111});
 }
 
 //                      byte 0                byte1             byte 2
@@ -147,7 +147,7 @@ TEST_F (VarInt, 14Bits) {
 // value   | 0 | 0 | 0 | 0 | 0 | 1 | 0 | 0 |         | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 0 |
 //         +-------------------+-----------+         +-------------------------------+
 TEST_F (VarInt, 2pow14) {
-    check (power (14), {0x04, 0, 0x02});
+    check (power (14), {0b00000100, 0, 0b00000010});
 }
 
 //                      byte 0                byte1             byte 2
@@ -163,47 +163,39 @@ TEST_F (VarInt, 21Bits) {
     check (all_ones (21), {0xFC, 0xFF, 0xFF});
 }
 TEST_F (VarInt, 2pow21) {
-    check (power (21), {binary<std::uint8_t, 0, 0, 0, 0, 1, 0, 0, 0>::value, 0, 0,
-                        binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value});
+    check (power (21), {0b00001000, 0, 0, 0b00000010});
 }
 TEST_F (VarInt, 28Bits) {
-    check (all_ones (28), {binary<std::uint8_t, 1, 1, 1, 1, 1, 0, 0, 0>::value, 0xFF, 0xFF, 0xFF});
+    check (all_ones (28), {0b11111000, 0b11111111, 0b11111111, 0b11111111});
 }
 TEST_F (VarInt, 2pow28) {
-    check (power (28), {binary<std::uint8_t, 0, 0, 0, 1, 0, 0, 0, 0>::value, 0, 0, 0,
-                        binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value});
+    check (power (28), {0b00010000, 0, 0, 0, 0b00000010});
 }
 TEST_F (VarInt, 35Bits) {
-    check (all_ones (35),
-           {binary<std::uint8_t, 1, 1, 1, 1, 0, 0, 0, 0>::value, 0xFF, 0xFF, 0xFF, 0xFF});
+    check (all_ones (35), {0b11110000, 0b11111111, 0b11111111, 0b11111111, 0b11111111});
 }
 TEST_F (VarInt, 2pow35) {
-    check (power (35), {binary<std::uint8_t, 0, 0, 1, 0, 0, 0, 0, 0>::value, 0, 0, 0, 0,
-                        binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value});
+    check (power (35), {0b00100000, 0, 0, 0, 0, 0b00000010});
 }
 TEST_F (VarInt, 42Bits) {
-    check (all_ones (42),
-           {binary<std::uint8_t, 1, 1, 1, 0, 0, 0, 0, 0>::value, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});
+    check (all_ones (42), {0b11100000, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111});
 }
 TEST_F (VarInt, 2pow42) {
-    check (power (42), {binary<std::uint8_t, 0, 1, 0, 0, 0, 0, 0, 0>::value, 0, 0, 0, 0, 0,
-                        binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value});
+    check (power (42), {0b01000000, 0, 0, 0, 0, 0, 0b00000010});
 }
 TEST_F (VarInt, 49Bits) {
-    check (all_ones (49), {binary<std::uint8_t, 1, 1, 0, 0, 0, 0, 0, 0>::value, 0xFF, 0xFF, 0xFF,
-                           0xFF, 0xFF, 0xFF});
+    check (all_ones (49),
+           {0b11000000, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111});
 }
 TEST_F (VarInt, 2pow49) {
-    check (power (49), {binary<std::uint8_t, 1, 0, 0, 0, 0, 0, 0, 0>::value, 0, 0, 0, 0, 0, 0,
-                        binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value});
+    check (power (49), {0b10000000, 0, 0, 0, 0, 0, 0, 0b00000010});
 }
 TEST_F (VarInt, 56Bits) {
-    check (all_ones (56), {binary<std::uint8_t, 1, 0, 0, 0, 0, 0, 0, 0>::value, 0xFF, 0xFF, 0xFF,
-                           0xFF, 0xFF, 0xFF, 0xFF});
+    check (all_ones (56), {0b10000000, 0b11111111, 0b11111111, 0b11111111, 0b11111111, 0b11111111,
+                           0b11111111, 0b11111111});
 }
 TEST_F (VarInt, 2pow63) {
-    check (power (63),
-           {0, 0, 0, 0, 0, 0, 0, 0, binary<std::uint8_t, 1, 0, 0, 0, 0, 0, 0, 0>::value});
+    check (power (63), {0, 0, 0, 0, 0, 0, 0, 0, 0b10000000});
 }
 TEST_F (VarInt, 64Bits) {
     check (~UINT64_C (0), {0, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF});

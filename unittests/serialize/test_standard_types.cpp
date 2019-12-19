@@ -51,14 +51,13 @@
 #include <string>
 #include <type_traits>
 
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
 #include "pstore/serialize/archive.hpp"
 #include "pstore/serialize/types.hpp"
 
-#include "binary.hpp"
-
 namespace {
+
     class StringWriter : public ::testing::Test {
     public:
         StringWriter ()
@@ -70,16 +69,17 @@ namespace {
 
         static constexpr auto const three_byte_varint = std::string::size_type{1} << 14;
     };
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (StringWriter, WriteCharString) {
     std::string const str{"hello"};
     pstore::serialize::write (writer_, str);
 
     EXPECT_THAT (bytes_,
-                 ::testing::ElementsAre (binary<std::uint8_t, 1, 0, 1, 1>::value, std::uint8_t{0},
-                                         std::uint8_t{'h'}, std::uint8_t{'e'}, std::uint8_t{'l'},
-                                         std::uint8_t{'l'}, std::uint8_t{'o'}));
+                 ::testing::ElementsAre (std::uint8_t{0b1011}, std::uint8_t{0}, std::uint8_t{'h'},
+                                         std::uint8_t{'e'}, std::uint8_t{'l'}, std::uint8_t{'l'},
+                                         std::uint8_t{'o'}));
     EXPECT_EQ (bytes_.size (), writer_.bytes_consumed ());
     EXPECT_EQ (bytes_.size (), writer_.bytes_produced ());
 }
@@ -93,8 +93,8 @@ TEST_F (StringWriter, WriteMaxTwoByteLengthCharString) {
 
     EXPECT_EQ (str.length () + 2, bytes_.size ());
     auto first = std::begin (bytes_);
-    EXPECT_EQ ((binary<std::uint8_t, 1, 1, 1, 1, 1, 1, 1, 0>::value), *(first++));
-    EXPECT_EQ ((binary<std::uint8_t, 1, 1, 1, 1, 1, 1, 1, 1>::value), *(first++));
+    EXPECT_EQ (0b11111110, *(first++));
+    EXPECT_EQ (0b11111111, *(first++));
     std::vector<std::uint8_t> const body (first, std::end (bytes_));
     std::vector<std::uint8_t> const expected_body (src_length, src_char);
 
@@ -112,9 +112,9 @@ TEST_F (StringWriter, WriteThreeByteLengthCharString) {
 
     EXPECT_EQ (str.length () + 3, bytes_.size ());
     auto first = std::begin (bytes_);
-    EXPECT_EQ ((binary<std::uint8_t, 0, 0, 0, 0, 0, 1, 0, 0>::value), *(first++));
-    EXPECT_EQ ((binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 0, 0>::value), *(first++));
-    EXPECT_EQ ((binary<std::uint8_t, 0, 0, 0, 0, 0, 0, 1, 0>::value), *(first++));
+    EXPECT_EQ (0b00000100, *(first++));
+    EXPECT_EQ (0b00000000, *(first++));
+    EXPECT_EQ (0b00000010, *(first++));
     std::vector<std::uint8_t> const body (first, std::end (bytes_));
     std::vector<std::uint8_t> const expected_body (src_length, src_char);
 
