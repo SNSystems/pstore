@@ -345,16 +345,10 @@ namespace pstore {
                 os << " ]";
             } else {
                 os << '\n';
-                indent next_indent = ind.next (2);
                 for (value_ptr const & value : values_) {
                     os << sep << ind << "- ";
-                    if (value->dynamic_cast_object () != nullptr) {
-                        next_indent = ind.next (2);
-                    } else {
-                        next_indent = ind.next (4);
-                    }
-
-                    value->write_impl (os, next_indent);
+                    value->write_impl (os,
+                                       ind.next (value->dynamic_cast_object () == nullptr ? 4 : 2));
                     sep = "\n";
                 }
             }
@@ -389,7 +383,7 @@ namespace pstore {
         // ~~~~~~~~
         std::shared_ptr<string> object::property (std::string const & p) {
             // If the string contains ': ', then we _must_ quote it.
-            bool const force_quoted = (p.find (": ") != std::string::npos);
+            bool const force_quoted = p.find (": ") != std::string::npos;
             return std::make_shared<string> (p, force_quoted);
         }
 
@@ -452,9 +446,8 @@ namespace pstore {
             using string_type = std::basic_string<char_type>;
 
             // Proceed in two phases: the first measures the length of all of the object keys to
-            // find
-            // the longest. This enables the values to be nicely aligned by inserting the correct
-            // horizontal spacing.
+            // find the longest. This enables the values to be nicely aligned by inserting the
+            // correct horizontal spacing.
             enum { key_index, value_index, key_length_index };
             std::vector<std::tuple<value_ptr, value_ptr, std::size_t>> kvps;
             kvps.reserve (members_.size ());
@@ -467,10 +460,14 @@ namespace pstore {
             }
 
             // The second phase: produce the keys and values with the correct number of spaces
-            // between
-            // them.
+            // between them.
             string_type sep;
             indent next_indent = ind.next (4);
+
+            auto const is_non_compact_object = [] (value_ptr const value) {
+                object const * const obj = value->dynamic_cast_object ();
+                return obj != nullptr && !obj->is_compact ();
+            };
 
             for (auto const & a : kvps) {
                 std::size_t const num_spaces = longest - std::get<key_length_index> (a) + 1U;
@@ -478,11 +475,9 @@ namespace pstore {
                    << string_type (num_spaces, strings.space_str[0]) << strings.colon_space_str;
 
                 // If the value is an object then we may need to insert a new line here.
-                auto value = std::get<value_index> (a);
-                if (auto nested_obj = value->dynamic_cast_object ()) {
-                    if (!nested_obj->is_compact ()) {
-                        os << strings.cr_str << next_indent;
-                    }
+                auto const value = std::get<value_index> (a);
+                if (is_non_compact_object (value)) {
+                    os << strings.cr_str << next_indent;
                 }
                 value->write_impl (os, next_indent);
 
@@ -529,18 +524,21 @@ namespace {
     // We accumulate a number of lines of encoded binary in a single string object
     // rather than writing individual characters to the output stream one at a time.
     template <typename OStream>
-    struct accumulator {
+    class accumulator {
+    public:
+        using value_type = std::uint8_t;
+
         accumulator (OStream & os, pstore::dump::indent const & ind);
 
         /// Append a single character to the output.
-        void write (char c);
+        void push_back (char c);
 
         /// Flush any remaining output.
         void flush ();
 
     private:
         static constexpr unsigned line_width_ = 80U;
-        static constexpr unsigned num_lines_to_accumulate_ = 50U;
+        static constexpr unsigned lines_to_accumulate_ = 50U;
 
         OStream & os_;
         unsigned const chars_to_reserve_;
@@ -555,13 +553,13 @@ namespace {
     template <typename OStream>
     accumulator<OStream>::accumulator (OStream & os, pstore::dump::indent const & ind)
             : os_{os}
-            , chars_to_reserve_{(ind.size () + line_width_ + 1U) * num_lines_to_accumulate_}
+            , chars_to_reserve_{(ind.size () + line_width_ + 1U) * lines_to_accumulate_}
             , indent_string_{ind.str<char_type> ()} {
         lines_.reserve (chars_to_reserve_);
     }
 
     template <typename OStream>
-    void accumulator<OStream>::write (char const c) {
+    void accumulator<OStream>::push_back (char const c) {
         if (width_ == 0) {
             lines_ += indent_string_;
         }
@@ -569,7 +567,7 @@ namespace {
         if (++width_ >= line_width_) {
             lines_ += '\n';
             width_ = 0;
-            if (++line_count_ >= num_lines_to_accumulate_) {
+            if (++line_count_ >= lines_to_accumulate_) {
                 os_ << lines_;
                 line_count_ = 0;
 
@@ -588,6 +586,50 @@ namespace {
         lines_.clear ();
     }
 
+    template <typename ElementType, std::ptrdiff_t Extent, typename BackInserter,
+              typename = typename std::enable_if<std::is_same<
+                  typename std::remove_cv<ElementType>::type, std::uint8_t>::value>::type>
+    BackInserter to_base64 (pstore::gsl::span<ElementType, Extent> const & span, BackInserter out) {
+        static constexpr std::array<std::uint8_t, 64> alphabet{
+            {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
+             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+             'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'}};
+        using index_type = typename pstore::gsl::span<ElementType, Extent>::index_type;
+        auto it = std::begin (span);
+        index_type const size = span.size ();
+        for (auto index = index_type{0}; index < size / 3; ++index) {
+            auto value1 = static_cast<std::uint32_t> (*(it++) << 16);
+            value1 += static_cast<std::uint32_t> (*(it++) << 8);
+            value1 += static_cast<std::uint32_t> (*(it++));
+            *(out++) = alphabet[(value1 & 0x00FC0000) >> 18];
+            *(out++) = alphabet[(value1 & 0x0003F000) >> 12];
+            *(out++) = alphabet[(value1 & 0x00000FC0) >> 6];
+            *(out++) = alphabet[value1 & 0x0000003F];
+        }
+
+        switch (size % 3) {
+        case 0: break;
+        case 1: {
+            auto const value2 = static_cast<std::uint32_t> (*(it++) << 16);
+            *(out++) = alphabet[(value2 & 0x00FC0000) >> 18];
+            *(out++) = alphabet[(value2 & 0x0003F000) >> 12];
+            *(out++) = '=';
+            *(out++) = '=';
+        } break;
+        case 2: {
+            auto value3 = static_cast<std::uint32_t> (*(it++) << 16);
+            value3 += static_cast<std::uint32_t> (*(it++) << 8);
+            *(out++) = alphabet[(value3 & 0x00FC0000) >> 18];
+            *(out++) = alphabet[(value3 & 0x0003F000) >> 12];
+            *(out++) = alphabet[(value3 & 0x00000FC0) >> 6];
+            *(out++) = '=';
+        } break;
+        }
+        assert (it == std::end (span));
+        return out;
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -600,57 +642,10 @@ namespace pstore {
         // ~~~~~~
         template <typename OStream>
         OStream & binary::writer (OStream & os, indent const & ind) const {
-
-            static constexpr char alphabet[]{"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                                             "abcdefghijklmnopqrstuvwxyz"
-                                             "0123456789+/"};
-
             accumulator<OStream> acc (os, ind);
-
             os << "!!binary |\n";
-
-            std::uint32_t temp;
-            auto it = std::begin (v_);
-            std::size_t const size = v_.size ();
-            for (std::size_t index = 0; index < size / 3U; ++index) {
-                temp = static_cast<std::uint32_t> ((*it) << 16);
-                ++it;
-                temp += static_cast<std::uint32_t> ((*it) << 8);
-                ++it;
-                temp += (*it);
-                ++it;
-
-                acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
-                acc.write (alphabet[(temp & 0x0003F000) >> 12]);
-                acc.write (alphabet[(temp & 0x00000FC0) >> 6]);
-                acc.write (alphabet[temp & 0x0000003F]);
-            }
-
-            switch (size % 3) {
-            case 0: break;
-
-            case 1:
-                temp = static_cast<std::uint32_t> ((*it++) << 16);
-                acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
-                acc.write (alphabet[(temp & 0x0003F000) >> 12]);
-                acc.write ('=');
-                acc.write ('=');
-                break;
-
-            case 2:
-                temp = static_cast<std::uint32_t> ((*it++) << 16);
-                temp += static_cast<std::uint32_t> ((*it++) << 8);
-
-                acc.write (alphabet[(temp & 0x00FC0000) >> 18]);
-                acc.write (alphabet[(temp & 0x0003F000) >> 12]);
-                acc.write (alphabet[(temp & 0x00000FC0) >> 6]);
-                acc.write ('=');
-                break;
-
-            default: assert (false); break;
-            }
+            to_base64 (gsl::make_span (v_), std::back_inserter (acc));
             acc.flush ();
-            assert (it == std::end (v_));
             return os;
         }
 
