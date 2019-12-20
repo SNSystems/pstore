@@ -464,7 +464,7 @@ namespace pstore {
             string_type sep;
             indent next_indent = ind.next (4);
 
-            auto const is_non_compact_object = [] (value_ptr const value) {
+            auto const needs_new_line = [] (value_ptr const value) {
                 object const * const obj = value->dynamic_cast_object ();
                 return obj != nullptr && !obj->is_compact ();
             };
@@ -476,7 +476,7 @@ namespace pstore {
 
                 // If the value is an object then we may need to insert a new line here.
                 auto const value = std::get<value_index> (a);
-                if (is_non_compact_object (value)) {
+                if (needs_new_line (value)) {
                     os << strings.cr_str << next_indent;
                 }
                 value->write_impl (os, next_indent);
@@ -586,6 +586,15 @@ namespace {
         lines_.clear ();
     }
 
+    /// Converts an array of bytes to ASCII85.
+    ///
+    /// \tparam ElementType  Must be a const and/or volatile qualified std::uint8_t.
+    /// \tparam Extent  The gsl::span<> extent.
+    /// \tparam BackInserter  A LegacyOutputIterator iterator type.
+    /// \param span  The byte span to be converted.
+    /// \param out  The output iterator to which the encoded characters are written.
+    /// \returns Output iterator to the element in the destination range, one past the last element
+    ///   copied.
     template <typename ElementType, std::ptrdiff_t Extent, typename BackInserter,
               typename = typename std::enable_if<std::is_same<
                   typename std::remove_cv<ElementType>::type, std::uint8_t>::value>::type>
@@ -598,6 +607,7 @@ namespace {
         using index_type = typename pstore::gsl::span<ElementType, Extent>::index_type;
         auto it = std::begin (span);
         index_type const size = span.size ();
+        // Consume the input, converting three input bytes to four output characters.
         for (auto index = index_type{0}; index < size / 3; ++index) {
             auto value1 = static_cast<std::uint32_t> (*(it++) << 16);
             value1 += static_cast<std::uint32_t> (*(it++) << 8);
@@ -608,6 +618,7 @@ namespace {
             *(out++) = alphabet[value1 & 0x0000003F];
         }
 
+        // Deal with the remaining 0..2 characters.
         switch (size % 3) {
         case 0: break;
         case 1: {
@@ -625,6 +636,9 @@ namespace {
             *(out++) = alphabet[(value3 & 0x00000FC0) >> 6];
             *(out++) = '=';
         } break;
+        default:
+            assert (false); //! OCLINT(PH - don't warn about a conditional constant)
+            break;
         }
         assert (it == std::end (span));
         return out;
@@ -670,21 +684,21 @@ namespace pstore {
                 os << '\n' << ind;
             } else {
                 using char_type = typename OStream::char_type;
-                constexpr auto number_of_bytes_per_row = 8U * 2U;
-                auto ctr = 0U;
+                constexpr auto bytes_per_row = 8U * 2U;
+                auto byte_no = 0U;
                 for (std::uint8_t const b : v_) {
-                    if (ctr == 0U || ctr >= number_of_bytes_per_row) {
+                    if (byte_no == 0U || byte_no >= bytes_per_row) {
                         // Line wrap and indent on the first iteration or when we run out of width.
                         os << '\n' << ind;
-                        ctr = 0U;
-                    } else if (ctr % 2U == 0U) {
+                        byte_no = 0U;
+                    } else if (byte_no % 2U == 0U) {
                         // Values grouped into two-byte pairs.
                         os << ' ';
                     }
                     std::array<char_type, 3> const hex{{to_hex<char_type> ((b >> 4U) & 0x0FU),
                                                         to_hex<char_type> (b & 0x0FU), '\0'}};
                     os << hex.data ();
-                    ++ctr;
+                    ++byte_no;
                 }
             }
             return os << '>';
