@@ -72,8 +72,8 @@ endfunction()
 # pstore_enable_warnings
 # ~~~~~~~~~~~~~~~~~~~~~~
 function (pstore_enable_warnings)
-    cmake_parse_arguments (arg #prefix
-        "IS_UNIT_TEST" #options
+    cmake_parse_arguments (arg # prefix
+        "IS_UNIT_TEST" # options
         "TARGET" # one-value-keywords
         "" # multi-value-keywords
         ${ARGN}
@@ -96,16 +96,6 @@ function (pstore_enable_warnings)
                 -Wno-used-but-marked-unused
             )
         endif ()
-#    -Wno-deprecated
-#    -Wno-disabled-macro-expansion
-#    -Wno-missing-noreturn
-#    -Wno-missing-variable-declarations
-#    -Wno-shift-sign-overflow
-#    -Wno-undef
-#    -Wno-unused-macros
-#    -Wno-used-but-marked-unused
-
-
     elseif (CMAKE_COMPILER_IS_GNUCXX)
         set (options
             -Wall
