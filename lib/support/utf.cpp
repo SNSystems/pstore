@@ -57,36 +57,30 @@ namespace pstore {
 
         // length
         // ~~~~~~
-        auto length (gsl::czstring const str, std::size_t const nbytes) -> std::size_t {
-            if (str == nullptr) {
-                return 0;
-            }
-            return length (str, str + nbytes);
+        auto length (char const * const str, std::size_t const nbytes) -> std::size_t {
+            return str == nullptr ? 0 : length (str, str + nbytes);
         }
 
         auto length (gsl::czstring const str) -> std::size_t {
-            if (str == nullptr) {
-                return 0;
-            }
-            return length (str, str + std::strlen (str));
+            return str == nullptr ? 0 : length (str, str + std::strlen (str));
         }
 
         // index
         // ~~~~~
         // returns a pointer to the beginning of the pos'th utf8 codepoint
-        // in the buffer at s
+        // in the buffer at str.
         auto index (gsl::czstring const str, std::size_t const pos) -> gsl::czstring {
             if (str == nullptr) {
                 return nullptr;
             }
             gsl::czstring const end = str + std::strlen (str);
             gsl::czstring const result = index (str, end, pos);
-            return result != end ? result : nullptr;
+            return result == end ? nullptr : result;
         }
 
         // slice
         // ~~~~~
-        // converts codepoint indices start and end to byte offsets in the buffer at s
+        // converts codepoint indices start and end to byte offsets in the buffer at str.
         auto slice (gsl::czstring const str, std::ptrdiff_t const start, std::ptrdiff_t const end)
             -> std::pair<std::ptrdiff_t, std::ptrdiff_t> {
 

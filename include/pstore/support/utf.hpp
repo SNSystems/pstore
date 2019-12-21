@@ -369,6 +369,7 @@ namespace pstore {
 
         /// Returns the number of UTF-8 code points in the buffer given by a start address and
         /// length.
+        ///
         /// \param str  The buffer start address.
         /// \param nbytes The number of bytes in the buffer.
         /// \return The number of UTF-8 code points in the buffer given by 'str' and 'nbytes'.
