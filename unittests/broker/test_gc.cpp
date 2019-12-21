@@ -50,6 +50,8 @@
 
 #include <gmock/gmock.h>
 
+#include "pstore/support/error.hpp"
+
 using testing::_;
 using testing::ElementsAre;
 using testing::Eq;
@@ -119,16 +121,15 @@ namespace {
     process_identifier Gc::make_process_id (int index) {
         int const id = 7919 + index; // No significance to this number: it's just the 1000th prime
 #ifdef _WIN32
-        HANDLE current_process = ::GetCurrentProcess ();
-        HANDLE new_handle = 0;
-        ::DuplicateHandle (current_process, // hSourceProcessHandle
-                           current_process, // hSourceHandle
-                           current_process, // hTargetProcessHandle
-                           &new_handle,     // lpTargetHandle
-                           0,               // ignored if dwOptions==DUPLICATE_SAME_ACCESS
-                           FALSE,           // bInheritHandle
-                           DUPLICATE_SAME_ACCESS);
-        return std::make_shared<pstore::broker::win32::process_pair> (new_handle, id);
+        HANDLE event = ::CreateEventW (nullptr, // lpEventAttributes,
+                                       false,   // bManualReset,
+                                       false,   // bInitialState,
+                                       nullptr  // lpName
+        );
+        if (event == nullptr) {
+            raise (pstore::win32_erc{::GetLastError ()}, "CreateEventW");
+        }
+        return std::make_shared<pstore::broker::win32::process_pair> (event, id);
 #else
         return id;
 #endif // _WIN32
@@ -185,10 +186,9 @@ TEST_F (Gc, SpawnOne) {
     constexpr auto path = "db-path";
 
     test_watch_thead gc;
-    std::thread thread{[&gc] () { gc.watcher (); }};
-
     expect_call (gc, path, make_process_id ());
 
+    std::thread thread{[&gc] () { gc.watcher (); }};
     // Initiate garbage collection of the pstore file at path.
     gc.start_vacuum (path);
     // Our simulation never indicates that the GC process has exited. Therefore a second GC
@@ -221,9 +221,9 @@ TEST_F (Gc, SpawnTwo) {
 TEST_F (Gc, SpawnMax) {
     test_watch_thead gc;
 
+    auto const sp = expect_spawn_calls (gc, pstore::broker::gc_watch_thread::max_gc_processes);
     std::thread thread{[&gc] () { gc.watcher (); }};
-    for (auto const & c :
-         expect_spawn_calls (gc, pstore::broker::gc_watch_thread::max_gc_processes)) {
+    for (auto const & c : sp) {
         gc.start_vacuum (std::get<std::string> (c));
     }
     gc.stop ();
@@ -233,9 +233,9 @@ TEST_F (Gc, SpawnMax) {
 TEST_F (Gc, SpawnMaxPlus1) {
     test_watch_thead gc;
 
+    auto const sp = expect_spawn_calls (gc, pstore::broker::gc_watch_thread::max_gc_processes);
     std::thread thread{[&gc] () { gc.watcher (); }};
-    for (auto const & c :
-         expect_spawn_calls (gc, pstore::broker::gc_watch_thread::max_gc_processes)) {
+    for (auto const & c : sp) {
         gc.start_vacuum (std::get<std::string> (c));
     }
     gc.start_vacuum ("one-extra-call");
