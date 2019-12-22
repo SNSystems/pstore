@@ -204,16 +204,20 @@ namespace pstore {
     // ~~~~~~~
     auto uuid::variant () const noexcept -> variant_type {
         auto const octet = data_[variant_octet];
-        if ((octet & 0b10000000) == 0b00000000) { // 0b0xxxxxxx
+        // 0b0xxxxxxx
+        if ((octet & 0b10000000) == 0b00000000) { //! OCLINT (PH - bitwise operator is just fine)
             return variant_type::ncs;
         }
-        if ((octet & 0b11000000) == 0b10000000) { // 0b10xxxxxx
+        // 0b10xxxxxx
+        if ((octet & 0b11000000) == 0b10000000) { //! OCLINT (PH - bitwise operator is just fine)
             return variant_type::rfc_4122;
         }
-        if ((octet & 0b11100000) == 0b11000000) { // 0b110xxxxx
+        // 0b110xxxxx
+        if ((octet & 0b11100000) == 0b11000000) { //! OCLINT (PH - bitwise operator is just fine)
             return variant_type::microsoft;
         }
-        assert ((octet & 0b11100000) == 0b11100000); // 0b111xxxx
+        // 0b111xxxx
+        assert ((octet & 0b11100000) == 0b11100000); //! OCLINT (PH - bitwise operator is just fine)
         return variant_type::future;
     }
 
@@ -248,7 +252,10 @@ namespace pstore {
             case 6:
             case 8:
             case 10: resl += '-'; PSTORE_FALLTHROUGH;
-            default: resl += digit_to_hex ((c >> 4) & 0x0F); resl += digit_to_hex (c & 0x0F);
+            default:
+                resl += digit_to_hex ((c >> 4) & 0x0F);
+                resl += digit_to_hex (c & 0x0F);
+                break;
             }
         });
         return resl;
