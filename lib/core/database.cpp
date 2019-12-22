@@ -110,7 +110,7 @@ namespace pstore {
     // ~database
     // ~~~~~~~~~
     database::~database () noexcept {
-        PSTORE_NO_EX_ESCAPE (this->close ());
+        PSTORE_NO_EX_ESCAPE (this->close ()); //! OCLINT(PH - don't warn about an empty catch)
     }
 
     // finish_init
@@ -252,25 +252,25 @@ namespace pstore {
                 // as the one to which we're currently synced. The previous early out code didn't
                 // have sufficient context to catch this case, but here we do. Nothing more to do.
                 return;
-            } else {
-                footer_pos = new_footer_pos;
-
-                // Always check file size after loading from the footer.
-                auto const file_size = storage_.file ()->size ();
-
-                // Perform a proper footer validity check.
-                if (footer_pos.absolute () + sizeof (trailer) > file_size) {
-                    raise (error_code::footer_corrupt, storage_.file ()->path ());
-                }
-
-                // We may need to map additional data from the file. If another process has added
-                // data to the store since we opened our connection, then a sync may want to access
-                // that new data. Deal with that possibility here.
-                storage_.map_bytes (footer_pos.absolute () + sizeof (trailer));
-
-                size_.update_footer_pos (footer_pos);
-                trailer::validate (*this, footer_pos);
             }
+
+            footer_pos = new_footer_pos;
+
+            // Always check file size after loading from the footer.
+            auto const file_size = storage_.file ()->size ();
+
+            // Perform a proper footer validity check.
+            if (footer_pos.absolute () + sizeof (trailer) > file_size) {
+                raise (error_code::footer_corrupt, storage_.file ()->path ());
+            }
+
+            // We may need to map additional data from the file. If another process has added
+            // data to the store since we opened our connection, then a sync may want to access
+            // that new data. Deal with that possibility here.
+            storage_.map_bytes (footer_pos.absolute () + sizeof (trailer));
+
+            size_.update_footer_pos (footer_pos);
+            trailer::validate (*this, footer_pos);
         }
 
         // The code above moves to the head revision. If that's what was requested, then we're done.
@@ -461,7 +461,7 @@ namespace pstore {
         storage_.map_bytes (new_logical_size);
 
         size_.update_logical_size (new_logical_size);
-        if (database::small_files_enabled ()) {
+        if (database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
             this->file ()->truncate (new_logical_size);
         }
 
@@ -482,7 +482,7 @@ namespace pstore {
         storage_.map_bytes (size);
 
         size_.truncate_logical_size (size);
-        if (database::small_files_enabled ()) {
+        if (database::small_files_enabled ()) { //! OCLINT(PH - don't warn that this is a constant)
             this->file ()->truncate (size);
         }
     }
