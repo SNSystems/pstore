@@ -56,10 +56,12 @@ namespace pstore {
             if (r1 == pstore::head_revision) {
                 r1 = actual_head;
             }
-            if (!r2) {
-                r2 = r1 - 1;
-            } else if (*r2 == pstore::head_revision) {
-                r2 = actual_head;
+            if (r2) {
+                if (*r2 == pstore::head_revision) {
+                    r2 = actual_head;
+                }
+            } else {
+                r2 = r1 > 0 ? r1 - 1 : 0;
             }
             if (r1 < *r2) {
                 std::swap (r1, *r2);

@@ -82,6 +82,17 @@ TEST_F (RevisionsFixture, InitOneOnly) {
     EXPECT_EQ (expected, actual);
 }
 
+TEST_F (RevisionsFixture, InitZeroOnly) {
+    constexpr auto r1 = diff::revision_number{0};
+
+    diff::revisions_type const expected = this->expected_revisions (r1, r1);
+    diff::revisions_type const actual = diff::update_revisions (
+        std::make_pair (r1, nothing<diff::revision_number> ()), db_head_revision);
+
+    EXPECT_EQ (expected, actual);
+}
+
+
 TEST_F (RevisionsFixture, InitOne5Two3) {
     constexpr auto r1 = diff::revision_number{5};
     auto r2 = just (diff::revision_number{3});
