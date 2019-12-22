@@ -83,23 +83,25 @@ namespace {
 namespace pstore {
 
     std::uint64_t fnv_64a_buf (void const * const buf, std::size_t const len,
-                               std::uint64_t hval) noexcept {
+                               std::uint64_t const hval) noexcept {
         // FNV-1a hash each octet of the buffer
         auto * it = static_cast<uint8_t const *> (buf);
         auto const * const end = it + len;
+        auto result = hval;
         for (; it < end; ++it) {
-            hval = append (*it, hval);
+            result = append (*it, result);
         }
-        return hval;
+        return result;
     }
 
 
-    std::uint64_t fnv_64a_str (char const * const str, std::uint64_t hval) noexcept {
+    std::uint64_t fnv_64a_str (gsl::czstring const str, std::uint64_t const hval) noexcept {
         // FNV-1a hash each octet of the string
+        auto result = hval;
         for (auto s = reinterpret_cast<uint8_t const *> (str); *s != '\0'; ++s) {
-            hval = append (*s, hval);
+            result = append (*s, result);
         }
-        return hval;
+        return result;
     }
 
 } // end namespace pstore
