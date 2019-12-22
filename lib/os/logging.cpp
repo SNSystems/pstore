@@ -192,48 +192,48 @@ namespace {
     // ~~~
     void asl_logger::log (logging::priority const p, std::string const & message) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ());
+        os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ()); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring message, int const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%d", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%d", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%u", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%u", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring message, long const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%ld", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%ld", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned long const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%lu", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%lu", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring const message,
                           long long const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%lld", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%lld", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring const message,
                           unsigned long long const d) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%llu", message, d);
+        os_log_with_type (log_, priority_code (p), "%s%llu", message, d); //! OCLINT
     }
     void asl_logger::log (logging::priority p, gsl::czstring const message) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s", message);
+        os_log_with_type (log_, priority_code (p), "%s", message); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring const part1,
                           gsl::czstring const part2) {
         // NOLINTNEXTLINE
-        os_log_with_type (log_, priority_code (p), "%s%s", part1, part2);
+        os_log_with_type (log_, priority_code (p), "%s%s", part1, part2); //! OCLINT
     }
     void asl_logger::log (logging::priority const p, gsl::czstring const part1,
                           logging::quoted const part2) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s\"%s\"", part1,
-                          static_cast<gsl::czstring> (part2));
+                          static_cast<gsl::czstring> (part2)); //! OCLINT
     }
 
     // priority_code
