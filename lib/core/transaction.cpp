@@ -57,7 +57,8 @@ namespace pstore {
             , dbsize_{rhs.dbsize_}
             , first_ (rhs.first_) {
         rhs.first_ = address::null ();
-        assert (!rhs.is_open ());
+
+        assert (!rhs.is_open ()); //! OCLINT(PH - don't warn about the assert macro)
     }
 
     // allocate
@@ -100,55 +101,58 @@ namespace pstore {
     // commit
     // ~~~~~~
     transaction_base & transaction_base::commit () {
-        if (this->is_open ()) {
-            database & db = this->db ();
-
-            // We're going to write to the header, but this must be the very last
-            // step of completing the transaction.
-            auto new_footer_pos = typed_address<trailer>::null ();
-            {
-                auto const & head = db.get_header ();
-                auto const prev_footer = db.getro (head.footer_pos.load ());
-
-                unsigned const generation = prev_footer->a.generation + 1;
-
-                // Make a copy of the index locations; write out any modifications to the indices.
-                // Any updated indices will modify the 'locations' array.
-                //
-                // This must happen before the transaction is final because we're allocating and
-                // writing data here.
-
-                auto locations = prev_footer->a.index_records;
-                index::flush_indices (*this, &locations, generation);
-
-                // Writing new data is done. Now we begin to build the new file footer.
-                {
-                    std::shared_ptr<trailer> trailer_ptr;
-                    std::tie (trailer_ptr, new_footer_pos) = this->alloc_rw<trailer> ();
-                    auto * const t = new (trailer_ptr.get ()) trailer;
-
-                    t->a.index_records = locations;
-
-                    // Point the new header at the previous version.
-                    t->a.generation = generation;
-                    // The size of the transaction doesn't include the size of the footer record.
-                    t->a.size = size_ - sizeof (trailer);
-                    t->a.time = pstore::milliseconds_since_epoch ();
-                    t->a.prev_generation = head.footer_pos;
-                    t->crc = t->get_crc ();
-                }
-            }
-            // Complete the transaction by making it available to other clients. This modifies the
-            // footer pointer in the file's header record.
-            db.set_new_footer (new_footer_pos);
-
-            // Mark both this transaction's contents and its trailer as read-only.
-            db.protect (first_, (new_footer_pos + 1).to_address ());
-
-            // That's the end of this transaction.
-            first_ = address::null ();
-            assert (!this->is_open ());
+        if (!this->is_open ()) {
+            // No data was added to the transaction. Nothing to do.
+            return *this;
         }
+
+        database & db = this->db ();
+
+        // We're going to write to the header, but this must be the very last
+        // step of completing the transaction.
+        auto new_footer_pos = typed_address<trailer>::null ();
+        {
+            auto const & head = db.get_header ();
+            auto const prev_footer = db.getro (head.footer_pos.load ());
+
+            unsigned const generation = prev_footer->a.generation + 1;
+
+            // Make a copy of the index locations; write out any modifications to the indices.
+            // Any updated indices will modify the 'locations' array.
+            //
+            // This must happen before the transaction is final because we're allocating and
+            // writing data here.
+
+            auto locations = prev_footer->a.index_records;
+            index::flush_indices (*this, &locations, generation);
+
+            // Writing new data is done. Now we begin to build the new file footer.
+            {
+                std::shared_ptr<trailer> trailer_ptr;
+                std::tie (trailer_ptr, new_footer_pos) = this->alloc_rw<trailer> ();
+                auto * const t = new (trailer_ptr.get ()) trailer;
+
+                t->a.index_records = locations;
+
+                // Point the new header at the previous version.
+                t->a.generation = generation;
+                // The size of the transaction doesn't include the size of the footer record.
+                t->a.size = size_ - sizeof (trailer);
+                t->a.time = pstore::milliseconds_since_epoch ();
+                t->a.prev_generation = head.footer_pos;
+                t->crc = t->get_crc ();
+            }
+        }
+        // Complete the transaction by making it available to other clients. This modifies the
+        // footer pointer in the file's header record.
+        db.set_new_footer (new_footer_pos);
+
+        // Mark both this transaction's contents and its trailer as read-only.
+        db.protect (first_, (new_footer_pos + 1).to_address ());
+
+        // That's the end of this transaction.
+        first_ = address::null ();
+        assert (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
         return *this;
     }
 
@@ -157,7 +161,7 @@ namespace pstore {
     transaction_base & transaction_base::rollback () noexcept {
         if (this->is_open ()) {
             first_ = address::null ();
-            assert (!this->is_open ());
+            assert (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
             // if we grew the db, truncate it back
             if (db_.size () > dbsize_) {
                 db_.truncate (dbsize_);
