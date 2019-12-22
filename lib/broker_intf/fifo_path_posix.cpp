@@ -65,13 +65,13 @@ namespace {
 
     class umask_raii {
     public:
-        explicit umask_raii (mode_t const new_umask)
+        explicit umask_raii (mode_t const new_umask) noexcept
                 : old_{::umask (new_umask)} {}
-        umask_raii (umask_raii &&) = delete;
         umask_raii (umask_raii const &) = delete;
+        umask_raii (umask_raii &&) noexcept = delete;
         umask_raii & operator= (umask_raii const &) = delete;
-        umask_raii & operator= (umask_raii &&) = delete;
-        ~umask_raii () { ::umask (old_); }
+        umask_raii & operator= (umask_raii &&) noexcept = delete;
+        ~umask_raii () noexcept { ::umask (old_); }
 
     private:
         mode_t const old_;
@@ -79,27 +79,28 @@ namespace {
 
     int make_fifo (pstore::gsl::czstring const path, mode_t const mode) {
         // Temporarily set the umask to 0 so that any user can connect to our pipe.
-        umask_raii const umask (0);
+        umask_raii const umask{0}; //! OCLINT (PH - intentionally unused)
         return ::mkfifo (path, mode);
     }
 
     pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring const path, int const flags) {
         pstore::broker::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
-        if (pipe.native_handle () >= 0) {
-            // If the file open succeeded. We check whether it's a FIFO.
-            struct stat buf {};
-            if (::fstat (pipe.native_handle (), &buf) != 0) {
-                int const errcode = errno;
-                std::ostringstream str;
-                str << "Could not stat the file at " << pstore::quoted (path);
-                raise (pstore::errno_erc{errcode}, str.str ());
-            }
-            if (!S_ISFIFO (buf.st_mode)) {
-                int const errcode = errno;
-                std::ostringstream str;
-                str << "The file at " << pstore::quoted (path) << " was not a FIFO";
-                raise (pstore::errno_erc{errcode}, str.str ());
-            }
+        if (pipe.native_handle () < 0) {
+            return pipe;
+        }
+        // If the file open succeeded. We check whether it's a FIFO.
+        struct stat buf {};
+        if (::fstat (pipe.native_handle (), &buf) != 0) {
+            int const errcode = errno;
+            std::ostringstream str;
+            str << "Could not stat the file at " << pstore::quoted (path);
+            raise (pstore::errno_erc{errcode}, str.str ());
+        }
+        if (!S_ISFIFO (buf.st_mode)) { //! OCLINT
+            int const errcode = errno;
+            std::ostringstream str;
+            str << "The file at " << pstore::quoted (path) << " was not a FIFO";
+            raise (pstore::errno_erc{errcode}, str.str ());
         }
         return pipe;
     }
@@ -129,7 +130,8 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         auto fifo_path::open_server_pipe () -> server_pipe {
             auto * const path = path_.c_str ();
-            std::lock_guard<decltype (open_server_pipe_mut_)> const lock (open_server_pipe_mut_);
+            std::lock_guard<decltype (open_server_pipe_mut_)> //! OCLINT
+                const lock{open_server_pipe_mut_};
 
             // The server opens its well-known FIFO read-only (since it only reads from it) each
             // time the number of clients goes from 1 to 0, the server will read an end of file on
@@ -141,8 +143,9 @@ namespace pstore {
             pstore::broker::pipe_descriptor fdread = open_fifo (path, O_RDONLY);
             if (fdread.native_handle () < 0) {
                 // If the file open failed, we create the FIFO and try again.
-                if (make_fifo (path, S_IFIFO | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH |
-                                         S_IWOTH) != 0) {
+                constexpr mode_t mode =
+                    S_IFIFO | S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+                if (make_fifo (path, mode) != 0) {
                     raise_cannot_create_fifo (path, errno);
                 }
 
