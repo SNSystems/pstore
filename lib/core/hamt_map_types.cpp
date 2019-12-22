@@ -256,8 +256,8 @@ namespace pstore {
                 auto const index_a = get_new_index (new_hash, existing_hash);
                 auto const index_b = static_cast<unsigned> (index_a == 0);
 
-                assert ((index_a & 1) == index_a);
-                assert ((index_b & 1) == index_b);
+                assert ((index_a & 1) == index_a); //! OCLINT(PH - bitwise in conditional is ok)
+                assert ((index_b & 1) == index_b); //! OCLINT(PH - bitwise in conditional is ok)
                 assert (index_a != index_b);
 
                 children_[index_a] = index_pointer{new_leaf};
@@ -327,7 +327,7 @@ namespace pstore {
                 std::size_t index = not_found;
 
                 auto const bit_pos = hash_type{1} << hash_index;
-                if ((bitmap_ & bit_pos) != 0) {
+                if ((bitmap_ & bit_pos) != 0) { //! OCLINT(PH - bitwise in conditional is ok)
                     index = bit_count::pop_count (bitmap_ & (bit_pos - 1U));
                     child = children_[index];
                 }
@@ -427,7 +427,8 @@ namespace pstore {
                 auto const hash_index = hash & details::hash_index_mask;
                 auto const bit_pos = hash_type{1} << hash_index;
                 assert (bit_pos != 0); // guarantee that we didn't shift the bit to oblivion
-                assert ((this->bitmap_ & bit_pos) == 0); // check that this slot is free
+                // check that this slot is free.
+                assert ((this->bitmap_ & bit_pos) == 0); //! OCLINT(PH - bitwise in conditional)
 
                 // Compute the child index by counting the number of 1 bits below bit_pos.
                 unsigned const index = bit_count::pop_count (this->bitmap_ & (bit_pos - 1));
