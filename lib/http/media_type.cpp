@@ -98,7 +98,7 @@ namespace pstore {
         gsl::czstring PSTORE_NONNULL media_type_from_filename (std::string const & filename) {
             auto const dot_pos = filename.rfind ('.');
             return media_type_from_extension (
-                filename.c_str () + (dot_pos != std::string::npos ? dot_pos : filename.length ()));
+                filename.c_str () + (dot_pos == std::string::npos ? filename.length () : dot_pos));
         }
 
     } // end namespace httpd
