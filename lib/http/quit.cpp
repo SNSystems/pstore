@@ -73,9 +73,11 @@ namespace pstore {
                 }
 
                 struct sockaddr_in sock_addr {};
-                sock_addr.sin_port = htons (http_status->port ()); // NOLINT
+                // NOLINTNEXTLINE
+                sock_addr.sin_port = htons (http_status->port ()); //! OCLINT
                 sock_addr.sin_family = AF_INET;
-                sock_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK); // NOLINT
+                // NOLINTNEXTLINE
+                sock_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK); //! OCLINT
 
                 log (logging::priority::info, "Connecting");
 
