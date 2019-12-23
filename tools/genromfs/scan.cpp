@@ -165,15 +165,21 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
     while (struct dirent const * const dp = readdir (dirp.get ())) {
         auto const name = std::string (dp->d_name);
         if (!is_hidden (name)) {
-            struct stat sb {};
-            if (lstat (path_string (name).c_str (), &sb) != 0) {
-                return count;
-            }
+            continue;
+        }
 
-            if (S_ISREG (sb.st_mode)) { // NOLINT
-                // It's a regular file
-                count = add_file (directory, path, name, count, sb.st_mtime);
-            } else if (S_ISDIR (sb.st_mode)) { // NOLINT
+        struct stat sb {};
+        if (lstat (path_string (name).c_str (), &sb) != 0) {
+            return count;
+        }
+
+        // NOLINTNEXTLINE
+        if (S_ISREG (sb.st_mode)) { //! OCLINT(PH - don't warn about system macro)
+            // It's a regular file
+            count = add_file (directory, path, name, count, sb.st_mtime);
+        } else {
+            // NOLINTNEXTLINE
+            if (S_ISDIR (sb.st_mode)) { //! OCLINT(PH - don't warn about system macro)
                 // A directory
                 count = add_directory (directory, path, name, count);
             } else {
