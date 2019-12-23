@@ -273,9 +273,8 @@ namespace pstore {
             owned_ = true;
         }
         lock_guard (lock_guard && rhs) noexcept
-                : mut_{std::move (rhs.mut_)} {
-
-            owned_ = rhs.owned_;
+                : mut_{std::move (rhs.mut_)}
+                , owned_{rhs.owned_} {
             rhs.owned_ = false;
         }
 
@@ -301,7 +300,7 @@ namespace pstore {
 
     private:
         MutexType mut_;
-        bool owned_;
+        bool owned_ = false;
     };
 
 
