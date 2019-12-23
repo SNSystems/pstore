@@ -164,7 +164,7 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
 
     while (struct dirent const * const dp = readdir (dirp.get ())) {
         auto const name = std::string (dp->d_name);
-        if (!is_hidden (name)) {
+        if (is_hidden (name)) {
             continue;
         }
 
