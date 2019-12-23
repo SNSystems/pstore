@@ -172,7 +172,9 @@ namespace pstore {
                 value_ptr contents;
                 switch (kind) {
                     PSTORE_MCREPO_SECTION_KINDS
-                case repo::section_kind::last: assert (false); break;
+                case repo::section_kind::last:
+                    assert (false); //! OCLINT(PH - don't warn about the assert macro)
+                    break;
                 }
                 array.emplace_back (make_value (
                     object::container{{"type", make_value (kind)}, {"contents", contents}}));
