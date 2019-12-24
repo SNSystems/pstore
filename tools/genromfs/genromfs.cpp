@@ -63,7 +63,6 @@
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 
 // local includes
@@ -189,7 +188,7 @@ int main (int argc, char * argv[]) {
               "using namespace pstore::romfs;\n"
               "namespace {\n"
               "\n";
-        auto root = pstore::make_unique<directory_container> ();
+        auto root = std::make_unique<directory_container> ();
         auto root_id = scan (*root, src_path.get (), 0);
         std::unordered_set<unsigned> forwards;
         dump_tree (os, forwards, *root, root_id, root_id);

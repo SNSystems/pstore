@@ -121,13 +121,6 @@ check_cxx_source_compiles (
     PSTORE_HAVE_STD_QUOTED)
 
 check_cxx_source_compiles (
-    "#include <memory>
-    int main () {
-        std::make_unique<int> ();
-    }"
-    PSTORE_HAVE_STD_MAKE_UNIQUE)
-
-check_cxx_source_compiles (
     "#include <map>
     int main () {
         std::map<int,int> m;
@@ -304,7 +297,6 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/inherit_const.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ios_state.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/make_unique.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/parallel_for_each.hpp"

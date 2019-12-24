@@ -67,7 +67,6 @@
 #include <utility>
 
 #include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/make_unique.hpp"
 
 namespace pstore {
     namespace broker {
@@ -92,7 +91,7 @@ namespace pstore {
             std::unique_lock<std::mutex> lock (mut_);
             if (queue_.size () == 0) {
                 lock.unlock ();
-                return make_unique<message_type> ();
+                return std::make_unique<message_type> ();
             }
 
             auto res = std::move (queue_.front ());

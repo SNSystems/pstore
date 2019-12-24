@@ -67,7 +67,6 @@
 #include "pstore/config/config.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/varint.hpp"
 

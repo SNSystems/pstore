@@ -50,7 +50,6 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_error_or.cpp
     test_fnv.cpp
     test_gsl.cpp
-    test_make_unique.cpp
     test_maybe.cpp
     test_parallel_for_each.cpp
     test_path.cpp

@@ -170,7 +170,7 @@ namespace pstore {
                 /// \return The value of the element to which this iterator is currently pointing.
                 value_reference_type operator* () const {
                     if (pos_ == nullptr) {
-                        pos_ = pstore::make_unique<value_type> (
+                        pos_ = std::make_unique<value_type> (
                             index_->load_leaf_node (db_, this->get_address ()));
                     }
                     return *pos_;

@@ -50,9 +50,6 @@
 // 3rd party
 #include <gmock/gmock.h>
 
-// pstore
-#include "pstore/support/make_unique.hpp"
-
 namespace {
 
     std::shared_ptr<char> new_shared (std::string const & s) {
@@ -78,7 +75,7 @@ namespace {
     struct string_maker<std::unique_ptr<CharType[]>> {
         std::unique_ptr<CharType[]> operator() (std::string const & str) const {
             auto ptr =
-                pstore::make_unique<typename std::remove_const<CharType>::type[]> (str.length ());
+                std::make_unique<typename std::remove_const<CharType>::type[]> (str.length ());
             std::copy (std::begin (str), std::end (str), ptr.get ());
             return std::unique_ptr<CharType[]>{ptr.release ()};
         }

@@ -121,14 +121,14 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
     using ::testing::Return;
 
     auto const fixed_page_size_bytes = 4096U;
-    auto page_size = pstore::make_unique<fixed_page_size> ();
+    auto page_size = std::make_unique<fixed_page_size> ();
     EXPECT_CALL (*page_size, get ()).WillRepeatedly (Return (fixed_page_size_bytes));
 
     // Create the data store instance. It will use 4K pages mapped using mock_mapper instances.
-    pstore::database db{
-        this->file (), std::move (page_size),
-        pstore::make_unique<mock_region_factory> (this->file (), pstore::storage::min_region_size,
-                                                  pstore::storage::min_region_size)};
+    pstore::database db{this->file (), std::move (page_size),
+                        std::make_unique<mock_region_factory> (this->file (),
+                                                               pstore::storage::min_region_size,
+                                                               pstore::storage::min_region_size)};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
 
@@ -160,14 +160,14 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
     using ::testing::Return;
 
     auto const fixed_page_size_bytes = 4096U;
-    auto page_size = pstore::make_unique<fixed_page_size> ();
+    auto page_size = std::make_unique<fixed_page_size> ();
     EXPECT_CALL (*page_size, get ()).WillRepeatedly (Return (fixed_page_size_bytes));
 
     // Create the data store instance. It will use 4K pages mapped using mock_mapper instances.
     pstore::database db{this->file (), std::move (page_size),
-                        pstore::make_unique<mock_region_factory> (this->file (),
-                                                                  pstore::address::segment_size,
-                                                                  pstore::address::segment_size)};
+                        std::make_unique<mock_region_factory> (this->file (),
+                                                               pstore::address::segment_size,
+                                                               pstore::address::segment_size)};
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
 
 

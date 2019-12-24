@@ -48,7 +48,6 @@
 #include <vector>
 
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
@@ -74,7 +73,7 @@ namespace {
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
         if (path.length () > 0) {
-            result = pstore::make_unique<std::string> (path);
+            result = std::make_unique<std::string> (path);
         }
         return result;
     }

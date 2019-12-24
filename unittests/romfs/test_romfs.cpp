@@ -47,7 +47,6 @@
 
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error_or.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/romfs/dirent.hpp"
 
 #include <gmock/gmock.h>

@@ -57,7 +57,6 @@
 #include "pstore/config/config.hpp"
 #include "pstore/os/rotating_log.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/time.hpp"
 
@@ -346,7 +345,7 @@ namespace pstore {
             enabled.set (handlers::standard_error);
 #endif
 
-            auto loggers = make_unique<details::logger_collection> ();
+            auto loggers = std::make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
 
 #ifdef PSTORE_HAVE_ASL_H

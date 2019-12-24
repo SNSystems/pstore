@@ -46,7 +46,6 @@
 #include "heartbeat.hpp"
 
 #include "pstore/os/thread.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -128,7 +127,7 @@ namespace pstore {
 
     void heartbeat::attach (key_type const key, callback const cb) {
         if (!state_) {
-            state_ = make_unique<state> ();
+            state_ = std::make_unique<state> ();
             auto & w = state_->worker;
             state_->thread = std::thread ([&w]() {
                 threads::set_name ("heartbeat");

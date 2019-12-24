@@ -123,10 +123,6 @@
 /// available even when compiling for C++11 on some platforms.
 #cmakedefine PSTORE_HAVE_STD_QUOTED 1
 
-/// Defined if std::make_unique<>() is available. This was not officially introduced until C++14
-/// but is available even when compiling C++ on some platforms.
-#cmakedefine PSTORE_HAVE_STD_MAKE_UNIQUE 1
-
 /// Defined if std::to_string<>() is available.
 #cmakedefine PSTORE_HAVE_STD_TO_STRING 1
 

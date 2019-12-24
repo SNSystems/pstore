@@ -70,7 +70,6 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/head_revision.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/sstring_view.hpp"
 #include "pstore/support/uint128.hpp"
 
@@ -108,7 +107,7 @@ namespace pstore {
 
         template <typename File>
         explicit database (std::shared_ptr<File> file, bool access_tick_enabled = true)
-                : database (file, make_unique<system_page_size> (),
+                : database (file, std::make_unique<system_page_size> (),
                             region::get_factory (file, storage::full_region_size,
                                                  storage::min_region_size),
                             access_tick_enabled) {}

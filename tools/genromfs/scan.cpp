@@ -58,7 +58,6 @@
 #endif
 
 #include "pstore/support/error.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 
@@ -69,7 +68,7 @@ namespace {
 
     unsigned add_directory (directory_container & directory, std::string const & path,
                             std::string const & file_name, unsigned count) {
-        directory.emplace_back (file_name, count, pstore::make_unique<directory_container> ());
+        directory.emplace_back (file_name, count, std::make_unique<directory_container> ());
         return scan (*directory.back ().children, path + '/' + file_name, count + 1U);
     }
 

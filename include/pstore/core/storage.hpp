@@ -52,7 +52,6 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/support/aligned.hpp"
-#include "pstore/support/make_unique.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -110,7 +109,7 @@ namespace pstore {
         explicit storage (std::shared_ptr<File> const & file)
                 : sat_{new segment_address_table}
                 , file_{std::static_pointer_cast<file::file_base> (file)}
-                , page_size_{make_unique<system_page_size> ()}
+                , page_size_{std::make_unique<system_page_size> ()}
                 , region_factory_{region::get_factory (
                       std::static_pointer_cast<file::file_handle> (file), full_region_size,
                       min_region_size)}

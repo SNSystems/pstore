@@ -53,7 +53,6 @@
 
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/make_unique.hpp"
 
 namespace {
 
@@ -89,7 +88,7 @@ namespace {
         -> std::unique_ptr<std::string> {
         auto const pos = std::find_if (msg.payload.rbegin (), msg.payload.rend (),
                                        [] (char const c) { return c != '\0'; });
-        return pstore::make_unique<std::string> (std::begin (msg.payload), pos.base ());
+        return std::make_unique<std::string> (std::begin (msg.payload), pos.base ());
     }
 
 } // end anonymous namespace
@@ -141,8 +140,8 @@ namespace pstore {
                     auto end = std::end (complete_command);
                     auto const verb_parts = extract_word (std::begin (complete_command), end);
                     auto const path_parts = std::make_pair (skip_ws (verb_parts.second, end), end);
-                    return pstore::make_unique<broker_command> (substr (verb_parts),
-                                                                substr (path_parts));
+                    return std::make_unique<broker_command> (substr (verb_parts),
+                                                             substr (path_parts));
                 }
             }
 

@@ -49,19 +49,17 @@
 
 #include "pstore/core/region.hpp"
 
-#include "pstore/support/make_unique.hpp"
-
 namespace pstore {
     namespace region {
 
         std::unique_ptr<factory> get_factory (std::shared_ptr<file::file_handle> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size) {
-            return pstore::make_unique<file_based_factory> (file, full_size, min_size);
+            return std::make_unique<file_based_factory> (file, full_size, min_size);
         }
 
         std::unique_ptr<factory> get_factory (std::shared_ptr<file::in_memory> const & file,
                                               std::uint64_t full_size, std::uint64_t min_size) {
-            return pstore::make_unique<mem_based_factory> (file, full_size, min_size);
+            return std::make_unique<mem_based_factory> (file, full_size, min_size);
         }
 
 
