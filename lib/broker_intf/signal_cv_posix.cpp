@@ -51,6 +51,7 @@
 #    include <cassert>
 #    include <cstring> // for memset() [used by FD_ZERO on solaris]
 #    include <fcntl.h>
+#    include <poll.h>
 #    include <unistd.h>
 
 #    include "pstore/support/error.hpp"
@@ -99,17 +100,41 @@ namespace pstore {
         return read_fd_;
     }
 
-    // notify
-    // ~~~~~~
+    // write
+    // ~~~~~
+    int descriptor_condition_variable::write (int fd) noexcept {
+        pipe_content_type const buffer{};
+        for (;;) {
+            if (::write (fd, &buffer, sizeof (buffer)) < 0) {
+                if (errno != EINTR && errno != EAGAIN) {
+                    return errno;
+                }
+                // Retry the write.
+            } else {
+                // Success.
+                break;
+            }
+        }
+        return 0;
+    }
+
+    // notify_all
+    // ~~~~~~~~~~
+    // To wake up the listener, we just write a single character to the write file descriptor.
+    void descriptor_condition_variable::notify_all () {
+        int const err = descriptor_condition_variable::write (write_fd_.native_handle ());
+        if (err < 0) {
+            raise (errno_erc{err}, "write");
+        }
+    }
+
+    // notify_all_no_except
+    // ~~~~~~~~~~~~~~~~~~~~
     // To wake up the listener, we just write a single character to the write file descriptor.
     // On POSIX, this function is called from a signal handler. It must only call
     // signal-safe functions.
-    void descriptor_condition_variable::notify_all () noexcept {
-        auto const write_fd = write_fd_.native_handle ();
-        pipe_content_type const buffer{};
-        if (::write (write_fd, &buffer, sizeof (buffer)) == -1 && errno != EAGAIN) {
-            // TODO: Can I report this error somehow?
-        }
+    void descriptor_condition_variable::notify_all_no_except () noexcept {
+        descriptor_condition_variable::write (write_fd_.native_handle ());
     }
 
     // make_non_blocking
@@ -129,29 +154,27 @@ namespace pstore {
     // ~~~~
     void descriptor_condition_variable::wait () {
         int const read_fd = this->wait_descriptor ().native_handle ();
-        fd_set readfds{};
-        FD_ZERO (&readfds);
-        // Add the read end of pipe to 'readfds'.
-        FD_SET (read_fd, &readfds); // NOLINT
-        int const nfds = read_fd + 1;
-
+        auto const pollin = [] (pollfd const & pfd) { return pfd.revents & POLLIN; };
+        pollfd pollfds = {read_fd, POLLIN, 0};
+        int count = 0;
         do {
-            int err = 0;
-            while ((err = ::select (nfds, &readfds, nullptr, nullptr, nullptr)) == -1 &&
-                   errno == EINTR) {
-                continue; // Restart if interrupted by signal.
+            errno = 0;
+            constexpr int timeout = -1; // Wait forever.
+            while ((count = ::poll (&pollfds, 1, timeout)) == -1 && errno == EINTR) {
+                errno = 0; // Restart if interrupted by signal.
             }
-            if (err == -1) {
+            if (count == -1) {
                 raise (errno_erc{errno}, "select");
             }
 
             this->reset ();
-        } while (!FD_ISSET (read_fd, &readfds));
+        } while (count != 1 && !pollin (pollfds));
     }
 
     void descriptor_condition_variable::wait (std::unique_lock<std::mutex> & lock) {
         lock.unlock ();
-        auto const _ = make_scope_guard ([&lock] () { lock.lock (); });
+        auto const _ = //! OCLINT(PH - variable is intentionally unused)
+            make_scope_guard ([&lock] () { lock.lock (); });
         this->wait ();
     }
 

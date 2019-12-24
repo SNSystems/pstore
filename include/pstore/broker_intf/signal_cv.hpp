@@ -67,12 +67,14 @@ namespace pstore {
 
         virtual ~descriptor_condition_variable () = default;
 
+        /// \brief Unblocks all threads currently waiting for *this.
+        void notify_all ();
 
         /// \brief Unblocks all threads currently waiting for *this.
         ///
         /// \note On POSIX, this function is called from a signal handler. It must only call
         /// signal-safe functions.
-        void notify_all () noexcept;
+        void notify_all_no_except () noexcept;
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when
         /// notify() is executed. When unblocked, lock is reacquired and wait exits.
@@ -93,6 +95,7 @@ namespace pstore {
         broker::pipe_descriptor read_fd_;
         broker::pipe_descriptor write_fd_;
         static void make_non_blocking (int fd);
+        static int write (int fd) noexcept;
 #endif
     };
 
@@ -114,7 +117,7 @@ namespace pstore {
         /// signal-safe functions.
         void notify_all (int const signal) noexcept {
             signal_ = signal;
-            cv_.notify_all ();
+            cv_.notify_all_no_except ();
         }
 
         /// Releases lock and blocks the current executing thread. The thread will be unblocked when

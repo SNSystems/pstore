@@ -75,9 +75,17 @@ namespace pstore {
         return event_;
     }
 
-    // notify
-    // ~~~~~~
-    void descriptor_condition_variable::notify_all () noexcept {
+    // notify_all
+    // ~~~~~~~~~~
+    void descriptor_condition_variable::notify_all () {
+        if (!::SetEvent (event_.native_handle ())) {
+            raise (win32_erc{::GetLastError ()}, "SetEvent");
+        }
+    }
+
+    // notify_all_no_except
+    // ~~~~~~~~~~~~~~~~~~~~
+    void descriptor_condition_variable::notify_all_no_except () noexcept {
         ::SetEvent (event_.native_handle ());
     }
 
