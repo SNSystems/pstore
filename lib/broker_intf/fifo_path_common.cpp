@@ -58,7 +58,7 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/quoted_string.hpp"
+#include "pstore/support/quoted.hpp"
 
 namespace pstore {
     namespace broker {
@@ -94,8 +94,8 @@ namespace pstore {
 
             if (!fd.valid ()) {
                 std::ostringstream str;
-                str << "Could not open client named pipe " << quoted (path_);
-                raise (pstore::error_code::unable_to_open_named_pipe, str.str ());
+                str << "Could not open client named pipe " << pstore::quoted (path_);
+                raise (error_code::unable_to_open_named_pipe, str.str ());
             }
             return fd;
         }

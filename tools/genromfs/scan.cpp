@@ -58,7 +58,7 @@
 #endif
 
 #include "pstore/support/error.hpp"
-#include "pstore/support/quoted_string.hpp"
+#include "pstore/support/quoted.hpp"
 #include "pstore/support/utf.hpp"
 
 #include "copy.hpp"

@@ -60,7 +60,6 @@
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN
 #    include <Windows.h>
-#    include "pstore/support/utf.hpp"
 #else // !_WIN32
 #    include <cerrno>
 #    include <fcntl.h>
@@ -74,7 +73,8 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/quoted_string.hpp"
+#include "pstore/support/quoted.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace posix {
@@ -431,7 +431,8 @@ namespace pstore {
             utf::win32::to16 (name).c_str ()); // name of mapping object
         if (map_file == nullptr) {
             std::ostringstream str;
-            str << "Couldn't create a file mapping for " << ::pstore::quoted (name);
+char const * n = "hello";
+            str << "Couldn't create a file mapping for " << pstore::quoted (n);
             raise (win32_erc (::GetLastError ()), str.str ());
         }
         return map_file;

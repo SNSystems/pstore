@@ -70,14 +70,13 @@ namespace pstore {
             // When fork() returns 0, we are in the child process.
             case 0: {
                 try {
-                    logging::log (logging::priority::info, "starting vacuum ",
-                                  logging::quoted (exe_path));
+                    log (logging::priority::info, "starting vacuum ", logging::quoted (exe_path));
                     ::execv (exe_path, const_cast<char **> (argv.get ()));
                     raise (errno_erc{errno}, "execv"); // If execv returns, it must have failed.
                 } catch (std::exception const & ex) {
-                    logging::log (logging::priority::error, "fork error: ", ex.what ());
+                    log (logging::priority::error, "fork error: ", ex.what ());
                 } catch (...) {
-                    logging::log (logging::priority::error, "fork unknown error");
+                    log (logging::priority::error, "fork unknown error");
                 }
                 std::exit (EXIT_FAILURE);
             }

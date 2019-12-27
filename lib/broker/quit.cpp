@@ -89,8 +89,8 @@ namespace {
     void push (pstore::broker::command_processor & cp, std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
-        pstore::logging::log (pstore::logging::priority::info, "push command ",
-                              pstore::logging::quoted (message.c_str ()));
+        log (pstore::logging::priority::info, "push command ",
+             pstore::logging::quoted (message.c_str ()));
 
         assert (message.length () <= pstore::broker::message_type::payload_chars);
         auto msg = std::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},

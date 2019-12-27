@@ -66,7 +66,7 @@
 #    include "pstore/support/small_vector.hpp"
 #    include "pstore/support/utf.hpp"
 #    include "pstore/support/path.hpp"
-#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/quoted.hpp"
 
 namespace pstore {
     namespace file {
@@ -433,7 +433,7 @@ namespace pstore {
                     got_lock = false;
                 } else {
                     std::ostringstream str;
-                    str << "Unable to lock range of " << quoted (path_);
+                    str << "Unable to lock range of " << pstore::quoted (path_);
                     raise (win32_erc{last_error}, str.str ());
                 }
             }
@@ -456,7 +456,7 @@ namespace pstore {
             if (!ok) {
                 DWORD const last_error = ::GetLastError ();
                 std::ostringstream str;
-                str << "Unable to unlock range of " << quoted (path_);
+                str << "Unable to unlock range of " << pstore::quoted (path_);
                 raise (win32_erc{last_error}, str.str ());
             }
         }
@@ -533,7 +533,7 @@ namespace pstore {
                 DWORD const last_error = ::GetLastError ();
                 if (!allow_noent || last_error != ERROR_FILE_NOT_FOUND) {
                     std::ostringstream str;
-                    str << "Unable to delete file " << quoted (path);
+                    str << "Unable to delete file " << pstore::quoted (path);
                     raise (win32_erc{last_error}, str.str ());
                 }
             }

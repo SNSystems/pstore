@@ -112,15 +112,6 @@ check_cxx_source_compiles (
     PSTORE_HAVE_NON_CONST_STD_STRING_DATA)
 
 check_cxx_source_compiles (
-    "#include <iomanip>
-    #include <sstream>
-    int main () {
-        std::stringstream ss;
-        ss << std::quoted (\"Hello World\");
-    }"
-    PSTORE_HAVE_STD_QUOTED)
-
-check_cxx_source_compiles (
     "#include <map>
     int main () {
         std::map<int,int> m;
@@ -304,7 +295,7 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted_string.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/round2.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"

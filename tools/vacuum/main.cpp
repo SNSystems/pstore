@@ -74,7 +74,6 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/path.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/quoted_string.hpp"
 #include "pstore/support/utf.hpp"
 #include "pstore/vacuum/copy.hpp"
 #include "pstore/vacuum/quit.hpp"
@@ -136,8 +135,8 @@ int main (int argc, char * argv[]) {
         std::string const src_path = user_opt.src_path;
         std::string const src_dir = pstore::path::dir_name (src_path);
 
-        pstore::logging::log (pstore::logging::priority::notice, "Start ",
-                              pstore::quoted (src_path));
+        log (pstore::logging::priority::notice, "Start ",
+             pstore::logging::quoted (src_path.c_str ()));
 
         // Superficially, we shouldn't need write access to the data store, but we do so because
         // once the collection is complete, we'll rename the temporary file that has been created
@@ -176,23 +175,23 @@ int main (int argc, char * argv[]) {
         // On macOS we can do better than rename() [see man 2 exchangedata].
         // Similar elsewhere?
 
-        pstore::logging::log (pstore::logging::priority::notice,
-                              "main () exiting: ", pstore::quoted (src_path));
+        log (pstore::logging::priority::notice,
+             "main () exiting: ", pstore::logging::quoted (src_path.c_str ()));
     }
     // clang-format off
-    PSTORE_CATCH (std::exception const & ex, {
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
         char const * what = ex.what ();
         error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
                     << pstore::utf::to_native_string (what) << std::endl;
         pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
         exit_code = EXIT_FAILURE;
     })
-    PSTORE_CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
         std::cerr << "vacuumd: An unknown error occurred." << std::endl;
         pstore::logging::log (pstore::logging::priority::error, "Unknown error");
         exit_code = EXIT_FAILURE;
     })
-    // clang-format on
 
     return exit_code;
 }

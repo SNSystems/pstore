@@ -67,7 +67,7 @@
 // pstore
 #    include "pstore/config/config.hpp"
 #    include "pstore/support/error.hpp"
-#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/quoted.hpp"
 
 namespace {
 
@@ -171,7 +171,7 @@ namespace pstore {
         if (ptr == map_failed) {
             int const last_error = errno;
             std::ostringstream message;
-            message << "Could not memory map file " << quoted (file.path ());
+            message << "Could not memory map file " << pstore::quoted (file.path ());
             raise (errno_erc{last_error}, message.str ());
         }
 

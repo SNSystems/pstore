@@ -61,7 +61,7 @@
 #    include <system_error>
 
 #    include "pstore/os/uint64.hpp"
-#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/quoted.hpp"
 
 namespace {
 
@@ -93,7 +93,7 @@ namespace {
         if (mapping_ == nullptr) {
             DWORD const last_error = ::GetLastError ();
             std::ostringstream message;
-            message << "CreateFileMapping failed for " << std::quoted (file.path ());
+            message << "CreateFileMapping failed for " << pstore::quoted (file.path ());
             raise (pstore::win32_erc{last_error}, message.str ());
         }
     }
@@ -181,7 +181,7 @@ namespace pstore {
             DWORD const last_error = ::GetLastError ();
 
             std::ostringstream message;
-            message << "Could not map view of file " << std::quoted (file.path ());
+            message << "Could not map view of file " << pstore::quoted (file.path ());
             raise (win32_erc{last_error}, message.str ());
         }
 

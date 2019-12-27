@@ -59,7 +59,7 @@
 #    include <unistd.h>
 
 #    include "pstore/support/error.hpp"
-#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/quoted.hpp"
 
 namespace {
 

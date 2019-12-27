@@ -66,9 +66,9 @@
 // local includes
 #    include "pstore/support/gsl.hpp"
 #    include "pstore/support/path.hpp"
-#    include "pstore/support/quoted_string.hpp"
+#    include "pstore/support/quoted.hpp"
 #    include "pstore/support/small_vector.hpp"
-#include "pstore/support/unsigned_cast.hpp"
+#    include "pstore/support/unsigned_cast.hpp"
 
 // includes which depend on values in config.hpp
 #    ifdef PSTORE_HAVE_SYS_SYSCALL_H
@@ -365,8 +365,8 @@ namespace pstore {
         // ~~~~~~
         bool file_handle::rename (std::string const & new_name) {
             bool result = true;
-            auto const & p = this->path ();
-            int err = rename_noreplace (p.c_str (), new_name.c_str ());
+            auto const & path = this->path ();
+            int err = rename_noreplace (path.c_str (), new_name.c_str ());
             if (err >= 0) {
                 path_ = new_name;
             } else {
@@ -375,7 +375,7 @@ namespace pstore {
                     result = false;
                 } else {
                     std::ostringstream message;
-                    message << "Unable to rename " << quoted (p);
+                    message << "Unable to rename " << pstore::quoted (path);
                     raise (errno_erc{err}, message.str ());
                 }
             }

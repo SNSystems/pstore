@@ -1,10 +1,10 @@
-//*                    _           _       _        _              *
-//*   __ _ _   _  ___ | |_ ___  __| |  ___| |_ _ __(_)_ __   __ _  *
-//*  / _` | | | |/ _ \| __/ _ \/ _` | / __| __| '__| | '_ \ / _` | *
-//* | (_| | |_| | (_) | ||  __/ (_| | \__ \ |_| |  | | | | | (_| | *
-//*  \__, |\__,_|\___/ \__\___|\__,_| |___/\__|_|  |_|_| |_|\__, | *
-//*     |_|                                                 |___/  *
-//===- include/pstore/support/quoted_string.hpp ---------------------------===//
+//*                    _           _  *
+//*   __ _ _   _  ___ | |_ ___  __| | *
+//*  / _` | | | |/ _ \| __/ _ \/ _` | *
+//* | (_| | |_| | (_) | ||  __/ (_| | *
+//*  \__, |\__,_|\___/ \__\___|\__,_| *
+//*     |_|                           *
+//===- include/pstore/support/quoted.hpp ----------------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,17 +41,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file quoted_string.hpp
+/// \brief Wrapping quotation marks around strings for output to the user.
 
-#ifndef PSTORE_SUPPORT_QUOTED_STRING_HPP
-#define PSTORE_SUPPORT_QUOTED_STRING_HPP
+#ifndef PSTORE_SUPPORT_QUOTED_HPP
+#define PSTORE_SUPPORT_QUOTED_HPP
 
+#include <iomanip>
 #include <string>
+
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
 
-    inline std::string quoted (std::string const & s) { return R"(")" + s + R"(")"; }
+    /// Wraps quotation marks around a string for presentation to the user. Intended for use
+    /// as an io-manipulator.
+    ///
+    /// \param str The string to be wrapped in quotation marks.
+    inline auto quoted (gsl::czstring const str) { return std::quoted (str, '"', '\0'); }
 
-} // namespace pstore
+    /// Wraps quotation marks around a string for presentation to the user. Intended for use
+    /// as an io-manipulator.
+    ///
+    /// \param str The string to be wrapped in quotation marks.
+    inline auto quoted (std::string const & str) { return std::quoted (str, '"', '\0'); }
 
-#endif // PSTORE_SUPPORT_QUOTED_STRING_HPP
+} // end namespace pstore
+
+#endif // PSTORE_SUPPORT_QUOTED_HPP
