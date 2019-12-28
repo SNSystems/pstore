@@ -42,6 +42,7 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-mcrepo-unit-tests
+    test_bss_section.cpp
     test_compilation.cpp
     test_fragment.cpp
     test_sparse_array.cpp

@@ -60,10 +60,9 @@ namespace pstore {
         public:
             using size_type = std::uint32_t;
 
-            ///
-            bss_section (unsigned const align, size_type const size)
-                    : field64_{0} {
-
+            /// \param align  The alignment of the BSS data. Must be a power of 2.
+            /// \param size  The number of bytes of BSS data.
+            bss_section (unsigned const align, size_type const size) {
                 PSTORE_STATIC_ASSERT (std::is_standard_layout<bss_section>::value);
                 PSTORE_STATIC_ASSERT (offsetof (bss_section, field64_) == 0);
                 PSTORE_STATIC_ASSERT (sizeof (bss_section) == 8);
@@ -92,7 +91,7 @@ namespace pstore {
 
         private:
             union {
-                std::uint64_t field64_;
+                std::uint64_t field64_ = 0;
                 /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment
                 /// is expressed as an align_ value of 3). (Allowing for as many as 8 bits here is
                 /// probably a little excessive.)
