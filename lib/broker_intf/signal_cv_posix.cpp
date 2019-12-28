@@ -102,7 +102,7 @@ namespace pstore {
 
     // write
     // ~~~~~
-    int descriptor_condition_variable::write (int fd) noexcept {
+    int descriptor_condition_variable::write (int const fd) noexcept {
         pipe_content_type const buffer{};
         for (;;) {
             if (::write (fd, &buffer, sizeof (buffer)) < 0) {
