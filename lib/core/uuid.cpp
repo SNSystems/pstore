@@ -247,17 +247,14 @@ namespace pstore {
         resl.reserve (string_length);
         auto index = 0U;
         std::for_each (std::begin (data_), std::end (data_), [&] (unsigned const c) {
-            switch (index++) {
-            case 4:
-            case 6:
-            case 8:
-            case 10: resl += '-'; PSTORE_FALLTHROUGH;
-            default:
-                resl += digit_to_hex ((c >> 4) & 0x0F);
-                resl += digit_to_hex (c & 0x0F);
-                break;
+            if (index == 4 || index == 6 || index == 8 || index == 10) {
+                resl += '-';
             }
+            ++index;
+            resl += digit_to_hex ((c >> 4) & 0x0F);
+            resl += digit_to_hex (c & 0x0F);
         });
+        assert (resl.length () == string_length);
         return resl;
     }
 
