@@ -253,6 +253,11 @@ namespace pstore {
                 return read_and_byte_swap<std::uint64_t> (reader, io);
             }
 
+            error_or_n<gsl::span<std::uint8_t> const>
+            decode_payload (std::uint64_t expected_length,
+                            gsl::span<std::uint8_t const> const & mask,
+                            gsl::span<std::uint8_t> const & payload);
+
         } // end namespace details
 
 
@@ -318,24 +323,15 @@ namespace pstore {
                                    std::uint8_t{0});
 
                                return reader.get_span (io3, gsl::make_span (payload)) >>=
-                                      [&payload, payload_length, &mask, &part1](
-                                          IO io4, gsl::span<std::uint8_t> const & payload_span) {
-                                          auto const payload_size = payload_span.size ();
-                                          if (payload_size < 0 ||
-                                              static_cast<std::make_unsigned<std::remove_const<
-                                                      decltype (payload_size)>::type>::type> (
-                                                  payload_size) != payload_length) {
-                                              return return_type{ws_error::insufficient_data};
-                                          }
-
-                                          for (auto ctr = gsl::span<std::uint8_t>::index_type{0};
-                                               ctr < payload_size; ++ctr) {
-                                              payload_span[ctr] ^= mask[ctr % 4];
-                                          }
-
-                                          return return_type{
-                                              in_place, io4,
-                                              frame{part1.opcode, part1.fin, std::move (payload)}};
+                                      [&] (IO io4, gsl::span<std::uint8_t> const & payload_span) {
+                                          return details::decode_payload (payload_length, mask,
+                                                                          payload_span) >>=
+                                                 [&] (gsl::span<std::uint8_t> const &) {
+                                                     return return_type{in_place, io4,
+                                                                        frame{part1.opcode,
+                                                                              part1.fin,
+                                                                              std::move (payload)}};
+                                                 };
                                       };
                            };
                 };

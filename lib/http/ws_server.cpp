@@ -43,6 +43,8 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/http/ws_server.hpp"
 
+#include "pstore/support/unsigned_cast.hpp"
+
 namespace pstore {
     namespace httpd {
 
@@ -112,6 +114,28 @@ namespace pstore {
             case close_status_code::try_again: return false;
             }
             return code >= 3000 && code < 5000;
+        }
+
+        error_or_n<gsl::span<std::uint8_t> const>
+        details::decode_payload (std::uint64_t expected_length,
+                                 gsl::span<std::uint8_t const> const & mask,
+                                 gsl::span<std::uint8_t> const & payload) {
+            using return_type = error_or_n<gsl::span<std::uint8_t>>;
+            auto const size = payload.size ();
+            if (size < 0 || unsigned_cast (size) != expected_length) {
+                return return_type{ws_error::insufficient_data};
+            }
+
+            // "Octet i of the transformed data ("transformed-octet-i") is the XOR of octet i of
+            // the original data ("original-octet-i") with octet at index i modulo 4 of the
+            // masking key ("masking-key-octet-j"):
+            //     j                   = i MOD 4
+            //     transformed-octet-i = original-octet-i XOR masking-key-octet-j"
+
+            for (auto ctr = gsl::span<std::uint8_t>::index_type{0}; ctr < size; ++ctr) {
+                payload[ctr] ^= mask[ctr % 4];
+            }
+            return return_type{payload};
         }
 
     } // end namespace httpd
