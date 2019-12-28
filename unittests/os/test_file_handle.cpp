@@ -163,4 +163,3 @@ TYPED_TEST (SplitFixture, SplitUint8TwiceMaxPlus1) {
     // Check the return value.
     EXPECT_EQ (total_size, total);
 }
-
