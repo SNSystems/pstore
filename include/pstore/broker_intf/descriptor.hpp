@@ -100,16 +100,16 @@ namespace pstore {
 #endif
 
                 explicit constexpr descriptor (
-                    DescriptorTraits traits = DescriptorTraits ()) noexcept
-                        : fd_{invalid}
-                        , traits_ (traits) {}
+                    DescriptorTraits const traits = DescriptorTraits ()) noexcept
+                        : traits_{traits} {}
                 explicit constexpr descriptor (
-                    value_type fd, DescriptorTraits traits = DescriptorTraits ()) noexcept
+                    value_type const fd,
+                    DescriptorTraits const traits = DescriptorTraits ()) noexcept
                         : fd_{fd}
-                        , traits_ (traits) {}
+                        , traits_{traits} {}
                 descriptor (descriptor && rhs) noexcept
                         : fd_{rhs.release ()}
-                        , traits_(std::move (rhs.traits_)) {}
+                        , traits_{std::move (rhs.traits_)} {}
                 descriptor (descriptor const &) = delete;
 
                 ~descriptor () {
@@ -151,7 +151,7 @@ namespace pstore {
                 }
 
             private:
-                value_type fd_;
+                value_type fd_ = invalid;
                 DescriptorTraits traits_;
             };
 

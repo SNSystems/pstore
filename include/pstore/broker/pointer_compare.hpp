@@ -68,10 +68,9 @@ namespace pstore {
             // uses std::less<Ptr> to compare them.
             class helper {
             public:
-                helper () noexcept
-                        : ptr_ (nullptr) {}
                 constexpr explicit helper (Ptr p) noexcept
                         : ptr_ (p) {}
+                helper () noexcept = default;
                 helper (helper const &) noexcept = default;
                 helper (helper &&) noexcept = default;
 
@@ -91,7 +90,7 @@ namespace pstore {
                 bool operator< (helper other) const { return std::less<Ptr> () (ptr_, other.ptr_); }
 
             private:
-                Ptr ptr_;
+                Ptr ptr_ = nullptr;
             };
 
             template <typename Lhs, typename Rhs>
