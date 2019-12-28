@@ -76,7 +76,6 @@ namespace pstore {
         /// thread_entry() function for pulling commands from the queue and executing them.
         class command_processor {
         public:
-            // TODO: make this scavenger threshold user configurable
             /// \param num_read_threads  The number of threads listening to the command pipe.
             /// \param http_status  A pointer to an object which can be used to tell the http server
             ///   to exit.
@@ -84,10 +83,10 @@ namespace pstore {
             ///   uptime thread to exit.
             /// \param scavenge_threshold  The time for which messages are
             ///   allowed to wait in the message queue before the scavenger will delete them.
-            command_processor (
-                unsigned const num_read_threads, gsl::not_null<httpd::server_status *> http_status,
-                gsl::not_null<std::atomic<bool> *> uptime_done,
-                std::chrono::seconds scavenge_threshold = std::chrono::seconds (4 * 60 * 60));
+            command_processor (unsigned const num_read_threads,
+                               gsl::not_null<httpd::server_status *> http_status,
+                               gsl::not_null<std::atomic<bool> *> uptime_done,
+                               std::chrono::seconds scavenge_threshold);
             virtual ~command_processor () = default;
 
             // No copying or assignment.

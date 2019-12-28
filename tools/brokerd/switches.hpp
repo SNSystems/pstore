@@ -45,6 +45,7 @@
 #ifndef SWITCHES_HPP
 #define SWITCHES_HPP
 
+#include <chrono>
 #include <memory>
 #include <string>
 #include <tuple>
@@ -56,6 +57,7 @@ struct switches {
     std::unique_ptr<std::string> record_path;
     std::unique_ptr<std::string> pipe_path;
     unsigned num_read_threads = 2U;
+    std::chrono::seconds scavenge_time;
 };
 
 std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);

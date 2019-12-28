@@ -215,7 +215,7 @@ int main (int argc, char * argv[]) {
 
         {
             auto commands = std::make_shared<broker::command_processor> (
-                opt.num_read_threads, http_status.get (), &uptime_done);
+                opt.num_read_threads, http_status.get (), &uptime_done, opt.scavenge_time);
             auto scav = std::make_shared<broker::scavenger> (commands);
             commands->attach_scavenger (scav);
 
