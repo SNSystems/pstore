@@ -303,7 +303,8 @@ namespace pstore {
 
                 return details::read_payload_length (
                            reader, io1,
-                           part1.payload_length) >>= [&](IO io2, std::uint64_t payload_length) {
+                           part1.payload_length) >>= [&] (IO io2,
+                                                          std::uint64_t const payload_length) {
                     log (pstore::logging::priority::info, "Payload length: ", payload_length);
                     if ((payload_length & (std::uint64_t{1} << 63U)) != 0U) {
                         // "The most significant bit MUST be 0."

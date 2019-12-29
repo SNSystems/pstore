@@ -117,7 +117,7 @@ namespace pstore {
         }
 
         error_or_n<gsl::span<std::uint8_t> const>
-        details::decode_payload (std::uint64_t expected_length,
+        details::decode_payload (std::uint64_t const expected_length,
                                  gsl::span<std::uint8_t const> const & mask,
                                  gsl::span<std::uint8_t> const & payload) {
             using return_type = error_or_n<gsl::span<std::uint8_t>>;
