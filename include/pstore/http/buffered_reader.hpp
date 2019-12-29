@@ -188,8 +188,7 @@ namespace pstore {
                 , buf_ (std::max (buffer_size, std::size_t{1}), std::uint8_t{0})
                 , span_ (gsl::make_span (buf_))
                 , pos_ (span_.begin ())
-                , end_ (span_.begin ())
-                , push_ () {
+                , end_ (span_.begin ()) {
             this->check_invariants ();
         }
 

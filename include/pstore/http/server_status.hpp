@@ -54,8 +54,7 @@ namespace pstore {
         class server_status {
         public:
             constexpr explicit server_status (in_port_t const port) noexcept
-                    : state_{http_state::initializing}
-                    , port_{port} {}
+                    : port_{port} {}
 
             server_status (server_status const & rhs) = delete;
             server_status (server_status && rhs) = delete;
@@ -77,7 +76,7 @@ namespace pstore {
             constexpr in_port_t port () const noexcept { return port_; }
 
         private:
-            std::atomic<http_state> state_;
+            std::atomic<http_state> state_{http_state::initializing};
             in_port_t const port_;
         };
 

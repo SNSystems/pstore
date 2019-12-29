@@ -85,14 +85,13 @@ namespace pstore {
 
     class system_page_size final : public system_page_size_interface {
     public:
-        system_page_size ()
-                : size_{sysconf ()} {}
+        system_page_size () = default;
         ~system_page_size () noexcept override;
 
         unsigned get () const override { return size_; }
 
     private:
-        unsigned size_;
+        unsigned size_ = sysconf ();
         static unsigned sysconf ();
     };
 

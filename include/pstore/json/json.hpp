@@ -217,7 +217,8 @@ namespace pstore {
 
             /// Preallocated storage for "singleton" matcher. These are the matchers, such as
             /// numbers of strings, which are "terminal" and can't have child objects.
-            std::unique_ptr<details::singleton_storage<Callbacks>> singletons_;
+            std::unique_ptr<details::singleton_storage<Callbacks>> singletons_{
+                new details::singleton_storage<Callbacks>};
             /// The maximum depth to which we allow the parse stack to grow. This value should be
             /// sufficient for any reasonable input: its intention is to prevent bogus (attack)
             /// inputs from taking the parser down.
@@ -229,7 +230,7 @@ namespace pstore {
 
             /// The column and row number of the parse within the input stream. Stored as (column,
             /// row) [i.e. (x,y)].
-            std::tuple<unsigned, unsigned> coordinate_;
+            std::tuple<unsigned, unsigned> coordinate_{1U, 1U};
         };
 
         template <typename Callbacks>
@@ -1471,9 +1472,7 @@ namespace pstore {
         // ~~~~~~
         template <typename Callbacks>
         parser<Callbacks>::parser (Callbacks callbacks)
-                : singletons_ (new details::singleton_storage<Callbacks>)
-                , callbacks_ (std::move (callbacks))
-                , coordinate_ (std::make_tuple (1U, 1U)) {
+                : callbacks_ (std::move (callbacks)) {
 
             using mpointer = typename matcher::pointer;
             using deleter = typename mpointer::deleter_type;

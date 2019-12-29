@@ -54,8 +54,7 @@ namespace pstore {
         class address final : public value {
         public:
             explicit address (pstore::address addr)
-                    : addr_ (std::move (addr))
-                    , expanded_{default_expanded_} {}
+                    : addr_ (std::move (addr)) {}
 
             bool is_number_like () const override {
                 // A non-expanded address is printed just like a number.
@@ -73,7 +72,7 @@ namespace pstore {
             static bool default_expanded_;
 
             pstore::address addr_;
-            bool expanded_;
+            bool expanded_ = default_expanded_;
             mutable value_ptr value_;
         };
 

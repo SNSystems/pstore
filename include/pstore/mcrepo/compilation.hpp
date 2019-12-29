@@ -164,15 +164,14 @@ namespace pstore {
             /// \name Construction
             ///@{
 
-            /// \brief Allocates a new compilation in-store and copy the ticket file path and the
-            /// contents of a vector of compilation_members into it.
+            /// Allocates a new compilation in-store and copy the ticket file path and the contents
+            /// of a vector of compilation_members into it.
             ///
             /// \param transaction  The transaction to which the compilation will be appended.
             /// \param path  A ticket file path address in the store.
             /// \param triple  The target-triple associated with this compilation.
             /// \param first_member  The first of a sequence of compilation_member instances. The
-            /// range
-            ///   defined by \p first_member and \p last_member will be copied into the newly
+            ///   range defined by \p first_member and \p last_member will be copied into the newly
             ///   allocated compilation.
             /// \param last_member  The end of the range of compilation_member instances.
             /// \result A pair of a pointer and an extent which describes
@@ -202,7 +201,6 @@ namespace pstore {
 
             /// \name Iterators
             ///@{
-
             iterator begin () { return members_; }
             const_iterator begin () const { return members_; }
             const_iterator cbegin () const { return this->begin (); }
@@ -260,7 +258,7 @@ namespace pstore {
             static constexpr std::array<char, 8> compilation_signature_ = {
                 {'C', 'm', 'p', 'l', '8', 'i', 'o', 'n'}};
 
-            std::array<char, 8> signature_;
+            std::array<char, 8> signature_ = compilation_signature_;
 
             /// The path containing the ticket file when it was created. (Used to guide the garbage
             /// collector's ticket-file search.)
@@ -280,8 +278,7 @@ namespace pstore {
         compilation::compilation (typed_address<indirect_string> const path,
                                   typed_address<indirect_string> const triple, size_type const size,
                                   Iterator const first_member, Iterator const last_member) noexcept
-                : signature_{compilation_signature_}
-                , path_{path}
+                : path_{path}
                 , triple_{triple}
                 , size_{size} {
             // An assignment to suppress a warning from clang that the field is not used.
