@@ -193,7 +193,7 @@ namespace pstore {
             //* |_|_||_\__\___|_| |_||_\__,_|_| |_||_\___/\__,_\___| *
             //*                                                      *
 
-            internal_node::signature_type const internal_node::signature = {
+            internal_node::signature_type const internal_node::node_signature_ = {
                 {'I', 'n', 't', 'e', 'r', 'n', 'a', 'l'}};
 
             // operator new
@@ -218,10 +218,7 @@ namespace pstore {
 
             // ctor
             // ~~~~
-            internal_node::internal_node ()
-                    : signature_ (signature)
-                    , bitmap_{0} {
-
+            internal_node::internal_node () {
                 static_assert (std::is_standard_layout<internal_node>::value,
                                "internal internal_node must be standard-layout");
                 static_assert (alignof (linear_node) >= 4, "internal_node must have alignment "
@@ -239,8 +236,7 @@ namespace pstore {
             // ctor (one child)
             // ~~~~~~~~~~~~~~~~
             internal_node::internal_node (index_pointer const & leaf, hash_type const hash)
-                    : signature_ (signature)
-                    , bitmap_{hash_type{1} << hash}
+                    : bitmap_{hash_type{1} << hash}
                     , children_{{leaf}} {}
 
             // ctor (two children)
@@ -248,8 +244,7 @@ namespace pstore {
             internal_node::internal_node (index_pointer const & existing_leaf,
                                           index_pointer const & new_leaf,
                                           hash_type const existing_hash, hash_type const new_hash)
-                    : signature_ (signature)
-                    , bitmap_ (hash_type{1} << existing_hash | hash_type{1} << new_hash) {
+                    : bitmap_ (hash_type{1} << existing_hash | hash_type{1} << new_hash) {
 
                 auto const index_a = get_new_index (new_hash, existing_hash);
                 auto const index_b = static_cast<unsigned> (index_a == 0);
@@ -265,8 +260,7 @@ namespace pstore {
             // copy ctor
             // ~~~~~~~~~
             internal_node::internal_node (internal_node const & rhs)
-                    : signature_ (signature)
-                    , bitmap_{rhs.bitmap_} {
+                    : bitmap_{rhs.bitmap_} {
 
                 auto const first = std::begin (rhs.children_);
                 std::copy (first, first + rhs.size (), std::begin (children_));
@@ -307,7 +301,7 @@ namespace pstore {
                 internal_node * inode = nullptr;
                 if (node.is_heap ()) {
                     inode = node.untag_node<internal_node *> ();
-                    assert (inode->signature_ == signature);
+                    assert (inode->signature_ == node_signature_);
                 } else {
                     new_node = internal_node::allocate (internal);
                     inode = new_node.get ();
@@ -352,7 +346,7 @@ namespace pstore {
             bool internal_node::validate_after_load (internal_node const & internal,
                                                      typed_address<internal_node> const addr) {
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
-                if (internal.signature_ != signature) {
+                if (internal.signature_ != node_signature_) {
                     return false;
                 }
 #endif

@@ -49,7 +49,6 @@
 #ifndef _WIN32
 
 #    include <cassert>
-#    include <cstring> // for memset() [used by FD_ZERO on solaris]
 #    include <fcntl.h>
 #    include <poll.h>
 #    include <unistd.h>
@@ -73,10 +72,7 @@ namespace pstore {
     //*                       |_|                             *
     // (ctor)
     // ~~~~~~
-    descriptor_condition_variable::descriptor_condition_variable ()
-            : read_fd_{}
-            , write_fd_{} {
-
+    descriptor_condition_variable::descriptor_condition_variable () {
         enum { read_index, write_index, last_index };
         int fds_[last_index] = {0};
         if (::pipe (&fds_[0]) == -1) {

@@ -92,8 +92,9 @@ namespace pstore {
 #ifdef _WIN32
         broker::pipe_descriptor event_;
 #else
-        broker::pipe_descriptor read_fd_;
-        broker::pipe_descriptor write_fd_;
+        broker::pipe_descriptor read_fd_{};
+        broker::pipe_descriptor write_fd_{};
+
         static void make_non_blocking (int fd);
         static int write (int fd) noexcept;
 #endif

@@ -681,16 +681,16 @@ namespace pstore {
                 address store_node (transaction_base & transaction) const;
 
                 using signature_type = std::array<std::uint8_t, 8>;
-                static signature_type const signature;
+                static signature_type const node_signature_;
 
                 /// A magic number for internal nodes in the store. Acts as a quick integrity test
                 /// for the index structures.
-                signature_type signature_;
+                signature_type signature_ = node_signature_;
 
                 /// For each index in the children array, the corresponding bit is set in this field
                 /// if it is a reference to an internal node or an leaf node. In a linear node, the
                 /// bitmap field contains the number of elements in the array.
-                hash_type bitmap_;
+                hash_type bitmap_ = 0;
 
                 /// \brief The array of child node references.
                 /// Each child may be in-memory or in-store.
