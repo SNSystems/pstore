@@ -389,12 +389,10 @@ namespace pstore {
         /// be written at this location.
         class sizes {
         public:
-            sizes () noexcept
-                    : footer_pos_{typed_address<trailer>::null ()}
-                    , logical_{0} {}
-            explicit sizes (typed_address<trailer> const footer_pos) noexcept
-                    : footer_pos_ (footer_pos)
-                    , logical_ (footer_pos_.absolute () + sizeof (trailer)) {}
+            sizes () noexcept = default;
+            constexpr explicit sizes (typed_address<trailer> const footer_pos) noexcept
+                    : footer_pos_{footer_pos}
+                    , logical_{footer_pos_.absolute () + sizeof (trailer)} {}
 
             typed_address<trailer> footer_pos () const noexcept { return footer_pos_; }
             std::uint64_t logical_size () const noexcept { return logical_; }
@@ -416,10 +414,10 @@ namespace pstore {
             }
 
         private:
-            typed_address<trailer> footer_pos_;
+            typed_address<trailer> footer_pos_ = typed_address<trailer>::null ();
 
             /// This value tracks space as it's appended to the file.
-            std::uint64_t logical_;
+            std::uint64_t logical_ = 0;
         };
         sizes size_;
 

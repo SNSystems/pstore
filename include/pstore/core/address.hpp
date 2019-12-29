@@ -131,8 +131,7 @@ namespace pstore {
         static constexpr std::uint64_t const segment_size =
             std::uint64_t{max_offset} + UINT64_C (1);
 
-        constexpr address () noexcept
-                : a_{0} {}
+        constexpr address () noexcept = default;
         explicit constexpr address (std::uint64_t const absolute) noexcept
                 : a_{absolute} {}
         constexpr address (segment_type const segment, offset_type const offset) noexcept
@@ -192,7 +191,7 @@ namespace pstore {
         }
 
     private:
-        std::uint64_t a_;
+        std::uint64_t a_ = 0;
 
         static constexpr std::uint64_t as_absolute (segment_type const segment,
                                                     offset_type const offset) noexcept {

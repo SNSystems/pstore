@@ -57,10 +57,10 @@
 #include <type_traits>
 
 #ifndef _WIN32
-#include <limits.h> // POSIX definition of PIPE_BUF
-#ifndef PIPE_BUF
-#define PIPE_BUF (512) // POSIX minimum value for PIPE_BUF
-#endif
+#    include <limits.h> // POSIX definition of PIPE_BUF
+#    ifndef PIPE_BUF
+#        define PIPE_BUF (512) // POSIX minimum value for PIPE_BUF
+#    endif
 #endif
 
 #include "pstore/support/error.hpp"
@@ -78,8 +78,7 @@ namespace pstore {
         /// Instances of this structure are written to the broker's communication pipe.
         class message_type {
         public:
-            message_type ()
-                    : payload{{'\0'}} {}
+            constexpr message_type () noexcept = default;
 
             /// \param mid The message ID.
             /// \param pno The message part number.
@@ -103,7 +102,6 @@ namespace pstore {
                     raise (::pstore::error_code::bad_message_part_number);
                 }
             }
-
 
             bool operator== (message_type const & rhs) const;
             bool operator!= (message_type const & rhs) const { return !operator== (rhs); }
@@ -135,7 +133,7 @@ namespace pstore {
             std::uint16_t const num_parts = 1;
 
             /// \brief A character array containing the actual message content.
-            payload_type const payload;
+            payload_type const payload{{'\0'}};
 
         private:
             template <typename InputIterator>

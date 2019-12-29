@@ -172,30 +172,24 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (alignof (header) == 8);
     PSTORE_STATIC_ASSERT (sizeof (header) == 48);
 
-    constexpr std::uint64_t chars_to_uint64 (char const c1, char const c2, char const c3,
-                                             char const c4, char const c5, char const c6,
-                                             char const c7, char const c8) noexcept {
-        return static_cast<std::uint64_t> (c1) | static_cast<std::uint64_t> (c2) << 8U |
-               static_cast<std::uint64_t> (c3) << 16U | static_cast<std::uint64_t> (c4) << 24U |
-               static_cast<std::uint64_t> (c5) << 32U | static_cast<std::uint64_t> (c6) << 40U |
-               static_cast<std::uint64_t> (c7) << 48U | static_cast<std::uint64_t> (c8) << 56U;
-    }
-
-    /// \brief The lock block is a small struct placed immediately after the file header which is
+    /// \brief The lock-block is a small struct placed immediately after the file header which is
     /// used by the transaction lock.
     ///
-    /// This value is not read or written but a file range lock is placed on it as part of the
-    /// implementation of the transaction lock. Its value is a small magic number which is intended
-    /// to resemble "LOCKBLOC" in a hex dump.
+    /// This data is not read or written but a file range lock is placed on it as part of the
+    /// implementation of the transaction lock.
     struct lock_block {
-        lock_block ()
-                : vacuum_lock{chars_to_uint64 ('V', 'a', 'c', 'u', 'u', 'm', 'L', 'k')}
-                , transaction_lock{chars_to_uint64 ('T', 'r', 'n', 's', 'a', 'c', 't', 'L')} {}
-
-        std::uint64_t vacuum_lock;
-        std::uint64_t transaction_lock;
+        std::uint64_t vacuum_lock{chars_to_uint64 ('V', 'a', 'c', 'u', 'u', 'm', 'L', 'k')};
+        std::uint64_t transaction_lock{chars_to_uint64 ('T', 'r', 'n', 's', 'a', 'c', 't', 'L')};
 
         static constexpr auto file_offset = std::uint64_t{sizeof (header)};
+        static constexpr std::uint64_t chars_to_uint64 (char const c1, char const c2, char const c3,
+                                                        char const c4, char const c5, char const c6,
+                                                        char const c7, char const c8) noexcept {
+            return static_cast<std::uint64_t> (c1) | static_cast<std::uint64_t> (c2) << 8U |
+                   static_cast<std::uint64_t> (c3) << 16U | static_cast<std::uint64_t> (c4) << 24U |
+                   static_cast<std::uint64_t> (c5) << 32U | static_cast<std::uint64_t> (c6) << 40U |
+                   static_cast<std::uint64_t> (c7) << 48U | static_cast<std::uint64_t> (c8) << 56U;
+        }
     };
 
     PSTORE_STATIC_ASSERT (offsetof (lock_block, vacuum_lock) == 0);

@@ -149,8 +149,7 @@ namespace pstore {
             public:
                 template <class... Mods>
                 explicit opt (Mods const &... mods)
-                        : option ()
-                        , value_{} {
+                        : option () {
                     apply (*this, mods...);
                 }
                 opt (opt const &) = delete;
@@ -172,7 +171,7 @@ namespace pstore {
                 parser_base * get_parser () override;
 
             private:
-                T value_;
+                T value_{};
                 Parser parser_;
             };
 

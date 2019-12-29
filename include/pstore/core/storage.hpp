@@ -99,17 +99,14 @@ namespace pstore {
         storage (std::shared_ptr<File> const & file,
                  std::unique_ptr<system_page_size_interface> && page_size,
                  std::unique_ptr<region::factory> && region_factory)
-                : sat_{new segment_address_table}
-                , file_{std::static_pointer_cast<file::file_base> (file)}
+                : file_{std::static_pointer_cast<file::file_base> (file)}
                 , page_size_{std::move (page_size)}
                 , region_factory_{std::move (region_factory)}
                 , regions_{region_factory_->init ()} {}
 
         template <typename File>
         explicit storage (std::shared_ptr<File> const & file)
-                : sat_{new segment_address_table}
-                , file_{std::static_pointer_cast<file::file_base> (file)}
-                , page_size_{std::make_unique<system_page_size> ()}
+                : file_{std::static_pointer_cast<file::file_base> (file)}
                 , region_factory_{region::get_factory (
                       std::static_pointer_cast<file::file_handle> (file), full_region_size,
                       min_region_size)}
@@ -204,11 +201,12 @@ namespace pstore {
 
         /// The Segment Address Table: an array of pointers to the base-address of each segment's
         /// memory-mapped storage and their corresponding region object.
-        std::unique_ptr<segment_address_table> sat_;
+        std::unique_ptr<segment_address_table> sat_ = std::make_unique<segment_address_table> ();
 
         /// The file used to hold the data.
         file_ptr file_;
-        std::unique_ptr<system_page_size_interface> page_size_;
+        std::unique_ptr<system_page_size_interface> page_size_ =
+            std::make_unique<system_page_size> ();
         std::unique_ptr<region::factory> region_factory_;
         region_container regions_;
     };
