@@ -81,11 +81,11 @@ namespace pstore {
         ///     bool(KeyType, KeyType)
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         class hamt_map final : public index_base {
-            using hash_type = pstore::index::details::hash_type;
-            using index_pointer = pstore::index::details::index_pointer;
-            using internal_node = pstore::index::details::internal_node;
-            using linear_node = pstore::index::details::linear_node;
-            using parent_stack = pstore::index::details::parent_stack;
+            using hash_type = details::hash_type;
+            using index_pointer = details::index_pointer;
+            using internal_node = details::internal_node;
+            using linear_node = details::linear_node;
+            using parent_stack = details::parent_stack;
 
             /// A helper class which provides a member constant `value`` which is equal to true if
             /// types K and V have a serialized representation which is compatible with KeyType and
@@ -224,10 +224,11 @@ namespace pstore {
             ///
             /// \param db A database to which the index belongs.
             /// \param ip The index root address.
-            /// \param hash A hash function that generates the hash value from the key value.
+            /// \param hash A function that yields a hash from the key value.
+            /// \param equal A function used to compare keys for equality.
             hamt_map (database const & db,
                       typed_address<header_block> ip = typed_address<header_block>::null (),
-                      Hash const & hash = Hash ());
+                      Hash const & hash = Hash (), KeyEqual const & equal = KeyEqual ());
 
             ~hamt_map () override { this->clear (); }
 
@@ -586,10 +587,11 @@ namespace pstore {
 
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (
-            database const & db, typed_address<header_block> const pos, Hash const & hash)
-                : revision_ (db.get_current_revision ())
-                , hash_ (hash)
-                , equal_ (KeyEqual ()) {
+            database const & db, typed_address<header_block> const pos, Hash const & hash,
+            KeyEqual const & equal)
+                : revision_{db.get_current_revision ()}
+                , hash_{hash}
+                , equal_{equal} {
 
             if (pos != typed_address<header_block>::null ()) {
                 // 'pos' points to the index header block which gives us the tree root and size.
