@@ -58,7 +58,7 @@ namespace pstore {
             //* |_|_|_||_\___\__,_|_|   |_||_\___/\__,_\___| *
             //*                                              *
 
-            linear_node::signature_type const linear_node::signature = {
+            linear_node::signature_type const linear_node::node_signature_ = {
                 {'I', 'n', 'd', 'x', 'L', 'n', 'e', 'r'}};
 
             // operator new
@@ -80,8 +80,7 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             linear_node::linear_node (std::size_t const size)
-                    : signature_{signature}
-                    , size_{size} {
+                    : size_{size} {
 
                 static_assert (std::is_standard_layout<linear_node>::value,
                                "linear_node must be standard-layout");
@@ -100,8 +99,7 @@ namespace pstore {
             }
 
             linear_node::linear_node (linear_node const & rhs)
-                    : signature_{signature}
-                    , size_{rhs.size ()} {
+                    : size_{rhs.size ()} {
 
                 std::copy (rhs.begin (), rhs.end (), &leaves_[0]);
             }
@@ -154,7 +152,7 @@ namespace pstore {
 
                 if (node.is_heap ()) {
                     auto ptr = node.untag_node<linear_node const *> ();
-                    assert (ptr->signature_ == signature);
+                    assert (ptr->signature_ == node_signature_);
                     return {nullptr, ptr};
                 }
 
@@ -169,7 +167,7 @@ namespace pstore {
                 auto const ln = std::static_pointer_cast<linear_node const> (
                     db.getro (addr.to_address (), in_store_size));
 #if PSTORE_SIGNATURE_CHECKS_ENABLED
-                if (ln->signature_ != signature) {
+                if (ln->signature_ != node_signature_) {
                     raise (pstore::error_code::index_corrupt);
                 }
 #endif

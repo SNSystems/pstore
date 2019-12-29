@@ -463,7 +463,7 @@ namespace pstore {
 
             private:
                 using signature_type = std::array<std::uint8_t, 8>;
-                static signature_type const signature;
+                static signature_type const node_signature_;
 
                 /// A placement-new implementation which allocates sufficient storage for a linear
                 /// node with the number of children given by the size parameter.
@@ -495,7 +495,7 @@ namespace pstore {
                 static std::unique_ptr<linear_node> allocate (std::size_t num_children,
                                                               linear_node const & from_node);
 
-                signature_type signature_;
+                signature_type signature_ = node_signature_;
                 std::uint64_t size_;
                 address leaves_[1];
             };

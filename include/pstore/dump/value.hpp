@@ -166,13 +166,12 @@ namespace pstore {
             static unsigned default_base () { return default_base_; }
 
         protected:
-            number_base () noexcept
-                    : base_{default_base_} {}
+            number_base () noexcept = default;
             explicit constexpr number_base (unsigned const base) noexcept
                     : base_{base} {}
 
             static unsigned default_base_;
-            unsigned const base_;
+            unsigned const base_ = default_base_;
 
             // write_decimal
             // ~~~~~~~~~~~~~
