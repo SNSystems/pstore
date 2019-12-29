@@ -74,7 +74,7 @@ namespace {
         scavenge_time ("scavenge-time",
                        cl::desc ("The time in seconds that a message will spend in the command "
                                  "queue before being removed by the scavenger"),
-                       cl::init (4 * 60 * 60));
+                       cl::init (4U * 60U * 60U));
 
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
