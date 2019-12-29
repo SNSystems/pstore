@@ -135,7 +135,7 @@ namespace pstore {
             for (auto ctr = gsl::span<std::uint8_t>::index_type{0}; ctr < size; ++ctr) {
                 payload[ctr] ^= mask[ctr % 4];
             }
-            return return_type{payload};
+            return return_type{in_place, payload};
         }
 
     } // end namespace httpd
