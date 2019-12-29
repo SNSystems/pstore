@@ -236,11 +236,11 @@ namespace pstore {
     //* \__|_||_\__,_|_||_|_||_\___|_| *
     //*                                *
 
+    // ctor
+    // ~~~~
     template <typename ConditionVariable>
     channel<ConditionVariable>::channel (gsl::not_null<ConditionVariable *> cv)
-            : mut_{}
-            , cv_{cv}
-            , subscribers_{} {}
+            : cv_{cv} {}
 
     // dtor
     // ~~~~

@@ -73,8 +73,7 @@ namespace pstore {
         template <typename T>
         class sticky_assign {
         public:
-            sticky_assign ()
-                    : t_{} {}
+            sticky_assign () = default;
             /// Construct from a sticky_assign<T>. This is considered equivalent to assignment.
             sticky_assign (sticky_assign<T> const & rhs)
                     : t_ (rhs.get ())
@@ -107,7 +106,7 @@ namespace pstore {
             T const & get () const { return t_; }
 
         private:
-            T t_;
+            T t_{};
             bool is_first_ = true;
         };
 
