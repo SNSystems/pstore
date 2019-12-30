@@ -270,14 +270,13 @@ namespace {
         static int priority_code (logging::priority p) noexcept;
 
         int facility_;
-        std::array<char, 50> ident_;
+        std::array<char, 50> ident_{{0}};
     };
 
     // (ctor)
     // ~~~~~~
     syslog_logger::syslog_logger (std::string const & ident, int const facility)
-            : facility_ (facility)
-            , ident_{{0}} {
+            : facility_{facility} {
 
         std::strncpy (ident_.data (), ident.c_str (), sizeof (ident_));
         ident_[ident_.size () - 1] = '\0';
@@ -384,11 +383,6 @@ namespace pstore {
 
         std::mutex basic_logger::mutex_;
 
-        // (ctor)
-        // ~~~~~~
-        basic_logger::basic_logger ()
-                : thread_name_ (get_current_thread_name ()) {}
-
         // log
         // ~~~
         void basic_logger::log (priority const p, std::string const & message) {
@@ -451,5 +445,6 @@ namespace pstore {
 
         stdout_logger::~stdout_logger () noexcept = default;
         stderr_logger::~stderr_logger () noexcept = default;
+
     } // end namespace logging
 } // end namespace pstore

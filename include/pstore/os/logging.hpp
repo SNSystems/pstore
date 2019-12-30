@@ -130,7 +130,7 @@ namespace pstore {
         //*                             |___/|___/          *
         class basic_logger : public logger {
         public:
-            basic_logger ();
+            basic_logger () = default;
 
             static gsl::czstring priority_string (priority p) noexcept;
             static std::string get_current_thread_name ();
@@ -146,7 +146,7 @@ namespace pstore {
             virtual void log_impl (std::string const & message) = 0;
 
             static std::mutex mutex_;
-            std::string thread_name_;
+            std::string thread_name_ = get_current_thread_name ();
         };
 
         //*   _                       *
