@@ -84,8 +84,7 @@ namespace pstore {
                 using reference = value_type &;
                 using iterator_category = std::input_iterator_tag;
 
-                content_type_iterator ()
-                        : it_{} {}
+                content_type_iterator () = default;
                 explicit content_type_iterator (Iterator it)
                         : it_{it} {}
                 content_type_iterator (content_type_iterator const & rhs)
@@ -113,7 +112,7 @@ namespace pstore {
                 reference operator[] (difference_type n) const { return it_[n].kind (); }
 
             private:
-                Iterator it_;
+                Iterator it_{};
             };
 
             template <typename Iterator>
@@ -289,8 +288,7 @@ namespace pstore {
         private:
             template <typename IteratorIdx>
             constexpr fragment (IteratorIdx const first_index, IteratorIdx const last_index)
-                    : signature_{fragment_signature_}
-                    , arr_ (first_index, last_index) {
+                    : arr_ (first_index, last_index) {
 
                 // Verify that the structure layout is the same regardless of the compiler and
                 // target platform.
@@ -397,7 +395,7 @@ namespace pstore {
             static constexpr std::array<char, 8> fragment_signature_ = {
                 {'F', 'r', 'a', 'g', 'm', 'e', 'n', 't'}};
 
-            std::array<char, 8> signature_;
+            std::array<char, 8> signature_ = fragment_signature_;
 
             /// A sparse array of offsets to each of the contained sections. (Must be the struct's
             /// last member.)

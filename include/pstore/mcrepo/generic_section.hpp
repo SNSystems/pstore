@@ -272,9 +272,9 @@ namespace pstore {
             void operator delete[] (void *, std::nothrow_t const &) noexcept = delete;
 
             union {
-                std::uint32_t field32_;
-                /// The alignment of this section expressed as a power of two (i.e. 8 byte alignment is
-                /// expressed as an align_ value of 3).
+                std::uint32_t field32_ = 0;
+                /// The alignment of this section expressed as a power of two (i.e. 8 byte
+                /// alignment is expressed as an align_ value of 3).
                 bit_field <std::uint32_t, 0, 8> align_;
                 /// The number of internal fixups.
                 bit_field <std::uint32_t, 8, 24> num_ifixups_;
@@ -310,17 +310,17 @@ namespace pstore {
         // ~~~~~~
         template <typename DataRange, typename IFixupRange, typename XFixupRange>
         generic_section::generic_section (DataRange const & d, IFixupRange const & i,
-                                          XFixupRange const & x, std::uint8_t const align)
-                : field32_{0} {
-
+                                          XFixupRange const & x, std::uint8_t const align) {
             align_ = bit_count::ctz (align);
             num_ifixups_ = std::uint32_t{0};
 
             PSTORE_STATIC_ASSERT (std::is_standard_layout<generic_section>::value);
 
             PSTORE_STATIC_ASSERT (offsetof (generic_section, field32_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (generic_section, align_) == offsetof (generic_section, field32_));
-            PSTORE_STATIC_ASSERT (offsetof (generic_section, num_ifixups_) == offsetof (generic_section, field32_));
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, align_) ==
+                                  offsetof (generic_section, field32_));
+            PSTORE_STATIC_ASSERT (offsetof (generic_section, num_ifixups_) ==
+                                  offsetof (generic_section, field32_));
 
             PSTORE_STATIC_ASSERT (offsetof (generic_section, num_xfixups_) == 4);
             PSTORE_STATIC_ASSERT (offsetof (generic_section, data_size_) == 8);
@@ -329,7 +329,7 @@ namespace pstore {
 #ifndef NDEBUG
             auto * const start = reinterpret_cast<std::uint8_t const *> (this);
 #endif
-            // note that the memory pointed to by 'p' is uninitialized.
+            // Note that the memory pointed to by 'p' is uninitialized.
             auto * p = reinterpret_cast<std::uint8_t *> (this + 1);
             assert (bit_count::pop_count (align) == 1);
 
@@ -345,8 +345,8 @@ namespace pstore {
                     ++iout;
                 });
                 p = reinterpret_cast<std::uint8_t *> (iout);
-                num_ifixups_ =
-                    generic_section::set_size<decltype (num_ifixups_)::value_type> (i.first, i.second);
+                num_ifixups_ = generic_section::set_size<decltype (num_ifixups_)::value_type> (
+                    i.first, i.second);
             }
             if (x.first != x.second) {
                 auto * xout = aligned_ptr<external_fixup> (p);

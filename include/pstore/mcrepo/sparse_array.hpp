@@ -55,7 +55,7 @@
 #include <utility>
 
 #ifdef _MSC_VER
-#include <intrin.h>
+#    include <intrin.h>
 #endif
 
 #include "pstore/support/bit_count.hpp"
@@ -284,9 +284,8 @@ namespace pstore {
                     using pointer = value_type const *;
                     using reference = value_type const &;
 
-                    explicit constexpr const_iterator (BitmapType bitmap) noexcept
-                            : bitmap_{bitmap}
-                            , pos_{0} {
+                    constexpr explicit const_iterator (BitmapType bitmap) noexcept
+                            : bitmap_{bitmap} {
                         next ();
                     }
 
@@ -326,7 +325,7 @@ namespace pstore {
                         }
                     }
                     BitmapType bitmap_;
-                    std::size_t pos_;
+                    std::size_t pos_ = 0;
                 };
                 explicit indices (sparse_array const & arr)
                         : bitmap_{arr.bitmap_} {}
@@ -451,7 +450,8 @@ namespace pstore {
             /// \param indices_last  The end of the range of index values.
             /// \returns A pointer to the newly allocated memory block.
             template <typename InputIterator>
-            void * operator new (std::size_t count, InputIterator indices_first, InputIterator indices_last) {
+            void * operator new (std::size_t count, InputIterator indices_first,
+                                 InputIterator indices_last) {
                 return ::operator new (
                     sparse_array::allocate_bytes (count, indices_first, indices_last));
             }
