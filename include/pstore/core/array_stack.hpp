@@ -71,35 +71,26 @@ namespace pstore {
         using const_reference = typename container_type::const_reference;
         using size_type = typename container_type::size_type;
 
-    private:
-        /// The array which holds the stack contents.
-        container_type c_;
-        /// The number of elements on the stack. Always >= 0 and < Size.
-        std::size_t elements_{0};
-
-    public:
         array_stack () = default;
 
-        /// Returns an iterator pointing to the past-the-end element in the array container.
         bool operator== (array_stack const & other) const {
             return elements_ == other.elements_ && std::equal (begin (), end (), other.begin ());
         }
+        bool operator!= (array_stack const & other) const { return !operator== (other); }
 
         /// Returns an iterator pointing to the first element in the stack.
         typename container_type::const_iterator begin () const { return std::begin (c_); }
-
+        /// Returns an iterator pointing to the past-the-end element in the array container.
         typename container_type::const_iterator end () const { return std::begin (c_) + elements_; }
-
-        bool operator!= (array_stack const & other) const { return !operator== (other); }
 
         /// \name Capacity
         ///@{
 
         /// Checks whether the stack is empty.
-        bool empty () const noexcept { return elements_ == 0; }
+        constexpr bool empty () const noexcept { return elements_ == 0; }
 
         /// Returns the number of elements stored on the stack.
-        size_type size () const noexcept { return elements_; }
+        constexpr size_type size () const noexcept { return elements_; }
 
         /// Returns the maximum number of elements that the stack is able to
         /// hold.
@@ -143,6 +134,12 @@ namespace pstore {
             --elements_;
         }
         ///@}
+
+    private:
+        /// The array which holds the stack contents.
+        container_type c_;
+        /// The number of elements on the stack. Always >= 0 and < Size.
+        std::size_t elements_{0};
     };
 } // namespace pstore
 
