@@ -322,22 +322,23 @@ namespace pstore {
     private:
         address a_;
     };
+
     // ordering
 
     template <typename T>
-    inline bool operator> (typed_address<T> lhs, typed_address<T> rhs) noexcept {
+    constexpr bool operator> (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () > rhs.to_address ();
     }
     template <typename T>
-    inline bool operator>= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
+    constexpr bool operator>= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () >= rhs.to_address ();
     }
     template <typename T>
-    inline bool operator< (typed_address<T> lhs, typed_address<T> rhs) noexcept {
+    constexpr bool operator< (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () < rhs.to_address ();
     }
     template <typename T>
-    inline bool operator<= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
+    constexpr bool operator<= (typed_address<T> lhs, typed_address<T> rhs) noexcept {
         return lhs.to_address () <= rhs.to_address ();
     }
 
@@ -373,8 +374,8 @@ namespace std {
     //* |_| |_|\__,_|_| |_| |_|\___|_|  |_|\___| |_|_|_| |_| |_|_|\__|___/ *
     //*                                                                    *
 
-    // TODO: strictly speaking we should be providing const and volatile versions of this
-    // specialization as well.
+    // (Strictly speaking, we should be providing const and volatile versions of this specialization
+    // as well.)
     template <>
     class numeric_limits<pstore::address> {
         using base = std::numeric_limits<std::uint64_t>;
@@ -460,13 +461,12 @@ namespace std {
         }
     };
 
-} // namespace std
+} // end namespace std
 
 
 namespace pstore {
 
-    /// \brief An extent is a contiguous area of storage reserved for a data BLOB, represented as a
-    /// range.
+    /// An extent is a contiguous area of storage reserved for a data BLOB, represented as a range.
     /// This type is used to represent a BLOB of data: be it either an index key or an associated
     /// value.
     template <typename T>
@@ -505,29 +505,29 @@ namespace pstore {
 
     // comparison
     template <typename T>
-    inline bool operator== (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator== (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return lhs.addr == rhs.addr && lhs.size == rhs.size;
     }
     template <typename T>
-    inline bool operator!= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator!= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs == rhs);
     }
 
     // ordering
     template <typename T>
-    inline bool operator< (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator< (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return lhs.addr < rhs.addr || (lhs.addr == rhs.addr && lhs.size < rhs.size);
     }
     template <typename T>
-    inline bool operator>= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator>= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs < rhs);
     }
     template <typename T>
-    inline bool operator> (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator> (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return rhs < lhs;
     }
     template <typename T>
-    inline bool operator<= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
+    constexpr bool operator<= (extent<T> const & lhs, extent<T> const & rhs) noexcept {
         return !(lhs > rhs);
     }
 
