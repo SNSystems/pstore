@@ -91,8 +91,7 @@ compilation_member::compilation_member (pstore::index::digest const d,
                                         enum linkage const l, enum visibility const v) noexcept
         : digest{d}
         , fext{x}
-        , name{n}
-        , bf{} {
+        , name{n} {
 
     PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation_member>::value);
     PSTORE_STATIC_ASSERT (alignof (compilation_member) == 16);

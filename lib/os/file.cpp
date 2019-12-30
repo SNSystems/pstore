@@ -102,16 +102,12 @@ namespace pstore {
         //*                   |___/                            *
         // (ctor)
         // ~~~~~~
-        range_lock::range_lock () noexcept
-                : range_lock (nullptr, 0U, 0U, file_base::lock_kind::shared_read) {}
-
         range_lock::range_lock (file_base * const file, std::uint64_t const offset,
                                 std::size_t const size, file_base::lock_kind const kind) noexcept
                 : file_{file}
                 , offset_{offset}
                 , size_{size}
-                , kind_{kind}
-                , locked_{false} {}
+                , kind_{kind} {}
 
         range_lock::range_lock (range_lock && other) noexcept
                 : file_{other.file_}

@@ -423,7 +423,7 @@ namespace pstore {
             /// - size is 0
             /// - kind is file_base::lock_kind::shared_read
             /// - is_locked will return false
-            range_lock () noexcept;
+            range_lock () noexcept = default;
             /// \param file    The file whose contents are to be range-locked.
             /// \param offset  The offset of the first byte of the file to be locked.
             /// \param size    The number of bytes to be locked.
@@ -477,15 +477,15 @@ namespace pstore {
 
         private:
             /// The file whose contents are to be range-locked
-            file_base * file_;
+            file_base * file_ = nullptr;
             /// The offset of the first byte of the file to be locked
-            std::uint64_t offset_;
+            std::uint64_t offset_ = 0U;
             /// The number of bytes to be locked
-            std::size_t size_;
+            std::size_t size_ = 0U;
             /// Specifies the type of lock to be obtained
-            file_base::lock_kind kind_;
+            file_base::lock_kind kind_ = file_base::lock_kind::shared_read;
             /// True if the file range has been locked
-            bool locked_;
+            bool locked_ = false;
 
             bool lock_impl (file_base::blocking_mode mode);
 

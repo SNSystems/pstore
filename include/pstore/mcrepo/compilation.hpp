@@ -103,14 +103,14 @@ namespace pstore {
             index::digest digest;
             /// The extent of the fragment referenced by this compilation symbol.
             extent<fragment> fext;
-            //  TODO: it looks tempting to use some of the bits of this address for the
-            //  linkage/visibility fields. We know that they're not all used and it would eliminate
-            //  all of the padding bits from the structure. Unfortunately, repo-object-writer is
-            //  currently stashing host pointers in this field and although the same may be true for
-            //  those, it's difficult to be certain.
+            // TODO: it looks tempting to use some of the bits of this address for the
+            // linkage/visibility fields. We know that they're not all used and it would eliminate
+            // all of the padding bits from the structure. Unfortunately, repo-object-writer is
+            // currently stashing host pointers in this field and although the same may be true for
+            // those, it's difficult to be certain.
             typed_address<indirect_string> name;
             union {
-                std::uint8_t bf;
+                std::uint8_t bf = UINT8_C (0);
                 bit_field<std::uint8_t, 0, 4> linkage_;
                 bit_field<std::uint8_t, 4, 2> visibility_;
             };
@@ -135,7 +135,7 @@ namespace pstore {
 
         private:
             friend class compilation;
-            compilation_member () noexcept = default;
+            compilation_member () noexcept {}
         };
         // load
         // ~~~~
