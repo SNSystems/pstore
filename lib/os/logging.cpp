@@ -338,7 +338,7 @@ namespace pstore {
 #elif defined(PSTORE_HAVE_SYS_LOG_H)
             enabled.set (handlers::syslog);
 #else
-            // TODO: At the moment, I just log to stderr unless syslog() or ASK are available.
+            // TODO: At the moment, I just log to stderr unless syslog() or ASL are available.
             // Consider offering an option to the user to control the logging destination and
             // whether to use file-base logging.
             enabled.set (handlers::standard_error);
