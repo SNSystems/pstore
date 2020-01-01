@@ -87,7 +87,7 @@ def _select_vs_generator():
     _logger.info('Running vswhere at "%s"', vswhere)
     # Ask vswhere to disclose all of the vs installations.
     output = subprocess.check_output([vswhere, '-products', '*', '-format', 'json', '-utf8'], stderr=subprocess.STDOUT)
-    _logger.info('vswhere said: %s', output)
+    _logger.debug('vswhere said: %s', output)
     installations = json.loads(output)
     if len (installations) == 0:
         _logger.error ('vswhere listed no Visual Studio installations')
