@@ -47,8 +47,8 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            option_category::option_category (std::string const title)
-                    : title_{std::move (title)} {}
+            option_category::option_category (std::string const & title)
+                    : title_{title} {}
 
         } // namespace cl
     }     // namespace cmd_util

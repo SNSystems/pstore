@@ -65,5 +65,7 @@ namespace pstore {
             return *this;
         }
 
+        gsl::czstring cl::type_description<revision_opt>::value = "rev";
+
     } // end namespace cmd_util
 } // end namespace pstore

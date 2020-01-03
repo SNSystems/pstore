@@ -106,6 +106,9 @@ namespace pstore {
 
         ElementType const & operator[] (std::size_t n) const noexcept { return index (*this, n); }
         ElementType & operator[] (std::size_t n) noexcept { return index (*this, n); }
+
+        ElementType & back () { return index (*this, size () - 1U); }
+
         ///@}
 
         /// \name Capacity

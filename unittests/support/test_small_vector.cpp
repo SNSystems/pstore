@@ -286,6 +286,14 @@ TEST (SmallVector, PushBack) {
     EXPECT_THAT (a, ElementsAre (1, 2, 3, 4));
 }
 
+TEST (SmallVector, Back) {
+    pstore::small_vector<int, 1> a;
+    a.push_back (1);
+    EXPECT_EQ (a.back (), 1);
+    a.push_back (2);
+    EXPECT_EQ (a.back (), 2);
+}
+
 TEST (SmallVector, AppendIteratorRange) {
     pstore::small_vector<int, 4> a (std::size_t{4});
     std::iota (std::begin (a), std::end (a), 0);

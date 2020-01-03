@@ -64,20 +64,15 @@ namespace pstore {
             //* |_|                                               *
             class parser_base {
             public:
-                virtual ~parser_base ();
+                virtual ~parser_base () noexcept;
                 void add_literal_option (std::string const & name, int value,
                                          std::string const & description);
 
             protected:
                 struct literal {
-                    literal (std::string const & name_, int const value_,
-                             std::string const & description_)
-                            : name{name_}
-                            , value{value_}
-                            , description{description_} {}
                     std::string name;
                     int value;
-                    std::string const & description;
+                    std::string description;
                 };
 
                 using container = std::vector<literal>;
@@ -88,7 +83,7 @@ namespace pstore {
                 const_iterator end () const { return std::end (literals_); }
 
             private:
-                std::vector<literal> literals_;
+                container literals_;
             };
 
 
@@ -121,14 +116,14 @@ namespace pstore {
                         return nothing<T> ();
                     }
                     return just (static_cast<T> (res));
-                } else {
-                    auto it = std::find_if (begin, end,
-                                            [&v](literal const & lit) { return v == lit.name; });
-                    if (it == end) {
-                        return nothing<T> ();
-                    }
-                    return just (T (it->value));
                 }
+
+                auto it =
+                    std::find_if (begin, end, [&v] (literal const & lit) { return v == lit.name; });
+                if (it == end) {
+                    return nothing<T> ();
+                }
+                return just (T (it->value));
             }
 
             //*                                  _       _            *
@@ -139,11 +134,12 @@ namespace pstore {
             template <>
             class parser<std::string> : public parser_base {
             public:
-                ~parser () override;
+                ~parser () noexcept override;
                 maybe<std::string> operator() (std::string const & v) const;
             };
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore
 
 #endif // PSTORE_CMD_UTIL_PARSER_HPP

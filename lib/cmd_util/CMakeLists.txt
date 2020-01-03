@@ -55,6 +55,7 @@ set (pstore_cmd_util_cl_includes
     "${pstore_cmd_util_include_dir}/option.hpp"
     "${pstore_cmd_util_include_dir}/parser.hpp"
     "${pstore_cmd_util_include_dir}/string_distance.hpp"
+    "${pstore_cmd_util_include_dir}/stream_traits.hpp"
     "${pstore_cmd_util_include_dir}/tchar.hpp"
     "${pstore_cmd_util_include_dir}/word_wrapper.hpp"
 )

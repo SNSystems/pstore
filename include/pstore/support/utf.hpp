@@ -54,9 +54,7 @@
 #include <cstdint>
 #include <iosfwd>
 #include <string>
-#include <tuple>
 #include <type_traits>
-#include <vector>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
@@ -377,6 +375,7 @@ namespace pstore {
 
         /// Returns the number of UTF-8 code points in the null-terminated buffer at str
         auto length (gsl::czstring str) -> std::size_t;
+        auto length (std::string const & str) -> std::size_t;
 
         inline auto length (std::nullptr_t) noexcept -> std::size_t { return 0; }
         ///@}

@@ -47,6 +47,15 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
+            gsl::czstring type_description<std::string>::value = "str";
+            gsl::czstring type_description<int>::value = "int";
+            gsl::czstring type_description<long>::value = "int";
+            gsl::czstring type_description<long long>::value = "int";
+            gsl::czstring type_description<unsigned short>::value = "uint";
+            gsl::czstring type_description<unsigned int>::value = "uint";
+            gsl::czstring type_description<unsigned long>::value = "uint";
+            gsl::czstring type_description<unsigned long long>::value = "uint";
+
             //*           _   _           *
             //*  ___ _ __| |_(_)___ _ _   *
             //* / _ \ '_ \  _| / _ \ ' \  *
@@ -71,6 +80,9 @@ namespace pstore {
             bool option::is_positional () const { return positional_; }
             bool option::is_alias () const { return false; }
 
+            alias * option::as_alias () { return nullptr; }
+            alias const * option::as_alias () const { return nullptr; }
+
             std::string const & option::name () const { return name_; }
             void option::set_name (std::string const & name) {
                 assert ((name.empty () || name[0] != '-') && "Option can't start with '-");
@@ -78,7 +90,11 @@ namespace pstore {
             }
             std::string const & option::description () const { return description_; }
 
-            void option::add_occurrence () { ++num_occurrences_; }
+            bool option::add_occurrence () {
+                ++num_occurrences_;
+                return true;
+            }
+
             bool option::is_satisfied () const {
                 bool result = true;
                 switch (this->get_num_occurrences_flag ()) {
@@ -101,6 +117,8 @@ namespace pstore {
                 return result;
             }
 
+            gsl::czstring option::arg_description () const noexcept { return nullptr; }
+
             option::options_container & option::all () {
                 static options_container all_options;
                 return all_options;
@@ -112,17 +130,19 @@ namespace pstore {
                 return a;
             }
 
+
             //*           _     _              _  *
             //*  ___ _ __| |_  | |__  ___  ___| | *
             //* / _ \ '_ \  _| | '_ \/ _ \/ _ \ | *
             //* \___/ .__/\__| |_.__/\___/\___/_| *
             //*     |_|                           *
             bool opt<bool>::value (std::string const &) { return false; }
-            void opt<bool>::add_occurrence () {
+            bool opt<bool>::add_occurrence () {
                 option::add_occurrence ();
                 if (this->get_num_occurrences () == 1U) {
                     value_ = !value_;
                 }
+                return true;
             }
             parser_base * opt<bool>::get_parser () { return nullptr; }
 

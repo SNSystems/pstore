@@ -51,11 +51,11 @@ namespace pstore {
             //* | '_ \/ _` | '_(_-</ -_) '_| | '_ \/ _` (_-</ -_) *
             //* | .__/\__,_|_| /__/\___|_|   |_.__/\__,_/__/\___| *
             //* |_|                                               *
-            parser_base::~parser_base () {}
+            parser_base::~parser_base () noexcept = default;
 
             void parser_base::add_literal_option (std::string const & name, int value,
                                                   std::string const & description) {
-                literals_.emplace_back (name, value, description);
+                literals_.push_back (literal{name, value, description});
             }
 
 
@@ -65,7 +65,7 @@ namespace pstore {
             //* | .__/\__,_|_| /__/\___|_|   /__/\__|_| |_|_||_\__, | *
             //* |_|                                            |___/  *
 
-            parser<std::string>::~parser () {}
+            parser<std::string>::~parser () noexcept = default;
 
             maybe<std::string> parser<std::string>::operator() (std::string const & v) const {
                 auto const begin = this->begin ();

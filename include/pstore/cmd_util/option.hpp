@@ -46,12 +46,57 @@
 
 #include <cassert>
 #include <list>
+#include <type_traits>
 
-#include "parser.hpp"
+#include "pstore/cmd_util/parser.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace cmd_util {
         namespace cl {
+
+            template <typename T, typename = void>
+            struct type_description {};
+            template <>
+            struct type_description<std::string> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<int> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<long> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<long long> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<unsigned short> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<unsigned int> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<unsigned long> {
+                static gsl::czstring value;
+            };
+            template <>
+            struct type_description<unsigned long long> {
+                static gsl::czstring value;
+            };
+            template <typename T>
+            struct type_description<T, typename std::enable_if<std::is_enum<T>::value>::type> {
+                static gsl::czstring value;
+            };
+            template <typename T>
+            gsl::czstring
+                type_description<T, typename std::enable_if<std::is_enum<T>::value>::type>::value =
+                    "enum";
 
             enum class num_occurrences_flag {
                 optional,     // Zero or One occurrence
@@ -60,6 +105,7 @@ namespace pstore {
                 one_or_more,  // One or more occurrences required
             };
             class option_category;
+            class alias;
 
             //*           _   _           *
             //*  ___ _ __| |_(_)___ _ _   *
@@ -86,11 +132,15 @@ namespace pstore {
                 std::string const & description () const;
 
                 void set_category (option_category const * const cat) { category_ = cat; }
+                virtual option_category const * category () const noexcept { return category_; }
 
                 virtual void set_positional ();
                 virtual bool is_positional () const;
 
                 virtual bool is_alias () const;
+                virtual alias * as_alias ();
+                virtual alias const * as_alias () const;
+
                 virtual parser_base * get_parser () = 0;
 
                 std::string const & name () const;
@@ -98,12 +148,14 @@ namespace pstore {
 
                 virtual bool takes_argument () const = 0;
                 virtual bool value (std::string const & v) = 0;
-                virtual void add_occurrence ();
+                virtual bool add_occurrence ();
 
                 using options_container = std::list<option *>;
                 static options_container & all ();
                 /// For unit testing.
                 static options_container & reset_container ();
+
+                virtual gsl::czstring arg_description () const noexcept;
 
             protected:
                 option ();
@@ -154,6 +206,8 @@ namespace pstore {
                 }
                 opt (opt const &) = delete;
                 opt (opt &&) = delete;
+                ~opt () noexcept override = default;
+
                 opt & operator= (opt const &) = delete;
                 opt & operator= (opt &&) = delete;
 
@@ -169,6 +223,10 @@ namespace pstore {
                 bool value (std::string const & v) override;
                 bool takes_argument () const override;
                 parser_base * get_parser () override;
+
+                gsl::czstring arg_description () const noexcept override {
+                    return type_description<T>::value;
+                }
 
             private:
                 T value_{};
@@ -207,6 +265,8 @@ namespace pstore {
                 }
                 opt (opt const &) = delete;
                 opt (opt &&) = delete;
+                ~opt () noexcept override = default;
+
                 opt & operator= (opt const &) = delete;
                 opt & operator= (opt &&) = delete;
 
@@ -215,7 +275,7 @@ namespace pstore {
 
                 bool takes_argument () const override { return false; }
                 bool value (std::string const & v) override;
-                void add_occurrence () override;
+                bool add_occurrence () override;
                 parser_base * get_parser () override;
 
                 template <typename U>
@@ -247,6 +307,8 @@ namespace pstore {
 
                 list (list const &) = delete;
                 list (list &&) = delete;
+                ~list () noexcept override = default;
+
                 list & operator= (list const &) = delete;
                 list & operator= (list &&) = delete;
 
@@ -263,6 +325,10 @@ namespace pstore {
                 const_iterator end () const { return std::end (values_); }
                 std::size_t size () const { return values_.size (); }
                 bool empty () const { return values_.empty (); }
+
+                gsl::czstring arg_description () const noexcept override {
+                    return type_description<T>::value;
+                }
 
             private:
                 Parser parser_;
@@ -297,8 +363,17 @@ namespace pstore {
 
                 alias (alias const &) = delete;
                 alias (alias &&) = delete;
+                ~alias () noexcept override = default;
+
                 alias & operator= (alias const &) = delete;
                 alias & operator= (alias &&) = delete;
+
+                alias * as_alias () override { return this; }
+                alias const * as_alias () const override { return this; }
+
+                option_category const * category () const noexcept override {
+                    return original_->category ();
+                }
 
                 void set_num_occurrences_flag (num_occurrences_flag n) override;
                 num_occurrences_flag get_num_occurrences_flag () const override;
@@ -310,7 +385,12 @@ namespace pstore {
                 bool takes_argument () const override;
                 bool value (std::string const & v) override;
 
+                gsl::czstring arg_description () const noexcept override {
+                    return original_->arg_description ();
+                }
+
                 void set_original (option * o);
+                option const * original () const { return original_; }
 
             private:
                 option * original_ = nullptr;

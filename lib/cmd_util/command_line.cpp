@@ -114,7 +114,9 @@ namespace pstore {
                 // ~~~~~~~~~~~~~~~~~
                 bool handler_set_value (maybe<option *> handler, std::string const & value) {
                     assert (handler_takes_argument (handler));
-                    (*handler)->add_occurrence ();
+                    if (!(*handler)->add_occurrence ()) {
+                        return false;
+                    }
                     return (*handler)->value (value);
                 }
 

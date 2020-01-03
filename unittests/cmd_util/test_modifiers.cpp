@@ -111,36 +111,40 @@ namespace {
 
 TEST_F (EnumerationParse, SetA) {
     std::vector<std::string> argv{"progname", "--enumeration=a"};
+    string_stream output;
     string_stream errors;
     bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", errors);
+                                                       "overview", output, errors);
     ASSERT_TRUE (ok);
     ASSERT_EQ (enum_opt_.get (), enumeration::a);
 }
 
 TEST_F (EnumerationParse, SetC) {
     std::vector<std::string> argv{"progname", "--enumeration=c"};
+    string_stream output;
     string_stream errors;
     bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", errors);
+                                                       "overview", output, errors);
     ASSERT_TRUE (ok);
     ASSERT_EQ (enum_opt_.get (), enumeration::c);
 }
 
 TEST_F (EnumerationParse, ErrorBadValue) {
     std::vector<std::string> argv{"progname", "--enumeration=bad"};
+    string_stream output;
     string_stream errors;
     bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", errors);
+                                                       "overview", output, errors);
     ASSERT_FALSE (ok);
     EXPECT_THAT (errors.str (), HasSubstr (NATIVE_TEXT ("'bad'")));
 }
 
 TEST_F (EnumerationParse, GoodValueAfterError) {
     std::vector<std::string> argv{"progname", "--unknown", "--enumeration=a"};
+    string_stream output;
     string_stream errors;
     bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", errors);
+                                                       "overview", output, errors);
     ASSERT_FALSE (ok);
     EXPECT_THAT (errors.str (), Not (HasSubstr (NATIVE_TEXT ("'a'"))));
 }

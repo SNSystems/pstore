@@ -46,7 +46,6 @@
 #define PSTORE_CMD_UTIL_CATEGORY_HPP
 
 #include <string>
-#include <utility>
 
 namespace pstore {
     namespace cmd_util {
@@ -54,7 +53,8 @@ namespace pstore {
 
             class option_category {
             public:
-                explicit option_category (std::string const title);
+                explicit option_category (std::string const & title);
+                std::string const & title () const noexcept { return title_; }
 
             private:
                 std::string title_;

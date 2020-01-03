@@ -1,10 +1,10 @@
-//*                  _                      _                 _    *
-//*  _   _ _ __  ___(_) __ _ _ __   ___  __| |   ___ __ _ ___| |_  *
-//* | | | | '_ \/ __| |/ _` | '_ \ / _ \/ _` |  / __/ _` / __| __| *
-//* | |_| | | | \__ \ | (_| | | | |  __/ (_| | | (_| (_| \__ \ |_  *
-//*  \__,_|_| |_|___/_|\__, |_| |_|\___|\__,_|  \___\__,_|___/\__| *
-//*                    |___/                                       *
-//===- include/pstore/support/unsigned_cast.hpp ---------------------------===//
+//*      _                              _             _ _        *
+//*  ___| |_ _ __ ___  __ _ _ __ ___   | |_ _ __ __ _(_) |_ ___  *
+//* / __| __| '__/ _ \/ _` | '_ ` _ \  | __| '__/ _` | | __/ __| *
+//* \__ \ |_| | |  __/ (_| | | | | | | | |_| | | (_| | | |_\__ \ *
+//* |___/\__|_|  \___|\__,_|_| |_| |_|  \__|_|  \__,_|_|\__|___/ *
+//*                                                              *
+//===- include/pstore/cmd_util/stream_traits.hpp --------------------------===//
 // Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,35 +41,43 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_SUPPORT_UNSIGNED_CAST_HPP
-#define PSTORE_SUPPORT_UNSIGNED_CAST_HPP
+#ifndef PSTORE_CMD_UTIL_STREAM_TRAITS_HPP
+#define PSTORE_CMD_UTIL_STREAM_TRAITS_HPP
 
-#include <cassert>
-#include <type_traits>
+#include <string>
 
-#include "pstore/support/error.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/utf.hpp"
 
 namespace pstore {
+    namespace cmd_util {
 
-    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    struct unsigned_castable {
-        using type = typename std::make_unsigned<typename std::remove_cv<T>::type>::type;
-    };
+        template <typename T>
+        struct stream_trait {};
 
-    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    constexpr auto unsigned_cast (T const value) noexcept -> typename unsigned_castable<T>::type {
-        assert (value >= T{0});
-        return static_cast <typename unsigned_castable<T>::type> (value);
-    }
+        template <>
+        struct stream_trait<char> {
+            static constexpr std::string const & out_string (std::string const & str) noexcept {
+                return str;
+            }
+            static constexpr gsl::czstring out_text (gsl::czstring const str) noexcept {
+                return str;
+            }
+        };
 
-    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    constexpr auto checked_unsigned_cast (T const value) -> typename unsigned_castable<T>::type {
-        if (value < 0) {
-            raise (std::errc::invalid_argument, "bad cast to unsigned");
-        }
-        return unsigned_cast(value);
-    }
+#ifdef _WIN32
+        template <>
+        struct stream_trait<wchar_t> {
+            static std::wstring out_string (std::string const & str) {
+                return utf::to_native_string (str);
+            }
+            static std::wstring out_text (gsl::czstring const str) {
+                return utf::to_native_string (str);
+            }
+        };
+#endif // _WIN32
 
+    } // end namespace cmd_util
 } // end namespace pstore
 
-#endif // PSTORE_SUPPORT_UNSIGNED_CAST_HPP
+#endif // PSTORE_CMD_UTIL_STREAM_TRAITS_HPP

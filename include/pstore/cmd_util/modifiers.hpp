@@ -223,7 +223,7 @@ namespace pstore {
                 struct one_or_more {
                     // The need for this constructor was removed by CWG defect 253 but Clang (prior
                     // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr one_or_more () noexcept {}
+                    constexpr one_or_more () noexcept {} // NOLINT
 
                     template <typename Opt>
                     void apply (Opt & o) const {

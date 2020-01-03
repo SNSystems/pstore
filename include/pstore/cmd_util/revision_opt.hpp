@@ -46,6 +46,7 @@
 
 #include <string>
 
+#include "pstore/cmd_util/option.hpp"
 #include "pstore/support/head_revision.hpp"
 
 namespace pstore {
@@ -58,6 +59,11 @@ namespace pstore {
 
         private:
             unsigned r_ = pstore::head_revision;
+        };
+
+        template <>
+        struct cl::type_description<revision_opt> {
+            static gsl::czstring value;
         };
 
     } // end namespace cmd_util

@@ -50,7 +50,9 @@
 #include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/help.hpp"
 #include "pstore/cmd_util/modifiers.hpp"
+#include "pstore/cmd_util/stream_traits.hpp"
 #include "pstore/cmd_util/tchar.hpp"
+
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/path.hpp"
@@ -62,36 +64,11 @@ namespace pstore {
 
             namespace details {
 
-                template <typename T>
-                struct stream_trait {};
-
-                template <>
-                struct stream_trait<char> {
-                    static constexpr std::string const &
-                    out_string (std::string const & str) noexcept {
-                        return str;
-                    }
-                    static constexpr gsl::czstring out_text (gsl::czstring const str) noexcept {
-                        return str;
-                    }
-                };
-#ifdef _WIN32
-                template <>
-                struct stream_trait<wchar_t> {
-                    static std::wstring out_string (std::string const & str) {
-                        return utf::to_native_string (str);
-                    }
-                    static std::wstring out_text (gsl::czstring const str) {
-                        return utf::to_native_string (str);
-                    }
-                };
-#endif // _WIN32
-
                 maybe<option *>
                 lookup_nearest_option (std::string const & arg,
                                        option::options_container const & all_options);
 
-                bool starts_with (std::string const & s, gsl::czstring const prefix);
+                bool starts_with (std::string const & s, gsl::czstring prefix);
                 maybe<option *> find_handler (std::string const & name);
 
                 // check_for_missing
@@ -195,8 +172,10 @@ namespace pstore {
                             : v_{v} {}
                     sticky_bool (sticky_bool const &) noexcept = default;
                     sticky_bool (sticky_bool &&) noexcept = default;
+                    ~sticky_bool () noexcept = default;
+
                     sticky_bool & operator= (sticky_bool const & other) = default;
-                    sticky_bool & operator= (sticky_bool && other) = default;
+                    sticky_bool & operator= (sticky_bool && other) noexcept = default;
 
                     sticky_bool & operator= (bool const b) noexcept {
                         if (v_ != stick_to) {
@@ -241,7 +220,7 @@ namespace pstore {
                                  << str::out_text ("' does not take a value\n");
                             ok = false;
                         } else {
-                            (*handler)->add_occurrence ();
+                            ok = (*handler)->add_occurrence ();
                             handler.reset ();
                         }
                     }
@@ -316,7 +295,7 @@ namespace pstore {
                     for (; first_arg != last_arg && it != end; ++first_arg) {
                         option * const handler = *it;
                         assert (handler->is_positional ());
-                        handler->add_occurrence ();
+                        ok = handler->add_occurrence ();
                         if (!handler->value (*first_arg)) {
                             ok = false;
                         }
@@ -327,11 +306,12 @@ namespace pstore {
                     return ok;
                 }
 
-                template <typename InputIterator, typename ErrorStream>
+                template <typename InputIterator, typename OutputStream, typename ErrorStream>
                 bool parse_command_line_options (InputIterator first_arg, InputIterator last_arg,
-                                                 std::string const & overview, ErrorStream & errs) {
+                                                 std::string const & overview, OutputStream & outs,
+                                                 ErrorStream & errs) {
                     std::string const program_name = pstore::path::base_name (*(first_arg++));
-                    help const help (program_name, overview, name ("help"));
+                    help<OutputStream> const help (program_name, overview, outs, name ("help"));
 
                     bool ok = true;
                     std::tie (first_arg, ok) =
@@ -347,7 +327,7 @@ namespace pstore {
                     return ok;
                 }
 
-            } // namespace details
+            } // end namespace details
 
 #ifdef _WIN32
             /// For Windows, a variation on the ParseCommandLineOptions functions which takes the
@@ -362,14 +342,14 @@ namespace pstore {
                     argv, argv + argc, std::back_inserter (args),
                     [](CharType const * str) { return pstore::utf::from_native_string (str); });
                 if (!details::parse_command_line_options (std::begin (args), std::end (args),
-                                                          overview, error_stream)) {
+                                                          overview, out_stream, error_stream)) {
                     std::exit (EXIT_FAILURE);
                 }
             }
 #else
             inline void ParseCommandLineOptions (int const argc, char * const argv[],
                                                  std::string const & overview) {
-                if (!details::parse_command_line_options (argv, argv + argc, overview,
+                if (!details::parse_command_line_options (argv, argv + argc, overview, out_stream,
                                                           error_stream)) {
                     std::exit (EXIT_FAILURE);
                 }
