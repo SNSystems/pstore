@@ -57,6 +57,7 @@
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/small_vector.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {
@@ -64,6 +65,15 @@ namespace pstore {
         namespace cl {
 
             namespace details {
+
+                template <typename T,
+                          typename = typename std::enable_if<std::is_unsigned<T>::value>::type>
+                constexpr int int_cast (T value) noexcept {
+                    using common = typename std::common_type<T, unsigned>::type;
+                    return static_cast<int> (std::min (
+                        static_cast<common> (value),
+                        static_cast<common> (unsigned_cast (std::numeric_limits<int>::max ()))));
+                }
 
                 /// The maximum allowed length of the name of an option in the help output.
                 constexpr std::size_t overlong_opt_max = 20;
@@ -228,7 +238,8 @@ namespace pstore {
                             if (!is_first) {
                                 outs_ << new_line;
                             }
-                            outs_ << details::prefix_indent << std::left << std::setw (max_name_len)
+                            outs_ << details::prefix_indent << std::left
+                                  << std::setw (details::int_cast (max_name_len))
                                   << ostream_traits::out_string (std::get<std::string> (name));
 
                             is_first = false;
@@ -246,7 +257,9 @@ namespace pstore {
                             [&] (std::string const & str) {
                                 if (!is_first || is_overlong) {
                                     outs_ << new_line
-                                          << std::setw (indent + details::prefix_indent_len) << ' ';
+                                          << std::setw (details::int_cast (
+                                                 indent + details::prefix_indent_len))
+                                          << ' ';
                                 }
                                 outs_ << ostream_traits::out_string (str);
                                 is_first = false;
