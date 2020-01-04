@@ -61,10 +61,15 @@ namespace pstore {
         class recorder {
         public:
             explicit recorder (std::string path);
+            // No copying or assignment.
+            recorder (recorder const &) = delete;
+            recorder (recorder &&) noexcept = delete;
+
             ~recorder ();
 
-            recorder (recorder const &) = delete;
+            // No copying or assignment.
             recorder & operator== (recorder const &) = delete;
+            recorder & operator== (recorder &&) noexcept = delete;
 
             void record (message_type const & cmd);
 
@@ -76,10 +81,15 @@ namespace pstore {
         class player {
         public:
             explicit player (std::string path);
+            // No copying or assignment.
+            player (player const &) = delete;
+            player (player &&) noexcept = delete;
+
             ~player ();
 
-            player (player const &) = delete;
+            // No copying or assignment.
             player & operator== (player const &) = delete;
+            player & operator== (player &&) noexcept = delete;
 
             message_ptr read ();
 
@@ -88,7 +98,7 @@ namespace pstore {
             file::file_handle file_;
         };
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_RECORDER_HPP

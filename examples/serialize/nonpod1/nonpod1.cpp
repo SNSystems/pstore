@@ -47,16 +47,15 @@
 #include "pstore/serialize/types.hpp"
 
 namespace {
+
     class foo {
     public:
         explicit constexpr foo (int const a) noexcept
-                : a_ (a) {}
+                : a_{a} {}
         foo (foo const &) = default;
 
         // The presence of virtual methods in this class means that it is not "standard layout".
-        virtual ~foo () {}
-
-        foo & operator= (foo const &) = default;
+        virtual ~foo () noexcept = default;
 
         // Archival methods. The following two methods can be implemented on "non-standard layout"
         // types to enable reading from and writing to an archive. An alternative approach (which
@@ -72,6 +71,8 @@ namespace {
             return pstore::serialize::write (archive, a_);
         }
 
+        foo & operator= (foo const &) = default;
+
         virtual int get () const { return a_; }
 
     private:
@@ -81,7 +82,8 @@ namespace {
     std::ostream & operator<< (std::ostream & os, foo const & f) {
         return os << "foo(" << f.get () << ')';
     }
-} // namespace
+
+} // end anonymous namespace
 
 int main () {
     std::vector<std::uint8_t> bytes;

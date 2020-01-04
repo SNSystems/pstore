@@ -272,6 +272,7 @@ namespace pstore {
             mut_.lock ();
             owned_ = true;
         }
+        lock_guard (lock_guard const & rhs) = delete;
         lock_guard (lock_guard && rhs) noexcept
                 : mut_{std::move (rhs.mut_)}
                 , owned_{rhs.owned_} {
@@ -285,6 +286,7 @@ namespace pstore {
             }
         }
 
+        lock_guard & operator= (lock_guard const & rhs) = delete;
         lock_guard & operator= (lock_guard && rhs) noexcept {
             if (this != &rhs) {
                 mut_ = std::move (rhs.mut_);
@@ -293,10 +295,6 @@ namespace pstore {
             }
             return *this;
         }
-
-        // No copying or assignment.
-        lock_guard & operator= (lock_guard const & rhs) = delete;
-        lock_guard (lock_guard const & rhs) = delete;
 
     private:
         MutexType mut_;

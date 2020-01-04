@@ -73,9 +73,10 @@ namespace pstore {
 
                 server_pipe (pipe_descriptor && read, pipe_descriptor && write)
                         : fd_{std::move (read), std::move (write)} {}
-                ~server_pipe () = default;
                 server_pipe (server_pipe &&) noexcept = default;
                 server_pipe & operator= (server_pipe &&) noexcept = default;
+
+                ~server_pipe () = default;
 
                 // No copying or assignment.
                 server_pipe (server_pipe const &) = delete;
@@ -138,7 +139,7 @@ namespace pstore {
             update_callback const update_cb_;
         };
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_INTF_FIFO_PATH_HPP

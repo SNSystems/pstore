@@ -87,13 +87,15 @@ namespace pstore {
                                gsl::not_null<httpd::server_status *> http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done,
                                std::chrono::seconds scavenge_threshold);
-            virtual ~command_processor () = default;
-
             // No copying or assignment.
             command_processor (command_processor const &) = delete;
+            command_processor (command_processor &&) noexcept = delete;
+
+            virtual ~command_processor () noexcept = default;
+
+            // No copying or assignment.
             command_processor & operator= (command_processor const &) = delete;
-            command_processor (command_processor &&) = delete;
-            command_processor & operator= (command_processor &&) = delete;
+            command_processor & operator= (command_processor &&) noexcept = delete;
 
             void thread_entry (fifo_path const & fifo);
 
