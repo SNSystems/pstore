@@ -61,11 +61,14 @@ namespace pstore {
             unsigned r_ = pstore::head_revision;
         };
 
-        template <>
-        struct cl::type_description<revision_opt> {
-            static gsl::czstring value;
-        };
+        namespace cl {
 
+            template <>
+            struct type_description<revision_opt> {
+                static gsl::czstring value;
+            };
+
+        } // end namespace cl
     } // end namespace cmd_util
 } // end namespace pstore
 
