@@ -56,6 +56,7 @@ namespace pstore {
             string_distance (std::string const & from, std::string const & to,
                              std::string::size_type const max_edit_distance) {
                 using size_type = std::string::size_type;
+
                 size_type const m = from.size ();
                 size_type const n = to.size ();
 
@@ -75,7 +76,7 @@ namespace pstore {
                         last_diagonal = old_diagonal;
                         best_this_column = std::min (best_this_column, column[y]);
                     }
-                    if (max_edit_distance && best_this_column > max_edit_distance) {
+                    if (max_edit_distance != 0 && best_this_column > max_edit_distance) {
                         return max_edit_distance + 1U;
                     }
                 }

@@ -52,6 +52,7 @@ namespace pstore {
         namespace cl {
 
             /// \brief Determine the edit distance between two sequences.
+            ///
             /// The algorithm implemented below is the "classic"
             /// dynamic-programming algorithm for computing the Levenshtein distance, which is
             /// described here:
