@@ -73,14 +73,15 @@ namespace pstore {
 
                 server_pipe (pipe_descriptor && read, pipe_descriptor && write)
                         : fd_{std::move (read), std::move (write)} {}
+                // No copying or assignment.
+                server_pipe (server_pipe const &) = delete;
                 server_pipe (server_pipe &&) noexcept = default;
-                server_pipe & operator= (server_pipe &&) noexcept = default;
 
                 ~server_pipe () = default;
 
                 // No copying or assignment.
-                server_pipe (server_pipe const &) = delete;
                 server_pipe & operator= (server_pipe const &) = delete;
+                server_pipe & operator= (server_pipe &&) noexcept = default;
 
                 value_type native_handle () const noexcept { return read_pipe ().native_handle (); }
                 bool valid () const noexcept { return read_pipe ().valid (); }
@@ -103,12 +104,14 @@ namespace pstore {
             /// path (as defined at configure time) is used.
             fifo_path (gsl::czstring pipe_path, duration_type retry_timeout, unsigned max_retries,
                        update_callback cb = default_update_cb);
+            // No copying or assignment.
+            fifo_path (fifo_path const & rhs) = delete;
+            fifo_path (fifo_path && rhs) noexcept = delete;
             ~fifo_path ();
 
-            fifo_path (fifo_path && rhs) = delete;
-            fifo_path (fifo_path const & rhs) = delete;
-            fifo_path & operator= (fifo_path && rhs) = delete;
+            // No copying or assignment.
             fifo_path & operator= (fifo_path const & rhs) = delete;
+            fifo_path & operator= (fifo_path && rhs) noexcept = delete;
 
 #ifndef _WIN32
             /// Create the pipe and open a read descriptor. (Used by the pipe server.)

@@ -256,14 +256,14 @@ namespace pstore {
                 static std::uintptr_t tag (void * const p) noexcept {
                     return reinterpret_cast<std::uintptr_t> (p) | internal_node_bit | heap_node_bit;
                 }
+                std::uintptr_t tag () const noexcept { return tag (internal); }
+
                 static internal_node * tag_node (internal_node * const p) noexcept {
                     return reinterpret_cast<internal_node *> (tag (p));
                 }
                 static linear_node * tag_node (linear_node * const p) noexcept {
                     return reinterpret_cast<linear_node *> (tag (p));
                 }
-
-                std::uintptr_t tag () const noexcept { return tag (internal); }
 
                 std::uintptr_t untag () const noexcept {
                     return reinterpret_cast<std::uintptr_t> (internal) & ~internal_node_bit &
@@ -468,12 +468,12 @@ namespace pstore {
                 /// A placement-new implementation which allocates sufficient storage for a linear
                 /// node with the number of children given by the size parameter.
                 void * operator new (std::size_t s, nchildren size);
-                void operator delete (void * p, nchildren size);
-
                 // Non-allocating placement allocation functions.
                 void * operator new (std::size_t const size, void * const ptr) noexcept {
                     return ::operator new (size, ptr);
                 }
+
+                void operator delete (void * p, nchildren size);
                 void operator delete (void * const p, void * const ptr) noexcept {
                     ::operator delete (p, ptr);
                 }
@@ -640,10 +640,11 @@ namespace pstore {
                 ///@{
 
                 iterator begin () noexcept { return &children_[0]; }
-                iterator end () noexcept { return this->begin () + this->size (); }
                 const_iterator begin () const { return &children_[0]; }
-                const_iterator end () const { return this->begin () + this->size (); }
                 const_iterator cbegin () const { return &children_[0]; }
+
+                iterator end () noexcept { return this->begin () + this->size (); }
+                const_iterator end () const { return this->begin () + this->size (); }
                 const_iterator cend () const { return this->cbegin () + this->size (); }
                 ///@}
 

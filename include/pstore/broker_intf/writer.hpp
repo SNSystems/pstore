@@ -80,13 +80,13 @@ namespace pstore {
             writer (fifo_path const & fifo, duration_type retry_timeout, unsigned max_retries,
                     update_callback cb = default_callback);
             writer (fifo_path const & fifo, update_callback cb = default_callback);
+            writer (writer const &) = delete;
+            writer (writer && rhs) noexcept = default;
+
             virtual ~writer () = default;
 
-            writer (writer && rhs) = default;
-            writer & operator= (writer && rhs) = default;
-
-            writer (writer const &) = delete;
             writer & operator= (writer const &) = delete;
+            writer & operator= (writer && rhs) noexcept = default;
 
             void write (message_type const & msg, bool error_on_timeout);
 

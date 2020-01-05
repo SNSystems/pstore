@@ -70,10 +70,11 @@ namespace pstore {
 
             this->validate ();
         }
-        generation_iterator (generation_iterator &&) = default;
-        generation_iterator & operator= (generation_iterator &&) = default;
         generation_iterator (generation_iterator const &) = default;
+        generation_iterator (generation_iterator &&) noexcept = default;
+
         generation_iterator & operator= (generation_iterator const &) = default;
+        generation_iterator & operator= (generation_iterator &&) noexcept = default;
 
         bool operator== (generation_iterator const & rhs) const noexcept {
             return std::tie (db_, pos_) == std::tie (rhs.db_, rhs.pos_);
