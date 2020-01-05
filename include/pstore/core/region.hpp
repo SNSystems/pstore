@@ -90,12 +90,13 @@ namespace pstore {
             /// region.
             region_builder (std::shared_ptr<File> file, std::uint64_t full_size,
                             std::uint64_t minimum_size) noexcept;
+            // No assignment or copying.
+            region_builder (region_builder const &) = delete;
+            region_builder (region_builder &&) noexcept = delete;
 
             ~region_builder () noexcept = default;
 
             // No assignment or copying.
-            region_builder (region_builder const &) = delete;
-            region_builder (region_builder &&) noexcept = delete;
             region_builder & operator= (region_builder const &) = delete;
             region_builder & operator= (region_builder &&) = delete;
 
