@@ -129,11 +129,12 @@ namespace pstore {
                     if (maybe<option *> const best_option =
                             lookup_nearest_option (arg_name, option::all ())) {
                         std::string nearest_string = (*best_option)->name ();
+                        gsl::czstring const dashes = utf::length (nearest_string) < 2U ? "-" : "--";
                         if (!value.empty ()) {
                             nearest_string += '=';
                             nearest_string += value;
                         }
-                        errs << str::out_text ("Did you mean '--")
+                        errs << str::out_text ("Did you mean '") << str::out_string (dashes)
                              << str::out_string (nearest_string) << str::out_text ("'?\n");
                     }
                 }
@@ -224,7 +225,47 @@ namespace pstore {
                             handler.reset ();
                         }
                     }
-                    return std::tuple<maybe<option *>, bool>{handler, ok};
+                    return std::make_tuple (std::move (handler), ok);
+                }
+
+                // process_single_dash
+                // ~~~~~~~~~~~~~~~~~~~
+                template <typename ErrorStream>
+                std::tuple<maybe<option *>, bool>
+                process_single_dash (std::string arg_name, std::string const & program_name,
+                                     ErrorStream & errs) {
+                    assert (starts_with (arg_name, "-"));
+                    arg_name.erase (0, 1U); // Remove the leading dash.
+
+                    auto handler = nothing<option *> ();
+                    sticky_bool<false> ok{true};
+                    while (ok && !arg_name.empty ()) {
+                        char const name[2]{arg_name[0], '\0'};
+                        handler = find_handler (name);
+                        if (!handler || (*handler)->is_positional ()) {
+                            report_unknown_option (program_name, name, nothing<std::string> (),
+                                                   errs);
+                            ok = false;
+                            break;
+                        }
+
+                        if ((*handler)->takes_argument ()) {
+                            arg_name.erase (0, 1U);
+                            if (arg_name.length () == 0U) {
+                                // No value was supplied immediately after the argument name. It
+                                // could be the next argument.
+                                break;
+                            } else {
+                                ok = handler_set_value (handler, arg_name);
+                                arg_name.clear ();
+                            }
+                        } else {
+                            arg_name.erase (0, 1U);
+                            ok = (*handler)->add_occurrence ();
+                        }
+                        handler.reset ();
+                    }
+                    return std::make_tuple (std::move (handler), ok.get ());
                 }
 
                 // parse_option_arguments
@@ -259,17 +300,22 @@ namespace pstore {
                             break;
                         }
 
-                        std::tie (arg_name, value) = get_option_and_value (arg_name);
+                        if (starts_with (arg_name, "--")) {
+                            std::tie (arg_name, value) = get_option_and_value (arg_name);
 
-                        handler = find_handler (arg_name);
-                        if (!handler || (*handler)->is_positional ()) {
-                            report_unknown_option (program_name, arg_name, value, errs);
-                            ok = false;
-                            continue;
+                            handler = find_handler (arg_name);
+                            if (!handler || (*handler)->is_positional ()) {
+                                report_unknown_option (program_name, arg_name, value, errs);
+                                ok = false;
+                                continue;
+                            }
+
+                            std::tie (handler, ok) =
+                                record_value_if_available (handler, value, program_name, errs);
+                        } else {
+                            std::tie (handler, ok) =
+                                process_single_dash (arg_name, program_name, errs);
                         }
-
-                        std::tie (handler, ok) =
-                            record_value_if_available (handler, value, program_name, errs);
                     }
 
                     if (handler && (*handler)->takes_argument ()) {
@@ -316,15 +362,13 @@ namespace pstore {
                     bool ok = true;
                     std::tie (first_arg, ok) =
                         parse_option_arguments (first_arg, last_arg, program_name, errs);
-
+                    if (!ok) {
+                        return false;
+                    }
                     if (!parse_positional_arguments (first_arg, last_arg)) {
-                        ok = false;
+                        return false;
                     }
-
-                    if (!check_for_missing (program_name, errs)) {
-                        ok = false;
-                    }
-                    return ok;
+                    return check_for_missing (program_name, errs);
                 }
 
             } // end namespace details

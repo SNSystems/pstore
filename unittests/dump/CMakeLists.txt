@@ -54,6 +54,7 @@ set (PSTORE_DUMP_UNIT_TEST_SRC
     test_base16.cpp
     test_base64.cpp
     test_db.cpp
+    test_digest_opt.cpp
     test_line_splitter.cpp
     test_mcrepo.cpp
     test_number.cpp

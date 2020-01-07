@@ -47,11 +47,11 @@
 #include <cassert>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/option.hpp"
 #include "pstore/cmd_util/parser.hpp"
+#include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     namespace cmd_util {
@@ -91,7 +91,7 @@ namespace pstore {
                     }
 
                 private:
-                    std::vector<option_enum_value> values_;
+                    small_vector<option_enum_value, 3> values_;
                 };
 
             } // end namespace details
@@ -162,8 +162,8 @@ namespace pstore {
                 template <typename T>
                 class initializer {
                 public:
-                    explicit initializer (T const & t)
-                            : init_{t} {}
+                    explicit initializer (T && t)
+                            : init_{std::forward<T> (t)} {}
                     template <class Opt>
                     void apply (Opt & o) const {
                         o.set_initial_value (init_);
@@ -176,8 +176,8 @@ namespace pstore {
             } // end namespace details
 
             template <typename T>
-            details::initializer<T> init (T const & t) {
-                return details::initializer<T>{t};
+            details::initializer<T> init (T && t) {
+                return details::initializer<T>{std::forward<T> (t)};
             }
 
             //*                                              *

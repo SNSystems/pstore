@@ -49,23 +49,24 @@
 #include <utility>
 
 #include "pstore/cmd_util/tchar.hpp"
-#include "pstore/core/database.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/core/index_types.hpp"
 
 struct switches {
     bool show_all = false;
     bool show_contents = false;
 
     /// A list of the individual fragment digests from the command-line.
-    std::list<std::string> fragments;
+    std::list<pstore::index::digest> fragments;
     /// True if --all-fragments was specified on the command-line.
     bool show_all_fragments = false;
     /// A list containing compilations digests from the command-line.
-    std::list<std::string> compilations;
+    std::list<pstore::index::digest> compilations;
     /// True is --all-compilations was specified on the command-line.
     bool show_all_compilations = false;
     /// A list of the individual debug line header digests from the command-line.
-    std::list<std::string> debug_line_headers;
+    std::list<pstore::index::digest> debug_line_headers;
     /// True if --all-debug-line-headers was specified on the command-line.
     bool show_all_debug_line_headers = false;
     /// The target-triple to use for disassembly if one is not known.

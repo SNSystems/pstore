@@ -231,46 +231,17 @@ namespace {
         return static_cast<std::uint64_t> (buf.st_size);
     }
 
-    unsigned hex_to_digit (char digit) {
-        if (digit >= 'a' && digit <= 'f') {
-            return static_cast<unsigned> (digit) - ('a' - 10);
-        }
-        if (digit >= 'A' && digit <= 'F') {
-            return static_cast<unsigned> (digit) - ('A' - 10);
-        }
-        if (digit >= '0' && digit <= '9') {
-            return static_cast<unsigned> (digit) - '0';
-        }
-        pstore::raise_error_code (make_error_code (dump_error_code::bad_digest));
-    }
-
-    pstore::index::digest string_to_digest (std::string const & str) {
-        if (str.length () != 32) {
-            pstore::raise_error_code (make_error_code (dump_error_code::bad_digest), str);
-        }
-        auto get64 = [&str](unsigned index) {
-            assert (index < str.length ());
-            auto result = std::uint64_t{0};
-            for (auto shift = 60; shift >= 0; shift -= 4, ++index) {
-                result |= (static_cast<std::uint64_t> (hex_to_digit (str[index])) << shift);
-            }
-            return result;
-        };
-        return {get64 (0U), get64 (16U)};
-    }
-
-
-    template <typename IndexType, typename StringToKeyFunction, typename RecordFunction>
-    pstore::dump::value_ptr
-    add_specified (pstore::database const & db, IndexType const & index,
-                   std::list<std::string> const & items_to_show, dump_error_code not_found_error,
-                   StringToKeyFunction string_to_key, RecordFunction record_function) {
+    template <typename IndexType, typename RecordFunction>
+    pstore::dump::value_ptr add_specified (pstore::database const & db, IndexType const & index,
+                                           std::list<pstore::index::digest> const & items_to_show,
+                                           dump_error_code not_found_error,
+                                           RecordFunction record_function) {
         pstore::dump::array::container container;
         container.reserve (items_to_show.size ());
 
         auto end = index.end (db);
-        for (std::string const & t : items_to_show) {
-            auto pos = index.find (db, string_to_key (t));
+        for (pstore::index::digest const & t : items_to_show) {
+            auto pos = index.find (db, t);
             if (pos == end) {
                 pstore::raise_error_code (make_error_code (not_found_error));
             } else {
@@ -281,7 +252,7 @@ namespace {
         return pstore::dump::make_value (container);
     }
 
-    char const * index_to_string (pstore::trailer::indices kind) {
+    constexpr pstore::gsl::czstring index_to_string (pstore::trailer::indices kind) noexcept {
         char const * name = "*unknown*";
 #define X(k)                                                                                       \
     case pstore::trailer::indices::k: name = #k "s"; break;
@@ -296,7 +267,7 @@ namespace {
 
     template <typename pstore::trailer::indices Index, typename RecordFunction>
     void show_index (pstore::dump::object::container & file, pstore::database const & db,
-                     bool show_all, std::list<std::string> const & items_to_show,
+                     bool show_all, std::list<pstore::index::digest> const & items_to_show,
                      dump_error_code not_found_error, dump_error_code no_index,
                      RecordFunction record_function) {
 
@@ -308,7 +279,7 @@ namespace {
                 if (auto const index = pstore::index::get_index<Index> (db, false)) {
                     file.emplace_back (index_to_string (Index),
                                        add_specified (db, *index, items_to_show, not_found_error,
-                                                      string_to_digest, record_function));
+                                                      record_function));
                 } else {
                     pstore::raise_error_code (make_error_code (no_index));
                 }

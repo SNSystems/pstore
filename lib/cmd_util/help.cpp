@@ -101,7 +101,7 @@ namespace {
         // Add the argument value's meta-name.
         pstore::gsl::czstring const desc = op.takes_argument () ? op.arg_description () : nullptr;
         if (desc != nullptr) {
-            if (code_points > 1U) {
+            if (code_points > 2U) {
                 str += "=";
                 ++code_points;
             }

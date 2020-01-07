@@ -67,6 +67,7 @@ add_pstore_library (
     NAME dump
     SOURCES
         db_value.cpp
+        digest_opt.cpp
         error.cpp
         line_splitter.cpp
         mcdebugline_value.cpp
@@ -75,6 +76,7 @@ add_pstore_library (
         value.cpp
     INCLUDES
         "${pstore_dump_include_dir}/db_value.hpp"
+        "${pstore_dump_include_dir}/digest_opt.hpp"
         "${pstore_dump_include_dir}/error.hpp"
         "${pstore_dump_include_dir}/index_value.hpp"
         "${pstore_dump_include_dir}/line_splitter.hpp"

@@ -64,16 +64,16 @@ namespace pstore {
             //* | '_ \/ _` | '_(_-</ -_) '_| (_-<  _| '_| | ' \/ _` | *
             //* | .__/\__,_|_| /__/\___|_|   /__/\__|_| |_|_||_\__, | *
             //* |_|                                            |___/  *
-
             parser<std::string>::~parser () noexcept = default;
 
             maybe<std::string> parser<std::string>::operator() (std::string const & v) const {
+                // If this one of the literal strings?
                 auto const begin = this->begin ();
                 auto const end = this->end ();
                 if (std::distance (begin, end) != 0) {
-                    auto const it = std::find_if (
+                    auto const pos = std::find_if (
                         begin, end, [&v] (literal const & lit) { return v == lit.name; });
-                    if (it == end) {
+                    if (pos == end) {
                         return nothing<std::string> ();
                     }
                 }
