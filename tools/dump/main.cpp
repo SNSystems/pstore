@@ -252,7 +252,7 @@ namespace {
         return pstore::dump::make_value (container);
     }
 
-    constexpr pstore::gsl::czstring index_to_string (pstore::trailer::indices kind) noexcept {
+    pstore::gsl::czstring index_to_string (pstore::trailer::indices kind) noexcept {
         char const * name = "*unknown*";
 #define X(k)                                                                                       \
     case pstore::trailer::indices::k: name = #k "s"; break;
