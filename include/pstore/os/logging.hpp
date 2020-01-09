@@ -56,7 +56,6 @@
 #include "pstore/os/file.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/to_string.hpp"
 
 namespace pstore {
     namespace logging {
@@ -116,7 +115,7 @@ namespace pstore {
         private:
             template <typename T>
             static std::string to_string (gsl::czstring const message, T const t) {
-                return message + pstore::to_string (t);
+                return message + std::to_string (t);
             }
 
             std::string buffer_;

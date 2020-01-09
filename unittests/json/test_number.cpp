@@ -46,7 +46,6 @@
 #include <gtest/gtest.h>
 
 #include "pstore/json/dom_types.hpp"
-#include "pstore/support/to_string.hpp"
 #include "callbacks.hpp"
 
 using namespace pstore;
@@ -205,7 +204,7 @@ TEST_F (JsonNumber, OneExpMinusZero2) {
 
 TEST_F (JsonNumber, IntegerMax) {
     auto const long_max = std::numeric_limits<long>::max ();
-    auto const str_max = pstore::to_string (long_max);
+    auto const str_max = std::to_string (long_max);
 
     EXPECT_CALL (callbacks_, integer_value (long_max)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
@@ -215,7 +214,7 @@ TEST_F (JsonNumber, IntegerMax) {
 
 TEST_F (JsonNumber, IntegerMin) {
     auto const long_min = std::numeric_limits<long>::min ();
-    auto const str_min = pstore::to_string (long_min);
+    auto const str_min = std::to_string (long_min);
 
     EXPECT_CALL (callbacks_, integer_value (long_min)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
@@ -225,7 +224,7 @@ TEST_F (JsonNumber, IntegerMin) {
 
 TEST_F (JsonNumber, IntegerPositiveOverflow) {
     auto const str =
-        pstore::to_string (static_cast<unsigned long> (std::numeric_limits<long>::max ()) + 1L);
+        std::to_string (static_cast<unsigned long> (std::numeric_limits<long>::max ()) + 1L);
 
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (str).eof ();

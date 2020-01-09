@@ -53,7 +53,6 @@
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/to_string.hpp"
 
 #include "switches.hpp"
 
@@ -102,7 +101,7 @@ namespace {
     dump_leaf (pstore::database const & db,
                pstore::index::hamt_map<KeyType, ValueType, Hash, KeyEqual> const & index,
                std::ostream & os, pstore::address addr) {
-        auto const this_id = "leaf" + pstore::to_string (addr.absolute ());
+        auto const this_id = "leaf" + std::to_string (addr.absolute ());
         auto const kvp = index.load_leaf_node (db, addr);
 
         std::ostringstream key_stream;
@@ -119,7 +118,7 @@ namespace {
     std::string dump_leaf (pstore::database const & db,
                            pstore::index::hamt_set<KeyType, Hash, KeyEqual> const & index,
                            std::ostream & os, pstore::address addr) {
-        auto const this_id = "leaf" + pstore::to_string (addr.absolute ());
+        auto const this_id = "leaf" + std::to_string (addr.absolute ());
 
         std::ostringstream key_stream;
         key_stream << index.load_leaf_node (db, addr);
@@ -139,7 +138,7 @@ namespace {
                                    std::ostream & os, index_pointer node, unsigned shifts) {
         assert (!node.is_heap ());
         auto const this_id =
-            node_type_name<NodeType>::name + pstore::to_string (node.addr.absolute ());
+            node_type_name<NodeType>::name + std::to_string (node.addr.absolute ());
 
         std::shared_ptr<void const> store_ptr;
         NodeType const * ptr = nullptr;
