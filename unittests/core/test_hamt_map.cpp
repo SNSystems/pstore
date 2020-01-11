@@ -60,6 +60,11 @@
 #include "mock_mutex.hpp"
 
 using namespace std::string_literals;
+using pstore::gsl::not_null;
+
+using index_pointer = pstore::index::details::index_pointer;
+using internal_node = pstore::index::details::internal_node;
+using linear_node = pstore::index::details::linear_node;
 
 // *******************************************
 // *                                         *
@@ -68,10 +73,6 @@ using namespace std::string_literals;
 // *******************************************
 
 namespace {
-
-    using index_pointer = pstore::index::details::index_pointer;
-    using internal_node = pstore::index::details::internal_node;
-    using linear_node = pstore::index::details::linear_node;
 
     class IndexFixture : public EmptyStore {
     public:
@@ -323,73 +324,72 @@ namespace {
 
     class GenericIndexFixture : public IndexFixture {
     protected:
-        std::unique_ptr<test_trie> index_;
+        // insert_or_assign a new node into the index.
+        static auto insert_or_assign (test_trie & index, transaction_type & transaction,
+                                      std::string const & key)
+            -> std::pair<test_trie::iterator, bool>;
 
         // insert_or_assign a new node into the index.
-        std::pair<test_trie::iterator, bool> insert_or_assign (transaction_type & transaction,
-                                                               std::string const & key);
-
-        // insert_or_assign a new node into the index.
-        std::pair<test_trie::iterator, bool> insert_or_assign (transaction_type & transaction,
-                                                               std::string const & key,
-                                                               std::string const & value);
+        static auto insert_or_assign (test_trie & index, transaction_type & transaction,
+                                      std::string const & key, std::string const & value)
+            -> std::pair<test_trie::iterator, bool>;
 
         // Return true if the key in the store, false otherwise.
-        bool is_found (std::string const & key);
+        bool is_found (test_trie const & index, std::string const & key);
 
         // Check the leaf node
-        void check_is_leaf_node (index_pointer node);
+        void check_is_leaf_node (index_pointer node) const;
 
         // Check the leaf node
-        void check_is_heap_internal_node (index_pointer node);
+        void check_is_heap_internal_node (index_pointer node) const;
 
         // Check the leaf node
-        void check_is_store_internal_node (index_pointer node);
+        void check_is_store_internal_node (index_pointer node) const;
     };
 
     // insert_or_assign a new node
     // ~~~
-    std::pair<test_trie::iterator, bool>
-    GenericIndexFixture::insert_or_assign (transaction_type & transaction,
-                                           std::string const & key) {
-        auto kv = std::make_pair (key, "value " + key);
-        return index_->insert_or_assign (transaction, kv);
+    auto GenericIndexFixture::insert_or_assign (test_trie & index, transaction_type & transaction,
+                                                std::string const & key)
+        -> std::pair<test_trie::iterator, bool> {
+        return index.insert_or_assign (transaction, std::make_pair (key, "value "s + key));
     }
 
     // insert_or_assign a new node
     // ~~~
-    std::pair<test_trie::iterator, bool>
-    GenericIndexFixture::insert_or_assign (transaction_type & transaction, std::string const & key,
-                                           std::string const & value) {
-        return index_->insert_or_assign (transaction, key, value);
+    auto GenericIndexFixture::insert_or_assign (test_trie & index, transaction_type & transaction,
+                                                std::string const & key, std::string const & value)
+        -> std::pair<test_trie::iterator, bool> {
+        return index.insert_or_assign (transaction, key, value);
     }
 
     // find a node
     // ~~~
-    bool GenericIndexFixture::is_found (std::string const & key) {
-        return index_->find (*db_, key) != index_->cend (*db_);
+    bool GenericIndexFixture::is_found (test_trie const & index, std::string const & key) {
+        return index.find (*db_, key) != index.cend (*db_);
     }
 
     // check a leaf node
     // ~~~
-    void GenericIndexFixture::check_is_leaf_node (index_pointer node) {
+    void GenericIndexFixture::check_is_leaf_node (index_pointer node) const {
         EXPECT_TRUE (node.is_address ());
         EXPECT_TRUE (node.is_leaf ());
     }
 
     // check a heap internal node
     // ~~~
-    void GenericIndexFixture::check_is_heap_internal_node (index_pointer node) {
+    void GenericIndexFixture::check_is_heap_internal_node (index_pointer node) const {
         EXPECT_TRUE (node.is_heap ());
         EXPECT_TRUE (node.is_internal ());
     }
 
     // check a heap internal node
     // ~~~
-    void GenericIndexFixture::check_is_store_internal_node (index_pointer node) {
+    void GenericIndexFixture::check_is_store_internal_node (index_pointer node) const {
         EXPECT_TRUE (node.is_address ());
         EXPECT_TRUE (node.is_internal ());
     }
+
 } // end anonymous namespace
 
 
@@ -452,13 +452,12 @@ namespace {
     class OneLevel : public GenericIndexFixture {
     protected:
         OneLevel ()
-                : hash_ (hashes_) {}
+                : hash_{hashes_}
+                , index_{new test_trie (
+                      *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_)} {}
 
         void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (new test_trie (
-                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
-
             // With a known hash function (see map_) and the insertion order below, we should end
             // up with a trie which looks like:
             //
@@ -468,15 +467,15 @@ namespace {
             //            +--------+--------+--------+--------+
             //                |       |          |       |
             //                v       |          |       |
-            //               "b"      v          |       |      (0b 000001)
-            //                       "a"         v       |      (0b 000011)
-            //                                  "c"      v      (0b 000111)
-            //                                          "d"     (0b 001111)
+            //               "b"      v          |       |      (0b000001)
+            //                       "a"         v       |      (0b000011)
+            //                                  "c"      v      (0b000111)
+            //                                          "d"     (0b001111)
             std::uint64_t const first_hash = hash_ ("a");
             std::uint64_t const second_hash = hash_ ("b");
             std::uint64_t const third_hash = hash_ ("c");
             std::uint64_t const fourth_hash = hash_ ("d");
-            auto mask = (1U << 6) - 1U;
+            auto const mask = (1U << 6) - 1U;
             EXPECT_NE (first_hash & mask, second_hash & mask);
             EXPECT_NE (first_hash & mask, third_hash & mask);
             EXPECT_NE (first_hash & mask, fourth_hash & mask);
@@ -485,15 +484,17 @@ namespace {
             EXPECT_NE (third_hash & mask, fourth_hash & mask);
         }
 
-        hash_function hash_;
         static std::map<std::string, std::uint64_t> const hashes_;
+
+        hash_function hash_;
+        std::unique_ptr<test_trie> index_;
     };
 
     std::map<std::string, std::uint64_t> const OneLevel::hashes_{
-        {"a", 0b000011},
-        {"b", 0b000001},
-        {"c", 0b000111},
-        {"d", 0b001111},
+        {"a", UINT64_C (0b000011)},
+        {"b", UINT64_C (0b000001)},
+        {"c", UINT64_C (0b000111)},
+        {"d", UINT64_C (0b001111)},
     };
 
 } // end anonymous namespace
@@ -501,25 +502,25 @@ namespace {
 // insert_or_assign a single node ("a") into the database.
 TEST_F (OneLevel, InsertFirstNode) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    EXPECT_FALSE (this->is_found ("a")); // check the index::empty() function.
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "a");
+    EXPECT_FALSE (this->is_found (*index_, "a")); // check the index::empty() function.
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("a", key);
     EXPECT_TRUE (itp.second);
     EXPECT_EQ (1U, index_->size ());
-    EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "a")) << "key \"a\" should be present in the index";
 }
 
 // insert_or_assign the second node ("b") into the existing leaf node ("a").
 TEST_F (OneLevel, InsertSecondNode) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "b");
+    this->insert_or_assign (*index_, t1, "a");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "b");
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("b", key);
     EXPECT_TRUE (itp.second);
     EXPECT_EQ (2U, index_->size ());
-    EXPECT_TRUE (this->is_found ("b")) << "key \"b\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "b")) << "key \"b\" should be present in the index";
     {
         // Check that the root is in heap as we expected.
         index_pointer root = index_->root ();
@@ -550,19 +551,19 @@ TEST_F (OneLevel, InsertOfExistingKeyDoesNotResultInHeapNode) {
 // insert_or_assign a new node into the store internal node.
 TEST_F (OneLevel, InsertThirdNode) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    EXPECT_FALSE (this->is_found ("c")); // check "c" is not in the index.
+    OneLevel::insert_or_assign (*index_, t1, "a");
+    OneLevel::insert_or_assign (*index_, t1, "b");
+    EXPECT_FALSE (this->is_found (*index_, "c")); // check "c" is not in the index.
     index_->flush (t1, db_->get_current_revision());
     // The index root is a store internal node. To insert_or_assign a new node, the store internal
     // node need to be copied into the heap.
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "c");
+    std::pair<test_trie::iterator, bool> const itp = OneLevel::insert_or_assign (*index_, t1, "c");
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("c", key);
     EXPECT_TRUE (itp.second);
 
     EXPECT_EQ (3U, index_->size ());
-    EXPECT_TRUE (this->is_found ("c")) << "key \"c\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "c")) << "key \"c\" should be present in the index";
     {
         auto root = index_->root ();
         this->check_is_heap_internal_node (root);
@@ -573,24 +574,24 @@ TEST_F (OneLevel, InsertThirdNode) {
         EXPECT_GT ((*root_internal)[2].addr.absolute (), (*root_internal)[0].addr.absolute ());
         index_->flush (t1, db_->get_current_revision());
         EXPECT_NE (root.addr, index_->root ().addr);
-        EXPECT_TRUE (this->is_found ("c")) << "key \"c\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "c")) << "key \"c\" should be present in the index";
     }
 }
 
 //  insert_or_assign a new node into the heap internal node.
 TEST_F (OneLevel, InsertFourthNode) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
 
     // The node "d" is inserted into the internal heap node.
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "d");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "d");
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("d", key);
     EXPECT_TRUE (itp.second);
     EXPECT_EQ (4U, index_->size ());
-    EXPECT_TRUE (this->is_found ("d")) << "key \"d\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "d")) << "key \"d\" should be present in the index";
     {
         // Check that the trie was laid out as we expected.
         index_pointer root = index_->root ();
@@ -602,17 +603,17 @@ TEST_F (OneLevel, InsertFourthNode) {
         EXPECT_GT ((*root_internal)[3].addr.absolute (), (*root_internal)[2].addr.absolute ());
         index_->flush (t1, db_->get_current_revision());
         this->check_is_store_internal_node (index_->root ());
-        EXPECT_TRUE (this->is_found ("d")) << "key \"d\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "d")) << "key \"d\" should be present in the index";
     }
 }
 
 //  Test forward iterator.
 TEST_F (OneLevel, ForwardIteration) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = index_->begin (*db_);
@@ -658,10 +659,10 @@ TEST_F (OneLevel, ForwardIteration) {
 
 TEST_F (OneLevel, UpsertIteration) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "b");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "b");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = itp.first;
@@ -683,7 +684,7 @@ TEST_F (OneLevel, UpsertIteration) {
     EXPECT_EQ (begin, end);
 
     index_->flush (t1, db_->get_current_revision());
-    itp = this->insert_or_assign (t1, "b");
+    itp = this->insert_or_assign (*index_, t1, "b");
     begin = itp.first;
 
     std::string const v5 = begin->first;
@@ -714,19 +715,21 @@ namespace {
     class TwoValuesWithHashCollision : public GenericIndexFixture {
     protected:
         TwoValuesWithHashCollision ()
-                : hash_{hashes_} {}
+                : hash_{hashes_}
+                , index_{new test_trie (
+                      *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_)} {}
 
         void SetUp () final {
             GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (new test_trie (
-                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
             this->check_collision (hash_ ("a"), hash_ ("b"), 1);
             this->check_collision (hash_ ("a"), hash_ ("c"), 1);
             this->check_collision (hash_ ("e"), hash_ ("f"), 10);
         }
 
-        hash_function hash_;
         static std::map<std::string, std::uint64_t> const hashes_;
+
+        hash_function hash_;
+        std::unique_ptr<test_trie> index_;
 
         void check_collision (std::uint64_t const first_hash, std::uint64_t const second_hash,
                               unsigned collision_level);
@@ -784,14 +787,14 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
     //           +--------+--------+
     //                |       |
     //                v       |
-    //               "a"      v       (0b 000000 000000)
-    //                       "b"      (0b 000001 000000)
+    //               "a"      v       (0b000000'000000)
+    //                       "b"      (0b000001'000000)
 
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
     EXPECT_EQ (2U, index_->size ());
-    EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
-    EXPECT_TRUE (this->is_found ("b")) << "key \"b\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "a")) << "key \"a\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "b")) << "key \"b\" should be present in the index";
     {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
@@ -823,8 +826,8 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
         EXPECT_EQ (level1_internal->get_bitmap (), 0b11U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
-        EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
-        EXPECT_TRUE (this->is_found ("b")) << "key \"b\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "a")) << "key \"a\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "b")) << "key \"b\" should be present in the index";
     }
 }
 
@@ -845,15 +848,14 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
     //           +--------+--------+--------+
     //                |       |        |
     //                v       |        |
-    //               "a"      v        |            (0b 000000 000000)
-    //                       "b"       v            (0b 000001 000000)
-    //                                "c"           (0b 000010 000000)
-
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
+    //               "a"      v        |            (0b000000'000000)
+    //                       "b"       v            (0b000001'000000)
+    //                                "c"           (0b000010'000000)
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
     EXPECT_EQ (3U, index_->size ());
-    EXPECT_TRUE (this->is_found ("c")) << "key \"c\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "c")) << "key \"c\" should be present in the index";
     {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
@@ -886,17 +888,17 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         EXPECT_EQ (level1_internal->get_bitmap (), 0b111U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
-        EXPECT_TRUE (this->is_found ("a")) << "key \"a\" should be present in the index";
-        EXPECT_TRUE (this->is_found ("b")) << "key \"b\" should be present in the index";
-        EXPECT_TRUE (this->is_found ("c")) << "key \"c\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "a")) << "key \"a\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "b")) << "key \"b\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "c")) << "key \"c\" should be present in the index";
     }
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = index_->begin (*db_);
@@ -936,9 +938,9 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LevelOneCollisionUpsertIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
 
     // Check trie iterator in the heap.
     EXPECT_TRUE (itp.second);
@@ -960,7 +962,7 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionUpsertIterator) {
     index_->flush (t1, db_->get_current_revision());
 
     // Check trie iterator in the store.
-    itp = this->insert_or_assign (t1, "a");
+    itp = this->insert_or_assign (*index_, t1, "a");
     EXPECT_FALSE (itp.second);
     // Check trie iterator in the heap.
     begin = itp.first;
@@ -1013,11 +1015,11 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
     //                       "f"      (0b1111 001001 001000 000111 000110 000101 000100 000011
     //                       000010 000001 000000)
 
-    this->insert_or_assign (t1, "e");
-    this->insert_or_assign (t1, "f");
+    this->insert_or_assign (*index_, t1, "e");
+    this->insert_or_assign (*index_, t1, "f");
 
-    EXPECT_TRUE (this->is_found ("e")) << "key \"e\" should be present in the index";
-    EXPECT_TRUE (this->is_found ("f")) << "key \"f\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "e")) << "key \"e\" should be present in the index";
+    EXPECT_TRUE (this->is_found (*index_, "f")) << "key \"f\" should be present in the index";
     {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
@@ -1025,18 +1027,18 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         auto root_internal = root.untag_node<internal_node *> ();
         EXPECT_EQ (root_internal->get_bitmap (), 0b1U);
 
-        auto level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
-        auto level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
-        auto level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
-        auto level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
-        auto level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
+        auto const level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
+        auto const level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
+        auto const level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
+        auto const level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
+        auto const level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
         EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
 
-        auto level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
-        auto level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
-        auto level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
-        auto level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
-        auto level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
+        auto const level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
+        auto const level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
+        auto const level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
+        auto const level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
+        auto const level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
         EXPECT_EQ (level10_internal->get_bitmap (), 0b1001000000000000U);
 
         this->check_is_leaf_node ((*level10_internal)[0]);
@@ -1049,39 +1051,49 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
         this->check_is_store_internal_node (root);
         auto root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
 
-        auto level1 = (*root_internal)[0];
-        auto level1_internal = internal_node::read_node (*db_, level1.untag_internal_address ());
-        auto level2 = (*level1_internal)[0];
-        auto level2_internal = internal_node::read_node (*db_, level2.untag_internal_address ());
-        auto level3 = (*level2_internal)[0];
-        auto level3_internal = internal_node::read_node (*db_, level3.untag_internal_address ());
-        auto level4 = (*level3_internal)[0];
-        auto level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
-        auto level5 = (*level4_internal)[0];
-        auto level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
+        auto const level1 = (*root_internal)[0];
+        auto const level1_internal =
+            internal_node::read_node (*db_, level1.untag_internal_address ());
+        auto const level2 = (*level1_internal)[0];
+        auto const level2_internal =
+            internal_node::read_node (*db_, level2.untag_internal_address ());
+        auto const level3 = (*level2_internal)[0];
+        auto const level3_internal =
+            internal_node::read_node (*db_, level3.untag_internal_address ());
+        auto const level4 = (*level3_internal)[0];
+        auto const level4_internal =
+            internal_node::read_node (*db_, level4.untag_internal_address ());
+        auto const level5 = (*level4_internal)[0];
+        auto const level5_internal =
+            internal_node::read_node (*db_, level5.untag_internal_address ());
         EXPECT_EQ (level5_internal->get_bitmap (), 0b100000U);
-        auto level6 = (*level5_internal)[0];
-        auto level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
-        auto level7 = (*level6_internal)[0];
-        auto level7_internal = internal_node::read_node (*db_, level7.untag_internal_address ());
-        auto level8 = (*level7_internal)[0];
-        auto level8_internal = internal_node::read_node (*db_, level8.untag_internal_address ());
-        auto level9 = (*level8_internal)[0];
-        auto level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
-        auto level10 = (*level9_internal)[0];
-        auto level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
+        auto const level6 = (*level5_internal)[0];
+        auto const level6_internal =
+            internal_node::read_node (*db_, level6.untag_internal_address ());
+        auto const level7 = (*level6_internal)[0];
+        auto const level7_internal =
+            internal_node::read_node (*db_, level7.untag_internal_address ());
+        auto const level8 = (*level7_internal)[0];
+        auto const level8_internal =
+            internal_node::read_node (*db_, level8.untag_internal_address ());
+        auto const level9 = (*level8_internal)[0];
+        auto const level9_internal =
+            internal_node::read_node (*db_, level9.untag_internal_address ());
+        auto const level10 = (*level9_internal)[0];
+        auto const level10_internal =
+            internal_node::read_node (*db_, level10.untag_internal_address ());
         EXPECT_EQ (level10_internal->get_bitmap (), 0b10010000'00000000U);
         this->check_is_leaf_node ((*level10_internal)[0]);
         this->check_is_leaf_node ((*level10_internal)[1]);
-        EXPECT_TRUE (this->is_found ("e")) << "key \"e\" should be present in the index";
-        EXPECT_TRUE (this->is_found ("f")) << "key \"f\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "e")) << "key \"e\" should be present in the index";
+        EXPECT_TRUE (this->is_found (*index_, "f")) << "key \"f\" should be present in the index";
     }
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "e");
-    this->insert_or_assign (t1, "f");
+    this->insert_or_assign (*index_, t1, "e");
+    this->insert_or_assign (*index_, t1, "f");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = index_->begin (*db_);
@@ -1114,8 +1126,8 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "f");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "e");
+    this->insert_or_assign (*index_, t1, "f");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "e");
 
     // Check trie iterator in the heap.
     EXPECT_TRUE (itp.second);
@@ -1132,7 +1144,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
     EXPECT_EQ (begin, end);
 
     index_->flush (t1, db_->get_current_revision());
-    itp = this->insert_or_assign (t1, "e");
+    itp = this->insert_or_assign (*index_, t1, "e");
     EXPECT_FALSE (itp.second);
 
     // Check trie iterator in the store.
@@ -1188,12 +1200,12 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
     //                 "h"  v          ( 0 )
     //                     "i"         ( 0 )
 
-    this->insert_or_assign (t1, "g");
-    this->insert_or_assign (t1, "h");
-    this->insert_or_assign (t1, "i");
-    EXPECT_TRUE (this->is_found ("g")) << "key 'g' should be present in the index (heap)";
-    EXPECT_TRUE (this->is_found ("h")) << "key 'h' should be present in the index (heap)";
-    EXPECT_TRUE (this->is_found ("i")) << "key 'i' should be present in the index (heap)";
+    this->insert_or_assign (*index_, t1, "g");
+    this->insert_or_assign (*index_, t1, "h");
+    this->insert_or_assign (*index_, t1, "i");
+    EXPECT_TRUE (this->is_found (*index_, "g")) << "key 'g' should be present in the index (heap)";
+    EXPECT_TRUE (this->is_found (*index_, "h")) << "key 'h' should be present in the index (heap)";
+    EXPECT_TRUE (this->is_found (*index_, "i")) << "key 'i' should be present in the index (heap)";
     {
         // Check that the trie was laid out as we expected in the heap.
         index_pointer root = index_->root ();
@@ -1251,17 +1263,20 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
             linear_node::get_node (*db_, index_pointer{level11.untag_linear_address ()});
 
         EXPECT_EQ (level11_linear->size (), 3U);
-        EXPECT_TRUE (this->is_found ("g")) << "key 'g' should be present in the index (store)";
-        EXPECT_TRUE (this->is_found ("h")) << "key 'h' should be present in the index (store)";
-        EXPECT_TRUE (this->is_found ("i")) << "key 'i' should be present in the index (store)";
+        EXPECT_TRUE (this->is_found (*index_, "g"))
+            << "key 'g' should be present in the index (store)";
+        EXPECT_TRUE (this->is_found (*index_, "h"))
+            << "key 'h' should be present in the index (store)";
+        EXPECT_TRUE (this->is_found (*index_, "i"))
+            << "key 'i' should be present in the index (store)";
     }
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "g");
-    this->insert_or_assign (t1, "h");
-    this->insert_or_assign (t1, "i");
+    this->insert_or_assign (*index_, t1, "g");
+    this->insert_or_assign (*index_, t1, "h");
+    this->insert_or_assign (*index_, t1, "i");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = index_->begin (*db_);
@@ -1297,14 +1312,14 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
     ++begin;
     EXPECT_EQ (begin, end);
 
-    this->insert_or_assign (t1, "g", "new value g");
+    this->insert_or_assign (*index_, t1, "g", "new value g");
     begin = index_->begin (*db_);
     std::string const & v7 = (*begin).second;
     EXPECT_EQ ("new value g", v7);
 
     {
         auto value = "second new g";
-        test_trie::iterator it = this->insert_or_assign (t1, "g", value).first;
+        test_trie::iterator it = this->insert_or_assign (*index_, t1, "g", value).first;
         std::string const & v8 = (*it).second;
         EXPECT_EQ (value, v8);
     }
@@ -1312,13 +1327,13 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "g");
+    this->insert_or_assign (*index_, t1, "g");
     {
-        std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "h");
+        std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "h");
         EXPECT_TRUE (itp.second);
         EXPECT_EQ ((*itp.first).first, "h"s);
     }
-    this->insert_or_assign (t1, "i");
+    this->insert_or_assign (*index_, t1, "i");
 
     // Check trie iterator in the heap.
     test_trie::const_iterator first = index_->find (*db_, "h"s);
@@ -1334,7 +1349,8 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
 
     index_->flush (t1, db_->get_current_revision());
 
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "g", "new value g");
+    std::pair<test_trie::iterator, bool> itp =
+        this->insert_or_assign (*index_, t1, "g", "new value g");
     EXPECT_FALSE (itp.second);
     // Check trie iterator in the store.
     first = itp.first;
@@ -1376,56 +1392,52 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearInsertIterator) {
 // *******************************************
 
 namespace {
+
     class FourNodesOnTwoLevels : public GenericIndexFixture {
     protected:
         FourNodesOnTwoLevels ()
-                : hash_ (hashes_) {}
+                : index_{new test_trie (*db_,
+                                        pstore::typed_address<pstore::index::header_block>::null (),
+                                        hash_function{hashes_})} {}
 
-        virtual void SetUp () final {
-            GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (new test_trie (
-                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
-            // With a known hash function (see map_) and the insertion order a to d, we should end
-            // up with a trie which looks like:
-            //
-            //            +--------+--------+
-            // root_ ->   | 000000 | 000001 |             (hash bits 0-5)
-            //            +--------+--------+
-            //                 |       |
-            //           +-----+       +----+
-            //           |                  |
-            //           v                  v
-            // +--------+--------+     +-------+-------+
-            // | 000000 | 000001 |     | 00000 | 00001 |  (hash bits 6-11)
-            // +--------+--------+     +-------+-------+
-            //     |        |              |       |
-            //     v        |              |       |
-            //    "a"       v              |       |      (0b 0000000 0000000)
-            //             "b"             v       |      (0b 0000001 0000000)
-            //                            "c"      v      (0b 0000000 0000001)
-            //                                    "d"     (0b 0000001 0000001)
-        }
-
-        hash_function hash_;
+        std::unique_ptr<test_trie> index_;
         static std::map<std::string, std::uint64_t> const hashes_;
     };
 
-
     std::map<std::string, std::uint64_t> const FourNodesOnTwoLevels::hashes_{
-        {"a", UINT64_C (0b000000000000)}, // "a" and "b" collide in the lower 6 bits
-        {"b", UINT64_C (0b000001000000)},
-        {"c", UINT64_C (0b000000000001)}, // ... as do "c" and "d".
-        {"d", UINT64_C (0b000001000001)},
+        {"a", UINT64_C (0b000000'000000)}, // "a" and "b" collide in the lower 6 bits
+        {"b", UINT64_C (0b000001'000000)},
+        {"c", UINT64_C (0b000000'000001)}, // ... as do "c" and "d".
+        {"d", UINT64_C (0b000001'000001)},
     };
-} // namespace
 
+} // end anonymous namespace
+
+// With a known hash function (see map_) and the insertion order a to d, we should end
+// up with a trie which looks like:
+//
+//            +--------+--------+
+// root_ ->   | 000000 | 000001 |             (hash bits 0-5)
+//            +--------+--------+
+//                 |       |
+//           +-----+       +----+
+//           |                  |
+//           v                  v
+// +--------+--------+     +-------+-------+
+// | 000000 | 000001 |     | 00000 | 00001 |  (hash bits 6-11)
+// +--------+--------+     +-------+-------+
+//     |        |              |       |
+//     v        |              |       |
+//    "a"       v              |       |      (0b0000000'0000000)
+//             "b"             v       |      (0b0000001'0000000)
+//                            "c"      v      (0b0000000'0000001)
+//                                    "d"     (0b0000001'0000001)
 TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
-
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = index_->begin (*db_);
@@ -1471,10 +1483,10 @@ TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
 
 TEST_F (FourNodesOnTwoLevels, UpsertIteration) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
 
     // Check trie iterator in the heap.
     test_trie::iterator begin = itp.first;
@@ -1496,7 +1508,7 @@ TEST_F (FourNodesOnTwoLevels, UpsertIteration) {
     EXPECT_EQ (begin, end);
 
     index_->flush (t1, db_->get_current_revision());
-    itp = this->insert_or_assign (t1, "a");
+    itp = this->insert_or_assign (*index_, t1, "a");
 
     // Check trie iterator in the store.
     begin = itp.first;
@@ -1524,36 +1536,14 @@ TEST_F (FourNodesOnTwoLevels, UpsertIteration) {
 namespace {
 
     class LeavesAtDifferentLevels : public GenericIndexFixture {
-    protected:
+    public:
         LeavesAtDifferentLevels ()
-                : hash_ (hashes_) {}
+                : index_{new test_trie (*db_,
+                                        pstore::typed_address<pstore::index::header_block>::null (),
+                                        hash_function{hashes_})} {}
 
-        virtual void SetUp () final {
-            GenericIndexFixture::SetUp ();
-            GenericIndexFixture::index_.reset (new test_trie (
-                *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
-
-            // With a known hash function and the insertion order below, we should end up with a
-            // trie which looks like:
-            //
-            //          +--------+--------+--------+
-            // root_ -> | 000000 | 000001 | 000010 |   (hash bits 0-5)
-            //          +--------+--------+--------+
-            //              |        |        |
-            //              v        |        |
-            //             "a"       |        v       (0b 000000 000000)
-            //                       |       "d"      (0b 000000 000010)
-            //                       v
-            //              +--------+--------+
-            //              | 000000 | 000001 |       (hash bits 6-11)
-            //              +--------+--------+
-            //                  |        |
-            //                  v        |
-            //                 "b"       v            (0b 000000 000001)
-            //                          "c"           (0b 000001 000001)
-        }
-
-        hash_function hash_;
+    protected:
+        std::unique_ptr<test_trie> index_;
         static std::map<std::string, std::uint64_t> const hashes_;
     };
 
@@ -1568,10 +1558,28 @@ namespace {
 
 TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "a");
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
+    // With a known hash function and the insertion order below, we should end up with a
+    // trie which looks like:
+    //
+    //          +--------+--------+--------+
+    // root_ -> | 000000 | 000001 | 000010 |   (hash bits 0-5)
+    //          +--------+--------+--------+
+    //              |        |        |
+    //              v        |        |
+    //             "a"       |        v       (0b000000'000000)
+    //                       |       "d"      (0b000000'000010)
+    //                       v
+    //              +--------+--------+
+    //              | 000000 | 000001 |       (hash bits 6-11)
+    //              +--------+--------+
+    //                  |        |
+    //                  v        |
+    //                 "b"       v            (0b000000'000001)
+    //                          "c"           (0b000001'000001)
+    this->insert_or_assign (*index_, t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
 
     test_trie::iterator begin = index_->begin (*db_);
     test_trie::iterator end = index_->end (*db_);
@@ -1616,10 +1624,10 @@ TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
 
 TEST_F (LeavesAtDifferentLevels, UpsertIteration) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    this->insert_or_assign (t1, "b");
-    this->insert_or_assign (t1, "c");
-    this->insert_or_assign (t1, "d");
-    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "a");
+    this->insert_or_assign (*index_, t1, "b");
+    this->insert_or_assign (*index_, t1, "c");
+    this->insert_or_assign (*index_, t1, "d");
+    std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
 
     test_trie::iterator begin = itp.first;
     test_trie::iterator end = index_->end (*db_);
@@ -1642,7 +1650,7 @@ TEST_F (LeavesAtDifferentLevels, UpsertIteration) {
     index_->flush (t1, db_->get_current_revision());
 
     // Check trie iterator in the store.
-    itp = this->insert_or_assign (t1, "a");
+    itp = this->insert_or_assign (*index_, t1, "a");
     begin = itp.first;
     std::string const v5 = begin->first;
     EXPECT_EQ ("a", v5);
@@ -1665,9 +1673,9 @@ namespace {
     class CorruptInternalNodes : public GenericIndexFixture {
     public:
         CorruptInternalNodes ()
-                : hash_ (hashes_) {}
-
-        void SetUp () final;
+                : index_{new test_trie (*db_,
+                                        pstore::typed_address<pstore::index::header_block>::null (),
+                                        hash_function{hashes_})} {}
 
     protected:
         void build (transaction_type & transaction);
@@ -1678,8 +1686,7 @@ namespace {
         std::shared_ptr<internal_node> load_inode (index_pointer ptr);
         static constexpr unsigned internal_node_children = 2U;
 
-    private:
-        hash_function hash_;
+        std::unique_ptr<test_trie> index_;
         static std::map<std::string, std::uint64_t> const hashes_;
     };
 
@@ -1690,19 +1697,11 @@ namespace {
         {"b", UINT64_C (0b0000'00000001)},
     };
 
-    // SetUp
-    // ~~~~~
-    void CorruptInternalNodes::SetUp () {
-        GenericIndexFixture::SetUp ();
-        index_.reset (new test_trie (
-            *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
-    }
-
     // build
     // ~~~~~
     void CorruptInternalNodes::build (transaction_type & transaction) {
-        this->insert_or_assign (transaction, "a");
-        this->insert_or_assign (transaction, "b");
+        this->insert_or_assign (*index_, transaction, "a");
+        this->insert_or_assign (*index_, transaction, "b");
         index_->flush (transaction, transaction.db ().get_current_revision ());
     }
 
