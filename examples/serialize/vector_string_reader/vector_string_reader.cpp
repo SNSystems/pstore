@@ -11,7 +11,7 @@
 //* |_|  \___|\__,_|\__,_|\___|_|    *
 //*                                  *
 //===- examples/serialize/vector_string_reader/vector_string_reader.cpp ---===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

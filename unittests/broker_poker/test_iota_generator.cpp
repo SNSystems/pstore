@@ -5,7 +5,7 @@
 //* |_|\___/ \__\__,_|  \__, |\___|_| |_|\___|_|  \__,_|\__\___/|_|    *
 //*                     |___/                                          *
 //===- unittests/broker_poker/test_iota_generator.cpp ---------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

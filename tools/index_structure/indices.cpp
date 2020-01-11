@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|_|\___\___||___/ *
 //*                                 *
 //===- tools/index_structure/indices.cpp ----------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

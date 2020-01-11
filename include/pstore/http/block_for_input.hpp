@@ -5,7 +5,7 @@
 //* |_.__/|_|\___/ \___|_|\_\ |_|  \___/|_|    |_|_| |_| .__/ \__,_|\__| *
 //*                                                    |_|               *
 //===- include/pstore/http/block_for_input.hpp ----------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

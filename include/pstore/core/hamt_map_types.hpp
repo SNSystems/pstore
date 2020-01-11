@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/   \__|\__, | .__/ \___||___/ *
 //*                                             |_|          |___/|_|               *
 //===- include/pstore/core/hamt_map_types.hpp -----------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

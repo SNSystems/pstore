@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|_| |_| |_| .__/   \__|_|  \___|\___| *
 //*                       |_|                         *
 //===- tools/genromfs/dump_tree.hpp ---------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

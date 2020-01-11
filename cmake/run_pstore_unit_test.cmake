@@ -11,7 +11,7 @@
 #*  \__\___||___/\__| *
 #*                    *
 #===- cmake/run_pstore_unit_test.cmake ------------------------------------===//
-# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

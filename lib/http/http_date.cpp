@@ -5,7 +5,7 @@
 //* |_| |_|\__|\__| .__/   \__,_|\__,_|\__\___| *
 //*               |_|                           *
 //===- lib/http/http_date.cpp ---------------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -6,7 +6,7 @@
 # * |_.__/ \___/|_|_|\___|_|  | .__/|_|\__,_|\__\___| *
 # *                           |_|                     *
 # ===- utils/boilerplate/boilerplate.py -----------------------------------===//
-#  Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:
@@ -57,7 +57,7 @@ import subprocess
 import sys
 
 license_text = \
-'''Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+'''Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 All rights reserved.
 
 Developed by:

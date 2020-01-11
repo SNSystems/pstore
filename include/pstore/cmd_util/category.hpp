@@ -5,7 +5,7 @@
 //*  \___\__,_|\__\___|\__, |\___/|_|   \__, | *
 //*                    |___/            |___/  *
 //===- include/pstore/cmd_util/category.hpp -------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

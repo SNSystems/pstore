@@ -5,7 +5,7 @@
 # *  \__|_|_| |_| |_|\___|\__,_| | .__/|_|  \___/ \___\___||___/___/ *
 # *                              |_|                                 *
 # ===- system_tests/broker/timed_process.py -------------------------------===//
-#  Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

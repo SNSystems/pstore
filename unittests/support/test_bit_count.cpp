@@ -5,7 +5,7 @@
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
 //===- unittests/support/test_bit_count.cpp -------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- tools/diff/CMakeLists.txt -------------------------------------------===//
-# Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

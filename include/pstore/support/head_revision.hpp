@@ -5,7 +5,7 @@
 //* |_| |_|\___|\__,_|\__,_| |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                                               *
 //===- include/pstore/support/head_revision.hpp ---------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

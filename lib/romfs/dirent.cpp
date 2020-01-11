@@ -5,7 +5,7 @@
 //*  \__,_|_|_|  \___|_| |_|\__| *
 //*                              *
 //===- lib/romfs/dirent.cpp -----------------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

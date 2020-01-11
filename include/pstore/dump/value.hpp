@@ -5,7 +5,7 @@
 //*   \_/ \__,_|_|\__,_|\___| *
 //*                           *
 //===- include/pstore/dump/value.hpp --------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
 //===- tools/broker_poker/switches.cpp ------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

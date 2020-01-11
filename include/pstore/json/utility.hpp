@@ -5,7 +5,7 @@
 //*  \__,_|\__|_|_|_|\__|\__, | *
 //*                      |___/  *
 //===- include/pstore/json/utility.hpp ------------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 //* |___/\__\__,_|_| |_|\__,_|\__,_|_|  \__,_|  \__|\__, | .__/ \___||___/ *
 //*                                                 |___/|_|               *
 //===- unittests/serialize/test_standard_types.cpp ------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

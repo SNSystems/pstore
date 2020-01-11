@@ -5,7 +5,7 @@
 //* |___/\__\__,_|_|   \__|   \_/ \__,_|\___|\__,_|\__,_|_| |_| |_| *
 //*                                                                 *
 //===- include/pstore/core/start_vacuum.hpp -------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -6,7 +6,7 @@
 # * |_|\___/ \___|_|\_\_|_| |_|\__, | *
 # *                            |___/  *
 # ===- system_tests/locking/locking.py ------------------------------------===//
-#  Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

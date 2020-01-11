@@ -5,7 +5,7 @@
 //*  \__, |\___|\__| |___/ .__/ \__,_|_| |_| *
 //*  |___/               |_|                 *
 //===- unittests/http/klee/get_span.cpp -----------------------------------===//
-// Copyright (c) 2017-2019 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
