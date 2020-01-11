@@ -48,6 +48,7 @@
 #include "pstore/json/dom_types.hpp"
 #include "callbacks.hpp"
 
+using namespace std::string_literals;
 using namespace pstore;
 using testing::StrictMock;
 using testing::DoubleEq;
@@ -67,7 +68,7 @@ protected:
 TEST_F (JsonNumber, Zero) {
     EXPECT_CALL (callbacks_, integer_value (0L)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"0"}).eof ();
+    p.input ("0"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
@@ -75,7 +76,7 @@ TEST_F (JsonNumber, NegativeZero) {
     EXPECT_CALL (callbacks_, integer_value (0L)).Times (1);
 
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-0"}).eof ();
+    p.input ("-0"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
@@ -83,13 +84,13 @@ TEST_F (JsonNumber, One) {
     EXPECT_CALL (callbacks_, integer_value (1L)).Times (1);
 
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{" 1 "}).eof ();
+    p.input (" 1 "s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, LeadingZero) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"01"}).eof ();
+    p.input ("01"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
@@ -97,108 +98,108 @@ TEST_F (JsonNumber, MinusOne) {
     EXPECT_CALL (callbacks_, integer_value (-1)).Times (1);
 
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-1"}).eof ();
+    p.input ("-1"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, MinusOneLeadingZero) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-01"}).eof ();
+    p.input ("-01"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, MinusOnly) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-"}).eof ();
+    p.input ("-"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::expected_digits));
 }
 TEST_F (JsonNumber, MinusMinus) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"--"}).eof ();
+    p.input ("--"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 
 TEST_F (JsonNumber, AllDigits) {
     EXPECT_CALL (callbacks_, integer_value (1234567890L)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1234567890"}).eof ();
+    p.input ("1234567890"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, PositivePi) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (3.1415))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"3.1415"}).eof ();
+    p.input ("3.1415"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, NegativePi) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (-3.1415))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-3.1415"}).eof ();
+    p.input ("-3.1415"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, PositiveZeroPoint45) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0.45))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"0.45"}).eof ();
+    p.input ("0.45"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, NegativeZeroPoint45) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (-0.45))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-0.45"}).eof ();
+    p.input ("-0.45"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, ZeroExp2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"0e2"}).eof ();
+    p.input ("0e2"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, OneExp2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (100.0))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1e2"}).eof ();
+    p.input ("1e2"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, OneExpPlus2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (100.0))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1e+2"}).eof ();
+    p.input ("1e+2"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, ZeroPointZeroOne) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"0.01"}).eof ();
+    p.input ("0.01"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, OneExpMinus2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1e-2"}).eof ();
+    p.input ("1e-2"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, OneCapitalExpMinus2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1E-2"}).eof ();
+    p.input ("1E-2"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonNumber, OneExpMinusZero2) {
     EXPECT_CALL (callbacks_, float_value (DoubleEq (0.01))).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1E-02"}).eof ();
+    p.input ("1E-02"s).eof ();
     EXPECT_FALSE (p.has_error ());
 }
 
@@ -233,47 +234,47 @@ TEST_F (JsonNumber, IntegerPositiveOverflow) {
 
 TEST_F (JsonNumber, IntegerNegativeOverflow) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-123123123123123123123123123123"}).eof ();
+    p.input ("-123123123123123123123123123123"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, IntegerNegativeOverflow2) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"-9223372036854775809"}).eof ();
+    p.input ("-9223372036854775809"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealPositiveOverflow) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"123123e100000"}).eof ();
+    p.input ("123123e100000"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealPositiveOverflow2) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"9999E999"}).eof ();
+    p.input ("9999E999"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, RealUnderflow) {
     json::parser<decltype (proxy_)> p = json::make_parser (proxy_);
-    p.input (std::string{"123e-10000000"}).eof ();
+    p.input ("123e-10000000"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::number_out_of_range));
 }
 
 TEST_F (JsonNumber, BadExponentDigit) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1Ex"}).eof ();
+    p.input ("1Ex"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 
 TEST_F (JsonNumber, BadFractionDigit) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1.."}).eof ();
+    p.input ("1.."s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }
 TEST_F (JsonNumber, BadExponentAfterPoint) {
     json::parser<decltype (proxy_)> p (proxy_);
-    p.input (std::string{"1.E"}).eof ();
+    p.input ("1.E"s).eof ();
     EXPECT_EQ (p.last_error (), make_error_code (json::error_code::unrecognized_token));
 }

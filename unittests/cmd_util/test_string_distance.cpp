@@ -46,48 +46,49 @@
 #include "gtest/gtest.h"
 
 using pstore::cmd_util::cl::string_distance;
+using namespace std::string_literals;
 
 TEST (StringDistance, EmptyStrings) {
-    EXPECT_EQ (string_distance (std::string{""}, std::string{""}), 0U);
-    EXPECT_EQ (string_distance (std::string{"a"}, std::string{""}), 1U);
-    EXPECT_EQ (string_distance (std::string{""}, std::string{"a"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"abc"}, std::string{""}), 3U);
-    EXPECT_EQ (string_distance (std::string{""}, std::string{"abc"}), 3U);
+    EXPECT_EQ (string_distance (""s, ""s), 0U);
+    EXPECT_EQ (string_distance ("a"s, ""s), 1U);
+    EXPECT_EQ (string_distance (""s, "a"s), 1U);
+    EXPECT_EQ (string_distance ("abc"s, ""s), 3U);
+    EXPECT_EQ (string_distance (""s, "abc"s), 3U);
 }
 
 TEST (StringDistance, EqualStrings) {
-    EXPECT_EQ (string_distance (std::string{""}, std::string{""}), 0U);
-    EXPECT_EQ (string_distance (std::string{"a"}, std::string{"a"}), 0U);
-    EXPECT_EQ (string_distance (std::string{"abc"}, std::string{"abc"}), 0U);
+    EXPECT_EQ (string_distance (""s, ""s), 0U);
+    EXPECT_EQ (string_distance ("a"s, "a"s), 0U);
+    EXPECT_EQ (string_distance ("abc"s, "abc"s), 0U);
 }
 
 TEST (StringDistance, InsertsOnly) {
-    EXPECT_EQ (string_distance (std::string{""}, std::string{"a"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"a"}, std::string{"ab"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"b"}, std::string{"ab"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"ac"}, std::string{"abc"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"abcdefg"}, std::string{"xabxcdxxefxgx"}), 6U);
+    EXPECT_EQ (string_distance (""s, "a"s), 1U);
+    EXPECT_EQ (string_distance ("a"s, "ab"s), 1U);
+    EXPECT_EQ (string_distance ("b"s, "ab"s), 1U);
+    EXPECT_EQ (string_distance ("ac"s, "abc"s), 1U);
+    EXPECT_EQ (string_distance ("abcdefg"s, "xabxcdxxefxgx"s), 6U);
 }
 
 TEST (StringDistance, DeletesOnly) {
-    EXPECT_EQ (string_distance (std::string{"a"}, std::string{""}), 1U);
-    EXPECT_EQ (string_distance (std::string{"ab"}, std::string{"a"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"ab"}, std::string{"b"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"abc"}, std::string{"ac"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"xabxcdxxefxgx"}, std::string{"abcdefg"}), 6U);
+    EXPECT_EQ (string_distance ("a"s, ""s), 1U);
+    EXPECT_EQ (string_distance ("ab"s, "a"s), 1U);
+    EXPECT_EQ (string_distance ("ab"s, "b"s), 1U);
+    EXPECT_EQ (string_distance ("abc"s, "ac"s), 1U);
+    EXPECT_EQ (string_distance ("xabxcdxxefxgx"s, "abcdefg"s), 6U);
 }
 
 TEST (StringDistance, SubstitutionsOnly) {
-    EXPECT_EQ (string_distance (std::string{"a"}, std::string{"b"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"ab"}, std::string{"ac"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"ac"}, std::string{"bc"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"abc"}, std::string{"axc"}), 1U);
-    EXPECT_EQ (string_distance (std::string{"xabxcdxxefxgx"}, std::string{"1ab2cd34ef5g6"}), 6U);
+    EXPECT_EQ (string_distance ("a"s, "b"s), 1U);
+    EXPECT_EQ (string_distance ("ab"s, "ac"s), 1U);
+    EXPECT_EQ (string_distance ("ac"s, "bc"s), 1U);
+    EXPECT_EQ (string_distance ("abc"s, "axc"s), 1U);
+    EXPECT_EQ (string_distance ("xabxcdxxefxgx"s, "1ab2cd34ef5g6"s), 6U);
 }
 
 TEST (StringDistance, VariedOperations) {
-    EXPECT_EQ (string_distance (std::string{"example"}, std::string{"samples"}), 3U);
-    EXPECT_EQ (string_distance (std::string{"sturgeon"}, std::string{"urgently"}), 6U);
-    EXPECT_EQ (string_distance (std::string{"levenshtein"}, std::string{"frankenstein"}), 6U);
-    EXPECT_EQ (string_distance (std::string{"distance"}, std::string{"difference"}), 5U);
+    EXPECT_EQ (string_distance ("example"s, "samples"s), 3U);
+    EXPECT_EQ (string_distance ("sturgeon"s, "urgently"s), 6U);
+    EXPECT_EQ (string_distance ("levenshtein"s, "frankenstein"s), 6U);
+    EXPECT_EQ (string_distance ("distance"s, "difference"s), 5U);
 }

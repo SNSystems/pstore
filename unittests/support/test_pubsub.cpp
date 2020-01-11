@@ -48,6 +48,8 @@
 
 #include <gmock/gmock.h>
 
+using namespace std::string_literals;
+
 namespace {
 
     class counter {
@@ -104,8 +106,8 @@ TEST (PubSub, PubSub) {
     counter received_counter;
     mock_received received;
 
-    EXPECT_CALL (received, call (std::string{"message 1"}));
-    EXPECT_CALL (received, call (std::string{"message 2"}));
+    EXPECT_CALL (received, call ("message 1"s));
+    EXPECT_CALL (received, call ("message 2"s));
 
     std::unique_ptr<pstore::subscriber<decltype (cv)>> sub = chan.new_subscriber ();
 

@@ -46,7 +46,8 @@
 #include <algorithm>
 #include <string>
 #include <utility>
-#include "gtest/gtest.h"
+
+#include <gtest/gtest.h>
 
 TEST (ArrayStack, Empty) {
     pstore::array_stack<int, 2> stack;
@@ -74,7 +75,7 @@ TEST (ArrayStack, PushMoveValue) {
     stack.push (std::move (value));
 
     std::string const & top = stack.top ();
-    EXPECT_EQ (std::string{"Hello"}, top);
+    EXPECT_STREQ ("Hello", top.c_str());
 }
 
 TEST (ArrayStack, PushAndPop1Value) {

@@ -61,6 +61,8 @@
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/quoted.hpp"
 
+using namespace std::string_literals;
+
 namespace {
 
     class umask_raii {
@@ -204,7 +206,7 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         std::string fifo_path::get_default_path () {
             // TODO: consider using /run/user/<userid> on Linux?
-            return std::string{"/var/tmp/"} + default_pipe_name;
+            return "/var/tmp/"s + default_pipe_name;
         }
 
     } // namespace broker

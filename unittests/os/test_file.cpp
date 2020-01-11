@@ -60,6 +60,8 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/small_vector.hpp"
 
+using namespace std::string_literals;
+
 namespace {
 
     class FileNameTemplate : public ::testing::Test {
@@ -74,7 +76,7 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (FileNameTemplate, Empty) {
-    EXPECT_EQ (pstore::file::details::name_from_template ("", rng_), std::string{""});
+    EXPECT_EQ (pstore::file::details::name_from_template ("", rng_), "");
 }
 TEST_F (FileNameTemplate, NoTrailingX) {
     EXPECT_EQ (pstore::file::details::name_from_template ("A", rng_), "A");
@@ -386,7 +388,7 @@ namespace {
 
 TEST (Deleter, UnlinkCallsPlatformUnlinkWithOriginalPath) {
     mock_unlinker mu;
-    EXPECT_CALL (mu, unlink (std::string{"path"}));
+    EXPECT_CALL (mu, unlink ("path"s));
     test_file_deleter d ("path", mu);
     d.unlink ();
 }
@@ -400,7 +402,7 @@ TEST (Deleter, UnlinkDoesNotCallPlatformUnlinkAfterRelease) {
 
 TEST (Deleter, DestructorCallsPlatformUnlinkWithOriginalPath) {
     mock_unlinker mu;
-    EXPECT_CALL (mu, unlink (std::string{"path"}));
+    EXPECT_CALL (mu, unlink ("path"s));
     { test_file_deleter d ("path", mu); }
 }
 

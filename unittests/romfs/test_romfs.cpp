@@ -51,6 +51,7 @@
 
 #include <gmock/gmock.h>
 
+using namespace std::string_literals;
 using namespace pstore::romfs;
 
 namespace {
@@ -99,25 +100,24 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (RomFs, WorkingDirectory) {
-    EXPECT_EQ (fs ().getcwd (), std::string{"/"});
+    EXPECT_EQ (fs ().getcwd (), "/"s);
     EXPECT_EQ (fs ().chdir ("/."), std::error_code{});
-    EXPECT_EQ (fs ().getcwd (), std::string{"/"});
+    EXPECT_EQ (fs ().getcwd (), "/"s);
 
     EXPECT_EQ (fs ().chdir ("hello"), make_error_code (error_code::enotdir));
-    EXPECT_EQ (fs ().getcwd (), std::string{"/"})
-        << "Expected no change to the WD after a failed chdir";
+    EXPECT_EQ (fs ().getcwd (), "/"s) << "Expected no change to the WD after a failed chdir";
 
     EXPECT_EQ (fs ().chdir ("./dir"), std::error_code{});
-    EXPECT_EQ (fs ().getcwd (), std::string{"/dir"});
+    EXPECT_EQ (fs ().getcwd (), "/dir"s);
 
     EXPECT_EQ (fs ().chdir ("../dir"), std::error_code{});
-    EXPECT_EQ (fs ().getcwd (), std::string{"/dir"});
+    EXPECT_EQ (fs ().getcwd (), "/dir"s);
 
     EXPECT_EQ (fs ().chdir (".."), std::error_code{});
-    EXPECT_EQ (fs ().getcwd (), std::string{"/"});
+    EXPECT_EQ (fs ().getcwd (), "/"s);
 
     EXPECT_EQ (fs ().chdir (".."), std::error_code{});
-    EXPECT_EQ (fs ().getcwd (), std::string{"/"});
+    EXPECT_EQ (fs ().getcwd (), "/"s);
 }
 
 TEST_F (RomFs, OpenFile) {

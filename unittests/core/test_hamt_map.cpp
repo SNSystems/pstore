@@ -54,6 +54,8 @@
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
 
+using namespace std::string_literals;
+
 // *******************************************
 // *                                         *
 // *              IndexFixture               *
@@ -153,8 +155,8 @@ TEST_F (DefaultIndexFixture, EmptyBeginEqualsEnd) {
 // test insert: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
-    auto const second = std::make_pair (std::string{"a"}, std::string{"c"});
+    auto const first = std::make_pair ("a"s, "b"s);
+    auto const second = std::make_pair ("a"s, "c"s);
     std::pair<default_index::iterator, bool> itp = index_->insert (t1, first);
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("a", key);
@@ -168,8 +170,8 @@ TEST_F (DefaultIndexFixture, InsertSingle) {
 // test insert_or_assign: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, UpsertSingle) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
-    auto const second = std::make_pair (std::string{"a"}, std::string{"c"});
+    auto const first = std::make_pair ("a"s, "b"s);
+    auto const second = std::make_pair ("a"s, "c"s);
     std::pair<default_index::iterator, bool> itp = index_->insert_or_assign (t1, first);
     std::string const & key = (*itp.first).first;
     EXPECT_EQ ("a", key);
@@ -183,7 +185,7 @@ TEST_F (DefaultIndexFixture, UpsertSingle) {
 // test iterator: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
+    auto const first = std::make_pair ("a"s, "b"s);
     index_->insert_or_assign (t1, first);
 
     default_index::iterator begin = index_->begin (*db_);
@@ -198,8 +200,8 @@ TEST_F (DefaultIndexFixture, InsertSingleIterator) {
 // test iterator: index contains an internal heap node.
 TEST_F (DefaultIndexFixture, InsertHeap) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
-    auto const second = std::make_pair (std::string{"c"}, std::string{"d"});
+    auto const first = std::make_pair ("a"s, "b"s);
+    auto const second = std::make_pair ("c"s, "d"s);
     index_->insert_or_assign (t1, first);
     index_->insert_or_assign (t1, second);
 
@@ -215,7 +217,7 @@ TEST_F (DefaultIndexFixture, InsertHeap) {
 // test iterator: index only contains a leaf store node.
 TEST_F (DefaultIndexFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    auto const first = std::make_pair (std::string{"a"}, std::string{"b"});
+    auto const first = std::make_pair ("a"s, "b"s);
     index_->insert_or_assign (t1, first);
     index_->flush (t1, db_->get_current_revision ());
 
@@ -231,8 +233,8 @@ TEST_F (DefaultIndexFixture, InsertLeafStore) {
 // test iterator: index contains an internal store node.
 TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert_or_assign (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
-    index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
+    index_->insert_or_assign (t1, std::make_pair ("a"s, "b"s));
+    index_->insert_or_assign (t1, std::make_pair ("c"s, "d"s));
     index_->flush (t1, db_->get_current_revision ());
 
     default_index::const_iterator begin = index_->cbegin (*db_);
@@ -248,9 +250,9 @@ TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
 TEST_F (DefaultIndexFixture, InsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<default_index::iterator, bool> itp1 =
-        index_->insert (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
+        index_->insert (t1, std::make_pair ("a"s, "b"s));
     std::pair<default_index::iterator, bool> itp2 =
-        index_->insert (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
+        index_->insert (t1, std::make_pair ("c"s, "d"s));
 
     std::string const & key1 = (*itp1.first).first;
     EXPECT_EQ ("a", key1);
@@ -262,7 +264,7 @@ TEST_F (DefaultIndexFixture, InsertInternalStore) {
     index_->flush (t1, db_->get_current_revision ());
 
     std::pair<default_index::iterator, bool> itp3 =
-        index_->insert (t1, std::make_pair (std::string{"c"}, std::string{"f"}));
+        index_->insert (t1, std::make_pair ("c"s, "f"s));
     std::string & value = (*itp3.first).second;
     EXPECT_EQ ("d", value);
     EXPECT_FALSE (itp3.second);
@@ -272,9 +274,9 @@ TEST_F (DefaultIndexFixture, InsertInternalStore) {
 TEST_F (DefaultIndexFixture, UpsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
     std::pair<default_index::iterator, bool> itp1 =
-        index_->insert_or_assign (t1, std::make_pair (std::string{"a"}, std::string{"b"}));
+        index_->insert_or_assign (t1, std::make_pair ("a"s, "b"s));
     std::pair<default_index::iterator, bool> itp2 =
-        index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"d"}));
+        index_->insert_or_assign (t1, std::make_pair ("c"s, "d"s));
 
     std::string const & key1 = (*itp1.first).first;
     EXPECT_EQ ("a", key1);
@@ -286,7 +288,7 @@ TEST_F (DefaultIndexFixture, UpsertInternalStore) {
     index_->flush (t1, db_->get_current_revision());
 
     std::pair<default_index::iterator, bool> itp3 =
-        index_->insert_or_assign (t1, std::make_pair (std::string{"c"}, std::string{"f"}));
+        index_->insert_or_assign (t1, std::make_pair ("c"s, "f"s));
     std::string & value = (*itp3.first).second;
     EXPECT_EQ ("f", value);
     EXPECT_FALSE (itp3.second);
@@ -1156,14 +1158,14 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionInsert) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::make_pair (std::string{"f"}, std::string{"value f"}));
+    index_->insert (t1, std::make_pair ("f"s, "value f"s));
     std::pair<test_trie::iterator, bool> itp =
-        index_->insert (t1, std::make_pair (std::string{"e"}, std::string{"value e"}));
+        index_->insert (t1, std::make_pair ("e"s, "value e"s));
     EXPECT_TRUE (itp.second);
     std::string const & v = (*itp.first).second;
     EXPECT_EQ ("value e", v);
 
-    itp = index_->insert (t1, std::make_pair (std::string{"e"}, std::string{"new value e"}));
+    itp = index_->insert (t1, std::make_pair ("e"s, "new value e"s));
     EXPECT_FALSE (itp.second);
     std::string const & v1 = (*itp.first).second;
     EXPECT_EQ ("value e", v1);
@@ -1322,12 +1324,12 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
     {
         std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (t1, "h");
         EXPECT_TRUE (itp.second);
-        EXPECT_EQ ((*itp.first).first, std::string{"h"});
+        EXPECT_EQ ((*itp.first).first, "h"s);
     }
     this->insert_or_assign (t1, "i");
 
     // Check trie iterator in the heap.
-    test_trie::const_iterator first = index_->find (*db_, std::string{"h"});
+    test_trie::const_iterator first = index_->find (*db_, "h"s);
     test_trie::const_iterator last = index_->end (*db_);
     EXPECT_NE (first, last);
     std::string const & v1 = (*first).first;
@@ -1363,14 +1365,14 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearInsertIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::make_pair (std::string{"g"}, std::string{"value g"}));
-    index_->insert (t1, std::make_pair (std::string{"h"}, std::string{"value h"}));
+    index_->insert (t1, std::make_pair ("g"s, "value g"s));
+    index_->insert (t1, std::make_pair ("h"s, "value h"s));
     std::pair<test_trie::iterator, bool> itp =
-        index_->insert (t1, std::make_pair (std::string{"i"}, std::string{"value i"}));
+        index_->insert (t1, std::make_pair ("i"s, "value i"s));
     EXPECT_TRUE (itp.second);
     index_->flush (t1, db_->get_current_revision());
 
-    itp = index_->insert (t1, std::make_pair (std::string{"g"}, std::string{"new value g"}));
+    itp = index_->insert (t1, std::make_pair ("g"s, "new value g"s));
     EXPECT_FALSE (itp.second);
     std::string const & v = (*itp.first).second;
     EXPECT_EQ ("value g", v);
@@ -1730,7 +1732,7 @@ namespace {
     // ~~~~
     void CorruptInternalNodes::find () const {
         test_trie const & index = *index_.get ();
-        check_for_error ([this, &index]() { index.find (*db_, std::string{"a"}); },
+        check_for_error ([this, &index] () { index.find (*db_, "a"s); },
                          pstore::error_code::index_corrupt);
     }
 
@@ -1842,7 +1844,7 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
         auto r1index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
-        r1index->insert_or_assign (t1, std::string{"key1"}, pstore::extent<char> ());
+        r1index->insert_or_assign (t1, "key1"s, pstore::extent<char> ());
         t1.commit ();
     }
     db_->sync (0);
@@ -1853,7 +1855,7 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
         // We're now synced to revision 1. Trying to insert into the index loaded from
         // r0 should raise an error.
         check_for_error (
-            [&]() { r0index->insert_or_assign (t2, std::string{"key2"}, pstore::extent<char> ()); },
+            [&] () { r0index->insert_or_assign (t2, "key2"s, pstore::extent<char> ()); },
             pstore::error_code::index_not_latest_revision);
     }
 }

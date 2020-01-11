@@ -45,6 +45,8 @@
 
 #include <gtest/gtest.h>
 
+using namespace std::string_literals;
+
 TEST (Quoted, Empty) {
     std::stringstream str;
     str << pstore::quoted ("");
@@ -59,7 +61,7 @@ TEST (Quoted, Simple) {
 
 TEST (Quoted, SimpleStdString) {
     std::stringstream str;
-    str << pstore::quoted (std::string{"simple"});
+    str << pstore::quoted ("simple"s);
     EXPECT_EQ (str.str (), R"("simple")");
 }
 

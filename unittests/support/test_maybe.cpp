@@ -51,6 +51,7 @@
 // 3rd party
 #include <gtest/gtest.h>
 
+using namespace std::string_literals;
 using pstore::maybe;
 
 namespace {
@@ -145,7 +146,7 @@ TEST (Maybe, AssignZero) {
 
 TEST (Maybe, MoveCtor) {
     {
-        maybe<std::string> m1{std::string{"test"}};
+        maybe<std::string> m1{"test"s};
         EXPECT_TRUE (m1.has_value ());
         EXPECT_EQ (m1.value (), "test");
 
@@ -166,9 +167,9 @@ TEST (Maybe, MoveAssign) {
     {
         maybe<std::string> m1;
         EXPECT_FALSE (m1);
-        m1 = std::string{"test"};
+        m1 = "test"s;
         EXPECT_TRUE (m1.has_value ());
-        EXPECT_EQ (m1.value (), std::string{"test"});
+        EXPECT_EQ (m1.value (), "test"s);
     }
     // With an initial value
     {
@@ -184,7 +185,7 @@ TEST (Maybe, MoveAssign) {
 #ifndef __clang_analyzer__
         EXPECT_TRUE (m3.has_value ()); // a moved-from maybe still contains a value.
 #endif
-        EXPECT_EQ (m2.value (), std::string{"after"});
+        EXPECT_EQ (m2.value (), "after"s);
     }
 }
 
@@ -203,7 +204,7 @@ TEST (Maybe, CopyAssign) {
         maybe<std::string> const m2 ("test");
         m1.operator= (m2);
         ASSERT_TRUE (m1.has_value ());
-        EXPECT_EQ (m1.value (), std::string{"test"});
+        EXPECT_EQ (m1.value (), "test"s);
     }
 
     // lhs with value, rhs with no value.
@@ -220,7 +221,7 @@ TEST (Maybe, CopyAssign) {
         maybe<std::string> m2 ("new");
         m1.operator= (m2);
         ASSERT_TRUE (m1.has_value ());
-        EXPECT_EQ (m1.value (), std::string{"new"});
+        EXPECT_EQ (m1.value (), "new"s);
     }
 }
 
@@ -237,7 +238,7 @@ TEST (Maybe, SelfAssign) {
         maybe<std::string> m1 ("test");
         m1.operator= (m1);
         ASSERT_TRUE (m1.has_value ());
-        EXPECT_EQ (m1.value (), std::string{"test"});
+        EXPECT_EQ (m1.value (), "test"s);
     }
 }
 

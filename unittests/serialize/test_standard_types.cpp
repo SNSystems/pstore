@@ -56,6 +56,8 @@
 #include "pstore/serialize/archive.hpp"
 #include "pstore/serialize/types.hpp"
 
+using namespace std::string_literals;
+
 namespace {
 
     class StringWriter : public ::testing::Test {
@@ -172,8 +174,8 @@ TEST_F (StringWriter, ReadThreeByteLengthCharString) {
 }
 
 TEST_F (StringWriter, WriteTwoStrings) {
-    std::size_t s1 = pstore::serialize::write (writer_, std::string{"a"});
-    std::size_t s2 = pstore::serialize::write (writer_, std::string{"b"});
+    std::size_t s1 = pstore::serialize::write (writer_, "a"s);
+    std::size_t s2 = pstore::serialize::write (writer_, "b"s);
     EXPECT_EQ (0U, s1);
     EXPECT_EQ (3U, s2);
 }
@@ -322,10 +324,10 @@ TEST_F (MapWriter, write) {
     pstore::serialize::archive::vector_writer expected{expected_bytes};
 
     pstore::serialize::write (expected, std::size_t{2});
-    pstore::serialize::write (expected, std::string{"k1"});
-    pstore::serialize::write (expected, std::string{"First key"});
-    pstore::serialize::write (expected, std::string{"k2"});
-    pstore::serialize::write (expected, std::string{"Second key"});
+    pstore::serialize::write (expected, "k1"s);
+    pstore::serialize::write (expected, "First key"s);
+    pstore::serialize::write (expected, "k2"s);
+    pstore::serialize::write (expected, "Second key"s);
 
     auto const num_expected_bytes = std::distance (std::begin (expected), std::end (expected));
     auto const num_actual_bytes = std::distance (std::begin (writer_), std::end (writer_));

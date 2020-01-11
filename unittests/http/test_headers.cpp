@@ -45,6 +45,7 @@
 
 #include <gtest/gtest.h>
 
+using namespace std::string_literals;
 using pstore::just;
 using pstore::httpd::header_info;
 
@@ -69,7 +70,7 @@ TEST (Headers, ExampleWS) {
     header_info expected;
     expected.upgrade_to_websocket = true;
     expected.connection_upgrade = true;
-    expected.websocket_key = just (std::string{"dGhlIHNhbXBsZSBub25jZQ=="});
+    expected.websocket_key = just ("dGhlIHNhbXBsZSBub25jZQ=="s);
     expected.websocket_version = just (13U);
     EXPECT_EQ (hi, expected);
 }

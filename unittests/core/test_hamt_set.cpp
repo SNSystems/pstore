@@ -50,6 +50,8 @@
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
 
+using namespace std::string_literals;
+
 //*  ___      _   ___ _     _                 *
 //* / __| ___| |_| __(_)_ _| |_ _  _ _ _ ___  *
 //* \__ \/ -_)  _| _|| \ \ /  _| || | '_/ -_) *
@@ -111,11 +113,11 @@ TEST_F (SetFixture, EmptyBeginEqualsEnd) {
 // test insert: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleLeaf) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<iterator, bool> itp = index_->insert (t1, std::string{"a"});
+    std::pair<iterator, bool> itp = index_->insert (t1, "a"s);
     std::string const & key = (*itp.first);
     EXPECT_EQ ("a", key);
     EXPECT_TRUE (itp.second);
-    itp = index_->insert (t1, std::string{"a"});
+    itp = index_->insert (t1, "a"s);
     EXPECT_FALSE (itp.second);
     EXPECT_EQ (1U, index_->size ());
 }
@@ -139,7 +141,7 @@ TEST_F (SetFixture, FindSingle) {
 // test iterator: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::string{"a"});
+    index_->insert (t1, "a"s);
 
     iterator begin = index_->begin (*db_);
     iterator end = index_->end (*db_);
@@ -153,8 +155,8 @@ TEST_F (SetFixture, InsertSingleIterator) {
 // test iterator: index contains an internal heap node.
 TEST_F (SetFixture, InsertHeap) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::string{"a"});
-    index_->insert (t1, std::string{"b"});
+    index_->insert (t1, "a"s);
+    index_->insert (t1, "b"s);
     EXPECT_EQ (2U, index_->size ());
 
     iterator begin = index_->begin (*db_);
@@ -169,7 +171,7 @@ TEST_F (SetFixture, InsertHeap) {
 // test iterator: index only contains a leaf store node.
 TEST_F (SetFixture, InsertLeafStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::string{"a"});
+    index_->insert (t1, "a"s);
     index_->flush (t1, db_->get_current_revision());
 
     const_iterator begin = index_->cbegin (*db_);
@@ -184,8 +186,8 @@ TEST_F (SetFixture, InsertLeafStore) {
 // test iterator: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStoreIterator) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    index_->insert (t1, std::string{"a"});
-    index_->insert (t1, std::string{"b"});
+    index_->insert (t1, "a"s);
+    index_->insert (t1, "b"s);
     index_->flush (t1, db_->get_current_revision());
 
     const_iterator begin = index_->cbegin (*db_);
@@ -200,8 +202,8 @@ TEST_F (SetFixture, InsertInternalStoreIterator) {
 // test insert: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStore) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-    std::pair<iterator, bool> itp1 = index_->insert (t1, std::string{"a"});
-    std::pair<iterator, bool> itp2 = index_->insert (t1, std::string{"b"});
+    std::pair<iterator, bool> itp1 = index_->insert (t1, "a"s);
+    std::pair<iterator, bool> itp2 = index_->insert (t1, "b"s);
 
     std::string const & key1 = (*itp1.first);
     EXPECT_EQ ("a", key1);
@@ -211,7 +213,7 @@ TEST_F (SetFixture, InsertInternalStore) {
     EXPECT_TRUE (itp2.second);
     index_->flush (t1, db_->get_current_revision());
 
-    std::pair<iterator, bool> itp3 = index_->insert (t1, std::string{"a"});
+    std::pair<iterator, bool> itp3 = index_->insert (t1, "a"s);
     EXPECT_FALSE (itp3.second);
 }
 
@@ -221,20 +223,20 @@ TEST_F (SetFixture, FindInternal) {
     const_iterator cend = index_->cend (*db_);
     std::string ini ("Initial string");
 
-    index_->insert (t1, std::string{"a"});
+    index_->insert (t1, "a"s);
     index_->insert (t1, ini);
-    auto it = index_->find (*db_, std::string{"a"});
+    auto it = index_->find (*db_, "a"s);
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, std::string{"a"});
+    EXPECT_EQ (*it, "a"s);
     it = index_->find (*db_, ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);
 
     index_->flush (t1, db_->get_current_revision ());
 
-    it = index_->find (*db_, std::string{"a"});
+    it = index_->find (*db_, "a"s);
     EXPECT_NE (it, cend);
-    EXPECT_EQ (*it, std::string{"a"});
+    EXPECT_EQ (*it, "a"s);
     it = index_->find (*db_, ini);
     EXPECT_NE (it, cend);
     EXPECT_EQ (*it, ini);

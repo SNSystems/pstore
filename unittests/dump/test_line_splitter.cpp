@@ -47,6 +47,8 @@
 
 #include "gmock/gmock.h"
 
+using namespace std::string_literals;
+
 TEST (ExpandTabs, Empty) {
     std::string in;
     std::string out;
@@ -55,34 +57,40 @@ TEST (ExpandTabs, Empty) {
 }
 
 TEST (ExpandTabs, NoTabs) {
-    std::string in = "a b";
+    auto const in = "a b"s;
     std::string out;
     pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out));
     EXPECT_EQ (out, "a b");
 }
 
 TEST (ExpandTabs, SingleTab) {
-    std::string in = "a\tb";
-    std::string out;
-    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
-    EXPECT_EQ (out, "a       b");
-
-    in = "12345678\t12345678";
-    out.clear ();
-    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
-    EXPECT_EQ (out, "12345678        12345678");
+    {
+        auto const in1 = "a\tb"s;
+        std::string out1;
+        pstore::dump::expand_tabs (std::begin (in1), std::end (in1), std::back_inserter (out1), 8U);
+        EXPECT_EQ (out1, "a       b");
+    }
+    {
+        std::string const in2 = "12345678\t12345678";
+        std::string out2;
+        pstore::dump::expand_tabs (std::begin (in2), std::end (in2), std::back_inserter (out2), 8U);
+        EXPECT_EQ (out2, "12345678        12345678");
+    }
 }
 
 TEST (ExpandTabs, TwoTabs) {
-    std::string in = "a\tb\tc";
-    std::string out;
-    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
-    EXPECT_EQ (out, "a       b       c");
-
-    in = "\t1234567\t12345678";
-    out.clear ();
-    pstore::dump::expand_tabs (std::begin (in), std::end (in), std::back_inserter (out), 8U);
-    EXPECT_EQ (out, "        1234567 12345678");
+    {
+        auto const in1 = "a\tb\tc"s;
+        std::string out1;
+        pstore::dump::expand_tabs (std::begin (in1), std::end (in1), std::back_inserter (out1), 8U);
+        EXPECT_EQ (out1, "a       b       c");
+    }
+    {
+        auto const in2 = "\t1234567\t12345678"s;
+        std::string out2;
+        pstore::dump::expand_tabs (std::begin (in2), std::end (in2), std::back_inserter (out2), 8U);
+        EXPECT_EQ (out2, "        1234567 12345678");
+    }
 }
 
 
@@ -90,7 +98,7 @@ TEST (LineSplitter, SingleString) {
     using namespace pstore::dump;
 
     array::container container;
-    std::string const str = "hello\n";
+    auto const str = "hello\n"s;
 
     line_splitter ls (&container);
     ls.append (pstore::gsl::make_span (str));
@@ -123,8 +131,8 @@ TEST (LineSplitter, SingleStringInTwoParts) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append (std::string{"he"});
-    ls.append (std::string{"llo\n"});
+    ls.append ("he"s);
+    ls.append ("llo\n"s);
 
     array arr (std::move (container));
     std::ostringstream out;
@@ -137,7 +145,7 @@ TEST (LineSplitter, TwoStringsSingleAppend) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append (std::string{"hello\nthere\n"});
+    ls.append ("hello\nthere\n"s);
 
     array arr (std::move (container));
     std::ostringstream out;
@@ -150,8 +158,8 @@ TEST (LineSplitter, TwoStringsInTwoParts) {
 
     array::container container;
     line_splitter ls (&container);
-    ls.append (std::string{"hello\nth"});
-    ls.append (std::string{"ere\n"});
+    ls.append ("hello\nth"s);
+    ls.append ("ere\n"s);
 
     array arr (std::move (container));
     std::ostringstream out;
