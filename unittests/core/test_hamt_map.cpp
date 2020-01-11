@@ -43,13 +43,18 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/hamt_map.hpp"
 
+// Standard library
 #include <random>
 #include <list>
-#include "gtest/gtest.h"
 
+// 3rd party
+#include <gtest/gtest.h>
+
+// pstore includes
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
 
+// local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
 #include "mock_mutex.hpp"
@@ -63,14 +68,16 @@ using namespace std::string_literals;
 // *******************************************
 
 namespace {
+
     using index_pointer = pstore::index::details::index_pointer;
     using internal_node = pstore::index::details::internal_node;
     using linear_node = pstore::index::details::linear_node;
 
     class IndexFixture : public EmptyStore {
     public:
-        void SetUp () override;
-        void TearDown () override;
+        IndexFixture () : db_{new pstore::database (this->file ())} {
+            db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
+        }
 
         using lock_guard = std::unique_lock<mock_mutex>;
         using transaction_type = pstore::transaction<lock_guard>;
@@ -79,21 +86,6 @@ namespace {
         mock_mutex mutex_;
         std::unique_ptr<pstore::database> db_;
     };
-
-    // SetUp
-    // ~~~~~
-    void IndexFixture::SetUp () {
-        EmptyStore::SetUp ();
-        db_.reset (new pstore::database (this->file ()));
-        db_->set_vacuum_mode (pstore::database::vacuum_mode::disabled);
-    }
-
-    // TearDown
-    // ~~~~~~~~
-    void IndexFixture::TearDown () {
-        db_.reset ();
-        EmptyStore::TearDown ();
-    }
 
 } // end anonymous namespace
 
@@ -122,18 +114,15 @@ TEST_F (IndexFixture, InternalSizeBytes) {
 }
 
 namespace {
+
     class DefaultIndexFixture : public IndexFixture {
     public:
-        void SetUp () override;
+        DefaultIndexFixture () : index_{(new default_index{*db_})} {}
     protected:
         using default_index = pstore::index::hamt_map<std::string, std::string>;
         std::unique_ptr<default_index> index_;
     };
 
-    void DefaultIndexFixture::SetUp () {
-        IndexFixture::SetUp ();
-        index_.reset (new default_index{*db_});
-    }
 } // end anonymous namespace
 
 // Test default constructor.
@@ -301,6 +290,7 @@ TEST_F (DefaultIndexFixture, UpsertInternalStore) {
 // *******************************************
 
 namespace {
+
     // An implementation of the hash function interface that has a hard-wired map from input
     // string to the corresponding hash value.
     class hash_function {
@@ -320,6 +310,7 @@ namespace {
 
     using test_trie = pstore::index::hamt_map<std::string, std::string, hash_function,
                                               std::equal_to<std::string>>;
+
 } // end anonymous namespace
 
 // *******************************************
@@ -332,9 +323,6 @@ namespace {
 
     class GenericIndexFixture : public IndexFixture {
     protected:
-        void SetUp () override { IndexFixture::SetUp (); }
-        void TearDown () override { IndexFixture::TearDown (); }
-
         std::unique_ptr<test_trie> index_;
 
         // insert_or_assign a new node into the index.
@@ -379,7 +367,7 @@ namespace {
     // find a node
     // ~~~
     bool GenericIndexFixture::is_found (std::string const & key) {
-        return (index_->find (*db_, key) != index_->cend (*db_));
+        return index_->find (*db_, key) != index_->cend (*db_);
     }
 
     // check a leaf node
@@ -460,6 +448,7 @@ TEST_F (HamtRoundTrip, LeafMember) {
 // ****************
 
 namespace {
+
     class OneLevel : public GenericIndexFixture {
     protected:
         OneLevel ()
@@ -506,6 +495,7 @@ namespace {
         {"c", 0b000111},
         {"d", 0b001111},
     };
+
 } // end anonymous namespace
 
 // insert_or_assign a single node ("a") into the database.
@@ -606,7 +596,7 @@ TEST_F (OneLevel, InsertFourthNode) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
         auto root_internal = root.untag_node<internal_node *> ();
-        EXPECT_EQ (root_internal->get_bitmap (), 0b10000000'10001010);
+        EXPECT_EQ (root_internal->get_bitmap (), 0b10000000'10001010U);
         EXPECT_EQ (4U, pstore::bit_count::pop_count (root_internal->get_bitmap ()));
         this->check_is_leaf_node ((*root_internal)[3]);
         EXPECT_GT ((*root_internal)[3].addr.absolute (), (*root_internal)[2].addr.absolute ());
@@ -718,6 +708,7 @@ TEST_F (OneLevel, UpsertIteration) {
 // *******************************************
 
 namespace {
+
     // Careful choice of input and our knowledge of the hash function's behaviour means that
     // we can choose two inputs whose hashes collide in the bottom 6 bits.
     class TwoValuesWithHashCollision : public GenericIndexFixture {
@@ -725,7 +716,7 @@ namespace {
         TwoValuesWithHashCollision ()
                 : hash_{hashes_} {}
 
-        virtual void SetUp () final {
+        void SetUp () final {
             GenericIndexFixture::SetUp ();
             GenericIndexFixture::index_.reset (new test_trie (
                 *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
@@ -772,7 +763,8 @@ namespace {
         auto const shifted_mask = (UINT64_C (1) << 6) - 1U;
         EXPECT_NE (shifted_first_hash & shifted_mask, shifted_second_hash & shifted_mask);
     }
-} // namespace
+
+} // end anonymous namespace
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
     transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
@@ -873,7 +865,7 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
         this->check_is_heap_internal_node (level1);
 
         auto level1_internal = level1.untag_node<internal_node *> ();
-        EXPECT_EQ (level1_internal->get_bitmap (), 0b111);
+        EXPECT_EQ (level1_internal->get_bitmap (), 0b111U);
         this->check_is_leaf_node ((*level1_internal)[0]);
         this->check_is_leaf_node ((*level1_internal)[1]);
         this->check_is_leaf_node ((*level1_internal)[2]);
@@ -1207,19 +1199,19 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         index_pointer root = index_->root ();
         this->check_is_heap_internal_node (root);
 
-        auto root_internal = root.untag_node<internal_node *> ();
-        auto level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
-        auto level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
-        auto level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
-        auto level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
-        auto level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
-        auto level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
-        auto level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
-        auto level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
-        auto level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
-        auto level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
+        auto const root_internal = root.untag_node<internal_node *> ();
+        auto const level1_internal = (*root_internal)[0].untag_node<internal_node *> ();
+        auto const level2_internal = (*level1_internal)[0].untag_node<internal_node *> ();
+        auto const level3_internal = (*level2_internal)[0].untag_node<internal_node *> ();
+        auto const level4_internal = (*level3_internal)[0].untag_node<internal_node *> ();
+        auto const level5_internal = (*level4_internal)[0].untag_node<internal_node *> ();
+        auto const level6_internal = (*level5_internal)[0].untag_node<internal_node *> ();
+        auto const level7_internal = (*level6_internal)[0].untag_node<internal_node *> ();
+        auto const level8_internal = (*level7_internal)[0].untag_node<internal_node *> ();
+        auto const level9_internal = (*level8_internal)[0].untag_node<internal_node *> ();
+        auto const level10_internal = (*level9_internal)[0].untag_node<internal_node *> ();
         EXPECT_TRUE ((*level10_internal)[0].is_linear ());
-        auto level11_linear = (*level10_internal)[0].untag_node<linear_node *> ();
+        auto const level11_linear = (*level10_internal)[0].untag_node<linear_node *> ();
         EXPECT_EQ (level11_linear->size (), 3U);
         EXPECT_EQ (level11_linear->size_bytes (), 40U);
         EXPECT_NE ((*level11_linear)[0], pstore::address::null ());
@@ -1230,28 +1222,28 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
         index_pointer root = index_->root ();
         this->check_is_store_internal_node (root);
 
-        auto root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
-        auto level1 = (*root_internal)[0];
-        auto level1_internal = internal_node::read_node (*db_, level1.untag_internal_address ());
-        auto level2 = (*level1_internal)[0];
-        auto level2_internal = internal_node::read_node (*db_, level2.untag_internal_address ());
-        auto level3 = (*level2_internal)[0];
-        auto level3_internal = internal_node::read_node (*db_, level3.untag_internal_address ());
-        auto level4 = (*level3_internal)[0];
-        auto level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
-        auto level5 = (*level4_internal)[0];
-        auto level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
-        auto level6 = (*level5_internal)[0];
-        auto level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
-        auto level7 = (*level6_internal)[0];
-        auto level7_internal = internal_node::read_node (*db_, level7.untag_internal_address ());
-        auto level8 = (*level7_internal)[0];
-        auto level8_internal = internal_node::read_node (*db_, level8.untag_internal_address ());
-        auto level9 = (*level8_internal)[0];
-        auto level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
-        auto level10 = (*level9_internal)[0];
-        auto level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
-        auto level11 = (*level10_internal)[0];
+        auto const root_internal = internal_node::read_node (*db_, root.untag_internal_address ());
+        auto const level1 = (*root_internal)[0];
+        auto const level1_internal = internal_node::read_node (*db_, level1.untag_internal_address ());
+        auto const level2 = (*level1_internal)[0];
+        auto const level2_internal = internal_node::read_node (*db_, level2.untag_internal_address ());
+        auto const level3 = (*level2_internal)[0];
+        auto const level3_internal = internal_node::read_node (*db_, level3.untag_internal_address ());
+        auto const level4 = (*level3_internal)[0];
+        auto const level4_internal = internal_node::read_node (*db_, level4.untag_internal_address ());
+        auto const level5 = (*level4_internal)[0];
+        auto const level5_internal = internal_node::read_node (*db_, level5.untag_internal_address ());
+        auto const level6 = (*level5_internal)[0];
+        auto const level6_internal = internal_node::read_node (*db_, level6.untag_internal_address ());
+        auto const level7 = (*level6_internal)[0];
+        auto const level7_internal = internal_node::read_node (*db_, level7.untag_internal_address ());
+        auto const level8 = (*level7_internal)[0];
+        auto const level8_internal = internal_node::read_node (*db_, level8.untag_internal_address ());
+        auto const level9 = (*level8_internal)[0];
+        auto const level9_internal = internal_node::read_node (*db_, level9.untag_internal_address ());
+        auto const level10 = (*level9_internal)[0];
+        auto const level10_internal = internal_node::read_node (*db_, level10.untag_internal_address ());
+        auto const level11 = (*level10_internal)[0];
 
         std::shared_ptr<linear_node const> sptr;
         linear_node const * level11_linear = nullptr;
@@ -1540,9 +1532,9 @@ namespace {
             GenericIndexFixture::SetUp ();
             GenericIndexFixture::index_.reset (new test_trie (
                 *db_, pstore::typed_address<pstore::index::header_block>::null (), hash_));
+
             // With a known hash function and the insertion order below, we should end up with a
-            // trie which
-            // looks like:
+            // trie which looks like:
             //
             //          +--------+--------+--------+
             // root_ -> | 000000 | 000001 | 000010 |   (hash bits 0-5)
