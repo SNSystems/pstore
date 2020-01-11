@@ -147,6 +147,6 @@ TEST_F (Help, SwitchStrings) {
     ASSERT_EQ (actual.size (), 1U);
     auto it = std::begin (actual);
     EXPECT_EQ (it->first, &option1);
-    ASSERT_EQ (it->second.size (), 1);
+    ASSERT_EQ (it->second.size (), 1U);
     EXPECT_EQ (it->second[0], std::make_tuple ("--"s + name + "=<str>", std::size_t{13}));
 }
