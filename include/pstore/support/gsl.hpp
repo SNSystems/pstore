@@ -99,6 +99,8 @@ namespace pstore {
                     typename std::conditional<IsConst, element_type_ const, element_type_>::type &;
                 using pointer = typename std::add_pointer<reference>::type;
 
+                friend class span_iterator<Span, true>;
+
                 constexpr span_iterator () noexcept = default;
                 constexpr span_iterator (Span const * span,
                                          typename Span::index_type index) noexcept
@@ -106,8 +108,6 @@ namespace pstore {
                         , index_ (index) {
                     assert (span == nullptr || (index_ >= 0 && index <= span_->length ()));
                 }
-                friend class span_iterator<Span, true>;
-
                 // Note that we allow non-const iterators to be assigned and constructed from
                 // const iterators, but not the other way round.
                 constexpr span_iterator (span_iterator<Span, false> const & other) noexcept
@@ -176,13 +176,12 @@ namespace pstore {
                     return *this;
                 }
 
+                span_iterator & operator-= (difference_type n) noexcept { return *this += -n; }
+
                 span_iterator operator- (difference_type n) const noexcept {
                     auto ret = *this;
                     return ret -= n;
                 }
-
-                span_iterator & operator-= (difference_type n) noexcept { return *this += -n; }
-
                 difference_type operator- (span_iterator const & rhs) const {
                     assert (span_ == rhs.span_);
                     return index_ - rhs.index_;
@@ -372,10 +371,20 @@ namespace pstore {
                 return {data (), Count};
             }
 
+            span<element_type, dynamic_extent> first (index_type count) const {
+                assert (count >= 0 && count <= size ());
+                return {data (), count};
+            }
+
             template <std::ptrdiff_t Count>
             span<element_type, Count> last () const {
                 assert (Count >= 0 && Count <= size ());
                 return {data () + (size () - Count), Count};
+            }
+
+            span<element_type, dynamic_extent> last (index_type count) const {
+                assert (count >= 0 && count <= size ());
+                return {data () + (size () - count), count};
             }
 
             template <std::ptrdiff_t Offset, std::ptrdiff_t Count = dynamic_extent>
@@ -383,16 +392,6 @@ namespace pstore {
                 assert ((Offset == 0 || (Offset > 0 && Offset <= size ())) &&
                         (Count == dynamic_extent || (Count >= 0 && Offset + Count <= size ())));
                 return {data () + Offset, Count == dynamic_extent ? size () - Offset : Count};
-            }
-
-            span<element_type, dynamic_extent> first (index_type count) const {
-                assert (count >= 0 && count <= size ());
-                return {data (), count};
-            }
-
-            span<element_type, dynamic_extent> last (index_type count) const {
-                assert (count >= 0 && count <= size ());
-                return {data () + (size () - count), count};
             }
 
             span<element_type, dynamic_extent>
@@ -621,18 +620,18 @@ namespace pstore {
             // prevents compilation when someone attempts to assign a nullptr
             not_null (std::nullptr_t) noexcept = delete;
             not_null (int) noexcept = delete;
+            not_null (not_null const &) noexcept = default;
+            not_null (not_null &&) noexcept = default;
 
             ~not_null () noexcept = default;
 
+            not_null & operator= (not_null const &) noexcept = default;
+            not_null & operator= (not_null &&) noexcept = default;
             not_null & operator= (T const & t) noexcept {
                 ptr_ = t;
                 ensure_invariant ();
                 return *this;
             }
-            not_null (not_null const &) noexcept = default;
-            not_null (not_null &&) noexcept = default;
-            not_null & operator= (not_null const &) noexcept = default;
-            not_null & operator= (not_null &&) noexcept = default;
 
             // prevents compilation when someone attempts to assign a nullptr
             not_null<T> & operator= (std::nullptr_t) = delete;

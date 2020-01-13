@@ -73,8 +73,9 @@ namespace pstore {
         virtual ~transaction_base () noexcept = default;
 
         transaction_base (transaction_base const &) = delete;
-        transaction_base & operator= (transaction_base const &) = delete;
         transaction_base (transaction_base && rhs) noexcept;
+
+        transaction_base & operator= (transaction_base const &) = delete;
         transaction_base & operator= (transaction_base && rhs) noexcept = delete;
 
         database & db () noexcept { return db_; }
@@ -226,12 +227,13 @@ namespace pstore {
         using lock_type = LockGuard;
 
         transaction (database & db, lock_type && lock);
+        transaction (transaction const & rhs) = delete;
+        transaction (transaction && rhs) noexcept = default;
+
         ~transaction () noexcept override;
 
-        transaction (transaction && rhs) noexcept = default;
+        transaction & operator= (transaction const & rhs) = delete;
         transaction & operator= (transaction && rhs) noexcept = delete;
-        transaction (transaction const &) = delete;
-        transaction & operator= (transaction const &) = delete;
 
     private:
         lock_type lock_;
@@ -319,12 +321,11 @@ namespace pstore {
                       pstore::file::file_base::lock_kind::exclusive_write        // kind
                   } {}
 
-        // Move.
-        transaction_mutex (transaction_mutex &&) noexcept = default;
-        transaction_mutex & operator= (transaction_mutex &&) noexcept = default;
-        // No copying or assignment
-        transaction_mutex (transaction_mutex const &) = delete;
-        transaction_mutex & operator= (transaction_mutex const &) = delete;
+        transaction_mutex (transaction_mutex && rhs) noexcept = default;
+        transaction_mutex (transaction_mutex const & rhs) = delete;
+
+        transaction_mutex & operator= (transaction_mutex const & rhs) = delete;
+        transaction_mutex & operator= (transaction_mutex && rhs) noexcept = default;
 
         void lock () { rl_.lock (); }
         void unlock () { rl_.unlock (); }
