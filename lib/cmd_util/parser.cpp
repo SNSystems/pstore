@@ -46,6 +46,7 @@
 namespace pstore {
     namespace cmd_util {
         namespace cl {
+
             //*                               _                   *
             //*  _ __  __ _ _ _ ___ ___ _ _  | |__  __ _ ___ ___  *
             //* | '_ \/ _` | '_(_-</ -_) '_| | '_ \/ _` (_-</ -_) *
@@ -53,9 +54,9 @@ namespace pstore {
             //* |_|                                               *
             parser_base::~parser_base () noexcept = default;
 
-            void parser_base::add_literal_option (std::string const & name, int value,
+            void parser_base::add_literal_option (std::string const & name, int const value,
                                                   std::string const & description) {
-                literals_.push_back (literal{name, value, description});
+                literals_.emplace_back (literal{name, value, description});
             }
 
 
@@ -80,6 +81,6 @@ namespace pstore {
                 return just (v);
             }
 
-        } // namespace cl
-    }     // namespace cmd_util
-} // namespace pstore
+        } // end namespace cl
+    }     // end namespace cmd_util
+} // end namespace pstore

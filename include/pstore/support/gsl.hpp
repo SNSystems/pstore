@@ -412,13 +412,15 @@ namespace pstore {
             constexpr bool empty () const noexcept { return size () == 0; }
 
             // [span.elem], span element access
-            reference operator[] (index_type idx) const {
+            reference operator[] (index_type const idx) const {
                 assert (idx >= 0 && idx < storage_.size ());
                 return data ()[idx];
             }
 
-            constexpr reference at (index_type idx) const { return this->operator[] (idx); }
-            constexpr reference operator() (index_type idx) const { return this->operator[] (idx); }
+            constexpr reference at (index_type const idx) const { return this->operator[] (idx); }
+            constexpr reference operator() (index_type const idx) const {
+                return this->operator[] (idx);
+            }
             constexpr pointer data () const noexcept { return storage_.data (); }
 
             // [span.iter], span iterator support
