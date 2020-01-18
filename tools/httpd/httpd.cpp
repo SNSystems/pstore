@@ -93,7 +93,7 @@ int main (int argc, char * argv[]) {
 #endif // _WIN32
 
     PSTORE_TRY {
-        cl::ParseCommandLineOptions (
+        cl::parse_command_line_options (
             argc, argv,
             "pstore httpd: A basic HTTP/WS server for testing the pstore-httpd library.\n");
 

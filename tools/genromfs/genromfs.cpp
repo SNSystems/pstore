@@ -174,7 +174,7 @@ int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif
-    cl::ParseCommandLineOptions (argc, argv, "pstore romfs generation utility\n");
+    cl::parse_command_line_options (argc, argv, "pstore romfs generation utility\n");
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {

@@ -378,8 +378,8 @@ namespace pstore {
             /// arguments as either UTF-16 or MBCS strings and converts them to UTF-8 as expected
             /// by the rest of the code.
             template <typename CharType>
-            void ParseCommandLineOptions (int const argc, CharType * const argv[],
-                                          std::string const & overview) {
+            void parse_command_line_options (int const argc, CharType * const argv[],
+                                             std::string const & overview) {
                 std::vector<std::string> args;
                 args.reserve (argc);
                 std::transform (
@@ -391,8 +391,8 @@ namespace pstore {
                 }
             }
 #else
-            inline void ParseCommandLineOptions (int const argc, char * const argv[],
-                                                 std::string const & overview) {
+            inline void parse_command_line_options (int const argc, char * const argv[],
+                                                    std::string const & overview) {
                 if (!details::parse_command_line_options (argv, argv + argc, overview, out_stream,
                                                           error_stream)) {
                     std::exit (EXIT_FAILURE);

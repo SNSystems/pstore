@@ -51,15 +51,16 @@
 using namespace pstore::cmd_util;
 
 namespace {
+
     cl::opt<std::string> db_path (cl::positional,
                                   cl::desc ("Path of the pstore repository to be read."),
                                   cl::required);
 
-    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+    cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
         first_revision (cl::positional, cl::desc ("The first revision number (or 'HEAD')"),
                         cl::optional);
 
-    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+    cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
         second_revision (cl::positional, cl::desc ("The second revision number (or 'HEAD')"),
                          cl::optional);
 
@@ -69,11 +70,11 @@ namespace {
                        cl::cat (how_cat));
     cl::alias hex2 ("x", cl::desc ("Alias for --hex"), cl::aliasopt (hex));
 
-} // anonymous namespace
+} // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     using namespace pstore;
-    cl::ParseCommandLineOptions (argc, argv, "pstore diff utility\n");
+    cl::parse_command_line_options (argc, argv, "pstore diff utility\n");
 
     switches result;
     result.db_path = db_path.get ();

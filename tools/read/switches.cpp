@@ -52,7 +52,7 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::opt<pstore::cmd_util::revision_opt, false, cl::parser<std::string>>
+    cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
@@ -68,7 +68,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore read utility\n");
+    cl::parse_command_line_options (argc, argv, "pstore read utility\n");
 
     switches result;
     result.revision = static_cast<unsigned> (revision.get ());

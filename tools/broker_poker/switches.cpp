@@ -83,7 +83,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore broker poker\n");
+    cl::parse_command_line_options (argc, argv, "pstore broker poker\n");
 
     switches result;
     result.verb = verb.get ();

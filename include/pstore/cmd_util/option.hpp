@@ -193,10 +193,8 @@ namespace pstore {
             //* \___/ .__/\__| *
             //*     |_|        *
             /// \tparam T The type produced by this option.
-            /// \tparam ExternalStorage Included for compatibility with the LLVM command-line
-            /// parser. Has no effect.
             /// \tparam Parser The parser which will convert from the user's string to type T.
-            template <typename T, bool ExternalStorage = false, typename Parser = parser<T>>
+            template <typename T, typename Parser = parser<T>>
             class opt final : public option {
             public:
                 template <class... Mods>
@@ -233,20 +231,20 @@ namespace pstore {
                 Parser parser_;
             };
 
-            template <typename T, bool ExternalStorage, typename Parser>
-            bool opt<T, ExternalStorage, Parser>::takes_argument () const {
+            template <typename T, typename Parser>
+            bool opt<T, Parser>::takes_argument () const {
                 return true;
             }
-            template <typename T, bool ExternalStorage, typename Parser>
-            bool opt<T, ExternalStorage, Parser>::value (std::string const & v) {
+            template <typename T, typename Parser>
+            bool opt<T, Parser>::value (std::string const & v) {
                 if (auto m = parser_ (v)) {
                     value_ = m.value ();
                     return true;
                 }
                 return false;
             }
-            template <typename T, bool ExternalStorage, typename Parser>
-            parser_base * opt<T, ExternalStorage, Parser>::get_parser () {
+            template <typename T, typename Parser>
+            parser_base * opt<T, Parser>::get_parser () {
                 return &parser_;
             }
 

@@ -218,7 +218,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {
-        cl::ParseCommandLineOptions (argc, argv, "Tests the pstore index code");
+        cl::parse_command_line_options (argc, argv, "Tests the pstore index code");
 
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);

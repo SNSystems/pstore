@@ -78,7 +78,7 @@ namespace {
 int _tmain (int argc, TCHAR * argv[]) {
     int exit_code = EXIT_SUCCESS;
     try {
-        cl::ParseCommandLineOptions (argc, argv, "pstore broker server");
+        cl::parse_command_line_options (argc, argv, "pstore broker server");
 
         if (install_opt && remove_opt) {
             std::wcerr << L"--install and --remove cannot be specified together!\n";

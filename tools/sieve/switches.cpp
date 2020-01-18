@@ -74,7 +74,7 @@ namespace {
 } // end anonymous namespace
 
 user_options user_options::get (int argc, tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore prime number generator\n");
+    cl::parse_command_line_options (argc, argv, "pstore prime number generator\n");
 
     user_options result;
     result.output = output_opt.get ();

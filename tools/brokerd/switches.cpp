@@ -92,7 +92,7 @@ namespace {
 
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore broker agent");
+    cl::parse_command_line_options (argc, argv, "pstore broker agent");
 
     switches result;
     result.playback_path = path_option (playback_path);

@@ -97,7 +97,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::ParseCommandLineOptions (argc, argv, "pstore write utility\n");
+    cl::parse_command_line_options (argc, argv, "pstore write utility\n");
 
     auto const make_value_pair = [](std::string const & arg) { return to_value_pair (arg); };
 

@@ -176,7 +176,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
-        pstore::cmd_util::cl::ParseCommandLineOptions (
+        pstore::cmd_util::cl::parse_command_line_options (
             argc, argv, "pstore lock test: A simple test for the transaction lock.\n");
 
         say (out_stream, NATIVE_TEXT ("start"));
