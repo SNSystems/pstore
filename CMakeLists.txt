@@ -200,7 +200,6 @@ add_subdirectory (unittests) # Add the unit tests
 
 function (write_lit_config LIT_CONFIG_DIR)
     set (CONFIG_DIR "${LIT_CONFIG_DIR}")
-    message (STATUS "Writing LIT configuration to ${LIT_CONFIG_DIR}")
     configure_file ("${CMAKE_CURRENT_SOURCE_DIR}/lit.cfg.in"
                     "${LIT_CONFIG_DIR}/lit.cfg"
                     @ONLY)
