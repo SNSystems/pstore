@@ -94,10 +94,6 @@ namespace pstore {
                         : it_{std::move (it)}
                         , acc_{std::move (acc)} {}
 
-                difference_type operator- (pair_field_iterator const & other) const {
-                    return it_ - other.it_;
-                }
-
                 pair_field_iterator & operator+= (difference_type rhs) {
                     it_ += rhs;
                     return *this;
@@ -105,6 +101,10 @@ namespace pstore {
                 pair_field_iterator & operator-= (difference_type rhs) {
                     it_ -= rhs;
                     return *this;
+                }
+
+                difference_type operator- (pair_field_iterator const & other) const {
+                    return it_ - other.it_;
                 }
 
                 pair_field_iterator operator- (difference_type rhs) {

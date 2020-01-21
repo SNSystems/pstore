@@ -213,8 +213,9 @@ namespace pstore {
                                        align) {}
 
             generic_section (generic_section const &) = delete;
-            generic_section & operator= (generic_section const &) = delete;
             generic_section (generic_section &&) = delete;
+
+            generic_section & operator= (generic_section const &) = delete;
             generic_section & operator= (generic_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_; }

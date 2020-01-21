@@ -116,9 +116,12 @@ namespace pstore {
         public:
             explicit section_creation_dispatcher (section_kind const kind) noexcept
                     : kind_{kind} {}
-            virtual ~section_creation_dispatcher () noexcept;
             section_creation_dispatcher (section_creation_dispatcher const &) = delete;
+            section_creation_dispatcher (section_creation_dispatcher &&) = delete;
+            virtual ~section_creation_dispatcher () noexcept;
+
             section_creation_dispatcher & operator= (section_creation_dispatcher const &) = delete;
+            section_creation_dispatcher & operator= (section_creation_dispatcher &&) = delete;
 
             section_kind const & kind () const noexcept { return kind_; }
 

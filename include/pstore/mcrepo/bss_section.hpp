@@ -76,8 +76,9 @@ namespace pstore {
             }
 
             bss_section (bss_section const &) = delete;
-            bss_section & operator= (bss_section const &) = delete;
             bss_section (bss_section &&) = delete;
+
+            bss_section & operator= (bss_section const &) = delete;
             bss_section & operator= (bss_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_.value (); }

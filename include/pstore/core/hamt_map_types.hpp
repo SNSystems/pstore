@@ -655,12 +655,12 @@ namespace pstore {
                 /// A placement-new implementation which allocates sufficient storage for an
                 /// internal node with the number of children given by the size parameter.
                 void * operator new (std::size_t s, nchildren size);
-                void operator delete (void * p, nchildren size);
-
-                // Non-allocating placement allocation functions.
+                // Non-allocating placement allocation.
                 void * operator new (std::size_t const size, void * const ptr) noexcept {
                     return ::operator new (size, ptr);
                 }
+
+                void operator delete (void * p, nchildren size);
                 void operator delete (void * const p, void * const ptr) noexcept {
                     ::operator delete (p, ptr);
                 }

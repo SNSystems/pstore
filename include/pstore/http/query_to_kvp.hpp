@@ -125,12 +125,12 @@ namespace pstore {
 
             explicit insert_iterator (Container & container) noexcept
                     : container_{&container} {}
-            ~insert_iterator () noexcept = default;
             insert_iterator (insert_iterator const &) noexcept = default;
             insert_iterator (insert_iterator &&) noexcept = default;
+            ~insert_iterator () noexcept = default;
+
             insert_iterator & operator= (insert_iterator const &) noexcept = default;
             insert_iterator & operator= (insert_iterator &&) noexcept = default;
-
             insert_iterator & operator= (typename container_type::value_type const & value) {
                 container_->insert (value);
                 return *this;

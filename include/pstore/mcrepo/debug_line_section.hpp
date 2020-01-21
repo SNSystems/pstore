@@ -72,11 +72,6 @@ namespace pstore {
             extent<std::uint8_t> const & header_extent () const noexcept { return header_; }
             generic_section const & generic () const noexcept { return g_; }
 
-            /// \returns The number of bytes occupied by this section.
-            std::size_t size_bytes () const {
-                return offsetof (debug_line_section, g_) + g_.size_bytes ();
-            }
-
             unsigned align () const noexcept { return g_.align (); }
             // \returns The section's data payload.
             container<std::uint8_t> payload () const { return g_.payload (); }
@@ -84,6 +79,11 @@ namespace pstore {
             std::size_t size () const noexcept { return this->payload ().size (); }
             container<internal_fixup> ifixups () const { return g_.ifixups (); }
             container<external_fixup> xfixups () const { return g_.xfixups (); }
+
+            /// \returns The number of bytes occupied by this section.
+            std::size_t size_bytes () const {
+                return offsetof (debug_line_section, g_) + g_.size_bytes ();
+            }
 
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
             static std::size_t size_bytes (DataRange const & d, IFixupRange const & i,
