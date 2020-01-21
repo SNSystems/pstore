@@ -92,7 +92,8 @@ namespace pstore {
             this->update_master_pointers (old_num_regions);
         } else if (new_size < old_size) { // if shrinking the storage
             bool done = false;
-            // we now look backwards through the regions, discarding segments and regions introduced by this transaction
+            // we now look backwards through the regions, discarding segments and regions introduced
+            // by this transaction
             while (!done && (regions_.size () > 0)) {
                 if (regions_.back ()->offset () <= new_size) {
                     done = true;

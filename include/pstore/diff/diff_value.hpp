@@ -88,13 +88,10 @@ namespace pstore {
             public:
                 explicit revision_restorer (database & db)
                         : db_{db}
-                        , old_revision_{db.get_current_revision ()} {
-                }
-                revision_restorer (revision_restorer const & ) = delete;
-                revision_restorer & operator= (revision_restorer const & ) = delete;
-                ~revision_restorer () noexcept {
-                    PSTORE_NO_EX_ESCAPE(db_.sync (old_revision_));
-                }
+                        , old_revision_{db.get_current_revision ()} {}
+                revision_restorer (revision_restorer const &) = delete;
+                revision_restorer & operator= (revision_restorer const &) = delete;
+                ~revision_restorer () noexcept { PSTORE_NO_EX_ESCAPE (db_.sync (old_revision_)); }
 
             private:
                 database & db_;
@@ -119,7 +116,7 @@ namespace pstore {
 
             auto const differences = diff (db, *index, old_revision);
             std::transform (std::begin (differences), std::end (differences),
-                            std::back_inserter (members), [&db, &index](pstore::address addr) {
+                            std::back_inserter (members), [&db, &index] (pstore::address addr) {
                                 return dump::make_value (
                                     get_key (index->load_leaf_node (db, addr)));
                             });

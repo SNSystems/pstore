@@ -221,7 +221,7 @@ namespace pstore {
             error_or_n<IO, T> read_and_byte_swap (Reader & reader, IO io) {
                 auto v = T{0};
                 return reader.get_span (io, gsl::make_span (&v, 1)) >>=
-                       [](IO io2, gsl::span<T> const & l1) {
+                       [] (IO io2, gsl::span<T> const & l1) {
                            return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
             }
@@ -230,7 +230,7 @@ namespace pstore {
             error_or_n<IO, std::uint64_t> read_extended_payload_length (Reader & reader, IO io) {
                 auto length16n = T{0};
                 return reader.get_span (io, gsl::make_span (&length16n, 1)) >>=
-                       [](IO io2, gsl::span<T> const & l1) {
+                       [] (IO io2, gsl::span<T> const & l1) {
                            return error_or_n<IO, T>{in_place, io2, network_to_host (l1.at (0))};
                        };
             }
@@ -268,8 +268,8 @@ namespace pstore {
 
             return reader.get_span (
                        io, gsl::make_span (
-                               &res, 1)) >>= [&reader](IO io1,
-                                                       gsl::span<frame_fixed_layout> const & p1) {
+                               &res, 1)) >>= [&reader] (IO io1,
+                                                        gsl::span<frame_fixed_layout> const & p1) {
                 using return_type = error_or_n<IO, frame>;
 
                 if (p1.size () != 1) {
@@ -301,41 +301,41 @@ namespace pstore {
                     return return_type{ws_error::unmasked_frame};
                 }
 
-                return details::read_payload_length (
-                           reader, io1,
-                           part1.payload_length) >>= [&] (IO io2,
-                                                          std::uint64_t const payload_length) {
-                    log (pstore::logging::priority::info, "Payload length: ", payload_length);
-                    if ((payload_length & (std::uint64_t{1} << 63U)) != 0U) {
-                        // "The most significant bit MUST be 0."
-                        return return_type{ws_error::payload_too_long};
-                    }
+                return details::read_payload_length (reader, io1, part1.payload_length) >>=
+                       [&] (IO io2, std::uint64_t const payload_length) {
+                           log (pstore::logging::priority::info,
+                                "Payload length: ", payload_length);
+                           if ((payload_length & (std::uint64_t{1} << 63U)) != 0U) {
+                               // "The most significant bit MUST be 0."
+                               return return_type{ws_error::payload_too_long};
+                           }
 
-                    constexpr auto mask_length = 4U;
-                    std::array<std::uint8_t, mask_length> mask_arr{{0}};
-                    return reader.get_span (io2, gsl::make_span (mask_arr)) >>=
-                           [&](IO io3, gsl::span<std::uint8_t> const & mask) {
-                               if (mask.size () != mask_length) {
-                                   return return_type{ws_error::insufficient_data};
-                               }
+                           constexpr auto mask_length = 4U;
+                           std::array<std::uint8_t, mask_length> mask_arr{{0}};
+                           return reader.get_span (io2, gsl::make_span (mask_arr)) >>=
+                                  [&] (IO io3, gsl::span<std::uint8_t> const & mask) {
+                                      if (mask.size () != mask_length) {
+                                          return return_type{ws_error::insufficient_data};
+                                      }
 
-                               std::vector<std::uint8_t> payload (
-                                   std::vector<std::uint8_t>::size_type{payload_length},
-                                   std::uint8_t{0});
+                                      std::vector<std::uint8_t> payload (
+                                          std::vector<std::uint8_t>::size_type{payload_length},
+                                          std::uint8_t{0});
 
-                               return reader.get_span (io3, gsl::make_span (payload)) >>=
-                                      [&] (IO io4, gsl::span<std::uint8_t> const & payload_span) {
-                                          return details::decode_payload (payload_length, mask,
-                                                                          payload_span) >>=
-                                                 [&] (gsl::span<std::uint8_t> const &) {
-                                                     return return_type{in_place, io4,
-                                                                        frame{part1.opcode,
-                                                                              part1.fin,
-                                                                              std::move (payload)}};
-                                                 };
-                                      };
-                           };
-                };
+                                      return reader.get_span (io3, gsl::make_span (payload)) >>=
+                                             [&] (IO io4,
+                                                  gsl::span<std::uint8_t> const & payload_span) {
+                                                 return details::decode_payload (
+                                                            payload_length, mask, payload_span) >>=
+                                                        [&] (gsl::span<std::uint8_t> const &) {
+                                                            return return_type{
+                                                                in_place, io4,
+                                                                frame{part1.opcode, part1.fin,
+                                                                      std::move (payload)}};
+                                                        };
+                                             };
+                                  };
+                       };
             };
         }
 
@@ -346,7 +346,7 @@ namespace pstore {
             error_or<IO> send_extended_length_message (Sender sender, IO io,
                                                        frame_fixed_layout const & f,
                                                        gsl::span<std::uint8_t const> const & span) {
-                auto send_length = [&](IO io2) {
+                auto send_length = [&] (IO io2) {
                     auto const size = span.size ();
                     assert (
                         size >= 0 &&
@@ -355,7 +355,7 @@ namespace pstore {
                             size) <= std::numeric_limits<LengthType>::max ());
                     return send (sender, io2, static_cast<LengthType> (size));
                 };
-                auto send_payload = [&](IO io3) { return send (sender, io3, span); };
+                auto send_payload = [&] (IO io3) { return send (sender, io3, span); };
 
                 return (send (sender, io, f.raw) >>= send_length) >>= send_payload;
             }
@@ -378,7 +378,7 @@ namespace pstore {
             if (length < 126) {
                 f.payload_length = static_cast<std::uint16_t> (length);
                 return send (sender, io, f.raw) >>=
-                       [sender, &span](IO io2) { return send (sender, io2, span); };
+                       [sender, &span] (IO io2) { return send (sender, io2, span); };
             }
 
             if (length <= std::numeric_limits<std::uint16_t>::max ()) {
@@ -401,7 +401,8 @@ namespace pstore {
         // pong
         // ~~~~
         template <typename Sender, typename IO>
-        error_or<IO> pong (Sender const sender, IO const io, gsl::span<std::uint8_t const> const & payload) {
+        error_or<IO> pong (Sender const sender, IO const io,
+                           gsl::span<std::uint8_t const> const & payload) {
             log (logging::priority::info, "Sending pong. Length=", payload.size ());
             return send_message (sender, io, opcode::pong, payload);
         }
@@ -410,7 +411,8 @@ namespace pstore {
         // send_close_frame
         // ~~~~~~~~~~~~~~~~
         template <typename Sender, typename IO>
-        error_or<IO> send_close_frame (Sender const sender, IO const io, close_status_code const status) {
+        error_or<IO> send_close_frame (Sender const sender, IO const io,
+                                       close_status_code const status) {
             log (logging::priority::info,
                  "Sending close frame code=", static_cast<std::uint16_t> (status));
             PSTORE_STATIC_ASSERT ((
@@ -425,7 +427,7 @@ namespace pstore {
         template <typename Iterator>
         bool is_valid_utf8 (Iterator const first, Iterator const last) {
             utf::utf8_decoder decoder;
-            std::for_each (first, last, [&decoder](std::uint8_t const cu) { decoder.get (cu); });
+            std::for_each (first, last, [&decoder] (std::uint8_t const cu) { decoder.get (cu); });
             return decoder.is_well_formed ();
         }
 
@@ -469,8 +471,8 @@ namespace pstore {
         }
 
         template <typename Sender, typename IO>
-        bool check_message_complete (Sender const sender, IO const io, frame const & wsp, opcode & op,
-                                     std::vector<std::uint8_t> & payload) {
+        bool check_message_complete (Sender const sender, IO const io, frame const & wsp,
+                                     opcode & op, std::vector<std::uint8_t> & payload) {
             if (wsp.fin) {
                 // We've got the complete message. If this was a text message, we need to
                 // validate the UTF-8 that it contains.
@@ -489,7 +491,7 @@ namespace pstore {
                     std::string str;
                     std::transform (std::begin (payload), std::end (payload),
                                     std::back_inserter (str),
-                                    [](std::uint8_t const v) { return static_cast<char> (v); });
+                                    [] (std::uint8_t const v) { return static_cast<char> (v); });
                     log (logging::priority::info, "Received: ", str);
                 }
 

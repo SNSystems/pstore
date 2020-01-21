@@ -192,8 +192,7 @@ namespace pstore {
         ///                   will be modified to point at the new file address.
         /// \param generation  A revision number into which the index will be flushed.
         void flush_indices (::pstore::transaction_base & transaction,
-                            trailer::index_records_array * const locations,
-                            unsigned generation);
+                            trailer::index_records_array * const locations, unsigned generation);
 
     } // namespace index
 } // namespace pstore

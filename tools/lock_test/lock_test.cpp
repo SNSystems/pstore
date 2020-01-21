@@ -138,7 +138,7 @@ namespace {
     // ctor
     // ~~~~
     blocked_notifier::blocked_notifier ()
-            : thread_{[this]() { this->blocked (); }} {}
+            : thread_{[this] () { this->blocked (); }} {}
 
     // ~dtor
     // ~~~~~
@@ -155,14 +155,14 @@ namespace {
         std::unique_lock<std::mutex> lock{mut_};
         if (is_blocked_) {
             say (out_stream, NATIVE_TEXT ("blocked"));
-            cv_.wait (lock, [this]() { return !is_blocked_; });
+            cv_.wait (lock, [this] () { return !is_blocked_; });
         }
     }
 
     // not_blocked
     // ~~~~~~~~~~~
     void blocked_notifier::not_blocked () {
-        std::lock_guard<std::mutex> _{mut_}; //!OCLint(PH - meant to be unused)
+        std::lock_guard<std::mutex> _{mut_}; //! OCLint(PH - meant to be unused)
         is_blocked_ = false;
         cv_.notify_all ();
     }

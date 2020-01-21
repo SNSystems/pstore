@@ -66,8 +66,8 @@ namespace pstore {
         inline index_base::~index_base () {}
 
 #ifdef _WIN32
-#pragma warning(push)
-#pragma warning(disable : 4521)
+#    pragma warning(push)
+#    pragma warning(disable : 4521)
 #endif
         /// \brief A Hash array mapped trie index type for the pstore.
         ///
@@ -269,9 +269,7 @@ namespace pstore {
             }
 
             /// Returns the number of elements
-            std::size_t size () const noexcept {
-                return size_;
-            }
+            std::size_t size () const noexcept { return size_; }
             ///@}
 
             /// \name Modifiers
@@ -468,7 +466,7 @@ namespace pstore {
             key_equal equal_;
         };
 #ifdef _WIN32
-#pragma warning(pop)
+#    pragma warning(pop)
 #endif
 
         //*  _ _                 _               _                     *
@@ -481,8 +479,9 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         template <bool IsConstIterator>
-        auto hamt_map<KeyType, ValueType, Hash, KeyEqual>::iterator_base<IsConstIterator>::
-        operator++ () -> iterator_base & {
+        auto
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::iterator_base<IsConstIterator>::operator++ ()
+            -> iterator_base & {
             pos_.reset ();
             assert (!visited_parents_.empty ());
             this->increment_internal_node ();
@@ -886,7 +885,7 @@ namespace pstore {
 
             index_pointer result;
             bool key_exists = false;
-            if (node.is_leaf ()) {                                 // This node is a leaf node.
+            if (node.is_leaf ()) { // This node is a leaf node.
                 key_type const existing_key = get_key (transaction.db (), node.addr); // Read key.
                 if (equal_ (value.first, existing_key)) {
                     if (is_upsert) {

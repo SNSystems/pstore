@@ -114,13 +114,13 @@ TEST (Maybe, AssignValue) {
     maybe<value> m;
 
     // First assignment, m has no value
-    m.operator= (value{43});
+    m.operator=(value{43});
     EXPECT_TRUE (m.has_value ());
     EXPECT_TRUE (m);
     EXPECT_EQ (m.value (), value{43});
 
     // Second assignment, m holds a value
-    m.operator= (value{44});
+    m.operator=(value{44});
     EXPECT_TRUE (m.has_value ());
     EXPECT_TRUE (m);
     EXPECT_EQ (m.value (), value{44});

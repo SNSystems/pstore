@@ -75,7 +75,7 @@ TEST (ArrayStack, PushMoveValue) {
     stack.push (std::move (value));
 
     std::string const & top = stack.top ();
-    EXPECT_STREQ ("Hello", top.c_str());
+    EXPECT_STREQ ("Hello", top.c_str ());
 }
 
 TEST (ArrayStack, PushAndPop1Value) {

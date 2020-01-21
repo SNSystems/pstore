@@ -127,7 +127,7 @@ namespace pstore {
             return x.high () != 0U ? clz (x.high ()) : 64U + clz (x.low ());
         }
 #endif //_MSC_VER
-        ///@}
+       ///@}
 
         //*         _          *
         //*   ___  | |_   ____ *
@@ -162,7 +162,7 @@ namespace pstore {
             return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
         }
 #endif //_MSC_VER
-        ///@}
+       ///@}
 
 
 #ifdef _MSC_VER

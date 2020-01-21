@@ -53,7 +53,7 @@
 namespace {
 
     std::shared_ptr<char> new_shared (std::string const & s) {
-        auto result = std::shared_ptr<char> (new char[s.size ()], [](char * p) { delete[] p; });
+        auto result = std::shared_ptr<char> (new char[s.size ()], [] (char * p) { delete[] p; });
         std::copy (std::begin (s), std::end (s), result.get ());
         return result;
     }
@@ -65,7 +65,7 @@ namespace {
     struct string_maker<std::shared_ptr<CharType>> {
         std::shared_ptr<CharType> operator() (std::string const & str) const {
             auto ptr =
-                std::shared_ptr<char> (new char[str.length ()], [](char * p) { delete[] p; });
+                std::shared_ptr<char> (new char[str.length ()], [] (char * p) { delete[] p; });
             std::copy (std::begin (str), std::end (str), ptr.get ());
             return std::static_pointer_cast<CharType> (ptr);
         }
@@ -344,7 +344,7 @@ TEST (SStringView, Substr) {
 }
 
 TEST (SStringView, OperatorWrite) {
-    auto check = [](std::string const & str) {
+    auto check = [] (std::string const & str) {
         auto view = pstore::make_sstring_view (str.data (), str.length ());
         std::ostringstream stream;
         stream << view;

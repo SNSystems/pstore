@@ -168,7 +168,8 @@ namespace pstore {
 
             /// \brief Check that the file system's structures are intact.
             ///
-            /// Since the data is read-only there should be no need to call this function except as a belf-and-braces debug check.
+            /// Since the data is read-only there should be no need to call this function except as
+            /// a belf-and-braces debug check.
             bool fsck () const;
 
         private:

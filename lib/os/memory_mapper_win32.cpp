@@ -118,7 +118,7 @@ namespace pstore {
             raise (win32_erc{last_error}, "VirtualAlloc");
         }
 
-        auto deleter = [ptr](std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
+        auto deleter = [ptr] (std::uint8_t *) { ::VirtualFree (ptr, 0, MEM_RELEASE); };
         auto const mask = ~(std::uintptr_t{align} - 1);
         auto ptr_aligned = reinterpret_cast<std::uint8_t *> (
             (reinterpret_cast<std::uintptr_t> (ptr) + align - 1) & mask);
@@ -185,7 +185,7 @@ namespace pstore {
             raise (win32_erc{last_error}, message.str ());
         }
 
-        auto unmap_deleter = [](void * p) {
+        auto unmap_deleter = [] (void * p) {
             if (::UnmapViewOfFile (p) == 0) {
                 DWORD const last_error = ::GetLastError ();
                 raise (win32_erc{last_error}, "UnmapViewOfFile");

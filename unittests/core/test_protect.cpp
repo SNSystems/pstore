@@ -58,7 +58,7 @@ namespace {
 
     class fixed_page_size final : public pstore::system_page_size_interface {
     public:
-        MOCK_CONST_METHOD0 (get, unsigned());
+        MOCK_CONST_METHOD0 (get, unsigned ());
     };
 
 
@@ -68,7 +68,7 @@ namespace {
                      std::uint64_t length)
                 : pstore::in_memory_mapper (file, write_enabled, offset, length) {}
 
-        MOCK_METHOD2 (read_only, void(void * addr, std::size_t len));
+        MOCK_METHOD2 (read_only, void (void * addr, std::size_t len));
     };
 
 

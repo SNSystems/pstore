@@ -102,7 +102,7 @@ namespace {
 
     std::function<std::ostream &()> open_output_file (std::string const & path) {
         if (path == "-") {
-            return []() { return std::ref (std::cout); };
+            return [] () { return std::ref (std::cout); };
         }
 
         auto file = std::make_shared<std::ofstream> (
@@ -112,7 +112,7 @@ namespace {
             str << "Could not open " << pstore::quoted (path);
             pstore::raise (std::errc::no_such_file_or_directory, str.str ());
         }
-        return [file]() { return std::ref (*file); };
+        return [file] () { return std::ref (*file); };
     }
 
 } // anonymous namespace

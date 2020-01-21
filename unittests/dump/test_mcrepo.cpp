@@ -168,7 +168,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     std::array<pstore::typed_address<compilation_member>, 1> dependents{{addr}};
 
-    // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's various sections.
+    // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
+    // various sections.
     std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
     dispatchers.emplace_back (new generic_section_creation_dispatcher (data.kind, &data));
     dispatchers.emplace_back (new dependents_creation_dispatcher (
@@ -211,8 +212,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
                  ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "foo"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("linkage", ":", "internal"));
-    EXPECT_THAT (split_tokens (lines.at (line++)),
-                 ElementsAre ("visibility", ":", "default"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("visibility", ":", "default"));
 }
 
 TEST_F (MCRepoFixture, DumpCompilation) {
@@ -268,7 +268,7 @@ TEST_F (MCRepoFixture, DumpDebugLineHeader) {
     std::ostringstream out;
     pstore::dump::value_ptr addr =
         pstore::dump::make_index<pstore::trailer::indices::debug_line_header> (
-            *db_, [this](pstore::index::debug_line_header_index::value_type const & value) {
+            *db_, [this] (pstore::index::debug_line_header_index::value_type const & value) {
                 return pstore::dump::make_value (*this->db_, value, true);
             });
 
@@ -298,7 +298,8 @@ TEST_F (MCRepoFixture, DumpBssSection) {
             {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
 
         section_content & data = c.back ();
-        // Build the bss section's data, no internal and external fixups. (Note that this is used by the dispatcher and it doesn't end up in the resulting bss_section instance.)
+        // Build the bss section's data, no internal and external fixups. (Note that this is used by
+        // the dispatcher and it doesn't end up in the resulting bss_section instance.)
         data.data.assign ({0, 0, 0, 0});
 
         // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
@@ -311,11 +312,11 @@ TEST_F (MCRepoFixture, DumpBssSection) {
                                    pstore::make_pointee_adaptor (dispatchers.end ())));
         transaction.commit ();
         return f;
-    } ();
+    }();
 
     std::ostringstream out;
-    pstore::dump::value_ptr value = pstore::dump::make_fragment_value (
-        *db_, *frag, "machine-vendor-os", false /*hex mode?*/);
+    pstore::dump::value_ptr value =
+        pstore::dump::make_fragment_value (*db_, *frag, "machine-vendor-os", false /*hex mode?*/);
     value->write (out);
 
     auto const lines = split_lines (out.str ());

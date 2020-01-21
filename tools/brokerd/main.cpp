@@ -123,23 +123,23 @@ namespace {
         using namespace pstore;
         std::vector<std::future<void>> futures;
 
-        futures.push_back (create_thread ([&fifo, commands]() {
+        futures.push_back (create_thread ([&fifo, commands] () {
             thread_init ("command");
             commands->thread_entry (fifo);
         }));
 
-        futures.push_back (create_thread ([scav]() {
+        futures.push_back (create_thread ([scav] () {
             thread_init ("scavenger");
             scav->thread_entry ();
         }));
 
-        futures.push_back (create_thread ([]() {
+        futures.push_back (create_thread ([] () {
             thread_init ("gcwatch");
             broker::gc_process_watch_thread ();
         }));
 
         futures.push_back (create_thread (
-            [](httpd::server_status * const status) {
+            [] (httpd::server_status * const status) {
                 thread_init ("http");
                 pstore::httpd::channel_container channels{
                     {"commits",
@@ -154,7 +154,7 @@ namespace {
             http_status.get ()));
 
         futures.push_back (create_thread (
-            [](std::atomic<bool> * const done) {
+            [] (std::atomic<bool> * const done) {
                 thread_init ("uptime");
                 broker::uptime (done);
             },
@@ -235,7 +235,7 @@ int main (int argc, char * argv[]) {
                           http_status.get (), &uptime_done);
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
-                    futures.push_back (create_thread ([ctr, &fifo, &record_file, commands]() {
+                    futures.push_back (create_thread ([ctr, &fifo, &record_file, commands] () {
                         auto const name = "read"s + std::to_string (ctr);
                         threads::set_name (name.c_str ());
                         logging::create_log_stream ("broker." + name);

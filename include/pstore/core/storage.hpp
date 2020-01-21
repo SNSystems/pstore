@@ -266,7 +266,7 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (std::numeric_limits<std::size_t>::max () <=
                               std::numeric_limits<std::uint64_t>::max ());
         address::segment_type segment = addr.segment ();
-        PSTORE_STATIC_ASSERT (std::numeric_limits <decltype (segment)>::max () <= sat_elements);
+        PSTORE_STATIC_ASSERT (std::numeric_limits<decltype (segment)>::max () <= sat_elements);
         sat_entry const & segment_pointer = (*sat_)[segment];
 
         auto in_store_ptr =

@@ -99,7 +99,7 @@ namespace pstore {
             /// Helper to build a details::values by forwarding a variable number of arguments
             /// as an initializer list to the details::values constructor.
             template <typename... OptsTy>
-            details::values values (OptsTy && ...options) {
+            details::values values (OptsTy &&... options) {
                 return details::values{std::forward<OptsTy> (options)...};
             }
 

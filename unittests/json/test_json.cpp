@@ -47,8 +47,8 @@
 
 using namespace std::string_literals;
 using namespace pstore;
-using testing::StrictMock;
 using testing::DoubleEq;
+using testing::StrictMock;
 
 namespace {
 
@@ -229,7 +229,9 @@ namespace {
 
     class JsonBoolean : public Json {
     public:
-        JsonBoolean () : proxy_{callbacks_} {}
+        JsonBoolean ()
+                : proxy_{callbacks_} {}
+
     protected:
         StrictMock<mock_json_callbacks> callbacks_;
         callbacks_proxy<mock_json_callbacks> proxy_;
@@ -243,7 +245,7 @@ TEST_F (JsonBoolean, True) {
     json::parser<decltype (proxy_)> p = json::make_parser (proxy_);
     p.input ("true"s);
     p.eof ();
-    EXPECT_FALSE (p.has_error());
+    EXPECT_FALSE (p.has_error ());
 }
 
 TEST_F (JsonBoolean, False) {
@@ -254,7 +256,7 @@ TEST_F (JsonBoolean, False) {
     json::parser<decltype (proxy)> p = json::make_parser (proxy);
     p.input (" false "s);
     p.eof ();
-    EXPECT_FALSE (p.has_error());
+    EXPECT_FALSE (p.has_error ());
 }
 
 
@@ -384,7 +386,9 @@ namespace {
 
     class JsonArray : public ::testing::Test {
     public:
-        JsonArray () : proxy_{callbacks_} {}
+        JsonArray ()
+                : proxy_{callbacks_} {}
+
     protected:
         StrictMock<mock_json_callbacks> callbacks_;
         callbacks_proxy<mock_json_callbacks> proxy_;
@@ -587,7 +591,9 @@ namespace {
 
     class JsonObject : public testing::Test {
     public:
-        JsonObject () : proxy_{callbacks_} {}
+        JsonObject ()
+                : proxy_{callbacks_} {}
+
     protected:
         StrictMock<mock_json_callbacks> callbacks_;
         callbacks_proxy<mock_json_callbacks> proxy_;

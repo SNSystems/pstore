@@ -48,7 +48,7 @@
 #include "allocator.h"
 
 #ifndef CL_STANDARD_ONLY
-#define CL_STANDARD_ONLY (0)
+#    define CL_STANDARD_ONLY (0)
 #endif
 
 #if INSTRUMENT_ALLOCATIONS && !CL_STANDARD_ONLY

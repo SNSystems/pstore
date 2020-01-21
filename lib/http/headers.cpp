@@ -64,8 +64,8 @@ namespace {
             return false;
         }
         return std::equal (
-            lhs_first, lhs_last, rhs_first, [](char const a, char const b) noexcept {
-                auto const lower = [](char const c) noexcept {
+            lhs_first, lhs_last, rhs_first, [] (char const a, char const b) noexcept {
+                auto const lower = [] (char const c) noexcept {
                     return static_cast<char> (std::tolower (static_cast<unsigned char> (c)));
                 };
                 return lower (a) == lower (b);
@@ -123,7 +123,7 @@ namespace {
         split (value, std::back_inserter (strings), ',');
 
         for (auto const & str : strings) {
-            auto is_ws = [](char const c) { return pstore::isspace (c); };
+            auto is_ws = [] (char const c) { return pstore::isspace (c); };
             // Remove trailing whitespace.
             auto const end = std::find_if_not (str.rbegin (), str.rend (), is_ws).base ();
             // Skip leading whitespace.
@@ -143,7 +143,7 @@ namespace {
     }
 
     header_info sec_websocket_version (header_info hi, std::string const & value) {
-        auto str_to_num = [](std::string const & v) {
+        auto str_to_num = [] (std::string const & v) {
             auto pos = std::string::size_type{0};
             auto const last = v.length ();
             auto num = 0U;

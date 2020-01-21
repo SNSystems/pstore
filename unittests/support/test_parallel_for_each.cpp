@@ -62,11 +62,11 @@ namespace {
         }
 
         static container make_input (unsigned num) {
-            return build_vector (num, [](int c) { return c; });
+            return build_vector (num, [] (int c) { return c; });
         }
 
         static container make_expected (unsigned num) {
-            return build_vector (num, [](int c) { return c * 2; });
+            return build_vector (num, [] (int c) { return c * 2; });
         }
 
         static container run_for_each (container const & src);
@@ -81,10 +81,11 @@ namespace {
     auto ParallelForEach::run_for_each (container const & src) -> container {
         std::mutex mut;
         container out;
-        pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src), [&out, &mut](int v) {
-            std::lock_guard<std::mutex> lock (mut);
-            out.emplace_back (v * 2);
-        });
+        pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
+                                             [&out, &mut] (int v) {
+                                                 std::lock_guard<std::mutex> lock (mut);
+                                                 out.emplace_back (v * 2);
+                                             });
         std::sort (std::begin (out), std::end (out), std::less<int> ());
         return out;
     }
@@ -95,7 +96,7 @@ namespace {
     auto ParallelForEach::build_vector (unsigned num, UnaryFunction f) -> container {
         container v;
         auto count = 0;
-        std::generate_n (std::back_inserter (v), num, [&count, f]() { return f (++count); });
+        std::generate_n (std::back_inserter (v), num, [&count, f] () { return f (++count); });
         return v;
     }
 
@@ -141,10 +142,10 @@ TEST (ParallelForEachException, WorkerExceptionPropogates) {
     // Check that an exception throw in a worker thread fully propogates back to the caller.
 #if PSTORE_EXCEPTIONS
     class custom_exception : public std::exception {};
-    auto op = [&]() {
+    auto op = [&] () {
         std::array<int, 2> const src{{3, 5}};
         pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
-                                             [](int) { throw custom_exception{}; });
+                                             [] (int) { throw custom_exception{}; });
     };
     EXPECT_THROW (op (), custom_exception);
 #endif // PSTORE_EXCEPTIONS

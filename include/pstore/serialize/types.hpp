@@ -450,7 +450,7 @@ namespace pstore {
             read_uninit (std::forward<Archive> (archive), t2);
 
             // This object will destroy the remains of the T2 instance in uninit_buffer.
-            auto dtor = [](T2 * p) { p->~T2 (); };
+            auto dtor = [] (T2 * p) { p->~T2 (); };
             std::unique_ptr<T2, decltype (dtor)> d (&t2, dtor);
             return std::move (t2);
         }
@@ -539,7 +539,7 @@ namespace pstore {
             write (archive, static_cast<std::size_t> (distance));
 
             using value_type = typename std::iterator_traits<InputIterator>::value_type;
-            std::for_each (begin, end, [&archive](value_type const & value) {
+            std::for_each (begin, end, [&archive] (value_type const & value) {
                 write (std::forward<Archive> (archive), value);
             });
         }

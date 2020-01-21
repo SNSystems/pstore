@@ -947,7 +947,7 @@ namespace pstore {
                 -> maybe<std::tuple<unsigned, enum state>> {
 
                     return hex_value (code_point, hex) >>=
-                           [state](unsigned value) {
+                           [state] (unsigned value) {
                                assert (value <= std::numeric_limits<std::uint16_t>::max ());
                                auto next_state = state;
                                switch (state) {
@@ -970,10 +970,11 @@ namespace pstore {
 
             // [static]
             template <typename Callbacks>
-            auto string_matcher<Callbacks>::consume_escape_state (char32_t code_point, appender & app)
+            auto string_matcher<Callbacks>::consume_escape_state (char32_t code_point,
+                                                                  appender & app)
                 -> std::tuple<state, error_code> {
 
-                auto decode = [](char32_t cp) {
+                auto decode = [] (char32_t cp) {
                     state next_state = normal_char_state;
                     switch (cp) {
                     case '"': cp = '"'; break;
@@ -990,7 +991,7 @@ namespace pstore {
                     return just (std::make_tuple (cp, next_state));
                 };
 
-                auto append = [&app](std::tuple<char32_t, state> const & s) {
+                auto append = [&app] (std::tuple<char32_t, state> const & s) {
                     char32_t const cp = std::get<0> (s);
                     state const next_state = std::get<1> (s);
                     assert (next_state == normal_char_state || next_state == hex1_state);

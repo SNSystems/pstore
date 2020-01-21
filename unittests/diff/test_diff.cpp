@@ -117,7 +117,7 @@ namespace {
         std::vector<typename Index::value_type> values;
         std::transform (
             first, last, std::back_inserter (values),
-            [&db, &index](pstore::address addr) { return index.load_leaf_node (db, addr); });
+            [&db, &index] (pstore::address addr) { return index.load_leaf_node (db, addr); });
         return values;
     }
 

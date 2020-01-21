@@ -119,7 +119,7 @@ constexpr std::array<char, 8> fragment::fragment_signature_;
 std::shared_ptr<fragment const> fragment::load (pstore::database const & db,
                                                 pstore::extent<fragment> const & location) {
     return load_impl<std::shared_ptr<fragment const>> (
-        location, [&db](extent<fragment> const & x) { return db.getro (x); });
+        location, [&db] (extent<fragment> const & x) { return db.getro (x); });
 }
 
 // section_offset_is_valid [static]

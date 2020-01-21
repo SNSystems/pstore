@@ -48,11 +48,11 @@
 
 #ifdef _WIN32
 
-#include <sstream>
-#include <thread>
+#    include <sstream>
+#    include <thread>
 
-#include "pstore/support/error.hpp"
-#include "pstore/support/utf.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace broker {
@@ -67,11 +67,11 @@ namespace pstore {
             return std::string{R"(\\.\pipe\)"} + default_pipe_name;
         }
 
-#if 0
+#    if 0
         // create
         // ~~~~~~
         void fifo_path::create () {}
-#endif
+#    endif
 
         // open_impl
         // ~~~~~~~~~

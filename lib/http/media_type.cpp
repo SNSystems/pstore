@@ -81,13 +81,13 @@ namespace pstore {
 
             assert (std::is_sorted (
                 begin, end,
-                [](media_type_entry const & lhs, media_type_entry const & rhs) noexcept {
+                [] (media_type_entry const & lhs, media_type_entry const & rhs) noexcept {
                     return std::strcmp (lhs.name, rhs.name) < 0;
                 }));
 
             auto const pos = std::lower_bound (
                 begin, end, extension,
-                [](media_type_entry const & mte, gsl::czstring const ext) noexcept {
+                [] (media_type_entry const & mte, gsl::czstring const ext) noexcept {
                     return std::strcmp (mte.name, ext) < 0;
                 });
             return pos != end && std::strcmp (extension, pos->name) == 0

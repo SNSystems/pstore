@@ -50,8 +50,7 @@
 namespace {
 
     template <typename T>
-    class BitFieldAssignment : public ::testing::Test {
-    };
+    class BitFieldAssignment : public ::testing::Test {};
 
     template <typename Type, unsigned Index, unsigned Bits>
     struct param {

@@ -111,7 +111,7 @@ namespace {
         random_list l;
         random_number_generator random;
 
-        auto uint32_rnum = [&random]() {
+        auto uint32_rnum = [&random] () {
             return static_cast<std::uint64_t> (
                 std::llrint (random () * std::numeric_limits<std::uint32_t>::max ()));
         };
@@ -192,7 +192,7 @@ namespace {
     bool find (pstore::database const & db, pstore::index::fragment_index const & index,
                Map const & expected_results, std::string const & test_name) {
         std::atomic<bool> is_found (true);
-        auto check_key = [&db, &index, &test_name, &is_found](typename Map::value_type value) {
+        auto check_key = [&db, &index, &test_name, &is_found] (typename Map::value_type value) {
             auto it = index.find (db, value.first);
             if (it == index.cend (db)) {
                 print_cerr ("Test name:", test_name, " Error: ", value.first, ": not found");

@@ -69,7 +69,7 @@ namespace pstore {
             };
 
         } // end namespace cl
-    } // end namespace cmd_util
+    }     // end namespace cmd_util
 } // end namespace pstore
 
 #endif // PSTORE_CMD_UTIL_REVISION_OPT_HPP

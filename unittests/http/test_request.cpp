@@ -107,7 +107,7 @@ namespace {
 
     class mocked_header_handler : public header_handler {
     public:
-        MOCK_CONST_METHOD3 (call, int(int, std::string const &, std::string const &));
+        MOCK_CONST_METHOD3 (call, int (int, std::string const &, std::string const &));
     };
 
 } // end anonymous namespace
@@ -130,7 +130,7 @@ TEST (ReadHeaders, Common) {
     EXPECT_CALL (handler, call (2, "referer", "http://localhost:8080/")).WillOnce (Return (3));
     error_or_n<int, int> const res = pstore::httpd::read_headers (
         br, 0,
-        [&handler](int io, std::string const & key, std::string const & value) {
+        [&handler] (int io, std::string const & key, std::string const & value) {
             return handler.call (io, key, value);
         },
         0);

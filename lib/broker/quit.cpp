@@ -154,29 +154,29 @@ namespace pstore {
     X (sig_self_quit)
 
 #ifdef _WIN32
-#define SIGNALS COMMON_SIGNALS X (SIGBREAK)
+#    define SIGNALS COMMON_SIGNALS X (SIGBREAK)
 #else
-#define SIGNALS                                                                                    \
-    COMMON_SIGNALS                                                                                 \
-    X (SIGALRM)                                                                                    \
-    X (SIGBUS)                                                                                     \
-    X (SIGCHLD)                                                                                    \
-    X (SIGCONT)                                                                                    \
-    X (SIGHUP)                                                                                     \
-    X (SIGPIPE)                                                                                    \
-    X (SIGQUIT)                                                                                    \
-    X (SIGSTOP)                                                                                    \
-    X (SIGTSTP)                                                                                    \
-    X (SIGTTIN)                                                                                    \
-    X (SIGTTOU)                                                                                    \
-    X (SIGUSR1)                                                                                    \
-    X (SIGUSR2)                                                                                    \
-    X (SIGSYS)                                                                                     \
-    X (SIGTRAP)                                                                                    \
-    X (SIGURG)                                                                                     \
-    X (SIGVTALRM)                                                                                  \
-    X (SIGXCPU)                                                                                    \
-    X (SIGXFSZ)
+#    define SIGNALS                                                                                \
+        COMMON_SIGNALS                                                                             \
+        X (SIGALRM)                                                                                \
+        X (SIGBUS)                                                                                 \
+        X (SIGCHLD)                                                                                \
+        X (SIGCONT)                                                                                \
+        X (SIGHUP)                                                                                 \
+        X (SIGPIPE)                                                                                \
+        X (SIGQUIT)                                                                                \
+        X (SIGSTOP)                                                                                \
+        X (SIGTSTP)                                                                                \
+        X (SIGTTIN)                                                                                \
+        X (SIGTTOU)                                                                                \
+        X (SIGUSR1)                                                                                \
+        X (SIGUSR2)                                                                                \
+        X (SIGSYS)                                                                                 \
+        X (SIGTRAP)                                                                                \
+        X (SIGURG)                                                                                 \
+        X (SIGVTALRM)                                                                              \
+        X (SIGXCPU)                                                                                \
+        X (SIGXFSZ)
 #endif //_WIN32
 
 namespace {

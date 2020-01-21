@@ -125,7 +125,7 @@ namespace pstore {
             value[msg.part_no] = std::move (payload);
 
             if (was_missing) {
-                auto not_null = [](std::unique_ptr<std::string> const & str) {
+                auto not_null = [] (std::unique_ptr<std::string> const & str) {
                     return str.get () != nullptr;
                 };
                 if (std::all_of (std::begin (value), std::end (value), not_null)) {

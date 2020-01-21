@@ -80,78 +80,77 @@ namespace {
 
     // (dtor)
     // ~~~~~~
-    time_zone_setter::~time_zone_setter () noexcept {
-        PSTORE_TRY {
-            if (std::string const * const s = old_.get ()) {
-                time_zone_setter::setenv ("TZ", s->c_str ());
-            } else {
+    time_zone_setter::~time_zone_setter () noexcept {PSTORE_TRY{
+        if (std::string const * const s = old_.get ()){time_zone_setter::setenv ("TZ", s->c_str ());
+} // namespace
+else {
 #ifdef _WIN32
-                ::_putenv ("TZ=");
+    ::_putenv ("TZ=");
 #else
-                ::unsetenv ("TZ");
+    ::unsetenv ("TZ");
 #endif
-            }
-        } PSTORE_CATCH (..., {
-        })
-    }
+}
+}
+PSTORE_CATCH (..., {})
+}
 
-    // tz_value
-    // ~~~~~~~~
-    std::unique_ptr<std::string> time_zone_setter::tz_value () const {
-        char const * old = std::getenv ("TZ");
-        return std::unique_ptr<std::string> (old != nullptr ? new std::string{old} : nullptr);
-    }
+// tz_value
+// ~~~~~~~~
+std::unique_ptr<std::string> time_zone_setter::tz_value () const {
+    char const * old = std::getenv ("TZ");
+    return std::unique_ptr<std::string> (old != nullptr ? new std::string{old} : nullptr);
+}
 
-    // set
-    // ~~~
-    void time_zone_setter::set_tz (char const * tz) {
-        assert (tz != nullptr);
-        time_zone_setter::setenv ("TZ", tz);
-    }
+// set
+// ~~~
+void time_zone_setter::set_tz (char const * tz) {
+    assert (tz != nullptr);
+    time_zone_setter::setenv ("TZ", tz);
+}
 
-    // setenv
-    // ~~~~~~
-    void time_zone_setter::setenv (char const * name, char const * value) {
-        assert (name != nullptr && value != nullptr);
+// setenv
+// ~~~~~~
+void time_zone_setter::setenv (char const * name, char const * value) {
+    assert (name != nullptr && value != nullptr);
 #ifdef _WIN32
-        using ::pstore::utf::win32::to16;
-        if (errno_t const err = ::_wputenv_s (to16 (name).c_str (), to16 (value).c_str ())) {
-            raise (pstore::errno_erc{err}, "_wputenv_s");
-        }
-        ::_tzset ();
+    using ::pstore::utf::win32::to16;
+    if (errno_t const err = ::_wputenv_s (to16 (name).c_str (), to16 (value).c_str ())) {
+        raise (pstore::errno_erc{err}, "_wputenv_s");
+    }
+    ::_tzset ();
 #else
-        errno = 0;
-        if (::setenv (name, value, 1 /*overwrite*/) != 0) {
-            raise (pstore::errno_erc{errno}, "setenv");
-        }
-        ::tzset ();
+    errno = 0;
+    if (::setenv (name, value, 1 /*overwrite*/) != 0) {
+        raise (pstore::errno_erc{errno}, "setenv");
+    }
+    ::tzset ();
 #endif
+}
+
+
+//***************************************************
+//*   B a s i c L o g g e r T i m e F i x t u r e   *
+//***************************************************
+class BasicLoggerTimeFixture : public ::testing::Test {
+public:
+    std::array<char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
+    static constexpr unsigned const sign_index_ = 19;
+
+    // If the time zone offset is 0, 0he standard library could legimately describe that
+    // as either +0000 or -0000. Canonicalize here (to -0000).
+    void canonicalize_sign ();
+};
+
+// canonicalize_sign
+// ~~~~~~~~~~~~~~~~~
+void BasicLoggerTimeFixture::canonicalize_sign () {
+    static_assert (::pstore::logging::basic_logger::time_buffer_size >= sign_index_,
+                   "sign index is too large for time_buffer");
+    ASSERT_EQ ('\0', buffer_[::pstore::logging::basic_logger::time_buffer_size - 1]);
+    if (std::strcmp (&buffer_[sign_index_], "+0000") == 0) {
+        buffer_[sign_index_] = '-';
     }
-
-
-    //***************************************************
-    //*   B a s i c L o g g e r T i m e F i x t u r e   *
-    //***************************************************
-    class BasicLoggerTimeFixture : public ::testing::Test {
-    public:
-        std::array<char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
-        static constexpr unsigned const sign_index_ = 19;
-
-        // If the time zone offset is 0, 0he standard library could legimately describe that
-        // as either +0000 or -0000. Canonicalize here (to -0000).
-        void canonicalize_sign ();
-    };
-
-    // canonicalize_sign
-    // ~~~~~~~~~~~~~~~~~
-    void BasicLoggerTimeFixture::canonicalize_sign () {
-        static_assert (::pstore::logging::basic_logger::time_buffer_size >= sign_index_,
-                       "sign index is too large for time_buffer");
-        ASSERT_EQ ('\0', buffer_[::pstore::logging::basic_logger::time_buffer_size - 1]);
-        if (std::strcmp (&buffer_[sign_index_], "+0000") == 0) {
-            buffer_[sign_index_] = '-';
-        }
-    }
+}
 } // namespace
 
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
@@ -219,10 +218,8 @@ namespace {
     // (dtor)
     // ~~~~~~
     BasicLoggerThreadNameFixture::~BasicLoggerThreadNameFixture () {
-        PSTORE_TRY {
-            ::pstore::threads::set_name (old_name_.c_str ());
-        } PSTORE_CATCH (..., {
-        })
+        PSTORE_TRY { ::pstore::threads::set_name (old_name_.c_str ()); }
+        PSTORE_CATCH (..., {})
     }
 } // end anonymous namespace
 

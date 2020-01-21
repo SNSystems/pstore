@@ -101,8 +101,8 @@ TEST_F (ProcessFileName, BufferContentsWithInitialSize) {
 
 TEST_F (ProcessFileName, GetProcessPathAlwaysReturns0) {
     std::vector<char> buffer;
-    auto get_process_path = [](::pstore::gsl::span<char>) -> std::size_t { return 0; };
-    check_for_error ([&]() { pstore::process_file_name (get_process_path, buffer); },
+    auto get_process_path = [] (::pstore::gsl::span<char>) -> std::size_t { return 0; };
+    check_for_error ([&] () { pstore::process_file_name (get_process_path, buffer); },
                      pstore::error_code::unknown_process_path);
 }
 
@@ -118,8 +118,8 @@ namespace {
     };
     class sysctl_mock2 final : public sysctl_base {
     public:
-        MOCK_METHOD6 (sysctl, int(int const * name, unsigned int namelen, void * oldp,
-                                  std::size_t * oldlenp, void const * newp, std::size_t newlen));
+        MOCK_METHOD6 (sysctl, int (int const * name, unsigned int namelen, void * oldp,
+                                   std::size_t * oldlenp, void const * newp, std::size_t newlen));
     };
 
     class ProcessFileNameFreeBSD : public ::testing::Test {
@@ -132,8 +132,8 @@ namespace {
         ::pstore::gsl::span<int> command_;
 
         static auto bind (sysctl_mock2 * cb)
-            -> std::function<int(int const *, unsigned int, void *, std::size_t *, void const *,
-                                 std::size_t)> {
+            -> std::function<int (int const *, unsigned int, void *, std::size_t *, void const *,
+                                  std::size_t)> {
             using namespace std::placeholders;
             return std::bind (&sysctl_mock2::sysctl, cb, _1, _2, _3, _4, _5, _6);
         }
@@ -153,8 +153,8 @@ TEST_F (ProcessFileNameFreeBSD, CommandContents) {
         .WillRepeatedly (DoAll (Assign (&errno, ENOMEM), Return (-1)));
 
     // Behaviour for calls where the output buffer is large enough.
-    auto copy_string = [](int const *, unsigned int, void * oldp, std::size_t * oldlenp,
-                          void const *, std::size_t) {
+    auto copy_string = [] (int const *, unsigned int, void * oldp, std::size_t * oldlenp,
+                           void const *, std::size_t) {
         std::strncpy (static_cast<char *> (oldp), result, *oldlenp);
         *oldlenp = result_length;
     };
@@ -175,7 +175,7 @@ TEST_F (ProcessFileNameFreeBSD, RaisesError) {
         .WillRepeatedly (DoAll (Assign (&errno, EPERM), Return (-1)));
 
     using namespace std::placeholders;
-    auto fn = [this, &callback]() {
+    auto fn = [this, &callback] () {
         std::vector<char> buffer;
         ::pstore::freebsd::process_file_name (command_, ProcessFileNameFreeBSD::bind (&callback),
                                               buffer);
@@ -195,7 +195,7 @@ TEST_F (ProcessFileNameFreeBSD, AlwaysRaisesNoMem) {
 
     std::vector<char> buffer;
     check_for_error (
-        [&]() {
+        [&] () {
             pstore::freebsd::process_file_name (command_, ProcessFileNameFreeBSD::bind (&callback),
                                                 buffer);
         },
@@ -214,8 +214,8 @@ TEST_F (ProcessFileNameFreeBSD, BufferContents) {
         .WillRepeatedly (DoAll (Assign (&errno, ENOMEM), Return (-1)));
 
     // Behaviour for calls where the output buffer _is_ large enough.
-    auto copy_string = [](int const *, unsigned int, void * oldp, std::size_t * oldlenp,
-                          void const *, std::size_t) {
+    auto copy_string = [] (int const *, unsigned int, void * oldp, std::size_t * oldlenp,
+                           void const *, std::size_t) {
         std::strncpy (static_cast<char *> (oldp), result, *oldlenp);
         *oldlenp = std::strlen (result) + 1U;
     };
@@ -236,14 +236,14 @@ TEST_F (ProcessFileNameFreeBSD, LengthIncreasesOnEachIteration) {
     sysctl_mock2 callback;
 
     // Record the size of the output buffer in the 'lengths' container.
-    auto record_length = [&lengths](int const *, unsigned int, void *, std::size_t * oldlenp,
-                                    void const *, std::size_t) { lengths.push_back (*oldlenp); };
+    auto record_length = [&lengths] (int const *, unsigned int, void *, std::size_t * oldlenp,
+                                     void const *, std::size_t) { lengths.push_back (*oldlenp); };
 
     static constexpr auto const output_size = std::size_t{3};
 
     // Returns a string containing two characters (both MAXCHAR)
-    auto two_maxchars = [](int const *, unsigned int, void * oldp, std::size_t * oldlenp,
-                           void const *, std::size_t) {
+    auto two_maxchars = [] (int const *, unsigned int, void * oldp, std::size_t * oldlenp,
+                            void const *, std::size_t) {
         *oldlenp = output_size;
         auto out = static_cast<char *> (oldp);
         out[0] = out[1] = std::numeric_limits<char>::max ();

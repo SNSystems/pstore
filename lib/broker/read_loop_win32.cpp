@@ -48,7 +48,7 @@
 
 #ifdef _WIN32
 
-    // Standard includes
+// Standard includes
 #    include <algorithm>
 #    include <array>
 #    include <cstdio>
@@ -58,12 +58,12 @@
 #    include <sstream>
 #    include <utility>
 
-    // Platform includes
+// Platform includes
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN
 #    include <Windows.h>
 
-    // pstore includes
+// pstore includes
 #    include "pstore/broker/command.hpp"
 #    include "pstore/broker/globals.hpp"
 #    include "pstore/broker/intrusive_list.hpp"
@@ -106,7 +106,7 @@ namespace {
 
         if (error_text) {
             // The string returned by FormatMessage probably ends with a CR. Remove it.
-            auto is_space = [](wchar_t const c) {
+            auto is_space = [] (wchar_t const c) {
                 return c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v';
             };
             for (; size > 0 && is_space (error_text.get ()[size - 1]); --size) {

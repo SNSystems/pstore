@@ -49,9 +49,9 @@
 
 #ifndef _WIN32
 
-#include <unistd.h>
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/support/error.hpp"
+#    include <unistd.h>
+#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/support/error.hpp"
 
 namespace pstore {
     namespace broker {

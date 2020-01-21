@@ -54,13 +54,15 @@
 
 namespace {
 
-    auto make_pipe () -> pstore::broker::fifo_path::client_pipe { return pstore::broker::fifo_path::client_pipe{}; }
+    auto make_pipe () -> pstore::broker::fifo_path::client_pipe {
+        return pstore::broker::fifo_path::client_pipe{};
+    }
 
     class mock_writer : public pstore::broker::writer {
     public:
         mock_writer ()
                 : pstore::broker::writer (make_pipe ()) {}
-        MOCK_METHOD1 (write_impl, bool(pstore::broker::message_type const &));
+        MOCK_METHOD1 (write_impl, bool (pstore::broker::message_type const &));
     };
 
     class BrokerSendMessage : public ::testing::Test {

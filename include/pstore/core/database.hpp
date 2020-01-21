@@ -502,7 +502,7 @@ namespace pstore {
         file.seek (0);
         file.read (h);
 
-        auto const dtor = [](header * const p) { p->~header (); };
+        auto const dtor = [] (header * const p) { p->~header (); };
         std::unique_ptr<header, decltype (dtor)> deleter (h, dtor);
 
 #if PSTORE_SIGNATURE_CHECKS_ENABLED

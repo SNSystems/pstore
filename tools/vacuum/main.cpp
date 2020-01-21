@@ -182,7 +182,7 @@ int main (int argc, char * argv[]) {
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
         char const * what = ex.what ();
         error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
-                    << pstore::utf::to_native_string (what) << std::endl;
+                     << pstore::utf::to_native_string (what) << std::endl;
         pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
         exit_code = EXIT_FAILURE;
     })

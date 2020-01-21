@@ -80,7 +80,7 @@ namespace {
 
     shared_sstring_view SStringViewArchive::make_shared_sstring_view (char const * s) {
         auto const length = std::strlen (s);
-        auto ptr = std::shared_ptr<char> (new char[length], [](char * p) { delete[] p; });
+        auto ptr = std::shared_ptr<char> (new char[length], [] (char * p) { delete[] p; });
         std::copy (s, s + length, ptr.get ());
         return {ptr, length};
     }

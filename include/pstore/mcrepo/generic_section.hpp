@@ -275,9 +275,9 @@ namespace pstore {
                 std::uint32_t field32_ = 0;
                 /// The alignment of this section expressed as a power of two (i.e. 8 byte
                 /// alignment is expressed as an align_ value of 3).
-                bit_field <std::uint32_t, 0, 8> align_;
+                bit_field<std::uint32_t, 0, 8> align_;
                 /// The number of internal fixups.
-                bit_field <std::uint32_t, 8, 24> num_ifixups_;
+                bit_field<std::uint32_t, 8, 24> num_ifixups_;
             };
             /// The number of external fixups in this section.
             std::uint32_t num_xfixups_ = 0;
@@ -340,7 +340,7 @@ namespace pstore {
             }
             if (i.first != i.second) {
                 auto * iout = aligned_ptr<internal_fixup> (p);
-                std::for_each (i.first, i.second, [&iout](internal_fixup const & ifx) {
+                std::for_each (i.first, i.second, [&iout] (internal_fixup const & ifx) {
                     new (iout) internal_fixup (ifx);
                     ++iout;
                 });
@@ -350,7 +350,7 @@ namespace pstore {
             }
             if (x.first != x.second) {
                 auto * xout = aligned_ptr<external_fixup> (p);
-                std::for_each (x.first, x.second, [&xout](external_fixup const & xfx) {
+                std::for_each (x.first, x.second, [&xout] (external_fixup const & xfx) {
                     new (xout) external_fixup (xfx);
                     ++xout;
                 });
@@ -393,9 +393,7 @@ namespace pstore {
 
         // num_ifixups
         // ~~~~~~~~~~~
-        inline std::uint32_t generic_section::num_ifixups () const noexcept {
-            return num_ifixups_;
-        }
+        inline std::uint32_t generic_section::num_ifixups () const noexcept { return num_ifixups_; }
 
         struct section_content {
             section_content (section_kind const kind_, std::uint8_t const align_) noexcept

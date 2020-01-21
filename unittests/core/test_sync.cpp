@@ -183,7 +183,7 @@ TEST_F (SyncFixture, SyncBetweenVersions) {
 
 TEST_F (SyncFixture, SyncToBadVersions) {
 
-    check_for_error ([this]() { db_->sync (1); }, pstore::error_code::unknown_revision);
+    check_for_error ([this] () { db_->sync (1); }, pstore::error_code::unknown_revision);
 
     {
         transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
@@ -197,5 +197,5 @@ TEST_F (SyncFixture, SyncToBadVersions) {
         t2.commit ();
     }
 
-    check_for_error ([this]() { db_->sync (3); }, pstore::error_code::unknown_revision);
+    check_for_error ([this] () { db_->sync (3); }, pstore::error_code::unknown_revision);
 }

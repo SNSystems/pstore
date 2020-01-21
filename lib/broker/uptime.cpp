@@ -66,7 +66,7 @@ namespace pstore {
                 std::this_thread::sleep_until (until);
                 ++seconds;
 
-                uptime_channel.publish ([seconds]() {
+                uptime_channel.publish ([seconds] () {
                     std::ostringstream os;
                     os << "{ \"uptime\": " << seconds << " }";
                     std::string const & str = os.str ();

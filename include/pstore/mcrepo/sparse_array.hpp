@@ -598,7 +598,7 @@ namespace pstore {
         BitmapType sparse_array<ValueType, BitmapType>::bitmap (InputIterator first,
                                                                 InputIterator last) {
             using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
-            auto op = [](BitmapType mm, iter_value_type v) {
+            auto op = [] (BitmapType mm, iter_value_type v) {
                 auto idx = static_cast<unsigned> (v);
                 assert (idx >= 0 && idx < max_size ());
                 auto const mask = BitmapType{1U} << idx;

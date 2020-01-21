@@ -44,7 +44,7 @@
 #include "pstore/broker_intf/wsa_startup.hpp"
 
 #ifdef _WIN32
-#include <Winsock2.h>
+#    include <Winsock2.h>
 
 namespace pstore {
     wsa_startup::~wsa_startup () {

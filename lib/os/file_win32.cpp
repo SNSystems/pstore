@@ -133,7 +133,7 @@ namespace {
         unsigned tries = 10;
         while (tries-- > 0) {
             std::string const path =
-                name_from_template (tmpl, [](unsigned max) { return rng.get (max); });
+                name_from_template (tmpl, [] (unsigned max) { return rng.get (max); });
             HANDLE const handle = create_new_file (path, is_temporary);
             // create_new_file() returns INVALID_HANDLE_VALUE if the file exists;
             // we dream up a new name and try again.
@@ -299,7 +299,7 @@ namespace pstore {
         std::size_t file_handle::read_buffer (gsl::not_null<void *> buffer, std::size_t size) {
             this->ensure_open ();
 
-            auto reader = [this](void * ptr, DWORD num_to_read) -> DWORD {
+            auto reader = [this] (void * ptr, DWORD num_to_read) -> DWORD {
                 auto num_read = DWORD{0};
                 BOOL ok = ::ReadFile (file_, ptr, num_to_read, &num_read, nullptr /*overlapped*/);
                 if (!ok) {
@@ -319,7 +319,7 @@ namespace pstore {
         void file_handle::write_buffer (gsl::not_null<void const *> buffer, std::size_t size) {
             this->ensure_open ();
 
-            auto writer = [this](std::uint8_t const * ptr, DWORD num_to_write) -> DWORD {
+            auto writer = [this] (std::uint8_t const * ptr, DWORD num_to_write) -> DWORD {
                 auto num_written = DWORD{0};
                 BOOL ok = ::WriteFile (file_, ptr, num_to_write, &num_written,
                                        nullptr /* not overlapped*/);
@@ -482,7 +482,7 @@ namespace pstore {
                 raise (win32_erc{last_error}, str.str ());
             }
 
-            auto compare = [](FILETIME const & lhs, FILETIME const & rhs) {
+            auto compare = [] (FILETIME const & lhs, FILETIME const & rhs) {
                 return std::make_pair (lhs.dwHighDateTime, lhs.dwLowDateTime) <
                        std::make_pair (rhs.dwHighDateTime, rhs.dwLowDateTime);
             };

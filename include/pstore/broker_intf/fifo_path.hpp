@@ -92,7 +92,7 @@ namespace pstore {
             };
 #endif
             enum class operation { open, wait };
-            using update_callback = std::function<void(operation)>;
+            using update_callback = std::function<void (operation)>;
             static constexpr void default_update_cb (operation const) noexcept {}
             static constexpr unsigned infinite_retries = std::numeric_limits<unsigned>::max ();
 

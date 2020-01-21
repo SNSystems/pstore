@@ -108,14 +108,14 @@ namespace {
         // allocation being required when the vector is resized. In typical use, the number of
         // elements in the output vector will likely be small (less than round_to?)
         constexpr auto round_to = std::size_t{8};
-        auto const roundup = [](std::size_t v, std::size_t m) { return v + (m - v % m); };
+        auto const roundup = [] (std::size_t v, std::size_t m) { return v + (m - v % m); };
 
         v->clear ();
         v->reserve (roundup (processes.size () + 1U, round_to));
         v->push_back (cv.wait_descriptor ().native_handle ());
         std::transform (
             processes.right_begin (), processes.right_end (), std::back_inserter (*v),
-            [](pstore::broker::process_identifier const & process) { return process.get (); });
+            [] (pstore::broker::process_identifier const & process) { return process.get (); });
     }
 
 } // end anonymous namespace

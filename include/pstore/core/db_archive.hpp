@@ -109,12 +109,13 @@ namespace pstore {
             class database_writer final
                     : public writer_base<details::database_writer_policy<Transaction>> {
                 using policy = details::database_writer_policy<Transaction>;
+
             public:
                 /// \brief Constructs the writer using the transaction.
                 /// \param transaction The active transaction to the store to which the
                 ///                    database_writer will write.
                 explicit database_writer (Transaction & transaction)
-                        : writer_base<policy> (policy {transaction}) {}
+                        : writer_base<policy> (policy{transaction}) {}
             };
 
             /// A convenience function which simplifies the construction of a database_writer

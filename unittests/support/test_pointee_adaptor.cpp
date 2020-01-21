@@ -127,8 +127,8 @@ TEST_F (PointeeAdaptor, Relational) {
 TEST_F (PointeeAdaptor, UniquePtr) {
     // Test usage with a container of smart (rather than raw) pointers.
     std::vector<std::unique_ptr<int>> v;
-    v.emplace_back (new int(1));
-    v.emplace_back (new int(2));
+    v.emplace_back (new int (1));
+    v.emplace_back (new int (2));
 
     std::vector<int> out;
     std::copy (pstore::make_pointee_adaptor (std::begin (v)),

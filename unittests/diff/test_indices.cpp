@@ -143,7 +143,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
         t2.commit ();
     }
 
-    auto check = [](std::ostringstream & out, char const * name) {
+    auto check = [] (std::ostringstream & out, char const * name) {
         auto const lines = split_lines (out.str ());
         ASSERT_EQ (3U, lines.size ());
 
@@ -200,7 +200,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
         t2.commit ();
     }
 
-    auto check = [](std::ostringstream & out, char const * name) {
+    auto check = [] (std::ostringstream & out, char const * name) {
         auto const lines = split_lines (out.str ());
         ASSERT_EQ (4U, lines.size ());
 
@@ -213,7 +213,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
         auto line4 = split_tokens (lines.at (line++));
         ASSERT_EQ (line4.size (), 2U);
 
-        std::array <std::string, 2> const actual_prefix{{line3[0], line4[0]}};
+        std::array<std::string, 2> const actual_prefix{{line3[0], line4[0]}};
         EXPECT_THAT (actual_prefix, Each ("-"));
         std::array<std::string, 2> const actual_keys{{line3[1], line4[1]}};
         EXPECT_THAT (actual_keys, UnorderedElementsAre ("key1", "key2"));
@@ -253,7 +253,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
         t1.commit ();
     }
 
-    auto check = [](std::ostringstream & out, char const * name) {
+    auto check = [] (std::ostringstream & out, char const * name) {
         auto const lines = split_lines (out.str ());
         ASSERT_EQ (2U, lines.size ());
 

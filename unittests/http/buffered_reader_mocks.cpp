@@ -62,19 +62,20 @@ refiller::~refiller () noexcept = default;
 
 
 refiller_function refiller::refill_function () const {
-    return [this](int io, pstore::gsl::span<std::uint8_t> const & s) { return this->fill (io, s); };
+    return
+        [this] (int io, pstore::gsl::span<std::uint8_t> const & s) { return this->fill (io, s); };
 }
 
 /// Returns a function which which simply returns end-of-stream when invoked.
 refiller_function eof () {
-    return [](int io, pstore::gsl::span<std::uint8_t> const & s) {
+    return [] (int io, pstore::gsl::span<std::uint8_t> const & s) {
         return refiller_result_type{pstore::in_place, io + 1, s.begin ()};
     };
 }
 
 /// Returns a function which will yield the bytes as its argument.
 refiller_function yield_bytes (pstore::gsl::span<std::uint8_t const> const & v) {
-    return [v](int io, pstore::gsl::span<std::uint8_t> const & s) {
+    return [v] (int io, pstore::gsl::span<std::uint8_t> const & s) {
         assert (s.size () > 0 && v.size () <= s.size ());
         return refiller_result_type{pstore::in_place, io + 1,
                                     std::copy (v.begin (), v.end (), s.begin ())};
@@ -83,11 +84,11 @@ refiller_function yield_bytes (pstore::gsl::span<std::uint8_t const> const & v) 
 
 /// Returns a function which will yield the string passed as its argument.
 refiller_function yield_string (std::string const & str) {
-    return [str](int io, pstore::gsl::span<std::uint8_t> const & s) {
+    return [str] (int io, pstore::gsl::span<std::uint8_t> const & s) {
         assert (str.length () <= pstore::unsigned_cast (s.size ()));
         return refiller_result_type{
             pstore::in_place, io + 1,
-            std::transform (str.begin (), str.end (), s.begin (), [](std::uint8_t v) {
+            std::transform (str.begin (), str.end (), s.begin (), [] (std::uint8_t v) {
                 assert (v < 128);
                 return static_cast<char> (v);
             })};

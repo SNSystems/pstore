@@ -217,6 +217,6 @@ namespace pstore {
                 }
 
             } // end namespace details
-        } // end namespace cl
-    }     // end namespace cmd_util
+        }     // end namespace cl
+    }         // end namespace cmd_util
 } // end namespace pstore

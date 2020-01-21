@@ -99,7 +99,7 @@ namespace {
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     cl::parse_command_line_options (argc, argv, "pstore write utility\n");
 
-    auto const make_value_pair = [](std::string const & arg) { return to_value_pair (arg); };
+    auto const make_value_pair = [] (std::string const & arg) { return to_value_pair (arg); };
 
     switches result;
 
@@ -114,7 +114,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     std::transform (std::begin (add_file), std::end (add_file), std::back_inserter (result.files),
                     make_value_pair);
     std::transform (std::begin (files), std::end (files), std::back_inserter (result.files),
-                    [](std::string const & path) { return std::make_pair (path, path); });
+                    [] (std::string const & path) { return std::make_pair (path, path); });
 
     return {result, EXIT_SUCCESS};
 }

@@ -118,9 +118,7 @@ namespace pstore {
             return gc;
         }
 
-        void gc_process_watch_thread () {
-            getgc ().watcher ();
-        }
+        void gc_process_watch_thread () { getgc ().watcher (); }
 
         void start_vacuum (std::string db_path) { getgc ().start_vacuum (std::move (db_path)); }
 

@@ -122,7 +122,7 @@ namespace {
         public:
             using result_type = pstore::serialize::archive::void_type;
             MOCK_METHOD1 (write, result_type (simple_struct const &));
-            MOCK_METHOD1 (read, void(simple_struct &));
+            MOCK_METHOD1 (read, void (simple_struct &));
         };
     };
 } // namespace
@@ -184,7 +184,7 @@ namespace {
         public:
             using result_type = pstore::serialize::archive::void_type;
             MOCK_METHOD1 (writen, result_type (pstore::gsl::span<simple_struct>));
-            MOCK_METHOD1 (readn, void(pstore::gsl::span<simple_struct>));
+            MOCK_METHOD1 (readn, void (pstore::gsl::span<simple_struct>));
         };
     };
 } // namespace
@@ -256,7 +256,7 @@ namespace {
 
         class archive_type : public pstore::serialize::archive::writer_base<mock_fallback_policy> {
         public:
-            MOCK_METHOD1 (get, void(int &));
+            MOCK_METHOD1 (get, void (int &));
         };
     };
 } // namespace
@@ -303,12 +303,12 @@ namespace {
             using result_type = pstore::serialize::archive::void_type;
 
             MOCK_METHOD1 (put, result_type (int const &));
-            MOCK_METHOD1 (get, void(int &));
+            MOCK_METHOD1 (get, void (int &));
 
             // The span methods. We can't mock the template function directly so calls
             // are forwarded to the mock (get/putn_mock) from the real thing (getn/putn).
             MOCK_METHOD1 (putn_mock, result_type (::pstore::gsl::span<int>));
-            MOCK_METHOD1 (getn_mock, void(::pstore::gsl::span<int>));
+            MOCK_METHOD1 (getn_mock, void (::pstore::gsl::span<int>));
 
             template <typename SpanType>
             result_type putn (SpanType span) {
@@ -364,9 +364,10 @@ TEST_F (ArchiveSpan, ReadSpan) {
     EXPECT_CALL (archive, put (_)).Times (0);
     EXPECT_CALL (archive, putn_mock (_)).Times (0);
     EXPECT_CALL (archive, get (_)).Times (0);
-    EXPECT_CALL (archive, getn_mock (_)).WillOnce (Invoke ([expected](::pstore::gsl::span<int> sp) {
-        std::copy (std::begin (expected), std::end (expected), std::begin (sp));
-    }));
+    EXPECT_CALL (archive, getn_mock (_))
+        .WillOnce (Invoke ([expected] (::pstore::gsl::span<int> sp) {
+            std::copy (std::begin (expected), std::end (expected), std::begin (sp));
+        }));
 
     std::array<int, 3> arr;
     pstore::serialize::read (archive, pstore::gsl::make_span (arr));

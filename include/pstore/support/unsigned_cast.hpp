@@ -59,7 +59,7 @@ namespace pstore {
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
     constexpr auto unsigned_cast (T const value) noexcept -> typename unsigned_castable<T>::type {
         assert (value >= T{0});
-        return static_cast <typename unsigned_castable<T>::type> (value);
+        return static_cast<typename unsigned_castable<T>::type> (value);
     }
 
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
@@ -67,7 +67,7 @@ namespace pstore {
         if (value < 0) {
             raise (std::errc::invalid_argument, "bad cast to unsigned");
         }
-        return unsigned_cast(value);
+        return unsigned_cast (value);
     }
 
 } // end namespace pstore

@@ -254,11 +254,11 @@ namespace pstore {
     // ~~~~~~~
     template <typename ConditionVariable>
     void channel<ConditionVariable>::publish (std::string const & message) {
-        this->publish ([&message]() { return message; });
+        this->publish ([&message] () { return message; });
     }
     template <typename ConditionVariable>
     void channel<ConditionVariable>::publish (char const * message) {
-        this->publish ([&message]() { return std::string{message}; });
+        this->publish ([&message] () { return std::string{message}; });
     }
 
     template <typename ConditionVariable>

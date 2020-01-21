@@ -142,7 +142,7 @@ namespace pstore {
 #ifdef _WIN32
         if (access_tick_enabled) {
             heartbeat_ = heartbeat::get ();
-            heartbeat_->attach (heartbeat::to_key_type (this), [this](heartbeat::key_type) {
+            heartbeat_->attach (heartbeat::to_key_type (this), [this] (heartbeat::key_type) {
                 this->get_shared ()->time = std::time (nullptr);
             });
         }
@@ -381,7 +381,7 @@ namespace pstore {
                                  bool const writable) const -> std::shared_ptr<void const> {
         // The deleter is called when the shared pointer that we're about to return is
         // released.
-        auto deleter = [this, addr, size, writable](std::uint8_t * const p) {
+        auto deleter = [this, addr, size, writable] (std::uint8_t * const p) {
             if (writable) {
                 // Check that this code is not trying to write back to read-only storage. This error
                 // can occur if a non-const pointer is being destroyed after the containing
@@ -392,8 +392,8 @@ namespace pstore {
                 // modified) contents back to the data store.
                 storage_.copy<storage::copy_to_store_traits> (
                     addr, size, p,
-                    [](std::uint8_t * const dest, std::uint8_t const * const src,
-                       std::size_t const n) { std::memcpy (dest, src, n); });
+                    [] (std::uint8_t * const dest, std::uint8_t const * const src,
+                        std::size_t const n) { std::memcpy (dest, src, n); });
             }
             delete[](p);
         };
@@ -407,9 +407,8 @@ namespace pstore {
             // Copy from the data store's regions to the newly allocated memory block.
             storage_.copy<storage::copy_from_store_traits> (
                 addr, size, result.get (),
-                [](std::uint8_t const * const src, std::uint8_t * const dest, std::size_t const n) {
-                    std::memcpy (dest, src, n);
-                });
+                [] (std::uint8_t const * const src, std::uint8_t * const dest,
+                    std::size_t const n) { std::memcpy (dest, src, n); });
         }
         return std::static_pointer_cast<void const> (result);
     }

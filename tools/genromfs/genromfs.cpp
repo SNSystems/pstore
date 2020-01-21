@@ -155,15 +155,16 @@ namespace {
     std::ostream & write_definition (std::ostream & os, std::string const & var_name,
                                      std::string const & root) {
         auto const start = for_each_namespace (
-            var_name, [&os](std::string const & ns) { os << "namespace " << ns << " {\n"; });
+            var_name, [&os] (std::string const & ns) { os << "namespace " << ns << " {\n"; });
 
         auto const name = var_name.substr (start);
         if (name.length () == 0) {
             pstore::raise (genromfs_erc::empty_name_component);
         }
         os << "::pstore::romfs::romfs " << name << " (&" << root << ");\n";
-        for_each_namespace (
-            var_name, [&os](std::string const & ns) { os << "} // end namespace " << ns << '\n'; });
+        for_each_namespace (var_name, [&os] (std::string const & ns) {
+            os << "} // end namespace " << ns << '\n';
+        });
         return os;
     }
 

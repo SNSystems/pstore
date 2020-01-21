@@ -221,7 +221,7 @@ TEST (SmallVector, IteratorNonConstReverse) {
 TEST (SmallVector, IteratorConstReverse) {
     // Wrap the buffer construction code in a lambda to hide the non-const
     // small_vector instance.
-    auto const & cbuffer = []() {
+    auto const & cbuffer = [] () {
         pstore::small_vector<int, 4> buffer (std::size_t{4});
         std::iota (std::begin (buffer), std::end (buffer), 42); // fill with increasing values
         return buffer;

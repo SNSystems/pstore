@@ -144,7 +144,7 @@ TEST_F (StringWriter, ReadMaxTwoByteLengthCharString) {
         auto output_it = std::back_inserter (bytes_);
         pstore::varint::encode (src_length, output_it);
         std::generate_n (output_it, src_length,
-                         [src_char]() { return static_cast<std::uint8_t> (src_char); });
+                         [src_char] () { return static_cast<std::uint8_t> (src_char); });
     }
 
     auto archive = pstore::serialize::archive::make_reader (std::begin (writer_));
@@ -163,7 +163,7 @@ TEST_F (StringWriter, ReadThreeByteLengthCharString) {
         auto output_it = std::back_inserter (bytes_);
         pstore::varint::encode (src_length, output_it);
         std::generate_n (output_it, src_length,
-                         [src_char]() { return static_cast<std::uint8_t> (src_char); });
+                         [src_char] () { return static_cast<std::uint8_t> (src_char); });
     }
 
     auto archive = pstore::serialize::archive::make_reader (std::begin (writer_));
@@ -215,7 +215,7 @@ namespace pstore {
             template <typename Archive>
             static void read (Archive && archive, value_type & out) {
                 new (&out) value_type;
-                auto inserter = [&out](int v) { out.insert (v); };
+                auto inserter = [&out] (int v) { out.insert (v); };
                 container_archive_helper<value_type>::read (std::forward<Archive> (archive),
                                                             inserter);
             }
@@ -309,7 +309,7 @@ namespace pstore {
             template <typename Archive>
             static void read (Archive && archive, value_type & out) {
                 new (&out) value_type;
-                auto inserter = [&out](MapWriter::map_type::value_type const & v) {
+                auto inserter = [&out] (MapWriter::map_type::value_type const & v) {
                     out.insert (v);
                 };
                 return container_archive_helper<value_type>::read (std::forward<Archive> (archive),

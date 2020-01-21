@@ -57,10 +57,10 @@
 #include "pstore/support/portab.hpp"
 
 #if defined(_WIN32)
-#define WIN32_LEAN_AND_MEAN
-#include <Rpc.h>
+#    define WIN32_LEAN_AND_MEAN
+#    include <Rpc.h>
 #elif defined(__APPLE__)
-#include <uuid/uuid.h>
+#    include <uuid/uuid.h>
 #endif
 
 namespace pstore {

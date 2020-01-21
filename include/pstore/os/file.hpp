@@ -110,7 +110,7 @@ namespace pstore {
                 // Walk backwards looking for the start of the sequence of 'X'
                 // characters that form the end of the template string.
                 auto const it = std::find_if (tmpl.rbegin (), tmpl.rend (),
-                                              [](char const c) { return c != 'X'; });
+                                              [] (char const c) { return c != 'X'; });
                 // Build the result string starting from the non-template characters.
                 std::string path;
                 path.reserve (tmpl.length ());
@@ -755,7 +755,7 @@ namespace pstore {
         /// method.
         class deleter_base {
         public:
-            using unlink_proc = std::function<void(std::string const &)>;
+            using unlink_proc = std::function<void (std::string const &)>;
 
             virtual ~deleter_base () noexcept;
 

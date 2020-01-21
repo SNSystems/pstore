@@ -384,7 +384,7 @@ namespace pstore {
                 args.reserve (argc);
                 std::transform (
                     argv, argv + argc, std::back_inserter (args),
-                    [](CharType const * str) { return pstore::utf::from_native_string (str); });
+                    [] (CharType const * str) { return pstore::utf::from_native_string (str); });
                 if (!details::parse_command_line_options (std::begin (args), std::end (args),
                                                           overview, out_stream, error_stream)) {
                     std::exit (EXIT_FAILURE);

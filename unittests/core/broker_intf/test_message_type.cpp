@@ -52,7 +52,7 @@
 #include "check_for_error.hpp"
 
 TEST (BrokerMessageType, BadPartNo) {
-    auto create = []() {
+    auto create = [] () {
         std::uint32_t const mid = 3;
         std::uint16_t const part = 2;
         std::uint16_t const num_parts = 2;
@@ -116,7 +116,7 @@ namespace {
     template <typename OutputIterator>
     void generate (OutputIterator out, std::size_t num) {
         auto ctr = 0U;
-        std::generate_n (out, num, [&ctr]() { return static_cast<char> (ctr++ % 26 + 'A'); });
+        std::generate_n (out, num, [&ctr] () { return static_cast<char> (ctr++ % 26 + 'A'); });
     }
 
 } // end anonymous namespace

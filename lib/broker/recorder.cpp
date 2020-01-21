@@ -60,7 +60,8 @@ namespace pstore {
         //*                                   *
         // (ctor)
         // ~~~~~~
-        recorder::recorder (std::string path) : file_{std::move (path)} {
+        recorder::recorder (std::string path)
+                : file_{std::move (path)} {
             file_.open (file::file_handle::create_mode::create_new,
                         file::file_handle::writable_mode::read_write);
         }
@@ -84,7 +85,8 @@ namespace pstore {
         //* |_|          |__/          *
         // (ctor)
         // ~~~~~~
-        player::player (std::string path) : file_{std::move (path)} {
+        player::player (std::string path)
+                : file_{std::move (path)} {
             file_.open (file::file_handle::create_mode::open_existing,
                         file::file_handle::writable_mode::read_only);
         }

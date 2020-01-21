@@ -108,7 +108,7 @@ namespace {
     }
 
     void OpenCorruptStore::check_database_open (pstore::error_code err) const {
-        check_for_error ([this]() { pstore::database{this->file ()}; }, err);
+        check_for_error ([this] () { pstore::database{this->file ()}; }, err);
     }
 
 } // end anonymous namespace
@@ -228,7 +228,7 @@ TEST_F (Database, GetEndPastLogicalEOF) {
 
     auto const addr = pstore::address::null ();
     std::size_t size = db.size () + 1;
-    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
                      pstore::error_code::bad_address);
 }
 
@@ -238,7 +238,7 @@ TEST_F (Database, GetStartPastLogicalEOF) {
 
     auto const addr = pstore::address{db.size () + 1};
     constexpr std::size_t size = 1;
-    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
                      pstore::error_code::bad_address);
 }
 
@@ -251,7 +251,7 @@ TEST_F (Database, GetLocationOverflows) {
                           std::numeric_limits<std::uint64_t>::max ());
     std::size_t const size = std::numeric_limits<std::uint64_t>::max () - addr.absolute () + 1U;
     ASSERT_TRUE (addr + size < addr); // This addition is attended to overflow.
-    check_for_error ([&db, addr, size]() { db.getro (addr, size); },
+    check_for_error ([&db, addr, size] () { db.getro (addr, size); },
                      pstore::error_code::bad_address);
 }
 

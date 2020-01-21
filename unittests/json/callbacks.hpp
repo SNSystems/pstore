@@ -66,15 +66,15 @@ class mock_json_callbacks : public json_callbacks_base {
 public:
     ~mock_json_callbacks ();
 
-    MOCK_METHOD1 (string_value, void(std::string const &));
-    MOCK_METHOD1 (integer_value, void(long));
-    MOCK_METHOD1 (float_value, void(double));
-    MOCK_METHOD1 (boolean_value, void(bool));
-    MOCK_METHOD0 (null_value, void());
-    MOCK_METHOD0 (begin_array, void());
-    MOCK_METHOD0 (end_array, void());
-    MOCK_METHOD0 (begin_object, void());
-    MOCK_METHOD0 (end_object, void());
+    MOCK_METHOD1 (string_value, void (std::string const &));
+    MOCK_METHOD1 (integer_value, void (long));
+    MOCK_METHOD1 (float_value, void (double));
+    MOCK_METHOD1 (boolean_value, void (bool));
+    MOCK_METHOD0 (null_value, void ());
+    MOCK_METHOD0 (begin_array, void ());
+    MOCK_METHOD0 (end_array, void ());
+    MOCK_METHOD0 (begin_object, void ());
+    MOCK_METHOD0 (end_object, void ());
 };
 
 template <typename T>

@@ -53,7 +53,7 @@ namespace {
     };
     class mock_callback final : public callback_base {
     public:
-        MOCK_METHOD1 (callback, void(pstore::heartbeat::key_type));
+        MOCK_METHOD1 (callback, void (pstore::heartbeat::key_type));
     };
 
     class HeartbeatAttachDetach : public ::testing::Test {

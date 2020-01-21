@@ -56,7 +56,7 @@ namespace pstore {
         template <typename Iterator>
         std::list<std::string> csv (Iterator first, Iterator last) {
             std::list<std::string> result;
-            std::for_each (first, last, [&result](std::string const & s) {
+            std::for_each (first, last, [&result] (std::string const & s) {
                 result.splice (result.end (), csv (s));
             });
             return result;

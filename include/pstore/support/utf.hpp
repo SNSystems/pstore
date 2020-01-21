@@ -351,7 +351,7 @@ namespace pstore {
         template <typename Iterator>
         auto length (Iterator first, Iterator last) -> std::size_t {
             auto const result =
-                std::count_if (first, last, [](char const c) { return is_utf_char_start (c); });
+                std::count_if (first, last, [] (char const c) { return is_utf_char_start (c); });
             assert (result >= 0);
             using utype = typename std::make_unsigned<decltype (result)>::type;
             static_assert (std::numeric_limits<utype>::max () <=
@@ -400,7 +400,7 @@ namespace pstore {
         auto index (InputIterator const first, InputIterator const last, std::size_t const pos)
             -> InputIterator {
             auto start_count = std::size_t{0};
-            return std::find_if (first, last, [&start_count, pos](char const c) {
+            return std::find_if (first, last, [&start_count, pos] (char const c) {
                 return is_utf_char_start (c) ? (start_count++ == pos) : false;
             });
         }

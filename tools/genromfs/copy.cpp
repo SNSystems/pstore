@@ -113,7 +113,7 @@ void copy (std::string const & path, unsigned file_no) {
 
     std::ostream & os = std::cout;
 
-    auto getcr = [](std::size_t width) {
+    auto getcr = [] (std::size_t width) {
         return width >= line_width ? std::make_pair (std::size_t{0}, crindent)
                                    : std::make_pair (width, "");
     };

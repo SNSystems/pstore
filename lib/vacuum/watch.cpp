@@ -98,7 +98,7 @@ namespace vacuum {
                     pstore::logging::log (pstore::logging::priority::notice,
                                           "Waiting until asked to watch by the copy thread...");
                     wst.start_watch_cv.wait_for (mlock, watch_interval,
-                                                 [st]() { return wst.start_watch || st->done; });
+                                                 [st] () { return wst.start_watch || st->done; });
                 }
                 wst.start_watch = false;
 

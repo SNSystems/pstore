@@ -100,7 +100,7 @@ namespace {
 
     int rename_noreplace (pstore::gsl::czstring const old_path,
                           pstore::gsl::czstring const new_path) {
-        auto const is_unavailable = [](int const e) noexcept {
+        auto const is_unavailable = [] (int const e) noexcept {
             return e == EINVAL || errno == ENOSYS || errno == ENOTTY;
         };
 
@@ -119,7 +119,8 @@ namespace {
 #    elif defined(PSTORE_HAVE_SYS_renameat2)
         // Support for renameat2() was added in glibc 2.28. If we have an older version, we have
         // to invoke the syscall dfirectly.
-        ret_val = ::syscall (SYS_renameat2, AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
+        ret_val =
+            ::syscall (SYS_renameat2, AT_FDCWD, old_path, AT_FDCWD, new_path, RENAME_NOREPLACE);
         err = errno;
 #    else
         // A platform with no renameat2() equivalent that we know about.
@@ -466,7 +467,7 @@ namespace pstore {
 /// The time members of struct stat might be called st_Xtimespec (of type struct timespec) or
 /// st_Xtime (and be of type time_t). This macro is defined in the former situation.
 #    ifdef PSTORE_STAT_TIMESPEC
-            auto compare = [](struct timespec const & lhs, struct timespec const & rhs) {
+            auto compare = [] (struct timespec const & lhs, struct timespec const & rhs) {
                 return std::make_pair (lhs.tv_sec, lhs.tv_nsec) <
                        std::make_pair (rhs.tv_sec, rhs.tv_nsec);
             };

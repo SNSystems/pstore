@@ -54,7 +54,7 @@ namespace {
     public:
         std::shared_ptr<std::uint8_t> make_array (std::size_t size) {
             return std::shared_ptr<std::uint8_t>{new std::uint8_t[size],
-                                                 [](std::uint8_t * p) { delete[] p; }};
+                                                 [] (std::uint8_t * p) { delete[] p; }};
         }
     };
 

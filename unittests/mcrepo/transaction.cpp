@@ -46,7 +46,7 @@
 
 auto transaction::allocate (std::size_t size, unsigned /*align*/) -> pstore::address {
     auto ptr = std::shared_ptr<std::uint8_t> (new std::uint8_t[size],
-                                              [](std::uint8_t * p) { delete[] p; });
+                                              [] (std::uint8_t * p) { delete[] p; });
     storage_[ptr.get ()] = ptr;
 
     static_assert (sizeof (std::uint8_t *) >= sizeof (pstore::address),

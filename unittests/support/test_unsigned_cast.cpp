@@ -48,16 +48,14 @@
 #include "check_for_error.hpp"
 
 TEST (UnsignedCast, Zero) {
-    EXPECT_EQ (pstore::checked_unsigned_cast(0), 0U);
+    EXPECT_EQ (pstore::checked_unsigned_cast (0), 0U);
 }
 
 TEST (UnsignedCast, Max) {
     auto const max = std::numeric_limits<int>::max ();
-    EXPECT_EQ (pstore::checked_unsigned_cast(max), static_cast <unsigned> (max));
+    EXPECT_EQ (pstore::checked_unsigned_cast (max), static_cast<unsigned> (max));
 }
 
 TEST (UnsignedCast, Negative) {
-    check_for_error ([] () {
-        pstore::checked_unsigned_cast(-1);
-    }, std::errc::invalid_argument);
+    check_for_error ([] () { pstore::checked_unsigned_cast (-1); }, std::errc::invalid_argument);
 }

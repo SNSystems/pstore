@@ -127,7 +127,7 @@ bool pstore::romfs::directory::check (directory const * const PSTORE_NONNULL par
     }
 
     // CHeck that the directory entries are sorted by name.
-    if (!std::is_sorted (begin (), end (), [](dirent const & a, dirent const & b) {
+    if (!std::is_sorted (begin (), end (), [] (dirent const & a, dirent const & b) {
             return std::strcmp (a.name (), b.name ()) < 0;
         })) {
         return false;

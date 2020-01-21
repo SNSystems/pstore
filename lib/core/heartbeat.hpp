@@ -81,7 +81,7 @@ namespace pstore {
             return reinterpret_cast<key_type> (t);
         }
 
-        using callback = std::function<void(key_type)>;
+        using callback = std::function<void (key_type)>;
         void attach (key_type key, callback cb);
         void detach (key_type key);
 

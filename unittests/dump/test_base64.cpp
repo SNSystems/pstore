@@ -120,7 +120,7 @@ TEST_F (Base64Fixture, RFC4648SixChars) {
 namespace {
     template <typename OutputIterator, typename Size, typename Assignable>
     void iota_n (OutputIterator first, Size n, Assignable value) {
-        std::generate_n (first, n, [&value]() { return value++; });
+        std::generate_n (first, n, [&value] () { return value++; });
     }
 } // namespace
 

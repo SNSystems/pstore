@@ -77,7 +77,7 @@ TEST (WsServer, NothingFromClient) {
 
     // Record the server's response.
     std::vector<std::uint8_t> output;
-    auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
+    auto sender = [&output] (int io, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (s.begin (), s.end (), std::back_inserter (output));
         return pstore::error_or<int>{pstore::in_place, io + 1};
     };
@@ -109,7 +109,7 @@ TEST (WsServer, Ping) {
         auto const sf1_span = as_bytes (make_span (&sf1, 1));
         std::copy (std::begin (sf1_span), std::end (sf1_span), std::back_inserter (send_frames));
         // 4 mask bytes (all 0)
-        std::generate_n (std::back_inserter (send_frames), 4, []() { return std::uint8_t{0}; });
+        std::generate_n (std::back_inserter (send_frames), 4, [] () { return std::uint8_t{0}; });
     }
     {
         pstore::httpd::frame_fixed_layout sf2{};
@@ -120,7 +120,7 @@ TEST (WsServer, Ping) {
         auto const sf2_span = as_bytes (make_span (&sf2, 1));
         std::copy (std::begin (sf2_span), std::end (sf2_span), std::back_inserter (send_frames));
         // 4 mask bytes (all 0)
-        std::generate_n (std::back_inserter (send_frames), 4, []() { return std::uint8_t{0}; });
+        std::generate_n (std::back_inserter (send_frames), 4, [] () { return std::uint8_t{0}; });
     }
 
 
@@ -164,7 +164,7 @@ TEST (WsServer, Ping) {
 
     // Record the server's response.
     std::vector<std::uint8_t> output;
-    auto sender = [&output](int io2, pstore::gsl::span<std::uint8_t const> const & s) {
+    auto sender = [&output] (int io2, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (s.begin (), s.end (), std::back_inserter (output));
         return pstore::error_or<int>{pstore::in_place, io2 + 1};
     };

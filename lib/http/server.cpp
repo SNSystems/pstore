@@ -193,8 +193,8 @@ namespace {
         static constexpr auto crlf = pstore::httpd::crlf;
         static constexpr auto sender = pstore::httpd::net::network_sender;
 
-        auto report = [&error, &request, &socket](unsigned const code,
-                                                  pstore::gsl::czstring const message) {
+        auto report = [&error, &request, &socket] (unsigned const code,
+                                                   pstore::gsl::czstring const message) {
             cerror (sender, std::ref (socket), request.uri ().c_str (), code, message,
                     error.message ().c_str ());
         };
@@ -266,7 +266,7 @@ namespace {
 
 
         // Send back the server handshake response.
-        auto const accept_ws_connection = [&header_contents, &io]() {
+        auto const accept_ws_connection = [&header_contents, &io] () {
             log (priority::info, "Accepting WebSockets upgrade");
 
             static constexpr auto crlf = pstore::httpd::crlf;
@@ -287,8 +287,8 @@ namespace {
             return pstore::httpd::send (pstore::httpd::net::network_sender, std::ref (io), os);
         };
 
-        auto server_loop_thread = [&channels](Reader && reader2, socket_descriptor io2,
-                                              std::string const uri) {
+        auto server_loop_thread = [&channels] (Reader && reader2, socket_descriptor io2,
+                                               std::string const uri) {
             PSTORE_TRY {
                 constexpr auto ident = "websocket";
                 pstore::threads::set_name (ident);
@@ -314,7 +314,7 @@ namespace {
 
         // Spawn a thread to manage this WebSockets session.
         auto const create_ws_server = [&reader, server_loop_thread,
-                                       &request](socket_descriptor & s) {
+                                       &request] (socket_descriptor & s) {
             assert (s.valid ());
             return return_type{pstore::in_place,
                                new std::thread (server_loop_thread, std::move (reader),
@@ -418,8 +418,8 @@ namespace pstore {
 
                 // Respond appropriately based on the request and headers.
                 auto const serve_reply =
-                    [&](socket_descriptor & io2,
-                        header_info const & header_contents) -> std::error_code {
+                    [&] (socket_descriptor & io2,
+                         header_info const & header_contents) -> std::error_code {
                     if (header_contents.connection_upgrade &&
                         header_contents.upgrade_to_websocket) {
 
@@ -446,7 +446,7 @@ namespace pstore {
                 assert (childfd.valid ());
                 std::error_code const err = read_headers (
                     reader, std::ref (childfd),
-                    [](header_info io, std::string const & key, std::string const & value) {
+                    [] (header_info io, std::string const & key, std::string const & value) {
                         return io.handler (key, value);
                     },
                     header_info ()) >>= serve_reply;

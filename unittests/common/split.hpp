@@ -74,7 +74,7 @@ std::vector<StringType> split_tokens (StringType const & s) {
     std::vector<StringType> result;
 
     using char_type = typename StringType::value_type;
-    auto is_space = [](char_type c) { return pstore::isspace (c); };
+    auto is_space = [] (char_type c) { return pstore::isspace (c); };
 
     auto it = std::begin (s);
     auto end = std::end (s);

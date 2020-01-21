@@ -78,7 +78,7 @@ namespace pstore {
 
         template <typename Sender, typename IO>
         pstore::error_or<IO> handle_version (Sender sender, IO io, query_container const &) {
-            auto version_string = []() {
+            auto version_string = [] () {
                 std::ostringstream os;
                 os << "{ \"version\": \"" << header::major_version << '.' << header::minor_version
                    << "\" }";
@@ -167,15 +167,15 @@ namespace pstore {
             // Do we know how to handle this command?
             auto const & commands = details::get_commands<Sender, IO> ();
             using value_type = typename details::commands_helper<Sender, IO>::container::value_type;
-            auto const compare = [](value_type const & a, value_type const & b) {
+            auto const compare = [] (value_type const & a, value_type const & b) {
                 return std::get<0> (a) < std::get<0> (b);
             };
             assert (std::is_sorted (std::begin (commands), std::end (commands), compare));
 
             auto const lb = std::lower_bound (
                 std::begin (commands), std::end (commands),
-                value_type{command, [](Sender, IO io2,
-                                       query_container const &) { return error_or<IO>{io2}; }},
+                value_type{command, [] (Sender, IO io2,
+                                        query_container const &) { return error_or<IO>{io2}; }},
                 compare);
             if (lb == std::end (commands) || std::get<0> (*lb) != command) {
                 return error_or<IO>{error_code::bad_request};

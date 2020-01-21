@@ -59,7 +59,7 @@
 
 TEST (ServeDynamicContent, BadRequest) {
     std::vector<std::uint8_t> output;
-    auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
+    auto sender = [&output] (int io, pstore::gsl::span<std::uint8_t const> const & s) {
         std::copy (std::begin (s), std::end (s), std::back_inserter (output));
         return pstore::error_or<int>{io};
     };
@@ -72,9 +72,9 @@ TEST (ServeDynamicContent, BadRequest) {
 
 TEST (ServeDynamicContent, Version) {
     std::string output;
-    auto sender = [&output](int io, pstore::gsl::span<std::uint8_t const> const & s) {
+    auto sender = [&output] (int io, pstore::gsl::span<std::uint8_t const> const & s) {
         std::transform (std::begin (s), std::end (s), std::back_inserter (output),
-                        [](std::uint8_t v) { return static_cast<char> (v); });
+                        [] (std::uint8_t v) { return static_cast<char> (v); });
         return pstore::error_or<int>{io};
     };
 

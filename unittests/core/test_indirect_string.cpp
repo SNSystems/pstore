@@ -84,7 +84,7 @@ TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
     constexpr auto str = "string";
     auto const sstring = pstore::make_sstring_view (str);
 
-    auto const pointer_addr = [this, &sstring]() -> pstore::address {
+    auto const pointer_addr = [this, &sstring] () -> pstore::address {
         // Create a transaction
         mock_mutex mutex;
         auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
@@ -109,7 +109,7 @@ TEST_F (IndirectString, StoreRefToHeapRoundTrip) {
 TEST_F (IndirectString, StoreRoundTrip) {
     constexpr auto str = "string";
 
-    auto const pointer_addr = [this, str]() -> pstore::address {
+    auto const pointer_addr = [this, str] () -> pstore::address {
         // Create a transaction.
         mock_mutex mutex;
         auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
@@ -179,7 +179,7 @@ TEST_F (IndirectString, BadDatabaseAddress) {
     *db_.getrw (typed_address<address> (indirect_addr)) = address{0x01};
 
     check_for_error (
-        [this, indirect_addr]() {
+        [this, indirect_addr] () {
             get_sstring_view (db_, typed_address<indirect_string>{indirect_addr});
         },
         error_code::bad_address);

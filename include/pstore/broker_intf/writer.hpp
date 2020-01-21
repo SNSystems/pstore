@@ -68,7 +68,7 @@ namespace pstore {
             using duration_type = std::chrono::milliseconds;
             static constexpr unsigned infinite_retries = std::numeric_limits<unsigned>::max ();
 
-            using update_callback = std::function<void()>;
+            using update_callback = std::function<void ()>;
             /// The default function called by write() to as the write() function retries the
             /// the write operation. A simple no-op.
             static void default_callback ();

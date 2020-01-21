@@ -82,7 +82,7 @@ namespace pstore {
             void append (std::string const & s) { this->append (gsl::make_span (s)); }
 
             void append (gsl::span<char const> const chars) {
-                this->append (chars, [](std::string const & s) { return s; });
+                this->append (chars, [] (std::string const & s) { return s; });
             }
             template <typename OperationFunc>
             void append (gsl::span<char const> chars, OperationFunc operation);

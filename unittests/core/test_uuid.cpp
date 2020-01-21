@@ -88,7 +88,7 @@ TEST (UUID, ParseStringBadLength) {
         pstore::maybe<pstore::uuid> v1 = pstore::uuid::from_string (input1);
         EXPECT_FALSE (v1.has_value ());
 
-        check_for_error ([&input1]() { pstore::uuid _ (input1); },
+        check_for_error ([&input1] () { pstore::uuid _ (input1); },
                          pstore::error_code::uuid_parse_error);
     }
     {
@@ -96,7 +96,7 @@ TEST (UUID, ParseStringBadLength) {
         pstore::maybe<pstore::uuid> v2 = pstore::uuid::from_string (input2);
         EXPECT_FALSE (v2.has_value ());
 
-        check_for_error ([&input2]() { pstore::uuid _ (input2); },
+        check_for_error ([&input2] () { pstore::uuid _ (input2); },
                          pstore::error_code::uuid_parse_error);
     }
 }

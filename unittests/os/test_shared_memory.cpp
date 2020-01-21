@@ -73,7 +73,8 @@ TEST (PosixMutexName, LargeOutputBuffer) {
     // character.)
 
     auto const begin = std::begin (arr) + expected.length () + 1;
-    EXPECT_TRUE (std::all_of (begin, std::end (arr), [sentinel](char c) { return c == sentinel; }));
+    EXPECT_TRUE (
+        std::all_of (begin, std::end (arr), [sentinel] (char c) { return c == sentinel; }));
 }
 
 TEST (PosixMutexName, OutputBufferTooSmall) {

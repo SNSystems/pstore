@@ -193,7 +193,7 @@ namespace vacuum {
 
                     // TODO: wait for the watch thread to close its connection to the source store.
 
-                    pstore::file::file_handle destination_file {destination->path ()};
+                    pstore::file::file_handle destination_file{destination->path ()};
                     std::string const source_path = source->path ();
                     destination.reset (); // Close the target data store
                     // assert that there's a single reference to the source pointer.

@@ -129,5 +129,5 @@ TEST (SerializeBufferReader, ReadByte) {
 TEST (SerializeBufferReader, ReadPastEnd) {
     std::array<std::uint8_t, 1> buffer{{28}};
     pstore::serialize::archive::buffer_reader reader (::pstore::gsl::make_span (buffer));
-    check_for_error ([&reader]() { reader.get<std::uint16_t> (); }, std::errc::no_buffer_space);
+    check_for_error ([&reader] () { reader.get<std::uint16_t> (); }, std::errc::no_buffer_space);
 }

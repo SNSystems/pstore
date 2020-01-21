@@ -139,14 +139,20 @@ namespace pstore {
             }
 
             iterator begin (database & db) { return iterator{map_.begin (db)}; }
-            const_iterator begin (database const & db) const { return const_iterator{map_.cbegin (db)}; }
-            const_iterator cbegin (database const & db) const { return const_iterator{map_.cbegin (db)}; }
+            const_iterator begin (database const & db) const {
+                return const_iterator{map_.cbegin (db)};
+            }
+            const_iterator cbegin (database const & db) const {
+                return const_iterator{map_.cbegin (db)};
+            }
 
             iterator end (database & db) { return iterator{map_.end (db)}; }
             const_iterator end (database const & db) const {
                 return const_iterator{map_.cend (db)};
             }
-            const_iterator cend (database const & db) const { return const_iterator{map_.cend (db)}; }
+            const_iterator cend (database const & db) const {
+                return const_iterator{map_.cend (db)};
+            }
             ///@}
 
             /// \name Capacity

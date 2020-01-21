@@ -63,19 +63,19 @@ namespace {
                           std::atomic<bool> * const uptime_done)
                 : command_processor (num_read_threads, status, uptime_done, 4h) {}
 
-        MOCK_METHOD2 (suicide, void(pstore::broker::fifo_path const &,
-                                    pstore::broker::broker_command const &));
-        MOCK_METHOD2 (quit, void(pstore::broker::fifo_path const &,
-                                 pstore::broker::broker_command const &));
-        MOCK_METHOD2 (cquit, void(pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (suicide, void (pstore::broker::fifo_path const &,
+                                     pstore::broker::broker_command const &));
+        MOCK_METHOD2 (quit, void (pstore::broker::fifo_path const &,
                                   pstore::broker::broker_command const &));
-        MOCK_METHOD2 (gc, void(pstore::broker::fifo_path const &,
-                               pstore::broker::broker_command const &));
-        MOCK_METHOD2 (echo, void(pstore::broker::fifo_path const &,
-                                 pstore::broker::broker_command const &));
-        MOCK_METHOD2 (nop, void(pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (cquit, void (pstore::broker::fifo_path const &,
+                                   pstore::broker::broker_command const &));
+        MOCK_METHOD2 (gc, void (pstore::broker::fifo_path const &,
                                 pstore::broker::broker_command const &));
-        MOCK_CONST_METHOD1 (unknown, void(pstore::broker::broker_command const &));
+        MOCK_METHOD2 (echo, void (pstore::broker::fifo_path const &,
+                                  pstore::broker::broker_command const &));
+        MOCK_METHOD2 (nop, void (pstore::broker::fifo_path const &,
+                                 pstore::broker::broker_command const &));
+        MOCK_CONST_METHOD1 (unknown, void (pstore::broker::broker_command const &));
 
         // Replace the log message with an implementation that does nothing at all. We don't really
         // want to be writing logs from the unit tests.

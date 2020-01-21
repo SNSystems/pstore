@@ -293,13 +293,13 @@ namespace {
         std::vector<std::string> argv_strings;
         std::vector<char const *> argv2;
         argv_strings.reserve (argc);
-        std::transform (argv, argv + argc, std::back_inserter (argv_strings), [](TCHAR * arg) {
+        std::transform (argv, argv + argc, std::back_inserter (argv_strings), [] (TCHAR * arg) {
             return pstore::utf::win32::to_mbcs (arg, std::wcslen (arg));
         });
         argv2.reserve (argc + 1);
         std::transform (std::begin (argv_strings), std::end (argv_strings),
                         std::back_inserter (argv2),
-                        [](std::string const & s) { return s.data (); });
+                        [] (std::string const & s) { return s.data (); });
         argv2.emplace_back (nullptr);
         return {std::move (argv_strings), std::move (argv2)};
     }
@@ -386,14 +386,14 @@ int main (int argc, char * argv[]) {
             show_index<pstore::trailer::indices::fragment> (
                 file, db, show_all_fragments, opt.fragments, dump_error_code::fragment_not_found,
                 dump_error_code::no_fragment_index,
-                [&db, &opt](pstore::index::fragment_index::value_type const & value) {
+                [&db, &opt] (pstore::index::fragment_index::value_type const & value) {
                     return make_value (db, value, opt.triple.c_str (), opt.hex);
                 });
 
             show_index<pstore::trailer::indices::compilation> (
                 file, db, show_all_compilations, opt.compilations,
                 dump_error_code::compilation_not_found, dump_error_code::no_compilation_index,
-                [&db](pstore::index::compilation_index::value_type const & value) {
+                [&db] (pstore::index::compilation_index::value_type const & value) {
                     return make_value (db, value);
                 });
 
@@ -401,7 +401,7 @@ int main (int argc, char * argv[]) {
                 file, db, show_all_debug_line_headers, opt.debug_line_headers,
                 dump_error_code::debug_line_header_not_found,
                 dump_error_code::no_debug_line_header_index,
-                [&db, &opt](pstore::index::debug_line_header_index::value_type const & value) {
+                [&db, &opt] (pstore::index::debug_line_header_index::value_type const & value) {
                     return make_value (db, value, opt.hex);
                 });
 

@@ -58,7 +58,7 @@ bool set_from_name (indices_bitset * const bs, std::string const & name) {
     } else {
         auto begin = std::begin (index_names);
         auto end = std::end (index_names);
-        auto it = std::find_if (begin, end, [&name](decltype (index_names)::value_type const & v) {
+        auto it = std::find_if (begin, end, [&name] (decltype (index_names)::value_type const & v) {
             return v == name;
         });
         if (it == end) {

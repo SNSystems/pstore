@@ -68,7 +68,7 @@ using testing::Invoke;
 
 TEST (HttpdBufferedReader, Span) {
     using byte_span = pstore::gsl::span<std::uint8_t>;
-    auto refill = [](int io, byte_span const & sp) {
+    auto refill = [] (int io, byte_span const & sp) {
         std::fill (std::begin (sp), std::end (sp), std::uint8_t{0});
         return pstore::error_or_n<int, byte_span::iterator>{pstore::in_place, io, sp.end ()};
     };
@@ -104,7 +104,7 @@ TEST (HttpdBufferedReader, GetcThenEOF) {
         getc_result_type const c2 = br.getc (io);
         ASSERT_TRUE (static_cast<bool> (c2));
         // Uncomment the next line if adding further blocks to this test!
-        //io = std::get<0> (*c2);
+        // io = std::get<0> (*c2);
         maybe<char> const char2 = std::get<1> (*c2);
         ASSERT_FALSE (char2.has_value ());
     }
@@ -233,7 +233,7 @@ TEST (HttpdBufferedReader, StringCRNoLFChars) {
 TEST (HttpdBufferedReader, SomeCharactersThenAnError) {
     refiller r;
     EXPECT_CALL (r, fill (0, _)).WillOnce (Invoke (yield_string ("abc\nd")));
-    EXPECT_CALL (r, fill (1, _)).WillOnce (Invoke ([](int, span<std::uint8_t> const &) {
+    EXPECT_CALL (r, fill (1, _)).WillOnce (Invoke ([] (int, span<std::uint8_t> const &) {
         return refiller_result_type (std::make_error_code (std::errc::operation_not_permitted));
     }));
 

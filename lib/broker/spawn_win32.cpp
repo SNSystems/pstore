@@ -48,12 +48,12 @@
 #ifdef _WIN32
 
 // standard includes
-#include <cstring>
+#    include <cstring>
 
 // pstore includes
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/support/error.hpp"
-#include "pstore/support/utf.hpp"
+#    include "pstore/broker_intf/descriptor.hpp"
+#    include "pstore/support/error.hpp"
+#    include "pstore/support/utf.hpp"
 
 
 namespace pstore {

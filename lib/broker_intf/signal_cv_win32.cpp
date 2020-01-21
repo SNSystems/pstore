@@ -103,7 +103,7 @@ namespace pstore {
 
     void descriptor_condition_variable::wait (std::unique_lock<std::mutex> & lock) {
         lock.unlock ();
-        auto _ = make_scope_guard ([&lock]() { lock.lock (); });
+        auto _ = make_scope_guard ([&lock] () { lock.lock (); });
         this->wait ();
     }
 

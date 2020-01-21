@@ -173,7 +173,7 @@ TEST (ErrorOrN, StdGet) {
 
 TEST (ErrorOrN, Bind) {
     pstore::error_or_n<int, int, int> eo{pstore::in_place, 3, 5, 7};
-    pstore::error_or<int> y = eo >>= [](int a, int b, int c) {
+    pstore::error_or<int> y = eo >>= [] (int a, int b, int c) {
         return pstore::error_or<int>{pstore::in_place, a + b + c};
     };
     EXPECT_TRUE (y);

@@ -60,7 +60,7 @@ namespace pstore {
                     index::get_index<Index> (db, false /* create */)) {
                 std::for_each (
                     index->begin (db), index->end (db),
-                    [&members, mk](value_type const & v) { members.emplace_back (mk (v)); });
+                    [&members, mk] (value_type const & v) { members.emplace_back (mk (v)); });
             }
             return make_value (std::move (members));
         }

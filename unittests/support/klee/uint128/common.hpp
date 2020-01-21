@@ -53,11 +53,11 @@ constexpr inline __uint128_t to_native (pstore::uint128 v) noexcept {
 }
 
 constexpr inline std::uint64_t max64 () noexcept {
-    return static_cast <std::uint64_t> ((__uint128_t{1} << 64) - 1U);
+    return static_cast<std::uint64_t> ((__uint128_t{1} << 64) - 1U);
 }
 
 constexpr inline std::uint64_t high (__uint128_t v) noexcept {
-    return static_cast <std::uint64_t> ((v >> 64) & max64 ());
+    return static_cast<std::uint64_t> ((v >> 64) & max64 ());
 }
 
 constexpr inline std::uint64_t high (pstore::uint128 v) noexcept {
@@ -65,7 +65,7 @@ constexpr inline std::uint64_t high (pstore::uint128 v) noexcept {
 }
 
 constexpr inline std::uint64_t low (__uint128_t v) noexcept {
-    return static_cast <std::uint64_t> (v & max64 ());
+    return static_cast<std::uint64_t> (v & max64 ());
 }
 
 constexpr inline std::uint64_t low (pstore::uint128 v) noexcept {
@@ -91,4 +91,4 @@ void dump_uint128 (char const * n1, T v1, char const * n2, T v2) {
     std::fputc ('\n', stdout);
 }
 
-#endif //PSTORE_UNITTEST_SUPPORT_KLEE_UINT128
+#endif // PSTORE_UNITTEST_SUPPORT_KLEE_UINT128

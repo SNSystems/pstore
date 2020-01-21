@@ -71,8 +71,7 @@ namespace {
         return addr;
     }
 
-    class DbArchive : public EmptyStore {
-    };
+    class DbArchive : public EmptyStore {};
 
 } // end anonymous namespace
 

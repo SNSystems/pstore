@@ -123,7 +123,7 @@ namespace pstore {
                 {"xfixups",
                  make_value (
                      std::begin (section.xfixups ()), std::end (section.xfixups ()),
-                     [&db](repo::external_fixup const & xfx) { return make_value (db, xfx); })},
+                     [&db] (repo::external_fixup const & xfx) { return make_value (db, xfx); })},
             });
         }
 
@@ -131,7 +131,7 @@ namespace pstore {
                                       repo::section_kind const /*sk*/,
                                       gsl::czstring const /*triple*/, bool const /*hex_mode*/) {
             return make_value (std::begin (dependents), std::end (dependents),
-                               [&db](typed_address<repo::compilation_member> const & member) {
+                               [&db] (typed_address<repo::compilation_member> const & member) {
                                    return make_value (db, *db.getro (member));
                                });
         }

@@ -456,7 +456,6 @@ namespace pstore {
                     /// Initially equal to begin_, but incremented as data is written to the
                     /// archive. Always <= end_;
                     std::uint8_t * it_;
-
                 };
             } // namespace details
 

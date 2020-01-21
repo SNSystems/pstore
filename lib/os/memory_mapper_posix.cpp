@@ -175,7 +175,7 @@ namespace pstore {
             raise (errno_erc{last_error}, message.str ());
         }
 
-        return std::shared_ptr<void> (ptr, [length](void * const p) {
+        return std::shared_ptr<void> (ptr, [length] (void * const p) {
             if (::munmap (p, length) == -1) {
                 raise (errno_erc{errno}, "munmap");
             }

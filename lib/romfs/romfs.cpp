@@ -162,7 +162,7 @@ namespace pstore {
         // seek
         // ~~~~
         error_or<std::size_t> open_file::seek (off_t const offset, int const whence) {
-            auto make_error = [](error_code const erc) {
+            auto make_error = [] (error_code const erc) {
                 return error_or<std::size_t> (make_error_code (erc));
             };
             using uoff_type = std::make_unsigned<off_t>::type;
@@ -280,7 +280,7 @@ namespace pstore {
         // open
         // ~~~~
         auto romfs::open (gsl::czstring PSTORE_NONNULL const path) const -> error_or<descriptor> {
-            return this->parse_path (path) >>= [](dirent_ptr const de) {
+            return this->parse_path (path) >>= [] (dirent_ptr const de) {
                 auto const file = std::make_shared<open_file> (*de);
                 return error_or<descriptor>{descriptor{file}};
             };
@@ -289,13 +289,13 @@ namespace pstore {
         // opendir
         // ~~~~~~~
         auto romfs::opendir (gsl::czstring const path) -> error_or<dirent_descriptor> {
-            auto get_directory = [](dirent_ptr const de) {
+            auto get_directory = [] (dirent_ptr const de) {
                 using rett = error_or<directory const * PSTORE_NONNULL>;
                 return de->is_directory () ? rett{de->opendir ()}
                                            : rett{make_error_code (error_code::enotdir)};
             };
 
-            auto create_descriptor = [](directory const * PSTORE_NONNULL const d) {
+            auto create_descriptor = [] (directory const * PSTORE_NONNULL const d) {
                 auto const directory = std::make_shared<open_directory> (*d);
                 return error_or<dirent_descriptor>{dirent_descriptor{directory}};
             };
@@ -305,7 +305,7 @@ namespace pstore {
 
         error_or<struct stat> romfs::stat (gsl::czstring PSTORE_NONNULL const path) const {
             return this->parse_path (path) >>=
-                   [](dirent_ptr const de) { return error_or<struct stat>{de->stat ()}; };
+                   [] (dirent_ptr const de) { return error_or<struct stat>{de->stat ()}; };
         }
 
         // getcwd
@@ -315,9 +315,9 @@ namespace pstore {
         // chdir
         // ~~~~~
         std::error_code romfs::chdir (gsl::czstring const path) {
-            auto dirent_to_directory = [](dirent_ptr const de) { return de->opendir (); };
+            auto dirent_to_directory = [] (dirent_ptr const de) { return de->opendir (); };
 
-            auto set_cwd = [this](directory const * const d) {
+            auto set_cwd = [this] (directory const * const d) {
                 cwd_ = d; // Warning: side-effect!
                 return error_or<directory const *> (d);
             };
@@ -393,8 +393,8 @@ namespace pstore {
             dirent const * const parent_de = dir->find ("..");
             assert (parent_de != nullptr);
             return parent_de->opendir () >>=
-                   [this, dir](directory const * const PSTORE_NONNULL parent) {
-                       return this->dir_to_string (parent) >>= [dir, parent](std::string s) {
+                   [this, dir] (directory const * const PSTORE_NONNULL parent) {
+                       return this->dir_to_string (parent) >>= [dir, parent] (std::string s) {
                            assert (s.length () > 0);
                            if (s.back () != '/') {
                                s += '/';

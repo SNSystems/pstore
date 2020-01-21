@@ -95,8 +95,8 @@ namespace pstore {
 
                 // Create an asynchronous task which will sequentially process from 'first' to
                 // 'next' invoking f() for each data member.
-                auto per_thread_fn = [&fn](InputIt fst, InputIt lst) {
-                    std::for_each (fst, lst, [&fn](value_type const & v) { fn (v); });
+                auto per_thread_fn = [&fn] (InputIt fst, InputIt lst) {
+                    std::for_each (fst, lst, [&fn] (value_type const & v) { fn (v); });
                 };
                 futures.emplace_back (std::async (std::launch::async, per_thread_fn, first, next));
 

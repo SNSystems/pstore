@@ -55,7 +55,7 @@
 
 // platform includes
 #ifndef _WIN32
-#include <unistd.h>
+#    include <unistd.h>
 #endif
 
 #include "pstore/broker/gc.hpp"
@@ -153,7 +153,7 @@ namespace pstore {
             start_vacuum (c.path);
 
             ++commits_;
-            commits_channel.publish ([this]() {
+            commits_channel.publish ([this] () {
                 std::ostringstream os;
                 os << "{ \"commits\": " << commits_ << " }";
                 std::string const & str = os.str ();

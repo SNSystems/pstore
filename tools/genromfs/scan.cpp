@@ -103,7 +103,7 @@ namespace {
 
 
 unsigned scan (directory_container & directory, std::string const & path, unsigned count) {
-    auto is_hidden = [](WIN32_FIND_DATA const & fd) -> bool {
+    auto is_hidden = [] (WIN32_FIND_DATA const & fd) -> bool {
         return fd.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN;
     };
 
@@ -138,7 +138,7 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
     ::FindClose (find);
     std::sort (
         std::begin (directory), std::end (directory),
-        [](directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
+        [] (directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
     return count;
 }
 
@@ -153,8 +153,8 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
         raise (pstore::errno_erc{erc}, str.str ());
     }
 
-    auto is_hidden = [](std::string const & n) { return n.length () == 0 || n.front () == '.'; };
-    auto path_string = [&path](std::string const & n) {
+    auto is_hidden = [] (std::string const & n) { return n.length () == 0 || n.front () == '.'; };
+    auto path_string = [&path] (std::string const & n) {
         std::string res = path;
         res += '/';
         res += n;
@@ -189,7 +189,7 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
 
     std::sort (
         std::begin (directory), std::end (directory),
-        [](directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
+        [] (directory_entry const & a, directory_entry const & b) { return a.name < b.name; });
     return count;
 }
 

@@ -56,9 +56,9 @@ namespace {
         mock_file_system_traits (mock_file_system_traits const &) {}
         mock_file_system_traits & operator= (mock_file_system_traits const &) { return *this; }
 
-        MOCK_METHOD1 (exists, bool(std::string const &));
-        MOCK_METHOD1 (unlink, void(std::string const &));
-        MOCK_METHOD2 (rename, void(std::string const &, std::string const &));
+        MOCK_METHOD1 (exists, bool (std::string const &));
+        MOCK_METHOD1 (unlink, void (std::string const &));
+        MOCK_METHOD2 (rename, void (std::string const &, std::string const &));
     };
 
     struct mock_string_stream_traits {
@@ -68,9 +68,9 @@ namespace {
         mock_string_stream_traits (mock_string_stream_traits const &) {}
         mock_string_stream_traits & operator= (mock_string_stream_traits const &) { return *this; }
 
-        MOCK_METHOD3 (open, void(stream_type &, std::string const &, std::ios_base::openmode));
-        MOCK_METHOD1 (close, void(stream_type &));
-        MOCK_METHOD1 (clear, void(stream_type &));
+        MOCK_METHOD3 (open, void (stream_type &, std::string const &, std::ios_base::openmode));
+        MOCK_METHOD1 (close, void (stream_type &));
+        MOCK_METHOD1 (clear, void (stream_type &));
     };
 
 } // end anonymous namespace
@@ -137,7 +137,7 @@ TEST (RotatingLog, TwoRotations) {
         // I need the clear() method to really clear the stream contents.
         EXPECT_CALL (string_stream, clear (_))
             .Times (AnyNumber ())
-            .WillRepeatedly (Invoke ([](std::ostringstream & os) { os.str (""); }));
+            .WillRepeatedly (Invoke ([] (std::ostringstream & os) { os.str (""); }));
 
         EXPECT_CALL (string_stream, open (_, StrEq ("base_name"), _)).Times (3);
         EXPECT_CALL (string_stream, close (_)).Times (3);

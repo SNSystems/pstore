@@ -70,8 +70,8 @@ TEST (Win32ArgvQuote, SingleSpecialCharacter) {
     EXPECT_EQ ("\"a\nbc\"", win32::argv_quote ("a\nbc"));
 }
 
-#define BS "\\"    // backslash
-#define QUOTE "\"" // double quote
+#    define BS "\\"    // backslash
+#    define QUOTE "\"" // double quote
 
 TEST (Win32ArgvQuote, SingleBackslash) {
     EXPECT_EQ (QUOTE "a" BS "bc" QUOTE, win32::argv_quote ("a\\bc", true));

@@ -77,7 +77,7 @@ namespace {
         assert (std::distance (begin, end) >= 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
-        std::for_each (begin, end, [&dispatchers](section_content const & section) {
+        std::for_each (begin, end, [&dispatchers] (section_content const & section) {
             dispatchers.emplace_back (
                 new generic_section_creation_dispatcher (section.kind, &section));
         });

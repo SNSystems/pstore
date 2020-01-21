@@ -73,7 +73,7 @@ namespace {
     // implemented on some platforms.)
     char const * core_dump_string (int status) {
 #    ifdef WCOREDUMP
-        if (WCOREDUMP (status)) { //!OCLint(PH - OS-provided macro)
+        if (WCOREDUMP (status)) { //! OCLint(PH - OS-provided macro)
             return "(core file generated)";
         }
 #    endif
@@ -84,12 +84,12 @@ namespace {
     // friend are implemented on some platforms.)
     void pr_exit (pid_t const pid, int status) {
         log (priority::info, "GC process exited pid ", pid);
-        if (WIFEXITED (status)) {  //!OCLint(PH - OS-provided macro)
+        if (WIFEXITED (status)) { //! OCLint(PH - OS-provided macro)
             log (priority::info, "Normal termination, exit status = ", WEXITSTATUS (status));
-        } else if (WIFSIGNALED (status)) { //!OCLint(PH - OS-provided macro)
+        } else if (WIFSIGNALED (status)) { //! OCLint(PH - OS-provided macro)
             log (priority::info, "Abormal termination, signal number ", WTERMSIG (status));
             log (priority::info, "  ", core_dump_string (status));
-        } else if (WIFSTOPPED (status)) { //!OCLint(PH - OS-provided macro)
+        } else if (WIFSTOPPED (status)) { //! OCLint(PH - OS-provided macro)
             log (priority::info, "Child stopped, signal number = ", WSTOPSIG (status));
         }
     }
@@ -141,7 +141,7 @@ namespace pstore {
         /// \note This function is called from a signal handler so must restrict itself to
         /// signal-safe functions.
         void gc_watch_thread::child_signal (int const sig) {
-            errno_saver const old_errno;  //!OCLint(PH - meant to be unused)
+            errno_saver const old_errno; //! OCLint(PH - meant to be unused)
             getgc ().cv_.notify_all (sig);
         }
 

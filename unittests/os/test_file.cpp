@@ -101,27 +101,27 @@ namespace {
     // A file class which is used to mock the lock() and unlock() methods.
     class mock_file final : public pstore::file::file_base {
     public:
-        MOCK_METHOD0 (close, void());
+        MOCK_METHOD0 (close, void ());
 
         // is_open() and is_writable() are noexcept functions which gmock cannot currently directly
         // intercept.
-        MOCK_CONST_METHOD0 (is_open_hook, bool());
+        MOCK_CONST_METHOD0 (is_open_hook, bool ());
         bool is_open () const noexcept override { return this->is_open_hook (); }
 
-        MOCK_CONST_METHOD0 (is_writable_hook, bool());
+        MOCK_CONST_METHOD0 (is_writable_hook, bool ());
         bool is_writable () const noexcept override { return this->is_writable_hook (); }
 
         MOCK_CONST_METHOD0 (path, std::string ());
-        MOCK_METHOD1 (seek, void(std::uint64_t));
+        MOCK_METHOD1 (seek, void (std::uint64_t));
         MOCK_METHOD0 (tell, std::uint64_t ());
         MOCK_METHOD2 (read_buffer, std::size_t (pstore::gsl::not_null<void *>, std::size_t));
-        MOCK_METHOD2 (write_buffer, void(pstore::gsl::not_null<void const *>, std::size_t));
+        MOCK_METHOD2 (write_buffer, void (pstore::gsl::not_null<void const *>, std::size_t));
         MOCK_METHOD0 (size, std::uint64_t ());
-        MOCK_METHOD1 (truncate, void(std::uint64_t));
+        MOCK_METHOD1 (truncate, void (std::uint64_t));
         MOCK_CONST_METHOD0 (latest_time, std::time_t ());
 
-        MOCK_METHOD4 (lock, bool(std::uint64_t, std::size_t, lock_kind, blocking_mode));
-        MOCK_METHOD2 (unlock, void(std::uint64_t, std::size_t));
+        MOCK_METHOD4 (lock, bool (std::uint64_t, std::size_t, lock_kind, blocking_mode));
+        MOCK_METHOD2 (unlock, void (std::uint64_t, std::size_t));
     };
 
 } // end anonymous namespace
@@ -374,13 +374,13 @@ namespace {
 
     class mock_unlinker : public unlinker {
     public:
-        MOCK_METHOD1 (unlink, void(std::string const &));
+        MOCK_METHOD1 (unlink, void (std::string const &));
     };
 
     class test_file_deleter final : public pstore::file::deleter_base {
     public:
         test_file_deleter (std::string const & path, mock_unlinker & u)
-                : deleter_base{path, [&u](std::string const & p) { u.unlink (p); }} {}
+                : deleter_base{path, [&u] (std::string const & p) { u.unlink (p); }} {}
     };
 
 } // end anonymous namespace
@@ -446,7 +446,7 @@ namespace {
         using buffer = std::shared_ptr<std::uint8_t>;
 
         static buffer make_buffer (std::size_t elements) {
-            return buffer (new std::uint8_t[elements], [](std::uint8_t * p) { delete[] p; });
+            return buffer (new std::uint8_t[elements], [] (std::uint8_t * p) { delete[] p; });
         }
         static buffer make_buffer (std::string const & str) {
             auto result = make_buffer (str.length ());
@@ -555,7 +555,7 @@ TEST_F (MemoryFile, Seek) {
     }
 
     // Seek past EOF
-    check_for_error ([&mf]() { mf.seek (127); }, std::errc::invalid_argument);
+    check_for_error ([&mf] () { mf.seek (127); }, std::errc::invalid_argument);
     EXPECT_EQ (5U, mf.tell ());
 }
 
@@ -579,7 +579,7 @@ TEST_F (MemoryFile, Truncate) {
     mf.truncate (0);
     EXPECT_EQ (0U, mf.size ());
     EXPECT_EQ (0U, mf.tell ());
-    check_for_error ([&mf]() { mf.truncate (6); }, std::errc::invalid_argument);
+    check_for_error ([&mf] () { mf.truncate (6); }, std::errc::invalid_argument);
     EXPECT_EQ (0U, mf.tell ());
 
 
@@ -620,7 +620,7 @@ TEST_F (NativeFile, ReadEmptyFile) {
     EXPECT_EQ (0U, file_.read_span (pstore::gsl::make_span (c)));
 
     check_for_error (
-        [this]() {
+        [this] () {
             long l;
             file_.read (&l);
         },
@@ -637,7 +637,7 @@ TEST_F (NativeFile, ReadTinyFile) {
     EXPECT_EQ (sizeof (char), file_.read_span (::pstore::gsl::make_span (c)));
 
     check_for_error (
-        [this]() {
+        [this] () {
             file_.seek (0U);
             long l;
             file_.read (&l);

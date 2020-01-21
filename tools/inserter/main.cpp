@@ -116,7 +116,7 @@ namespace {
 
         double operator() () {
             seed_ = (IA * seed_ + IC) % IM;
-            return seed_ / double(IM);
+            return seed_ / double (IM);
         }
 
     private:
@@ -152,7 +152,7 @@ namespace {
             // invoking f() for each data member.
             futures.push_back (std::async (
                 std::launch::async,
-                [&fn](InputIt fst, InputIt lst) { std::for_each (fst, lst, fn); }, first, next));
+                [&fn] (InputIt fst, InputIt lst) { std::for_each (fst, lst, fn); }, first, next));
 
             first = next;
             assert (num_elements >= distance);
@@ -169,11 +169,11 @@ namespace {
 
     void find (pstore::database const & database, pstore::index::fragment_index const & index,
                digest_set const & keys) {
-        profile_marker sgn (2); //!OCLint(PH - meant to be unused)
+        profile_marker sgn (2); //! OCLint(PH - meant to be unused)
 
         parallel_for_each (
             std::begin (keys), std::end (keys),
-            [&database, &index](pstore::index::digest key) { index.find (database, key); });
+            [&database, &index] (pstore::index::digest key) { index.find (database, key); });
     }
 
 } // end anonymous namespace
@@ -213,11 +213,11 @@ int main (int argc, char * argv[]) {
         std::vector<std::uint8_t> value{0, 1};
 
         {
-            profile_marker sgn (1); //!OCLint(PH - meant to be unused)
+            profile_marker sgn (1); //! OCLint(PH - meant to be unused)
 
             auto const num_keys = std::size_t{300000};
             rng random;
-            auto u64_random = [&random]() -> std::uint64_t {
+            auto u64_random = [&random] () -> std::uint64_t {
                 return static_cast<std::uint64_t> (
                     std::round (random () * std::numeric_limits<std::uint64_t>::max ()));
             };
@@ -238,7 +238,7 @@ int main (int argc, char * argv[]) {
         find (database, *index, keys);
 
         {
-            profile_marker sgn (3); //!OCLint(PH - meant to be unused)
+            profile_marker sgn (3); //! OCLint(PH - meant to be unused)
             // Start a transaction...
             auto transaction = pstore::begin (database);
 

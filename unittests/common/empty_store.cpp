@@ -57,7 +57,6 @@ EmptyStore::EmptyStore ()
 EmptyStore::~EmptyStore () = default;
 
 EmptyStoreFile::EmptyStoreFile ()
-        : file_{std::make_shared<pstore::file::file_handle> ()} {
-}
+        : file_{std::make_shared<pstore::file::file_handle> ()} {}
 
 EmptyStoreFile::~EmptyStoreFile () = default;

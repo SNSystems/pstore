@@ -92,7 +92,7 @@ namespace {
 
     class mock_received : public received_base {
     public:
-        MOCK_CONST_METHOD1 (call, void(std::string const &));
+        MOCK_CONST_METHOD1 (call, void (std::string const &));
     };
 
 } // end anonymous namespace
@@ -111,7 +111,7 @@ TEST (PubSub, PubSub) {
 
     std::unique_ptr<pstore::subscriber<decltype (cv)>> sub = chan.new_subscriber ();
 
-    std::thread thread{[&]() {
+    std::thread thread{[&] () {
         listening_counter.increment ();
         while (pstore::maybe<std::string> const message = sub->listen ()) {
             received_counter.increment ();
@@ -124,7 +124,7 @@ TEST (PubSub, PubSub) {
 
     // Now post some messages to the channel.
     chan.publish ("message 1");
-    chan.publish ([](char const * s) { return std::string{s}; }, "message 2");
+    chan.publish ([] (char const * s) { return std::string{s}; }, "message 2");
 
     received_counter.wait_for_value (2);
     sub->cancel ();

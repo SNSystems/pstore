@@ -50,20 +50,22 @@
 
 using namespace std::string_literals;
 using namespace pstore;
-using testing::StrictMock;
 using testing::DoubleEq;
+using testing::StrictMock;
 
 namespace {
 
-class JsonNumber : public ::testing::Test {
-public:
-    JsonNumber () : proxy_{callbacks_} {}
-protected:
-    StrictMock<mock_json_callbacks> callbacks_;
-    callbacks_proxy<mock_json_callbacks> proxy_;
-};
+    class JsonNumber : public ::testing::Test {
+    public:
+        JsonNumber ()
+                : proxy_{callbacks_} {}
 
-}  //end of anonymous namespace
+    protected:
+        StrictMock<mock_json_callbacks> callbacks_;
+        callbacks_proxy<mock_json_callbacks> proxy_;
+    };
+
+} // end of anonymous namespace
 
 TEST_F (JsonNumber, Zero) {
     EXPECT_CALL (callbacks_, integer_value (0L)).Times (1);

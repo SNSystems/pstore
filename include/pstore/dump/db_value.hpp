@@ -120,7 +120,7 @@ namespace pstore {
                               MakeValueFn mk = &details::default_make_value<ValueType const &>) {
             array::container members;
             std::for_each (first, last,
-                           [&members, mk](ValueType const & v) { members.emplace_back (mk (v)); });
+                           [&members, mk] (ValueType const & v) { members.emplace_back (mk (v)); });
             return make_value (std::move (members));
         }
 

@@ -98,13 +98,13 @@ namespace {
         std::string actual;
 
         using eoint = pstore::error_or<int>;
-        auto sender = [&actual](int io, pstore::gsl::span<std::uint8_t const> const & sp) {
+        auto sender = [&actual] (int io, pstore::gsl::span<std::uint8_t const> const & sp) {
             std::transform (std::begin (sp), std::end (sp), std::back_inserter (actual),
-                            [](std::uint8_t b) { return static_cast<char> (b); });
+                            [] (std::uint8_t b) { return static_cast<char> (b); });
             return eoint (io + 1);
         };
 
-        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual](int) {
+        return pstore::httpd::serve_static_content (sender, 0, path, fs ()) >>= [&actual] (int) {
             return pstore::error_or<std::string>{pstore::in_place, actual};
         };
     }
@@ -144,10 +144,10 @@ TEST_F (ServeStaticContent, Simple) {
     std::vector<string_pair> headers;
 
     reader r{*actual};
-    auto const record_headers = [&r, &headers](reader::state_type io,
-                                               pstore::httpd::request_info const &) {
-        auto record_header = [&headers](int io2, std::string const & key,
-                                        std::string const & value) {
+    auto const record_headers = [&r, &headers] (reader::state_type io,
+                                                pstore::httpd::request_info const &) {
+        auto record_header = [&headers] (int io2, std::string const & key,
+                                         std::string const & value) {
             // The date value will change according to when the test is run so we preserve its
             // presence but drop its value.
             headers.emplace_back (key, (key == "date") ? "" : value);

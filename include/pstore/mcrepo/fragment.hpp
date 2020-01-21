@@ -231,6 +231,7 @@ namespace pstore {
             /// a loaded fragment quite straightforward.
             class const_iterator {
                 using wrapped_iterator = member_array::indices::const_iterator;
+
             public:
                 using iterator_category = std::forward_iterator_tag;
                 using value_type = section_kind;
@@ -432,7 +433,7 @@ case section_kind::k: name = #k; break;
 
             // Copy the contents of each of the segments to the fragment.
             std::for_each (
-                first, last, [&out, &fragment_ptr](section_creation_dispatcher const & c) {
+                first, last, [&out, &fragment_ptr] (section_creation_dispatcher const & c) {
                     auto const index = static_cast<unsigned> (c.kind ());
                     out = reinterpret_cast<std::uint8_t *> (c.aligned (out));
                     fragment_ptr->arr_[index] = reinterpret_cast<std::uintptr_t> (out) -
@@ -491,7 +492,7 @@ case section_kind::k: name = #k; break;
             -> std::shared_ptr<fragment> {
             return load_impl<std::shared_ptr<fragment>> (
                 location,
-                [&transaction](extent<fragment> const & x) { return transaction.getrw (x); });
+                [&transaction] (extent<fragment> const & x) { return transaction.getrw (x); });
         }
 
 
@@ -515,7 +516,7 @@ case section_kind::k: name = #k; break;
             (void) last;
 #ifndef NDEBUG
             using value_type = typename std::iterator_traits<Iterator>::value_type;
-            assert (std::is_sorted (first, last, [](value_type const & a, value_type const & b) {
+            assert (std::is_sorted (first, last, [] (value_type const & a, value_type const & b) {
                 section_kind const akind = a.kind ();
                 section_kind const bkind = b.kind ();
                 using utype = std::underlying_type<section_kind>::type;
@@ -540,7 +541,7 @@ case section_kind::k: name = #k; break;
             std::size_t size_bytes =
                 offsetof (fragment, arr_) + decltype (fragment::arr_)::size_bytes (unum_contents);
             // Now the storage for each of the contents
-            std::for_each (first, last, [&size_bytes](section_creation_dispatcher const & c) {
+            std::for_each (first, last, [&size_bytes] (section_creation_dispatcher const & c) {
                 size_bytes = c.aligned (size_bytes);
                 size_bytes += c.size_bytes ();
             });
@@ -569,16 +570,13 @@ case section_kind::k: name = #k; break;
         std::size_t section_size (fragment const & fragment, section_kind kind);
 
         /// Returns the ifixups of the given section type in the given fragment.
-        container<internal_fixup> section_ifixups (fragment const & fragment,
-                                                            section_kind kind);
+        container<internal_fixup> section_ifixups (fragment const & fragment, section_kind kind);
 
         /// Returns the xfixups of the given section type in the given fragment.
-        container<external_fixup> section_xfixups (fragment const & fragment,
-                                                            section_kind kind);
+        container<external_fixup> section_xfixups (fragment const & fragment, section_kind kind);
 
         /// Returns the section content of the given section type in the given fragment.
-        container<std::uint8_t> section_value (fragment const & fragment,
-                                                        section_kind kind);
+        container<std::uint8_t> section_value (fragment const & fragment, section_kind kind);
     } // end namespace repo
 } // end namespace pstore
 

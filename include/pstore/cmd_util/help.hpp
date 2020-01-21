@@ -251,20 +251,19 @@ namespace pstore {
 
                         std::string const & description = op->description ();
                         is_first = true;
-                        std::for_each (
-                            word_wrapper (description, description_width),
-                            word_wrapper::end (description, description_width),
-                            [&] (std::string const & str) {
-                                if (!is_first || is_overlong) {
-                                    outs_ << new_line
-                                          << std::setw (details::int_cast (
-                                                 indent + details::prefix_indent_len))
-                                          << ' ';
-                                }
-                                outs_ << ostream_traits::out_string (str);
-                                is_first = false;
-                                is_overlong = false;
-                            });
+                        std::for_each (word_wrapper (description, description_width),
+                                       word_wrapper::end (description, description_width),
+                                       [&] (std::string const & str) {
+                                           if (!is_first || is_overlong) {
+                                               outs_ << new_line
+                                                     << std::setw (details::int_cast (
+                                                            indent + details::prefix_indent_len))
+                                                     << ' ';
+                                           }
+                                           outs_ << ostream_traits::out_string (str);
+                                           is_first = false;
+                                           is_overlong = false;
+                                       });
                         outs_ << new_line;
                     }
                 }

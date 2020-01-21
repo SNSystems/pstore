@@ -123,13 +123,11 @@ namespace pstore {
 
         /// sstring_view instances are serialized using the same format as std::string.
         template <typename Pointer1>
-        struct is_compatible<::pstore::sstring_view<Pointer1>, std::string>
-                : std::true_type {};
+        struct is_compatible<::pstore::sstring_view<Pointer1>, std::string> : std::true_type {};
 
         /// sstring_view instances are serialized using the same format as std::string.
         template <typename Pointer1>
-        struct is_compatible<std::string, ::pstore::sstring_view<Pointer1>>
-                : std::true_type {};
+        struct is_compatible<std::string, ::pstore::sstring_view<Pointer1>> : std::true_type {};
 
 
         /// \brief A serializer for sstring_view const. It delegates both read and write operations

@@ -52,12 +52,12 @@
 #include <ctime>
 
 #if defined(_WIN32)
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
+#    define NOMINMAX
+#    define WIN32_LEAN_AND_MEAN
+#    include <Windows.h>
 #else
-#include <pthread.h>
-#include <unistd.h>
+#    include <pthread.h>
+#    include <unistd.h>
 #endif
 
 namespace pstore {

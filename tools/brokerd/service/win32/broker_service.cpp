@@ -67,7 +67,7 @@ sample_service::~sample_service () {
 void sample_service::start_handler (DWORD /*argc*/, TCHAR * /*argv*/[]) {
     // Log a service start message to the Application log.
     this->write_event_log_entry ("CppWindowsService in OnStart", event_type::information);
-    thread_ = std::thread ([this]() { this->worker (); });
+    thread_ = std::thread ([this] () { this->worker (); });
 }
 
 

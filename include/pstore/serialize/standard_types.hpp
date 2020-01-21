@@ -224,7 +224,7 @@ namespace pstore {
                 return result;
             }
 
-            using insert_callback = std::function<void(typename Container::value_type const &)>;
+            using insert_callback = std::function<void (typename Container::value_type const &)>;
 
             /// \brief Reads the contents of a container from an archive.
             ///

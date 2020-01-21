@@ -98,7 +98,7 @@ namespace pstore {
         template <typename InputIt, typename OutputIt>
         OutputIt kvp_to_query (InputIt first, InputIt last, OutputIt out) {
             auto is_first = true;
-            auto const f = [&is_first, &out](
+            auto const f = [&is_first, &out] (
                                typename std::iterator_traits<InputIt>::value_type const & value) {
                 if (is_first) {
                     is_first = false;

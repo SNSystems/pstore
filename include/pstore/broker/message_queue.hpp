@@ -77,7 +77,7 @@ namespace pstore {
         template <typename T>
         T message_queue<T>::pop () {
             std::unique_lock<decltype (mut_)> lock (mut_);
-            cv.wait (lock, [this]() { return queue_.size () > 0; });
+            cv.wait (lock, [this] () { return queue_.size () > 0; });
             T res = std::move (queue_.front ());
             queue_.pop ();
             return res;

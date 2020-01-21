@@ -54,7 +54,7 @@ using byte_span = pstore::gsl::span<std::uint8_t>;
 
 int main (int argc, char * argv[]) {
 
-    auto refill = [](IO io, byte_span const & sp) {
+    auto refill = [] (IO io, byte_span const & sp) {
         std::memset (sp.data (), 0, sp.size ());
         return pstore::error_or_n<IO, byte_span::iterator>{pstore::in_place, io, sp.end ()};
     };

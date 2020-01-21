@@ -385,7 +385,7 @@ TEST (GslSpan, FromArrayConstructor) {
 }
 
 TEST (GslSpan, FromDynamicArrayConstructor) {
-    double(*arr)[3][4] = new double[100][3][4];
+    double (*arr)[3][4] = new double[100][3][4];
 
     {
         span<double> s (&arr[0][0][0], 10);
@@ -440,16 +440,16 @@ TEST (GslSpan, FromStdArrayConstructor) {
     }
     { span<int, 5> s{arr}; }
     {
-        auto get_an_array = []() -> std::array<int, 4> { return {1, 2, 3, 4}; };
-        auto take_a_span = [](span<int> s) { static_cast<void> (s); };
+        auto get_an_array = [] () -> std::array<int, 4> { return {1, 2, 3, 4}; };
+        auto take_a_span = [] (span<int> s) { static_cast<void> (s); };
         // try to take a temporary std::array
         take_a_span (get_an_array ());
     }
 #endif
 
     {
-        auto get_an_array = []() -> std::array<int, 4> { return {{1, 2, 3, 4}}; };
-        auto take_a_span = [](span<int const> s) { static_cast<void> (s); };
+        auto get_an_array = [] () -> std::array<int, 4> { return {{1, 2, 3, 4}}; };
+        auto take_a_span = [] (span<int const> s) { static_cast<void> (s); };
         // try to take a temporary std::array
         take_a_span (span<int const, 4>{get_an_array ()});
     }
@@ -487,8 +487,8 @@ TEST (GslSpan, FromConstStdArrayConstructor) {
 #endif
 
     {
-        auto get_an_array = []() -> const std::array<int, 4> { return {{1, 2, 3, 4}}; };
-        auto take_a_span = [](span<int const> s) { static_cast<void> (s); };
+        auto get_an_array = [] () -> const std::array<int, 4> { return {{1, 2, 3, 4}}; };
+        auto take_a_span = [] (span<int const> s) { static_cast<void> (s); };
         // try to take a temporary std::array
         take_a_span (span<int const, 4>{get_an_array ()});
     }
@@ -650,16 +650,16 @@ TEST (GslSpan, FromContainerConstructor) {
     std::string const cstr = "hello";
 
     {
-#ifdef CONFIRM_COMPILATION_ERRORS
+#    ifdef CONFIRM_COMPILATION_ERRORS
         span<char> s{str};
         EXPECT_EQ (s.size() == narrow_cast<std::ptrdiff_t>(str.size()) && s.data(), str.data());
-#endif
+#    endif
         span<char const > cs{str};
         EXPECT_EQ (cs.size(), static_cast<std::ptrdiff_t>(str.size()));
         EXPECT_EQ (cs.data(), str.data());
     }
     {
-#ifdef CONFIRM_COMPILATION_ERRORS
+#    ifdef CONFIRM_COMPILATION_ERRORS
         span<char> s{cstr};
 #    endif
         span<const char> cs{cstr};
@@ -669,20 +669,20 @@ TEST (GslSpan, FromContainerConstructor) {
 #endif
     {
 #ifdef CONFIRM_COMPILATION_ERRORS
-        auto get_temp_vector = []() -> std::vector<int> { return {}; };
-        auto use_span = [](span<int> s) { static_cast<void> (s); };
+        auto get_temp_vector = [] () -> std::vector<int> { return {}; };
+        auto use_span = [] (span<int> s) { static_cast<void> (s); };
         use_span (get_temp_vector ());
 #endif
     }
     {
-        auto get_temp_vector = []() -> std::vector<int> { return {}; };
-        auto use_span = [](span<int const> s) { static_cast<void> (s); };
+        auto get_temp_vector = [] () -> std::vector<int> { return {}; };
+        auto use_span = [] (span<int const> s) { static_cast<void> (s); };
         use_span (span<int const> (get_temp_vector ()));
     }
     {
 #ifdef CONFIRM_COMPILATION_ERRORS
-        auto get_temp_string = []() -> std::string { return {}; };
-        auto use_span = [](span<char> s) { static_cast<void> (s); };
+        auto get_temp_string = [] () -> std::string { return {}; };
+        auto use_span = [] (span<char> s) { static_cast<void> (s); };
         use_span (get_temp_string ());
 #endif
     }
@@ -693,11 +693,11 @@ TEST (GslSpan, FromContainerConstructor) {
         use_span(get_temp_string());
     }
     {
-#ifdef CONFIRM_COMPILATION_ERRORS
+#    ifdef CONFIRM_COMPILATION_ERRORS
         auto get_temp_vector = []() -> const std::vector<int> { return {}; };
         auto use_span = [](span<const char> s) { static_cast<void>(s); };
         use_span(get_temp_vector());
-#endif
+#    endif
     }
     {
         auto get_temp_string = []() -> std::string const { return {}; };
@@ -766,8 +766,8 @@ TEST (GslSpan, CopyMoveAndAssignment) {
     s2 = s1;
     EXPECT_TRUE (s2.empty ());
 
-    auto get_temp_span = [&]() -> span<int> { return {&arr[1], 2}; };
-    auto use_span = [&](span<int const> s) {
+    auto get_temp_span = [&] () -> span<int> { return {&arr[1], 2}; };
+    auto use_span = [&] (span<int const> s) {
         EXPECT_EQ (s.length (), 2);
         EXPECT_EQ (s.data (), &arr[1]);
     };
@@ -1248,7 +1248,7 @@ TEST (GslSpan, ComparisonOperators) {
     {
         int arr[] = {1, 2, 3};
 
-        span<int> s1 = {&arr[0], 2}; // shorter
+        span<int> s1 = {&arr[0], 2};    // shorter
         span<int> s2 = make_span (arr); // longer
 
         EXPECT_TRUE (s1 != s2);

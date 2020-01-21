@@ -106,7 +106,7 @@ namespace pstore {
         read_request (Reader & reader, typename Reader::state_type io) {
             using state_type = typename Reader::state_type;
 
-            auto check_for_eof = [](state_type io2, maybe<std::string> const & buf) {
+            auto check_for_eof = [] (state_type io2, maybe<std::string> const & buf) {
                 using result_type = error_or_n<state_type, std::string>;
                 if (!buf) {
                     return result_type{details::out_of_data_error ()};
@@ -114,7 +114,7 @@ namespace pstore {
                 return result_type{in_place, io2, *buf};
             };
 
-            auto extract_request_info = [](state_type io3, std::string const & s) {
+            auto extract_request_info = [] (state_type io3, std::string const & s) {
                 using result_type = error_or_n<state_type, request_info>;
 
                 std::istringstream is{s};
