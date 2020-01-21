@@ -661,7 +661,7 @@ TEST (GslSpan, FromContainerConstructor) {
     {
 #ifdef CONFIRM_COMPILATION_ERRORS
         span<char> s{cstr};
-#endif                                                          
+#    endif
         span<const char> cs{cstr};
         EXPECT_EQ (cs.size(), static_cast<std::ptrdiff_t>(cstr.size()));
         EXPECT_EQ (cs.data(), cstr.data());
@@ -1408,7 +1408,7 @@ TEST (GslSpan, FixedSizeConversions) {
         auto f = [&]() {
             span<int, 4> s4 = {arr2, 2};
             static_cast<void>(s4);
-        };                     
+        };
         CHECK_THROW(f(), fail_fast);
     }
     // this should fail - we are trying to assign a small dynamic span to a fixed_size larger one

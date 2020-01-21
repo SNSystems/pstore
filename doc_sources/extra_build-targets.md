@@ -17,7 +17,7 @@ The following example uses [Docker](https://docker.com). It must be installed an
 Download the KLEE docker image:
 
     $ docker pull klee/klee
-    
+
 Create a container from this image (replace `<path-to-pstore>` with the path of your pstore checkout; e.g. `~/llvm-prepo/tools/pstore`):
 
     $ docker run --rm -ti --ulimit='stack=-1:-1' -v <path-to-pstore>:/home/klee/pstore klee/klee

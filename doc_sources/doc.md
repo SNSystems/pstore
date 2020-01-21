@@ -17,12 +17,12 @@ You'll notice that I usually refer to PStore as a "data store" rather than a "da
 1. Efficiency.
 2. Supports fast concurrent access.
 3. Server-less. Avoid a single central process which runs the danger of introducing configuration complexity and becoming a performance bottleneck.
-4. Crash resistant. A host process crashing should not result in corruption of the data store. 
+4. Crash resistant. A host process crashing should not result in corruption of the data store.
 5. Friendly to distributed build systems
 
 ### Server-less
 
-Interaction with distributed build systems (e.g. SN-DBS, distcc, IncrediBuild) is important for the maximum compilation speed. These tools distribute the build over a number of separate machines. This means that although the program repository is trying to build a complete image of a program, the distribution makes this tricky. One approach might be to run a single centralized server into which all of the remote slaves write their contributions to the overall program. However, this creates a number of administrative issues: 
+Interaction with distributed build systems (e.g. SN-DBS, distcc, IncrediBuild) is important for the maximum compilation speed. These tools distribute the build over a number of separate machines. This means that although the program repository is trying to build a complete image of a program, the distribution makes this tricky. One approach might be to run a single centralized server into which all of the remote slaves write their contributions to the overall program. However, this creates a number of administrative issues:
 
 > Weak. Weak.
 
@@ -53,7 +53,7 @@ __Durability__: The durability requirements on the program data store is relativ
 
 # Append-Only
 
-The PStore design uses the append-only model although the use of memory-mapped files for data access means that it cannot be a true append-only implementation. This approach makes the data from a committed transaction immutable and therefore enables the use of non-blocking algorithms for access to the stored data in multiple threads and processes. 
+The PStore design uses the append-only model although the use of memory-mapped files for data access means that it cannot be a true append-only implementation. This approach makes the data from a committed transaction immutable and therefore enables the use of non-blocking algorithms for access to the stored data in multiple threads and processes.
 
 The only lock necessary is to ensure that a single thread appends to the store at time. Although it does not block readers, this lock acts on the _entire_ data store so it important that a client application holds it for the shortest possible time.
 
@@ -92,7 +92,7 @@ This shows, starting at the bottom, that we have 4 core concepts:
 
 \section physical_file Physical File
 
-At the lowest level, we have the physical file on the user's disk. Like any file, this can be viewed as a variable-length contiguous stream of bytes. Unfortunately, the fact that the data store must be of variable length is not immediately compatible with our desire to memory-map the file. 
+At the lowest level, we have the physical file on the user's disk. Like any file, this can be viewed as a variable-length contiguous stream of bytes. Unfortunately, the fact that the data store must be of variable length is not immediately compatible with our desire to memory-map the file.
 
 On Windows platforms, each memory-mapped byte must correspond to a physical byte in the file. The size of the memory-mapped region is determined when the memory mapped "view" (to use Microsoft's terminology) is created: if the file is not large enough at that point then it is automatically grown by the operating system. The operating system does not support sparse files, so this is an expensive operation.
 
@@ -126,7 +126,7 @@ The "address" structure is the data store's equivalent of a "pointer". Using an 
 
 An "address" consists of two parts:
 
-- A _segment number_. The segment number is used as an index into the SAT: this lookup yields the physical address of the 4Mb block. 
+- A _segment number_. The segment number is used as an index into the SAT: this lookup yields the physical address of the 4Mb block.
 - A _segment offset_. The segment offset provides the offset within this 4Mb region.
 
 
@@ -145,7 +145,7 @@ The header and footer types are pstore::header and pstore::trailer respectively.
 
 \image html store_file_format_t1.svg
 
-The data block shown as data(_t_<sub>1</sub>) includes the real data payload as well as index meta-data. 
+The data block shown as data(_t_<sub>1</sub>) includes the real data payload as well as index meta-data.
 
 > The structure of this data block will be discussed later.
 

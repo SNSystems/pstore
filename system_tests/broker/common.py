@@ -53,7 +53,7 @@ IS_CYGWIN = PLATFORM_NAME.startswith('CYGWIN_NT-')
 
 def executable(path):
     """
-    On a Windows or Cygwin host, adds the Windows .exe file extension for an 
+    On a Windows or Cygwin host, adds the Windows .exe file extension for an
     executable if it isn't there already.
 
     :param path: The path or name of an executable.

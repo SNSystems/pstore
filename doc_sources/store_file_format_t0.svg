@@ -67,7 +67,7 @@
                 <line x1="113" y1="99" x2="113" y2="142"/><!-- projection line: footer(t0)/data(t1) -->
             </g>
 
-            
+
             <g><!-- footer(t0) to ground line -->
                 <path d="M96,204 L96,230  C96,233 94,236 90,236 L82,236  C82,236 82,236 82,236  L75,236  C74,236 74,236 74,236 L66,236" stroke="red" marker-end="url(#ground_symbol)" stroke-width="2"/>
                 <text x="105" y="225" fill="black">prev</text>

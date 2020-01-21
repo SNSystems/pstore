@@ -12,7 +12,7 @@ import tempfile
 
 def can_mmap_path (path):
     """Returns true if the given path allows the use of memory-mapped files."""
-    
+
     result = True
     with tempfile.NamedTemporaryFile (mode = 'w+t', dir = path) as f:
         # We need to put some data in the file: can't memory map it if the file is empty.
@@ -26,7 +26,7 @@ def can_mmap_path (path):
             if ex.errno == errno.EINVAL:
                 result = False
     return result
-        
+
 
 def data_store_path ():
     '''Returns the path to use for data stores. Since the data stores relies on
@@ -34,7 +34,7 @@ def data_store_path ():
     this. Normally one can use the test directory, but if this is a directory
     on a virtual machine that's been mapped from the host (and that's how I
     tend to roll), then it doesn't work and an alternative has to be found.'''
-    
+
     if can_mmap_path (config.test_exec_root):
         return config.test_exec_root
     return tempfile.gettempdir ()

@@ -24,7 +24,7 @@ RUN: "%binaries/pstore-sieve" --endian=big --maximum=10000000 -o "%T/large1/p1e7
 RUN: "%binaries/pstore-sieve" --endian=big --maximum=20000000 -o "%T/large1/p2e7.bin"
 RUN: "%binaries/pstore-sieve" --endian=big --maximum=30000000 -o "%T/large1/p3e7.bin"
 
-# Copy the three files into the data store with the keys 'p1e7', 'p2e7', and 
+# Copy the three files into the data store with the keys 'p1e7', 'p2e7', and
 # 'p3e7' respectively.
 RUN: "%binaries/pstore-write" "--add-file=p1e7,%T/large1/p1e7.bin" \
 RUN:                          "--add-file=p2e7,%T/large1/p2e7.bin" \

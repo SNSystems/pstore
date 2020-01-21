@@ -273,7 +273,7 @@ def test(binaries, database):
     logging.debug('done')
     return state.exit_code
 
-           
+
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG,
                         format='%(levelname)s - %(asctime)s - %(threadName)s - %(filename)s:%(lineno)d - %(message)s')

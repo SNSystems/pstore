@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/SNSystems/pstore.svg?branch=master)](https://travis-ci.org/SNSystems/pstore)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/15170/badge.svg)](https://scan.coverity.com/projects/snsystems-pstore)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SNSystems_pstore&metric=alert_status)](https://sonarcloud.io/dashboard?id=SNSystems_pstore) 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=SNSystems_pstore&metric=alert_status)](https://sonarcloud.io/dashboard?id=SNSystems_pstore)
 [![Language grade: C/C++](https://img.shields.io/lgtm/grade/cpp/g/SNSystems/pstore.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/SNSystems/pstore/context:cpp)
 
 pstore is a lightweight persistent append-only key/value store intended for use as a back-end for the [LLVM Program Repository](https://github.com/SNSystems/llvm-project-prepo).
@@ -118,15 +118,15 @@ The [pstore-read](tools/read/) and [pstore-write](tools/write/) tools provide a 
     $ pstore-dump --log pstore.db
     ---
 
-    - file : 
+    - file :
           path : pstore.db
           size : 4194304
-      log  : 
+      log  :
           - { number: 2, size: 32, time: 2018-03-12T13:52:04Z }
           - { number: 1, size: 32, time: 2018-03-12T13:51:38Z }
           - { number: 0, size: 0, time: 2018-03-12T13:51:38Z }
     ...
-    $ 
+    $
 
 Let’s pick this apart one step at a time…
 

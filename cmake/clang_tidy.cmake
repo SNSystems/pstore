@@ -115,7 +115,7 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
 
         # If the PSTORE_SYS_INCLUDES cache variable has not been set by an
         # earlier call to this function...
-        
+
         if (NOT PSTORE_SYS_INCLUDES)
             if (PSTORE_CLANG_TIDY STREQUAL "PSTORE_CLANG_TIDY-NOTFOUND")
                 message (STATUS "clang-tidy was not found: targets omitted")
@@ -147,7 +147,7 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
 
                 # Now turn this string into a Cmake list.
                 string (REPLACE "\n" ";" include_paths ${include_paths})
-    
+
                 # Finally we get to build the system include directory
                 # switches. Each path has leading and trailing whitespace stripped
                 # and an -isystem switch preceeding it.
@@ -161,10 +161,10 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
                 set (PSTORE_SYS_INCLUDES ${sys_includes} CACHE INTERNAL "The compiler's system include paths")
             endif ()
         endif (NOT PSTORE_SYS_INCLUDES)
-        
+
         set (${sys_includes} "${PSTORE_SYS_INCLUDES}" PARENT_SCOPE)
     endif (NOT can_tidy)
-    
+
 endfunction (pstore_find_clang_tidy)
 
 
@@ -202,7 +202,7 @@ function (add_clang_tidy_target source_target)
                 list (APPEND cpp_files "${src_file}")
             endif ()
         endforeach (src_file)
-        
+
         set (tidy_target "${source_target}-tidy")
 
         add_custom_target ("${tidy_target}"

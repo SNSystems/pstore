@@ -203,7 +203,7 @@ function (pstore_add_klee_test )
         )
         pstore_configure_klee_test_target ("${bc_tname}")
         target_compile_options ("${bc_tname}" PRIVATE -emit-llvm)
-        
+
         foreach (dependent ${depends})
             # If the dependent target has public include directories, then add the same to the
             # bitcode library.

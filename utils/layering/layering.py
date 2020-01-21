@@ -81,7 +81,7 @@ EXIT_FAILURE = 1
 
 def bind(x, f):
     """
-    A monadic bind operation similar to Haskell's Maybe type. Used to enable function 
+    A monadic bind operation similar to Haskell's Maybe type. Used to enable function
     composition where a function returning None indicates failure.
 
     :param x: The input value passed to callable f is not None.

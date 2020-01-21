@@ -89,7 +89,7 @@ namespace pstore {
         }
 
 
-        /// An empty class used as the base type for all sections. 
+        /// An empty class used as the base type for all sections.
         struct section_base {};
 
 

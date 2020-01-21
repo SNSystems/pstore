@@ -51,7 +51,7 @@ add_subdirectory (vector_int_reader)
 add_subdirectory (vector_string_reader)
 add_subdirectory (write_integers)
 add_subdirectory (write_pod_struct)
-    
+
 add_custom_target (pstore-examples-serialize
                    ALL
                    DEPENDS

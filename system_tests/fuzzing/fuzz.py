@@ -68,21 +68,21 @@ def _setup (binary_dir, temp_dir, src_file):
         # do nothing if the file wasn't present.
         if osex.errno != errno.ENOENT:
             raise
-        
+
     print ("Performing setup")
     for command in setup_commands:
         print (' '.join (command))
         subprocess.check_call (command, executable = command [0])
     print ("Setup complete")
 
-        
+
 def run_tests (name, binary_dir, temp_dir, iterations, args):
     print ('Running tests for {0}'.format (name))
     print ('binary_dir = "{0}"'.format (binary_dir))
     print ('temp_dir = "{0}"'.format (temp_dir))
     print ('iterations = {0}'.format (iterations))
     print ('args = {0}'.format (args))
-    
+
     src_file = os.path.join (temp_dir, name + '-src')
     fuzz_file = os.path.join (temp_dir, name + '-dest')
 
@@ -95,7 +95,7 @@ def run_tests (name, binary_dir, temp_dir, iterations, args):
 
         # Starting with our "known good" file (src_file), make a copy so that
         # the mangler can do its evil work.
-        shutil.copyfile (src_file, fuzz_file) 
+        shutil.copyfile (src_file, fuzz_file)
 
         # Fuzz the file
         mangle_exe = os.path.join (binary_dir, 'pstore-mangle' + xtension)

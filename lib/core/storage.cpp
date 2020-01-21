@@ -85,12 +85,12 @@ namespace pstore {
         std::uint64_t const old_size =
             regions_.size () == 0 ? std::uint64_t{0} : regions_.back ()->end ();
         // if growing the storage
-        if (new_size > old_size) { 
+        if (new_size > old_size) {
             auto const old_num_regions = regions_.size ();
             // Allocate new memory region(s) to accommodate the additional bytes requested.
             region_factory_->add (&regions_, old_size, new_size);
             this->update_master_pointers (old_num_regions);
-        } else if (new_size < old_size) {   // if shrinking the storage
+        } else if (new_size < old_size) { // if shrinking the storage
             bool done = false;
             // we now look backwards through the regions, discarding segments and regions introduced by this transaction
             while (!done && (regions_.size () > 0)) {
