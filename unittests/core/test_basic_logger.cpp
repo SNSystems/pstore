@@ -47,116 +47,146 @@
 
 #include <cstring>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#include <gmock/gmock.h>
 
 #include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace {
+
+    template <typename Function>
+    void no_ex_escape (Function fn) {
+        // Just call fn and catch any exception it may throw.
+        // clang-format off
+        PSTORE_TRY {
+            fn ();
+        }
+        PSTORE_CATCH (..., {
+            // Do nothing.
+        })
+        // clang-format on
+    }
+
+} // end anonymous namespace
+
+using pstore::just;
+using pstore::maybe;
+using pstore::nothing;
+using pstore::gsl::czstring;
+using pstore::gsl::not_null;
+
+namespace {
+
     //***************************************
     //*   t i m e _ z o n e _ s e t t e r   *
     // **************************************
     class time_zone_setter {
     public:
-        explicit time_zone_setter (char const * tz);
+        explicit time_zone_setter (czstring tz);
         ~time_zone_setter () noexcept;
 
     private:
-        std::unique_ptr<std::string> tz_value () const;
-        static void set_tz (char const * tz);
-        static void setenv (char const * var, char const * value);
-        std::unique_ptr<std::string> old_;
+        static maybe<std::string> tz_value ();
+
+        static void set_tz (not_null<czstring> tz);
+        static void setenv (not_null<czstring> name, not_null<czstring> value);
+        static void unsetenv (not_null<czstring> name);
+
+        maybe<std::string> old_;
     };
 
     // (ctor)
     // ~~~~~~
-    time_zone_setter::time_zone_setter (char const * tz)
-            : old_ (tz_value ()) {
+    time_zone_setter::time_zone_setter (czstring tz)
+            : old_ (time_zone_setter::tz_value ()) {
         time_zone_setter::set_tz (tz);
     }
 
     // (dtor)
     // ~~~~~~
-    time_zone_setter::~time_zone_setter () noexcept {PSTORE_TRY{
-        if (std::string const * const s = old_.get ()){time_zone_setter::setenv ("TZ", s->c_str ());
-} // namespace
-else {
+    time_zone_setter::~time_zone_setter () noexcept {
+        no_ex_escape ([this] {
+            if (old_) {
+                time_zone_setter::setenv ("TZ", old_->c_str ());
+            } else {
+                time_zone_setter::unsetenv ("TZ");
+            }
+        });
+    }
+
+    // tz_value
+    // ~~~~~~~~
+    maybe<std::string> time_zone_setter::tz_value () {
+        czstring const tz = std::getenv ("TZ");
+        return tz != nullptr ? just (std::string{tz}) : nothing<std::string> ();
+    }
+
+    // set
+    // ~~~
+    void time_zone_setter::set_tz (not_null<czstring> tz) { time_zone_setter::setenv ("TZ", tz); }
+
+    // setenv
+    // ~~~~~~
+    void time_zone_setter::setenv (not_null<czstring> name, not_null<czstring> value) {
 #ifdef _WIN32
-    ::_putenv ("TZ=");
+        using pstore::utf::win32::to16;
+        if (errno_t const err = ::_wputenv_s (to16 (name).c_str (), to16 (value).c_str ())) {
+            raise (pstore::errno_erc{err}, "_wputenv_s");
+        }
 #else
-    ::unsetenv ("TZ");
+        errno = 0;
+        if (::setenv (name, value, 1 /*overwrite*/) != 0) {
+            raise (pstore::errno_erc{errno}, "setenv");
+        }
 #endif
-}
-}
-PSTORE_CATCH (..., {})
-}
+        ::tzset ();
+    }
 
-// tz_value
-// ~~~~~~~~
-std::unique_ptr<std::string> time_zone_setter::tz_value () const {
-    char const * old = std::getenv ("TZ");
-    return std::unique_ptr<std::string> (old != nullptr ? new std::string{old} : nullptr);
-}
-
-// set
-// ~~~
-void time_zone_setter::set_tz (char const * tz) {
-    assert (tz != nullptr);
-    time_zone_setter::setenv ("TZ", tz);
-}
-
-// setenv
-// ~~~~~~
-void time_zone_setter::setenv (char const * name, char const * value) {
-    assert (name != nullptr && value != nullptr);
+    // unsetenv
+    // ~~~~~~~~
+    void time_zone_setter::unsetenv (not_null<czstring> name) {
 #ifdef _WIN32
-    using ::pstore::utf::win32::to16;
-    if (errno_t const err = ::_wputenv_s (to16 (name).c_str (), to16 (value).c_str ())) {
-        raise (pstore::errno_erc{err}, "_wputenv_s");
-    }
-    ::_tzset ();
+        using pstore::utf::win32::to16;
+        ::_wputenv_s (to16 (name).c_str (), L"");
 #else
-    errno = 0;
-    if (::setenv (name, value, 1 /*overwrite*/) != 0) {
-        raise (pstore::errno_erc{errno}, "setenv");
-    }
-    ::tzset ();
+        ::unsetenv (name);
 #endif
-}
-
-
-//***************************************************
-//*   B a s i c L o g g e r T i m e F i x t u r e   *
-//***************************************************
-class BasicLoggerTimeFixture : public ::testing::Test {
-public:
-    std::array<char, ::pstore::logging::basic_logger::time_buffer_size> buffer_;
-    static constexpr unsigned const sign_index_ = 19;
-
-    // If the time zone offset is 0, 0he standard library could legimately describe that
-    // as either +0000 or -0000. Canonicalize here (to -0000).
-    void canonicalize_sign ();
-};
-
-// canonicalize_sign
-// ~~~~~~~~~~~~~~~~~
-void BasicLoggerTimeFixture::canonicalize_sign () {
-    static_assert (::pstore::logging::basic_logger::time_buffer_size >= sign_index_,
-                   "sign index is too large for time_buffer");
-    ASSERT_EQ ('\0', buffer_[::pstore::logging::basic_logger::time_buffer_size - 1]);
-    if (std::strcmp (&buffer_[sign_index_], "+0000") == 0) {
-        buffer_[sign_index_] = '-';
     }
-}
-} // namespace
+
+    //***************************************************
+    //*   B a s i c L o g g e r T i m e F i x t u r e   *
+    //***************************************************
+    class BasicLoggerTimeFixture : public testing::Test {
+    public:
+        std::array<char, pstore::logging::basic_logger::time_buffer_size> buffer_;
+        static constexpr unsigned const sign_index_ = 19;
+
+        // If the time zone offset is 0, 0he standard library could legimately describe that
+        // as either +0000 or -0000. Canonicalize here (to -0000).
+        void canonicalize_sign ();
+    };
+
+    // canonicalize_sign
+    // ~~~~~~~~~~~~~~~~~
+    void BasicLoggerTimeFixture::canonicalize_sign () {
+        static_assert (pstore::logging::basic_logger::time_buffer_size >= sign_index_,
+                       "sign index is too large for time_buffer");
+        ASSERT_EQ ('\0', buffer_[pstore::logging::basic_logger::time_buffer_size - 1]);
+        if (std::strcmp (&buffer_[sign_index_], "+0000") == 0) {
+            buffer_[sign_index_] = '-';
+        }
+    }
+
+} // end anonymous namespace
 
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
     time_zone_setter tzs ("UTC0");
-    std::size_t const r = ::pstore::logging::basic_logger::time_string (
-        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t const r = pstore::logging::basic_logger::time_string (
+        std::time_t{0}, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     this->canonicalize_sign ();
@@ -165,8 +195,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
 
 TEST_F (BasicLoggerTimeFixture, EpochInJST) {
     time_zone_setter tzs ("JST-9"); // Japan
-    std::size_t const r = ::pstore::logging::basic_logger::time_string (
-        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t const r = pstore::logging::basic_logger::time_string (
+        std::time_t{0}, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1970-01-01T09:00:00+0900", buffer_.data ());
@@ -179,8 +209,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInPST) {
     // Since it isn't specified, daylight saving time starts on the first Sunday of April at 2:00
     // A.M., and ends on the last Sunday of October at 2:00 A.M.
     time_zone_setter tzs ("PST8PDT");
-    std::size_t r = ::pstore::logging::basic_logger::time_string (
-        std::time_t{0}, ::pstore::gsl::make_span (buffer_));
+    std::size_t r = pstore::logging::basic_logger::time_string (std::time_t{0},
+                                                                pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1969-12-31T16:00:00-0800", buffer_.data ());
@@ -190,7 +220,7 @@ TEST_F (BasicLoggerTimeFixture, ArbitraryPointInTime) {
     time_zone_setter tzs ("UTC0");
     std::time_t const time{1447134860};
     std::size_t const r =
-        ::pstore::logging::basic_logger::time_string (time, ::pstore::gsl::make_span (buffer_));
+        pstore::logging::basic_logger::time_string (time, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     this->canonicalize_sign ();
     EXPECT_STREQ ("2015-11-10T05:54:20-0000", buffer_.data ());
@@ -198,10 +228,11 @@ TEST_F (BasicLoggerTimeFixture, ArbitraryPointInTime) {
 
 
 namespace {
+
     //***************************************************************
     //*   B a s i c L o g g e r T h r e a d N a m e F i x t u r e   *
     //***************************************************************
-    class BasicLoggerThreadNameFixture : public ::testing::Test {
+    class BasicLoggerThreadNameFixture : public testing::Test {
     public:
         BasicLoggerThreadNameFixture ();
         ~BasicLoggerThreadNameFixture ();
@@ -213,33 +244,33 @@ namespace {
     // (ctor)
     // ~~~~~~
     BasicLoggerThreadNameFixture::BasicLoggerThreadNameFixture ()
-            : old_name_ (::pstore::threads::get_name ()) {}
+            : old_name_ (pstore::threads::get_name ()) {}
 
     // (dtor)
     // ~~~~~~
     BasicLoggerThreadNameFixture::~BasicLoggerThreadNameFixture () {
-        PSTORE_TRY { ::pstore::threads::set_name (old_name_.c_str ()); }
-        PSTORE_CATCH (..., {})
+        no_ex_escape ([this] () { pstore::threads::set_name (old_name_.c_str ()); });
     }
+
 } // end anonymous namespace
 
 TEST_F (BasicLoggerThreadNameFixture, ThreadNameSet) {
-    using ::testing::StrEq;
-    ::pstore::threads::set_name ("mythreadname");
-    EXPECT_THAT (::pstore::logging::basic_logger::get_current_thread_name ().c_str (),
+    using testing::StrEq;
+    pstore::threads::set_name ("mythreadname");
+    EXPECT_THAT (pstore::logging::basic_logger::get_current_thread_name ().c_str (),
                  StrEq ("mythreadname"));
 }
 
 TEST_F (BasicLoggerThreadNameFixture, ThreadNameEmpty) {
-    using ::testing::AllOf;
-    using ::testing::Ge;
-    using ::testing::Le;
+    using testing::AllOf;
+    using testing::Ge;
+    using testing::Le;
 
-    ::pstore::threads::set_name ("");
+    pstore::threads::set_name ("");
 
-    std::string const name = ::pstore::logging::basic_logger::get_current_thread_name ();
+    std::string const name = pstore::logging::basic_logger::get_current_thread_name ();
 
-    // Here we're logging for '\([0-9]+\)'. Sadly regular expression support is extremely
+    // Here we're looking for '\([0-9]+\)'. Sadly regular expression support is extremely
     // limited on Windows, so it has to be done the hard way.
     std::size_t const length = name.length ();
     ASSERT_THAT (length, Ge (std::size_t{3}));
