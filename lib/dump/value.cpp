@@ -56,6 +56,7 @@
 #include <tuple>
 
 #include "pstore/support/array_elements.hpp"
+#include "pstore/support/base64.hpp"
 #include "pstore/support/utf.hpp"
 #include "pstore/support/time.hpp"
 
@@ -586,64 +587,6 @@ namespace {
         lines_.clear ();
     }
 
-    /// Converts an array of bytes to ASCII85.
-    ///
-    /// \tparam ElementType  Must be a const and/or volatile qualified std::uint8_t.
-    /// \tparam Extent  The gsl::span<> extent.
-    /// \tparam BackInserter  A LegacyOutputIterator iterator type.
-    /// \param span  The byte span to be converted.
-    /// \param out  The output iterator to which the encoded characters are written.
-    /// \returns Output iterator to the element in the destination range, one past the last element
-    ///   copied.
-    template <typename ElementType, std::ptrdiff_t Extent, typename BackInserter,
-              typename = typename std::enable_if<std::is_same<
-                  typename std::remove_cv<ElementType>::type, std::uint8_t>::value>::type>
-    BackInserter to_base64 (pstore::gsl::span<ElementType, Extent> const & span, BackInserter out) {
-        static constexpr std::array<std::uint8_t, 64> alphabet{
-            {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-             'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-             'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-             'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'}};
-        using index_type = typename pstore::gsl::span<ElementType, Extent>::index_type;
-        auto it = std::begin (span);
-        index_type const size = span.size ();
-        // Consume the input, converting three input bytes to four output characters.
-        for (auto index = index_type{0}; index < size / 3; ++index) {
-            auto value1 = static_cast<std::uint32_t> (*(it++) << 16);
-            value1 += static_cast<std::uint32_t> (*(it++) << 8);
-            value1 += static_cast<std::uint32_t> (*(it++));
-            *(out++) = alphabet[(value1 & 0x00FC0000) >> 18];
-            *(out++) = alphabet[(value1 & 0x0003F000) >> 12];
-            *(out++) = alphabet[(value1 & 0x00000FC0) >> 6];
-            *(out++) = alphabet[value1 & 0x0000003F];
-        }
-
-        // Deal with the remaining 0..2 characters.
-        switch (size % 3) {
-        case 0: break;
-        case 1: {
-            auto const value2 = static_cast<std::uint32_t> (*(it++) << 16);
-            *(out++) = alphabet[(value2 & 0x00FC0000) >> 18];
-            *(out++) = alphabet[(value2 & 0x0003F000) >> 12];
-            *(out++) = '=';
-            *(out++) = '=';
-        } break;
-        case 2: {
-            auto value3 = static_cast<std::uint32_t> (*(it++) << 16);
-            value3 += static_cast<std::uint32_t> (*(it++) << 8);
-            *(out++) = alphabet[(value3 & 0x00FC0000) >> 18];
-            *(out++) = alphabet[(value3 & 0x0003F000) >> 12];
-            *(out++) = alphabet[(value3 & 0x00000FC0) >> 6];
-            *(out++) = '=';
-        } break;
-        default:
-            assert (false); //! OCLINT(PH - don't warn about a conditional constant)
-            break;
-        }
-        assert (it == std::end (span));
-        return out;
-    }
-
 } // end anonymous namespace
 
 namespace pstore {
@@ -658,7 +601,7 @@ namespace pstore {
         OStream & binary::writer (OStream & os, indent const & ind) const {
             accumulator<OStream> acc (os, ind);
             os << "!!binary |\n";
-            to_base64 (gsl::make_span (v_), std::back_inserter (acc));
+            to_base64 (std::begin (v_), std::end (v_), std::back_inserter (acc));
             acc.flush ();
             return os;
         }

@@ -44,6 +44,7 @@
 
 add_pstore_unit_test (pstore-support-unit-tests
     test_aligned.cpp
+    test_base64.cpp
     test_bit_count.cpp
     test_bit_field.cpp
     test_error.cpp

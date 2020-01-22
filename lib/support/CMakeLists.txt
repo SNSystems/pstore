@@ -271,6 +271,7 @@ set (PSTORE_SUPPORT_INCLUDES
 
     "${PSTORE_SUPPORT_INCLUDE_DIR}/aligned.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/array_elements.hpp"
+    "${PSTORE_SUPPORT_INCLUDE_DIR}/base64.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_count.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_field.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"

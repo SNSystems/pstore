@@ -77,6 +77,7 @@
 #include <cctype>
 
 #include "pstore/support/array_elements.hpp"
+#include "pstore/support/base64.hpp"
 
 namespace pstore {
     namespace httpd {
@@ -243,21 +244,8 @@ namespace pstore {
         // digest_to_base64 [static]
         // ~~~~~~~~~~~~~~~~
         std::string sha1::digest_to_base64 (sha1::result_type const & digest) {
-            constexpr gsl::czstring alphabet =
-                "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
             std::string result;
-            for (auto ctr = 0U; ctr < 18U; ctr += 3U) {
-                result += alphabet[(digest[ctr] >> 2U) & 0x3FU];
-                result +=
-                    alphabet[((digest[ctr] & 0x03U) << 4U) | ((digest[ctr + 1U] & 0xF0U) >> 4U)];
-                result += alphabet[((digest[ctr + 1U] & 0x0FU) << 2U) |
-                                   ((digest[ctr + 2U] & 0xC0U) >> 6U)];
-                result += alphabet[digest[ctr + 2U] & 0x3FU];
-            }
-            result += alphabet[(digest[18] >> 2U) & 0x3FU];
-            result += alphabet[((digest[18] & 0x03U) << 4U) | ((digest[19] & 0xF0U) >> 4U)];
-            result += alphabet[(digest[19] & 0x0FU) << 2U];
-            result += '=';
+            to_base64 (std::begin (digest), std::end (digest), std::back_inserter (result));
             return result;
         }
 
