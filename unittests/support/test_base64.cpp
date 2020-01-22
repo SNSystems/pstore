@@ -46,6 +46,7 @@
 
 #include "pstore/support/base64.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <vector>
 
