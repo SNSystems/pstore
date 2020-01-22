@@ -215,7 +215,7 @@ namespace pstore {
     // operator==
     // ~~~~~~~~~~
     template <typename T>
-    constexpr inline bool uint128::operator== (T rhs) const noexcept {
+    constexpr bool uint128::operator== (T rhs) const noexcept {
 #ifdef PSTORE_HAVE_UINT128_T
         return v_ == rhs;
 #else
@@ -224,7 +224,7 @@ namespace pstore {
     }
 
     template <>
-    constexpr inline bool uint128::operator==<uint128> (uint128 const rhs) const noexcept {
+    constexpr bool uint128::operator==<uint128> (uint128 const rhs) const noexcept {
 #ifdef PSTORE_HAVE_UINT128_T
         return v_ == rhs.v_;
 #else
