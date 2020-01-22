@@ -85,8 +85,8 @@ namespace pstore {
             if (str.length () != 32) {
                 return nothing<index::digest> ();
             }
-            return get64 (str, 0U) >>= [&] (std::uint64_t high) {
-                return get64 (str, 16U) >>= [&] (std::uint64_t low) {
+            return get64 (str, 0U) >>= [&] (std::uint64_t const high) {
+                return get64 (str, 16U) >>= [&] (std::uint64_t const low) {
                     return just (index::digest{high, low});
                 };
             };

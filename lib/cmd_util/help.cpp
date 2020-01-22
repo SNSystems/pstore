@@ -166,7 +166,7 @@ namespace pstore {
                         assert (pstore::utf::length (std::get<std::string> (name)) ==
                                 std::get<std::size_t> (name));
 
-                        if (auto alias = op->as_alias ()) {
+                        if (alias const * const alias = op->as_alias ()) {
                             op = alias->original ();
                         }
 
