@@ -122,13 +122,15 @@ namespace pstore {
 
         // (dtor)
         // ~~~~~~
-        range_lock::~range_lock () noexcept { PSTORE_NO_EX_ESCAPE (this->unlock ()); }
+        range_lock::~range_lock () noexcept {
+            no_ex_escape ([this] () { this->unlock (); });
+        }
 
         // operator=
         // ~~~~~~~~~
         range_lock & range_lock::operator= (range_lock && other) noexcept {
             if (&other != this) {
-                PSTORE_NO_EX_ESCAPE (this->unlock ());
+                no_ex_escape ([this] () { this->unlock (); });
                 file_ = other.file_;
                 offset_ = other.offset_;
                 size_ = other.size_;
@@ -320,12 +322,14 @@ namespace pstore {
 
         // ~file_handle
         // ~~~~~~~~~~~~
-        file_handle::~file_handle () noexcept { PSTORE_NO_EX_ESCAPE (this->close ()); }
+        file_handle::~file_handle () noexcept {
+            no_ex_escape ([this] () { this->close (); });
+        }
 
         // operator= (rvalue assignment)
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         file_handle & file_handle::operator= (file_handle && rhs) noexcept {
-            PSTORE_NO_EX_ESCAPE (this->close ());
+            no_ex_escape ([this] () { this->close (); });
 
             path_ = std::move (rhs.path_);
             file_ = rhs.file_;
@@ -351,7 +355,7 @@ namespace pstore {
                 , unlinker_{std::move (unlinker)} {}
 
         deleter_base::~deleter_base () noexcept {
-            PSTORE_NO_EX_ESCAPE ({ this->unlink (); });
+            no_ex_escape ([this] () { this->unlink (); });
         }
 
         void deleter_base::unlink () {

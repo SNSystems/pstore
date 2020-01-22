@@ -188,7 +188,7 @@ namespace pstore {
                 writer_base & operator= (writer_base &&) noexcept = default;
 
                 virtual ~writer_base () noexcept {
-                    PSTORE_NO_EX_ESCAPE ({ this->flush (); });
+                    no_ex_escape ([this] () { this->flush (); });
                 }
 
                 ///@{

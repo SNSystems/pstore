@@ -68,7 +68,7 @@ namespace pstore {
 
         ~scope_guard () noexcept {
             if (execute_on_destruction_) {
-                PSTORE_NO_EX_ESCAPE (exit_function_ ());
+                no_ex_escape ([this] () { exit_function_ (); });
             }
         }
 

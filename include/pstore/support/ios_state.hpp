@@ -70,7 +70,7 @@ namespace pstore {
         ios_flags_saver (ios_flags_saver && rhs) noexcept = delete;
 
         ~ios_flags_saver () noexcept {
-            PSTORE_NO_EX_ESCAPE ({ stream_.flags (flags_); });
+            no_ex_escape ([this] () { stream_.flags (flags_); });
         }
 
         // No copying, moving, or assignment.

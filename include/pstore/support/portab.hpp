@@ -60,12 +60,22 @@
 #    define PSTORE_CATCH(x, code)
 #endif
 
-#define PSTORE_NO_EX_ESCAPE(x)                                                                     \
-    do {                                                                                           \
-        PSTORE_TRY { x; }                                                                          \
-        PSTORE_CATCH (..., {})                                                                     \
-    } while (false)
+namespace pstore {
 
+    template <typename Function>
+    void no_ex_escape (Function fn) {
+        // Just call fn and catch any exception it may throw.
+        // clang-format off
+        PSTORE_TRY {
+            fn ();
+        }
+        PSTORE_CATCH (..., {
+            //! OCLINT(PH - don't warn about an empty catch)
+        })
+        // clang-format on
+    }
+
+} // end namespace pstore
 
 /// PSTORE_CPP_RTTI: Defined if RTTI is enabled.
 #ifdef __cpp_rtti

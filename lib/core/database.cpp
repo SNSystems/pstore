@@ -110,7 +110,7 @@ namespace pstore {
     // ~database
     // ~~~~~~~~~
     database::~database () noexcept {
-        PSTORE_NO_EX_ESCAPE (this->close ()); //! OCLINT(PH - don't warn about an empty catch)
+        no_ex_escape ([this] () { this->close (); });
     }
 
     // finish_init

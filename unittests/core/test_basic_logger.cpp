@@ -56,23 +56,6 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
-namespace {
-
-    template <typename Function>
-    void no_ex_escape (Function fn) {
-        // Just call fn and catch any exception it may throw.
-        // clang-format off
-        PSTORE_TRY {
-            fn ();
-        }
-        PSTORE_CATCH (..., {
-            // Do nothing.
-        })
-        // clang-format on
-    }
-
-} // end anonymous namespace
-
 using pstore::just;
 using pstore::maybe;
 using pstore::nothing;
@@ -109,7 +92,7 @@ namespace {
     // (dtor)
     // ~~~~~~
     time_zone_setter::~time_zone_setter () noexcept {
-        no_ex_escape ([this] {
+        pstore::no_ex_escape ([this] {
             if (old_) {
                 time_zone_setter::setenv ("TZ", old_->c_str ());
             } else {
@@ -249,7 +232,7 @@ namespace {
     // (dtor)
     // ~~~~~~
     BasicLoggerThreadNameFixture::~BasicLoggerThreadNameFixture () {
-        no_ex_escape ([this] () { pstore::threads::set_name (old_name_.c_str ()); });
+        pstore::no_ex_escape ([this] () { pstore::threads::set_name (old_name_.c_str ()); });
     }
 
 } // end anonymous namespace

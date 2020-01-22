@@ -83,6 +83,7 @@ namespace pstore {
     namespace diff {
 
         namespace details {
+
             /// A simple RAII helper class which saves and restores the current db revision number.
             class revision_restorer {
             public:
@@ -90,12 +91,16 @@ namespace pstore {
                         : db_{db}
                         , old_revision_{db.get_current_revision ()} {}
                 revision_restorer (revision_restorer const &) = delete;
+
+                ~revision_restorer () noexcept {
+                    no_ex_escape ([this] () { db_.sync (old_revision_); });
+                }
+
                 revision_restorer & operator= (revision_restorer const &) = delete;
-                ~revision_restorer () noexcept { PSTORE_NO_EX_ESCAPE (db_.sync (old_revision_)); }
 
             private:
                 database & db_;
-                unsigned old_revision_;
+                unsigned const old_revision_;
             };
 
         } // namespace details
