@@ -305,18 +305,9 @@ namespace {
     }
 #endif // PSTORE_IS_INSIDE_LLVM && _WIN32 && _UNICODE
 
-} // end anonymous namespace
-
-#if defined(_WIN32)
-int _tmain (int argc, TCHAR * argv[]) {
-#else
-int main (int argc, char * argv[]) {
-#endif
-    int exit_code = EXIT_SUCCESS;
-
-    PSTORE_TRY {
-
+    void initialize (int argc, pstore::cmd_util::tchar * argv[]) {
 #ifdef PSTORE_IS_INSIDE_LLVM
+
 #    if defined(_WIN32) && defined(_UNICODE)
         // Windows will present our _tmain function with its arguments encoded as UTF-16. The LLVM
         // APIs, are expecting multi-byte characters instead. That means that we
@@ -335,7 +326,27 @@ int main (int argc, char * argv[]) {
         llvm::InitializeAllTargetInfos ();
         llvm::InitializeAllTargetMCs ();
         llvm::InitializeAllDisassemblers ();
+
+#else
+
+        (void) argc;
+        (void) argv;
+
 #endif // PSTORE_IS_INSIDE_LLVM
+    }
+
+} // end anonymous namespace
+
+
+#if defined(_WIN32)
+int _tmain (int argc, TCHAR * argv[]) {
+#else
+int main (int argc, char * argv[]) {
+#endif
+    int exit_code = EXIT_SUCCESS;
+
+    PSTORE_TRY {
+        initialize (argc, argv);
 
         switches opt;
         std::tie (opt, exit_code) = get_switches (argc, argv);
@@ -343,17 +354,10 @@ int main (int argc, char * argv[]) {
             return exit_code;
         }
 
-        bool show_contents = opt.show_contents;
-        bool show_all_fragments = opt.show_all_fragments;
-        bool show_all_compilations = opt.show_all_compilations;
-        bool show_all_debug_line_headers = opt.show_all_debug_line_headers;
-        bool show_header = opt.show_header;
-        bool show_indices = opt.show_indices;
-        bool show_log = opt.show_log;
-        bool show_shared = opt.show_shared;
         if (opt.show_all) {
-            show_contents = show_all_fragments = show_all_compilations = show_header =
-                show_indices = show_log = show_all_debug_line_headers = true;
+            opt.show_contents = opt.show_all_fragments = opt.show_all_compilations =
+                opt.show_header = opt.show_indices = opt.show_log =
+                    opt.show_all_debug_line_headers = true;
         }
 
         if (opt.hex) {
@@ -363,7 +367,6 @@ int main (int argc, char * argv[]) {
         }
         pstore::dump::address::set_expanded (opt.expanded_addresses);
 
-        bool const no_times = opt.no_times;
         using pstore::dump::make_value;
         using pstore::dump::object;
 
@@ -378,45 +381,45 @@ int main (int argc, char * argv[]) {
                                            {"path", make_value (path)},
                                            {"size", make_value (file_size (path.c_str ()))}}));
 
-            if (show_contents) {
-                file.emplace_back ("contents",
-                                   pstore::dump::make_contents (db, db.footer_pos (), no_times));
+            if (opt.show_contents) {
+                file.emplace_back (
+                    "contents", pstore::dump::make_contents (db, db.footer_pos (), opt.no_times));
             }
 
             show_index<pstore::trailer::indices::fragment> (
-                file, db, show_all_fragments, opt.fragments, dump_error_code::fragment_not_found,
-                dump_error_code::no_fragment_index,
+                file, db, opt.show_all_fragments, opt.fragments,
+                dump_error_code::fragment_not_found, dump_error_code::no_fragment_index,
                 [&db, &opt] (pstore::index::fragment_index::value_type const & value) {
                     return make_value (db, value, opt.triple.c_str (), opt.hex);
                 });
 
             show_index<pstore::trailer::indices::compilation> (
-                file, db, show_all_compilations, opt.compilations,
+                file, db, opt.show_all_compilations, opt.compilations,
                 dump_error_code::compilation_not_found, dump_error_code::no_compilation_index,
                 [&db] (pstore::index::compilation_index::value_type const & value) {
                     return make_value (db, value);
                 });
 
             show_index<pstore::trailer::indices::debug_line_header> (
-                file, db, show_all_debug_line_headers, opt.debug_line_headers,
+                file, db, opt.show_all_debug_line_headers, opt.debug_line_headers,
                 dump_error_code::debug_line_header_not_found,
                 dump_error_code::no_debug_line_header_index,
                 [&db, &opt] (pstore::index::debug_line_header_index::value_type const & value) {
                     return make_value (db, value, opt.hex);
                 });
 
-            if (show_header) {
+            if (opt.show_header) {
                 auto header = db.getro (pstore::typed_address<pstore::header>::null ());
                 file.emplace_back ("header", make_value (*header));
             }
-            if (show_indices) {
+            if (opt.show_indices) {
                 file.emplace_back ("indices", make_indices (db));
             }
-            if (show_log) {
-                file.emplace_back ("log", make_log (db, no_times));
+            if (opt.show_log) {
+                file.emplace_back ("log", make_log (db, opt.no_times));
             }
-            if (show_shared) {
-                file.emplace_back ("shared_memory", make_shared_memory (db, no_times));
+            if (opt.show_shared) {
+                file.emplace_back ("shared_memory", make_shared_memory (db, opt.no_times));
             }
 
             output.push_back (make_value (file));
