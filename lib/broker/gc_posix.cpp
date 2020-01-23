@@ -63,7 +63,7 @@
 #    include <unistd.h>
 
 #    include "pstore/os/logging.hpp"
-#    include "pstore/support/signal_helpers.hpp"
+#    include "pstore/os/signal_helpers.hpp"
 
 using pstore::logging::priority;
 

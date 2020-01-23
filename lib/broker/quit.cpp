@@ -77,9 +77,9 @@
 #include "pstore/http/quit.hpp"
 #include "pstore/http/server.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/signal_helpers.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/array_elements.hpp"
-#include "pstore/support/signal_helpers.hpp"
 
 namespace {
 

@@ -51,7 +51,7 @@
 #include "pstore/os/logging.hpp"
 #include "pstore/os/path.hpp"
 #include "pstore/os/process_file_name.hpp"
-#include "pstore/support/signal_helpers.hpp"
+#include "pstore/os/signal_helpers.hpp"
 
 namespace pstore {
 

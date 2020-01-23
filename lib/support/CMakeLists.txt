@@ -292,7 +292,6 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/round2.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
@@ -305,7 +304,6 @@ set (PSTORE_SUPPORT_LIB_SRC
 
     error.cpp
     fnv.cpp
-    signal_helpers.cpp
     sstring_view.cpp
     uint128.cpp
     utf.cpp

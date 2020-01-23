@@ -4,7 +4,7 @@
 //* \__ \ | (_| | | | | (_| | | | | | |  __/ | |_) |  __/ |  \__ \ *
 //* |___/_|\__, |_| |_|\__,_|_| |_| |_|\___|_| .__/ \___|_|  |___/ *
 //*        |___/                             |_|                   *
-//===- include/pstore/support/signal_helpers.hpp --------------------------===//
+//===- include/pstore/os/signal_helpers.hpp -------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,8 +44,8 @@
 
 /// \file signal_helpers.hpp
 
-#ifndef PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
-#define PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
+#ifndef PSTORE_OS_SIGNAL_HELPERS_HPP
+#define PSTORE_OS_SIGNAL_HELPERS_HPP
 
 #include <cerrno>
 #include <csignal>
@@ -73,4 +73,5 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_SUPPORT_SIGNAL_HELPERS_HPP
+#endif // PSTORE_OS_SIGNAL
+

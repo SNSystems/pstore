@@ -64,8 +64,8 @@
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/signal_helpers.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/signal_helpers.hpp"
 #include "pstore/vacuum/status.hpp"
 #include "pstore/vacuum/watch.hpp"
 
