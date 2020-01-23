@@ -9,22 +9,22 @@ pstore is a lightweight persistent append-only key/value store intended for use 
 
 Its design goals are:
 
-- Performance approaching that of an in-memory hash table
-- Good support for parallel compilations
-- Multiple indices
-- In-process
+-   Performance approaching that of an in-memory hash table
+-   Good support for parallel compilations
+-   Multiple indices
+-   In-process
 
 # Table of Contents
 
-* [Table of Contents](#table-of-contents)
-* [Building pstore](#building-pstore)
-    * [Prerequisites](#prerequisites)
-    * [Building](#building)
-        * [Standalone](#standalone)
-            * [Installing](#installing)
-        * [Inside LLVM](#inside-llvm)
-* [Getting started](#getting-started)
-    * [Using the read and write utilities](#using-the-read-and-write-utilities)
+-   [Table of Contents](#table-of-contents)
+-   [Building pstore](#building-pstore)
+    -   [Prerequisites](#prerequisites)
+    -   [Building](#building)
+        -   [Standalone](#standalone)
+            -   [Installing](#installing)
+        -   [Inside LLVM](#inside-llvm)
+-   [Getting started](#getting-started)
+    -   [Using the read and write utilities](#using-the-read-and-write-utilities)
 
 # Building pstore
 
@@ -32,24 +32,24 @@ Its design goals are:
 
 pstore is built and tested on a variety of platforms:
 
-- Ubuntu Linux 14.04 LTS Trusty Tahr: building with GCC 5.5.0 and GCC 9.2.1
-- Ubuntu Linux 16.04 LTS Xenial Xerus: building with Clang 3.8.0 and Clang 9.0.1
-- macOS: building with Xcode 9.3
-- Windows: building with Visual Studio 2017 version 15.9
+-   Ubuntu Linux 14.04 LTS Trusty Tahr: building with GCC 5.5.0 and GCC 9.2.1
+-   Ubuntu Linux 16.04 LTS Xenial Xerus: building with Clang 3.8.0 and Clang 9.0.1
+-   macOS: building with Xcode 9.3
+-   Windows: building with Visual Studio 2017 version 15.9
 
 In addition, there’s support for FreeBSD 11 and Solaris 11.4 beta using clang 4.0.0 and GCC 5.5.0 respectively. However, note that Windows Subsystem for Linux does not currently work: perhaps due to [this](https://github.com/Microsoft/WSL/issues/1927) bug.
 
 To build it, you’ll also need the following tools:
 
-- [cmake](http://cmake.org) (version 3.4 or later, version 3.8 or later if using Visual Studio 2017)
+-   [cmake](http://cmake.org) (version 3.4 or later, version 3.8 or later if using Visual Studio 2017)
 
 Optionally:
 
-- [Doxygen](http://doxygen.org) for building the documentation
-- [GraphViz](http://graphviz.org) for graph rendering
-- [nodejs](https://nodejs.org/) for the [ElectronJS](https://electronjs.org)-based broker dashboard
-- [Python](https://www.python.org) 2.7 or later for running the system tests as well as a few utilities
-- [Valgrind](http://valgrind.org) for extra validation of the executables (enabled by passing the `-D PSTORE_VALGRIND=Yes` argument when running `cmake` to generate the build)
+-   [Doxygen](http://doxygen.org) for building the documentation
+-   [GraphViz](http://graphviz.org) for graph rendering
+-   [nodejs](https://nodejs.org/) for the [ElectronJS](https://electronjs.org)-based broker dashboard
+-   [Python](https://www.python.org) 2.7 or later for running the system tests as well as a few utilities
+-   [Valgrind](http://valgrind.org) for extra validation of the executables (enabled by passing the `-D PSTORE_VALGRIND=Yes` argument when running `cmake` to generate the build)
 
 ## Building
 
@@ -101,64 +101,80 @@ $ ninja
 ~~~~
 
 # Getting started
+
 ## Using the read and write utilities
 
 The [pstore-read](tools/read/) and [pstore-write](tools/write/) tools provide a simple way to experiment with the capabilities of the pstore library. Consider the following exchange:
 
-    $ echo foo > foo.txt
-    $ echo bar > bar.txt
-    $ pstore-write --add-file mykey,foo.txt pstore.db
-    $ pstore-read pstore.db mykey
-    foo
-    $ pstore-write --add-file mykey,bar.txt pstore.db
-    $ pstore-read pstore.db mykey
-    bar
-    $ pstore-read -r 1 pstore.db mykey
-    foo
-    $ pstore-dump --log pstore.db
-    ---
+~~~~bash
+$ echo foo > foo.txt
+$ echo bar > bar.txt
+$ pstore-write --add-file mykey,foo.txt pstore.db
+$ pstore-read pstore.db mykey
+foo
+$ pstore-write --add-file mykey,bar.txt pstore.db
+$ pstore-read pstore.db mykey
+bar
+$ pstore-read -r 1 pstore.db mykey
+foo
+$ pstore-dump --log pstore.db
+---
 
-    - file :
-          path : pstore.db
-          size : 4194304
-      log  :
-          - { number: 2, size: 32, time: 2018-03-12T13:52:04Z }
-          - { number: 1, size: 32, time: 2018-03-12T13:51:38Z }
-          - { number: 0, size: 0, time: 2018-03-12T13:51:38Z }
-    ...
-    $
+- file :
+      path : pstore.db
+      size : 4194304
+  log  :
+      - { number: 2, size: 32, time: 2018-03-12T13:52:04Z }
+      - { number: 1, size: 32, time: 2018-03-12T13:51:38Z }
+      - { number: 0, size: 0, time: 2018-03-12T13:51:38Z }
+...
+$
+~~~~
 
 Let’s pick this apart one step at a time…
 
-    $ echo foo > foo.txt
-    $ echo bar > bar.txt
+~~~~bash
+$ echo foo > foo.txt
+$ echo bar > bar.txt
+~~~~
 
 Create two files which contain short text strings that we’ll shortly record in a pstore file:
 
-    $ pstore-write --add-file mykey,foo.txt pstore.db
+~~~~bash
+$ pstore-write --add-file mykey,foo.txt pstore.db
+~~~~
 
 This command creates a new pstore file named `pstore.db` or appends to that file if it already exists. The choice of file name is arbitrary. The tool creates an entry in one of the pstore indexes with the key “mykey” which has a corresponding value string “foo\n” as read from the `foo.txt` file we created earlier.
 
-    $ pstore-read pstore.db mykey
-    foo
+~~~~bash
+$ pstore-read pstore.db mykey
+foo
+~~~~
 
 Next we use the `pstore-read` utility to search the `pstore.db` file for key named “mykey” and print its value. Happily it prints “foo\n”: the same string that we passed to `pstore-write` above.
 
-    $ pstore-write --add-file mykey,bar.txt pstore.db
+~~~~bash
+$ pstore-write --add-file mykey,bar.txt pstore.db
+~~~~
 
 Now we run `pstore-write` again but this time associating the value “bar” (plus the inevitable newline) with the key “mykey”.
 
-    $ pstore-read pstore.db mykey
-    bar
+~~~~bash
+$ pstore-read pstore.db mykey
+bar
+~~~~
 
 Running `pstore-read` a second time prints “bar” showing that the key “mykey” has been updated.
 
-    $ pstore-read -r 1 pstore.db mykey
-    foo
+~~~~bash
+$ pstore-read -r 1 pstore.db mykey
+foo
+~~~~
 
 This command is a little more interesting. Here we’ve retrieved the original value that was linked to “mykey”. Each time that `pstore-write` stores data in a pstore file, it does so in a self-contained transaction. Each transaction is appended to the file, preserving the previous contents. The first transaction in a pstore file is number 0 (which is always empty). The first time data is added, transaction 1 is created; the second time, we build transaction 2, and so on. Any redundant data stays in the file &mdash; and is immutable &mdash; until the garbage collector (`pstore-vacuumd`) runs. This property enables a store to be read without any need for locks.
 
-    $ pstore-dump --log pstore.db
+~~~~bash
+$ pstore-dump --log pstore.db
+~~~~
 
 The [pstore-dump](tools/dump/) command allows us to inspect the innards of a pstore file. It produces a YAML dump of the requested structures: the transaction log in this case showing a list of all of the transactions in the file (newest first), how much data each of them is carrying, and when that data was committed.
-
