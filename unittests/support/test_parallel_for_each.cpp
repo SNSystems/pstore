@@ -81,11 +81,10 @@ namespace {
     auto ParallelForEach::run_for_each (container const & src) -> container {
         std::mutex mut;
         container out;
-        pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
-                                             [&out, &mut] (int v) {
-                                                 std::lock_guard<std::mutex> lock (mut);
-                                                 out.emplace_back (v * 2);
-                                             });
+        pstore::parallel_for_each (std::begin (src), std::end (src), [&out, &mut] (int v) {
+            std::lock_guard<std::mutex> _{mut};
+            out.emplace_back (v * 2);
+        });
         std::sort (std::begin (out), std::end (out), std::less<int> ());
         return out;
     }
@@ -144,8 +143,8 @@ TEST (ParallelForEachException, WorkerExceptionPropogates) {
     class custom_exception : public std::exception {};
     auto op = [&] () {
         std::array<int, 2> const src{{3, 5}};
-        pstore::cmd_util::parallel_for_each (std::begin (src), std::end (src),
-                                             [] (int) { throw custom_exception{}; });
+        pstore::parallel_for_each (std::begin (src), std::end (src),
+                                   [] (int) { throw custom_exception{}; });
     };
     EXPECT_THROW (op (), custom_exception);
 #endif // PSTORE_EXCEPTIONS

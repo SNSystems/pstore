@@ -203,8 +203,8 @@ namespace {
                 is_found = false;
             }
         };
-        pstore::cmd_util::parallel_for_each (std::begin (expected_results),
-                                             std::end (expected_results), check_key);
+        pstore::parallel_for_each (std::begin (expected_results), std::end (expected_results),
+                                   check_key);
         return is_found.load ();
     }
 

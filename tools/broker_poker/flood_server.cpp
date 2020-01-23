@@ -58,20 +58,18 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
     auto begin = pstore::cmd_util::iota_generator ();
     auto end = pstore::cmd_util::iota_generator (num);
 
-    pstore::cmd_util::parallel_for_each (
-        begin, end, [pipe_path, retry_timeout] (unsigned long count) {
-            pstore::broker::fifo_path fifo (pipe_path, retry_timeout,
-                                            pstore::broker::fifo_path::infinite_retries);
-            pstore::broker::writer wr (fifo, retry_timeout,
-                                       pstore::broker::writer::infinite_retries);
+    pstore::parallel_for_each (begin, end, [pipe_path, retry_timeout] (unsigned long count) {
+        pstore::broker::fifo_path fifo (pipe_path, retry_timeout,
+                                        pstore::broker::fifo_path::infinite_retries);
+        pstore::broker::writer wr (fifo, retry_timeout, pstore::broker::writer::infinite_retries);
 
-            std::string path;
-            path.reserve (count);
-            for (auto ctr = 0UL; ctr <= count; ++ctr) {
-                path += ctr % 10 + '0';
-            }
+        std::string path;
+        path.reserve (count);
+        for (auto ctr = 0UL; ctr <= count; ++ctr) {
+            path += ctr % 10 + '0';
+        }
 
-            constexpr bool error_on_timeout = true;
-            pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
-        });
+        constexpr bool error_on_timeout = true;
+        pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
+    });
 }

@@ -64,6 +64,7 @@
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
+#include "pstore/support/parallel_for_each.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
@@ -133,45 +134,11 @@ namespace {
 
     using digest_set = std::unordered_set<pstore::index::digest, pstore::index::u128_hash>;
 
-    template <typename InputIt, typename UnaryFunction>
-    void parallel_for_each (InputIt first, InputIt last, UnaryFunction fn) {
-        auto num_elements = std::distance (first, last);
-        auto const num_threads = std::max (std::thread::hardware_concurrency (), 1U);
-        auto const partition_size = (num_elements + num_threads - 1) / num_threads;
-        assert (partition_size * num_threads >= num_elements);
-
-        std::vector<std::future<void>> futures;
-        futures.reserve (num_threads);
-
-        while (first != last) {
-            auto const distance = std::min (partition_size, num_elements);
-            auto next = first;
-            std::advance (next, distance);
-
-            // Create an asynchronous task which will sequentially process from 'first' to 'next'
-            // invoking f() for each data member.
-            futures.push_back (std::async (
-                std::launch::async,
-                [&fn] (InputIt fst, InputIt lst) { std::for_each (fst, lst, fn); }, first, next));
-
-            first = next;
-            assert (num_elements >= distance);
-            num_elements -= distance;
-        }
-        assert (num_elements == 0);
-        assert (futures.size () == num_threads);
-
-        // Join
-        for (auto & f : futures) {
-            f.wait ();
-        }
-    }
-
     void find (pstore::database const & database, pstore::index::fragment_index const & index,
                digest_set const & keys) {
         profile_marker sgn (2); //! OCLint(PH - meant to be unused)
 
-        parallel_for_each (
+        pstore::parallel_for_each (
             std::begin (keys), std::end (keys),
             [&database, &index] (pstore::index::digest key) { index.find (database, key); });
     }
@@ -183,10 +150,9 @@ namespace {
 
     using namespace pstore::cmd_util;
 
-    cl::opt<std::string>
-        data_file (cl::positional,
-                   cl::desc ("Path of the pstore repository to use for index exercise."),
-                   cl::required);
+    cl::opt<std::string> data_file{
+        cl::positional, cl::desc ("Path of the pstore repository to use for index exercise."),
+        cl::required};
 
 } // end anonymous namespace
 
@@ -264,14 +230,15 @@ int main (int argc, char * argv[]) {
         database.close ();
     }
     // clang-format off
-    PSTORE_CATCH (std::exception const & ex, {
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
         auto what = ex.what ();
         pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
                                        << to_native_string (what)
                                        << std::endl;
         exit_code = EXIT_FAILURE;
     })
-    PSTORE_CATCH (..., {
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
         pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
