@@ -4,7 +4,7 @@
 //* | |_| | | | | | |  __/ *
 //*  \__|_|_| |_| |_|\___| *
 //*                        *
-//===- lib/support/time.cpp -----------------------------------------------===//
+//===- include/pstore/os/time.hpp -----------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,61 +41,17 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/support/time.hpp"
 
-#include <cassert>
-#include <cerrno>
+#ifndef PSTORE_SUPPORT_TIME_HPP
+#define PSTORE_SUPPORT_TIME_HPP
 
-#include "pstore/config/config.hpp"
-#include "pstore/support/error.hpp"
+#include <ctime>
 
 namespace pstore {
 
-#ifdef PSTORE_HAVE_LOCALTIME_S
-    struct std::tm local_time (std::time_t const clock) {
-        struct tm result;
-        if (errno_t const err = localtime_s (&result, &clock)) {
-            raise (errno_erc{errno}, "localtime_s");
-        }
-        return result;
-    }
-
-#elif defined(PSTORE_HAVE_LOCALTIME_R)
-    struct std::tm local_time (std::time_t const clock) {
-        errno = 0;
-        struct tm result {};
-        struct tm * const res = localtime_r (&clock, &result);
-        if (res == nullptr) {
-            raise (errno_erc{errno}, "localtime_r");
-        }
-        assert (res == &result);
-        return result;
-    }
-#else
-#    error "Need localtime_r() or localtime_s()"
-#endif
-
-#ifdef PSTORE_HAVE_GMTIME_S
-    struct std::tm gm_time (std::time_t const clock) {
-        struct tm result;
-        if (errno_t const err = gmtime_s (&result, &clock)) {
-            raise (errno_erc{errno}, "gmtime_s");
-        }
-        return result;
-    }
-#elif defined(PSTORE_HAVE_GMTIME_R)
-    struct std::tm gm_time (std::time_t const clock) {
-        errno = 0;
-        struct tm result {};
-        struct tm * const res = gmtime_r (&clock, &result);
-        if (res == nullptr) {
-            raise (errno_erc{errno}, "gmtime_r");
-        }
-        assert (res == &result);
-        return result;
-    }
-#else
-#    error "Need gmtime_r() or gmtime_s()"
-#endif
+    struct std::tm local_time (std::time_t clock);
+    struct std::tm gm_time (std::time_t clock);
 
 } // end namespace pstore
+
+#endif // PSTORE_SUPPORT_TIME_HPP

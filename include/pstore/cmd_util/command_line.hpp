@@ -52,10 +52,9 @@
 #include "pstore/cmd_util/modifiers.hpp"
 #include "pstore/cmd_util/stream_traits.hpp"
 #include "pstore/cmd_util/tchar.hpp"
-
+#include "pstore/os/path.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
-#include "pstore/support/path.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {

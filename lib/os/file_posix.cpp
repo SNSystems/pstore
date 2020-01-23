@@ -63,9 +63,9 @@
 #    include <sys/types.h>
 #    include <unistd.h>
 
-// local includes
+// pstore includes
+#    include "pstore/os/path.hpp"
 #    include "pstore/support/gsl.hpp"
-#    include "pstore/support/path.hpp"
 #    include "pstore/support/quoted.hpp"
 #    include "pstore/support/small_vector.hpp"
 #    include "pstore/support/unsigned_cast.hpp"

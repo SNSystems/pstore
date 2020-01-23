@@ -46,6 +46,7 @@ set (PSTORE_OS_UNIT_TEST_SRC
     test_file.cpp
     test_file_handle.cpp
     test_memory_mapper.cpp
+    test_path.cpp
     test_process_file_name.cpp
     test_shared_memory.cpp
 )

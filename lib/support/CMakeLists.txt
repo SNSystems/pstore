@@ -285,7 +285,6 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/parallel_for_each.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/path.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
@@ -296,7 +295,6 @@ set (PSTORE_SUPPORT_INCLUDES
     "${PSTORE_SUPPORT_INCLUDE_DIR}/signal_helpers.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/time.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/unsigned_cast.hpp"
     "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
@@ -307,8 +305,6 @@ set (PSTORE_SUPPORT_LIB_SRC
 
     error.cpp
     fnv.cpp
-    time.cpp
-    path.cpp
     signal_helpers.cpp
     sstring_view.cpp
     uint128.cpp

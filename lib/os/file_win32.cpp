@@ -60,12 +60,13 @@
 #    include <stdexcept>
 #    include <system_error>
 
+// pstore includes
+#    include "pstore/os/path.hpp"
 #    include "pstore/os/uint64.hpp"
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/random.hpp"
 #    include "pstore/support/small_vector.hpp"
 #    include "pstore/support/utf.hpp"
-#    include "pstore/support/path.hpp"
 #    include "pstore/support/quoted.hpp"
 
 namespace pstore {

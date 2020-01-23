@@ -50,10 +50,12 @@ set (pstore_os_includes
     "${pstore_os_include_dir}/file_win32.hpp"
     "${pstore_os_include_dir}/logging.hpp"
     "${pstore_os_include_dir}/memory_mapper.hpp"
+    "${pstore_os_include_dir}/path.hpp"
     "${pstore_os_include_dir}/process_file_name.hpp"
     "${pstore_os_include_dir}/rotating_log.hpp"
     "${pstore_os_include_dir}/shared_memory.hpp"
     "${pstore_os_include_dir}/thread.hpp"
+    "${pstore_os_include_dir}/time.hpp"
     "${pstore_os_include_dir}/uint64.hpp"
 )
 set (pstore_os_lib_src
@@ -64,12 +66,14 @@ set (pstore_os_lib_src
     memory_mapper.cpp
     memory_mapper_posix.cpp
     memory_mapper_win32.cpp
+    path.cpp
     process_file_name_posix.cpp
     process_file_name_win32.cpp
     shared_memory.cpp
     thread.cpp
     thread_posix.cpp
     thread_win32.cpp
+    time.cpp
 )
 
 add_pstore_library (

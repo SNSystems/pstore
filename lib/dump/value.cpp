@@ -55,10 +55,10 @@
 #include <sstream>
 #include <tuple>
 
+#include "pstore/os/time.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/base64.hpp"
 #include "pstore/support/utf.hpp"
-#include "pstore/support/time.hpp"
 
 namespace {
 

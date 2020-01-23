@@ -47,7 +47,7 @@
 #include "gtest/gtest.h"
 
 #include "pstore/os/file.hpp"
-#include "pstore/support/path.hpp"
+#include "pstore/os/path.hpp"
 
 namespace {
 

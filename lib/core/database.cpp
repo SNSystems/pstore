@@ -56,8 +56,8 @@
 #include "pstore/config/config.hpp"
 #include "pstore/core/start_vacuum.hpp"
 #include "pstore/core/time.hpp"
+#include "pstore/os/path.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/path.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 

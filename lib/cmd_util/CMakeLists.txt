@@ -94,7 +94,7 @@ add_pstore_library (TARGET pstore-cmd-util
     SOURCES ${pstore_cmd_util_src}
     INCLUDES ${pstore_cmd_util_includes}
 )
-target_link_libraries (pstore-cmd-util PUBLIC pstore-support)
+target_link_libraries (pstore-cmd-util PUBLIC pstore-os pstore-support)
 add_clang_tidy_target (pstore-cmd-util)
 
 if (NOT PSTORE_EXCEPTIONS)
@@ -112,5 +112,5 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-cmd-util-ex pstore-support-ex)
+    target_link_libraries (pstore-cmd-util-ex PUBLIC pstore-os-ex pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)

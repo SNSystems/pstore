@@ -4,7 +4,7 @@
 //* | |_) | (_| | |_| | | | *
 //* | .__/ \__,_|\__|_| |_| *
 //* |_|                     *
-//===- include/pstore/support/path.hpp ------------------------------------===//
+//===- include/pstore/os/path.hpp -----------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

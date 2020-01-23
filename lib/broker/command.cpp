@@ -68,8 +68,8 @@
 #include "pstore/broker_intf/writer.hpp"
 #include "pstore/json/utility.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/time.hpp"
 #include "pstore/support/array_elements.hpp"
-#include "pstore/support/time.hpp"
 
 namespace {
 

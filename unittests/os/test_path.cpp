@@ -4,7 +4,7 @@
 //* | |_) | (_| | |_| | | | *
 //* | .__/ \__,_|\__|_| |_| *
 //* |_|                     *
-//===- unittests/support/test_path.cpp ------------------------------------===//
+//===- unittests/os/test_path.cpp -----------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,7 +44,7 @@
 /// \file test_path.cpp
 /// \brief Unit tests for the path.hpp (path management) interfaces.
 
-#include "pstore/support/path.hpp"
+#include "pstore/os/path.hpp"
 #include "gtest/gtest.h"
 
 TEST (Path, PosixDirName) {

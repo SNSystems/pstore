@@ -56,9 +56,9 @@
 // pstore includes
 #include "pstore/config/config.hpp"
 #include "pstore/os/rotating_log.hpp"
+#include "pstore/os/time.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/time.hpp"
 
 #ifdef PSTORE_HAVE_ASL_H
 #    include <asl.h>
