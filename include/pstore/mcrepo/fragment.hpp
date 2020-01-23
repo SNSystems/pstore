@@ -120,21 +120,27 @@ namespace pstore {
                 return content_type_iterator<Iterator> (it);
             }
 
-
         } // end namespace details
 
 
-        // clang-format off
         /// Maps from the section kind enumeration to the type that is used to represent a section
         /// of that kind.
         template <section_kind T>
-        struct enum_to_section { using type = generic_section; };
-        template <> struct enum_to_section<section_kind::bss> { using type = bss_section; };
-        template <> struct enum_to_section<section_kind::debug_line> { using type = debug_line_section; };
-        template <> struct enum_to_section<section_kind::dependent> { using type = dependents; };
-        // clang-format on
-
-
+        struct enum_to_section {
+            using type = generic_section;
+        };
+        template <>
+        struct enum_to_section<section_kind::bss> {
+            using type = bss_section;
+        };
+        template <>
+        struct enum_to_section<section_kind::debug_line> {
+            using type = debug_line_section;
+        };
+        template <>
+        struct enum_to_section<section_kind::dependent> {
+            using type = dependents;
+        };
 
         //*   __                             _    *
         //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  *
