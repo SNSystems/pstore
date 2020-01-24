@@ -120,13 +120,14 @@ namespace {
         if (errno_t const err = ::_wputenv_s (to16 (name).c_str (), to16 (value).c_str ())) {
             raise (pstore::errno_erc{err}, "_wputenv_s");
         }
+        ::_tzset ();
 #else
         errno = 0;
         if (::setenv (name, value, 1 /*overwrite*/) != 0) {
             raise (pstore::errno_erc{errno}, "setenv");
         }
-#endif
         ::tzset ();
+#endif
     }
 
     // unsetenv
@@ -148,7 +149,7 @@ namespace {
         std::array<char, pstore::logging::basic_logger::time_buffer_size> buffer_;
         static constexpr unsigned const sign_index_ = 19;
 
-        // If the time zone offset is 0, 0he standard library could legimately describe that
+        // If the time zone offset is 0, the standard library could legimately describe that
         // as either +0000 or -0000. Canonicalize here (to -0000).
         void canonicalize_sign ();
     };
