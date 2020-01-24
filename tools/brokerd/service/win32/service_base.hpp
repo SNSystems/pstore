@@ -68,8 +68,8 @@ public:
     /// \param can_stop  Can the service be stopped?
     /// \param can_shutdown  Should the service be notified when system shutdown occurs?
     /// \param can_pause_continue  Can the service be paused and continued?
-    service_base (TCHAR const * service_name, bool can_stop = true, bool can_shutdown = true,
-                  bool can_pause_continue = false);
+    explicit service_base (TCHAR const * service_name, bool can_stop = true,
+                           bool can_shutdown = true, bool can_pause_continue = false);
 
     virtual ~service_base ();
 
