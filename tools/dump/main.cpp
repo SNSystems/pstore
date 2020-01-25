@@ -231,10 +231,9 @@ namespace {
         return static_cast<std::uint64_t> (buf.st_size);
     }
 
-    template <typename IndexType, typename RecordFunction>
+    template <dump_error_code NotFoundError, typename IndexType, typename RecordFunction>
     pstore::dump::value_ptr add_specified (pstore::database const & db, IndexType const & index,
                                            std::list<pstore::index::digest> const & items_to_show,
-                                           dump_error_code not_found_error,
                                            RecordFunction record_function) {
         pstore::dump::array::container container;
         container.reserve (items_to_show.size ());
@@ -243,7 +242,7 @@ namespace {
         for (pstore::index::digest const & t : items_to_show) {
             auto pos = index.find (db, t);
             if (pos == end) {
-                pstore::raise_error_code (make_error_code (not_found_error));
+                pstore::raise_error_code (make_error_code (NotFoundError));
             } else {
                 container.emplace_back (record_function (*pos));
             }
@@ -265,24 +264,25 @@ namespace {
         return name;
     }
 
-    template <typename pstore::trailer::indices Index, typename RecordFunction>
+    template <typename pstore::trailer::indices Index, dump_error_code NotFoundError,
+              dump_error_code NoIndex, typename RecordFunction>
     void show_index (pstore::dump::object::container & file, pstore::database const & db,
-                     bool show_all, std::list<pstore::index::digest> const & items_to_show,
-                     dump_error_code not_found_error, dump_error_code no_index,
+                     bool show_all, std::list<pstore::index::digest> const & digests,
                      RecordFunction record_function) {
 
         if (show_all) {
             file.emplace_back (index_to_string (Index),
                                pstore::dump::make_index<Index> (db, record_function));
-        } else {
-            if (items_to_show.size () > 0) {
-                if (auto const index = pstore::index::get_index<Index> (db, false)) {
-                    file.emplace_back (index_to_string (Index),
-                                       add_specified (db, *index, items_to_show, not_found_error,
-                                                      record_function));
-                } else {
-                    pstore::raise_error_code (make_error_code (no_index));
-                }
+            return;
+        }
+
+        if (digests.size () > 0) {
+            if (auto const index = pstore::index::get_index<Index> (db, false)) {
+                file.emplace_back (
+                    index_to_string (Index),
+                    add_specified<NotFoundError> (db, *index, digests, record_function));
+            } else {
+                pstore::raise_error_code (make_error_code (NoIndex));
             }
         }
     }
@@ -386,24 +386,25 @@ int main (int argc, char * argv[]) {
                     "contents", pstore::dump::make_contents (db, db.footer_pos (), opt.no_times));
             }
 
-            show_index<pstore::trailer::indices::fragment> (
+            show_index<pstore::trailer::indices::fragment, dump_error_code::fragment_not_found,
+                       dump_error_code::no_fragment_index> (
                 file, db, opt.show_all_fragments, opt.fragments,
-                dump_error_code::fragment_not_found, dump_error_code::no_fragment_index,
                 [&db, &opt] (pstore::index::fragment_index::value_type const & value) {
                     return make_value (db, value, opt.triple.c_str (), opt.hex);
                 });
 
-            show_index<pstore::trailer::indices::compilation> (
+            show_index<pstore::trailer::indices::compilation,
+                       dump_error_code::compilation_not_found,
+                       dump_error_code::no_compilation_index> (
                 file, db, opt.show_all_compilations, opt.compilations,
-                dump_error_code::compilation_not_found, dump_error_code::no_compilation_index,
                 [&db] (pstore::index::compilation_index::value_type const & value) {
                     return make_value (db, value);
                 });
 
-            show_index<pstore::trailer::indices::debug_line_header> (
+            show_index<pstore::trailer::indices::debug_line_header,
+                       dump_error_code::debug_line_header_not_found,
+                       dump_error_code::no_debug_line_header_index> (
                 file, db, opt.show_all_debug_line_headers, opt.debug_line_headers,
-                dump_error_code::debug_line_header_not_found,
-                dump_error_code::no_debug_line_header_index,
                 [&db, &opt] (pstore::index::debug_line_header_index::value_type const & value) {
                     return make_value (db, value, opt.hex);
                 });
