@@ -183,7 +183,7 @@ namespace pstore {
         }
 
         auto utf8_decoder::get (std::uint8_t const byte) noexcept -> maybe<char32_t> {
-            if (decode (&state_, &codepoint_, byte)) {
+            if (decode (&state_, &codepoint_, byte) != 0U) {
                 well_formed_ = false;
                 return nothing<char32_t> ();
             }

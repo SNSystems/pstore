@@ -86,8 +86,7 @@ namespace pstore {
     /// \returns 64 bit hash.
     /// \note  To use the recommended 64 bit FNV-1a hash, use fnv1a_64_init as the hval arg on the
     /// first call to either fnv_64a_buf() or fnv_64a_str().
-    std::uint64_t fnv_64a_str (gsl::czstring const str,
-                               std::uint64_t hval = fnv1a_64_init) noexcept;
+    std::uint64_t fnv_64a_str (gsl::czstring str, std::uint64_t hval = fnv1a_64_init) noexcept;
 
 
     /// A simple function object wrapper for the fnv_64a_buf() function which is intended to

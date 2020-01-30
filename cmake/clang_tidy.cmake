@@ -174,7 +174,31 @@ function (add_clang_tidy_target source_target)
     pstore_find_clang_tidy (tidy_path sys_includes)
 
     if (NOT tidy_path STREQUAL "tidy_path-NOTFOUND")
-        set (clang_tidy_checks -checks=cert-*,misc-*,modernize-*,clang-analyzer-nullability*,hicpp-*,performance-*,portability-*)
+        set (clang_tidy_checks "*,\
+-cert-dcl21-cpp,\
+-cppcoreguidelines-avoid-magic-numbers,\
+-cppcoreguidelines-macro-usage,\
+-cppcoreguidelines-owning-memory,\
+-cppcoreguidelines-pro-bounds-constant-array-index,\
+-cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+-cppcoreguidelines-pro-type-reinterpret-cast,\
+-cppcoreguidelines-pro-type-union-access,\
+-cppcoreguidelines-avoid-c-arrays,\
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+-cppcoreguidelines-init-variables,\
+-cppcoreguidelines-pro-type-member-init,\
+-fuchsia-*,\
+-google-runtime-int,\
+-google-readability-todo,\
+-google-explicit-constructor,\
+-hicpp-avoid-c-arrays,\
+-hicpp-no-array-decay,\
+-hicpp-member-init,\
+-modernize-avoid-c-arrays,\
+-modernize-use-trailing-return-type,\
+-modernize-pass-by-value,\
+-readability-magic-numbers,\
+-readability-named-parameter")
 
         # Collect the *.cpp files: clang-tidy will scan these.
         get_target_property (source_files "${source_target}" SOURCES)
@@ -207,11 +231,11 @@ function (add_clang_tidy_target source_target)
 
         add_custom_target ("${tidy_target}"
             COMMAND "${tidy_path}"
-                    ${clang_tidy_checks}
+                    -checks=${clang_tidy_checks}
                     -header-filter="${PROJECT_SOURCE_DIR}/include/.*"
                     ${cpp_files}
                     --
-                    -std=c++11
+                    -std=c++14
                     -D NDEBUG
                     "-I$<JOIN:$<TARGET_PROPERTY:${source_target},INCLUDE_DIRECTORIES>,;-I>"
                     ${sys_includes}

@@ -159,7 +159,7 @@ namespace pstore {
 
         class utf8_decoder {
         public:
-            auto get (std::uint8_t c) noexcept -> maybe<char32_t>;
+            auto get (std::uint8_t byte) noexcept -> maybe<char32_t>;
             auto is_well_formed () const noexcept -> bool { return well_formed_; }
 
         private:
