@@ -69,13 +69,13 @@ namespace pstore {
             using ltype = Left;
             using rtype = Right;
 
-            void set (Left const & a, Right const & b);
+            void set (Left const & left, Right const & right);
 
             Right const & getr (Left const & left);
             Left const & getl (Right const & right);
 
-            bool presentl (Left const & a) const;
-            bool presentr (Right const & b) const;
+            bool presentl (Left const & l) const;
+            bool presentr (Right const & r) const;
 
             ///@{
             /// Remove the element (if one exists) with a key equivalent to the supplied value.

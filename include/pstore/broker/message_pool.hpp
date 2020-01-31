@@ -89,7 +89,7 @@ namespace pstore {
 
         inline message_ptr message_pool::get_from_pool () {
             std::unique_lock<std::mutex> lock (mut_);
-            if (queue_.size () == 0) {
+            if (queue_.empty ()) {
                 lock.unlock ();
                 return std::make_unique<message_type> ();
             }

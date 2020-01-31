@@ -83,7 +83,7 @@ namespace pstore {
             ///   uptime thread to exit.
             /// \param scavenge_threshold  The time for which messages are
             ///   allowed to wait in the message queue before the scavenger will delete them.
-            command_processor (unsigned const num_read_threads,
+            command_processor (unsigned num_read_threads,
                                gsl::not_null<httpd::server_status *> http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done,
                                std::chrono::seconds scavenge_threshold);
@@ -106,7 +106,7 @@ namespace pstore {
             /// \param cmd  The message to which this parameter points is moved to the end of the
             /// command queue.
             /// \param record_file  If not null, this object is used to record the command.
-            void push_command (message_ptr && cmd, recorder * const record_file);
+            void push_command (message_ptr && cmd, recorder * record_file);
             void clear_queue ();
 
             void scavenge ();

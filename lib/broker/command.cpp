@@ -267,7 +267,7 @@ namespace pstore {
         // push_command
         // ~~~~~~~~~~~~
         void command_processor::push_command (message_ptr && cmd, recorder * const record_file) {
-            if (record_file) {
+            if (record_file != nullptr) {
                 record_file->record (*cmd);
             }
             messages_.push (std::move (cmd));

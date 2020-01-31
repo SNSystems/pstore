@@ -126,7 +126,7 @@ namespace pstore {
 
             if (was_missing) {
                 auto not_null = [] (std::unique_ptr<std::string> const & str) {
-                    return str.get () != nullptr;
+                    return str != nullptr;
                 };
                 if (std::all_of (std::begin (value), std::end (value), not_null)) {
                     std::string complete_command;
