@@ -68,7 +68,7 @@ namespace pstore {
 
         // (dtor)
         // ~~~~~~
-        recorder::~recorder () {}
+        recorder::~recorder () = default;
 
         // record
         // ~~~~~~

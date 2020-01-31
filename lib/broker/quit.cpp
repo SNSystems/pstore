@@ -86,7 +86,8 @@ namespace {
     // push
     // ~~~~
     /// Push a simple message onto the command queue.
-    void push (pstore::broker::command_processor & cp, std::string const & message) {
+    void push (pstore::gsl::not_null<pstore::broker::command_processor *> const cp,
+               std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
         log (pstore::logging::priority::info, "push command ",
@@ -95,7 +96,7 @@ namespace {
         assert (message.length () <= pstore::broker::message_type::payload_chars);
         auto msg = std::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},
                                                                    std::uint16_t{1}, message);
-        cp.push_command (std::move (msg), nullptr);
+        cp->push_command (std::move (msg), nullptr);
     }
 
 
@@ -128,10 +129,10 @@ namespace pstore {
                 if (cp != nullptr) {
                     // Ask the read-loop threads to quit
                     for (auto ctr = 0U; ctr < num_read_threads; ++ctr) {
-                        push (*cp, read_loop_quit_command);
+                        push (cp, read_loop_quit_command);
                     }
                     // Finally ask the command loop thread to exit.
-                    push (*cp, command_loop_quit_command);
+                    push (cp, command_loop_quit_command);
                 }
 
                 pstore::httpd::quit (http_status);

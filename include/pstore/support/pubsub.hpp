@@ -267,7 +267,7 @@ namespace pstore {
         bool render = false;
         {
             std::lock_guard<std::mutex> const lock{mut_};
-            render = subscribers_.size () > 0;
+            render = !subscribers_.empty ();
         }
         if (render) {
             // Note that f() is called without the lock held.

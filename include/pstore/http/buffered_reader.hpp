@@ -90,13 +90,13 @@ namespace pstore {
 
             explicit buffered_reader (RefillFunction refill,
                                       std::size_t buffer_size = default_buffer_size);
-            buffered_reader (buffered_reader const &) = delete;
-            buffered_reader (buffered_reader &&) noexcept;
+            buffered_reader (buffered_reader const & other) = delete;
+            buffered_reader (buffered_reader && other) noexcept;
 
             ~buffered_reader () noexcept = default;
 
-            buffered_reader & operator= (buffered_reader const &) = delete;
-            buffered_reader & operator= (buffered_reader &&) noexcept = delete;
+            buffered_reader & operator= (buffered_reader const & other) = delete;
+            buffered_reader & operator= (buffered_reader && other) noexcept = delete;
 
             /// \brief Read a span of objects from the data source.
             ///
@@ -184,11 +184,11 @@ namespace pstore {
         template <typename IO, typename RefillFunction>
         buffered_reader<IO, RefillFunction>::buffered_reader (RefillFunction const refill,
                                                               std::size_t const buffer_size)
-                : refill_ (refill)
+                : refill_{refill}
                 , buf_ (std::max (buffer_size, std::size_t{1}), std::uint8_t{0})
-                , span_ (gsl::make_span (buf_))
-                , pos_ (span_.begin ())
-                , end_ (span_.begin ()) {
+                , span_{gsl::make_span (buf_)}
+                , pos_{span_.begin ()}
+                , end_{span_.begin ()} {
             this->check_invariants ();
         }
 
@@ -217,7 +217,7 @@ namespace pstore {
                 available = available.subspan (1);
             }
 
-            while (available.size () > 0 && !is_eof_) {
+            while (!available.empty () && !is_eof_) {
                 if (pos_ == end_) {
                     // Refill the buffer.
                     error_or_n<IO, gsl::span<std::uint8_t>::iterator> x = refill_ (io, span_);

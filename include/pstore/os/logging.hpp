@@ -192,17 +192,17 @@ namespace pstore {
                 pstore::file::file_handle f{from};
                 f.rename (to);
             }
-            void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
+            static void unlink (std::string const & path) { pstore::file::unlink (path.c_str ()); }
         };
         struct fstream_traits {
             using stream_type = std::ofstream;
 
-            void open (stream_type & s, std::string const & name,
-                       std::ios_base::openmode const mode) {
+            static void open (stream_type & s, std::string const & name,
+                              std::ios_base::openmode const mode) {
                 s.open (name, mode);
             }
-            void close (stream_type & s) { s.close (); }
-            void clear (stream_type &) {}
+            static void close (stream_type & s) { s.close (); }
+            static void clear (stream_type &) {}
         };
 
 

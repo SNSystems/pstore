@@ -80,7 +80,7 @@ namespace pstore {
         pstore::error_or<IO> handle_version (Sender sender, IO io, query_container const &) {
             auto version_string = [] () {
                 std::ostringstream os;
-                os << "{ \"version\": \"" << header::major_version << '.' << header::minor_version
+                os << R"({ "version": ")" << header::major_version << '.' << header::minor_version
                    << "\" }";
                 auto const & v = os.str ();
                 assert (json::is_valid (v));

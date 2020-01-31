@@ -51,14 +51,14 @@
 
 #    include <atomic>
 #    include <cassert>
+#    include <csignal>
+#    include <cstring>
 #    include <chrono>
 #    include <condition_variable>
 #    include <memory>
 #    include <mutex>
 #    include <thread>
 
-#    include <signal.h>
-#    include <string.h>
 #    include <sys/wait.h>
 #    include <unistd.h>
 

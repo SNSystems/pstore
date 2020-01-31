@@ -44,11 +44,12 @@
 
 /// \file signal_cv.hpp
 
-#ifndef PSTORE_SIGNAL_CV_HPP
-#define PSTORE_SIGNAL_CV_HPP
+#ifndef PSTORE_BROKER_INTF_SIGNAL_CV_HPP
+#define PSTORE_BROKER_INTF_SIGNAL_CV_HPP
 
 #include <atomic>
 #include <mutex>
+
 #include "pstore/broker_intf/descriptor.hpp"
 
 namespace pstore {
@@ -108,6 +109,9 @@ namespace pstore {
         // No copying or assignment.
         signal_cv (signal_cv const &) = delete;
         signal_cv (signal_cv &&) = delete;
+
+        ~signal_cv () noexcept = default;
+
         signal_cv & operator= (signal_cv const &) = delete;
         signal_cv & operator= (signal_cv &&) = delete;
 
@@ -143,4 +147,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_SIGNAL_CV_HPP
+#endif // PSTORE_BROKER_INTF_SIGNAL_CV_HPP

@@ -73,5 +73,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_OS_SIGNAL
-
+#endif // PSTORE_OS_SIGNAL_HELPERS_HPP

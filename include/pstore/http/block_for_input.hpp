@@ -64,10 +64,6 @@ namespace pstore {
             constexpr inputs_ready (bool const s, bool const c) noexcept
                     : socket{s}
                     , cv{c} {}
-            inputs_ready (inputs_ready const &) = default;
-            inputs_ready (inputs_ready &&) = default;
-            inputs_ready & operator= (inputs_ready const &) = default;
-            inputs_ready & operator= (inputs_ready &&) = default;
 
             /// True if data is available on the input socket.
             bool socket;
@@ -124,17 +120,17 @@ namespace pstore {
 #else
             timeval timeout{timeout_seconds, 0};
             fd_set read_fds;
-            FD_ZERO (&read_fds);
-            FD_SET (socket_fd.native_handle (), &read_fds);
+            FD_ZERO (&read_fds);                            // NOLINT
+            FD_SET (socket_fd.native_handle (), &read_fds); // NOLINT
             if (cv_fd != nullptr) {
-                FD_SET (cv_fd->native_handle (), &read_fds);
+                FD_SET (cv_fd->native_handle (), &read_fds); // NOLINT
             }
 
             fd_set error_fds;
-            FD_ZERO (&error_fds);
-            FD_SET (socket_fd.native_handle (), &error_fds);
+            FD_ZERO (&error_fds);                            // NOLINT
+            FD_SET (socket_fd.native_handle (), &error_fds); // NOLINT
             if (cv_fd != nullptr) {
-                FD_SET (cv_fd->native_handle (), &error_fds);
+                FD_SET (cv_fd->native_handle (), &error_fds); // NOLINT
             }
 
             int const maxfd = std::max (socket_fd.native_handle (),

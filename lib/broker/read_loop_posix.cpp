@@ -76,12 +76,12 @@ namespace {
     void block_for_input (int const fd) {
         timeval timeout{pstore::broker::details::timeout_seconds, 0};
         fd_set rfds;
-        FD_ZERO (&rfds);
-        FD_SET (fd, &rfds);
+        FD_ZERO (&rfds);    // NOLINT
+        FD_SET (fd, &rfds); // NOLINT
 
         fd_set efds;
-        FD_ZERO (&efds);
-        FD_SET (fd, &efds);
+        FD_ZERO (&efds);    // NOLINT
+        FD_SET (fd, &efds); // NOLINT
 
         int const retval = select (fd + 1, &rfds, nullptr, &efds, &timeout);
         if (retval == -1) {
@@ -116,26 +116,25 @@ namespace pstore {
                             if (err == EAGAIN || err == EWOULDBLOCK) {
                                 // Data ran out so wait for more to arrive.
                                 break;
-                            } else {
-                                raise (errno_erc{err}, "read");
                             }
+                            raise (errno_erc{err}, "read");
+                        }
+
+                        if (done) {
+                            log (logging::priority::notice, "exiting read loop");
+                            return;
+                        }
+
+                        if (bytes_read != message_size) {
+                            log (logging::priority::error, "Partial message received. Length ",
+                                 bytes_read);
                         } else {
-                            if (done) {
-                                log (logging::priority::notice, "exiting read loop");
-                                return;
-                            }
+                            // Push the command buffer on to the queue for processing and pull
+                            // an new read buffer from the pool.
+                            assert (static_cast<std::size_t> (bytes_read) <= sizeof (*readbuf));
+                            cp->push_command (std::move (readbuf), record_file.get ());
 
-                            if (bytes_read != message_size) {
-                                log (logging::priority::error, "Partial message received. Length ",
-                                     bytes_read);
-                            } else {
-                                // Push the command buffer on to the queue for processing and pull
-                                // an new read buffer from the pool.
-                                assert (static_cast<std::size_t> (bytes_read) <= sizeof (*readbuf));
-                                cp->push_command (std::move (readbuf), record_file.get ());
-
-                                readbuf = pool.get_from_pool ();
-                            }
+                            readbuf = pool.get_from_pool ();
                         }
                     }
 
