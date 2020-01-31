@@ -175,7 +175,7 @@ int main (int argc, char * argv[]) {
     try {
         threads::set_name ("main");
         logging::create_log_stream ("broker.main");
-        logging::log (logging::priority::notice, "broker starting");
+        log (logging::priority::notice, "broker starting");
 
         switches opt;
         std::tie (opt, broker::exit_code) = get_switches (argc, argv);
@@ -201,7 +201,7 @@ int main (int argc, char * argv[]) {
 
         // TODO: ensure that this is a singleton process?
         // auto const path = std::make_unique<fifo_path> ();
-        logging::log (logging::priority::notice, "opening pipe");
+        log (logging::priority::notice, "opening pipe");
 
         broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
@@ -220,7 +220,7 @@ int main (int argc, char * argv[]) {
             commands->attach_scavenger (scav);
 
 
-            logging::log (logging::priority::notice, "starting threads");
+            log (logging::priority::notice, "starting threads");
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
                                        http_status.get (), &uptime_done);
 
@@ -245,20 +245,20 @@ int main (int argc, char * argv[]) {
             }
         }
 
-        logging::log (logging::priority::notice, "waiting");
+        log (logging::priority::notice, "waiting");
         for (auto & f : futures) {
             assert (f.valid ());
             f.get ();
         }
-        logging::log (logging::priority::notice, "worker threads done: stopping quit thread");
+        log (logging::priority::notice, "worker threads done: stopping quit thread");
         broker::notify_quit_thread ();
         quit.join ();
-        logging::log (logging::priority::notice, "exiting");
+        log (logging::priority::notice, "exiting");
     } catch (std::exception const & ex) {
-        logging::log (logging::priority::error, "error: ", ex.what ());
+        log (logging::priority::error, "error: ", ex.what ());
         broker::exit_code = EXIT_FAILURE;
     } catch (...) {
-        logging::log (logging::priority::error, "unknown error");
+        log (logging::priority::error, "unknown error");
         broker::exit_code = EXIT_FAILURE;
     }
     return broker::exit_code;

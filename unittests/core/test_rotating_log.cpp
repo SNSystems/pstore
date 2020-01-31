@@ -174,11 +174,11 @@ TEST (RotatingLog, TwoRotations) {
     EXPECT_EQ ("message 21", log.stream ().str ());
 
 
+// FIXME: This is a system test. It shouldn't be here.
 #if 0
-    // This is a system test. It shouldn't be here.
     logging::create_log_stream (std::make_unique <logging::rotating_log> ("footle", 500, 2));
     for (auto const & m : messages) {
-        logging::log (logging::priority::info, m);
+        log (logging::priority::info, m);
     }
     logging::create_log_stream (std::unique_ptr <logging::rotating_log> ());
 #endif

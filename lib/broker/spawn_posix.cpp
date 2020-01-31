@@ -87,7 +87,7 @@ namespace pstore {
                 // we got here, so record the child PID if we're still in the "starting"
                 // state.
 
-                logging::log (logging::priority::info, "vacuum is now running: pid ", child_pid);
+                log (logging::priority::info, "vacuum is now running: pid ", child_pid);
                 break;
             }
             return child_pid;

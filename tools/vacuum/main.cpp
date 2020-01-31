@@ -154,8 +154,7 @@ int main (int argc, char * argv[]) {
         }
 
         if (file_lock->try_lock ()) {
-            pstore::logging::log (pstore::logging::priority::info,
-                                  "Got the file lock. No-one has the file open.");
+            log (pstore::logging::priority::info, "Got the file lock. No-one has the file open.");
             file_lock->unlock ();
         }
 
@@ -183,13 +182,13 @@ int main (int argc, char * argv[]) {
         char const * what = ex.what ();
         error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
                      << pstore::utf::to_native_string (what) << std::endl;
-        pstore::logging::log (pstore::logging::priority::error, "An error occurred: ", what);
+        log (pstore::logging::priority::error, "An error occurred: ", what);
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
         std::cerr << "vacuumd: An unknown error occurred." << std::endl;
-        pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+        log (pstore::logging::priority::error, "Unknown error");
         exit_code = EXIT_FAILURE;
     })
 

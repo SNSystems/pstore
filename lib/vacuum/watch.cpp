@@ -95,8 +95,8 @@ namespace vacuum {
                 // Block until the start_watch condition variable is signaled.
                 auto start_time = from->latest_time ();
                 while (!wst.start_watch && !st->done) {
-                    pstore::logging::log (pstore::logging::priority::notice,
-                                          "Waiting until asked to watch by the copy thread...");
+                    log (pstore::logging::priority::notice,
+                         "Waiting until asked to watch by the copy thread...");
                     wst.start_watch_cv.wait_for (mlock, watch_interval,
                                                  [st] () { return wst.start_watch || st->done; });
                 }
@@ -105,7 +105,7 @@ namespace vacuum {
                 auto count = 0U;
 
                 while (!st->done && !st->modified) {
-                    pstore::logging::log (pstore::logging::priority::notice, "watch ... ", count);
+                    log (pstore::logging::priority::notice, "watch ... ", count);
                     ++count;
 
                     auto const current_time = from->latest_time ();
@@ -113,8 +113,8 @@ namespace vacuum {
                     start_time = current_time;
 
                     if (file_modified || !can_lock (lock)) {
-                        pstore::logging::log (pstore::logging::priority::notice,
-                                              "Store touched by another process!");
+                        log (pstore::logging::priority::notice,
+                             "Store touched by another process!");
                         st->modified = true;
                     }
 
@@ -124,16 +124,16 @@ namespace vacuum {
         }
         // clang-format off
         PSTORE_CATCH (std::exception const & ex, {
-            pstore::logging::log (pstore::logging::priority::error,
-                                  "An error occurred: ", ex.what ());
+            log (pstore::logging::priority::error,
+                 "An error occurred: ", ex.what ());
         })
         PSTORE_CATCH (..., {
-            pstore::logging::log (pstore::logging::priority::error, "Unknown error");
+            log (pstore::logging::priority::error, "Unknown error");
         })
         // clang-format on
 
         from.reset ();
-        pstore::logging::log (pstore::logging::priority::notice, "Watch thread exiting");
+        log (pstore::logging::priority::notice, "Watch thread exiting");
         st->watch_running = false;
     }
 } // end namespace vacuum
