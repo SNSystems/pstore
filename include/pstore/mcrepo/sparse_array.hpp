@@ -207,12 +207,30 @@ namespace pstore {
             using reverse_iterator = std::reverse_iterator<iterator>;
             using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
+            /// Constructs a sparse array whose available indices are defined by the
+            /// iterator range from [first_index,last_index) and the values assigned to
+            /// those indices are given by [FirstValue, LastValue). If the number of
+            /// elements in [first_value, last_value) is less than the number of elements in
+            /// [first_index,last_index), the remaining values are default-constructed; if
+            /// it is greater then the remaining values are ignored.
+            template <typename IteratorIdx, typename IteratorV>
+            sparse_array (IteratorIdx first_index, IteratorIdx last_index, IteratorV first_value,
+                          IteratorV last_value);
+
+            /// Constructs a sparse array whose available indices are defined by the
+            /// iterator range from [first_index,last_index) and whose corresponding values
+            /// are default constructed.
+            template <typename IteratorIdx>
+            sparse_array (IteratorIdx first_index, IteratorIdx last_index);
+
             sparse_array (sparse_array const &) = delete;
             sparse_array (sparse_array &&) = delete;
+
+            ~sparse_array ();
+
             sparse_array & operator= (sparse_array const &) = delete;
             sparse_array & operator= (sparse_array &&) = delete;
 
-            ~sparse_array ();
 
             /// Constructs a sparse_array index instance where the indices are extraced from an
             /// iterator range [first_index, last_index) and the values at each index are given by
@@ -426,22 +444,6 @@ namespace pstore {
             void * operator new (std::size_t const /*count*/, void * const ptr) { return ptr; }
             void operator delete (void * const /*ptr*/, void * const /*place*/) {}
             void operator delete (void * const p) { ::operator delete (p); }
-
-            /// Constructs a sparse array whose available indices are defined by the
-            /// iterator range from [first_index,last_index) and the values assigned to
-            /// those indices are given by [FirstValue, LastValue). If the number of
-            /// elements in [first_value, last_value) is less than the number of elements in
-            /// [first_index,last_index), the remaining values are default-constructed; if
-            /// it is greater then the remaining values are ignored.
-            template <typename IteratorIdx, typename IteratorV>
-            sparse_array (IteratorIdx first_index, IteratorIdx last_index, IteratorV first_value,
-                          IteratorV last_value);
-
-            /// Constructs a sparse array whose available indices are defined by the
-            /// iterator range from [first_index,last_index) and whose corresponding values
-            /// are default constructed.
-            template <typename IteratorIdx>
-            sparse_array (IteratorIdx first_index, IteratorIdx last_index);
 
         private:
             /// \param count  The number of bytes to allocate (to which the storage

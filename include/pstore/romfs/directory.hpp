@@ -67,11 +67,11 @@ namespace pstore {
             explicit constexpr directory (Container const & c) noexcept
                     : directory (c.size (), c.data ()) {}
 
-            ~directory () noexcept = default;
-
-            // No copying or assignment.
             directory (directory const &) = delete;
             directory (directory &&) = delete;
+
+            ~directory () noexcept = default;
+
             directory & operator= (directory const &) = delete;
             directory & operator= (directory &&) = delete;
 

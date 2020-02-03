@@ -179,17 +179,15 @@ namespace pstore {
                 using policy_type = WriterPolicy;
                 using result_type = typename policy_type::result_type;
 
-                // No copying or assignment.
                 writer_base (writer_base const &) = delete;
-                writer_base & operator= (writer_base const &) = delete;
-
-                // Move is allowed.
                 writer_base (writer_base &&) noexcept = default;
-                writer_base & operator= (writer_base &&) noexcept = default;
 
                 virtual ~writer_base () noexcept {
                     no_ex_escape ([this] () { this->flush (); });
                 }
+
+                writer_base & operator= (writer_base &&) noexcept = default;
+                writer_base & operator= (writer_base const &) = delete;
 
                 ///@{
                 /// \brief Writes one or more instances of a standard-layout type Ty to the output.

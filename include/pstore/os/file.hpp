@@ -635,6 +635,10 @@ namespace pstore {
 
             /// unique is an empty class type used to disambiguate the overloads of creating a file.
             struct unique {};
+            /// temporary is an empty class type used to disambiguate the overloads of creating a
+            /// file.
+            struct temporary {};
+
 
             file_handle () = default;
             explicit file_handle (std::string path) noexcept
@@ -653,16 +657,13 @@ namespace pstore {
             /// Create a new, uniquely named, file in the specified directory.
             void open (unique, std::string const & directory);
 
-            /// temporary is an empty class type used to disambiguate the overloads of creating a
-            /// file.
-            struct temporary {};
-
             /// Creates a temporary file in the system temporary directory
             void open (temporary const t) {
                 return open (t, file_handle::get_temporary_directory ());
             }
             /// Creates a temporary file in the specified directory.
             void open (temporary, std::string const & directory);
+
 
             /// Returns a UTF-8 encoded string representing the temporary directory.
             ///

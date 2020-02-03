@@ -72,10 +72,11 @@ namespace pstore {
     class system_page_size_interface {
     public:
         system_page_size_interface () = default;
-        virtual ~system_page_size_interface () noexcept;
-
         system_page_size_interface (system_page_size_interface &&) noexcept = default;
         system_page_size_interface (system_page_size_interface const &) = default;
+
+        virtual ~system_page_size_interface () noexcept;
+
         system_page_size_interface & operator= (system_page_size_interface &&) noexcept = default;
         system_page_size_interface & operator= (system_page_size_interface const &) = default;
 
