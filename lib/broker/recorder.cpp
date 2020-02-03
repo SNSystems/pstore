@@ -93,7 +93,7 @@ namespace pstore {
 
         // (dtor)
         // ~~~~~~
-        player::~player () {}
+        player::~player () = default;
 
         // read
         // ~~~~
