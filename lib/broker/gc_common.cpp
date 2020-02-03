@@ -120,7 +120,7 @@ namespace pstore {
 
         void gc_process_watch_thread () { getgc ().watcher (); }
 
-        void start_vacuum (std::string db_path) { getgc ().start_vacuum (std::move (db_path)); }
+        void start_vacuum (std::string const & db_path) { getgc ().start_vacuum (db_path); }
 
         /// Called when a signal has been recieved which should result in the process shutting.
         /// \note This function is called from the quit-thread rather than directly from a signal
