@@ -44,8 +44,8 @@
 /// \file heartbeat.hpp
 /// \brief Provides an asynchonous background "heartbeat" for the data store.
 
-#ifndef PSTORE_HEARTBEAT_HPP
-#define PSTORE_HEARTBEAT_HPP
+#ifndef PSTORE_CORE_HEARTBEAT_HPP
+#define PSTORE_CORE_HEARTBEAT_HPP
 
 #include <atomic>
 #include <chrono>
@@ -92,11 +92,11 @@ namespace pstore {
         class worker_thread {
         public:
             worker_thread ();
-            ~worker_thread () = default;
-
-            // No copying or assignment
             worker_thread (worker_thread const &) = delete;
             worker_thread (worker_thread &&) = delete;
+
+            ~worker_thread () = default;
+
             worker_thread & operator= (worker_thread const &) = delete;
             worker_thread & operator= (worker_thread &&) = delete;
 
@@ -155,5 +155,7 @@ namespace pstore {
         };
         std::unique_ptr<state> state_;
     };
-} // namespace pstore
-#endif // PSTORE_HEARTBEAT_HPP
+
+} // end namespace pstore
+
+#endif // PSTORE_CORE_HEARTBEAT_HPP

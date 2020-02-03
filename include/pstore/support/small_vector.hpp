@@ -81,23 +81,18 @@ namespace pstore {
         using reverse_iterator = std::reverse_iterator<iterator>;
         using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
-
         /// Constructs the buffer with an initial size of 0.
         small_vector () noexcept;
         /// Constructs the buffer with the given initial numbe of elements.
         explicit small_vector (std::size_t required_elements);
-
         explicit small_vector (std::initializer_list<ElementType> init);
-
-        // Move construct and assign.
         small_vector (small_vector && other);
-        small_vector & operator= (small_vector && other);
-
-        // Copying and assign.
         small_vector (small_vector const & rhs);
-        small_vector & operator= (small_vector const &);
 
         ~small_vector () noexcept = default;
+
+        small_vector & operator= (small_vector && other);
+        small_vector & operator= (small_vector const &);
 
         /// \name Element access
         ///@{

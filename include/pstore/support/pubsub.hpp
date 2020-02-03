@@ -139,11 +139,11 @@ namespace pstore {
         using subscriber_pointer = std::unique_ptr<subscriber_type>;
 
         explicit channel (gsl::not_null<ConditionVariable *> cv);
-        ~channel () noexcept;
-
-        // No copying or assignment.
         channel (channel const &) = delete;
         channel (channel &&) = delete;
+
+        ~channel () noexcept;
+
         channel & operator= (channel const &) = delete;
         channel & operator= (channel &&) = delete;
 

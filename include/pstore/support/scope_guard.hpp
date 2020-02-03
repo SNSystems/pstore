@@ -60,11 +60,15 @@ namespace pstore {
         explicit scope_guard (OtherExitFunction && other)
                 : exit_function_{std::forward<OtherExitFunction> (other)} {}
 
+        scope_guard (scope_guard const &) = delete;
         scope_guard (scope_guard && rhs) noexcept
                 : execute_on_destruction_{rhs.execute_on_destruction_}
                 , exit_function_{std::move (rhs.exit_function_)} {
             rhs.release ();
         }
+
+        scope_guard & operator= (scope_guard const &) = delete;
+        scope_guard & operator= (scope_guard &&) = delete;
 
         ~scope_guard () noexcept {
             if (execute_on_destruction_) {
@@ -73,10 +77,6 @@ namespace pstore {
         }
 
         void release () noexcept { execute_on_destruction_ = false; }
-
-        scope_guard (scope_guard const &) = delete;
-        scope_guard & operator= (scope_guard const &) = delete;
-        scope_guard & operator= (scope_guard &&) = delete;
 
     private:
         bool execute_on_destruction_ = true;

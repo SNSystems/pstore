@@ -155,26 +155,23 @@ namespace pstore {
         // ****
         // comparison (operator== and operator!=)
         // ****
+        bool operator== (std::error_code const rhs) const { return get_error () == rhs; }
+        bool operator== (error_or const & rhs);
         bool operator== (T const & rhs) const {
             return static_cast<bool> (*this) && this->get () == rhs;
         }
-        bool operator!= (T const & rhs) const { return !operator== (rhs); }
-
         template <typename Error>
         typename std::enable_if<is_error<Error>::value, bool>::type operator== (Error rhs) const {
             return get_error () == rhs;
         }
 
+        bool operator!= (T const & rhs) const { return !operator== (rhs); }
+        bool operator!= (std::error_code const rhs) const { return !operator== (rhs); }
+        bool operator!= (error_or const & rhs) { return !operator== (rhs); }
         template <typename Error>
         typename std::enable_if<is_error<Error>::value, bool>::type operator!= (Error rhs) const {
             return !operator== (rhs);
         }
-
-        bool operator== (std::error_code const rhs) const { return get_error () == rhs; }
-        bool operator!= (std::error_code const rhs) const { return !operator== (rhs); }
-
-        bool operator== (error_or const & rhs);
-        bool operator!= (error_or const & rhs) { return !operator== (rhs); }
 
 
         // ****
