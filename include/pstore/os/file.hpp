@@ -430,6 +430,7 @@ namespace pstore {
             /// \param kind    Specifies the type of lock to be obtained
             range_lock (file_base * const file, std::uint64_t offset, std::size_t size,
                         file_base::lock_kind kind) noexcept;
+            range_lock (range_lock const & other) = delete;
             range_lock (range_lock && other) noexcept;
 
             /// \brief Destroys the range lock.
@@ -441,9 +442,6 @@ namespace pstore {
             /// ownership of it, the mutex is unlocked. If this operation fails, the resulting
             /// exception is dropped.
             range_lock & operator= (range_lock && other) noexcept;
-
-            // No copying or assignment.
-            range_lock (range_lock const & other) = delete;
             range_lock & operator= (range_lock const &) = delete;
 
             /// \brief Blocks until a lock can be obtained for the current thread.
@@ -634,38 +632,37 @@ namespace pstore {
                 read_only,
                 read_write,
             };
-            file_handle () = default;
-            explicit file_handle (std::string path) noexcept
-                    : path_{std::move (path)} {}
-            void open (create_mode create, writable_mode writable,
-                       present_mode present = present_mode::allow_not_found);
 
             /// unique is an empty class type used to disambiguate the overloads of creating a file.
             struct unique {};
+
+            file_handle () = default;
+            explicit file_handle (std::string path) noexcept
+                    : path_{std::move (path)} {}
+            file_handle (file_handle const &) = delete;
+            file_handle (file_handle && other) noexcept;
+
+            ~file_handle () noexcept override;
+
+            file_handle & operator= (file_handle && rhs) noexcept;
+            file_handle & operator= (file_handle const &) = delete;
+
+
+            void open (create_mode create, writable_mode writable,
+                       present_mode present = present_mode::allow_not_found);
             /// Create a new, uniquely named, file in the specified directory.
             void open (unique, std::string const & directory);
 
             /// temporary is an empty class type used to disambiguate the overloads of creating a
             /// file.
             struct temporary {};
+
             /// Creates a temporary file in the system temporary directory
             void open (temporary const t) {
                 return open (t, file_handle::get_temporary_directory ());
             }
-
             /// Creates a temporary file in the specified directory.
             void open (temporary, std::string const & directory);
-
-
-            ~file_handle () noexcept override;
-
-            // Movable
-            file_handle (file_handle && other) noexcept;
-            file_handle & operator= (file_handle && rhs) noexcept;
-
-            // Not copyable or assignable.
-            file_handle (file_handle const &) = delete;
-            file_handle & operator= (file_handle const &) = delete;
 
             /// Returns a UTF-8 encoded string representing the temporary directory.
             ///
