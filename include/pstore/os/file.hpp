@@ -710,6 +710,7 @@ namespace pstore {
             std::size_t read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) override;
             void write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) override;
             void ensure_open ();
+            static oshandle close (oshandle file, std::string const & path);
 
 #ifdef _WIN32
 #else

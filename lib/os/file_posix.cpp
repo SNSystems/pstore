@@ -252,15 +252,18 @@ namespace pstore {
         // close
         // ~~~~~
         void file_handle::close () {
-            if (file_ != invalid_oshandle) {
-                bool const ok = ::close (file_) != -1;
-                file_ = invalid_oshandle;
-                if (!ok) {
+            is_writable_ = false;
+            file_ = file_handle::close (file_, path_);
+        }
+
+        auto file_handle::close (oshandle file, std::string const & path) -> oshandle {
+            if (file != invalid_oshandle) {
+                if (::close (file) == -1) {
                     int const err = errno;
-                    raise_file_error (err, "Unable to close", this->path ());
+                    raise_file_error (err, "Unable to close", path);
                 }
-                is_writable_ = false;
             }
+            return invalid_oshandle;
         }
 
         // seek

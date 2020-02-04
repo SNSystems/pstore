@@ -238,21 +238,20 @@ namespace pstore {
         // close
         // ~~~~~
         void file_handle::close () {
-            if (file_ != invalid_oshandle) {
-                BOOL ok = ::CloseHandle (file_);
-                // At least pretend that we successfully closed the file. I
-                // don't want to inadvertently end up thinking the file should
-                // be closed.
-                file_ = invalid_oshandle;
-                if (!ok) {
+            is_writable_ = false;
+            file_ = file_handle::close (file_, path_);
+        }
+
+        auto file_handle::close (oshandle file, std::string const & path) -> oshandle {
+            if (file != invalid_oshandle) {
+                if (!::CloseHandle (file)) {
                     DWORD const last_error = ::GetLastError ();
                     std::ostringstream str;
-                    str << "Unable to close " << pstore::quoted (path_);
+                    str << "Unable to close " << pstore::quoted (path);
                     raise (win32_erc{last_error}, str.str ());
                 }
             }
-
-            is_writable_ = false;
+            return invalid_oshandle;
         }
 
         // seek
