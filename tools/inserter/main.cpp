@@ -167,9 +167,9 @@ int main (int argc, char * argv[]) {
     using pstore::utf::to_native_string;
 
     PSTORE_TRY {
-        cl::parse_command_line_options (argc, argv, "Exerices the pstore index code");
+        cl::parse_command_line_options (argc, argv, "Exercises the pstore index code");
 
-        pstore::database database (data_file.get (), pstore::database::access_mode::writable);
+        pstore::database database{data_file.get (), pstore::database::access_mode::writable};
 
         auto index = pstore::index::get_index<pstore::trailer::indices::fragment> (database);
 
