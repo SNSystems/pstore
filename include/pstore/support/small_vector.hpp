@@ -92,7 +92,7 @@ namespace pstore {
         ~small_vector () noexcept = default;
 
         small_vector & operator= (small_vector && other);
-        small_vector & operator= (small_vector const &);
+        small_vector & operator= (small_vector const & other);
 
         /// \name Element access
         ///@{
@@ -197,7 +197,7 @@ namespace pstore {
 
         /// The actual number of elements for which this buffer is sized.
         /// Note that this may be less than BodyElements.
-        std::size_t elements_;
+        std::size_t elements_ = 0;
 
         /// A "small" in-object buffer that is used for relatively small
         /// allocations.
@@ -237,8 +237,7 @@ namespace pstore {
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector () noexcept
-            : elements_{0U}
-            , small_buffer_{} {
+            : small_buffer_{} {
         this->set_buffer_ptr (elements_);
     }
 
