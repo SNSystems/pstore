@@ -162,6 +162,10 @@ endif ()
 if (PSTORE_IS_INSIDE_LLVM)
     add_custom_target (PstoreUnitTests)
     set_target_properties(PstoreUnitTests PROPERTIES FOLDER "pstore tests")
+    add_lit_testsuite(check-pstore "Running the Pstore regression tests"
+        ${CMAKE_CURRENT_BINARY_DIR}
+         DEPENDS PstoreUnitTests
+        )
 endif (PSTORE_IS_INSIDE_LLVM)
 
 
