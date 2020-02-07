@@ -64,19 +64,35 @@
 #include "copy.hpp"
 #include "directory_entry.hpp"
 
+using namespace std::string_literals;
+
 namespace {
 
-    unsigned add_directory (directory_container & directory, std::string const & path,
+    unsigned add_directory (directory_container & directory, std::string const & path_name,
                             std::string const & file_name, unsigned count) {
         directory.emplace_back (file_name, count, std::make_unique<directory_container> ());
-        return scan (*directory.back ().children, path + '/' + file_name, count + 1U);
+        return scan (*directory.back ().children, path_name, count + 1U);
     }
 
-    unsigned add_file (directory_container & directory, std::string const & path,
+    unsigned add_file (directory_container & directory, std::string const & path_name,
                        std::string const & file_name, unsigned count, std::time_t modtime) {
         directory.emplace_back (file_name, count, modtime);
-        copy (path + '/' + file_name, directory.back ().contents);
+        copy (path_name, directory.back ().contents);
         return count + 1U;
+    }
+
+    bool ends_with (std::string const & str, std::string const & suffix) {
+        auto const suffix_size = suffix.size ();
+        auto const str_size = str.size ();
+        return str_size >= suffix_size &&
+               str.compare (str_size - suffix_size, suffix_size, suffix) == 0;
+    }
+
+    bool skip_file (std::string const & name) {
+        if (name.length () == 0 || name.front () == '.') {
+            return true;
+        }
+        return ends_with (name, "~"s);
     }
 
 } // end anonymous namespace
@@ -120,19 +136,15 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
         if (is_hidden (ffd)) {
             continue;
         }
-
         auto const name = pstore::utf::win32::to8 (ffd.cFileName);
-        if (name == "." || name == "..") {
+        if (skip_file (name)) {
             continue;
         }
-
-        if (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-            count = add_directory (directory, path, name, count);
-        } else {
-            ;
-            count =
-                add_file (directory, path, name, count, filetime_to_timet (ffd.ftLastWriteTime));
-        }
+        auto const path_string = path + '/' + name;
+        count = (ffd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                    ? add_directory (directory, path_string, name, count)
+                    : add_file (directory, path_string, name, count,
+                                filetime_to_timet (ffd.ftLastWriteTime));
     } while (::FindNextFileW (find, &ffd) != 0);
 
     ::FindClose (find);
@@ -153,34 +165,30 @@ unsigned scan (directory_container & directory, std::string const & path, unsign
         raise (pstore::errno_erc{erc}, str.str ());
     }
 
-    auto is_hidden = [] (std::string const & n) { return n.length () == 0 || n.front () == '.'; };
-    auto path_string = [&path] (std::string const & n) {
-        std::string res = path;
-        res += '/';
-        res += n;
-        return res;
-    };
-
     while (struct dirent const * const dp = readdir (dirp.get ())) {
-        auto const name = std::string (dp->d_name);
-        if (is_hidden (name)) {
+        auto const name = std::string{dp->d_name};
+        if (skip_file (name)) {
             continue;
         }
 
+        auto const path_string = path + '/' + name;
         struct stat sb {};
-        if (lstat (path_string (name).c_str (), &sb) != 0) {
-            return count;
+        if (lstat (path_string.c_str (), &sb) != 0) {
+            auto last_error = errno;
+            std::ostringstream str;
+            str << "Could not stat file " << pstore::quoted (path_string);
+            raise (pstore::errno_erc (last_error), str.str ());
         }
 
         // NOLINTNEXTLINE
         if (S_ISREG (sb.st_mode)) { //! OCLINT(PH - don't warn about system macro)
             // It's a regular file
-            count = add_file (directory, path, name, count, sb.st_mtime);
+            count = add_file (directory, path_string, name, count, sb.st_mtime);
         } else {
             // NOLINTNEXTLINE
             if (S_ISDIR (sb.st_mode)) { //! OCLINT(PH - don't warn about system macro)
                 // A directory
-                count = add_directory (directory, path, name, count);
+                count = add_directory (directory, path_string, name, count);
             } else {
                 // skip
             }

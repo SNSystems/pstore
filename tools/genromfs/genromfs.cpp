@@ -186,7 +186,6 @@ int main (int argc, char * argv[]) {
               "#include <cstdint>\n"
               "#include \"pstore/romfs/romfs.hpp\"\n"
               "\n"
-              "using namespace pstore::romfs;\n"
               "namespace {\n"
               "\n";
         auto root = std::make_unique<directory_container> ();

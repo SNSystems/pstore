@@ -56,7 +56,7 @@ namespace {
     void forward_declaration (std::ostream & os, std::unordered_set<unsigned> & forwards,
                               unsigned dirid) {
         if (forwards.find (dirid) == forwards.end ()) {
-            os << "extern directory const " << directory_var (dirid) << ";\n";
+            os << "extern pstore::romfs::directory const " << directory_var (dirid) << ";\n";
             forwards.insert (dirid);
         }
     }
@@ -83,7 +83,8 @@ void dump_tree (std::ostream & os, std::unordered_set<unsigned> & forwards,
     forward_declaration (os, forwards, id);
     forward_declaration (os, forwards, parent_id);
 
-    os << "std::array<dirent," << dir.size () + 2U << "> const " << dirent_array_name << " = {{\n"
+    os << "std::array<pstore::romfs::dirent," << dir.size () + 2U << "> const " << dirent_array_name
+       << " = {{\n"
        << indent << "{\".\", &" << directory_var (id) << "},\n"
        << indent << "{\"..\", &" << directory_var (parent_id) << "},\n";
 
@@ -100,5 +101,5 @@ void dump_tree (std::ostream & os, std::unordered_set<unsigned> & forwards,
     }
 
     os << "}};\n"
-       << "directory const " << dir_name << " {" << dirent_array_name << "};\n";
+       << "pstore::romfs::directory const " << dir_name << " {" << dirent_array_name << "};\n";
 }
