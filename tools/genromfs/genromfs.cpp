@@ -161,7 +161,8 @@ namespace {
         if (name.length () == 0) {
             pstore::raise (genromfs_erc::empty_name_component);
         }
-        os << "::pstore::romfs::romfs " << name << " (&" << root << ");\n";
+        os << "extern ::pstore::romfs::romfs " << name << ";\n"
+           << "::pstore::romfs::romfs " << name << " (&" << root << ");\n";
         for_each_namespace (var_name, [&os] (std::string const & ns) {
             os << "} // end namespace " << ns << '\n';
         });
