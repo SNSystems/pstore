@@ -68,8 +68,8 @@ namespace pstore {
             ~recorder ();
 
             // No copying or assignment.
-            recorder & operator== (recorder const &) = delete;
-            recorder & operator== (recorder &&) noexcept = delete;
+            recorder & operator= (recorder const &) = delete;
+            recorder & operator= (recorder &&) noexcept = delete;
 
             void record (message_type const & cmd);
 
@@ -88,8 +88,8 @@ namespace pstore {
             ~player ();
 
             // No copying or assignment.
-            player & operator== (player const &) = delete;
-            player & operator== (player &&) noexcept = delete;
+            player & operator= (player const &) = delete;
+            player & operator= (player &&) noexcept = delete;
 
             message_ptr read ();
 
