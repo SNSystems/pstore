@@ -527,7 +527,7 @@ namespace {
     template <typename OStream>
     class accumulator {
     public:
-        using value_type = std::uint8_t;
+        using value_type = char;
 
         accumulator (OStream & os, pstore::dump::indent const & ind);
 

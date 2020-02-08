@@ -66,7 +66,7 @@ namespace pstore {
     ///   copied.
     template <typename ForwardIterator, typename BackInserter>
     BackInserter to_base64 (ForwardIterator first, ForwardIterator last, BackInserter out) {
-        static constexpr std::array<std::uint8_t, 64> alphabet{
+        static constexpr std::array<char, 64> alphabet{
             {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
              'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
              'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
@@ -77,6 +77,7 @@ namespace pstore {
             auto value1 = static_cast<std::uint32_t> (*(first++) << 16);
             value1 += static_cast<std::uint32_t> (*(first++) << 8);
             value1 += static_cast<std::uint32_t> (*(first++));
+
             *(out++) = alphabet[(value1 & 0x00FC0000) >> 18];
             *(out++) = alphabet[(value1 & 0x0003F000) >> 12];
             *(out++) = alphabet[(value1 & 0x00000FC0) >> 6];
@@ -88,6 +89,7 @@ namespace pstore {
         case 0: break;
         case 1: {
             auto const value2 = static_cast<std::uint32_t> (*(first++) << 16);
+
             *(out++) = alphabet[(value2 & 0x00FC0000) >> 18];
             *(out++) = alphabet[(value2 & 0x0003F000) >> 12];
             *(out++) = '=';
@@ -96,6 +98,7 @@ namespace pstore {
         case 2: {
             auto value3 = static_cast<std::uint32_t> (*(first++) << 16);
             value3 += static_cast<std::uint32_t> (*(first++) << 8);
+
             *(out++) = alphabet[(value3 & 0x00FC0000) >> 18];
             *(out++) = alphabet[(value3 & 0x0003F000) >> 12];
             *(out++) = alphabet[(value3 & 0x00000FC0) >> 6];
