@@ -74,9 +74,6 @@ namespace pstore {
     X (dependent)
 
 #define X(a) a,
-        // TODO: the members of this collection are drawn from
-        // RepoObjectWriter::writeRepoSectionData(). It's missing at least the debugging, and
-        // EH-related sections and probably others...
         enum class section_kind : std::uint8_t {
             PSTORE_MCREPO_SECTION_KINDS last // always last, never used.
         };
