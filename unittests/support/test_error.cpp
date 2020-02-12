@@ -50,7 +50,7 @@ TEST (Error, None) {
     EXPECT_FALSE (err);
     EXPECT_STREQ (err.category ().name (), "pstore category");
     EXPECT_EQ (err.value (), 0);
-    EXPECT_EQ (err.message (), "none");
+    EXPECT_EQ (err.message (), "no error");
 }
 
 TEST (Error, UnknownRevision) {
@@ -58,7 +58,7 @@ TEST (Error, UnknownRevision) {
     EXPECT_TRUE (err);
     EXPECT_STREQ (err.category ().name (), "pstore category");
     EXPECT_EQ (err.value (), static_cast<int> (pstore::error_code::unknown_revision));
-    EXPECT_EQ (err.message (), "unknown_revision");
+    EXPECT_EQ (err.message (), "unknown revision");
 }
 
 TEST (Error, RaisePstoreError) {

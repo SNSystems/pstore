@@ -171,4 +171,15 @@ namespace pstore {
         return *this;
     }
 
+
+    // *********
+    // * begin *
+    // *********
+    transaction<transaction_lock> begin (database & db) {
+        if (!db.is_writable ()) {
+            raise (error_code::transaction_on_read_only_database);
+        }
+        return begin (db, transaction_lock{transaction_mutex{db}});
+    }
+
 } // end namespace pstore

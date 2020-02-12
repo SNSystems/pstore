@@ -164,6 +164,7 @@ namespace pstore {
 #endif
             return lt;
         }
+        bool is_writable () const noexcept { return storage_.file ()->is_writable (); }
 
         ///@{
         /// Load a block of data starting at address \p addr and of \p size bytes.

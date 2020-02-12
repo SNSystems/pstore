@@ -69,6 +69,8 @@ namespace pstore {
 
 #define PSTORE_ERROR_CODES                                                                         \
     X (none)                                                                                       \
+    X (transaction_on_read_only_database) /* an attempt to create a transaction when the database  \
+                                             is read-only */                                       \
     X (unknown_revision)                                                                           \
     X (header_corrupt)                                                                             \
     X (header_version_mismatch)                                                                    \

@@ -343,13 +343,14 @@ namespace pstore {
     /// object's commit() method commits the work performed by all operations since the start of
     /// the transaction.
     template <typename LockGuard>
-    inline transaction<LockGuard> begin (database & db, LockGuard && lock) {
+    transaction<LockGuard> begin (database & db, LockGuard && lock) {
+        if (!db.is_writable ()) {
+            raise (error_code::transaction_on_read_only_database);
+        }
         return {db, std::move (lock)};
     }
 
-    inline transaction<transaction_lock> begin (database & db) {
-        return begin (db, transaction_lock{transaction_mutex{db}});
-    }
+    transaction<transaction_lock> begin (database & db);
     ///@}
 
 } // namespace pstore
