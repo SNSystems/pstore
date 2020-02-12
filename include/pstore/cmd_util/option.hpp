@@ -171,19 +171,21 @@ namespace pstore {
             };
 
             template <typename Modifier>
-            Modifier make_modifier (Modifier m) {
-                return m;
+            Modifier && make_modifier (Modifier && m) {
+                return std::forward<Modifier> (m);
             }
 
             class name;
-            name make_modifier (char const * n);
+            name make_modifier (gsl::czstring n);
+            name make_modifier (std::string const & n);
 
             template <typename Option>
-            inline void apply (Option &) {}
+            void apply (Option &&) {}
+
             template <typename Option, typename M0, typename... Mods>
-            void apply (Option & opt, M0 const & m0, Mods const &... mods) {
-                make_modifier (m0).apply (opt);
-                apply (opt, mods...);
+            void apply (Option && opt, M0 && m0, Mods &&... mods) {
+                make_modifier (std::forward<M0> (m0)).apply (std::forward<Option> (opt));
+                apply (std::forward<Option> (opt), std::forward<Mods> (mods)...);
             }
 
 

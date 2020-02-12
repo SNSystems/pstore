@@ -116,7 +116,8 @@ namespace pstore {
                 std::string const name_;
             };
 
-            inline name make_modifier (char const * const n) { return name (n); }
+            inline name make_modifier (gsl::czstring const n) { return name (n); }
+            inline name make_modifier (std::string const & n) { return name (n); }
 
 
             //*     _             *
