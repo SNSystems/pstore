@@ -46,7 +46,6 @@
 # Vacuum Core Library
 ################
 
-set (pstore_vacuum_include_dir "${PSTORE_ROOT_DIR}/include/pstore/vacuum")
 add_pstore_library (
     TARGET pstore-vacuum-lib
     NAME vacuum
@@ -54,11 +53,13 @@ add_pstore_library (
         copy.cpp
         quit.cpp
         watch.cpp
+    HEADER_DIR
+        "${PSTORE_ROOT_DIR}/include/pstore/vacuum"
     INCLUDES
-        "${pstore_vacuum_include_dir}/copy.hpp"
-        "${pstore_vacuum_include_dir}/quit.hpp"
-        "${pstore_vacuum_include_dir}/status.hpp"
-        "${pstore_vacuum_include_dir}/watch.hpp"
-        "${pstore_vacuum_include_dir}/user_options.hpp"
+        copy.hpp
+        quit.hpp
+        status.hpp
+        watch.hpp
+        user_options.hpp
 )
 target_link_libraries (pstore-vacuum-lib PUBLIC pstore-broker-intf pstore-core)

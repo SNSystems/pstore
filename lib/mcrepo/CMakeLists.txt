@@ -42,7 +42,6 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (pstore_mcrepo_public_include "${PSTORE_ROOT_DIR}/include/pstore/mcrepo")
 add_pstore_library (
     NAME mcrepo
     SOURCES
@@ -54,15 +53,17 @@ add_pstore_library (
         generic_section.cpp
         repo_error.cpp
         section.cpp
+    HEADER_DIR
+        "${PSTORE_ROOT_DIR}/include/pstore/mcrepo"
     INCLUDES
-        "${pstore_mcrepo_public_include}/bss_section.hpp"
-        "${pstore_mcrepo_public_include}/compilation.hpp"
-        "${pstore_mcrepo_public_include}/debug_line_section.hpp"
-        "${pstore_mcrepo_public_include}/dependents_section.hpp"
-        "${pstore_mcrepo_public_include}/fragment.hpp"
-        "${pstore_mcrepo_public_include}/generic_section.hpp"
-        "${pstore_mcrepo_public_include}/repo_error.hpp"
-        "${pstore_mcrepo_public_include}/section.hpp"
-        "${pstore_mcrepo_public_include}/sparse_array.hpp"
+        bss_section.hpp
+        compilation.hpp
+        debug_line_section.hpp
+        dependents_section.hpp
+        fragment.hpp
+        generic_section.hpp
+        repo_error.hpp
+        section.hpp
+        sparse_array.hpp
 )
 target_link_libraries (pstore-mcrepo PUBLIC pstore-core)

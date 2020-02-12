@@ -41,16 +41,18 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-set (pstore_serialize_include_dir "${PSTORE_ROOT_DIR}/include/pstore/serialize")
+
 add_pstore_library (
     NAME serialize
     SOURCES
         archive.cpp
+    HEADER_DIR
+        "${PSTORE_ROOT_DIR}/include/pstore/serialize"
     INCLUDES
-        "${pstore_serialize_include_dir}/archive.hpp"
-        "${pstore_serialize_include_dir}/common.hpp"
-        "${pstore_serialize_include_dir}/standard_types.hpp"
-        "${pstore_serialize_include_dir}/types.hpp"
+        archive.hpp
+        common.hpp
+        standard_types.hpp
+        types.hpp
 )
 add_clang_tidy_target (pstore-serialize)
 target_link_libraries (pstore-serialize PUBLIC pstore-support)

@@ -263,44 +263,43 @@ set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 # -- Thats's the end of the code setting up config.hpp
 #
 
+include (add_pstore)
+include (clang_tidy)
 
-
-set (PSTORE_SUPPORT_INCLUDE_DIR "${PSTORE_ROOT_DIR}/include/pstore/support")
 set (PSTORE_SUPPORT_INCLUDES
-    "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
-
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/aligned.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/array_elements.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/base64.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_count.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/bit_field.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/ctype.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/error.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/error_or.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/fnv.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/gsl.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/head_revision.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/inherit_const.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/ios_state.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/max.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/maybe.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/parallel_for_each.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/pointee_adaptor.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/portab.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/pubsub.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/quoted.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/random.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/round2.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/scope_guard.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/small_vector.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/sstring_view.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/uint128.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/unsigned_cast.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/utf.hpp"
-    "${PSTORE_SUPPORT_INCLUDE_DIR}/varint.hpp"
+    aligned.hpp
+    array_elements.hpp
+    base64.hpp
+    bit_count.hpp
+    bit_field.hpp
+    ctype.hpp
+    error.hpp
+    error_or.hpp
+    fnv.hpp
+    gsl.hpp
+    head_revision.hpp
+    inherit_const.hpp
+    ios_state.hpp
+    max.hpp
+    maybe.hpp
+    parallel_for_each.hpp
+    pointee_adaptor.hpp
+    portab.hpp
+    pubsub.hpp
+    quoted.hpp
+    random.hpp
+    round2.hpp
+    scope_guard.hpp
+    small_vector.hpp
+    sstring_view.hpp
+    uint128.hpp
+    unsigned_cast.hpp
+    utf.hpp
+    varint.hpp
 )
 set (PSTORE_SUPPORT_LIB_SRC
     config.hpp.in
+    "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
     error.cpp
     fnv.cpp
@@ -310,14 +309,13 @@ set (PSTORE_SUPPORT_LIB_SRC
     utf_win32.cpp
 )
 
-include (add_pstore)
-include (clang_tidy)
 
 
 add_pstore_library (
     NAME support
-    SOURCES ${PSTORE_SUPPORT_LIB_SRC}
-    INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+    SOURCES "${PSTORE_SUPPORT_LIB_SRC}"
+    HEADER_DIR "${PSTORE_ROOT_DIR}/include/pstore/support"
+    INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
 )
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 add_clang_tidy_target (pstore-support)
@@ -327,7 +325,7 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
         FILES "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
         DESTINATION include/pstore/config
         COMPONENT pstore
-)
+    )
 endif ()
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
@@ -338,8 +336,9 @@ if (NOT PSTORE_EXCEPTIONS)
     add_pstore_library (
         TARGET pstore-support-ex
         NAME support
-        SOURCES ${PSTORE_SUPPORT_LIB_SRC}
-        INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+        SOURCES "${PSTORE_SUPPORT_LIB_SRC}"
+        HEADER_DIR "${PSTORE_ROOT_DIR}/include/pstore/support"
+        INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
     )
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
@@ -352,8 +351,9 @@ if (PSTORE_BITCODE)
     add_pstore_library (
         TARGET pstore-support-bc
         NAME support
-        SOURCES ${PSTORE_SUPPORT_LIB_SRC}
-        INCLUDES ${PSTORE_SUPPORT_INCLUDES}
+        SOURCES "${PSTORE_SUPPORT_LIB_SRC}"
+        HEADER_DIR "${PSTORE_ROOT_DIR}/include/pstore/support"
+        INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
     )
     target_compile_options (pstore-support-bc PRIVATE
         -emit-llvm

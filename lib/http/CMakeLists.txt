@@ -45,24 +45,24 @@ include (add_pstore)
 
 set (pstore_http_public_include "${PSTORE_ROOT_DIR}/include/pstore/http")
 set (pstore_http_includes
-    "${pstore_http_public_include}/block_for_input.hpp"
-    "${pstore_http_public_include}/buffered_reader.hpp"
-    "${pstore_http_public_include}/endian.hpp"
-    "${pstore_http_public_include}/error.hpp"
-    "${pstore_http_public_include}/headers.hpp"
-    "${pstore_http_public_include}/http_date.hpp"
-    "${pstore_http_public_include}/media_type.hpp"
-    "${pstore_http_public_include}/net_txrx.hpp"
-    "${pstore_http_public_include}/query_to_kvp.hpp"
-    "${pstore_http_public_include}/quit.hpp"
-    "${pstore_http_public_include}/request.hpp"
-    "${pstore_http_public_include}/send.hpp"
-    "${pstore_http_public_include}/serve_dynamic_content.hpp"
-    "${pstore_http_public_include}/serve_static_content.hpp"
-    "${pstore_http_public_include}/server.hpp"
-    "${pstore_http_public_include}/server_status.hpp"
-    "${pstore_http_public_include}/ws_server.hpp"
-    "${pstore_http_public_include}/wskey.hpp"
+    block_for_input.hpp
+    buffered_reader.hpp
+    endian.hpp
+    error.hpp
+    headers.hpp
+    http_date.hpp
+    media_type.hpp
+    net_txrx.hpp
+    query_to_kvp.hpp
+    quit.hpp
+    request.hpp
+    send.hpp
+    serve_dynamic_content.hpp
+    serve_static_content.hpp
+    server.hpp
+    server_status.hpp
+    ws_server.hpp
+    wskey.hpp
 )
 set (pstore_http_lib_src
     error.cpp
@@ -80,8 +80,9 @@ set (pstore_http_lib_src
 add_pstore_library (
     TARGET pstore-http
     NAME http
-    SOURCES ${pstore_http_lib_src}
-    INCLUDES ${pstore_http_includes}
+    SOURCES "${pstore_http_lib_src}"
+    HEADER_DIR "${pstore_http_public_include}"
+    INCLUDES "${pstore_http_includes}"
 )
 target_link_libraries (pstore-http PUBLIC
     pstore-broker-intf
@@ -100,8 +101,9 @@ if (NOT PSTORE_EXCEPTIONS)
     add_pstore_library (
         TARGET pstore-http-ex
         NAME http
-        SOURCES ${pstore_http_lib_src}
-        INCLUDES ${pstore_http_includes}
+        SOURCES "${pstore_http_lib_src}"
+        HEADER_DIR "${pstore_http_public_include}"
+        INCLUDES "${pstore_http_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)
@@ -115,17 +117,15 @@ if (NOT PSTORE_EXCEPTIONS)
         pstore-os-ex
         pstore-support-ex
     )
-endif ()
-
-
-
+endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (
         TARGET pstore-http-bc
         NAME http
-        SOURCES ${pstore_http_lib_src}
-        INCLUDES ${pstore_http_includes}
+        SOURCES "${pstore_http_lib_src}"
+        HEADER_DIR "${pstore_http_public_include}"
+        INCLUDES "${pstore_http_includes}"
     )
     target_compile_options (pstore-http-bc PRIVATE
         -emit-llvm

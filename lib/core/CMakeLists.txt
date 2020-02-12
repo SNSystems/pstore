@@ -48,26 +48,24 @@ include (clang_tidy)
 set (pstore_core_include_dir "${PSTORE_ROOT_DIR}/include/pstore/core")
 set (PSTORE_SRC )
 
-
 ########
 # Core #
 ########
-set (pstore_core_core_includes
-    "${pstore_core_include_dir}/address.hpp"
-    "${pstore_core_include_dir}/database.hpp"
-    "${pstore_core_include_dir}/db_archive.hpp"
-    "${pstore_core_include_dir}/file_header.hpp"
-    "${pstore_core_include_dir}/generation_iterator.hpp"
-    "${pstore_core_include_dir}/index_types.hpp"
-    "${pstore_core_include_dir}/indirect_string.hpp"
-    "${pstore_core_include_dir}/region.hpp"
-    "${pstore_core_include_dir}/start_vacuum.hpp"
-    "${pstore_core_include_dir}/storage.hpp"
-    "${pstore_core_include_dir}/transaction.hpp"
-    "${pstore_core_include_dir}/vacuum_intf.hpp"
+list (APPEND pstore_core_includes
+    address.hpp
+    database.hpp
+    db_archive.hpp
+    file_header.hpp
+    generation_iterator.hpp
+    index_types.hpp
+    indirect_string.hpp
+    region.hpp
+    start_vacuum.hpp
+    storage.hpp
+    transaction.hpp
+    vacuum_intf.hpp
 )
-list (APPEND pstore_core_includes ${pstore_core_core_includes})
-set (pstore_core_core_src
+list (APPEND PSTORE_SRC
     address.cpp
     database.cpp
     file_header.cpp
@@ -82,70 +80,64 @@ set (pstore_core_core_src
     transaction.cpp
     vacuum_intf.cpp
 )
-list (APPEND PSTORE_SRC ${pstore_core_core_src})
-source_group ("core" FILES ${pstore_core_core_src} ${pstore_core_core_includes})
 
 
 ###########
 # Support #
 ###########
-set (pstore_core_support_includes
-    "${pstore_core_include_dir}/array_stack.hpp"
-    "${pstore_core_include_dir}/crc32.hpp"
-    "${pstore_core_include_dir}/sstring_view_archive.hpp"
-    "${pstore_core_include_dir}/time.hpp"
-    "${pstore_core_include_dir}/uuid.hpp"
+list (APPEND pstore_core_includes
+    array_stack.hpp
+    crc32.hpp
+    sstring_view_archive.hpp
+    time.hpp
+    uuid.hpp
 )
-list (APPEND pstore_core_includes ${pstore_core_support_includes})
-set (pstore_core_support_src
+list (APPEND PSTORE_SRC
     base32.cpp
     base32.hpp
     crc32.cpp
     time.cpp
     uuid.cpp
 )
-list (APPEND PSTORE_SRC ${pstore_core_support_src})
-source_group ("support" FILES ${pstore_core_support_src} ${pstore_core_support_includes})
 
 
 ######
 # OS #
 ######
-set (pstore_core_os_includes
-    "${pstore_core_include_dir}/errno_exception.hpp"
-)
-list (APPEND pstore_core_includes ${pstore_core_os_includes})
-set (pstore_core_os_src
-    errno_exception.cpp
-)
-list (APPEND PSTORE_SRC ${pstore_core_os_src})
-source_group (os FILES ${pstore_core_os_src} ${pstore_core_os_includes})
+list (APPEND pstore_core_includes errno_exception.hpp)
+list (APPEND PSTORE_SRC errno_exception.cpp)
 
 
 #########
 # Index #
 #########
-set (pstore_core_index_includes
-    "${pstore_core_include_dir}/hamt_map.hpp"
-    "${pstore_core_include_dir}/hamt_map_fwd.hpp"
-    "${pstore_core_include_dir}/hamt_map_types.hpp"
-    "${pstore_core_include_dir}/hamt_set.hpp"
+list (APPEND pstore_core_includes
+    hamt_map.hpp
+    hamt_map_fwd.hpp
+    hamt_map_types.hpp
+    hamt_set.hpp
 )
-list (APPEND pstore_core_includes ${pstore_core_index_includes})
-set (PSTORE_INDEX_SRC
+list (APPEND PSTORE_SRC
     hamt_map_types.cpp
 )
-list (APPEND PSTORE_SRC ${PSTORE_INDEX_SRC})
-source_group (index FILES ${PSTORE_INDEX_SRC} ${pstore_core_index_includes})
 
 
-
-include (add_pstore)
 add_pstore_library (
     NAME core
-    SOURCES ${PSTORE_SRC}
-    INCLUDES ${pstore_core_includes}
+    SOURCES "${PSTORE_SRC}"
+    HEADER_DIR "${pstore_core_include_dir}"
+    INCLUDES "${pstore_core_includes}"
 )
+
+
+
+target_link_libraries (pstore-core PUBLIC
+    pstore-broker-intf
+    pstore-os
+    pstore-serialize
+    pstore-support
+)
+add_clang_tidy_target (pstore-core)
 
 
 # Our use of shared memory needs an extra library on a Linux system.
@@ -154,11 +146,6 @@ check_library_exists (rt shm_open "" NEED_LIBRT)
 if (NEED_LIBRT)
     target_link_libraries (pstore-core PRIVATE rt)
 endif ()
-
-
-target_link_libraries (pstore-core PUBLIC pstore-broker-intf pstore-os pstore-serialize pstore-support)
-add_clang_tidy_target (pstore-core)
-
 
 include (check_atomic)
 if (NOT PSTORE_HAVE_CXX_ATOMICS_WITHOUT_LIB AND PSTORE_HAVE_CXX_ATOMICS_WITH_LIB)

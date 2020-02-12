@@ -43,12 +43,13 @@
 #===----------------------------------------------------------------------===//
 
 include (add_pstore)
+
 set (pstore_json_include_dir "${PSTORE_ROOT_DIR}/include/pstore/json/")
 set (pstore_json_includes
-    "${pstore_json_include_dir}/dom_types.hpp"
-    "${pstore_json_include_dir}/json.hpp"
-    "${pstore_json_include_dir}/json_error.hpp"
-    "${pstore_json_include_dir}/utility.hpp"
+    dom_types.hpp
+    json.hpp
+    json_error.hpp
+    utility.hpp
 )
 set (pstore_json_sources
     json_error.cpp
@@ -58,8 +59,9 @@ set (pstore_json_sources
 add_pstore_library (
     TARGET pstore-json-lib
     NAME json
-    SOURCES ${pstore_json_sources}
-    INCLUDES ${pstore_json_includes}
+    SOURCES "${pstore_json_sources}"
+    HEADER_DIR "${pstore_json_include_dir}"
+    INCLUDES "${pstore_json_includes}"
 )
 target_link_libraries (pstore-json-lib PUBLIC pstore-support)
 add_clang_tidy_target (pstore-json-lib)
@@ -72,8 +74,9 @@ if (NOT PSTORE_EXCEPTIONS)
     add_pstore_library (
         TARGET pstore-json-lib-ex
         NAME json
-        SOURCES ${pstore_json_sources}
-        INCLUDES ${pstore_json_includes}
+        SOURCES "${pstore_json_sources}"
+        HEADER_DIR "${pstore_json_include_dir}"
+        INCLUDES "${pstore_json_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)

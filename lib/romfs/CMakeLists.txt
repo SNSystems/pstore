@@ -42,11 +42,12 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 include (add_pstore)
+
 set (pstore_romfs_include_dir "${PSTORE_ROOT_DIR}/include/pstore/romfs")
 set (pstore_romfs_includes
-    "${pstore_romfs_include_dir}/directory.hpp"
-    "${pstore_romfs_include_dir}/dirent.hpp"
-    "${pstore_romfs_include_dir}/romfs.hpp"
+    directory.hpp
+    dirent.hpp
+    romfs.hpp
 )
 set (pstore_romfs_lib_src
     directory.cpp
@@ -56,8 +57,9 @@ set (pstore_romfs_lib_src
 
 add_pstore_library (
     NAME romfs
-    SOURCES ${pstore_romfs_lib_src}
-    INCLUDES ${pstore_romfs_includes}
+    SOURCES "${pstore_romfs_lib_src}"
+    HEADER_DIR "${pstore_romfs_include_dir}"
+    INCLUDES "${pstore_romfs_includes}"
 )
 add_clang_tidy_target (pstore-romfs)
 target_link_libraries (pstore-romfs PUBLIC pstore-support)
@@ -70,8 +72,9 @@ if (NOT PSTORE_EXCEPTIONS)
     add_pstore_library (
         TARGET pstore-romfs-ex
         NAME romfs
-        SOURCES ${pstore_romfs_lib_src}
-        INCLUDES ${pstore_romfs_includes}
+        SOURCES "${pstore_romfs_lib_src}"
+        HEADER_DIR "${pstore_romfs_include_dir}"
+        INCLUDES "${pstore_romfs_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)
@@ -79,14 +82,15 @@ if (NOT PSTORE_EXCEPTIONS)
     set (PSTORE_EXCEPTIONS No)
 
     target_link_libraries (pstore-romfs-ex PUBLIC pstore-support-ex)
-endif ()
+endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (
         TARGET pstore-romfs-bc
         NAME romfs
-        SOURCES ${pstore_romfs_lib_src}
-        INCLUDES ${pstore_romfs_includes}
+        SOURCES "${pstore_romfs_lib_src}"
+        HEADER_DIR "${pstore_romfs_include_dir}"
+        INCLUDES "${pstore_romfs_includes}"
     )
     target_compile_options (pstore-romfs-bc PRIVATE
         -emit-llvm

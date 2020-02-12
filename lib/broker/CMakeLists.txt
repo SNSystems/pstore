@@ -48,22 +48,22 @@ else ()
     set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker")
 
     set (pstore_broker_includes
-        "${pstore_broker_include_dir}/bimap.hpp"
-        "${pstore_broker_include_dir}/command.hpp"
-        "${pstore_broker_include_dir}/gc.hpp"
-        "${pstore_broker_include_dir}/globals.hpp"
-        "${pstore_broker_include_dir}/internal_commands.hpp"
-        "${pstore_broker_include_dir}/intrusive_list.hpp"
-        "${pstore_broker_include_dir}/message_pool.hpp"
-        "${pstore_broker_include_dir}/message_queue.hpp"
-        "${pstore_broker_include_dir}/parser.hpp"
-        "${pstore_broker_include_dir}/pointer_compare.hpp"
-        "${pstore_broker_include_dir}/quit.hpp"
-        "${pstore_broker_include_dir}/read_loop.hpp"
-        "${pstore_broker_include_dir}/recorder.hpp"
-        "${pstore_broker_include_dir}/scavenger.hpp"
-        "${pstore_broker_include_dir}/spawn.hpp"
-        "${pstore_broker_include_dir}/uptime.hpp"
+        bimap.hpp
+        command.hpp
+        gc.hpp
+        globals.hpp
+        internal_commands.hpp
+        intrusive_list.hpp
+        message_pool.hpp
+        message_queue.hpp
+        parser.hpp
+        pointer_compare.hpp
+        quit.hpp
+        read_loop.hpp
+        recorder.hpp
+        scavenger.hpp
+        spawn.hpp
+        uptime.hpp
     )
 
     set (pstore_broker_lib_src
@@ -93,8 +93,9 @@ else ()
         add_pstore_library (
             TARGET pstore-broker
             NAME broker
-            SOURCES ${pstore_broker_lib_src}
-            INCLUDES ${pstore_broker_includes}
+            SOURCES "${pstore_broker_lib_src}"
+            HEADER_DIR "${pstore_broker_include_dir}"
+            INCLUDES "${pstore_broker_includes}"
         )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf-ex
@@ -110,8 +111,9 @@ else ()
         add_pstore_library (
             TARGET pstore-broker
             NAME broker
-            SOURCES ${pstore_broker_lib_src}
-            INCLUDES ${pstore_broker_includes}
+            SOURCES "${pstore_broker_lib_src}"
+            HEADER_DIR "${pstore_broker_include_dir}"
+            INCLUDES "${pstore_broker_includes}"
         )
         target_link_libraries (pstore-broker PUBLIC
             pstore-broker-intf

@@ -45,13 +45,13 @@
 set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker_intf")
 
 set (pstore_broker_intf_includes
-    "${pstore_broker_include_dir}/descriptor.hpp"
-    "${pstore_broker_include_dir}/fifo_path.hpp"
-    "${pstore_broker_include_dir}/message_type.hpp"
-    "${pstore_broker_include_dir}/send_message.hpp"
-    "${pstore_broker_include_dir}/signal_cv.hpp"
-    "${pstore_broker_include_dir}/writer.hpp"
-    "${pstore_broker_include_dir}/wsa_startup.hpp"
+    descriptor.hpp
+    fifo_path.hpp
+    message_type.hpp
+    send_message.hpp
+    signal_cv.hpp
+    writer.hpp
+    wsa_startup.hpp
 )
 
 set (pstore_broker_intf_src
@@ -72,8 +72,9 @@ set (pstore_broker_intf_src
 include (add_pstore)
 add_pstore_library (TARGET pstore-broker-intf
     NAME broker_intf
-    SOURCES ${pstore_broker_intf_src}
-    INCLUDES ${pstore_broker_intf_includes}
+    SOURCES "${pstore_broker_intf_src}"
+    HEADER_DIR "${pstore_broker_include_dir}"
+    INCLUDES "${pstore_broker_intf_includes}"
 )
 target_link_libraries (pstore-broker-intf PUBLIC pstore-support)
 
@@ -84,8 +85,9 @@ if (NOT PSTORE_EXCEPTIONS)
 
     add_pstore_library (TARGET pstore-broker-intf-ex
         NAME broker-intf-ex
-        SOURCES ${pstore_broker_intf_src}
-        INCLUDES ${pstore_broker_intf_includes}
+        SOURCES "${pstore_broker_intf_src}"
+        HEADER_DIR "${pstore_broker_include_dir}"
+        INCLUDES "${pstore_broker_intf_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)

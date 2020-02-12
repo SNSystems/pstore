@@ -46,7 +46,6 @@
 # PStore Dump Core Library
 ##########################
 
-set (pstore_dump_include_dir "${PSTORE_ROOT_DIR}/include/pstore/dump")
 set (LLVM_LINK_COMPONENTS
     AllTargetsAsmPrinters
     AllTargetsDescs
@@ -74,15 +73,17 @@ add_pstore_library (
         mcdisassembler_value.cpp
         mcrepo_value.cpp
         value.cpp
+    HEADER_DIR
+        "${PSTORE_ROOT_DIR}/include/pstore/dump"
     INCLUDES
-        "${pstore_dump_include_dir}/db_value.hpp"
-        "${pstore_dump_include_dir}/digest_opt.hpp"
-        "${pstore_dump_include_dir}/error.hpp"
-        "${pstore_dump_include_dir}/index_value.hpp"
-        "${pstore_dump_include_dir}/line_splitter.hpp"
-        "${pstore_dump_include_dir}/mcdebugline_value.hpp"
-        "${pstore_dump_include_dir}/mcdisassembler_value.hpp"
-        "${pstore_dump_include_dir}/mcrepo_value.hpp"
-        "${pstore_dump_include_dir}/value.hpp"
+        db_value.hpp
+        digest_opt.hpp
+        error.hpp
+        index_value.hpp
+        line_splitter.hpp
+        mcdebugline_value.hpp
+        mcdisassembler_value.hpp
+        mcrepo_value.hpp
+        value.hpp
 )
 target_link_libraries (pstore-dump-lib PUBLIC pstore-core pstore-mcrepo)

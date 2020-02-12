@@ -41,58 +41,44 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-set (pstore_cmd_util_include_dir "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
-
 include (add_pstore)
-set (pstore_cmd_util_includes "")
-set (pstore_cmd_util_src "")
 
-set (pstore_cmd_util_cl_includes
-    "${pstore_cmd_util_include_dir}/category.hpp"
-    "${pstore_cmd_util_include_dir}/command_line.hpp"
-    "${pstore_cmd_util_include_dir}/help.hpp"
-    "${pstore_cmd_util_include_dir}/modifiers.hpp"
-    "${pstore_cmd_util_include_dir}/option.hpp"
-    "${pstore_cmd_util_include_dir}/parser.hpp"
-    "${pstore_cmd_util_include_dir}/string_distance.hpp"
-    "${pstore_cmd_util_include_dir}/stream_traits.hpp"
-    "${pstore_cmd_util_include_dir}/tchar.hpp"
-    "${pstore_cmd_util_include_dir}/word_wrapper.hpp"
-)
-set (PSTORE_CMD_UTIL_CL_SRC
+set (pstore_cmd_util_include_dir "${PSTORE_ROOT_DIR}/include/pstore/cmd_util")
+set (pstore_cmd_util_src
     category.cpp
     command_line.cpp
+    csv.cpp
     help.cpp
     modifiers.cpp
     option.cpp
     parser.cpp
+    revision_opt.cpp
+    str_to_revision.cpp
     string_distance.cpp
     tchar.cpp
     word_wrapper.cpp
 )
-list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_CL_SRC})
-list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_cl_includes})
-source_group ("cl" FILES ${PSTORE_CMD_UTIL_CL_SRC} ${pstore_cmd_util_cl_includes})
-
-set (pstore_cmd_util_opt_helpers_includes
-    "${pstore_cmd_util_include_dir}/csv.hpp"
-    "${pstore_cmd_util_include_dir}/str_to_revision.hpp"
-    "${pstore_cmd_util_include_dir}/revision_opt.hpp"
+set (pstore_cmd_util_includes
+    category.hpp
+    command_line.hpp
+    csv.hpp
+    help.hpp
+    modifiers.hpp
+    option.hpp
+    parser.hpp
+    revision_opt.hpp
+    str_to_revision.hpp
+    stream_traits.hpp
+    string_distance.hpp
+    tchar.hpp
+    word_wrapper.hpp
 )
-set (PSTORE_CMD_UTIL_OPT_HELPERS_SRC
-    csv.cpp
-    str_to_revision.cpp
-    revision_opt.cpp
-)
-list (APPEND pstore_cmd_util_src ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC})
-list (APPEND pstore_cmd_util_includes ${pstore_cmd_util_opt_helpers_includes})
-source_group ("opt_helpers" FILES ${PSTORE_CMD_UTIL_OPT_HELPERS_SRC} ${pstore_cmd_util_opt_helpers_includes})
-
 
 add_pstore_library (TARGET pstore-cmd-util
     NAME cmd_util
-    SOURCES ${pstore_cmd_util_src}
-    INCLUDES ${pstore_cmd_util_includes}
+    SOURCES "${pstore_cmd_util_src}"
+    HEADER_DIR "${pstore_cmd_util_include_dir}"
+    INCLUDES "${pstore_cmd_util_includes}"
 )
 target_link_libraries (pstore-cmd-util PUBLIC pstore-os pstore-support)
 add_clang_tidy_target (pstore-cmd-util)
@@ -104,8 +90,9 @@ if (NOT PSTORE_EXCEPTIONS)
 
     add_pstore_library (TARGET pstore-cmd-util-ex
         NAME pstore_cmd_util_ex
-        SOURCES ${pstore_cmd_util_src}
-        INCLUDES ${pstore_cmd_util_includes}
+        SOURCES "${pstore_cmd_util_src}"
+        HEADER_DIR "${pstore_cmd_util_include_dir}"
+        INCLUDES "${pstore_cmd_util_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)

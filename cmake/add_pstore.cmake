@@ -276,6 +276,7 @@ endfunction()
 # add_pstore_library
 ####################
 
+# HEADER_DIR - The path of the directory containing the library's include files.
 # NAME - The name of the directory containing the targets include files.
 # TARGET - The name of the target to be created. If omitted, defaults to the NAME value with a
 #          "pstore-" prefix. Underscores (_) are replaced with dash (-) to follow the pstore naming
@@ -285,7 +286,7 @@ endfunction()
 
 function (add_pstore_library)
     cmake_parse_arguments (arg ""
-        "TARGET;NAME"
+        "TARGET;NAME;HEADER_DIR"
         "SOURCES;INCLUDES"
         ${ARGN}
     )
@@ -295,14 +296,31 @@ function (add_pstore_library)
     if ("${arg_SOURCES}" STREQUAL "")
         message (SEND_ERROR "add_pstore_library: no SOURCES were supplied")
     endif ()
+    if ("${arg_HEADER_DIR}" STREQUAL "")
+        message (SEND_ERROR "add_pstore_library: HEADER_DIR argument was missing")
+    endif ()
 
     if ("${arg_TARGET}" STREQUAL "")
        set (arg_TARGET "pstore-${arg_NAME}")
        string (REPLACE "_" "-" arg_TARGET "${arg_TARGET}")
     endif ()
 
+    # The collection of include file paths is built by stitching the HEADER_DIR
+    # on to the front of each of the INCLUDES.
+    set (include_files "")
+    foreach (include ${arg_INCLUDES})
+       list (APPEND include_files "${arg_HEADER_DIR}/${include}")
+    endforeach ()
+
     if (PSTORE_IS_INSIDE_LLVM)
-        add_llvm_library (${arg_TARGET} STATIC ${arg_SOURCES})
+        add_llvm_library (${arg_TARGET}
+            STATIC
+            ${arg_SOURCES}
+            ${include_files}
+
+            ADDITIONAL_HEADER_DIRS
+            "${arg_HEADER_DIR}"
+        )
         add_pstore_additional_compiler_flags (${arg_TARGET})
 
         # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
@@ -310,7 +328,7 @@ function (add_pstore_library)
             target_compile_options (${arg_TARGET} PUBLIC -std=c++14)
         endif ()
     else ()
-        add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${arg_INCLUDES})
+        add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${include_files})
 
         set_target_properties (${arg_TARGET} PROPERTIES
             CXX_STANDARD 14

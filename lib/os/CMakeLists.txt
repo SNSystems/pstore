@@ -42,22 +42,21 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-
 set (pstore_os_include_dir "${PSTORE_ROOT_DIR}/include/pstore/os")
 set (pstore_os_includes
-    "${pstore_os_include_dir}/file.hpp"
-    "${pstore_os_include_dir}/file_posix.hpp"
-    "${pstore_os_include_dir}/file_win32.hpp"
-    "${pstore_os_include_dir}/logging.hpp"
-    "${pstore_os_include_dir}/memory_mapper.hpp"
-    "${pstore_os_include_dir}/path.hpp"
-    "${pstore_os_include_dir}/process_file_name.hpp"
-    "${pstore_os_include_dir}/rotating_log.hpp"
-    "${pstore_os_include_dir}/shared_memory.hpp"
-    "${pstore_os_include_dir}/signal_helpers.hpp"
-    "${pstore_os_include_dir}/thread.hpp"
-    "${pstore_os_include_dir}/time.hpp"
-    "${pstore_os_include_dir}/uint64.hpp"
+    file.hpp
+    file_posix.hpp
+    file_win32.hpp
+    logging.hpp
+    memory_mapper.hpp
+    path.hpp
+    process_file_name.hpp
+    rotating_log.hpp
+    shared_memory.hpp
+    signal_helpers.hpp
+    thread.hpp
+    time.hpp
+    uint64.hpp
 )
 set (pstore_os_lib_src
     file.cpp
@@ -80,8 +79,9 @@ set (pstore_os_lib_src
 
 add_pstore_library (
     NAME os
-    SOURCES ${pstore_os_lib_src}
-    INCLUDES ${pstore_os_includes}
+    SOURCES "${pstore_os_lib_src}"
+    HEADER_DIR "${pstore_os_include_dir}"
+    INCLUDES "${pstore_os_includes}"
 )
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package (Threads)
@@ -97,8 +97,9 @@ if (NOT PSTORE_EXCEPTIONS)
     add_pstore_library (
         TARGET pstore-os-ex
         NAME os
-        SOURCES ${pstore_os_lib_src}
-        INCLUDES ${pstore_os_includes}
+        SOURCES "${pstore_os_lib_src}"
+        HEADER_DIR "${pstore_os_include_dir}"
+        INCLUDES "${pstore_os_includes}"
     )
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
@@ -111,8 +112,9 @@ if (PSTORE_BITCODE)
     add_pstore_library (
         TARGET pstore-os-bc
         NAME os
-        SOURCES ${pstore_os_lib_src}
-        INCLUDES ${pstore_os_includes}
+        SOURCES "${pstore_os_lib_src}"
+        HEADER_DIR "${pstore_os_include_dir}"
+        INCLUDES "${pstore_os_includes}"
     )
     target_compile_options (pstore-os-bc PRIVATE
         -emit-llvm
