@@ -6,7 +6,7 @@ import os
 import lit.formats
 
 # name: The name of this test suite.
-config.name = 'Pstore-Unit'
+config.name = 'pstore-Unit'
 
 # suffixes: A list of file extensions to treat as test files.
 config.suffixes = []

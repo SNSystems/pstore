@@ -73,8 +73,8 @@ endif ()
 set (PSTORE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Define pstore source and binary dirs similar to the definitions in clang
-set(PSTORE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(PSTORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set (PSTORE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set (PSTORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 if (MSVC)
     # Microsoft's linker/archiver (not sure which) likes to warn when it sees
