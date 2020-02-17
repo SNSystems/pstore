@@ -55,6 +55,25 @@ target_include_directories (pstore-unit-test-harness PRIVATE ../include)
 if (PSTORE_IS_INSIDE_LLVM)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googletest/include)
     include_directories (${LLVM_MAIN_SRC_DIR}/utils/unittest/googlemock/include)
+    configure_lit_site_cfg (
+        ${CMAKE_CURRENT_SOURCE_DIR}/lit.site.cfg.py.in
+        ${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg.py
+        MAIN_CONFIG
+        ${CMAKE_CURRENT_SOURCE_DIR}/lit.cfg.py
+        )
+
+    list (APPEND PSTORE_TEST_DEPS PstoreUnitTests)
+
+    add_custom_target (pstore-test-depends DEPENDS ${PSTORE_TEST_DEPS})
+    set_target_properties (pstore-test-depends PROPERTIES FOLDER "pstore tests")
+
+    add_lit_testsuite (check-pstore "Running the pstore regression tests"
+        ${CMAKE_CURRENT_BINARY_DIR}
+        PARAMS ${PSTORE_TEST_PARAMS}
+        DEPENDS ${PSTORE_TEST_DEPS}
+        ARGS ${PSTORE_TEST_EXTRA_ARGS}
+        )
+    set_target_properties (check-pstore PROPERTIES FOLDER "pstore tests")
 endif (PSTORE_IS_INSIDE_LLVM)
 
 add_subdirectory (klee EXCLUDE_FROM_ALL)

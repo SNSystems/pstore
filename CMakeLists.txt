@@ -72,6 +72,9 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
 endif ()
 set (PSTORE_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
 
+# Define pstore source and binary dirs similar to the definitions in clang
+set (PSTORE_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+set (PSTORE_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
 if (MSVC)
     # Microsoft's linker/archiver (not sure which) likes to warn when it sees
@@ -162,10 +165,6 @@ endif ()
 if (PSTORE_IS_INSIDE_LLVM)
     add_custom_target (PstoreUnitTests)
     set_target_properties(PstoreUnitTests PROPERTIES FOLDER "pstore tests")
-    add_lit_testsuite(check-pstore "Running the Pstore regression tests"
-        ${CMAKE_CURRENT_BINARY_DIR}
-         DEPENDS PstoreUnitTests
-        )
 endif (PSTORE_IS_INSIDE_LLVM)
 
 
