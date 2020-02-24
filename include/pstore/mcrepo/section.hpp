@@ -53,24 +53,24 @@ namespace pstore {
     namespace repo {
 
 #define PSTORE_MCREPO_SECTION_KINDS                                                                \
-    X (bss)                                                                                        \
+    X (text)                                                                                       \
     X (data)                                                                                       \
-    X (debug_line)                                                                                 \
-    X (debug_ranges)                                                                               \
-    X (debug_string)                                                                               \
-    X (interp)                                                                                     \
+    X (bss)                                                                                        \
+    X (rel_ro)                                                                                     \
     X (mergeable_1_byte_c_string)                                                                  \
     X (mergeable_2_byte_c_string)                                                                  \
     X (mergeable_4_byte_c_string)                                                                  \
-    X (mergeable_const_16)                                                                         \
-    X (mergeable_const_32)                                                                         \
     X (mergeable_const_4)                                                                          \
     X (mergeable_const_8)                                                                          \
+    X (mergeable_const_16)                                                                         \
+    X (mergeable_const_32)                                                                         \
     X (read_only)                                                                                  \
-    X (rel_ro)                                                                                     \
-    X (text)                                                                                       \
-    X (thread_bss)                                                                                 \
     X (thread_data)                                                                                \
+    X (thread_bss)                                                                                 \
+    X (debug_line)                                                                                 \
+    X (debug_string)                                                                               \
+    X (debug_ranges)                                                                               \
+    X (interp)                                                                                     \
     X (dependent)
 
 #define X(a) a,
