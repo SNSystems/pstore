@@ -90,6 +90,14 @@ namespace {
     using uoff_type = std::make_unsigned<off_t>::type;
     constexpr auto uoff_max = pstore::unsigned_cast (std::numeric_limits<off_t>::max ());
 
+    template <typename ErrorCode, typename MessageStr, typename PathStr>
+    PSTORE_NO_RETURN void raise_file_error (ErrorCode err, MessageStr const message,
+                                            PathStr const path) {
+        std::ostringstream str;
+        str << message << ' ' << pstore::quoted (path);
+        pstore::raise_error_code (err, str.str ());
+    }
+
     template <typename MessageStr, typename PathStr>
     PSTORE_NO_RETURN void raise_file_error (int const err, MessageStr const message,
                                             PathStr const path) {
@@ -172,6 +180,8 @@ namespace {
 namespace pstore {
     namespace file {
 
+        constexpr file_handle::oshandle file_handle::invalid_oshandle;
+
         //*   __ _ _       _                 _ _      *
         //*  / _(_) |___  | |_  __ _ _ _  __| | |___  *
         //* |  _| | / -_) | ' \/ _` | ' \/ _` | / -_) *
@@ -253,15 +263,20 @@ namespace pstore {
         // ~~~~~
         void file_handle::close () {
             is_writable_ = false;
-            file_ = file_handle::close (file_, path_);
+            auto file_or_error = file_handle::close_noex (file_);
+            if (!file_or_error) {
+                raise_file_error (file_or_error.get_error (), "Unable to close", path_);
+            }
+            file_ = *file_or_error;
         }
 
-        auto file_handle::close (oshandle const file, std::string const & path) -> oshandle {
+        // close_noex
+        // ~~~~~~~~~~
+        auto file_handle::close_noex (oshandle const file) -> error_or<oshandle> {
             if (file != invalid_oshandle && ::close (file) == -1) {
-                int const err = errno;
-                raise_file_error (err, "Unable to close", path);
+                return error_or<oshandle>{make_error_code (pstore::errno_erc (errno))};
             }
-            return invalid_oshandle;
+            return {in_place, invalid_oshandle};
         }
 
         // seek

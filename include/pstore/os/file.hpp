@@ -68,6 +68,7 @@
 #include "pstore/config/config.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
+#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -710,7 +711,7 @@ namespace pstore {
             std::size_t read_buffer (gsl::not_null<void *> buffer, std::size_t nbytes) override;
             void write_buffer (gsl::not_null<void const *> buffer, std::size_t nbytes) override;
             void ensure_open ();
-            static oshandle close (oshandle file, std::string const & path);
+            static error_or<oshandle> close_noex (oshandle const file);
 
 #ifdef _WIN32
 #else

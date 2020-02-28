@@ -323,10 +323,9 @@ namespace pstore {
         // ~file_handle
         // ~~~~~~~~~~~~
         file_handle::~file_handle () noexcept {
-            no_ex_escape ([this] () {
-                is_writable_ = false;
-                file_ = file_handle::close (file_, path_);
-            });
+            is_writable_ = false;
+            file_handle::close_noex (file_);
+            file_ = invalid_oshandle;
         }
 
         // operator= (rvalue assignment)
