@@ -76,7 +76,6 @@
 
 /// Defined if the POSIX syslog API is available.
 #cmakedefine PSTORE_HAVE_SYS_LOG_H 1
-#cmakedefine PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H 1
 
 /// Defined if <byteswap.h> is available.
 #cmakedefine PSTORE_HAVE_BYTESWAP_H 1

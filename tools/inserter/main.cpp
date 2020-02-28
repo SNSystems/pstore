@@ -68,45 +68,6 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp" // for UTF-8 to UTF-16 conversion on Windows.
 
-#ifdef PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
-#    include <sys/kdebug_signpost.h>
-#endif
-
-namespace {
-
-#ifdef PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
-
-    class profile_marker {
-    public:
-        profile_marker (std::uint32_t code, std::uintptr_t arg1 = 0, std::uintptr_t arg2 = 0,
-                        std::uintptr_t arg3 = 0, std::uintptr_t arg4 = 0)
-                : code_{code}
-                , args_{{arg1, arg2, arg3, arg4}} {
-
-            kdebug_signpost_start (code_, args_[0], args_[1], args_[2], args_[3]);
-        }
-        ~profile_marker () { kdebug_signpost_end (code_, args_[0], args_[1], args_[2], args_[3]); }
-
-    private:
-        std::uint32_t code_;
-        std::array<std::uintptr_t, 4> args_;
-    };
-
-#else
-
-    class profile_marker {
-    public:
-        profile_marker (std::uint32_t /*code*/, std::uintptr_t /*arg1*/ = 0,
-                        std::uintptr_t /*arg2*/ = 0, std::uintptr_t /*arg3*/ = 0,
-                        std::uintptr_t /*arg4*/ = 0) {}
-        ~profile_marker () {}
-    };
-
-#endif // PSTORE_HAVE_SYS_KDEBUG_SIGNPOST_H
-
-} // end anonymous namespace
-
-
 namespace {
 
     // A simple linear congruential random number generator from Numerical Recipes
@@ -128,25 +89,14 @@ namespace {
         unsigned seed_;
     };
 
-} // end anonymous namespace
-
-namespace {
-
     using digest_set = std::unordered_set<pstore::index::digest, pstore::index::u128_hash>;
 
     void find (pstore::database const & database, pstore::index::fragment_index const & index,
                digest_set const & keys) {
-        profile_marker sgn (2); //! OCLint(PH - meant to be unused)
-
         pstore::parallel_for_each (
             std::begin (keys), std::end (keys),
             [&database, &index] (pstore::index::digest key) { index.find (database, key); });
     }
-
-} // end anonymous namespace
-
-
-namespace {
 
     using namespace pstore::cmd_util;
 
@@ -179,8 +129,6 @@ int main (int argc, char * argv[]) {
         std::vector<std::uint8_t> value{0, 1};
 
         {
-            profile_marker sgn (1); //! OCLint(PH - meant to be unused)
-
             auto const num_keys = std::size_t{300000};
             rng random;
             auto u64_random = [&random] () -> std::uint64_t {
@@ -204,7 +152,6 @@ int main (int argc, char * argv[]) {
         find (database, *index, keys);
 
         {
-            profile_marker sgn (3); //! OCLint(PH - meant to be unused)
             // Start a transaction...
             auto transaction = pstore::begin (database);
 
