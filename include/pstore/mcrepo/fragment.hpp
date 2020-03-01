@@ -64,7 +64,6 @@
 #include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/inherit_const.hpp"
-#include "pstore/support/max.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 #include "pstore/support/small_vector.hpp"
 

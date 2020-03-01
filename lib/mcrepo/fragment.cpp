@@ -48,6 +48,7 @@
 #include "pstore/config/config.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/max.hpp"
 
 using namespace pstore::repo;
 

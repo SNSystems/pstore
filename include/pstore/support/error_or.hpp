@@ -50,7 +50,6 @@
 #include <tuple>
 
 #include "pstore/support/inherit_const.hpp"
-#include "pstore/support/max.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
