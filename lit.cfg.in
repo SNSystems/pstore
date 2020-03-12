@@ -42,7 +42,7 @@ def data_store_path ():
 
 
 # name: The name of this test suite.
-config.name = 'PStore'
+config.name = 'pstore'
 
 # suffixes: A list of file extensions to treat as test files.
 config.suffixes = [

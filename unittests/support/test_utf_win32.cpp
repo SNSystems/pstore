@@ -49,7 +49,7 @@
 // 3rd party includes
 #    include "gtest/gtest.h"
 
-// PStore includes
+// pstore includes
 #    include "pstore/support/utf.hpp"
 
 namespace {

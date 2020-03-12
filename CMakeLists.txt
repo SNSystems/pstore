@@ -186,9 +186,9 @@ include (klee)
 pstore_add_klee_run_all_target (PSTORE_BITCODE)
 
 include (run_pstore_unit_test)
-add_subdirectory (lib)    # add the PStore library itself
+add_subdirectory (lib)       # Add the pstore libraries
 add_subdirectory (examples)
-add_subdirectory (tools) # Add the utility tools
+add_subdirectory (tools)     # Add the utility tools
 add_subdirectory (unittests) # Add the unit tests
 
 

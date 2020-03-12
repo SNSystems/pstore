@@ -42,9 +42,9 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-##########################
-# PStore Dump Core Library
-##########################
+#####################
+# pstore diff library
+#####################
 
 add_pstore_library (
     TARGET pstore-diff-lib
