@@ -57,14 +57,18 @@ namespace pstore {
         // ~~~~
         struct size {
             template <typename T>
-            static constexpr std::size_t value = sizeof (T);
+            static constexpr std::size_t value () {
+                return sizeof (T);
+            }
         };
 
         // align
         // ~~~~~
         struct align {
             template <typename T>
-            static constexpr std::size_t value = alignof (T);
+            static constexpr std::size_t value () {
+                return alignof (T);
+            }
         };
 
     } // end namespace details
@@ -80,7 +84,7 @@ namespace pstore {
     template <typename TypeValue, typename Head, typename... Tail>
     struct maxof<TypeValue, Head, Tail...> {
         static constexpr auto value =
-            std::max (TypeValue::template value<Head>, maxof<TypeValue, Tail...>::value);
+            std::max (TypeValue::template value<Head> (), maxof<TypeValue, Tail...>::value);
     };
 
     // characteristics
