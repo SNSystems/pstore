@@ -53,50 +53,53 @@
 namespace pstore {
     namespace details {
 
-        // max_sizeof
-        // ~~~~~~~~~~
-        template <typename... T>
-        struct max_sizeof;
-        template <>
-        struct max_sizeof<> {
-            static constexpr auto value = std::size_t{1};
-        };
-        template <typename Head, typename... Tail>
-        struct max_sizeof<Head, Tail...> {
-            static constexpr auto value = std::max (sizeof (Head), max_sizeof<Tail...>::value);
+        // size
+        // ~~~~
+        struct size {
+            template <typename T>
+            static constexpr std::size_t value = sizeof (T);
         };
 
-        // max_alignment
-        // ~~~~~~~~~~~~~
-        template <typename... T>
-        struct max_alignment;
-        template <>
-        struct max_alignment<> {
-            static constexpr auto value = std::size_t{1};
-        };
-        template <typename Head, typename... Tail>
-        struct max_alignment<Head, Tail...> {
-            static constexpr auto value = std::max (alignof (Head), max_alignment<Tail...>::value);
+        // align
+        // ~~~~~
+        struct align {
+            template <typename T>
+            static constexpr std::size_t value = alignof (T);
         };
 
     } // end namespace details
+
+    // maxof
+    // ~~~~~
+    template <typename TypeValue, typename... T>
+    struct maxof;
+    template <typename TypeValue>
+    struct maxof<TypeValue> {
+        static constexpr auto value = std::size_t{1};
+    };
+    template <typename TypeValue, typename Head, typename... Tail>
+    struct maxof<TypeValue, Head, Tail...> {
+        static constexpr auto value =
+            std::max (TypeValue::template value<Head>, maxof<TypeValue, Tail...>::value);
+    };
 
     // characteristics
     // ~~~~~~~~~~~~~~~
     /// Given a list of types, find the size of the largest and the alignment of the most aligned.
     template <typename... T>
     struct characteristics {
-        static constexpr std::size_t size = details::max_sizeof<T...>::value;
-        static constexpr std::size_t align = details::max_alignment<T...>::value;
+        static constexpr std::size_t size = maxof<details::size, T...>::value;
+        static constexpr std::size_t align = maxof<details::align, T...>::value;
     };
 
 } // end namespace pstore
 
-static_assert (pstore::details::max_sizeof<std::uint_least8_t>::value ==
+static_assert (pstore::maxof<pstore::details::size, std::uint_least8_t>::value ==
                    sizeof (std::uint_least8_t),
                "max(sizeof(1)) != sizeof(1)");
-static_assert (pstore::details::max_sizeof<std::uint_least8_t, std::uint_least16_t>::value >=
-                   sizeof (std::uint_least16_t),
-               "max(sizeof(1),sizeof(2) != 2");
+static_assert (
+    pstore::maxof<pstore::details::size, std::uint_least8_t, std::uint_least16_t>::value >=
+        sizeof (std::uint_least16_t),
+    "max(sizeof(1),sizeof(2) != 2");
 
 #endif // PSTORE_SUPPORT_MAX_HPP
