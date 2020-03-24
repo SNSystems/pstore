@@ -359,7 +359,6 @@ namespace {
                 }
                 address += bytes_consumed;
                 offset += bytes_consumed;
-                sub = span.subspan (offset);
             }
             return error_or<bool>{true};
         };
