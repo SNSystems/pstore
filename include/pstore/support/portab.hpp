@@ -162,12 +162,14 @@ namespace pstore {
 #endif
 
 
-#ifdef PSTORE_HAVE_NONNULL_KEYWORD
+// Use of the _Nonnull/_Nullable keywords draws an warning from clang ("Type nullability specifier
+// is a Clang extention") which the LLVM build does not suppress.
+#if defined(PSTORE_HAVE_NONNULL_KEYWORD) && !defined(PSTORE_IS_INSIDE_LLVM)
 #    define PSTORE_NONNULL _Nonnull
 #else
 #    define PSTORE_NONNULL
 #endif
-#ifdef PSTORE_HAVE_NULLABLE_KEYWORD
+#if defined(PSTORE_HAVE_NULLABLE_KEYWORD) && !defined(PSTORE_IS_INSIDE_LLVM)
 #    define PSTORE_NULLABLE _Nullable
 #else
 #    define PSTORE_NULLABLE
