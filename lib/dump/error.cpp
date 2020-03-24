@@ -68,6 +68,9 @@ std::string pstore::dump::error_category::message (int const error) const {
         result = "no instruction info for target";
         break;
     case error_code::no_disassembler_for_target: result = "no disassembler for target"; break;
+    case error_code::no_instruction_printer: result = "no instruction printer for target"; break;
+    case error_code::cannot_create_asm_streamer: result = "cannot create asm streamer"; break;
+    case error_code::unknown_target: result = "unknown target"; break;
     }
     return result;
 }

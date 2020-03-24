@@ -57,6 +57,9 @@ namespace pstore {
             no_subtarget_info_for_target,
             no_instruction_info_for_target,
             no_disassembler_for_target,
+            no_instruction_printer,
+            cannot_create_asm_streamer,
+            unknown_target,
         };
 
         class error_category : public std::error_category {
