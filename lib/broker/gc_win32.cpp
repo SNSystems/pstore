@@ -115,7 +115,7 @@ namespace {
         v->push_back (cv.wait_descriptor ().native_handle ());
         std::transform (
             processes.right_begin (), processes.right_end (), std::back_inserter (*v),
-            [] (pstore::broker::process_identifier const & process) { return process.get (); });
+            [] (pstore::broker::process_identifier const & pid) { return pid->process (); });
     }
 
 } // end anonymous namespace
