@@ -83,11 +83,12 @@ namespace {
         return dispatcher_ptr (new (buffer) dispatcher_type (f.at<Kind> ()), nop_deleter{});
     }
 
-    /// Constructs a dispatcher instance for the a specific section of the given fragment.
+    /// Constructs a dispatcher instance for a specific section of the given fragment.
     ///
     /// \param f  The fragment.
     /// \param kind  The section that is being accessed. The fragment must hold a section of this
-    /// kind. \param buffer A non-null pointer to a buffer into which the object will be
+    /// kind.
+    /// \param buffer A non-null pointer to a buffer into which the object will be
     /// constructed. In other words, on return the result will be a unique_ptr<> to an object inside
     /// this buffer. The lifetime of this buffer must be greater than that of the result pointer.
     dispatcher_ptr make_dispatcher (fragment const & f, section_kind const kind,
