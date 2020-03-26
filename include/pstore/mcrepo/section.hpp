@@ -161,6 +161,11 @@ namespace pstore {
             section_kind const kind_;
         };
 
+        /// Maps from the type of data that is associated with a fragment's section to a
+        /// "dispatcher" subclass which provides a generic interface for creating instances of these
+        /// sections.
+        template <typename T>
+        struct section_to_creation_dispatcher {};
 
         /// A simple wrapper around the elements of one of the three arrays that make
         /// up a section. Enables the use of standard algorithms as well as

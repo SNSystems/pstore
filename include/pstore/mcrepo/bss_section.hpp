@@ -143,11 +143,22 @@ namespace pstore {
             section_content const * const section_;
         };
 
+        template <>
+        struct section_to_creation_dispatcher<bss_section> {
+            using type = bss_section_creation_dispatcher;
+        };
 
+        //*             _   _               _ _               _      _             *
+        //*  ___ ___ __| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
+        //* (_-</ -_) _|  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
+        //* /__/\___\__|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
+        //*                                       |_|                              *
         class bss_section_dispatcher final : public dispatcher {
         public:
             explicit bss_section_dispatcher (bss_section const & b) noexcept
                     : b_{b} {}
+            bss_section_dispatcher (unsigned const align, bss_section::size_type const size)
+                    : bss_section_dispatcher (bss_section{align, size}) {}
             ~bss_section_dispatcher () noexcept override;
 
             std::size_t size_bytes () const final { return b_.size_bytes (); }

@@ -471,7 +471,16 @@ namespace pstore {
             section_content const * const section_;
         };
 
+        template <>
+        struct section_to_creation_dispatcher<generic_section> {
+            using type = generic_section_creation_dispatcher;
+        };
 
+        //*             _   _               _ _               _      _             *
+        //*  ___ ___ __| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
+        //* (_-</ -_) _|  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
+        //* /__/\___\__|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
+        //*                                       |_|                              *
         class section_dispatcher final : public dispatcher {
         public:
             explicit section_dispatcher (generic_section const & s) noexcept
@@ -488,7 +497,6 @@ namespace pstore {
         private:
             generic_section const & s_;
         };
-
 
         template <>
         struct section_to_dispatcher<generic_section> {
