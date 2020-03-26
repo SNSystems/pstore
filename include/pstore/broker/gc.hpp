@@ -53,6 +53,7 @@
 #include "pstore/broker/spawn.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace broker {
@@ -69,10 +70,21 @@ namespace pstore {
 
             void start_vacuum (std::string const & db_path);
 
-            /// Called when a shutdown request is received. This method wakes the watcher
+            /// If a GC process is running for \p path, it is killed and true returned otherwise
+            /// false.
+            ///
+            /// \param path  Path of a pstore file.
+            /// \returns True if a GC process is running for \p path otherwise false.
+            bool stop_vacuum (std::string const & path);
+
+            /// Call when a shutdown request is received. This method wakes the watcher
             /// thread and asks all child processes to exit.
+            ///
+            /// \param signum  The signal number that is the cause of the shutdown or -1 if
+            /// shutting down for any other reason.
             void stop (int signum = -1);
 
+            std::size_t size () const;
             static std::string vacuumd_path ();
 
 #ifdef _WIN32
@@ -84,6 +96,10 @@ namespace pstore {
         private:
             virtual process_identifier spawn (std::initializer_list<gsl::czstring> argv);
             virtual void kill (process_identifier const & pid);
+
+            /// \param path  The path of a pstore file.
+            /// \returns  The proccess-id for a GC runnning on a file at the path given by \p path.
+            maybe<process_identifier> get_pid (std::string const & path);
 
 #ifdef _WIN32
             static constexpr auto vacuumd_name = PSTORE_VACUUM_TOOL_NAME ".exe";
@@ -97,7 +113,7 @@ namespace pstore {
             static void child_signal (int sig);
 #endif
 
-            std::mutex mut_;
+            mutable std::mutex mut_;
             signal_cv cv_;
             process_bimap processes_;
             bool done_ = false;

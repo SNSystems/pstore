@@ -66,7 +66,6 @@
 #    include "pstore/os/logging.hpp"
 #    include "pstore/os/thread.hpp"
 
-
 namespace {
 
     void pr_exit (HANDLE process) {
@@ -148,13 +147,18 @@ namespace pstore {
                     log (priority::info, "waiting for a GC process to complete");
 
                     build_object_vector (processes_, cv_, &object_vector);
-                    assert (object_vector.size () <= MAXIMUM_WAIT_OBJECTS);
+                    auto const num_objects = object_vector.size ();
+                    assert (num_objects > 0 && num_objects <= MAXIMUM_WAIT_OBJECTS);
 
                     lock.unlock ();
-                    DWORD const wmo_timeout = 60 * 1000; // 60 second timeout.
-                    DWORD wmo_res = ::WaitForMultipleObjects (
-                        static_cast<DWORD> (object_vector.size ()), object_vector.data (),
-                        FALSE /*wait all*/, wmo_timeout);
+                    constexpr DWORD wmo_timeout = 60 * 1000; // 60 second timeout.
+                    DWORD const wmo_res = ::WaitForMultipleObjects (
+                        static_cast<DWORD> (num_objects), // Size of the handle array.
+                        object_vector.data (),            // The array of handles on which to wait.
+                        FALSE,                            // Wait for all handles?
+                        wmo_timeout                       // Timeout (milliseconds)
+                    );
+                    DWORD const last_error = ::GetLastError ();
                     lock.lock ();
 
                     // We may have been woken up because the program is exiting.
@@ -163,8 +167,7 @@ namespace pstore {
                     }
 
                     if (wmo_res == WAIT_FAILED) {
-                        raise (pstore::win32_erc{::GetLastError ()},
-                               "WaitForMultipleObjects failed");
+                        raise (pstore::win32_erc{last_error}, "WaitForMultipleObjects failed");
                     } else if (wmo_res == WAIT_TIMEOUT) {
                         log (priority::info, "WaitForMultipleObjects timeout");
                     } else if (wmo_res >= WAIT_OBJECT_0) {
@@ -178,6 +181,12 @@ namespace pstore {
                             pr_exit (h);
                             processes_.eraser (h);
                         }
+                    } else if (wmo_res >= WAIT_ABANDONED_0) {
+                        // "If a thread terminates without releasing its ownership of a mutex
+                        // object, the mutex object is considered to be abandoned." We don't expect
+                        // that to ever happen here.
+                        log (priority::error, "WaitForMultipleObjects WAIT_ABANDONED error n=",
+                             wmo_res - WAIT_ABANDONED_0);
                     } else {
                         log (priority::error, "Unknown WaitForMultipleObjects return value ",
                              wmo_res);

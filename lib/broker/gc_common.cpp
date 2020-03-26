@@ -92,6 +92,29 @@ namespace pstore {
             cv_.notify_all (-1);
         }
 
+        // get_pid
+        // ~~~~~~~
+        maybe<process_identifier> gc_watch_thread::get_pid (std::string const & path) {
+            std::unique_lock<decltype (mut_)> const lock{mut_};
+            if (!processes_.presentl (path)) {
+                return {};
+            }
+            return maybe<process_identifier>{processes_.getr (path)};
+        }
+
+        // stop_vacuum
+        // ~~~~~~~~~~~
+        bool gc_watch_thread::stop_vacuum (std::string const & path) {
+            if (maybe<process_identifier> const pid = this->get_pid (path)) {
+                log (priority::info, "Killing GC for ", logging::quoted (path.c_str ()));
+                this->kill (*pid);
+                processes_.erasel (path);
+                return true;
+            }
+            log (priority::info, "No GC process running for ", logging::quoted (path.c_str ()));
+            return false;
+        }
+
         // stop
         // ~~~~
         void gc_watch_thread::stop (int const signum) {
@@ -101,6 +124,13 @@ namespace pstore {
             }
             log (priority::info, "asking gc process watch thread to exit");
             cv_.notify_all (signum);
+        }
+
+        // size
+        // ~~~~
+        std::size_t gc_watch_thread::size () const {
+            std::unique_lock<decltype (mut_)> const lock{mut_};
+            return processes_.size ();
         }
 
         // vacuumd_path
