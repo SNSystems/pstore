@@ -70,8 +70,7 @@ namespace pstore {
         constexpr int sig_self_quit = -1;
 
         void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_threads,
-                       gsl::not_null<pstore::httpd::server_status *> http_status,
+                       unsigned num_read_threads, pstore::httpd::server_status * http_status,
                        gsl::not_null<std::atomic<bool> *> uptime_done);
 
         /// Wakes up the quit thread to start the process of shutting down the server.
@@ -79,7 +78,7 @@ namespace pstore {
 
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        gsl::not_null<pstore::httpd::server_status *> http_status,
+                                        pstore::httpd::server_status * http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done);
     } // namespace broker
 } // namespace pstore

@@ -138,20 +138,22 @@ namespace {
             broker::gc_process_watch_thread ();
         }));
 
-        futures.push_back (create_thread (
-            [] (httpd::server_status * const status) {
-                thread_init ("http");
-                pstore::httpd::channel_container channels{
-                    {"commits",
-                     pstore::httpd::channel_container_entry{&pstore::broker::commits_channel,
-                                                            &pstore::broker::commits_cv}},
-                    {"uptime",
-                     pstore::httpd::channel_container_entry{&pstore::broker::uptime_channel,
-                                                            &pstore::broker::uptime_cv}},
-                };
-                httpd::server (fs, status, channels);
-            },
-            http_status.get ()));
+        if (http_status) {
+            futures.push_back (create_thread (
+                [](httpd::server_status * const status) {
+                    thread_init ("http");
+                    pstore::httpd::channel_container channels{
+                        {"commits",
+                         pstore::httpd::channel_container_entry{&pstore::broker::commits_channel,
+                                                                &pstore::broker::commits_cv}},
+                        {"uptime",
+                         pstore::httpd::channel_container_entry{&pstore::broker::uptime_channel,
+                                                                &pstore::broker::uptime_cv}},
+                    };
+                    httpd::server (fs, status, channels);
+                },
+                http_status.get ()));
+        }
 
         futures.push_back (create_thread (
             [] (std::atomic<bool> * const done) {
@@ -208,9 +210,9 @@ int main (int argc, char * argv[]) {
         std::vector<std::future<void>> futures;
         std::thread quit;
 
-        constexpr in_port_t http_port = 8080;
-        auto http_status = std::unique_ptr<pstore::httpd::server_status> (
-            new pstore::httpd::server_status (http_port));
+        auto http_status = opt.http_port == 0U
+                               ? std::unique_ptr<pstore::httpd::server_status>{}
+                               : std::make_unique<pstore::httpd::server_status> (opt.http_port);
         std::atomic<bool> uptime_done{false};
 
         {

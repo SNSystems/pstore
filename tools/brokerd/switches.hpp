@@ -50,6 +50,7 @@
 #include <string>
 #include <tuple>
 
+#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
 #include "pstore/cmd_util/tchar.hpp"
 
 struct switches {
@@ -57,6 +58,7 @@ struct switches {
     std::unique_ptr<std::string> record_path;
     std::unique_ptr<std::string> pipe_path;
     unsigned num_read_threads = 2U;
+    in_port_t http_port = 8080;
     std::chrono::seconds scavenge_time;
 };
 

@@ -70,6 +70,11 @@ namespace {
                                         cl::desc ("The number of pipe reading threads"),
                                         cl::init (2U));
 
+    cl::opt<std::uint16_t>
+        http_port ("http-port",
+                   cl::desc ("The port on which to listen for HTTP connections (0 to disable)"),
+                   cl::init (in_port_t{8080}));
+
     cl::opt<unsigned>
         scavenge_time ("scavenge-time",
                        cl::desc ("The time in seconds that a message will spend in the command "
@@ -99,6 +104,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.record_path = path_option (record_path);
     result.pipe_path = path_option (pipe_path);
     result.num_read_threads = num_read_threads.get ();
+    result.http_port = http_port.get ();
     result.scavenge_time = std::chrono::seconds{scavenge_time.get ()};
     return {std::move (result), EXIT_SUCCESS};
 }

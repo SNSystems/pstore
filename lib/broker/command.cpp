@@ -102,11 +102,10 @@ namespace pstore {
 
         // ctor
         // ~~~~
-        command_processor::command_processor (
-            unsigned const num_read_threads,
-            gsl::not_null<httpd::server_status *> const http_status,
-            gsl::not_null<std::atomic<bool> *> const uptime_done,
-            std::chrono::seconds const delete_threshold)
+        command_processor::command_processor (unsigned const num_read_threads,
+                                              httpd::server_status * const http_status,
+                                              gsl::not_null<std::atomic<bool> *> const uptime_done,
+                                              std::chrono::seconds const delete_threshold)
                 : http_status_{http_status}
                 , uptime_done_{uptime_done}
                 , delete_threshold_{delete_threshold}

@@ -62,7 +62,10 @@
 namespace pstore {
     namespace httpd {
 
-        void quit (gsl::not_null<server_status *> const http_status) {
+        void quit (server_status * const http_status) {
+            if (!http_status) {
+                return;
+            }
             if (http_status->shutdown () == server_status::http_state::listening) {
                 // Wake up the server by connecting to it.
                 broker::socket_descriptor const fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};

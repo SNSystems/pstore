@@ -47,12 +47,11 @@
 #include <string>
 
 #include "pstore/http/server_status.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {
 
-        void quit (gsl::not_null<server_status *> http_status);
+        void quit (server_status * http_status);
 
     } // end namespace httpd
 } // end namespace pstore

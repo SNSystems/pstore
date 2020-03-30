@@ -350,6 +350,32 @@ namespace {
     }
 #endif
 
+    // wait_for_connection
+    // ~~~~~~~~~~~~~~~~~~~
+    pstore::error_or<socket_descriptor> wait_for_connection (socket_descriptor const & parentfd) {
+        using return_type = pstore::error_or<socket_descriptor>;
+
+        using pstore::logging::priority;
+
+        sockaddr_in client_addr{}; // client address.
+        auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
+        socket_descriptor childfd{::accept (parentfd.native_handle (),
+                                            reinterpret_cast<struct sockaddr *> (&client_addr),
+                                            &clientlen)};
+        if (!childfd.valid ()) {
+            return return_type{pstore::httpd::get_last_error ()};
+        }
+
+        // Determine who sent the message.
+        assert (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
+        pstore::error_or<std::string> ename = get_client_name (client_addr);
+        if (!ename) {
+            return return_type{pstore::httpd::get_last_error ()};
+        }
+        log (priority::info, "Connection from ", ename.get ());
+        return return_type{std::move (childfd)};
+    }
+
 } // end anonymous namespace
 
 namespace pstore {
@@ -373,24 +399,13 @@ namespace pstore {
                  expected_state = server_status::http_state::listening) {
 
                 // Wait for a connection request.
-                sockaddr_in client_addr{}; // client address.
-                auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
-                socket_descriptor childfd{
-                    ::accept (parentfd.native_handle (),
-                              reinterpret_cast<struct sockaddr *> (&client_addr), &clientlen)};
-                if (!childfd.valid ()) {
-                    log (logging::priority::error, "accept", get_last_error ().message ());
+                pstore::error_or<socket_descriptor> echildfd = wait_for_connection (parentfd);
+                if (!echildfd) {
+                    log (logging::priority::error, "wait_for_connection",
+                         echildfd.get_error ().message ());
                     continue;
                 }
-
-                // Determine who sent the message.
-                assert (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
-                pstore::error_or<std::string> ename = get_client_name (client_addr);
-                if (!ename) {
-                    log (logging::priority::error, "getnameinfo", ename.get_error ().message ());
-                    continue;
-                }
-                log (logging::priority::info, "Connection from ", ename.get ());
+                socket_descriptor & childfd = *echildfd;
 
                 // Get the HTTP request line.
                 auto reader = make_buffered_reader<socket_descriptor &> (net::refiller);

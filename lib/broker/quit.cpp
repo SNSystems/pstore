@@ -109,7 +109,7 @@ namespace pstore {
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
                        unsigned const num_read_threads,
-                       gsl::not_null<pstore::httpd::server_status *> const http_status,
+                       pstore::httpd::server_status * const http_status,
                        gsl::not_null<std::atomic<bool> *> const uptime_done) {
 
             // Set the global "done" flag unless we're already shutting down. The latter condition
@@ -211,7 +211,7 @@ namespace {
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> const cp,
                       std::weak_ptr<pstore::broker::scavenger> const scav,
                       unsigned const num_read_threads,
-                      pstore::gsl::not_null<pstore::httpd::server_status *> const http_status,
+                      pstore::httpd::server_status * const http_status,
                       pstore::gsl::not_null<std::atomic<bool> *> const uptime_done) {
         try {
             pstore::threads::set_name ("quit");
@@ -270,7 +270,7 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        gsl::not_null<pstore::httpd::server_status *> http_status,
+                                        pstore::httpd::server_status * const http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
                               http_status, uptime_done);
