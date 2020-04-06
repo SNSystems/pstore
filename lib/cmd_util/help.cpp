@@ -51,6 +51,7 @@
 #    include <Windows.h>
 #else
 #    include <sys/ioctl.h>
+#    include <termios.h>
 #    include <unistd.h>
 #endif // _WIN32
 
