@@ -52,6 +52,7 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/support/aligned.hpp"
+#include "pstore/support/inherit_const.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
@@ -173,13 +174,22 @@ namespace pstore {
         /// Returns the base address of a segment given its index.
         /// \param segment The segment number whose base address it to be returned. The segment
         ///                number must lie within the memory mapped regions.
-        std::shared_ptr<void const> segment_base (address::segment_type segment) const noexcept;
-        std::shared_ptr<void> segment_base (address::segment_type segment) noexcept;
+        std::shared_ptr<void const> segment_base (address::segment_type segment) const noexcept {
+            return segment_base_impl (*this, segment);
+        }
+        std::shared_ptr<void> const & segment_base (address::segment_type segment) noexcept {
+            return segment_base_impl (*this, segment);
+        }
         ///@}
 
         ///@{
-        std::shared_ptr<void const> address_to_pointer (address addr) const noexcept;
-        std::shared_ptr<void> address_to_pointer (address addr) noexcept;
+        std::shared_ptr<void const> address_to_pointer (address addr) const noexcept {
+            return address_to_pointer_impl (*this, addr);
+        }
+        std::shared_ptr<void> address_to_pointer (address addr) noexcept {
+            return address_to_pointer_impl (*this, addr);
+        }
+
         template <typename T>
         std::shared_ptr<T const> address_to_pointer (typed_address<T> addr) const noexcept {
             return std::static_pointer_cast<T const> (address_to_pointer (addr.to_address ()));
@@ -199,6 +209,18 @@ namespace pstore {
         slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
                                     sat_iterator segment_it, sat_iterator segment_end);
 
+        template <typename Storage,
+                  typename ResultType = typename inherit_const<
+                      Storage, std::shared_ptr<void> const &, std::shared_ptr<void const>>::type>
+        static auto segment_base_impl (Storage & storage,
+                                       address::segment_type const segment) noexcept -> ResultType;
+
+        template <typename Storage,
+                  typename ResultType = typename inherit_const<Storage, std::shared_ptr<void>,
+                                                               std::shared_ptr<void const>>::type>
+        static auto address_to_pointer_impl (Storage & storage, address const addr) noexcept
+            -> ResultType;
+
         /// The Segment Address Table: an array of pointers to the base-address of each segment's
         /// memory-mapped storage and their corresponding region object.
         std::unique_ptr<segment_address_table> sat_ = std::make_unique<segment_address_table> ();
@@ -213,32 +235,25 @@ namespace pstore {
 
     // segment_base
     // ~~~~~~~~~~~~
-    inline auto storage::segment_base (address::segment_type const segment) const noexcept
-        -> std::shared_ptr<void const> {
-        assert (segment < sat_->size ());
-        sat_entry const & e = (*sat_)[segment];
+    template <typename Storage, typename ResultType>
+    inline auto storage::segment_base_impl (Storage & storage,
+                                            address::segment_type const segment) noexcept
+        -> ResultType {
+        assert (segment < storage.sat_->size ());
+        auto & e = (*storage.sat_)[segment];
         assert (e.is_valid ());
         return e.value;
-    }
-    inline auto storage::segment_base (address::segment_type const segment) noexcept
-        -> std::shared_ptr<void> {
-        auto const * const cthis = this;
-        return std::const_pointer_cast<void> (cthis->segment_base (segment));
     }
 
     // address_to_pointer
     // ~~~~~~~~~~~~~~~~~~
-    inline auto storage::address_to_pointer (address const addr) const noexcept
-        -> std::shared_ptr<void const> {
-        auto const segment_base = this->segment_base (addr.segment ());
-        auto * const ptr =
-            std::static_pointer_cast<std::uint8_t const> (segment_base).get () + addr.offset ();
-        return std::shared_ptr<void const> (segment_base, ptr);
-    }
-
-    inline auto storage::address_to_pointer (address const addr) noexcept -> std::shared_ptr<void> {
-        auto const * const cthis = this;
-        return std::const_pointer_cast<void> (cthis->address_to_pointer (addr));
+    template <typename Storage, typename ResultType>
+    inline auto storage::address_to_pointer_impl (Storage & storage, address const addr) noexcept
+        -> ResultType {
+        auto segment_base = storage.segment_base (addr.segment ());
+        using uint8_type = typename inherit_const<Storage, std::uint8_t>::type;
+        return {segment_base,
+                std::static_pointer_cast<uint8_type> (segment_base).get () + addr.offset ()};
     }
 
     // request_spans_regions
