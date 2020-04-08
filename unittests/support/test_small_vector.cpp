@@ -305,3 +305,14 @@ TEST (SmallVector, AppendIteratorRange) {
 
     EXPECT_THAT (a, ::testing::ElementsAre (0, 1, 2, 3, 100, 101, 102, 103));
 }
+
+TEST (SmallVector, CapacityReserve) {
+    pstore::small_vector<int, 4> a;
+    EXPECT_EQ (a.capacity (), 4U);
+    a.reserve (1U);
+    EXPECT_EQ (a.capacity (), 4U);
+    a.reserve (10U);
+    EXPECT_EQ (a.capacity (), 10U);
+    a.reserve (1U);
+    EXPECT_EQ (a.capacity (), 10U);
+}

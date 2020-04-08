@@ -118,8 +118,19 @@ namespace pstore {
         /// Returns the number of elements that can be held in currently allocated
         /// storage.
         std::size_t capacity () const noexcept {
-            return is_small (elements_) ? BodyElements : big_buffer_.capacity ();
+            return std::max (BodyElements, big_buffer_.capacity ());
         }
+
+        /// Increase the capacity of the vector to a value that's greater or equal to new_cap. If
+        /// new_cap is greater than the current capacity(), new storage is allocated, otherwise the
+        /// method does nothing. reserve() does not change the size of the vector.
+        ///
+        /// \note If new_cap is greater than capacity(), all iterators, including the past-the-end
+        /// iterator, and all references to the elements are invalidated. Otherwise, no iterators or
+        /// references are invalidated.
+        ///
+        /// \param new_cap The new capacity of the vector
+        void reserve (std::size_t new_cap);
 
         /// Resizes the container so that it is large enough for accommodate the
         /// given number of elements.
@@ -287,6 +298,15 @@ namespace pstore {
             std::copy (std::begin (rhs), std::end (rhs), std::begin (*this));
         }
         return *this;
+    }
+
+    // reserve
+    // ~~~~~~~
+    template <typename ElementType, std::size_t BodyElements>
+    void small_vector<ElementType, BodyElements>::reserve (std::size_t new_cap) {
+        if (new_cap > capacity ()) {
+            big_buffer_.reserve (new_cap);
+        }
     }
 
     // resize
