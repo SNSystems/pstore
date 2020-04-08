@@ -350,21 +350,14 @@ namespace pstore {
                     return false;
                 }
 #endif
-                auto first = std::begin (internal);
-                auto const last = std::end (internal);
-                while (first != last) {
-                    index_pointer const child = *(first++);
-                    if (child.is_heap () || child.untag_internal_address () >= addr) {
-                        return false;
-                    }
-
-                    for (auto it = first; it != last; ++it) {
-                        if (child == *it) {
-                            return false;
-                        }
-                    }
-                }
-                return true;
+                return std::all_of (std::begin (internal), std::end (internal),
+                                    [addr] (index_pointer const & child) {
+                                        if (child.is_heap () ||
+                                            child.untag_internal_address () >= addr) {
+                                            return false;
+                                        }
+                                        return true;
+                                    });
             }
 
             // read_node [static]

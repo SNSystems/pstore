@@ -1811,26 +1811,6 @@ TEST_F (CorruptInternalNodes, ChildClaimsToBeOnHeap) {
     this->find ();
 }
 
-TEST_F (CorruptInternalNodes, MatchingChildPointers) {
-    {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
-        this->build (t1);
-
-        index_pointer root = index_->root ();
-        this->check_is_store_internal_node (root);
-
-        // The first two child pointers are the same.
-        {
-            std::shared_ptr<internal_node> inode = this->load_inode (root);
-            ASSERT_EQ (inode->size (), internal_node_children);
-            (*inode)[1] = (*inode)[0];
-        }
-        t1.commit ();
-    }
-    this->iterate ();
-    this->find ();
-}
-
 // *******************************************
 // *                                         *
 // *              InvalidIndex               *
