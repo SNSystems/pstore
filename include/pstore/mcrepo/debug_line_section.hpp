@@ -141,6 +141,10 @@ namespace pstore {
             section_content const * const section_;
         };
 
+        template <>
+        struct section_to_creation_dispatcher<debug_line_section> {
+            using type = debug_line_section_creation_dispatcher;
+        };
 
         class debug_line_dispatcher final : public dispatcher {
         public:
