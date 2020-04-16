@@ -166,7 +166,7 @@ namespace pstore {
         ///
         /// \param args  Arguments that will be passed to \p f.
         template <typename MessageFunction, typename... Args>
-        void publish (MessageFunction f, Args... args);
+        void publish (MessageFunction f, Args &&... args);
 
         /// Creates a new subscriber instance and attaches it to this channel.
         subscriber_pointer new_subscriber ();
@@ -263,7 +263,7 @@ namespace pstore {
 
     template <typename ConditionVariable>
     template <typename MessageFunction, typename... Args>
-    void channel<ConditionVariable>::publish (MessageFunction f, Args... args) {
+    void channel<ConditionVariable>::publish (MessageFunction f, Args &&... args) {
         bool render = false;
         {
             std::lock_guard<std::mutex> const lock{mut_};
