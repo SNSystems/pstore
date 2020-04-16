@@ -95,10 +95,10 @@ namespace pstore {
 
         void serializer<indirect_string>::read (archive::database_reader && archive,
                                                 value_type & value) {
-            read_string_address (std::forward<archive::database_reader> (archive), value);
+            read_string_address (archive, value);
         }
 
-    } // namespace serialize
+    } // end namespace serialize
 
 
     //*  _         _ _            _        _       _                     _    _          *
@@ -134,4 +134,4 @@ namespace pstore {
         return {owner, str.as_db_string_view (&owner)};
     }
 
-} // namespace pstore
+} // end namespace pstore
