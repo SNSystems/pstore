@@ -59,19 +59,45 @@ namespace pstore {
         return {owner->data (), owner->length ()};
     }
 
-    bool indirect_string::operator== (indirect_string const & rhs) const {
-        assert (&db_ == &rhs.db_);
-        shared_sstring_view lhs_owner;
-        shared_sstring_view rhs_owner;
-        return this->as_string_view (&lhs_owner) == rhs.as_string_view (&rhs_owner);
-    }
-
+    // operator<
+    // ~~~~~~~~~
     bool indirect_string::operator< (indirect_string const & rhs) const {
         assert (&db_ == &rhs.db_);
         shared_sstring_view lhs_owner;
         shared_sstring_view rhs_owner;
         return this->as_string_view (&lhs_owner) < rhs.as_string_view (&rhs_owner);
     }
+
+    // operator==
+    // ~~~~~~~~~~
+    bool indirect_string::operator== (indirect_string const & rhs) const {
+        assert (&db_ == &rhs.db_);
+        if (!is_pointer_ && !rhs.is_pointer_) {
+            // We define that all strings in the database are unique. That means
+            // that if both this and the rhs string are in the store then we can
+            // simply compare their addresses.
+            auto const equal = address_ == rhs.address_;
+            assert (this->equal_contents (rhs) == equal);
+            return equal;
+        }
+        if (is_pointer_ && rhs.is_pointer_ && str_ == rhs.str_) {
+            // Note that we can't immediately return false if str_ != rhs.str_
+            // because two strings with different address may still have identical
+            // contents.
+            assert (this->equal_contents (rhs));
+            return true;
+        }
+        return equal_contents (rhs);
+    }
+
+    // equal_contents
+    // ~~~~~~~~~~~~~~
+    bool indirect_string::equal_contents (indirect_string const & rhs) const {
+        shared_sstring_view lhs_owner;
+        shared_sstring_view rhs_owner;
+        return this->as_string_view (&lhs_owner) == rhs.as_string_view (&rhs_owner);
+    }
+
 
     std::ostream & operator<< (std::ostream & os, indirect_string const & ind_str) {
         shared_sstring_view owner;

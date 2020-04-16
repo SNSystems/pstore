@@ -129,6 +129,7 @@ namespace pstore {
 
     private:
         static constexpr std::uint64_t in_heap_mask = 0x01;
+        bool equal_contents (indirect_string const & rhs) const;
 
         database const & db_;
         // TODO: replace with std::variant<>...?
