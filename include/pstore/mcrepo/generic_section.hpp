@@ -55,6 +55,7 @@
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/bit_field.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/small_vector.hpp"
 
 namespace pstore {
@@ -451,8 +452,11 @@ namespace pstore {
         //*                                            |_|                              *
         class generic_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
+            explicit generic_section_creation_dispatcher (section_kind const kind)
+                    : section_creation_dispatcher (kind) {}
+
             generic_section_creation_dispatcher (section_kind const kind,
-                                                 section_content const * const sec)
+                                                 gsl::not_null<section_content const *> const sec)
                     : section_creation_dispatcher (kind)
                     , section_{sec} {}
 
@@ -461,6 +465,10 @@ namespace pstore {
             generic_section_creation_dispatcher &
             operator= (generic_section_creation_dispatcher const &) = delete;
 
+            void set_content (gsl::not_null<section_content const *> const content) {
+                section_ = content;
+            }
+
             std::size_t size_bytes () const final;
 
             // Write the section data to the memory which the pointer 'out' pointed to.
@@ -468,7 +476,7 @@ namespace pstore {
 
         private:
             std::uintptr_t aligned_impl (std::uintptr_t in) const final;
-            section_content const * const section_;
+            section_content const * section_ = nullptr;
         };
 
         template <>

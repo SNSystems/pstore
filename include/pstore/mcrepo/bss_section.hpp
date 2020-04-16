@@ -120,27 +120,39 @@ namespace pstore {
         //*                                            |_|                              *
         class bss_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
+            bss_section_creation_dispatcher () noexcept
+                    : section_creation_dispatcher (section_kind::bss) {}
             explicit bss_section_creation_dispatcher (
                 gsl::not_null<section_content const *> const sec)
                     : section_creation_dispatcher (section_kind::bss)
-                    , section_ (sec) {
-                assert (sec->ifixups.empty () && sec->xfixups.empty ());
-                if (sec->data.size () > std::numeric_limits<bss_section::size_type>::max ()) {
-                    raise (error_code::bss_section_too_large);
-                }
+                    , section_{sec} {
+                validate (sec);
             }
 
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher &
             operator= (bss_section_creation_dispatcher const &) = delete;
 
+            void set_content (gsl::not_null<section_content const *> const sec) noexcept {
+                validate (sec);
+                section_ = sec;
+            }
+
             std::size_t size_bytes () const final;
 
             std::uint8_t * write (std::uint8_t * out) const final;
 
         private:
+            section_content const * section_ = nullptr;
+
             std::uintptr_t aligned_impl (std::uintptr_t in) const final;
-            section_content const * const section_;
+
+            static void validate (gsl::not_null<section_content const *> const sec) {
+                assert (sec->ifixups.empty () && sec->xfixups.empty ());
+                if (sec->data.size () > std::numeric_limits<bss_section::size_type>::max ()) {
+                    raise (error_code::bss_section_too_large);
+                }
+            }
         };
 
         template <>
