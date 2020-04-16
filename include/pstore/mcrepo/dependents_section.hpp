@@ -213,6 +213,10 @@ namespace pstore {
             const_iterator end_;
         };
 
+        template <>
+        struct section_to_creation_dispatcher<dependents> {
+            using type = dependents_creation_dispatcher;
+        };
 
         class dependents_dispatcher final : public dispatcher {
         public:
