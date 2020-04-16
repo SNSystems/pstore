@@ -163,8 +163,9 @@ namespace pstore {
                 template <typename T>
                 class initializer {
                 public:
-                    explicit initializer (T && t)
-                            : init_{std::forward<T> (t)} {}
+                    template <typename U>
+                    explicit initializer (U && t)
+                            : init_{std::forward<U> (t)} {}
                     template <class Opt>
                     void apply (Opt & o) const {
                         o.set_initial_value (init_);
