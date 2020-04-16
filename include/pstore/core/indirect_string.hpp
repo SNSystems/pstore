@@ -189,7 +189,7 @@ namespace pstore {
                                value_type const & value)
                 -> archive_result_type<archive::database_writer<Transaction>> {
 
-                return write_string_address (std::forward<decltype (archive)> (archive), value);
+                return write_string_address (archive, value);
             }
 
             /// \brief Writes an instance of `indirect_string` to an archiver.
