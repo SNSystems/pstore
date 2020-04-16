@@ -57,7 +57,6 @@
 #include "pstore/core/db_archive.hpp"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
     using shared_sstring_view = pstore::sstring_view<std::shared_ptr<char const>>;
@@ -109,7 +108,7 @@ TEST_F (SStringViewArchive, Empty) {
     // Append 'str'' to the store (we don't need to have committed the transaction to be able to
     // access its contents).
     mock_mutex mutex;
-    auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
     auto const first = pstore::typed_address<char> (this->current_pos (transaction));
     pstore::serialize::write (pstore::serialize::archive::make_writer (transaction), str);
 
@@ -129,7 +128,7 @@ TEST_F (SStringViewArchive, WriteHello) {
     auto str = make_shared_sstring_view ("hello");
 
     mock_mutex mutex;
-    auto transaction = pstore::begin (db_, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db_, std::unique_lock<mock_mutex>{mutex});
     auto const first = pstore::typed_address<char> (this->current_pos (transaction));
     {
         auto writer = pstore::serialize::archive::make_writer (transaction);

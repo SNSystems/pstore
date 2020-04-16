@@ -51,6 +51,20 @@
 
 namespace pstore {
 
+    // ctor
+    // ~~~~
+    transaction_base::transaction_base (database & db)
+            : db_{db} {
+        if (!db.is_writable ()) {
+            raise (error_code::transaction_on_read_only_database);
+        }
+
+        // First thing that creating a transaction does is update the view
+        // to that of the head revision.
+        db_.sync ();
+        dbsize_ = db.size ();
+    }
+
     transaction_base::transaction_base (transaction_base && rhs) noexcept
             : db_{rhs.db_}
             , size_{rhs.size_}
@@ -176,9 +190,6 @@ namespace pstore {
     // * begin *
     // *********
     transaction<transaction_lock> begin (database & db) {
-        if (!db.is_writable ()) {
-            raise (error_code::transaction_on_read_only_database);
-        }
         return begin (db, transaction_lock{transaction_mutex{db}});
     }
 

@@ -51,6 +51,7 @@
 #include "gmock/gmock.h"
 
 #include "pstore/core/database.hpp"
+#include "pstore/core/transaction.hpp"
 
 
 class EmptyStore : public ::testing::Test {
@@ -83,5 +84,15 @@ protected:
 private:
     std::shared_ptr<pstore::file::file_handle> file_;
 };
+
+struct mock_mutex {
+    void lock () {}
+    void unlock () {}
+};
+
+inline pstore::transaction<std::unique_lock<mock_mutex>>
+begin (pstore::database & db, std::unique_lock<mock_mutex> && lock) {
+    return {db, std::move (lock)};
+}
 
 #endif // EMPTY_STORE_HPP

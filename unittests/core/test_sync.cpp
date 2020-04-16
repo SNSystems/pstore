@@ -59,7 +59,6 @@
 // local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
     class SyncFixture : public EmptyStore {
@@ -136,13 +135,13 @@ namespace {
 TEST_F (SyncFixture, SyncBetweenVersions) {
 
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         this->add (t1, "key0", "doesn't change");
         this->add (t1, "key1", "first value");
         t1.commit ();
     }
     {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
         this->add (t2, "key1", "second value");
         t2.commit ();
     }
@@ -186,13 +185,13 @@ TEST_F (SyncFixture, SyncToBadVersions) {
     check_for_error ([this] () { db_->sync (1); }, pstore::error_code::unknown_revision);
 
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         this->add (t1, "a", "first value");
         t1.commit ();
     }
     db_->sync (1);
     {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
         this->add (t2, "b", "second value");
         t2.commit ();
     }

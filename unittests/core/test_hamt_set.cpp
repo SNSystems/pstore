@@ -48,7 +48,6 @@
 #include "pstore/core/transaction.hpp"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 using namespace std::string_literals;
 
@@ -112,7 +111,7 @@ TEST_F (SetFixture, EmptyBeginEqualsEnd) {
 
 // test insert: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleLeaf) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     std::pair<iterator, bool> itp = index_->insert (t1, "a"s);
     std::string const & key = (*itp.first);
     EXPECT_EQ ("a", key);
@@ -124,7 +123,7 @@ TEST_F (SetFixture, InsertSingleLeaf) {
 
 // test find: index only contains a single leaf node.
 TEST_F (SetFixture, FindSingle) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     const_iterator cend = index_->cend (*db_);
     std::string const a{"a"};
     EXPECT_EQ (index_->find (*db_, a), cend);
@@ -140,7 +139,7 @@ TEST_F (SetFixture, FindSingle) {
 
 // test iterator: index only contains a single leaf node.
 TEST_F (SetFixture, InsertSingleIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, "a"s);
 
     iterator begin = index_->begin (*db_);
@@ -154,7 +153,7 @@ TEST_F (SetFixture, InsertSingleIterator) {
 
 // test iterator: index contains an internal heap node.
 TEST_F (SetFixture, InsertHeap) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, "a"s);
     index_->insert (t1, "b"s);
     EXPECT_EQ (2U, index_->size ());
@@ -170,7 +169,7 @@ TEST_F (SetFixture, InsertHeap) {
 
 // test iterator: index only contains a leaf store node.
 TEST_F (SetFixture, InsertLeafStore) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, "a"s);
     index_->flush (t1, db_->get_current_revision ());
 
@@ -185,7 +184,7 @@ TEST_F (SetFixture, InsertLeafStore) {
 
 // test iterator: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStoreIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, "a"s);
     index_->insert (t1, "b"s);
     index_->flush (t1, db_->get_current_revision ());
@@ -201,7 +200,7 @@ TEST_F (SetFixture, InsertInternalStoreIterator) {
 
 // test insert: index contains an internal store node.
 TEST_F (SetFixture, InsertInternalStore) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     std::pair<iterator, bool> itp1 = index_->insert (t1, "a"s);
     std::pair<iterator, bool> itp2 = index_->insert (t1, "b"s);
 
@@ -219,7 +218,7 @@ TEST_F (SetFixture, InsertInternalStore) {
 
 // test find: index only contains a single leaf node.
 TEST_F (SetFixture, FindInternal) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     const_iterator cend = index_->cend (*db_);
     std::string ini ("Initial string");
 

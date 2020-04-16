@@ -52,7 +52,6 @@
 
 // Local private includes
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
 
@@ -172,7 +171,7 @@ TEST_F (EmptyStore, ProtectAllOfTwoRegions) {
 
 
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     transaction.allocate (pstore::address::segment_size + 4096U /*size*/, 1 /*align*/);
 
     pstore::storage::region_container const & regions = db.storage ().regions ();

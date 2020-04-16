@@ -194,13 +194,7 @@ namespace pstore {
         std::uint64_t size () const noexcept { return size_; }
 
     protected:
-        explicit transaction_base (database & db)
-                : db_{db} {
-            // First thing that creating a transaction does is update the view
-            // to that of the head revision.
-            db_.sync ();
-            dbsize_ = db.size ();
-        }
+        explicit transaction_base (database & db);
 
     private:
         database & db_;
@@ -342,15 +336,14 @@ namespace pstore {
     /// Every operation performed on a transaction instance can be potentially undone. The
     /// object's commit() method commits the work performed by all operations since the start of
     /// the transaction.
-    template <typename LockGuard>
-    transaction<LockGuard> begin (database & db, LockGuard && lock) {
-        if (!db.is_writable ()) {
-            raise (error_code::transaction_on_read_only_database);
-        }
+    inline transaction<transaction_lock> begin (database & db, transaction_lock & lock) {
         return {db, std::move (lock)};
     }
-
+    inline transaction<transaction_lock> begin (database & db, transaction_lock && lock) {
+        return {db, std::move (lock)};
+    }
     transaction<transaction_lock> begin (database & db);
+
     ///@}
 
 } // namespace pstore

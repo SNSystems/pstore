@@ -59,7 +59,6 @@
 #include "pstore/support/sstring_view.hpp"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 #include "split.hpp"
 
 namespace {
@@ -121,7 +120,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     using ::testing::ElementsAre;
 
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");
@@ -132,7 +131,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
         t1.commit ();
     }
     {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
 
         pstore::indirect_string_adder adder2;
         auto str2 = pstore::make_sstring_view ("key2");
@@ -178,7 +177,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     using ::testing::UnorderedElementsAre;
 
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");
@@ -189,7 +188,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
         t1.commit ();
     }
     {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
 
         pstore::indirect_string_adder adder2;
         auto str2 = pstore::make_sstring_view ("key2");
@@ -242,7 +241,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     using ::testing::ElementsAre;
 
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
         pstore::indirect_string_adder adder1;
         auto str1 = pstore::make_sstring_view ("key1");

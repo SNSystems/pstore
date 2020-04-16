@@ -57,7 +57,6 @@
 
 // Local test includes
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
 
@@ -84,7 +83,7 @@ TEST_F (DbArchive, ReadASingleUint64) {
     // Append v1 to the store (we don't need to have committed the transaction to be able to access
     // its contents).
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, v1);
 
     // Now try reading it back again using a serializer.
@@ -106,7 +105,7 @@ TEST_F (DbArchive, ReadAUint64Span) {
 
     // Append 'original' to the store.
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, original[0]);
     append_uint64 (transaction, original[1]);
 
@@ -126,7 +125,7 @@ TEST_F (DbArchive, WriteASingleUint64) {
 
     // Write 'original' to the store using a serializer.
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     auto archive = pstore::serialize::archive::make_writer (transaction);
     auto where = pstore::typed_address<std::uint64_t>::make (db.size ());
     pstore::serialize::write (archive, original);
@@ -150,7 +149,7 @@ TEST_F (DbArchive, WriteAUint64Span) {
 
     // Write the 'original' array span to the store using a serializer.
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     auto where = pstore::address{db.size ()};
     pstore::serialize::write (pstore::serialize::archive::make_writer (transaction),
                               pstore::gsl::make_span (original));
@@ -255,7 +254,7 @@ TEST_F (DbArchiveReadSpan, ReadUint64Span) {
     }};
 
     mock_mutex mutex;
-    auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+    auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
     pstore::typed_address<std::uint64_t> addr = append_uint64 (transaction, original[0]);
     append_uint64 (transaction, original[1]);
 

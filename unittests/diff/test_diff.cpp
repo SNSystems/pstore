@@ -52,7 +52,6 @@
 #include "pstore/core/index_types.hpp"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 #include "split.hpp"
 
 namespace {
@@ -132,13 +131,13 @@ TEST_F (Diff, BuildWriteIndexValues) {
 
     {
         std::string const k1 = "key1";
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         v1 = std::make_pair (k1, this->add (t1, k1, "first value"));
         t1.commit ();
     }
     {
         std::string const k2 = "key2";
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
         v2 = std::make_pair (k2, this->add (t2, k2, "second value"));
         t2.commit ();
     }
@@ -182,14 +181,14 @@ TEST_F (Diff, UncomittedTransaction) {
 
     {
         std::string const k1 = "key1";
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         v1 = std::make_pair (k1, this->add (t1, k1, "first value"));
         t1.commit ();
     }
 
     // The transaction t2 is left uncommitted whilst we perform the diff.
     std::string const k2 = "key2";
-    transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t2 = begin (*db_, lock_guard{mutex_});
     value_type v2 = std::make_pair (k2, this->add (t2, k2, "second value"));
 
     {

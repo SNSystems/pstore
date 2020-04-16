@@ -56,7 +56,6 @@
 
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
 

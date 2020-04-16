@@ -57,7 +57,6 @@
 // local includes
 #include "check_for_error.hpp"
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 using namespace std::string_literals;
 using pstore::gsl::not_null;
@@ -147,7 +146,7 @@ TEST_F (DefaultIndexFixture, EmptyBeginEqualsEnd) {
 
 // test insert: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingle) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     auto const first = std::make_pair ("a"s, "b"s);
     auto const second = std::make_pair ("a"s, "c"s);
     std::pair<default_index::iterator, bool> itp = index_->insert (t1, first);
@@ -162,7 +161,7 @@ TEST_F (DefaultIndexFixture, InsertSingle) {
 
 // test insert_or_assign: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, UpsertSingle) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     auto const first = std::make_pair ("a"s, "b"s);
     auto const second = std::make_pair ("a"s, "c"s);
     std::pair<default_index::iterator, bool> itp = index_->insert_or_assign (t1, first);
@@ -177,7 +176,7 @@ TEST_F (DefaultIndexFixture, UpsertSingle) {
 
 // test iterator: index only contains a single leaf node.
 TEST_F (DefaultIndexFixture, InsertSingleIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     auto const first = std::make_pair ("a"s, "b"s);
     index_->insert_or_assign (t1, first);
 
@@ -192,7 +191,7 @@ TEST_F (DefaultIndexFixture, InsertSingleIterator) {
 
 // test iterator: index contains an internal heap node.
 TEST_F (DefaultIndexFixture, InsertHeap) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     auto const first = std::make_pair ("a"s, "b"s);
     auto const second = std::make_pair ("c"s, "d"s);
     index_->insert_or_assign (t1, first);
@@ -209,7 +208,7 @@ TEST_F (DefaultIndexFixture, InsertHeap) {
 
 // test iterator: index only contains a leaf store node.
 TEST_F (DefaultIndexFixture, InsertLeafStore) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     auto const first = std::make_pair ("a"s, "b"s);
     index_->insert_or_assign (t1, first);
     index_->flush (t1, db_->get_current_revision ());
@@ -225,7 +224,7 @@ TEST_F (DefaultIndexFixture, InsertLeafStore) {
 
 // test iterator: index contains an internal store node.
 TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert_or_assign (t1, std::make_pair ("a"s, "b"s));
     index_->insert_or_assign (t1, std::make_pair ("c"s, "d"s));
     index_->flush (t1, db_->get_current_revision ());
@@ -241,7 +240,7 @@ TEST_F (DefaultIndexFixture, InsertInternalStoreIterator) {
 
 // test insert: index contains an internal store node.
 TEST_F (DefaultIndexFixture, InsertInternalStore) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     std::pair<default_index::iterator, bool> itp1 =
         index_->insert (t1, std::make_pair ("a"s, "b"s));
     std::pair<default_index::iterator, bool> itp2 =
@@ -265,7 +264,7 @@ TEST_F (DefaultIndexFixture, InsertInternalStore) {
 
 // test insert_or_assign: index contains an internal store node.
 TEST_F (DefaultIndexFixture, UpsertInternalStore) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     std::pair<default_index::iterator, bool> itp1 =
         index_->insert_or_assign (t1, std::make_pair ("a"s, "b"s));
     std::pair<default_index::iterator, bool> itp2 =
@@ -418,7 +417,7 @@ TEST_F (HamtRoundTrip, Empty) {
     pstore::typed_address<pstore::index::header_block> addr;
     index_type index1{*db_, pstore::typed_address<pstore::index::header_block>::null ()};
     {
-        auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
+        auto t1 = begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         addr = index1.flush (t1, db_->get_current_revision ());
         t1.commit ();
     }
@@ -431,7 +430,7 @@ TEST_F (HamtRoundTrip, LeafMember) {
     pstore::typed_address<pstore::index::header_block> addr;
     index_type index1{*db_, pstore::typed_address<pstore::index::header_block>::null ()};
     {
-        auto t1 = pstore::begin (*db_, std::unique_lock<mock_mutex>{mutex_});
+        auto t1 = begin (*db_, std::unique_lock<mock_mutex>{mutex_});
         index1.insert_or_assign (t1, index_type::value_type{"a", "a"});
         addr = index1.flush (t1, db_->get_current_revision ());
         t1.commit ();
@@ -504,7 +503,7 @@ namespace {
 
 // insert_or_assign a single node ("a") into the database.
 TEST_F (OneLevel, InsertFirstNode) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     EXPECT_FALSE (this->is_found (*index_, "a")); // check the index::empty() function.
     std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
     std::string const & key = (*itp.first).first;
@@ -516,7 +515,7 @@ TEST_F (OneLevel, InsertFirstNode) {
 
 // insert_or_assign the second node ("b") into the existing leaf node ("a").
 TEST_F (OneLevel, InsertSecondNode) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "b");
     std::string const & key = (*itp.first).first;
@@ -540,7 +539,7 @@ TEST_F (OneLevel, InsertSecondNode) {
 }
 
 TEST_F (OneLevel, InsertOfExistingKeyDoesNotResultInHeapNode) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, test_trie::value_type{"a", "a"});
     index_->insert (t1, test_trie::value_type{"b", "b"});
     index_->flush (t1, db_->get_current_revision ());
@@ -553,7 +552,7 @@ TEST_F (OneLevel, InsertOfExistingKeyDoesNotResultInHeapNode) {
 
 // insert_or_assign a new node into the store internal node.
 TEST_F (OneLevel, InsertThirdNode) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     OneLevel::insert_or_assign (*index_, t1, "a");
     OneLevel::insert_or_assign (*index_, t1, "b");
     EXPECT_FALSE (this->is_found (*index_, "c")); // check "c" is not in the index.
@@ -583,7 +582,7 @@ TEST_F (OneLevel, InsertThirdNode) {
 
 //  insert_or_assign a new node into the heap internal node.
 TEST_F (OneLevel, InsertFourthNode) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
@@ -612,7 +611,7 @@ TEST_F (OneLevel, InsertFourthNode) {
 
 //  Test forward iterator.
 TEST_F (OneLevel, ForwardIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
@@ -661,7 +660,7 @@ TEST_F (OneLevel, ForwardIteration) {
 }
 
 TEST_F (OneLevel, UpsertIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     this->insert_or_assign (*index_, t1, "c");
     this->insert_or_assign (*index_, t1, "d");
@@ -773,7 +772,7 @@ namespace {
 } // end anonymous namespace
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
     // First insert_or_assign should be very conventional. The result will be a trie whose root
     // points to an address of the "first" string. Second insert_or_assign should trigger the
@@ -835,7 +834,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelOneCollision) {
 }
 
 TEST_F (TwoValuesWithHashCollision, InternalCollision) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
     // After inserting "a" and "b", the index root is an internal node. when inserting "c", this
     // unit test checks the insert_or_assign_node function. With a known hash function and the
@@ -898,7 +897,7 @@ TEST_F (TwoValuesWithHashCollision, InternalCollision) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
@@ -940,7 +939,7 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelOneCollisionUpsertIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
     std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "a");
@@ -984,7 +983,7 @@ TEST_F (TwoValuesWithHashCollision, LevelOneCollisionUpsertIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
     // First insert_or_assign should be very conventional. The result will be a trie whose root
     // points to an address of the "first" string. Second insert_or_assign should trigger the
@@ -1094,7 +1093,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelTenCollision) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "e");
     this->insert_or_assign (*index_, t1, "f");
 
@@ -1128,7 +1127,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "f");
     std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "e");
 
@@ -1164,7 +1163,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionUpsertIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LevelTenCollisionInsert) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, std::make_pair ("f"s, "value f"s));
     std::pair<test_trie::iterator, bool> itp =
         index_->insert (t1, std::make_pair ("e"s, "value e"s));
@@ -1179,7 +1178,7 @@ TEST_F (TwoValuesWithHashCollision, LevelTenCollisionInsert) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
 
     //
     //              +--------+
@@ -1286,7 +1285,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCase) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "g");
     this->insert_or_assign (*index_, t1, "h");
     this->insert_or_assign (*index_, t1, "i");
@@ -1339,7 +1338,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearCaseIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "g");
     {
         std::pair<test_trie::iterator, bool> itp = this->insert_or_assign (*index_, t1, "h");
@@ -1385,7 +1384,7 @@ TEST_F (TwoValuesWithHashCollision, LeafLevelLinearUpsertIterator) {
 }
 
 TEST_F (TwoValuesWithHashCollision, LeafLevelLinearInsertIterator) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     index_->insert (t1, std::make_pair ("g"s, "value g"s));
     index_->insert (t1, std::make_pair ("h"s, "value h"s));
     std::pair<test_trie::iterator, bool> itp =
@@ -1446,7 +1445,7 @@ namespace {
 //                            "c"      v      (0b0000000'0000001)
 //                                    "d"     (0b0000001'0000001)
 TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "a");
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
@@ -1495,7 +1494,7 @@ TEST_F (FourNodesOnTwoLevels, ForwardIteration) {
 }
 
 TEST_F (FourNodesOnTwoLevels, UpsertIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
     this->insert_or_assign (*index_, t1, "d");
@@ -1570,7 +1569,7 @@ namespace {
 
 
 TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     // With a known hash function and the insertion order below, we should end up with a
     // trie which looks like:
     //
@@ -1636,7 +1635,7 @@ TEST_F (LeavesAtDifferentLevels, ForwardIteration) {
 }
 
 TEST_F (LeavesAtDifferentLevels, UpsertIteration) {
-    transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type t1 = begin (*db_, lock_guard{mutex_});
     this->insert_or_assign (*index_, t1, "b");
     this->insert_or_assign (*index_, t1, "c");
     this->insert_or_assign (*index_, t1, "d");
@@ -1753,7 +1752,7 @@ namespace {
 
 TEST_F (CorruptInternalNodes, BitmapIsZero) {
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         this->build (t1);
 
         index_pointer root = index_->root ();
@@ -1773,7 +1772,7 @@ TEST_F (CorruptInternalNodes, BitmapIsZero) {
 
 TEST_F (CorruptInternalNodes, ChildPointsToParent) {
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         this->build (t1);
 
         index_pointer root = index_->root ();
@@ -1793,7 +1792,7 @@ TEST_F (CorruptInternalNodes, ChildPointsToParent) {
 
 TEST_F (CorruptInternalNodes, ChildClaimsToBeOnHeap) {
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         this->build (t1);
 
         index_pointer root = index_->root ();
@@ -1825,7 +1824,7 @@ namespace {
 
 TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     {
-        transaction_type t1 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t1 = begin (*db_, lock_guard{mutex_});
         auto r1index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
         r1index->insert_or_assign (t1, "key1"s, pstore::extent<char> ());
         t1.commit ();
@@ -1833,7 +1832,7 @@ TEST_F (InvalidIndex, InsertIntoIndexAtWrongRevision) {
     db_->sync (0);
     auto r0index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
     {
-        transaction_type t2 = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type t2 = begin (*db_, lock_guard{mutex_});
 
         // We're now synced to revision 1. Trying to insert into the index loaded from
         // r0 should raise an error.

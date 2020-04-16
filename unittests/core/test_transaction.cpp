@@ -49,7 +49,6 @@
 #include "gmock/gmock.h"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 
 namespace {
 
@@ -220,7 +219,7 @@ TEST_F (Transaction, CommitEmptyDoesNothing) {
 
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
         transaction.commit ();
     }
 
@@ -239,7 +238,7 @@ TEST_F (Transaction, CommitInt) {
     // Scope for the single transaction that we'll commit for the test.
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
         {
             // Write an integer to the store.
             // If rw is a spanning pointer, it will only be saved to the store when it is deleted.
@@ -323,7 +322,7 @@ TEST_F (Transaction, RollbackAfterAppendingInt) {
     {
         mock_mutex mutex;
         using guard_type = std::unique_lock<mock_mutex>;
-        auto transaction = pstore::begin (db, guard_type{mutex});
+        auto transaction = begin (db, guard_type{mutex});
 
         // Write an integer to the store.
         *(transaction.alloc_rw<int> ().first) = 42;
@@ -360,7 +359,7 @@ TEST_F (TransactionFile, RollbackAfterAppendingFile4mb) {
     mock_mutex mutex;
     using guard_type = std::unique_lock<mock_mutex>;
     auto num_regions = db->storage ().regions ().size ();
-    auto transaction = pstore::begin (*db, guard_type{mutex});
+    auto transaction = begin (*db, guard_type{mutex});
     std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
     transaction.allocate (elements * sizeof (int), 1 /*align*/);
     EXPECT_NE (db->storage ().regions ().size (), num_regions) << "allocate did not create regions";
@@ -376,7 +375,7 @@ TEST_F (Transaction, CommitAfterAppending4Mb) {
     db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
 
         std::size_t const elements = (4U * 1024U * 1024U) / sizeof (int);
         transaction.allocate (elements * sizeof (int), 1 /*align*/);
@@ -437,7 +436,7 @@ TEST_F (Transaction, CommitAfterAppendingAndWriting4Mb) {
     auto addr = pstore::typed_address<element_type>::null ();
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (db, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
         {
             // A first allocation to fill up most of the first segment.
             transaction.allocate (initial_elements * sizeof (element_type), alignof (element_type));
@@ -481,12 +480,12 @@ TEST_F (Transaction, CommitTwoSeparateTransactions) {
         db.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         mock_mutex mutex;
         {
-            auto t1 = pstore::begin (db, mock_lock (mutex));
+            auto t1 = begin (db, mock_lock (mutex));
             append_int (t1, 1);
             t1.commit ();
         }
         {
-            auto t2 = pstore::begin (db, mock_lock (mutex));
+            auto t2 = begin (db, mock_lock (mutex));
             append_int (t2, 2);
             t2.commit ();
         }
@@ -534,7 +533,7 @@ TEST_F (Transaction, GetRwInt) {
     // Now the real body of the test
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (*database, std::unique_lock<mock_mutex>{mutex});
         transaction.alloc_rw<int> ();
         transaction.commit ();
     }
@@ -551,7 +550,7 @@ TEST_F (Transaction, GetRoInt) {
     // Now the real body of the test
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (*database, std::unique_lock<mock_mutex>{mutex});
         database->getro (pstore::typed_address<int>::null (), 1);
         transaction.commit ();
     }
@@ -563,7 +562,7 @@ TEST_F (Transaction, GetRwUInt64) {
     pstore::extent<std::uint64_t> extent;
     {
         mock_mutex mutex;
-        auto transaction = pstore::begin (*database, std::unique_lock<mock_mutex>{mutex});
+        auto transaction = begin (*database, std::unique_lock<mock_mutex>{mutex});
         {
             // Allocate the storage
             pstore::address const addr =

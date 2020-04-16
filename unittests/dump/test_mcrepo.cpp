@@ -57,7 +57,6 @@
 #include "pstore/support/pointee_adaptor.hpp"
 
 #include "empty_store.hpp"
-#include "mock_mutex.hpp"
 #include "split.hpp"
 
 using namespace pstore::repo;
@@ -141,7 +140,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
 
-    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
     std::array<section_content, 1> c = {
         {section_content (section_kind::data, std::uint8_t{0x10} /*alignment*/)}};
@@ -219,7 +218,7 @@ TEST_F (MCRepoFixture, DumpCompilation) {
     using ::testing::ElementsAre;
 
     // Write output file path "/home/user/test.c"
-    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
     std::vector<compilation_member> v{
         {pstore::index::digest{28U},
@@ -254,7 +253,7 @@ TEST_F (MCRepoFixture, DumpCompilation) {
 
 TEST_F (MCRepoFixture, DumpDebugLineHeader) {
     using ::testing::ElementsAre;
-    transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+    transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
     // debug line header content.
     static std::uint8_t const data[] = {0x44, 0x00, 0x00, 0x00};
@@ -292,7 +291,7 @@ TEST_F (MCRepoFixture, DumpBssSection) {
 
     // Create a fragment which containing a BSS section.
     std::shared_ptr<fragment const> frag = [this] () {
-        transaction_type transaction = pstore::begin (*db_, lock_guard{mutex_});
+        transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
         std::array<section_content, 1> c = {
             {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
