@@ -297,33 +297,14 @@ namespace pstore {
             std::pair<std::unique_ptr<internal_node>, internal_node *>
             internal_node::make_writable (index_pointer const node,
                                           internal_node const & internal) {
-                std::unique_ptr<internal_node> new_node;
-                internal_node * inode = nullptr;
                 if (node.is_heap ()) {
-                    inode = node.untag_node<internal_node *> ();
+                    internal_node * const inode = node.untag_node<internal_node *> ();
                     assert (inode->signature_ == node_signature_);
-                } else {
-                    new_node = internal_node::allocate (internal);
-                    inode = new_node.get ();
+                    return {nullptr, inode};
                 }
-                return {std::move (new_node), inode};
-            }
 
-            // lookup
-            // ~~~~~~
-            auto internal_node::lookup (hash_type const hash_index) const
-                -> std::pair<index_pointer, std::size_t> {
-
-                assert (hash_index < (hash_type{1} << hash_index_bits));
-                index_pointer child;
-                std::size_t index = not_found;
-
-                auto const bit_pos = hash_type{1} << hash_index;
-                if ((bitmap_ & bit_pos) != 0) { //! OCLINT(PH - bitwise in conditional is ok)
-                    index = bit_count::pop_count (bitmap_ & (bit_pos - 1U));
-                    child = children_[index];
-                }
-                return {child, index};
+                std::unique_ptr<internal_node> new_node = internal_node::allocate (internal);
+                return {std::move (new_node), new_node.get ()};
             }
 
             // validate_after_load

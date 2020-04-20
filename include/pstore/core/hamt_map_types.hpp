@@ -698,6 +698,20 @@ namespace pstore {
                 index_pointer children_[1];
             };
 
+            // lookup
+            // ~~~~~~
+            inline auto internal_node::lookup (hash_type const hash_index) const
+                -> std::pair<index_pointer, std::size_t> {
+                assert (hash_index < (hash_type{1} << hash_index_bits));
+                auto const bit_pos = hash_type{1} << hash_index;
+                if ((bitmap_ & bit_pos) != 0) { //! OCLINT(PH - bitwise in conditional is ok)
+                    std::size_t const index = bit_count::pop_count (bitmap_ & (bit_pos - 1U));
+                    return {children_[index], index};
+                }
+                return {index_pointer{}, not_found};
+            }
+
+
         } // namespace details
     }     // namespace index
 } // namespace pstore
