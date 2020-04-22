@@ -112,12 +112,12 @@ namespace pstore {
                                                  storage::min_region_size),
                             access_tick_enabled) {}
 
-        database (database &&) noexcept = default;
+        database (database &&) = delete;
         database (database const &) = delete;
 
         virtual ~database () noexcept;
 
-        database & operator= (database &&) = default;
+        database & operator= (database &&) = delete;
         database & operator= (database const &) = delete;
 
 
