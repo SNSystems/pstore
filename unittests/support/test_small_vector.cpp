@@ -83,11 +83,23 @@ TEST (SmallVector, CtorInitializerList) {
     EXPECT_THAT (b, ::testing::ElementsAre (1, 2, 3));
 }
 
+TEST (SmallVector, CtorInitializerList2) {
+    pstore::small_vector<int, 2> b{1, 2, 3, 4};
+    EXPECT_THAT (b, ::testing::ElementsAre (1, 2, 3, 4));
+}
+
 TEST (SmallVector, CtorCopy) {
     pstore::small_vector<int, 3> const b{3, 5};
     pstore::small_vector<int, 3> c = b;
     EXPECT_EQ (2U, c.size ());
     EXPECT_THAT (c, ::testing::ElementsAre (3, 5));
+}
+
+TEST (SmallVector, CtorCopy2) {
+    pstore::small_vector<int, 3> const b{3, 5, 7, 11, 13};
+    pstore::small_vector<int, 3> c = b;
+    EXPECT_EQ (5U, c.size ());
+    EXPECT_THAT (c, ::testing::ElementsAre (3, 5, 7, 11, 13));
 }
 
 TEST (SmallVector, MoveCtor) {

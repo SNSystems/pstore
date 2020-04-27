@@ -263,17 +263,16 @@ namespace pstore {
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (std::initializer_list<ElementType> init)
-            : elements_ (init.size ())
-            , small_buffer_{} {
-
-        this->set_buffer_ptr (elements_);
-        std::copy (std::begin (init), std::end (init), this->begin ());
+            : small_vector () {
+        this->reserve (init.size ());
+        std::copy (std::begin (init), std::end (init), std::back_inserter (*this));
     }
 
     template <typename ElementType, std::size_t BodyElements>
     small_vector<ElementType, BodyElements>::small_vector (small_vector const & rhs)
-            : small_vector (rhs.size ()) {
-        std::copy (std::begin (rhs), std::end (rhs), this->begin ());
+            : small_vector () {
+        this->reserve (rhs.size ());
+        std::copy (std::begin (rhs), std::end (rhs), std::back_inserter (*this));
     }
 
     // operator=
