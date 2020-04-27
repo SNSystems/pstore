@@ -212,6 +212,8 @@ namespace pstore {
 
                 /// Returns true if the index_pointer is pointing to a linear node, false otherwise.
                 /// \sa is_leaf
+                /// \note A linear node is always found at max_internal_depth. This function will
+                /// return true for internal nodes  at lower tree levels.
                 bool is_linear () const noexcept { return is_internal (); }
 
                 /// Returns true if the index_pointer is pointing to a value address in the store,
