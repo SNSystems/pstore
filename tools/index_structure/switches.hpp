@@ -51,8 +51,6 @@
 #include "pstore/core/database.hpp"
 #include "pstore/config/config.hpp"
 
-#include "indices.hpp"
-
 struct switches {
     std::bitset<static_cast<std::underlying_type<pstore::trailer::indices>::type> (
         pstore::trailer::indices::last)>

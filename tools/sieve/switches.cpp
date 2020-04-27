@@ -52,11 +52,10 @@ namespace {
 
     cl::opt<endian> endian_opt (
         "endian", cl::desc ("The endian-ness of the output data"),
-        cl::values (cl::option_enum_value{"big", static_cast<int> (endian::big), "Big-endian"},
-                    cl::option_enum_value{"little", static_cast<int> (endian::little),
-                                          "Little-endian"},
-                    cl::option_enum_value{"native", static_cast<int> (endian::native),
-                                          "The endian-ness of the host machine"}),
+        cl::values (cl::literal{"big", static_cast<int> (endian::big), "Big-endian"},
+                    cl::literal{"little", static_cast<int> (endian::little), "Little-endian"},
+                    cl::literal{"native", static_cast<int> (endian::native),
+                                "The endian-ness of the host machine"}),
         cl::init (endian::native));
     cl::alias endian2_opt ("e", cl::desc ("Alias for --endian"), cl::aliasopt (endian_opt));
 

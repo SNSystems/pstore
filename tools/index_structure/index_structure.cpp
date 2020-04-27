@@ -51,12 +51,16 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_map_types.hpp"
 #include "pstore/core/hamt_set.hpp"
+#include "pstore/core/index_types.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/support/portab.hpp"
 
 #include "switches.hpp"
 
 using pstore::database;
+// Note that using these internal "details" namespace is not, in general, good practice.
+// Here it is justified because the tool's purpose is to poke about inside the index
+// internals!
 using pstore::index::details::depth_is_internal_node;
 using pstore::index::details::hash_index_bits;
 using pstore::index::details::index_pointer;
@@ -185,15 +189,24 @@ namespace {
     }
 
     template <pstore::trailer::indices Index>
+    struct index_name {};
+#define X(a)                                                                                       \
+    template <>                                                                                    \
+    struct index_name<pstore::trailer::indices::a> {                                               \
+        static constexpr auto name = #a;                                                           \
+    };
+    PSTORE_INDICES
+#undef X
+
+    template <pstore::trailer::indices Index>
     void dump_if_selected (switches const & opt, pstore::database const & db) {
         if (opt.test (Index)) {
-            char const * name =
-                index_names[static_cast<std::underlying_type<pstore::trailer::indices>::type> (
-                    Index)];
-            dump_index (db, pstore::index::get_index<Index> (db, false /*create*/).get (), name);
+            auto const index = pstore::index::get_index<Index> (db, false /*create*/);
+            dump_index (db, index.get (), index_name<Index>::name);
         }
     }
-} // anonymous namespace
+
+} // end anonymous namespace
 
 
 #if defined(_WIN32)
@@ -218,13 +231,14 @@ int main (int argc, char * argv[]) {
         dump_if_selected<pstore::trailer::indices::write> (opt, db);
     }
     // clang-format off
-    PSTORE_CATCH (std::exception const & ex, {
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
         pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ") << pstore::utf::to_native_string (ex.what ()) << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
-    PSTORE_CATCH (..., {
-       pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown exception\n");
-       exit_code = EXIT_FAILURE;
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
+        pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown exception\n");
+        exit_code = EXIT_FAILURE;
     })
     // clang-format on
     return exit_code;

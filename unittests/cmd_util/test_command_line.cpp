@@ -313,6 +313,40 @@ TEST_F (ClCommandLine, List) {
     EXPECT_THAT (opt, ::testing::ElementsAre ("foo", "bar"));
 }
 
+namespace {
+
+    enum class enumeration { a, b, c };
+
+    std::ostream & operator<< (std::ostream & os, enumeration e) {
+        auto str = "";
+        switch (e) {
+        case enumeration::a: str = "a"; break;
+        case enumeration::b: str = "b"; break;
+        case enumeration::c: str = "c"; break;
+        }
+        return os << str;
+    }
+
+} // namespace
+
+TEST_F (ClCommandLine, ListOfEnums) {
+    cl::list<enumeration> opt{
+        "opt", cl::values (cl::literal{"a", static_cast<int> (enumeration::a), "a description"},
+                           cl::literal{"b", static_cast<int> (enumeration::b), "b description"},
+                           cl::literal{"c", static_cast<int> (enumeration::c), "c description"})};
+    this->add ("progname", "--opt", "a", "--opt", "b");
+
+    string_stream output;
+    string_stream errors;
+    bool const res = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res);
+
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (output.str ().length (), 0U);
+
+    EXPECT_THAT (opt, ::testing::ElementsAre (enumeration::a, enumeration::b));
+}
+
 TEST_F (ClCommandLine, ListSingleDash) {
     cl::list<std::string> opt{"o"};
 

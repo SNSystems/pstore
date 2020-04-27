@@ -57,25 +57,32 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
+            // This represents a single enum value, using "int" as the underlying type.
+            struct literal {
+                literal () = default;
+                literal (std::string name, int value, std::string description)
+                        : name{name}
+                        , value{value}
+                        , description{description} {}
+                std::string name;
+                int value = 0;
+                std::string description;
+            };
+
+
             //*                               _                   *
             //*  _ __  __ _ _ _ ___ ___ _ _  | |__  __ _ ___ ___  *
             //* | '_ \/ _` | '_(_-</ -_) '_| | '_ \/ _` (_-</ -_) *
             //* | .__/\__,_|_| /__/\___|_|   |_.__/\__,_/__/\___| *
             //* |_|                                               *
             class parser_base {
+                using container = std::vector<literal>;
+
             public:
                 virtual ~parser_base () noexcept;
                 void add_literal_option (std::string const & name, int value,
                                          std::string const & description);
 
-            protected:
-                struct literal {
-                    std::string name;
-                    int value;
-                    std::string description;
-                };
-
-                using container = std::vector<literal>;
                 using iterator = container::iterator;
                 using const_iterator = container::const_iterator;
 
@@ -92,39 +99,57 @@ namespace pstore {
             //* | '_ \/ _` | '_(_-</ -_) '_| *
             //* | .__/\__,_|_| /__/\___|_|   *
             //* |_|                          *
-            template <typename T>
+            template <typename T, typename = void>
             class parser : public parser_base {
             public:
                 maybe<T> operator() (std::string const & v) const;
             };
 
             template <typename T>
-            maybe<T> parser<T>::operator() (std::string const & v) const {
-                auto begin = this->begin ();
-                auto end = this->end ();
-                if (std::distance (begin, end) == 0) {
-                    if (v.length () == 0) {
+            class parser<T, typename std::enable_if<std::is_enum<T>::value>::type>
+                    : public parser_base {
+            public:
+                maybe<T> operator() (std::string const & v) const {
+                    auto begin = this->begin ();
+                    auto end = this->end ();
+                    auto it = std::find_if (begin, end,
+                                            [&v] (literal const & lit) { return v == lit.name; });
+                    if (it == end) {
                         return nothing<T> ();
                     }
-                    gsl::zstring str_end = nullptr;
-                    gsl::czstring const str = v.c_str ();
-                    errno = 0;
-                    long const res = std::strtol (str, &str_end, 10);
-                    if (str_end != str + v.length () || errno != 0 ||
-                        res > std::numeric_limits<int>::max () ||
-                        res < std::numeric_limits<int>::min ()) {
-                        return nothing<T> ();
-                    }
-                    return just (static_cast<T> (res));
+                    return just (T (it->value));
                 }
+            };
 
-                auto it =
-                    std::find_if (begin, end, [&v] (literal const & lit) { return v == lit.name; });
-                if (it == end) {
+
+            template <typename T>
+            class parser<T, typename std::enable_if<std::is_integral<T>::value>::type>
+                    : public parser_base {
+            public:
+                maybe<T> operator() (std::string const & v) const;
+            };
+
+            template <typename T>
+            maybe<T>
+            parser<T, typename std::enable_if<std::is_integral<T>::value>::type>::operator() (
+                std::string const & v) const {
+                assert (std::distance (this->begin (), this->end ()) == 0 &&
+                        "Don't specify literal values for an integral option!");
+                if (v.length () == 0) {
                     return nothing<T> ();
                 }
-                return just (T (it->value));
+                gsl::zstring str_end = nullptr;
+                gsl::czstring const str = v.c_str ();
+                errno = 0;
+                long const res = std::strtol (str, &str_end, 10);
+                if (str_end != str + v.length () || errno != 0 ||
+                    res > std::numeric_limits<int>::max () ||
+                    res < std::numeric_limits<int>::min ()) {
+                    return nothing<T> ();
+                }
+                return just (static_cast<T> (res));
             }
+
 
             //*                                  _       _            *
             //*  _ __  __ _ _ _ ___ ___ _ _   __| |_ _ _(_)_ _  __ _  *

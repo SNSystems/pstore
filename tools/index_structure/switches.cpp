@@ -52,6 +52,7 @@
 #include "pstore/cmd_util/revision_opt.hpp"
 #include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/tchar.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/utf.hpp"
 
 using namespace pstore::cmd_util;
@@ -62,23 +63,25 @@ namespace {
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::positional, cl::desc ("database-path"));
-    cl::list<std::string> index_names_opt (cl::positional, cl::optional, cl::one_or_more,
-                                           cl::desc ("<index-name>..."));
+    cl::opt<std::string> db_path (cl::positional, cl::desc ("Database path"));
 
+#define X(a) cl::literal (#a, static_cast<int> (pstore::trailer::indices::a), #a),
+    cl::list<pstore::trailer::indices> index_names_opt (cl::positional, cl::optional,
+                                                        cl::one_or_more,
+                                                        cl::desc ("<index-name>..."),
+                                                        cl::values ({PSTORE_INDICES}));
+#undef X
 
     std::string usage_help () {
         std::ostringstream usage;
-        usage << "pstore index structure\n\n";
-
-        usage << "Dumps the internal structure of one of more pstore indexes. index-name may be "
+        usage << "pstore index structure\n\n"
+                 "Dumps the internal structure of one of more pstore indexes. index-name may be "
                  "any of: ";
-        char const * separator = "";
-        for (auto const & in : index_names_opt) {
-            usage << separator << '\'' << in << '\'';
+        pstore::gsl::czstring separator = "";
+        for (cl::literal const & lit : *index_names_opt.get_parser ()) {
+            usage << separator << '\'' << lit.name << '\'';
             separator = ", ";
         }
-        usage << " ('*' may be used as a shortcut for all names).\n";
         return usage.str ();
     }
 
@@ -90,13 +93,8 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     switches sw;
     sw.revision = static_cast<unsigned> (revision.get ());
     sw.db_path = db_path.get ();
-
-    for (auto const & name : index_names_opt) {
-        if (!set_from_name (&sw.selected, name)) {
-            error_stream << NATIVE_TEXT ("Unknown index ") << pstore::utf::to_native_string (name)
-                         << NATIVE_TEXT ("\n");
-            return {sw, EXIT_FAILURE};
-        }
+    for (pstore::trailer::indices idx : index_names_opt) {
+        sw.selected.set (static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx));
     }
     return {sw, EXIT_SUCCESS};
 }

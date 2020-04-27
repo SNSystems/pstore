@@ -44,8 +44,6 @@
 
 add_pstore_tool (pstore-index-structure
     index_structure.cpp
-    indices.hpp
-    indices.cpp
     switches.cpp
     switches.hpp
 )

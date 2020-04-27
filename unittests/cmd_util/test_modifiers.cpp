@@ -81,11 +81,13 @@ TEST_F (Modifiers, DefaultConstruction) {
 TEST_F (Modifiers, Init) {
     // cl::init() allows the initial (default) value of the option to be described.
     cl::opt<enumeration> opt_a (cl::init (enumeration::a));
+
     EXPECT_EQ (opt_a.get (), enumeration::a);
 
     cl::opt<enumeration> opt_b (cl::init (enumeration::b));
     EXPECT_EQ (opt_b.get (), enumeration::b);
 }
+
 
 namespace {
 
@@ -94,13 +96,10 @@ namespace {
         EnumerationParse ()
                 : enum_opt_{
                       "enumeration",
-                      cl::values (cl::option_enum_value{"a", static_cast<int> (enumeration::a),
-                                                        "a description"},
-                                  cl::option_enum_value{"b", static_cast<int> (enumeration::b),
-                                                        "b description"},
-                                  cl::option_enum_value{"c", static_cast<int> (enumeration::c),
-                                                        "c description"})} {}
-
+                      cl::values (
+                          cl::literal{"a", static_cast<int> (enumeration::a), "a description"},
+                          cl::literal{"b", static_cast<int> (enumeration::b), "b description"},
+                          cl::literal{"c", static_cast<int> (enumeration::c), "c description"})} {}
         ~EnumerationParse () { cl::option::reset_container (); }
 
     protected:

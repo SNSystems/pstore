@@ -346,7 +346,7 @@ namespace pstore {
             }
             template <typename T, typename Parser>
             parser_base * list<T, Parser>::get_parser () {
-                return nullptr;
+                return &parser_;
             }
 
             //*       _ _          *

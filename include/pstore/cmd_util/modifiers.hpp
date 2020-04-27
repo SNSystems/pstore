@@ -66,20 +66,13 @@ namespace pstore {
             // Enum valued command line option
             //
 
-            // This represents a single enum value, using "int" as the underlying type.
-            struct option_enum_value {
-                std::string name;
-                int value;
-                std::string description;
-            };
-
             // values - For custom data types, allow specifying a group of values together
             // as the values that go into the mapping that the option handler uses.
             namespace details {
 
                 class values {
                 public:
-                    explicit values (std::initializer_list<option_enum_value> options);
+                    explicit values (std::initializer_list<literal> options);
 
                     template <class Opt>
                     void apply (Opt & o) const {
@@ -91,7 +84,7 @@ namespace pstore {
                     }
 
                 private:
-                    small_vector<option_enum_value, 3> values_;
+                    small_vector<literal, 3> values_;
                 };
 
             } // end namespace details
@@ -101,6 +94,10 @@ namespace pstore {
             template <typename... OptsTy>
             details::values values (OptsTy &&... options) {
                 return details::values{std::forward<OptsTy> (options)...};
+            }
+
+            inline details::values values (std::initializer_list<literal> options) {
+                return details::values (options);
             }
 
             class name {
