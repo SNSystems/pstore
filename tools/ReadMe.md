@@ -59,7 +59,7 @@ Executables that are used as part of the pstore build itself.
 | [pstore&#8209;httpd](httpd/) | A minimal HTTP server to exercise the [httpd](../include/pstore/httpd) library. |
 | [pstore&#8209;inserter](inserter/) | A utility to exercise the digest index. |
 | [pstore&#8209;json](json/) | A small wrapper for the [JSON parser](../include/pstore/json) library. |
-| [lock_test](lock_test/) | A test for the cross-process transaction lock. |
+| [pstore-lock-test](lock_test/) | A test for the cross-process transaction lock. |
 | [pstore&#8209;mangle](mangle/) | A simple file fuzzing utility. |
 | [pstore&#8209;sieve](sieve/) | A utility to generate data for the system tests. |
 
