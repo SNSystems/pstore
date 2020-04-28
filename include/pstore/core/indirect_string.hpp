@@ -79,8 +79,8 @@ namespace pstore {
                 : db_{db}
                 , is_pointer_{false}
                 , address_{addr.absolute ()} {}
-        constexpr indirect_string (database const & db,
-                                   gsl::not_null<raw_sstring_view const *> const str) noexcept
+        indirect_string (database const & db,
+                         gsl::not_null<raw_sstring_view const *> const str) noexcept
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
