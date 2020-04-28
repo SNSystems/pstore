@@ -60,10 +60,12 @@ namespace pstore {
             // This represents a single enum value, using "int" as the underlying type.
             struct literal {
                 literal () = default;
-                literal (std::string name, int value, std::string description)
+                literal (std::string const & name, int value, std::string const & description)
                         : name{name}
                         , value{value}
                         , description{description} {}
+                literal (std::string const & name, int value)
+                        : literal (name, value, name) {}
                 std::string name;
                 int value = 0;
                 std::string description;
