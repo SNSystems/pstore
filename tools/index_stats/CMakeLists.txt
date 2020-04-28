@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- tools/CMakeLists.txt ------------------------------------------------===//
+#===- tools/index_stats/CMakeLists.txt ------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,20 +42,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-add_subdirectory (brokerd)
-add_subdirectory (broker_poker) # A utility for exercising the broker agent
-add_subdirectory (diff)         # Dumps diff between two pstore revisions as YAML
-add_subdirectory (dump)         # Dumps pstore contents as YAML
-add_subdirectory (genromfs)     # Converts a local directory tree to romfs
-add_subdirectory (hamt_test)    # A utility to check the HAMT index
-add_subdirectory (httpd)        # A host for the broker's HTTP server
-add_subdirectory (index_stats)  # Dumps pstore index statistics
-add_subdirectory (index_structure) # Dumps pstore index structures as GraphViz DOT graphs
-add_subdirectory (inserter)     # A utility to exercise the digest index
-add_subdirectory (json)         # A small wrapper for the JSON parser library
-add_subdirectory (lock_test)    # Test the global transaction lock
-add_subdirectory (mangle)       # A simple file fuzzing utility
-add_subdirectory (read)         # A utility for reading the write or strings index
-add_subdirectory (sieve)        # A utility to generate data for the system tests
-add_subdirectory (vacuum)       # Data store garbage collector utility
-add_subdirectory (write)
+add_pstore_executable (pstore-index-stats
+    index_stats.cpp
+)
+target_link_libraries (pstore-index-stats PRIVATE pstore-core pstore-support pstore-cmd-util)
+add_clang_tidy_target (pstore-index-stats)
