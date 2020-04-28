@@ -254,10 +254,9 @@ namespace pstore {
                                 // No value was supplied immediately after the argument name. It
                                 // could be the next argument.
                                 break;
-                            } else {
-                                ok = handler_set_value (handler, arg_name);
-                                arg_name.clear ();
                             }
+                            ok = handler_set_value (handler, arg_name);
+                            arg_name.clear ();
                         } else {
                             arg_name.erase (0, 1U);
                             ok = (*handler)->add_occurrence ();
