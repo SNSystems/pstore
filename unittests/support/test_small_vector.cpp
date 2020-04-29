@@ -298,6 +298,19 @@ TEST (SmallVector, PushBack) {
     EXPECT_THAT (a, ElementsAre (1, 2, 3, 4));
 }
 
+TEST (SmallVector, EmplaceBack) {
+    using ::testing::ElementsAre;
+    pstore::small_vector<int, 2> a;
+    a.emplace_back (1);
+    EXPECT_THAT (a, ElementsAre (1));
+    a.emplace_back (2);
+    EXPECT_THAT (a, ElementsAre (1, 2));
+    a.emplace_back (3);
+    EXPECT_THAT (a, ElementsAre (1, 2, 3));
+    a.emplace_back (4);
+    EXPECT_THAT (a, ElementsAre (1, 2, 3, 4));
+}
+
 TEST (SmallVector, Back) {
     pstore::small_vector<int, 1> a;
     a.push_back (1);

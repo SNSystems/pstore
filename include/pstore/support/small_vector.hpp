@@ -180,6 +180,8 @@ namespace pstore {
 
         /// Adds an element to the end.
         void push_back (ElementType const & v);
+        template <typename... Args>
+        void emplace_back (Args &&... args);
 
         template <typename InputIt>
         void assign (InputIt first, InputIt last);
@@ -227,6 +229,9 @@ namespace pstore {
             return elements <= BodyElements;
         }
 
+        void switch_to_big (std::size_t new_elements);
+        template <typename... Args>
+        void emplace_back_big (Args &&... args);
         ElementType * set_buffer_ptr (std::size_t const required_elements) noexcept {
             buffer_ = is_small (required_elements) ? small_buffer_.data () : big_buffer_.data ();
             return buffer_;
@@ -343,21 +348,56 @@ namespace pstore {
     // push_back
     // ~~~~~~~~~
     template <typename ElementType, std::size_t BodyElements>
-    void small_vector<ElementType, BodyElements>::push_back (ElementType const & v) {
+    inline void small_vector<ElementType, BodyElements>::push_back (ElementType const & v) {
         auto const new_elements = elements_ + 1U;
-        bool const is_small_before = is_small (elements_);
-        bool const is_small_after = is_small (new_elements);
-        if (is_small_after) {
+        if (is_small (new_elements)) {
             small_buffer_[elements_] = v;
         } else {
-            if (is_small_before != is_small_after) {
-                big_buffer_.clear ();
-                std::copy (buffer_, buffer_ + elements_, std::back_inserter (big_buffer_));
+            if (is_small (elements_)) {
+                this->switch_to_big (new_elements);
             }
             big_buffer_.push_back (v);
             this->set_buffer_ptr (new_elements);
         }
-        ++elements_;
+        elements_ = new_elements;
+    }
+
+    // emplace_back
+    // ~~~~~~~~~~~~
+    template <typename ElementType, std::size_t BodyElements>
+    template <typename... Args>
+    inline void small_vector<ElementType, BodyElements>::emplace_back (Args &&... args) {
+        auto const new_elements = elements_ + 1U;
+        if (!is_small (new_elements)) {
+            return emplace_back_big (std::forward<Args> (args)...);
+        }
+        small_buffer_[elements_] = ElementType (std::forward<Args> (args)...);
+        elements_ = new_elements;
+    }
+
+    // emplace_back_big
+    // ~~~~~~~~~~~~~~~~
+    // The "slow" path for emplace_back which inserts into the "big" vector.
+    template <typename ElementType, std::size_t BodyElements>
+    template <typename... Args>
+    void small_vector<ElementType, BodyElements>::emplace_back_big (Args &&... args) {
+        auto const new_elements = elements_ + 1U;
+        if (is_small (elements_)) {
+            this->switch_to_big (new_elements);
+        }
+        big_buffer_.emplace_back (std::forward<Args> (args)...);
+        this->set_buffer_ptr (new_elements);
+        elements_ = new_elements;
+    }
+
+    // switch_to_big
+    // ~~~~~~~~~~~~~
+    template <typename ElementType, std::size_t BodyElements>
+    void small_vector<ElementType, BodyElements>::switch_to_big (std::size_t new_elements) {
+        big_buffer_.clear ();
+        big_buffer_.reserve (new_elements);
+        std::copy (buffer_, buffer_ + elements_, std::back_inserter (big_buffer_));
+        this->set_buffer_ptr (new_elements);
     }
 
     // assign
