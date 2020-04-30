@@ -49,6 +49,6 @@ It will produce output something like:
 
 If there is a layering violation, you will see an error reflecting this:
 
-    ERROR: cannot include from component "core" from file "lib/support/error.cpp" (component "support-lib")
+    ERROR: cannot include from component "core" from file "lib/support/error.cpp" (component "support")
 
 On success, the exit code is 0 and 1 if there are any errors.
