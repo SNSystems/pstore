@@ -52,7 +52,6 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_gsl.cpp
     test_parallel_for_each.cpp
     test_pointee_adaptor.cpp
-    test_pubsub.cpp
     test_quoted.cpp
     test_round2.cpp
     test_uint128.cpp

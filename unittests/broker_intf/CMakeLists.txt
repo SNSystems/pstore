@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/broker_intf/CMakeLists.txt --------------------------------------===//
+#===- unittests/broker_intf/CMakeLists.txt --------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,66 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-
-set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker_intf")
-
-set (pstore_broker_intf_includes
-    descriptor.hpp
-    fifo_path.hpp
-    message_type.hpp
-    pubsub.hpp
-    send_message.hpp
-    signal_cv.hpp
-    writer.hpp
-    wsa_startup.hpp
+add_pstore_unit_test (pstore-broker-intf-unit-tests
+    test_pubsub.cpp
 )
-
-set (pstore_broker_intf_src
-    descriptor.cpp
-    fifo_path_common.cpp
-    fifo_path_posix.cpp
-    fifo_path_win32.cpp
-    message_type.cpp
-    send_message.cpp
-    signal_cv_posix.cpp
-    signal_cv_win32.cpp
-    writer_common.cpp
-    writer_posix.cpp
-    writer_win32.cpp
-    wsa_startup.cpp
-)
-
-include (add_pstore)
-add_pstore_library (TARGET pstore-broker-intf
-    NAME broker_intf
-    SOURCES "${pstore_broker_intf_src}"
-    HEADER_DIR "${pstore_broker_include_dir}"
-    INCLUDES "${pstore_broker_intf_includes}"
-)
-target_link_libraries (pstore-broker-intf PUBLIC pstore-adt pstore-support)
-
-if (NOT PSTORE_EXCEPTIONS)
-    set (LLVM_REQUIRES_EH Yes)
-    set (LLVM_REQUIRES_RTTI Yes)
-    set (PSTORE_EXCEPTIONS Yes)
-
-    add_pstore_library (TARGET pstore-broker-intf-ex
-        NAME broker-intf-ex
-        SOURCES "${pstore_broker_intf_src}"
-        HEADER_DIR "${pstore_broker_include_dir}"
-        INCLUDES "${pstore_broker_intf_includes}"
-    )
-
-    set (LLVM_REQUIRES_EH No)
-    set (LLVM_REQUIRES_RTTI No)
-    set (PSTORE_EXCEPTIONS No)
-
-    target_link_libraries (pstore-broker-intf-ex PUBLIC pstore-adt-ex pstore-support-ex)
-endif (NOT PSTORE_EXCEPTIONS)
-
-if (WIN32)
-    target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
-    if (NOT PSTORE_EXCEPTIONS)
-        target_link_libraries (pstore-broker-intf-ex PUBLIC Ws2_32.dll)
-    endif ()
-endif (WIN32)
+target_link_libraries (pstore-broker-intf-unit-tests PRIVATE pstore-broker-intf)

@@ -70,6 +70,7 @@
 
 // Local includes
 #include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/broker_intf/pubsub.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/http/headers.hpp"
@@ -84,7 +85,6 @@
 #include "pstore/http/ws_server.hpp"
 #include "pstore/http/wskey.hpp"
 #include "pstore/os/logging.hpp"
-#include "pstore/support/pubsub.hpp"
 
 namespace {
 

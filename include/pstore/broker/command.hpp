@@ -57,9 +57,9 @@
 #include "pstore/broker/parser.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
 #include "pstore/broker_intf/message_type.hpp"
+#include "pstore/broker_intf/pubsub.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/pubsub.hpp"
 
 namespace pstore {
     namespace httpd {

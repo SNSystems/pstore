@@ -282,7 +282,6 @@ set (PSTORE_SUPPORT_INCLUDES
     parallel_for_each.hpp
     pointee_adaptor.hpp
     portab.hpp
-    pubsub.hpp
     quoted.hpp
     random.hpp
     round2.hpp

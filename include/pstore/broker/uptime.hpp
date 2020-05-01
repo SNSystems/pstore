@@ -47,7 +47,7 @@
 #include <atomic>
 
 #include "pstore/broker_intf/signal_cv.hpp"
-#include "pstore/support/pubsub.hpp"
+#include "pstore/broker_intf/pubsub.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

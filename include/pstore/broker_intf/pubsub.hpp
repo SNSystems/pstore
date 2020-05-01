@@ -4,7 +4,7 @@
 //* | |_) | |_| | |_) \__ \ |_| | |_) | *
 //* | .__/ \__,_|_.__/|___/\__,_|_.__/  *
 //* |_|                                 *
-//===- include/pstore/support/pubsub.hpp ----------------------------------===//
+//===- include/pstore/broker_intf/pubsub.hpp ------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

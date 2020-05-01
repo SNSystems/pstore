@@ -4,7 +4,7 @@
 //* | |_) | |_| | |_) \__ \ |_| | |_) | *
 //* | .__/ \__,_|_.__/|___/\__,_|_.__/  *
 //* |_|                                 *
-//===- unittests/support/test_pubsub.cpp ----------------------------------===//
+//===- unittests/broker_intf/test_pubsub.cpp ------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/support/pubsub.hpp"
+#include "pstore/broker_intf/pubsub.hpp"
 
 #include <condition_variable>
 #include <thread>

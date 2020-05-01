@@ -4,7 +4,7 @@
 //* \__ \ | | | | | (_| | | |  \ V /  __/ (__| || (_) | |    *
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
-//===- unittests/support/test_small_vector.cpp ----------------------------===//
+//===- unittests/adt/test_small_vector.cpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

@@ -81,7 +81,8 @@ else ()
     endif ()
     target_link_libraries (pstore-brokerd PRIVATE pstore-broker)
 
-    add_clang_tidy_target (pstore-broker)
+    add_clang_tidy_target (pstore-brokerd)
+    run_pstore_unit_test (pstore-brokerd pstore-broker-intf-unit-tests)
     run_pstore_unit_test (pstore-brokerd pstore-broker-unit-tests)
 
     # Run pstore-genromfs to create the structures for the HTTP server's built-in file system.
