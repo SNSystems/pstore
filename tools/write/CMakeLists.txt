@@ -54,6 +54,7 @@ add_pstore_tool (pstore-write
 )
 target_link_libraries (pstore-write PRIVATE pstore-core pstore-cmd-util)
 
+run_pstore_unit_test (pstore-write pstore-adt-unit-tests)
 run_pstore_unit_test (pstore-write pstore-cmd-util-unit-tests)
 run_pstore_unit_test (pstore-write pstore-core-unit-tests)
 run_pstore_unit_test (pstore-write pstore-mcrepo-unit-tests)
