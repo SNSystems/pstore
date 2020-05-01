@@ -4,7 +4,7 @@
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
-//===- unittests/support/test_sstring_view.cpp ----------------------------===//
+//===- unittests/adt/test_sstring_view.cpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/support/sstring_view.hpp"
+#include "pstore/adt/sstring_view.hpp"
 
 // Standard library includes
 #include <cstring>

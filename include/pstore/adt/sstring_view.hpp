@@ -4,7 +4,7 @@
 //* \__ \__ \ |_| |  | | | | | (_| |  \ V /| |  __/\ V  V /  *
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
-//===- include/pstore/support/sstring_view.hpp ----------------------------===//
+//===- include/pstore/adt/sstring_view.hpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -49,8 +49,8 @@
 /// construction of std::string instances -- and to enable string values from the database and
 /// in-memory string values to be used interchangably.
 
-#ifndef PSTORE_SUPPORT_SSTRING_VIEW_HPP
-#define PSTORE_SUPPORT_SSTRING_VIEW_HPP
+#ifndef PSTORE_ADT_SSTRING_VIEW_HPP
+#define PSTORE_ADT_SSTRING_VIEW_HPP
 
 #include <array>
 #include <cassert>
@@ -471,4 +471,4 @@ namespace std {
 
 } // namespace std
 
-#endif // PSTORE_SUPPORT_SSTRING_VIEW_HPP
+#endif // PSTORE_ADT_SSTRING_VIEW_HPP

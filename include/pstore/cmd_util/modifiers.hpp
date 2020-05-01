@@ -48,10 +48,10 @@
 #include <string>
 #include <utility>
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/option.hpp"
 #include "pstore/cmd_util/parser.hpp"
-#include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     namespace cmd_util {

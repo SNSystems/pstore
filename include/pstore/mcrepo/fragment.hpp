@@ -53,6 +53,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/address.hpp"
 #include "pstore/core/transaction.hpp"
@@ -65,7 +66,6 @@
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/inherit_const.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
-#include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     namespace repo {

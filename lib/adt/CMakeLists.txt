@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/http/CMakeLists.txt ---------------------------------------------===//
+#===- lib/adt/CMakeLists.txt ----------------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,105 +41,59 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-include (add_pstore)
-
-set (pstore_http_public_include "${PSTORE_ROOT_DIR}/include/pstore/http")
-set (pstore_http_includes
-    block_for_input.hpp
-    buffered_reader.hpp
-    endian.hpp
-    error.hpp
-    headers.hpp
-    http_date.hpp
-    media_type.hpp
-    net_txrx.hpp
-    query_to_kvp.hpp
-    quit.hpp
-    request.hpp
-    send.hpp
-    serve_dynamic_content.hpp
-    serve_static_content.hpp
-    server.hpp
-    server_status.hpp
-    ws_server.hpp
-    wskey.hpp
+set (pstore_adt_lib_src
+    sstring_view.cpp
 )
-set (pstore_http_lib_src
-    error.cpp
-    headers.cpp
-    http_date.cpp
-    media_type.cpp
-    net_txrx.cpp
-    quit.cpp
-    server.cpp
-    ws_server.cpp
-    wskey.cpp
-    "${pstore_http_fs_source}"
+set (pstore_adt_include_dir "${PSTORE_ROOT_DIR}/include/pstore/adt")
+set (pstore_adt_lib_includes
+    error_or.hpp
+    maybe.hpp
+    small_vector.hpp
+    sstring_view.hpp
 )
-
+      
 add_pstore_library (
-    TARGET pstore-http
-    NAME http
-    SOURCES "${pstore_http_lib_src}"
-    HEADER_DIR "${pstore_http_public_include}"
-    INCLUDES "${pstore_http_includes}"
+    NAME adt
+    SOURCES ${pstore_adt_lib_src}
+    HEADER_DIR "${pstore_adt_include_dir}"
+    INCLUDES ${pstore_adt_lib_includes}
 )
-target_link_libraries (pstore-http PUBLIC
-    pstore-adt
-    pstore-broker-intf
-    pstore-json-lib
-    pstore-romfs
-    pstore-os
-    pstore-support
-)
-add_clang_tidy_target (pstore-http)
+target_link_libraries (pstore-adt PUBLIC pstore-support)
+add_clang_tidy_target (pstore-adt)
 
+# Add the exception-handling-enabled pstore-adt-ex if we're building inside LLVM
 if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
-
     add_pstore_library (
-        TARGET pstore-http-ex
-        NAME http
-        SOURCES "${pstore_http_lib_src}"
-        HEADER_DIR "${pstore_http_public_include}"
-        INCLUDES "${pstore_http_includes}"
+        TARGET pstore-adt-ex
+        NAME adt
+        SOURCES ${pstore_adt_lib_src}
+        HEADER_DIR "${pstore_adt_include_dir}"
+        INCLUDES ${pstore_adt_lib_includes}
     )
-
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-http-ex PUBLIC
-        pstore-adt-ex
-        pstore-broker-intf-ex
-        pstore-json-lib-ex
-        pstore-romfs-ex
-        pstore-os-ex
-        pstore-support-ex
-    )
+    target_link_libraries (pstore-adt-ex PUBLIC pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
     add_pstore_library (
-        TARGET pstore-http-bc
-        NAME http
-        SOURCES "${pstore_http_lib_src}"
-        HEADER_DIR "${pstore_http_public_include}"
-        INCLUDES "${pstore_http_includes}"
+        TARGET pstore-adt-bc
+        NAME os
+        SOURCES ${pstore_adt_lib_src}
+        HEADER_DIR "${pstore_adt_include_dir}"
+        INCLUDES ${pstore_adt_lib_includes}
     )
-    target_compile_options (pstore-http-bc PRIVATE
+    target_compile_options (pstore-os-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu
         -fsanitize=signed-integer-overflow
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
-    target_link_libraries (pstore-http-bc PUBLIC
-        pstore-broker-intf-bc
-        pstore-romfs-bc
-        pstore-os-bc
-        pstore-support-bc
-    )
+    target_link_libraries (pstore-os-bc PUBLIC pstore-support-bc)
 endif (PSTORE_BITCODE)

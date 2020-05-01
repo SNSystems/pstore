@@ -98,6 +98,7 @@ else ()
             INCLUDES "${pstore_broker_includes}"
         )
         target_link_libraries (pstore-broker PUBLIC
+            pstore-adt-ex
             pstore-broker-intf-ex
             pstore-http-ex
             pstore-json-lib-ex
@@ -116,6 +117,7 @@ else ()
             INCLUDES "${pstore_broker_includes}"
         )
         target_link_libraries (pstore-broker PUBLIC
+            pstore-adt        
             pstore-broker-intf
             pstore-http
             pstore-json-lib

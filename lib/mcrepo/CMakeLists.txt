@@ -66,4 +66,4 @@ add_pstore_library (
         section.hpp
         sparse_array.hpp
 )
-target_link_libraries (pstore-mcrepo PUBLIC pstore-core)
+target_link_libraries (pstore-mcrepo PUBLIC pstore-adt pstore-core)

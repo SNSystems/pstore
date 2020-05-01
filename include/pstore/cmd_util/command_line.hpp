@@ -47,6 +47,7 @@
 #include <string>
 #include <tuple>
 
+#include "pstore/adt/maybe.hpp"
 #include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/help.hpp"
 #include "pstore/cmd_util/modifiers.hpp"
@@ -54,7 +55,6 @@
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/os/path.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/maybe.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {

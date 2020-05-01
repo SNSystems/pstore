@@ -64,10 +64,10 @@
 #    include <unistd.h>
 
 // pstore includes
+#    include "pstore/adt/small_vector.hpp"
 #    include "pstore/os/path.hpp"
 #    include "pstore/support/gsl.hpp"
 #    include "pstore/support/quoted.hpp"
-#    include "pstore/support/small_vector.hpp"
 #    include "pstore/support/unsigned_cast.hpp"
 
 // includes which depend on values in config.hpp

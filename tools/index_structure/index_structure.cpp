@@ -226,9 +226,9 @@ int main (int argc, char * argv[]) {
         pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
         db.sync (opt.revision);
 
-        dump_if_selected<pstore::trailer::indices::fragment> (opt, db);
-        dump_if_selected<pstore::trailer::indices::name> (opt, db);
-        dump_if_selected<pstore::trailer::indices::write> (opt, db);
+#define X(a) dump_if_selected<pstore::trailer::indices::a> (opt, db);
+        PSTORE_INDICES
+#undef X
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on

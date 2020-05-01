@@ -49,10 +49,10 @@
 
 #include <gmock/gmock.h>
 
+#include "pstore/adt/maybe.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 

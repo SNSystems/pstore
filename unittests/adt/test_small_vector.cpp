@@ -41,7 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/support/small_vector.hpp"
+
+#include "pstore/adt/small_vector.hpp"
 
 #include <numeric>
 

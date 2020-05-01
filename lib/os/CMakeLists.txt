@@ -85,7 +85,7 @@ add_pstore_library (
 )
 set (CMAKE_THREAD_PREFER_PTHREAD TRUE)
 find_package (Threads)
-target_link_libraries (pstore-os PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support)
+target_link_libraries (pstore-os PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-adt pstore-support)
 add_clang_tidy_target (pstore-os)
 
 # Add the exception-handling-enabled pstore-os-ex
@@ -105,7 +105,7 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-os-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-support-ex)
+    target_link_libraries (pstore-os-ex PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-adt-ex pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (PSTORE_BITCODE)
@@ -123,5 +123,5 @@ if (PSTORE_BITCODE)
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
-    target_link_libraries (pstore-os-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+    target_link_libraries (pstore-os-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT} pstore-adt-bc pstore-support-bc)
 endif (PSTORE_BITCODE)

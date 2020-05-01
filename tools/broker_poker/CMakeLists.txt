@@ -50,6 +50,10 @@ add_pstore_executable (pstore-broker-poker
     switches.cpp
     switches.hpp
 )
-target_link_libraries (pstore-broker-poker PRIVATE pstore-broker-intf pstore-cmd-util)
+target_link_libraries (pstore-broker-poker PRIVATE
+    pstore-adt
+    pstore-broker-intf
+    pstore-cmd-util
+)
 
 run_pstore_unit_test (pstore-broker-poker pstore-broker-poker-unit-tests)

@@ -63,7 +63,7 @@ add_pstore_library (
     HEADER_DIR "${pstore_json_include_dir}"
     INCLUDES "${pstore_json_includes}"
 )
-target_link_libraries (pstore-json-lib PUBLIC pstore-support)
+target_link_libraries (pstore-json-lib PUBLIC pstore-adt pstore-support)
 add_clang_tidy_target (pstore-json-lib)
 
 if (NOT PSTORE_EXCEPTIONS)
@@ -83,5 +83,5 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-json-lib-ex PUBLIC pstore-support-ex)
+    target_link_libraries (pstore-json-lib-ex PUBLIC pstore-adt-ex pstore-support-ex)
 endif ()

@@ -4,7 +4,7 @@
 //* |  __/ |  | | | (_) | |    | (_) | |    *
 //*  \___|_|  |_|  \___/|_|     \___/|_|    *
 //*                                         *
-//===- include/pstore/support/error_or.hpp --------------------------------===//
+//===- include/pstore/adt/error_or.hpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_SUPPORT_ERROR_OR_HPP
-#define PSTORE_SUPPORT_ERROR_OR_HPP
+#ifndef PSTORE_ADT_ERROR_OR_HPP
+#define PSTORE_ADT_ERROR_OR_HPP
 
 #include <cassert>
 #include <new>
@@ -460,4 +460,4 @@ namespace pstore {
 
 } // end namespace pstore
 
-#endif // PSTORE_SUPPORT_ERROR_OR_HPP
+#endif // PSTORE_ADT_ERROR_OR_HPP

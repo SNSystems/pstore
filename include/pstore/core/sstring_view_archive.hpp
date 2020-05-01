@@ -52,11 +52,10 @@
 #ifndef PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
 #define PSTORE_CORE_SSTRING_VIEW_ARCHIVE_HPP
 
+#include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/db_archive.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/serialize/types.hpp"
-#include "pstore/support/sstring_view.hpp"
 #include "pstore/support/varint.hpp"
 
 namespace pstore {

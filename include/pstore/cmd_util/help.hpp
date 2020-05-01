@@ -54,9 +54,9 @@
 #include "pstore/cmd_util/stream_traits.hpp"
 #include "pstore/cmd_util/word_wrapper.hpp"
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/small_vector.hpp"
 #include "pstore/support/unsigned_cast.hpp"
 #include "pstore/support/utf.hpp"
 

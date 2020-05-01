@@ -52,8 +52,9 @@
 // 3rd party
 #include "gmock/gmock.h"
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/small_vector.hpp"
+
 #include "check_for_error.hpp"
 
 namespace {

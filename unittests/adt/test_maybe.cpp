@@ -4,7 +4,7 @@
 //* | | | | | | (_| | |_| | |_) |  __/ *
 //* |_| |_| |_|\__,_|\__, |_.__/ \___| *
 //*                  |___/             *
-//===- unittests/support/test_maybe.cpp -----------------------------------===//
+//===- unittests/adt/test_maybe.cpp ---------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/support/maybe.hpp"
+#include "pstore/adt/maybe.hpp"
 
 // Standard library
 #include <memory>

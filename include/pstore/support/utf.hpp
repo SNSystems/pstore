@@ -56,8 +56,8 @@
 #include <string>
 #include <type_traits>
 
+#include "pstore/adt/maybe.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 
 #if defined(_WIN32)

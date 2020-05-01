@@ -49,8 +49,8 @@
 #include <string>
 #include <type_traits>
 
+#include "pstore/adt/error_or.hpp"
 #include "pstore/http/endian.hpp"
-#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

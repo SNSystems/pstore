@@ -48,17 +48,13 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_bit_count.cpp
     test_bit_field.cpp
     test_error.cpp
-    test_error_or.cpp
     test_fnv.cpp
     test_gsl.cpp
-    test_maybe.cpp
     test_parallel_for_each.cpp
     test_pointee_adaptor.cpp
     test_pubsub.cpp
     test_quoted.cpp
     test_round2.cpp
-    test_small_vector.cpp
-    test_sstring_view.cpp
     test_uint128.cpp
     test_unsigned_cast.cpp
     test_utf.cpp

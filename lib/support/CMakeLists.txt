@@ -273,14 +273,12 @@ set (PSTORE_SUPPORT_INCLUDES
     bit_field.hpp
     ctype.hpp
     error.hpp
-    error_or.hpp
     fnv.hpp
     gsl.hpp
     head_revision.hpp
     inherit_const.hpp
     ios_state.hpp
     max.hpp
-    maybe.hpp
     parallel_for_each.hpp
     pointee_adaptor.hpp
     portab.hpp
@@ -289,8 +287,6 @@ set (PSTORE_SUPPORT_INCLUDES
     random.hpp
     round2.hpp
     scope_guard.hpp
-    small_vector.hpp
-    sstring_view.hpp
     uint128.hpp
     unsigned_cast.hpp
     utf.hpp
@@ -302,13 +298,10 @@ set (PSTORE_SUPPORT_LIB_SRC
 
     error.cpp
     fnv.cpp
-    sstring_view.cpp
     uint128.cpp
     utf.cpp
     utf_win32.cpp
 )
-
-
 
 add_pstore_library (
     NAME support

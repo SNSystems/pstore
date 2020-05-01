@@ -59,5 +59,5 @@ add_pstore_library (
         diff.hpp
         diff_value.hpp
 )
-target_link_libraries (pstore-diff-lib PUBLIC pstore-core pstore-dump-lib)
+target_link_libraries (pstore-diff-lib PUBLIC pstore-adt pstore-core pstore-dump-lib)
 add_clang_tidy_target (pstore-diff-lib)

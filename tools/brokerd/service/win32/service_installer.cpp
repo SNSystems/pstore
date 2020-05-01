@@ -51,9 +51,9 @@
 #include <cstdio>
 #include <thread>
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/small_vector.hpp"
 
 namespace {
 

@@ -46,7 +46,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "pstore/support/small_vector.hpp"
+#include "pstore/adt/small_vector.hpp"
 
 namespace pstore {
     namespace cmd_util {

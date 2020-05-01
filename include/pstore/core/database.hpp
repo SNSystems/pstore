@@ -59,6 +59,7 @@
 #include <type_traits>
 #include <vector>
 
+#include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/region.hpp"
@@ -70,7 +71,6 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/head_revision.hpp"
-#include "pstore/support/sstring_view.hpp"
 #include "pstore/support/uint128.hpp"
 
 namespace pstore {

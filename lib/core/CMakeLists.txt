@@ -132,6 +132,7 @@ add_pstore_library (
 
 
 target_link_libraries (pstore-core PUBLIC
+    pstore-adt
     pstore-broker-intf
     pstore-os
     pstore-serialize

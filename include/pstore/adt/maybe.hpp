@@ -4,7 +4,7 @@
 //* | | | | | | (_| | |_| | |_) |  __/ *
 //* |_| |_| |_|\__,_|\__, |_.__/ \___| *
 //*                  |___/             *
-//===- include/pstore/support/maybe.hpp -----------------------------------===//
+//===- include/pstore/adt/maybe.hpp ---------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -49,8 +49,8 @@
 /// methods of that type, so we should switch to the standard type once we're able to migrate to
 /// C++17.
 
-#ifndef PSTORE_SUPPORT_MAYBE_HPP
-#define PSTORE_SUPPORT_MAYBE_HPP
+#ifndef PSTORE_ADT_MAYBE_HPP
+#define PSTORE_ADT_MAYBE_HPP
 
 #include <cassert>
 #include <new>
@@ -257,4 +257,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_SUPPORT_MAYBE_HPP
+#endif // PSTORE_ADT_MAYBE_HPP

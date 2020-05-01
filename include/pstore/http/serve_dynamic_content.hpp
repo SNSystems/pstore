@@ -58,6 +58,7 @@
 #include <type_traits>
 #include <unordered_map>
 
+#include "pstore/adt/error_or.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/http/http_date.hpp"
@@ -67,7 +68,6 @@
 #include "pstore/http/send.hpp"
 #include "pstore/json/utility.hpp"
 #include "pstore/support/array_elements.hpp"
-#include "pstore/support/error_or.hpp"
 
 namespace pstore {
     namespace httpd {

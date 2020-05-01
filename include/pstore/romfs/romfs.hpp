@@ -55,9 +55,9 @@
 #    include <sys/types.h>
 #endif
 
+#include "pstore/adt/error_or.hpp"
 #include "pstore/romfs/directory.hpp"
 #include "pstore/romfs/dirent.hpp"
-#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

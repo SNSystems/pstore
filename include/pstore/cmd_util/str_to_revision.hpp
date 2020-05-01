@@ -51,7 +51,7 @@
 #include <string>
 #include <utility>
 
-#include "pstore/support/maybe.hpp"
+#include "pstore/adt/maybe.hpp"
 
 namespace pstore {
 

@@ -45,8 +45,8 @@
 /// \brief Provides a small, normally stack allocated, buffer but which can be
 /// resized dynamically when necessary.
 
-#ifndef PSTORE_SUPPORT_SMALL_VECTOR_HPP
-#define PSTORE_SUPPORT_SMALL_VECTOR_HPP
+#ifndef PSTORE_ADT_SMALL_VECTOR_HPP
+#define PSTORE_ADT_SMALL_VECTOR_HPP
 
 #include <array>
 #include <cassert>
@@ -422,4 +422,4 @@ namespace pstore {
     }
 
 } // end namespace pstore
-#endif // PSTORE_SUPPORT_SMALL_VECTOR_HPP
+#endif // PSTORE_ADT_SMALL_VECTOR_HPP

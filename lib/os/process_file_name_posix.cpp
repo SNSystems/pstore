@@ -48,9 +48,9 @@
 #if !defined(_WIN32)
 
 #    include "pstore/config/config.hpp"
+#    include "pstore/adt/small_vector.hpp"
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/portab.hpp"
-#    include "pstore/support/small_vector.hpp"
 #    include "pstore/support/unsigned_cast.hpp"
 
 #    ifdef PSTORE_HAVE_NSGETEXECUTABLEPATH

@@ -43,6 +43,7 @@
 #===----------------------------------------------------------------------===//
 add_subdirectory (support)
 
+add_subdirectory (adt)
 add_subdirectory (broker)
 add_subdirectory (broker_intf)
 add_subdirectory (cmd_util)

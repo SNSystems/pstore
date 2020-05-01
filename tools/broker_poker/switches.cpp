@@ -46,8 +46,8 @@
 
 #include <cstdlib>
 
+#include "pstore/adt/maybe.hpp"
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/support/maybe.hpp"
 
 using namespace pstore::cmd_util;
 

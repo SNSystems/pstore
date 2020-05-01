@@ -77,9 +77,9 @@
 #    include "llvm/Support/TargetRegistry.h"
 #    include "llvm/MC/MCInstrInfo.h"
 
+#    include "pstore/adt/error_or.hpp"
 #    include "pstore/support/bit_count.hpp"
 #    include "pstore/support/error.hpp"
-#    include "pstore/support/error_or.hpp"
 #    include "pstore/support/gsl.hpp"
 
 namespace {

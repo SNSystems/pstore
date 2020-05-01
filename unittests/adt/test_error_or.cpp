@@ -4,7 +4,7 @@
 //* |  __/ |  | | | (_) | |    | (_) | |    *
 //*  \___|_|  |_|  \___/|_|     \___/|_|    *
 //*                                         *
-//===- unittests/support/test_error_or.cpp --------------------------------===//
+//===- unittests/adt/test_error_or.cpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/support/error_or.hpp"
+
+#include "pstore/adt/error_or.hpp"
 
 #include <stdexcept>
 #include <system_error>

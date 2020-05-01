@@ -50,13 +50,13 @@
 #include <new>
 #include <type_traits>
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/core/address.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/support/aligned.hpp"
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/small_vector.hpp"
 
 namespace pstore {
     class indirect_string;

@@ -57,8 +57,8 @@
 
 #include "check_for_error.hpp"
 
+#include "pstore/adt/small_vector.hpp"
 #include "pstore/support/portab.hpp"
-#include "pstore/support/small_vector.hpp"
 
 using namespace std::string_literals;
 

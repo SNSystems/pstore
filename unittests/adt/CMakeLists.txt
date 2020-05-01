@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/dump/CMakeLists.txt ---------------------------------------------===//
+#===- unittests/adt/CMakeLists.txt ----------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,49 +41,11 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-
-##########################
-# pstore Dump Core Library
-##########################
-
-set (LLVM_LINK_COMPONENTS
-    AllTargetsAsmPrinters
-    AllTargetsDescs
-    AllTargetsDisassemblers
-    AllTargetsInfos
-    CodeGen
-    DebugInfoDWARF
-    DebugInfoPDB
-    Demangle
-    MC
-    MCDisassembler
-    Object
-    Support
-    Symbolize
+add_pstore_unit_test (pstore-adt-unit-tests
+    test_error_or.cpp
+    test_maybe.cpp
+    test_small_vector.cpp
+    test_sstring_view.cpp
 )
-add_pstore_library (
-    TARGET pstore-dump-lib
-    NAME dump
-    SOURCES
-        db_value.cpp
-        digest_opt.cpp
-        error.cpp
-        line_splitter.cpp
-        mcdebugline_value.cpp
-        mcdisassembler_value.cpp
-        mcrepo_value.cpp
-        value.cpp
-    HEADER_DIR
-        "${PSTORE_ROOT_DIR}/include/pstore/dump"
-    INCLUDES
-        db_value.hpp
-        digest_opt.hpp
-        error.hpp
-        index_value.hpp
-        line_splitter.hpp
-        mcdebugline_value.hpp
-        mcdisassembler_value.hpp
-        mcrepo_value.hpp
-        value.hpp
-)
-target_link_libraries (pstore-dump-lib PUBLIC pstore-adt pstore-core pstore-mcrepo)
+target_link_libraries (pstore-adt-unit-tests PRIVATE pstore-adt)
+  

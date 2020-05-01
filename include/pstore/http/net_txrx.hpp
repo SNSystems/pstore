@@ -44,8 +44,8 @@
 #ifndef PSTORE_HTTP_NET_TXRX_HPP
 #define PSTORE_HTTP_NET_TXRX_HPP
 
+#include "pstore/adt/error_or.hpp"
 #include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/support/error_or.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {

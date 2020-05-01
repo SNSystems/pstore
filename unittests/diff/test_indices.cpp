@@ -50,13 +50,13 @@
 
 #include "gmock/gmock.h"
 
+#include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
 #include "pstore/core/transaction.hpp"
-#include "pstore/support/sstring_view.hpp"
 
 #include "empty_store.hpp"
 #include "split.hpp"

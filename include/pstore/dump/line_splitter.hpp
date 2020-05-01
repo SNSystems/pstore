@@ -47,9 +47,10 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+
+#include "pstore/adt/sstring_view.hpp"
 #include "pstore/dump/value.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/sstring_view.hpp"
 
 namespace pstore {
     namespace dump {
