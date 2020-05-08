@@ -58,14 +58,14 @@ namespace pstore {
     /// Converts an array of bytes to ASCII85.
     ///
     /// \tparam ForwardIterator  A LegacyForwardIterator iterator type.
-    /// \tparam BackInserter  A LegacyOutputIterator iterator type.
+    /// \tparam OutputIterator  A LegacyOutputIterator iterator type.
     /// \param first  The first in the range of elements to be converted.
     /// \param last  The end of the range of elements to be converted.
     /// \param out  The output iterator to which the encoded characters are written.
     /// \returns Output iterator to the element in the destination range, one past the last element
     ///   copied.
-    template <typename ForwardIterator, typename BackInserter>
-    BackInserter to_base64 (ForwardIterator first, ForwardIterator last, BackInserter out) {
+    template <typename ForwardIterator, typename OutputIterator>
+    OutputIterator to_base64 (ForwardIterator first, ForwardIterator last, OutputIterator out) {
         static constexpr std::array<char, 64> alphabet{
             {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
              'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
