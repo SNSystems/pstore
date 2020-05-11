@@ -45,16 +45,19 @@
 
 #include "pstore/os/logging.hpp"
 
+// standard library
 #include <cstring>
 
-#include <gmock/gmock.h>
-
-#include "pstore/adt/maybe.hpp"
+// pstore includes
 #include "pstore/os/thread.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
+
+// 3rd party
+#include <gmock/gmock.h>
 
 using pstore::just;
 using pstore::maybe;

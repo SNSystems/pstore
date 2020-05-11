@@ -4,7 +4,7 @@
 //* | | | | | | (_| | |_| | |_) |  __/ *
 //* |_| |_| |_|\__,_|\__, |_.__/ \___| *
 //*                  |___/             *
-//===- include/pstore/adt/maybe.hpp ---------------------------------------===//
+//===- include/pstore/support/maybe.hpp -----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

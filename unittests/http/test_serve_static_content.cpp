@@ -54,10 +54,10 @@
 #include <cstring>
 #include <string>
 
-#include "pstore/adt/maybe.hpp"
-#include "pstore/support/array_elements.hpp"
 #include "pstore/http/request.hpp"
 #include "pstore/http/send.hpp"
+#include "pstore/support/array_elements.hpp"
+#include "pstore/support/maybe.hpp"
 
 #include <gmock/gmock.h>
 

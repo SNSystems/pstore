@@ -279,6 +279,7 @@ set (PSTORE_SUPPORT_INCLUDES
     inherit_const.hpp
     ios_state.hpp
     max.hpp
+    maybe.hpp
     parallel_for_each.hpp
     pointee_adaptor.hpp
     portab.hpp

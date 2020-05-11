@@ -46,7 +46,7 @@
 
 #include <string>
 
-#include "pstore/adt/maybe.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace httpd {

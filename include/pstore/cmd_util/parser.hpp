@@ -50,8 +50,8 @@
 #include <string>
 #include <vector>
 
-#include "pstore/adt/maybe.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace cmd_util {

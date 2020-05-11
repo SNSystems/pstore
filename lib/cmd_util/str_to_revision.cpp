@@ -55,10 +55,10 @@
 #include <iterator>
 #include <type_traits>
 
-#include "pstore/adt/maybe.hpp"
 #include "pstore/support/ctype.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/head_revision.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/unsigned_cast.hpp"
 
 namespace {

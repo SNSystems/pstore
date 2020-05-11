@@ -47,7 +47,6 @@ set (pstore_adt_lib_src
 set (pstore_adt_include_dir "${PSTORE_ROOT_DIR}/include/pstore/adt")
 set (pstore_adt_lib_includes
     error_or.hpp
-    maybe.hpp
     small_vector.hpp
     sstring_view.hpp
 )

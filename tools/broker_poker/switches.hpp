@@ -49,9 +49,9 @@
 #include <string>
 #include <utility>
 
-#include "pstore/adt/maybe.hpp"
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/support/maybe.hpp"
 
 struct switches {
     std::string verb;
