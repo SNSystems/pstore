@@ -46,11 +46,11 @@
 
 #ifdef _WIN32
 
-// 3rd party includes
-#    include "gtest/gtest.h"
-
-// pstore includes
 #    include "pstore/support/utf.hpp"
+
+// 3rd party includes
+#    include <gtest/gtest.h>
+
 
 namespace {
     struct UtfStringsFixture : testing::Test {
