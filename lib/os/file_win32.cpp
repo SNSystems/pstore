@@ -67,7 +67,6 @@
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/gsl.hpp"
 #    include "pstore/support/random.hpp"
-#    include "pstore/support/utf.hpp"
 #    include "pstore/support/quoted.hpp"
 
 namespace pstore {
