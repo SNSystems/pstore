@@ -96,7 +96,7 @@ namespace pstore {
             chunks_.clear ();
             size_ = 0;
         }
-        void reserve (std::size_t size) {
+        void reserve (std::size_t /*size*/) {
             // TODO: Not currently implemented.
         }
         std::size_t capacity () const noexcept { return chunks_.size () * ElementsPerChunk; }
