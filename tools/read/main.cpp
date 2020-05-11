@@ -55,15 +55,15 @@
 #    endif
 #endif
 
-#include "switches.hpp"
-
+#include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
+
+#include "switches.hpp"
 
 using pstore::cmd_util::error_stream;
 using pstore::cmd_util::out_stream;
