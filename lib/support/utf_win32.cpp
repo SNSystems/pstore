@@ -50,6 +50,7 @@
 // Standard Library includes
 #    include <cassert>
 #    include <cwchar>
+#    include <vector>
 
 // System includes
 #    define NOMINMAX
@@ -57,7 +58,6 @@
 #    include <Windows.h>
 
 // Local includes
-#    include "pstore/adt/small_vector.hpp"
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/portab.hpp"
 
@@ -92,7 +92,7 @@ namespace {
 
         static std::size_t output_size (input_char_type const * wstr, std::size_t length);
         static void convert (input_char_type const * str, std::size_t str_length,
-                             pstore::small_vector<output_char_type> * const output);
+                             std::vector<output_char_type> * const output);
     };
 
     std::size_t from_8_to_16_traits::output_size (input_char_type const * str, std::size_t length) {
@@ -109,7 +109,7 @@ namespace {
     }
 
     void from_8_to_16_traits::convert (input_char_type const * wstr, std::size_t wstr_length,
-                                       pstore::small_vector<output_char_type> * const output) {
+                                       std::vector<output_char_type> * const output) {
 
         std::size_t const wstr_size = wstr_length * sizeof (input_char_type);
         std::size_t const output_size = output->size ();
@@ -123,7 +123,7 @@ namespace {
                 output->data (),             // output buffer
                 length_as_int (output_size)) // size (in code units) of the output buffer
         );
-        assert (wchars_written <= output->size_bytes ());
+        assert (wchars_written <= output_size * sizeof (output_char_type));
         assert (wchars_written == from_8_to_16_traits::output_size (wstr, wstr_length));
     }
 
@@ -140,7 +140,7 @@ namespace {
         static std::size_t output_size (input_char_type const * wstr, std::size_t length);
 
         static void convert (input_char_type const * wstr, std::size_t wstr_length,
-                             pstore::small_vector<output_char_type> * const output);
+                             std::vector<output_char_type> * const output);
     };
 
     std::size_t from_16_to_8_traits::output_size (input_char_type const * wstr,
@@ -159,20 +159,20 @@ namespace {
     }
 
     void from_16_to_8_traits::convert (input_char_type const * wstr, std::size_t wstr_length,
-                                       pstore::small_vector<output_char_type> * const output) {
+                                       std::vector<output_char_type> * const output) {
+        std::size_t const output_size = output->size () * sizeof (output_char_type);
         int const bytes_written = conversion_result (
             "WideCharToMultiByte",
-            ::WideCharToMultiByte (
-                CP_UTF8,                               // output encoding
-                0,                                     // flags
-                wstr,                                  // input UTF-16 string
-                length_as_int (wstr_length),           // number of UTF-16 code-units
-                output->data (),                       // output buffer
-                length_as_int (output->size_bytes ()), // output buffer length (in bytes)
-                nullptr,                               // missing character (must be NULL for UTF8)
-                nullptr) // missing character was used? (must be NULL for UTF8)
+            ::WideCharToMultiByte (CP_UTF8,                     // output encoding
+                                   0,                           // flags
+                                   wstr,                        // input UTF-16 string
+                                   length_as_int (wstr_length), // number of UTF-16 code-units
+                                   output->data (),             // output buffer
+                                   length_as_int (output_size), // output buffer length (in bytes)
+                                   nullptr, // missing character (must be NULL for UTF8)
+                                   nullptr) // missing character was used? (must be NULL for UTF8)
         );
-        assert (bytes_written <= output->size_bytes ());
+        assert (bytes_written <= output_size);
         assert (bytes_written == from_16_to_8_traits::output_size (wstr, wstr_length));
     }
 
@@ -204,7 +204,7 @@ namespace {
         if (str != nullptr && length > 0) {
             std::size_t const chars_required = ConverterTraits::output_size (str, length);
             if (chars_required > 0) {
-                pstore::small_vector<output_char_type> buffer (chars_required);
+                std::vector<output_char_type> buffer (chars_required);
                 ConverterTraits::convert (str, length, &buffer);
 
                 auto begin = std::begin (buffer);
