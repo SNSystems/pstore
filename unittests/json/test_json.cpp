@@ -58,8 +58,9 @@ namespace {
         result_type result () { return out_; }
 
         void string_value (std::string const & s) { append ('"' + s + '"'); }
-        void integer_value (long v) { append (std::to_string (v)); }
-        void float_value (double v) { append (std::to_string (v)); }
+        void int64_value (std::int64_t v) { append (std::to_string (v)); }
+        void uint64_value (std::uint64_t v) { append (std::to_string (v)); }
+        void double_value (double v) { append (std::to_string (v)); }
         void boolean_value (bool v) { append (v ? "true" : "false"); }
         void null_value () { append ("null"); }
 
@@ -67,6 +68,7 @@ namespace {
         void end_array () { append ("]"); }
 
         void begin_object () { append ("{"); }
+        void key (std::string const & s) { string_value (s); }
         void end_object () { append ("}"); }
 
     private:
@@ -419,7 +421,7 @@ TEST_F (JsonArray, SingleElement) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1L)).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
     }
     auto p = json::make_parser (proxy_);
@@ -446,7 +448,7 @@ TEST_F (JsonArray, ZeroExpPlus1) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, float_value (DoubleEq (0.0))).Times (1);
+        EXPECT_CALL (callbacks_, double_value (DoubleEq (0.0))).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
     }
     auto p = json::make_parser (proxy_);
@@ -458,7 +460,7 @@ TEST_F (JsonArray, SimpleFloat) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, float_value (DoubleEq (1.234))).Times (1);
+        EXPECT_CALL (callbacks_, double_value (DoubleEq (1.234))).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
     }
     auto p = json::make_parser (proxy_);
@@ -470,7 +472,7 @@ TEST_F (JsonArray, MinusZero) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (0)).Times (1);
+        EXPECT_CALL (callbacks_, int64_value (0)).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
     }
     auto p = json::make_parser (proxy_);
@@ -482,7 +484,7 @@ TEST_F (JsonArray, TwoElements) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1)).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
         EXPECT_CALL (callbacks_, string_value ("hello")).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
     }
@@ -565,7 +567,7 @@ TEST_F (JsonArray, Nested2) {
         EXPECT_CALL (callbacks_, null_value ()).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1)).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (2);
     }
     auto p = json::make_parser (proxy_);
@@ -619,8 +621,8 @@ TEST_F (JsonObject, SingleKvp) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_object ()).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("a")).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1L)).Times (1);
+        EXPECT_CALL (callbacks_, key ("a")).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
         EXPECT_CALL (callbacks_, end_object ()).Times (1);
     }
 
@@ -635,9 +637,9 @@ TEST_F (JsonObject, TwoKvps) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_object ()).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("a")).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1)).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("b")).Times (1);
+        EXPECT_CALL (callbacks_, key ("a")).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
+        EXPECT_CALL (callbacks_, key ("b")).Times (1);
         EXPECT_CALL (callbacks_, boolean_value (true)).Times (1);
         EXPECT_CALL (callbacks_, end_object ()).Times (1);
     }
@@ -651,9 +653,9 @@ TEST_F (JsonObject, DuplicateKeys) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_object ()).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("a")).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1)).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("a")).Times (1);
+        EXPECT_CALL (callbacks_, key ("a")).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
+        EXPECT_CALL (callbacks_, key ("a")).Times (1);
         EXPECT_CALL (callbacks_, boolean_value (true)).Times (1);
         EXPECT_CALL (callbacks_, end_object ()).Times (1);
     }
@@ -667,10 +669,10 @@ TEST_F (JsonObject, ArrayValue) {
     {
         ::testing::InSequence _;
         EXPECT_CALL (callbacks_, begin_object ()).Times (1);
-        EXPECT_CALL (callbacks_, string_value ("a")).Times (1);
+        EXPECT_CALL (callbacks_, key ("a")).Times (1);
         EXPECT_CALL (callbacks_, begin_array ()).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (1L)).Times (1);
-        EXPECT_CALL (callbacks_, integer_value (2L)).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (1)).Times (1);
+        EXPECT_CALL (callbacks_, uint64_value (2)).Times (1);
         EXPECT_CALL (callbacks_, end_array ()).Times (1);
         EXPECT_CALL (callbacks_, end_object ()).Times (1);
     }

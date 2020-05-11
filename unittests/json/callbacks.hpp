@@ -52,13 +52,15 @@ public:
     virtual ~json_callbacks_base ();
 
     virtual void string_value (std::string const &) = 0;
-    virtual void integer_value (long) = 0;
-    virtual void float_value (double) = 0;
+    virtual void int64_value (std::int64_t) = 0;
+    virtual void uint64_value (std::uint64_t) = 0;
+    virtual void double_value (double) = 0;
     virtual void boolean_value (bool) = 0;
     virtual void null_value () = 0;
     virtual void begin_array () = 0;
     virtual void end_array () = 0;
     virtual void begin_object () = 0;
+    virtual void key (std::string const & ) = 0;
     virtual void end_object () = 0;
 };
 
@@ -67,13 +69,15 @@ public:
     ~mock_json_callbacks ();
 
     MOCK_METHOD1 (string_value, void (std::string const &));
-    MOCK_METHOD1 (integer_value, void (long));
-    MOCK_METHOD1 (float_value, void (double));
+    MOCK_METHOD1 (int64_value, void (std::int64_t));
+    MOCK_METHOD1 (uint64_value, void (std::uint64_t));
+    MOCK_METHOD1 (double_value, void (double));
     MOCK_METHOD1 (boolean_value, void (bool));
     MOCK_METHOD0 (null_value, void ());
     MOCK_METHOD0 (begin_array, void ());
     MOCK_METHOD0 (end_array, void ());
     MOCK_METHOD0 (begin_object, void ());
+    MOCK_METHOD1 (key, void(std::string const &));
     MOCK_METHOD0 (end_object, void ());
 };
 
@@ -88,13 +92,15 @@ public:
     callbacks_proxy (callbacks_proxy const &) = default;
 
     void string_value (std::string const & s) { original_.string_value (s); }
-    void integer_value (long v) { original_.integer_value (v); }
-    void float_value (double v) { original_.float_value (v); }
+    void int64_value (std::int64_t v) { original_.int64_value (v); }
+    void uint64_value (std::uint64_t v) { original_.uint64_value (v); }
+    void double_value (double v) { original_.double_value (v); }
     void boolean_value (bool v) { original_.boolean_value (v); }
     void null_value () { original_.null_value (); }
     void begin_array () { original_.begin_array (); }
     void end_array () { original_.end_array (); }
     void begin_object () { original_.begin_object (); }
+    void key (std::string const & s) { original_.key (s); }
     void end_object () { original_.end_object (); }
 
 private:

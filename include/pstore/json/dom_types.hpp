@@ -41,19 +41,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file dom_types.hpp
 
 #ifndef PSTORE_JSON_DOM_TYPES_HPP
 #define PSTORE_JSON_DOM_TYPES_HPP
 
-#include <cassert>
+#include <cstdint>
 #include <string>
-#include <unordered_map>
-#include <memory>
-#include <ostream>
-#include <stack>
-#include <utility>
-#include <vector>
 
 namespace pstore {
     namespace json {
@@ -63,8 +56,10 @@ namespace pstore {
             using result_type = void;
 
             void string_value (std::string const &) const noexcept {}
-            void integer_value (long const) const noexcept {}
-            void float_value (double const) const noexcept {}
+            void int64_value (std::int64_t) const noexcept {}
+            void uint64_value (std::uint64_t) const noexcept {}
+            void uinteger (unsigned long) const noexcept {}
+            void double_value (double const) const noexcept {}
             void boolean_value (bool const) const noexcept {}
             void null_value () const noexcept {}
 
@@ -72,6 +67,7 @@ namespace pstore {
             void end_array () const noexcept {}
 
             void begin_object () const noexcept {}
+            void key (std::string const & ) const noexcept {}
             void end_object () const noexcept {}
 
             result_type result () const noexcept {}

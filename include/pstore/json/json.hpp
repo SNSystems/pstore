@@ -109,13 +109,15 @@ namespace pstore {
         ///     ----------|------------
         ///     result_type | The type returned by the Callbacks::result() member function. This will be the type returned by parser<>::eof(). Should be default-constructible.
         ///     void string_value (std::string const & s) | Called when a JSON string has been parsed.
-        ///     void integer_value (long v) | Called when an integer value has been parsed.
-        ///     void float_value (double v) | Called when a floating-point value has been parsed.
+        ///     void int64_value (long v) | Called when an integer value has been parsed.
+        ///     void uin64_value (unsigned long v) | Called when an unsigned integer value has been parsed.
+        ///     void double_value (double v) | Called when a floating-point value has been parsed.
         ///     void boolean_value (bool v) | Called when a boolean value has been parsed.
         ///     void null_value () | Called when a null value has been parsed.
         ///     void begin_array () | Called to notify the start of an array. Subsequent event notifications are for members of this array until a matching call to Callbacks::end_array().
         ///     void end_array () | Called indicate that an array has been completely parsed. This will always follow an earlier call to begin_array().
         ///     void begin_object () | Called to notify the start of an object. Subsequent event notifications are for members of this object until a matching call to Callbacks::end_object().
+        ///     void key () | Called when an object key string has been parsed.
         ///     void end_object () | Called to indicate that an object has been completely parsed. This will always follow an earlier call to begin_object().
         ///     result_type result () const | Returns the result of the parse. If the parse was successful, this function is called by parser<>::eof() which will return its result.
         // clang-format on
@@ -207,7 +209,7 @@ namespace pstore {
             }
             ///@}
 
-            pointer make_root_matcher (bool only_string = false);
+            pointer make_root_matcher (bool object_key = false);
             pointer make_whitespace_matcher ();
 
             template <typename Matcher, typename... Args>
@@ -289,8 +291,8 @@ namespace pstore {
                 }
                 ///@}
 
-                pointer make_root_matcher (parser<Callbacks> & parser, bool only_string = false) {
-                    return parser.make_root_matcher (only_string);
+                pointer make_root_matcher (parser<Callbacks> & parser, bool object_key = false) {
+                    return parser.make_root_matcher (object_key);
                 }
                 pointer make_whitespace_matcher (parser<Callbacks> & parser) {
                     return parser.make_whitespace_matcher ();
@@ -489,7 +491,7 @@ namespace pstore {
 
                 bool is_neg_ = false;
                 bool is_integer_ = true;
-                unsigned long int_acc_ = 0UL;
+                std::uint64_t int_acc_ = 0;
 
                 struct {
                     double frac_part = 0.0;
@@ -506,7 +508,7 @@ namespace pstore {
             template <typename Callbacks>
             void number_matcher<Callbacks>::number_is_float () {
                 if (is_integer_) {
-                    fp_acc_.whole_part = int_acc_;
+                    fp_acc_.whole_part = static_cast <double> (int_acc_);
                     is_integer_ = false;
                 }
             }
@@ -683,10 +685,11 @@ namespace pstore {
                     this->set_state (exponent_sign_state);
                     number_is_float ();
                 } else if (c >= '0' && c <= '9') {
-                    if (int_acc_ > std::numeric_limits<decltype (int_acc_)>::max () / 10U + 10U) {
+                    std::uint64_t const new_acc = int_acc_ * 10U + static_cast<unsigned> (c - '0');
+                    if (new_acc < int_acc_) { // Did this overflow?
                         this->set_error (parser, error_code::number_out_of_range);
                     } else {
-                        int_acc_ = int_acc_ * 10U + static_cast<unsigned> (c - '0');
+                        int_acc_ = new_acc;
                     }
                 } else {
                     match = false;
@@ -743,25 +746,19 @@ namespace pstore {
                 assert (this->in_terminal_state ());
 
                 if (is_integer_) {
-                    using acc_type = typename std::make_signed<decltype (int_acc_)>::type;
-                    using uacc_type = typename std::make_unsigned<decltype (int_acc_)>::type;
+                    constexpr auto min = std::numeric_limits<std::int64_t>::min ();
+                    constexpr auto umin = static_cast<std::uint64_t> (min);
 
-                    constexpr auto max = std::numeric_limits<acc_type>::max ();
-                    constexpr auto min = std::numeric_limits<acc_type>::min ();
-                    constexpr auto umin = static_cast<uacc_type> (min);
+                    if (is_neg_) {
+                        if (int_acc_ > umin) {
+                            this->set_error (parser, error_code::number_out_of_range);
+                            return;
+                        }
 
-                    if (is_neg_ ? int_acc_ > umin : int_acc_ > max) {
-                        this->set_error (parser, error_code::number_out_of_range);
+                        parser.callbacks ().int64_value ((int_acc_ == umin) ? min : -static_cast<std::int64_t> (int_acc_));
                         return;
                     }
-
-                    long lv;
-                    if (is_neg_) {
-                        lv = (int_acc_ == umin) ? min : -static_cast<acc_type> (int_acc_);
-                    } else {
-                        lv = static_cast<long> (int_acc_);
-                    }
-                    parser.callbacks ().integer_value (lv);
+                    parser.callbacks ().uint64_value (int_acc_);
                     return;
                 }
 
@@ -784,7 +781,7 @@ namespace pstore {
                     this->set_error (parser, error_code::number_out_of_range);
                     return;
                 }
-                parser.callbacks ().float_value (xf);
+                parser.callbacks ().double_value (xf);
             }
 
 
@@ -796,8 +793,9 @@ namespace pstore {
             template <typename Callbacks>
             class string_matcher final : public matcher<Callbacks> {
             public:
-                string_matcher () noexcept
-                        : matcher<Callbacks> (start_state) {}
+                explicit string_matcher (bool object_key) noexcept
+                        : matcher<Callbacks> (start_state)
+                        , object_key_{object_key} {}
 
                 std::pair<typename matcher<Callbacks>::pointer, bool>
                 consume (parser<Callbacks> & parser, maybe<char> ch) override;
@@ -826,7 +824,7 @@ namespace pstore {
                     char16_t high_surrogate_ = 0;
                 };
 
-                static std::tuple<state, error_code>
+                std::tuple<state, error_code>
                 consume_normal_state (parser<Callbacks> & parser, char32_t code_point,
                                       appender & app);
 
@@ -837,7 +835,7 @@ namespace pstore {
 
                 static std::tuple<state, error_code> consume_escape_state (char32_t code_point,
                                                                            appender & app);
-
+                bool object_key_;
                 utf::utf8_decoder decoder_;
                 appender app_;
                 unsigned hex_ = 0U;
@@ -891,7 +889,6 @@ namespace pstore {
                 return ok;
             }
 
-            // [static]
             template <typename Callbacks>
             auto string_matcher<Callbacks>::consume_normal_state (parser<Callbacks> & parser,
                                                                   char32_t code_point,
@@ -905,7 +902,11 @@ namespace pstore {
                         error = error_code::bad_unicode_code_point;
                     } else {
                         // Consume the closing quote character.
-                        parser.callbacks ().string_value (app.result ());
+                        if (object_key_) {
+                            parser.callbacks ().key (app.result ());
+                        } else {
+                            parser.callbacks ().string_value (app.result ());
+                        }
                     }
                     next_state = done_state;
                 } else if (code_point == '\\') {
@@ -1205,7 +1206,7 @@ namespace pstore {
                     PSTORE_FALLTHROUGH;
                 case key_state:
                     this->set_state (colon_state);
-                    return {this->make_root_matcher (parser, true /*only string allowed*/), false};
+                    return {this->make_root_matcher (parser, true /*object key?*/), false};
                 case colon_state:
                     if (isspace (c)) {
                         // just consume whitespace before the colon.
@@ -1342,9 +1343,9 @@ namespace pstore {
             template <typename Callbacks>
             class root_matcher final : public matcher<Callbacks> {
             public:
-                explicit constexpr root_matcher (bool const only_string = false) noexcept
+                explicit constexpr root_matcher (bool const object_key = false) noexcept
                         : matcher<Callbacks> (start_state)
-                        , only_string_{only_string} {}
+                        , object_key_{object_key} {}
 
                 std::pair<typename matcher<Callbacks>::pointer, bool>
                 consume (parser<Callbacks> & parser, maybe<char> ch) override;
@@ -1355,7 +1356,7 @@ namespace pstore {
                     start_state,
                     new_token_state,
                 };
-                bool const only_string_;
+                bool const object_key_;
             };
 
             template <typename Callbacks>
@@ -1372,7 +1373,7 @@ namespace pstore {
                     return {this->make_whitespace_matcher (parser), false};
 
                 case new_token_state: {
-                    if (only_string_ && *ch != '"') {
+                    if (object_key_ && *ch != '"') {
                         this->set_error (parser, error_code::expected_string);
                         // Don't return here in order to allow the switch default to produce a
                         // different error code for a bad token.
@@ -1395,7 +1396,7 @@ namespace pstore {
                                 false};
                     case '"':
                         return {this->template make_terminal_matcher<string_matcher<Callbacks>> (
-                                    parser),
+                                    parser, object_key_),
                                 false};
                     case 't':
                         return {
@@ -1491,9 +1492,9 @@ namespace pstore {
         // make_root_matcher
         // ~~~~~~~~~~~~~~~~~
         template <typename Callbacks>
-        auto parser<Callbacks>::make_root_matcher (bool only_string_allowed) -> pointer {
+        auto parser<Callbacks>::make_root_matcher (bool object_key) -> pointer {
             using root_matcher = details::root_matcher<Callbacks>;
-            return pointer (new (&singletons_->root) root_matcher (only_string_allowed),
+            return pointer (new (&singletons_->root) root_matcher (object_key),
                             typename pointer::deleter_type{false});
         }
 

@@ -44,6 +44,7 @@
 #ifndef PSTORE_SUPPORT_BASE64_HPP
 #define PSTORE_SUPPORT_BASE64_HPP
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -111,6 +112,57 @@ namespace pstore {
         assert (first == last);
         return out;
     }
+
+    namespace details {
+
+        template <typename OutputIterator>
+        OutputIterator decode4 (std::array<std::uint8_t, 4> const & in, OutputIterator out, unsigned count) {
+            std::array<std::uint8_t, 3> result;
+            result[0] = (in[0] << 2) + ((in[1] & 0x30) >> 4);
+            result[1] = ((in[1] & 0xF) << 4) + ((in[2] & 0x3C) >> 2);
+            result[2] = ((in[2] & 0x3) << 6) + in[3];
+            for (auto ctr = 0U; ctr < count; ++ctr) {
+                *out = result[ctr];
+                ++out;
+            }
+            return out;
+        }
+
+    } // end namespace details
+
+    template <typename InputIterator, typename OutputIterator>
+    OutputIterator from_base64(InputIterator first, InputIterator last, OutputIterator out) {
+        auto count = 0U;
+        std::array<std::uint8_t, 4> buff;
+
+        for (; first != last; ++first) {
+            auto c = *first;
+            if (c >= 'A' && c <= 'Z') {
+                c = c - 'A';
+            } else if (c >= 'a' && c <= 'z') {
+                c = c - 'a' + 26;
+            } else if (c >= '0' && c <= '9') {
+                c = c - '0' + 26 * 2;
+            } else if (c == '+') {
+                c = 0x3E;
+            } else if (c == '/') {
+                c = 0x3F;
+            } else {
+                break; //error.
+            }
+            buff[count++] = c;
+            if (count >= 4U) {
+                out = details::decode4 (buff, out, 3);
+                count = 0U;
+            }
+        }
+        if (count > 0) {
+            std::fill (buff.begin () + count, buff.end (), std::uint8_t{0});
+            out = details::decode4 (buff, out, count - 1);
+        }
+        return out;
+    }
+
 
 } // end namespace pstore
 

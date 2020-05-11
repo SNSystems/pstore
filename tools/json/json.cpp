@@ -61,8 +61,9 @@ namespace {
         using result_type = std::shared_ptr<pstore::dump::value>;
 
         void string_value (std::string const & s) { out_.emplace (new pstore::dump::string (s)); }
-        void integer_value (long v) { out_.emplace (pstore::dump::make_number (v)); }
-        void float_value (double v) { out_.emplace (pstore::dump::make_number (v)); }
+        void int64_value (std::int64_t v) { out_.emplace (pstore::dump::make_number (v)); }
+        void uint64_value (std::uint64_t v) { out_.emplace (pstore::dump::make_number (v)); }
+        void double_value (double v) { out_.emplace (pstore::dump::make_number (v)); }
         void boolean_value (bool v) { out_.emplace (new pstore::dump::boolean (v)); }
         void null_value () { out_.emplace (new pstore::dump::null ()); }
 
@@ -70,6 +71,7 @@ namespace {
         void end_array ();
 
         void begin_object () { out_.emplace (nullptr); }
+        void key (std::string const & s) { string_value (s); }
         void end_object ();
 
         result_type result () const {
