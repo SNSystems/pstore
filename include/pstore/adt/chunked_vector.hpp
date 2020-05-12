@@ -44,13 +44,15 @@
 #ifndef PSTORE_ADT_CHUNKED_VECTOR_HPP
 #define PSTORE_ADT_CHUNKED_VECTOR_HPP
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <list>
 
 namespace pstore {
 
-    template <typename T, std::size_t ElementsPerChunk = 4096 / sizeof (T)>
+    template <typename T,
+              std::size_t ElementsPerChunk = std::max (4096 / sizeof (T), std::size_t{1})>
     class chunked_vector {
         static_assert (ElementsPerChunk > 0, "Must be at least 1 element per chunk");
         class chunk;
@@ -118,6 +120,19 @@ namespace pstore {
         const_reference front () const {
             assert (size_ > 0);
             return chunks_.front ().front ();
+        }
+
+        /// Returns a reference to the last element in the container. Calling back
+        /// on an empty container is undefined.
+        reference back () {
+            assert (size_ > 0);
+            return chunks_.back ().back ();
+        }
+        /// Returns a reference to the last element in the container. Calling back
+        /// on an empty container is undefined.
+        const_reference back () const {
+            assert (size_ > 0);
+            return chunks_.back ().back ();
         }
 
         void swap (chunked_vector & other) noexcept {
@@ -190,6 +205,8 @@ namespace pstore {
 
         reference front () { return (*this)[0]; }
         const_reference front () const { return (*this)[0]; }
+        reference back () { return (*this)[size_ - 1U]; }
+        const_reference back () const { return (*this)[size_ - 1U]; }
 
         template <typename... Args>
         reference emplace_back (Args &&... args);
