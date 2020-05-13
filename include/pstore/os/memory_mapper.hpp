@@ -109,7 +109,7 @@ namespace pstore {
         //@{
         /// Returns the base address of this memory-mapped region. Returns nullptr if unmap() has
         /// been called.
-        std::shared_ptr<void> data () { return ptr_; }
+        std::shared_ptr<void> const & data () { return ptr_; }
         std::shared_ptr<void const> data () const { return ptr_; }
         //@}
 
