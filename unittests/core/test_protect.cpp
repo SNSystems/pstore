@@ -139,14 +139,14 @@ TEST_F (EmptyStore, ProtectAllOfOneRegion) {
     //  data store must remain writable.
     // - The second should be the size of the file minus the size of that missing first page.
     auto r0 = cast<mock_mapper> (regions.at (0));
-    void * addr =
-        reinterpret_cast<std::uint8_t *> (this->file ()->data ().get ()) + fixed_page_size_bytes;
 
     // If "POSIX small file" mode is enabled, the file will be smaller than a VM page (4K), so
     // read_only() won't be called at all.
     if (pstore::database::small_files_enabled ()) {
         EXPECT_CALL (*r0.get (), read_only (_, _)).Times (0);
     } else {
+        void * addr = reinterpret_cast<std::uint8_t *> (this->file ()->data ().get ()) +
+                      fixed_page_size_bytes;
         EXPECT_CALL (*r0.get (), read_only (addr, this->file ()->size () - fixed_page_size_bytes))
             .Times (1);
     }
