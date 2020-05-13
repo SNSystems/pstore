@@ -57,8 +57,8 @@
 #include <gmock/gmock.h>
 
 #include "pstore/adt/error_or.hpp"
-#include "pstore/adt/maybe.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 using getc_result_type = pstore::error_or_n<int, pstore::maybe<char>>;
 using gets_result_type = pstore::error_or_n<int, pstore::maybe<std::string>>;

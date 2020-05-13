@@ -388,7 +388,7 @@ namespace pstore {
                 // transaction has been committed.
                 assert (addr >= this->first_writable_address ());
 
-                // If we're returning a writable pointer then we must be copy the (potentially
+                // If we're returning a writable pointer then we must copy the (potentially
                 // modified) contents back to the data store.
                 storage_.copy<storage::copy_to_store_traits> (
                     addr, size, p,

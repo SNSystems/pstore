@@ -55,7 +55,7 @@
 #include <utility>
 
 #include "pstore/adt/error_or.hpp"
-#include "pstore/adt/maybe.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace httpd {

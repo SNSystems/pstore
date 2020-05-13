@@ -52,9 +52,9 @@
 #include <vector>
 
 #include "pstore/adt/error_or.hpp"
-#include "pstore/adt/maybe.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 
 namespace pstore {

@@ -66,7 +66,6 @@
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/utf.hpp"
 
-
 namespace pstore {
     namespace httpd {
 

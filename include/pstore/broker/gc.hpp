@@ -48,12 +48,12 @@
 
 #include <string>
 
-#include "pstore/adt/maybe.hpp"
 #include "pstore/broker/bimap.hpp"
 #include "pstore/broker/pointer_compare.hpp"
 #include "pstore/broker/spawn.hpp"
 #include "pstore/broker_intf/signal_cv.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace broker {

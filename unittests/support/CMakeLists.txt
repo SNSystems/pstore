@@ -50,6 +50,7 @@ add_pstore_unit_test (pstore-support-unit-tests
     test_error.cpp
     test_fnv.cpp
     test_gsl.cpp
+    test_maybe.cpp
     test_parallel_for_each.cpp
     test_pointee_adaptor.cpp
     test_quoted.cpp

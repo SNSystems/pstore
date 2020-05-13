@@ -74,7 +74,6 @@
 
 #include "flood_server.hpp"
 #include "switches.hpp"
-#include <thread>
 
 namespace {
     constexpr bool error_on_timeout = true;

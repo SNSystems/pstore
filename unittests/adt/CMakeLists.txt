@@ -42,8 +42,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-adt-unit-tests
+    test_chunked_vector.cpp
     test_error_or.cpp
-    test_maybe.cpp
     test_small_vector.cpp
     test_sstring_view.cpp
 )

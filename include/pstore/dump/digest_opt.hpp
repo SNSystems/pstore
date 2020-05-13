@@ -44,9 +44,9 @@
 #ifndef PSTORE_DUMP_DIGEST_OPT_HPP
 #define PSTORE_DUMP_DIGEST_OPT_HPP
 
-#include "pstore/adt/maybe.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/cmd_util/command_line.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace dump {

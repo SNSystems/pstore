@@ -261,13 +261,12 @@ namespace pstore {
     inline bool storage::request_spans_regions (address const & addr, std::size_t const size) const
         noexcept {
         (void) addr;
-        (void) size;
-#ifdef PSTORE_ALWAYS_SPANNING
-        return true;
-#else
         if (size == 0) {
             return false;
         }
+#ifdef PSTORE_ALWAYS_SPANNING
+        return true;
+#else
         return (*sat_)[addr.segment ()].region != (*sat_)[(addr + size - 1U).segment ()].region;
 #endif // PSTORE_ALWAYS_SPANNING
     }
@@ -283,6 +282,8 @@ namespace pstore {
         address::segment_type segment = addr.segment ();
         PSTORE_STATIC_ASSERT (std::numeric_limits<decltype (segment)>::max () <= sat_elements);
         sat_entry const & segment_pointer = (*sat_)[segment];
+        assert (segment_pointer.value != nullptr && segment_pointer.region != nullptr &&
+                segment_pointer.is_valid ());
 
         auto in_store_ptr =
             static_cast<typename Traits::in_store_pointer> (segment_pointer.value.get ()) +
