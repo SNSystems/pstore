@@ -108,17 +108,17 @@ namespace pstore {
         ///     Signature | Description
         ///     ----------|------------
         ///     result_type | The type returned by the Callbacks::result() member function. This will be the type returned by parser<>::eof(). Should be default-constructible.
-        ///     void string_value (std::string const & s) | Called when a JSON string has been parsed.
-        ///     void int64_value (long v) | Called when an integer value has been parsed.
-        ///     void uin64_value (unsigned long v) | Called when an unsigned integer value has been parsed.
-        ///     void double_value (double v) | Called when a floating-point value has been parsed.
-        ///     void boolean_value (bool v) | Called when a boolean value has been parsed.
-        ///     void null_value () | Called when a null value has been parsed.
-        ///     void begin_array () | Called to notify the start of an array. Subsequent event notifications are for members of this array until a matching call to Callbacks::end_array().
-        ///     void end_array () | Called indicate that an array has been completely parsed. This will always follow an earlier call to begin_array().
-        ///     void begin_object () | Called to notify the start of an object. Subsequent event notifications are for members of this object until a matching call to Callbacks::end_object().
-        ///     void key () | Called when an object key string has been parsed.
-        ///     void end_object () | Called to indicate that an object has been completely parsed. This will always follow an earlier call to begin_object().
+        ///     std::error_code string_value (std::string const & s) | Called when a JSON string has been parsed.
+        ///     std::error_code int64_value (std::int64_t v) | Called when an integer value has been parsed.
+        ///     std::error_code uint64_value (std::uint64_t v) | Called when an unsigned integer value has been parsed.
+        ///     std::error_code double_value (double v) | Called when a floating-point value has been parsed.
+        ///     std::error_code boolean_value (bool v) | Called when a boolean value has been parsed.
+        ///     std::error_code null_value () | Called when a null value has been parsed.
+        ///     std::error_code begin_array () | Called to notify the start of an array. Subsequent event notifications are for members of this array until a matching call to Callbacks::end_array().
+        ///     std::error_code end_array () | Called indicate that an array has been completely parsed. This will always follow an earlier call to begin_array().
+        ///     std::error_code begin_object () | Called to notify the start of an object. Subsequent event notifications are for members of this object until a matching call to Callbacks::end_object().
+        ///     std::error_code key (std::string const & s) | Called when an object key string has been parsed.
+        ///     std::error_code end_object () | Called to indicate that an object has been completely parsed. This will always follow an earlier call to begin_object().
         ///     result_type result () const | Returns the result of the parse. If the parse was successful, this function is called by parser<>::eof() which will return its result.
         // clang-format on
         template <typename Callbacks>
@@ -163,15 +163,17 @@ namespace pstore {
             ///@{
 
             /// \returns True if the parser has signalled an error.
-            bool has_error () const noexcept { return error_ != error_code::none; }
+            bool has_error () const noexcept { return static_cast<bool> (error_); }
             /// \returns The error code held by the parser.
-            std::error_code last_error () const noexcept { return make_error_code (error_); }
+            std::error_code const & last_error () const noexcept { return error_; }
 
             ///@{
             Callbacks & callbacks () noexcept { return callbacks_; }
             Callbacks const & callbacks () const noexcept { return callbacks_; }
             ///@}
 
+            /// Returns the parser's position in the input text as a tuple which represents
+            /// (column, row).
             std::tuple<unsigned, unsigned> coordinate () const noexcept { return coordinate_; }
 
         private:
@@ -203,9 +205,10 @@ namespace pstore {
             /// subsequent text is ignored.
             ///
             /// \param err  The json error code to be stored in the parser.
-            void set_error (error_code const err) noexcept {
-                assert (error_ == error_code::none || err != error_code::none);
+            bool set_error (std::error_code const err) noexcept {
+                assert (!error_ || err);
                 error_ = err;
+                return this->has_error ();
             }
             ///@}
 
@@ -227,7 +230,7 @@ namespace pstore {
             static constexpr std::size_t max_stack_depth_ = 200;
             /// The parse stack.
             std::stack<pointer> stack_;
-            error_code error_ = error_code::none;
+            std::error_code error_;
             Callbacks callbacks_;
 
             /// The column and row number of the parse within the input stream. Stored as (column,
@@ -283,11 +286,13 @@ namespace pstore {
                 ///@{
                 /// \brief Errors
 
-                void set_error (parser<Callbacks> & parser, error_code err) noexcept {
-                    parser.set_error (err);
-                    if (err != error_code::none) {
+                /// \returns True if the parser is in an error state.
+                bool set_error (parser<Callbacks> & parser, std::error_code const & err) noexcept {
+                    bool const has_error = parser.set_error (err);
+                    if (has_error) {
                         set_state (done);
                     }
+                    return has_error;
                 }
                 ///@}
 
@@ -378,7 +383,7 @@ namespace pstore {
                         }
                         match = false;
                     }
-                    done_ (parser);
+                    this->set_error (parser, done_ (parser));
                     this->set_state (done_state);
                     break;
                 case done_state: assert (false); break;
@@ -394,8 +399,8 @@ namespace pstore {
 
             struct false_complete {
                 template <typename Callbacks>
-                void operator() (parser<Callbacks> & parser) const {
-                    parser.callbacks ().boolean_value (false);
+                std::error_code operator() (parser<Callbacks> & parser) const {
+                    return parser.callbacks ().boolean_value (false);
                 }
             };
 
@@ -410,8 +415,8 @@ namespace pstore {
 
             struct true_complete {
                 template <typename Callbacks>
-                void operator() (parser<Callbacks> & parser) const {
-                    parser.callbacks ().boolean_value (true);
+                std::error_code operator() (parser<Callbacks> & parser) const {
+                    return parser.callbacks ().boolean_value (true);
                 }
             };
 
@@ -426,8 +431,8 @@ namespace pstore {
 
             struct null_complete {
                 template <typename Callbacks>
-                void operator() (parser<Callbacks> & parser) const {
-                    parser.callbacks ().null_value ();
+                std::error_code operator() (parser<Callbacks> & parser) const {
+                    return parser.callbacks ().null_value ();
                 }
             };
 
@@ -755,10 +760,13 @@ namespace pstore {
                             return;
                         }
 
-                        parser.callbacks ().int64_value ((int_acc_ == umin) ? min : -static_cast<std::int64_t> (int_acc_));
+                        this->set_error (
+                            parser,
+                            parser.callbacks ().int64_value (
+                                (int_acc_ == umin) ? min : -static_cast<std::int64_t> (int_acc_)));
                         return;
                     }
-                    parser.callbacks ().uint64_value (int_acc_);
+                    this->set_error (parser, parser.callbacks ().uint64_value (int_acc_));
                     return;
                 }
 
@@ -781,7 +789,7 @@ namespace pstore {
                     this->set_error (parser, error_code::number_out_of_range);
                     return;
                 }
-                parser.callbacks ().double_value (xf);
+                this->set_error (parser, parser.callbacks ().double_value (xf));
             }
 
 
@@ -824,9 +832,9 @@ namespace pstore {
                     char16_t high_surrogate_ = 0;
                 };
 
-                std::tuple<state, error_code>
-                consume_normal_state (parser<Callbacks> & parser, char32_t code_point,
-                                      appender & app);
+                std::tuple<state, std::error_code> consume_normal_state (parser<Callbacks> & parser,
+                                                                         char32_t code_point,
+                                                                         appender & app);
 
                 static maybe<unsigned> hex_value (char32_t c, unsigned value);
 
@@ -893,9 +901,9 @@ namespace pstore {
             auto string_matcher<Callbacks>::consume_normal_state (parser<Callbacks> & parser,
                                                                   char32_t code_point,
                                                                   appender & app)
-                -> std::tuple<state, error_code> {
+                -> std::tuple<state, std::error_code> {
                 state next_state = normal_char_state;
-                error_code error = error_code::none;
+                std::error_code error;
 
                 if (code_point == '"') {
                     if (app.has_high_surrogate ()) {
@@ -903,9 +911,9 @@ namespace pstore {
                     } else {
                         // Consume the closing quote character.
                         if (object_key_) {
-                            parser.callbacks ().key (app.result ());
+                            error = parser.callbacks ().key (app.result ());
                         } else {
-                            parser.callbacks ().string_value (app.result ());
+                            error = parser.callbacks ().string_value (app.result ());
                         }
                     }
                     next_state = done_state;
@@ -1114,7 +1122,9 @@ namespace pstore {
                 switch (this->get_state ()) {
                 case start_state:
                     assert (c == '[');
-                    parser.callbacks ().begin_array ();
+                    if (this->set_error (parser, parser.callbacks ().begin_array ())) {
+                        break;
+                    }
                     this->set_state (first_object_state);
                     // Match this character and consume whitespace before the object (or close
                     // bracket).
@@ -1148,7 +1158,7 @@ namespace pstore {
 
             template <typename Callbacks>
             void array_matcher<Callbacks>::end_array (parser<Callbacks> & parser) {
-                parser.callbacks ().end_array ();
+                this->set_error (parser, parser.callbacks ().end_array ());
                 this->set_state (done_state);
             }
 
@@ -1182,7 +1192,7 @@ namespace pstore {
             std::pair<typename matcher<Callbacks>::pointer, bool>
             object_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch) {
                 if (this->get_state () == done_state) {
-                    assert (parser.last_error () != make_error_code (error_code::none));
+                    assert (parser.last_error ());
                     return {nullptr, true};
                 }
                 if (!ch) {
@@ -1194,12 +1204,14 @@ namespace pstore {
                 case start_state:
                     assert (c == '{');
                     this->set_state (first_key_state);
-                    parser.callbacks ().begin_object ();
+                    if (this->set_error (parser, parser.callbacks ().begin_object ())) {
+                        break;
+                    }
                     return {this->make_whitespace_matcher (parser), true};
 
                 case first_key_state:
                     if (c == '}') {
-                        parser.callbacks ().end_object ();
+                        this->set_error (parser, parser.callbacks ().end_object ());
                         this->set_state (done_state);
                         break;
                     }
@@ -1229,7 +1241,7 @@ namespace pstore {
                     if (c == ',') {
                         this->set_state (key_state);
                     } else if (c == '}') {
-                        parser.callbacks ().end_object ();
+                        this->set_error (parser, parser.callbacks ().end_object ());
                         this->set_state (done_state);
                     } else {
                         this->set_error (parser, error_code::expected_object_member);
@@ -1547,7 +1559,7 @@ namespace pstore {
                                  typename std::iterator_traits<InputIterator>::value_type>::type,
                              char>::value,
                 "iterator value_type must be char");
-            if (error_ != error_code::none) {
+            if (error_) {
                 return *this;
             }
             while (first != last) {
@@ -1555,7 +1567,7 @@ namespace pstore {
                 auto & handler = stack_.top ();
                 auto res = handler->consume (*this, just (*first));
                 if (handler->is_done ()) {
-                    if (error_ != error_code::none) {
+                    if (error_) {
                         break;
                     }
                     stack_.pop (); // release the topmost matcher object.
@@ -1565,8 +1577,8 @@ namespace pstore {
                     if (stack_.size () > max_stack_depth_) {
                         // We've already hit the maximum allowed parse stack depth. Reject this new
                         // matcher.
-                        assert (error_ == error_code::none);
-                        error_ = error_code::nesting_too_deep;
+                        assert (!error_);
+                        error_ = make_error_code (error_code::nesting_too_deep);
                         break;
                     }
 

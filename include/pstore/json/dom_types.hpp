@@ -47,6 +47,7 @@
 
 #include <cstdint>
 #include <string>
+#include <system_error>
 
 namespace pstore {
     namespace json {
@@ -55,20 +56,19 @@ namespace pstore {
         public:
             using result_type = void;
 
-            void string_value (std::string const &) const noexcept {}
-            void int64_value (std::int64_t) const noexcept {}
-            void uint64_value (std::uint64_t) const noexcept {}
-            void uinteger (unsigned long) const noexcept {}
-            void double_value (double const) const noexcept {}
-            void boolean_value (bool const) const noexcept {}
-            void null_value () const noexcept {}
+            std::error_code string_value (std::string const &) const noexcept { return {}; }
+            std::error_code int64_value (std::int64_t) const noexcept { return {}; }
+            std::error_code uint64_value (std::uint64_t) const noexcept { return {}; }
+            std::error_code double_value (double const) const noexcept { return {}; }
+            std::error_code boolean_value (bool const) const noexcept { return {}; }
+            std::error_code null_value () const noexcept { return {}; }
 
-            void begin_array () const noexcept {}
-            void end_array () const noexcept {}
+            std::error_code begin_array () const noexcept { return {}; }
+            std::error_code end_array () const noexcept { return {}; }
 
-            void begin_object () const noexcept {}
-            void key (std::string const & ) const noexcept {}
-            void end_object () const noexcept {}
+            std::error_code begin_object () const noexcept { return {}; }
+            std::error_code key (std::string const &) const noexcept { return {}; }
+            std::error_code end_object () const noexcept { return {}; }
 
             result_type result () const noexcept {}
         };

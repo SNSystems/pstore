@@ -32,13 +32,14 @@ namespace {
     constexpr bool comments = false;
 
     auto footers (pstore::database const & db) {
-        auto const num_generations = db.get_current_revision () + 1;
+        auto const num_transactions = db.get_current_revision () + 1;
         std::vector<pstore::typed_address<pstore::trailer>> footers;
-        footers.reserve (num_generations);
+        footers.reserve (num_transactions);
 
-        pstore::generation_container generations{db};
-        std::copy (std::begin (generations), std::end (generations), std::back_inserter (footers));
-        assert (footers.size () == num_generations);
+        pstore::generation_container transactions{db};
+        std::copy (std::begin (transactions), std::end (transactions),
+                   std::back_inserter (footers));
+        assert (footers.size () == num_transactions);
         std::reverse (std::begin (footers), std::end (footers));
         return footers;
     }
@@ -339,7 +340,7 @@ int main (int argc, char * argv[]) {
     name_mapping string_table;
     std::printf ("{\n");
     std::printf (INDENT1 "\"version\": 1,\n");
-    std::printf (INDENT1 "\"generations\": ");
+    std::printf (INDENT1 "\"transactions\": ");
 
     auto const f = footers (db);
     emit_array (std::begin (f), std::end (f), INDENT1, [&] (pstore::typed_address<pstore::trailer> footer_pos) {
@@ -350,7 +351,6 @@ int main (int argc, char * argv[]) {
         if (comments) {
             std::printf (INDENT3 "// generation %u\n", generation);
         }
-        std::printf (INDENT3 "\"time\": %" PRIu64 ",\n", footer->a.time.load ());
         std::printf (INDENT3 "\"names\": ");
         names (db, generation, &string_table);
         std::printf (",\n" INDENT3 "\"fragments\": {");

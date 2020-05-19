@@ -1,4 +1,11 @@
-add_pstore_executable (pstore-import import.cpp)
+add_pstore_executable (pstore-import
+    array_helpers.hpp
+    import.cpp
+    import_fragment.cpp
+    import_fragment.hpp
+    json_callbacks.cpp
+    json_callbacks.hpp
+)
 target_link_libraries (pstore-import PRIVATE
     pstore-cmd-util
     pstore-core
