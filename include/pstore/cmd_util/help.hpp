@@ -140,7 +140,7 @@ namespace pstore {
                         , overview_{std::move (program_overview)}
                         , outs_{outs} {
 
-                    apply (*this, mods...);
+                    apply_to_option (*this, mods...);
                 }
 
                 help (help const &) = delete;

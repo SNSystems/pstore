@@ -180,12 +180,12 @@ namespace pstore {
             name make_modifier (std::string const & n);
 
             template <typename Option>
-            void apply (Option &&) {}
+            void apply_to_option (Option &&) {}
 
             template <typename Option, typename M0, typename... Mods>
-            void apply (Option && opt, M0 && m0, Mods &&... mods) {
+            void apply_to_option (Option && opt, M0 && m0, Mods &&... mods) {
                 make_modifier (std::forward<M0> (m0)).apply (std::forward<Option> (opt));
-                apply (std::forward<Option> (opt), std::forward<Mods> (mods)...);
+                apply_to_option (std::forward<Option> (opt), std::forward<Mods> (mods)...);
             }
 
 
@@ -202,7 +202,7 @@ namespace pstore {
                 template <class... Mods>
                 explicit opt (Mods const &... mods)
                         : option () {
-                    apply (*this, mods...);
+                    apply_to_option (*this, mods...);
                 }
                 opt (opt const &) = delete;
                 opt (opt &&) = delete;
@@ -261,7 +261,7 @@ namespace pstore {
             public:
                 template <class... Mods>
                 explicit opt (Mods const &... mods) {
-                    apply (*this, mods...);
+                    apply_to_option (*this, mods...);
                 }
                 opt (opt const &) = delete;
                 opt (opt &&) = delete;
@@ -302,7 +302,7 @@ namespace pstore {
                 template <class... Mods>
                 explicit list (Mods const &... mods)
                         : option (num_occurrences_flag::zero_or_more) {
-                    apply (*this, mods...);
+                    apply_to_option (*this, mods...);
                 }
 
                 list (list const &) = delete;
@@ -358,7 +358,7 @@ namespace pstore {
             public:
                 template <typename... Mods>
                 explicit alias (Mods const &... mods) {
-                    apply (*this, mods...);
+                    apply_to_option (*this, mods...);
                 }
 
                 alias (alias const &) = delete;

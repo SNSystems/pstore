@@ -360,7 +360,7 @@ namespace pstore {
 #endif
 
             if (enabled.test (handlers::rotating_file)) {
-                constexpr auto max_size = std::ios_base::streamoff{1024 * 1024};
+                constexpr auto max_size = std::streamoff{1024 * 1024};
                 constexpr auto num_backups = 10U;
                 loggers->emplace_back (
                     new logging::rotating_log (ident + ".log", max_size, num_backups));

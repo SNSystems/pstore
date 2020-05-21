@@ -85,7 +85,7 @@ namespace pstore {
             /// cause no backups to be made.
             /// \note  Both num_backups and max_size must be greater than zero before rollover is
             /// enabled.
-            basic_rotating_log (std::string base_name, std::ios_base::streamoff max_bytes,
+            basic_rotating_log (std::string base_name, std::streamoff max_bytes,
                                 unsigned num_backups, StreamTraits const & traits = StreamTraits (),
                                 FileSystemTraits const & fs_traits = FileSystemTraits ());
             basic_rotating_log (basic_rotating_log const &) = delete;
@@ -119,7 +119,7 @@ namespace pstore {
             static constexpr std::ios_base::openmode mode_flags_ =
                 std::ofstream::out | std::ofstream::app | std::ofstream::ate;
 
-            std::ios_base::streamoff const max_size_;
+            std::streamoff const max_size_;
             std::string const base_name_;
             unsigned const num_backups_;
 
@@ -133,10 +133,9 @@ namespace pstore {
         // ~~~~~~
         template <typename StreamTraits, typename FileSystemTraits>
         basic_rotating_log<StreamTraits, FileSystemTraits>::basic_rotating_log (
-            std::string base_name, std::ios_base::streamoff const max_size,
-            unsigned const num_backups, StreamTraits const & stream_traits,
-            FileSystemTraits const & fs_traits)
-                : max_size_ (std::max (max_size, std::ios_base::streamoff{0}))
+            std::string base_name, std::streamoff const max_size, unsigned const num_backups,
+            StreamTraits const & stream_traits, FileSystemTraits const & fs_traits)
+                : max_size_ (std::max (max_size, std::streamoff{0}))
                 , base_name_{std::move (base_name)}
                 , num_backups_ (num_backups)
                 , stream_ ()
