@@ -159,32 +159,32 @@ namespace {
 
     void
     emit_section_ifixups (pstore::repo::container<pstore::repo::internal_fixup> const & ifixups) {
-        printf (INDENT7 "\"ifixups\": ");
-        emit_array (std::begin (ifixups), std::end (ifixups), INDENT7,
+        printf (INDENT6 "\"ifixups\": ");
+        emit_array (std::begin (ifixups), std::end (ifixups), INDENT6,
                     [] (pstore::repo::internal_fixup const & ifx) {
-                        std::printf (INDENT8 "{\n");
-                        std::printf (INDENT9 "\"section\": \"%s\",\n", section_name (ifx.section));
-                        std::printf (INDENT9 "\"type\": %u,\n", ifx.type);
-                        std::printf (INDENT9 "\"offset\": %" PRIu64 ",\n", ifx.offset);
-                        std::printf (INDENT9 "\"addend\": %" PRIu64 "\n", ifx.addend);
-                        std::printf (INDENT8 "}");
+                        std::printf (INDENT7 "{\n");
+                        std::printf (INDENT8 "\"section\": \"%s\",\n", section_name (ifx.section));
+                        std::printf (INDENT8 "\"type\": %u,\n", ifx.type);
+                        std::printf (INDENT8 "\"offset\": %" PRIu64 ",\n", ifx.offset);
+                        std::printf (INDENT8 "\"addend\": %" PRIu64 "\n", ifx.addend);
+                        std::printf (INDENT7 "}");
                     });
     }
 
     void
     emit_section_xfixups (pstore::database const & db, name_mapping const & names,
                           pstore::repo::container<pstore::repo::external_fixup> const & xfixups) {
-        std::printf (INDENT7 "\"xfixups\": ");
-        emit_array (std::begin (xfixups), std::end (xfixups), INDENT7,
+        std::printf (INDENT6 "\"xfixups\": ");
+        emit_array (std::begin (xfixups), std::end (xfixups), INDENT6,
                     [&] (pstore::repo::external_fixup const & xfx) {
-                        std::printf (INDENT8 "{\n");
-                        std::printf (INDENT9 "\"name\": %" PRIu64 ",", names.index (xfx.name));
+                        std::printf (INDENT7 "{\n");
+                        std::printf (INDENT8 "\"name\": %" PRIu64 ",", names.index (xfx.name));
                         show_string (db, xfx.name);
                         std::printf ("\n");
-                        std::printf (INDENT9 "\"type\": %u,\n", xfx.type);
-                        std::printf (INDENT9 "\"offset\": %" PRIu64 ",\n", xfx.offset);
-                        std::printf (INDENT9 "\"addend\": %" PRIu64 "\n", xfx.addend);
-                        std::printf (INDENT8 "}");
+                        std::printf (INDENT8 "\"type\": %u,\n", xfx.type);
+                        std::printf (INDENT8 "\"offset\": %" PRIu64 ",\n", xfx.offset);
+                        std::printf (INDENT8 "\"addend\": %" PRIu64 "\n", xfx.addend);
+                        std::printf (INDENT7 "}");
                     });
     }
 
@@ -193,12 +193,12 @@ namespace {
     void emit_section (pstore::database const & db, name_mapping const & names,
                        Content const & content) {
         {
-            std::printf (INDENT7 "\"data\": \"");
+            std::printf (INDENT6 "\"data\": \"");
             pstore::repo::container<std::uint8_t> const payload = content.payload ();
             pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
             std::printf ("\",\n");
         }
-        std::printf (INDENT7 "\"align\": %u,\n", content.align ());
+        std::printf (INDENT6 "\"align\": %u,\n", content.align ());
         emit_section_ifixups (content.ifixups ());
         std::printf (",\n");
         emit_section_xfixups (db, names, content.xfixups ());
@@ -209,8 +209,8 @@ namespace {
     void emit_section<pstore::repo::section_kind::bss, pstore::repo::bss_section> (
         pstore::database const & db, name_mapping const & names,
         pstore::repo::bss_section const & bss) {
-        std::printf (INDENT7 "\"size\": %d\n", bss.size ());
-        std::printf (INDENT7 "\"align\": %d\n", bss.align ());
+        std::printf (INDENT6 "\"size\": %d\n", bss.size ());
+        std::printf (INDENT6 "\"align\": %d\n", bss.align ());
         emit_section_ifixups (bss.ifixups ());
         std::printf (",\n");
         emit_section_xfixups (db, names, bss.xfixups ());
@@ -222,7 +222,7 @@ namespace {
         pstore::database const & db, name_mapping const & names,
         pstore::repo::dependents const & dependents) {
 
-        emit_array (std::begin (dependents), std::end (dependents), INDENT7,
+        emit_array (std::begin (dependents), std::end (dependents), INDENT6,
                     [&] (pstore::typed_address<pstore::repo::compilation_member> const & d) {
                         // FIXME: how to represent this in the JSON?
                     });
@@ -238,13 +238,14 @@ namespace {
                  pstore::diff::diff (db, *fragments, generation - 1U)) {
                 auto const & kvp = fragments->load_leaf_node (db, addr);
                 std::string const digest = kvp.first.to_hex_string ();
-                std::printf ("%s" INDENT4 "\"%s\": [\n", fragment_sep, digest.c_str ());
+                std::printf ("%s" INDENT4 "\"%s\": {\n", fragment_sep, digest.c_str ());
 
                 auto fragment = db.getro (kvp.second);
                 auto section_sep = INDENT5;
                 for (pstore::repo::section_kind section : *fragment) {
-                    std::printf ("%s{\n" INDENT6 "\"%s\": {\n", section_sep,
-                                 section_name (section));
+                    std::printf ("%s"
+                                 "\"%s\": {\n",
+                                 section_sep, section_name (section));
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
         emit_section<pstore::repo::section_kind::a> (                                              \
@@ -258,11 +259,10 @@ namespace {
                         break;
                     }
 #undef X
-                    std::printf (INDENT6 "}\n");
                     std::printf (INDENT5 "}");
                     section_sep = ",\n" INDENT5;
                 }
-                std::printf ("\n" INDENT4 "]");
+                std::printf ("\n" INDENT4 "}");
                 fragment_sep = ",\n";
             }
         }
@@ -343,23 +343,25 @@ int main (int argc, char * argv[]) {
     std::printf (INDENT1 "\"transactions\": ");
 
     auto const f = footers (db);
-    emit_array (std::begin (f), std::end (f), INDENT1, [&] (pstore::typed_address<pstore::trailer> footer_pos) {
-        auto const footer = db.getro (footer_pos);
-        unsigned const generation = footer->a.generation;
-        db.sync (generation);
-        std::printf (INDENT2 "{\n");
-        if (comments) {
-            std::printf (INDENT3 "// generation %u\n", generation);
-        }
-        std::printf (INDENT3 "\"names\": ");
-        names (db, generation, &string_table);
-        std::printf (",\n" INDENT3 "\"fragments\": {");
-        fragments (db, generation, string_table);
-        std::printf ("\n" INDENT3 "},\n");
-        std::printf (INDENT3 "\"compilations\": {");
-        compilations (db, generation, string_table);
-        std::printf ("\n" INDENT3 "}\n");
-        std::printf (INDENT2 "}");
-    });
+    assert (std::distance (std::begin (f), std::end (f)) >= 1);
+    emit_array (std::next (std::begin (f)), std::end (f), INDENT1,
+                [&] (pstore::typed_address<pstore::trailer> footer_pos) {
+                    auto const footer = db.getro (footer_pos);
+                    unsigned const generation = footer->a.generation;
+                    db.sync (generation);
+                    std::printf (INDENT2 "{\n");
+                    if (comments) {
+                        std::printf (INDENT3 "// generation %u\n", generation);
+                    }
+                    std::printf (INDENT3 "\"names\": ");
+                    names (db, generation, &string_table);
+                    std::printf (",\n" INDENT3 "\"fragments\": {");
+                    fragments (db, generation, string_table);
+                    std::printf ("\n" INDENT3 "},\n");
+                    std::printf (INDENT3 "\"compilations\": {");
+                    compilations (db, generation, string_table);
+                    std::printf ("\n" INDENT3 "}\n");
+                    std::printf (INDENT2 "}");
+                });
     std::printf ("\n}\n");
 }

@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <iostream>
 #include <list>
+#include <tuple>
 #include <unordered_map>
 #include <stack>
 
@@ -45,7 +46,7 @@ private:
 
     pstore::indirect_string_adder adder_;
     std::list<std::string> strings_;
-    std::vector<pstore::raw_sstring_view> views_;
+    std::list<pstore::raw_sstring_view> views_;
 };
 
 class names_array_members final : public state {
@@ -57,10 +58,67 @@ public:
         names_->add_string (str);
         return {};
     }
-    std::error_code end_array () override { return this->suicide (); }
+    std::error_code end_array () override { return pop (); }
 
 private:
     gsl::not_null<names *> names_;
+};
+
+class fragment_object final : public state {
+public:
+    fragment_object (gsl::not_null<parse_stack *> s)
+            : state (s) {}
+    std::error_code begin_object () { return {}; }
+    std::error_code key (std::string const & s) {}
+};
+
+
+
+class fragment_index final : public state {
+public:
+    fragment_index (gsl::not_null<parse_stack *> s, gsl::not_null<transaction_type *> transaction)
+            : state (s)
+            , transaction_{transaction} {}
+    std::error_code begin_object () override {
+        // key is digest, value fragment.
+        return {};
+    }
+    int x;
+    std::error_code key (std::string const & s) override {
+        digest_ = s; // deocde the digest here.
+        // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
+        return {};
+    }
+    std::error_code end_object () override { return pop (); }
+
+private:
+    gsl::not_null<transaction_type *> transaction_;
+    std::string digest_;
+    std::vector<std::unique_ptr<pstore::repo::section_base>> sections_;
+};
+
+class compilations_index final : public state {
+public:
+    compilations_index (gsl::not_null<parse_stack *> s,
+                        gsl::not_null<transaction_type *> transaction)
+            : state (s)
+            , transaction_{transaction} {}
+    std::error_code begin_object () override {
+        // key is digest, value compilation.
+        return {};
+    }
+    int x;
+    std::error_code key (std::string const & s) override {
+        digest_ = s; // deocde the digest here.
+        // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
+        return {};
+    }
+    std::error_code end_object () override { return pop (); }
+
+private:
+    gsl::not_null<transaction_type *> transaction_;
+    std::string digest_;
+    //    std::vector<std::unique_ptr<pstore::repo::section_base>> sections_;
 };
 
 class transaction_contents final : public state {
@@ -79,17 +137,18 @@ private:
 };
 
 std::error_code transaction_contents::key (std::string const & s) {
-    std::cout << "transaction::" << s << '\n';
     if (s == "names") {
-        stack ()->push (
-            std::make_unique<array_consumer<names, names_array_members>> (stack (), &names_));
-        return {};
+        return push<array_consumer<names, names_array_members>> (&names_);
     }
     if (s == "fragments") {
-        return {};
+        object_consumer<fragment_index, gsl::not_null<transaction_type *>> c{stack (),
+                                                                             transaction_};
+        // return push<object_consumer<fragment_index>> (make_object_consumer<fragment_index> (stack
+        // (), transaction_));
+        //        return push<fragment_index> (transaction_);
     }
     if (s == "compilations") {
-        return {};
+        return push<compilations_index> (transaction_);
     }
     return make_error_code (import_error::unknown_transaction_object_key);
 }
@@ -97,7 +156,7 @@ std::error_code transaction_contents::key (std::string const & s) {
 std::error_code transaction_contents::end_object () {
     names_.flush ();
     transaction_->commit ();
-    return this->suicide ();
+    return pop ();
 }
 
 
@@ -106,11 +165,8 @@ public:
     transaction_object (gsl::not_null<parse_stack *> s, gsl::not_null<database *> db)
             : state (s)
             , transaction_{begin (*db)} {}
-    std::error_code begin_object () override {
-        stack ()->push (std::make_unique<transaction_contents> (stack (), &transaction_));
-        return {};
-    }
-    std::error_code end_array () override { return this->suicide (); }
+    std::error_code begin_object () override { return push<transaction_contents> (&transaction_); }
+    std::error_code end_array () override { return pop (); }
 
 private:
     transaction_type transaction_;
@@ -121,18 +177,11 @@ public:
     transaction_array (gsl::not_null<parse_stack *> s, gsl::not_null<database *> db)
             : state (s)
             , db_{db} {}
-    std::error_code begin_array () override;
+    std::error_code begin_array () override { return this->replace_top<transaction_object> (db_); }
 
 private:
     gsl::not_null<database *> db_;
 };
-
-std::error_code transaction_array::begin_array () {
-    auto stack = this->stack ();
-    this->suicide ();
-    stack->push (std::make_unique<transaction_object> (stack, db_));
-    return {};
-}
 
 class root_object final : public state {
 public:
@@ -153,13 +202,11 @@ private:
 std::error_code root_object::key (std::string const & k) {
     if (k == "version") {
         seen_[version] = true;
-        stack ()->push (std::make_unique<expect_uint64> (stack (), &version_));
-        return {};
+        return push<expect_uint64> (&version_);
     }
     if (k == "transactions") {
         seen_[transactions] = true;
-        stack ()->push (std::make_unique<transaction_array> (stack (), db_));
-        return {};
+        return push<transaction_array> (db_);
     }
     return make_error_code (import_error::unrecognized_root_key);
 }
@@ -270,15 +317,18 @@ try {
     }
 
     auto parser = json::make_parser (callbacks::make<root> (&db));
+    using parser_type = decltype (parser);
     for (int ch = std::getc (infile); ch != EOF; ch = std::getc (infile)) {
         auto const c = static_cast<char> (ch);
+        std::cout << c;
         parser.input (&c, &c + 1);
         if (parser.has_error ()) {
             std::error_code const erc = parser.last_error ();
             // raise (erc);
             std::cerr << "Error: " << erc.message () << '\n';
-            std::cout << "Row " << std::get<1> (parser.coordinate ()) << ", column "
-                      << std::get<0> (parser.coordinate ()) << '\n';
+            std::cout << "Row " << std::get<parser_type::row_index> (parser.coordinate ())
+                      << ", column " << std::get<parser_type::column_index> (parser.coordinate ())
+                      << '\n';
             break;
         }
     }

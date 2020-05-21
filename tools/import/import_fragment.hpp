@@ -1,5 +1,5 @@
-#ifndef import_fragment_hpp
-#define import_fragment_hpp
+#ifndef PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#define PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
 
 #include <bitset>
 #include <vector>
@@ -31,5 +31,4 @@ private:
     std::vector<pstore::repo::external_fixup> xfixups_;
 };
 
-
-#endif /* import_fragment_hpp */
+#endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP

@@ -101,7 +101,7 @@ std::error_code ifixup_state::end_object () {
     }
     // TODO: validate more values here.
     fixups_->emplace_back (*scn, static_cast<repo::relocation_type> (type_), offset_, addend_);
-    return this->suicide ();
+    return pop ();
 }
 
 
@@ -166,7 +166,7 @@ std::error_code xfixup_state::end_object () {
     // TODO: validate some values here.
     fixups_->emplace_back (typed_address<indirect_string>::make (name_),
                            static_cast<repo::relocation_type> (type_), offset_, addend_);
-    return this->suicide ();
+    return pop ();
 }
 
 
@@ -197,7 +197,7 @@ std::error_code generic_section::key (std::string const & k) {
     v_ = nullptr;
 
     if (k == "data") {
-        seen_[data] = true; // string (ascii85
+        seen_[data] = true; // string (ascii85)
         str_ = &data_;
         return {};
     }

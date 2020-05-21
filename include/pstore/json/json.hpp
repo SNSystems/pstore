@@ -172,9 +172,12 @@ namespace pstore {
             Callbacks const & callbacks () const noexcept { return callbacks_; }
             ///@}
 
+            enum { column_index, row_index };
+
             /// Returns the parser's position in the input text as a tuple which represents
             /// (column, row).
             std::tuple<unsigned, unsigned> coordinate () const noexcept { return coordinate_; }
+
 
         private:
             using matcher = details::matcher<Callbacks>;
@@ -184,19 +187,19 @@ namespace pstore {
             /// \brief Managing the column and row number (the "coordinate").
 
             /// Increments the column number.
-            void advance_column () noexcept { ++std::get<0> (coordinate_); }
+            void advance_column () noexcept { ++std::get<column_index> (coordinate_); }
 
             /// Increments the row number and resets the column.
             void advance_row () noexcept {
                 // The column number is set to 0. This is because the outer parse loop automatically
                 // advances the column number for each character consumed. This happens after the
                 // row is advanced by a matcher's consume() function.
-                coordinate_ = std::make_tuple (0U, std::get<1> (coordinate_) + 1U);
+                coordinate_ = std::make_tuple (0U, std::get<row_index> (coordinate_) + 1U);
             }
 
             /// Resets the column count but does not affect the row number.
             void reset_column () noexcept {
-                coordinate_ = std::make_tuple (0U, std::get<1> (coordinate_));
+                coordinate_ = std::make_tuple (0U, std::get<row_index> (coordinate_));
             }
             ///@}
 
