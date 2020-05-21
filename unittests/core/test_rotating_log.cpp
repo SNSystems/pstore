@@ -78,7 +78,7 @@ namespace {
 TEST (RotatingLog, NothingIsLogged) {
     using log_type =
         pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
-    log_type log ("base_name", std::ios_base::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
+    log_type log ("base_name", std::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
     EXPECT_FALSE (log.is_open ()) << "Expected the log file to be initially closed";
     EXPECT_EQ ("", log.stream ().str ());
 }
@@ -92,7 +92,7 @@ TEST (RotatingLog, OneFile) {
 
     using log_type =
         pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
-    log_type log ("base_name", std::ios_base::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
+    log_type log ("base_name", std::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
 
     Expectation open =
         EXPECT_CALL (log.stream_traits (), open (_, StrEq ("base_name"), _)).Times (1);
@@ -123,7 +123,7 @@ TEST (RotatingLog, TwoRotations) {
 
     // We'll contrive two rollovers by generating at least max_size * num_backups
     // worth of output.
-    constexpr auto max_size = std::ios_base::streamoff{100};
+    constexpr auto max_size = std::streamoff{100};
     constexpr auto num_backups = 2U;
     log_type log ("base_name", max_size, num_backups);
 
@@ -153,7 +153,7 @@ TEST (RotatingLog, TwoRotations) {
     // feeds).
     std::vector<std::string> messages;
     {
-        auto size = std::ios_base::streamoff{0};
+        auto size = std::streamoff{0};
         auto index = 1U;
         while (size < max_size * num_backups) {
             std::ostringstream str;
