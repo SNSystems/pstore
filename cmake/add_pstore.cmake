@@ -44,6 +44,8 @@
 include (CheckCSourceCompiles)
 include (CheckCXXCompilerFlag)
 
+set (pstore_cxx_version "14" CACHE STRING "The version of C++ used by pstore")
+
 macro(add_pstore_subdirectory name)
     if (PSTORE_IS_INSIDE_LLVM)
         add_llvm_subdirectory(PSTORE TOOL ${name})
@@ -325,13 +327,13 @@ function (add_pstore_library)
 
         # TODO: remove once we can upgrade to a C++14-enabled LLVM revision.
         if (CMAKE_COMPILER_IS_GNUCXX OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-            target_compile_options (${arg_TARGET} PUBLIC -std=c++14)
+            target_compile_options (${arg_TARGET} PUBLIC "-std=c++${pstore_cxx_version}")
         endif ()
     else ()
         add_library (${arg_TARGET} STATIC ${arg_SOURCES} ${include_files})
 
         set_target_properties (${arg_TARGET} PROPERTIES
-            CXX_STANDARD 14
+            CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
             PUBLIC_HEADER "${arg_INCLUDES}"
         )
@@ -374,7 +376,7 @@ function (add_pstore_executable target)
     else ()
         add_executable (${target} ${ARGN})
         set_target_properties (${target} PROPERTIES
-            CXX_STANDARD 14
+            CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
         )
         pstore_enable_warnings (TARGET ${target})
@@ -438,7 +440,7 @@ function (add_pstore_test_library target_name)
     else ()
         add_library (${target_name} STATIC ${ARGN})
         set_target_properties (${target_name} PROPERTIES
-            CXX_STANDARD 14
+            CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
         )
         pstore_enable_warnings (TARGET ${target_name})
@@ -468,7 +470,7 @@ function (add_pstore_unit_test target_name)
         add_executable (${target_name} ${ARGN})
         set_target_properties (${target_name} PROPERTIES
             FOLDER "pstore tests"
-            CXX_STANDARD 14
+            CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
         )
         target_include_directories (${target_name} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
