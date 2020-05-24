@@ -117,45 +117,62 @@ namespace {
 
     class Base64Decode : public ::testing::Test {
     public:
-        std::vector<std::uint8_t> convert (std::string const & source) const;
+        using container = std::vector<std::uint8_t>;
+        pstore::maybe<container> convert (std::string const & source) const;
     };
 
-    std::vector<std::uint8_t> Base64Decode::convert (std::string const & source) const {
+    auto Base64Decode::convert (std::string const & source) const -> pstore::maybe<container> {
         std::vector<std::uint8_t> out;
-        pstore::from_base64 (std::begin(source), std::end (source), std::back_inserter (out));
-        return out;
+        std::back_insert_iterator<container> it = std::back_inserter (out);
+        pstore::maybe<decltype (it)> const oit =
+            pstore::from_base64 (std::begin (source), std::end (source), it);
+        if (oit) {
+            return pstore::just (out);
+        }
+        return pstore::nothing<container> ();
     }
 
 } // end anonymous namespace
 
 TEST_F (Base64Decode, RFC4648OneOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zg==");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f'));
+    auto const actual = convert ("Zg==");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f'));
 }
 
 TEST_F (Base64Decode, RFC4648TwoOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zm8=");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f', 'o'));
+    auto const actual = convert ("Zm8=");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f', 'o'));
 }
 
 TEST_F (Base64Decode, RFC4648ThreeOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zm9v");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f', 'o', 'o'));
+    auto const actual = convert ("Zm9v");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f', 'o', 'o'));
 }
 
 TEST_F (Base64Decode, RFC4648FourOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zm9vYg==");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f', 'o', 'o', 'b'));
+    auto const actual = convert ("Zm9vYg==");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f', 'o', 'o', 'b'));
 }
 
 TEST_F (Base64Decode, RFC4648FiveOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zm9vYmE=");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f', 'o', 'o', 'b', 'a'));
+    auto const actual = convert ("Zm9vYmE=");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f', 'o', 'o', 'b', 'a'));
 }
 
 TEST_F (Base64Decode, RFC4648SixOut) {
-    std::vector<std::uint8_t> const actual = convert ("Zm9vYmFy");
-    EXPECT_THAT (actual, ::testing::ElementsAre ('f', 'o', 'o', 'b', 'a', 'r'));
+    auto const actual = convert ("Zm9vYmFy");
+    ASSERT_TRUE (actual.has_value ());
+    EXPECT_THAT (*actual, ::testing::ElementsAre ('f', 'o', 'o', 'b', 'a', 'r'));
+}
+
+TEST_F (Base64Decode, BadCharacter) {
+    auto const actual = convert ("Z!==");
+    ASSERT_FALSE (actual.has_value ());
 }
 
 TEST (Base64, RoundTrip) {

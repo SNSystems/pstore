@@ -1,5 +1,7 @@
 add_pstore_executable (pstore-import
     array_helpers.hpp
+    digest_from_string.cpp
+    digest_from_string.hpp
     import.cpp
     import_fragment.cpp
     import_fragment.hpp

@@ -209,13 +209,38 @@ namespace {
     void emit_section<pstore::repo::section_kind::bss, pstore::repo::bss_section> (
         pstore::database const & db, name_mapping const & names,
         pstore::repo::bss_section const & bss) {
-        std::printf (INDENT6 "\"size\": %d\n", bss.size ());
-        std::printf (INDENT6 "\"align\": %d\n", bss.align ());
+        std::printf (INDENT6 "\"size\": %" SCNu32 "\n", bss.size ());
+        std::printf (INDENT6 "\"align\": %u\n", bss.align ());
         emit_section_ifixups (bss.ifixups ());
         std::printf (",\n");
         emit_section_xfixups (db, names, bss.xfixups ());
         std::printf ("\n");
     }
+
+    template <>
+    void emit_section<pstore::repo::section_kind::debug_line, pstore::repo::debug_line_section> (
+        pstore::database const & db, name_mapping const & names,
+        pstore::repo::debug_line_section const & dl) {
+
+        assert (dl.align () == 1U);
+        assert (dl.xfixups ().size () == 0U);
+
+        // TODO: emit the header digest.
+        pstore::index::digest header_digest;
+        std::printf (INDENT6 "\"header\": \"%s\",\n", header_digest.to_hex_string ().c_str ());
+
+        {
+            std::printf (INDENT6 "\"data\": \"");
+            pstore::repo::container<std::uint8_t> const payload = dl.payload ();
+            pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
+            std::printf ("\",\n");
+        }
+
+        emit_section_ifixups (dl.ifixups ());
+        std::printf ("\n");
+    }
+
+
 
     template <>
     void emit_section<pstore::repo::section_kind::dependent, pstore::repo::dependents> (
@@ -326,6 +351,28 @@ namespace {
         }
     }
 
+    void debug_line (pstore::database const & db, unsigned const generation) {
+        auto debug_line_headers =
+            pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
+        if (!debug_line_headers->empty ()) {
+            auto sep = "\n";
+            assert (generation > 0);
+            for (pstore::address const addr :
+                 pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
+                auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
+                std::printf ("%s" INDENT4 "\"%s\": ", sep, kvp.first.to_hex_string ().c_str ());
+
+                std::fputc ('"', stdout);
+                std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
+                auto const ptr = data.get ();
+                pstore::to_base64 (ptr, ptr + kvp.second.size, stdio_output{});
+                std::fputc ('"', stdout);
+
+                sep = ",\n";
+            }
+        }
+    }
+
 } // end anonymous namespace
 
 int main (int argc, char * argv[]) {
@@ -355,7 +402,10 @@ int main (int argc, char * argv[]) {
                     }
                     std::printf (INDENT3 "\"names\": ");
                     names (db, generation, &string_table);
-                    std::printf (",\n" INDENT3 "\"fragments\": {");
+                    std::printf (",\n" INDENT3 "\"debugline\": {");
+                    debug_line (db, generation);
+                    std::printf ("\n" INDENT3 "},\n");
+                    std::printf (INDENT3 "\"fragments\": {");
                     fragments (db, generation, string_table);
                     std::printf ("\n" INDENT3 "},\n");
                     std::printf (INDENT3 "\"compilations\": {");

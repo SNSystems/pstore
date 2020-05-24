@@ -53,6 +53,7 @@
 #include <type_traits>
 
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
 
@@ -131,7 +132,8 @@ namespace pstore {
     } // end namespace details
 
     template <typename InputIterator, typename OutputIterator>
-    OutputIterator from_base64(InputIterator first, InputIterator last, OutputIterator out) {
+    maybe<OutputIterator> from_base64 (InputIterator first, InputIterator last,
+                                       OutputIterator out) {
         auto count = 0U;
         std::array<std::uint8_t, 4> buff;
 
@@ -147,8 +149,10 @@ namespace pstore {
                 c = 0x3E;
             } else if (c == '/') {
                 c = 0x3F;
+            } else if (c == '=') {
+                continue;
             } else {
-                break; //error.
+                break; // error.
             }
             buff[count++] = c;
             if (count >= 4U) {
@@ -160,7 +164,7 @@ namespace pstore {
             std::fill (buff.begin () + count, buff.end (), std::uint8_t{0});
             out = details::decode4 (buff, out, count - 1);
         }
-        return out;
+        return first == last ? just (out) : nothing<OutputIterator> ();
     }
 
 

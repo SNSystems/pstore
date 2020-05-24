@@ -1044,7 +1044,7 @@ namespace pstore {
                         auto const normal_resl =
                             string_matcher::consume_normal_state (parser, *code_point, app_);
                         this->set_state (std::get<0> (normal_resl));
-                        this->set_error (parser, std::get<1> (normal_resl));
+                        this->set_error (parser, std::get<std::error_code> (normal_resl));
                     } break;
 
                     case escape_state: {

@@ -64,16 +64,42 @@ std::string import_error_category::message (int const error) const {
     case import_error::ifixup_object_was_incomplete:
         result = "internal fixup object was not complete";
         break;
-    case import_error::unrecognized_xfixup_key: result = "unrecognized xfixup object key"; break;
+    case import_error::unrecognized_xfixup_key:
+        result = "unrecognized external fixup object key";
+        break;
     case import_error::xfixup_object_was_incomplete:
         result = "external fixup object was incomplete";
         break;
-    case import_error::unrecognized_section_key: result = "unrecognized section key"; break;
+    case import_error::unrecognized_section_object_key:
+        result = "unrecognized section object key";
+        break;
+    case import_error::generic_section_was_incomplete:
+        result = "generic section object was incomplete";
+        break;
     case import_error::root_object_was_incomplete: result = "root object was incomplete"; break;
     case import_error::unrecognized_root_key: result = "unrecognized root object key"; break;
     case import_error::unknown_transaction_object_key:
         result = "unrecognized transaction object key";
         break;
+    case import_error::unknown_compilation_object_key:
+        result = "unknown compilation object key";
+        break;
+    case import_error::unknown_definition_object_key:
+        result = "unknown definition object key";
+        break;
+
+    case import_error::incomplete_debug_line_section:
+        result = "debug line section object was incomplete";
+        break;
+    case import_error::incomplete_compilation_object:
+        result = "compilation object was incomplete";
+        break;
+
+    case import_error::bad_linkage: result = "unknown linkage type"; break;
+    case import_error::bad_base64_data: result = "bad Base64 data"; break;
+    case import_error::bad_digest: result = "bad digest"; break;
+    case import_error::bad_visibility: result = "unknown visibility"; break;
+    case import_error::unknown_section_name: result = "unknown section name"; break;
     }
     return result;
 }
