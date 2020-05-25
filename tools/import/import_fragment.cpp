@@ -8,12 +8,16 @@
 
 #include "array_helpers.hpp"
 #include "digest_from_string.hpp"
+#include "import_error.hpp"
+#include "import_rule.hpp"
+#include "import_terminals.hpp"
+#include "import_non_terminals.hpp"
 
 using namespace pstore;
 
 class section_name final : public state {
 public:
-    section_name (gsl::not_null<parse_stack *> s, gsl::not_null<repo::section_kind *> section)
+    section_name (parse_stack_pointer s, gsl::not_null<repo::section_kind *> section)
             : state (s)
             , section_{section} {}
 
@@ -26,7 +30,7 @@ private:
 #undef X
         auto pos = map.find (s);
         if (pos == map.end ()) {
-            return make_error_code (import_error::unknown_section_name);
+            return import_error::unknown_section_name;
         }
         *section_ = pos->second;
         return pop ();
@@ -36,10 +40,9 @@ private:
     gsl::not_null<repo::section_kind *> section_;
 };
 
-class ifixup_state final : public state {
+class ifixup_rule final : public state {
 public:
-    explicit ifixup_state (gsl::not_null<parse_stack *> s,
-                           std::vector<repo::internal_fixup> * fixups)
+    explicit ifixup_rule (parse_stack_pointer s, std::vector<repo::internal_fixup> * fixups)
             : state (s)
             , fixups_{fixups} {}
 
@@ -61,11 +64,11 @@ private:
     std::uint64_t addend_ = 0;
 };
 
-gsl::czstring ifixup_state::name () const noexcept {
-    return "ifixup_state";
+gsl::czstring ifixup_rule::name () const noexcept {
+    return "ifixup_rule";
 }
 
-maybe<repo::section_kind> ifixup_state::section_from_string (std::string const & s) {
+maybe<repo::section_kind> ifixup_rule::section_from_string (std::string const & s) {
 #define X(a) {#a, repo::section_kind::a},
     static std::unordered_map<std::string, repo::section_kind> map = {PSTORE_MCREPO_SECTION_KINDS};
 #undef X
@@ -76,27 +79,27 @@ maybe<repo::section_kind> ifixup_state::section_from_string (std::string const &
     return just (pos->second);
 }
 
-std::error_code ifixup_state::key (std::string const & k) {
+std::error_code ifixup_rule::key (std::string const & k) {
     if (k == "section") {
         seen_[section] = true;
         return push<section_name> (&section_);
     }
     if (k == "type") {
         seen_[type] = true;
-        return push<expect_uint64> (&type_);
+        return push<uint64_rule> (&type_);
     }
     if (k == "offset") {
         seen_[offset] = true;
-        return push<expect_uint64> (&offset_);
+        return push<uint64_rule> (&offset_);
     }
     if (k == "addend") {
         seen_[addend] = true;
-        return push<expect_uint64> (&addend_);
+        return push<uint64_rule> (&addend_);
     }
     return make_error_code (import_error::unrecognized_ifixup_key);
 }
 
-std::error_code ifixup_state::end_object () {
+std::error_code ifixup_rule::end_object () {
     if (!seen_.all ()) {
         return make_error_code (import_error::ifixup_object_was_incomplete);
     }
@@ -108,8 +111,8 @@ std::error_code ifixup_state::end_object () {
 
 class xfixup_state final : public state {
 public:
-    xfixup_state (gsl::not_null<parse_stack *> s,
-                  gsl::not_null<std::vector<repo::external_fixup> *> fixups);
+    xfixup_state (parse_stack_pointer s, gsl::not_null<std::vector<repo::external_fixup> *> fixups);
+
 private:
     std::error_code key (std::string const & k) override;
     std::error_code end_object () override;
@@ -125,7 +128,7 @@ private:
     std::uint64_t addend_ = 0;
 };
 
-xfixup_state::xfixup_state (gsl::not_null<parse_stack *> s,
+xfixup_state::xfixup_state (parse_stack_pointer s,
                             gsl::not_null<std::vector<repo::external_fixup> *> fixups)
         : state (s)
         , fixups_{fixups} {}
@@ -137,19 +140,19 @@ gsl::czstring xfixup_state::name () const noexcept {
 std::error_code xfixup_state::key (std::string const & k) {
     if (k == "name") {
         seen_[name_index] = true;
-        return push<expect_uint64> (&name_);
+        return push<uint64_rule> (&name_);
     }
     if (k == "type") {
         seen_[type] = true;
-        return push<expect_uint64> (&type_);
+        return push<uint64_rule> (&type_);
     }
     if (k == "offset") {
         seen_[offset] = true;
-        return push<expect_uint64> (&offset_);
+        return push<uint64_rule> (&offset_);
     }
     if (k == "addend") {
         seen_[addend] = true;
-        return push<expect_uint64> (&addend_);
+        return push<uint64_rule> (&addend_);
     }
     return make_error_code (import_error::unrecognized_xfixup_key);
 }
@@ -167,7 +170,7 @@ std::error_code xfixup_state::end_object () {
 template <typename Next, typename Fixup>
 class fixups_object final : public state {
 public:
-    fixups_object (gsl::not_null<parse_stack *> stack, gsl::not_null<std::vector<Fixup> *> fixups)
+    fixups_object (parse_stack_pointer stack, gsl::not_null<std::vector<Fixup> *> fixups)
             : state (stack)
             , fixups_{fixups} {}
     gsl::czstring name () const noexcept override { return "fixups_object"; }
@@ -178,10 +181,10 @@ private:
     gsl::not_null<std::vector<Fixup> *> fixups_;
 };
 
-using ifixups_object = fixups_object<ifixup_state, repo::internal_fixup>;
+using ifixups_object = fixups_object<ifixup_rule, repo::internal_fixup>;
 using xfixups_object = fixups_object<xfixup_state, repo::external_fixup>;
 
-generic_section::generic_section (gsl::not_null<parse_stack *> stack)
+generic_section::generic_section (parse_stack_pointer stack)
         : state (stack) {}
 
 pstore::gsl::czstring generic_section::name () const noexcept {
@@ -191,19 +194,19 @@ pstore::gsl::czstring generic_section::name () const noexcept {
 std::error_code generic_section::key (std::string const & k) {
     if (k == "data") {
         seen_[data] = true; // string (ascii85)
-        return push<expect_string> (&data_);
+        return push<string_rule> (&data_);
     }
     if (k == "align") {
         seen_[align] = true; // integer
-        return this->push<expect_uint64> (&align_);
+        return this->push<uint64_rule> (&align_);
     }
     if (k == "ifixups") {
         seen_[ifixups] = true;
-        return push_array_consumer<ifixups_object> (this, &ifixups_);
+        return push_array_rule<ifixups_object> (this, &ifixups_);
     }
     if (k == "xfixups") {
         seen_[xfixups] = true;
-        return push_array_consumer<xfixups_object> (this, &xfixups_);
+        return push_array_rule<xfixups_object> (this, &xfixups_);
     }
     return make_error_code (import_error::unrecognized_section_object_key);
 }
@@ -223,7 +226,7 @@ std::error_code generic_section::end_object () {
 
 
 
-debug_line_section::debug_line_section (pstore::gsl::not_null<parse_stack *> stack)
+debug_line_section::debug_line_section (parse_stack_pointer stack)
         : state (stack) {}
 
 pstore::gsl::czstring debug_line_section::name () const noexcept {
@@ -233,15 +236,15 @@ pstore::gsl::czstring debug_line_section::name () const noexcept {
 std::error_code debug_line_section::key (std::string const & k) {
     if (k == "header") {
         seen_[header] = true;
-        return push<expect_string> (&header_);
+        return push<string_rule> (&header_);
     }
     if (k == "data") {
         seen_[data] = true; // string (ascii85)
-        return push<expect_string> (&data_);
+        return push<string_rule> (&data_);
     }
     if (k == "ifixups") {
         seen_[ifixups] = true;
-        return push_array_consumer<ifixups_object> (this, &ifixups_);
+        return push_array_rule<ifixups_object> (this, &ifixups_);
     }
     return import_error::unrecognized_section_object_key;
 }

@@ -6,11 +6,12 @@
 
 #include "pstore/core/database.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-#include "json_callbacks.hpp"
+
+#include "import_rule.hpp"
 
 class generic_section final : public state {
 public:
-    generic_section (pstore::gsl::not_null<parse_stack *> stack);
+    generic_section (parse_stack_pointer stack);
 
 private:
     std::error_code key (std::string const & k) override;
@@ -28,7 +29,7 @@ private:
 
 class debug_line_section final : public state {
 public:
-    debug_line_section (pstore::gsl::not_null<parse_stack *> stack);
+    debug_line_section (parse_stack_pointer stack);
 
 private:
     std::error_code key (std::string const & k) override;

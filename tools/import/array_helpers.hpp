@@ -1,13 +1,12 @@
 #ifndef PSTORE_IMPORT_ARRAY_HELPERS_HPP
 #define PSTORE_IMPORT_ARRAY_HELPERS_HPP
 
-#include "json_callbacks.hpp"
+#include "import_rule.hpp"
 
 template <typename T, typename Next>
 class array_object final : public state {
 public:
-    array_object (pstore::gsl::not_null<parse_stack *> s,
-                  pstore::gsl::not_null<std::vector<T> *> arr)
+    array_object (parse_stack_pointer s, pstore::gsl::not_null<std::vector<T> *> arr)
             : state (s)
             , arr_{arr} {}
     std::error_code begin_object () override { return push<Next> (arr_); }
