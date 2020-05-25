@@ -664,7 +664,7 @@ namespace pstore {
                 /// computing the number of bytes occupied.
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
-                static std::size_t size_bytes (std::size_t const num_children) noexcept {
+                static constexpr std::size_t size_bytes (std::size_t const num_children) noexcept {
                     assert (num_children > 0 && num_children < max_hash_bits);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_[0])) * num_children;

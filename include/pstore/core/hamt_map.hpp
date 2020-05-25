@@ -475,8 +475,7 @@ namespace pstore {
             /// sizes due to the bloated memory consumption.
             using internal_nodes_container =
                 chunked_vector<internal_node, internal_nodes_per_chunk,
-                               sizeof (internal_node) +
-                                   sizeof (index_pointer) * sizeof (hash_type) * 8U - 1U>;
+                               internal_node::size_bytes (details::hash_size)>;
             std::unique_ptr<internal_nodes_container> internals_container_;
 
             unsigned revision_;
