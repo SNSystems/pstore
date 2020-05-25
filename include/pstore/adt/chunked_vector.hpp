@@ -365,6 +365,7 @@ namespace pstore {
             --index_;
         } else {
             --it_;
+            assert (it_->size () > 0);
             index_ = it_->size () - 1U;
         }
         return *this;
