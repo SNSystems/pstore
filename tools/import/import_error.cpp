@@ -43,6 +43,8 @@
 //===----------------------------------------------------------------------===//
 #include "import_error.hpp"
 
+#include <string>
+
 import_error_category::import_error_category () noexcept = default;
 
 char const * import_error_category::name () const noexcept {
