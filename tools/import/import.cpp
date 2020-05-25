@@ -43,7 +43,7 @@ public:
 
 private:
     std::error_code begin_object () { return {}; }
-    std::error_code key (std::string const & s) {}
+    std::error_code key (std::string const &) { return {}; }
     gsl::czstring name () const noexcept override { return "fragment_object"; }
 };
 
@@ -53,63 +53,66 @@ public:
             : state (s) {}
 
     gsl::czstring name () const noexcept override { return "fragment_sections"; }
-
-    std::error_code key (std::string const & s) override {
-#define X(a) {#a, pstore::repo::section_kind::a},
-        static std::unordered_map<std::string, pstore::repo::section_kind> const map{
-            PSTORE_MCREPO_SECTION_KINDS};
-#undef X
-        auto const pos = map.find (s);
-        if (pos == map.end ()) {
-            return import_error::unknown_section_name;
-        }
-#define X(a)                                                                                       \
-    case pstore::repo::section_kind::a:                                                            \
-        return create_consumer<                                                                    \
-            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
-
-        switch (pos->second) {
-            PSTORE_MCREPO_SECTION_KINDS
-        case pstore::repo::section_kind::last: assert (false); // unreachable
-        }
-#undef X
-        // digest_ = s; // decode the digest here.
-        // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
-        return {};
-    }
+    std::error_code key (std::string const & s) override;
     std::error_code end_object () override { return this->pop (); }
 
 private:
     template <typename Content>
     struct create_consumer;
-    template <>
-    struct create_consumer<pstore::repo::generic_section> {
-        std::error_code operator() (state * const s) const {
-            return s->push<object_rule<generic_section>> ();
-        }
-    };
-    template <>
-    struct create_consumer<pstore::repo::bss_section> {
-        std::error_code operator() (state * const s) const {
-            // TODO: implement BSS
-            return {};
-        }
-    };
-    template <>
-    struct create_consumer<pstore::repo::debug_line_section> {
-        std::error_code operator() (state * const s) const {
-            return s->push<object_rule<debug_line_section>> ();
-        }
-    };
-    template <>
-    struct create_consumer<pstore::repo::dependents> {
-        std::error_code operator() (state * const s) const {
-            // TODO: implement dependents
-            return {};
-        }
-    };
 };
 
+
+template <>
+struct fragment_sections::create_consumer<pstore::repo::generic_section> {
+    std::error_code operator() (state * const s) const {
+        return s->push<object_rule<generic_section>> ();
+    }
+};
+
+template <>
+struct fragment_sections::create_consumer<pstore::repo::bss_section> {
+    std::error_code operator() (state * const s) const {
+        // TODO: implement BSS
+        return {};
+    }
+};
+template <>
+struct fragment_sections::create_consumer<pstore::repo::debug_line_section> {
+    std::error_code operator() (state * const s) const {
+        return s->push<object_rule<debug_line_section>> ();
+    }
+};
+template <>
+struct fragment_sections::create_consumer<pstore::repo::dependents> {
+    std::error_code operator() (state * const s) const {
+        // TODO: implement dependents
+        return {};
+    }
+};
+
+std::error_code fragment_sections::key (std::string const & s) {
+#define X(a) {#a, pstore::repo::section_kind::a},
+    static std::unordered_map<std::string, pstore::repo::section_kind> const map{
+        PSTORE_MCREPO_SECTION_KINDS};
+#undef X
+    auto const pos = map.find (s);
+    if (pos == map.end ()) {
+        return import_error::unknown_section_name;
+    }
+#define X(a)                                                                                       \
+    case pstore::repo::section_kind::a:                                                            \
+        return create_consumer<                                                                    \
+            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
+
+    switch (pos->second) {
+        PSTORE_MCREPO_SECTION_KINDS
+    case pstore::repo::section_kind::last: assert (false); // unreachable
+    }
+#undef X
+    // digest_ = s; // decode the digest here.
+    // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
+    return {};
+}
 
 class debug_line_index final : public state {
 public:

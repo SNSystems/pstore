@@ -32,7 +32,7 @@ namespace cxx17shim {
 
         template <typename F, typename Tuple, size_t... I>
         constexpr decltype (auto) apply_impl (F && f, Tuple && t, std::index_sequence<I...>) {
-            return invoke (std::forward<F> (f), std::get<I> (std::forward<Tuple> (t))...);
+            return details::invoke (std::forward<F> (f), std::get<I> (std::forward<Tuple> (t))...);
         }
 
     } // end namespace details

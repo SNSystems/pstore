@@ -1,5 +1,7 @@
 #include "import_compilations.hpp"
 
+#include <bitset>
+
 #include "pstore/mcrepo/compilation.hpp"
 #include "import_names.hpp"
 #include "import_terminals.hpp"
