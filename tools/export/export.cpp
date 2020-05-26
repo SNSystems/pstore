@@ -58,6 +58,56 @@
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 
+class crude_ostream {
+public:
+    explicit crude_ostream (FILE * const os)
+            : os_ (os) {}
+    crude_ostream (crude_ostream const &) = delete;
+    crude_ostream & operator= (crude_ostream const &) = delete;
+
+    crude_ostream & write (char c) {
+        std::fputc (c, os_);
+        return *this;
+    }
+    crude_ostream & write (std::uint16_t v) {
+        std::fprintf (os_, "%" PRIu16, v);
+        return *this;
+    }
+    crude_ostream & write (std::uint32_t v) {
+        std::fprintf (os_, "%" PRIu32, v);
+        return *this;
+    }
+    crude_ostream & write (std::uint64_t v) {
+        std::fprintf (os_, "%" PRIu64, v);
+        return *this;
+    }
+    crude_ostream & write (pstore::gsl::czstring str) {
+        std::fputs (str, os_);
+        return *this;
+    }
+    crude_ostream & write (std::string const & str) {
+        std::fputs (str.c_str (), os_);
+        return *this;
+    }
+
+    template <typename T, typename = typename std::enable_if<true>::type>
+    crude_ostream & write_raw (pstore::gsl::span<T> const & sp) {
+        std::fwrite (sp.data (), sizeof (T), sp.size (), os_);
+        return *this;
+    }
+
+    void flush () { std::fflush (os_); }
+
+private:
+    FILE * os_;
+};
+
+template <typename T>
+crude_ostream & operator<< (crude_ostream & os, T const & t) {
+    return os.write (t);
+}
+
+
 class stdio_output : public std::iterator<std::output_iterator_tag, char> {
 public:
     stdio_output & operator= (char c) {
@@ -123,24 +173,27 @@ namespace {
     };
 
     template <typename Iterator>
-    void emit_string (Iterator first, Iterator last) {
-        std::fputc ('"', stdout);
+    void emit_string (crude_ostream & os, Iterator first, Iterator last) {
+        os << '"';
         auto pos = first;
         while ((pos = std::find_if (first, last, [] (char c) { return c == '"' || c == '\\'; })) !=
                last) {
-            std::fwrite (&*first, sizeof (char), pos - first, stdout);
-            std::fputc ('\\', stdout);
-            std::fputc (*pos, stdout);
+            os.write_raw (pstore::gsl::make_span (&*first, pos - first));
+            os << '\\' << *pos;
             first = pos + 1;
         }
         if (first != last) {
-            std::fwrite (&*first, sizeof (char), last - first, stdout);
+            os.write_raw (pstore::gsl::make_span (&*first, last - first));
         }
-        std::fputc ('"', stdout);
+        os << '"';
     }
 
-    void emit_string (pstore::raw_sstring_view const & view) {
-        emit_string (std::begin (view), std::end (view));
+    void emit_string (crude_ostream & os, pstore::raw_sstring_view const & view) {
+        emit_string (os, std::begin (view), std::end (view));
+    }
+
+    void emit_string (crude_ostream & os, std::string const & str) {
+        emit_string (os, std::begin (str), std::end (str));
     }
 
     template <typename Iterator, typename Function>
@@ -169,10 +222,9 @@ namespace {
 #define INDENT6 INDENT5 INDENT1
 #define INDENT7 INDENT6 INDENT1
 #define INDENT8 INDENT7 INDENT1
-#define INDENT9 INDENT8 INDENT1
 
 
-    void names (pstore::database const & db, unsigned const generation,
+    void names (crude_ostream & os, pstore::database const & db, unsigned const generation,
                 name_mapping * const string_table) {
 
         auto strings = pstore::index::get_index<pstore::trailer::indices::name> (db);
@@ -182,8 +234,8 @@ namespace {
                         pstore::indirect_string const str = strings->load_leaf_node (db, addr);
                         pstore::shared_sstring_view owner;
                         pstore::raw_sstring_view view = str.as_db_string_view (&owner);
-                        std::fputs (INDENT4, stdout);
-                        emit_string (view);
+                        os << INDENT4;
+                        emit_string (os, view);
                         string_table->add (addr);
                     });
     }
@@ -296,7 +348,7 @@ namespace {
                     });
     }
 
-    void fragments (pstore::database const & db, unsigned const generation,
+    void fragments (crude_ostream & os, pstore::database const & db, unsigned const generation,
                     name_mapping const & names) {
         auto fragments = pstore::index::get_index<pstore::trailer::indices::fragment> (db);
         if (!fragments->empty ()) {
@@ -305,15 +357,12 @@ namespace {
             for (pstore::address const addr :
                  pstore::diff::diff (db, *fragments, generation - 1U)) {
                 auto const & kvp = fragments->load_leaf_node (db, addr);
-                std::string const digest = kvp.first.to_hex_string ();
-                std::printf ("%s" INDENT4 "\"%s\": {\n", fragment_sep, digest.c_str ());
+                os << fragment_sep << INDENT4 "\"" << kvp.first.to_hex_string () << "\": {\n";
 
                 auto fragment = db.getro (kvp.second);
                 auto section_sep = INDENT5;
                 for (pstore::repo::section_kind section : *fragment) {
-                    std::printf ("%s"
-                                 "\"%s\": {\n",
-                                 section_sep, section_name (section));
+                    os << section_sep << '"' << section_name (section) << "\": {\n";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
         emit_section<pstore::repo::section_kind::a> (                                              \
@@ -327,35 +376,33 @@ namespace {
                         break;
                     }
 #undef X
-                    std::printf (INDENT5 "}");
+                    os << INDENT5 "}";
                     section_sep = ",\n" INDENT5;
                 }
-                std::printf ("\n" INDENT4 "}");
+                os << "\n" INDENT4 "}";
                 fragment_sep = ",\n";
             }
         }
     }
 
 #define X(a)                                                                                       \
-    case pstore::repo::linkage::a: result = #a; break;
-    pstore::gsl::czstring linkage_name (pstore::repo::linkage linkage) {
-        auto result = "unknown";
+    case pstore::repo::linkage::a: return os << #a;
+    crude_ostream & operator<< (crude_ostream & os, pstore::repo::linkage linkage) {
         switch (linkage) { PSTORE_REPO_LINKAGES }
-        return result;
+        return os << "unknown";
     }
 #undef X
 
-    pstore::gsl::czstring visibility_name (pstore::repo::visibility visibility) {
-        auto result = "unknown";
+    crude_ostream & operator<< (crude_ostream & os, pstore::repo::visibility visibility) {
         switch (visibility) {
-        case pstore::repo::visibility::default_vis: result = "default"; break;
-        case pstore::repo::visibility::hidden_vis: result = "hidden"; break;
-        case pstore::repo::visibility::protected_vis: result = "protected"; break;
+        case pstore::repo::visibility::default_vis: return os << "default";
+        case pstore::repo::visibility::hidden_vis: return os << "hidden";
+        case pstore::repo::visibility::protected_vis: return os << "protected";
         }
-        return result;
+        return os << "unknown";
     }
 
-    void compilations (pstore::database const & db, unsigned const generation,
+    void compilations (crude_ostream & os, pstore::database const & db, unsigned const generation,
                        name_mapping const & names) {
         auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (db);
         if (!compilations->empty ()) {
@@ -364,52 +411,46 @@ namespace {
             for (pstore::address const addr :
                  pstore::diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
-                printf ("%s" INDENT4 "\"%s\": {\n", sep, kvp.first.to_hex_string ().c_str ());
-
                 auto compilation = db.getro (kvp.second);
-                printf (INDENT5 "\"path\": %" PRIu64 ",", names.index (compilation->path ()));
+
+                os << sep << INDENT4 "\"" << kvp.first.to_hex_string () << "\": {";
+                os << "\n" INDENT5 "\"path\": " << names.index (compilation->path ()) << ',';
                 show_string (db, compilation->path ());
-                printf ("\n");
-                printf (INDENT5 "\"triple\": %" PRIu64 ",", names.index (compilation->triple ()));
+                os << "\n" INDENT5 "\"triple\": " << names.index (compilation->triple ()) << ',';
                 show_string (db, compilation->triple ());
-                printf ("\n");
-                printf (INDENT5 "\"definitions\": ");
+                os << "\n" INDENT5 "\"definitions\": ";
                 emit_array (compilation->begin (), compilation->end (), INDENT5,
                             [&] (pstore::repo::compilation_member const & d) {
-                                printf (INDENT6 "{\n");
-                                printf (INDENT7 "\"digest\": \"%s\",\n",
-                                        d.digest.to_hex_string ().c_str ());
-                                printf (INDENT7 "\"name\": %" PRIu64 ",", names.index (d.name));
+                                os << INDENT6 "{\n";
+                                os << INDENT7 "\"digest\": \"" << d.digest.to_hex_string ()
+                                   << "\",\n";
+                                os << INDENT7 "\"name\": " << names.index (d.name) << ',';
                                 show_string (db, d.name);
-                                printf ("\n");
-                                printf (INDENT7 "\"linkage\": \"%s\",\n",
-                                        linkage_name (d.linkage ()));
-                                printf (INDENT7 "\"visibility\": \"%s\"\n",
-                                        visibility_name (d.visibility ()));
-                                printf (INDENT6 "}");
+                                os << '\n';
+                                os << INDENT7 "\"linkage\": \"" << d.linkage () << "\",\n";
+                                os << INDENT7 "\"visibility\": \"" << d.visibility () << "\"\n";
+                                os << INDENT6 "}";
                             });
-                printf ("\n" INDENT4 "}");
+                os << "\n" INDENT4 "}";
                 sep = ",\n";
             }
         }
     }
 
-    void debug_line (pstore::database const & db, unsigned const generation) {
+    void debug_line (crude_ostream & os, pstore::database const & db, unsigned const generation) {
         auto debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
             auto sep = "\n";
             assert (generation > 0);
-            for (pstore::address const addr :
+            for (pstore::address const & addr :
                  pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
-                std::printf ("%s" INDENT4 "\"%s\": ", sep, kvp.first.to_hex_string ().c_str ());
-
-                std::fputc ('"', stdout);
+                os << sep << INDENT4 << '"' << kvp.first.to_hex_string () << "\": \"";
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
                 auto const ptr = data.get ();
                 pstore::to_base64 (ptr, ptr + kvp.second.size, stdio_output{});
-                std::fputc ('"', stdout);
+                os << '"';
 
                 sep = ",\n";
             }
@@ -419,18 +460,19 @@ namespace {
 } // end anonymous namespace
 
 int main (int argc, char * argv[]) {
+    crude_ostream os{stdout};
 #if 0
-    emit_string ("hello"); printf ("\n");
-    emit_string ("a \" b"); printf ("\n");
-    emit_string ("\\"); printf ("\n");
+    emit_string (os, "hello"); printf ("\n");
+    emit_string (os, "a \" b"); printf ("\n");
+    emit_string (os, "\\"); printf ("\n");
 #endif
 
     pstore::database db{argv[1], pstore::database::access_mode::read_only};
 
     name_mapping string_table;
-    std::printf ("{\n");
-    std::printf (INDENT1 "\"version\": 1,\n");
-    std::printf (INDENT1 "\"transactions\": ");
+    os << "{\n";
+    os << INDENT1 "\"version\": 1,\n";
+    os << INDENT1 "\"transactions\": ";
 
     auto const f = footers (db);
     assert (std::distance (std::begin (f), std::end (f)) >= 1);
@@ -439,22 +481,22 @@ int main (int argc, char * argv[]) {
                     auto const footer = db.getro (footer_pos);
                     unsigned const generation = footer->a.generation;
                     db.sync (generation);
-                    std::printf (INDENT2 "{\n");
+                    os << INDENT2 "{\n";
                     if (comments) {
-                        std::printf (INDENT3 "// generation %u\n", generation);
+                        os << INDENT3 "// generation " << generation << '\n';
                     }
-                    std::printf (INDENT3 "\"names\": ");
-                    names (db, generation, &string_table);
-                    std::printf (",\n" INDENT3 "\"debugline\": {");
-                    debug_line (db, generation);
-                    std::printf ("\n" INDENT3 "},\n");
-                    std::printf (INDENT3 "\"fragments\": {");
-                    fragments (db, generation, string_table);
-                    std::printf ("\n" INDENT3 "},\n");
-                    std::printf (INDENT3 "\"compilations\": {");
-                    compilations (db, generation, string_table);
-                    std::printf ("\n" INDENT3 "}\n");
-                    std::printf (INDENT2 "}");
+                    os << INDENT3 "\"names\": ";
+                    names (os, db, generation, &string_table);
+                    os << ",\n" INDENT3 "\"debugline\": {";
+                    debug_line (os, db, generation);
+                    os << "\n" INDENT3 "},\n";
+                    os << INDENT3 "\"fragments\": {";
+                    fragments (os, db, generation, string_table);
+                    os << "\n" INDENT3 "},\n";
+                    os << INDENT3 "\"compilations\": {";
+                    compilations (os, db, generation, string_table);
+                    os << "\n" INDENT3 "}\n";
+                    os << INDENT2 "}";
                 });
-    std::printf ("\n}\n");
+    os << "\n}\n";
 }
