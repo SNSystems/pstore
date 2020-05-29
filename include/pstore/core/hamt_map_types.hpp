@@ -62,6 +62,9 @@ namespace pstore {
     namespace index {
         namespace details {
             using hash_type = std::uint64_t;
+            /// The number of bits in hash_type. This is the maximum number of children that an
+            /// internal-node can carry.
+            constexpr auto const hash_size = sizeof (hash_type) * 8;
 
 #ifdef _MSC_VER
             // TODO: VC2015RC won't allow pop_count to be constexpr. Sigh. This forces a (very
@@ -80,21 +83,17 @@ namespace pstore {
                            bit_set (v, 0x0F);
                 }
             } // namespace details_count
-            constexpr unsigned hash_index_bits =
-                details_count::crude_pop_count (sizeof (hash_type) * 8 - 1);
+            constexpr unsigned hash_index_bits = details_count::crude_pop_count (hash_size - 1);
 #else
-            // TODO: one day the MSVC-specific code will go away and this will be all we need...
-            constexpr unsigned hash_index_bits = bit_count::pop_count (sizeof (hash_type) * 8 - 1);
+            /// The number of bits that it takes to represent hash_size.
+            constexpr unsigned hash_index_bits = bit_count::pop_count (hash_size - 1);
 #endif
-
-            constexpr auto const hash_size = sizeof (hash_type) * 8;
-            constexpr auto const max_hash_bits =
-                (hash_size + 7) / hash_index_bits * hash_index_bits;
+            constexpr unsigned max_hash_bits = (hash_size + 7) / hash_index_bits * hash_index_bits;
             constexpr unsigned hash_index_mask = (1U << hash_index_bits) - 1U;
             constexpr unsigned max_internal_depth = max_hash_bits / hash_index_bits;
 
-            /// The max depth of the hash trees include several levels internal nodes (max_hash_bits
-            /// / hash_index_bits), one level linear node and one level leaf node.
+            /// The max depth of the hash trees include several levels internal nodes
+            /// (max_internal_depth), one linear node and one leaf node.
             constexpr unsigned max_tree_depth = max_internal_depth + 2U;
 
             /// Using LSB for marking internal nodes
@@ -103,13 +102,7 @@ namespace pstore {
             /// Using second LSB for marking newly allocated internal nodes
             constexpr std::uintptr_t heap_node_bit = 2;
 
-        } // namespace details
-    }     // namespace index
-} // namespace pstore
-
-
-namespace pstore {
-    namespace index {
+        } // end namespace details
 
         //*  _                _           _    _         _    *
         //* | |_  ___ __ _ __| |___ _ _  | |__| |___  __| |__ *
@@ -665,7 +658,7 @@ namespace pstore {
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
                 static constexpr std::size_t size_bytes (std::size_t const num_children) noexcept {
-                    assert (num_children > 0 && num_children < max_hash_bits);
+                    assert (num_children > 0 && num_children <= hash_size);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_[0])) * num_children;
                 }
