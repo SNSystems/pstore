@@ -196,29 +196,12 @@ namespace pstore {
             internal_node::signature_type const internal_node::node_signature_ = {
                 {'I', 'n', 't', 'e', 'r', 'n', 'a', 'l'}};
 
-            // operator new
-            // ~~~~~~~~~~~~
-            void * internal_node::operator new (std::size_t const s, nchildren const size) {
-                (void) s;
-                // TODO: we currently allocate in-heap nodes at their maximum size to avoid
-                // reallocations. This is acceptable for 64-bit hashes, but will become expensive
-                // once the hash size increases to 128 bits.
-                assert (size.n == hash_size);
-                std::size_t const actual_bytes = internal_node::size_bytes (size.n);
-                assert (actual_bytes >= s);
-                return ::operator new (actual_bytes);
-            }
+            // ctor (one child)
+            // ~~~~~~~~~~~~~~~~
+            internal_node::internal_node (index_pointer const & leaf, hash_type const hash)
+                    : bitmap_{hash_type{1} << hash}
+                    , children_{{leaf}} {
 
-            // operator delete
-            // ~~~~~~~~~~~~~~~
-            void internal_node::operator delete (void * const p, nchildren const /*size*/) {
-                ::operator delete (p);
-            }
-            void internal_node::operator delete (void * const p) { ::operator delete (p); }
-
-            // ctor
-            // ~~~~
-            internal_node::internal_node () {
                 static_assert (std::is_standard_layout<internal_node>::value,
                                "internal internal_node must be standard-layout");
                 static_assert (alignof (linear_node) >= 4, "internal_node must have alignment "
@@ -232,12 +215,6 @@ namespace pstore {
                 static_assert (offsetof (internal_node, children_) == 16,
                                "offset of the first child must be 16.");
             }
-
-            // ctor (one child)
-            // ~~~~~~~~~~~~~~~~
-            internal_node::internal_node (index_pointer const & leaf, hash_type const hash)
-                    : bitmap_{hash_type{1} << hash}
-                    , children_{{leaf}} {}
 
             // ctor (two children)
             // ~~~~~~~~~~~~~~~~~~~
@@ -264,47 +241,6 @@ namespace pstore {
 
                 auto const first = std::begin (rhs.children_);
                 std::copy (first, first + rhs.size (), std::begin (children_));
-            }
-
-            // allocate
-            // ~~~~~~~~
-            std::unique_ptr<internal_node> internal_node::allocate () {
-                return std::unique_ptr<internal_node>{new (nchildren{hash_size}) internal_node ()};
-            }
-
-            std::unique_ptr<internal_node> internal_node::allocate (internal_node const & other) {
-                return std::unique_ptr<internal_node>{new (nchildren{hash_size})
-                                                          internal_node (other)};
-            }
-
-            std::unique_ptr<internal_node> internal_node::allocate (index_pointer const & leaf,
-                                                                    hash_type const hash) {
-                return std::unique_ptr<internal_node>{new (nchildren{hash_size})
-                                                          internal_node (leaf, hash)};
-            }
-
-            std::unique_ptr<internal_node>
-            internal_node::allocate (index_pointer const & existing_leaf,
-                                     index_pointer const & new_leaf, hash_type const existing_hash,
-                                     hash_type const new_hash) {
-                return std::unique_ptr<internal_node>{new (nchildren{hash_size}) internal_node (
-                    existing_leaf, new_leaf, existing_hash, new_hash)};
-            }
-
-
-            // make_writable
-            // ~~~~~~~~~~~~~
-            std::pair<std::unique_ptr<internal_node>, internal_node *>
-            internal_node::make_writable (index_pointer const node,
-                                          internal_node const & internal) {
-                if (node.is_heap ()) {
-                    internal_node * const inode = node.untag_node<internal_node *> ();
-                    assert (inode->signature_ == node_signature_);
-                    return {nullptr, inode};
-                }
-
-                std::unique_ptr<internal_node> new_node = internal_node::allocate (internal);
-                return {std::move (new_node), new_node.get ()};
             }
 
             // validate_after_load
@@ -444,7 +380,9 @@ namespace pstore {
                             assert (p.is_internal ());
                             auto const internal = p.untag_node<internal_node *> ();
                             p = internal->flush (transaction, shifts);
-                            delete internal;
+                            // This node is owned by a container in the outer HAMT structure. Don't
+                            // delete it here. If this ever changes, then add a 'delete internal;'
+                            // here.
                         } else { // linear node
                             assert (p.is_linear ());
                             auto const linear = p.untag_node<linear_node *> ();

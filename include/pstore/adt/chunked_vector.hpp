@@ -51,10 +51,23 @@
 
 namespace pstore {
 
+    /// Chunked-vector is a sequence-container which uses a list of large blocks ("chunks") to
+    /// ensure very fast append times at the expense of only permitting bi-directional iterators:
+    /// random access is not supported, unlike std::deque<> or std::vector<>.
+    ///
+    /// \tparam T The type of the elements.
+    /// \tparam ElementsPerChunk The number of elements in an individual chunk.
+    /// \tparam ActualSize The storage allocated to an individual element. Normally equal to
+    ///   sizeof(T), this can be increased to allow for dynamically-sized types.
+    /// \tparam ActualAlign The alignment of an individual element. Normally equal to alignof(T).
     template <typename T,
-              std::size_t ElementsPerChunk = std::max (4096 / sizeof (T), std::size_t{1})>
+              std::size_t ElementsPerChunk = std::max (4096 / sizeof (T), std::size_t{1}),
+              std::size_t ActualSize = sizeof (T), std::size_t ActualAlign = alignof (T)>
     class chunked_vector {
         static_assert (ElementsPerChunk > 0, "Must be at least 1 element per chunk");
+        static_assert (ActualSize >= sizeof (T), "ActualSize must be at least sizeof(T)");
+        static_assert (ActualAlign >= alignof (T), "ActualAlign must be at least alignof(T)");
+
         class chunk;
         using chunk_list = std::list<chunk>;
         template <bool Const = true>
@@ -162,9 +175,12 @@ namespace pstore {
 
     // emplace_back
     // ~~~~~~~~~~~~
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <typename... Args>
-    auto chunked_vector<T, ElementsPerChunk>::emplace_back (Args &&... args) -> reference {
+    auto
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::emplace_back (Args &&... args)
+        -> reference {
         if (chunks_.size () == 0U || chunks_.back ().size () >= ElementsPerChunk) {
             // Append a new chunk.
             chunks_.emplace_back ();
@@ -180,8 +196,9 @@ namespace pstore {
     //* / _| ' \ || | ' \| / / *
     //* \__|_||_\_,_|_||_|_\_\ *
     //*                        *
-    template <typename T, std::size_t ElementsPerChunk>
-    class chunked_vector<T, ElementsPerChunk>::chunk {
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
     public:
         chunk () noexcept = default;
         ~chunk () noexcept;
@@ -213,14 +230,15 @@ namespace pstore {
 
     private:
         std::size_t size_ = 0U;
-        std::array<typename std::aligned_storage<sizeof (T), alignof (T)>::type, ElementsPerChunk>
+        std::array<typename std::aligned_storage<ActualSize, ActualAlign>::type, ElementsPerChunk>
             membs_;
     };
 
     // dtor
     // ~~~~
-    template <typename T, std::size_t ElementsPerChunk>
-    chunked_vector<T, ElementsPerChunk>::chunk::~chunk () noexcept {
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::~chunk () noexcept {
         for (auto ctr = std::size_t{0}; ctr < size_; ++ctr) {
             (*this)[ctr].~T ();
         }
@@ -229,9 +247,11 @@ namespace pstore {
 
     // emplace_back
     // ~~~~~~~~~~~~
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <typename... Args>
-    auto chunked_vector<T, ElementsPerChunk>::chunk::emplace_back (Args &&... args) -> reference {
+    auto chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::emplace_back (
+        Args &&... args) -> reference {
         assert (size_ < membs_.size ());
         T & place = (*this)[size_];
         new (&place) T (std::forward<Args> (args)...);
@@ -244,9 +264,10 @@ namespace pstore {
     //* | |  _/ -_) '_/ _` |  _/ _ \ '_| | '_ \/ _` (_-</ -_) *
     //* |_|\__\___|_| \__,_|\__\___/_|   |_.__/\__,_/__/\___| *
     //*                                                       *
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <bool IsConst>
-    class chunked_vector<T, ElementsPerChunk>::iterator_base
+    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::iterator_base
             : public std::iterator<std::bidirectional_iterator_tag,
                                    typename details::value_type<T, IsConst>::type> {
 
@@ -308,9 +329,11 @@ namespace pstore {
     };
 
     // Prefix increment
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk>::iterator_base<IsConst>::operator++ ()
+    auto chunked_vector<T, ElementsPerChunk, ActualSize,
+                        ActualAlign>::iterator_base<IsConst>::operator++ ()
         -> iterator_base<IsConst> & {
         if (++index_ >= it_->size ()) {
             ++it_;
@@ -320,9 +343,11 @@ namespace pstore {
     }
 
     // Postfix increment operator (e.g., it++)
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk>::iterator_base<IsConst>::operator++ (int)
+    auto chunked_vector<T, ElementsPerChunk, ActualSize,
+                        ActualAlign>::iterator_base<IsConst>::operator++ (int)
         -> iterator_base<IsConst> {
         auto const old = *this;
         ++(*this);
@@ -330,23 +355,28 @@ namespace pstore {
     }
 
     // Prefix decrement
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk>::iterator_base<IsConst>::operator-- ()
+    auto chunked_vector<T, ElementsPerChunk, ActualSize,
+                        ActualAlign>::iterator_base<IsConst>::operator-- ()
         -> iterator_base<IsConst> & {
         if (index_ > 0U) {
             --index_;
         } else {
             --it_;
+            assert (it_->size () > 0);
             index_ = it_->size () - 1U;
         }
         return *this;
     }
 
     // Postfix decrement
-    template <typename T, std::size_t ElementsPerChunk>
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
     template <bool IsConst>
-    auto chunked_vector<T, ElementsPerChunk>::iterator_base<IsConst>::operator-- (int)
+    auto chunked_vector<T, ElementsPerChunk, ActualSize,
+                        ActualAlign>::iterator_base<IsConst>::operator-- (int)
         -> iterator_base<IsConst> {
         auto old = *this;
         --(*this);
@@ -357,9 +387,11 @@ namespace pstore {
 
 namespace std {
 
-    template <typename T, std::size_t ElementsPerChunk>
-    void swap (pstore::chunked_vector<T, ElementsPerChunk> & lhs,
-               pstore::chunked_vector<T, ElementsPerChunk> & rhs) noexcept {
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    void
+    swap (pstore::chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign> & lhs,
+          pstore::chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign> & rhs) noexcept {
         lhs.swap (rhs);
     }
 

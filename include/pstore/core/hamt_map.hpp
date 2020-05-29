@@ -49,6 +49,7 @@
 #include <iterator>
 #include <type_traits>
 
+#include "pstore/adt/chunked_vector.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
@@ -457,6 +458,26 @@ namespace pstore {
             /// internal or linear node.
             void delete_node (index_pointer node, unsigned shifts);
 
+            static constexpr auto internal_nodes_per_chunk =
+                std::size_t{256} * 1024 / sizeof (internal_node);
+
+            /// Internal nodes are allocated using a "chunked-vector". This allocates memory in
+            /// lumps sufficent for internal_nodes_per_chunk entries. This is then consumed as new
+            /// in-heap internal nodes are created.
+            ///
+            /// The effect of this is to significantly reduce the number of memory allocations
+            /// performed by the index code under heavy insertion pressure as thus give us a little
+            /// extra performance. The cost is that we may waste as much as one chunk's worth of
+            /// memory (minus sizeof (internal_node).
+            ///
+            /// TODO: we allocate nodes at their maximum size even though they may only contain two
+            /// members. This is rather wasteful and will prevent us from moving to larger hash
+            /// sizes due to the bloated memory consumption.
+            using internal_nodes_container =
+                chunked_vector<internal_node, internal_nodes_per_chunk,
+                               internal_node::size_bytes (details::hash_size)>;
+            std::unique_ptr<internal_nodes_container> internals_container_;
+
             unsigned revision_;
             index_pointer root_;
             std::size_t size_ = 0;
@@ -588,7 +609,8 @@ namespace pstore {
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::hamt_map (
             database const & db, typed_address<header_block> const pos, Hash const & hash,
             KeyEqual const & equal)
-                : revision_{db.get_current_revision ()}
+                : internals_container_{std::make_unique<internal_nodes_container> ()}
+                , revision_{db.get_current_revision ()}
                 , hash_{hash}
                 , equal_{equal} {
 
@@ -697,9 +719,8 @@ namespace pstore {
                     address const leaf_addr =
                         this->store_leaf_node (transaction, new_leaf, parents);
                     auto const internal_ptr = index_pointer{
-                        internal_node::allocate (existing_leaf, index_pointer{leaf_addr}, old_hash,
-                                                 new_hash)
-                            .release ()};
+                        internal_node::allocate (internals_container_.get (), existing_leaf,
+                                                 index_pointer{leaf_addr}, old_hash, new_hash)};
                     parents->push (
                         {internal_ptr, internal_node::get_new_index (new_hash, old_hash)});
                     return internal_ptr;
@@ -719,8 +740,8 @@ namespace pstore {
 
                 index_pointer const leaf_ptr = this->insert_into_leaf (
                     transaction, existing_leaf, new_leaf, existing_hash, hash, shifts, parents);
-                auto const internal_ptr =
-                    index_pointer{internal_node::allocate (leaf_ptr, old_hash).release ()};
+                auto const internal_ptr = index_pointer{
+                    internal_node::allocate (internals_container_.get (), leaf_ptr, old_hash)};
                 parents->push ({internal_ptr, 0U});
                 return internal_ptr;
             }
@@ -742,7 +763,9 @@ namespace pstore {
             if (node.is_heap ()) {
                 assert (!node.is_leaf ());
                 if (details::depth_is_internal_node (shifts)) {
-                    delete node.untag_node<internal_node *> ();
+                    // Internal nodes are owned by internals_container_. Don't delete them here. If
+                    // this ever changes, then add something like: delete
+                    // node.untag_node<internal_node *> ();
                 } else {
                     delete node.untag_node<linear_node *> ();
                 }
@@ -771,14 +794,11 @@ namespace pstore {
             // If this slot isn't used, then ensure the node is on the heap, write the new leaf node
             // and point to it.
             if (index == details::not_found) {
-                std::unique_ptr<internal_node> new_node;
-                internal_node * inode = nullptr;
-                std::tie (new_node, inode) = internal_node::make_writable (node, *internal);
-
+                internal_node * const inode =
+                    internal_node::make_writable (internals_container_.get (), node, *internal);
                 inode->insert_child (
                     hash, index_pointer{this->store_leaf_node (transaction, value, parents)},
                     parents);
-                new_node.release ();
                 return {index_pointer{inode}, false};
             }
 
@@ -797,8 +817,8 @@ namespace pstore {
 
             std::unique_ptr<internal_node> new_node;
             if (new_child != child_slot) {
-                internal_node * inode = nullptr;
-                std::tie (new_node, inode) = internal_node::make_writable (node, *internal);
+                internal_node * const inode =
+                    internal_node::make_writable (internals_container_.get (), node, *internal);
 
                 // Release a previous heap-allocated instance.
                 index_pointer & child = (*inode)[index];
@@ -999,7 +1019,8 @@ namespace pstore {
                 assert (root_.is_internal ());
                 auto internal = root_.untag_node<internal_node *> ();
                 root_ = internal->flush (transaction, 0 /* shifts */);
-                delete internal;
+                // Don't delete the internal node here. They are owned by internals_container_. If
+                // this ever changes, then use something like 'delete internal' here.
             }
 
             // Write the index header. This simply holds a check signature, the tree root, and
@@ -1009,8 +1030,12 @@ namespace pstore {
             pos.first->size = this->size ();
             pos.first->root = root_.addr;
 
+            // Release all of the in-heap internal nodes that we have now flushed.
+            internals_container_->clear ();
+
             // Update the revision number into which the index will be flushed.
             revision_ = generation;
+
             return pos.second;
         }
 
