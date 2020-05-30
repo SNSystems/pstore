@@ -100,18 +100,11 @@ TEST_F (IndexFixture, InitAddress) {
 }
 
 // Test initial pointer index pointer.
-TEST_F (IndexFixture, InitPointer) {
-    std::unique_ptr<internal_node> internal = pstore::index::details::internal_node::allocate ();
-    index_pointer index{internal.get ()};
-    EXPECT_TRUE (index.is_heap ());
-    EXPECT_TRUE (index.is_internal ());
-}
-
-// Test initial pointer index pointer.
 TEST_F (IndexFixture, InternalSizeBytes) {
-    EXPECT_EQ (24U, pstore::index::details::internal_node::size_bytes (1));
-    EXPECT_EQ (32U, pstore::index::details::internal_node::size_bytes (2));
-    EXPECT_EQ (528U, pstore::index::details::internal_node::size_bytes (64));
+    using internal_node = pstore::index::details::internal_node;
+    EXPECT_EQ (24U, internal_node::size_bytes (1));
+    EXPECT_EQ (32U, internal_node::size_bytes (2));
+    EXPECT_EQ (528U, internal_node::size_bytes (64));
 }
 
 namespace {

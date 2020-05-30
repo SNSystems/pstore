@@ -49,6 +49,7 @@
 #include <array>
 #include <vector>
 
+#include "pstore/adt/chunked_vector.hpp"
 #include "pstore/core/array_stack.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
@@ -61,6 +62,9 @@ namespace pstore {
     namespace index {
         namespace details {
             using hash_type = std::uint64_t;
+            /// The number of bits in hash_type. This is the maximum number of children that an
+            /// internal-node can carry.
+            constexpr auto const hash_size = sizeof (hash_type) * 8;
 
 #ifdef _MSC_VER
             // TODO: VC2015RC won't allow pop_count to be constexpr. Sigh. This forces a (very
@@ -79,21 +83,17 @@ namespace pstore {
                            bit_set (v, 0x0F);
                 }
             } // namespace details_count
-            constexpr unsigned hash_index_bits =
-                details_count::crude_pop_count (sizeof (hash_type) * 8 - 1);
+            constexpr unsigned hash_index_bits = details_count::crude_pop_count (hash_size - 1);
 #else
-            // TODO: one day the MSVC-specific code will go away and this will be all we need...
-            constexpr unsigned hash_index_bits = bit_count::pop_count (sizeof (hash_type) * 8 - 1);
+            /// The number of bits that it takes to represent hash_size.
+            constexpr unsigned hash_index_bits = bit_count::pop_count (hash_size - 1);
 #endif
-
-            constexpr auto const hash_size = sizeof (hash_type) * 8;
-            constexpr auto const max_hash_bits =
-                (hash_size + 7) / hash_index_bits * hash_index_bits;
+            constexpr unsigned max_hash_bits = (hash_size + 7) / hash_index_bits * hash_index_bits;
             constexpr unsigned hash_index_mask = (1U << hash_index_bits) - 1U;
             constexpr unsigned max_internal_depth = max_hash_bits / hash_index_bits;
 
-            /// The max depth of the hash trees include several levels internal nodes (max_hash_bits
-            /// / hash_index_bits), one level linear node and one level leaf node.
+            /// The max depth of the hash trees include several levels internal nodes
+            /// (max_internal_depth), one linear node and one leaf node.
             constexpr unsigned max_tree_depth = max_internal_depth + 2U;
 
             /// Using LSB for marking internal nodes
@@ -102,13 +102,7 @@ namespace pstore {
             /// Using second LSB for marking newly allocated internal nodes
             constexpr std::uintptr_t heap_node_bit = 2;
 
-        } // namespace details
-    }     // namespace index
-} // namespace pstore
-
-
-namespace pstore {
-    namespace index {
+        } // end namespace details
 
         //*  _                _           _    _         _    *
         //* | |_  ___ __ _ __| |___ _ _  | |__| |___  __| |__ *
@@ -141,7 +135,6 @@ namespace pstore {
             constexpr bool depth_is_internal_node (unsigned const shift) noexcept {
                 return shift < details::max_hash_bits;
             }
-
 
             struct nchildren {
                 std::size_t n;
@@ -523,6 +516,7 @@ namespace pstore {
                 return {index_pointer (), details::not_found};
             }
 
+
             //*  _     _                     _                _      *
             //* (_)_ _| |_ ___ _ _ _ _  __ _| |  ___  ___  __| |___  *
             //* | | ' \  _/ -_) '_| ' \/ _` | | |   \/ _ \/ _` / -_) *
@@ -534,26 +528,82 @@ namespace pstore {
                 using iterator = index_pointer *;
                 using const_iterator = index_pointer const *;
 
-                void * operator new (std::size_t) = delete;
-                void operator delete (void * p);
+                /// Construct an internal node with a child.
+                internal_node (index_pointer const & leaf, hash_type hash);
+                /// Construct the internal node with two children.
+                internal_node (index_pointer const & existing_leaf, index_pointer const & new_leaf,
+                               hash_type existing_hash, hash_type new_hash);
+
+                internal_node (internal_node const & rhs);
+                internal_node (internal_node && rhs) = delete;
 
                 ~internal_node () noexcept = default;
 
                 internal_node & operator= (internal_node const & rhs) = delete;
                 internal_node & operator= (internal_node && rhs) = delete;
 
-                static std::unique_ptr<internal_node> allocate ();
-                /// Construct an internal node with a child.
-                static std::unique_ptr<internal_node> allocate (internal_node const & other);
-                /// Construct an internal node with a child.
-                static std::unique_ptr<internal_node> allocate (index_pointer const & leaf,
-                                                                hash_type hash);
-                /// Construct the internal node with two children.
-                static std::unique_ptr<internal_node> allocate (index_pointer const & existing_leaf,
-                                                                index_pointer const & new_leaf,
-                                                                hash_type existing_hash,
-                                                                hash_type new_hash);
+                /// Construct an internal node from existing internal-node instance. This may be
+                /// used, for example, when copying an in-store node into memory in preparation for
+                /// modifying it.
+                ///
+                /// \tparam SequenceContainer A container of internal_node instances which supports
+                ///   emplace_back().
+                /// \param container Points to the container which will own the new internal node
+                ///   instance.
+                /// \param other A existing internal_node whose contents are copied into the newly
+                ///   allocated instance.
+                /// \returns A new instance of internal_node which is owned by *container.
+                template <typename SequenceContainer,
+                          typename = typename std::enable_if<std::is_same<
+                              typename SequenceContainer::value_type, internal_node>::value>::type>
+                static internal_node * allocate (SequenceContainer * const container,
+                                                 internal_node const & other) {
+                    container->emplace_back (other);
+                    // TODO: in C++17 we can use the emplace_back return value.
+                    return &container->back ();
+                }
 
+                /// Construct an internal node with a single child.
+                ///
+                /// \tparam SequenceContainer A container of internal_node instances which supports
+                ///   emplace_back().
+                /// \param container Points to the container which will own the new internal node
+                ///   instance.
+                /// \param leaf The child of the newly allocated internal node.
+                /// \param hash The hash associated with the child node.
+                /// \returns A new instance of internal_node which is owned by *container.
+                template <typename SequenceContainer,
+                          typename = typename std::enable_if<std::is_same<
+                              typename SequenceContainer::value_type, internal_node>::value>::type>
+                static internal_node * allocate (SequenceContainer * container,
+                                                 index_pointer const & leaf, hash_type const hash) {
+                    container->emplace_back (leaf, hash);
+                    // TODO: in C++17 we can use the emplace_back return value.
+                    return &container->back ();
+                }
+
+                /// Construct an internal node with two children.
+                ///
+                /// \tparam SequenceContainer A container of internal_node instances which supports
+                ///   emplace_back().
+                /// \param container Points to the container which will own the new internal node
+                ///   instance.
+                /// \param existing_leaf  One of the two child nodes of the new internal node.
+                /// \param new_leaf  One of the two child nodes of the new internal node.
+                /// \param existing_hash  The hash associated with the \p existing_leaf node.
+                /// \param new_hash  The hash associated with the \p new_leaf node.
+                /// \returns A new instance of internal_node which is owned by *container.
+                template <typename SequenceContainer,
+                          typename = typename std::enable_if<std::is_same<
+                              typename SequenceContainer::value_type, internal_node>::value>::type>
+                static internal_node *
+                allocate (SequenceContainer * container, index_pointer const & existing_leaf,
+                          index_pointer const & new_leaf, hash_type const existing_hash,
+                          hash_type const new_hash) {
+                    container->emplace_back (existing_leaf, new_leaf, existing_hash, new_hash);
+                    // TODO: in C++17 we can use the emplace_back return value.
+                    return &container->back ();
+                }
 
                 /// Return a pointer to an internal node. If the node is in-store, it is loaded and
                 /// the internal heap node pointer if \p node is a heap internal node.
@@ -584,19 +634,31 @@ namespace pstore {
                 /// \param internal  A read-only instance of an internal node. If the \p node
                 /// parameter is in-store then a copy of this value is placed on the heap.
                 /// \result  See above.
+                template <typename SequenceContainer,
+                          typename = typename std::enable_if<std::is_same<
+                              typename SequenceContainer::value_type, internal_node>::value>::type>
+                static internal_node * make_writable (SequenceContainer * const container,
+                                                      index_pointer const node,
+                                                      internal_node const & internal) {
+                    if (node.is_heap ()) {
+                        internal_node * const inode = node.untag_node<internal_node *> ();
+                        assert (inode->signature_ == node_signature_);
+                        return inode;
+                    }
 
-                static std::pair<std::unique_ptr<internal_node>, internal_node *>
-                make_writable (index_pointer node, internal_node const & internal);
+                    return allocate (container, internal);
+                }
 
-                /// Computes the number of bytes occupied by the in-store representation of an
-                /// internal node with the given number of children.
+                /// Returns the number of bytes occupied by an in-store internal node with the given
+                /// number of child nodes. Note that the storage occupied by an in-heap internal
+                /// node with the same number of children may be greater.
                 ///
                 /// \param num_children  The number of children to assume for the purpose of
                 /// computing the number of bytes occupied.
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
-                static std::size_t size_bytes (std::size_t const num_children) noexcept {
-                    assert (num_children > 0 && num_children < max_hash_bits);
+                static constexpr std::size_t size_bytes (std::size_t const num_children) noexcept {
+                    assert (num_children > 0 && num_children <= hash_size);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_[0])) * num_children;
                 }
@@ -654,31 +716,6 @@ namespace pstore {
                 static bool validate_after_load (internal_node const & internal,
                                                  typed_address<internal_node> const addr);
 
-                /// A placement-new implementation which allocates sufficient storage for an
-                /// internal node with the number of children given by the size parameter.
-                void * operator new (std::size_t s, nchildren size);
-                // Non-allocating placement allocation.
-                void * operator new (std::size_t const size, void * const ptr) noexcept {
-                    return ::operator new (size, ptr);
-                }
-
-                void operator delete (void * p, nchildren size);
-                void operator delete (void * const p, void * const ptr) noexcept {
-                    ::operator delete (p, ptr);
-                }
-
-
-                internal_node ();
-                /// Construct an internal node with a child.
-                internal_node (index_pointer const & leaf, hash_type hash);
-                /// Construct the internal node with two children.
-                internal_node (index_pointer const & existing_leaf, index_pointer const & new_leaf,
-                               hash_type existing_hash, hash_type new_hash);
-
-                internal_node (internal_node const & rhs);
-                internal_node (internal_node && rhs) = delete;
-
-
                 /// Appends the internal node (which refers to a node in heap memory) to the
                 /// store. Returns a new (in-store) internal store address.
                 address store_node (transaction_base & transaction) const;
@@ -697,7 +734,7 @@ namespace pstore {
 
                 /// \brief The array of child node references.
                 /// Each child may be in-memory or in-store.
-                index_pointer children_[1];
+                index_pointer children_[1U];
             };
 
             // lookup
