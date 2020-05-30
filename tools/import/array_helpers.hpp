@@ -47,16 +47,16 @@
 #include "import_rule.hpp"
 
 template <typename T, typename Next>
-class array_object final : public state {
+class array_object final : public rule {
 public:
-    array_object (parse_stack_pointer s, pstore::gsl::not_null<std::vector<T> *> arr)
-            : state (s)
+    array_object (parse_stack_pointer s, not_null<std::vector<T> *> arr)
+            : rule (s)
             , arr_{arr} {}
     std::error_code begin_object () override { return push<Next> (arr_); }
     std::error_code end_array () override { return pop (); }
 
 private:
-    pstore::gsl::not_null<std::vector<T> *> arr_;
+    not_null<std::vector<T> *> arr_;
 };
 
 

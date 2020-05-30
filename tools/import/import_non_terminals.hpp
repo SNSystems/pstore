@@ -105,10 +105,10 @@ namespace cxx17shim {
 //* \___/_.__// \___\__|\__| |_|  \_,_|_\___| *
 //*         |__/                              *
 template <typename NextState, typename... Args>
-class object_rule final : public state {
+class object_rule final : public rule {
 public:
     object_rule (parse_stack_pointer s, Args... args)
-            : state (s)
+            : rule (s)
             , args_{std::forward_as_tuple (args...)} {}
     std::error_code begin_object () override {
         cxx17shim::apply (&object_rule::replace_top<NextState, Args...>,
@@ -124,8 +124,8 @@ private:
 
 
 template <typename Next, typename... Args>
-std::error_code push_object_rule (state * const s, Args &&... args) {
-    return s->push<object_rule<Next, Args...>> (std::forward<Args> (args)...);
+std::error_code push_object_rule (rule * const rule, Args &&... args) {
+    return rule->push<object_rule<Next, Args...>> (std::forward<Args> (args)...);
 }
 
 
@@ -135,10 +135,10 @@ std::error_code push_object_rule (state * const s, Args &&... args) {
 //* \__,_|_| |_| \__,_|\_, | |_|  \_,_|_\___| *
 //*                    |__/                   *
 template <typename NextRule, typename... Args>
-class array_rule final : public state {
+class array_rule final : public rule {
 public:
     array_rule (parse_stack_pointer s, Args... args)
-            : state (s)
+            : rule (s)
             , args_{std::forward_as_tuple (args...)} {}
     std::error_code begin_array () override {
         cxx17shim::apply (&array_rule::replace_top<NextRule, Args...>,
@@ -153,8 +153,8 @@ private:
 };
 
 template <typename NextRule, typename... Args>
-std::error_code push_array_rule (state * const s, Args &&... args) {
-    return s->push<array_rule<NextRule, Args...>> (std::forward<Args> (args)...);
+std::error_code push_array_rule (rule * const rule, Args &&... args) {
+    return rule->push<array_rule<NextRule, Args...>> (std::forward<Args> (args)...);
 }
 
 #endif // PSTORE_IMPORT_IMPORT_NON_TERMINALS_HPP

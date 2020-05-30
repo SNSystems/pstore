@@ -65,11 +65,11 @@ using namespace pstore;
 //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
 //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
 //*                                        *
-class definition final : public state {
+class definition final : public rule {
 public:
     using container = std::vector<repo::compilation_member>;
     definition (parse_stack_pointer s, not_null<container *> definitions, names_pointer names)
-            : state (s)
+            : rule (s)
             , definitions_{definitions}
             , names_{names} {}
 
@@ -160,11 +160,11 @@ maybe<repo::visibility> definition::decode_visibility (std::string const & visib
 //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
 //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
 //*                                                |__/             *
-class definition_object final : public state {
+class definition_object final : public rule {
 public:
     definition_object (parse_stack_pointer s, not_null<definition::container *> definitions,
                        not_null<names *> names)
-            : state (s)
+            : rule (s)
             , definitions_{definitions}
             , names_{names} {}
     gsl::czstring name () const noexcept override { return "definition_object"; }
@@ -184,11 +184,11 @@ private:
 //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
 //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
 //*              |_|                            *
-class compilation final : public state {
+class compilation final : public rule {
 public:
     compilation (parse_stack_pointer s, transaction_pointer transaction,
                  gsl::not_null<names *> names, index::digest digest)
-            : state (s)
+            : rule (s)
             , transaction_{transaction}
             , names_{names}
             , digest_{digest} {}
@@ -247,7 +247,7 @@ std::error_code compilation::end_object () {
 // (ctor)
 compilations_index::compilations_index (parse_stack_pointer s, transaction_pointer transaction,
                                         names_pointer names)
-        : state (s)
+        : rule (s)
         , transaction_{transaction}
         , names_{names} {}
 

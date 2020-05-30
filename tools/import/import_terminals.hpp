@@ -46,10 +46,10 @@
 
 #include "import_rule.hpp"
 
-class uint64_rule final : public state {
+class uint64_rule final : public rule {
 public:
     uint64_rule (parse_stack_pointer stack, not_null<std::uint64_t *> v)
-            : state (stack)
+            : rule (stack)
             , v_{v} {}
     std::error_code uint64_value (std::uint64_t v) override;
     pstore::gsl::czstring name () const noexcept override;
@@ -58,10 +58,10 @@ private:
     not_null<std::uint64_t *> v_;
 };
 
-class string_rule final : public state {
+class string_rule final : public rule {
 public:
     string_rule (parse_stack_pointer stack, not_null<std::string *> v)
-            : state (stack)
+            : rule (stack)
             , v_{v} {}
     std::error_code string_value (std::string const & v) override;
     pstore::gsl::czstring name () const noexcept override;

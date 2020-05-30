@@ -52,17 +52,22 @@
 template <typename T>
 using not_null = pstore::gsl::not_null<T>;
 
-class state {
+//*           _      *
+//*  _ _ _  _| |___  *
+//* | '_| || | / -_) *
+//* |_|  \_,_|_\___| *
+//*                  *
+class rule {
 public:
-    using parse_stack = std::stack<std::unique_ptr<state>>;
+    using parse_stack = std::stack<std::unique_ptr<rule>>;
     using parse_stack_pointer = not_null<parse_stack *>;
 
-    explicit state (parse_stack_pointer stack)
+    explicit rule (parse_stack_pointer stack)
             : stack_{stack} {}
-    state (state const &) = delete;
-    virtual ~state ();
+    rule (rule const &) = delete;
+    virtual ~rule ();
 
-    state & operator= (state const &) = delete;
+    rule & operator= (rule const &) = delete;
 
     virtual pstore::gsl::czstring name () const noexcept = 0;
 
@@ -121,7 +126,7 @@ public:
 
     template <typename Root, typename... Args>
     static callbacks make (Args &&... args) {
-        auto stack = std::make_shared<state::parse_stack> ();
+        auto stack = std::make_shared<rule::parse_stack> ();
         return {stack, std::make_unique<Root> (stack.get (), std::forward<Args> (args)...)};
     }
 
@@ -138,16 +143,16 @@ public:
     std::error_code end_object () { return top ()->end_object (); }
 
 private:
-    callbacks (std::shared_ptr<state::parse_stack> const & stack, std::unique_ptr<state> && root)
+    callbacks (std::shared_ptr<rule::parse_stack> const & stack, std::unique_ptr<rule> && root)
             : stack_{stack} {
         stack_->push (std::move (root));
     }
 
-    std::unique_ptr<state> & top () {
+    std::unique_ptr<rule> & top () {
         assert (!stack_->empty ());
         return stack_->top ();
     }
-    std::shared_ptr<state::parse_stack> stack_;
+    std::shared_ptr<rule::parse_stack> stack_;
 };
 
 #endif // PSTORE_IMPORT_IMPORT_RULE_HPP

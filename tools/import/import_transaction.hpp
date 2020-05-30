@@ -57,9 +57,9 @@
 using transaction_type = pstore::transaction<pstore::transaction_lock>;
 using transaction_pointer = pstore::gsl::not_null<transaction_type *>;
 
-class transaction_array final : public state {
+class transaction_array final : public rule {
 public:
-    transaction_array (parse_stack_pointer s, pstore::gsl::not_null<pstore::database *> db);
+    transaction_array (parse_stack_pointer s, not_null<pstore::database *> db);
     pstore::gsl::czstring name () const noexcept override;
     std::error_code begin_array () override;
 

@@ -60,7 +60,7 @@ using namespace pstore;
 // (ctor)
 // ~~~~~~
 debug_line_index::debug_line_index (parse_stack_pointer s, transaction_pointer transaction)
-        : state (s)
+        : rule (s)
         , transaction_{transaction}
         , index_{pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
               transaction->db ())} {}

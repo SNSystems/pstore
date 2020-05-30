@@ -59,7 +59,7 @@
 #include "import_rule.hpp"
 #include "import_transaction.hpp"
 
-class fragment_index final : public state {
+class fragment_index final : public rule {
 public:
     fragment_index (parse_stack_pointer s, transaction_pointer transaction);
     pstore::gsl::czstring name () const noexcept override;

@@ -44,38 +44,38 @@
 #include "import_rule.hpp"
 #include "import_error.hpp"
 
-state::~state () = default;
+rule::~rule () = default;
 
-std::error_code state::int64_value (std::int64_t) {
+std::error_code rule::int64_value (std::int64_t) {
     return make_error_code (import_error::unexpected_number);
 }
-std::error_code state::uint64_value (std::uint64_t) {
+std::error_code rule::uint64_value (std::uint64_t) {
     return make_error_code (import_error::unexpected_number);
 }
-std::error_code state::double_value (double) {
+std::error_code rule::double_value (double) {
     return make_error_code (import_error::unexpected_number);
 }
-std::error_code state::boolean_value (bool) {
+std::error_code rule::boolean_value (bool) {
     return make_error_code (import_error::unexpected_boolean);
 }
-std::error_code state::null_value () {
+std::error_code rule::null_value () {
     return make_error_code (import_error::unexpected_null);
 }
-std::error_code state::begin_array () {
+std::error_code rule::begin_array () {
     return make_error_code (import_error::unexpected_array);
 }
-std::error_code state::string_value (std::string const &) {
+std::error_code rule::string_value (std::string const &) {
     return make_error_code (import_error::unexpected_string);
 }
-std::error_code state::end_array () {
+std::error_code rule::end_array () {
     return make_error_code (import_error::unexpected_end_array);
 }
-std::error_code state::begin_object () {
+std::error_code rule::begin_object () {
     return make_error_code (import_error::unexpected_object);
 }
-std::error_code state::key (std::string const &) {
+std::error_code rule::key (std::string const &) {
     return make_error_code (import_error::unexpected_object_key);
 }
-std::error_code state::end_object () {
+std::error_code rule::end_object () {
     return make_error_code (import_error::unexpected_end_object);
 }

@@ -73,7 +73,7 @@ private:
 using names_pointer = pstore::gsl::not_null<names *>;
 
 
-class names_array_members final : public state {
+class names_array_members final : public rule {
 public:
     names_array_members (parse_stack_pointer s, names_pointer n);
 

@@ -60,10 +60,10 @@ using namespace pstore;
 
 namespace {
 
-    class transaction_contents final : public state {
+    class transaction_contents final : public rule {
     public:
         transaction_contents (parse_stack_pointer stack, not_null<database *> db)
-                : state (stack)
+                : rule (stack)
                 , transaction_{begin (*db)}
                 , names_{&transaction_} {}
 
@@ -101,10 +101,10 @@ namespace {
     }
 
 
-    class transaction_object final : public state {
+    class transaction_object final : public rule {
     public:
         transaction_object (parse_stack_pointer s, not_null<database *> db)
-                : state (s)
+                : rule (s)
                 , db_{db} {}
         gsl::czstring name () const noexcept override { return "transaction_object"; }
         std::error_code begin_object () override { return push<transaction_contents> (db_); }
@@ -124,7 +124,7 @@ namespace {
 // (ctor)
 // ~~~~~~
 transaction_array::transaction_array (parse_stack_pointer s, not_null<database *> db)
-        : state (s)
+        : rule (s)
         , db_{db} {}
 
 // name

@@ -55,7 +55,7 @@
 #include "import_rule.hpp"
 #include "import_transaction.hpp"
 
-class debug_line_index final : public state {
+class debug_line_index final : public rule {
 public:
     debug_line_index (parse_stack_pointer s, transaction_pointer transaction);
 

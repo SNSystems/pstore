@@ -41,6 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include <bitset>
+
 #include "pstore/json/json.hpp"
 
 #include "import_error.hpp"
@@ -54,10 +56,10 @@ using namespace pstore;
 //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
 //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
 //*                            |__/             *
-class root_object final : public state {
+class root_object final : public rule {
 public:
     root_object (parse_stack_pointer stack, not_null<database *> db)
-            : state (stack)
+            : rule (stack)
             , db_{db} {}
     gsl::czstring name () const noexcept;
     std::error_code key (std::string const & k) override;
@@ -106,10 +108,10 @@ std::error_code root_object::end_object () {
 //* | '_/ _ \/ _ \  _| *
 //* |_| \___/\___/\__| *
 //*                    *
-class root final : public state {
+class root final : public rule {
 public:
     root (parse_stack_pointer stack, not_null<database *> db)
-            : state (stack)
+            : rule (stack)
             , db_{db} {}
     gsl::czstring name () const noexcept override;
     std::error_code begin_object () override;

@@ -53,7 +53,7 @@
 #include "import_rule.hpp"
 #include "import_names.hpp"
 
-class compilations_index final : public state {
+class compilations_index final : public rule {
 public:
     compilations_index (parse_stack_pointer s, transaction_pointer transaction,
                         names_pointer names);

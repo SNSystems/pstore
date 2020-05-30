@@ -68,10 +68,10 @@
 using namespace pstore;
 
 
-class section_name final : public state {
+class section_name final : public rule {
 public:
     section_name (parse_stack_pointer s, gsl::not_null<repo::section_kind *> section)
-            : state (s)
+            : rule (s)
             , section_{section} {}
 
 private:
@@ -93,10 +93,10 @@ private:
     gsl::not_null<repo::section_kind *> section_;
 };
 
-class ifixup_rule final : public state {
+class ifixup_rule final : public rule {
 public:
     explicit ifixup_rule (parse_stack_pointer s, std::vector<repo::internal_fixup> * fixups)
-            : state (s)
+            : rule (s)
             , fixups_{fixups} {}
 
 private:
@@ -162,7 +162,7 @@ std::error_code ifixup_rule::end_object () {
 }
 
 
-class xfixup_state final : public state {
+class xfixup_state final : public rule {
 public:
     xfixup_state (parse_stack_pointer s, gsl::not_null<std::vector<repo::external_fixup> *> fixups);
 
@@ -183,7 +183,7 @@ private:
 
 xfixup_state::xfixup_state (parse_stack_pointer s,
                             gsl::not_null<std::vector<repo::external_fixup> *> fixups)
-        : state (s)
+        : rule (s)
         , fixups_{fixups} {}
 
 gsl::czstring xfixup_state::name () const noexcept {
@@ -221,10 +221,10 @@ std::error_code xfixup_state::end_object () {
 }
 
 template <typename Next, typename Fixup>
-class fixups_object final : public state {
+class fixups_object final : public rule {
 public:
     fixups_object (parse_stack_pointer stack, gsl::not_null<std::vector<Fixup> *> fixups)
-            : state (stack)
+            : rule (stack)
             , fixups_{fixups} {}
     gsl::czstring name () const noexcept override { return "fixups_object"; }
     std::error_code begin_object () override { return push<Next> (fixups_); }
@@ -242,7 +242,7 @@ using xfixups_object = fixups_object<xfixup_state, repo::external_fixup>;
 //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
 //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
 //* |___/                                                    *
-class generic_section final : public state {
+class generic_section final : public rule {
 public:
     generic_section (parse_stack_pointer stack);
 
@@ -263,7 +263,7 @@ private:
 // (ctor)
 // ~~~~~~
 generic_section::generic_section (parse_stack_pointer stack)
-        : state (stack) {}
+        : rule (stack) {}
 
 // name
 // ~~~~
@@ -318,7 +318,7 @@ std::error_code generic_section::end_object () {
 //* / _` / -_) '_ \ || / _` | | | | ' \/ -_) (_-</ -_) _|  _| / _ \ ' \  *
 //* \__,_\___|_.__/\_,_\__, | |_|_|_||_\___| /__/\___\__|\__|_\___/_||_| *
 //*                    |___/                                             *
-class debug_line_section final : public state {
+class debug_line_section final : public rule {
 public:
     debug_line_section (parse_stack_pointer stack);
 
@@ -338,7 +338,7 @@ private:
 // (ctor)
 // ~~~~~~
 debug_line_section::debug_line_section (parse_stack_pointer stack)
-        : state (stack) {}
+        : rule (stack) {}
 
 // name
 // ~~~~
@@ -385,27 +385,27 @@ namespace {
 
     template <>
     struct create_consumer<pstore::repo::generic_section> {
-        std::error_code operator() (state * const s) const {
-            return s->push<object_rule<generic_section>> ();
+        std::error_code operator() (rule * const rule) const {
+            return rule->push<object_rule<generic_section>> ();
         }
     };
 
     template <>
     struct create_consumer<pstore::repo::bss_section> {
-        std::error_code operator() (state * const s) const {
+        std::error_code operator() (rule * const rule) const {
             // TODO: implement BSS
             return {};
         }
     };
     template <>
     struct create_consumer<pstore::repo::debug_line_section> {
-        std::error_code operator() (state * const s) const {
-            return s->push<object_rule<debug_line_section>> ();
+        std::error_code operator() (rule * const rule) const {
+            return rule->push<object_rule<debug_line_section>> ();
         }
     };
     template <>
     struct create_consumer<pstore::repo::dependents> {
-        std::error_code operator() (state * const s) const {
+        std::error_code operator() (rule * const rule) const {
             // TODO: implement dependents
             return {};
         }
@@ -418,10 +418,10 @@ namespace {
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| (_-</ -_) _|  _| / _ \ ' \(_-< *
 //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| /__/\___\__|\__|_\___/_||_/__/ *
 //*              |___/                                                   *
-class fragment_sections final : public state {
+class fragment_sections final : public rule {
 public:
     fragment_sections (parse_stack_pointer s)
-            : state (s) {}
+            : rule (s) {}
 
     pstore::gsl::czstring name () const noexcept override;
     std::error_code key (std::string const & s) override;
@@ -475,7 +475,7 @@ std::error_code fragment_sections::key (std::string const & s) {
 // (ctor)
 // ~~~~~~
 fragment_index::fragment_index (parse_stack_pointer s, transaction_pointer transaction)
-        : state (s)
+        : rule (s)
         , transaction_{transaction} {}
 
 // name

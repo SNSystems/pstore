@@ -65,7 +65,7 @@ void names::flush () {
 
 
 names_array_members::names_array_members (parse_stack_pointer s, not_null<names *> n)
-        : state (s)
+        : rule (s)
         , names_{n} {}
 
 std::error_code names_array_members::string_value (std::string const & str) {
