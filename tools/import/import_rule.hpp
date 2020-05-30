@@ -83,7 +83,6 @@ public:
     virtual std::error_code key (std::string const & k);
     virtual std::error_code end_object ();
 
-    // protected:
     template <typename T, typename... Args>
     std::error_code push (Args &&... args) {
         stack_->push (std::make_unique<T> (stack_, std::forward<Args> (args)...));
@@ -92,6 +91,7 @@ public:
         return {};
     }
 
+protected:
     template <typename T, typename... Args>
     std::error_code replace_top (Args &&... args) {
         auto p = std::make_unique<T> (stack_, std::forward<Args> (args)...);
