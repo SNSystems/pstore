@@ -460,4 +460,5 @@ TEST_F (ClCommandLine, AliasBool) {
 
     EXPECT_EQ (opt.get_num_occurrences (), 1U);
     EXPECT_EQ (opt.get (), true);
+    EXPECT_EQ (opt2.get_num_occurrences (), 1U);
 }
