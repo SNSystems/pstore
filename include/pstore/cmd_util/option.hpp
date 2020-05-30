@@ -375,6 +375,7 @@ namespace pstore {
                     return original_->category ();
                 }
 
+                bool add_occurrence () override;
                 void set_num_occurrences_flag (num_occurrences_flag n) override;
                 num_occurrences_flag get_num_occurrences_flag () const override;
                 void set_positional () override;

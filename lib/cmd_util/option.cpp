@@ -155,6 +155,7 @@ namespace pstore {
                 assert (o != nullptr);
                 original_ = o;
             }
+            bool alias::add_occurrence () { return original_->add_occurrence (); }
             void alias::set_num_occurrences_flag (num_occurrences_flag const n) {
                 original_->set_num_occurrences_flag (n);
             }

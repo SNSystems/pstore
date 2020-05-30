@@ -444,3 +444,20 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
     EXPECT_EQ (opt.get (), "");
     EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
 }
+
+TEST_F (ClCommandLine, AliasBool) {
+    cl::opt<bool> opt ("opt");
+    cl::alias opt2 ("o", cl::aliasopt (opt));
+
+    this->add ("progname", "-o");
+
+    string_stream output;
+    string_stream errors;
+    bool const res = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res);
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (output.str ().length (), 0U);
+
+    EXPECT_EQ (opt.get_num_occurrences (), 1U);
+    EXPECT_EQ (opt.get (), true);
+}
