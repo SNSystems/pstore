@@ -161,10 +161,33 @@ namespace {
         using namespace pstore::dump;
 
         array::container result;
-        if (std::shared_ptr<pstore::index::write_index const> const write =
-                pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
-            result.push_back (make_index ("write", db, *write));
+        if (std::shared_ptr<pstore::index::compilation_index const> const compilation =
+                pstore::index::get_index<pstore::trailer::indices::compilation> (
+                    db, false /* create */)) {
+            result.push_back (make_value (object::container{
+                {"name", make_value ("compilation")},
+                {"members", make_value (compilation->begin (db), compilation->end (db))},
+            }));
         }
+
+        if (std::shared_ptr<pstore::index::debug_line_header_index const> const dlh =
+                pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
+                    db, false /* create */)) {
+            result.push_back (make_value (object::container{
+                {"name", make_value ("debug_line_header")},
+                {"members", make_value (dlh->begin (db), dlh->end (db))},
+            }));
+        }
+
+        if (std::shared_ptr<pstore::index::fragment_index const> const fragment =
+                pstore::index::get_index<pstore::trailer::indices::fragment> (db,
+                                                                              false /* create */)) {
+            result.push_back (make_value (object::container{
+                {"name", make_value ("fragment")},
+                {"members", make_value (fragment->begin (db), fragment->end (db))},
+            }));
+        }
+
         if (std::shared_ptr<pstore::index::name_index const> const name =
                 pstore::index::get_index<pstore::trailer::indices::name> (db, false /* create */)) {
             result.push_back (make_value (object::container{
@@ -172,9 +195,14 @@ namespace {
                 {"members", make_value (name->begin (db), name->end (db))},
             }));
         }
+
+        if (std::shared_ptr<pstore::index::write_index const> const write =
+                pstore::index::get_index<pstore::trailer::indices::write> (db, false /* create*/)) {
+            result.push_back (make_index ("write", db, *write));
+        }
+
         return make_value (result);
     }
-
 
     pstore::dump::value_ptr make_log (pstore::database const & db, bool no_times) {
         using namespace pstore::dump;

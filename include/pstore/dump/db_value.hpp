@@ -106,6 +106,16 @@ namespace pstore {
             return std::static_pointer_cast<value> (v);
         }
 
+        template <typename First, typename Second>
+        value_ptr make_value (std::pair<First, Second> const & p) {
+            auto const v = std::make_shared<object> (object::container{
+                {"first", make_value (p.first)},
+                {"second", make_value (p.second)},
+            });
+            v->compact ();
+            return std::static_pointer_cast<value> (v);
+        }
+
         namespace details {
             template <typename T>
             inline value_ptr default_make_value (T const & t) {
