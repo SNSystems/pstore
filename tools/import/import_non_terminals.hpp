@@ -81,8 +81,8 @@ namespace cxx17shim {
 
     template <typename F, typename Tuple>
     constexpr decltype (auto) apply (F && f, Tuple && t) {
-        using Indices = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
-        return details::apply_impl (std::forward<F> (f), std::forward<Tuple> (t), Indices{});
+        using indices = std::make_index_sequence<std::tuple_size<std::decay_t<Tuple>>::value>;
+        return details::apply_impl (std::forward<F> (f), std::forward<Tuple> (t), indices{});
     }
 
 } // end namespace cxx17shim
@@ -99,6 +99,11 @@ namespace cxx17shim {
 
 #endif
 
+//*      _     _        _              _      *
+//*  ___| |__ (_)___ __| |_   _ _ _  _| |___  *
+//* / _ \ '_ \| / -_) _|  _| | '_| || | / -_) *
+//* \___/_.__// \___\__|\__| |_|  \_,_|_\___| *
+//*         |__/                              *
 template <typename NextState, typename... Args>
 class object_rule final : public state {
 public:
@@ -111,7 +116,7 @@ public:
         return {};
     }
 
-    pstore::gsl::czstring name () const noexcept { return "object_rule"; }
+    pstore::gsl::czstring name () const noexcept override { return "object rule"; }
 
 private:
     std::tuple<Args...> args_;
@@ -124,6 +129,11 @@ std::error_code push_object_rule (state * const s, Args &&... args) {
 }
 
 
+//*                                    _      *
+//*  __ _ _ _ _ _ __ _ _  _   _ _ _  _| |___  *
+//* / _` | '_| '_/ _` | || | | '_| || | / -_) *
+//* \__,_|_| |_| \__,_|\_, | |_|  \_,_|_\___| *
+//*                    |__/                   *
 template <typename NextRule, typename... Args>
 class array_rule final : public state {
 public:
@@ -136,7 +146,7 @@ public:
         return {};
     }
 
-    pstore::gsl::czstring name () const noexcept { return "array_rule"; }
+    pstore::gsl::czstring name () const noexcept override { return "array rule"; }
 
 private:
     std::tuple<Args...> args_;

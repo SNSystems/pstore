@@ -48,6 +48,8 @@ add_pstore_executable (pstore-import
     import.cpp
     import_compilations.cpp
     import_compilations.hpp
+    import_debug_line_header.cpp
+    import_debug_line_header.hpp
     import_error.cpp
     import_error.hpp
     import_fragment.cpp
@@ -60,6 +62,8 @@ add_pstore_executable (pstore-import
     import_rule.hpp
     import_terminals.cpp
     import_terminals.hpp
+    import_transaction.cpp
+    import_transaction.hpp
 )
 target_link_libraries (pstore-import PRIVATE
     pstore-cmd-util

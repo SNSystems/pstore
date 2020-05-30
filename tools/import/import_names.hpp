@@ -52,9 +52,7 @@
 #include "pstore/core/transaction.hpp"
 
 #include "import_rule.hpp"
-
-using transaction_type = pstore::transaction<pstore::transaction_lock>;
-using transaction_pointer = pstore::gsl::not_null<transaction_type *>;
+#include "import_transaction.hpp"
 
 class names {
 public:

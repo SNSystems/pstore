@@ -53,44 +53,22 @@
 #include <bitset>
 #include <vector>
 
-#include "pstore/core/database.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/mcrepo/section.hpp"
 
 #include "import_rule.hpp"
+#include "import_transaction.hpp"
 
-class generic_section final : public state {
+class fragment_index final : public state {
 public:
-    generic_section (parse_stack_pointer stack);
+    fragment_index (parse_stack_pointer s, transaction_pointer transaction);
+    pstore::gsl::czstring name () const noexcept override;
+    std::error_code key (std::string const & s) override;
+    std::error_code end_object () override;
 
 private:
-    std::error_code key (std::string const & k) override;
-    std::error_code end_object () override;
-    pstore::gsl::czstring name () const noexcept override;
-
-    enum { data, align, ifixups, xfixups };
-    std::bitset<xfixups + 1> seen_;
-
-    std::string data_;
-    std::uint64_t align_ = 0;
-    std::vector<pstore::repo::internal_fixup> ifixups_;
-    std::vector<pstore::repo::external_fixup> xfixups_;
+    transaction_pointer transaction_;
+    pstore::index::digest digest_;
+    std::vector<std::unique_ptr<pstore::repo::section_base>> sections_;
 };
-
-class debug_line_section final : public state {
-public:
-    debug_line_section (parse_stack_pointer stack);
-
-private:
-    std::error_code key (std::string const & k) override;
-    std::error_code end_object () override;
-    pstore::gsl::czstring name () const noexcept override;
-
-    enum { header, data, ifixups };
-    std::bitset<ifixups + 1> seen_;
-
-    std::string header_;
-    std::string data_;
-    std::vector<pstore::repo::internal_fixup> ifixups_;
-};
-
 #endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP

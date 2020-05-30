@@ -43,9 +43,36 @@
 //===----------------------------------------------------------------------===//
 #include "import_terminals.hpp"
 
-pstore::gsl::czstring uint64_rule::name () const noexcept {
-    return "uint64_rule";
+//*       _     _    __ _ _             _      *
+//*  _  _(_)_ _| |_ / /| | |   _ _ _  _| |___  *
+//* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
+//*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
+//*                                            *
+// uint64_value
+// ~~~~~~~~~~~~
+std::error_code uint64_rule::uint64_value (std::uint64_t v) {
+    *v_ = v;
+    return pop ();
 }
+
+pstore::gsl::czstring uint64_rule::name () const noexcept {
+    return "uint64 rule";
+}
+
+//*     _       _                      _      *
+//*  __| |_ _ _(_)_ _  __ _   _ _ _  _| |___  *
+//* (_-<  _| '_| | ' \/ _` | | '_| || | / -_) *
+//* /__/\__|_| |_|_||_\__, | |_|  \_,_|_\___| *
+//*                   |___/                   *
+// name
+// ~~~~
 pstore::gsl::czstring string_rule::name () const noexcept {
-    return "string_rule";
+    return "string rule";
+}
+
+// string value
+// ~~~~~~~~~~~~
+std::error_code string_rule::string_value (std::string const & v) {
+    *v_ = v;
+    return pop ();
 }

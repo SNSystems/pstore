@@ -49,10 +49,13 @@
 #include <iostream> // TODO: remove this!
 #include "pstore/support/gsl.hpp"
 
+template <typename T>
+using not_null = pstore::gsl::not_null<T>;
+
 class state {
 public:
     using parse_stack = std::stack<std::unique_ptr<state>>;
-    using parse_stack_pointer = pstore::gsl::not_null<parse_stack *>;
+    using parse_stack_pointer = not_null<parse_stack *>;
 
     explicit state (parse_stack_pointer stack)
             : stack_{stack} {}

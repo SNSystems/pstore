@@ -82,13 +82,13 @@ namespace {
 
 } // end anonymous namespace
 
-maybe<uint128> digest_from_string (std::string const & str) {
+maybe<pstore::index::digest> digest_from_string (std::string const & str) {
     if (str.length () != 32) {
         return nothing<uint128> ();
     }
     return get64 (str, 0U) >>= [&] (std::uint64_t const high) {
         return get64 (str, 16U) >>= [&] (std::uint64_t const low) {
-            return just (uint128{high, low});
+            return just (pstore::index::digest{high, low});
         };
     };
 }

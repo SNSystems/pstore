@@ -51,9 +51,10 @@
 #define PSTORE_IMPORT_DIGEST_FROM_STRING_HPP
 
 #include <string>
-#include "pstore/support/maybe.hpp"
-#include "pstore/support/uint128.hpp"
 
-pstore::maybe<pstore::uint128> digest_from_string (std::string const & str);
+#include "pstore/core/index_types.hpp"
+#include "pstore/support/maybe.hpp"
+
+pstore::maybe<pstore::index::digest> digest_from_string (std::string const & str);
 
 #endif // PSTORE_IMPORT_DIGEST_FROM_STRING_HPP

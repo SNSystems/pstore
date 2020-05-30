@@ -4,13 +4,13 @@
 //* | | | | | | | |_) | (_) | |  | |_  *
 //* |_|_| |_| |_| .__/ \___/|_|   \__| *
 //*             |_|                    *
-//*                            _ _       _   _                  *
-//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __  ___  *
-//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \/ __| *
-//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | \__ \ *
-//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_|___/ *
-//*                     |_|                                     *
-//===- tools/import/import_compilations.hpp -------------------------------===//
+//*  _                                  _   _              *
+//* | |_ _ __ __ _ _ __  ___  __ _  ___| |_(_) ___  _ __   *
+//* | __| '__/ _` | '_ \/ __|/ _` |/ __| __| |/ _ \| '_ \  *
+//* | |_| | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | | *
+//*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
+//*                                                        *
+//===- tools/import/import_transaction.hpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,24 +47,24 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
-#define PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#ifndef PSTORE_IMPORT_IMPORT_TRANSACTION_HPP
+#define PSTORE_IMPORT_IMPORT_TRANSACTION_HPP
+
+#include "pstore/core/transaction.hpp"
 
 #include "import_rule.hpp"
-#include "import_names.hpp"
 
-class compilations_index final : public state {
+using transaction_type = pstore::transaction<pstore::transaction_lock>;
+using transaction_pointer = pstore::gsl::not_null<transaction_type *>;
+
+class transaction_array final : public state {
 public:
-    compilations_index (parse_stack_pointer s, transaction_pointer transaction,
-                        names_pointer names);
-
+    transaction_array (parse_stack_pointer s, pstore::gsl::not_null<pstore::database *> db);
     pstore::gsl::czstring name () const noexcept override;
-    std::error_code key (std::string const & s) override;
-    std::error_code end_object () override;
+    std::error_code begin_array () override;
 
 private:
-    transaction_pointer transaction_;
-    names_pointer names_;
+    pstore::gsl::not_null<pstore::database *> db_;
 };
 
-#endif // PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#endif // PSTORE_IMPORT_IMPORT_TRANSACTION_HPP

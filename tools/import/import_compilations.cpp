@@ -60,9 +60,6 @@
 
 using namespace pstore;
 
-template <typename T>
-using not_null = pstore::gsl::not_null<T>;
-
 //*     _      __ _      _ _   _           *
 //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
 //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
@@ -231,7 +228,7 @@ std::error_code compilation::key (std::string const & k) {
     return import_error::unknown_compilation_object_key;
 }
 
-// end_object
+// end object
 // ~~~~~~~~~~
 std::error_code compilation::end_object () {
     if (!seen_.all ()) {
@@ -247,17 +244,30 @@ std::error_code compilation::end_object () {
 //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
 //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
 //*              |_|                                                     *
+// (ctor)
+compilations_index::compilations_index (parse_stack_pointer s, transaction_pointer transaction,
+                                        names_pointer names)
+        : state (s)
+        , transaction_{transaction}
+        , names_{names} {}
 
+// name
+// ~~~~
 pstore::gsl::czstring compilations_index::name () const noexcept {
-    return "compilations_index";
+    return "compilations index";
 }
 
+// key
+// ~~~
 std::error_code compilations_index::key (std::string const & s) {
     if (maybe<index::digest> const digest = digest_from_string (s)) {
         return push_object_rule<compilation> (this, transaction_, names_, index::digest{*digest});
     }
     return import_error::bad_digest;
 }
+
+// end object
+// ~~~~~~~~~~
 std::error_code compilations_index::end_object () {
     return pop ();
 }

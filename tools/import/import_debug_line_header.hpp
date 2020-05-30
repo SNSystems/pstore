@@ -1,16 +1,16 @@
-//*  _                            _    *
-//* (_)_ __ ___  _ __   ___  _ __| |_  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
-//* | | | | | | | |_) | (_) | |  | |_  *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| *
-//*             |_|                    *
-//*                            _ _       _   _                  *
-//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __  ___  *
-//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \/ __| *
-//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | \__ \ *
-//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_|___/ *
-//*                     |_|                                     *
-//===- tools/import/import_compilations.hpp -------------------------------===//
+//*  _                            _         _      _                  *
+//* (_)_ __ ___  _ __   ___  _ __| |_    __| | ___| |__  _   _  __ _  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __|  / _` |/ _ \ '_ \| | | |/ _` | *
+//* | | | | | | | |_) | (_) | |  | |_  | (_| |  __/ |_) | |_| | (_| | *
+//* |_|_| |_| |_| .__/ \___/|_|   \__|  \__,_|\___|_.__/ \__,_|\__, | *
+//*             |_|                                            |___/  *
+//*  _ _              _                    _            *
+//* | (_)_ __   ___  | |__   ___  __ _  __| | ___ _ __  *
+//* | | | '_ \ / _ \ | '_ \ / _ \/ _` |/ _` |/ _ \ '__| *
+//* | | | | | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
+//* |_|_|_| |_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
+//*                                                     *
+//===- tools/import/import_debug_line_header.hpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,24 +47,28 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
-#define PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#ifndef PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+#define PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+
+#include "pstore/core/index_types.hpp"
 
 #include "import_rule.hpp"
-#include "import_names.hpp"
+#include "import_transaction.hpp"
 
-class compilations_index final : public state {
+class debug_line_index final : public state {
 public:
-    compilations_index (parse_stack_pointer s, transaction_pointer transaction,
-                        names_pointer names);
+    debug_line_index (parse_stack_pointer s, transaction_pointer transaction);
 
     pstore::gsl::czstring name () const noexcept override;
+
+    std::error_code string_value (std::string const & s) override;
     std::error_code key (std::string const & s) override;
     std::error_code end_object () override;
 
 private:
     transaction_pointer transaction_;
-    names_pointer names_;
+    std::shared_ptr<pstore::index::debug_line_header_index> index_;
+    pstore::index::digest digest_;
 };
 
-#endif // PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#endif // PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP

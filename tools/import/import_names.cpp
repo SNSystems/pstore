@@ -45,9 +45,6 @@
 
 #include "pstore/core/indirect_string.hpp"
 
-template <typename T>
-using not_null = pstore::gsl::not_null<T>;
-
 names::names (transaction_pointer transaction)
         : transaction_{transaction}
         , names_index_{
@@ -80,5 +77,5 @@ std::error_code names_array_members::end_array () {
 }
 
 pstore::gsl::czstring names_array_members::name () const noexcept {
-    return "names_array_members";
+    return "names array members";
 }
