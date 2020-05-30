@@ -43,99 +43,13 @@
 //===----------------------------------------------------------------------===//
 #include <bitset>
 
+#include "pstore/core/database.hpp"
 #include "pstore/json/json.hpp"
 
-#include "import_error.hpp"
-#include "import_terminals.hpp"
-#include "import_transaction.hpp"
-
-using namespace pstore;
-
-//*               _         _     _        _    *
-//*  _ _ ___  ___| |_   ___| |__ (_)___ __| |_  *
-//* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
-//* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
-//*                            |__/             *
-class root_object final : public rule {
-public:
-    root_object (parse_stack_pointer stack, not_null<database *> db)
-            : rule (stack)
-            , db_{db} {}
-    gsl::czstring name () const noexcept;
-    std::error_code key (std::string const & k) override;
-    std::error_code end_object () override;
-
-private:
-    not_null<database *> db_;
-
-    enum { version, transactions };
-    std::bitset<transactions + 1> seen_;
-    std::uint64_t version_ = 0;
-};
-
-// name
-// ~~~~
-gsl::czstring root_object::name () const noexcept {
-    return "root object";
-}
-
-// key
-// ~~~
-std::error_code root_object::key (std::string const & k) {
-    // TODO: check that 'version' is the first key that we see.
-    if (k == "version") {
-        seen_[version] = true;
-        return push<uint64_rule> (&version_);
-    }
-    if (k == "transactions") {
-        seen_[transactions] = true;
-        return push<transaction_array> (db_);
-    }
-    return import_error::unrecognized_root_key;
-}
-
-// end object
-// ~~~~~~~~~~
-std::error_code root_object::end_object () {
-    if (!seen_.all ()) {
-        return import_error::root_object_was_incomplete;
-    }
-    return {};
-}
-
-//*               _    *
-//*  _ _ ___  ___| |_  *
-//* | '_/ _ \/ _ \  _| *
-//* |_| \___/\___/\__| *
-//*                    *
-class root final : public rule {
-public:
-    root (parse_stack_pointer stack, not_null<database *> db)
-            : rule (stack)
-            , db_{db} {}
-    gsl::czstring name () const noexcept override;
-    std::error_code begin_object () override;
-
-private:
-    not_null<database *> db_;
-};
-
-// name
-// ~~~~
-gsl::czstring root::name () const noexcept {
-    return "root";
-}
-
-// begin object
-// ~~~~~~~~~~~~
-std::error_code root::begin_object () {
-    return push<root_object> (db_);
-}
-
-
+#include "import_root.hpp"
 
 int main (int argc, char * argv[]) {
-    try {
+    PSTORE_TRY {
         pstore::database db{argv[1], pstore::database::access_mode::writable};
         FILE * infile = argc == 3 ? std::fopen (argv[2], "r") : stdin;
         if (infile == nullptr) {
@@ -143,7 +57,7 @@ int main (int argc, char * argv[]) {
             return EXIT_FAILURE;
         }
 
-        auto parser = json::make_parser (callbacks::make<root> (&db));
+        auto parser = pstore::json::make_parser (callbacks::make<root> (&db));
         using parser_type = decltype (parser);
         for (int ch = std::getc (infile); ch != EOF; ch = std::getc (infile)) {
             auto const c = static_cast<char> (ch);
@@ -171,9 +85,13 @@ int main (int argc, char * argv[]) {
             std::fclose (infile);
             infile = nullptr;
         }
-    } catch (std::exception const & ex) {
-        std::cerr << "Error: " << ex.what () << '\n';
-    } catch (...) {
-        std::cerr << "Error: an unknown error occurred\n";
     }
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
+        std::cerr << "Error: " << ex.what () << '\n';
+    })
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
+        std::cerr << "Error: an unknown error occurred\n";
+    })
 }

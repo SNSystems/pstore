@@ -58,6 +58,8 @@ add_pstore_executable (pstore-import
     import_names.hpp
     import_non_terminals.cpp
     import_non_terminals.hpp
+    import_root.cpp
+    import_root.hpp
     import_rule.cpp
     import_rule.hpp
     import_terminals.cpp
