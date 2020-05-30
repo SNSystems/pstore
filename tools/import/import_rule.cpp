@@ -47,35 +47,35 @@
 rule::~rule () = default;
 
 std::error_code rule::int64_value (std::int64_t) {
-    return make_error_code (import_error::unexpected_number);
+    return import_error::unexpected_number;
 }
 std::error_code rule::uint64_value (std::uint64_t) {
-    return make_error_code (import_error::unexpected_number);
+    return import_error::unexpected_number;
 }
 std::error_code rule::double_value (double) {
-    return make_error_code (import_error::unexpected_number);
+    return import_error::unexpected_number;
 }
 std::error_code rule::boolean_value (bool) {
-    return make_error_code (import_error::unexpected_boolean);
+    return import_error::unexpected_boolean;
 }
 std::error_code rule::null_value () {
-    return make_error_code (import_error::unexpected_null);
+    return import_error::unexpected_null;
 }
 std::error_code rule::begin_array () {
-    return make_error_code (import_error::unexpected_array);
+    return import_error::unexpected_array;
 }
 std::error_code rule::string_value (std::string const &) {
-    return make_error_code (import_error::unexpected_string);
+    return import_error::unexpected_string;
 }
 std::error_code rule::end_array () {
-    return make_error_code (import_error::unexpected_end_array);
+    return import_error::unexpected_end_array;
 }
 std::error_code rule::begin_object () {
-    return make_error_code (import_error::unexpected_object);
+    return import_error::unexpected_object;
 }
 std::error_code rule::key (std::string const &) {
-    return make_error_code (import_error::unexpected_object_key);
+    return import_error::unexpected_object_key;
 }
 std::error_code rule::end_object () {
-    return make_error_code (import_error::unexpected_end_object);
+    return import_error::unexpected_end_object;
 }
