@@ -68,6 +68,11 @@
 using namespace pstore;
 
 
+//*             _   _                                 *
+//*  ___ ___ __| |_(_)___ _ _    _ _  __ _ _ __  ___  *
+//* (_-</ -_) _|  _| / _ \ ' \  | ' \/ _` | '  \/ -_) *
+//* /__/\___\__|\__|_\___/_||_| |_||_\__,_|_|_|_\___| *
+//*                                                   *
 class section_name final : public rule {
 public:
     section_name (parse_stack_pointer s, gsl::not_null<repo::section_kind *> section)
@@ -75,24 +80,40 @@ public:
             , section_{section} {}
 
 private:
-    std::error_code string_value (std::string const & s) override {
-        // TODO: this map appears both here and in the fragment code.
-#define X(a) {#a, repo::section_kind::a},
-        static std::unordered_map<std::string, repo::section_kind> map = {
-            PSTORE_MCREPO_SECTION_KINDS};
-#undef X
-        auto pos = map.find (s);
-        if (pos == map.end ()) {
-            return import_error::unknown_section_name;
-        }
-        *section_ = pos->second;
-        return pop ();
-    }
-    gsl::czstring name () const noexcept override { return "section_name"; }
+    gsl::czstring name () const noexcept override;
+    std::error_code string_value (std::string const & s) override;
 
     gsl::not_null<repo::section_kind *> section_;
 };
 
+// name
+// ~~~~
+gsl::czstring section_name::name () const noexcept {
+    return "section name";
+}
+
+// string value
+// ~~~~~~~~~~~~
+std::error_code section_name::string_value (std::string const & s) {
+    // TODO: this map appears both here and in the fragment code.
+#define X(a) {#a, repo::section_kind::a},
+    static std::unordered_map<std::string, repo::section_kind> map = {
+        PSTORE_MCREPO_SECTION_KINDS};
+#undef X
+    auto pos = map.find (s);
+    if (pos == map.end ()) {
+        return import_error::unknown_section_name;
+    }
+    *section_ = pos->second;
+    return pop ();
+}
+
+
+//*  _  __ _                          _      *
+//* (_)/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
+//* | |  _| \ \ / || | '_ \ | '_| || | / -_) *
+//* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
+//*                  |_|                     *
 class ifixup_rule final : public rule {
 public:
     explicit ifixup_rule (parse_stack_pointer s, std::vector<repo::internal_fixup> * fixups)
@@ -117,10 +138,14 @@ private:
     std::uint64_t addend_ = 0;
 };
 
+// name
+// ~~~~
 gsl::czstring ifixup_rule::name () const noexcept {
     return "ifixup rule";
 }
 
+// section from string
+// ~~~~~~~~~~~~~~~~~~~
 maybe<repo::section_kind> ifixup_rule::section_from_string (std::string const & s) {
 #define X(a) {#a, repo::section_kind::a},
     static std::unordered_map<std::string, repo::section_kind> map = {PSTORE_MCREPO_SECTION_KINDS};
@@ -132,6 +157,8 @@ maybe<repo::section_kind> ifixup_rule::section_from_string (std::string const & 
     return just (pos->second);
 }
 
+// key
+// ~~~
 std::error_code ifixup_rule::key (std::string const & k) {
     if (k == "section") {
         seen_[section] = true;
@@ -149,22 +176,28 @@ std::error_code ifixup_rule::key (std::string const & k) {
         seen_[addend] = true;
         return push<uint64_rule> (&addend_);
     }
-    return make_error_code (import_error::unrecognized_ifixup_key);
+    return import_error::unrecognized_ifixup_key;
 }
 
+// end object
+// ~~~~~~~~~~
 std::error_code ifixup_rule::end_object () {
     if (!seen_.all ()) {
-        return make_error_code (import_error::ifixup_object_was_incomplete);
+        return import_error::ifixup_object_was_incomplete;
     }
     // TODO: validate more values here.
     fixups_->emplace_back (section_, static_cast<repo::relocation_type> (type_), offset_, addend_);
     return pop ();
 }
 
-
-class xfixup_state final : public rule {
+//*       __ _                          _      *
+//* __ __/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
+//* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
+//* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
+//*                    |_|                     *
+class xfixup_rule final : public rule {
 public:
-    xfixup_state (parse_stack_pointer s, gsl::not_null<std::vector<repo::external_fixup> *> fixups);
+    xfixup_rule (parse_stack_pointer s, not_null<std::vector<repo::external_fixup> *> fixups);
 
 private:
     std::error_code key (std::string const & k) override;
@@ -181,16 +214,22 @@ private:
     std::uint64_t addend_ = 0;
 };
 
-xfixup_state::xfixup_state (parse_stack_pointer s,
-                            gsl::not_null<std::vector<repo::external_fixup> *> fixups)
+// (ctor)
+// ~~~~~~
+xfixup_rule::xfixup_rule (parse_stack_pointer s,
+                            not_null<std::vector<repo::external_fixup> *> fixups)
         : rule (s)
         , fixups_{fixups} {}
 
-gsl::czstring xfixup_state::name () const noexcept {
+// name
+// ~~~~
+gsl::czstring xfixup_rule::name () const noexcept {
     return "xfixup rule";
 }
 
-std::error_code xfixup_state::key (std::string const & k) {
+// key
+// ~~~
+std::error_code xfixup_rule::key (std::string const & k) {
     if (k == "name") {
         seen_[name_index] = true;
         return push<uint64_rule> (&name_);
@@ -210,7 +249,9 @@ std::error_code xfixup_state::key (std::string const & k) {
     return import_error::unrecognized_xfixup_key;
 }
 
-std::error_code xfixup_state::end_object () {
+// end object
+// ~~~~~~~~~~
+std::error_code xfixup_rule::end_object () {
     if (!seen_.all ()) {
         return import_error::xfixup_object_was_incomplete;
     }
@@ -220,13 +261,18 @@ std::error_code xfixup_state::end_object () {
     return pop ();
 }
 
+//*   __ _                        _     _        _    *
+//*  / _(_)_ ___  _ _ __ ___  ___| |__ (_)___ __| |_  *
+//* |  _| \ \ / || | '_ (_-< / _ \ '_ \| / -_) _|  _| *
+//* |_| |_/_\_\\_,_| .__/__/ \___/_.__// \___\__|\__| *
+//*                |_|               |__/             *
 template <typename Next, typename Fixup>
 class fixups_object final : public rule {
 public:
     fixups_object (parse_stack_pointer stack, gsl::not_null<std::vector<Fixup> *> fixups)
             : rule (stack)
             , fixups_{fixups} {}
-    gsl::czstring name () const noexcept override { return "fixups_object"; }
+    gsl::czstring name () const noexcept override { return "fixups object"; }
     std::error_code begin_object () override { return push<Next> (fixups_); }
     std::error_code end_array () override { return pop (); }
 
@@ -235,16 +281,18 @@ private:
 };
 
 using ifixups_object = fixups_object<ifixup_rule, repo::internal_fixup>;
-using xfixups_object = fixups_object<xfixup_state, repo::external_fixup>;
+using xfixups_object = fixups_object<xfixup_rule, repo::external_fixup>;
 
 //*                        _                 _   _           *
 //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
 //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
 //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
 //* |___/                                                    *
+template <typename OutputIterator>
 class generic_section final : public rule {
 public:
-    generic_section (parse_stack_pointer stack);
+    generic_section (parse_stack_pointer stack, OutputIterator out)
+        : rule(stack), out_{std::move (out)} {}
 
 private:
     std::error_code key (std::string const & k) override;
@@ -253,6 +301,7 @@ private:
 
     enum { data, align, ifixups, xfixups };
     std::bitset<xfixups + 1> seen_;
+    OutputIterator out_;
 
     std::string data_;
     std::uint64_t align_ = 0;
@@ -260,20 +309,17 @@ private:
     std::vector<pstore::repo::external_fixup> xfixups_;
 };
 
-// (ctor)
-// ~~~~~~
-generic_section::generic_section (parse_stack_pointer stack)
-        : rule (stack) {}
-
 // name
 // ~~~~
-pstore::gsl::czstring generic_section::name () const noexcept {
+template <typename OutputIterator>
+pstore::gsl::czstring generic_section<OutputIterator>::name () const noexcept {
     return "generic section";
 }
 
 // key
 // ~~~
-std::error_code generic_section::key (std::string const & k) {
+template <typename OutputIterator>
+std::error_code generic_section<OutputIterator>::key (std::string const & k) {
     if (k == "data") {
         seen_[data] = true; // string (ascii85)
         return push<string_rule> (&data_);
@@ -295,20 +341,22 @@ std::error_code generic_section::key (std::string const & k) {
 
 // end object
 // ~~~~~~~~~~
-std::error_code generic_section::end_object () {
+template <typename OutputIterator>
+std::error_code generic_section<OutputIterator>::end_object () {
     if (!seen_.all ()) {
-        return make_error_code (import_error::generic_section_was_incomplete);
+        return import_error::generic_section_was_incomplete;
     }
+    if (!is_power_of_two (align_)) {
+        return import_error::alignment_must_be_power_of_2;
+    }
+
     std::vector<std::uint8_t> data;
     from_base64 (std::begin (data_), std::end (data_), std::back_inserter (data));
-    // std::cout << "create generic section\n";
-    // TODO: align must be a power of 2!
-    // TODO: offsets must lie inside the data!
-    auto const data_span = gsl::make_span (data);
-    pstore::repo::generic_section section (
-        std::make_pair (data_span.data (), data_span.data () + data_span.size ()),
-        std::make_pair (std::begin (ifixups_), std::end (ifixups_)),
-        std::make_pair (std::begin (xfixups_), std::end (xfixups_)), align_);
+    // TODO: fixup offsets must lie inside the data!
+//    *out_ = std::make_unique<repo::generic_section_creation_dispatcher> ();
+//    content_->align = align_;
+//    content_->ifixups = std::move (ifixups_);
+//    content_->xfixups = std::move (xfixups_);
     return pop ();
 }
 
@@ -320,12 +368,12 @@ std::error_code generic_section::end_object () {
 //*                    |___/                                             *
 class debug_line_section final : public rule {
 public:
-    debug_line_section (parse_stack_pointer stack);
-
+    debug_line_section (parse_stack_pointer stack)
+        : rule (stack) {}
 private:
     std::error_code key (std::string const & k) override;
     std::error_code end_object () override;
-    pstore::gsl::czstring name () const noexcept override;
+    gsl::czstring name () const noexcept override;
 
     enum { header, data, ifixups };
     std::bitset<ifixups + 1> seen_;
@@ -334,11 +382,6 @@ private:
     std::string data_;
     std::vector<pstore::repo::internal_fixup> ifixups_;
 };
-
-// (ctor)
-// ~~~~~~
-debug_line_section::debug_line_section (parse_stack_pointer stack)
-        : rule (stack) {}
 
 // name
 // ~~~~
@@ -377,42 +420,6 @@ std::error_code debug_line_section::end_object () {
     return pop ();
 }
 
-
-namespace {
-
-    template <typename Content>
-    struct create_consumer;
-
-    template <>
-    struct create_consumer<pstore::repo::generic_section> {
-        std::error_code operator() (rule * const rule) const {
-            return rule->push<object_rule<generic_section>> ();
-        }
-    };
-
-    template <>
-    struct create_consumer<pstore::repo::bss_section> {
-        std::error_code operator() (rule * const rule) const {
-            // TODO: implement BSS
-            return {};
-        }
-    };
-    template <>
-    struct create_consumer<pstore::repo::debug_line_section> {
-        std::error_code operator() (rule * const rule) const {
-            return rule->push<object_rule<debug_line_section>> ();
-        }
-    };
-    template <>
-    struct create_consumer<pstore::repo::dependents> {
-        std::error_code operator() (rule * const rule) const {
-            // TODO: implement dependents
-            return {};
-        }
-    };
-
-} // end anonymous namespace
-
 //*   __                             _                _   _              *
 //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   ___ ___ __| |_(_)___ _ _  ___ *
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| (_-</ -_) _|  _| / _ \ ' \(_-< *
@@ -422,10 +429,13 @@ class fragment_sections final : public rule {
 public:
     fragment_sections (parse_stack_pointer s)
             : rule (s) {}
-
     pstore::gsl::czstring name () const noexcept override;
     std::error_code key (std::string const & s) override;
     std::error_code end_object () override;
+private:
+    std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
+//    std::unique_ptr<repo::section_content> content_;
+
 };
 
 // name
@@ -437,7 +447,7 @@ pstore::gsl::czstring fragment_sections::name () const noexcept {
 // end object
 // ~~~~~~~~~~
 std::error_code fragment_sections::end_object () {
-    return this->pop ();
+    return pop ();
 }
 
 // key
@@ -445,25 +455,36 @@ std::error_code fragment_sections::end_object () {
 std::error_code fragment_sections::key (std::string const & s) {
 #define X(a) {#a, pstore::repo::section_kind::a},
     static std::unordered_map<std::string, pstore::repo::section_kind> const map{
-        PSTORE_MCREPO_SECTION_KINDS};
+        PSTORE_MCREPO_SECTION_KINDS
+    };
 #undef X
     auto const pos = map.find (s);
     if (pos == map.end ()) {
         return import_error::unknown_section_name;
     }
-#define X(a)                                                                                       \
-    case pstore::repo::section_kind::a:                                                            \
-        return create_consumer<                                                                    \
-            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
+//#define X(a)                                                                                       \
+//    case pstore::repo::section_kind::a:                                                            \
+//        return create_consumer<                                                                    \
+//            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
 
+    auto oit = std::back_inserter (sections_);
     switch (pos->second) {
-        PSTORE_MCREPO_SECTION_KINDS
-    case pstore::repo::section_kind::last: assert (false); // unreachable
+        //PSTORE_MCREPO_SECTION_KINDS
+    case repo::section_kind::text:
+    case repo::section_kind::data: {
+        //content_ = std::make_unique<repo::section_content> (pos->second);
+        return push_object_rule<generic_section<decltype(oit)>> (this, oit);
     }
-#undef X
+    case repo::section_kind::debug_line:
+        //debug_line_ = std::make_unique<repo::debug_line_dispatcher>
+    case repo::section_kind::last: assert (false && "Illegal section kind"); // unreachable
+    default:
+        assert (false && "Unimplemented section kind"); // unreachable
+    }
+//#undef X
     // digest_ = s; // decode the digest here.
     // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
-    return {};
+    return import_error::unknown_section_name;
 }
 
 //*   __                             _     _         _          *
@@ -471,12 +492,13 @@ std::error_code fragment_sections::key (std::string const & s) {
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| | | ' \/ _` / -_) \ / *
 //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| |_|_||_\__,_\___/_\_\ *
 //*              |___/                                          *
-
 // (ctor)
 // ~~~~~~
 fragment_index::fragment_index (parse_stack_pointer s, transaction_pointer transaction)
         : rule (s)
-        , transaction_{transaction} {}
+        , transaction_{transaction} {
+    sections_.reserve (static_cast <std::underlying_type_t<repo::section_kind>> (repo::section_kind::last));
+}
 
 // name
 // ~~~~

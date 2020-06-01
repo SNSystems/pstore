@@ -49,6 +49,8 @@
 enum class import_error : int {
     none,
 
+    alignment_must_be_power_of_2,
+
     unexpected_null,
     unexpected_boolean,
     unexpected_number,

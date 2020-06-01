@@ -55,6 +55,8 @@ std::string import_error_category::message (int const error) const {
     auto * result = "unknown import_error_category error";
     switch (static_cast<import_error> (error)) {
     case import_error::none: result = "none"; break;
+
+    case import_error::alignment_must_be_power_of_2: result = "alignment must be a power of 2"; break;
     case import_error::unexpected_null: result = "unexpected null"; break;
     case import_error::unexpected_boolean: result = "unexpected boolean"; break;
     case import_error::unexpected_number: result = "unexpected number"; break;

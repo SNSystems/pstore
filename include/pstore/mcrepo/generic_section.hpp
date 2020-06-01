@@ -398,6 +398,8 @@ namespace pstore {
         inline std::uint32_t generic_section::num_ifixups () const noexcept { return num_ifixups_; }
 
         struct section_content {
+            explicit section_content (section_kind const kind_) noexcept
+                    : kind{kind_} {}
             section_content (section_kind const kind_, std::uint8_t const align_) noexcept
                     : kind{kind_}
                     , align{align_} {}
@@ -415,7 +417,7 @@ namespace pstore {
             }
 
             section_kind kind;
-            std::uint8_t align;
+            std::uint8_t align = 1;
             small_vector<std::uint8_t, 128> data;
             std::vector<internal_fixup> ifixups;
             std::vector<external_fixup> xfixups;
