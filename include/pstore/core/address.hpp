@@ -115,9 +115,10 @@ namespace pstore {
     //*                                       *
     struct address {
         /// An offset is 0-2^22 (4 megabytes)
-        static constexpr unsigned const offset_number_bits = 22U;
+        static constexpr unsigned offset_number_bits = 22U;
         /// A segment number is 0-2^16
-        static constexpr unsigned const segment_number_bits = 16U;
+        static constexpr unsigned segment_number_bits = 16U;
+        static constexpr unsigned total_bits = offset_number_bits + segment_number_bits;
 
         using offset_type = std::uint_least32_t;
         using segment_type = std::uint_least16_t;
@@ -264,6 +265,8 @@ namespace pstore {
     template <typename T>
     class typed_address {
     public:
+        static constexpr unsigned total_bits = address::total_bits;
+
         using type = T;
 
         constexpr typed_address () = default;
