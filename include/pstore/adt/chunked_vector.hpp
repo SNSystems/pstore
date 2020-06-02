@@ -49,6 +49,9 @@
 #include <cassert>
 #include <list>
 
+#include "pstore/support/inherit_const.hpp"
+#include "pstore/support/portab.hpp"
+
 namespace pstore {
 
     /// Chunked-vector is a sequence-container which uses a list of large blocks ("chunks") to
@@ -87,28 +90,29 @@ namespace pstore {
         // using reverse_iterator =
         // using const_reverse_iterator =
 
-        chunked_vector () = default;
+        chunked_vector ();
         chunked_vector (chunked_vector const &) = delete;
-        chunked_vector (chunked_vector && other) noexcept
-                : chunks_{std::move (other.chunks_)}
-                , size_{other.size_} {
-            other.size_ = 0;
-        }
+        chunked_vector (chunked_vector && other) noexcept;
 
         ~chunked_vector () noexcept { this->clear (); }
+
+        chunked_vector & operator= (chunked_vector const & other) noexcept = delete;
+        chunked_vector & operator= (chunked_vector && other) noexcept;
 
         constexpr bool empty () const noexcept { return size_ == 0; }
         constexpr size_type size () const noexcept { return size_; }
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
-        iterator end () noexcept { return {chunks_.end (), 0U}; }
+        iterator end () noexcept { return end_impl (*this); }
         const_iterator begin () const noexcept { return {chunks_.begin (), 0U}; }
-        const_iterator end () const noexcept { return {chunks_.end (), 0U}; }
+        const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cbegin () const noexcept { return begin (); }
         const_iterator cend () const noexcept { return end (); }
 
         void clear () noexcept {
             chunks_.clear ();
+            // Ensure that there's always at least one chunk.
+            chunks_.emplace_back ();
             size_ = 0;
         }
         void reserve (std::size_t /*size*/) {
@@ -159,6 +163,10 @@ namespace pstore {
         }
 
     private:
+        template <typename ChunkedVector, typename Result = typename inherit_const<
+                                              ChunkedVector, iterator, const_iterator>::type>
+        static Result end_impl (ChunkedVector & cv) noexcept;
+
         chunk_list chunks_;
         size_type size_ = 0; ///< The number of elements.
     };
@@ -173,7 +181,41 @@ namespace pstore {
 
     } // end namespace details
 
-    // emplace_back
+    // (ctor)
+    // ~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_vector () {
+        // Create an initial, empty chunk. This avoids checking whether the chunk list is empty
+        // in the (performance sensitive) append function.
+        chunks_.emplace_back ();
+    }
+
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunked_vector (
+        chunked_vector && other) noexcept
+            : chunks_{std::move (other.chunks_)}
+            , size_{other.size_} {
+        other.size_ = 0;
+    }
+
+    // operator=
+    // ~~~~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    auto chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::operator= (
+        chunked_vector && other) noexcept -> chunked_vector & {
+        if (this != &other) {
+            chunks_ = std::move (other.chunks_);
+            size_ = other.size_;
+            other.size_ = 0;
+        }
+        return *this;
+    }
+
+
+    // emplace back
     // ~~~~~~~~~~~~
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
@@ -181,14 +223,33 @@ namespace pstore {
     auto
     chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::emplace_back (Args &&... args)
         -> reference {
-        if (chunks_.size () == 0U || chunks_.back ().size () >= ElementsPerChunk) {
+        assert (chunks_.size () > 0U);
+        auto * tail = &chunks_.back ();
+        if (PSTORE_UNLIKELY (tail->size () >= ElementsPerChunk)) {
             // Append a new chunk.
             chunks_.emplace_back ();
+            tail = &chunks_.back ();
         }
-        // Append a new instance to the last chunk.
-        reference result = chunks_.back ().emplace_back (std::forward<Args> (args)...);
+        // Append a new instance to the tail chunk.
+        reference result = tail->emplace_back (std::forward<Args> (args)...);
         ++size_;
         return result;
+    }
+
+    // end impl
+    // ~~~~~~~~
+    template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
+              std::size_t ActualAlign>
+    template <typename ChunkedVector, typename Result>
+    Result chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::end_impl (
+        ChunkedVector & cv) noexcept {
+        // We always have at least 1 chunk. If the container is empty then return the begin iterator
+        // otherwise an iterator referencing end and of the last member of the last chunk.
+        assert (cv.chunks_.size () > 0U);
+        if (cv.size () > 0U) {
+            return {cv.chunks_.end (), 0U};
+        }
+        return cv.begin ();
     }
 
     //*     _             _    *
@@ -200,7 +261,9 @@ namespace pstore {
               std::size_t ActualAlign>
     class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
     public:
-        chunk () noexcept = default;
+        chunk () noexcept {
+            // Don't use "=default" here. We don't want the zero initializer for membs_ to run.
+        }
         ~chunk () noexcept;
 
         // no copying or assignment.

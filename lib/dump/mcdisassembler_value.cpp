@@ -366,7 +366,7 @@ namespace {
         state.inst_printer->setPrintImmHex (hex_mode);
         return create_asm_streamer (state.context, std::move (os),
                                     state.inst_printer.release ()) >>= emit;
-    };
+    }
 
     // disasm_block
     // ~~~~~~~~~~~~
