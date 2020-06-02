@@ -101,12 +101,6 @@
 
 namespace pstore {
 
-#if defined(__cpp_constexpr) && __cpp_constexpr >= 201304
-#    define PSTORE_CONST_EXPR_ASSERT(cond) assert (cond)
-#else
-#    define PSTORE_CONST_EXPR_ASSERT(cond)
-#endif
-
     //*            _     _                    *
     //*   __ _  __| | __| |_ __ ___  ___ ___  *
     //*  / _` |/ _` |/ _` | '__/ _ \/ __/ __| *
@@ -196,8 +190,8 @@ namespace pstore {
 
         static constexpr std::uint64_t as_absolute (segment_type const segment,
                                                     offset_type const offset) noexcept {
-            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
-            PSTORE_CONST_EXPR_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
+            assert (std::uint64_t{segment} <= max_segment + UINT64_C (1));
+            assert (std::uint64_t{offset} <= max_offset + UINT64_C (1));
             return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
         }
     };
