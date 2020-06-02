@@ -103,10 +103,11 @@ namespace pstore {
         constexpr size_type size () const noexcept { return size_; }
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
-        iterator end () noexcept { return end_impl (*this); }
         const_iterator begin () const noexcept { return {chunks_.begin (), 0U}; }
-        const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cbegin () const noexcept { return begin (); }
+
+        iterator end () noexcept { return end_impl (*this); }
+        const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cend () const noexcept { return end (); }
 
         void clear () noexcept {
@@ -115,7 +116,7 @@ namespace pstore {
             chunks_.emplace_back ();
             size_ = 0;
         }
-        void reserve (std::size_t /*size*/) {
+        void reserve (std::size_t const /*size*/) {
             // TODO: Not currently implemented.
         }
         std::size_t capacity () const noexcept { return chunks_.size () * ElementsPerChunk; }
@@ -264,20 +265,19 @@ namespace pstore {
         chunk () noexcept {
             // Don't use "=default" here. We don't want the zero initializer for membs_ to run.
         }
+        chunk (chunk const &) = delete;
         ~chunk () noexcept;
 
-        // no copying or assignment.
-        chunk (chunk const &) = delete;
         bool operator= (chunk const &) = delete;
 
         T * data () noexcept { return membs_.data (); }
         T const * data () const noexcept { return membs_.data (); }
 
-        T & operator[] (std::size_t index) noexcept {
+        T & operator[] (std::size_t const index) noexcept {
             assert (index < ElementsPerChunk);
             return reinterpret_cast<T &> (membs_[index]);
         }
-        T const & operator[] (std::size_t index) const noexcept {
+        T const & operator[] (std::size_t const index) const noexcept {
             assert (index < ElementsPerChunk);
             return reinterpret_cast<T const &> (membs_[index]);
         }
@@ -346,7 +346,7 @@ namespace pstore {
         using typename base::pointer;
         using typename base::reference;
 
-        iterator_base (list_iterator it, std::size_t index)
+        iterator_base (list_iterator const it, std::size_t const index)
                 : it_{it}
                 , index_{index} {}
         iterator_base (iterator_base<false> const & rhs)
