@@ -139,6 +139,17 @@ TEST (ChunkedVector, Splice) {
     EXPECT_THAT (a, testing::ElementsAre (7, 11));
 }
 
+TEST (ChunkedVector, Clear) {
+    cvector_int a;
+    a.emplace_back (7);
+    a.clear ();
+    EXPECT_THAT (a.size (), 0U);
+
+    // Try appending after the clear.
+    a.emplace_back (11);
+    EXPECT_THAT (a.size (), 1U);
+}
+
 TEST (ChunkedVector, IteratorAssign) {
     cvector_int cv;
     cv.emplace_back (7);

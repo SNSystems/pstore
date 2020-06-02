@@ -86,6 +86,9 @@ namespace pstore {
 #    undef PSTORE_CPP_RTTI
 #endif
 
+#ifndef __has_builtin
+#    define __has_builtin(x) 0
+#endif
 #ifndef __has_cpp_attribute
 #    define __has_cpp_attribute(x) 0
 #endif
@@ -99,6 +102,17 @@ namespace pstore {
 #else
 #    define PSTORE_HAS_ATTRIBUTE(x) false
 #endif
+
+/// A macro which is a wrapper around __builtin_expect() which is available with both GCC and Clang
+/// to tell the compiler whether a particular branch is likely to be taken.
+#if __has_builtin(__builtin_expect)
+#    define PSTORE_LIKELY(expr) __builtin_expect ((expr), true)
+#    define PSTORE_UNLIKELY(expr) __builtin_expect ((expr), false)
+#else
+#    define PSTORE_LIKELY(expr) (expr)
+#    define PSTORE_UNLIKELY(expr) (expr)
+#endif
+
 
 // Specifies that the function does not return.
 #if __has_cpp_attribute(noreturn)
