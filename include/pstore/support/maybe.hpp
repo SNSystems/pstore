@@ -57,8 +57,10 @@
 #include <stdexcept>
 #include <type_traits>
 
+#include "pstore/adt/utility.hpp"
 #include "pstore/support/inherit_const.hpp"
 #include "pstore/support/portab.hpp"
+
 
 namespace pstore {
 
@@ -98,6 +100,12 @@ namespace pstore {
                                               !std::is_convertible<U &&, T>::value) {
 
             new (&storage_) T (std::forward<U> (value));
+            valid_ = true;
+        }
+
+        template <typename... Args>
+        explicit maybe (in_place_t, Args &&... args) {
+            new (&storage_) T (std::forward<Args> (args)...);
             valid_ = true;
         }
 
@@ -230,14 +238,19 @@ namespace pstore {
     // just
     // ~~~~
     template <typename T>
-    constexpr maybe<typename details::remove_cvref_t<T>> just (T && value) {
+    constexpr decltype (auto) just (T && value) {
         return maybe<typename details::remove_cvref_t<T>>{std::forward<T> (value)};
+    }
+
+    template <typename T, typename... Args>
+    constexpr decltype (auto) just (in_place_t, Args &&... args) {
+        return maybe<typename details::remove_cvref_t<T>>{in_place, std::forward<Args> (args)...};
     }
 
     // nothing
     // ~~~~~~~
     template <typename T>
-    constexpr maybe<typename details::remove_cvref_t<T>> nothing () noexcept {
+    constexpr decltype (auto) nothing () noexcept {
         return maybe<typename details::remove_cvref_t<T>>{};
     }
 

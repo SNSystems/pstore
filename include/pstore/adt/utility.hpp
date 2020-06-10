@@ -1,16 +1,10 @@
-//*  _                            _    *
-//* (_)_ __ ___  _ __   ___  _ __| |_  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
-//* | | | | | | | |_) | (_) | |  | |_  *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| *
-//*             |_|                    *
-//*   __                                      _    *
-//*  / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
-//* | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
-//* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
-//* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
-//*                |___/                           *
-//===- tools/import/import_fragment.hpp -----------------------------------===//
+//*        _   _ _ _ _          *
+//*  _   _| |_(_) (_) |_ _   _  *
+//* | | | | __| | | | __| | | | *
+//* | |_| | |_| | | | |_| |_| | *
+//*  \__,_|\__|_|_|_|\__|\__, | *
+//*                      |___/  *
+//===- include/pstore/adt/utility.hpp -------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,29 +41,14 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
-#define PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#ifndef PSTORE_ADT_UTILITY_HPP
+#define PSTORE_ADT_UTILITY_HPP
 
-#include <bitset>
-#include <vector>
+namespace pstore {
+    struct in_place_t {
+        explicit in_place_t () = default;
+    };
+    constexpr in_place_t in_place{};
+} // namespace pstore
 
-#include "pstore/core/index_types.hpp"
-#include "pstore/mcrepo/section.hpp"
-
-#include "import_rule.hpp"
-#include "import_transaction.hpp"
-
-class fragment_index final : public rule {
-public:
-    fragment_index (parse_stack_pointer s, transaction_pointer transaction);
-    pstore::gsl::czstring name () const noexcept override;
-    std::error_code key (std::string const & s) override;
-    std::error_code end_object () override;
-
-private:
-    transaction_pointer transaction_;
-    pstore::index::digest digest_;
-    std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> sections_;
-};
-
-#endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#endif // PSTORE_ADT_UTILITY_HPP

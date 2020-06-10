@@ -53,9 +53,9 @@
 #include <functional>
 #include "import_rule.hpp"
 
-#if __cplusplus < 201703L
 namespace cxx17shim {
 
+#if __cplusplus < 201703L
     namespace details {
 
         template <typename Fn, typename... Args,
@@ -85,19 +85,12 @@ namespace cxx17shim {
         return details::apply_impl (std::forward<F> (f), std::forward<Tuple> (t), indices{});
     }
 
-} // end namespace cxx17shim
-
-
 #else
-
-namespace cxx17shim {
-
     template <typename F, typename Tuple>
     using apply = std::apply<F, Tuple>;
+#endif
 
 } // end namespace cxx17shim
-
-#endif
 
 //*      _     _        _              _      *
 //*  ___| |__ (_)___ __| |_   _ _ _  _| |___  *
@@ -110,18 +103,18 @@ public:
     object_rule (parse_stack_pointer s, Args... args)
             : rule (s)
             , args_{std::forward_as_tuple (args...)} {}
+
+    pstore::gsl::czstring name () const noexcept override { return "object rule"; }
+
     std::error_code begin_object () override {
         cxx17shim::apply (&object_rule::replace_top<NextState, Args...>,
                           std::tuple_cat (std::make_tuple (this), args_));
         return {};
     }
 
-    pstore::gsl::czstring name () const noexcept override { return "object rule"; }
-
 private:
     std::tuple<Args...> args_;
 };
-
 
 template <typename Next, typename... Args>
 std::error_code push_object_rule (rule * const rule, Args &&... args) {
