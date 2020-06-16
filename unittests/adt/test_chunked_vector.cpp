@@ -139,6 +139,16 @@ TEST (ChunkedVector, Splice) {
     EXPECT_THAT (a, testing::ElementsAre (7, 11));
 }
 
+TEST (ChunkedVector, SpliceOntoEmpty) {
+    cvector_int a;
+    cvector_int b;
+    b.emplace_back (11);
+
+    a.splice (std::move (b));
+    EXPECT_EQ (a.front (), 11);
+    EXPECT_THAT (a, testing::ElementsAre (11));
+}
+
 TEST (ChunkedVector, Clear) {
     cvector_int a;
     a.emplace_back (7);

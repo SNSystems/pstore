@@ -103,7 +103,10 @@ namespace pstore {
         constexpr size_type size () const noexcept { return size_; }
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
-        const_iterator begin () const noexcept { return {chunks_.begin (), 0U}; }
+        const_iterator begin () const noexcept {
+            assert (empty () || chunks_.front ().size () > 0);
+            return {chunks_.begin (), 0U};
+        }
         const_iterator cbegin () const noexcept { return begin (); }
 
         iterator end () noexcept { return end_impl (*this); }
@@ -159,6 +162,14 @@ namespace pstore {
         }
 
         void splice (chunked_vector && other) {
+            // If this CV is empty then we need to replace the pre-allocated chunk rather than
+            // splice onto the end of our chunk list.
+            if (empty ()) {
+                size_ = other.size ();
+                chunks_ = std::move (other.chunks_);
+                return;
+            }
+
             size_ += other.size ();
             chunks_.splice (chunks_.end (), std::move (other.chunks_));
         }
