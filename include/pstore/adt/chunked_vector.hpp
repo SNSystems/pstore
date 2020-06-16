@@ -162,6 +162,10 @@ namespace pstore {
         }
 
         void splice (chunked_vector && other) {
+            // If the other CV is empty then do nothing.
+            if (other.empty ()) {
+                return;
+            }
             // If this CV is empty then we need to replace the pre-allocated chunk rather than
             // splice onto the end of our chunk list.
             if (empty ()) {
@@ -169,7 +173,6 @@ namespace pstore {
                 chunks_ = std::move (other.chunks_);
                 return;
             }
-
             size_ += other.size ();
             chunks_.splice (chunks_.end (), std::move (other.chunks_));
         }
