@@ -56,8 +56,7 @@ namespace pstore {
     namespace broker {
 
         /// A very simple bi-directional map in which either 'Left' or 'Right' type may be used as a
-        /// key for
-        /// lookup.
+        /// key for lookup.
         template <typename Left, typename Right, typename LeftCompare = std::less<Left>,
                   typename RightCompare = std::less<Right>>
         class bimap {
@@ -81,15 +80,13 @@ namespace pstore {
             /// Remove the element (if one exists) with a key equivalent to the supplied value.
 
             /// Searches the bimap for an element with a left key of type L2 (which must be
-            /// implicitly
-            /// convertable to type Left) and, if one exists, removes it.
+            /// implicitly convertable to type Left) and, if one exists, removes it.
             /// \param l2  Left key of the element to remove.
             template <typename L2>
             void erasel (L2 const & l2);
 
             /// Searches the bimap for an element with a right key of type R2 (which must be
-            /// implicitly
-            /// convertable to type Right) and, if one exists, removes it.
+            /// implicitly convertable to type Right) and, if one exists, removes it.
             /// \param r2  Right key of the element to remove.
             template <typename R2>
             void eraser (R2 const & r2);
@@ -100,12 +97,13 @@ namespace pstore {
             std::size_t size () const { return left_.size (); }
 
             template <typename MapIterator>
-            class iterator : public std::iterator<std::forward_iterator_tag,
-                                                  typename MapIterator::value_type::first_type> {
+            class iterator {
             public:
+                using iterator_category = std::forward_iterator_tag;
                 using value_type = typename MapIterator::value_type::first_type;
-                using value_reference_type = value_type const &;
-                using value_pointer_type = value_type const *;
+                using difference_type = std::ptrdiff_t;
+                using pointer = value_type *;
+                using reference = value_type &;
 
                 explicit iterator (MapIterator it)
                         : it_ (it) {}
@@ -115,8 +113,8 @@ namespace pstore {
 
                 /// Dereference operator
                 /// @return the value of the element to which this iterator is currently pointing
-                value_reference_type operator* () const { return it_->first; }
-                value_pointer_type operator-> () const { return &it_->first; }
+                value_type const & operator* () const { return it_->first; }
+                value_type const * operator-> () const { return &it_->first; }
                 /// Prefix increment
                 iterator & operator++ () {
                     ++it_;

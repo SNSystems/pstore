@@ -47,40 +47,39 @@
 
 #include <iterator>
 
-namespace pstore {
-    namespace cmd_util {
+/// An InputIterator which will generate a monotonically increasing integer value.
+class iota_generator {
+public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = unsigned long;
+    using difference_type = std::ptrdiff_t;
+    using pointer = unsigned long *;
+    using reference = unsigned long &;
 
-        /// An InputIterator which will generate a monotonically increasing integer value.
-        class iota_generator : public std::iterator<std::input_iterator_tag, unsigned long> {
-        public:
-            explicit iota_generator (unsigned long v = 0UL)
-                    : v_{v} {}
-            iota_generator (iota_generator const & rhs) = default;
-            iota_generator & operator= (iota_generator const & rhs) = default;
+    explicit iota_generator (value_type const v = 0UL)
+            : v_{v} {}
+    iota_generator (iota_generator const & rhs) = default;
+    iota_generator & operator= (iota_generator const & rhs) = default;
 
-            bool operator== (iota_generator const & rhs) const noexcept { return v_ == rhs.v_; }
-            bool operator!= (iota_generator const & rhs) const noexcept {
-                return !operator== (rhs);
-            }
+    bool operator== (iota_generator const & rhs) const noexcept { return v_ == rhs.v_; }
+    bool operator!= (iota_generator const & rhs) const noexcept { return !operator== (rhs); }
 
-            iota_generator & operator++ () {
-                ++v_;
-                return *this;
-            }
-            iota_generator operator++ (int) {
-                auto const t = *this;
-                ++(*this);
-                return t;
-            }
+    iota_generator & operator++ () {
+        ++v_;
+        return *this;
+    }
+    iota_generator operator++ (int) {
+        auto const t = *this;
+        ++(*this);
+        return t;
+    }
 
-            value_type operator* () const noexcept { return v_; }
-            // pointer operator->() const noexcept { return &v_; }
+    value_type operator* () const noexcept { return v_; }
+    // pointer operator->() const noexcept { return &v_; }
 
-        private:
-            unsigned long v_;
-        };
+private:
+    value_type v_;
+};
 
-    } // namespace cmd_util
-} // namespace pstore
 
 #endif // PSTORE_BROKER_POKER_IOTA_GENERATOR_HPP

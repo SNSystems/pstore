@@ -64,19 +64,17 @@ namespace pstore {
             using index_pointer = pstore::index::details::index_pointer;
 
             template <typename MapIterator>
-            class set_iterator : public std::iterator<std::forward_iterator_tag,
-                                                      typename std::add_const<KeyType>::type> {
-
+            class set_iterator {
                 static_assert (std::is_same<typename MapIterator::value_type::first_type,
                                             typename std::add_const<KeyType>::type>::value,
                                "hamt_set key type does not match the iterator key type");
 
-                using base = std::iterator<std::forward_iterator_tag,
-                                           typename std::add_const<KeyType>::type>;
-
             public:
-                using typename base::pointer;
-                using typename base::reference;
+                using iterator_category = std::forward_iterator_tag;
+                using value_type = typename std::add_const<KeyType>::type;
+                using difference_type = std::ptrdiff_t;
+                using pointer = value_type *;
+                using reference = value_type &;
 
                 explicit set_iterator (MapIterator const & it)
                         : it_ (it) {}

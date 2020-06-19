@@ -52,8 +52,14 @@ namespace pstore {
     namespace cmd_util {
         namespace cl {
 
-            class word_wrapper : public std::iterator<std::input_iterator_tag, std::string const> {
+            class word_wrapper {
             public:
+                using iterator_category = std::input_iterator_tag;
+                using value_type = std::string const;
+                using difference_type = std::ptrdiff_t;
+                using pointer = std::string const *;
+                using reference = std::string const &;
+
                 static constexpr std::size_t default_width = 79;
 
                 explicit word_wrapper (std::string const & text,

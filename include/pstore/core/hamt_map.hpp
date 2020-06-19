@@ -105,7 +105,7 @@ namespace pstore {
 
             /// Inner class that describes a const_iterator and 'regular' iterator.
             template <bool IsConstIterator = true>
-            class iterator_base : public std::iterator<std::forward_iterator_tag, value_type> {
+            class iterator_base {
                 // Make iterator_base<true> a friend class of iterator_base<false> so the copy
                 // constructor can access the private member variables.
                 friend class iterator_base<true>;
@@ -116,6 +116,12 @@ namespace pstore {
                     typename hamt_map<KeyType, ValueType, Hash, KeyEqual>::index_pointer;
 
             public:
+                using iterator_category = std::forward_iterator_tag;
+                using value_type = hamt_map<KeyType, ValueType, Hash, KeyEqual>::value_type;
+                using difference_type = std::ptrdiff_t;
+                using pointer = value_type *;
+                using reference = value_type &;
+
                 /// For const_iterator: define value_reference_type to be a 'value_type const &'
                 /// For iterator:       define value_reference_type to be a 'value_type &'
                 using value_reference_type =

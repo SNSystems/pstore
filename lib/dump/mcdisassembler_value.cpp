@@ -71,6 +71,7 @@
 #    include "llvm/MC/MCObjectFileInfo.h"
 #    include "llvm/MC/MCStreamer.h"
 #    include "llvm/MC/MCSubtargetInfo.h"
+#    include "llvm/MC/MCTargetOptionsCommandFlags.inc"
 #    include "llvm/Support/Format.h"
 #    include "llvm/Support/MemoryBuffer.h"
 #    include "llvm/Support/SourceMgr.h"
@@ -243,7 +244,8 @@ namespace {
     auto create_asm_info (llvm::Target const & target, llvm::MCRegisterInfo const & register_info,
                           llvm::Triple const & triple) {
         using return_type = error_or<asm_info_ptr>;
-        if (asm_info_ptr asm_info{target.createMCAsmInfo (register_info, triple.getTriple ())}) {
+        if (asm_info_ptr asm_info{target.createMCAsmInfo (register_info, triple.getTriple (),
+                                                          InitMCTargetOptionsFromFlags ())}) {
             return return_type{std::move (asm_info)};
         }
         return return_type{make_error_code (error_code::no_assembly_info_for_target)};
@@ -321,8 +323,8 @@ namespace {
     error_or<bool> emit_instructions (disassembler_state & state,
                                       pstore::gsl::span<std::uint8_t const> const & span,
                                       pstore::dump::array::container & array, bool hex_mode) {
-        auto out = llvm::make_unique<array_stream> (array);
-        auto os = llvm::make_unique<llvm::formatted_raw_ostream> (*out);
+        auto out = std::make_unique<array_stream> (array);
+        auto os = std::make_unique<llvm::formatted_raw_ostream> (*out);
         auto osp = os.get ();
 
         auto const emit = [&] (streamer_ptr & streamer) {
@@ -341,7 +343,6 @@ namespace {
                     llvm::ArrayRef<std::uint8_t> (sub.data (),
                                                   sub.size ()), // actual bytes of the instruction
                     address,        // address of the first byte of the instruction
-                    llvm::nulls (), // stream on which to print warnings and messages
                     llvm::nulls ()) // stream on which to print comments and annotations)
                 ) {
                 case llvm::MCDisassembler::Fail:

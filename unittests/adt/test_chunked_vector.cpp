@@ -139,6 +139,29 @@ TEST (ChunkedVector, Splice) {
     EXPECT_THAT (a, testing::ElementsAre (7, 11));
 }
 
+TEST (ChunkedVector, SpliceOntoEmpty) {
+    {
+        // Start with an empty CV and splice a populated CV onto it.
+        cvector_int a;
+        cvector_int b;
+        b.emplace_back (11);
+
+        a.splice (std::move (b));
+        EXPECT_EQ (a.front (), 11);
+        EXPECT_THAT (a, testing::ElementsAre (11));
+    }
+    {
+        // Start with a populated CV and splice an empty CV onto it.
+        cvector_int c;
+        cvector_int d;
+        c.emplace_back (13);
+
+        c.splice (std::move (d));
+        EXPECT_EQ (c.front (), 13);
+        EXPECT_THAT (c, testing::ElementsAre (13));
+    }
+}
+
 TEST (ChunkedVector, Clear) {
     cvector_int a;
     a.emplace_back (7);

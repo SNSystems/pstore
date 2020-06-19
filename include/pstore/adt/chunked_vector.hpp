@@ -63,6 +63,7 @@ namespace pstore {
     /// \tparam ActualSize The storage allocated to an individual element. Normally equal to
     ///   sizeof(T), this can be increased to allow for dynamically-sized types.
     /// \tparam ActualAlign The alignment of an individual element. Normally equal to alignof(T).
+    //-MARK: chunked_vector
     template <typename T,
               std::size_t ElementsPerChunk = std::max (4096 / sizeof (T), std::size_t{1}),
               std::size_t ActualSize = sizeof (T), std::size_t ActualAlign = alignof (T)>
@@ -103,7 +104,10 @@ namespace pstore {
         constexpr size_type size () const noexcept { return size_; }
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
-        const_iterator begin () const noexcept { return {chunks_.begin (), 0U}; }
+        const_iterator begin () const noexcept {
+            assert (empty () || chunks_.front ().size () > 0);
+            return {chunks_.begin (), 0U};
+        }
         const_iterator cbegin () const noexcept { return begin (); }
 
         iterator end () noexcept { return end_impl (*this); }
@@ -159,6 +163,17 @@ namespace pstore {
         }
 
         void splice (chunked_vector && other) {
+            // If the other CV is empty then do nothing.
+            if (other.empty ()) {
+                return;
+            }
+            // If this CV is empty then we need to replace the pre-allocated chunk rather than
+            // splice onto the end of our chunk list.
+            if (empty ()) {
+                size_ = other.size ();
+                chunks_ = std::move (other.chunks_);
+                return;
+            }
             size_ += other.size ();
             chunks_.splice (chunks_.end (), std::move (other.chunks_));
         }
@@ -258,6 +273,7 @@ namespace pstore {
     //* / _| ' \ || | ' \| / / *
     //* \__|_||_\_,_|_||_|_\_\ *
     //*                        *
+    //-MARK: chunk
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
@@ -327,15 +343,11 @@ namespace pstore {
     //* | |  _/ -_) '_/ _` |  _/ _ \ '_| | '_ \/ _` (_-</ -_) *
     //* |_|\__\___|_| \__,_|\__\___/_|   |_.__/\__,_/__/\___| *
     //*                                                       *
+    // -MARK: iterator base
     template <typename T, std::size_t ElementsPerChunk, std::size_t ActualSize,
               std::size_t ActualAlign>
     template <bool IsConst>
-    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::iterator_base
-            : public std::iterator<std::bidirectional_iterator_tag,
-                                   typename details::value_type<T, IsConst>::type> {
-
-        using base = std::iterator<std::bidirectional_iterator_tag,
-                                   typename details::value_type<T, IsConst>::type>;
+    class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::iterator_base {
         using list_iterator =
             typename std::conditional<IsConst, typename chunk_list::const_iterator,
                                       typename chunk_list::iterator>::type;
@@ -343,8 +355,11 @@ namespace pstore {
         friend class iterator_base<true>;
 
     public:
-        using typename base::pointer;
-        using typename base::reference;
+        using iterator_category = std::bidirectional_iterator_tag;
+        using value_type = typename details::value_type<T, IsConst>::type;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
 
         iterator_base (list_iterator const it, std::size_t const index)
                 : it_{it}

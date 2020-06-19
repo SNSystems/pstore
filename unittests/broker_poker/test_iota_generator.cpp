@@ -47,28 +47,28 @@
 #include <gtest/gtest.h>
 
 TEST (IotaGenerator, InitialValue) {
-    pstore::cmd_util::iota_generator g1;
+    iota_generator g1;
     EXPECT_EQ (*g1, 0UL);
 
-    pstore::cmd_util::iota_generator g2 (3);
+    iota_generator g2 (3);
     EXPECT_EQ (*g2, 3UL);
 }
 
 TEST (IotaGenerator, Compare) {
-    pstore::cmd_util::iota_generator g1 (3);
-    pstore::cmd_util::iota_generator g2 (3);
-    pstore::cmd_util::iota_generator g3 (5);
+    iota_generator g1 (3);
+    iota_generator g2 (3);
+    iota_generator g3 (5);
     EXPECT_EQ (*g1, *g2);
     EXPECT_NE (*g1, *g3);
 }
 
 TEST (IotaGenerator, Increment) {
-    pstore::cmd_util::iota_generator g1 (3);
-    pstore::cmd_util::iota_generator post = g1++;
-    EXPECT_EQ (post, pstore::cmd_util::iota_generator (3));
-    EXPECT_EQ (g1, pstore::cmd_util::iota_generator (4));
+    iota_generator g1 (3);
+    iota_generator post = g1++;
+    EXPECT_EQ (post, iota_generator (3));
+    EXPECT_EQ (g1, iota_generator (4));
 
-    pstore::cmd_util::iota_generator pre = ++g1;
-    EXPECT_EQ (pre, pstore::cmd_util::iota_generator (5));
-    EXPECT_EQ (g1, pstore::cmd_util::iota_generator (5));
+    iota_generator pre = ++g1;
+    EXPECT_EQ (pre, iota_generator (5));
+    EXPECT_EQ (g1, iota_generator (5));
 }
