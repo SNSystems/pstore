@@ -118,10 +118,15 @@ namespace pstore {
 
         /// An output iterator which calls insert() on a container when a vaue is assigned to it.
         template <typename Container>
-        class insert_iterator
-                : public std::iterator<std::output_iterator_tag, void, void, void, void> {
+        class insert_iterator {
         public:
             using container_type = Container;
+
+            using iterator_category = std::output_iterator_tag;
+            using value_type = void;
+            using difference_type = void;
+            using pointer = void;
+            using reference = void;
 
             explicit insert_iterator (Container & container) noexcept
                     : container_{&container} {}
@@ -289,7 +294,6 @@ namespace pstore {
         std::string::const_iterator query_to_kvp (std::string const & in, OutputIt out) {
             return query_to_kvp (in.cbegin (), in.cend (), out);
         }
-
 
     } // end namespace httpd
 } // end namespace pstore

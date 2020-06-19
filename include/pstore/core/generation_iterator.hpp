@@ -60,9 +60,14 @@ namespace pstore {
     class database;
     struct trailer;
 
-    class generation_iterator : public std::iterator<std::input_iterator_tag, // category
-                                                     typed_address<trailer>> {
+    class generation_iterator {
     public:
+        using iterator_category = std::input_iterator_tag;
+        using value_type = typed_address<trailer>;
+        using difference_type = std::ptrdiff_t;
+        using pointer = value_type *;
+        using reference = value_type &;
+
         generation_iterator (gsl::not_null<database const *> const db,
                              typed_address<trailer> const pos)
                 : db_{db}

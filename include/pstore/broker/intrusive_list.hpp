@@ -64,8 +64,14 @@ namespace pstore {
             ~intrusive_list () noexcept { this->check (); }
 
             /// The list does not own the pointers.
-            class iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+            class iterator {
             public:
+                using iterator_category = std::bidirectional_iterator_tag;
+                using value_type = T;
+                using difference_type = std::ptrdiff_t;
+                using pointer = value_type *;
+                using reference = value_type &;
+
                 constexpr iterator () noexcept = default;
                 explicit constexpr iterator (T * ptr) noexcept
                         : ptr_{ptr} {}
