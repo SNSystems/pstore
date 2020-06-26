@@ -167,7 +167,7 @@ bar
 Running `pstore-read` a second time prints “bar” showing that the key “mykey” has been updated.
 
 ~~~~bash
-$ pstore-read -r 1 pstore.db mykey
+$ pstore-read --revision 1 pstore.db mykey
 foo
 ~~~~
 
