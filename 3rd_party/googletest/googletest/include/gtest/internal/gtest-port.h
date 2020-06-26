@@ -223,7 +223,8 @@
 //
 // Integer types:
 //   TypeWithSize   - maps an integer to a int type.
-//   TimeInMillis   - integers of known sizes.
+//   Int32, UInt32, Int64, UInt64, TimeInMillis
+//                  - integers of known sizes.
 //   BiggestInt     - the biggest signed integer type.
 //
 // Command-line utilities:
@@ -234,7 +235,7 @@
 // Environment variable utilities:
 //   GetEnv()             - gets the value of an environment variable.
 //   BoolFromGTestEnv()   - parses a bool environment variable.
-//   Int32FromGTestEnv()  - parses an int32_t environment variable.
+//   Int32FromGTestEnv()  - parses an Int32 environment variable.
 //   StringFromGTestEnv() - parses a string environment variable.
 //
 // Deprecation warnings:
@@ -247,8 +248,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <cstdint>
-#include <limits>
+#include <memory>
 #include <type_traits>
 
 #ifndef _WIN32_WCE
@@ -261,14 +261,16 @@
 # include <TargetConditionals.h>
 #endif
 
-#include <iostream>  // NOLINT
-#include <memory>
-#include <string>  // NOLINT
+#include <algorithm>  // NOLINT
+#include <iostream>   // NOLINT
+#include <sstream>    // NOLINT
+#include <string>     // NOLINT
 #include <tuple>
+#include <utility>
 #include <vector>  // NOLINT
 
-#include "gtest/internal/custom/gtest-port.h"
 #include "gtest/internal/gtest-port-arch.h"
+#include "gtest/internal/custom/gtest-port.h"
 
 #if !defined(GTEST_DEV_EMAIL_)
 # define GTEST_DEV_EMAIL_ "googletestframework@@googlegroups.com"
@@ -439,6 +441,15 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 # endif  // defined(_MSC_VER) || defined(__BORLANDC__)
 #endif  // GTEST_HAS_EXCEPTIONS
 
+#if !defined(GTEST_HAS_STD_STRING)
+// Even though we don't use this macro any longer, we keep it in case
+// some clients still depend on it.
+# define GTEST_HAS_STD_STRING 1
+#elif !GTEST_HAS_STD_STRING
+// The user told us that ::std::string isn't available.
+# error "::std::string isn't available."
+#endif  // !defined(GTEST_HAS_STD_STRING)
+
 #ifndef GTEST_HAS_STD_WSTRING
 // The user didn't tell us whether ::std::wstring is available, so we need
 // to figure it out.
@@ -447,7 +458,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 // no support for it at least as recent as Froyo (2.2).
 #define GTEST_HAS_STD_WSTRING                                         \
   (!(GTEST_OS_LINUX_ANDROID || GTEST_OS_CYGWIN || GTEST_OS_SOLARIS || \
-     GTEST_OS_HAIKU || GTEST_OS_ESP32 || GTEST_OS_ESP8266))
+     GTEST_OS_HAIKU))
 
 #endif  // GTEST_HAS_STD_WSTRING
 
@@ -571,8 +582,7 @@ typedef struct _RTL_CRITICAL_SECTION GTEST_CRITICAL_SECTION;
 #ifndef GTEST_HAS_STREAM_REDIRECTION
 // By default, we assume that stream redirection is supported on all
 // platforms except known mobile ones.
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266
+# if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
 #  define GTEST_HAS_STREAM_REDIRECTION 0
 # else
 #  define GTEST_HAS_STREAM_REDIRECTION 1
@@ -845,6 +855,9 @@ class Secret;
 // The second argument to the macro must be a valid C++ identifier. If the
 // expression is false, compiler will issue an error containing this identifier.
 #define GTEST_COMPILE_ASSERT_(expr, msg) static_assert(expr, #msg)
+
+// Evaluates to the number of elements in 'array'.
+#define GTEST_ARRAY_SIZE_(array) (sizeof(array) / sizeof(array[0]))
 
 // A helper for suppressing warnings on constant condition.  It just
 // returns 'condition'.
@@ -1586,7 +1599,7 @@ class ThreadLocal : public ThreadLocalBase {
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
     DefaultValueHolderFactory() {}
-    ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
+    virtual ValueHolder* MakeNewHolder() const { return new ValueHolder(); }
 
    private:
     GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
@@ -1595,7 +1608,7 @@ class ThreadLocal : public ThreadLocalBase {
   class InstanceValueHolderFactory : public ValueHolderFactory {
    public:
     explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-    ValueHolder* MakeNewHolder() const override {
+    virtual ValueHolder* MakeNewHolder() const {
       return new ValueHolder(value_);
     }
 
@@ -1795,7 +1808,7 @@ class GTEST_API_ ThreadLocal {
   class DefaultValueHolderFactory : public ValueHolderFactory {
    public:
     DefaultValueHolderFactory() {}
-    ValueHolder* MakeNewHolder() const override { return new ValueHolder(); }
+    virtual ValueHolder* MakeNewHolder() const { return new ValueHolder(); }
 
    private:
     GTEST_DISALLOW_COPY_AND_ASSIGN_(DefaultValueHolderFactory);
@@ -1804,7 +1817,7 @@ class GTEST_API_ ThreadLocal {
   class InstanceValueHolderFactory : public ValueHolderFactory {
    public:
     explicit InstanceValueHolderFactory(const T& value) : value_(value) {}
-    ValueHolder* MakeNewHolder() const override {
+    virtual ValueHolder* MakeNewHolder() const {
       return new ValueHolder(value_);
     }
 
@@ -1874,12 +1887,18 @@ class GTEST_API_ ThreadLocal {
 // we cannot detect it.
 GTEST_API_ size_t GetThreadCount();
 
+template <bool B>
+using bool_constant = std::integral_constant<bool, B>;
+
 #if GTEST_OS_WINDOWS
 # define GTEST_PATH_SEP_ "\\"
 # define GTEST_HAS_ALT_PATH_SEP_ 1
+// The biggest signed integer type the compiler supports.
+typedef __int64 BiggestInt;
 #else
 # define GTEST_PATH_SEP_ "/"
 # define GTEST_HAS_ALT_PATH_SEP_ 0
+typedef long long BiggestInt;  // NOLINT
 #endif  // GTEST_OS_WINDOWS
 
 // Utilities for char.
@@ -1974,22 +1993,6 @@ inline bool IsDir(const StatStruct& st) {
 }
 # endif  // GTEST_OS_WINDOWS_MOBILE
 
-#elif GTEST_OS_ESP8266
-typedef struct stat StatStruct;
-
-inline int FileNo(FILE* file) { return fileno(file); }
-inline int IsATTY(int fd) { return isatty(fd); }
-inline int Stat(const char* path, StatStruct* buf) {
-  // stat function not implemented on ESP8266
-  return 0;
-}
-inline int StrCaseCmp(const char* s1, const char* s2) {
-  return strcasecmp(s1, s2);
-}
-inline char* StrDup(const char* src) { return strdup(src); }
-inline int RmDir(const char* dir) { return rmdir(dir); }
-inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
-
 #else
 
 typedef struct stat StatStruct;
@@ -2009,6 +2012,10 @@ inline bool IsDir(const StatStruct& st) { return S_ISDIR(st.st_mode); }
 // Functions deprecated by MSVC 8.0.
 
 GTEST_DISABLE_MSC_DEPRECATED_PUSH_()
+
+inline const char* StrNCpy(char* dest, const char* src, size_t n) {
+  return strncpy(dest, src, n);
+}
 
 // ChDir(), FReopen(), FDOpen(), Read(), Write(), Close(), and
 // StrError() aren't needed on Windows CE at this time and thus not
@@ -2038,9 +2045,8 @@ inline int Close(int fd) { return close(fd); }
 inline const char* StrError(int errnum) { return strerror(errnum); }
 #endif
 inline const char* GetEnv(const char* name) {
-#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || \
-    GTEST_OS_WINDOWS_RT || GTEST_OS_ESP8266
-  // We are on an embedded platform, which has no environment variables.
+#if GTEST_OS_WINDOWS_MOBILE || GTEST_OS_WINDOWS_PHONE || GTEST_OS_WINDOWS_RT
+  // We are on Windows CE, which has no environment variables.
   static_cast<void>(name);  // To prevent 'unused argument' warning.
   return nullptr;
 #elif defined(__BORLANDC__) || defined(__SunOS_5_8) || defined(__SunOS_5_9)
@@ -2082,13 +2088,15 @@ GTEST_DISABLE_MSC_DEPRECATED_POP_()
 # define GTEST_SNPRINTF_ snprintf
 #endif
 
-// The biggest signed integer type the compiler supports.
+// The maximum number a BiggestInt can represent.  This definition
+// works no matter BiggestInt is represented in one's complement or
+// two's complement.
 //
-// long long is guaranteed to be at least 64-bits in C++11.
-using BiggestInt = long long;  // NOLINT
-
-// The maximum number a BiggestInt can represent.
-constexpr BiggestInt kMaxBiggestInt = (std::numeric_limits<BiggestInt>::max)();
+// We cannot rely on numeric_limits in STL, as __int64 and long long
+// are not part of standard C++ and numeric_limits doesn't need to be
+// defined for them.
+const BiggestInt kMaxBiggestInt =
+    ~(static_cast<BiggestInt>(1) << (8*sizeof(BiggestInt) - 1));
 
 // This template class serves as a compile-time function from size to
 // type.  It maps a size in bytes to a primitive type with that
@@ -2113,27 +2121,40 @@ class TypeWithSize {
  public:
   // This prevents the user from using TypeWithSize<N> with incorrect
   // values of N.
-  using UInt = void;
+  typedef void UInt;
 };
 
 // The specialization for size 4.
 template <>
 class TypeWithSize<4> {
  public:
-  using Int = std::int32_t;
-  using UInt = std::uint32_t;
+  // unsigned int has size 4 in both gcc and MSVC.
+  //
+  // As base/basictypes.h doesn't compile on Windows, we cannot use
+  // uint32, uint64, and etc here.
+  typedef int Int;
+  typedef unsigned int UInt;
 };
 
 // The specialization for size 8.
 template <>
 class TypeWithSize<8> {
  public:
-  using Int = std::int64_t;
-  using UInt = std::uint64_t;
+#if GTEST_OS_WINDOWS
+  typedef __int64 Int;
+  typedef unsigned __int64 UInt;
+#else
+  typedef long long Int;  // NOLINT
+  typedef unsigned long long UInt;  // NOLINT
+#endif  // GTEST_OS_WINDOWS
 };
 
 // Integer types of known sizes.
-using TimeInMillis = int64_t;  // Represents time in milliseconds.
+typedef TypeWithSize<4>::Int Int32;
+typedef TypeWithSize<4>::UInt UInt32;
+typedef TypeWithSize<8>::Int Int64;
+typedef TypeWithSize<8>::UInt UInt64;
+typedef TypeWithSize<8>::Int TimeInMillis;  // Represents time in milliseconds.
 
 // Utilities for command line flags and environment variables.
 
@@ -2152,7 +2173,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 // Macros for declaring flags.
 # define GTEST_DECLARE_bool_(name) GTEST_API_ extern bool GTEST_FLAG(name)
 # define GTEST_DECLARE_int32_(name) \
-    GTEST_API_ extern std::int32_t GTEST_FLAG(name)
+    GTEST_API_ extern ::testing::internal::Int32 GTEST_FLAG(name)
 # define GTEST_DECLARE_string_(name) \
     GTEST_API_ extern ::std::string GTEST_FLAG(name)
 
@@ -2160,7 +2181,7 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 # define GTEST_DEFINE_bool_(name, default_val, doc) \
     GTEST_API_ bool GTEST_FLAG(name) = (default_val)
 # define GTEST_DEFINE_int32_(name, default_val, doc) \
-    GTEST_API_ std::int32_t GTEST_FLAG(name) = (default_val)
+    GTEST_API_ ::testing::internal::Int32 GTEST_FLAG(name) = (default_val)
 # define GTEST_DEFINE_string_(name, default_val, doc) \
     GTEST_API_ ::std::string GTEST_FLAG(name) = (default_val)
 
@@ -2175,12 +2196,12 @@ using TimeInMillis = int64_t;  // Represents time in milliseconds.
 // Parses 'str' for a 32-bit signed integer.  If successful, writes the result
 // to *value and returns true; otherwise leaves *value unchanged and returns
 // false.
-bool ParseInt32(const Message& src_text, const char* str, int32_t* value);
+bool ParseInt32(const Message& src_text, const char* str, Int32* value);
 
-// Parses a bool/int32_t/string from the environment variable
+// Parses a bool/Int32/string from the environment variable
 // corresponding to the given Google Test flag.
 bool BoolFromGTestEnv(const char* flag, bool default_val);
-GTEST_API_ int32_t Int32FromGTestEnv(const char* flag, int32_t default_val);
+GTEST_API_ Int32 Int32FromGTestEnv(const char* flag, Int32 default_val);
 std::string OutputFlagAlsoCheckEnvVar();
 const char* StringFromGTestEnv(const char* flag, const char* default_val);
 

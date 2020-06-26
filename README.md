@@ -78,7 +78,7 @@ The `‑‑target install-pstore` option in addition to the `‑‑build` option
 
 ### Inside LLVM
 
-Make sure that pstore is located within the llvm-project directory tree. For example, to build pstore inside the LLVM with Program Repository Support
+Make sure that pstore is located within the llvm-project directory tree. For example, to build pstore inside LLVM with Program Repository Support ([llvm-project-prepo](https://github.com/SNSystems/llvm-project-prepo)):
 
 ~~~bash
 $ git clone http://github.com/SNSystems/llvm-project-prepo.git
@@ -115,7 +115,7 @@ foo
 $ pstore-write --add-file mykey,bar.txt pstore.db
 $ pstore-read pstore.db mykey
 bar
-$ pstore-read -r 1 pstore.db mykey
+$ pstore-read --revision=1 pstore.db mykey
 foo
 $ pstore-dump --log pstore.db
 ---
@@ -124,9 +124,9 @@ $ pstore-dump --log pstore.db
       path : pstore.db
       size : 4194304
   log  :
-      - { number: 2, size: 32, time: 2018-03-12T13:52:04Z }
-      - { number: 1, size: 32, time: 2018-03-12T13:51:38Z }
-      - { number: 0, size: 0, time: 2018-03-12T13:51:38Z }
+      - { number: 2, size: 80, time: 2020-06-26T08:44:45Z }
+      - { number: 1, size: 80, time: 2020-06-26T08:44:15Z }
+      - { number: 0, size: 0, time: 2020-06-26T08:44:15Z }
 ...
 $
 ~~~~
@@ -167,7 +167,7 @@ bar
 Running `pstore-read` a second time prints “bar” showing that the key “mykey” has been updated.
 
 ~~~~bash
-$ pstore-read -r 1 pstore.db mykey
+$ pstore-read --revision=1 pstore.db mykey
 foo
 ~~~~
 
@@ -177,4 +177,4 @@ This command is a little more interesting. Here we’ve retrieved the original v
 $ pstore-dump --log pstore.db
 ~~~~
 
-The [pstore-dump](tools/dump/) command allows us to inspect the innards of a pstore file. It produces a YAML dump of the requested structures: the transaction log in this case showing a list of all of the transactions in the file (newest first), how much data each of them is carrying, and when that data was committed.
+The [pstore-dump](tools/dump/) command allows us to inspect the innards of a pstore file. It produces a YAML dump of the requested structures: the transaction log in this case showing a list of all of the transactions in the file (newest first), how much data each of them is carrying, and when that data was committed. There is a small number of [other utilities in the tools/ directory](tools/) which allow various aspects of a pstore file to be explored.

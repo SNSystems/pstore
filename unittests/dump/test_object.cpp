@@ -44,7 +44,7 @@
 #include "pstore/dump/value.hpp"
 // System includes
 #include <sstream>
-// 3rd partly includes
+// 3rd party includes
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 // Local includes
