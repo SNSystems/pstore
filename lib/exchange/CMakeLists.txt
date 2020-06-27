@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- tools/export/CMakeLists.txt -----------------------------------------===//
+#===- lib/exchange/CMakeLists.txt -----------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,5 +41,50 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_executable (pstore-export export.cpp)
-target_link_libraries (pstore-export PRIVATE pstore-cmd-util pstore-exchange)
+
+include (add_pstore)
+
+set (pstore_exchange_include_dir "${PSTORE_ROOT_DIR}/include/pstore/exchange/")
+set (pstore_exchange_includes
+    array_helpers.hpp
+    digest_from_string.hpp
+    export.hpp
+    export_emit.hpp
+    export_ostream.hpp
+    import_compilations.hpp
+    import_debug_line_header.hpp
+    import_error.hpp
+    import_fragment.hpp
+    import_names.hpp
+    import_non_terminals.hpp
+    import_root.hpp
+    import_rule.hpp
+    import_terminals.hpp
+    import_transaction.hpp
+)
+set (pstore_exchange_sources
+    digest_from_string.cpp
+    export.cpp
+    export_emit.cpp
+    export_ostream.cpp
+    import_compilations.cpp
+    import_debug_line_header.cpp
+    import_error.cpp
+    import_fragment.cpp
+    import_names.cpp
+    import_non_terminals.cpp
+    import_root.cpp
+    import_rule.cpp
+    import_terminals.cpp
+    import_transaction.cpp
+)
+
+add_pstore_library (
+    TARGET pstore-exchange
+    NAME exchange
+    SOURCES "${pstore_exchange_sources}"
+    HEADER_DIR "${pstore_exchange_include_dir}"
+    INCLUDES "${pstore_exchange_includes}"
+)
+target_link_libraries (pstore-exchange PUBLIC pstore-core pstore-json-lib pstore-mcrepo)
+add_clang_tidy_target (pstore-exchange)

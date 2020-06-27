@@ -47,8 +47,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
-#define PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#ifndef PSTORE_EXCHANGE_IMPORT_COMPILATIONS_HPP
+#define PSTORE_EXCHANGE_IMPORT_COMPILATIONS_HPP
 
 #include "import_rule.hpp"
 #include "import_names.hpp"
@@ -73,4 +73,4 @@ namespace pstore {
     } // end namespace exchange
 } // end namespace pstore
 
-#endif // PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#endif // PSTORE_EXCHANGE_IMPORT_COMPILATIONS_HPP

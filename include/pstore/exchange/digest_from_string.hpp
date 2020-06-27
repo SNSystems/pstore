@@ -47,8 +47,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_DIGEST_FROM_STRING_HPP
-#define PSTORE_IMPORT_DIGEST_FROM_STRING_HPP
+#ifndef PSTORE_EXCHANGE_DIGEST_FROM_STRING_HPP
+#define PSTORE_EXCHANGE_DIGEST_FROM_STRING_HPP
 
 #include <string>
 
@@ -63,4 +63,4 @@ namespace pstore {
     } // end namespace exchange
 } // end namespace pstore
 
-#endif // PSTORE_IMPORT_DIGEST_FROM_STRING_HPP
+#endif // PSTORE_EXCHANGE_DIGEST_FROM_STRING_HPP

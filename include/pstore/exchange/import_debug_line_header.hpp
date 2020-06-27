@@ -47,8 +47,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
-#define PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+#ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
+#define PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
 
 #include "pstore/core/index_types.hpp"
 
@@ -78,4 +78,4 @@ namespace pstore {
     } // end namespace exchange
 } // end namespace pstore
 
-#endif // PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+#endif // PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
