@@ -168,6 +168,7 @@ namespace {
         return pop ();
     }
 
+
     //*       __ _                          _      *
     //* __ __/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
     //* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
@@ -229,6 +230,7 @@ namespace {
         return pop ();
     }
 
+
     //*   __ _                        _     _        _    *
     //*  / _(_)_ ___  _ _ __ ___  ___| |__ (_)___ __| |_  *
     //* |  _| \ \ / || | '_ (_-< / _ \ '_ \| / -_) _|  _| *
@@ -252,6 +254,7 @@ namespace {
     using ifixups_object = fixups_object<ifixup_rule, repo::internal_fixup>;
     using xfixups_object = fixups_object<xfixup_rule, repo::external_fixup>;
 
+
     //*                        _                 _   _           *
     //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
     //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
@@ -261,107 +264,34 @@ namespace {
     template <typename OutputIterator>
     class generic_section final : public rule {
     public:
-        generic_section (parse_stack_pointer stack, OutputIterator * const out)
+        generic_section (parse_stack_pointer stack, repo::section_kind kind,
+                         not_null<repo::section_content *> const content,
+                         not_null<OutputIterator *> const out) noexcept
                 : rule (stack)
-                , out_{out} {}
-        generic_section (generic_section const &) = delete;
-        generic_section & operator= (generic_section const &) = delete;
-
-        pstore::gsl::czstring name () const noexcept override { return "generic section"; }
-        std::error_code key (std::string const & k) override;
-        std::error_code end_object () override;
-
-    private:
-        enum { data, align, ifixups, xfixups };
-        std::bitset<xfixups + 1> seen_;
-        OutputIterator * const out_;
-
-        std::string data_;
-        std::uint64_t align_ = 0;
-        std::vector<pstore::repo::internal_fixup> ifixups_;
-        std::vector<pstore::repo::external_fixup> xfixups_;
-    };
-
-    // key
-    // ~~~
-    template <typename OutputIterator>
-    std::error_code generic_section<OutputIterator>::key (std::string const & k) {
-        if (k == "data") {
-            seen_[data] = true; // string (ascii85)
-            return push<string_rule> (&data_);
-        }
-        if (k == "align") {
-            seen_[align] = true; // integer
-            return this->push<uint64_rule> (&align_);
-        }
-        if (k == "ifixups") {
-            seen_[ifixups] = true;
-            return push_array_rule<ifixups_object> (this, &ifixups_);
-        }
-        if (k == "xfixups") {
-            seen_[xfixups] = true;
-            return push_array_rule<xfixups_object> (this, &xfixups_);
-        }
-        return import_error::unrecognized_section_object_key;
-    }
-
-    // end object
-    // ~~~~~~~~~~
-    template <typename OutputIterator>
-    std::error_code generic_section<OutputIterator>::end_object () {
-        if (!seen_.all ()) {
-            return import_error::generic_section_was_incomplete;
-        }
-        if (!is_power_of_two (align_)) {
-            return import_error::alignment_must_be_power_of_2;
-        }
-
-        std::vector<std::uint8_t> data;
-        from_base64 (std::begin (data_), std::end (data_), std::back_inserter (data));
-        // TODO: fixup offsets must lie inside the data!
-        //    *out_ = std::make_unique<repo::generic_section_creation_dispatcher> ();
-        //    content_->align = align_;
-        //    content_->ifixups = std::move (ifixups_);
-        //    content_->xfixups = std::move (xfixups_);
-        return pop ();
-    }
-
-    //*  _   _         _                 _       _            *
-    //* / | | |__ _  _| |_ ___   __   __| |_ _ _(_)_ _  __ _  *
-    //* | | | '_ \ || |  _/ -_) / _| (_-<  _| '_| | ' \/ _` | *
-    //* |_| |_.__/\_, |\__\___| \__| /__/\__|_| |_|_||_\__, | *
-    //*           |__/                                 |___/  *
-    //-MARK: 1 byte string section
-    template <typename OutputIterator>
-    class mergeable_1_byte_c_string_section final : public rule {
-    public:
-        mergeable_1_byte_c_string_section (parse_stack_pointer stack,
-                                           repo::section_content * const content,
-                                           OutputIterator * const out)
-                : rule (stack)
+                , kind_{kind}
                 , content_{content}
                 , out_{out} {}
-        gsl::czstring name () const noexcept override {
-            return "mergeable 1 byte c string section";
-        }
+        gsl::czstring name () const noexcept override { return "generic section"; }
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
 
     private:
+        repo::section_kind const kind_;
+
         enum { align, data, ifixups, xfixups };
         std::bitset<xfixups + 1> seen_;
 
         std::string data_;
         std::uint64_t align_ = 0;
 
-        repo::section_content * const content_ = nullptr;
-        OutputIterator * const out_ = nullptr;
+        not_null<repo::section_content *> const content_;
+        not_null<OutputIterator *> const out_;
     };
 
     // key
     // ~~~
     template <typename OutputIterator>
-    std::error_code mergeable_1_byte_c_string_section<OutputIterator>::key (std::string const & k) {
+    std::error_code generic_section<OutputIterator>::key (std::string const & k) {
         if (k == "data") {
             seen_[data] = true; // string (ascii85)
             return push<string_rule> (&data_);
@@ -384,7 +314,10 @@ namespace {
     // end object
     // ~~~~~~~~~~
     template <typename OutputIterator>
-    std::error_code mergeable_1_byte_c_string_section<OutputIterator>::end_object () {
+    std::error_code generic_section<OutputIterator>::end_object () {
+        if (!seen_.all ()) {
+            return import_error::generic_section_was_incomplete;
+        }
         if (!is_power_of_two (align_)) {
             return import_error::alignment_must_be_power_of_2;
         }
@@ -394,12 +327,16 @@ namespace {
             return import_error::alignment_is_too_great;
         }
         content_->align = static_cast<align_type> (align_);
-        from_base64 (std::begin (data_), std::end (data_), std::back_inserter (content_->data));
+        if (!from_base64 (std::begin (data_), std::end (data_),
+                          std::back_inserter (content_->data))) {
+            return import_error::bad_base64_data;
+        }
 
-        *out_ = std::make_unique<repo::generic_section_creation_dispatcher> (
-            repo::section_kind::mergeable_1_byte_c_string, content_);
+        *out_ =
+            std::make_unique<repo::generic_section_creation_dispatcher> (kind_, content_.get ());
         return pop ();
     }
+
 
     //*     _     _                _ _                       _   _           *
     //*  __| |___| |__ _  _ __ _  | (_)_ _  ___   ___ ___ __| |_(_)___ _ _   *
@@ -475,18 +412,19 @@ namespace {
 
 
         repo::section_content content{repo::section_kind::debug_line, std::uint8_t{1} /*align*/};
-        from_base64 (std::begin (data_), std::end (data_), std::back_inserter (content.data));
+        if (!from_base64 (std::begin (data_), std::end (data_),
+                          std::back_inserter (content.data))) {
+            return import_error::bad_base64_data;
+        }
         // content.xfixups =
         // content.ifixups = std::move (ifixups_);
-
-
-
         //*content_ = just<debug_line_content> (in_place, std::move (content), header_extent);
         /// content_->emplace (std::move (content));
         *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (header_extent,
                                                                                 content_);
         return pop ();
     }
+
 
     //*   __                             _                _   _              *
     //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   ___ ___ __| |_(_)___ _ _  ___ *
@@ -516,7 +454,6 @@ namespace {
         std::array<repo::section_content, repo::num_section_kinds> contents_;
         std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
         std::back_insert_iterator<decltype (sections_)> oit_;
-        //    std::unique_ptr<repo::section_content> content_;
     };
 
     // key
@@ -530,38 +467,42 @@ namespace {
         if (pos == map.end ()) {
             return import_error::unknown_section_name;
         }
-        //#define X(a)                                                                                       \
-//    case pstore::repo::section_kind::a:                                                            \
-//        return create_consumer<                                                                    \
-//            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
 
         switch (pos->second) {
-            // PSTORE_MCREPO_SECTION_KINDS
-        case repo::section_kind::text:
         case repo::section_kind::data:
-        case repo::section_kind::read_only:
-        case repo::section_kind::interp: {
-            // content_ = std::make_unique<repo::section_content> (pos->second);
-            return push_object_rule<generic_section<decltype (oit_)>> (this, &oit_);
-        }
-
+        case repo::section_kind::interp:
         case repo::section_kind::mergeable_1_byte_c_string:
-            return push_object_rule<mergeable_1_byte_c_string_section<decltype (oit_)>> (
-                this, section_contents (repo::section_kind::mergeable_1_byte_c_string), &oit_);
+        case repo::section_kind::mergeable_2_byte_c_string:
+        case repo::section_kind::mergeable_4_byte_c_string:
+        case repo::section_kind::mergeable_const_16:
+        case repo::section_kind::mergeable_const_32:
+        case repo::section_kind::mergeable_const_4:
+        case repo::section_kind::mergeable_const_8:
+        case repo::section_kind::read_only:
+        case repo::section_kind::rel_ro:
+        case repo::section_kind::text:
+        case repo::section_kind::thread_data:
+            return push_object_rule<generic_section<decltype (oit_)>> (
+                this, pos->second, section_contents (pos->second), &oit_);
 
         case repo::section_kind::debug_line:
             return push_object_rule<debug_line_section<decltype (oit_)>> (
                 this, transaction_->db (), section_contents (repo::section_kind::debug_line),
                 &oit_);
-            // debug_line_ = std::make_unique<repo::debug_line_dispatcher>
 
         case repo::section_kind::last: assert (false && "Illegal section kind"); // unreachable
-        default: assert (false && "Unimplemented section kind");                 // unreachable
+        case pstore::repo::section_kind::bss:
+        case pstore::repo::section_kind::thread_bss:
+        case pstore::repo::section_kind::debug_string:
+        case pstore::repo::section_kind::debug_ranges:
+        case pstore::repo::section_kind::dependent:
+            assert (false && "Unimplemented section kind"); // unreachable
         }
         return import_error::unknown_section_name;
     }
 
 } // end anonymous namespace
+
 
 //*   __                             _     _         _          *
 //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  (_)_ _  __| |_____ __ *
