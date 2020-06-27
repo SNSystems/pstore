@@ -242,7 +242,7 @@ namespace {
         if (!fragments->empty ()) {
             auto fragment_sep = "\n";
             assert (generation > 0U);
-            for (pstore::address const addr :
+            for (pstore::address const & addr :
                  pstore::diff::diff (db, *fragments, generation - 1U)) {
                 auto const & kvp = fragments->load_leaf_node (db, addr);
                 os << fragment_sep << INDENT4 "\"" << kvp.first.to_hex_string () << "\": {\n";
@@ -296,7 +296,7 @@ namespace {
         if (!compilations->empty ()) {
             auto sep = "\n";
             assert (generation > 0);
-            for (pstore::address const addr :
+            for (pstore::address const & addr :
                  pstore::diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
                 auto compilation = db.getro (kvp.second);
