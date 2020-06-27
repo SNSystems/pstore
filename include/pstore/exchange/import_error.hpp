@@ -4,7 +4,7 @@
 //* | | | | | | | |_) | (_) | |  | |_  |  __/ |  | | | (_) | |    *
 //* |_|_| |_| |_| .__/ \___/|_|   \__|  \___|_|  |_|  \___/|_|    *
 //*             |_|                                               *
-//===- tools/import/import_error.hpp --------------------------------------===//
+//===- include/pstore/exchange/import_error.hpp ---------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -46,61 +46,66 @@
 
 #include <system_error>
 
-enum class import_error : int {
-    none,
+namespace pstore {
+    namespace exchange {
 
-    alignment_must_be_power_of_2,
-    alignment_is_too_great,
+        enum class import_error : int {
+            none,
 
-    unexpected_null,
-    unexpected_boolean,
-    unexpected_number,
-    unexpected_string,
-    unexpected_array,
-    unexpected_end_array,
-    unexpected_object,
-    unexpected_object_key,
-    unexpected_end_object,
+            alignment_must_be_power_of_2,
+            alignment_is_too_great,
 
-    unrecognized_ifixup_key,
-    ifixup_object_was_incomplete,
-    unrecognized_xfixup_key,
-    xfixup_object_was_incomplete,
-    generic_section_was_incomplete,
-    unrecognized_section_object_key,
-    unrecognized_root_key,
-    root_object_was_incomplete,
-    unknown_transaction_object_key,
-    unknown_compilation_object_key,
-    unknown_definition_object_key,
+            unexpected_null,
+            unexpected_boolean,
+            unexpected_number,
+            unexpected_string,
+            unexpected_array,
+            unexpected_end_array,
+            unexpected_object,
+            unexpected_object_key,
+            unexpected_end_object,
 
-    incomplete_compilation_object,
-    incomplete_debug_line_section,
+            unrecognized_ifixup_key,
+            ifixup_object_was_incomplete,
+            unrecognized_xfixup_key,
+            xfixup_object_was_incomplete,
+            generic_section_was_incomplete,
+            unrecognized_section_object_key,
+            unrecognized_root_key,
+            root_object_was_incomplete,
+            unknown_transaction_object_key,
+            unknown_compilation_object_key,
+            unknown_definition_object_key,
 
-    bad_digest,
-    bad_base64_data,
-    bad_linkage,
-    bad_visibility,
-    unknown_section_name,
-    debug_line_header_digest_not_found,
-};
+            incomplete_compilation_object,
+            incomplete_debug_line_section,
+
+            bad_digest,
+            bad_base64_data,
+            bad_linkage,
+            bad_visibility,
+            unknown_section_name,
+            debug_line_header_digest_not_found,
+        };
 
 
-class import_error_category : public std::error_category {
-public:
-    import_error_category () noexcept;
-    char const * name () const noexcept override;
-    std::string message (int error) const override;
-};
+        class import_error_category : public std::error_category {
+        public:
+            import_error_category () noexcept;
+            char const * name () const noexcept override;
+            std::string message (int error) const override;
+        };
 
-std::error_category const & get_import_error_category () noexcept;
-std::error_code make_error_code (import_error const e) noexcept;
+        std::error_category const & get_import_error_category () noexcept;
+        std::error_code make_error_code (import_error const e) noexcept;
 
+    } // end namespace exchange
+} // end namespace pstore
 
 namespace std {
 
     template <>
-    struct is_error_code_enum<import_error> : std::true_type {};
+    struct is_error_code_enum<pstore::exchange::import_error> : std::true_type {};
 
 } // end namespace std
 

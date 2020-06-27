@@ -1,16 +1,10 @@
-//*  _                            _    *
-//* (_)_ __ ___  _ __   ___  _ __| |_  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
-//* | | | | | | | |_) | (_) | |  | |_  *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| *
-//*             |_|                    *
-//*   __                                      _    *
-//*  / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
-//* | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
-//* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
-//* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
-//*                |___/                           *
-//===- tools/import/import_fragment.hpp -----------------------------------===//
+//*  _                            _     _                      _             _      *
+//* (_)_ __ ___  _ __   ___  _ __| |_  | |_ ___ _ __ _ __ ___ (_)_ __   __ _| |___  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| | __/ _ \ '__| '_ ` _ \| | '_ \ / _` | / __| *
+//* | | | | | | | |_) | (_) | |  | |_  | ||  __/ |  | | | | | | | | | | (_| | \__ \ *
+//* |_|_| |_| |_| .__/ \___/|_|   \__|  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|___/ *
+//*             |_|                                                                 *
+//===- include/pstore/exchange/import_terminals.hpp -----------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,31 +41,39 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
-#define PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#ifndef PSTORE_IMPORT_IMPORT_TERMINALS_HPP
+#define PSTORE_IMPORT_IMPORT_TERMINALS_HPP
 
-#include <bitset>
-#include <vector>
+#include "pstore/exchange/import_rule.hpp"
 
-#include "pstore/core/index_types.hpp"
-#include "pstore/mcrepo/section.hpp"
+namespace pstore {
+    namespace exchange {
 
-#include "import_rule.hpp"
-#include "import_transaction.hpp"
+        class uint64_rule final : public rule {
+        public:
+            uint64_rule (parse_stack_pointer stack, not_null<std::uint64_t *> v) noexcept
+                    : rule (stack)
+                    , v_{v} {}
+            std::error_code uint64_value (std::uint64_t v) override;
+            gsl::czstring name () const noexcept override;
 
-class fragment_index final : public rule {
-public:
-    fragment_index (parse_stack_pointer s, transaction_pointer transaction);
+        private:
+            not_null<std::uint64_t *> v_;
+        };
 
-    pstore::gsl::czstring name () const noexcept override;
-    std::error_code key (std::string const & s) override;
-    std::error_code end_object () override;
+        class string_rule final : public rule {
+        public:
+            string_rule (parse_stack_pointer stack, not_null<std::string *> v) noexcept
+                    : rule (stack)
+                    , v_{v} {}
+            std::error_code string_value (std::string const & v) override;
+            gsl::czstring name () const noexcept override;
 
-private:
-    pstore::index::digest digest_;
-    std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> sections_;
+        private:
+            not_null<std::string *> v_;
+        };
 
-    transaction_pointer transaction_;
-};
+    } // end namespace exchange
+} // end namespace pstore
 
-#endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#endif // PSTORE_IMPORT_IMPORT_TERMINALS_HPP

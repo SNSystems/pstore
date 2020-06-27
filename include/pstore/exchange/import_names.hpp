@@ -4,7 +4,7 @@
 //* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*             |_|                                                      *
-//===- tools/import/import_names.hpp --------------------------------------===//
+//===- include/pstore/exchange/import_names.hpp ---------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -50,39 +50,44 @@
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/exchange/import_transaction.hpp"
 
-#include "import_rule.hpp"
-#include "import_transaction.hpp"
+namespace pstore {
+    namespace exchange {
 
-class names {
-public:
-    explicit names (transaction_pointer transaction);
+        class names {
+        public:
+            explicit names (transaction_pointer transaction);
 
-    std::error_code add_string (std::string const & str);
-    void flush ();
+            std::error_code add_string (std::string const & str);
+            void flush ();
 
-private:
-    transaction_pointer transaction_;
-    std::shared_ptr<pstore::index::name_index> names_index_;
+        private:
+            transaction_pointer transaction_;
+            std::shared_ptr<index::name_index> names_index_;
 
-    pstore::indirect_string_adder adder_;
-    std::list<std::string> strings_;
-    std::list<pstore::raw_sstring_view> views_;
-};
+            indirect_string_adder adder_;
+            std::list<std::string> strings_;
+            std::list<raw_sstring_view> views_;
+        };
 
-using names_pointer = pstore::gsl::not_null<names *>;
+        using names_pointer = gsl::not_null<names *>;
 
 
-class names_array_members final : public rule {
-public:
-    names_array_members (parse_stack_pointer s, names_pointer n);
+        class names_array_members final : public rule {
+        public:
+            names_array_members (parse_stack_pointer s, names_pointer n);
 
-private:
-    std::error_code string_value (std::string const & str) override;
-    std::error_code end_array () override;
-    pstore::gsl::czstring name () const noexcept override;
+        private:
+            std::error_code string_value (std::string const & str) override;
+            std::error_code end_array () override;
+            gsl::czstring name () const noexcept override;
 
-    names_pointer names_;
-};
+            names_pointer names_;
+        };
+
+    } // end namespace exchange
+} // namespace pstore
 
 #endif // PSTORE_IMPORT_IMPORT_NAMES_HPP

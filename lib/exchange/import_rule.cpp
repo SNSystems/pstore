@@ -1,10 +1,10 @@
-//*  _                            _                                      *
-//* (_)_ __ ___  _ __   ___  _ __| |_   _ __   __ _ _ __ ___   ___  ___  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '_ \ / _` | '_ ` _ \ / _ \/ __| *
-//* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
-//*             |_|                                                      *
-//===- tools/import/import_names.cpp --------------------------------------===//
+//*  _                            _                _       *
+//* (_)_ __ ___  _ __   ___  _ __| |_   _ __ _   _| | ___  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '__| | | | |/ _ \ *
+//* | | | | | | | |_) | (_) | |  | |_  | |  | |_| | |  __/ *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| |_|   \__,_|_|\___| *
+//*             |_|                                        *
+//===- lib/exchange/import_rule.cpp ---------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,41 +41,31 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_names.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/exchange/import_error.hpp"
 
-#include "pstore/core/indirect_string.hpp"
+namespace pstore {
+    namespace exchange {
 
-names::names (transaction_pointer transaction)
-        : transaction_{transaction}
-        , names_index_{
-              pstore::index::get_index<pstore::trailer::indices::name> (transaction->db ())} {}
+        rule::~rule () = default;
 
-std::error_code names::add_string (std::string const & str) {
-    strings_.push_back (str);
-    std::string const & x = strings_.back ();
-    views_.emplace_back (pstore::make_sstring_view (x));
-    auto & s = views_.back ();
-    adder_.add (*transaction_, names_index_, &s);
-    return {};
-}
+        std::error_code rule::int64_value (std::int64_t) { return import_error::unexpected_number; }
+        std::error_code rule::uint64_value (std::uint64_t) {
+            return import_error::unexpected_number;
+        }
+        std::error_code rule::double_value (double) { return import_error::unexpected_number; }
+        std::error_code rule::boolean_value (bool) { return import_error::unexpected_boolean; }
+        std::error_code rule::null_value () { return import_error::unexpected_null; }
+        std::error_code rule::begin_array () { return import_error::unexpected_array; }
+        std::error_code rule::string_value (std::string const &) {
+            return import_error::unexpected_string;
+        }
+        std::error_code rule::end_array () { return import_error::unexpected_end_array; }
+        std::error_code rule::begin_object () { return import_error::unexpected_object; }
+        std::error_code rule::key (std::string const &) {
+            return import_error::unexpected_object_key;
+        }
+        std::error_code rule::end_object () { return import_error::unexpected_end_object; }
 
-void names::flush () {
-    adder_.flush (*transaction_);
-}
-
-
-names_array_members::names_array_members (parse_stack_pointer s, not_null<names *> n)
-        : rule (s)
-        , names_{n} {}
-
-std::error_code names_array_members::string_value (std::string const & str) {
-    return names_->add_string (str);
-}
-
-std::error_code names_array_members::end_array () {
-    return pop ();
-}
-
-pstore::gsl::czstring names_array_members::name () const noexcept {
-    return "names array members";
-}
+    } // end namespace exchange
+} // end namespace pstore

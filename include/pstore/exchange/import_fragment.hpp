@@ -1,10 +1,16 @@
-//*  _                            _                _       *
-//* (_)_ __ ___  _ __   ___  _ __| |_   _ __ _   _| | ___  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '__| | | | |/ _ \ *
-//* | | | | | | | |_) | (_) | |  | |_  | |  | |_| | |  __/ *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| |_|   \__,_|_|\___| *
-//*             |_|                                        *
-//===- tools/import/import_rule.cpp ---------------------------------------===//
+//*  _                            _    *
+//* (_)_ __ ___  _ __   ___  _ __| |_  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
+//* | | | | | | | |_) | (_) | |  | |_  *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| *
+//*             |_|                    *
+//*   __                                      _    *
+//*  / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
+//* | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
+//* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
+//* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
+//*                |___/                           *
+//===- include/pstore/exchange/import_fragment.hpp ------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,41 +47,35 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_rule.hpp"
-#include "import_error.hpp"
+#ifndef PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
+#define PSTORE_IMPORT_IMPORT_FRAGMENT_HPP
 
-rule::~rule () = default;
+#include <vector>
 
-std::error_code rule::int64_value (std::int64_t) {
-    return import_error::unexpected_number;
-}
-std::error_code rule::uint64_value (std::uint64_t) {
-    return import_error::unexpected_number;
-}
-std::error_code rule::double_value (double) {
-    return import_error::unexpected_number;
-}
-std::error_code rule::boolean_value (bool) {
-    return import_error::unexpected_boolean;
-}
-std::error_code rule::null_value () {
-    return import_error::unexpected_null;
-}
-std::error_code rule::begin_array () {
-    return import_error::unexpected_array;
-}
-std::error_code rule::string_value (std::string const &) {
-    return import_error::unexpected_string;
-}
-std::error_code rule::end_array () {
-    return import_error::unexpected_end_array;
-}
-std::error_code rule::begin_object () {
-    return import_error::unexpected_object;
-}
-std::error_code rule::key (std::string const &) {
-    return import_error::unexpected_object_key;
-}
-std::error_code rule::end_object () {
-    return import_error::unexpected_end_object;
-}
+#include "pstore/core/index_types.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/exchange/import_transaction.hpp"
+#include "pstore/mcrepo/section.hpp"
+
+namespace pstore {
+    namespace exchange {
+
+        class fragment_index final : public rule {
+        public:
+            fragment_index (parse_stack_pointer s, transaction_pointer transaction);
+
+            gsl::czstring name () const noexcept override;
+            std::error_code key (std::string const & s) override;
+            std::error_code end_object () override;
+
+        private:
+            index::digest digest_;
+            std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
+
+            transaction_pointer transaction_;
+        };
+
+    } // end namespace exchange
+} // end namespace pstore
+
+#endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP

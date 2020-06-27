@@ -43,14 +43,11 @@
 //===----------------------------------------------------------------------===//
 #include <bitset>
 
-#include "pstore/core/database.hpp"
-#include "pstore/json/json.hpp"
-
-#include "import_root.hpp"
-
 #include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
 #include "pstore/cmd_util/revision_opt.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/core/database.hpp"
+#include "pstore/exchange/import_root.hpp"
 
 using namespace pstore::cmd_util;
 
@@ -80,7 +77,8 @@ int main (int argc, char * argv[]) {
             return EXIT_FAILURE;
         }
 
-        auto parser = pstore::json::make_parser (callbacks::make<root> (&db));
+        auto parser = pstore::exchange::create_import_parser (db);
+
         using parser_type = decltype (parser);
         for (int ch = std::getc (infile); ch != EOF; ch = std::getc (infile)) {
             auto const c = static_cast<char> (ch);

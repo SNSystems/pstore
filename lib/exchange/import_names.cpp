@@ -1,16 +1,10 @@
-//*  _                            _         _      _                  *
-//* (_)_ __ ___  _ __   ___  _ __| |_    __| | ___| |__  _   _  __ _  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __|  / _` |/ _ \ '_ \| | | |/ _` | *
-//* | | | | | | | |_) | (_) | |  | |_  | (_| |  __/ |_) | |_| | (_| | *
-//* |_|_| |_| |_| .__/ \___/|_|   \__|  \__,_|\___|_.__/ \__,_|\__, | *
-//*             |_|                                            |___/  *
-//*  _ _              _                    _            *
-//* | (_)_ __   ___  | |__   ___  __ _  __| | ___ _ __  *
-//* | | | '_ \ / _ \ | '_ \ / _ \/ _` |/ _` |/ _ \ '__| *
-//* | | | | | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
-//* |_|_|_| |_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
-//*                                                     *
-//===- tools/import/import_debug_line_header.hpp --------------------------===//
+//*  _                            _                                      *
+//* (_)_ __ ___  _ __   ___  _ __| |_   _ __   __ _ _ __ ___   ___  ___  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| | '_ \ / _` | '_ ` _ \ / _ \/ __| *
+//* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
+//*             |_|                                                      *
+//===- lib/exchange/import_names.cpp --------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,29 +41,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
-#define PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+#include "pstore/exchange/import_names.hpp"
 
-#include "pstore/core/index_types.hpp"
+#include "pstore/core/indirect_string.hpp"
 
-#include "import_rule.hpp"
-#include "import_transaction.hpp"
+namespace pstore {
+    namespace exchange {
 
-class debug_line_index final : public rule {
-public:
-    debug_line_index (parse_stack_pointer s, transaction_pointer transaction);
+        names::names (transaction_pointer transaction)
+                : transaction_{transaction}
+                , names_index_{index::get_index<trailer::indices::name> (transaction->db ())} {}
 
-    pstore::gsl::czstring name () const noexcept override;
+        std::error_code names::add_string (std::string const & str) {
+            strings_.push_back (str);
+            std::string const & x = strings_.back ();
+            views_.emplace_back (make_sstring_view (x));
+            auto & s = views_.back ();
+            adder_.add (*transaction_, names_index_, &s);
+            return {};
+        }
 
-    std::error_code string_value (std::string const & s) override;
-    std::error_code key (std::string const & s) override;
-    std::error_code end_object () override;
+        void names::flush () { adder_.flush (*transaction_); }
 
-private:
-    std::shared_ptr<pstore::index::debug_line_header_index> index_;
-    pstore::index::digest digest_;
 
-    transaction_pointer transaction_;
-};
+        names_array_members::names_array_members (parse_stack_pointer s, not_null<names *> n)
+                : rule (s)
+                , names_{n} {}
 
-#endif // PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP
+        std::error_code names_array_members::string_value (std::string const & str) {
+            return names_->add_string (str);
+        }
+
+        std::error_code names_array_members::end_array () { return pop (); }
+
+        gsl::czstring names_array_members::name () const noexcept { return "names array members"; }
+
+    } // end namespace exchange
+} // namespace pstore

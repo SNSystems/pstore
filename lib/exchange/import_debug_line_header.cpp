@@ -10,7 +10,7 @@
 //* | | | | | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
 //* |_|_|_| |_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
 //*                                                     *
-//===- tools/import/import_debug_line_header.cpp --------------------------===//
+//===- lib/exchange/import_debug_line_header.cpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,67 +47,65 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_debug_line_header.hpp"
+#include "pstore/exchange/import_debug_line_header.hpp"
 
-#include "pstore/support/base64.hpp"
 #include "pstore/core/hamt_map.hpp"
+#include "pstore/exchange/digest_from_string.hpp"
+#include "pstore/exchange/import_error.hpp"
+#include "pstore/support/base64.hpp"
 
-#include "digest_from_string.hpp"
-#include "import_error.hpp"
+namespace pstore {
+    namespace exchange {
 
-using namespace pstore;
+        // (ctor)
+        // ~~~~~~
+        debug_line_index::debug_line_index (parse_stack_pointer s, transaction_pointer transaction)
+                : rule (s)
+                , index_{index::get_index<trailer::indices::debug_line_header> (transaction->db ())}
+                , transaction_{transaction} {}
 
-// (ctor)
-// ~~~~~~
-debug_line_index::debug_line_index (parse_stack_pointer s, transaction_pointer transaction)
-        : rule (s)
-        , index_{pstore::index::get_index<pstore::trailer::indices::debug_line_header> (
-              transaction->db ())}
-        , transaction_{transaction} {}
+        // name
+        // ~~~~
+        gsl::czstring debug_line_index::name () const noexcept { return "debug line index"; }
 
-// name
-// ~~~~
-gsl::czstring debug_line_index::name () const noexcept {
-    return "debug line index";
-}
+        // string_value
+        // ~~~~~~~~~~~~
+        std::error_code debug_line_index::string_value (std::string const & s) {
+            // Decode the received string to get the raw binary.
+            std::vector<std::uint8_t> data;
+            maybe<std::back_insert_iterator<decltype (data)>> oit =
+                from_base64 (std::begin (s), std::end (s), std::back_inserter (data));
+            if (!oit) {
+                return import_error::bad_base64_data;
+            }
 
-// string_value
-// ~~~~~~~~~~~~
-std::error_code debug_line_index::string_value (std::string const & s) {
-    // Decode the received string to get the raw binary.
-    std::vector<std::uint8_t> data;
-    maybe<std::back_insert_iterator<decltype (data)>> oit =
-        from_base64 (std::begin (s), std::end (s), std::back_inserter (data));
-    if (!oit) {
-        return import_error::bad_base64_data;
-    }
+            // Create space for this data in the store.
+            std::shared_ptr<std::uint8_t> out;
+            typed_address<std::uint8_t> where;
+            std::tie (out, where) = transaction_->alloc_rw<std::uint8_t> (data.size ());
 
-    // Create space for this data in the store.
-    std::shared_ptr<std::uint8_t> out;
-    pstore::typed_address<std::uint8_t> where;
-    std::tie (out, where) = transaction_->alloc_rw<std::uint8_t> (data.size ());
+            // Copy the data to the store.
+            std::copy (std::begin (data), std::end (data), out.get ());
 
-    // Copy the data to the store.
-    std::copy (std::begin (data), std::end (data), out.get ());
+            // Add an index entry for this data.
+            index_->insert (*transaction_,
+                            std::make_pair (digest_, extent<std::uint8_t>{where, data.size ()}));
+            return {};
+        }
 
-    // Add an index entry for this data.
-    index_->insert (*transaction_,
-                    std::make_pair (digest_, pstore::extent<std::uint8_t>{where, data.size ()}));
-    return {};
-}
+        // key
+        // ~~~
+        std::error_code debug_line_index::key (std::string const & s) {
+            if (maybe<uint128> const digest = digest_from_string (s)) {
+                digest_ = *digest;
+                return {};
+            }
+            return import_error::bad_digest;
+        }
 
-// key
-// ~~~
-std::error_code debug_line_index::key (std::string const & s) {
-    if (maybe<uint128> const digest = digest_from_string (s)) {
-        digest_ = *digest;
-        return {};
-    }
-    return import_error::bad_digest;
-}
+        // end_object
+        // ~~~~~~~~~~
+        std::error_code debug_line_index::end_object () { return pop (); }
 
-// end_object
-// ~~~~~~~~~~
-std::error_code debug_line_index::end_object () {
-    return pop ();
-}
+    } // end namespace exchange
+} // end namespace pstore

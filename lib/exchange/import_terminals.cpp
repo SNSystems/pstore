@@ -4,7 +4,7 @@
 //* | | | | | | | |_) | (_) | |  | |_  | ||  __/ |  | | | | | | | | | | (_| | \__ \ *
 //* |_|_| |_| |_| .__/ \___/|_|   \__|  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|___/ *
 //*             |_|                                                                 *
-//===- tools/import/import_terminals.hpp ----------------------------------===//
+//===- lib/exchange/import_terminals.cpp ----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,33 +41,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_TERMINALS_HPP
-#define PSTORE_IMPORT_IMPORT_TERMINALS_HPP
+#include "pstore/exchange/import_terminals.hpp"
 
-#include "import_rule.hpp"
+namespace pstore {
+    namespace exchange {
 
-class uint64_rule final : public rule {
-public:
-    uint64_rule (parse_stack_pointer stack, not_null<std::uint64_t *> v) noexcept
-            : rule (stack)
-            , v_{v} {}
-    std::error_code uint64_value (std::uint64_t v) override;
-    pstore::gsl::czstring name () const noexcept override;
+        //*       _     _    __ _ _             _      *
+        //*  _  _(_)_ _| |_ / /| | |   _ _ _  _| |___  *
+        //* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
+        //*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
+        //*                                            *
+        // uint64_value
+        // ~~~~~~~~~~~~
+        std::error_code uint64_rule::uint64_value (std::uint64_t v) {
+            *v_ = v;
+            return pop ();
+        }
 
-private:
-    not_null<std::uint64_t *> v_;
-};
+        gsl::czstring uint64_rule::name () const noexcept { return "uint64 rule"; }
 
-class string_rule final : public rule {
-public:
-    string_rule (parse_stack_pointer stack, not_null<std::string *> v) noexcept
-            : rule (stack)
-            , v_{v} {}
-    std::error_code string_value (std::string const & v) override;
-    pstore::gsl::czstring name () const noexcept override;
+        //*     _       _                      _      *
+        //*  __| |_ _ _(_)_ _  __ _   _ _ _  _| |___  *
+        //* (_-<  _| '_| | ' \/ _` | | '_| || | / -_) *
+        //* /__/\__|_| |_|_||_\__, | |_|  \_,_|_\___| *
+        //*                   |___/                   *
+        // name
+        // ~~~~
+        gsl::czstring string_rule::name () const noexcept { return "string rule"; }
 
-private:
-    not_null<std::string *> v_;
-};
+        // string value
+        // ~~~~~~~~~~~~
+        std::error_code string_rule::string_value (std::string const & v) {
+            *v_ = v;
+            return pop ();
+        }
 
-#endif // PSTORE_IMPORT_IMPORT_TERMINALS_HPP
+    } // end namespace exchange
+} // end namespace pstore

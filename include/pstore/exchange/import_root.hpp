@@ -4,7 +4,7 @@
 //* | | | | | | | |_) | (_) | |  | |_  | | | (_) | (_) | |_  *
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_|  \___/ \___/ \__| *
 //*             |_|                                          *
-//===- tools/import/import_root.hpp ---------------------------------------===//
+//===- include/pstore/exchange/import_root.hpp ----------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,20 +44,31 @@
 #ifndef PSTORE_IMPORT_IMPORT_ROOT_HPP
 #define PSTORE_IMPORT_IMPORT_ROOT_HPP
 
-#include "import_rule.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/json/json.hpp"
 
-namespace pstore { class database; }
+namespace pstore {
 
-class root final : public rule {
-public:
-    root (parse_stack_pointer stack, not_null<pstore::database *> db)
-            : rule (stack)
-            , db_{db} {}
-    pstore::gsl::czstring name () const noexcept override;
-    std::error_code begin_object () override;
+    class database;
 
-private:
-    not_null<pstore::database *> db_;
-};
+    namespace exchange {
+
+        class root final : public rule {
+        public:
+            root (parse_stack_pointer stack, not_null<database *> db)
+                    : rule (stack)
+                    , db_{db} {}
+            gsl::czstring name () const noexcept override;
+            std::error_code begin_object () override;
+
+        private:
+            not_null<database *> db_;
+        };
+
+
+        json::parser<callbacks> create_import_parser (database & db);
+
+    } // end namespace exchange
+} // end namespace pstore
 
 #endif // PSTORE_IMPORT_IMPORT_ROOT_HPP

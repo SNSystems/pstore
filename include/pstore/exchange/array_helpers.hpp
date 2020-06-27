@@ -1,16 +1,10 @@
-//*  _                            _    *
-//* (_)_ __ ___  _ __   ___  _ __| |_  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
-//* | | | | | | | |_) | (_) | |  | |_  *
-//* |_|_| |_| |_| .__/ \___/|_|   \__| *
-//*             |_|                    *
-//*  _                                  _   _              *
-//* | |_ _ __ __ _ _ __  ___  __ _  ___| |_(_) ___  _ __   *
-//* | __| '__/ _` | '_ \/ __|/ _` |/ __| __| |/ _ \| '_ \  *
-//* | |_| | | (_| | | | \__ \ (_| | (__| |_| | (_) | | | | *
-//*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
-//*                                                        *
-//===- tools/import/import_transaction.hpp --------------------------------===//
+//*                               _          _                      *
+//*   __ _ _ __ _ __ __ _ _   _  | |__   ___| |_ __   ___ _ __ ___  *
+//*  / _` | '__| '__/ _` | | | | | '_ \ / _ \ | '_ \ / _ \ '__/ __| *
+//* | (_| | |  | | | (_| | |_| | | | | |  __/ | |_) |  __/ |  \__ \ *
+//*  \__,_|_|  |_|  \__,_|\__, | |_| |_|\___|_| .__/ \___|_|  |___/ *
+//*                       |___/               |_|                   *
+//===- include/pstore/exchange/array_helpers.hpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,24 +41,28 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_IMPORT_IMPORT_TRANSACTION_HPP
-#define PSTORE_IMPORT_IMPORT_TRANSACTION_HPP
+#ifndef PSTORE_IMPORT_ARRAY_HELPERS_HPP
+#define PSTORE_IMPORT_ARRAY_HELPERS_HPP
 
-#include "pstore/core/transaction.hpp"
+#include "pstore/exchange/import_rule.hpp"
 
-#include "import_rule.hpp"
+namespace pstore {
+    namespace exchange {
 
-using transaction_type = pstore::transaction<pstore::transaction_lock>;
-using transaction_pointer = pstore::gsl::not_null<transaction_type *>;
+        template <typename T, typename Next>
+        class array_object final : public rule {
+        public:
+            array_object (parse_stack_pointer s, not_null<std::vector<T> *> arr)
+                    : rule (s)
+                    , arr_{arr} {}
+            std::error_code begin_object () override { return push<Next> (arr_); }
+            std::error_code end_array () override { return pop (); }
 
-class transaction_array final : public rule {
-public:
-    transaction_array (parse_stack_pointer s, not_null<pstore::database *> db);
-    pstore::gsl::czstring name () const noexcept override;
-    std::error_code begin_array () override;
+        private:
+            not_null<std::vector<T> *> arr_;
+        };
 
-private:
-    pstore::gsl::not_null<pstore::database *> db_;
-};
+    } // end namespace exchange
+} // end namespace pstore
 
-#endif // PSTORE_IMPORT_IMPORT_TRANSACTION_HPP
+#endif // PSTORE_IMPORT_ARRAY_HELPERS_HPP

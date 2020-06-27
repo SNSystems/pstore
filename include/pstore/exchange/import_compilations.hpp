@@ -1,10 +1,16 @@
-//*  _                            _     _                      _             _      *
-//* (_)_ __ ___  _ __   ___  _ __| |_  | |_ ___ _ __ _ __ ___ (_)_ __   __ _| |___  *
-//* | | '_ ` _ \| '_ \ / _ \| '__| __| | __/ _ \ '__| '_ ` _ \| | '_ \ / _` | / __| *
-//* | | | | | | | |_) | (_) | |  | |_  | ||  __/ |  | | | | | | | | | | (_| | \__ \ *
-//* |_|_| |_| |_| .__/ \___/|_|   \__|  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|___/ *
-//*             |_|                                                                 *
-//===- tools/import/import_terminals.cpp ----------------------------------===//
+//*  _                            _    *
+//* (_)_ __ ___  _ __   ___  _ __| |_  *
+//* | | '_ ` _ \| '_ \ / _ \| '__| __| *
+//* | | | | | | | |_) | (_) | |  | |_  *
+//* |_|_| |_| |_| .__/ \___/|_|   \__| *
+//*             |_|                    *
+//*                            _ _       _   _                  *
+//*   ___ ___  _ __ ___  _ __ (_) | __ _| |_(_) ___  _ __  ___  *
+//*  / __/ _ \| '_ ` _ \| '_ \| | |/ _` | __| |/ _ \| '_ \/ __| *
+//* | (_| (_) | | | | | | |_) | | | (_| | |_| | (_) | | | \__ \ *
+//*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_|___/ *
+//*                     |_|                                     *
+//===- include/pstore/exchange/import_compilations.hpp --------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,38 +47,30 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_terminals.hpp"
+#ifndef PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
+#define PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP
 
-//*       _     _    __ _ _             _      *
-//*  _  _(_)_ _| |_ / /| | |   _ _ _  _| |___  *
-//* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
-//*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
-//*                                            *
-// uint64_value
-// ~~~~~~~~~~~~
-std::error_code uint64_rule::uint64_value (std::uint64_t v) {
-    *v_ = v;
-    return pop ();
-}
+#include "import_rule.hpp"
+#include "import_names.hpp"
 
-pstore::gsl::czstring uint64_rule::name () const noexcept {
-    return "uint64 rule";
-}
+namespace pstore {
+    namespace exchange {
 
-//*     _       _                      _      *
-//*  __| |_ _ _(_)_ _  __ _   _ _ _  _| |___  *
-//* (_-<  _| '_| | ' \/ _` | | '_| || | / -_) *
-//* /__/\__|_| |_|_||_\__, | |_|  \_,_|_\___| *
-//*                   |___/                   *
-// name
-// ~~~~
-pstore::gsl::czstring string_rule::name () const noexcept {
-    return "string rule";
-}
+        class compilations_index final : public rule {
+        public:
+            compilations_index (parse_stack_pointer s, transaction_pointer transaction,
+                                names_pointer names);
 
-// string value
-// ~~~~~~~~~~~~
-std::error_code string_rule::string_value (std::string const & v) {
-    *v_ = v;
-    return pop ();
-}
+            gsl::czstring name () const noexcept override;
+            std::error_code key (std::string const & s) override;
+            std::error_code end_object () override;
+
+        private:
+            transaction_pointer transaction_;
+            names_pointer names_;
+        };
+
+    } // end namespace exchange
+} // end namespace pstore
+
+#endif // PSTORE_IMPORT_IMPORT_COMPILATIONS_HPP

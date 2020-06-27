@@ -10,7 +10,7 @@
 //* | ||  __/ |  | | | | | | | | | | (_| | \__ \ *
 //*  \__\___|_|  |_| |_| |_|_|_| |_|\__,_|_|___/ *
 //*                                              *
-//===- tools/import/import_non_terminals.cpp ------------------------------===//
+//===- lib/exchange/import_non_terminals.cpp ------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,4 +47,4 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_non_terminals.hpp"
+#include "pstore/exchange/import_non_terminals.hpp"

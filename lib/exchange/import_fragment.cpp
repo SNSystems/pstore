@@ -10,7 +10,7 @@
 //* |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
 //* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*                |___/                           *
-//===- tools/import/import_fragment.cpp -----------------------------------===//
+//===- lib/exchange/import_fragment.cpp -----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,26 +47,26 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "import_fragment.hpp"
+#include "pstore/exchange/import_fragment.hpp"
 
+#include <bitset>
 #include <unordered_map>
 #include <vector>
 
-#include "pstore/support/base64.hpp"
-#include "pstore/core/index_types.hpp"
 #include "pstore/core/hamt_map.hpp"
+#include "pstore/core/index_types.hpp"
+#include "pstore/exchange/array_helpers.hpp"
+#include "pstore/exchange/digest_from_string.hpp"
+#include "pstore/exchange/import_error.hpp"
+#include "pstore/exchange/import_non_terminals.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-
-
-#include "array_helpers.hpp"
-#include "digest_from_string.hpp"
-#include "import_error.hpp"
-#include "import_rule.hpp"
-#include "import_terminals.hpp"
-#include "import_non_terminals.hpp"
+#include "pstore/support/base64.hpp"
 
 using namespace pstore;
+using namespace pstore::exchange;
 
 namespace {
 
@@ -126,7 +126,7 @@ namespace {
         enum { section, type, offset, addend };
         std::bitset<addend + 1> seen_;
 
-        gsl::not_null<std::vector<pstore::repo::internal_fixup> *> fixups_;
+        gsl::not_null<std::vector<repo::internal_fixup> *> fixups_;
 
         repo::section_kind section_ = repo::section_kind::last;
         std::uint64_t type_ = 0;
@@ -347,7 +347,7 @@ namespace {
     template <typename OutputIterator>
     class debug_line_section final : public rule {
     public:
-        debug_line_section (parse_stack_pointer stack, pstore::database & db,
+        debug_line_section (parse_stack_pointer stack, database & db,
                             repo::section_content * const content, OutputIterator * const out)
                 : rule (stack)
                 , db_{db}
@@ -362,7 +362,7 @@ namespace {
         enum { header, data, ifixups };
         std::bitset<ifixups + 1> seen_;
 
-        pstore::database & db_;
+        database & db_;
         repo::section_content * const content_;
         OutputIterator * const out_;
 
@@ -401,7 +401,7 @@ namespace {
             return import_error::incomplete_debug_line_section;
         }
 
-        auto index = pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db_);
+        auto index = index::get_index<trailer::indices::debug_line_header> (db_);
         // FIXME: search the index for the DLH associated with 'digest'. Record the hash and its
         // associated extent in the debug_line_section instance.
         auto pos = index->find (db_, *digest);
@@ -459,8 +459,8 @@ namespace {
     // key
     // ~~~
     std::error_code fragment_sections::key (std::string const & s) {
-#define X(a) {#a, pstore::repo::section_kind::a},
-        static std::unordered_map<std::string, pstore::repo::section_kind> const map{
+#define X(a) {#a, repo::section_kind::a},
+        static std::unordered_map<std::string, repo::section_kind> const map{
             PSTORE_MCREPO_SECTION_KINDS};
 #undef X
         auto const pos = map.find (s);
@@ -491,11 +491,11 @@ namespace {
                 &oit_);
 
         case repo::section_kind::last: assert (false && "Illegal section kind"); // unreachable
-        case pstore::repo::section_kind::bss:
-        case pstore::repo::section_kind::thread_bss:
-        case pstore::repo::section_kind::debug_string:
-        case pstore::repo::section_kind::debug_ranges:
-        case pstore::repo::section_kind::dependent:
+        case repo::section_kind::bss:
+        case repo::section_kind::thread_bss:
+        case repo::section_kind::debug_string:
+        case repo::section_kind::debug_ranges:
+        case repo::section_kind::dependent:
             assert (false && "Unimplemented section kind"); // unreachable
         }
         return import_error::unknown_section_name;
