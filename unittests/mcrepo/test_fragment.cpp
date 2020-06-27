@@ -128,8 +128,7 @@ TEST_F (FragmentTest, Empty) {
 }
 
 TEST_F (FragmentTest, MakeReadOnlySection) {
-    std::vector<section_content> c;
-    c.emplace_back (section_kind::read_only, std::uint8_t{4} /*alignment*/);
+    std::array<section_content, 1> c = {{{section_kind::read_only, std::uint8_t{4} /*alignment*/}}};
     section_content & rodata = c.back ();
     rodata.data.assign ({'r', 'o', 'd', 'a', 't', 'a'});
     auto extent = build_fragment (transaction_, std::begin (c), std::end (c));
@@ -167,8 +166,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
 
     std::vector<std::uint8_t> const original{'t', 'e', 'x', 't'};
 
-    std::vector<section_content> c;
-    c.emplace_back (section_kind::text, std::uint8_t{16} /*alignment*/);
+    std::array<section_content, 1> c = {{{section_kind::text, std::uint8_t{16} /*alignment*/}}};
     {
         // Build the text section's contents and fixups.
         section_content & text = c.back ();

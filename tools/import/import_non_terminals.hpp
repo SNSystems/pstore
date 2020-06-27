@@ -97,10 +97,11 @@ namespace cxx17shim {
 //* / _ \ '_ \| / -_) _|  _| | '_| || | / -_) *
 //* \___/_.__// \___\__|\__| |_|  \_,_|_\___| *
 //*         |__/                              *
+//-MARK: object rule
 template <typename NextState, typename... Args>
 class object_rule final : public rule {
 public:
-    object_rule (parse_stack_pointer s, Args... args)
+    object_rule (parse_stack_pointer s, Args &&... args)
             : rule (s)
             , args_{std::forward_as_tuple (args...)} {}
 
@@ -127,10 +128,11 @@ std::error_code push_object_rule (rule * const rule, Args &&... args) {
 //* / _` | '_| '_/ _` | || | | '_| || | / -_) *
 //* \__,_|_| |_| \__,_|\_, | |_|  \_,_|_\___| *
 //*                    |__/                   *
+//-MARK: array rule
 template <typename NextRule, typename... Args>
 class array_rule final : public rule {
 public:
-    array_rule (parse_stack_pointer s, Args... args)
+    array_rule (parse_stack_pointer s, Args &&... args)
             : rule (s)
             , args_{std::forward_as_tuple (args...)} {}
     std::error_code begin_array () override {

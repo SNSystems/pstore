@@ -48,7 +48,7 @@
 
 class uint64_rule final : public rule {
 public:
-    uint64_rule (parse_stack_pointer stack, not_null<std::uint64_t *> v)
+    uint64_rule (parse_stack_pointer stack, not_null<std::uint64_t *> v) noexcept
             : rule (stack)
             , v_{v} {}
     std::error_code uint64_value (std::uint64_t v) override;
@@ -60,7 +60,7 @@ private:
 
 class string_rule final : public rule {
 public:
-    string_rule (parse_stack_pointer stack, not_null<std::string *> v)
+    string_rule (parse_stack_pointer stack, not_null<std::string *> v) noexcept
             : rule (stack)
             , v_{v} {}
     std::error_code string_value (std::string const & v) override;

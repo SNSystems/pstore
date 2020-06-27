@@ -48,10 +48,33 @@
 
 #include "import_root.hpp"
 
+#include "pstore/cmd_util/command_line.hpp"
+#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/cmd_util/revision_opt.hpp"
+
+using namespace pstore::cmd_util;
+
+namespace {
+
+    // TODO: cl::desc is used as the short-form list of arguments. We're providing full help text!
+    cl::opt<std::string> db_path (cl::positional,
+                                  cl::desc ("Path of the pstore repository to be created."),
+                                  cl::required);
+    cl::opt<std::string>
+        json_source (cl::positional,
+                     cl::desc ("The export file to be read (stdin if not specified)."));
+
+} // end anonymous namespace
+
 int main (int argc, char * argv[]) {
     PSTORE_TRY {
-        pstore::database db{argv[1], pstore::database::access_mode::writable};
-        FILE * infile = argc == 3 ? std::fopen (argv[2], "r") : stdin;
+        cl::parse_command_line_options (argc, argv, "pstore import utility\n");
+
+        // TODO: check that db_path does not exist.
+        pstore::database db{db_path.get (), pstore::database::access_mode::writable};
+        FILE * infile = json_source.get_num_occurrences () > 0
+                            ? std::fopen (json_source.get ().c_str (), "r")
+                            : stdin;
         if (infile == nullptr) {
             std::perror ("File opening failed");
             return EXIT_FAILURE;
@@ -68,7 +91,7 @@ int main (int argc, char * argv[]) {
                 // raise (erc);
                 std::cerr << "Value: " << erc.value () << '\n';
                 std::cerr << "Error: " << erc.message () << '\n';
-                std::cout << "Row " << std::get<parser_type::row_index> (parser.coordinate ())
+                std::cout << "Line " << std::get<parser_type::row_index> (parser.coordinate ())
                           << ", column "
                           << std::get<parser_type::column_index> (parser.coordinate ()) << '\n';
                 break;

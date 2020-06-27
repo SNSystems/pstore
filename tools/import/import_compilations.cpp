@@ -65,6 +65,7 @@ using namespace pstore;
 //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
 //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
 //*                                        *
+//-MARK: definition
 class definition final : public rule {
 public:
     using container = std::vector<repo::compilation_member>;
@@ -160,6 +161,7 @@ maybe<repo::visibility> definition::decode_visibility (std::string const & visib
 //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
 //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
 //*                                                |__/             *
+//-MARK: definition object
 class definition_object final : public rule {
 public:
     definition_object (parse_stack_pointer s, not_null<definition::container *> definitions,
@@ -184,6 +186,7 @@ private:
 //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
 //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
 //*              |_|                            *
+//-MARK: compilation
 class compilation final : public rule {
 public:
     compilation (parse_stack_pointer s, transaction_pointer transaction,
@@ -244,6 +247,7 @@ std::error_code compilation::end_object () {
 //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
 //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
 //*              |_|                                                     *
+//-MARK: compilation index
 // (ctor)
 compilations_index::compilations_index (parse_stack_pointer s, transaction_pointer transaction,
                                         names_pointer names)

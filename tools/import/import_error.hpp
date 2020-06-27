@@ -50,6 +50,7 @@ enum class import_error : int {
     none,
 
     alignment_must_be_power_of_2,
+    alignment_is_too_great,
 
     unexpected_null,
     unexpected_boolean,
@@ -81,6 +82,7 @@ enum class import_error : int {
     bad_linkage,
     bad_visibility,
     unknown_section_name,
+    debug_line_header_digest_not_found,
 };
 
 

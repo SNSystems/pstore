@@ -57,12 +57,13 @@ using not_null = pstore::gsl::not_null<T>;
 //* | '_| || | / -_) *
 //* |_|  \_,_|_\___| *
 //*                  *
+//-MARK: rule
 class rule {
 public:
     using parse_stack = std::stack<std::unique_ptr<rule>>;
     using parse_stack_pointer = not_null<parse_stack *>;
 
-    explicit rule (parse_stack_pointer stack)
+    explicit rule (parse_stack_pointer stack) noexcept
             : stack_{stack} {}
     rule (rule const &) = delete;
     virtual ~rule ();
@@ -83,6 +84,8 @@ public:
     virtual std::error_code key (std::string const & k);
     virtual std::error_code end_object ();
 
+    /// Creates an instance of type T and pushes it onto the parse stack. The provided
+    /// arguments are forwarded to the T constructor in addition to the parse stack itself.
     template <typename T, typename... Args>
     std::error_code push (Args &&... args) {
         stack_->push (std::make_unique<T> (stack_, std::forward<Args> (args)...));
@@ -119,6 +122,7 @@ private:
 };
 
 
+//-MARK: callbacks
 class callbacks {
 public:
     using result_type = void;

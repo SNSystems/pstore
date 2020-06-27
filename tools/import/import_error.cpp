@@ -57,6 +57,9 @@ std::string import_error_category::message (int const error) const {
     case import_error::none: result = "none"; break;
 
     case import_error::alignment_must_be_power_of_2: result = "alignment must be a power of 2"; break;
+    case import_error::alignment_is_too_great:
+        result = "alignment value is too large to be represented";
+        break;
     case import_error::unexpected_null: result = "unexpected null"; break;
     case import_error::unexpected_boolean: result = "unexpected boolean"; break;
     case import_error::unexpected_number: result = "unexpected number"; break;
@@ -110,6 +113,10 @@ std::string import_error_category::message (int const error) const {
     case import_error::bad_digest: result = "bad digest"; break;
     case import_error::bad_visibility: result = "unknown visibility"; break;
     case import_error::unknown_section_name: result = "unknown section name"; break;
+
+    case import_error::debug_line_header_digest_not_found:
+        result = "debug line header digest was not found";
+        break;
     }
     return result;
 }

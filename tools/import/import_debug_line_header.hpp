@@ -66,9 +66,10 @@ public:
     std::error_code end_object () override;
 
 private:
-    transaction_pointer transaction_;
     std::shared_ptr<pstore::index::debug_line_header_index> index_;
     pstore::index::digest digest_;
+
+    transaction_pointer transaction_;
 };
 
 #endif // PSTORE_IMPORT_IMPORT_DEBUG_LINE_HEADER_HPP

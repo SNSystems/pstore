@@ -188,6 +188,22 @@ namespace pstore {
             return *this;
         }
 
+        /// Constructs the contained value in-place. If *this already contains a value before the
+        /// call, the contained value is destroyed by calling its destructor.
+        ///
+        /// \p args... The arguments to pass to the constructor
+        /// \returns A reference to the new contained value.
+        template <typename... Args>
+        T & emplace (Args &&... args) {
+            if (valid_) {
+                T temp (std::forward<Args> (args)...);
+                std::swap (this->value (), temp);
+            } else {
+                new (&storage_) T (std::forward<Args> (args)...);
+                valid_ = true;
+            }
+            return this->value ();
+        }
 
         bool operator== (maybe const & other) const {
             return this->has_value () == other.has_value () &&

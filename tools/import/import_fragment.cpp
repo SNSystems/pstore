@@ -75,6 +75,7 @@ namespace {
     //* (_-</ -_) _|  _| / _ \ ' \  | ' \/ _` | '  \/ -_) *
     //* /__/\___\__|\__|_\___/_||_| |_||_\__,_|_|_|_\___| *
     //*                                                   *
+    //-MARK: section name
     class section_name final : public rule {
     public:
         section_name (parse_stack_pointer s, gsl::not_null<repo::section_kind *> section)
@@ -110,6 +111,7 @@ namespace {
     //* | |  _| \ \ / || | '_ \ | '_| || | / -_) *
     //* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
     //*                  |_|                     *
+    //-MARK: ifixup rule
     class ifixup_rule final : public rule {
     public:
         explicit ifixup_rule (parse_stack_pointer s, std::vector<repo::internal_fixup> * fixups)
@@ -121,32 +123,16 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        static maybe<repo::section_kind> section_from_string (std::string const & s);
-
         enum { section, type, offset, addend };
         std::bitset<addend + 1> seen_;
 
         gsl::not_null<std::vector<pstore::repo::internal_fixup> *> fixups_;
 
-        repo::section_kind section_;
+        repo::section_kind section_ = repo::section_kind::last;
         std::uint64_t type_ = 0;
         std::uint64_t offset_ = 0;
         std::uint64_t addend_ = 0;
     };
-
-    // section from string
-    // ~~~~~~~~~~~~~~~~~~~
-    maybe<repo::section_kind> ifixup_rule::section_from_string (std::string const & s) {
-#define X(a) {#a, repo::section_kind::a},
-        static std::unordered_map<std::string, repo::section_kind> map = {
-            PSTORE_MCREPO_SECTION_KINDS};
-#undef X
-        auto pos = map.find (s);
-        if (pos == map.end ()) {
-            return nothing<repo::section_kind> ();
-        }
-        return just (pos->second);
-    }
 
     // key
     // ~~~
@@ -187,6 +173,7 @@ namespace {
     //* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
     //* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
     //*                    |_|                     *
+    //-MARK:xfixup rule
     class xfixup_rule final : public rule {
     public:
         xfixup_rule (parse_stack_pointer s, not_null<std::vector<repo::external_fixup> *> fixups)
@@ -247,6 +234,7 @@ namespace {
     //* |  _| \ \ / || | '_ (_-< / _ \ '_ \| / -_) _|  _| *
     //* |_| |_/_\_\\_,_| .__/__/ \___/_.__// \___\__|\__| *
     //*                |_|               |__/             *
+    //-MARK: fixups object
     template <typename Next, typename Fixup>
     class fixups_object final : public rule {
     public:
@@ -269,12 +257,15 @@ namespace {
     //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *
     //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
     //* |___/                                                    *
+    //-MARK: generic section
     template <typename OutputIterator>
     class generic_section final : public rule {
     public:
-        generic_section (parse_stack_pointer stack, OutputIterator out)
+        generic_section (parse_stack_pointer stack, OutputIterator * const out)
                 : rule (stack)
-                , out_{std::move (out)} {}
+                , out_{out} {}
+        generic_section (generic_section const &) = delete;
+        generic_section & operator= (generic_section const &) = delete;
 
         pstore::gsl::czstring name () const noexcept override { return "generic section"; }
         std::error_code key (std::string const & k) override;
@@ -283,7 +274,7 @@ namespace {
     private:
         enum { data, align, ifixups, xfixups };
         std::bitset<xfixups + 1> seen_;
-        OutputIterator out_;
+        OutputIterator * const out_;
 
         std::string data_;
         std::uint64_t align_ = 0;
@@ -335,36 +326,96 @@ namespace {
         return pop ();
     }
 
-    struct debug_line_content {
-        debug_line_content (repo::section_content && c, extent<std::uint8_t> const & header_extent)
-                : content{std::move (c)}
-                , section{std::make_unique<repo::debug_line_section> (
-                      header_extent, content.make_sources (), content.align)} {}
-        debug_line_content (debug_line_content const &) = delete;
-        debug_line_content (debug_line_content && other)
-                : content (std::move (other.content))
-                , section (std::move (other.section)) {}
+    //*  _   _         _                 _       _            *
+    //* / | | |__ _  _| |_ ___   __   __| |_ _ _(_)_ _  __ _  *
+    //* | | | '_ \ || |  _/ -_) / _| (_-<  _| '_| | ' \/ _` | *
+    //* |_| |_.__/\_, |\__\___| \__| /__/\__|_| |_|_||_\__, | *
+    //*           |__/                                 |___/  *
+    //-MARK: 1 byte string section
+    template <typename OutputIterator>
+    class mergeable_1_byte_c_string_section final : public rule {
+    public:
+        mergeable_1_byte_c_string_section (parse_stack_pointer stack,
+                                           repo::section_content * const content,
+                                           OutputIterator * const out)
+                : rule (stack)
+                , content_{content}
+                , out_{out} {}
+        gsl::czstring name () const noexcept override {
+            return "mergeable 1 byte c string section";
+        }
+        std::error_code key (std::string const & k) override;
+        std::error_code end_object () override;
 
-        repo::section_content content;
-        std::unique_ptr<repo::debug_line_section> section;
+    private:
+        enum { align, data, ifixups, xfixups };
+        std::bitset<xfixups + 1> seen_;
+
+        std::string data_;
+        std::uint64_t align_ = 0;
+
+        repo::section_content * const content_ = nullptr;
+        OutputIterator * const out_ = nullptr;
     };
+
+    // key
+    // ~~~
+    template <typename OutputIterator>
+    std::error_code mergeable_1_byte_c_string_section<OutputIterator>::key (std::string const & k) {
+        if (k == "data") {
+            seen_[data] = true; // string (ascii85)
+            return push<string_rule> (&data_);
+        }
+        if (k == "align") {
+            seen_[align] = true; // integer
+            return this->push<uint64_rule> (&align_);
+        }
+        if (k == "ifixups") {
+            seen_[ifixups] = true;
+            return push_array_rule<ifixups_object> (this, &content_->ifixups);
+        }
+        if (k == "xfixups") {
+            seen_[xfixups] = true;
+            return push_array_rule<xfixups_object> (this, &content_->xfixups);
+        }
+        return import_error::unrecognized_section_object_key;
+    }
+
+    // end object
+    // ~~~~~~~~~~
+    template <typename OutputIterator>
+    std::error_code mergeable_1_byte_c_string_section<OutputIterator>::end_object () {
+        if (!is_power_of_two (align_)) {
+            return import_error::alignment_must_be_power_of_2;
+        }
+        using align_type = decltype (content_->align);
+        static_assert (std::is_unsigned<align_type>::value, "Expected alignment to be unsigned");
+        if (align_ > std::numeric_limits<align_type>::max ()) {
+            return import_error::alignment_is_too_great;
+        }
+        content_->align = static_cast<align_type> (align_);
+        from_base64 (std::begin (data_), std::end (data_), std::back_inserter (content_->data));
+
+        *out_ = std::make_unique<repo::generic_section_creation_dispatcher> (
+            repo::section_kind::mergeable_1_byte_c_string, content_);
+        return pop ();
+    }
 
     //*     _     _                _ _                       _   _           *
     //*  __| |___| |__ _  _ __ _  | (_)_ _  ___   ___ ___ __| |_(_)___ _ _   *
     //* / _` / -_) '_ \ || / _` | | | | ' \/ -_) (_-</ -_) _|  _| / _ \ ' \  *
     //* \__,_\___|_.__/\_,_\__, | |_|_|_||_\___| /__/\___\__|\__|_\___/_||_| *
     //*                    |___/                                             *
+    //-MARK: debug line section
     template <typename OutputIterator>
     class debug_line_section final : public rule {
     public:
-        debug_line_section (parse_stack_pointer stack, pstore::database * db,
-                            maybe<debug_line_content> * content, OutputIterator out)
+        debug_line_section (parse_stack_pointer stack, pstore::database & db,
+                            repo::section_content * const content, OutputIterator * const out)
                 : rule (stack)
                 , db_{db}
                 , content_{content}
-                , out_{out} {
-            assert (!content->has_value ());
-        }
+                , out_{out} {}
 
         gsl::czstring name () const noexcept override { return "debug line section"; }
         std::error_code key (std::string const & k) override;
@@ -374,13 +425,12 @@ namespace {
         enum { header, data, ifixups };
         std::bitset<ifixups + 1> seen_;
 
-        pstore::database * const db_;
-        maybe<debug_line_content> * const content_;
-        OutputIterator out_;
+        pstore::database & db_;
+        repo::section_content * const content_;
+        OutputIterator * const out_;
 
         std::string header_digest_;
         std::string data_;
-        std::vector<pstore::repo::internal_fixup> ifixups_;
     };
 
     // key
@@ -397,7 +447,7 @@ namespace {
         }
         if (k == "ifixups") {
             seen_[ifixups] = true;
-            return push_array_rule<ifixups_object> (this, &ifixups_);
+            return push_array_rule<ifixups_object> (this, &content_->ifixups);
         }
         return import_error::unrecognized_section_object_key;
     }
@@ -414,20 +464,27 @@ namespace {
             return import_error::incomplete_debug_line_section;
         }
 
-        auto index = pstore::index::get_index<pstore::trailer::indices::debug_line_header> (*db_);
+        auto index = pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db_);
         // FIXME: search the index for the DLH associated with 'digest'. Record the hash and its
         // associated extent in the debug_line_section instance.
-        auto pos = index->find (*db_, *digest);
-        auto const header_extent = extent<std::uint8_t>{}; // pos->second
+        auto pos = index->find (db_, *digest);
+        if (pos == index->end (db_)) {
+            return import_error::debug_line_header_digest_not_found;
+        }
+        auto const header_extent = pos->second;
 
 
         repo::section_content content{repo::section_kind::debug_line, std::uint8_t{1} /*align*/};
         from_base64 (std::begin (data_), std::end (data_), std::back_inserter (content.data));
         // content.xfixups =
-        content.ifixups = std::move (ifixups_);
+        // content.ifixups = std::move (ifixups_);
 
-        *content_ = just<debug_line_content> (in_place, std::move (content), header_extent);
-        *out_ = std::make_unique<repo::debug_line_dispatcher> (*dls_);
+
+
+        //*content_ = just<debug_line_content> (in_place, std::move (content), header_extent);
+        /// content_->emplace (std::move (content));
+        *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (header_extent,
+                                                                                content_);
         return pop ();
     }
 
@@ -436,11 +493,15 @@ namespace {
     //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| (_-</ -_) _|  _| / _ \ ' \(_-< *
     //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| /__/\___\__|\__|_\___/_||_/__/ *
     //*              |___/                                                   *
+    //-MARK: fragment sections
     class fragment_sections final : public rule {
     public:
         fragment_sections (parse_stack_pointer s, transaction_pointer transaction)
                 : rule (s)
-                , transaction_{transaction} {}
+                , transaction_{transaction}
+                //, debug_line_content_{repo::section_kind::debug_line}
+                //, m1_content_{repo::section_kind::mergeable_1_byte_c_string},
+                , oit_{sections_} {}
         gsl::czstring name () const noexcept override { return "fragment sections"; }
         std::error_code key (std::string const & s) override;
         std::error_code end_object () override { return pop (); }
@@ -448,13 +509,13 @@ namespace {
     private:
         transaction_pointer transaction_;
 
-        struct debug_line_content {
-            repo::section_content content;
-            repo::debug_line_section section;
-        };
-        maybe<debug_line_content> debug_line_;
+        repo::section_content * section_contents (repo::section_kind kind) noexcept {
+            return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (kind)];
+        }
 
+        std::array<repo::section_content, repo::num_section_kinds> contents_;
         std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
+        std::back_insert_iterator<decltype (sections_)> oit_;
         //    std::unique_ptr<repo::section_content> content_;
     };
 
@@ -474,31 +535,29 @@ namespace {
 //        return create_consumer<                                                                    \
 //            pstore::repo::enum_to_section<pstore::repo::section_kind::a>::type>{}(this);
 
-        std::back_insert_iterator<
-            std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>>>
-            oit = std::back_inserter (sections_);
         switch (pos->second) {
             // PSTORE_MCREPO_SECTION_KINDS
         case repo::section_kind::text:
-        case repo::section_kind::data: {
+        case repo::section_kind::data:
+        case repo::section_kind::read_only:
+        case repo::section_kind::interp: {
             // content_ = std::make_unique<repo::section_content> (pos->second);
-            return push_object_rule<generic_section<decltype (oit)>> (this, oit);
+            return push_object_rule<generic_section<decltype (oit_)>> (this, &oit_);
         }
-        case repo::section_kind::debug_line:
-            return push_object_rule<debug_line_secton<decltype(oit)>> (this,
-                            transaction_->db (),
-                            debug_line_content,
-                            debug_line_section,
-                            oit))
 
-            return push_object_rule<debug_line_section<decltype (oit)>> (this, transaction_->db (), &debug_line_, oit);
+        case repo::section_kind::mergeable_1_byte_c_string:
+            return push_object_rule<mergeable_1_byte_c_string_section<decltype (oit_)>> (
+                this, section_contents (repo::section_kind::mergeable_1_byte_c_string), &oit_);
+
+        case repo::section_kind::debug_line:
+            return push_object_rule<debug_line_section<decltype (oit_)>> (
+                this, transaction_->db (), section_contents (repo::section_kind::debug_line),
+                &oit_);
             // debug_line_ = std::make_unique<repo::debug_line_dispatcher>
+
         case repo::section_kind::last: assert (false && "Illegal section kind"); // unreachable
         default: assert (false && "Unimplemented section kind");                 // unreachable
         }
-        //#undef X
-        // digest_ = s; // decode the digest here.
-        // return push (std::make_unique<object_consumer<int, next>> (stack (), &x));
         return import_error::unknown_section_name;
     }
 
@@ -509,6 +568,7 @@ namespace {
 //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| | | ' \/ _` / -_) \ / *
 //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| |_|_||_\__,_\___/_\_\ *
 //*              |___/                                          *
+//-MARK: fragment index
 // (ctor)
 // ~~~~~~
 fragment_index::fragment_index (parse_stack_pointer s, transaction_pointer transaction)
@@ -529,7 +589,7 @@ gsl::czstring fragment_index::name () const noexcept {
 std::error_code fragment_index::key (std::string const & s) {
     if (maybe<uint128> const digest = digest_from_string (s)) {
         digest_ = *digest;
-        return push<object_rule<fragment_sections>> (transaction_);
+        return push_object_rule<fragment_sections> (this, transaction_);
     }
     return import_error::bad_digest;
 }

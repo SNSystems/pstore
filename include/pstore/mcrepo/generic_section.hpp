@@ -398,15 +398,16 @@ namespace pstore {
         inline std::uint32_t generic_section::num_ifixups () const noexcept { return num_ifixups_; }
 
         struct section_content {
+            section_content () noexcept = default;
             explicit section_content (section_kind const kind_) noexcept
                     : kind{kind_} {}
             section_content (section_kind const kind_, std::uint8_t const align_) noexcept
                     : kind{kind_}
                     , align{align_} {}
             section_content (section_content const &) = delete;
-            section_content (section_content &&) = default;
+            section_content (section_content &&) noexcept = default;
             section_content & operator= (section_content const &) = delete;
-            section_content & operator= (section_content &&) = default;
+            section_content & operator= (section_content &&) noexcept = default;
 
             template <typename Iterator>
             using range = std::pair<Iterator, Iterator>;
@@ -416,7 +417,7 @@ namespace pstore {
                 return {begin, end};
             }
 
-            section_kind kind;
+            section_kind kind = section_kind::text;
             std::uint8_t align = 1;
             small_vector<std::uint8_t, 128> data;
             std::vector<internal_fixup> ifixups;

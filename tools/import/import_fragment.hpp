@@ -62,14 +62,16 @@
 class fragment_index final : public rule {
 public:
     fragment_index (parse_stack_pointer s, transaction_pointer transaction);
+
     pstore::gsl::czstring name () const noexcept override;
     std::error_code key (std::string const & s) override;
     std::error_code end_object () override;
 
 private:
-    transaction_pointer transaction_;
     pstore::index::digest digest_;
     std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> sections_;
+
+    transaction_pointer transaction_;
 };
 
 #endif // PSTORE_IMPORT_IMPORT_FRAGMENT_HPP

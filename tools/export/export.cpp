@@ -314,7 +314,7 @@ namespace {
 
     template <>
     void emit_section<pstore::repo::section_kind::debug_line, pstore::repo::debug_line_section> (
-        pstore::database const & db, name_mapping const & names,
+        pstore::database const & /*db*/, name_mapping const & /*names*/,
         pstore::repo::debug_line_section const & dl) {
 
         assert (dl.align () == 1U);
@@ -339,7 +339,7 @@ namespace {
 
     template <>
     void emit_section<pstore::repo::section_kind::dependent, pstore::repo::dependents> (
-        pstore::database const & db, name_mapping const & names,
+        pstore::database const & /*db*/, name_mapping const & /*names*/,
         pstore::repo::dependents const & dependents) {
 
         emit_array (std::begin (dependents), std::end (dependents), INDENT6,

@@ -142,8 +142,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
-    std::array<section_content, 1> c = {
-        {section_content (section_kind::data, std::uint8_t{0x10} /*alignment*/)}};
+    std::array<section_content, 1> c = {{{section_kind::data, std::uint8_t{0x10} /*alignment*/}}};
     section_content & data = c.back ();
     pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
     {
@@ -294,7 +293,7 @@ TEST_F (MCRepoFixture, DumpBssSection) {
         transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
         std::array<section_content, 1> c = {
-            {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
+            {{section_kind::bss, std::uint8_t{0x10} /*alignment*/}}};
 
         section_content & data = c.back ();
         // Build the bss section's data, no internal and external fixups. (Note that this is used by

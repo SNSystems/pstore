@@ -78,6 +78,8 @@ namespace pstore {
             PSTORE_MCREPO_SECTION_KINDS last // always last, never used.
         };
 #undef X
+        constexpr auto num_section_kinds =
+            static_cast<std::underlying_type<section_kind>::type> (section_kind::last);
 
         constexpr auto first_repo_metadata_section = section_kind::dependent;
 
