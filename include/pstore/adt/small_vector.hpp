@@ -86,12 +86,12 @@ namespace pstore {
         /// Constructs the buffer with the given initial numbe of elements.
         explicit small_vector (std::size_t required_elements);
         explicit small_vector (std::initializer_list<ElementType> init);
-        small_vector (small_vector && other);
+        small_vector (small_vector && other) noexcept;
         small_vector (small_vector const & rhs);
 
         ~small_vector () noexcept = default;
 
-        small_vector & operator= (small_vector && other);
+        small_vector & operator= (small_vector && other) noexcept;
         small_vector & operator= (small_vector const & other);
 
         /// \name Element access
@@ -258,7 +258,7 @@ namespace pstore {
     }
 
     template <typename ElementType, std::size_t BodyElements>
-    small_vector<ElementType, BodyElements>::small_vector (small_vector && other)
+    small_vector<ElementType, BodyElements>::small_vector (small_vector && other) noexcept
             : elements_ (std::move (other.elements_))
             , small_buffer_ (std::move (other.small_buffer_))
             , big_buffer_ (std::move (other.big_buffer_)) {
@@ -283,7 +283,7 @@ namespace pstore {
     // operator=
     // ~~~~~~~~~
     template <typename ElementType, std::size_t BodyElements>
-    auto small_vector<ElementType, BodyElements>::operator= (small_vector && other)
+    auto small_vector<ElementType, BodyElements>::operator= (small_vector && other) noexcept
         -> small_vector & {
         elements_ = std::move (other.elements_);
         small_buffer_ = std::move (other.small_buffer_);
