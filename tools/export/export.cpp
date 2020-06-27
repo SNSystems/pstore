@@ -46,12 +46,6 @@
 
 int main (int argc, char * argv[]) {
     pstore::exchange::crude_ostream os{stdout};
-#if 0
-    emit_string (os, "hello"); printf ("\n");
-    emit_string (os, "a \" b"); printf ("\n");
-    emit_string (os, "\\"); printf ("\n");
-#endif
-
     pstore::database db{argv[1], pstore::database::access_mode::read_only};
     export_database (db, os);
 }

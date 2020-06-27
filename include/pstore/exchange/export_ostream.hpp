@@ -24,8 +24,8 @@ namespace pstore {
             crude_ostream & write (std::string const & str);
 
             template <typename T, typename = typename std::enable_if<true>::type>
-            crude_ostream & write_raw (gsl::span<T> const & sp) {
-                std::fwrite (sp.data (), sizeof (T), sp.size (), os_);
+            crude_ostream & write (T const * s, std::size_t length) {
+                std::fwrite (s, sizeof (T), length, os_);
                 return *this;
             }
 

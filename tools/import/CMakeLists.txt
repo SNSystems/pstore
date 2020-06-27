@@ -48,3 +48,4 @@ target_link_libraries (pstore-import PRIVATE
     pstore-cmd-util
     pstore-exchange
 )
+run_pstore_unit_test (pstore-import pstore-exchange-unit-tests)

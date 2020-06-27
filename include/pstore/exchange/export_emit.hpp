@@ -7,8 +7,18 @@
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/support/gsl.hpp"
 
+
 namespace pstore {
     namespace exchange {
+
+        namespace details {
+
+            template <typename OSStream, typename T>
+            void write_span (OSStream & os, gsl::span<T> const & sp) {
+                os.write (sp.data (), sp.length ());
+            }
+
+        } // end namespace details
 
         template <typename OStream, typename Iterator>
         void emit_string (OStream & os, Iterator first, Iterator last) {
@@ -16,12 +26,12 @@ namespace pstore {
             auto pos = first;
             while ((pos = std::find_if (first, last,
                                         [] (char c) { return c == '"' || c == '\\'; })) != last) {
-                os.write_raw (gsl::make_span (&*first, pos - first));
+                details::write_span (os, gsl::make_span (&*first, pos - first));
                 os << '\\' << *pos;
                 first = pos + 1;
             }
             if (first != last) {
-                os.write_raw (gsl::make_span (&*first, last - first));
+                details::write_span (os, gsl::make_span (&*first, last - first));
             }
             os << '"';
         }
