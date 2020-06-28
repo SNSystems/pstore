@@ -122,9 +122,9 @@ namespace pstore {
         template <typename OStream, typename InputIt, typename Function>
         void emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring indent,
                          Function fn) {
-            auto sep = "";
-            auto tail_sep = "";
-            auto tail_sep_indent = "";
+            auto const * sep = "";
+            auto const * tail_sep = "";
+            auto const * tail_sep_indent = "";
             os << "[";
             std::for_each (first, last, [&] (auto const & element) {
                 os << sep << '\n';

@@ -97,7 +97,7 @@ namespace pstore {
         };
 
         std::error_category const & get_import_error_category () noexcept;
-        std::error_code make_error_code (import_error const e) noexcept;
+        std::error_code make_error_code (import_error e) noexcept;
 
     } // end namespace exchange
 } // end namespace pstore

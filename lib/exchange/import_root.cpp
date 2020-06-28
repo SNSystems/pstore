@@ -64,7 +64,7 @@ namespace pstore {
             root_object (parse_stack_pointer stack, not_null<database *> db)
                     : rule (stack)
                     , db_{db} {}
-            gsl::czstring name () const noexcept;
+            gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & k) override;
             std::error_code end_object () override;
 

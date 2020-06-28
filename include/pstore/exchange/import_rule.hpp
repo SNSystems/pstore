@@ -46,7 +46,7 @@
 
 #include <stack>
 #include <system_error>
-#include <iostream> // TODO: remove this!
+
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -92,8 +92,8 @@ namespace pstore {
             template <typename T, typename... Args>
             std::error_code push (Args &&... args) {
                 stack_->push (std::make_unique<T> (stack_, std::forward<Args> (args)...));
-                std::cout << std::string (stack_->size () * trace_indent, ' ') << '+'
-                          << stack_->top ()->name () << '\n';
+                // std::cout << std::string (stack_->size () * trace_indent, ' ') << '+'
+                //          << stack_->top ()->name () << '\n';
                 return {};
             }
 
@@ -102,16 +102,16 @@ namespace pstore {
             std::error_code replace_top (Args &&... args) {
                 auto p = std::make_unique<T> (stack_, std::forward<Args> (args)...);
                 auto stack = stack_;
-                std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
+                // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
 
                 stack->pop (); // Destroys this object.
                 stack->push (std::move (p));
-                std::cout << indent (*stack) << '+' << stack->top ()->name () << '\n';
+                // std::cout << indent (*stack) << '+' << stack->top ()->name () << '\n';
                 return {};
             }
 
             std::error_code pop () {
-                std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
+                // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
                 stack_->pop ();
                 return {};
             }

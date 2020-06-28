@@ -51,6 +51,7 @@
 #define PSTORE_EXCHANGE_IMPORT_NON_TERMINALS_HPP
 
 #include <functional>
+
 #include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {
@@ -108,7 +109,7 @@ namespace pstore {
         template <typename NextState, typename... Args>
         class object_rule final : public rule {
         public:
-            object_rule (parse_stack_pointer s, Args &&... args)
+            explicit object_rule (parse_stack_pointer s, Args &&... args)
                     : rule (s)
                     , args_{std::forward_as_tuple (args...)} {}
 
@@ -139,7 +140,7 @@ namespace pstore {
         template <typename NextRule, typename... Args>
         class array_rule final : public rule {
         public:
-            array_rule (parse_stack_pointer s, Args &&... args)
+            explicit array_rule (parse_stack_pointer s, Args &&... args)
                     : rule (s)
                     , args_{std::forward_as_tuple (args...)} {}
             std::error_code begin_array () override {

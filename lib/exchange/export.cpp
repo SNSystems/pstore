@@ -104,7 +104,7 @@ namespace {
     }
 
     pstore::gsl::czstring section_name (pstore::repo::section_kind section) {
-        auto result = "unknown";
+        auto const * result = "unknown";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a: result = #a; break;
         switch (section) {
@@ -122,7 +122,7 @@ namespace {
         emit_array (os, std::begin (ifixups), std::end (ifixups), indent6,
                     [] (crude_ostream & os1, pstore::repo::internal_fixup const & ifx) {
                         os1 << indent7 << "{\n";
-                        os1 << indent8 << "\"section\": \"" << section_name (ifx.section) << ",\n";
+                        os1 << indent8 << R"("section": ")" << section_name (ifx.section) << ",\n";
                         os1 << indent8 << "\"type\": " << static_cast<unsigned> (ifx.type) << ",\n";
                         os1 << indent8 << "\"offset\": " << ifx.offset << ",\n";
                         os1 << indent8 << "\"addend\": " << ifx.addend << '\n';
@@ -153,7 +153,7 @@ namespace {
     void emit_section (crude_ostream & os, pstore::database const & db, name_mapping const & names,
                        Content const & content) {
         {
-            os << indent6 << "\"data\": \"";
+            os << indent6 << R"("data": ")";
             pstore::repo::container<std::uint8_t> const payload = content.payload ();
             pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
             os << "\",\n";
@@ -168,45 +168,45 @@ namespace {
     template <>
     void emit_section<pstore::repo::section_kind::bss, pstore::repo::bss_section> (
         crude_ostream & os, pstore::database const & db, name_mapping const & names,
-        pstore::repo::bss_section const & bss) {
+        pstore::repo::bss_section const & content) {
 
-        os << indent6 << "\"size\": " << bss.size () << ",\n";
-        os << indent6 << "\"align\": " << bss.align () << ",\n";
-        emit_section_ifixups (os, bss.ifixups ());
+        os << indent6 << "\"size\": " << content.size () << ",\n";
+        os << indent6 << "\"align\": " << content.align () << ",\n";
+        emit_section_ifixups (os, content.ifixups ());
         os << ",\n";
-        emit_section_xfixups (os, db, names, bss.xfixups ());
+        emit_section_xfixups (os, db, names, content.xfixups ());
         os << '\n';
     }
 
     template <>
     void emit_section<pstore::repo::section_kind::debug_line, pstore::repo::debug_line_section> (
         crude_ostream & os, pstore::database const & /*db*/, name_mapping const & /*names*/,
-        pstore::repo::debug_line_section const & dl) {
+        pstore::repo::debug_line_section const & content) {
 
-        assert (dl.align () == 1U);
-        assert (dl.xfixups ().size () == 0U);
+        assert (content.align () == 1U);
+        assert (content.xfixups ().size () == 0U);
 
         // TODO: emit the header digest.
         pstore::index::digest header_digest;
-        os << indent6 << "\"header\": \"" << header_digest.to_hex_string () << "\",\n";
+        os << indent6 << R"("header": ")" << header_digest.to_hex_string () << "\",\n";
 
         {
-            os << indent6 << "\"data\": \"";
-            pstore::repo::container<std::uint8_t> const payload = dl.payload ();
+            os << indent6 << R"("data": ")";
+            pstore::repo::container<std::uint8_t> const payload = content.payload ();
             pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
             os << "\",\n";
         }
 
-        emit_section_ifixups (os, dl.ifixups ());
+        emit_section_ifixups (os, content.ifixups ());
         os << '\n';
     }
 
     template <>
     void emit_section<pstore::repo::section_kind::dependent, pstore::repo::dependents> (
         crude_ostream & os, pstore::database const & /*db*/, name_mapping const & /*names*/,
-        pstore::repo::dependents const & dependents) {
+        pstore::repo::dependents const & content) {
 
-        emit_array (os, std::begin (dependents), std::end (dependents), indent6,
+        emit_array (os, std::begin (content), std::end (content), indent6,
                     [] (crude_ostream & os1,
                         pstore::typed_address<pstore::repo::compilation_member> const & d) {
                         // FIXME: represent as a Relative JSON Pointer
@@ -218,7 +218,7 @@ namespace {
                     name_mapping const & names) {
         auto fragments = pstore::index::get_index<pstore::trailer::indices::fragment> (db);
         if (!fragments->empty ()) {
-            auto fragment_sep = "\n";
+            auto const * fragment_sep = "\n";
             assert (generation > 0U);
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *fragments, generation - 1U)) {
@@ -226,7 +226,7 @@ namespace {
                 os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": {\n";
 
                 auto fragment = db.getro (kvp.second);
-                auto section_sep = "";
+                auto const * section_sep = "";
                 for (pstore::repo::section_kind section : *fragment) {
                     os << section_sep << indent5 << '"' << section_name (section) << "\": {\n";
 #define X(a)                                                                                       \
@@ -272,7 +272,7 @@ namespace {
                        name_mapping const & names) {
         auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (db);
         if (!compilations->empty ()) {
-            auto sep = "\n";
+            auto const * sep = "\n";
             assert (generation > 0);
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *compilations, generation - 1U)) {
@@ -290,13 +290,13 @@ namespace {
                             [&db, &names] (crude_ostream & os1,
                                            pstore::repo::compilation_member const & d) {
                                 os1 << indent6 << "{\n";
-                                os1 << indent7 << "\"digest\": \"" << d.digest.to_hex_string ()
+                                os1 << indent7 << R"("digest": ")" << d.digest.to_hex_string ()
                                     << "\",\n";
                                 os1 << indent7 << "\"name\": " << names.index (d.name) << ',';
                                 show_string (os1, db, d.name);
                                 os1 << '\n';
-                                os1 << indent7 << "\"linkage\": \"" << d.linkage () << "\",\n";
-                                os1 << indent7 << "\"visibility\": \"" << d.visibility () << "\"\n";
+                                os1 << indent7 << R"("linkage": ")" << d.linkage () << "\",\n";
+                                os1 << indent7 << R"("visibility": ")" << d.visibility () << "\"\n";
                                 os1 << indent6 << '}';
                             });
                 os << '\n' << indent4 << '}';
@@ -309,14 +309,14 @@ namespace {
         auto debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
-            auto sep = "\n";
+            auto const * sep = "\n";
             assert (generation > 0);
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
                 os << sep << indent4 << '"' << kvp.first.to_hex_string () << "\": \"";
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
-                auto const ptr = data.get ();
+                auto const * const ptr = data.get ();
                 pstore::to_base64 (ptr, ptr + kvp.second.size, stdio_output{});
                 os << '"';
 

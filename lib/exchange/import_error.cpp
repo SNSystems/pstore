@@ -55,7 +55,7 @@ namespace pstore {
         }
 
         std::string import_error_category::message (int const error) const {
-            auto * result = "unknown import_error_category error";
+            auto const * result = "unknown import_error_category error";
             switch (static_cast<import_error> (error)) {
             case import_error::none: result = "none"; break;
 

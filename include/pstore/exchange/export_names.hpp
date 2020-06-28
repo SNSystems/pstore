@@ -69,7 +69,7 @@ namespace pstore {
         };
 
         void export_names (crude_ostream & os, database const & db, unsigned generation,
-                           name_mapping * const string_table);
+                           name_mapping * string_table);
 
     } // end namespace exchange
 } // end namespace pstore
