@@ -262,7 +262,7 @@ namespace {
     //* |___/                                                    *
     //-MARK: generic section
     template <typename OutputIterator>
-    class generic_section final : public rule {
+    class generic_section : public rule {
     public:
         generic_section (parse_stack_pointer stack, repo::section_kind kind,
                          not_null<repo::section_content *> const content,
@@ -275,6 +275,9 @@ namespace {
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
 
+    protected:
+        error_or<repo::section_content *> content_object ();
+
     private:
         repo::section_kind const kind_;
 
@@ -282,7 +285,7 @@ namespace {
         std::bitset<xfixups + 1> seen_;
 
         std::string data_;
-        std::uint64_t align_ = 0;
+        std::uint64_t align_ = 1U;
 
         not_null<repo::section_content *> const content_;
         not_null<OutputIterator *> const out_;
@@ -311,29 +314,42 @@ namespace {
         return import_error::unrecognized_section_object_key;
     }
 
-    // end object
-    // ~~~~~~~~~~
+    // content object
+    // ~~~~~~~~~~~~~~
     template <typename OutputIterator>
-    std::error_code generic_section<OutputIterator>::end_object () {
+    error_or<repo::section_content *> generic_section<OutputIterator>::content_object () {
+        using return_type = error_or<repo::section_content *>;
+
         if (!seen_.all ()) {
-            return import_error::generic_section_was_incomplete;
+            // FIXME: restore which check (but smarter)
+            // return return_type{import_error::generic_section_was_incomplete};
         }
         if (!is_power_of_two (align_)) {
-            return import_error::alignment_must_be_power_of_2;
+            return return_type{import_error::alignment_must_be_power_of_2};
         }
         using align_type = decltype (content_->align);
         static_assert (std::is_unsigned<align_type>::value, "Expected alignment to be unsigned");
         if (align_ > std::numeric_limits<align_type>::max ()) {
-            return import_error::alignment_is_too_great;
+            return return_type{import_error::alignment_is_too_great};
         }
+        content_->kind = kind_;
         content_->align = static_cast<align_type> (align_);
         if (!from_base64 (std::begin (data_), std::end (data_),
                           std::back_inserter (content_->data))) {
-            return import_error::bad_base64_data;
+            return return_type{import_error::bad_base64_data};
         }
+        return return_type{content_};
+    }
 
-        *out_ =
-            std::make_unique<repo::generic_section_creation_dispatcher> (kind_, content_.get ());
+    // end object
+    // ~~~~~~~~~~
+    template <typename OutputIterator>
+    std::error_code generic_section<OutputIterator>::end_object () {
+        error_or<repo::section_content *> c = this->content_object ();
+        if (!c) {
+            return c.get_error ();
+        }
+        *out_ = std::make_unique<repo::generic_section_creation_dispatcher> (kind_, c.get ());
         return pop ();
     }
 
@@ -345,13 +361,13 @@ namespace {
     //*                    |___/                                             *
     //-MARK: debug line section
     template <typename OutputIterator>
-    class debug_line_section final : public rule {
+    class debug_line_section final : public generic_section<OutputIterator> {
     public:
-        debug_line_section (parse_stack_pointer stack, database & db,
+        debug_line_section (rule::parse_stack_pointer stack, database & db,
                             repo::section_content * const content, OutputIterator * const out)
-                : rule (stack)
+                : generic_section<OutputIterator> (stack, repo::section_kind::debug_line, content,
+                                                   out)
                 , db_{db}
-                , content_{content}
                 , out_{out} {}
 
         gsl::czstring name () const noexcept override { return "debug line section"; }
@@ -359,15 +375,12 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        enum { header, data, ifixups };
-        std::bitset<ifixups + 1> seen_;
+        enum { header };
+        std::bitset<header + 1> seen_;
 
         database & db_;
-        repo::section_content * const content_;
-        OutputIterator * const out_;
-
         std::string header_digest_;
-        std::string data_;
+        not_null<OutputIterator *> const out_;
     };
 
     // key
@@ -376,17 +389,9 @@ namespace {
     std::error_code debug_line_section<OutputIterator>::key (std::string const & k) {
         if (k == "header") {
             seen_[header] = true;
-            return push<string_rule> (&header_digest_);
+            return this->template push<string_rule> (&header_digest_);
         }
-        if (k == "data") {
-            seen_[data] = true; // string (ascii85)
-            return push<string_rule> (&data_);
-        }
-        if (k == "ifixups") {
-            seen_[ifixups] = true;
-            return push_array_rule<ifixups_object> (this, &content_->ifixups);
-        }
-        return import_error::unrecognized_section_object_key;
+        return generic_section<OutputIterator>::key (k);
     }
 
     // end object
@@ -411,18 +416,13 @@ namespace {
         auto const header_extent = pos->second;
 
 
-        repo::section_content content{repo::section_kind::debug_line, std::uint8_t{1} /*align*/};
-        if (!from_base64 (std::begin (data_), std::end (data_),
-                          std::back_inserter (content.data))) {
-            return import_error::bad_base64_data;
+        error_or<repo::section_content *> c = this->content_object ();
+        if (!c) {
+            return c.get_error ();
         }
-        // content.xfixups =
-        // content.ifixups = std::move (ifixups_);
-        //*content_ = just<debug_line_content> (in_place, std::move (content), header_extent);
-        /// content_->emplace (std::move (content));
         *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (header_extent,
-                                                                                content_);
-        return pop ();
+                                                                                c.get ());
+        return this->pop ();
     }
 
 
@@ -434,26 +434,27 @@ namespace {
     //-MARK: fragment sections
     class fragment_sections final : public rule {
     public:
-        fragment_sections (parse_stack_pointer s, transaction_pointer transaction)
+        fragment_sections (parse_stack_pointer s, transaction_pointer transaction,
+                           index::digest const * const digest)
                 : rule (s)
                 , transaction_{transaction}
-                //, debug_line_content_{repo::section_kind::debug_line}
-                //, m1_content_{repo::section_kind::mergeable_1_byte_c_string},
-                , oit_{sections_} {}
+                , digest_{digest}
+                , oit_{dispatchers_} {}
         gsl::czstring name () const noexcept override { return "fragment sections"; }
         std::error_code key (std::string const & s) override;
-        std::error_code end_object () override { return pop (); }
+        std::error_code end_object () override;
 
     private:
         transaction_pointer transaction_;
+        index::digest const * const digest_;
 
         repo::section_content * section_contents (repo::section_kind kind) noexcept {
             return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (kind)];
         }
 
         std::array<repo::section_content, repo::num_section_kinds> contents_;
-        std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
-        std::back_insert_iterator<decltype (sections_)> oit_;
+        std::vector<std::unique_ptr<repo::section_creation_dispatcher>> dispatchers_;
+        std::back_insert_iterator<decltype (dispatchers_)> oit_;
     };
 
     // key
@@ -501,6 +502,22 @@ namespace {
         return import_error::unknown_section_name;
     }
 
+    // end object
+    // ~~~~~~~~~~
+    std::error_code fragment_sections::end_object () {
+
+        std::shared_ptr<pstore::index::fragment_index> index =
+            pstore::index::get_index<pstore::trailer::indices::fragment> (transaction_->db (),
+                                                                          true /* create */);
+
+        index->insert (*transaction_,
+                       std::make_pair (*digest_, repo::fragment::alloc (
+                                                     *transaction_,
+                                                     make_pointee_adaptor (dispatchers_.begin ()),
+                                                     make_pointee_adaptor (dispatchers_.end ()))));
+        return pop ();
+    }
+
 } // end anonymous namespace
 
 
@@ -530,7 +547,7 @@ gsl::czstring fragment_index::name () const noexcept {
 std::error_code fragment_index::key (std::string const & s) {
     if (maybe<uint128> const digest = digest_from_string (s)) {
         digest_ = *digest;
-        return push_object_rule<fragment_sections> (this, transaction_);
+        return push_object_rule<fragment_sections> (this, transaction_, &digest_);
     }
     return import_error::bad_digest;
 }

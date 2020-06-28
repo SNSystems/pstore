@@ -56,6 +56,7 @@
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_transaction.hpp"
 #include "pstore/mcrepo/section.hpp"
+#include "pstore/mcrepo/fragment.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -69,8 +70,8 @@ namespace pstore {
             std::error_code end_object () override;
 
         private:
-            index::digest digest_;
             std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
+            index::digest digest_;
 
             transaction_pointer transaction_;
         };
