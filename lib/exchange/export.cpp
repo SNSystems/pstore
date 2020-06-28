@@ -44,21 +44,20 @@
 #include "pstore/exchange/export.hpp"
 
 #include <type_traits>
-#include <unordered_map>
 
-#include "pstore/core/index_types.hpp"
-#include "pstore/diff/diff.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/core/generation_iterator.hpp"
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/database.hpp"
+#include "pstore/core/generation_iterator.hpp"
+#include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/mcrepo/section.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/mcrepo/fragment.hpp"
-#include "pstore/support/base64.hpp"
+#include "pstore/diff/diff.hpp"
 #include "pstore/exchange/export_emit.hpp"
-
+#include "pstore/exchange/export_names.hpp"
+#include "pstore/mcrepo/fragment.hpp"
+#include "pstore/mcrepo/generic_section.hpp"
+#include "pstore/mcrepo/section.hpp"
+#include "pstore/support/base64.hpp"
+#include "pstore/support/gsl.hpp"
 
 using namespace pstore::exchange;
 
@@ -97,76 +96,11 @@ namespace {
             .to_string ();
     }
 
-    void show_string (pstore::database const & db,
+    void show_string (crude_ostream & os, pstore::database const & db,
                       pstore::typed_address<pstore::indirect_string> addr) {
         if (comments) {
-            std::printf ("  // \"%s\"", get_string (db, addr).c_str ());
+            os << "  // \"" << get_string (db, addr) << '"';
         }
-    }
-
-
-    class name_mapping {
-    public:
-        void add (pstore::address addr) {
-            assert (names_.find (addr) == names_.end ());
-            assert (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
-            names_[addr] = static_cast<std::uint64_t> (names_.size ());
-        }
-        std::uint64_t index (pstore::address addr) const {
-            auto const pos = names_.find (addr);
-            assert (pos != names_.end ());
-            return pos->second;
-        }
-        std::uint64_t index (pstore::typed_address<pstore::indirect_string> addr) const {
-            return index (addr.to_address ());
-        }
-
-    private:
-        std::unordered_map<pstore::address, std::uint64_t> names_;
-    };
-
-
-    template <typename Iterator, typename Function>
-    void emit_array (crude_ostream & os, Iterator first, Iterator last,
-                     pstore::gsl::czstring indent, Function fn) {
-        auto sep = "\n";
-        auto tail_sep = "";
-        auto tail_sep_indent = "";
-        os << "[";
-        std::for_each (first, last, [&] (auto const & element) {
-            os << sep;
-            fn (element);
-            sep = ",\n";
-            tail_sep = "\n";
-            tail_sep_indent = indent;
-        });
-        os << tail_sep << tail_sep_indent << "]";
-    }
-
-#define INDENT1 "  "
-#define INDENT2 INDENT1 INDENT1
-#define INDENT3 INDENT2 INDENT1
-#define INDENT4 INDENT3 INDENT1
-#define INDENT5 INDENT4 INDENT1
-#define INDENT6 INDENT5 INDENT1
-#define INDENT7 INDENT6 INDENT1
-#define INDENT8 INDENT7 INDENT1
-
-
-    void names (crude_ostream & os, pstore::database const & db, unsigned const generation,
-                name_mapping * const string_table) {
-
-        auto strings = pstore::index::get_index<pstore::trailer::indices::name> (db);
-        auto const container = pstore::diff::diff (db, *strings, generation - 1U);
-        emit_array (os, std::begin (container), std::end (container), INDENT3,
-                    [&] (pstore::address addr) {
-                        pstore::indirect_string const str = strings->load_leaf_node (db, addr);
-                        pstore::shared_sstring_view owner;
-                        pstore::raw_sstring_view view = str.as_db_string_view (&owner);
-                        os << INDENT4;
-                        pstore::exchange::emit_string (os, view);
-                        string_table->add (addr);
-                    });
     }
 
     pstore::gsl::czstring section_name (pstore::repo::section_kind section) {
@@ -184,15 +118,15 @@ namespace {
     void
     emit_section_ifixups (crude_ostream & os,
                           pstore::repo::container<pstore::repo::internal_fixup> const & ifixups) {
-        os << INDENT6 "\"ifixups\": ";
-        emit_array (os, std::begin (ifixups), std::end (ifixups), INDENT6,
-                    [&] (pstore::repo::internal_fixup const & ifx) {
-                        os << INDENT7 "{\n";
-                        os << INDENT8 "\"section\": \"" << section_name (ifx.section) << ",\n";
-                        os << INDENT8 "\"type\": " << static_cast<unsigned> (ifx.type) << ",\n";
-                        os << INDENT8 "\"offset\": " << ifx.offset << ",\n";
-                        os << INDENT8 "\"addend\": " << ifx.addend << "\n";
-                        os << INDENT7 "}";
+        os << indent6 << "\"ifixups\": ";
+        emit_array (os, std::begin (ifixups), std::end (ifixups), indent6,
+                    [] (crude_ostream & os1, pstore::repo::internal_fixup const & ifx) {
+                        os1 << indent7 << "{\n";
+                        os1 << indent8 << "\"section\": \"" << section_name (ifx.section) << ",\n";
+                        os1 << indent8 << "\"type\": " << static_cast<unsigned> (ifx.type) << ",\n";
+                        os1 << indent8 << "\"offset\": " << ifx.offset << ",\n";
+                        os1 << indent8 << "\"addend\": " << ifx.addend << '\n';
+                        os1 << indent7 << '}';
                     });
     }
 
@@ -200,17 +134,17 @@ namespace {
     emit_section_xfixups (crude_ostream & os, pstore::database const & db,
                           name_mapping const & names,
                           pstore::repo::container<pstore::repo::external_fixup> const & xfixups) {
-        os << INDENT6 "\"xfixups\": ";
-        emit_array (os, std::begin (xfixups), std::end (xfixups), INDENT6,
-                    [&] (pstore::repo::external_fixup const & xfx) {
-                        os << INDENT7 "{\n";
-                        os << INDENT8 "\"name\": " << names.index (xfx.name) << ",";
-                        show_string (db, xfx.name);
-                        os << "\n";
-                        os << INDENT8 "\"type\": " << static_cast<unsigned> (xfx.type) << ",\n";
-                        os << INDENT8 "\"offset\": " << xfx.offset << ",\n";
-                        os << INDENT8 "\"addend\": " << xfx.addend << "\n";
-                        os << INDENT7 "}";
+        os << indent6 << "\"xfixups\": ";
+        emit_array (os, std::begin (xfixups), std::end (xfixups), indent6,
+                    [&] (crude_ostream & os1, pstore::repo::external_fixup const & xfx) {
+                        os1 << indent7 << "{\n";
+                        os1 << indent8 << "\"name\": " << names.index (xfx.name) << ',';
+                        show_string (os1, db, xfx.name);
+                        os1 << '\n';
+                        os1 << indent8 << "\"type\": " << static_cast<unsigned> (xfx.type) << ",\n";
+                        os1 << indent8 << "\"offset\": " << xfx.offset << ",\n";
+                        os1 << indent8 << "\"addend\": " << xfx.addend << '\n';
+                        os1 << indent7 << '}';
                     });
     }
 
@@ -219,16 +153,16 @@ namespace {
     void emit_section (crude_ostream & os, pstore::database const & db, name_mapping const & names,
                        Content const & content) {
         {
-            os << INDENT6 "\"data\": \"";
+            os << indent6 << "\"data\": \"";
             pstore::repo::container<std::uint8_t> const payload = content.payload ();
             pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
             os << "\",\n";
         }
-        os << INDENT6 "\"align\": " << content.align () << ",\n";
+        os << indent6 << "\"align\": " << content.align () << ",\n";
         emit_section_ifixups (os, content.ifixups ());
         os << ",\n";
         emit_section_xfixups (os, db, names, content.xfixups ());
-        os << "\n";
+        os << '\n';
     }
 
     template <>
@@ -236,12 +170,12 @@ namespace {
         crude_ostream & os, pstore::database const & db, name_mapping const & names,
         pstore::repo::bss_section const & bss) {
 
-        os << INDENT6 "\"size\": " << bss.size () << ",\n";
-        os << INDENT6 "\"align\": " << bss.align () << ",\n";
+        os << indent6 << "\"size\": " << bss.size () << ",\n";
+        os << indent6 << "\"align\": " << bss.align () << ",\n";
         emit_section_ifixups (os, bss.ifixups ());
         os << ",\n";
         emit_section_xfixups (os, db, names, bss.xfixups ());
-        os << "\n";
+        os << '\n';
     }
 
     template <>
@@ -254,17 +188,17 @@ namespace {
 
         // TODO: emit the header digest.
         pstore::index::digest header_digest;
-        os << INDENT6 "\"header\": \"" << header_digest.to_hex_string () << "\",\n";
+        os << indent6 << "\"header\": \"" << header_digest.to_hex_string () << "\",\n";
 
         {
-            os << INDENT6 "\"data\": \"";
+            os << indent6 << "\"data\": \"";
             pstore::repo::container<std::uint8_t> const payload = dl.payload ();
             pstore::to_base64 (std::begin (payload), std::end (payload), stdio_output{});
             os << "\",\n";
         }
 
         emit_section_ifixups (os, dl.ifixups ());
-        os << "\n";
+        os << '\n';
     }
 
     template <>
@@ -272,8 +206,9 @@ namespace {
         crude_ostream & os, pstore::database const & /*db*/, name_mapping const & /*names*/,
         pstore::repo::dependents const & dependents) {
 
-        emit_array (os, std::begin (dependents), std::end (dependents), INDENT6,
-                    [&] (pstore::typed_address<pstore::repo::compilation_member> const & d) {
+        emit_array (os, std::begin (dependents), std::end (dependents), indent6,
+                    [] (crude_ostream & os1,
+                        pstore::typed_address<pstore::repo::compilation_member> const & d) {
                         // FIXME: represent as a Relative JSON Pointer
                         // (https://json-schema.org/draft/2019-09/relative-json-pointer.html).
                     });
@@ -288,12 +223,12 @@ namespace {
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *fragments, generation - 1U)) {
                 auto const & kvp = fragments->load_leaf_node (db, addr);
-                os << fragment_sep << INDENT4 "\"" << kvp.first.to_hex_string () << "\": {\n";
+                os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": {\n";
 
                 auto fragment = db.getro (kvp.second);
-                auto section_sep = INDENT5;
+                auto section_sep = "";
                 for (pstore::repo::section_kind section : *fragment) {
-                    os << section_sep << '"' << section_name (section) << "\": {\n";
+                    os << section_sep << indent5 << '"' << section_name (section) << "\": {\n";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
         emit_section<pstore::repo::section_kind::a> (                                              \
@@ -307,10 +242,10 @@ namespace {
                         break;
                     }
 #undef X
-                    os << INDENT5 "}";
-                    section_sep = ",\n" INDENT5;
+                    os << indent5 << '}';
+                    section_sep = ",\n";
                 }
-                os << "\n" INDENT4 "}";
+                os << '\n' << indent4 << '}';
                 fragment_sep = ",\n";
             }
         }
@@ -344,25 +279,27 @@ namespace {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
                 auto compilation = db.getro (kvp.second);
 
-                os << sep << INDENT4 "\"" << kvp.first.to_hex_string () << "\": {";
-                os << "\n" INDENT5 "\"path\": " << names.index (compilation->path ()) << ',';
-                show_string (db, compilation->path ());
-                os << "\n" INDENT5 "\"triple\": " << names.index (compilation->triple ()) << ',';
-                show_string (db, compilation->triple ());
-                os << "\n" INDENT5 "\"definitions\": ";
-                emit_array (os, compilation->begin (), compilation->end (), INDENT5,
-                            [&] (pstore::repo::compilation_member const & d) {
-                                os << INDENT6 "{\n";
-                                os << INDENT7 "\"digest\": \"" << d.digest.to_hex_string ()
-                                   << "\",\n";
-                                os << INDENT7 "\"name\": " << names.index (d.name) << ',';
-                                show_string (db, d.name);
-                                os << '\n';
-                                os << INDENT7 "\"linkage\": \"" << d.linkage () << "\",\n";
-                                os << INDENT7 "\"visibility\": \"" << d.visibility () << "\"\n";
-                                os << INDENT6 "}";
+                os << sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": {";
+                os << '\n' << indent5 << "\"path\": " << names.index (compilation->path ()) << ',';
+                show_string (os, db, compilation->path ());
+                os << '\n'
+                   << indent5 << "\"triple\": " << names.index (compilation->triple ()) << ',';
+                show_string (os, db, compilation->triple ());
+                os << '\n' << indent5 << "\"definitions\": ";
+                emit_array (os, compilation->begin (), compilation->end (), indent5,
+                            [&db, &names] (crude_ostream & os1,
+                                           pstore::repo::compilation_member const & d) {
+                                os1 << indent6 << "{\n";
+                                os1 << indent7 << "\"digest\": \"" << d.digest.to_hex_string ()
+                                    << "\",\n";
+                                os1 << indent7 << "\"name\": " << names.index (d.name) << ',';
+                                show_string (os1, db, d.name);
+                                os1 << '\n';
+                                os1 << indent7 << "\"linkage\": \"" << d.linkage () << "\",\n";
+                                os1 << indent7 << "\"visibility\": \"" << d.visibility () << "\"\n";
+                                os1 << indent6 << '}';
                             });
-                os << "\n" INDENT4 "}";
+                os << '\n' << indent4 << '}';
                 sep = ",\n";
             }
         }
@@ -377,7 +314,7 @@ namespace {
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
-                os << sep << INDENT4 << '"' << kvp.first.to_hex_string () << "\": \"";
+                os << sep << indent4 << '"' << kvp.first.to_hex_string () << "\": \"";
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
                 auto const ptr = data.get ();
                 pstore::to_base64 (ptr, ptr + kvp.second.size, stdio_output{});
@@ -396,32 +333,33 @@ namespace pstore {
         void export_database (database & db, crude_ostream & os) {
             name_mapping string_table;
             os << "{\n";
-            os << INDENT1 "\"version\": 1,\n";
-            os << INDENT1 "\"transactions\": ";
+            os << indent1 << "\"version\": 1,\n";
+            os << indent1 << "\"transactions\": ";
 
             auto const f = footers (db);
             assert (std::distance (std::begin (f), std::end (f)) >= 1);
-            emit_array (os, std::next (std::begin (f)), std::end (f), INDENT1,
-                        [&] (pstore::typed_address<pstore::trailer> footer_pos) {
+            emit_array (os, std::next (std::begin (f)), std::end (f), indent1,
+                        [&db, &string_table] (crude_ostream & os1,
+                                              pstore::typed_address<pstore::trailer> footer_pos) {
                             auto const footer = db.getro (footer_pos);
                             unsigned const generation = footer->a.generation;
                             db.sync (generation);
-                            os << INDENT2 "{\n";
+                            os1 << indent2 << "{\n";
                             if (comments) {
-                                os << INDENT3 "// generation " << generation << '\n';
+                                os1 << indent3 << "// generation " << generation << '\n';
                             }
-                            os << INDENT3 "\"names\": ";
-                            names (os, db, generation, &string_table);
-                            os << ",\n" INDENT3 "\"debugline\": {";
-                            debug_line (os, db, generation);
-                            os << "\n" INDENT3 "},\n";
-                            os << INDENT3 "\"fragments\": {";
-                            fragments (os, db, generation, string_table);
-                            os << "\n" INDENT3 "},\n";
-                            os << INDENT3 "\"compilations\": {";
-                            compilations (os, db, generation, string_table);
-                            os << "\n" INDENT3 "}\n";
-                            os << INDENT2 "}";
+                            os1 << indent3 << "\"names\": ";
+                            names (os1, db, generation, &string_table);
+                            os1 << ",\n" << indent3 << "\"debugline\": {";
+                            debug_line (os1, db, generation);
+                            os1 << '\n' << indent3 << "},\n";
+                            os1 << indent3 << "\"fragments\": {";
+                            fragments (os1, db, generation, string_table);
+                            os1 << '\n' << indent3 << "},\n";
+                            os1 << indent3 << "\"compilations\": {";
+                            compilations (os1, db, generation, string_table);
+                            os1 << '\n' << indent3 << "}\n";
+                            os1 << indent2 << '}';
                         });
             os << "\n}\n";
         }

@@ -51,6 +51,7 @@ set (pstore_exchange_includes
     export.hpp
     export_emit.hpp
     export_ostream.hpp
+    export_names.hpp
     import_compilations.hpp
     import_debug_line_header.hpp
     import_error.hpp
@@ -66,6 +67,7 @@ set (pstore_exchange_sources
     digest_from_string.cpp
     export.cpp
     export_emit.cpp
+    export_names.cpp
     export_ostream.cpp
     import_compilations.cpp
     import_debug_line_header.cpp

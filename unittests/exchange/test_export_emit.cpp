@@ -47,27 +47,58 @@
 
 #include "gtest/gtest.h"
 
-TEST (ExportEmit, SimpleString) {
+TEST (ExportEmitString, SimpleString) {
     {
         std::ostringstream os1;
         pstore::exchange::emit_string (os1, "");
-        EXPECT_EQ (os1.str (), "\"\"");
+        auto const actual1 = os1.str ();
+        EXPECT_EQ (actual1, "\"\"");
     }
     {
         std::ostringstream os2;
         pstore::exchange::emit_string (os2, "hello");
-        EXPECT_EQ (os2.str (), "\"hello\"");
+        auto const actual2 = os2.str ();
+        EXPECT_EQ (actual2, "\"hello\"");
     }
 }
 
-TEST (ExportEmit, EscapeQuotes) {
+TEST (ExportEmitString, EscapeQuotes) {
     std::ostringstream os;
     pstore::exchange::emit_string (os, "a \" b");
-    EXPECT_EQ (os.str (), "\"a \\\" b\"");
+    auto const actual = os.str ();
+    EXPECT_EQ (actual, "\"a \\\" b\"");
 }
 
-TEST (ExportEmit, EscapeBackslash) {
+TEST (ExportEmitString, EscapeBackslash) {
     std::ostringstream os;
     pstore::exchange::emit_string (os, "\\");
-    EXPECT_EQ (os.str (), "\"\\\\\"");
+    auto const actual = os.str ();
+    EXPECT_EQ (actual, "\"\\\\\"");
+}
+
+TEST (ExportEmitString, Multiple) {
+    std::ostringstream os;
+    pstore::exchange::emit_string (os, "\"abc\\def\"");
+    auto const actual = os.str ();
+    EXPECT_EQ (actual, "\""
+                       "\\\"abc\\\\def\\\""
+                       "\"");
+}
+
+TEST (ExportEmitArray, Empty) {
+    std::ostringstream os;
+    std::vector<int> values{};
+    pstore::exchange::emit_array (os, std::begin (values), std::end (values), "  ",
+                                  [] (std::ostringstream & os, int v) { os << "  " << v; });
+    auto const actual = os.str ();
+    EXPECT_EQ (actual, "[]");
+}
+
+TEST (ExportEmitArray, Array) {
+    std::ostringstream os;
+    std::vector<int> values{2, 3, 5};
+    pstore::exchange::emit_array (os, std::begin (values), std::end (values), "  ",
+                                  [] (std::ostringstream & os, int v) { os << "  " << v; });
+    auto const actual = os.str ();
+    EXPECT_EQ (actual, "[\n  2,\n  3,\n  5\n  ]");
 }

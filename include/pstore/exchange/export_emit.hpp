@@ -50,9 +50,23 @@
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/support/gsl.hpp"
 
-
 namespace pstore {
     namespace exchange {
+
+#define PSTORE_INDENT "  "
+        constexpr auto indent1 = PSTORE_INDENT;
+        constexpr auto indent2 = PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent3 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent4 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent5 =
+            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent6 =
+            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent7 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT
+            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+        constexpr auto indent8 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT
+            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
+#undef PSTORE_INDENT
 
         namespace details {
 
@@ -87,6 +101,39 @@ namespace pstore {
         template <typename OStream>
         void emit_string (OStream & os, std::string const & str) {
             emit_string (os, std::begin (str), std::end (str));
+        }
+
+
+        /// Writes an array of values given by the range \p first to \p last to the output
+        /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each object
+        ///  (a, b) is written on a new line.
+        ///
+        /// \tparam OStream  An output stream type to which values can be written using the '<<'
+        ///     operator.
+        /// \tparam InputIt  An input iterator.
+        /// \tparam Function  A callable whose signature should be equivalent to:
+        ///     void fun(OStream &, std::iterator_traits<InputIt>::value_type const &a);
+        /// \param os  An output stream to which values are written using the '<<' operator.
+        /// \param first  The start of the range denoting array elements to be emitted.
+        /// \param last  The end of the range denoting array elements to be emitted.
+        /// \param indent  The indentation to be applied to each member of the array.
+        /// \param fn  A function which is called to emit the contents of each object in the
+        ///    iterator range denoted by [first, last).
+        template <typename OStream, typename InputIt, typename Function>
+        void emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring indent,
+                         Function fn) {
+            auto sep = "";
+            auto tail_sep = "";
+            auto tail_sep_indent = "";
+            os << "[";
+            std::for_each (first, last, [&] (auto const & element) {
+                os << sep << '\n';
+                fn (os, element);
+                sep = ",";
+                tail_sep = "\n";
+                tail_sep_indent = indent;
+            });
+            os << tail_sep << tail_sep_indent << "]";
         }
 
     } // end namespace exchange
