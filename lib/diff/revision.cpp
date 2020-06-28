@@ -48,7 +48,7 @@
 namespace pstore {
     namespace diff {
 
-        revisions_type update_revisions (revisions_type const revisions,
+        revisions_type update_revisions (revisions_type const & revisions,
                                          revision_number const actual_head) {
             revision_number r1 = revisions.first;
             maybe<revision_number> r2 = revisions.second;

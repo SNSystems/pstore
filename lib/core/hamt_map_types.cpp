@@ -113,7 +113,7 @@ namespace pstore {
                                                                   linear_node (num_children));
 
                 std::size_t const num_to_copy = std::min (num_children, from_node.size ());
-                auto * const src_begin = from_node.leaves_;
+                auto const * const src_begin = from_node.leaves_;
                 // Note that the last argument is '&leaves[0]' rather than just 'leaves' to defeat
                 // an MSVC debug assertion that thinks it knows how big the leaves_ array is...
                 std::copy (src_begin, src_begin + num_to_copy, &new_node->leaves_[0]);
@@ -151,7 +151,7 @@ namespace pstore {
                 -> std::pair<std::shared_ptr<linear_node const>, linear_node const *> {
 
                 if (node.is_heap ()) {
-                    auto ptr = node.untag_node<linear_node const *> ();
+                    auto const * ptr = node.untag_node<linear_node const *> ();
                     assert (ptr->signature_ == node_signature_);
                     return {nullptr, ptr};
                 }
@@ -171,7 +171,7 @@ namespace pstore {
                     raise (pstore::error_code::index_corrupt);
                 }
 #endif
-                auto * const p = ln.get ();
+                auto const * const p = ln.get ();
                 return {std::move (ln), p};
             }
 
@@ -239,7 +239,7 @@ namespace pstore {
             internal_node::internal_node (internal_node const & rhs)
                     : bitmap_{rhs.bitmap_} {
 
-                auto const first = std::begin (rhs.children_);
+                auto const * const first = std::begin (rhs.children_);
                 std::copy (first, first + rhs.size (), std::begin (children_));
             }
 
@@ -378,14 +378,14 @@ namespace pstore {
                     if (p.is_heap ()) {
                         if (shifts < max_hash_bits) { // internal node
                             assert (p.is_internal ());
-                            auto const internal = p.untag_node<internal_node *> ();
+                            auto * const internal = p.untag_node<internal_node *> ();
                             p = internal->flush (transaction, shifts);
                             // This node is owned by a container in the outer HAMT structure. Don't
                             // delete it here. If this ever changes, then add a 'delete internal;'
                             // here.
                         } else { // linear node
                             assert (p.is_linear ());
-                            auto const linear = p.untag_node<linear_node *> ();
+                            auto * const linear = p.untag_node<linear_node *> ();
                             p = linear->flush (transaction) | internal_node_bit;
                             delete linear;
                         }

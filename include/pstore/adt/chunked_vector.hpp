@@ -95,7 +95,7 @@ namespace pstore {
         chunked_vector (chunked_vector const &) = delete;
         chunked_vector (chunked_vector && other) noexcept;
 
-        ~chunked_vector () noexcept { this->clear (); }
+        ~chunked_vector () noexcept = default;
 
         chunked_vector & operator= (chunked_vector const & other) noexcept = delete;
         chunked_vector & operator= (chunked_vector && other) noexcept;
@@ -114,7 +114,7 @@ namespace pstore {
         const_iterator end () const noexcept { return end_impl (*this); }
         const_iterator cend () const noexcept { return end (); }
 
-        void clear () noexcept {
+        void clear () {
             chunks_.clear ();
             // Ensure that there's always at least one chunk.
             chunks_.emplace_back ();
@@ -278,13 +278,16 @@ namespace pstore {
               std::size_t ActualAlign>
     class chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk {
     public:
-        chunk () noexcept {
+        chunk () noexcept { // NOLINT
             // Don't use "=default" here. We don't want the zero initializer for membs_ to run.
         }
         chunk (chunk const &) = delete;
+        chunk (chunk && ) noexcept = delete;
+
         ~chunk () noexcept;
 
-        bool operator= (chunk const &) = delete;
+        chunk & operator= (chunk const &) = delete;
+        chunk & operator= (chunk && ) noexcept = delete;
 
         T * data () noexcept { return membs_.data (); }
         T const * data () const noexcept { return membs_.data (); }
