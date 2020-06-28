@@ -101,7 +101,6 @@ TEST_F (IndexFixture, InitAddress) {
 
 // Test initial pointer index pointer.
 TEST_F (IndexFixture, InternalSizeBytes) {
-    using internal_node = pstore::index::details::internal_node;
     EXPECT_EQ (24U, internal_node::size_bytes (1));
     EXPECT_EQ (32U, internal_node::size_bytes (2));
     EXPECT_EQ (528U, internal_node::size_bytes (64));
