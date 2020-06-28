@@ -44,40 +44,32 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_NAMES_HPP
 #define PSTORE_EXCHANGE_EXPORT_NAMES_HPP
 
-#include <cassert>
 #include <cstdint>
-#include <limits>
 #include <unordered_map>
 
 #include "pstore/core/address.hpp"
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
     namespace exchange {
 
+        class crude_ostream;
+
         class name_mapping {
         public:
-            void add (address addr) {
-                assert (names_.find (addr) == names_.end ());
-                assert (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
-                names_[addr] = static_cast<std::uint64_t> (names_.size ());
-            }
-            std::uint64_t index (address addr) const {
-                auto const pos = names_.find (addr);
-                assert (pos != names_.end ());
-                return pos->second;
-            }
+            void add (address addr);
+
+            std::uint64_t index (address addr) const;
             std::uint64_t index (typed_address<indirect_string> addr) const {
-                return index (addr.to_address ());
+                return this->index (addr.to_address ());
             }
 
         private:
             std::unordered_map<address, std::uint64_t> names_;
         };
 
-        void names (crude_ostream & os, database const & db, unsigned const generation,
-                    name_mapping * const string_table);
+        void export_names (crude_ostream & os, database const & db, unsigned generation,
+                           name_mapping * const string_table);
 
     } // end namespace exchange
 } // end namespace pstore

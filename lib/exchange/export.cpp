@@ -349,7 +349,7 @@ namespace pstore {
                                 os1 << indent3 << "// generation " << generation << '\n';
                             }
                             os1 << indent3 << "\"names\": ";
-                            names (os1, db, generation, &string_table);
+                            export_names (os1, db, generation, &string_table);
                             os1 << ",\n" << indent3 << "\"debugline\": {";
                             debug_line (os1, db, generation);
                             os1 << '\n' << indent3 << "},\n";

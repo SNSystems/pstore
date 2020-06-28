@@ -43,17 +43,48 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/export_names.hpp"
 
+#include <cassert>
+#include <limits>
+
 #include "pstore/core/index_types.hpp"
 #include "pstore/diff/diff.hpp"
 #include "pstore/exchange/export_emit.hpp"
+#include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
     namespace exchange {
 
-        void names (crude_ostream & os, database const & db, unsigned const generation,
-                    name_mapping * const string_table) {
+        //*                                             _            *
+        //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
+        //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
+        //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
+        //*                                  |_|  |_|         |___/  *
+        // add
+        // ~~~
+        void name_mapping::add (address const addr) {
+            assert (names_.find (addr) == names_.end ());
+            assert (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
+            names_[addr] = static_cast<std::uint64_t> (names_.size ());
+        }
+        // index
+        // ~~~~~
+        std::uint64_t name_mapping::index (address const addr) const {
+            auto const pos = names_.find (addr);
+            assert (pos != names_.end ());
+            return pos->second;
+        }
+
+
+        //*                        _                             *
+        //*  _____ ___ __  ___ _ _| |_   _ _  __ _ _ __  ___ ___ *
+        //* / -_) \ / '_ \/ _ \ '_|  _| | ' \/ _` | '  \/ -_|_-< *
+        //* \___/_\_\ .__/\___/_|  \__| |_||_\__,_|_|_|_\___/__/ *
+        //*         |_|                                          *
+        void export_names (crude_ostream & os, database const & db, unsigned const generation,
+                           name_mapping * const string_table) {
 
             auto strings = index::get_index<trailer::indices::name> (db);
+            assert (generation > 0);
             auto const container = diff::diff (db, *strings, generation - 1U);
             emit_array (os, std::begin (container), std::end (container), indent3,
                         [&strings, &string_table, &db] (crude_ostream & os1, address addr) {
