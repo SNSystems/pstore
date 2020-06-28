@@ -53,7 +53,7 @@ namespace pstore {
 
         using revision_number = unsigned;
         using revisions_type = std::pair<revision_number, maybe<revision_number>>;
-        revisions_type update_revisions (revisions_type revisions,
+        revisions_type update_revisions (revisions_type const & revisions,
                                          revision_number const actual_head);
 
     } // namespace diff
