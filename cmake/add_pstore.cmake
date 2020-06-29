@@ -87,6 +87,7 @@ function (pstore_enable_warnings)
             -Wno-c++98-compat
             -Wno-c++98-compat-pedantic
             -Wno-c++14-extensions
+            -Wno-disabled-macro-expansion
             -Wno-exit-time-destructors
             -Wno-global-constructors
             -Wno-padded
