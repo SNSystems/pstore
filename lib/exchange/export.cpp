@@ -122,7 +122,8 @@ namespace {
         emit_array (os, std::begin (ifixups), std::end (ifixups), indent6,
                     [] (crude_ostream & os1, pstore::repo::internal_fixup const & ifx) {
                         os1 << indent7 << "{\n";
-                        os1 << indent8 << R"("section": ")" << section_name (ifx.section) << ",\n";
+                        os1 << indent8 << R"("section": ")" << section_name (ifx.section)
+                            << "\",\n";
                         os1 << indent8 << "\"type\": " << static_cast<unsigned> (ifx.type) << ",\n";
                         os1 << indent8 << "\"offset\": " << ifx.offset << ",\n";
                         os1 << indent8 << "\"addend\": " << ifx.addend << '\n';
