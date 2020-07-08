@@ -164,7 +164,7 @@ TEST (SStringView, At) {
     EXPECT_EQ (sv.at (0), 'A');
     EXPECT_EQ (sv.at (1), 'B');
     EXPECT_EQ (sv.at (4), 'E');
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
     EXPECT_THROW (sv.at (5), std::out_of_range);
 #endif // PSTORE_EXCEPTIONS
 }

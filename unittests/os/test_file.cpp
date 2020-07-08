@@ -339,7 +339,7 @@ TEST (RangeLock, LockWithNoFile) {
     EXPECT_FALSE (lock.is_locked ());
 }
 
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
 TEST (RangeLock, ErrorWithLockHeld) {
     mock_file file;
 

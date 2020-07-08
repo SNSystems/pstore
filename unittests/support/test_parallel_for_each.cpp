@@ -139,7 +139,7 @@ TEST_F (ParallelForEach, ConcurrencyPlusOne) {
 
 TEST (ParallelForEachException, WorkerExceptionPropogates) {
     // Check that an exception throw in a worker thread fully propogates back to the caller.
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
     class custom_exception : public std::exception {};
     auto op = [&] () {
         std::array<int, 2> const src{{3, 5}};
