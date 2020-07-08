@@ -72,7 +72,7 @@
 #cmakedefine PSTORE_VENDOR_ID "@PSTORE_VENDOR_ID@"
 
 /// Defined if Apple System Log API is available. Probably only on Apple platforms.
-#cmakedefine PSTORE_HAVE_ASL_H 1
+#cmakedefine PSTORE_HAVE_OSLOG_H 1
 
 /// Defined if the POSIX syslog API is available.
 #cmakedefine PSTORE_HAVE_SYS_LOG_H 1

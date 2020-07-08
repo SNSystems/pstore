@@ -60,8 +60,7 @@
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
 
-#ifdef PSTORE_HAVE_ASL_H
-#    include <asl.h>
+#ifdef PSTORE_HAVE_OSLOG_H
 #    include <os/log.h>
 #endif
 #ifdef PSTORE_HAVE_SYS_LOG_H
@@ -139,7 +138,7 @@ namespace {
 
     using namespace pstore;
 
-#ifdef PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_OSLOG_H
 
     //*                         *
     //*  _. _| | _  _  _  _ ._  *
@@ -253,7 +252,7 @@ namespace {
         }
     }
 
-#endif // PSTORE_HAVE_ASL_H
+#endif // PSTORE_HAVE_OSLOG_H
 
 #ifdef PSTORE_HAVE_SYS_LOG_H
 
@@ -333,7 +332,7 @@ namespace pstore {
         void create_log_stream (std::string const & ident) {
             std::bitset<handlers::last> enabled;
 
-#ifdef PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_OSLOG_H
             enabled.set (handlers::asl);
 #elif defined(PSTORE_HAVE_SYS_LOG_H)
             enabled.set (handlers::syslog);
@@ -347,7 +346,7 @@ namespace pstore {
             auto loggers = std::make_unique<details::logger_collection> ();
             loggers->reserve (enabled.count ());
 
-#ifdef PSTORE_HAVE_ASL_H
+#ifdef PSTORE_HAVE_OSLOG_H
             if (enabled.test (handlers::asl)) {
                 loggers->emplace_back (new asl_logger (ident));
             }
