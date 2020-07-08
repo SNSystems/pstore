@@ -65,7 +65,7 @@ include (TestBigEndian)
 test_big_endian (PSTORE_IS_BIG_ENDIAN)
 
 if (APPLE)
-    check_include_files ("asl.h" PSTORE_HAVE_ASL_H)
+    check_include_file_cxx ("os/log.h" PSTORE_HAVE_OSLOG_H)
 endif ()
 
 check_include_files ("byteswap.h" PSTORE_HAVE_BYTESWAP_H)

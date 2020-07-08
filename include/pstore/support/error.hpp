@@ -61,7 +61,7 @@
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
-#if !PSTORE_EXCEPTIONS
+#ifndef PSTORE_EXCEPTIONS
 #    include <iostream>
 #endif
 
@@ -176,16 +176,16 @@ namespace pstore {
     template <typename Exception, typename = typename std::enable_if<
                                       std::is_base_of<std::exception, Exception>::value>::type>
     PSTORE_NO_RETURN void raise_exception (Exception const & ex) {
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
         throw ex;
 #else
 #    ifdef _WIN32
         std::wcerr << L"Error: " << utf::win32::to16 (ex.what ()) << L'\n';
 #    else
         std::cerr << "Error: " << ex.what () << '\n';
-#    endif
+#    endif // _WIN32
         std::exit (EXIT_FAILURE);
-#endif
+#endif     // PSTORE_EXCEPTIONS
     }
 
     template <typename ErrorCode>

@@ -167,7 +167,7 @@ TEST_F (ProcessFileNameFreeBSD, CommandContents) {
 }
 
 TEST_F (ProcessFileNameFreeBSD, RaisesError) {
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
     sysctl_mock2 callback;
 
     using namespace testing;

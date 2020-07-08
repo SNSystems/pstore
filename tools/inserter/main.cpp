@@ -132,8 +132,11 @@ int main (int argc, char * argv[]) {
             auto const num_keys = std::size_t{300000};
             rng random;
             auto u64_random = [&random] () -> std::uint64_t {
-                return static_cast<std::uint64_t> (
-                    std::round (random () * std::numeric_limits<std::uint64_t>::max ()));
+                return (static_cast<std::uint64_t> (
+                            std::round (random () * std::numeric_limits<std::uint32_t>::max ()))
+                        << 32) |
+                       static_cast<std::uint64_t> (
+                           std::round (random () * std::numeric_limits<std::uint32_t>::max ()));
             };
             while (keys.size () < num_keys) {
                 keys.insert (pstore::index::digest (u64_random (), u64_random ()));

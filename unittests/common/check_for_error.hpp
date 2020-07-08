@@ -55,7 +55,7 @@
 
 template <typename Function>
 void check_for_error (Function test_fn, int err, std::error_category const & category) {
-#if PSTORE_EXCEPTIONS
+#ifdef PSTORE_EXCEPTIONS
     auto f = [&] () {
         try {
             test_fn ();

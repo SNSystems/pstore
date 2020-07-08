@@ -516,7 +516,7 @@ namespace pstore {
             template <typename Callbacks>
             void number_matcher<Callbacks>::number_is_float () {
                 if (is_integer_) {
-                    fp_acc_.whole_part = static_cast <double> (int_acc_);
+                    fp_acc_.whole_part = static_cast<double> (int_acc_);
                     is_integer_ = false;
                 }
             }

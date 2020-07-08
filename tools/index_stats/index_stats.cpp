@@ -98,12 +98,14 @@ namespace {
         }
 
         double branching_factor () const noexcept {
-            return internal_visited_ == 0
-                       ? 0.0
-                       : static_cast<double> (internal_out_edges_) / internal_visited_;
+            return internal_visited_ == 0 ? 0.0
+                                          : static_cast<double> (internal_out_edges_) /
+                                                static_cast<double> (internal_visited_);
         }
         double mean_leaf_depth () const noexcept {
-            return leaves_visited_ == 0 ? 0.0 : static_cast<double> (leaf_depth_) / leaves_visited_;
+            return leaves_visited_ == 0
+                       ? 0.0
+                       : static_cast<double> (leaf_depth_) / static_cast<double> (leaves_visited_);
         }
         unsigned max_depth () const noexcept { return max_depth_; }
 
