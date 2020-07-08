@@ -65,10 +65,6 @@ namespace pstore {
                     maybe<index::digest> const d = dump::digest_from_string (v);
                     return d ? just (dump::digest_opt{*d}) : nothing<dump::digest_opt> ();
                 }
-
-            private:
-                static maybe<unsigned> hex_to_digit (char digit) noexcept;
-                static maybe<std::uint64_t> get64 (std::string const & str, unsigned index);
             };
 
             // type_description<digest_opt>
