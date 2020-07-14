@@ -12,7 +12,7 @@ Example output:
 For each index it computes the following:
 
 | Statistic       | Description |
-| --------------- + ----------- |
+| --------------- | ----------- |
 | Branching Factor | The [branching factor](https://en.wikipedia.org/wiki/Branching_factor) is the average number of children at each internal node (the node’s out-degree). Larger numbers for this statistic tend to indicate that, on average, fewer internal nodes must be visited when finding a specific key. |
 | Mean Leaf Depth | The mean number of nodes that must be visited when locating a specific key. Smaller numbers indicate a shorter average search path.
 | Max Depth       | The maximum number of nodes that must be visited when locating a specific key. Together with the mean depth, this conveys an impression of how well balanced the tree is. This value should not be too much greater than the mean leaf depth.
