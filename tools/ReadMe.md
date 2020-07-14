@@ -27,7 +27,7 @@
 | [pstore&#8209;diff](diff/) | Dumps diff between two pstore revisions. |
 | [pstore&#8209;dump](dump/) | Dumps pstore contents as YAML. |
 | [pstore&#8209;index&#8209;stats](index_stats/) | Dumps statistics about the index trees in a pstore file as CSV. |
-| [pstore&#8209;index&#8209;structure](index_structure/) | Dumps pstore index structures as GraphViz DOT graphs. |
+| [pstore&#8209;index&#8209;structure](index_structure/) | Dumps pstore index structures as [GraphViz DOT](https://graphviz.org) graphs. |
 
 The utility programs in this group enable you to inspect and explore the contents of a pstore database.
 
