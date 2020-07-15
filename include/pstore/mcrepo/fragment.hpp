@@ -298,10 +298,12 @@ namespace pstore {
 
                 // Verify that the structure layout is the same regardless of the compiler and
                 // target platform.
-                PSTORE_STATIC_ASSERT (alignof (fragment) == 8);
-                PSTORE_STATIC_ASSERT (sizeof (fragment) == 24);
+                PSTORE_STATIC_ASSERT (alignof (fragment) == 16);
+                PSTORE_STATIC_ASSERT (sizeof (fragment) == 32);
                 PSTORE_STATIC_ASSERT (offsetof (fragment, signature_) == 0);
-                PSTORE_STATIC_ASSERT (offsetof (fragment, arr_) == 8);
+                PSTORE_STATIC_ASSERT (offsetof (fragment, padding1_) == 8);
+                PSTORE_STATIC_ASSERT (offsetof (fragment, arr_) == 16);
+                padding1_ = 0; // assignment to silence an "unused" warning from clang.
 
                 static_assert (
                     std::numeric_limits<member_array::bitmap_type>::radix == 2,
@@ -402,10 +404,11 @@ namespace pstore {
                 {'F', 'r', 'a', 'g', 'm', 'e', 'n', 't'}};
 
             std::array<char, 8> signature_ = fragment_signature_;
+            std::uint64_t padding1_ = 0;
 
             /// A sparse array of offsets to each of the contained sections. (Must be the struct's
             /// last member.)
-            member_array arr_;
+            alignas (16) member_array arr_;
         };
 
         // operator<<
@@ -530,7 +533,7 @@ case section_kind::k: name = #k; break;
 #endif
         }
 
-        // size_bytes
+        // size bytes [static]
         // ~~~~~~~~~~
         template <typename Iterator>
         std::size_t fragment::size_bytes (Iterator first, Iterator last) {
