@@ -407,7 +407,8 @@ namespace pstore {
             std::uint64_t padding1_ = 0;
 
             /// A sparse array of offsets to each of the contained sections. (Must be the struct's
-            /// last member.)
+            /// last member.) It must be aligned at least as much as any of the possible member
+            /// types.
             alignas (16) member_array arr_;
         };
 
