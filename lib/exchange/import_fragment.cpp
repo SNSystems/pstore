@@ -437,13 +437,12 @@ namespace {
         }
         auto const header_extent = pos->second;
 
-
         error_or<repo::section_content *> c = this->content_object ();
         if (!c) {
             return c.get_error ();
         }
-        *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (header_extent,
-                                                                                c.get ());
+        *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (
+            *digest, header_extent, c.get ());
         return this->pop ();
     }
 
