@@ -51,6 +51,7 @@
 #define PSTORE_MCREPO_DEBUG_LINE_SECTION_HPP
 
 #include "pstore/core/address.hpp"
+#include "pstore/core/index_types.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 
 namespace pstore {
@@ -62,13 +63,15 @@ namespace pstore {
         public:
             template <typename DataRange, typename IFixupRange, typename XFixupRange>
             debug_line_section (
-                extent<std::uint8_t> const & header_extent,
+                index::digest const & header_digest, extent<std::uint8_t> const & header_extent,
                 generic_section::sources<DataRange, IFixupRange, XFixupRange> const & src,
                 std::uint8_t align)
-                    : header_{header_extent}
+                    : header_digest_{header_digest}
+                    , header_{header_extent}
                     , g_ (src.data_range, src.ifixups_range, src.xfixups_range, align) {}
 
 
+            index::digest const & header_digest () const noexcept { return header_digest_; }
             extent<std::uint8_t> const & header_extent () const noexcept { return header_; }
             generic_section const & generic () const noexcept { return g_; }
 
@@ -98,6 +101,7 @@ namespace pstore {
             }
 
         private:
+            index::digest header_digest_;
             extent<std::uint8_t> header_;
             generic_section g_;
         };
@@ -119,9 +123,11 @@ namespace pstore {
 
         class debug_line_section_creation_dispatcher final : public section_creation_dispatcher {
         public:
-            debug_line_section_creation_dispatcher (extent<std::uint8_t> const & header,
+            debug_line_section_creation_dispatcher (index::digest const & header_digest,
+                                                    extent<std::uint8_t> const & header,
                                                     section_content const * const sec)
                     : section_creation_dispatcher (section_kind::debug_line)
+                    , header_digest_{header_digest}
                     , header_{header}
                     , section_ (sec) {}
 
@@ -137,6 +143,7 @@ namespace pstore {
 
         private:
             std::uintptr_t aligned_impl (std::uintptr_t in) const override;
+            index::digest header_digest_;
             extent<std::uint8_t> header_;
             section_content const * const section_;
         };

@@ -141,6 +141,7 @@ namespace pstore {
                                       bool const hex_mode) {
             assert (sk == repo::section_kind::debug_line);
             return make_value (object::container{
+                {"digest", make_value (section.header_digest ())},
                 {"header", make_value (section.header_extent ())},
                 {"generic", make_section_value (db, section.generic (), sk, triple, hex_mode)},
             });

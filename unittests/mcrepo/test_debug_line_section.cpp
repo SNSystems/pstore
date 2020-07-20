@@ -10,7 +10,7 @@
 //* \__ \  __/ (__| |_| | (_) | | | | *
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
-//===- lib/mcrepo/debug_line_section.cpp ----------------------------------===//
+//===- unittests/mcrepo/test_debug_line_section.cpp -----------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -49,27 +49,67 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/mcrepo/debug_line_section.hpp"
 
-namespace pstore {
-    namespace repo {
+// System includes
+#include <vector>
+#include <memory>
 
-        std::size_t debug_line_section_creation_dispatcher::size_bytes () const {
-            return debug_line_section::size_bytes (section_->make_sources ());
+// 3rd party includes
+#include "gmock/gmock.h"
+
+// pstore includes
+#include "pstore/support/pointee_adaptor.hpp"
+#include "pstore/mcrepo/fragment.hpp"
+
+// Local includes
+#include "empty_store.hpp"
+
+namespace {
+
+    class DebugLineSection : public EmptyStore {
+    public:
+        DebugLineSection ()
+                : db_{this->file ()} {
+            db_.set_vacuum_mode (pstore::database::vacuum_mode::disabled);
         }
 
-        std::uint8_t *
-        debug_line_section_creation_dispatcher::write (std::uint8_t * const out) const {
-            assert (this->aligned (out) == out);
-            auto * const scn = new (out) debug_line_section (
-                header_digest_, header_, section_->make_sources (), section_->align);
-            return out + scn->size_bytes ();
-        }
+    protected:
+        using lock_guard = std::unique_lock<mock_mutex>;
+        using transaction_type = pstore::transaction<lock_guard>;
 
-        std::uintptr_t
-        debug_line_section_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
-            return pstore::aligned<debug_line_section> (in);
-        }
+        mock_mutex mutex_;
+        pstore::database db_;
+    };
 
-        debug_line_dispatcher::~debug_line_dispatcher () noexcept = default;
+} // end anonymous namespace
 
-    } // end namespace repo
-} // end namespace pstore
+TEST_F (DebugLineSection, RoundTrip) {
+    using pstore::repo::debug_line_section_creation_dispatcher;
+
+    constexpr auto section_type = pstore::repo::section_kind::debug_line;
+    constexpr auto alignment = std::uint8_t{4};
+    constexpr auto header_digest = pstore::index::digest{0x01234567U, 0x89ABCDEF};
+    constexpr auto header_extent =
+        pstore::make_extent (pstore::typed_address<std::uint8_t>::make (5), 7);
+
+    pstore::repo::section_content content{section_type, alignment};
+    content.data.emplace_back (std::uint8_t{11});
+    content.data.emplace_back (std::uint8_t{13});
+
+    std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> dispatchers;
+    dispatchers.emplace_back (
+        new debug_line_section_creation_dispatcher (header_digest, header_extent, &content));
+
+    transaction_type transaction = begin (db_, lock_guard{mutex_});
+    auto fragment = pstore::repo::fragment::load (
+        db_, pstore::repo::fragment::alloc (transaction,
+                                            pstore::make_pointee_adaptor (dispatchers.begin ()),
+                                            pstore::make_pointee_adaptor (dispatchers.end ())));
+    transaction.commit ();
+
+    auto const * const dls = fragment->atp<section_type> ();
+    ASSERT_NE (dls, nullptr);
+    EXPECT_EQ (dls->align (), alignment);
+    EXPECT_EQ (dls->header_digest (), header_digest);
+    EXPECT_EQ (dls->header_extent (), header_extent);
+    EXPECT_THAT (dls->payload (), testing::ElementsAre (std::uint8_t{11}, std::uint8_t{13}));
+}
