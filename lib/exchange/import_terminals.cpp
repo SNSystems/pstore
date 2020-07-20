@@ -51,7 +51,7 @@ namespace pstore {
         //* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
         //*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
         //*                                            *
-        // uint64_value
+        // uint64 value
         // ~~~~~~~~~~~~
         std::error_code uint64_rule::uint64_value (std::uint64_t v) {
             *v_ = v;

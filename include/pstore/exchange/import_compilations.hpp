@@ -60,14 +60,20 @@ namespace pstore {
         public:
             compilations_index (parse_stack_pointer s, transaction_pointer transaction,
                                 names_pointer names);
+            compilations_index (compilations_index const & ) = delete;
+            compilations_index (compilations_index && ) noexcept = delete;
+
+            compilations_index & operator= (compilations_index const & ) = delete;
+            compilations_index & operator= (compilations_index && ) = delete;
 
             gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & s) override;
             std::error_code end_object () override;
 
         private:
-            transaction_pointer transaction_;
-            names_pointer names_;
+            transaction_pointer const transaction_;
+            names_pointer const names_;
+            std::shared_ptr<index::fragment_index> const fragments_;
         };
 
     } // end namespace exchange

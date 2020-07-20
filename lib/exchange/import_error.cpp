@@ -65,6 +65,9 @@ namespace pstore {
             case import_error::alignment_is_too_great:
                 result = "alignment value is too large to be represented";
                 break;
+            case import_error::duplicate_name: result = "duplicate name"; break;
+            case import_error::no_such_name: result = "no such name"; break;
+            case import_error::no_such_fragment: result = "no such fragment"; break;
             case import_error::unexpected_null: result = "unexpected null"; break;
             case import_error::unexpected_boolean: result = "unexpected boolean"; break;
             case import_error::unexpected_number: result = "unexpected number"; break;

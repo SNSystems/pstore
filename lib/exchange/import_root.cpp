@@ -47,62 +47,71 @@
 
 #include "pstore/core/database.hpp"
 #include "pstore/exchange/import_error.hpp"
+#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/exchange/import_transaction.hpp"
 
+using namespace pstore;
+using namespace exchange;
+
+namespace {
+
+    //*               _         _     _        _    *
+    //*  _ _ ___  ___| |_   ___| |__ (_)___ __| |_  *
+    //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
+    //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
+    //*                            |__/             *
+    class root_object final : public rule {
+    public:
+        root_object (parse_stack_pointer stack, not_null<database *> db)
+                : rule (stack)
+                , db_{db} {}
+        gsl::czstring name () const noexcept override;
+        std::error_code key (std::string const & k) override;
+        std::error_code end_object () override;
+
+    private:
+        not_null<database *> db_;
+        names names_;
+
+        enum { version, transactions };
+        std::bitset<transactions + 1> seen_;
+        std::uint64_t version_ = 0;
+    };
+
+    // name
+    // ~~~~
+    gsl::czstring root_object::name () const noexcept { return "root object"; }
+
+    // key
+    // ~~~
+    std::error_code root_object::key (std::string const & k) {
+        // TODO: check that 'version' is the first key that we see.
+        if (k == "version") {
+            seen_[version] = true;
+            return push<uint64_rule> (&version_);
+        }
+        if (k == "transactions") {
+            seen_[transactions] = true;
+            return push<transaction_array> (db_, &names_);
+        }
+        return import_error::unrecognized_root_key;
+    }
+
+    // end object
+    // ~~~~~~~~~~
+    std::error_code root_object::end_object () {
+        if (!seen_.all ()) {
+            return import_error::root_object_was_incomplete;
+        }
+        return {};
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
     namespace exchange {
-
-        //*               _         _     _        _    *
-        //*  _ _ ___  ___| |_   ___| |__ (_)___ __| |_  *
-        //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
-        //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
-        //*                            |__/             *
-        class root_object final : public rule {
-        public:
-            root_object (parse_stack_pointer stack, not_null<database *> db)
-                    : rule (stack)
-                    , db_{db} {}
-            gsl::czstring name () const noexcept override;
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
-
-        private:
-            not_null<database *> db_;
-
-            enum { version, transactions };
-            std::bitset<transactions + 1> seen_;
-            std::uint64_t version_ = 0;
-        };
-
-        // name
-        // ~~~~
-        gsl::czstring root_object::name () const noexcept { return "root object"; }
-
-        // key
-        // ~~~
-        std::error_code root_object::key (std::string const & k) {
-            // TODO: check that 'version' is the first key that we see.
-            if (k == "version") {
-                seen_[version] = true;
-                return push<uint64_rule> (&version_);
-            }
-            if (k == "transactions") {
-                seen_[transactions] = true;
-                return push<transaction_array> (db_);
-            }
-            return import_error::unrecognized_root_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        std::error_code root_object::end_object () {
-            if (!seen_.all ()) {
-                return import_error::root_object_was_incomplete;
-            }
-            return {};
-        }
 
         //*               _    *
         //*  _ _ ___  ___| |_  *

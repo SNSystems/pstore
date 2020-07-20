@@ -114,7 +114,8 @@ namespace {
     //-MARK: ifixup rule
     class ifixup_rule final : public rule {
     public:
-        explicit ifixup_rule (parse_stack_pointer s, std::vector<repo::internal_fixup> * fixups)
+        explicit ifixup_rule (parse_stack_pointer s, names_pointer const /*names*/,
+                              std::vector<repo::internal_fixup> * fixups)
                 : rule (s)
                 , fixups_{fixups} {}
 
@@ -177,8 +178,10 @@ namespace {
     //-MARK:xfixup rule
     class xfixup_rule final : public rule {
     public:
-        xfixup_rule (parse_stack_pointer s, not_null<std::vector<repo::external_fixup> *> fixups)
+        xfixup_rule (parse_stack_pointer s, names_pointer const names,
+                     not_null<std::vector<repo::external_fixup> *> fixups)
                 : rule (s)
+                , names_{names}
                 , fixups_{fixups} {}
 
         gsl::czstring name () const noexcept override { return "xfixup rule"; }
@@ -187,6 +190,7 @@ namespace {
 
     private:
         enum { name_index, type, offset, addend };
+        names_pointer const names_;
         std::bitset<addend + 1> seen_;
         gsl::not_null<std::vector<repo::external_fixup> *> fixups_;
 
@@ -224,9 +228,14 @@ namespace {
         if (!seen_.all ()) {
             return import_error::xfixup_object_was_incomplete;
         }
+
+        auto name = names_->lookup (name_);
+        if (!name) {
+            return name.get_error ();
+        }
+
         // TODO: validate some values here.
-        fixups_->emplace_back (typed_address<indirect_string>::make (name_),
-                               static_cast<repo::relocation_type> (type_), offset_, addend_);
+        fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), offset_, addend_);
         return pop ();
     }
 
@@ -240,14 +249,17 @@ namespace {
     template <typename Next, typename Fixup>
     class fixups_object final : public rule {
     public:
-        fixups_object (parse_stack_pointer stack, gsl::not_null<std::vector<Fixup> *> fixups)
+        fixups_object (parse_stack_pointer stack, names_pointer const names,
+                       gsl::not_null<std::vector<Fixup> *> fixups)
                 : rule (stack)
+                , names_{names}
                 , fixups_{fixups} {}
         gsl::czstring name () const noexcept override { return "fixups object"; }
-        std::error_code begin_object () override { return push<Next> (fixups_); }
+        std::error_code begin_object () override { return push<Next> (names_, fixups_); }
         std::error_code end_array () override { return pop (); }
 
     private:
+        names_pointer const names_;
         gsl::not_null<std::vector<Fixup> *> fixups_;
     };
 
@@ -265,12 +277,20 @@ namespace {
     class generic_section : public rule {
     public:
         generic_section (parse_stack_pointer stack, repo::section_kind kind,
-                         not_null<repo::section_content *> const content,
+                         names_pointer const names, not_null<repo::section_content *> const content,
                          not_null<OutputIterator *> const out) noexcept
                 : rule (stack)
                 , kind_{kind}
+                , names_{names}
                 , content_{content}
                 , out_{out} {}
+
+        generic_section (generic_section const &) = delete;
+        generic_section (generic_section &&) noexcept = delete;
+
+        generic_section & operator= (generic_section const &) = delete;
+        generic_section & operator= (generic_section &&) noexcept = delete;
+
         gsl::czstring name () const noexcept override { return "generic section"; }
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
@@ -280,6 +300,7 @@ namespace {
 
     private:
         repo::section_kind const kind_;
+        names_pointer const names_;
 
         enum { align, data, ifixups, xfixups };
         std::bitset<xfixups + 1> seen_;
@@ -305,11 +326,11 @@ namespace {
         }
         if (k == "ifixups") {
             seen_[ifixups] = true;
-            return push_array_rule<ifixups_object> (this, &content_->ifixups);
+            return push_array_rule<ifixups_object> (this, names_, &content_->ifixups);
         }
         if (k == "xfixups") {
             seen_[xfixups] = true;
-            return push_array_rule<xfixups_object> (this, &content_->xfixups);
+            return push_array_rule<xfixups_object> (this, names_, &content_->xfixups);
         }
         return import_error::unrecognized_section_object_key;
     }
@@ -364,9 +385,10 @@ namespace {
     class debug_line_section final : public generic_section<OutputIterator> {
     public:
         debug_line_section (rule::parse_stack_pointer stack, database & db,
-                            repo::section_content * const content, OutputIterator * const out)
-                : generic_section<OutputIterator> (stack, repo::section_kind::debug_line, content,
-                                                   out)
+                            names_pointer const names, repo::section_content * const content,
+                            OutputIterator * const out)
+                : generic_section<OutputIterator> (stack, repo::section_kind::debug_line, names,
+                                                   content, out)
                 , db_{db}
                 , out_{out} {}
 
@@ -434,10 +456,11 @@ namespace {
     //-MARK: fragment sections
     class fragment_sections final : public rule {
     public:
-        fragment_sections (parse_stack_pointer s, transaction_pointer transaction,
-                           index::digest const * const digest)
+        fragment_sections (parse_stack_pointer const s, transaction_pointer const transaction,
+                           names_pointer const names, index::digest const * const digest)
                 : rule (s)
                 , transaction_{transaction}
+                , names_{names}
                 , digest_{digest}
                 , oit_{dispatchers_} {}
         gsl::czstring name () const noexcept override { return "fragment sections"; }
@@ -445,7 +468,8 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        transaction_pointer transaction_;
+        transaction_pointer const transaction_;
+        names_pointer const names_;
         index::digest const * const digest_;
 
         repo::section_content * section_contents (repo::section_kind kind) noexcept {
@@ -484,12 +508,12 @@ namespace {
         case repo::section_kind::text:
         case repo::section_kind::thread_data:
             return push_object_rule<generic_section<decltype (oit_)>> (
-                this, pos->second, section_contents (pos->second), &oit_);
+                this, pos->second, names_, section_contents (pos->second), &oit_);
 
         case repo::section_kind::debug_line:
             return push_object_rule<debug_line_section<decltype (oit_)>> (
-                this, transaction_->db (), section_contents (repo::section_kind::debug_line),
-                &oit_);
+                this, transaction_->db (), names_,
+                section_contents (repo::section_kind::debug_line), &oit_);
 
         case repo::section_kind::last: assert (false && "Illegal section kind"); // unreachable
         case repo::section_kind::bss:
@@ -529,9 +553,11 @@ namespace {
 //-MARK: fragment index
 // (ctor)
 // ~~~~~~
-fragment_index::fragment_index (parse_stack_pointer s, transaction_pointer transaction)
+fragment_index::fragment_index (parse_stack_pointer const s, transaction_pointer const transaction,
+                                names_pointer const names)
         : rule (s)
-        , transaction_{transaction} {
+        , transaction_{transaction}
+        , names_{names} {
     sections_.reserve (
         static_cast<std::underlying_type_t<repo::section_kind>> (repo::section_kind::last));
 }
@@ -547,7 +573,7 @@ gsl::czstring fragment_index::name () const noexcept {
 std::error_code fragment_index::key (std::string const & s) {
     if (maybe<uint128> const digest = digest_from_string (s)) {
         digest_ = *digest;
-        return push_object_rule<fragment_sections> (this, transaction_, &digest_);
+        return push_object_rule<fragment_sections> (this, transaction_, names_, &digest_);
     }
     return import_error::bad_digest;
 }

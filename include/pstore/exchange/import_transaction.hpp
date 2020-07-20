@@ -51,22 +51,21 @@
 #define PSTORE_EXCHANGE_IMPORT_TRANSACTION_HPP
 
 #include "pstore/core/transaction.hpp"
+#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {
     namespace exchange {
 
-        using transaction_type = transaction<transaction_lock>;
-        using transaction_pointer = gsl::not_null<transaction_type *>;
-
         class transaction_array final : public rule {
         public:
-            transaction_array (parse_stack_pointer s, not_null<database *> db);
+            transaction_array (parse_stack_pointer s, not_null<database *> db, names_pointer names);
             gsl::czstring name () const noexcept override;
             std::error_code begin_array () override;
 
         private:
             gsl::not_null<database *> db_;
+            names_pointer names_;
         };
 
     } // end namespace exchange

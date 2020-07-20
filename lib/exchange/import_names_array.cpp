@@ -4,7 +4,13 @@
 //* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*             |_|                                                      *
-//===- include/pstore/exchange/import_names.hpp ---------------------------===//
+//*                              *
+//*   __ _ _ __ _ __ __ _ _   _  *
+//*  / _` | '__| '__/ _` | | | | *
+//* | (_| | |  | | | (_| | |_| | *
+//*  \__,_|_|  |_|  \__,_|\__, | *
+//*                       |___/  *
+//===- lib/exchange/import_names_array.cpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,48 +47,46 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_EXCHANGE_IMPORT_NAMES_HPP
-#define PSTORE_EXCHANGE_IMPORT_NAMES_HPP
-
-#include <list>
-#include <unordered_map>
-
-#include "pstore/core/hamt_set.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/exchange/import_rule.hpp"
+#include "pstore/exchange/import_names_array.hpp"
 
 namespace pstore {
     namespace exchange {
 
-        using transaction_type = transaction<transaction_lock>;
-        using transaction_pointer = gsl::not_null<transaction_type *>;
+        //*                                                   *
+        //*  _ _  __ _ _ __  ___ ___  __ _ _ _ _ _ __ _ _  _  *
+        //* | ' \/ _` | '  \/ -_|_-< / _` | '_| '_/ _` | || | *
+        //* |_||_\__,_|_|_|_\___/__/ \__,_|_| |_| \__,_|\_, | *
+        //*                                             |__/  *
+        //*                  _                 *
+        //*  _ __  ___ _ __ | |__  ___ _ _ ___ *
+        //* | '  \/ -_) '  \| '_ \/ -_) '_(_-< *
+        //* |_|_|_\___|_|_|_|_.__/\___|_| /__/ *
+        //*                                    *
 
-        class names {
-        public:
-            names () = default;
-            names (names const &) = delete;
-            names (names &&) noexcept = delete;
+        // (ctor)
+        // ~~~~~~
+        names_array_members::names_array_members (parse_stack_pointer s,
+                                                  transaction_pointer transaction, names_pointer n)
+                : rule (s)
+                , transaction_{transaction}
+                , names_{n} {}
 
-            names & operator= (names const &) = delete;
-            names & operator= (names &&) noexcept = delete;
+        // string value
+        // ~~~~~~~~~~~~
+        std::error_code names_array_members::string_value (std::string const & str) {
+            return names_->add_string (transaction_, str);
+        }
 
-            std::error_code add_string (transaction_pointer transaction, std::string const & str);
-            void flush (transaction_pointer transaction);
+        // end array
+        // ~~~~~~~~~
+        std::error_code names_array_members::end_array () {
+            names_->flush (transaction_);
+            return pop ();
+        }
 
-            error_or<typed_address<indirect_string>> lookup (std::uint64_t index) const;
-
-        private:
-            indirect_string_adder adder_;
-            std::list<std::string> strings_;
-            std::list<raw_sstring_view> views_;
-
-            std::unordered_map<std::uint64_t, typed_address<indirect_string>> lookup_;
-        };
-
-        using names_pointer = gsl::not_null<names *>;
-
+        // name
+        // ~~~~
+        gsl::czstring names_array_members::name () const noexcept { return "names array members"; }
 
     } // end namespace exchange
-} // namespace pstore
-
-#endif // PSTORE_EXCHANGE_IMPORT_NAMES_HPP
+} // end namespace pstore

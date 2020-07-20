@@ -58,190 +58,245 @@
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 
-namespace pstore {
-    namespace exchange {
+using namespace pstore;
+using namespace pstore::exchange;
 
-        //*     _      __ _      _ _   _           *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
-        //*                                        *
-        //-MARK: definition
-        class definition final : public rule {
-        public:
-            using container = std::vector<repo::compilation_member>;
-            definition (parse_stack_pointer s, not_null<container *> definitions,
-                        names_pointer names)
-                    : rule (s)
-                    , definitions_{definitions}
-                    , names_{names} {}
+namespace {
 
-            gsl::czstring name () const noexcept override { return "definition"; }
+    using fragment_index_pointer = gsl::not_null<std::shared_ptr<index::fragment_index>>;
 
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
+    //*     _      __ _      _ _   _           *
+    //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
+    //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
+    //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
+    //*                                        *
+    //-MARK: definition
+    class definition final : public rule {
+    public:
+        using container = std::vector<repo::compilation_member>;
 
-            static maybe<repo::linkage> decode_linkage (std::string const & linkage);
-            static maybe<repo::visibility> decode_visibility (std::string const & visibility);
+        definition (parse_stack_pointer s, gsl::not_null<container *> definitions,
+                    names_pointer names, transaction_pointer transaction,
+                    fragment_index_pointer const & fragments)
+                : rule (s)
+                , definitions_{definitions}
+                , names_{names}
+                , transaction_{transaction}
+                , fragments_{fragments} {}
 
-        private:
-            not_null<container *> const definitions_;
-            names_pointer const names_;
+        gsl::czstring name () const noexcept override { return "definition"; }
 
-            std::string digest_;
-            std::uint64_t name_;
-            std::string linkage_;
-            std::string visibility_;
-        };
+        std::error_code key (std::string const & k) override;
+        std::error_code end_object () override;
 
-        // key
-        // ~~~
-        std::error_code definition::key (std::string const & k) {
-            if (k == "digest") {
-                return push<string_rule> (&digest_);
-            }
-            if (k == "name") {
-                return push<uint64_rule> (&name_);
-            }
-            if (k == "linkage") {
-                return push<string_rule> (&linkage_);
-            }
-            if (k == "visibility") {
-                return push<string_rule> (&visibility_);
-            }
-            return import_error::unknown_definition_object_key;
+        static maybe<repo::linkage> decode_linkage (std::string const & linkage);
+        static maybe<repo::visibility> decode_visibility (std::string const & visibility);
+
+    private:
+        gsl::not_null<container *> const definitions_;
+        names_pointer const names_;
+        transaction_pointer transaction_;
+        fragment_index_pointer fragments_;
+
+        std::string digest_;
+        std::uint64_t name_ = 0;
+        std::string linkage_;
+        std::string visibility_;
+    };
+
+    // key
+    // ~~~
+    std::error_code definition::key (std::string const & k) {
+        if (k == "digest") {
+            return push<string_rule> (&digest_);
+        }
+        if (k == "name") {
+            return push<uint64_rule> (&name_);
+        }
+        if (k == "linkage") {
+            return push<string_rule> (&linkage_);
+        }
+        if (k == "visibility") {
+            return push<string_rule> (&visibility_);
+        }
+        return import_error::unknown_definition_object_key;
+    }
+
+    // end object
+    // ~~~~~~~~~~
+    std::error_code definition::end_object () {
+        auto const digest = digest_from_string (digest_);
+        if (!digest) {
+            return import_error::bad_digest;
+        }
+        auto const fpos = fragments_->find (transaction_->db (), *digest);
+        if (fpos == fragments_->end (transaction_->db ())) {
+            return import_error::no_such_fragment;
         }
 
-        // end_object
-        // ~~~~~~~~~~
-        std::error_code definition::end_object () {
-            maybe<index::digest> const digest = digest_from_string (digest_);
-            if (!digest) {
-                return import_error::bad_digest;
-            }
-            maybe<repo::linkage> const linkage = decode_linkage (linkage_);
-            if (!linkage) {
-                return import_error::bad_linkage;
-            }
-            maybe<repo::visibility> const visibility = decode_visibility (visibility_);
-            if (!visibility) {
-                return import_error::bad_visibility;
-            }
-            return pop ();
+        auto const linkage = decode_linkage (linkage_);
+        if (!linkage) {
+            return import_error::bad_linkage;
+        }
+        auto const visibility = decode_visibility (visibility_);
+        if (!visibility) {
+            return import_error::bad_visibility;
         }
 
-        // decode_linkage
-        // ~~~~~~~~~~~~~~
-        maybe<repo::linkage> definition::decode_linkage (std::string const & linkage) {
+        auto const name = names_->lookup (name_);
+        if (!name) {
+            return name.get_error ();
+        }
+
+        definitions_->emplace_back (*digest, fpos->second, *name, *linkage, *visibility);
+
+        return pop ();
+    }
+
+    // decode linkage
+    // ~~~~~~~~~~~~~~
+    maybe<repo::linkage> definition::decode_linkage (std::string const & linkage) {
 #define X(a)                                                                                       \
     if (linkage == #a) {                                                                           \
         return just (repo::linkage::a);                                                            \
     }
-            PSTORE_REPO_LINKAGES
+        PSTORE_REPO_LINKAGES
 #undef X
-            return nothing<repo::linkage> ();
+        return nothing<repo::linkage> ();
+    }
+
+    // decode visibility
+    // ~~~~~~~~~~~~~~~~~
+    maybe<repo::visibility> definition::decode_visibility (std::string const & visibility) {
+        if (visibility == "default") {
+            return just (repo::visibility::default_vis);
+        }
+        if (visibility == "hidden") {
+            return just (repo::visibility::hidden_vis);
+        }
+        if (visibility == "protected") {
+            return just (repo::visibility::protected_vis);
+        }
+        return nothing<repo::visibility> ();
+    }
+
+
+    //*     _      __ _      _ _   _                _     _        _    *
+    //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
+    //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
+    //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
+    //*                                                |__/             *
+    //-MARK: definition object
+    class definition_object final : public rule {
+    public:
+        definition_object (parse_stack_pointer s,
+                           gsl::not_null<definition::container *> definitions, names_pointer names,
+                           transaction_pointer transaction,
+                           fragment_index_pointer const & fragments)
+                : rule (s)
+                , definitions_{definitions}
+                , names_{names}
+                , transaction_{transaction}
+                , fragments_{fragments} {}
+        gsl::czstring name () const noexcept override { return "definition_object"; }
+
+        std::error_code begin_object () override {
+            return this->push<definition> (definitions_, names_, transaction_, fragments_);
+        }
+        std::error_code end_array () override { return pop (); }
+
+    private:
+        gsl::not_null<definition::container *> const definitions_;
+        names_pointer const names_;
+        transaction_pointer transaction_;
+        fragment_index_pointer fragments_;
+    };
+
+
+    //*                    _ _      _   _           *
+    //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
+    //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
+    //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
+    //*              |_|                            *
+    //-MARK: compilation
+    class compilation final : public rule {
+    public:
+        compilation (parse_stack_pointer s, transaction_pointer transaction, names_pointer names,
+                     fragment_index_pointer const & fragments, index::digest digest)
+                : rule (s)
+                , transaction_{transaction}
+                , names_{names}
+                , fragments_{fragments}
+                , digest_{digest} {}
+
+        gsl::czstring name () const noexcept override { return "compilation"; }
+
+        std::error_code key (std::string const & k) override;
+        std::error_code end_object () override;
+
+    private:
+        transaction_pointer transaction_;
+        names_pointer names_;
+        fragment_index_pointer fragments_;
+        index::digest const digest_;
+
+        enum { path_index, triple_index };
+        std::bitset<triple_index + 1> seen_;
+
+        std::uint64_t path_ = 0;
+        std::uint64_t triple_ = 0;
+        definition::container definitions_;
+    };
+
+    // key
+    // ~~~
+    std::error_code compilation::key (std::string const & k) {
+        if (k == "path") {
+            seen_[path_index] = true;
+            return push<uint64_rule> (&path_);
+        }
+        if (k == "triple") {
+            seen_[triple_index] = true;
+            return push<uint64_rule> (&triple_);
+        }
+        if (k == "definitions") {
+            return push_array_rule<definition_object> (this, &definitions_, names_, transaction_,
+                                                       fragments_);
+        }
+        return import_error::unknown_compilation_object_key;
+    }
+
+    // end object
+    // ~~~~~~~~~~
+    std::error_code compilation::end_object () {
+        if (!seen_.all ()) {
+            return import_error::incomplete_compilation_object;
+        }
+        auto const path = names_->lookup (path_);
+        if (!path) {
+            return path.get_error ();
+        }
+        auto const triple = names_->lookup (triple_);
+        if (!triple) {
+            return triple.get_error ();
         }
 
-        // decode_visibility
-        // ~~~~~~~~~~~~~~~~~
-        maybe<repo::visibility> definition::decode_visibility (std::string const & visibility) {
-            if (visibility == "default") {
-                return just (repo::visibility::default_vis);
-            }
-            if (visibility == "hidden") {
-                return just (repo::visibility::hidden_vis);
-            }
-            if (visibility == "protected") {
-                return just (repo::visibility::protected_vis);
-            }
-            return nothing<repo::visibility> ();
-        }
+        // Create the compilation record in the store.
+        extent<repo::compilation> const compilation_extent = repo::compilation::alloc (
+            *transaction_, *path, *triple, std::begin (definitions_), std::end (definitions_));
 
+        // Insert this compilation into the compilations index.
+        auto compilations =
+            pstore::index::get_index<pstore::trailer::indices::compilation> (transaction_->db ());
+        compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
 
-        //*     _      __ _      _ _   _                _     _        _    *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
-        //*                                                |__/             *
-        //-MARK: definition object
-        class definition_object final : public rule {
-        public:
-            definition_object (parse_stack_pointer s, not_null<definition::container *> definitions,
-                               not_null<names *> names)
-                    : rule (s)
-                    , definitions_{definitions}
-                    , names_{names} {}
-            gsl::czstring name () const noexcept override { return "definition_object"; }
+        return pop ();
+    }
 
-            std::error_code begin_object () override {
-                return this->push<definition> (definitions_, names_);
-            }
-            std::error_code end_array () override { return pop (); }
+} // end anonymous namespace
 
-        private:
-            not_null<definition::container *> const definitions_;
-            not_null<names *> const names_;
-        };
-
-        //*                    _ _      _   _           *
-        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
-        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
-        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
-        //*              |_|                            *
-        //-MARK: compilation
-        class compilation final : public rule {
-        public:
-            compilation (parse_stack_pointer s, transaction_pointer transaction,
-                         gsl::not_null<names *> names, index::digest digest)
-                    : rule (s)
-                    , transaction_{transaction}
-                    , names_{names}
-                    , digest_{digest} {}
-
-            gsl::czstring name () const noexcept override { return "compilation"; }
-
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
-
-        private:
-            transaction_pointer transaction_;
-            not_null<names *> names_;
-            uint128 const digest_;
-
-            enum { path_index, triple_index };
-            std::bitset<triple_index + 1> seen_;
-
-            std::uint64_t path_ = 0;
-            std::uint64_t triple_ = 0;
-            definition::container definitions_;
-        };
-
-        // key
-        // ~~~
-        std::error_code compilation::key (std::string const & k) {
-            if (k == "path") {
-                seen_[path_index] = true;
-                return push<uint64_rule> (&path_);
-            }
-            if (k == "triple") {
-                seen_[triple_index] = true;
-                return push<uint64_rule> (&triple_);
-            }
-            if (k == "definitions") {
-                return push_array_rule<definition_object> (this, &definitions_, names_);
-            }
-            return import_error::unknown_compilation_object_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        std::error_code compilation::end_object () {
-            if (!seen_.all ()) {
-                return import_error::incomplete_compilation_object;
-            }
-            // TODO: create the compilation!
-            return pop ();
-        }
+namespace pstore {
+    namespace exchange {
 
 
         //*                    _ _      _   _               _         _          *
@@ -256,7 +311,8 @@ namespace pstore {
                                                 names_pointer names)
                 : rule (s)
                 , transaction_{transaction}
-                , names_{names} {}
+                , names_{names}
+                , fragments_{index::get_index<trailer::indices::fragment> (transaction->db ())} {}
 
         // name
         // ~~~~
@@ -266,7 +322,7 @@ namespace pstore {
         // ~~~
         std::error_code compilations_index::key (std::string const & s) {
             if (maybe<index::digest> const digest = digest_from_string (s)) {
-                return push_object_rule<compilation> (this, transaction_, names_,
+                return push_object_rule<compilation> (this, transaction_, names_, fragments_,
                                                       index::digest{*digest});
             }
             return import_error::bad_digest;

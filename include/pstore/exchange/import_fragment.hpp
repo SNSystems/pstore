@@ -63,17 +63,25 @@ namespace pstore {
 
         class fragment_index final : public rule {
         public:
-            fragment_index (parse_stack_pointer s, transaction_pointer transaction);
+            fragment_index (parse_stack_pointer s, transaction_pointer transaction,
+                            names_pointer names);
+            fragment_index (fragment_index const &) = delete;
+            fragment_index (fragment_index &&) noexcept = delete;
+
+            fragment_index & operator= (fragment_index const &) = delete;
+            fragment_index & operator= (fragment_index &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & s) override;
             std::error_code end_object () override;
 
         private:
+            transaction_pointer const transaction_;
+            names_pointer const names_;
+
             std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
             index::digest digest_;
 
-            transaction_pointer transaction_;
         };
 
     } // end namespace exchange

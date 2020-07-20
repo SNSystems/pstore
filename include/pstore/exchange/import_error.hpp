@@ -54,6 +54,9 @@ namespace pstore {
 
             alignment_must_be_power_of_2,
             alignment_is_too_great,
+            duplicate_name,
+            no_such_name,
+            no_such_fragment,
 
             unexpected_null,
             unexpected_boolean,

@@ -57,6 +57,7 @@ set (pstore_exchange_includes
     import_error.hpp
     import_fragment.hpp
     import_names.hpp
+    import_names_array.hpp
     import_non_terminals.hpp
     import_root.hpp
     import_rule.hpp
@@ -74,6 +75,7 @@ set (pstore_exchange_sources
     import_error.cpp
     import_fragment.cpp
     import_names.cpp
+    import_names_array.cpp
     import_non_terminals.cpp
     import_root.cpp
     import_rule.cpp

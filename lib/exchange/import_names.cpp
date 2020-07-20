@@ -44,37 +44,47 @@
 #include "pstore/exchange/import_names.hpp"
 
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/exchange/import_error.hpp"
 
 namespace pstore {
     namespace exchange {
 
-        names::names (transaction_pointer transaction)
-                : transaction_{transaction}
-                , names_index_{index::get_index<trailer::indices::name> (transaction->db ())} {}
-
-        std::error_code names::add_string (std::string const & str) {
+        // add string
+        // ~~~~~~~~~~
+        std::error_code names::add_string (transaction_pointer transaction,
+                                           std::string const & str) {
             strings_.push_back (str);
             std::string const & x = strings_.back ();
+
             views_.emplace_back (make_sstring_view (x));
             auto & s = views_.back ();
-            adder_.add (*transaction_, names_index_, &s);
+
+            std::shared_ptr<index::name_index> names_index =
+                index::get_index<trailer::indices::name> (transaction->db ());
+            std::pair<index::name_index::iterator, bool> const res =
+                adder_.add (*transaction, names_index, &s);
+            if (!res.second) {
+                return {import_error::duplicate_name};
+            }
+
+            lookup_[lookup_.size ()] =
+                typed_address<indirect_string>::make (res.first.get_address ());
             return {};
         }
 
-        void names::flush () { adder_.flush (*transaction_); }
+        // flush
+        // ~~~~~
+        void names::flush (transaction_pointer transaction) { adder_.flush (*transaction); }
 
+        // lookup
+        // ~~~~~~
+        error_or<typed_address<indirect_string>> names::lookup (std::uint64_t const index) const {
+            using result_type = error_or<typed_address<indirect_string>>;
 
-        names_array_members::names_array_members (parse_stack_pointer s, not_null<names *> n)
-                : rule (s)
-                , names_{n} {}
-
-        std::error_code names_array_members::string_value (std::string const & str) {
-            return names_->add_string (str);
+            auto const pos = lookup_.find (index);
+            return pos != std::end (lookup_) ? result_type{pos->second}
+                                             : result_type{import_error::no_such_name};
         }
-
-        std::error_code names_array_members::end_array () { return pop (); }
-
-        gsl::czstring names_array_members::name () const noexcept { return "names array members"; }
 
     } // end namespace exchange
 } // namespace pstore

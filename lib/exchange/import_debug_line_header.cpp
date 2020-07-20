@@ -50,6 +50,7 @@
 #include "pstore/exchange/import_debug_line_header.hpp"
 
 #include "pstore/core/hamt_map.hpp"
+#include "pstore/core/transaction.hpp"
 #include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/support/base64.hpp"
@@ -68,7 +69,7 @@ namespace pstore {
         // ~~~~
         gsl::czstring debug_line_index::name () const noexcept { return "debug line index"; }
 
-        // string_value
+        // string value
         // ~~~~~~~~~~~~
         std::error_code debug_line_index::string_value (std::string const & s) {
             // Decode the received string to get the raw binary.
@@ -103,7 +104,7 @@ namespace pstore {
             return import_error::bad_digest;
         }
 
-        // end_object
+        // end object
         // ~~~~~~~~~~
         std::error_code debug_line_index::end_object () { return pop (); }
 
