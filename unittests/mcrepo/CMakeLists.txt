@@ -44,9 +44,10 @@
 add_pstore_unit_test (pstore-mcrepo-unit-tests
     test_bss_section.cpp
     test_compilation.cpp
+    test_debug_line_section.cpp
     test_fragment.cpp
     test_sparse_array.cpp
     transaction.cpp
     transaction.hpp
 )
-target_link_libraries (pstore-mcrepo-unit-tests PRIVATE pstore-mcrepo)
+target_link_libraries (pstore-mcrepo-unit-tests PRIVATE pstore-mcrepo pstore-common)

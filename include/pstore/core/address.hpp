@@ -489,7 +489,7 @@ namespace pstore {
     };
 
     template <typename T>
-    static inline extent<T> make_extent (typed_address<T> a, std::uint64_t s) noexcept {
+    static constexpr extent<T> make_extent (typed_address<T> a, std::uint64_t s) noexcept {
         return {a, s};
     }
 
