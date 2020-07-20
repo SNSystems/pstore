@@ -187,9 +187,7 @@ namespace {
         assert (content.align () == 1U);
         assert (content.xfixups ().size () == 0U);
 
-        // TODO: emit the header digest.
-        pstore::index::digest header_digest;
-        os << indent6 << R"("header": ")" << header_digest.to_hex_string () << "\",\n";
+        os << indent6 << R"("header": ")" << content.header_digest ().to_hex_string () << "\",\n";
 
         {
             os << indent6 << R"("data": ")";
