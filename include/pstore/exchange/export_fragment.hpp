@@ -1,10 +1,10 @@
-//*                             _                    _ _    *
-//*   _____  ___ __   ___  _ __| |_    ___ _ __ ___ (_) |_  *
-//*  / _ \ \/ / '_ \ / _ \| '__| __|  / _ \ '_ ` _ \| | __| *
-//* |  __/>  <| |_) | (_) | |  | |_  |  __/ | | | | | | |_  *
-//*  \___/_/\_\ .__/ \___/|_|   \__|  \___|_| |_| |_|_|\__| *
-//*           |_|                                           *
-//===- lib/exchange/export_emit.cpp ---------------------------------------===//
+//*                             _      __                                      _    *
+//*   _____  ___ __   ___  _ __| |_   / _|_ __ __ _  __ _ _ __ ___   ___ _ __ | |_  *
+//*  / _ \ \/ / '_ \ / _ \| '__| __| | |_| '__/ _` |/ _` | '_ ` _ \ / _ \ '_ \| __| *
+//* |  __/>  <| |_) | (_) | |  | |_  |  _| | | (_| | (_| | | | | | |  __/ | | | |_  *
+//*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
+//*           |_|                                   |___/                           *
+//===- include/pstore/exchange/export_fragment.hpp ------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,30 +41,21 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/exchange/export_emit.hpp"
-#include "pstore/exchange/export_ostream.hpp"
+#ifndef PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP
+#define PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP
 
-namespace {
-
-    std::string get_string (pstore::database const & db,
-                            pstore::typed_address<pstore::indirect_string> addr) {
-        return pstore::serialize::read<pstore::indirect_string> (
-                   pstore::serialize::archive::database_reader{db, addr.to_address ()})
-            .to_string ();
-    }
-
-} // end anonymous namespace
+#include "pstore/exchange/export_names.hpp"
 
 namespace pstore {
+
+    class database;
+
     namespace exchange {
 
-        constexpr bool comments = false;
-        void show_string (crude_ostream & os, pstore::database const & db,
-                          pstore::typed_address<pstore::indirect_string> addr) {
-            if (comments) {
-                os << "  // \"" << get_string (db, addr) << '"';
-            }
-        }
+        void fragments (crude_ostream & os, database const & db, unsigned const generation,
+                        name_mapping const & names);
 
     } // end namespace exchange
 } // end namespace pstore
+
+#endif // PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP

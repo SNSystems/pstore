@@ -50,6 +50,7 @@ set (pstore_exchange_includes
     digest_from_string.hpp
     export.hpp
     export_emit.hpp
+    export_fragment.hpp
     export_ostream.hpp
     export_names.hpp
     import_compilations.hpp
@@ -68,6 +69,7 @@ set (pstore_exchange_sources
     digest_from_string.cpp
     export.cpp
     export_emit.cpp
+    export_fragment.cpp
     export_names.cpp
     export_ostream.cpp
     import_compilations.cpp

@@ -83,6 +83,23 @@ namespace pstore {
             return os.write (t);
         }
 
+        class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
+        public:
+            explicit ostream_inserter (crude_ostream & os)
+                    : os_{os} {}
+
+            ostream_inserter & operator= (char c) {
+                os_ << c;
+                return *this;
+            }
+            ostream_inserter & operator* () noexcept { return *this; }
+            ostream_inserter & operator++ () noexcept { return *this; }
+            ostream_inserter operator++ (int) noexcept { return *this; }
+
+        private:
+            crude_ostream & os_;
+        };
+
     } // end namespace exchange
 } // end namespace pstore
 

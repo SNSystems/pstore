@@ -49,9 +49,15 @@
 
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/support/gsl.hpp"
+#include "pstore/core/indirect_string.hpp"
 
 namespace pstore {
+
+    class database;
+
     namespace exchange {
+
+        class crude_ostream;
 
 #define PSTORE_INDENT "  "
         constexpr auto indent1 = PSTORE_INDENT;
@@ -135,6 +141,9 @@ namespace pstore {
             });
             os << tail_sep << tail_sep_indent << "]";
         }
+
+        void show_string (crude_ostream & os, database const & db,
+                          typed_address<indirect_string> addr);
 
     } // end namespace exchange
 } // end namespace pstore
