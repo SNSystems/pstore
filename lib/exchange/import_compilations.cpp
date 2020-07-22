@@ -75,14 +75,19 @@ namespace {
     public:
         using container = std::vector<repo::compilation_member>;
 
-        definition (parse_stack_pointer s, gsl::not_null<container *> definitions,
-                    names_pointer names, transaction_pointer transaction,
+        definition (parse_stack_pointer const stack, gsl::not_null<container *> const definitions,
+                    names_pointer const names, transaction_pointer const transaction,
                     fragment_index_pointer const & fragments)
-                : rule (s)
+                : rule (stack)
                 , definitions_{definitions}
                 , names_{names}
                 , transaction_{transaction}
                 , fragments_{fragments} {}
+        definition (definition const &) = delete;
+        definition (definition &&) noexcept = delete;
+
+        definition & operator= (definition const &) = delete;
+        definition & operator= (definition &&) noexcept = delete;
 
         gsl::czstring name () const noexcept override { return "definition"; }
 
@@ -95,8 +100,8 @@ namespace {
     private:
         gsl::not_null<container *> const definitions_;
         names_pointer const names_;
-        transaction_pointer transaction_;
-        fragment_index_pointer fragments_;
+        transaction_pointer const transaction_;
+        fragment_index_pointer const fragments_;
 
         std::string digest_;
         std::uint64_t name_ = 0;
@@ -189,15 +194,21 @@ namespace {
     //-MARK: definition object
     class definition_object final : public rule {
     public:
-        definition_object (parse_stack_pointer s,
-                           gsl::not_null<definition::container *> definitions, names_pointer names,
-                           transaction_pointer transaction,
+        definition_object (parse_stack_pointer const stack,
+                           gsl::not_null<definition::container *> const definitions,
+                           names_pointer const names, transaction_pointer const transaction,
                            fragment_index_pointer const & fragments)
-                : rule (s)
+                : rule (stack)
                 , definitions_{definitions}
                 , names_{names}
                 , transaction_{transaction}
                 , fragments_{fragments} {}
+        definition_object (definition_object const &) = delete;
+        definition_object (definition_object &&) noexcept = delete;
+
+        definition_object & operator= (definition_object const &) = delete;
+        definition_object & operator= (definition_object &&) noexcept = delete;
+
         gsl::czstring name () const noexcept override { return "definition_object"; }
 
         std::error_code begin_object () override {
@@ -208,8 +219,8 @@ namespace {
     private:
         gsl::not_null<definition::container *> const definitions_;
         names_pointer const names_;
-        transaction_pointer transaction_;
-        fragment_index_pointer fragments_;
+        transaction_pointer const transaction_;
+        fragment_index_pointer const fragments_;
     };
 
 
@@ -221,13 +232,19 @@ namespace {
     //-MARK: compilation
     class compilation final : public rule {
     public:
-        compilation (parse_stack_pointer s, transaction_pointer transaction, names_pointer names,
-                     fragment_index_pointer const & fragments, index::digest digest)
-                : rule (s)
+        compilation (parse_stack_pointer const stack, transaction_pointer const transaction,
+                     names_pointer const names, fragment_index_pointer const & fragments,
+                     index::digest const digest)
+                : rule (stack)
                 , transaction_{transaction}
                 , names_{names}
                 , fragments_{fragments}
                 , digest_{digest} {}
+        compilation (compilation const &) = delete;
+        compilation (compilation &&) noexcept = delete;
+
+        compilation & operator= (compilation const &) = delete;
+        compilation & operator== (compilation &&) noexcept = delete;
 
         gsl::czstring name () const noexcept override { return "compilation"; }
 
@@ -235,9 +252,9 @@ namespace {
         std::error_code end_object () override;
 
     private:
-        transaction_pointer transaction_;
-        names_pointer names_;
-        fragment_index_pointer fragments_;
+        transaction_pointer const transaction_;
+        names_pointer const names_;
+        fragment_index_pointer const fragments_;
         index::digest const digest_;
 
         enum { path_index, triple_index };
@@ -306,10 +323,10 @@ namespace pstore {
         //*              |_|                                                     *
         //-MARK: compilation index
         // (ctor)
-        compilations_index::compilations_index (parse_stack_pointer s,
-                                                transaction_pointer transaction,
-                                                names_pointer names)
-                : rule (s)
+        compilations_index::compilations_index (parse_stack_pointer const stack,
+                                                transaction_pointer const transaction,
+                                                names_pointer const names)
+                : rule (stack)
                 , transaction_{transaction}
                 , names_{names}
                 , fragments_{index::get_index<trailer::indices::fragment> (transaction->db ())} {}
