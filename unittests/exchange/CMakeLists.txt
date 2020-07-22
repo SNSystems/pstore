@@ -44,5 +44,9 @@
 include (add_pstore)
 add_pstore_unit_test (pstore-exchange-unit-tests
     test_export_emit.cpp
+    test_section_fixups.cpp
 )
-target_link_libraries (pstore-exchange-unit-tests PRIVATE pstore-exchange)
+
+# Access the library's private include directory.
+target_include_directories (pstore-exchange-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/exchange")
+target_link_libraries (pstore-exchange-unit-tests PRIVATE pstore-exchange pstore-common)

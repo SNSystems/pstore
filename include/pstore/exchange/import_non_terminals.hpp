@@ -143,6 +143,12 @@ namespace pstore {
             explicit array_rule (parse_stack_pointer s, Args &&... args)
                     : rule (s)
                     , args_{std::forward_as_tuple (args...)} {}
+            array_rule (array_rule const &) = delete;
+            array_rule (array_rule &&) noexcept = delete;
+
+            array_rule & operator= (array_rule const &) = delete;
+            array_rule & operator= (array_rule &&) noexcept = delete;
+
             std::error_code begin_array () override {
                 cxx17shim::apply (&array_rule::replace_top<NextRule, Args...>,
                                   std::tuple_cat (std::make_tuple (this), args_));

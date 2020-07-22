@@ -69,12 +69,16 @@ set (pstore_exchange_sources
     digest_from_string.cpp
     export.cpp
     export_emit.cpp
+    export_fixups.hpp
+    export_fixups.cpp
     export_fragment.cpp
     export_names.cpp
     export_ostream.cpp
     import_compilations.cpp
     import_debug_line_header.cpp
     import_error.cpp
+    import_fixups.cpp
+    import_fixups.hpp
     import_fragment.cpp
     import_names.cpp
     import_names_array.cpp

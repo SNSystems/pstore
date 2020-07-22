@@ -142,8 +142,23 @@ namespace pstore {
             os << tail_sep << tail_sep_indent << "]";
         }
 
-        void show_string (crude_ostream & os, database const & db,
-                          typed_address<indirect_string> addr);
+
+        namespace details {
+
+            std::string get_string (pstore::database const & db,
+                                    pstore::typed_address<pstore::indirect_string> addr);
+
+        } // namespace details
+
+        constexpr bool comments = false;
+        template <typename OStream>
+        OStream & show_string (OStream & os, pstore::database const & db,
+                               pstore::typed_address<pstore::indirect_string> addr) {
+            if (comments) {
+                os << "  // \"" << details::get_string (db, addr) << '"';
+            }
+            return os;
+        }
 
     } // end namespace exchange
 } // end namespace pstore

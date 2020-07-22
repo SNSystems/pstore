@@ -65,6 +65,8 @@
 #include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/support/base64.hpp"
 
+#include "import_fixups.hpp"
+
 using pstore::exchange::import_error;
 using pstore::exchange::names_pointer;
 using pstore::exchange::rule;
@@ -73,205 +75,6 @@ using pstore::exchange::transaction_pointer;
 using pstore::exchange::uint64_rule;
 
 namespace {
-
-    //*             _   _                                 *
-    //*  ___ ___ __| |_(_)___ _ _    _ _  __ _ _ __  ___  *
-    //* (_-</ -_) _|  _| / _ \ ' \  | ' \/ _` | '  \/ -_) *
-    //* /__/\___\__|\__|_\___/_||_| |_||_\__,_|_|_|_\___| *
-    //*                                                   *
-    //-MARK: section name
-    class section_name final : public rule {
-    public:
-        section_name (parse_stack_pointer const stack,
-                      pstore::gsl::not_null<pstore::repo::section_kind *> section)
-                : rule (stack)
-                , section_{section} {}
-
-        pstore::gsl::czstring name () const noexcept override { return "section name"; }
-        std::error_code string_value (std::string const & s) override;
-
-    private:
-        pstore::gsl::not_null<pstore::repo::section_kind *> section_;
-    };
-
-    // string value
-    // ~~~~~~~~~~~~
-    std::error_code section_name::string_value (std::string const & s) {
-        // TODO: this map appears both here and in the fragment code.
-#define X(a) {#a, pstore::repo::section_kind::a},
-        static std::unordered_map<std::string, pstore::repo::section_kind> map = {
-            PSTORE_MCREPO_SECTION_KINDS};
-#undef X
-        auto pos = map.find (s);
-        if (pos == map.end ()) {
-            return import_error::unknown_section_name;
-        }
-        *section_ = pos->second;
-        return pop ();
-    }
-
-
-    //*  _  __ _                          _      *
-    //* (_)/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
-    //* | |  _| \ \ / || | '_ \ | '_| || | / -_) *
-    //* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
-    //*                  |_|                     *
-    //-MARK: ifixup rule
-    class ifixup_rule final : public rule {
-    public:
-        explicit ifixup_rule (parse_stack_pointer const stack, names_pointer const /*names*/,
-                              std::vector<pstore::repo::internal_fixup> * fixups)
-                : rule (stack)
-                , fixups_{fixups} {}
-
-        pstore::gsl::czstring name () const noexcept override { return "ifixup rule"; }
-        std::error_code key (std::string const & k) override;
-        std::error_code end_object () override;
-
-    private:
-        enum { section, type, offset, addend };
-        std::bitset<addend + 1> seen_;
-
-        pstore::gsl::not_null<std::vector<pstore::repo::internal_fixup> *> const fixups_;
-
-        pstore::repo::section_kind section_ = pstore::repo::section_kind::last;
-        std::uint64_t type_ = 0;
-        std::uint64_t offset_ = 0;
-        std::uint64_t addend_ = 0;
-    };
-
-    // key
-    // ~~~
-    std::error_code ifixup_rule::key (std::string const & k) {
-        if (k == "section") {
-            seen_[section] = true;
-            return this->push<section_name> (&section_);
-        }
-        if (k == "type") {
-            seen_[type] = true;
-            return this->push<uint64_rule> (&type_);
-        }
-        if (k == "offset") {
-            seen_[offset] = true;
-            return this->push<uint64_rule> (&offset_);
-        }
-        if (k == "addend") {
-            seen_[addend] = true;
-            return this->push<uint64_rule> (&addend_);
-        }
-        return import_error::unrecognized_ifixup_key;
-    }
-
-    // end object
-    // ~~~~~~~~~~
-    std::error_code ifixup_rule::end_object () {
-        if (!seen_.all ()) {
-            return import_error::ifixup_object_was_incomplete;
-        }
-        // TODO: validate more values here.
-        fixups_->emplace_back (section_, static_cast<pstore::repo::relocation_type> (type_),
-                               offset_, addend_);
-        return pop ();
-    }
-
-
-    //*       __ _                          _      *
-    //* __ __/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
-    //* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
-    //* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
-    //*                    |_|                     *
-    //-MARK:xfixup rule
-    class xfixup_rule final : public rule {
-    public:
-        xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                     pstore::gsl::not_null<std::vector<pstore::repo::external_fixup> *> fixups)
-                : rule (stack)
-                , names_{names}
-                , fixups_{fixups} {}
-
-        pstore::gsl::czstring name () const noexcept override { return "xfixup rule"; }
-        std::error_code key (std::string const & k) override;
-        std::error_code end_object () override;
-
-    private:
-        enum { name_index, type, offset, addend };
-        names_pointer const names_;
-        std::bitset<addend + 1> seen_;
-        pstore::gsl::not_null<std::vector<pstore::repo::external_fixup> *> fixups_;
-
-        std::uint64_t name_ = 0;
-        std::uint64_t type_ = 0;
-        std::uint64_t offset_ = 0;
-        std::uint64_t addend_ = 0;
-    };
-
-    // key
-    // ~~~
-    std::error_code xfixup_rule::key (std::string const & k) {
-        if (k == "name") {
-            seen_[name_index] = true;
-            return this->push<uint64_rule> (&name_);
-        }
-        if (k == "type") {
-            seen_[type] = true;
-            return this->push<uint64_rule> (&type_);
-        }
-        if (k == "offset") {
-            seen_[offset] = true;
-            return this->push<uint64_rule> (&offset_);
-        }
-        if (k == "addend") {
-            seen_[addend] = true;
-            return this->push<uint64_rule> (&addend_);
-        }
-        return import_error::unrecognized_xfixup_key;
-    }
-
-    // end object
-    // ~~~~~~~~~~
-    std::error_code xfixup_rule::end_object () {
-        if (!seen_.all ()) {
-            return import_error::xfixup_object_was_incomplete;
-        }
-
-        auto name = names_->lookup (name_);
-        if (!name) {
-            return name.get_error ();
-        }
-
-        // TODO: validate some values here.
-        fixups_->emplace_back (*name, static_cast<pstore::repo::relocation_type> (type_), offset_,
-                               addend_);
-        return pop ();
-    }
-
-
-    //*   __ _                        _     _        _    *
-    //*  / _(_)_ ___  _ _ __ ___  ___| |__ (_)___ __| |_  *
-    //* |  _| \ \ / || | '_ (_-< / _ \ '_ \| / -_) _|  _| *
-    //* |_| |_/_\_\\_,_| .__/__/ \___/_.__// \___\__|\__| *
-    //*                |_|               |__/             *
-    //-MARK: fixups object
-    template <typename Next, typename Fixup>
-    class fixups_object final : public rule {
-    public:
-        fixups_object (parse_stack_pointer const stack, names_pointer const names,
-                       pstore::gsl::not_null<std::vector<Fixup> *> fixups)
-                : rule (stack)
-                , names_{names}
-                , fixups_{fixups} {}
-        pstore::gsl::czstring name () const noexcept override { return "fixups object"; }
-        std::error_code begin_object () override { return this->push<Next> (names_, fixups_); }
-        std::error_code end_array () override { return pop (); }
-
-    private:
-        names_pointer const names_;
-        pstore::gsl::not_null<std::vector<Fixup> *> fixups_;
-    };
-
-    using ifixups_object = fixups_object<ifixup_rule, pstore::repo::internal_fixup>;
-    using xfixups_object = fixups_object<xfixup_rule, pstore::repo::external_fixup>;
-
 
     //*                        _                 _   _           *
     //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
@@ -333,13 +136,13 @@ namespace {
         }
         if (k == "ifixups") {
             seen_[ifixups] = true;
-            return pstore::exchange::push_array_rule<ifixups_object> (this, names_,
-                                                                      &content_->ifixups);
+            return pstore::exchange::push_array_rule<pstore::exchange::ifixups_object> (
+                this, names_, &content_->ifixups);
         }
         if (k == "xfixups") {
             seen_[xfixups] = true;
-            return pstore::exchange::push_array_rule<xfixups_object> (this, names_,
-                                                                      &content_->xfixups);
+            return pstore::exchange::push_array_rule<pstore::exchange::xfixups_object> (
+                this, names_, &content_->xfixups);
         }
         return import_error::unrecognized_section_object_key;
     }

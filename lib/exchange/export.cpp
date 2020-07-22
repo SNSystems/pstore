@@ -160,8 +160,6 @@ namespace {
 namespace pstore {
     namespace exchange {
 
-        constexpr bool comments = false;
-
         void export_database (database & db, crude_ostream & os) {
             name_mapping string_table;
             os << "{\n";

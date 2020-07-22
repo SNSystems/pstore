@@ -54,56 +54,12 @@
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 
+#include "./export_fixups.hpp"
+
 using namespace pstore;
 using namespace pstore::exchange;
 
 namespace {
-
-    pstore::gsl::czstring section_name (pstore::repo::section_kind section) {
-        auto const * result = "unknown";
-#define X(a)                                                                                       \
-    case pstore::repo::section_kind::a: result = #a; break;
-        switch (section) {
-            PSTORE_MCREPO_SECTION_KINDS
-        case pstore::repo::section_kind::last: break;
-        }
-#undef X
-        return result;
-    }
-
-    void
-    emit_section_ifixups (crude_ostream & os,
-                          pstore::repo::container<pstore::repo::internal_fixup> const & ifixups) {
-        os << indent6 << "\"ifixups\": ";
-        emit_array (os, std::begin (ifixups), std::end (ifixups), indent6,
-                    [] (crude_ostream & os1, pstore::repo::internal_fixup const & ifx) {
-                        os1 << indent7 << "{\n";
-                        os1 << indent8 << R"("section": ")" << section_name (ifx.section)
-                            << "\",\n";
-                        os1 << indent8 << "\"type\": " << static_cast<unsigned> (ifx.type) << ",\n";
-                        os1 << indent8 << "\"offset\": " << ifx.offset << ",\n";
-                        os1 << indent8 << "\"addend\": " << ifx.addend << '\n';
-                        os1 << indent7 << '}';
-                    });
-    }
-
-    void
-    emit_section_xfixups (crude_ostream & os, pstore::database const & db,
-                          name_mapping const & names,
-                          pstore::repo::container<pstore::repo::external_fixup> const & xfixups) {
-        os << indent6 << "\"xfixups\": ";
-        emit_array (os, std::begin (xfixups), std::end (xfixups), indent6,
-                    [&] (crude_ostream & os1, pstore::repo::external_fixup const & xfx) {
-                        os1 << indent7 << "{\n";
-                        os1 << indent8 << "\"name\": " << names.index (xfx.name) << ',';
-                        show_string (os1, db, xfx.name);
-                        os1 << '\n';
-                        os1 << indent8 << "\"type\": " << static_cast<unsigned> (xfx.type) << ",\n";
-                        os1 << indent8 << "\"offset\": " << xfx.offset << ",\n";
-                        os1 << indent8 << "\"addend\": " << xfx.addend << '\n';
-                        os1 << indent7 << '}';
-                    });
-    }
 
     template <pstore::repo::section_kind Kind,
               typename Content = typename pstore::repo::enum_to_section<Kind>::type>
@@ -116,10 +72,14 @@ namespace {
             os << "\",\n";
         }
         os << indent6 << "\"align\": " << content.align () << ",\n";
-        emit_section_ifixups (os, content.ifixups ());
-        os << ",\n";
-        emit_section_xfixups (os, db, names, content.xfixups ());
-        os << '\n';
+
+        repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
+        os << indent6 << "\"ifixups\": ";
+        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
+
+        repo::container<repo::external_fixup> const xfixups = content.xfixups ();
+        os << indent6 << R"("xfixups" :)";
+        emit_section_xfixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
     }
 
     template <>
@@ -127,12 +87,16 @@ namespace {
         crude_ostream & os, pstore::database const & db, name_mapping const & names,
         pstore::repo::bss_section const & content) {
 
-        os << indent6 << "\"size\": " << content.size () << ",\n";
-        os << indent6 << "\"align\": " << content.align () << ",\n";
-        emit_section_ifixups (os, content.ifixups ());
-        os << ",\n";
-        emit_section_xfixups (os, db, names, content.xfixups ());
-        os << '\n';
+        os << indent6 << R"("size": )" << content.size () << ",\n";
+        os << indent6 << R"("align": )" << content.align () << ",\n";
+
+        repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
+        os << indent6 << R"("ifixups": )";
+        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
+
+        repo::container<repo::external_fixup> const xfixups = content.xfixups ();
+        os << indent6 << R"("xfixups" :)";
+        emit_section_xfixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
     }
 
     template <>
@@ -152,8 +116,9 @@ namespace {
             os << "\",\n";
         }
 
-        emit_section_ifixups (os, content.ifixups ());
-        os << '\n';
+        repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
+        os << indent6 << R"("ifixups": )";
+        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << '\n';
     }
 
     template <>
