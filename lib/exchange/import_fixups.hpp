@@ -44,6 +44,8 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_FIXUPS_HPP
 #define PSTORE_EXCHANGE_IMPORT_FIXUPS_HPP
 
+#include <bitset>
+
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/exchange/import_names.hpp"
