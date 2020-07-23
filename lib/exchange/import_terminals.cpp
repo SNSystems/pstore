@@ -53,7 +53,7 @@ namespace pstore {
         //*                                            *
         // uint64 value
         // ~~~~~~~~~~~~
-        std::error_code uint64_rule::uint64_value (std::uint64_t v) {
+        std::error_code uint64_rule::uint64_value (std::uint64_t const v) {
             *v_ = v;
             return pop ();
         }
