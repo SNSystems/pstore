@@ -44,20 +44,17 @@
 #include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 
-
 namespace pstore {
     namespace exchange {
-
         namespace details {
 
-            std::string get_string (pstore::database const & db,
-                                    pstore::typed_address<pstore::indirect_string> addr) {
-                return pstore::serialize::read<pstore::indirect_string> (
-                           pstore::serialize::archive::database_reader{db, addr.to_address ()})
+            std::string get_string (database const & db,
+                                    typed_address<indirect_string> const addr) {
+                return serialize::read<pstore::indirect_string> (
+                           serialize::archive::database_reader{db, addr.to_address ()})
                     .to_string ();
             }
 
         } // end namespace details
-
     } // end namespace exchange
 } // end namespace pstore
