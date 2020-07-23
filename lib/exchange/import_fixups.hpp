@@ -46,9 +46,9 @@
 
 #include <bitset>
 
+#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/exchange/import_names.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -61,7 +61,7 @@ namespace pstore {
         class ifixup_rule final : public rule {
         public:
             ifixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         std::vector<repo::internal_fixup> * fixups);
+                         gsl::not_null<std::vector<repo::internal_fixup> *> const fixups);
 
             gsl::czstring name () const noexcept override { return "ifixup rule"; }
             std::error_code key (std::string const & k) override;
@@ -87,12 +87,9 @@ namespace pstore {
         class xfixup_rule final : public rule {
         public:
             xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         pstore::gsl::not_null<std::vector<pstore::repo::external_fixup> *> fixups)
-                    : rule (stack)
-                    , names_{names}
-                    , fixups_{fixups} {}
+                         gsl::not_null<std::vector<repo::external_fixup> *> const fixups);
 
-            pstore::gsl::czstring name () const noexcept override { return "xfixup rule"; }
+            gsl::czstring name () const noexcept override { return "xfixup rule"; }
             std::error_code key (std::string const & k) override;
             std::error_code end_object () override;
 
@@ -100,7 +97,7 @@ namespace pstore {
             enum { name_index, type, offset, addend };
             names_pointer const names_;
             std::bitset<addend + 1> seen_;
-            pstore::gsl::not_null<std::vector<pstore::repo::external_fixup> *> fixups_;
+            gsl::not_null<std::vector<repo::external_fixup> *> const fixups_;
 
             std::uint64_t name_ = 0;
             std::uint64_t type_ = 0;
@@ -118,7 +115,7 @@ namespace pstore {
         class fixups_object final : public rule {
         public:
             fixups_object (parse_stack_pointer const stack, names_pointer const names,
-                           gsl::not_null<std::vector<Fixup> *> fixups)
+                           gsl::not_null<std::vector<Fixup> *> const fixups)
                     : rule (stack)
                     , names_{names}
                     , fixups_{fixups} {}
@@ -128,7 +125,7 @@ namespace pstore {
 
         private:
             names_pointer const names_;
-            gsl::not_null<std::vector<Fixup> *> fixups_;
+            gsl::not_null<std::vector<Fixup> *> const fixups_;
         };
 
         using ifixups_object = fixups_object<ifixup_rule, repo::internal_fixup>;

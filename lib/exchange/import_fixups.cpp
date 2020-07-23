@@ -94,7 +94,7 @@ namespace pstore {
         //* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
         //*                  |_|                     *
         ifixup_rule::ifixup_rule (parse_stack_pointer const stack, names_pointer const /*names*/,
-                                  std::vector<pstore::repo::internal_fixup> * fixups)
+                                  gsl::not_null<std::vector<repo::internal_fixup> *> const fixups)
                 : rule (stack)
                 , fixups_{fixups} {}
 
@@ -138,6 +138,13 @@ namespace pstore {
         //* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
         //*                    |_|                     *
         //-MARK:xfixup rule
+        // (ctor)
+        xfixup_rule::xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
+                         gsl::not_null<std::vector<repo::external_fixup> *> const fixups)
+                    : rule (stack)
+                    , names_{names}
+                    , fixups_{fixups} {}
+
         // key
         // ~~~
         std::error_code xfixup_rule::key (std::string const & k) {

@@ -51,7 +51,7 @@ namespace pstore {
 
         // add string
         // ~~~~~~~~~~
-        std::error_code names::add_string (transaction_pointer transaction,
+        std::error_code names::add_string (transaction_pointer const transaction,
                                            std::string const & str) {
             strings_.push_back (str);
             std::string const & x = strings_.back ();
@@ -59,7 +59,7 @@ namespace pstore {
             views_.emplace_back (make_sstring_view (x));
             auto & s = views_.back ();
 
-            std::shared_ptr<index::name_index> names_index =
+            std::shared_ptr<index::name_index> const names_index =
                 index::get_index<trailer::indices::name> (transaction->db ());
             std::pair<index::name_index::iterator, bool> const res =
                 adder_.add (*transaction, names_index, &s);
@@ -74,7 +74,7 @@ namespace pstore {
 
         // flush
         // ~~~~~
-        void names::flush (transaction_pointer transaction) { adder_.flush (*transaction); }
+        void names::flush (transaction_pointer const transaction) { adder_.flush (*transaction); }
 
         // lookup
         // ~~~~~~
