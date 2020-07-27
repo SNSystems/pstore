@@ -73,7 +73,7 @@ namespace {
 
     private:
         not_null<database *> db_;
-        names names_;
+        names<transaction_lock> names_;
 
         enum { version, transactions };
         std::bitset<transactions + 1> seen_;
@@ -94,7 +94,7 @@ namespace {
         }
         if (k == "transactions") {
             seen_[transactions] = true;
-            return push<transaction_array> (db_, &names_);
+            return push<transaction_array<transaction_lock>> (db_, &names_);
         }
         return import_error::unrecognized_root_key;
     }

@@ -50,16 +50,27 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_NAMES_ARRAY_HPP
 #define PSTORE_EXCHANGE_IMPORT_NAMES_ARRAY_HPP
 
+#include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_rule.hpp"
-#include "pstore/exchange/import_transaction.hpp"
+#include "pstore/exchange/import_names.hpp"
 
 namespace pstore {
     namespace exchange {
 
+        template <typename TransactionLock>
         class names_array_members final : public rule {
         public:
+            using transaction_type = transaction<TransactionLock>;
+            using transaction_pointer = transaction_type *;
+            using names_pointer = names<TransactionLock> *;
+
             names_array_members (parse_stack_pointer s, transaction_pointer transaction,
                                  names_pointer n);
+            names_array_members (names_array_members const &) = delete;
+            names_array_members (names_array_members &&) noexcept = delete;
+
+            names_array_members & operator= (names_array_members const &) = delete;
+            names_array_members & operator= (names_array_members &&) noexcept = delete;
 
         private:
             std::error_code string_value (std::string const & str) override;
@@ -69,6 +80,40 @@ namespace pstore {
             transaction_pointer transaction_;
             names_pointer names_;
         };
+
+        // (ctor)
+        // ~~~~~~
+        template <typename TransactionLock>
+        names_array_members<TransactionLock>::names_array_members (parse_stack_pointer s,
+                                                                   transaction_pointer transaction,
+                                                                   names_pointer n)
+                : rule (s)
+                , transaction_{transaction}
+                , names_{n} {}
+
+        // string value
+        // ~~~~~~~~~~~~
+        template <typename TransactionLock>
+        std::error_code
+        names_array_members<TransactionLock>::string_value (std::string const & str) {
+            return names_->add_string (transaction_, str);
+        }
+
+        // end array
+        // ~~~~~~~~~
+        template <typename TransactionLock>
+        std::error_code names_array_members<TransactionLock>::end_array () {
+            names_->flush (transaction_);
+            return pop ();
+        }
+
+        // name
+        // ~~~~
+        template <typename TransactionLock>
+        gsl::czstring names_array_members<TransactionLock>::name () const noexcept {
+            return "names array members";
+        }
+
 
     } // end namespace exchange
 } // end namespace pstore

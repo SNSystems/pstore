@@ -141,6 +141,13 @@ namespace pstore {
             /// \param src The data to be parsed.
             parser & input (std::string const & src) { return this->input (gsl::make_span (src)); }
 
+            /// A convenience function which is equivalent to calling:
+            ///     input (gsl::make_span (src, std::strlen (src)))
+            /// \param src The data to be parsed.
+            parser & input (gsl::czstring const src) {
+                return this->input (gsl::make_span (src, std::strlen (src)));
+            }
+
             /// \param span The span of UTF-8 code units to be parsed.
             template <typename SpanType>
             parser & input (SpanType const & span);

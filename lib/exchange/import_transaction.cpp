@@ -49,111 +49,19 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/import_transaction.hpp"
 
-#include "pstore/exchange/import_compilations.hpp"
-#include "pstore/exchange/import_debug_line_header.hpp"
-#include "pstore/exchange/import_error.hpp"
-#include "pstore/exchange/import_fragment.hpp"
-#include "pstore/exchange/import_names_array.hpp"
-#include "pstore/exchange/import_non_terminals.hpp"
 
 using namespace pstore;
 using namespace pstore::exchange;
 
 namespace {
 
-    class transaction_contents final : public rule {
-    public:
-        transaction_contents (parse_stack_pointer stack, gsl::not_null<database *> db,
-                              names_pointer names)
-                : rule (stack)
-                , transaction_{begin (*db)}
-                , names_{names} {}
 
-    private:
-        std::error_code key (std::string const & s) override;
-        std::error_code end_object () override;
-        gsl::czstring name () const noexcept override;
-
-        transaction_type transaction_;
-        names_pointer names_;
-    };
-
-    // name
-    // ~~~~
-    gsl::czstring transaction_contents::name () const noexcept { return "transaction contents"; }
-
-    // key
-    // ~~~
-    std::error_code transaction_contents::key (std::string const & s) {
-        // TODO: check that "names" is the first key that we see.
-        if (s == "names") {
-            return push_array_rule<names_array_members> (this, &transaction_, names_);
-        }
-        if (s == "debugline") {
-            return push_object_rule<pstore::exchange::debug_line_index> (this, &transaction_);
-        }
-        if (s == "fragments") {
-            return push_object_rule<fragment_index> (this, &transaction_, names_);
-        }
-        if (s == "compilations") {
-            return push_object_rule<compilations_index> (this, &transaction_, names_);
-        }
-        return import_error::unknown_transaction_object_key;
-    }
-
-    // end object
-    // ~~~~~~~~~~
-    std::error_code transaction_contents::end_object () {
-        transaction_.commit ();
-        return pop ();
-    }
-
-
-    class transaction_object final : public rule {
-    public:
-        transaction_object (parse_stack_pointer s, not_null<pstore::database *> db,
-                            names_pointer names)
-                : rule (s)
-                , db_{db}
-                , names_{names} {}
-        pstore::gsl::czstring name () const noexcept override { return "transaction_object"; }
-        std::error_code begin_object () override {
-            return push<transaction_contents> (db_, names_);
-        }
-        std::error_code end_array () override { return pop (); }
-
-    private:
-        not_null<pstore::database *> db_;
-        names_pointer names_;
-    };
 
 } // end anonymous namespace
 
 namespace pstore {
     namespace exchange {
 
-        //*  _                             _   _                                    *
-        //* | |_ _ _ __ _ _ _  ___ __ _ __| |_(_)___ _ _    __ _ _ _ _ _ __ _ _  _  *
-        //* |  _| '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  / _` | '_| '_/ _` | || | *
-        //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| \__,_|_| |_| \__,_|\_, | *
-        //*                                                                   |__/  *
-        // (ctor)
-        // ~~~~~~
-        transaction_array::transaction_array (parse_stack_pointer s, not_null<database *> db,
-                                              names_pointer names)
-                : rule (s)
-                , db_{db}
-                , names_{names} {}
-
-        // name
-        // ~~~~
-        gsl::czstring transaction_array::name () const noexcept { return "transaction array"; }
-
-        // begin array
-        // ~~~~~~~~~~~
-        std::error_code transaction_array::begin_array () {
-            return this->replace_top<transaction_object> (db_, names_);
-        }
 
     } // end namespace exchange
 } // end namespace pstore

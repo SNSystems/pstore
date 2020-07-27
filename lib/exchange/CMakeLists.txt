@@ -56,6 +56,7 @@ set (pstore_exchange_includes
     import_compilations.hpp
     import_debug_line_header.hpp
     import_error.hpp
+    import_fixups.hpp
     import_fragment.hpp
     import_names.hpp
     import_names_array.hpp
@@ -78,7 +79,6 @@ set (pstore_exchange_sources
     import_debug_line_header.cpp
     import_error.cpp
     import_fixups.cpp
-    import_fixups.hpp
     import_fragment.cpp
     import_names.cpp
     import_names_array.cpp

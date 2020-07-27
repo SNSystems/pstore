@@ -49,16 +49,19 @@
 
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
+#include "pstore/core/indirect_string.hpp"
+#include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {
     namespace exchange {
 
-        using transaction_type = transaction<transaction_lock>;
-        using transaction_pointer = gsl::not_null<transaction_type *>;
-
+        template <typename TransactionLock>
         class names {
         public:
+            using transaction_type = transaction<TransactionLock>;
+            using transaction_pointer = gsl::not_null<transaction_type *>;
+
             names () = default;
             names (names const &) = delete;
             names (names &&) noexcept = delete;
@@ -79,8 +82,48 @@ namespace pstore {
             std::unordered_map<std::uint64_t, typed_address<indirect_string>> lookup_;
         };
 
-        using names_pointer = gsl::not_null<names *>;
+        // add string
+        // ~~~~~~~~~~
+        template <typename TransactionLock>
+        std::error_code names<TransactionLock>::add_string (transaction_pointer const transaction,
+                                                            std::string const & str) {
+            strings_.push_back (str);
+            std::string const & x = strings_.back ();
 
+            views_.emplace_back (make_sstring_view (x));
+            auto & s = views_.back ();
+
+            std::shared_ptr<index::name_index> const names_index =
+                index::get_index<trailer::indices::name> (transaction->db ());
+            std::pair<index::name_index::iterator, bool> const res =
+                adder_.add (*transaction, names_index, &s);
+            if (!res.second) {
+                return {import_error::duplicate_name};
+            }
+
+            lookup_[lookup_.size ()] =
+                typed_address<indirect_string>::make (res.first.get_address ());
+            return {};
+        }
+
+        // flush
+        // ~~~~~
+        template <typename TransactionLock>
+        void names<TransactionLock>::flush (transaction_pointer const transaction) {
+            adder_.flush (*transaction);
+        }
+
+        // lookup
+        // ~~~~~~
+        template <typename TransactionLock>
+        error_or<typed_address<indirect_string>>
+        names<TransactionLock>::lookup (std::uint64_t const index) const {
+            using result_type = error_or<typed_address<indirect_string>>;
+
+            auto const pos = lookup_.find (index);
+            return pos != std::end (lookup_) ? result_type{pos->second}
+                                             : result_type{import_error::no_such_name};
+        }
 
     } // end namespace exchange
 } // namespace pstore

@@ -50,16 +50,23 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
 #define PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
 
+#include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
-
-#include "import_rule.hpp"
-#include "import_transaction.hpp"
+#include "pstore/core/transaction.hpp"
+#include "pstore/exchange/digest_from_string.hpp"
+#include "pstore/exchange/import_error.hpp"
+#include "pstore/exchange/import_rule.hpp"
+#include "pstore/support/base64.hpp"
 
 namespace pstore {
     namespace exchange {
 
+        template <typename TransactionLock>
         class debug_line_index final : public rule {
         public:
+            using transaction_type = transaction<TransactionLock>;
+            using transaction_pointer = transaction_type *;
+
             debug_line_index (parse_stack_pointer s, transaction_pointer transaction);
 
             gsl::czstring name () const noexcept override;
@@ -74,6 +81,67 @@ namespace pstore {
 
             transaction_pointer transaction_;
         };
+
+        // (ctor)
+        // ~~~~~~
+        template <typename TransactionLock>
+        debug_line_index<TransactionLock>::debug_line_index (parse_stack_pointer s,
+                                                             transaction_pointer transaction)
+                : rule (s)
+                , index_{index::get_index<trailer::indices::debug_line_header> (transaction->db ())}
+                , transaction_{transaction} {}
+
+        // name
+        // ~~~~
+        template <typename TransactionLock>
+        gsl::czstring debug_line_index<TransactionLock>::name () const noexcept {
+            return "debug line index";
+        }
+
+        // string value
+        // ~~~~~~~~~~~~
+        template <typename TransactionLock>
+        std::error_code debug_line_index<TransactionLock>::string_value (std::string const & s) {
+            // Decode the received string to get the raw binary.
+            std::vector<std::uint8_t> data;
+            maybe<std::back_insert_iterator<decltype (data)>> oit =
+                from_base64 (std::begin (s), std::end (s), std::back_inserter (data));
+            if (!oit) {
+                return import_error::bad_base64_data;
+            }
+
+            // Create space for this data in the store.
+            std::shared_ptr<std::uint8_t> out;
+            typed_address<std::uint8_t> where;
+            std::tie (out, where) = transaction_->template alloc_rw<std::uint8_t> (data.size ());
+
+            // Copy the data to the store.
+            std::copy (std::begin (data), std::end (data), out.get ());
+
+            // Add an index entry for this data.
+            index_->insert (*transaction_,
+                            std::make_pair (digest_, extent<std::uint8_t>{where, data.size ()}));
+            return {};
+        }
+
+        // key
+        // ~~~
+        template <typename TransactionLock>
+        std::error_code debug_line_index<TransactionLock>::key (std::string const & s) {
+            if (maybe<uint128> const digest = digest_from_string (s)) {
+                digest_ = *digest;
+                return {};
+            }
+            return import_error::bad_digest;
+        }
+
+        // end object
+        // ~~~~~~~~~~
+        template <typename TransactionLock>
+        std::error_code debug_line_index<TransactionLock>::end_object () {
+            return pop ();
+        }
+
 
     } // end namespace exchange
 } // end namespace pstore

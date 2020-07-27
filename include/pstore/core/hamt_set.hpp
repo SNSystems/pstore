@@ -102,7 +102,7 @@ namespace pstore {
                     return old;
                 }
 
-                pstore::address get_address () const { return it_.get_address (); }
+                address get_address () const { return it_.get_address (); }
 
             private:
                 MapIterator it_;
