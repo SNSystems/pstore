@@ -48,6 +48,7 @@
 #include <vector>
 
 #include "pstore/json/json.hpp"
+#include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
 
@@ -64,7 +65,7 @@ namespace {
 
 } // end anonymous namespace
 
-TEST (ExchangeSectionFixups, InternalEmpty) {
+TEST (ExchangeSectionFixups, RoundTripInternalEmpty) {
     // Start with an empty collection of internal fixups.
     ifixup_collection ifixups;
 
@@ -88,7 +89,7 @@ TEST (ExchangeSectionFixups, InternalEmpty) {
         << "The imported and exported ifixups should match";
 }
 
-TEST (ExchangeSectionFixups, InternalCollection) {
+TEST (ExchangeSectionFixups, RoundTripInternalCollection) {
     // Start with a small collection of internal fixups.
     ifixup_collection ifixups;
     ifixups.emplace_back (pstore::repo::section_kind::text, pstore::repo::relocation_type{17},
@@ -118,6 +119,156 @@ TEST (ExchangeSectionFixups, InternalCollection) {
     EXPECT_THAT (imported_ifixups, testing::ContainerEq (ifixups))
         << "The imported and exported ifixups should match";
 }
+
+namespace {
+
+    class IFixupMembersImport : public testing::Test {
+    public:
+    protected:
+        static decltype (auto) parse (std::string const & src,
+                                      pstore::gsl::not_null<ifixup_collection *> const fixups) {
+            pstore::exchange::names names;
+            auto parser = pstore::json::make_parser (
+                pstore::exchange::callbacks::make<pstore::exchange::ifixups_object> (&names,
+                                                                                     fixups));
+            parser.input (src);
+            parser.eof ();
+            return parser;
+        }
+        static decltype (auto) parse (std::string const & src) {
+            ifixup_collection fixups;
+            return parse (src, &fixups);
+        }
+    };
+
+
+    // A test for all of the valid target secton names.
+    using name_section_pair = std::tuple<pstore::gsl::czstring, pstore::repo::section_kind>;
+    class IFixupSectionNames : public IFixupMembersImport,
+                               public testing::WithParamInterface<name_section_pair> {};
+
+} // end anonymous namespace
+
+TEST_P (IFixupSectionNames, SectionName) {
+    auto const & ns = GetParam ();
+    std::ostringstream os;
+    os << R"({ "section" : ")" << std::get<pstore::gsl::czstring> (ns) << R"(", )";
+    os << R"("type":17, "offset":19, "addend":23 })";
+
+    ifixup_collection fixups;
+    auto const & parser = this->parse (os.str (), &fixups);
+    ASSERT_FALSE (parser.has_error ()) << "Expected the parse to succeed";
+
+    ASSERT_EQ (fixups.size (), 1U);
+    EXPECT_EQ (fixups[0].section, std::get<pstore::repo::section_kind> (ns));
+    EXPECT_EQ (fixups[0].type, 17U);
+    EXPECT_EQ (fixups[0].offset, 19U);
+    EXPECT_EQ (fixups[0].addend, 23U);
+}
+
+#define X(x) name_section_pair{#x, pstore::repo::section_kind::x},
+#ifdef PSTORE_IS_INSIDE_LLVM
+INSTANTIATE_TEST_CASE_P (IFixupSectionNames, IFixupSectionNames,
+                         testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
+#else
+INSTANTIATE_TEST_SUITE_P (IFixupSectionNames, IFixupSectionNames,
+                          testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
+#endif
+#undef X
+
+TEST_F (IFixupMembersImport, MissingSection) {
+    // Section key is missing.
+    {
+        auto const & parser1 = this->parse (R"({ "type":17, "offset":19, "addend":23 })");
+        ASSERT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser1.last_error (),
+                   make_error_code (pstore::exchange::import_error::ifixup_object_was_incomplete));
+    }
+    // Section key has an unknown value.
+    {
+        auto const & parser2 =
+            this->parse (R"({ "section":"bad", "type":17, "offset":19, "addend":23 })");
+        EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser2.last_error (),
+                   make_error_code (pstore::exchange::import_error::unknown_section_name));
+    }
+    // Section key has the wrong type.
+    {
+        auto const & parser3 =
+            this->parse (R"({ "section":false, "type":17, "offset":19, "addend":23 })");
+        EXPECT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser3.last_error (),
+                   make_error_code (pstore::exchange::import_error::unexpected_boolean));
+    }
+}
+
+TEST_F (IFixupMembersImport, Type) {
+    // The type key is missing altogether.
+    {
+        auto const & parser1 = this->parse (R"({ "section":"text", "offset":19, "addend":23 })");
+        EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser1.last_error (),
+                   make_error_code (pstore::exchange::import_error::ifixup_object_was_incomplete));
+    }
+    // The type key has the wrong type.
+    {
+        auto const & parser2 =
+            this->parse (R"({ "section":"text", "type":true, "offset":19, "addend":23 })");
+        ASSERT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser2.last_error (),
+                   make_error_code (pstore::exchange::import_error::unexpected_boolean));
+    }
+}
+
+TEST_F (IFixupMembersImport, Offset) {
+    // The offset key is missing altogether.
+    {
+        auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "addend":23 })");
+        EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser1.last_error (),
+                   make_error_code (pstore::exchange::import_error::ifixup_object_was_incomplete));
+    }
+    // The offset key has the wrong type.
+    {
+        auto const & parser2 =
+            this->parse (R"({ "section":"text", "type":17, "offset":true, "addend":23 })");
+        EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser2.last_error (),
+                   make_error_code (pstore::exchange::import_error::unexpected_boolean));
+    }
+    // Offset is negative.
+    {
+        auto const & parser3 =
+            this->parse (R"({ "section":"text", "type":17, "offset":-3, "addend":23 })");
+        EXPECT_TRUE (parser3.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser3.last_error (),
+                   make_error_code (pstore::exchange::import_error::unexpected_number));
+    }
+}
+
+TEST_F (IFixupMembersImport, Addend) {
+    {
+        auto const & parser1 = this->parse (R"({ "section":"text", "type":17, "offset":19 })");
+        EXPECT_TRUE (parser1.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser1.last_error (),
+                   make_error_code (pstore::exchange::import_error::ifixup_object_was_incomplete));
+    }
+    {
+        auto const & parser2 =
+            this->parse (R"({ "section":"text", "type":17, "offset":19, "addend":true })");
+        EXPECT_TRUE (parser2.has_error ()) << "Expected the parse to fail";
+        EXPECT_EQ (parser2.last_error (),
+                   make_error_code (pstore::exchange::import_error::unexpected_boolean));
+    }
+}
+
+TEST_F (IFixupMembersImport, BadMember) {
+    auto const & parser = this->parse (R"({ "bad":true })");
+    EXPECT_TRUE (parser.has_error ()) << "Expected the parse to fail";
+    EXPECT_EQ (parser.last_error (),
+               make_error_code (pstore::exchange::import_error::unrecognized_ifixup_key));
+}
+
 
 namespace {
 
