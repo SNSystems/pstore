@@ -46,6 +46,7 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <iosfwd>
 #include <type_traits>
 
 namespace pstore {
@@ -80,6 +81,8 @@ namespace pstore {
 #undef X
         constexpr auto num_section_kinds =
             static_cast<std::underlying_type<section_kind>::type> (section_kind::last);
+
+        std::ostream & operator<< (std::ostream & os, section_kind kind);
 
         constexpr auto first_repo_metadata_section = section_kind::dependent;
 

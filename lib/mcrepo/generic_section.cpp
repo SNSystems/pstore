@@ -48,6 +48,18 @@
 namespace pstore {
     namespace repo {
 
+        std::ostream & operator<< (std::ostream & os, internal_fixup const & ifx) {
+            return os << "{ section:" << ifx.section
+                      << ", type:" << static_cast<unsigned> (ifx.type) << ", offset:" << ifx.offset
+                      << ", addend:" << ifx.addend << '}';
+        }
+
+        std::ostream & operator<< (std::ostream & os, external_fixup const & xfx) {
+            return os << "{ name:" << xfx.name << ", type:" << static_cast<unsigned> (xfx.type)
+                      << ", offset:" << xfx.offset << ", addend:" << xfx.addend << '}';
+        }
+
+
         //*                        _                 _   _           *
         //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
         //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *

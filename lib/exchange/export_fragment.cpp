@@ -71,15 +71,15 @@ namespace {
             pstore::to_base64 (std::begin (payload), std::end (payload), ostream_inserter{os});
             os << "\",\n";
         }
-        os << indent6 << "\"align\": " << content.align () << ",\n";
+        os << indent6 << R"("align": )" << content.align () << ",\n";
 
         repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
-        os << indent6 << "\"ifixups\": ";
-        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
+        os << indent6 << R"("ifixups": )";
+        export_internal_fixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
 
         repo::container<repo::external_fixup> const xfixups = content.xfixups ();
         os << indent6 << R"("xfixups" :)";
-        emit_section_xfixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
+        export_external_fixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
     }
 
     template <>
@@ -92,11 +92,11 @@ namespace {
 
         repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
         os << indent6 << R"("ifixups": )";
-        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
+        export_internal_fixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
 
         repo::container<repo::external_fixup> const xfixups = content.xfixups ();
         os << indent6 << R"("xfixups" :)";
-        emit_section_xfixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
+        export_external_fixups (os, db, names, std::begin (xfixups), std::end (xfixups)) << '\n';
     }
 
     template <>
@@ -118,7 +118,7 @@ namespace {
 
         repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
         os << indent6 << R"("ifixups": )";
-        emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups)) << '\n';
+        export_internal_fixups (os, std::begin (ifixups), std::end (ifixups)) << '\n';
     }
 
     template <>

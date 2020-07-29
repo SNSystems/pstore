@@ -76,7 +76,7 @@ TEST (ExchangeSectionFixups, RoundTripInternalEmpty) {
 
     // Export the internal fixup array to the 'os' string-stream.
     std::ostringstream os;
-    pstore::exchange::emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups));
+    pstore::exchange::export_internal_fixups (os, std::begin (ifixups), std::end (ifixups));
 
     // Setup the parse.
     pstore::exchange::names<transaction_lock> names;
@@ -107,7 +107,7 @@ TEST (ExchangeSectionFixups, RoundTripInternalCollection) {
 
     // Export the internal fixup array to the 'os' string-stream.
     std::ostringstream os;
-    pstore::exchange::emit_section_ifixups (os, std::begin (ifixups), std::end (ifixups));
+    pstore::exchange::export_internal_fixups (os, std::begin (ifixups), std::end (ifixups));
 
     // Setup the parse.
     pstore::exchange::names<transaction_lock> names;
@@ -314,8 +314,8 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     // Export the internal fixup array to the 'os' string-stream.
     std::ostringstream os;
     pstore::exchange::name_mapping names;
-    pstore::exchange::emit_section_xfixups (os, export_db_, names, std::begin (xfixups),
-                                            std::end (xfixups));
+    pstore::exchange::export_external_fixups (os, export_db_, names, std::begin (xfixups),
+                                              std::end (xfixups));
 
     // Setup the parse.
     xfixup_collection imported_xfixups;
@@ -335,7 +335,6 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 
 namespace {
 
-#if 0 // a couple of functions that are handy for debugging.
     pstore::raw_sstring_view load_string (pstore::database const & db,
                                           pstore::typed_address<pstore::indirect_string> addr,
                                           pstore::gsl::not_null<pstore::shared_sstring_view *> owner) {
@@ -347,14 +346,13 @@ namespace {
     std::string load_std_string (pstore::database const & db,
                                  pstore::typed_address<pstore::indirect_string> addr) {
         pstore::shared_sstring_view owner;
-        return std::string (load_string (db, addr, &owner));
+        return std::string{load_string (db, addr, &owner)};
     }
-#endif
 
 
     template <typename InputIterator, typename OutputIterator>
-    void add_export_strings (pstore::database & db, pstore::exchange::name_mapping * const names,
-                             InputIterator first, InputIterator last, OutputIterator out) {
+    void add_export_strings (pstore::database & db, InputIterator first, InputIterator last,
+                             OutputIterator out) {
         mock_mutex mutex;
         auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
         auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db);
@@ -366,25 +364,71 @@ namespace {
                 adder.add (transaction, name_index, &view);
             *(out++) =
                 pstore::typed_address<pstore::indirect_string>::make (res1.first.get_address ());
-            names->add (res1.first.get_address ());
         });
 
         adder.flush (transaction);
         transaction.commit ();
     }
 
+    void compare_external_fixups (pstore::database const & export_db,
+                                  xfixup_collection & exported_xfixups,
+                                  pstore::database const & import_db,
+                                  xfixup_collection & imported_xfixups) {
+        ASSERT_EQ (imported_xfixups.size (), exported_xfixups.size ())
+            << "Expected the number of xfixups imported to match the number we started with";
+
+        // The name fields are tricky here. The imported and exported fixups are from different
+        // databases so we can't simply compare string addresses to find out if they point to the
+        // same string. Instead we must load each of the strings and compare them directly.
+        // However, we still want to use operator== for all of the other fields so that we don't
+        // end up having to duplicate the rest of the comparison method here. Setting both name
+        // fields to 0 after comparison allows us to do that.
+        {
+            auto export_it = std::begin (exported_xfixups);
+            auto import_it = std::begin (imported_xfixups);
+            auto import_end = std::end (imported_xfixups);
+            auto count = std::size_t{0};
+            for (; import_it != import_end; ++import_it, ++export_it, ++count) {
+                EXPECT_EQ (load_std_string (import_db, import_it->name),
+                           load_std_string (export_db, export_it->name))
+                    << "Names of fixup #" << count;
+
+                // Set the import and export name values to the same address (it doesn't matter what
+                // that address is). This will mean that differences won't cause failures as we
+                // compare the two containers.
+                export_it->name = import_it->name =
+                    pstore::typed_address<pstore::indirect_string> ();
+            }
+        }
+
+        EXPECT_THAT (imported_xfixups, testing::ContainerEq (exported_xfixups))
+            << "The imported and exported xfixups should match";
+    }
+
+
 } // end anonymous namespace
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
-    pstore::exchange::name_mapping names;
     std::array<pstore::raw_sstring_view, 2> strings{{
         pstore::make_sstring_view ("foo"), // string #0
         pstore::make_sstring_view ("bar"), // string #1
     }};
+
+    // Add these strings to the database.
     std::vector<pstore::typed_address<pstore::indirect_string>> indir_strings;
     indir_strings.reserve (strings.size ());
-    add_export_strings (export_db_, &names, std::begin (strings), std::end (strings),
+    add_export_strings (export_db_, std::begin (strings), std::end (strings),
                         std::back_inserter (indir_strings));
+
+
+
+    // Write the names that we just created as JSON.
+    pstore::exchange::name_mapping exported_names;
+    std::ostringstream exported_names_stream;
+    export_names (exported_names_stream, export_db_, export_db_.get_current_revision (),
+                  &exported_names);
+
+
 
     // Build a collection of external fixups. These refer to names added to the database
     // add_export_strings().
@@ -392,10 +436,14 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     xfixups.emplace_back (indir_strings.at (0) /*foo*/, 5, 7, 9);
     xfixups.emplace_back (indir_strings.at (1) /*bar*/, 11, 13, 17);
 
-    // Export the external fixup array to the 'os' string-stream.
-    std::ostringstream os;
-    pstore::exchange::emit_section_xfixups (os, export_db_, names, std::begin (xfixups),
-                                            std::end (xfixups));
+
+
+    // Export the external fixup array to the 'exported_fixups' string-stream.
+    std::ostringstream exported_fixups;
+    pstore::exchange::export_external_fixups (exported_fixups, export_db_, exported_names,
+                                              std::begin (xfixups), std::end (xfixups));
+
+
 
     // Create matching names in the imported database.
     mock_mutex mutex;
@@ -408,11 +456,11 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
                 pstore::exchange::names_array_members<transaction_lock>, decltype (&transaction),
                 decltype (&imported_names)>> (&transaction, &imported_names));
 
-        // TODO: get the export code to produce this JSON!
-        parser.input (R"([ "foo", "bar" ])").eof ();
+        parser.input (exported_names_stream.str ()).eof ();
         ASSERT_FALSE (parser.has_error ())
             << "Expected the JSON parse to succeed (" << parser.last_error ().message () << ')';
     }
+
 
     {
         xfixup_collection imported_xfixups;
@@ -421,13 +469,13 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
         auto parser =
             pstore::json::make_parser (pstore::exchange::callbacks::make<xfixup_array_root> (
                 &imported_names, &imported_xfixups));
-        parser.input (os.str ()).eof ();
+        parser.input (exported_fixups.str ()).eof ();
 
         // Check the result.
-        EXPECT_FALSE (parser.has_error ())
+        ASSERT_FALSE (parser.has_error ())
             << "Expected the JSON parse to succeed (" << parser.last_error ().message () << ')';
-        EXPECT_THAT (imported_xfixups, testing::ContainerEq (xfixups))
-            << "The imported and exported xfixups should match";
+
+        compare_external_fixups (export_db_, xfixups, import_db_, imported_xfixups);
     }
     transaction.commit ();
 }

@@ -54,7 +54,7 @@ namespace pstore {
         gsl::czstring section_name (repo::section_kind section) noexcept;
 
         template <typename OStream, typename IFixupIterator>
-        OStream & emit_section_ifixups (OStream & os, IFixupIterator first, IFixupIterator last) {
+        OStream & export_internal_fixups (OStream & os, IFixupIterator first, IFixupIterator last) {
             emit_array (
                 os, first, last, indent6, [] (OStream & os1, repo::internal_fixup const & ifx) {
                     os1 << indent7 << "{\n";
@@ -68,9 +68,9 @@ namespace pstore {
         }
 
         template <typename OStream, typename XFixupIterator>
-        OStream & emit_section_xfixups (OStream & os, database const & db,
-                                        name_mapping const & names, XFixupIterator first,
-                                        XFixupIterator last) {
+        OStream & export_external_fixups (OStream & os, database const & db,
+                                          name_mapping const & names, XFixupIterator first,
+                                          XFixupIterator last) {
             emit_array (
                 os, first, last, indent6, [&] (OStream & os1, repo::external_fixup const & xfx) {
                     os1 << indent7 << "{\n";

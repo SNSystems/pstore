@@ -46,9 +46,6 @@
 #include <cassert>
 #include <limits>
 
-#include "pstore/core/index_types.hpp"
-#include "pstore/diff/diff.hpp"
-#include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
@@ -72,31 +69,6 @@ namespace pstore {
             auto const pos = names_.find (addr);
             assert (pos != names_.end ());
             return pos->second;
-        }
-
-
-        //*                        _                             *
-        //*  _____ ___ __  ___ _ _| |_   _ _  __ _ _ __  ___ ___ *
-        //* / -_) \ / '_ \/ _ \ '_|  _| | ' \/ _` | '  \/ -_|_-< *
-        //* \___/_\_\ .__/\___/_|  \__| |_||_\__,_|_|_|_\___/__/ *
-        //*         |_|                                          *
-        void export_names (crude_ostream & os, database const & db, unsigned const generation,
-                           name_mapping * const string_table) {
-
-            auto strings = index::get_index<trailer::indices::name> (db);
-            assert (generation > 0);
-            auto const container = diff::diff (db, *strings, generation - 1U);
-            emit_array (os, std::begin (container), std::end (container), indent3,
-                        [&strings, &string_table, &db] (crude_ostream & os1, address addr) {
-                            // FIXME: why use the index here? Just read the indirect string at
-                            // address addr.
-                            indirect_string const str = strings->load_leaf_node (db, addr);
-                            shared_sstring_view owner;
-                            raw_sstring_view view = str.as_db_string_view (&owner);
-                            os1 << indent4;
-                            emit_string (os1, view);
-                            string_table->add (addr);
-                        });
         }
 
     } // end namespace exchange

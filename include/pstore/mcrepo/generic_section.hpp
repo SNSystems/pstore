@@ -119,6 +119,8 @@ namespace pstore {
         static_assert (sizeof (internal_fixup) == 24,
                        "internal_fixup size differs from expected value");
 
+        std::ostream & operator<< (std::ostream & os, internal_fixup const & xfx);
+
         //*          _                     _    __ _                *
         //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
         //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
@@ -174,6 +176,7 @@ namespace pstore {
         static_assert (sizeof (external_fixup) == 32,
                        "external_fixup size differs from expected value");
 
+        std::ostream & operator<< (std::ostream & os, external_fixup const & xfx);
 
         //*                        _                 _   _           *
         //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *

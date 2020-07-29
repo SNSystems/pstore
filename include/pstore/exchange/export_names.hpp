@@ -47,8 +47,12 @@
 #include <cstdint>
 #include <unordered_map>
 
+
 #include "pstore/core/address.hpp"
+#include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/diff/diff.hpp"
+#include "pstore/exchange/export_emit.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -68,8 +72,28 @@ namespace pstore {
             std::unordered_map<address, std::uint64_t> names_;
         };
 
-        void export_names (crude_ostream & os, database const & db, unsigned generation,
-                           name_mapping * string_table);
+        //*                        _                             *
+        //*  _____ ___ __  ___ _ _| |_   _ _  __ _ _ __  ___ ___ *
+        //* / -_) \ / '_ \/ _ \ '_|  _| | ' \/ _` | '  \/ -_|_-< *
+        //* \___/_\_\ .__/\___/_|  \__| |_||_\__,_|_|_|_\___/__/ *
+        //*         |_|                                          *
+        template <typename OStream>
+        void export_names (OStream & os, database const & db, unsigned const generation,
+                           name_mapping * const string_table) {
+
+            auto names_index = index::get_index<trailer::indices::name> (db);
+            assert (generation > 0);
+            auto const container = diff::diff (db, *names_index, generation - 1U);
+            emit_array (os, std::begin (container), std::end (container), indent3,
+                        [&names_index, &string_table, &db] (OStream & os1, address addr) {
+                            indirect_string const str = names_index->load_leaf_node (db, addr);
+                            shared_sstring_view owner;
+                            raw_sstring_view view = str.as_db_string_view (&owner);
+                            os1 << indent4;
+                            emit_string (os1, view);
+                            string_table->add (addr);
+                        });
+        }
 
     } // end namespace exchange
 } // end namespace pstore
