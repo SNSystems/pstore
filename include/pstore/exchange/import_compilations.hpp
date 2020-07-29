@@ -50,6 +50,8 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_COMPILATIONS_HPP
 #define PSTORE_EXCHANGE_IMPORT_COMPILATIONS_HPP
 
+#include <bitset>
+
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_names.hpp"
 
