@@ -60,6 +60,7 @@
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/mcrepo/fragment.hpp"
+#include "pstore/support/base64.hpp"
 
 namespace pstore {
     namespace exchange {
