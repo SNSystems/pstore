@@ -313,7 +313,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
 
     // Export the internal fixup array to the 'os' string-stream.
     std::ostringstream os;
-    pstore::exchange::name_mapping names;
+    pstore::exchange::export_name_mapping names;
     pstore::exchange::export_external_fixups (os, export_db_, names, std::begin (xfixups),
                                               std::end (xfixups));
 
@@ -423,7 +423,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
 
 
     // Write the names that we just created as JSON.
-    pstore::exchange::name_mapping exported_names;
+    pstore::exchange::export_name_mapping exported_names;
     std::ostringstream exported_names_stream;
     export_names (exported_names_stream, export_db_, export_db_.get_current_revision (),
                   &exported_names);
@@ -433,8 +433,10 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     // Build a collection of external fixups. These refer to names added to the database
     // add_export_strings().
     xfixup_collection xfixups;
-    xfixups.emplace_back (indir_strings.at (0) /*foo*/, 5, 7, 9);
-    xfixups.emplace_back (indir_strings.at (1) /*bar*/, 11, 13, 17);
+    xfixups.emplace_back (indir_strings.at (0) /*foo*/,
+                          static_cast<pstore::repo::relocation_type> (5), 7, 9);
+    xfixups.emplace_back (indir_strings.at (1) /*bar*/,
+                          static_cast<pstore::repo::relocation_type> (11), 13, 17);
 
 
 

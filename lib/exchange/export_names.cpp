@@ -51,21 +51,17 @@
 namespace pstore {
     namespace exchange {
 
-        //*                                             _            *
-        //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
-        //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
-        //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
-        //*                                  |_|  |_|         |___/  *
         // add
         // ~~~
-        void name_mapping::add (address const addr) {
+        void export_name_mapping::add (address const addr) {
             assert (names_.find (addr) == names_.end ());
             assert (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
-            names_[addr] = static_cast<std::uint64_t> (names_.size ());
+            auto const index = static_cast<std::uint64_t> (names_.size ());
+            names_[addr] = index;
         }
         // index
         // ~~~~~
-        std::uint64_t name_mapping::index (address const addr) const {
+        std::uint64_t export_name_mapping::index (address const addr) const {
             auto const pos = names_.find (addr);
             assert (pos != names_.end ());
             return pos->second;

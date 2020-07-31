@@ -63,8 +63,8 @@ namespace {
 
     template <pstore::repo::section_kind Kind,
               typename Content = typename pstore::repo::enum_to_section<Kind>::type>
-    void emit_section (crude_ostream & os, pstore::database const & db, name_mapping const & names,
-                       Content const & content) {
+    void emit_section (crude_ostream & os, pstore::database const & db,
+                       export_name_mapping const & names, Content const & content) {
         {
             os << indent6 << R"("data": ")";
             pstore::repo::container<std::uint8_t> const payload = content.payload ();
@@ -84,7 +84,7 @@ namespace {
 
     template <>
     void emit_section<pstore::repo::section_kind::bss, pstore::repo::bss_section> (
-        crude_ostream & os, pstore::database const & db, name_mapping const & names,
+        crude_ostream & os, pstore::database const & db, export_name_mapping const & names,
         pstore::repo::bss_section const & content) {
 
         os << indent6 << R"("size": )" << content.size () << ",\n";
@@ -101,7 +101,7 @@ namespace {
 
     template <>
     void emit_section<pstore::repo::section_kind::debug_line, pstore::repo::debug_line_section> (
-        crude_ostream & os, pstore::database const & /*db*/, name_mapping const & /*names*/,
+        crude_ostream & os, pstore::database const & /*db*/, export_name_mapping const & /*names*/,
         pstore::repo::debug_line_section const & content) {
 
         assert (content.align () == 1U);
@@ -123,7 +123,7 @@ namespace {
 
     template <>
     void emit_section<pstore::repo::section_kind::dependent, pstore::repo::dependents> (
-        crude_ostream & os, pstore::database const & /*db*/, name_mapping const & /*names*/,
+        crude_ostream & os, pstore::database const & /*db*/, export_name_mapping const & /*names*/,
         pstore::repo::dependents const & content) {
 
         emit_array (os, std::begin (content), std::end (content), indent6,
@@ -140,7 +140,7 @@ namespace pstore {
     namespace exchange {
 
         void fragments (crude_ostream & os, pstore::database const & db, unsigned const generation,
-                        name_mapping const & names) {
+                        export_name_mapping const & names) {
             auto fragments = pstore::index::get_index<pstore::trailer::indices::fragment> (db);
             if (!fragments->empty ()) {
                 auto const * fragment_sep = "\n";

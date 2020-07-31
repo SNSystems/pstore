@@ -69,7 +69,7 @@ namespace pstore {
 
         template <typename OStream, typename XFixupIterator>
         OStream & export_external_fixups (OStream & os, database const & db,
-                                          name_mapping const & names, XFixupIterator first,
+                                          export_name_mapping const & names, XFixupIterator first,
                                           XFixupIterator last) {
             emit_array (
                 os, first, last, indent6, [&] (OStream & os1, repo::external_fixup const & xfx) {

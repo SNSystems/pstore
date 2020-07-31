@@ -59,7 +59,7 @@ namespace pstore {
 
         class crude_ostream;
 
-        class name_mapping {
+        class export_name_mapping {
         public:
             void add (address addr);
 
@@ -79,7 +79,7 @@ namespace pstore {
         //*         |_|                                          *
         template <typename OStream>
         void export_names (OStream & os, database const & db, unsigned const generation,
-                           name_mapping * const string_table) {
+                           export_name_mapping * const string_table) {
 
             auto names_index = index::get_index<trailer::indices::name> (db);
             assert (generation > 0);

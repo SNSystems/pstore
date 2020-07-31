@@ -99,7 +99,7 @@ namespace {
     }
 
     void compilations (crude_ostream & os, pstore::database const & db, unsigned const generation,
-                       name_mapping const & names) {
+                       export_name_mapping const & names) {
         auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (db);
         if (!compilations->empty ()) {
             auto const * sep = "\n";
@@ -161,7 +161,7 @@ namespace pstore {
     namespace exchange {
 
         void export_database (database & db, crude_ostream & os) {
-            name_mapping string_table;
+            export_name_mapping string_table;
             os << "{\n";
             os << indent1 << "\"version\": 1,\n";
             os << indent1 << "\"transactions\": ";

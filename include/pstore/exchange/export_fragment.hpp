@@ -53,7 +53,7 @@ namespace pstore {
     namespace exchange {
 
         void fragments (crude_ostream & os, database const & db, unsigned const generation,
-                        name_mapping const & names);
+                        export_name_mapping const & names);
 
     } // end namespace exchange
 } // end namespace pstore
