@@ -55,14 +55,20 @@ namespace pstore {
 
         class root final : public rule {
         public:
-            root (parse_stack_pointer stack, not_null<database *> db)
+            root (parse_stack_pointer const stack, not_null<database *> const db)
                     : rule (stack)
                     , db_{db} {}
+            root (root const &) = delete;
+            root (root &&) noexcept = delete;
+
+            root & operator= (root const &) = delete;
+            root & operator= (root &&) noexcept = delete;
+
             gsl::czstring name () const noexcept override;
             std::error_code begin_object () override;
 
         private:
-            not_null<database *> db_;
+            not_null<database *> const db_;
         };
 
 

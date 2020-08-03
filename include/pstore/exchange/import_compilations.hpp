@@ -65,7 +65,7 @@
 namespace pstore {
     namespace exchange {
 
-        using fragment_index_pointer = gsl::not_null<std::shared_ptr<index::fragment_index>>;
+        using fragment_index_pointer = not_null<std::shared_ptr<index::fragment_index>>;
 
         //*     _      __ _      _ _   _           *
         //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
@@ -76,15 +76,13 @@ namespace pstore {
         template <typename TransactionLock>
         class definition final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             using container = std::vector<repo::compilation_member>;
 
-            definition (parse_stack_pointer const stack,
-                        gsl::not_null<container *> const definitions, names_pointer const names,
-                        transaction_pointer const transaction,
+            definition (parse_stack_pointer const stack, not_null<container *> const definitions,
+                        names_pointer const names, transaction_pointer const transaction,
                         fragment_index_pointer const & fragments)
                     : rule (stack)
                     , definitions_{definitions}
@@ -106,7 +104,7 @@ namespace pstore {
             static maybe<repo::visibility> decode_visibility (std::string const & visibility);
 
         private:
-            gsl::not_null<container *> const definitions_;
+            not_null<container *> const definitions_;
             names_pointer const names_;
             transaction_pointer const transaction_;
             fragment_index_pointer const fragments_;
@@ -208,11 +206,10 @@ namespace pstore {
         template <typename TransactionLock>
         class definition_object final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
             using definition_container_pointer =
-                gsl::not_null<typename definition<TransactionLock>::container *>;
+                not_null<typename definition<TransactionLock>::container *>;
 
             definition_object (parse_stack_pointer const stack,
                                definition_container_pointer const definitions,
@@ -229,7 +226,7 @@ namespace pstore {
             definition_object & operator= (definition_object const &) = delete;
             definition_object & operator= (definition_object &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override { return "definition_object"; }
+            gsl::czstring name () const noexcept override { return "definition object"; }
 
             std::error_code begin_object () override {
                 return this->push<definition<TransactionLock>> (definitions_, names_, transaction_,
@@ -253,9 +250,8 @@ namespace pstore {
         template <typename TransactionLock>
         class compilation final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             compilation (parse_stack_pointer const stack, transaction_pointer const transaction,
                          names_pointer const names, fragment_index_pointer const & fragments,
@@ -346,12 +342,11 @@ namespace pstore {
         template <typename TransactionLock>
         class compilations_index final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
-            compilations_index (parse_stack_pointer s, transaction_pointer transaction,
-                                names_pointer names);
+            compilations_index (parse_stack_pointer const stack,
+                                transaction_pointer const transaction, names_pointer const names);
             compilations_index (compilations_index const & ) = delete;
             compilations_index (compilations_index && ) noexcept = delete;
 
@@ -365,7 +360,7 @@ namespace pstore {
         private:
             transaction_pointer const transaction_;
             names_pointer const names_;
-            std::shared_ptr<index::fragment_index> const fragments_;
+            fragment_index_pointer const fragments_;
         };
 
         // (ctor)

@@ -66,15 +66,20 @@ namespace pstore {
             class section_name final : public pstore::exchange::rule {
             public:
                 section_name (parse_stack_pointer const stack,
-                              gsl::not_null<pstore::repo::section_kind *> section)
+                              not_null<pstore::repo::section_kind *> const section)
                         : rule (stack)
                         , section_{section} {}
+                section_name (section_name const &) = delete;
+                section_name (section_name &&) noexcept = delete;
+
+                section_name & operator= (section_name const &) = delete;
+                section_name & operator= (section_name &&) noexcept = delete;
 
                 gsl::czstring name () const noexcept override { return "section name"; }
                 std::error_code string_value (std::string const & s) override;
 
             private:
-                gsl::not_null<repo::section_kind *> section_;
+                not_null<repo::section_kind *> const section_;
             };
 
         } // end namespace details
@@ -88,10 +93,15 @@ namespace pstore {
         template <typename TransactionLock>
         class ifixup_rule final : public rule {
         public:
-            using names_pointer = names<TransactionLock> *;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             ifixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         gsl::not_null<std::vector<repo::internal_fixup> *> const fixups);
+                         not_null<std::vector<repo::internal_fixup> *> const fixups);
+            ifixup_rule (ifixup_rule const &) = delete;
+            ifixup_rule (ifixup_rule &&) noexcept = delete;
+
+            ifixup_rule & operator= (ifixup_rule const &) = delete;
+            ifixup_rule & operator= (ifixup_rule &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "ifixup rule"; }
             std::error_code key (std::string const & k) override;
@@ -101,7 +111,7 @@ namespace pstore {
             enum { section, type, offset, addend };
             std::bitset<addend + 1> seen_;
 
-            gsl::not_null<std::vector<repo::internal_fixup> *> const fixups_;
+            not_null<std::vector<repo::internal_fixup> *> const fixups_;
 
             repo::section_kind section_ = repo::section_kind::last;
             std::uint64_t type_ = 0;
@@ -114,7 +124,7 @@ namespace pstore {
         template <typename TransactionLock>
         ifixup_rule<TransactionLock>::ifixup_rule (
             parse_stack_pointer const stack, names_pointer const /*names*/,
-            gsl::not_null<std::vector<repo::internal_fixup> *> const fixups)
+            not_null<std::vector<repo::internal_fixup> *> const fixups)
                 : rule (stack)
                 , fixups_{fixups} {}
 
@@ -163,10 +173,15 @@ namespace pstore {
         template <typename TransactionLock>
         class xfixup_rule final : public rule {
         public:
-            using names_pointer = names<TransactionLock> *;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         gsl::not_null<std::vector<repo::external_fixup> *> const fixups);
+                         not_null<std::vector<repo::external_fixup> *> const fixups);
+            xfixup_rule (xfixup_rule const &) = delete;
+            xfixup_rule (xfixup_rule &&) noexcept = delete;
+
+            xfixup_rule & operator= (xfixup_rule const &) = delete;
+            xfixup_rule & operator= (xfixup_rule &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "xfixup rule"; }
             std::error_code key (std::string const & k) override;
@@ -176,7 +191,7 @@ namespace pstore {
             enum { name_index, type, offset, addend };
             names_pointer const names_;
             std::bitset<addend + 1> seen_;
-            gsl::not_null<std::vector<repo::external_fixup> *> const fixups_;
+            not_null<std::vector<repo::external_fixup> *> const fixups_;
 
             std::uint64_t name_ = 0;
             std::uint64_t type_ = 0;
@@ -189,7 +204,7 @@ namespace pstore {
         template <typename TransactionLock>
         xfixup_rule<TransactionLock>::xfixup_rule (
             parse_stack_pointer const stack, names_pointer const names,
-            gsl::not_null<std::vector<repo::external_fixup> *> const fixups)
+            not_null<std::vector<repo::external_fixup> *> const fixups)
                 : rule (stack)
                 , names_{names}
                 , fixups_{fixups} {}
@@ -245,20 +260,26 @@ namespace pstore {
         template <typename TransactionLock, typename Next, typename Fixup>
         class fixups_object final : public rule {
         public:
-            using names_pointer = gsl::not_null<names<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             fixups_object (parse_stack_pointer const stack, names_pointer const names,
-                           gsl::not_null<std::vector<Fixup> *> const fixups)
+                           not_null<std::vector<Fixup> *> const fixups)
                     : rule (stack)
                     , names_{names}
                     , fixups_{fixups} {}
+            fixups_object (fixups_object const &) = delete;
+            fixups_object (fixups_object &&) noexcept = delete;
+
+            fixups_object & operator= (fixups_object const &) = delete;
+            fixups_object & operator= (fixups_object &&) noexcept = delete;
+
             gsl::czstring name () const noexcept override { return "fixups object"; }
             std::error_code begin_object () override { return this->push<Next> (names_, fixups_); }
             std::error_code end_array () override { return pop (); }
 
         private:
             names_pointer const names_;
-            gsl::not_null<std::vector<Fixup> *> const fixups_;
+            not_null<std::vector<Fixup> *> const fixups_;
         };
 
         template <typename TransactionLock>

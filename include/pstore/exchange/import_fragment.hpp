@@ -74,13 +74,13 @@ namespace pstore {
         template <typename TransactionLock, typename OutputIterator>
         class generic_section : public rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             generic_section (parse_stack_pointer const stack, pstore::repo::section_kind kind,
                              names_pointer const names,
-                             gsl::not_null<repo::section_content *> const content,
-                             gsl::not_null<OutputIterator *> const out) noexcept
+                             not_null<repo::section_content *> const content,
+                             not_null<OutputIterator *> const out) noexcept
                     : rule (stack)
                     , kind_{kind}
                     , names_{names}
@@ -110,8 +110,8 @@ namespace pstore {
             std::string data_;
             std::uint64_t align_ = 1U;
 
-            gsl::not_null<pstore::repo::section_content *> const content_;
-            gsl::not_null<OutputIterator *> const out_;
+            not_null<pstore::repo::section_content *> const content_;
+            not_null<OutputIterator *> const out_;
         };
 
         // key
@@ -192,8 +192,8 @@ namespace pstore {
         template <typename TransactionLock, typename OutputIterator>
         class debug_line_section final : public generic_section<TransactionLock, OutputIterator> {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             debug_line_section (rule::parse_stack_pointer const stack, pstore::database & db,
                                 names_pointer const names,
@@ -214,7 +214,7 @@ namespace pstore {
 
             pstore::database & db_;
             std::string header_digest_;
-            pstore::gsl::not_null<OutputIterator *> const out_;
+            not_null<OutputIterator *> const out_;
         };
 
         // key
@@ -269,8 +269,8 @@ namespace pstore {
         template <typename TransactionLock>
         class fragment_sections final : public rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             fragment_sections (parse_stack_pointer const stack,
                                transaction_pointer const transaction, names_pointer const names,
@@ -376,11 +376,11 @@ namespace pstore {
         template <typename TransactionLock>
         class fragment_index final : public rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
-            fragment_index (parse_stack_pointer s, transaction_pointer transaction,
-                            names_pointer names);
+            fragment_index (parse_stack_pointer const stack, transaction_pointer const transaction,
+                            names_pointer const names);
             fragment_index (fragment_index const &) = delete;
             fragment_index (fragment_index &&) noexcept = delete;
 

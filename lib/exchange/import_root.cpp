@@ -64,16 +64,22 @@ namespace {
     //*                            |__/             *
     class root_object final : public rule {
     public:
-        root_object (parse_stack_pointer stack, not_null<database *> db)
+        root_object (parse_stack_pointer const stack, not_null<database *> const db)
                 : rule (stack)
                 , db_{db} {}
+        root_object (root_object const &) = delete;
+        root_object (root_object &&) noexcept = delete;
+
+        root_object & operator= (root_object const &) = delete;
+        root_object & operator= (root_object &&) noexcept = delete;
+
         gsl::czstring name () const noexcept override;
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
 
     private:
-        not_null<database *> db_;
-        names<transaction_lock> names_;
+        not_null<database *> const db_;
+        import_name_mapping names_;
 
         enum { version, transactions };
         std::bitset<transactions + 1> seen_;

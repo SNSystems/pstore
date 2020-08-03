@@ -48,26 +48,3 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/import_compilations.hpp"
-
-#include <bitset>
-
-
-using namespace pstore;
-using namespace pstore::exchange;
-
-namespace {
-
-
-
-
-
-
-} // end anonymous namespace
-
-namespace pstore {
-    namespace exchange {
-
-
-
-    } // end namespace exchange
-} // end namespace pstore

@@ -66,22 +66,26 @@ namespace pstore {
         template <typename TransactionLock>
         class transaction_contents final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using db_pointer = not_null<pstore::database *>;
+            using names_pointer = not_null<import_name_mapping *>;
 
-            transaction_contents (parse_stack_pointer stack, gsl::not_null<database *> db,
+            transaction_contents (parse_stack_pointer const stack, db_pointer const db,
                                   names_pointer names)
                     : rule (stack)
                     , transaction_{begin (*db)}
                     , names_{names} {}
+            transaction_contents (transaction_contents const &) = delete;
+            transaction_contents (transaction_contents &&) noexcept = delete;
+
+            transaction_contents & operator= (transaction_contents const &) = delete;
+            transaction_contents & operator= (transaction_contents &&) noexcept = delete;
 
         private:
             std::error_code key (std::string const & s) override;
             std::error_code end_object () override;
             gsl::czstring name () const noexcept override;
 
-            transaction_type transaction_;
+            transaction<TransactionLock> transaction_;
             names_pointer names_;
         };
 
@@ -101,17 +105,19 @@ namespace pstore {
                 return push_array_rule<names_array_members<TransactionLock>> (this, &transaction_,
                                                                               names_);
             }
+            // For these other keys, the collection of imported names is constant.
+            not_null<import_name_mapping const *> const cnames = names_.get ();
             if (s == "debugline") {
                 return push_object_rule<pstore::exchange::debug_line_index<TransactionLock>> (
                     this, &transaction_);
             }
             if (s == "fragments") {
                 return push_object_rule<fragment_index<TransactionLock>> (this, &transaction_,
-                                                                          names_);
+                                                                          cnames);
             }
             if (s == "compilations") {
                 return push_object_rule<compilations_index<TransactionLock>> (this, &transaction_,
-                                                                              names_);
+                                                                              cnames);
             }
             return import_error::unknown_transaction_object_key;
         }
@@ -128,22 +134,29 @@ namespace pstore {
         template <typename TransactionLock>
         class transaction_object final : public rule {
         public:
-            using names_pointer = gsl::not_null<names<TransactionLock> *>;
+            using db_pointer = not_null<pstore::database *>;
+            using names_pointer = not_null<import_name_mapping *>;
 
-            transaction_object (parse_stack_pointer s, not_null<pstore::database *> db,
-                                names_pointer names)
+            transaction_object (parse_stack_pointer const s, db_pointer const db,
+                                names_pointer const names)
                     : rule (s)
                     , db_{db}
                     , names_{names} {}
-            pstore::gsl::czstring name () const noexcept override { return "transaction_object"; }
+            transaction_object (transaction_object const &) = delete;
+            transaction_object (transaction_object &&) noexcept = delete;
+
+            transaction_object & operator= (transaction_object const &) = delete;
+            transaction_object & operator= (transaction_object &&) noexcept = delete;
+
+            pstore::gsl::czstring name () const noexcept override { return "transaction object"; }
             std::error_code begin_object () override {
                 return push<transaction_contents<TransactionLock>> (db_, names_);
             }
             std::error_code end_array () override { return pop (); }
 
         private:
-            not_null<pstore::database *> db_;
-            names_pointer names_;
+            db_pointer const db_;
+            names_pointer const names_;
         };
 
         //*  _                             _   _                                    *
@@ -154,24 +167,32 @@ namespace pstore {
         template <typename TransactionLock>
         class transaction_array final : public rule {
         public:
-            using names_pointer = gsl::not_null<names<TransactionLock> *>;
+            using db_pointer = not_null<pstore::database *>;
+            using names_pointer = not_null<import_name_mapping *>;
 
-            transaction_array (parse_stack_pointer s, not_null<database *> db, names_pointer names);
+            transaction_array (parse_stack_pointer const s, db_pointer const db,
+                               names_pointer const names);
+            transaction_array (transaction_array const &) = delete;
+            transaction_array (transaction_array &&) noexcept = delete;
+
+            transaction_array & operator= (transaction_array const &) = delete;
+            transaction_array & operator= (transaction_array &&) noexcept = delete;
+
             gsl::czstring name () const noexcept override;
             std::error_code begin_array () override;
 
         private:
-            gsl::not_null<database *> db_;
-            names_pointer names_;
+            db_pointer const db_;
+            names_pointer const names_;
         };
 
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        transaction_array<TransactionLock>::transaction_array (parse_stack_pointer s,
-                                                               not_null<database *> db,
-                                                               names_pointer names)
-                : rule (s)
+        transaction_array<TransactionLock>::transaction_array (parse_stack_pointer const stack,
+                                                               db_pointer const db,
+                                                               names_pointer const names)
+                : rule (stack)
                 , db_{db}
                 , names_{names} {}
 

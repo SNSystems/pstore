@@ -52,14 +52,20 @@ namespace pstore {
         template <typename T, typename Next>
         class array_object final : public rule {
         public:
-            array_object (parse_stack_pointer s, not_null<std::vector<T> *> arr)
-                    : rule (s)
+            array_object (parse_stack_pointer const stack, not_null<std::vector<T> *> const arr)
+                    : rule (stack)
                     , arr_{arr} {}
+            array_object (array_object const &) = delete;
+            array_object (array_object &&) noexcept = delete;
+
+            array_object & operator= (array_object const &) = delete;
+            array_object & operator= (array_object &&) noexcept = delete;
+
             std::error_code begin_object () override { return push<Next> (arr_); }
             std::error_code end_array () override { return pop (); }
 
         private:
-            not_null<std::vector<T> *> arr_;
+            not_null<std::vector<T> *> const arr_;
         };
 
     } // end namespace exchange

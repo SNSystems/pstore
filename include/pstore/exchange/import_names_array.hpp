@@ -60,12 +60,11 @@ namespace pstore {
         template <typename TransactionLock>
         class names_array_members final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
-            using names_pointer = names<TransactionLock> *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using names_pointer = not_null<import_name_mapping *>;
 
-            names_array_members (parse_stack_pointer s, transaction_pointer transaction,
-                                 names_pointer n);
+            names_array_members (parse_stack_pointer const stack,
+                                 transaction_pointer const transaction, names_pointer const names);
             names_array_members (names_array_members const &) = delete;
             names_array_members (names_array_members &&) noexcept = delete;
 
@@ -77,26 +76,26 @@ namespace pstore {
             std::error_code end_array () override;
             gsl::czstring name () const noexcept override;
 
-            transaction_pointer transaction_;
-            names_pointer names_;
+            transaction_pointer const transaction_;
+            names_pointer const names_;
         };
 
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        names_array_members<TransactionLock>::names_array_members (parse_stack_pointer s,
-                                                                   transaction_pointer transaction,
-                                                                   names_pointer n)
-                : rule (s)
+        names_array_members<TransactionLock>::names_array_members (
+            parse_stack_pointer const stack, transaction_pointer const transaction,
+            names_pointer const names)
+                : rule (stack)
                 , transaction_{transaction}
-                , names_{n} {}
+                , names_{names} {}
 
         // string value
         // ~~~~~~~~~~~~
         template <typename TransactionLock>
         std::error_code
         names_array_members<TransactionLock>::string_value (std::string const & str) {
-            return names_->add_string (transaction_, str);
+            return names_->add_string (transaction_.get (), str);
         }
 
         // end array

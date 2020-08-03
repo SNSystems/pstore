@@ -109,9 +109,14 @@ namespace pstore {
         template <typename NextState, typename... Args>
         class object_rule final : public rule {
         public:
-            explicit object_rule (parse_stack_pointer s, Args &&... args)
-                    : rule (s)
+            explicit object_rule (parse_stack_pointer const stack, Args &&... args)
+                    : rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
+            object_rule (object_rule const &) = delete;
+            object_rule (object_rule &&) noexcept = delete;
+
+            object_rule & operator= (object_rule const &) = delete;
+            object_rule & operator= (object_rule &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "object rule"; }
 
@@ -140,8 +145,8 @@ namespace pstore {
         template <typename NextRule, typename... Args>
         class array_rule final : public rule {
         public:
-            explicit array_rule (parse_stack_pointer s, Args &&... args)
-                    : rule (s)
+            explicit array_rule (parse_stack_pointer stack, Args &&... args)
+                    : rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
             array_rule (array_rule const &) = delete;
             array_rule (array_rule &&) noexcept = delete;

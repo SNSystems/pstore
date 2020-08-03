@@ -64,10 +64,15 @@ namespace pstore {
         template <typename TransactionLock>
         class debug_line_index final : public rule {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = transaction_type *;
+            using transaction_pointer = not_null<transaction<TransactionLock> *>;
 
-            debug_line_index (parse_stack_pointer s, transaction_pointer transaction);
+            debug_line_index (parse_stack_pointer const stack,
+                              transaction_pointer const transaction);
+            debug_line_index (debug_line_index const &) = delete;
+            debug_line_index (debug_line_index &&) noexcept = delete;
+
+            debug_line_index & operator= (debug_line_index const &) = delete;
+            debug_line_index & operator= (debug_line_index &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override;
 
@@ -85,9 +90,9 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        debug_line_index<TransactionLock>::debug_line_index (parse_stack_pointer s,
-                                                             transaction_pointer transaction)
-                : rule (s)
+        debug_line_index<TransactionLock>::debug_line_index (parse_stack_pointer const stack,
+                                                             transaction_pointer const transaction)
+                : rule (stack)
                 , index_{index::get_index<trailer::indices::debug_line_header> (transaction->db ())}
                 , transaction_{transaction} {}
 

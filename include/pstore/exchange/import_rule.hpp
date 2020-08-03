@@ -66,12 +66,15 @@ namespace pstore {
             using parse_stack = std::stack<std::unique_ptr<rule>>;
             using parse_stack_pointer = not_null<parse_stack *>;
 
-            explicit rule (parse_stack_pointer stack) noexcept
+            explicit rule (parse_stack_pointer const stack) noexcept
                     : stack_{stack} {}
             rule (rule const &) = delete;
+            rule (rule &&) noexcept = delete;
+
             virtual ~rule ();
 
             rule & operator= (rule const &) = delete;
+            rule & operator= (rule &&) noexcept = delete;
 
             virtual gsl::czstring name () const noexcept = 0;
 
@@ -121,7 +124,7 @@ namespace pstore {
             static std::string indent (parse_stack const & stack) {
                 return std::string (stack.size () * trace_indent, ' ');
             }
-            parse_stack_pointer stack_;
+            parse_stack_pointer const stack_;
         };
 
 

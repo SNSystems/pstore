@@ -56,21 +56,21 @@
 namespace pstore {
     namespace exchange {
 
-        template <typename TransactionLock>
-        class names {
+        class import_name_mapping {
         public:
-            using transaction_type = transaction<TransactionLock>;
-            using transaction_pointer = gsl::not_null<transaction_type *>;
+            import_name_mapping () = default;
+            import_name_mapping (import_name_mapping const &) = delete;
+            import_name_mapping (import_name_mapping &&) noexcept = delete;
 
-            names () = default;
-            names (names const &) = delete;
-            names (names &&) noexcept = delete;
+            import_name_mapping & operator= (import_name_mapping const &) = delete;
+            import_name_mapping & operator= (import_name_mapping &&) noexcept = delete;
 
-            names & operator= (names const &) = delete;
-            names & operator= (names &&) noexcept = delete;
+            template <typename TransactionLock>
+            std::error_code add_string (transaction<TransactionLock> * transaction,
+                                        std::string const & str);
 
-            std::error_code add_string (transaction_pointer transaction, std::string const & str);
-            void flush (transaction_pointer transaction);
+            template <typename TransactionLock>
+            void flush (not_null<transaction<TransactionLock> *> transaction);
 
             error_or<typed_address<indirect_string>> lookup (std::uint64_t index) const;
 
@@ -85,8 +85,9 @@ namespace pstore {
         // add string
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code names<TransactionLock>::add_string (transaction_pointer const transaction,
-                                                            std::string const & str) {
+        std::error_code
+        import_name_mapping::add_string (transaction<TransactionLock> * const transaction,
+                                         std::string const & str) {
             strings_.push_back (str);
             std::string const & x = strings_.back ();
 
@@ -95,34 +96,23 @@ namespace pstore {
 
             std::shared_ptr<index::name_index> const names_index =
                 index::get_index<trailer::indices::name> (transaction->db ());
-            std::pair<index::name_index::iterator, bool> const res =
+            std::pair<index::name_index::iterator, bool> const add_res =
                 adder_.add (*transaction, names_index, &s);
-            if (!res.second) {
+            if (!add_res.second) {
                 return {import_error::duplicate_name};
             }
 
-            lookup_[lookup_.size ()] =
-                typed_address<indirect_string>::make (res.first.get_address ());
+            lookup_.emplace (lookup_.size (),
+                             typed_address<indirect_string>::make (add_res.first.get_address ()));
             return {};
         }
 
         // flush
         // ~~~~~
         template <typename TransactionLock>
-        void names<TransactionLock>::flush (transaction_pointer const transaction) {
+        void
+        import_name_mapping::flush (not_null<transaction<TransactionLock> *> const transaction) {
             adder_.flush (*transaction);
-        }
-
-        // lookup
-        // ~~~~~~
-        template <typename TransactionLock>
-        error_or<typed_address<indirect_string>>
-        names<TransactionLock>::lookup (std::uint64_t const index) const {
-            using result_type = error_or<typed_address<indirect_string>>;
-
-            auto const pos = lookup_.find (index);
-            return pos != std::end (lookup_) ? result_type{pos->second}
-                                             : result_type{import_error::no_such_name};
         }
 
     } // end namespace exchange
