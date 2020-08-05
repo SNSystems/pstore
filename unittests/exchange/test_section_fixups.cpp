@@ -179,10 +179,10 @@ TEST_P (InternalFixupSectionNames, SectionName) {
 
 #define X(x) name_section_pair{#x, pstore::repo::section_kind::x},
 #ifdef PSTORE_IS_INSIDE_LLVM
-INSTANTIATE_TEST_CASE_P (IFixupSectionNames, IFixupSectionNames,
+INSTANTIATE_TEST_CASE_P (InternalFixupSectionNames, InternalFixupSectionNames,
                          testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
 #else
-INSTANTIATE_TEST_SUITE_P (IFixupSectionNames, InternalFixupSectionNames,
+INSTANTIATE_TEST_SUITE_P (InternalFixupSectionNames, InternalFixupSectionNames,
                           testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
 #endif
 #undef X
