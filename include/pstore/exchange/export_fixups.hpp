@@ -4,7 +4,7 @@
 //* |  __/>  <| |_) | (_) | |  | |_  |  _| |>  <| |_| | |_) \__ \ *
 //*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_/_/\_\\__,_| .__/|___/ *
 //*           |_|                                     |_|         *
-//===- lib/exchange/export_fixups.hpp -------------------------------------===//
+//===- include/pstore/exchange/export_fixups.hpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
