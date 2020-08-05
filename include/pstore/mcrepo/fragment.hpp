@@ -128,6 +128,9 @@ namespace pstore {
         struct enum_to_section {
             using type = generic_section;
         };
+        template <section_kind T>
+        using enum_to_section_t = typename enum_to_section<T>::type;
+
         template <>
         struct enum_to_section<section_kind::bss> {
             using type = bss_section;

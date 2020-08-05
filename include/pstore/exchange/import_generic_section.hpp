@@ -67,14 +67,15 @@ namespace pstore {
         //* \__, \___|_||_\___|_| |_\__| /__/\___\__|\__|_\___/_||_| *
         //* |___/                                                    *
         //-MARK: generic section
-        template <typename TransactionLock, typename OutputIterator>
+        template <typename OutputIterator>
         class import_generic_section : public rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
+            using content_pointer = not_null<repo::section_content *>;
 
             import_generic_section (parse_stack_pointer const stack, repo::section_kind kind,
-                                    names_pointer const names,
-                                    not_null<repo::section_content *> const content,
+                                    database const &, names_pointer const names,
+                                    content_pointer const content,
                                     not_null<OutputIterator *> const out) noexcept
                     : rule (stack)
                     , kind_{kind}
@@ -105,15 +106,14 @@ namespace pstore {
             std::string data_;
             std::uint64_t align_ = 1U;
 
-            not_null<repo::section_content *> const content_;
+            content_pointer const content_;
             not_null<OutputIterator *> const out_;
         };
 
         // key
         // ~~~
-        template <typename TransactionLock, typename OutputIterator>
-        std::error_code
-        import_generic_section<TransactionLock, OutputIterator>::key (std::string const & k) {
+        template <typename OutputIterator>
+        std::error_code import_generic_section<OutputIterator>::key (std::string const & k) {
             if (k == "data") {
                 seen_[data] = true; // string (ascii85)
                 return this->push<string_rule> (&data_);
@@ -135,9 +135,9 @@ namespace pstore {
 
         // content object
         // ~~~~~~~~~~~~~~
-        template <typename TransactionLock, typename OutputIterator>
+        template <typename OutputIterator>
         error_or<repo::section_content *>
-        import_generic_section<TransactionLock, OutputIterator>::content_object () {
+        import_generic_section<OutputIterator>::content_object () {
             using return_type = error_or<repo::section_content *>;
 
             if (!seen_.all ()) {
@@ -164,15 +164,14 @@ namespace pstore {
 
         // end object
         // ~~~~~~~~~~
-        template <typename TransactionLock, typename OutputIterator>
-        std::error_code import_generic_section<TransactionLock, OutputIterator>::end_object () {
-            if (error_or<repo::section_content *> const c = this->content_object ()) {
-                *out_ =
-                    std::make_unique<repo::generic_section_creation_dispatcher> (kind_, c.get ());
-                return pop ();
-            } else {
+        template <typename OutputIterator>
+        std::error_code import_generic_section<OutputIterator>::end_object () {
+            error_or<repo::section_content *> const c = this->content_object ();
+            if (!c) {
                 return c.get_error ();
             }
+            *out_ = std::make_unique<repo::generic_section_creation_dispatcher> (kind_, c.get ());
+            return pop ();
         }
 
     } // end namespace exchange
