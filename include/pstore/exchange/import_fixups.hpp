@@ -85,25 +85,25 @@ namespace pstore {
         } // end namespace details
 
 
-        //*  _  __ _                          _      *
-        //* (_)/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
-        //* | |  _| \ \ / || | '_ \ | '_| || | / -_) *
-        //* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
-        //*                  |_|                     *
-        //-MARK:ifixup rule
-        class ifixup_rule final : public rule {
+        //*  _     _                     _    __ _                *
+        //* (_)_ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+        //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+        //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
+        //*                                                |_|    *
+        //-MARK:import internal fixup
+        class import_internal_fixup final : public rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
-            ifixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         not_null<std::vector<repo::internal_fixup> *> const fixups);
-            ifixup_rule (ifixup_rule const &) = delete;
-            ifixup_rule (ifixup_rule &&) noexcept = delete;
+            import_internal_fixup (parse_stack_pointer const stack, names_pointer const names,
+                                   not_null<std::vector<repo::internal_fixup> *> const fixups);
+            import_internal_fixup (import_internal_fixup const &) = delete;
+            import_internal_fixup (import_internal_fixup &&) noexcept = delete;
 
-            ifixup_rule & operator= (ifixup_rule const &) = delete;
-            ifixup_rule & operator= (ifixup_rule &&) noexcept = delete;
+            import_internal_fixup & operator= (import_internal_fixup const &) = delete;
+            import_internal_fixup & operator= (import_internal_fixup &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override { return "ifixup rule"; }
+            gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & k) override;
             std::error_code end_object () override;
 
@@ -120,25 +120,25 @@ namespace pstore {
         };
 
 
-        //*       __ _                          _      *
-        //* __ __/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
-        //* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
-        //* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
-        //*                    |_|                     *
-        //-MARK:xfixup rule
-        class xfixup_rule final : public rule {
+        //*          _                     _    __ _                *
+        //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+        //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+        //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
+        //*                                                  |_|    *
+        //-MARK:import external fixup
+        class import_external_fixup final : public rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
-            xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
-                         not_null<std::vector<repo::external_fixup> *> const fixups);
-            xfixup_rule (xfixup_rule const &) = delete;
-            xfixup_rule (xfixup_rule &&) noexcept = delete;
+            import_external_fixup (parse_stack_pointer const stack, names_pointer const names,
+                                   not_null<std::vector<repo::external_fixup> *> const fixups);
+            import_external_fixup (import_external_fixup const &) = delete;
+            import_external_fixup (import_external_fixup &&) noexcept = delete;
 
-            xfixup_rule & operator= (xfixup_rule const &) = delete;
-            xfixup_rule & operator= (xfixup_rule &&) noexcept = delete;
+            import_external_fixup & operator= (import_external_fixup const &) = delete;
+            import_external_fixup & operator= (import_external_fixup &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override { return "xfixup rule"; }
+            gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & k) override;
             std::error_code end_object () override;
 
@@ -186,8 +186,8 @@ namespace pstore {
             not_null<std::vector<Fixup> *> const fixups_;
         };
 
-        using ifixups_object = fixups_object<ifixup_rule, repo::internal_fixup>;
-        using xfixups_object = fixups_object<xfixup_rule, repo::external_fixup>;
+        using ifixups_object = fixups_object<import_internal_fixup, repo::internal_fixup>;
+        using xfixups_object = fixups_object<import_external_fixup, repo::external_fixup>;
 
     } // end namespace exchange
 } // end namespace pstore
