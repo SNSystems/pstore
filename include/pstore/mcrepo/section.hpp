@@ -44,13 +44,13 @@
 #ifndef PSTORE_MCREPO_SECTION_HPP
 #define PSTORE_MCREPO_SECTION_HPP
 
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <iosfwd>
 #include <type_traits>
 
 namespace pstore {
-
     namespace repo {
 
 #define PSTORE_MCREPO_SECTION_KINDS                                                                \

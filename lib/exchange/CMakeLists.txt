@@ -50,6 +50,7 @@ set (pstore_exchange_includes
     digest_from_string.hpp
     export.hpp
     export_emit.hpp
+    export_fixups.hpp
     export_fragment.hpp
     export_ostream.hpp
     export_names.hpp
@@ -58,6 +59,7 @@ set (pstore_exchange_includes
     import_error.hpp
     import_fixups.hpp
     import_fragment.hpp
+    import_generic_section.hpp
     import_names.hpp
     import_names_array.hpp
     import_non_terminals.hpp
@@ -70,7 +72,6 @@ set (pstore_exchange_sources
     digest_from_string.cpp
     export.cpp
     export_emit.cpp
-    export_fixups.hpp
     export_fixups.cpp
     export_fragment.cpp
     export_names.cpp
