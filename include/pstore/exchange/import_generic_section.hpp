@@ -70,7 +70,6 @@ namespace pstore {
         template <typename TransactionLock, typename OutputIterator>
         class import_generic_section : public rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
             import_generic_section (parse_stack_pointer const stack, repo::section_kind kind,
@@ -125,13 +124,11 @@ namespace pstore {
             }
             if (k == "ifixups") {
                 seen_[ifixups] = true;
-                return push_array_rule<ifixups_object<TransactionLock>> (this, names_,
-                                                                         &content_->ifixups);
+                return push_array_rule<ifixups_object> (this, names_, &content_->ifixups);
             }
             if (k == "xfixups") {
                 seen_[xfixups] = true;
-                return push_array_rule<xfixups_object<TransactionLock>> (this, names_,
-                                                                         &content_->xfixups);
+                return push_array_rule<xfixups_object> (this, names_, &content_->xfixups);
             }
             return import_error::unrecognized_section_object_key;
         }

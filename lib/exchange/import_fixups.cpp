@@ -65,5 +65,107 @@ namespace pstore {
             }
 
         } // end namespace details
+
+        //*  _  __ _                          _      *
+        //* (_)/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
+        //* | |  _| \ \ / || | '_ \ | '_| || | / -_) *
+        //* |_|_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
+        //*                  |_|                     *
+        //-MARK:ifixup rule
+        // (ctor)
+        // ~~~~~~
+        ifixup_rule::ifixup_rule (parse_stack_pointer const stack, names_pointer const /*names*/,
+                                  not_null<std::vector<repo::internal_fixup> *> const fixups)
+                : rule (stack)
+                , fixups_{fixups} {}
+
+        // key
+        // ~~~
+        std::error_code ifixup_rule::key (std::string const & k) {
+            if (k == "section") {
+                seen_[section] = true;
+                return this->push<details::section_name> (&section_);
+            }
+            if (k == "type") {
+                seen_[type] = true;
+                return this->push<uint64_rule> (&type_);
+            }
+            if (k == "offset") {
+                seen_[offset] = true;
+                return this->push<uint64_rule> (&offset_);
+            }
+            if (k == "addend") {
+                seen_[addend] = true;
+                return this->push<uint64_rule> (&addend_);
+            }
+            return import_error::unrecognized_ifixup_key;
+        }
+
+        // end object
+        // ~~~~~~~~~~
+        std::error_code ifixup_rule::end_object () {
+            if (!seen_.all ()) {
+                return import_error::ifixup_object_was_incomplete;
+            }
+            // TODO: validate more values here.
+            fixups_->emplace_back (section_, static_cast<pstore::repo::relocation_type> (type_),
+                                   offset_, addend_);
+            return pop ();
+        }
+
+        //*       __ _                          _      *
+        //* __ __/ _(_)_ ___  _ _ __   _ _ _  _| |___  *
+        //* \ \ /  _| \ \ / || | '_ \ | '_| || | / -_) *
+        //* /_\_\_| |_/_\_\\_,_| .__/ |_|  \_,_|_\___| *
+        //*                    |_|                     *
+        //-MARK:xfixup rule
+        // (ctor)
+        // ~~~~~~
+        xfixup_rule::xfixup_rule (parse_stack_pointer const stack, names_pointer const names,
+                                  not_null<std::vector<repo::external_fixup> *> const fixups)
+                : rule (stack)
+                , names_{names}
+                , fixups_{fixups} {}
+
+        // key
+        // ~~~
+        std::error_code xfixup_rule::key (std::string const & k) {
+            if (k == "name") {
+                seen_[name_index] = true;
+                return this->push<uint64_rule> (&name_);
+            }
+            if (k == "type") {
+                seen_[type] = true;
+                return this->push<uint64_rule> (&type_);
+            }
+            if (k == "offset") {
+                seen_[offset] = true;
+                return this->push<uint64_rule> (&offset_);
+            }
+            if (k == "addend") {
+                seen_[addend] = true;
+                return this->push<uint64_rule> (&addend_);
+            }
+            return import_error::unrecognized_xfixup_key;
+        }
+
+        // end object
+        // ~~~~~~~~~~
+        std::error_code xfixup_rule::end_object () {
+            if (!seen_.all ()) {
+                return import_error::xfixup_object_was_incomplete;
+            }
+
+            auto name = names_->lookup (name_);
+            if (!name) {
+                return name.get_error ();
+            }
+
+            // TODO: validate some values here.
+            fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), offset_,
+                                   addend_);
+            return pop ();
+        }
+
     } // end namespace exchange
 } // end namespace pstore

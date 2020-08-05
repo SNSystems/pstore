@@ -64,7 +64,7 @@ namespace {
 
     using internal_fixup_collection = std::vector<pstore::repo::internal_fixup>;
     using internal_fixup_array_root =
-        pstore::exchange::array_rule<pstore::exchange::ifixups_object<transaction_lock>,
+        pstore::exchange::array_rule<pstore::exchange::ifixups_object,
                                      pstore::exchange::import_name_mapping *,
                                      internal_fixup_collection *>;
 
@@ -139,8 +139,8 @@ namespace {
                                       not_null<internal_fixup_collection *> const fixups) {
             pstore::exchange::import_name_mapping names;
             auto parser = pstore::json::make_parser (
-                pstore::exchange::callbacks::make<
-                    pstore::exchange::ifixups_object<transaction_lock>> (&names, fixups));
+                pstore::exchange::callbacks::make<pstore::exchange::ifixups_object> (&names,
+                                                                                     fixups));
             parser.input (src);
             parser.eof ();
             return parser;
@@ -299,7 +299,7 @@ namespace {
 
         using transaction_lock = std::unique_lock<mock_mutex>;
         using xfixup_array_root =
-            pstore::exchange::array_rule<pstore::exchange::xfixups_object<transaction_lock>,
+            pstore::exchange::array_rule<pstore::exchange::xfixups_object,
                                          pstore::exchange::import_name_mapping *,
                                          xfixup_collection *>;
 
@@ -503,8 +503,8 @@ namespace {
                                       pstore::exchange::import_name_mapping const & names,
                                       not_null<external_fixup_collection *> const fixups) {
             auto parser = pstore::json::make_parser (
-                pstore::exchange::callbacks::make<
-                    pstore::exchange::xfixups_object<transaction_lock>> (&names, fixups));
+                pstore::exchange::callbacks::make<pstore::exchange::xfixups_object> (&names,
+                                                                                     fixups));
             parser.input (src);
             parser.eof ();
             return parser;
