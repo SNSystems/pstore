@@ -114,8 +114,8 @@ namespace pstore {
                            "expected enum_to_section_t for bss to yield bss_section");
 
             template <typename OStream>
-            OStream & operator() (OStream & os, database const & db,
-                                  export_name_mapping const & names,
+            OStream & operator() (OStream & os, database const & /*db*/,
+                                  export_name_mapping const & /*names*/,
                                   repo::bss_section const & content) {
                 os << indent6 << R"("size": )" << content.size () << ",\n";
                 os << indent6 << R"("align": )" << content.align () << '\n';
@@ -132,8 +132,8 @@ namespace pstore {
                            "expected enum_to_section_t for debug_line to yield debug_line_section");
 
             template <typename OStream>
-            OStream & operator() (OStream & os, database const & db,
-                                  export_name_mapping const & names,
+            OStream & operator() (OStream & os, database const & /*db*/,
+                                  export_name_mapping const & /*names*/,
                                   repo::debug_line_section const & content) {
                 assert (content.align () == 1U);
                 assert (content.xfixups ().size () == 0U);
