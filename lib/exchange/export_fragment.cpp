@@ -74,10 +74,10 @@ namespace pstore {
                     auto fragment = db.getro (kvp.second);
                     auto const * section_sep = "";
                     for (pstore::repo::section_kind section : *fragment) {
-                        os << section_sep << indent5 << '"' << section_name (section) << "\": {\n";
+                        os << section_sep << indent5 << '"' << section_name (section) << "\": ";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
-        emit_section<pstore::repo::section_kind::a> (                                              \
+        export_section<pstore::repo::section_kind::a> (                                            \
             os, db, names, fragment->at<pstore::repo::section_kind::a> ());                        \
         break;
                         switch (section) {
@@ -88,7 +88,6 @@ namespace pstore {
                             break;
                         }
 #undef X
-                        os << indent5 << '}';
                         section_sep = ",\n";
                     }
                     os << '\n' << indent4 << '}';

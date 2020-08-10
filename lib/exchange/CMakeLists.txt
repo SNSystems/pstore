@@ -54,8 +54,10 @@ set (pstore_exchange_includes
     export_fragment.hpp
     export_ostream.hpp
     export_names.hpp
+    export_section.hpp
     import_compilations.hpp
     import_debug_line_header.hpp
+    import_debug_line_section.hpp
     import_error.hpp
     import_fixups.hpp
     import_fragment.hpp
@@ -65,6 +67,7 @@ set (pstore_exchange_includes
     import_non_terminals.hpp
     import_root.hpp
     import_rule.hpp
+    import_section_to_importer.hpp
     import_terminals.hpp
     import_transaction.hpp
 )

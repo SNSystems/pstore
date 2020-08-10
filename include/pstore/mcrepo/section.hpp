@@ -201,10 +201,11 @@ namespace pstore {
 
             const_pointer data () const { return begin_; }
 
-            size_type size () const {
+            size_type size () const noexcept {
                 assert (end_ >= begin_);
                 return static_cast<size_type> (end_ - begin_);
             }
+            bool empty () const noexcept { return size () == 0U; }
 
         private:
             const_pointer begin_;

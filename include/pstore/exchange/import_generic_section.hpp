@@ -170,7 +170,9 @@ namespace pstore {
             if (!c) {
                 return c.get_error ();
             }
-            *out_ = std::make_unique<repo::generic_section_creation_dispatcher> (kind_, c.get ());
+            *out_ = std::make_unique<
+                repo::section_to_creation_dispatcher<repo::generic_section>::type> (kind_,
+                                                                                    c.get ());
             return pop ();
         }
 

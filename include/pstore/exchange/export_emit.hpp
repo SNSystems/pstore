@@ -126,8 +126,8 @@ namespace pstore {
         /// \param fn  A function which is called to emit the contents of each object in the
         ///    iterator range denoted by [first, last).
         template <typename OStream, typename InputIt, typename Function>
-        void emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring indent,
-                         Function fn) {
+        OStream & emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring indent,
+                              Function fn) {
             auto const * sep = "";
             auto const * tail_sep = "";
             auto const * tail_sep_indent = "";
@@ -140,6 +140,7 @@ namespace pstore {
                 tail_sep_indent = indent;
             });
             os << tail_sep << tail_sep_indent << "]";
+            return os;
         }
 
 

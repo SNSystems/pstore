@@ -56,157 +56,12 @@
 #include "pstore/core/index_types.hpp"
 #include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_generic_section.hpp"
+#include "pstore/exchange/import_section_to_importer.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 #include "pstore/support/base64.hpp"
 
 namespace pstore {
     namespace exchange {
-
-        //*     _     _                _ _                       _   _           *
-        //*  __| |___| |__ _  _ __ _  | (_)_ _  ___   ___ ___ __| |_(_)___ _ _   *
-        //* / _` / -_) '_ \ || / _` | | | | ' \/ -_) (_-</ -_) _|  _| / _ \ ' \  *
-        //* \__,_\___|_.__/\_,_\__, | |_|_|_||_\___| /__/\___\__|\__|_\___/_||_| *
-        //*                    |___/                                             *
-        //-MARK: debug line section
-        template <typename OutputIterator>
-        class import_debug_line_section final : public import_generic_section<OutputIterator> {
-        public:
-            using names_pointer = not_null<import_name_mapping const *>;
-
-            import_debug_line_section (rule::parse_stack_pointer const stack,
-                                       repo::section_kind kind, database & db,
-                                       names_pointer const names,
-                                       repo::section_content * const content,
-                                       OutputIterator * const out)
-                    : import_generic_section<OutputIterator> (stack, kind, db, names, content, out)
-                    , db_{db}
-                    , out_{out} {
-                assert (kind == repo::section_kind::debug_line);
-            }
-            import_debug_line_section (import_debug_line_section const &) = delete;
-            import_debug_line_section (import_debug_line_section &&) noexcept = delete;
-
-            import_debug_line_section & operator= (import_debug_line_section const &) = delete;
-            import_debug_line_section & operator= (import_debug_line_section &&) noexcept = delete;
-
-            gsl::czstring name () const noexcept override { return "debug line section"; }
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
-
-        private:
-            enum { header };
-            std::bitset<header + 1> seen_;
-
-            database & db_;
-            std::string header_digest_;
-            not_null<OutputIterator *> const out_;
-        };
-
-        // key
-        // ~~~
-        template <typename OutputIterator>
-        std::error_code import_debug_line_section<OutputIterator>::key (std::string const & k) {
-            if (k == "header") {
-                seen_[header] = true;
-                return this->template push<string_rule> (&header_digest_);
-            }
-            return import_generic_section<OutputIterator>::key (k);
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        template <typename OutputIterator>
-        std::error_code import_debug_line_section<OutputIterator>::end_object () {
-            maybe<index::digest> const digest = exchange::digest_from_string (header_digest_);
-            if (!digest) {
-                return import_error::bad_digest;
-            }
-            if (!seen_.all ()) {
-                return import_error::incomplete_debug_line_section;
-            }
-
-            auto const index = index::get_index<trailer::indices::debug_line_header> (db_);
-            auto pos = index->find (db_, *digest);
-            if (pos == index->end (db_)) {
-                return import_error::debug_line_header_digest_not_found;
-            }
-            auto const header_extent = pos->second;
-
-            if (error_or<repo::section_content *> const content = this->content_object ()) {
-                *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (
-                    *digest, header_extent, content.get ());
-                return this->pop ();
-            } else {
-                return content.get_error ();
-            }
-        }
-
-
-        namespace details {
-
-            // FIXME: This implementation is just a placeholder to allow the code to compile.
-            template <typename OutputIterator>
-            class import_bss_section : public rule {
-            public:
-                using names_pointer = not_null<import_name_mapping const *>;
-                using content_pointer = not_null<repo::section_content *>;
-
-                import_bss_section (parse_stack_pointer const stack, repo::section_kind kind,
-                                    database const &, names_pointer const names,
-                                    content_pointer const content,
-                                    not_null<OutputIterator *> const out) noexcept
-                        : rule (stack) {}
-
-                gsl::czstring name () const noexcept override { return "BSS section"; }
-            };
-
-            // FIXME: This implementation is just a placeholder to allow the code to compile.
-            template <typename OutputIterator>
-            class import_dependents_section : public rule {
-            public:
-                using names_pointer = not_null<import_name_mapping const *>;
-                using content_pointer = not_null<repo::section_content *>;
-
-                import_dependents_section (parse_stack_pointer const stack, repo::section_kind kind,
-                                           database const &, names_pointer const names,
-                                           content_pointer const content,
-                                           not_null<OutputIterator *> const out) noexcept
-                        : rule (stack) {}
-
-                gsl::czstring name () const noexcept override { return "dependents section"; }
-            };
-
-            /// We can map from the section_kind enum to the type of data used to represent a
-            /// section of that kind. section_to_importer is used to convert from this type class
-            /// that we use to import that data. For example, the text section is represented by the
-            /// generic_section type. We then use the import_generic_section class to import it.
-            /// There are template specializations for each of the section content types in the
-            /// database.
-            template <typename Section, typename OutputIterator>
-            struct section_to_importer {};
-            template <typename Section, typename OutputIterator>
-            using section_to_importer_t =
-                typename section_to_importer<Section, OutputIterator>::type;
-
-            template <typename OutputIterator>
-            struct section_to_importer<repo::generic_section, OutputIterator> {
-                using type = import_generic_section<OutputIterator>;
-            };
-            template <typename OutputIterator>
-            struct section_to_importer<repo::bss_section, OutputIterator> {
-                using type = import_bss_section<OutputIterator>;
-            };
-            template <typename OutputIterator>
-            struct section_to_importer<repo::dependents, OutputIterator> {
-                using type = import_dependents_section<OutputIterator>;
-            };
-            template <typename OutputIterator>
-            struct section_to_importer<repo::debug_line_section, OutputIterator> {
-                using type = import_debug_line_section<OutputIterator>;
-            };
-
-        } // end namespace details
-
 
         //*   __                             _                _   _              *
         //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   ___ ___ __| |_(_)___ _ _  ___ *
@@ -264,8 +119,8 @@ namespace pstore {
 
 #define X(a)                                                                                       \
 case section_kind::a:                                                                              \
-    return push_object_rule<details::section_to_importer_t<                                        \
-        repo::enum_to_section_t<section_kind::a>, decltype (oit_)>> (                              \
+    return push_object_rule<                                                                       \
+        section_to_importer_t<repo::enum_to_section_t<section_kind::a>, decltype (oit_)>> (        \
         this, pos->second, transaction_->db (), names_, section_contents (pos->second), &oit_);
 
             switch (pos->second) {
