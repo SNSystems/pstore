@@ -75,6 +75,14 @@ namespace {
         pstore::database import_db_;
     };
 
+    // placement_delete is paired with use of placement new and unique_ptr<> to enable unique_ptr<>
+    // to be used on memory that is now owned. unique_ptr<> will cause the object's destructor to be
+    // called when it goes out of scope, but the release of memory is a no-op.
+    template <typename T>
+    struct placement_delete {
+        constexpr void operator() (T *) const noexcept {}
+    };
+
     template <pstore::repo::section_kind Kind>
     decltype (auto) build_section (pstore::gsl::not_null<std::vector<std::uint8_t> *> const buffer,
                                    pstore::repo::section_content const & content) {
@@ -85,50 +93,73 @@ namespace {
             typename pstore::repo::section_to_creation_dispatcher<section_type>::type> (Kind,
                                                                                         &content);
         buffer->resize (dispatcher->size_bytes ());
-        dispatcher->write (buffer->data ());
-        return reinterpret_cast<section_type const *> (buffer->data ());
+        auto data = buffer->data ();
+        dispatcher->write (data);
+        // Use unique_ptr<> to ensure that the section_type object's destructor is called but since
+        // the memory is not owned by this object, the delete operation will do nothing thanks to
+        // placement_delete<>.
+        return std::unique_ptr<section_type const, placement_delete<section_type const>>{
+            reinterpret_cast<section_type const *> (data), placement_delete<section_type const>{}};
+    }
+
+    template <typename ImportRule, typename... Args>
+    decltype (auto) make_json_object_parser (Args &&... args) {
+        using rule = pstore::exchange::object_rule<ImportRule, Args...>;
+        return pstore::json::make_parser (
+            pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
+    }
+
+    template <pstore::repo::section_kind Kind>
+    std::string export_section (pstore::database const & db,
+                                pstore::repo::section_content const & content) {
+        // First build the section that we want to export.
+        std::vector<std::uint8_t> buffer;
+        auto const section = build_section<Kind> (&buffer, content);
+
+        // Now export it.
+        std::ostringstream os;
+        pstore::exchange::export_name_mapping names;
+        pstore::exchange::export_section<Kind> (os, db, names, *section);
+        return os.str ();
     }
 
 } // end anonymous namespace
 
 TEST_F (GenericSection, RoundTripForAnEmptySection) {
-
     constexpr auto kind = pstore::repo::section_kind::text;
     // The type used to store a text section's properties.
     using section_type = pstore::repo::enum_to_section<kind>::type;
     static_assert (std::is_same<section_type, pstore::repo::generic_section>::value,
                    "Expected text to map to generic_section");
 
-    pstore::repo::section_content text_content;
-    std::vector<std::uint8_t> export_section_buffer;
-    auto const * const section = build_section<kind> (&export_section_buffer, text_content);
-
-
-    std::ostringstream os;
-    pstore::exchange::export_name_mapping exported_names;
-    pstore::exchange::export_section<kind> (os, export_db_, exported_names, *section);
+    pstore::repo::section_content exported_content;
+    std::string const exported_json = export_section<kind> (export_db_, exported_content);
 
 
 
     std::vector<std::unique_ptr<pstore::repo::section_creation_dispatcher>> dispatchers;
-    auto oit = std::back_inserter (dispatchers);
+    auto inserter = std::back_inserter (dispatchers);
 
     pstore::exchange::import_name_mapping imported_names;
     pstore::repo::section_content imported_content;
 
     // Find the rule that is used to import sections represented by an instance of section_type.
-    using section_importer = pstore::exchange::section_to_importer_t<section_type, decltype (oit)>;
-    // A rule which will match an object wrapping the section_importer keys.
-    using section_importer_object_root =
-        pstore::exchange::object_rule<section_importer, decltype (kind),
-                                      decltype (std::ref (import_db_)), decltype (&imported_names),
-                                      decltype (&imported_content), decltype (&oit)>;
-
-    auto parser =
-        pstore::json::make_parser (pstore::exchange::callbacks::make<section_importer_object_root> (
-            pstore::repo::section_kind::text, import_db_, &imported_names, &imported_content,
-            &oit));
-    parser.input (os.str ()).eof ();
+    using section_importer =
+        pstore::exchange::section_to_importer_t<section_type, decltype (inserter)>;
+    auto parser = make_json_object_parser<section_importer> (kind, import_db_, &imported_names,
+                                                             &imported_content, &inserter);
+    parser.input (exported_json).eof ();
     EXPECT_FALSE (parser.has_error ());
     EXPECT_EQ (parser.last_error (), std::error_code{});
+
+    ASSERT_EQ (dispatchers.size (), 1U)
+        << "Expected a single creation dispatcher to be added to the dispatchers container";
+    EXPECT_EQ (dispatchers.front ()->kind (), kind)
+        << "The creation dispatcher should be able to create a text section";
+
+    EXPECT_EQ (exported_content.kind, imported_content.kind);
+    EXPECT_EQ (exported_content.align, imported_content.align);
+    EXPECT_TRUE (imported_content.data.empty ());
+    EXPECT_TRUE (imported_content.ifixups.empty ());
+    EXPECT_TRUE (exported_content.xfixups.empty ());
 }
