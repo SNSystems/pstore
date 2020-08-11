@@ -60,6 +60,33 @@ namespace pstore {
         }
 
 
+        //*             _   _                       _           _    *
+        //*  ___ ___ __| |_(_)___ _ _    __ ___ _ _| |_ ___ _ _| |_  *
+        //* (_-</ -_) _|  _| / _ \ ' \  / _/ _ \ ' \  _/ -_) ' \  _| *
+        //* /__/\___\__|\__|_\___/_||_| \__\___/_||_\__\___|_||_\__| *
+        //*                                                          *
+        bool operator== (section_content const & lhs, section_content const & rhs) {
+            return lhs.kind == rhs.kind && lhs.align == rhs.align && lhs.data == rhs.data &&
+                   lhs.ifixups == rhs.ifixups && lhs.xfixups == rhs.xfixups;
+        }
+
+        bool operator!= (section_content const & lhs, section_content const & rhs) {
+            return !operator== (lhs, rhs);
+        }
+
+        std::ostream & operator<< (std::ostream & os, section_content const & c) {
+            os << "{ kind:" << c.kind << ", align:" << c.align << ", data:[";
+            std::copy (std::begin (c.data), std::end (c.data),
+                       std::ostream_iterator<unsigned> (os, ", "));
+            os << "], ifixups:[";
+            std::copy (std::begin (c.ifixups), std::end (c.ifixups),
+                       std::ostream_iterator<internal_fixup> (os, ", "));
+            os << "], xfixups:[";
+            std::copy (std::begin (c.xfixups), std::end (c.xfixups),
+                       std::ostream_iterator<external_fixup> (os, ", "));
+            return os;
+        }
+
         //*                        _                 _   _           *
         //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
         //* / _` / -_) ' \/ -_) '_| / _| (_-</ -_) _|  _| / _ \ ' \  *

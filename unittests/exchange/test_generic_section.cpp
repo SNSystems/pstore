@@ -75,31 +75,33 @@ namespace {
         pstore::database import_db_;
     };
 
-    // placement_delete is paired with use of placement new and unique_ptr<> to enable unique_ptr<>
-    // to be used on memory that is now owned. unique_ptr<> will cause the object's destructor to be
-    // called when it goes out of scope, but the release of memory is a no-op.
+    /// placement_delete is paired with use of placement new and unique_ptr<> to enable unique_ptr<>
+    /// to be used on memory that is not owned. unique_ptr<> will cause the object's destructor to
+    /// be called when it goes out of scope, but the release of memory is a no-op.
     template <typename T>
     struct placement_delete {
         constexpr void operator() (T *) const noexcept {}
     };
 
-    template <pstore::repo::section_kind Kind>
+    /// \tparam Kind The type of section to be built.
+    /// \tparam SectionType  The type used to store the properties of Kind section.
+    /// \tparam CreationDispatcher  The type of creation dispatcher used to instantiate sections of
+    ///     type SectionType.
+    template <pstore::repo::section_kind Kind,
+              typename SectionType = typename pstore::repo::enum_to_section<Kind>::type,
+              typename CreationDispatcher =
+                  typename pstore::repo::section_to_creation_dispatcher<SectionType>::type>
     decltype (auto) build_section (pstore::gsl::not_null<std::vector<std::uint8_t> *> const buffer,
                                    pstore::repo::section_content const & content) {
-        // The type used to store the properties of section_kind Kind section.
-        using section_type = typename pstore::repo::enum_to_section<Kind>::type;
-
-        auto dispatcher = std::make_unique<
-            typename pstore::repo::section_to_creation_dispatcher<section_type>::type> (Kind,
-                                                                                        &content);
-        buffer->resize (dispatcher->size_bytes ());
-        auto data = buffer->data ();
-        dispatcher->write (data);
-        // Use unique_ptr<> to ensure that the section_type object's destructor is called but since
-        // the memory is not owned by this object, the delete operation will do nothing thanks to
-        // placement_delete<>.
-        return std::unique_ptr<section_type const, placement_delete<section_type const>>{
-            reinterpret_cast<section_type const *> (data), placement_delete<section_type const>{}};
+        CreationDispatcher dispatcher{Kind, &content};
+        buffer->resize (dispatcher.size_bytes ());
+        auto * const data = buffer->data ();
+        dispatcher.write (data);
+        // Use unique_ptr<> to ensure that the section_type object's destructor is called. Since
+        // the memory is not owned by this object (it belongs to 'buffer'), the delete operation
+        // will do nothing thanks to placement_delete<>.
+        return std::unique_ptr<SectionType const, placement_delete<SectionType const>>{
+            reinterpret_cast<SectionType const *> (data), placement_delete<SectionType const>{}};
     }
 
     template <typename ImportRule, typename... Args>
@@ -157,9 +159,5 @@ TEST_F (GenericSection, RoundTripForAnEmptySection) {
     EXPECT_EQ (dispatchers.front ()->kind (), kind)
         << "The creation dispatcher should be able to create a text section";
 
-    EXPECT_EQ (exported_content.kind, imported_content.kind);
-    EXPECT_EQ (exported_content.align, imported_content.align);
-    EXPECT_TRUE (imported_content.data.empty ());
-    EXPECT_TRUE (imported_content.ifixups.empty ());
-    EXPECT_TRUE (exported_content.xfixups.empty ());
+    EXPECT_EQ (exported_content, imported_content);
 }

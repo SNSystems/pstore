@@ -56,7 +56,7 @@
 
 #include <gmock/gmock.h>
 
-#include "empty_store.hpp"
+#include "add_export_strings.hpp"
 
 namespace {
 
@@ -141,8 +141,7 @@ namespace {
             auto parser = pstore::json::make_parser (
                 pstore::exchange::callbacks::make<pstore::exchange::ifixups_object> (&names,
                                                                                      fixups));
-            parser.input (src);
-            parser.eof ();
+            parser.input (src).eof ();
             return parser;
         }
 
@@ -163,12 +162,12 @@ namespace {
 TEST_P (InternalFixupSectionNames, SectionName) {
     auto const & ns = GetParam ();
     std::ostringstream os;
-    os << R"({ "section" : ")" << std::get<pstore::gsl::czstring> (ns) << R"(", )";
-    os << R"("type":17, "offset":19, "addend":23 })";
+    os << R"({ "section" : ")" << std::get<pstore::gsl::czstring> (ns)
+       << R"(", "type":17, "offset":19, "addend":23 })";
 
     internal_fixup_collection fixups;
     auto const & parser = this->parse (os.str (), &fixups);
-    ASSERT_FALSE (parser.has_error ()) << "Expected the parse to succeed";
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
 
     ASSERT_EQ (fixups.size (), 1U);
     EXPECT_EQ (fixups[0].section, std::get<pstore::repo::section_kind> (ns));
@@ -180,7 +179,7 @@ TEST_P (InternalFixupSectionNames, SectionName) {
 #define X(x) name_section_pair{#x, pstore::repo::section_kind::x},
 #ifdef PSTORE_IS_INSIDE_LLVM
 INSTANTIATE_TEST_CASE_P (InternalFixupSectionNames, InternalFixupSectionNames,
-                         testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
+                         testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}), );
 #else
 INSTANTIATE_TEST_SUITE_P (InternalFixupSectionNames, InternalFixupSectionNames,
                           testing::ValuesIn ({PSTORE_MCREPO_SECTION_KINDS}));
@@ -333,7 +332,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     parser.eof ();
 
     // Check the result.
-    EXPECT_FALSE (parser.has_error ()) << "Expected the JSON parse to succeed";
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
     EXPECT_THAT (imported_xfixups, testing::ContainerEq (xfixups))
         << "The imported and exported xfixups should match";
 }
@@ -352,30 +351,6 @@ namespace {
         return std::string{load_string (db, addr, &owner)};
     }
 
-
-    template <typename InputIterator, typename OutputIterator>
-    void add_export_strings (pstore::database & db, InputIterator first, InputIterator last,
-                             OutputIterator out) {
-        mock_mutex mutex;
-        auto transaction = begin (db, std::unique_lock<mock_mutex>{mutex});
-        auto const name_index = pstore::index::get_index<pstore::trailer::indices::name> (db);
-
-        std::vector<pstore::raw_sstring_view> views;
-        std::transform (first, last, std::back_inserter (views),
-                        [] (pstore::gsl::czstring str) { return pstore::make_sstring_view (str); });
-
-        pstore::indirect_string_adder adder;
-        std::transform (
-            std::begin (views), std::end (views), out, [&] (pstore::raw_sstring_view const & view) {
-                std::pair<pstore::index::name_index::iterator, bool> const res1 =
-                    adder.add (transaction, name_index, &view);
-                return std::make_pair (view.to_string (),
-                                       string_address::make (res1.first.get_address ()));
-            });
-
-        adder.flush (transaction);
-        transaction.commit ();
-    }
 
     void compare_external_fixups (pstore::database const & export_db,
                                   xfixup_collection & exported_xfixups,

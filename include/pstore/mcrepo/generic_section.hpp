@@ -438,6 +438,9 @@ namespace pstore {
             }
         };
 
+        bool operator== (section_content const & lhs, section_content const & rhs);
+        bool operator!= (section_content const & lhs, section_content const & rhs);
+        std::ostream & operator<< (std::ostream & os, section_content const & c);
 
         template <>
         inline unsigned section_alignment<pstore::repo::generic_section> (

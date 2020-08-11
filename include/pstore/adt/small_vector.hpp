@@ -421,5 +421,16 @@ namespace pstore {
         }
     }
 
+    template <typename ElementType, std::size_t LhsBodyElements, std::size_t RhsBodyElements>
+    bool operator== (small_vector<ElementType, LhsBodyElements> const & lhs,
+                     small_vector<ElementType, RhsBodyElements> const & rhs) {
+        return std::equal (std::begin (lhs), std::end (lhs), std::begin (rhs), std::end (rhs));
+    }
+    template <typename ElementType, std::size_t LhsBodyElements, std::size_t RhsBodyElements>
+    bool operator!= (small_vector<ElementType, LhsBodyElements> const & lhs,
+                     small_vector<ElementType, RhsBodyElements> const & rhs) {
+        return !operator== (lhs, rhs);
+    }
+
 } // end namespace pstore
 #endif // PSTORE_ADT_SMALL_VECTOR_HPP

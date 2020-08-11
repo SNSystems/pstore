@@ -43,6 +43,7 @@
 #===----------------------------------------------------------------------===//
 include (add_pstore)
 add_pstore_unit_test (pstore-exchange-unit-tests
+    add_export_strings.hpp
     test_export_emit.cpp
     test_generic_section.cpp
     test_section_fixups.cpp

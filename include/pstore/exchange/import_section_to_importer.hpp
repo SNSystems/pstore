@@ -68,10 +68,10 @@ namespace pstore {
                 using names_pointer = not_null<import_name_mapping const *>;
                 using content_pointer = not_null<repo::section_content *>;
 
-                import_bss_section (parse_stack_pointer const stack, repo::section_kind kind,
-                                    database const &, names_pointer const names,
-                                    content_pointer const content,
-                                    not_null<OutputIterator *> const out) noexcept
+                import_bss_section (parse_stack_pointer const stack, repo::section_kind /*kind*/,
+                                    database const &, names_pointer const /*names*/,
+                                    content_pointer const /*content*/,
+                                    not_null<OutputIterator *> const /*out*/) noexcept
                         : rule (stack) {}
 
                 gsl::czstring name () const noexcept override { return "BSS section"; }
@@ -84,10 +84,11 @@ namespace pstore {
                 using names_pointer = not_null<import_name_mapping const *>;
                 using content_pointer = not_null<repo::section_content *>;
 
-                import_dependents_section (parse_stack_pointer const stack, repo::section_kind kind,
-                                           database const &, names_pointer const names,
-                                           content_pointer const content,
-                                           not_null<OutputIterator *> const out) noexcept
+                import_dependents_section (parse_stack_pointer const stack,
+                                           repo::section_kind /*kind*/, database const &,
+                                           names_pointer const /*names*/,
+                                           content_pointer const /*content*/,
+                                           not_null<OutputIterator *> const /*out*/) noexcept
                         : rule (stack) {}
 
                 gsl::czstring name () const noexcept override { return "dependents section"; }

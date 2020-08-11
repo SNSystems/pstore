@@ -72,7 +72,6 @@ namespace pstore {
                 using type = ostream_inserter;
             };
 
-        } // end namespace details
 
         template <repo::section_kind Kind,
                   typename Content = typename repo::enum_to_section<Kind>::type>
@@ -176,12 +175,14 @@ namespace pstore {
             }
         };
 
+        } // end namespace details
+
         template <repo::section_kind Kind, typename OStream,
                   typename Content = typename repo::enum_to_section<Kind>::type>
         OStream & export_section (OStream & os, database const & db,
                                   export_name_mapping const & names, Content const & content) {
             os << "{\n";
-            section_exporter<Kind>{}(os, db, names, content);
+            details::section_exporter<Kind>{}(os, db, names, content);
             os << indent5 << '}';
             return os;
         }

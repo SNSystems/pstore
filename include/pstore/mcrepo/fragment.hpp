@@ -419,16 +419,16 @@ namespace pstore {
         // ~~~~~~~~~~
         template <typename OStream>
         OStream & operator<< (OStream & os, section_kind const kind) {
-            char const * name = "*unknown*";
+            auto * name = "*unknown*";
 #define X(k)                                                                                       \
 case section_kind::k: name = #k; break;
-
             switch (kind) {
                 PSTORE_MCREPO_SECTION_KINDS
             case section_kind::last: assert (false); break;
             }
 #undef X
-            return os << name;
+            os << name;
+            return os;
         }
 
         // populate [private, static]
