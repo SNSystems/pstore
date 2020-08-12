@@ -5,3 +5,6 @@
 .scannerwork
 .vs
 
+# Build directories created by make_build.py
+build_*
+
