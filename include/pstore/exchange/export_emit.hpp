@@ -156,7 +156,10 @@ namespace pstore {
         OStream & show_string (OStream & os, pstore::database const & db,
                                pstore::typed_address<pstore::indirect_string> addr) {
             if (comments) {
-                os << "  // \"" << details::get_string (db, addr) << '"';
+
+                auto const str = serialize::read<pstore::indirect_string> (
+                    serialize::archive::database_reader{db, addr.to_address ()});
+                os << "  // \"" << str << '"';
             }
             return os;
         }

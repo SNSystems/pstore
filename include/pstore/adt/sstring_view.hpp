@@ -408,13 +408,14 @@ namespace pstore {
 
     // operator <<
     // ~~~~~~~~~~~
-    template <typename PointerType>
-    inline std::ostream & operator<< (std::ostream & os, sstring_view<PointerType> const & str) {
+    template <typename OStream, typename PointerType>
+    inline OStream & operator<< (OStream & os, sstring_view<PointerType> const & str) {
         using ustreamsize = std::make_unsigned<std::streamsize>::type;
         constexpr auto max =
             static_cast<ustreamsize> (std::numeric_limits<std::streamsize>::max ());
         auto const size = std::min (str.length (), max);
-        return os.write (str.data (), static_cast<std::streamsize> (size));
+        os.write (str.data (), static_cast<std::streamsize> (size));
+        return os;
     }
 
 

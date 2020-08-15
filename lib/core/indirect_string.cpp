@@ -99,11 +99,6 @@ namespace pstore {
     }
 
 
-    std::ostream & operator<< (std::ostream & os, indirect_string const & ind_str) {
-        shared_sstring_view owner;
-        return os << ind_str.as_string_view (&owner);
-    }
-
     namespace serialize {
 
         template <typename DBArchive>

@@ -57,6 +57,7 @@
 #include <gmock/gmock.h>
 
 #include "add_export_strings.hpp"
+#include "compare_external_fixups.hpp"
 
 namespace {
 
@@ -336,58 +337,6 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     EXPECT_THAT (imported_xfixups, testing::ContainerEq (xfixups))
         << "The imported and exported xfixups should match";
 }
-
-namespace {
-
-    pstore::raw_sstring_view load_string (pstore::database const & db, string_address addr,
-                                          not_null<pstore::shared_sstring_view *> owner) {
-        using namespace pstore::serialize;
-        return read<pstore::indirect_string> (archive::database_reader{db, addr.to_address ()})
-            .as_string_view (owner);
-    }
-
-    std::string load_std_string (pstore::database const & db, string_address addr) {
-        pstore::shared_sstring_view owner;
-        return std::string{load_string (db, addr, &owner)};
-    }
-
-
-    void compare_external_fixups (pstore::database const & export_db,
-                                  xfixup_collection & exported_xfixups,
-                                  pstore::database const & import_db,
-                                  xfixup_collection & imported_xfixups) {
-        ASSERT_EQ (imported_xfixups.size (), exported_xfixups.size ())
-            << "Expected the number of xfixups imported to match the number we started with";
-
-        // The name fields are tricky here. The imported and exported fixups are from different
-        // databases so we can't simply compare string addresses to find out if they point to the
-        // same string. Instead we must load each of the strings and compare them directly.
-        // However, we still want to use operator== for all of the other fields so that we don't
-        // end up having to duplicate the rest of the comparison method here. Setting both name
-        // fields to 0 after comparison allows us to do that.
-        {
-            auto export_it = std::begin (exported_xfixups);
-            auto import_it = std::begin (imported_xfixups);
-            auto import_end = std::end (imported_xfixups);
-            auto count = std::size_t{0};
-            for (; import_it != import_end; ++import_it, ++export_it, ++count) {
-                EXPECT_EQ (load_std_string (import_db, import_it->name),
-                           load_std_string (export_db, export_it->name))
-                    << "Names of fixup #" << count;
-
-                // Set the import and export name values to the same address (it doesn't matter what
-                // that address is). This will mean that differences won't cause failures as we
-                // compare the two containers.
-                export_it->name = import_it->name = string_address ();
-            }
-        }
-
-        EXPECT_THAT (imported_xfixups, testing::ContainerEq (exported_xfixups))
-            << "The imported and exported xfixups should match";
-    }
-
-
-} // end anonymous namespace
 
 TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     std::vector<pstore::gsl::czstring> strings{"foo", "bar"};

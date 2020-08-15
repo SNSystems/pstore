@@ -72,7 +72,7 @@
 ///                         std::inserter (indir_strings, std::end (indir_strings)));
 ///
 /// \param db  The database in which the strings will be written.
-/// \param first  The first of the string to be stored.
+/// \param first  The first of the range of strings to be stored.
 /// \param last  The end of the range of strings to be stored.
 /// \param out  An OutputIterator which will store a pair<czstring, string_address>
 template <typename InputIterator, typename OutputIterator>

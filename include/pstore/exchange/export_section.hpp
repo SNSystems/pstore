@@ -97,7 +97,7 @@ namespace pstore {
                     export_internal_fixups (os, std::begin (ifixups), std::end (ifixups)) << ",\n";
                 }
                 {
-                    os << indent6 << R"("xfixups" :)";
+                    os << indent6 << R"("xfixups": )";
                     repo::container<repo::external_fixup> const xfixups = content.xfixups ();
                     export_external_fixups (os, db, names, std::begin (xfixups), std::end (xfixups))
                         << '\n';

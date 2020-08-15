@@ -48,6 +48,7 @@
 #include <string>
 
 #include "pstore/support/gsl.hpp"
+#include "pstore/core/indirect_string.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -67,7 +68,7 @@ namespace pstore {
             crude_ostream & write (std::string const & str);
 
             template <typename T, typename = typename std::enable_if<true>::type>
-            crude_ostream & write (T const * s, std::size_t length) {
+            crude_ostream & write (T const * s, std::streamsize const length) {
                 std::fwrite (s, sizeof (T), length, os_);
                 return *this;
             }
@@ -78,10 +79,26 @@ namespace pstore {
             FILE * os_;
         };
 
-        template <typename T>
-        crude_ostream & operator<< (crude_ostream & os, T const & t) {
-            return os.write (t);
+        inline crude_ostream & operator<< (crude_ostream & os, char c) { return os.write (c); }
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint16_t v) {
+            return os.write (v);
         }
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint32_t v) {
+            return os.write (v);
+        }
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint64_t v) {
+            return os.write (v);
+        }
+        inline crude_ostream & operator<< (crude_ostream & os, gsl::czstring str) {
+            return os.write (str);
+        }
+        inline crude_ostream & operator<< (crude_ostream & os, std::string const & str) {
+            return os.write (str);
+        }
+        inline crude_ostream & operator<< (crude_ostream & os, indirect_string const & ind_str) {
+            return operator<< (os, ind_str);
+        }
+
 
         class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
         public:
