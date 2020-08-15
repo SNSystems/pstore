@@ -53,6 +53,7 @@
 #include <memory>
 #include <stack>
 #include <system_error>
+#include <tuple>
 #include <type_traits>
 
 #include "pstore/json/json_error.hpp"
