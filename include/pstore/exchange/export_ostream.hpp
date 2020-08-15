@@ -96,7 +96,8 @@ namespace pstore {
             return os.write (str);
         }
         inline crude_ostream & operator<< (crude_ostream & os, indirect_string const & ind_str) {
-            return operator<< (os, ind_str);
+            shared_sstring_view owner;
+            return os << ind_str.as_string_view (&owner);
         }
 
 
