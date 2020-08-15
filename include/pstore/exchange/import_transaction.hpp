@@ -64,14 +64,14 @@ namespace pstore {
     namespace exchange {
 
         template <typename TransactionLock>
-        class transaction_contents final : public rule {
+        class transaction_contents final : public import_rule {
         public:
             using db_pointer = not_null<pstore::database *>;
             using names_pointer = not_null<import_name_mapping *>;
 
             transaction_contents (parse_stack_pointer const stack, db_pointer const db,
                                   names_pointer names)
-                    : rule (stack)
+                    : import_rule (stack)
                     , transaction_{begin (*db)}
                     , names_{names} {}
             transaction_contents (transaction_contents const &) = delete;
@@ -132,14 +132,14 @@ namespace pstore {
 
 
         template <typename TransactionLock>
-        class transaction_object final : public rule {
+        class transaction_object final : public import_rule {
         public:
             using db_pointer = not_null<pstore::database *>;
             using names_pointer = not_null<import_name_mapping *>;
 
             transaction_object (parse_stack_pointer const s, db_pointer const db,
                                 names_pointer const names)
-                    : rule (s)
+                    : import_rule (s)
                     , db_{db}
                     , names_{names} {}
             transaction_object (transaction_object const &) = delete;
@@ -165,7 +165,7 @@ namespace pstore {
         //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| \__,_|_| |_| \__,_|\_, | *
         //*                                                                   |__/  *
         template <typename TransactionLock>
-        class transaction_array final : public rule {
+        class transaction_array final : public import_rule {
         public:
             using db_pointer = not_null<pstore::database *>;
             using names_pointer = not_null<import_name_mapping *>;
@@ -192,7 +192,7 @@ namespace pstore {
         transaction_array<TransactionLock>::transaction_array (parse_stack_pointer const stack,
                                                                db_pointer const db,
                                                                names_pointer const names)
-                : rule (stack)
+                : import_rule (stack)
                 , db_{db}
                 , names_{names} {}
 

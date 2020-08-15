@@ -62,10 +62,10 @@ namespace {
     //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
     //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
     //*                            |__/             *
-    class root_object final : public rule {
+    class root_object final : public import_rule {
     public:
         root_object (parse_stack_pointer const stack, not_null<database *> const db)
-                : rule (stack)
+                : import_rule (stack)
                 , db_{db} {}
         root_object (root_object const &) = delete;
         root_object (root_object &&) noexcept = delete;

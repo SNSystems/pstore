@@ -47,25 +47,31 @@
 namespace pstore {
     namespace exchange {
 
-        rule::~rule () = default;
+        import_rule::~import_rule () = default;
 
-        std::error_code rule::int64_value (std::int64_t) { return import_error::unexpected_number; }
-        std::error_code rule::uint64_value (std::uint64_t) {
+        std::error_code import_rule::int64_value (std::int64_t) {
             return import_error::unexpected_number;
         }
-        std::error_code rule::double_value (double) { return import_error::unexpected_number; }
-        std::error_code rule::boolean_value (bool) { return import_error::unexpected_boolean; }
-        std::error_code rule::null_value () { return import_error::unexpected_null; }
-        std::error_code rule::begin_array () { return import_error::unexpected_array; }
-        std::error_code rule::string_value (std::string const &) {
+        std::error_code import_rule::uint64_value (std::uint64_t) {
+            return import_error::unexpected_number;
+        }
+        std::error_code import_rule::double_value (double) {
+            return import_error::unexpected_number;
+        }
+        std::error_code import_rule::boolean_value (bool) {
+            return import_error::unexpected_boolean;
+        }
+        std::error_code import_rule::null_value () { return import_error::unexpected_null; }
+        std::error_code import_rule::begin_array () { return import_error::unexpected_array; }
+        std::error_code import_rule::string_value (std::string const &) {
             return import_error::unexpected_string;
         }
-        std::error_code rule::end_array () { return import_error::unexpected_end_array; }
-        std::error_code rule::begin_object () { return import_error::unexpected_object; }
-        std::error_code rule::key (std::string const &) {
+        std::error_code import_rule::end_array () { return import_error::unexpected_end_array; }
+        std::error_code import_rule::begin_object () { return import_error::unexpected_object; }
+        std::error_code import_rule::key (std::string const &) {
             return import_error::unexpected_object_key;
         }
-        std::error_code rule::end_object () { return import_error::unexpected_end_object; }
+        std::error_code import_rule::end_object () { return import_error::unexpected_end_object; }
 
     } // end namespace exchange
 } // end namespace pstore

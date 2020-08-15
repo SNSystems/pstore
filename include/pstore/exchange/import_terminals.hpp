@@ -49,11 +49,11 @@
 namespace pstore {
     namespace exchange {
 
-        class uint64_rule final : public rule {
+        class uint64_rule final : public import_rule {
         public:
             uint64_rule (parse_stack_pointer const stack,
                          not_null<std::uint64_t *> const v) noexcept
-                    : rule (stack)
+                    : import_rule (stack)
                     , v_{v} {}
             std::error_code uint64_value (std::uint64_t v) override;
             gsl::czstring name () const noexcept override;
@@ -62,10 +62,10 @@ namespace pstore {
             not_null<std::uint64_t *> const v_;
         };
 
-        class string_rule final : public rule {
+        class string_rule final : public import_rule {
         public:
             string_rule (parse_stack_pointer const stack, not_null<std::string *> const v) noexcept
-                    : rule (stack)
+                    : import_rule (stack)
                     , v_{v} {}
             std::error_code string_value (std::string const & v) override;
             gsl::czstring name () const noexcept override;

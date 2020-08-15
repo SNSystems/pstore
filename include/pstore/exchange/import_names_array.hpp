@@ -58,7 +58,7 @@ namespace pstore {
     namespace exchange {
 
         template <typename TransactionLock>
-        class names_array_members final : public rule {
+        class names_array_members final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping *>;
@@ -86,7 +86,7 @@ namespace pstore {
         names_array_members<TransactionLock>::names_array_members (
             parse_stack_pointer const stack, transaction_pointer const transaction,
             names_pointer const names)
-                : rule (stack)
+                : import_rule (stack)
                 , transaction_{transaction}
                 , names_{names} {}
 

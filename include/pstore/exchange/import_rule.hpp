@@ -55,26 +55,26 @@ namespace pstore {
         template <typename T>
         using not_null = gsl::not_null<T>;
 
-        //*           _      *
-        //*  _ _ _  _| |___  *
-        //* | '_| || | / -_) *
-        //* |_|  \_,_|_\___| *
-        //*                  *
-        //-MARK: rule
-        class rule {
+        //*  _                     _              _      *
+        //* (_)_ __  _ __  ___ _ _| |_   _ _ _  _| |___  *
+        //* | | '  \| '_ \/ _ \ '_|  _| | '_| || | / -_) *
+        //* |_|_|_|_| .__/\___/_|  \__| |_|  \_,_|_\___| *
+        //*         |_|                                  *
+        //-MARK: import rule
+        class import_rule {
         public:
-            using parse_stack = std::stack<std::unique_ptr<rule>>;
+            using parse_stack = std::stack<std::unique_ptr<import_rule>>;
             using parse_stack_pointer = not_null<parse_stack *>;
 
-            explicit rule (parse_stack_pointer const stack) noexcept
+            explicit import_rule (parse_stack_pointer const stack) noexcept
                     : stack_{stack} {}
-            rule (rule const &) = delete;
-            rule (rule &&) noexcept = delete;
+            import_rule (import_rule const &) = delete;
+            import_rule (import_rule &&) noexcept = delete;
 
-            virtual ~rule ();
+            virtual ~import_rule ();
 
-            rule & operator= (rule const &) = delete;
-            rule & operator= (rule &&) noexcept = delete;
+            import_rule & operator= (import_rule const &) = delete;
+            import_rule & operator= (import_rule &&) noexcept = delete;
 
             virtual gsl::czstring name () const noexcept = 0;
 
@@ -136,7 +136,7 @@ namespace pstore {
 
             template <typename Root, typename... Args>
             static callbacks make (Args &&... args) {
-                auto stack = std::make_shared<rule::parse_stack> ();
+                auto stack = std::make_shared<import_rule::parse_stack> ();
                 return {stack, std::make_unique<Root> (stack.get (), std::forward<Args> (args)...)};
             }
 
@@ -155,17 +155,17 @@ namespace pstore {
             std::error_code end_object () { return top ()->end_object (); }
 
         private:
-            callbacks (std::shared_ptr<rule::parse_stack> const & stack,
-                       std::unique_ptr<rule> && root)
+            callbacks (std::shared_ptr<import_rule::parse_stack> const & stack,
+                       std::unique_ptr<import_rule> && root)
                     : stack_{stack} {
                 stack_->push (std::move (root));
             }
 
-            std::unique_ptr<rule> & top () {
+            std::unique_ptr<import_rule> & top () {
                 assert (!stack_->empty ());
                 return stack_->top ();
             }
-            std::shared_ptr<rule::parse_stack> stack_;
+            std::shared_ptr<import_rule::parse_stack> stack_;
         };
 
     } // end namespace exchange

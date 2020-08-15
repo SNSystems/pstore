@@ -63,11 +63,11 @@ namespace pstore {
             //* /__/\___\__|\__|_\___/_||_| |_||_\__,_|_|_|_\___| *
             //*                                                   *
             //-MARK: section name
-            class section_name final : public pstore::exchange::rule {
+            class section_name final : public import_rule {
             public:
                 section_name (parse_stack_pointer const stack,
                               not_null<pstore::repo::section_kind *> const section)
-                        : rule (stack)
+                        : import_rule (stack)
                         , section_{section} {}
                 section_name (section_name const &) = delete;
                 section_name (section_name &&) noexcept = delete;
@@ -91,7 +91,7 @@ namespace pstore {
         //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                |_|    *
         //-MARK:import internal fixup
-        class import_internal_fixup final : public rule {
+        class import_internal_fixup final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
@@ -126,7 +126,7 @@ namespace pstore {
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
         //-MARK:import external fixup
-        class import_external_fixup final : public rule {
+        class import_external_fixup final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
@@ -162,13 +162,13 @@ namespace pstore {
         //*                |_|               |__/             *
         //-MARK: fixups object
         template <typename Next, typename Fixup>
-        class fixups_object final : public rule {
+        class fixups_object final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
             fixups_object (parse_stack_pointer const stack, names_pointer const names,
                            not_null<std::vector<Fixup> *> const fixups)
-                    : rule (stack)
+                    : import_rule (stack)
                     , names_{names}
                     , fixups_{fixups} {}
             fixups_object (fixups_object const &) = delete;

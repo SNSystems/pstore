@@ -53,10 +53,10 @@ namespace pstore {
 
     namespace exchange {
 
-        class root final : public rule {
+        class root final : public import_rule {
         public:
             root (parse_stack_pointer const stack, not_null<database *> const db)
-                    : rule (stack)
+                    : import_rule (stack)
                     , db_{db} {}
             root (root const &) = delete;
             root (root &&) noexcept = delete;

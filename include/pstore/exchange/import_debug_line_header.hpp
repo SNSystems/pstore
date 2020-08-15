@@ -62,7 +62,7 @@ namespace pstore {
     namespace exchange {
 
         template <typename TransactionLock>
-        class debug_line_index final : public rule {
+        class debug_line_index final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
 
@@ -92,7 +92,7 @@ namespace pstore {
         template <typename TransactionLock>
         debug_line_index<TransactionLock>::debug_line_index (parse_stack_pointer const stack,
                                                              transaction_pointer const transaction)
-                : rule (stack)
+                : import_rule (stack)
                 , index_{index::get_index<trailer::indices::debug_line_header> (transaction->db ())}
                 , transaction_{transaction} {}
 

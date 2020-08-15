@@ -67,7 +67,7 @@ namespace pstore {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
 
-            import_debug_line_section (rule::parse_stack_pointer const stack,
+            import_debug_line_section (import_rule::parse_stack_pointer const stack,
                                        repo::section_kind kind, database & db,
                                        names_pointer const names,
                                        repo::section_content * const content,

@@ -107,10 +107,10 @@ namespace pstore {
         //*         |__/                              *
         //-MARK: object rule
         template <typename NextState, typename... Args>
-        class object_rule final : public rule {
+        class object_rule final : public import_rule {
         public:
             explicit object_rule (parse_stack_pointer const stack, Args &&... args)
-                    : rule (stack)
+                    : import_rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
             object_rule (object_rule const &) = delete;
             object_rule (object_rule &&) noexcept = delete;
@@ -131,7 +131,7 @@ namespace pstore {
         };
 
         template <typename Next, typename... Args>
-        std::error_code push_object_rule (rule * const rule, Args &&... args) {
+        std::error_code push_object_rule (import_rule * const rule, Args &&... args) {
             return rule->push<object_rule<Next, Args...>> (std::forward<Args> (args)...);
         }
 
@@ -143,10 +143,10 @@ namespace pstore {
         //*                    |__/                   *
         //-MARK: array rule
         template <typename NextRule, typename... Args>
-        class array_rule final : public rule {
+        class array_rule final : public import_rule {
         public:
             explicit array_rule (parse_stack_pointer stack, Args &&... args)
-                    : rule (stack)
+                    : import_rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
             array_rule (array_rule const &) = delete;
             array_rule (array_rule &&) noexcept = delete;
@@ -167,7 +167,7 @@ namespace pstore {
         };
 
         template <typename NextRule, typename... Args>
-        std::error_code push_array_rule (rule * const rule, Args &&... args) {
+        std::error_code push_array_rule (import_rule * const rule, Args &&... args) {
             return rule->push<array_rule<NextRule, Args...>> (std::forward<Args> (args)...);
         }
 

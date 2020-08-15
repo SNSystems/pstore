@@ -68,7 +68,7 @@ namespace pstore {
         //* |___/                                                    *
         //-MARK: generic section
         template <typename OutputIterator>
-        class import_generic_section : public rule {
+        class import_generic_section : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
             using content_pointer = not_null<repo::section_content *>;
@@ -77,7 +77,7 @@ namespace pstore {
                                     database const &, names_pointer const names,
                                     content_pointer const content,
                                     not_null<OutputIterator *> const out) noexcept
-                    : rule (stack)
+                    : import_rule (stack)
                     , kind_{kind}
                     , names_{names}
                     , content_{content}

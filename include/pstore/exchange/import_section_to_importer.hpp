@@ -63,7 +63,7 @@ namespace pstore {
 
             // FIXME: This implementation is just a placeholder to allow the code to compile.
             template <typename OutputIterator>
-            class import_bss_section : public rule {
+            class import_bss_section : public import_rule {
             public:
                 using names_pointer = not_null<import_name_mapping const *>;
                 using content_pointer = not_null<repo::section_content *>;
@@ -72,14 +72,14 @@ namespace pstore {
                                     database const &, names_pointer const /*names*/,
                                     content_pointer const /*content*/,
                                     not_null<OutputIterator *> const /*out*/) noexcept
-                        : rule (stack) {}
+                        : import_rule (stack) {}
 
                 gsl::czstring name () const noexcept override { return "BSS section"; }
             };
 
             // FIXME: This implementation is just a placeholder to allow the code to compile.
             template <typename OutputIterator>
-            class import_dependents_section : public rule {
+            class import_dependents_section : public import_rule {
             public:
                 using names_pointer = not_null<import_name_mapping const *>;
                 using content_pointer = not_null<repo::section_content *>;
@@ -89,7 +89,7 @@ namespace pstore {
                                            names_pointer const /*names*/,
                                            content_pointer const /*content*/,
                                            not_null<OutputIterator *> const /*out*/) noexcept
-                        : rule (stack) {}
+                        : import_rule (stack) {}
 
                 gsl::czstring name () const noexcept override { return "dependents section"; }
             };

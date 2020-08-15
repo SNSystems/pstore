@@ -70,7 +70,7 @@ namespace pstore {
         //*              |___/                                                   *
         //-MARK: fragment sections
         template <typename TransactionLock>
-        class fragment_sections final : public rule {
+        class fragment_sections final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -78,7 +78,7 @@ namespace pstore {
             fragment_sections (parse_stack_pointer const stack,
                                transaction_pointer const transaction, names_pointer const names,
                                index::digest const * const digest)
-                    : rule (stack)
+                    : import_rule (stack)
                     , transaction_{transaction}
                     , names_{names}
                     , digest_{digest}
@@ -155,7 +155,7 @@ case section_kind::a:                                                           
         //*              |___/                                          *
         //-MARK: fragment index
         template <typename TransactionLock>
-        class fragment_index final : public rule {
+        class fragment_index final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -186,7 +186,7 @@ case section_kind::a:                                                           
         fragment_index<TransactionLock>::fragment_index (parse_stack_pointer const stack,
                                                          transaction_pointer const transaction,
                                                          names_pointer const names)
-                : rule (stack)
+                : import_rule (stack)
                 , transaction_{transaction}
                 , names_{names} {
             sections_.reserve (

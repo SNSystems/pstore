@@ -74,7 +74,7 @@ namespace pstore {
         //*                                        *
         //-MARK: definition
         template <typename TransactionLock>
-        class definition final : public rule {
+        class definition final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -84,7 +84,7 @@ namespace pstore {
             definition (parse_stack_pointer const stack, not_null<container *> const definitions,
                         names_pointer const names, transaction_pointer const transaction,
                         fragment_index_pointer const & fragments)
-                    : rule (stack)
+                    : import_rule (stack)
                     , definitions_{definitions}
                     , names_{names}
                     , transaction_{transaction}
@@ -204,7 +204,7 @@ namespace pstore {
         //*                                                |__/             *
         //-MARK: definition object
         template <typename TransactionLock>
-        class definition_object final : public rule {
+        class definition_object final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -215,7 +215,7 @@ namespace pstore {
                                definition_container_pointer const definitions,
                                names_pointer const names, transaction_pointer const transaction,
                                fragment_index_pointer const & fragments)
-                    : rule (stack)
+                    : import_rule (stack)
                     , definitions_{definitions}
                     , names_{names}
                     , transaction_{transaction}
@@ -248,7 +248,7 @@ namespace pstore {
         //*              |_|                            *
         //-MARK: compilation
         template <typename TransactionLock>
-        class compilation final : public rule {
+        class compilation final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -256,7 +256,7 @@ namespace pstore {
             compilation (parse_stack_pointer const stack, transaction_pointer const transaction,
                          names_pointer const names, fragment_index_pointer const & fragments,
                          index::digest const digest)
-                    : rule (stack)
+                    : import_rule (stack)
                     , transaction_{transaction}
                     , names_{names}
                     , fragments_{fragments}
@@ -340,7 +340,7 @@ namespace pstore {
         //*              |_|                                                     *
         //-MARK: compilation index
         template <typename TransactionLock>
-        class compilations_index final : public rule {
+        class compilations_index final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
@@ -369,7 +369,7 @@ namespace pstore {
         compilations_index<TransactionLock>::compilations_index (
             parse_stack_pointer const stack, transaction_pointer const transaction,
             names_pointer const names)
-                : rule (stack)
+                : import_rule (stack)
                 , transaction_{transaction}
                 , names_{names}
                 , fragments_{index::get_index<trailer::indices::fragment> (transaction->db ())} {}
