@@ -194,6 +194,15 @@ namespace pstore {
 
             } // end namespace details
 
+            /// When this modifier is added to a list option, it will consider each of the argument
+            /// strings to be a sequence of one or more comma-separated values. These are broken
+            /// apart before being passed to the argument parser. The modifier has no effect on
+            /// other option types.
+            ///
+            /// For example, a list option named "opt" with comma-separated
+            /// enabled will consider command-lines such as "--opt a,b,c", "--opt a,b --opt c", and
+            /// "--opt a --opt b --opt c" to be equivalent. Without the option "--opt a,b" is has a
+            /// single value "a,b".
             extern details::comma_separated const comma_separated;
 
             //*                                              *
