@@ -104,12 +104,6 @@ namespace pstore {
             emit_string (os, std::begin (view), std::end (view));
         }
 
-        template <typename OStream>
-        void emit_string (OStream & os, std::string const & str) {
-            emit_string (os, std::begin (str), std::end (str));
-        }
-
-
         /// Writes an array of values given by the range \p first to \p last to the output
         /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each object
         ///  (a, b) is written on a new line.

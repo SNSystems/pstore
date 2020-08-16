@@ -48,41 +48,46 @@
 #include "gtest/gtest.h"
 
 TEST (ExportEmitString, SimpleString) {
+    using namespace std::string_literals;
     {
         std::ostringstream os1;
-        pstore::exchange::emit_string (os1, "");
-        auto const actual1 = os1.str ();
-        EXPECT_EQ (actual1, "\"\"");
+        auto const empty = ""s;
+        pstore::exchange::emit_string (os1, std::begin (empty), std::end (empty));
+        EXPECT_EQ (os1.str (), R"("")");
     }
     {
         std::ostringstream os2;
-        pstore::exchange::emit_string (os2, "hello");
-        auto const actual2 = os2.str ();
-        EXPECT_EQ (actual2, "\"hello\"");
+        auto const hello = "hello"s;
+        pstore::exchange::emit_string (os2, std::begin (hello), std::end (hello));
+        EXPECT_EQ (os2.str (), R"("hello")");
     }
 }
 
 TEST (ExportEmitString, EscapeQuotes) {
+    using namespace std::string_literals;
+
     std::ostringstream os;
-    pstore::exchange::emit_string (os, "a \" b");
-    auto const actual = os.str ();
-    EXPECT_EQ (actual, "\"a \\\" b\"");
+    auto const str = R"(a " b)"s;
+    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    EXPECT_EQ (os.str (), R"("a \" b")");
 }
 
 TEST (ExportEmitString, EscapeBackslash) {
+    using namespace std::string_literals;
+
     std::ostringstream os;
-    pstore::exchange::emit_string (os, "\\");
-    auto const actual = os.str ();
-    EXPECT_EQ (actual, "\"\\\\\"");
+    auto const str = R"(\)"s;
+    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    EXPECT_EQ (os.str (), R"("\\")");
 }
 
 TEST (ExportEmitString, Multiple) {
+    using namespace std::string_literals;
+
     std::ostringstream os;
-    pstore::exchange::emit_string (os, "\"abc\\def\"");
-    auto const actual = os.str ();
-    EXPECT_EQ (actual, "\""
-                       "\\\"abc\\\\def\\\""
-                       "\"");
+    auto const str = R"("abc\def")"s;
+    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    EXPECT_EQ (os.str (), R"("\"abc\\def\"")");
 }
 
 TEST (ExportEmitArray, Empty) {
