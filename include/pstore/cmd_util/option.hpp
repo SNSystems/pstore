@@ -48,6 +48,7 @@
 #include <list>
 #include <type_traits>
 
+#include "pstore/cmd_util/csv.hpp"
 #include "pstore/cmd_util/parser.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -131,6 +132,9 @@ namespace pstore {
                 virtual void set_description (std::string const & d);
                 std::string const & description () const;
 
+                void set_comma_separated () noexcept { comma_separated_ = true; }
+                bool allow_comma_separated () const noexcept { return comma_separated_; }
+
                 void set_category (option_category const * const cat) { category_ = cat; }
                 virtual option_category const * category () const noexcept { return category_; }
 
@@ -166,6 +170,7 @@ namespace pstore {
                 std::string description_;
                 num_occurrences_flag occurrences_ = num_occurrences_flag::optional;
                 bool positional_ = false;
+                bool comma_separated_ = false;
                 unsigned num_occurrences_ = 0U;
                 option_category const * category_ = nullptr;
             };
@@ -331,19 +336,47 @@ namespace pstore {
                 }
 
             private:
+                bool comma_separated (std::string const & v);
+                bool simple_value (std::string const & v);
+
                 Parser parser_;
                 std::list<T> values_;
             };
 
+            // value
+            // ~~~~~
             template <typename T, typename Parser>
             bool list<T, Parser>::value (std::string const & v) {
-                bool result = false;
+                if (this->allow_comma_separated ()) {
+                    return this->comma_separated (v);
+                }
+
+                return this->simple_value (v);
+            }
+
+            // comma separated
+            // ~~~~~~~~~~~~~~~
+            template <typename T, typename Parser>
+            bool list<T, Parser>::comma_separated (std::string const & v) {
+                for (auto const & subvalue : csv (v)) {
+                    if (!this->simple_value (subvalue)) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            // simple value
+            // ~~~~~~~~~~~~
+            template <typename T, typename Parser>
+            bool list<T, Parser>::simple_value (std::string const & v) {
                 if (maybe<T> m = parser_ (v)) {
                     values_.push_back (m.value ());
-                    result = true;
+                    return true;
                 }
-                return result;
+                return false;
             }
+
             template <typename T, typename Parser>
             parser_base * list<T, Parser>::get_parser () {
                 return &parser_;

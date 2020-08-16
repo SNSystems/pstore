@@ -179,6 +179,23 @@ namespace pstore {
                 return details::initializer<T>{std::forward<T> (t)};
             }
 
+            namespace details {
+
+                struct comma_separated {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    constexpr comma_separated () noexcept {} // NOLINT
+
+                    template <typename Opt>
+                    void apply (Opt & o) const {
+                        o.set_comma_separated ();
+                    }
+                };
+
+            } // end namespace details
+
+            extern details::comma_separated const comma_separated;
+
             //*                                              *
             //*  ___  __ __ _  _ _ _ _ _ ___ _ _  __ ___ ___ *
             //* / _ \/ _/ _| || | '_| '_/ -_) ' \/ _/ -_|_-< *
