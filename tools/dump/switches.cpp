@@ -91,13 +91,15 @@ namespace {
     cl::alias contents2{"c", cl::desc{"Alias for --contents"}, cl::aliasopt{contents}};
 
     cl::list<pstore::dump::digest_opt> fragment{
-        "fragment", cl::desc{"Dump the contents of a specific fragment"}, cl::cat (what_cat)};
+        "fragment", cl::desc{"Dump the contents of a specific fragment"}, cl::comma_separated,
+        cl::cat (what_cat)};
     cl::alias fragment2{"F", cl::aliasopt{fragment}};
     cl::opt<bool> all_fragments{
         "all-fragments", cl::desc{"Dump the contents of the fragments index"}, cl::cat (what_cat)};
 
     cl::list<pstore::dump::digest_opt> compilation{
-        "compilation", cl::desc{"Dump the contents of a specific compilation"}, cl::cat (what_cat)};
+        "compilation", cl::desc{"Dump the contents of a specific compilation"}, cl::comma_separated,
+        cl::cat (what_cat)};
     cl::alias compilation2{"C", cl::aliasopt{compilation}};
 
     cl::opt<bool> all_compilations{"all-compilations",
@@ -106,7 +108,7 @@ namespace {
 
     cl::list<pstore::dump::digest_opt> debug_line_header{
         "debug-line-header", cl::desc{"Dump the contents of a specific debug line header"},
-        cl::cat (what_cat)};
+        cl::comma_separated, cl::cat (what_cat)};
     cl::opt<bool> all_debug_line_headers{
         "all-debug-line-headers", cl::desc{"Dump the contents of the debug line headers index"},
         cl::cat (what_cat)};
