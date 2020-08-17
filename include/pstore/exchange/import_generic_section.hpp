@@ -140,9 +140,12 @@ namespace pstore {
         import_generic_section<OutputIterator>::content_object () {
             using return_type = error_or<repo::section_content *>;
 
+            // We allow either or both of the internal and external fixup keys to be omitted if
+            // their respective contents are empty.
+            seen_[ifixups] = true;
+            seen_[xfixups] = true;
             if (!seen_.all ()) {
-                // FIXME: restore which check (but smarter)
-                // return return_type{import_error::generic_section_was_incomplete};
+                return return_type{import_error::generic_section_was_incomplete};
             }
             if (!is_power_of_two (align_)) {
                 return return_type{import_error::alignment_must_be_power_of_2};

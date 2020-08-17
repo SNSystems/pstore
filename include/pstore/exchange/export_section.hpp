@@ -72,7 +72,6 @@ namespace pstore {
                 using type = ostream_inserter;
             };
 
-
             template <repo::section_kind Kind,
                       typename Content = typename repo::enum_to_section<Kind>::type>
             struct section_exporter {
@@ -83,28 +82,30 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & db,
                                       export_name_mapping const & names, Content const & content) {
-                    os << indent6 << R"("align": )" << content.align () << ",\n";
+                    os << indent6 << R"("align":)" << content.align ();
                     {
-                        os << indent6 << R"("data": ")";
+                        os << ",\n" << indent6 << R"("data":")";
                         repo::container<std::uint8_t> const payload = content.payload ();
                         using output_iterator =
                             typename details::output_iterator<OStream, char>::type;
                         to_base64 (std::begin (payload), std::end (payload), output_iterator{os});
-                        os << "\",\n";
+                        os << '"';
                     }
                     {
-                        os << indent6 << R"("ifixups": )";
-                        repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
-                        export_internal_fixups (os, std::begin (ifixups), std::end (ifixups))
-                            << ",\n";
+                        repo::container<repo::internal_fixup> const ifx = content.ifixups ();
+                        if (!ifx.empty ()) {
+                            os << ",\n" << indent6 << R"("ifixups":)";
+                            export_internal_fixups (os, std::begin (ifx), std::end (ifx));
+                        }
                     }
                     {
-                        os << indent6 << R"("xfixups": )";
-                        repo::container<repo::external_fixup> const xfixups = content.xfixups ();
-                        export_external_fixups (os, db, names, std::begin (xfixups),
-                                                std::end (xfixups))
-                            << '\n';
+                        repo::container<repo::external_fixup> const xfx = content.xfixups ();
+                        if (!xfx.empty ()) {
+                            os << ",\n" << indent6 << R"("xfixups":)";
+                            export_external_fixups (os, db, names, std::begin (xfx), std::end (xfx));
+                        }
                     }
+                    os << '\n';
                     return os;
                 }
             };
