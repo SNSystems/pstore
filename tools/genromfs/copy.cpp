@@ -49,6 +49,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <tuple>
 
 // pstore includes
 #include "pstore/support/array_elements.hpp"
