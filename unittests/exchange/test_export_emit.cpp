@@ -69,7 +69,8 @@ TEST (ExportEmitString, EscapeQuotes) {
     std::ostringstream os;
     auto const str = R"(a " b)"s;
     pstore::exchange::emit_string (os, std::begin (str), std::end (str));
-    EXPECT_EQ (os.str (), R"("a \" b")");
+    constexpr auto * expected = R"("a \" b")";
+    EXPECT_EQ (os.str (), expected);
 }
 
 TEST (ExportEmitString, EscapeBackslash) {
@@ -87,7 +88,8 @@ TEST (ExportEmitString, Multiple) {
     std::ostringstream os;
     auto const str = R"("abc\def")"s;
     pstore::exchange::emit_string (os, std::begin (str), std::end (str));
-    EXPECT_EQ (os.str (), R"("\"abc\\def\"")");
+    constexpr auto * expected = R"("\"abc\\def\"")";
+    EXPECT_EQ (os.str (), expected);
 }
 
 TEST (ExportEmitArray, Empty) {
