@@ -80,7 +80,6 @@ set (pstore_exchange_sources
     export_names.cpp
     export_ostream.cpp
     import_compilations.cpp
-    import_debug_line_header.cpp
     import_error.cpp
     import_fixups.cpp
     import_fragment.cpp
