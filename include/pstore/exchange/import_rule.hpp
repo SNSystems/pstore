@@ -104,7 +104,7 @@ namespace pstore {
             template <typename T, typename... Args>
             std::error_code replace_top (Args &&... args) {
                 auto p = std::make_unique<T> (stack_, std::forward<Args> (args)...);
-                auto stack = stack_;
+                auto const stack = stack_;
                 // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
 
                 stack->pop (); // Destroys this object.
@@ -140,13 +140,15 @@ namespace pstore {
                 return {stack, std::make_unique<Root> (stack.get (), std::forward<Args> (args)...)};
             }
 
-            std::error_code int64_value (std::int64_t v) { return top ()->int64_value (v); }
-            std::error_code uint64_value (std::uint64_t v) { return top ()->uint64_value (v); }
-            std::error_code double_value (double v) { return top ()->double_value (v); }
+            std::error_code int64_value (std::int64_t const v) { return top ()->int64_value (v); }
+            std::error_code uint64_value (std::uint64_t const v) {
+                return top ()->uint64_value (v);
+            }
+            std::error_code double_value (double const v) { return top ()->double_value (v); }
             std::error_code string_value (std::string const & v) {
                 return top ()->string_value (v);
             }
-            std::error_code boolean_value (bool v) { return top ()->boolean_value (v); }
+            std::error_code boolean_value (bool const v) { return top ()->boolean_value (v); }
             std::error_code null_value () { return top ()->null_value (); }
             std::error_code begin_array () { return top ()->begin_array (); }
             std::error_code end_array () { return top ()->end_array (); }

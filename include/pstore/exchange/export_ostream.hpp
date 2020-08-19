@@ -79,17 +79,19 @@ namespace pstore {
             FILE * os_;
         };
 
-        inline crude_ostream & operator<< (crude_ostream & os, char c) { return os.write (c); }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint16_t v) {
+        inline crude_ostream & operator<< (crude_ostream & os, char const c) {
+            return os.write (c);
+        }
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint16_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint32_t v) {
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint32_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint64_t v) {
+        inline crude_ostream & operator<< (crude_ostream & os, std::uint64_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, gsl::czstring str) {
+        inline crude_ostream & operator<< (crude_ostream & os, gsl::czstring const str) {
             return os.write (str);
         }
         inline crude_ostream & operator<< (crude_ostream & os, std::string const & str) {
@@ -106,7 +108,7 @@ namespace pstore {
             explicit ostream_inserter (crude_ostream & os)
                     : os_{os} {}
 
-            ostream_inserter & operator= (char c) {
+            ostream_inserter & operator= (char const c) {
                 os_ << c;
                 return *this;
             }

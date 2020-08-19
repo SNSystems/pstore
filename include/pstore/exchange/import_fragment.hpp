@@ -92,7 +92,7 @@ namespace pstore {
             names_pointer const names_;
             index::digest const * const digest_;
 
-            repo::section_content * section_contents (repo::section_kind kind) noexcept {
+            repo::section_content * section_contents (repo::section_kind const kind) noexcept {
                 return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (
                     kind)];
             }

@@ -87,8 +87,9 @@ namespace pstore {
         void emit_string (OStream & os, Iterator first, Iterator last) {
             os << '"';
             auto pos = first;
-            while ((pos = std::find_if (first, last,
-                                        [] (char c) { return c == '"' || c == '\\'; })) != last) {
+            while ((pos = std::find_if (first, last, [] (char const c) {
+                        return c == '"' || c == '\\';
+                    })) != last) {
                 details::write_span (os, gsl::make_span (&*first, pos - first));
                 os << '\\' << *pos;
                 first = pos + 1;
@@ -120,7 +121,7 @@ namespace pstore {
         /// \param fn  A function which is called to emit the contents of each object in the
         ///    iterator range denoted by [first, last).
         template <typename OStream, typename InputIt, typename Function>
-        OStream & emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring indent,
+        OStream & emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring const indent,
                               Function fn) {
             auto const * sep = "";
             auto const * tail_sep = "";
@@ -148,9 +149,8 @@ namespace pstore {
         constexpr bool comments = false;
         template <typename OStream>
         OStream & show_string (OStream & os, pstore::database const & db,
-                               pstore::typed_address<pstore::indirect_string> addr) {
+                               pstore::typed_address<pstore::indirect_string> const addr) {
             if (comments) {
-
                 auto const str = serialize::read<pstore::indirect_string> (
                     serialize::archive::database_reader{db, addr.to_address ()});
                 os << "  // \"" << str << '"';

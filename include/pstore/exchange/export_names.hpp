@@ -64,7 +64,7 @@ namespace pstore {
             void add (address addr);
 
             std::uint64_t index (address addr) const;
-            std::uint64_t index (typed_address<indirect_string> addr) const {
+            std::uint64_t index (typed_address<indirect_string> const addr) const {
                 return this->index (addr.to_address ());
             }
 
@@ -85,7 +85,7 @@ namespace pstore {
             assert (generation > 0);
             auto const container = diff::diff (db, *names_index, generation - 1U);
             emit_array (os, std::begin (container), std::end (container), indent3,
-                        [&names_index, &string_table, &db] (OStream & os1, address addr) {
+                        [&names_index, &string_table, &db] (OStream & os1, address const addr) {
                             indirect_string const str = names_index->load_leaf_node (db, addr);
                             shared_sstring_view owner;
                             raw_sstring_view view = str.as_db_string_view (&owner);
