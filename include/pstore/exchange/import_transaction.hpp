@@ -70,7 +70,7 @@ namespace pstore {
             using names_pointer = not_null<import_name_mapping *>;
 
             transaction_contents (parse_stack_pointer const stack, db_pointer const db,
-                                  names_pointer names)
+                                  names_pointer const names)
                     : import_rule (stack)
                     , transaction_{begin (*db)}
                     , names_{names} {}

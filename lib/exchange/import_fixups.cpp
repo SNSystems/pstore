@@ -56,7 +56,7 @@ namespace pstore {
                 static std::unordered_map<std::string, pstore::repo::section_kind> map = {
                     PSTORE_MCREPO_SECTION_KINDS};
 #undef X
-                auto pos = map.find (s);
+                auto const pos = map.find (s);
                 if (pos == map.end ()) {
                     return pstore::exchange::import_error::unknown_section_name;
                 }

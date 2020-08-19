@@ -61,7 +61,8 @@ namespace pstore {
 
         void fragments (export_ostream & os, pstore::database const & db, unsigned const generation,
                         export_name_mapping const & names) {
-            auto fragments = pstore::index::get_index<pstore::trailer::indices::fragment> (db);
+            auto const fragments =
+                pstore::index::get_index<pstore::trailer::indices::fragment> (db);
             if (!fragments->empty ()) {
                 auto const * fragment_sep = "\n";
                 assert (generation > 0U);
@@ -71,9 +72,9 @@ namespace pstore {
                     os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string ()
                        << "\": {\n";
 
-                    auto fragment = db.getro (kvp.second);
+                    auto const fragment = db.getro (kvp.second);
                     auto const * section_sep = "";
-                    for (pstore::repo::section_kind section : *fragment) {
+                    for (pstore::repo::section_kind const section : *fragment) {
                         os << section_sep << indent5 << '"' << section_name (section) << "\": ";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \

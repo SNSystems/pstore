@@ -49,16 +49,16 @@ namespace pstore {
 
         import_rule::~import_rule () = default;
 
-        std::error_code import_rule::int64_value (std::int64_t) {
+        std::error_code import_rule::int64_value (std::int64_t const) {
             return import_error::unexpected_number;
         }
-        std::error_code import_rule::uint64_value (std::uint64_t) {
+        std::error_code import_rule::uint64_value (std::uint64_t const) {
             return import_error::unexpected_number;
         }
-        std::error_code import_rule::double_value (double) {
+        std::error_code import_rule::double_value (double const) {
             return import_error::unexpected_number;
         }
-        std::error_code import_rule::boolean_value (bool) {
+        std::error_code import_rule::boolean_value (bool const) {
             return import_error::unexpected_boolean;
         }
         std::error_code import_rule::null_value () { return import_error::unexpected_null; }

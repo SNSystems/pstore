@@ -48,23 +48,23 @@
 namespace pstore {
     namespace exchange {
 
-        export_ostream & export_ostream::write (char c) {
+        export_ostream & export_ostream::write (char const c) {
             std::fputc (c, os_);
             return *this;
         }
-        export_ostream & export_ostream::write (std::uint16_t v) {
+        export_ostream & export_ostream::write (std::uint16_t const v) {
             std::fprintf (os_, "%" PRIu16, v);
             return *this;
         }
-        export_ostream & export_ostream::write (std::uint32_t v) {
+        export_ostream & export_ostream::write (std::uint32_t const v) {
             std::fprintf (os_, "%" PRIu32, v);
             return *this;
         }
-        export_ostream & export_ostream::write (std::uint64_t v) {
+        export_ostream & export_ostream::write (std::uint64_t const v) {
             std::fprintf (os_, "%" PRIu64, v);
             return *this;
         }
-        export_ostream & export_ostream::write (gsl::czstring str) {
+        export_ostream & export_ostream::write (gsl::czstring const str) {
             std::fputs (str, os_);
             return *this;
         }

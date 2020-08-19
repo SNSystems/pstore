@@ -83,13 +83,13 @@ namespace {
 
 #define X(a)                                                                                       \
     case pstore::repo::linkage::a: return os << #a;
-    export_ostream & operator<< (export_ostream & os, pstore::repo::linkage linkage) {
+    export_ostream & operator<< (export_ostream & os, pstore::repo::linkage const linkage) {
         switch (linkage) { PSTORE_REPO_LINKAGES }
         return os << "unknown";
     }
 #undef X
 
-    export_ostream & operator<< (export_ostream & os, pstore::repo::visibility visibility) {
+    export_ostream & operator<< (export_ostream & os, pstore::repo::visibility const visibility) {
         switch (visibility) {
         case pstore::repo::visibility::default_vis: return os << "default";
         case pstore::repo::visibility::hidden_vis: return os << "hidden";
@@ -100,14 +100,15 @@ namespace {
 
     void compilations (export_ostream & os, pstore::database const & db, unsigned const generation,
                        export_name_mapping const & names) {
-        auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (db);
+        auto const compilations =
+            pstore::index::get_index<pstore::trailer::indices::compilation> (db);
         if (!compilations->empty ()) {
             auto const * sep = "\n";
             assert (generation > 0);
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
-                auto compilation = db.getro (kvp.second);
+                auto const compilation = db.getro (kvp.second);
 
                 os << sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": {";
                 os << '\n' << indent5 << "\"path\": " << names.index (compilation->path ()) << ',';
@@ -136,7 +137,7 @@ namespace {
     }
 
     void debug_line (export_ostream & os, pstore::database const & db, unsigned const generation) {
-        auto debug_line_headers =
+        auto const debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
             auto const * sep = "\n";
@@ -168,29 +169,30 @@ namespace pstore {
 
             auto const f = footers (db);
             assert (std::distance (std::begin (f), std::end (f)) >= 1);
-            emit_array (os, std::next (std::begin (f)), std::end (f), indent1,
-                        [&db, &string_table] (export_ostream & os1,
-                                              pstore::typed_address<pstore::trailer> footer_pos) {
-                            auto const footer = db.getro (footer_pos);
-                            unsigned const generation = footer->a.generation;
-                            db.sync (generation);
-                            os1 << indent2 << "{\n";
-                            if (comments) {
-                                os1 << indent3 << "// generation " << generation << '\n';
-                            }
-                            os1 << indent3 << "\"names\": ";
-                            export_names (os1, db, generation, &string_table);
-                            os1 << ",\n" << indent3 << "\"debugline\": {";
-                            debug_line (os1, db, generation);
-                            os1 << '\n' << indent3 << "},\n";
-                            os1 << indent3 << "\"fragments\": {";
-                            fragments (os1, db, generation, string_table);
-                            os1 << '\n' << indent3 << "},\n";
-                            os1 << indent3 << "\"compilations\": {";
-                            compilations (os1, db, generation, string_table);
-                            os1 << '\n' << indent3 << "}\n";
-                            os1 << indent2 << '}';
-                        });
+            emit_array (
+                os, std::next (std::begin (f)), std::end (f), indent1,
+                [&db, &string_table] (export_ostream & os1,
+                                      pstore::typed_address<pstore::trailer> const footer_pos) {
+                    auto const footer = db.getro (footer_pos);
+                    unsigned const generation = footer->a.generation;
+                    db.sync (generation);
+                    os1 << indent2 << "{\n";
+                    if (comments) {
+                        os1 << indent3 << "// generation " << generation << '\n';
+                    }
+                    os1 << indent3 << "\"names\": ";
+                    export_names (os1, db, generation, &string_table);
+                    os1 << ",\n" << indent3 << "\"debugline\": {";
+                    debug_line (os1, db, generation);
+                    os1 << '\n' << indent3 << "},\n";
+                    os1 << indent3 << "\"fragments\": {";
+                    fragments (os1, db, generation, string_table);
+                    os1 << '\n' << indent3 << "},\n";
+                    os1 << indent3 << "\"compilations\": {";
+                    compilations (os1, db, generation, string_table);
+                    os1 << '\n' << indent3 << "}\n";
+                    os1 << indent2 << '}';
+                });
             os << "\n}\n";
         }
 
