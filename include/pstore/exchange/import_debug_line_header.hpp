@@ -109,9 +109,7 @@ namespace pstore {
         std::error_code debug_line_index<TransactionLock>::string_value (std::string const & s) {
             // Decode the received string to get the raw binary.
             std::vector<std::uint8_t> data;
-            maybe<std::back_insert_iterator<decltype (data)>> oit =
-                from_base64 (std::begin (s), std::end (s), std::back_inserter (data));
-            if (!oit) {
+            if (!from_base64 (std::begin (s), std::end (s), std::back_inserter (data))) {
                 return import_error::bad_base64_data;
             }
 
