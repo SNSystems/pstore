@@ -108,16 +108,15 @@ namespace pstore {
             // For these other keys, the collection of imported names is constant.
             not_null<import_name_mapping const *> const cnames = names_.get ();
             if (s == "debugline") {
-                return push_object_rule<pstore::exchange::debug_line_index<TransactionLock>> (
-                    this, &transaction_);
+                return push_object_rule<debug_line_index<TransactionLock>> (this, &transaction_);
             }
             if (s == "fragments") {
                 return push_object_rule<fragment_index<TransactionLock>> (this, &transaction_,
                                                                           cnames);
             }
             if (s == "compilations") {
-                return push_object_rule<compilations_index<TransactionLock>> (this, &transaction_,
-                                                                              cnames);
+                return push_object_rule<import_compilations_index<TransactionLock>> (
+                    this, &transaction_, cnames);
             }
             return import_error::unknown_transaction_object_key;
         }

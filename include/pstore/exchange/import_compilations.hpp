@@ -72,28 +72,30 @@ namespace pstore {
         //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
         //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
         //*                                        *
-        //-MARK: definition
+        //-MARK: import definition
         template <typename TransactionLock>
-        class definition final : public import_rule {
+        class import_definition final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
             using container = std::vector<repo::compilation_member>;
 
-            definition (parse_stack_pointer const stack, not_null<container *> const definitions,
-                        names_pointer const names, transaction_pointer const transaction,
-                        fragment_index_pointer const & fragments)
+            import_definition (parse_stack_pointer const stack,
+                               not_null<container *> const definitions, names_pointer const names,
+                               transaction_pointer const transaction,
+                               fragment_index_pointer const & fragments)
                     : import_rule (stack)
                     , definitions_{definitions}
                     , names_{names}
                     , transaction_{transaction}
                     , fragments_{fragments} {}
-            definition (definition const &) = delete;
-            definition (definition &&) noexcept = delete;
+            import_definition (import_definition const &) = delete;
+            import_definition (import_definition &&) noexcept = delete;
+            ~import_definition () noexcept override = default;
 
-            definition & operator= (definition const &) = delete;
-            definition & operator= (definition &&) noexcept = delete;
+            import_definition & operator= (import_definition const &) = delete;
+            import_definition & operator= (import_definition &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "definition"; }
 
@@ -118,7 +120,7 @@ namespace pstore {
         // key
         // ~~~
         template <typename TransactionLock>
-        std::error_code definition<TransactionLock>::key (std::string const & k) {
+        std::error_code import_definition<TransactionLock>::key (std::string const & k) {
             if (k == "digest") {
                 return push<string_rule> (&digest_);
             }
@@ -137,7 +139,7 @@ namespace pstore {
         // end object
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code definition<TransactionLock>::end_object () {
+        std::error_code import_definition<TransactionLock>::end_object () {
             auto const digest = digest_from_string (digest_);
             if (!digest) {
                 return import_error::bad_digest;
@@ -170,7 +172,7 @@ namespace pstore {
         // ~~~~~~~~~~~~~~
         template <typename TransactionLock>
         maybe<repo::linkage>
-        definition<TransactionLock>::decode_linkage (std::string const & linkage) {
+        import_definition<TransactionLock>::decode_linkage (std::string const & linkage) {
 #define X(a)                                                                                       \
     if (linkage == #a) {                                                                           \
         return just (repo::linkage::a);                                                            \
@@ -184,7 +186,7 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~
         template <typename TransactionLock>
         maybe<repo::visibility>
-        definition<TransactionLock>::decode_visibility (std::string const & visibility) {
+        import_definition<TransactionLock>::decode_visibility (std::string const & visibility) {
             if (visibility == "default") {
                 return just (repo::visibility::default_vis);
             }
@@ -202,35 +204,37 @@ namespace pstore {
         //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
         //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
         //*                                                |__/             *
-        //-MARK: definition object
+        //-MARK: import definition object
         template <typename TransactionLock>
-        class definition_object final : public import_rule {
+        class import_definition_object final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
             using definition_container_pointer =
-                not_null<typename definition<TransactionLock>::container *>;
+                not_null<typename import_definition<TransactionLock>::container *>;
 
-            definition_object (parse_stack_pointer const stack,
-                               definition_container_pointer const definitions,
-                               names_pointer const names, transaction_pointer const transaction,
-                               fragment_index_pointer const & fragments)
+            import_definition_object (parse_stack_pointer const stack,
+                                      definition_container_pointer const definitions,
+                                      names_pointer const names,
+                                      transaction_pointer const transaction,
+                                      fragment_index_pointer const & fragments)
                     : import_rule (stack)
                     , definitions_{definitions}
                     , names_{names}
                     , transaction_{transaction}
                     , fragments_{fragments} {}
-            definition_object (definition_object const &) = delete;
-            definition_object (definition_object &&) noexcept = delete;
+            import_definition_object (import_definition_object const &) = delete;
+            import_definition_object (import_definition_object &&) noexcept = delete;
+            ~import_definition_object () noexcept override = default;
 
-            definition_object & operator= (definition_object const &) = delete;
-            definition_object & operator= (definition_object &&) noexcept = delete;
+            import_definition_object & operator= (import_definition_object const &) = delete;
+            import_definition_object & operator= (import_definition_object &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "definition object"; }
 
             std::error_code begin_object () override {
-                return this->push<definition<TransactionLock>> (definitions_, names_, transaction_,
-                                                                fragments_);
+                return this->push<import_definition<TransactionLock>> (definitions_, names_,
+                                                                       transaction_, fragments_);
             }
             std::error_code end_array () override { return pop (); }
 
@@ -246,26 +250,28 @@ namespace pstore {
         //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
         //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
         //*              |_|                            *
-        //-MARK: compilation
+        //-MARK: import compilation
         template <typename TransactionLock>
-        class compilation final : public import_rule {
+        class import_compilation final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
-            compilation (parse_stack_pointer const stack, transaction_pointer const transaction,
-                         names_pointer const names, fragment_index_pointer const & fragments,
-                         index::digest const digest)
+            import_compilation (parse_stack_pointer const stack,
+                                transaction_pointer const transaction, names_pointer const names,
+                                fragment_index_pointer const & fragments,
+                                index::digest const digest)
                     : import_rule (stack)
                     , transaction_{transaction}
                     , names_{names}
                     , fragments_{fragments}
                     , digest_{digest} {}
-            compilation (compilation const &) = delete;
-            compilation (compilation &&) noexcept = delete;
+            import_compilation (import_compilation const &) = delete;
+            import_compilation (import_compilation &&) noexcept = delete;
+            ~import_compilation () noexcept override = default;
 
-            compilation & operator= (compilation const &) = delete;
-            compilation & operator== (compilation &&) noexcept = delete;
+            import_compilation & operator= (import_compilation const &) = delete;
+            import_compilation & operator== (import_compilation &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "compilation"; }
 
@@ -283,13 +289,13 @@ namespace pstore {
 
             std::uint64_t path_ = 0;
             std::uint64_t triple_ = 0;
-            typename definition<TransactionLock>::container definitions_;
+            typename import_definition<TransactionLock>::container definitions_;
         };
 
         // key
         // ~~~
         template <typename TransactionLock>
-        std::error_code compilation<TransactionLock>::key (std::string const & k) {
+        std::error_code import_compilation<TransactionLock>::key (std::string const & k) {
             if (k == "path") {
                 seen_[path_index] = true;
                 return push<uint64_rule> (&path_);
@@ -299,7 +305,7 @@ namespace pstore {
                 return push<uint64_rule> (&triple_);
             }
             if (k == "definitions") {
-                return push_array_rule<definition_object<TransactionLock>> (
+                return push_array_rule<import_definition_object<TransactionLock>> (
                     this, &definitions_, names_, transaction_, fragments_);
             }
             return import_error::unknown_compilation_object_key;
@@ -308,7 +314,7 @@ namespace pstore {
         // end object
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code compilation<TransactionLock>::end_object () {
+        std::error_code import_compilation<TransactionLock>::end_object () {
             if (!seen_.all ()) {
                 return import_error::incomplete_compilation_object;
             }
@@ -340,18 +346,20 @@ namespace pstore {
         //*              |_|                                                     *
         //-MARK: compilation index
         template <typename TransactionLock>
-        class compilations_index final : public import_rule {
+        class import_compilations_index final : public import_rule {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
-            compilations_index (parse_stack_pointer const stack,
-                                transaction_pointer const transaction, names_pointer const names);
-            compilations_index (compilations_index const & ) = delete;
-            compilations_index (compilations_index && ) noexcept = delete;
+            import_compilations_index (parse_stack_pointer const stack,
+                                       transaction_pointer const transaction,
+                                       names_pointer const names);
+            import_compilations_index (import_compilations_index const &) = delete;
+            import_compilations_index (import_compilations_index &&) noexcept = delete;
+            ~import_compilations_index () noexcept override = default;
 
-            compilations_index & operator= (compilations_index const & ) = delete;
-            compilations_index & operator= (compilations_index && ) = delete;
+            import_compilations_index & operator= (import_compilations_index const &) = delete;
+            import_compilations_index & operator= (import_compilations_index &&) = delete;
 
             gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & s) override;
@@ -366,7 +374,7 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        compilations_index<TransactionLock>::compilations_index (
+        import_compilations_index<TransactionLock>::import_compilations_index (
             parse_stack_pointer const stack, transaction_pointer const transaction,
             names_pointer const names)
                 : import_rule (stack)
@@ -377,16 +385,16 @@ namespace pstore {
         // name
         // ~~~~
         template <typename TransactionLock>
-        gsl::czstring compilations_index<TransactionLock>::name () const noexcept {
+        gsl::czstring import_compilations_index<TransactionLock>::name () const noexcept {
             return "compilations index";
         }
 
         // key
         // ~~~
         template <typename TransactionLock>
-        std::error_code compilations_index<TransactionLock>::key (std::string const & s) {
+        std::error_code import_compilations_index<TransactionLock>::key (std::string const & s) {
             if (maybe<index::digest> const digest = digest_from_string (s)) {
-                return push_object_rule<compilation<TransactionLock>> (
+                return push_object_rule<import_compilation<TransactionLock>> (
                     this, transaction_, names_, fragments_, index::digest{*digest});
             }
             return import_error::bad_digest;
@@ -395,7 +403,7 @@ namespace pstore {
         // end object
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code compilations_index<TransactionLock>::end_object () {
+        std::error_code import_compilations_index<TransactionLock>::end_object () {
             return pop ();
         }
 
