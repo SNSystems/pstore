@@ -83,13 +83,13 @@ namespace {
 
 #define X(a)                                                                                       \
     case pstore::repo::linkage::a: return os << #a;
-    crude_ostream & operator<< (crude_ostream & os, pstore::repo::linkage linkage) {
+    export_ostream & operator<< (export_ostream & os, pstore::repo::linkage linkage) {
         switch (linkage) { PSTORE_REPO_LINKAGES }
         return os << "unknown";
     }
 #undef X
 
-    crude_ostream & operator<< (crude_ostream & os, pstore::repo::visibility visibility) {
+    export_ostream & operator<< (export_ostream & os, pstore::repo::visibility visibility) {
         switch (visibility) {
         case pstore::repo::visibility::default_vis: return os << "default";
         case pstore::repo::visibility::hidden_vis: return os << "hidden";
@@ -98,7 +98,7 @@ namespace {
         return os << "unknown";
     }
 
-    void compilations (crude_ostream & os, pstore::database const & db, unsigned const generation,
+    void compilations (export_ostream & os, pstore::database const & db, unsigned const generation,
                        export_name_mapping const & names) {
         auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (db);
         if (!compilations->empty ()) {
@@ -117,7 +117,7 @@ namespace {
                 show_string (os, db, compilation->triple ());
                 os << '\n' << indent5 << "\"definitions\": ";
                 emit_array (os, compilation->begin (), compilation->end (), indent5,
-                            [&db, &names] (crude_ostream & os1,
+                            [&db, &names] (export_ostream & os1,
                                            pstore::repo::compilation_member const & d) {
                                 os1 << indent6 << "{\n";
                                 os1 << indent7 << R"("digest": ")" << d.digest.to_hex_string ()
@@ -135,7 +135,7 @@ namespace {
         }
     }
 
-    void debug_line (crude_ostream & os, pstore::database const & db, unsigned const generation) {
+    void debug_line (export_ostream & os, pstore::database const & db, unsigned const generation) {
         auto debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
@@ -160,7 +160,7 @@ namespace {
 namespace pstore {
     namespace exchange {
 
-        void export_database (database & db, crude_ostream & os) {
+        void export_database (database & db, export_ostream & os) {
             export_name_mapping string_table;
             os << "{\n";
             os << indent1 << "\"version\": 1,\n";
@@ -169,7 +169,7 @@ namespace pstore {
             auto const f = footers (db);
             assert (std::distance (std::begin (f), std::end (f)) >= 1);
             emit_array (os, std::next (std::begin (f)), std::end (f), indent1,
-                        [&db, &string_table] (crude_ostream & os1,
+                        [&db, &string_table] (export_ostream & os1,
                                               pstore::typed_address<pstore::trailer> footer_pos) {
                             auto const footer = db.getro (footer_pos);
                             unsigned const generation = footer->a.generation;

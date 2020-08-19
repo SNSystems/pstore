@@ -45,7 +45,7 @@
 #include "pstore/core/database.hpp"
 
 int main (int argc, char * argv[]) {
-    pstore::exchange::crude_ostream os{stdout};
+    pstore::exchange::export_ostream os{stdout};
     pstore::database db{argv[1], pstore::database::access_mode::read_only};
     export_database (db, os);
 }

@@ -57,8 +57,6 @@
 namespace pstore {
     namespace exchange {
 
-        class crude_ostream;
-
         class export_name_mapping {
         public:
             void add (address addr);

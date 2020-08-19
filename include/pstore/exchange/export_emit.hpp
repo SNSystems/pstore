@@ -57,7 +57,7 @@ namespace pstore {
 
     namespace exchange {
 
-        class crude_ostream;
+        class export_ostream;
 
 #define PSTORE_INDENT "  "
         constexpr auto indent1 = PSTORE_INDENT;

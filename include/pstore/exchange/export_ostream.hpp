@@ -53,22 +53,22 @@
 namespace pstore {
     namespace exchange {
 
-        class crude_ostream {
+        class export_ostream {
         public:
-            explicit crude_ostream (FILE * const os)
+            explicit export_ostream (FILE * const os)
                     : os_ (os) {}
-            crude_ostream (crude_ostream const &) = delete;
-            crude_ostream & operator= (crude_ostream const &) = delete;
+            export_ostream (export_ostream const &) = delete;
+            export_ostream & operator= (export_ostream const &) = delete;
 
-            crude_ostream & write (char c);
-            crude_ostream & write (std::uint16_t v);
-            crude_ostream & write (std::uint32_t v);
-            crude_ostream & write (std::uint64_t v);
-            crude_ostream & write (gsl::czstring str);
-            crude_ostream & write (std::string const & str);
+            export_ostream & write (char c);
+            export_ostream & write (std::uint16_t v);
+            export_ostream & write (std::uint32_t v);
+            export_ostream & write (std::uint64_t v);
+            export_ostream & write (gsl::czstring str);
+            export_ostream & write (std::string const & str);
 
             template <typename T, typename = typename std::enable_if<true>::type>
-            crude_ostream & write (T const * s, std::streamsize const length) {
+            export_ostream & write (T const * s, std::streamsize const length) {
                 std::fwrite (s, sizeof (T), length, os_);
                 return *this;
             }
@@ -79,25 +79,25 @@ namespace pstore {
             FILE * os_;
         };
 
-        inline crude_ostream & operator<< (crude_ostream & os, char const c) {
+        inline export_ostream & operator<< (export_ostream & os, char const c) {
             return os.write (c);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint16_t const v) {
+        inline export_ostream & operator<< (export_ostream & os, std::uint16_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint32_t const v) {
+        inline export_ostream & operator<< (export_ostream & os, std::uint32_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::uint64_t const v) {
+        inline export_ostream & operator<< (export_ostream & os, std::uint64_t const v) {
             return os.write (v);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, gsl::czstring const str) {
+        inline export_ostream & operator<< (export_ostream & os, gsl::czstring const str) {
             return os.write (str);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, std::string const & str) {
+        inline export_ostream & operator<< (export_ostream & os, std::string const & str) {
             return os.write (str);
         }
-        inline crude_ostream & operator<< (crude_ostream & os, indirect_string const & ind_str) {
+        inline export_ostream & operator<< (export_ostream & os, indirect_string const & ind_str) {
             shared_sstring_view owner;
             return os << ind_str.as_string_view (&owner);
         }
@@ -105,7 +105,7 @@ namespace pstore {
 
         class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
         public:
-            explicit ostream_inserter (crude_ostream & os)
+            explicit ostream_inserter (export_ostream & os)
                     : os_{os} {}
 
             ostream_inserter & operator= (char const c) {
@@ -117,7 +117,7 @@ namespace pstore {
             ostream_inserter operator++ (int) noexcept { return *this; }
 
         private:
-            crude_ostream & os_;
+            export_ostream & os_;
         };
 
     } // end namespace exchange
