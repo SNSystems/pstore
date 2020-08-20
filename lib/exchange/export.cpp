@@ -51,6 +51,7 @@
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/diff/diff.hpp"
+#include "pstore/exchange/export_compilation.hpp"
 #include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_fragment.hpp"
 #include "pstore/exchange/export_names.hpp"
@@ -80,61 +81,6 @@ namespace {
 
 
 
-
-#define X(a)                                                                                       \
-    case pstore::repo::linkage::a: return os << #a;
-    export_ostream & operator<< (export_ostream & os, pstore::repo::linkage const linkage) {
-        switch (linkage) { PSTORE_REPO_LINKAGES }
-        return os << "unknown";
-    }
-#undef X
-
-    export_ostream & operator<< (export_ostream & os, pstore::repo::visibility const visibility) {
-        switch (visibility) {
-        case pstore::repo::visibility::default_vis: return os << "default";
-        case pstore::repo::visibility::hidden_vis: return os << "hidden";
-        case pstore::repo::visibility::protected_vis: return os << "protected";
-        }
-        return os << "unknown";
-    }
-
-    void compilations (export_ostream & os, pstore::database const & db, unsigned const generation,
-                       export_name_mapping const & names) {
-        auto const compilations =
-            pstore::index::get_index<pstore::trailer::indices::compilation> (db);
-        if (!compilations->empty ()) {
-            auto const * sep = "\n";
-            assert (generation > 0);
-            for (pstore::address const & addr :
-                 pstore::diff::diff (db, *compilations, generation - 1U)) {
-                auto const & kvp = compilations->load_leaf_node (db, addr);
-                auto const compilation = db.getro (kvp.second);
-
-                os << sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": {";
-                os << '\n' << indent5 << "\"path\": " << names.index (compilation->path ()) << ',';
-                show_string (os, db, compilation->path ());
-                os << '\n'
-                   << indent5 << "\"triple\": " << names.index (compilation->triple ()) << ',';
-                show_string (os, db, compilation->triple ());
-                os << '\n' << indent5 << "\"definitions\": ";
-                emit_array (os, compilation->begin (), compilation->end (), indent5,
-                            [&db, &names] (export_ostream & os1,
-                                           pstore::repo::compilation_member const & d) {
-                                os1 << indent6 << "{\n";
-                                os1 << indent7 << R"("digest": ")" << d.digest.to_hex_string ()
-                                    << "\",\n";
-                                os1 << indent7 << "\"name\": " << names.index (d.name) << ',';
-                                show_string (os1, db, d.name);
-                                os1 << '\n';
-                                os1 << indent7 << R"("linkage": ")" << d.linkage () << "\",\n";
-                                os1 << indent7 << R"("visibility": ")" << d.visibility () << "\"\n";
-                                os1 << indent6 << '}';
-                            });
-                os << '\n' << indent4 << '}';
-                sep = ",\n";
-            }
-        }
-    }
 
     void debug_line (export_ostream & os, pstore::database const & db, unsigned const generation) {
         auto const debug_line_headers =
@@ -189,7 +135,7 @@ namespace pstore {
                     fragments (os1, db, generation, string_table);
                     os1 << '\n' << indent3 << "},\n";
                     os1 << indent3 << "\"compilations\": {";
-                    compilations (os1, db, generation, string_table);
+                    export_compilations (os1, db, generation, string_table);
                     os1 << '\n' << indent3 << "}\n";
                     os1 << indent2 << '}';
                 });

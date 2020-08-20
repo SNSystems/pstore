@@ -49,13 +49,14 @@ set (pstore_exchange_includes
     array_helpers.hpp
     digest_from_string.hpp
     export.hpp
+    export_compilation.hpp
     export_emit.hpp
     export_fixups.hpp
     export_fragment.hpp
     export_ostream.hpp
     export_names.hpp
     export_section.hpp
-    import_compilations.hpp
+    import_compilation.hpp
     import_debug_line_header.hpp
     import_debug_line_section.hpp
     import_error.hpp
@@ -79,7 +80,7 @@ set (pstore_exchange_sources
     export_fragment.cpp
     export_names.cpp
     export_ostream.cpp
-    import_compilations.cpp
+    import_compilation.cpp
     import_error.cpp
     import_fixups.cpp
     import_fragment.cpp
