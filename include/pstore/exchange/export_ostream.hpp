@@ -69,7 +69,9 @@ namespace pstore {
 
             template <typename T, typename = typename std::enable_if<true>::type>
             export_ostream & write (T const * s, std::streamsize const length) {
-                std::fwrite (s, sizeof (T), length, os_);
+                assert (length >= 0 && static_cast<std::make_unsigned_t<std::streamsize>> (
+                                           length) <= std::numeric_limits<std::size_t>::max ());
+                std::fwrite (s, sizeof (T), static_cast<std::size_t> (length), os_);
                 return *this;
             }
 
