@@ -52,13 +52,12 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_rule.hpp"
-#include "pstore/exchange/import_names.hpp"
-
 #include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
+#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 
@@ -73,23 +72,15 @@ namespace pstore {
         //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
         //*                                        *
         //-MARK: import definition
-        template <typename TransactionLock>
         class import_definition final : public import_rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
+            using container = std::vector<repo::compilation_member>;
+            using container_pointer = not_null<container *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
-            using container = std::vector<repo::compilation_member>;
-
-            import_definition (parse_stack_pointer const stack,
-                               not_null<container *> const definitions, names_pointer const names,
-                               transaction_pointer const transaction,
-                               fragment_index_pointer const & fragments)
-                    : import_rule (stack)
-                    , definitions_{definitions}
-                    , names_{names}
-                    , transaction_{transaction}
-                    , fragments_{fragments} {}
+            import_definition (parse_stack_pointer const stack, container_pointer const definitions,
+                               names_pointer const names, database const & db,
+                               fragment_index_pointer const & fragments);
             import_definition (import_definition const &) = delete;
             import_definition (import_definition &&) noexcept = delete;
             ~import_definition () noexcept override = default;
@@ -106,9 +97,9 @@ namespace pstore {
             static maybe<repo::visibility> decode_visibility (std::string const & visibility);
 
         private:
-            not_null<container *> const definitions_;
+            container_pointer const definitions_;
             names_pointer const names_;
-            transaction_pointer const transaction_;
+            database const & db_;
             fragment_index_pointer const fragments_;
 
             std::string digest_;
@@ -117,87 +108,6 @@ namespace pstore {
             std::string visibility_;
         };
 
-        // key
-        // ~~~
-        template <typename TransactionLock>
-        std::error_code import_definition<TransactionLock>::key (std::string const & k) {
-            if (k == "digest") {
-                return push<string_rule> (&digest_);
-            }
-            if (k == "name") {
-                return push<uint64_rule> (&name_);
-            }
-            if (k == "linkage") {
-                return push<string_rule> (&linkage_);
-            }
-            if (k == "visibility") {
-                return push<string_rule> (&visibility_);
-            }
-            return import_error::unknown_definition_object_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code import_definition<TransactionLock>::end_object () {
-            auto const digest = digest_from_string (digest_);
-            if (!digest) {
-                return import_error::bad_digest;
-            }
-            auto const fpos = fragments_->find (transaction_->db (), *digest);
-            if (fpos == fragments_->end (transaction_->db ())) {
-                return import_error::no_such_fragment;
-            }
-
-            auto const linkage = decode_linkage (linkage_);
-            if (!linkage) {
-                return import_error::bad_linkage;
-            }
-            auto const visibility = decode_visibility (visibility_);
-            if (!visibility) {
-                return import_error::bad_visibility;
-            }
-
-            auto const name = names_->lookup (name_);
-            if (!name) {
-                return name.get_error ();
-            }
-
-            definitions_->emplace_back (*digest, fpos->second, *name, *linkage, *visibility);
-
-            return pop ();
-        }
-
-        // decode linkage
-        // ~~~~~~~~~~~~~~
-        template <typename TransactionLock>
-        maybe<repo::linkage>
-        import_definition<TransactionLock>::decode_linkage (std::string const & linkage) {
-#define X(a)                                                                                       \
-    if (linkage == #a) {                                                                           \
-        return just (repo::linkage::a);                                                            \
-    }
-            PSTORE_REPO_LINKAGES
-#undef X
-            return nothing<repo::linkage> ();
-        }
-
-        // decode visibility
-        // ~~~~~~~~~~~~~~~~~
-        template <typename TransactionLock>
-        maybe<repo::visibility>
-        import_definition<TransactionLock>::decode_visibility (std::string const & visibility) {
-            if (visibility == "default") {
-                return just (repo::visibility::default_vis);
-            }
-            if (visibility == "hidden") {
-                return just (repo::visibility::hidden_vis);
-            }
-            if (visibility == "protected") {
-                return just (repo::visibility::protected_vis);
-            }
-            return nothing<repo::visibility> ();
-        }
 
         //*     _      __ _      _ _   _                _     _        _    *
         //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
@@ -205,24 +115,15 @@ namespace pstore {
         //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
         //*                                                |__/             *
         //-MARK: import definition object
-        template <typename TransactionLock>
         class import_definition_object final : public import_rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
-            using definition_container_pointer =
-                not_null<typename import_definition<TransactionLock>::container *>;
+            using definition_container_pointer = not_null<import_definition::container *>;
 
             import_definition_object (parse_stack_pointer const stack,
                                       definition_container_pointer const definitions,
-                                      names_pointer const names,
-                                      transaction_pointer const transaction,
-                                      fragment_index_pointer const & fragments)
-                    : import_rule (stack)
-                    , definitions_{definitions}
-                    , names_{names}
-                    , transaction_{transaction}
-                    , fragments_{fragments} {}
+                                      names_pointer const names, database const & db,
+                                      fragment_index_pointer const & fragments);
             import_definition_object (import_definition_object const &) = delete;
             import_definition_object (import_definition_object &&) noexcept = delete;
             ~import_definition_object () noexcept override = default;
@@ -230,18 +131,15 @@ namespace pstore {
             import_definition_object & operator= (import_definition_object const &) = delete;
             import_definition_object & operator= (import_definition_object &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override { return "definition object"; }
+            gsl::czstring name () const noexcept override;
 
-            std::error_code begin_object () override {
-                return this->push<import_definition<TransactionLock>> (definitions_, names_,
-                                                                       transaction_, fragments_);
-            }
-            std::error_code end_array () override { return pop (); }
+            std::error_code begin_object () override;
+            std::error_code end_array () override;
 
         private:
             definition_container_pointer const definitions_;
             names_pointer const names_;
-            transaction_pointer const transaction_;
+            database const & db_;
             fragment_index_pointer const fragments_;
         };
 
@@ -289,7 +187,7 @@ namespace pstore {
 
             std::uint64_t path_ = 0;
             std::uint64_t triple_ = 0;
-            typename import_definition<TransactionLock>::container definitions_;
+            import_definition::container definitions_;
         };
 
         // key
@@ -305,8 +203,8 @@ namespace pstore {
                 return push<uint64_rule> (&triple_);
             }
             if (k == "definitions") {
-                return push_array_rule<import_definition_object<TransactionLock>> (
-                    this, &definitions_, names_, transaction_, fragments_);
+                return push_array_rule<import_definition_object> (this, &definitions_, names_,
+                                                                  transaction_->db (), fragments_);
             }
             return import_error::unknown_compilation_object_key;
         }
