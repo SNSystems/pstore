@@ -44,6 +44,7 @@
 #include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/export_section.hpp"
 
+#include <iterator>
 #include <sstream>
 
 #include <gtest/gtest.h>
@@ -193,8 +194,9 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     exported_content.align = 32U;
     {
         unsigned value = 0;
-        std::generate_n (std::back_inserter (exported_content.data), 5U,
-                         [&value] () { return value++; });
+        std::generate_n (std::back_inserter (exported_content.data), 5U, [&value] () {
+            return static_cast<decltype (exported_content.data)::value_type> (value++);
+        });
     }
     exported_content.ifixups.emplace_back (
         pstore::repo::section_kind::data, pstore::repo::relocation_type{3},
