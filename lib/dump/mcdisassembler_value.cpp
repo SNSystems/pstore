@@ -71,7 +71,7 @@
 #    include "llvm/MC/MCObjectFileInfo.h"
 #    include "llvm/MC/MCStreamer.h"
 #    include "llvm/MC/MCSubtargetInfo.h"
-#    include "llvm/MC/MCTargetOptionsCommandFlags.inc"
+#    include "llvm/MC/MCTargetOptionsCommandFlags.h"
 #    include "llvm/Support/Format.h"
 #    include "llvm/Support/MemoryBuffer.h"
 #    include "llvm/Support/SourceMgr.h"
@@ -245,7 +245,7 @@ namespace {
                           llvm::Triple const & triple) {
         using return_type = error_or<asm_info_ptr>;
         if (asm_info_ptr asm_info{target.createMCAsmInfo (register_info, triple.getTriple (),
-                                                          InitMCTargetOptionsFromFlags ())}) {
+                                                          llvm::mc::InitMCTargetOptionsFromFlags ())}) {
             return return_type{std::move (asm_info)};
         }
         return return_type{make_error_code (error_code::no_assembly_info_for_target)};
@@ -355,7 +355,7 @@ namespace {
                     (*osp) << "potentially undefined instruction:";
                     LLVM_FALLTHROUGH;
                 case llvm::MCDisassembler::Success:
-                    streamer->EmitInstruction (instruction, *state.subtarget_info);
+                    streamer->emitInstruction (instruction, *state.subtarget_info);
                     break;
                 }
                 address += bytes_consumed;
