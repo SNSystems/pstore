@@ -61,8 +61,6 @@
 
 namespace {
 
-    using transaction_lock = std::unique_lock<mock_mutex>;
-
     using internal_fixup_collection = std::vector<pstore::repo::internal_fixup>;
     using internal_fixup_array_root =
         pstore::exchange::array_rule<pstore::exchange::ifixups_object,
