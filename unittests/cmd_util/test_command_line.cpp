@@ -379,6 +379,39 @@ TEST_F (ClCommandLine, ListPositional) {
     EXPECT_THAT (opt, ::testing::ElementsAre ("foo", "bar"));
 }
 
+TEST_F (ClCommandLine, ListCsvEnabled) {
+    cl::list<std::string> opt ("opt", cl::positional, cl::comma_separated);
+
+    this->add ("progname", "a,b", "c,d");
+
+    string_stream output;
+    string_stream errors;
+    bool const res = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res);
+
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (output.str ().length (), 0U);
+
+    EXPECT_THAT (opt, ::testing::ElementsAre ("a", "b", "c", "d"));
+}
+
+TEST_F (ClCommandLine, ListCsvDisabled) {
+    cl::list<std::string> opt ("opt", cl::positional);
+
+    this->add ("progname", "a,b");
+
+    string_stream output;
+    string_stream errors;
+    bool const res = this->parse_command_line_options (output, errors);
+    EXPECT_TRUE (res);
+
+    EXPECT_EQ (errors.str ().length (), 0U);
+    EXPECT_EQ (output.str ().length (), 0U);
+
+    EXPECT_THAT (opt, ::testing::ElementsAre ("a,b"));
+}
+
+
 TEST_F (ClCommandLine, MissingRequired) {
     cl::opt<std::string> opt ("opt", cl::required);
 

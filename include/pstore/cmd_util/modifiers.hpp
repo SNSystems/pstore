@@ -179,6 +179,32 @@ namespace pstore {
                 return details::initializer<T>{std::forward<T> (t)};
             }
 
+            namespace details {
+
+                struct comma_separated {
+                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                    constexpr comma_separated () noexcept {} // NOLINT
+
+                    template <typename Opt>
+                    void apply (Opt & o) const {
+                        o.set_comma_separated ();
+                    }
+                };
+
+            } // end namespace details
+
+            /// When this modifier is added to a list option, it will consider each of the argument
+            /// strings to be a sequence of one or more comma-separated values. These are broken
+            /// apart before being passed to the argument parser. The modifier has no effect on
+            /// other option types.
+            ///
+            /// For example, a list option named "opt" with comma-separated
+            /// enabled will consider command-lines such as "--opt a,b,c", "--opt a,b --opt c", and
+            /// "--opt a --opt b --opt c" to be equivalent. Without the option "--opt a,b" is has a
+            /// single value "a,b".
+            extern details::comma_separated const comma_separated;
+
             //*                                              *
             //*  ___  __ __ _  _ _ _ _ _ ___ _ _  __ ___ ___ *
             //* / _ \/ _/ _| || | '_| '_/ -_) ' \/ _/ -_|_-< *

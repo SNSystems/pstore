@@ -62,6 +62,8 @@ namespace pstore {
                     : original_ (o) {}
             void aliasopt::apply (alias & o) const { o.set_original (&original_); }
 
+            details::comma_separated const comma_separated;
+
             details::one_or_more const one_or_more;
             details::optional const optional;
             details::positional const positional;
