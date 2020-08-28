@@ -251,6 +251,9 @@ endif ()
 if (PSTORE_ENABLE_BROKER)
     list (APPEND LIT_PARAMS --param broker)
 endif ()
+if (PSTORE_IS_INSIDE_LLVM)
+    list (APPEND LIT_PARAMS --param is_inside_llvm)
+endif ()
 
 # Add a target to the build which will run the system tests.
 add_custom_target (pstore-system-tests
@@ -259,11 +262,19 @@ add_custom_target (pstore-system-tests
         ${LIT_PARAMS}
         --echo-all-commands
         "$<TARGET_FILE_DIR:pstore-write>"
-    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    WORKING_DIRECTORY "$<TARGET_FILE_DIR:pstore-write>"
     COMMENT "Running system tests with LIT"
     VERBATIM
 )
 set_target_properties (pstore-system-tests PROPERTIES FOLDER "pstore tests")
+
+if (PSTORE_IS_INSIDE_LLVM)
+    add_dependencies (pstore-system-tests
+        FileCheck
+        llc
+        opt
+    )
+endif ()
 
 add_dependencies (pstore-system-tests
     pstore-broker-poker
