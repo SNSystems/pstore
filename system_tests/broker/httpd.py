@@ -149,6 +149,7 @@ def kill_broker(process):
 
 
 def http_get(host, port, method="GET", path="/index.html"):
+    print("Connecting to broker at %s:%d" % (host, port), file=sys.stderr)
     conn = httplib.HTTPConnection(host, port)
     conn.connect()
 
