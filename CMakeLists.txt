@@ -262,7 +262,7 @@ add_custom_target (pstore-system-tests
         ${LIT_PARAMS}
         --echo-all-commands
         "$<TARGET_FILE_DIR:pstore-write>"
-    WORKING_DIRECTORY "$<TARGET_FILE_DIR:pstore-write>"
+    WORKING_DIRECTORY $<TARGET_FILE_DIR:pstore-write>
     COMMENT "Running system tests with LIT"
     VERBATIM
 )
