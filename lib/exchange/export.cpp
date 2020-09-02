@@ -135,7 +135,7 @@ namespace pstore {
                     fragments (os1, db, generation, string_table);
                     os1 << '\n' << indent3 << "},\n";
                     os1 << indent3 << "\"compilations\": {";
-                    export_compilations (os1, db, generation, string_table);
+                    export_compilation_index (os1, db, generation, string_table);
                     os1 << '\n' << indent3 << "}\n";
                     os1 << indent2 << '}';
                 });

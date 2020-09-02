@@ -88,7 +88,7 @@ TEST (ExchangeSectionFixups, RoundTripInternalEmpty) {
     parser.eof ();
 
     // Check the result.
-    EXPECT_FALSE (parser.has_error ()) << "Expected the JSON parse to succeed";
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
     EXPECT_THAT (imported_ifixups, testing::ContainerEq (ifixups))
         << "The imported and exported ifixups should match";
 }

@@ -134,10 +134,10 @@ namespace pstore {
             using result_type = void;
             result_type result () {}
 
-            template <typename Root, typename... Args>
+            template <typename Rule, typename... Args>
             static callbacks make (Args &&... args) {
                 auto stack = std::make_shared<import_rule::parse_stack> ();
-                return {stack, std::make_unique<Root> (stack.get (), std::forward<Args> (args)...)};
+                return {stack, std::make_unique<Rule> (stack.get (), std::forward<Args> (args)...)};
             }
 
             std::error_code int64_value (std::int64_t const v) { return top ()->int64_value (v); }
