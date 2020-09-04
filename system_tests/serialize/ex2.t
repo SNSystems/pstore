@@ -1,6 +1,11 @@
 # %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %t = temporary file name unique to the test
+
 REQUIRES: examples
-RUN: %binaries/example-write-pod-struct > %T/ex2_actual.txt
-RUN: diff %T/ex2_actual.txt %S/ex2_expected.txt
+
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
+
+RUN: %binaries/example-write-pod-struct > "%t/ex2_actual.txt"
+RUN: diff "%t/ex2_actual.txt" "%S/ex2_expected.txt"

@@ -1,30 +1,28 @@
-# %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
-# Delete an existing data store.
-RUN: rm -f %stores/name.db
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
 
 # Write three values into the data store
-RUN: "%binaries/pstore-write" "--add-string=key1" "%stores/name.db"
-RUN: "%binaries/pstore-write" "--add-string=key2" "%stores/name.db"
-RUN: "%binaries/pstore-write" "--add-string=key3" "%stores/name.db"
-RUN: "%binaries/pstore-write" "--add-string=key1" "%stores/name.db"
+RUN: "%binaries/pstore-write" "--add-string=key1" "%t/name.db"
+RUN: "%binaries/pstore-write" "--add-string=key2" "%t/name.db"
+RUN: "%binaries/pstore-write" "--add-string=key3" "%t/name.db"
+RUN: "%binaries/pstore-write" "--add-string=key1" "%t/name.db"
 
-RUN: echo "%stores"
 # Read the keys and store the resulting data in a file named read
 # in the test output directory
-RUN: "%binaries/pstore-read" --strings "%stores/name.db" key1 > "%T/name"
-RUN: echo '.' >>  "%T/name"
-RUN: "%binaries/pstore-read" --strings "%stores/name.db" key2 >> "%T/name"
-RUN: echo '.' >>  "%T/name"
-RUN: "%binaries/pstore-read" --strings "%stores/name.db" key3 >> "%T/name"
-RUN: echo '.' >>  "%T/name"
-RUN: "%binaries/pstore-read" --strings "%stores/name.db" key4 >> "%T/name"
-RUN: echo '.' >>  "%T/name"
-RUN: "%binaries/pstore-read" --strings "%stores/name.db" key5 >> "%T/name"
-RUN: echo '.' >>  "%T/name"
+RUN: "%binaries/pstore-read" --strings "%t/name.db" key1 > "%t/name"
+RUN: echo '.' >>  "%t/name"
+RUN: "%binaries/pstore-read" --strings "%t/name.db" key2 >> "%t/name"
+RUN: echo '.' >>  "%t/name"
+RUN: "%binaries/pstore-read" --strings "%t/name.db" key3 >> "%t/name"
+RUN: echo '.' >>  "%t/name"
+RUN: "%binaries/pstore-read" --strings "%t/name.db" key4 >> "%t/name"
+RUN: echo '.' >>  "%t/name"
+RUN: "%binaries/pstore-read" --strings "%t/name.db" key5 >> "%t/name"
+RUN: echo '.' >>  "%t/name"
 
 # Check that the data made the round trip successfully.
-RUN: diff "%T/name" "%S/name_expected.txt"
+RUN: diff "%t/name" "%S/name_expected.txt"

@@ -1,10 +1,8 @@
-# %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
-# Delete an existing data store.
-RUN: rm -f "%stores/hamt_test.db"
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
 
-# Try to run the hamt_test.exe.
-RUN: "%binaries/pstore-hamt-test" "%stores/hamt_test.db"
+RUN: "%binaries/pstore-hamt-test" "%t"
