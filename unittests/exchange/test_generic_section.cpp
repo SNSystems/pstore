@@ -292,9 +292,9 @@ TEST_F (GenericSectionImport, TextMissingAlign) {
     auto const & parser = parse<pstore::repo::section_kind::text> (
         R"({ "data":"" })", db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
-    EXPECT_TRUE (parser.has_error ());
-    EXPECT_EQ (parser.last_error (),
-               make_error_code (pstore::exchange::import_error::generic_section_was_incomplete));
+    ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
+    EXPECT_EQ (imported_content.align, 1U);
+    EXPECT_TRUE (imported_content.data.empty ());
 }
 
 TEST_F (GenericSectionImport, TextBadAlignValue) {

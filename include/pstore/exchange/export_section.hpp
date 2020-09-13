@@ -82,9 +82,16 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & db,
                                       export_name_mapping const & names, Content const & content) {
-                    os << indent6 << R"("align":)" << content.align ();
+                    auto const * separator = "";
                     {
-                        os << ",\n" << indent6 << R"("data":")";
+                        auto const align = content.align ();
+                        if (align != 1U) {
+                            os << indent6 << R"("align":)" << align;
+                            separator = ",\n";
+                        }
+                    }
+                    {
+                        os << separator << indent6 << R"("data":")";
                         repo::container<std::uint8_t> const payload = content.payload ();
                         using output_iterator =
                             typename details::output_iterator<OStream, char>::type;
@@ -120,8 +127,15 @@ namespace pstore {
                 OStream & operator() (OStream & os, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
                                       repo::bss_section const & content) {
-                    os << indent6 << R"("size":)" << content.size () << ",\n";
-                    os << indent6 << R"("align":)" << content.align () << '\n';
+                    auto const * separator = "";
+                    {
+                        auto const align = content.align ();
+                        if (align != 1U) {
+                            os << indent6 << R"("align":)" << align;
+                            separator = ",\n";
+                        }
+                    }
+                    os << separator << indent6 << R"("size":)" << content.size () << '\n';
                     assert (content.ifixups ().empty ());
                     assert (content.xfixups ().empty ());
                     return os;

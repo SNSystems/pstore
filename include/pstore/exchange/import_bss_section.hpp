@@ -119,6 +119,9 @@ namespace pstore {
         error_or<repo::section_content *> import_bss_section<OutputIterator>::content_object () {
             using return_type = error_or<repo::section_content *>;
 
+            // The 'align' key may be omitted if the alignment is 1.
+            seen_[align] = true;
+
             // Issue an error is any of the required fields were missing.
             if (!seen_.all ()) {
                 return return_type{import_error::bss_section_was_incomplete};

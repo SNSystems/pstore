@@ -139,6 +139,8 @@ namespace pstore {
         import_generic_section<OutputIterator>::content_object () {
             using return_type = error_or<repo::section_content *>;
 
+            // The alignment field may be omitted if it is 1.
+            seen_[align] = true;
             // We allow either or both of the internal and external fixup keys to be omitted if
             // their respective contents are empty.
             seen_[ifixups] = true;
