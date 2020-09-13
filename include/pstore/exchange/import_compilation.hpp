@@ -246,8 +246,8 @@ namespace pstore {
         template <typename TransactionLock>
         class import_compilations_index final : public import_rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
-            using names_pointer = not_null<import_name_mapping const *>;
+            using transaction_pointer = transaction<TransactionLock> *;
+            using names_pointer = import_name_mapping const *;
 
             import_compilations_index (parse_stack_pointer const stack,
                                        transaction_pointer const transaction,

@@ -158,8 +158,8 @@ case section_kind::a:                                                           
         template <typename TransactionLock>
         class fragment_index final : public import_rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
-            using names_pointer = not_null<import_name_mapping const *>;
+            using transaction_pointer = transaction<TransactionLock> *;
+            using names_pointer = import_name_mapping const *;
 
             fragment_index (parse_stack_pointer const stack, transaction_pointer const transaction,
                             names_pointer const names);

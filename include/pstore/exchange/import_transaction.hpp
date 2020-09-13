@@ -112,11 +112,11 @@ namespace pstore {
             }
             if (s == "fragments") {
                 return push_object_rule<fragment_index<TransactionLock>> (this, &transaction_,
-                                                                          cnames);
+                                                                          names_.get ());
             }
             if (s == "compilations") {
                 return push_object_rule<import_compilations_index<TransactionLock>> (
-                    this, &transaction_, cnames);
+                    this, &transaction_, names_.get ());
             }
             return import_error::unknown_transaction_object_key;
         }
