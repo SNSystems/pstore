@@ -57,12 +57,9 @@ namespace pstore {
         OStream & export_internal_fixups (OStream & os, IFixupIterator first, IFixupIterator last) {
             emit_array (
                 os, first, last, indent6, [] (OStream & os1, repo::internal_fixup const & ifx) {
-                    os1 << indent7 << "{\n";
-                    os1 << indent8 << R"("section":")" << section_name (ifx.section) << "\",\n";
-                    os1 << indent8 << R"("type":)" << static_cast<unsigned> (ifx.type) << ",\n";
-                    os1 << indent8 << R"("offset":)" << ifx.offset << ",\n";
-                    os1 << indent8 << R"("addend":)" << ifx.addend << '\n';
-                    os1 << indent7 << '}';
+                    os1 << indent7 << '{' << R"("section":")" << section_name (ifx.section)
+                        << R"(","type":)" << static_cast<unsigned> (ifx.type) << ',' << R"("offset":)"
+                        << ifx.offset << ',' << R"("addend":)" << ifx.addend << '}';
                 });
             return os;
         }
