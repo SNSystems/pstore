@@ -41,5 +41,5 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_executable (pstore-export export.cpp)
+add_pstore_tool (pstore-export export.cpp)
 target_link_libraries (pstore-export PRIVATE pstore-cmd-util pstore-exchange)

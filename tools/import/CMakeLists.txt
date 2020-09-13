@@ -41,7 +41,7 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_executable (pstore-import
+add_pstore_tool (pstore-import
     import.cpp
 )
 target_link_libraries (pstore-import PRIVATE
