@@ -3,8 +3,9 @@
 ## Table of Contents
 
 *   [Installed tools](#installed-tools)
-    *   [Garbage Collection](#garbage-collection)
+    *   [Exchange](#exchange)
     *   [Exploring](#exploring)
+    *   [Garbage Collection](#garbage-collection)
     *   [Read and Write](#read-and-write)
 *   [Build\-and\-test tools](#build-and-test-tools)
     *   [Build\-time](#build-time)
@@ -12,13 +13,12 @@
 
 ## Installed tools
 
-### Garbage Collection
+### Exchange
 
 | Name | Description |
 | --- | --- |
-| [pstore&#8209;brokerd](broker/) | The pstore message broker. The broker is a service which is used to manage the garbage collection processes. |
-| [pstore&#8209;ui](broker_ui)    | The pstore broker dashboard application. |
-| [pstore&#8209;vacuumd](vacuum/) | Data store garbage collector. |
+| [pstore&#8209;export](export/) | Exports the contents of a pstore repository in a format that can be consumed by pstore&#8209;import. |
+| [pstore&#8209;import](import/) | Creates a pstore repository from an export file created by pstore&#8209;export. |
 
 ### Exploring
 
@@ -30,6 +30,15 @@
 | [pstore&#8209;index&#8209;structure](index_structure/) | Dumps pstore index structures as [GraphViz DOT](https://graphviz.org) graphs. |
 
 The utility programs in this group enable you to inspect and explore the contents of a pstore database.
+
+### Garbage Collection
+
+| Name | Description |
+| --- | --- |
+| [pstore&#8209;brokerd](broker/) | The pstore message broker. The broker is a service which is used to manage the garbage collection processes. |
+| [pstore&#8209;ui](broker_ui)    | The pstore broker dashboard application. |
+| [pstore&#8209;vacuumd](vacuum/) | Data store garbage collector. |
+
 
 ### Read and Write
 
