@@ -126,7 +126,7 @@ namespace pstore {
                     if (comments) {
                         os1 << indent3 << "// generation " << generation << '\n';
                     }
-                    os1 << indent3 << R"("names":")";
+                    os1 << indent3 << R"("names":)";
                     export_names (os1, db, generation, &string_table);
                     os1 << ",\n" << indent3 << R"("debugline":{)";
                     debug_line (os1, db, generation);
