@@ -45,12 +45,40 @@
 #define PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP
 
 #include "pstore/exchange/export_names.hpp"
+#include "pstore/exchange/export_section.hpp"
+#include "pstore/mcrepo/fragment.hpp"
+#include "pstore/mcrepo/section.hpp"
 
 namespace pstore {
 
-    class database;
-
     namespace exchange {
+
+        template <typename OStream>
+        void export_fragment (OStream & os, database const & db, export_name_mapping const & names,
+                              std::shared_ptr<repo::fragment const> const & fragment) {
+            os << "{\n";
+            auto const * section_sep = "";
+            for (repo::section_kind const section : *fragment) {
+                os << section_sep << indent5 << '"' << section_name (section) << R"(":)";
+#define X(a)                                                                                       \
+case repo::section_kind::a:                                                                        \
+    export_section<pstore::repo::section_kind::a> (                                                \
+        os, db, names, fragment->at<pstore::repo::section_kind::a> ());                            \
+    break;
+                switch (section) {
+                    PSTORE_MCREPO_SECTION_KINDS
+                case repo::section_kind::last:
+                    // unreachable...
+                    assert (false);
+                    break;
+                }
+#undef X
+                section_sep = ",\n";
+            }
+            os << '\n' << indent4 << '}';
+        }
+
+
 
         void fragments (export_ostream & os, database const & db, unsigned const generation,
                         export_name_mapping const & names);

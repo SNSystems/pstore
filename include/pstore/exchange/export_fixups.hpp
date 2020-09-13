@@ -58,10 +58,10 @@ namespace pstore {
             emit_array (
                 os, first, last, indent6, [] (OStream & os1, repo::internal_fixup const & ifx) {
                     os1 << indent7 << "{\n";
-                    os1 << indent8 << R"("section": ")" << section_name (ifx.section) << "\",\n";
-                    os1 << indent8 << R"("type": )" << static_cast<unsigned> (ifx.type) << ",\n";
-                    os1 << indent8 << R"("offset": )" << ifx.offset << ",\n";
-                    os1 << indent8 << R"("addend": )" << ifx.addend << '\n';
+                    os1 << indent8 << R"("section":")" << section_name (ifx.section) << "\",\n";
+                    os1 << indent8 << R"("type":)" << static_cast<unsigned> (ifx.type) << ",\n";
+                    os1 << indent8 << R"("offset":)" << ifx.offset << ",\n";
+                    os1 << indent8 << R"("addend":)" << ifx.addend << '\n';
                     os1 << indent7 << '}';
                 });
             return os;
@@ -74,12 +74,12 @@ namespace pstore {
             emit_array (
                 os, first, last, indent6, [&] (OStream & os1, repo::external_fixup const & xfx) {
                     os1 << indent7 << "{\n";
-                    os1 << indent8 << R"("name": )" << names.index (xfx.name) << ',';
+                    os1 << indent8 << R"("name":)" << names.index (xfx.name) << ',';
                     show_string (os1, db, xfx.name);
                     os1 << '\n';
-                    os1 << indent8 << R"("type": )" << static_cast<unsigned> (xfx.type) << ",\n";
-                    os1 << indent8 << R"("offset": )" << xfx.offset << ",\n";
-                    os1 << indent8 << R"("addend": )" << xfx.addend << '\n';
+                    os1 << indent8 << R"("type":)" << static_cast<unsigned> (xfx.type) << ",\n";
+                    os1 << indent8 << R"("offset":)" << xfx.offset << ",\n";
+                    os1 << indent8 << R"("addend":)" << xfx.addend << '\n';
                     os1 << indent7 << '}';
                 });
             return os;

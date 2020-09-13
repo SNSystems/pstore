@@ -51,6 +51,7 @@
 #include <cstring>
 #include <limits>
 #include <memory>
+#include <ostream>
 #include <stack>
 #include <system_error>
 #include <tuple>
@@ -103,6 +104,23 @@ namespace pstore {
             };
 
         } // namespace details
+
+        struct coord {
+            constexpr coord (unsigned x, unsigned y) noexcept
+                    : column{x}
+                    , row{y} {}
+            bool operator== (coord const & rhs) const noexcept {
+                return column == rhs.column && row == rhs.row;
+            }
+            bool operator!= (coord const & rhs) const noexcept { return !operator== (rhs); }
+
+            unsigned column;
+            unsigned row;
+        };
+
+        inline std::ostream & operator<< (std::ostream & os, coord const & c) {
+            return os << '(' << c.row << ':' << c.column << ')';
+        }
 
         // clang-format off
         /// \tparam Callbacks  Should be a type containing the following members:
@@ -180,12 +198,8 @@ namespace pstore {
             Callbacks const & callbacks () const noexcept { return callbacks_; }
             ///@}
 
-            enum { column_index, row_index };
-
-            /// Returns the parser's position in the input text as a tuple which represents
-            /// (column, row).
-            std::tuple<unsigned, unsigned> coordinate () const noexcept { return coordinate_; }
-
+            /// Returns the parser's position in the input text.
+            constexpr coord coordinate () const noexcept { return coordinate_; }
 
         private:
             using matcher = details::matcher<Callbacks>;
@@ -195,20 +209,19 @@ namespace pstore {
             /// \brief Managing the column and row number (the "coordinate").
 
             /// Increments the column number.
-            void advance_column () noexcept { ++std::get<column_index> (coordinate_); }
+            void advance_column () noexcept { ++coordinate_.column; }
 
             /// Increments the row number and resets the column.
             void advance_row () noexcept {
                 // The column number is set to 0. This is because the outer parse loop automatically
                 // advances the column number for each character consumed. This happens after the
                 // row is advanced by a matcher's consume() function.
-                coordinate_ = std::make_tuple (0U, std::get<row_index> (coordinate_) + 1U);
+                coordinate_.column = 0U;
+                ++coordinate_.row;
             }
 
             /// Resets the column count but does not affect the row number.
-            void reset_column () noexcept {
-                coordinate_ = std::make_tuple (0U, std::get<row_index> (coordinate_));
-            }
+            void reset_column () noexcept { coordinate_.column = 0U; }
             ///@}
 
             /// Records an error for this parse. The parse will stop as soon as a non-zero error
@@ -244,9 +257,8 @@ namespace pstore {
             std::error_code error_;
             Callbacks callbacks_;
 
-            /// The column and row number of the parse within the input stream. Stored as (column,
-            /// row) [i.e. (x,y)].
-            std::tuple<unsigned, unsigned> coordinate_{1U, 1U};
+            /// The column and row number of the parse within the input stream.
+            coord coordinate_{1U, 1U};
         };
 
         template <typename Callbacks>

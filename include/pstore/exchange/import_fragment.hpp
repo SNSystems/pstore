@@ -74,10 +74,11 @@ namespace pstore {
         public:
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping const *>;
+            using digest_pointer = not_null<index::digest const *>;
 
             fragment_sections (parse_stack_pointer const stack,
                                transaction_pointer const transaction, names_pointer const names,
-                               index::digest const * const digest)
+                               digest_pointer const digest)
                     : import_rule (stack)
                     , transaction_{transaction}
                     , names_{names}
@@ -90,7 +91,7 @@ namespace pstore {
         private:
             transaction_pointer const transaction_;
             names_pointer const names_;
-            index::digest const * const digest_;
+            digest_pointer const digest_;
 
             repo::section_content * section_contents (repo::section_kind const kind) noexcept {
                 return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (

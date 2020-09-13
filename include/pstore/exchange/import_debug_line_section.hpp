@@ -52,6 +52,7 @@
 
 #include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/digest_from_string.hpp"
+#include "pstore/mcrepo/debug_line_section.hpp"
 
 namespace pstore {
     namespace exchange {

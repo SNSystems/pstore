@@ -116,7 +116,7 @@ case repo::linkage::a: return os << #a;
             auto const * sep = "\n";
             for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
-                os << sep << indent4 << '\"' << kvp.first.to_hex_string () << "\": ";
+                os << sep << indent4 << '\"' << kvp.first.to_hex_string () << R"(":)";
                 export_compilation (os, db, *db.getro (kvp.second), names);
                 sep = ",\n";
             }

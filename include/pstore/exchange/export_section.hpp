@@ -120,8 +120,8 @@ namespace pstore {
                 OStream & operator() (OStream & os, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
                                       repo::bss_section const & content) {
-                    os << indent6 << R"("size": )" << content.size () << ",\n";
-                    os << indent6 << R"("align": )" << content.align () << '\n';
+                    os << indent6 << R"("size":)" << content.size () << ",\n";
+                    os << indent6 << R"("align":)" << content.align () << '\n';
                     assert (content.ifixups ().empty ());
                     assert (content.xfixups ().empty ());
                     return os;
@@ -142,11 +142,11 @@ namespace pstore {
                     assert (content.align () == 1U);
                     assert (content.xfixups ().size () == 0U);
 
-                    os << indent6 << R"("header": ")" << content.header_digest ().to_hex_string ()
+                    os << indent6 << R"("header":")" << content.header_digest ().to_hex_string ()
                        << "\",\n";
 
                     {
-                        os << indent6 << R"("data": ")";
+                        os << indent6 << R"("data":")";
                         repo::container<std::uint8_t> const payload = content.payload ();
                         using output_iterator =
                             typename details::output_iterator<OStream, char>::type;
@@ -155,10 +155,11 @@ namespace pstore {
                     }
                     {
                         repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
-                        os << indent6 << R"("ifixups": )";
-                        return export_internal_fixups (os, std::begin (ifixups), std::end (ifixups))
-                               << '\n';
+                        os << indent6 << R"("ifixups":)";
+                        export_internal_fixups (os, std::begin (ifixups), std::end (ifixups));
+                        os << '\n';
                     }
+                    return os;
                 }
             };
 

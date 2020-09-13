@@ -128,6 +128,11 @@ namespace pstore {
                     , section_{sec} {
                 validate (sec);
             }
+            bss_section_creation_dispatcher (section_kind kind,
+                                             gsl::not_null<section_content const *> const sec)
+                    : bss_section_creation_dispatcher (sec) {
+                assert (kind == section_kind::bss);
+            }
 
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher &

@@ -50,11 +50,12 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_SECTION_TO_IMPORTER_HPP
 #define PSTORE_EXCHANGE_IMPORT_SECTION_TO_IMPORTER_HPP
 
+#include "pstore/exchange/import_bss_section.hpp"
+#include "pstore/exchange/import_debug_line_section.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
+#include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/dependents_section.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/mcrepo/debug_line_section.hpp"
-#include "pstore/exchange/import_debug_line_section.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -62,22 +63,6 @@ namespace pstore {
         namespace details {
 
             // FIXME: This implementation is just a placeholder to allow the code to compile.
-            template <typename OutputIterator>
-            class import_bss_section : public import_rule {
-            public:
-                using names_pointer = not_null<import_name_mapping const *>;
-                using content_pointer = not_null<repo::section_content *>;
-
-                import_bss_section (parse_stack_pointer const stack,
-                                    repo::section_kind const /*kind*/, database const &,
-                                    names_pointer const /*names*/,
-                                    content_pointer const /*content*/,
-                                    not_null<OutputIterator *> const /*out*/) noexcept
-                        : import_rule (stack) {}
-
-                gsl::czstring name () const noexcept override { return "BSS section"; }
-            };
-
             // FIXME: This implementation is just a placeholder to allow the code to compile.
             template <typename OutputIterator>
             class import_dependents_section : public import_rule {
@@ -116,7 +101,7 @@ namespace pstore {
         };
         template <typename OutputIterator>
         struct section_to_importer<repo::bss_section, OutputIterator> {
-            using type = details::import_bss_section<OutputIterator>;
+            using type = import_bss_section<OutputIterator>;
         };
         template <typename OutputIterator>
         struct section_to_importer<repo::dependents, OutputIterator> {

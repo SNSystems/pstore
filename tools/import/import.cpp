@@ -79,7 +79,6 @@ int main (int argc, char * argv[]) {
 
         auto parser = pstore::exchange::create_import_parser (db);
 
-        using parser_type = decltype (parser);
         for (int ch = std::getc (infile); ch != EOF; ch = std::getc (infile)) {
             auto const c = static_cast<char> (ch);
             // std::cout << c;
@@ -89,9 +88,8 @@ int main (int argc, char * argv[]) {
                 // raise (erc);
                 std::cerr << "Value: " << erc.value () << '\n';
                 std::cerr << "Error: " << erc.message () << '\n';
-                std::cout << "Line " << std::get<parser_type::row_index> (parser.coordinate ())
-                          << ", column "
-                          << std::get<parser_type::column_index> (parser.coordinate ()) << '\n';
+                std::cout << "Line " << parser.coordinate ().row << ", column "
+                          << parser.coordinate ().column << '\n';
                 break;
             }
         }

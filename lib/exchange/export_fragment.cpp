@@ -49,10 +49,7 @@
 #include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_fixups.hpp"
 #include "pstore/exchange/export_ostream.hpp"
-#include "pstore/exchange/export_section.hpp"
-#include "pstore/mcrepo/fragment.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/mcrepo/section.hpp"
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 
@@ -69,13 +66,12 @@ namespace pstore {
                 for (pstore::address const & addr :
                      pstore::diff::diff (db, *fragments, generation - 1U)) {
                     auto const & kvp = fragments->load_leaf_node (db, addr);
-                    os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string ()
-                       << "\": {\n";
-
+                    os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string () << R"(":)";
+                    os << "{\n";
                     auto const fragment = db.getro (kvp.second);
                     auto const * section_sep = "";
                     for (pstore::repo::section_kind const section : *fragment) {
-                        os << section_sep << indent5 << '"' << section_name (section) << "\": ";
+                        os << section_sep << indent5 << '"' << section_name (section) << R"(":)";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
         export_section<pstore::repo::section_kind::a> (                                            \
