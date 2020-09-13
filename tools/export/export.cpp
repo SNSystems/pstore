@@ -41,11 +41,46 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+
+#include <iostream>
+
 #include "pstore/exchange/export.hpp"
 #include "pstore/core/database.hpp"
+#include "pstore/cmd_util/command_line.hpp"
 
+using namespace pstore::cmd_util;
+
+namespace {
+
+    // TODO: cl::desc is used as the short-form list of arguments. We're providing full help text!
+    cl::opt<std::string> db_path (cl::positional,
+                                  cl::desc ("Path of the pstore repository to be exported."),
+                                  cl::required);
+
+} // end anonymous namespace.
+
+#ifdef _WIN32
+int _tmain (int argc, TCHAR const * argv[]) {
+#else
 int main (int argc, char * argv[]) {
-    pstore::exchange::export_ostream os{stdout};
-    pstore::database db{argv[1], pstore::database::access_mode::read_only};
-    export_database (db, os);
+#endif
+    int exit_code = EXIT_SUCCESS;
+    PSTORE_TRY {
+        cl::parse_command_line_options (argc, argv, "pstore export utility\n");
+
+        pstore::exchange::export_ostream os{stdout};
+        pstore::database db{db_path.get (), pstore::database::access_mode::read_only};
+        export_database (db, os);
+    }
+    // clang-format off
+    PSTORE_CATCH (std::exception const & ex, { // clang-format on
+        std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
+    })
+    // clang-format off
+    PSTORE_CATCH (..., { // clang-format on
+        std::cerr << "Error: an unknown error occurred\n";
+        exit_code = EXIT_FAILURE;
+    })
+    return exit_code;
 }
