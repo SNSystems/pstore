@@ -47,6 +47,7 @@ config.name = 'pstore'
 # suffixes: A list of file extensions to treat as test files.
 config.suffixes = [
     '.cpp',
+    '.ll',
     '.t',
     '.test',
 ]
@@ -88,6 +89,12 @@ if lit_config.params.get ('examples') is not None:
 # add 'broker' if '--param broker' was specified on the command line.
 if lit_config.params.get ('broker') is not None:
     config.available_features.add ('broker')
+
+# Add 'is_inside_llvm' if '--param is_inside_llvm' was on the command line. This
+# should happen to indicate that this build is happening inside the LLVM framework
+# and hence LLVM tools are available.
+if lit_config.params.get ('is_inside_llvm') is not None:
+    config.available_features.add ('is_inside_llvm')
 
 config.substitutions.append (('%binaries', '@LIT_CONFIG_DIR@'))
 config.substitutions.append (('%foo', 'this-is-foo'))

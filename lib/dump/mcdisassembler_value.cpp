@@ -244,8 +244,9 @@ namespace {
     auto create_asm_info (llvm::Target const & target, llvm::MCRegisterInfo const & register_info,
                           llvm::Triple const & triple) {
         using return_type = error_or<asm_info_ptr>;
-        if (asm_info_ptr asm_info{target.createMCAsmInfo (register_info, triple.getTriple (),
-                                                          llvm::mc::InitMCTargetOptionsFromFlags ())}) {
+        llvm::MCTargetOptions options;
+        if (asm_info_ptr asm_info{
+                target.createMCAsmInfo (register_info, triple.getTriple (), options)}) {
             return return_type{std::move (asm_info)};
         }
         return return_type{make_error_code (error_code::no_assembly_info_for_target)};
