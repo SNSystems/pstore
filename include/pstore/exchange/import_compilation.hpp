@@ -64,7 +64,7 @@
 namespace pstore {
     namespace exchange {
 
-        using fragment_index_pointer = not_null<std::shared_ptr<index::fragment_index>>;
+        using fragment_index_pointer = std::shared_ptr<index::fragment_index>;
 
         //*     _      __ _      _ _   _           *
         //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
@@ -77,9 +77,10 @@ namespace pstore {
             using container = std::vector<repo::compilation_member>;
             using container_pointer = not_null<container *>;
             using names_pointer = not_null<import_name_mapping const *>;
+            using db_pointer = not_null<database const *>;
 
             import_definition (parse_stack_pointer const stack, container_pointer const definitions,
-                               names_pointer const names, database const & db,
+                               names_pointer const names, db_pointer db,
                                fragment_index_pointer const & fragments);
             import_definition (import_definition const &) = delete;
             import_definition (import_definition &&) noexcept = delete;
@@ -99,7 +100,7 @@ namespace pstore {
         private:
             container_pointer const definitions_;
             names_pointer const names_;
-            database const & db_;
+            db_pointer const db_;
             fragment_index_pointer const fragments_;
 
             std::string digest_;
@@ -203,8 +204,8 @@ namespace pstore {
                 return push<uint64_rule> (&triple_);
             }
             if (k == "definitions") {
-                return push_array_rule<import_definition_object> (this, &definitions_, names_,
-                                                                  transaction_->db (), fragments_);
+                return push_array_rule<import_definition_object> (
+                    this, &definitions_, names_, std::ref (transaction_->db ()), fragments_);
             }
             return import_error::unknown_compilation_object_key;
         }

@@ -81,10 +81,9 @@ namespace {
     };
 
     template <typename ImportRule, typename... Args>
-    decltype (auto) make_json_object_parser (Args &&... args) {
+    decltype (auto) make_json_object_parser (Args... args) {
         using rule = pstore::exchange::object_rule<ImportRule, Args...>;
-        return pstore::json::make_parser (
-            pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
+        return pstore::json::make_parser (pstore::exchange::callbacks::make<rule> (args...));
     }
 
 } // end anonymous namespace
@@ -112,7 +111,7 @@ TEST_F (GenericSection, RoundTripForAnEmptySection) {
     // Find the rule that is used to import sections represented by an instance of section_type.
     using section_importer =
         pstore::exchange::section_to_importer_t<section_type, decltype (inserter)>;
-    auto parser = make_json_object_parser<section_importer> (kind, import_db_, &imported_names,
+    auto parser = make_json_object_parser<section_importer> (kind, &import_db_, &imported_names,
                                                              &imported_content, &inserter);
     parser.input (exported_json).eof ();
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
@@ -207,7 +206,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     // Find the rule that is used to import sections represented by an instance of section_type.
     using section_importer =
         pstore::exchange::section_to_importer_t<section_type, decltype (inserter)>;
-    auto parser = make_json_object_parser<section_importer> (kind, import_db_, &imported_names,
+    auto parser = make_json_object_parser<section_importer> (kind, &import_db_, &imported_names,
                                                              &imported_content, &inserter);
     parser.input (exported_json).eof ();
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
@@ -231,7 +230,7 @@ namespace {
     using not_null = pstore::gsl::not_null<T>;
 
     template <pstore::repo::section_kind Kind, typename OutputIterator>
-    decltype (auto) parse (std::string const & src, pstore::database const & db,
+    decltype (auto) parse (std::string const & src, not_null<pstore::database *> const db,
                            pstore::exchange::import_name_mapping const & names,
                            OutputIterator * const inserter,                        // out
                            not_null<pstore::repo::section_content *> const content // out
@@ -272,7 +271,7 @@ TEST_F (GenericSectionImport, TextEmptySuccess) {
     pstore::repo::section_content imported_content;
 
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8, "data":"" })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "align":8, "data":"" })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
 
@@ -290,7 +289,7 @@ TEST_F (GenericSectionImport, TextMissingAlign) {
 
     // The align value is missing.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "data":"" })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "data":"" })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
     EXPECT_EQ (imported_content.align, 1U);
@@ -304,7 +303,7 @@ TEST_F (GenericSectionImport, TextBadAlignValue) {
 
     // The align value must be a power of 2.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":7, "data":"" })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "align":7, "data":"" })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -318,7 +317,7 @@ TEST_F (GenericSectionImport, TextBadAlignType) {
 
     // The align value is a boolean rather than an integer.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":true, "data":"" })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "align":true, "data":"" })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -332,7 +331,7 @@ TEST_F (GenericSectionImport, TextMissingData) {
 
     // The data value is missing.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8 })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "align":8 })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -346,7 +345,7 @@ TEST_F (GenericSectionImport, TextBadDataType) {
 
     // The data value is a boolean rather than a string.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8, "data":true })", db_, pstore::exchange::import_name_mapping{}, &inserter,
+        R"({ "align":8, "data":true })", &db_, pstore::exchange::import_name_mapping{}, &inserter,
         &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -360,7 +359,7 @@ TEST_F (GenericSectionImport, TextBadDataContent) {
 
     // The data string does not contain valid ASCII85-encoded data.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8, "data":"this is not ASCII85" })", db_,
+        R"({ "align":8, "data":"this is not ASCII85" })", &db_,
         pstore::exchange::import_name_mapping{}, &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
@@ -374,8 +373,8 @@ TEST_F (GenericSectionImport, TextBadInternalFixupsType) {
 
     // The ifixups value is a boolean rather than an array.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8, "data":"", "ifixups":true })", db_, pstore::exchange::import_name_mapping{},
-        &inserter, &imported_content);
+        R"({ "align":8, "data":"", "ifixups":true })", &db_,
+        pstore::exchange::import_name_mapping{}, &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
                make_error_code (pstore::exchange::import_error::unexpected_boolean));
@@ -388,8 +387,8 @@ TEST_F (GenericSectionImport, TextBadExternalFixupsType) {
 
     // The xfixups value is a boolean rather than an array.
     auto const & parser = parse<pstore::repo::section_kind::text> (
-        R"({ "align":8, "data":"", "xfixups":true })", db_, pstore::exchange::import_name_mapping{},
-        &inserter, &imported_content);
+        R"({ "align":8, "data":"", "xfixups":true })", &db_,
+        pstore::exchange::import_name_mapping{}, &inserter, &imported_content);
     EXPECT_TRUE (parser.has_error ());
     EXPECT_EQ (parser.last_error (),
                make_error_code (pstore::exchange::import_error::unexpected_boolean));

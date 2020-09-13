@@ -70,11 +70,11 @@ namespace pstore {
         template <typename OutputIterator>
         class import_generic_section : public import_rule {
         public:
-            using names_pointer = not_null<import_name_mapping const *>;
             using content_pointer = not_null<repo::section_content *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             import_generic_section (parse_stack_pointer const stack, repo::section_kind const kind,
-                                    database const &, names_pointer const names,
+                                    not_null<database *>, names_pointer const names,
                                     content_pointer const content,
                                     not_null<OutputIterator *> const out) noexcept
                     : import_rule (stack)

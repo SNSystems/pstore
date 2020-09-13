@@ -66,10 +66,11 @@ namespace pstore {
         template <typename OutputIterator>
         class import_debug_line_section final : public import_generic_section<OutputIterator> {
         public:
+            using db_pointer = not_null<database *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
             import_debug_line_section (import_rule::parse_stack_pointer const stack,
-                                       repo::section_kind kind, database & db,
+                                       repo::section_kind kind, db_pointer db,
                                        names_pointer const names,
                                        repo::section_content * const content,
                                        OutputIterator * const out)
@@ -92,7 +93,7 @@ namespace pstore {
             enum { header };
             std::bitset<header + 1> seen_;
 
-            database & db_;
+            db_pointer db_;
             std::string header_digest_;
             not_null<OutputIterator *> const out_;
         };
@@ -120,9 +121,9 @@ namespace pstore {
                 return import_error::incomplete_debug_line_section;
             }
 
-            auto const index = index::get_index<trailer::indices::debug_line_header> (db_);
-            auto pos = index->find (db_, *digest);
-            if (pos == index->end (db_)) {
+            auto const index = index::get_index<trailer::indices::debug_line_header> (*db_);
+            auto pos = index->find (*db_, *digest);
+            if (pos == index->end (*db_)) {
                 return import_error::debug_line_header_digest_not_found;
             }
             auto const header_extent = pos->second;

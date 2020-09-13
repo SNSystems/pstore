@@ -61,7 +61,7 @@ namespace pstore {
         // ~~~~
         import_definition::import_definition (parse_stack_pointer const stack,
                                               container_pointer const definitions,
-                                              names_pointer const names, database const & db,
+                                              names_pointer const names, db_pointer const db,
                                               fragment_index_pointer const & fragments)
                 : import_rule (stack)
                 , definitions_{definitions}
@@ -94,8 +94,8 @@ namespace pstore {
             if (!digest) {
                 return import_error::bad_digest;
             }
-            auto const fpos = fragments_->find (db_, *digest);
-            if (fpos == fragments_->end (db_)) {
+            auto const fpos = fragments_->find (*db_, *digest);
+            if (fpos == fragments_->end (*db_)) {
                 return import_error::no_such_fragment;
             }
 
@@ -173,7 +173,7 @@ namespace pstore {
         // begin object
         // ~~~~~~~~~~~~
         std::error_code import_definition_object::begin_object () {
-            return this->push<import_definition> (definitions_, names_, db_, fragments_);
+            return this->push<import_definition> (definitions_, names_, &db_, fragments_);
         }
 
         // end array

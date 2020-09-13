@@ -122,7 +122,7 @@ namespace pstore {
 case section_kind::a:                                                                              \
     return push_object_rule<                                                                       \
         section_to_importer_t<repo::enum_to_section_t<section_kind::a>, decltype (oit_)>> (        \
-        this, pos->second, transaction_->db (), names_, section_contents (pos->second), &oit_);
+        this, pos->second, &transaction_->db (), names_, section_contents (pos->second), &oit_);
 
             switch (pos->second) {
                 PSTORE_MCREPO_SECTION_KINDS

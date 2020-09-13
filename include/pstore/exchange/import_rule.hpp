@@ -93,8 +93,8 @@ namespace pstore {
             /// Creates an instance of type T and pushes it onto the parse stack. The provided
             /// arguments are forwarded to the T constructor in addition to the parse stack itself.
             template <typename T, typename... Args>
-            std::error_code push (Args &&... args) {
-                stack_->push (std::make_unique<T> (stack_, std::forward<Args> (args)...));
+            std::error_code push (Args... args) {
+                stack_->push (std::make_unique<T> (stack_, args...));
                 // std::cout << std::string (stack_->size () * trace_indent, ' ') << '+'
                 //          << stack_->top ()->name () << '\n';
                 return {};
@@ -102,8 +102,8 @@ namespace pstore {
 
         protected:
             template <typename T, typename... Args>
-            std::error_code replace_top (Args &&... args) {
-                auto p = std::make_unique<T> (stack_, std::forward<Args> (args)...);
+            std::error_code replace_top (Args... args) {
+                auto p = std::make_unique<T> (stack_, args...);
                 auto const stack = stack_;
                 // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
 
@@ -135,9 +135,9 @@ namespace pstore {
             result_type result () {}
 
             template <typename Rule, typename... Args>
-            static callbacks make (Args &&... args) {
+            static callbacks make (Args... args) {
                 auto stack = std::make_shared<import_rule::parse_stack> ();
-                return {stack, std::make_unique<Rule> (stack.get (), std::forward<Args> (args)...)};
+                return {stack, std::make_unique<Rule> (stack.get (), args...)};
             }
 
             std::error_code int64_value (std::int64_t const v) { return top ()->int64_value (v); }

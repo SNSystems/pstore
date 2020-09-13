@@ -63,15 +63,15 @@ namespace pstore {
         namespace details {
 
             // FIXME: This implementation is just a placeholder to allow the code to compile.
-            // FIXME: This implementation is just a placeholder to allow the code to compile.
             template <typename OutputIterator>
             class import_dependents_section : public import_rule {
             public:
+                using db_pointer = not_null<database const *>;
                 using names_pointer = not_null<import_name_mapping const *>;
                 using content_pointer = not_null<repo::section_content *>;
 
                 import_dependents_section (parse_stack_pointer const stack,
-                                           repo::section_kind const /*kind*/, database const &,
+                                           repo::section_kind const /*kind*/, db_pointer const,
                                            names_pointer const /*names*/,
                                            content_pointer const /*content*/,
                                            not_null<OutputIterator *> const /*out*/) noexcept

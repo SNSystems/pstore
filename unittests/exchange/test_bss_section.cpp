@@ -82,10 +82,9 @@ namespace {
 
 
     template <typename ImportRule, typename... Args>
-    decltype (auto) make_json_object_parser (Args &&... args) {
+    decltype (auto) make_json_object_parser (Args... args) {
         using rule = pstore::exchange::object_rule<ImportRule, Args...>;
-        return pstore::json::make_parser (
-            pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
+        return pstore::json::make_parser (pstore::exchange::callbacks::make<rule> (args...));
     }
 
 } // end anonymous namespace
@@ -113,7 +112,7 @@ TEST_F (BssSection, RoundTripForAnEmptySection) {
     // Find the rule that is used to import sections represented by an instance of section_type.
     using section_importer =
         pstore::exchange::section_to_importer_t<section_type, decltype (inserter)>;
-    auto parser = make_json_object_parser<section_importer> (kind, import_db_, &imported_names,
+    auto parser = make_json_object_parser<section_importer> (kind, &import_db_, &imported_names,
                                                              &imported_content, &inserter);
     parser.input (exported_json).eof ();
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
@@ -159,7 +158,7 @@ TEST_F (BssSection, RoundTripForPopulated) {
     // Find the rule that is used to import sections represented by an instance of section_type.
     using section_importer =
         pstore::exchange::section_to_importer_t<section_type, decltype (inserter)>;
-    auto parser = make_json_object_parser<section_importer> (kind, import_db_, &imported_names,
+    auto parser = make_json_object_parser<section_importer> (kind, &import_db_, &imported_names,
                                                              &imported_content, &inserter);
     parser.input (exported_json).eof ();
     ASSERT_FALSE (parser.has_error ()) << "JSON error was: " << parser.last_error ().message ();
@@ -196,7 +195,7 @@ namespace {
             pstore::exchange::section_to_importer_t<section_type, OutputIterator>;
         // Create a JSON parser which understands this section object.
         auto parser =
-            make_json_object_parser<section_importer> (Kind, db, &names, content, inserter);
+            make_json_object_parser<section_importer> (Kind, &db, &names, content, inserter);
         // Parse the string.
         parser.input (src).eof ();
         return parser;

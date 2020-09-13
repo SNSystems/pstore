@@ -109,7 +109,8 @@ namespace {
         pstore::index::digest const & digest) {
         using rule = pstore::exchange::import_compilation<transaction_lock>;
         return make_json_object_parser<rule> (rule::transaction_pointer{transaction},
-                                              rule::names_pointer{names}, fragment_index, digest);
+                                              rule::names_pointer{names},
+                                              std::cref (fragment_index), std::cref (digest));
     }
 
 
