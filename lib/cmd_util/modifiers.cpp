@@ -55,6 +55,9 @@ namespace pstore {
             name::name (std::string name)
                     : name_{std::move (name)} {}
 
+            usage::usage (std::string str)
+                    : desc_{std::move (str)} {}
+
             desc::desc (std::string str)
                     : desc_{std::move (str)} {}
 

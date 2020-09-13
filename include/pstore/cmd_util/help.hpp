@@ -197,7 +197,7 @@ namespace pstore {
                 for (option const * const op : cl::option::all ()) {
                     if (op != this && op->is_positional ()) {
                         outs_ << ostream_traits::out_text (" ")
-                              << ostream_traits::out_string (op->description ());
+                              << ostream_traits::out_string (op->usage ());
                     }
                 }
                 outs_ << '\n';

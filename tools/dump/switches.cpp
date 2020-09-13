@@ -157,7 +157,7 @@ namespace {
         "triple", cl::desc{"The target triple to use for disassembly if one is not known"},
         cl::init ("x86_64-pc-linux-gnu-repo"), cl::cat (how_cat)};
 
-    cl::list<std::string> paths{cl::positional, cl::desc{"<filename>..."}};
+    cl::list<std::string> paths{cl::positional, cl::usage{"filename..."}};
 
 } // end anonymous namespace
 

@@ -68,11 +68,9 @@ namespace {
         cmd_util::cl::aliasopt (revision)
     };
 
-    cmd_util::cl::opt<std::string> db_path{
-        cmd_util::cl::positional,
-        cmd_util::cl::required,
-        cmd_util::cl::desc ("Database path")
-    };
+    cmd_util::cl::opt<std::string> db_path{cmd_util::cl::positional, cmd_util::cl::required,
+                                           cmd_util::cl::usage ("repository"),
+                                           cmd_util::cl::desc ("Database path")};
 
 } // end anonymous namespace
 

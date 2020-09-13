@@ -117,6 +117,21 @@ namespace pstore {
             inline name make_modifier (std::string const & n) { return name (n); }
 
 
+            /// A modifier to set the usage information shown in the -help output.
+            /// Only applicable to positional arguments.
+            class usage {
+            public:
+                explicit usage (std::string str);
+
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_usage (desc_);
+                }
+
+            private:
+                std::string const desc_;
+            };
+
             //*     _             *
             //*  __| |___ ___ __  *
             //* / _` / -_|_-</ _| *

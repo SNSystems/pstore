@@ -70,7 +70,7 @@ namespace {
 
     pstore::cmd_util::cl::opt<std::string> path (pstore::cmd_util::cl::positional,
                                                  pstore::cmd_util::cl::required,
-                                                 pstore::cmd_util::cl::desc ("<database-path>"));
+                                                 pstore::cmd_util::cl::usage ("repository"));
 
     //*                 *
     //*  ___ __ _ _  _  *

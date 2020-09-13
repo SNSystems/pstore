@@ -54,11 +54,11 @@ using namespace pstore::cmd_util;
 namespace {
 
     // TODO: cl::desc is used as the short-form list of arguments. We're providing full help text!
-    cl::opt<std::string> db_path (cl::positional,
+    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
                                   cl::desc ("Path of the pstore repository to be created."),
                                   cl::required);
     cl::opt<std::string>
-        json_source (cl::positional,
+        json_source (cl::positional, cl::usage ("[input]"),
                      cl::desc ("The export file to be read (stdin if not specified)."));
 
 } // end anonymous namespace

@@ -56,10 +56,10 @@ namespace {
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::positional,
-                                  cl::desc ("<Path of the pstore repository to be read>"),
+    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
+                                  cl::desc ("Path of the pstore repository to be read"),
                                   cl::required);
-    cl::opt<std::string> key (cl::positional, cl::desc ("key"), cl::required);
+    cl::opt<std::string> key (cl::positional, cl::usage ("key"), cl::required);
     cl::opt<bool>
         string_mode ("strings", cl::init (false),
                      cl::desc ("Reads from the 'strings' index rather than the 'names' index."));

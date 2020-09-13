@@ -63,12 +63,13 @@ namespace {
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::positional, cl::desc ("Database path"));
+    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
+                                  cl::desc ("Database path"));
 
 #define X(a) cl::literal (#a, static_cast<int> (pstore::trailer::indices::a), #a),
     cl::list<pstore::trailer::indices> index_names_opt (cl::positional, cl::optional,
                                                         cl::one_or_more,
-                                                        cl::desc ("<index-name>..."),
+                                                        cl::desc ("[index-name]..."),
                                                         cl::values ({PSTORE_INDICES}));
 #undef X
 
