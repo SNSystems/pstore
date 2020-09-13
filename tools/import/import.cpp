@@ -63,7 +63,12 @@ namespace {
 
 } // end anonymous namespace
 
+#ifdef _WIN32
+int _tmain (int argc, TCHAR const * argv[]) {
+#else
 int main (int argc, char * argv[]) {
+#endif
+    int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
         cl::parse_command_line_options (argc, argv, "pstore import utility\n");
 
@@ -95,10 +100,8 @@ int main (int argc, char * argv[]) {
         }
         parser.eof ();
 
-        if (std::feof (infile)) {
-            std::cout << "\n End of file reached.";
-        } else {
-            std::cout << "\n Something went wrong.";
+        if (!std::feof (infile)) {
+            std::cout << "\nSomething went wrong.\n";
         }
         if (infile != nullptr && infile != stdin) {
             std::fclose (infile);
@@ -108,9 +111,12 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
         std::cerr << "Error: " << ex.what () << '\n';
+        exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
         std::cerr << "Error: an unknown error occurred\n";
+        exit_code = EXIT_FAILURE;
     })
+    return exit_code;
 }
