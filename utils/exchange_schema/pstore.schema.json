@@ -30,9 +30,33 @@
                         "items": { "type": "string" },
                         "uniqueItems": true
                     },
-                    "debugline": {},
-                    "fragments": {},
+
+                    "debugline": {
+                        "description": "Index associating a digest with a DWARF debug-line header",
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A DWARF debug-line header",
+                                "type": "string",
+                                "contentEncoding": "base64"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+
+                    "fragments": {
+                        "description": "Index associating a digest with a fragment",
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A fragment"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+
                     "compilations": {
+                        "description": "Index associating a digest with compilation record",
                         "type": "object",
                         "patternProperties": {
                             "^[A-Fa-f0-9]{32}$": {

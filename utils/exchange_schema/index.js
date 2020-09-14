@@ -10,7 +10,7 @@ const util = require ('util');
 const read_file = util.promisify(fs.readFile);
 
 async function read_json (path) {
-    return JSON.parse (await read_file (path));
+    return JSON.parse (await read_file (path, 'utf-8'));
 }
 
 async function read_schema (schema_path) {
@@ -22,7 +22,7 @@ async function read_schema_and_instance (schema_path, instance_path) {
     return Promise.all ([read_schema (schema_path), read_json (instance_path)]);
 }
 
-function main () {
+async function main () {
     const argv = require ('yargs')
         .strict ()
         .command ('$0 schema instance', 'Validate JSON against a schema', (yargs) => {
@@ -37,20 +37,16 @@ function main () {
         })
         .argv;
 
-    read_schema_and_instance (argv.schema, argv.instance)
-        .then (values => {
-            const schema = values[0];
-            const instance = values[1];
-
-            const valid = schema (instance);
-            if (!valid) {
-                console.error (validate.errors);
-            }
-        })
-        .catch (e => {
-            console.error (e);
-            process.exitCode = 1;
-        });
+    const [schema, instance] = await read_schema_and_instance (argv.schema, argv.instance);
+    const result = schema (instance)
+    if (!result) {
+        throw new Error (JSON.stringify (schema.errors, null, 4));
+    }
 }
 
-main();
+(async () => {
+    await main();
+})().catch(e => {
+    console.error (e);
+    process.exitCode = 1;
+});
