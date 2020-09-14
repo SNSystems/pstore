@@ -1,0 +1,82 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://github.com/SNSystems/pstore.schema.json",
+
+    "definitions": {
+        "digest": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{32}$"
+        }
+    },
+
+    "title": "pstore exchange",
+    "description": "A pstore repository",
+
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "The exchange format version number",
+            "type": "integer"
+        },
+        "transactions": {
+            "description": "Transactions",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "names" : {
+                        "description": "The names defined by this transaction",
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "uniqueItems": true
+                    },
+                    "debugline": {},
+                    "fragments": {},
+                    "compilations": {
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A compilation defining a collection of symbols",
+                                "type": "object",
+                                "properties": {
+                                    "path": { "type": "number" },
+                                    "triple": { "type": "number" },
+                                    "definitions": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "digest": { "$ref": "#/definitions/digest" },
+                                                "name": {
+                                                    "description": "The name of the symbol being defined",
+                                                    "type": "number"
+                                                },
+                                                "linkage": {
+                                                    "description": "The linkage type for this definition",
+                                                    "type": "string",
+                                                    "enum": ["append", "common", "external",
+                                                             "internal_no_symbol", "internal",
+                                                             "link_once_any", "link_once_ord",
+                                                             "weak_any", "weak_odr"]
+                                                },
+                                                "visibility": {
+                                                    "type": "string",
+                                                    "enum": ["default", "hidden", "protected"]
+                                                }
+                                            },
+                                            "required": ["digest", "linkage", "name", "visibility"]
+                                        }
+                                    }
+                                },
+                                "required": ["definitions", "path", "triple" ]
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    "required": ["version", "transactions"]
+}
