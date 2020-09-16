@@ -279,7 +279,7 @@ if (NODEJS_EXECUTABLE)
         list (GET _VERSION_LIST 2 NODE_VERSION_PATCH)
     endif ()
 
-    message (STATUS "Node.JS version ${NODE_VERSION_STRING} was found")
+    message (STATUS "Node.JS version ${NODE_VERSION_STRING} was found at: ${NODEJS_EXECUTABLE}")
 else (NODEJS_EXECUTABLE)
     message (STATUS "Node.JS was NOT found")
 endif (NODEJS_EXECUTABLE)
@@ -295,6 +295,24 @@ find_program (NPM_EXECUTABLE
     DOC "npm executable location"
 )
 if (NPM_EXECUTABLE)
+    # Figure out which version of NPM we've got. This will set NPM_VERSION_STRING to the
+    # entire version string and NPM_VERSION_MAJOR/MINOR/PATCH accordingly.
+    execute_process(
+        COMMAND ${NPM_EXECUTABLE} --version
+        OUTPUT_VARIABLE _VERSION
+        RESULT_VARIABLE _NPM_VERSION_RESULT
+    )
+
+    if (NOT _NODE_VERSION_RESULT)
+        string (REGEX REPLACE "^(.*)\n$" "\\1" NPM_VERSION_STRING "${_VERSION}")
+        string (REPLACE "." ";" _VERSION_LIST "${NPM_VERSION_STRING}")
+        list (GET _VERSION_LIST 0 NPM_VERSION_MAJOR)
+        list (GET _VERSION_LIST 1 NPM_VERSION_MINOR)
+        list (GET _VERSION_LIST 2 NPM_VERSION_PATCH)
+    endif ()
+
+    message (STATUS "NPM version ${NODE_VERSION_STRING} was found at: ${NODEJS_EXECUTABLE}")
+
     list (APPEND LIT_PARAMS --param "npm=${NPM_EXECUTABLE}")
 endif ()
 
