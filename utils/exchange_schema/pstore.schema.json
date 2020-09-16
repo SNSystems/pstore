@@ -67,7 +67,7 @@
         "bss_section": {
             "type": "object",
             "properties": {
-                "align" { "type": "number" },
+                "align": { "type": "number" },
                 "size": { "type": "number" }
             },
             "additionalProperties": false
