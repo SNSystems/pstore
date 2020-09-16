@@ -61,7 +61,7 @@ BUILDS = [
         'addons': {
             'apt': {
                 'sources': ['ubuntu-toolchain-r-test'],
-                'packages': ['clang-3.8', 'ninja-build', 'valgrind'],
+                'packages': ['clang-3.8', 'ninja-build', 'valgrind', 'node', 'npm'],
             }
         },
         'env': [
@@ -83,7 +83,7 @@ BUILDS = [
                         'key_url': 'https://apt.llvm.org/llvm-snapshot.gpg.key',
                     }
                 ],
-                'packages': ['clang-9', 'ninja-build'],
+                'packages': ['clang-9', 'ninja-build', 'node', 'npm'],
             },
         },
         'env': [
