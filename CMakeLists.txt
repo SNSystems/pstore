@@ -311,7 +311,7 @@ if (NPM_EXECUTABLE)
         list (GET _VERSION_LIST 2 NPM_VERSION_PATCH)
     endif ()
 
-    message (STATUS "NPM version ${NODE_VERSION_STRING} was found at: ${NODEJS_EXECUTABLE}")
+    message (STATUS "NPM version ${NODE_VERSION_STRING} was found at: ${NPM_EXECUTABLE}")
 
     list (APPEND LIT_PARAMS --param "npm=${NPM_EXECUTABLE}")
 endif ()
