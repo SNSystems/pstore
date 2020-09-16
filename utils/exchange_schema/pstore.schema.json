@@ -64,6 +64,15 @@
             }
         },
 
+        "bss_section": {
+            "type": "object",
+            "properties": {
+                "align" { "type": "number" },
+                "size": { "type": "number" }
+            },
+            "additionalProperties": false
+        },
+
         "generic_section": {
             "type": "object",
             "properties": {
@@ -142,7 +151,7 @@
                                 "properties": {
                                     "text": { "$ref": "#/definitions/generic_section" },
                                     "data": {},
-                                    "bss": {},
+                                    "bss": { "$ref": "#/definitions/bss_section" },
                                     "rel_ro": {},
                                     "mergeable_1_byte_c_string": {},
                                     "mergeable_2_byte_c_string": {},
