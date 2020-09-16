@@ -18,6 +18,6 @@ RUN: "%binaries/pstore-export" "%t/db.db" > "%t/export.json"
 RUN: "%binaries/pstore-import" "%t/db2.db" "%t/export.json"
 
 # Validate the exported file against the schema.
-RUN: cd "%S/../../utils/exchange_schema" && "%npm" ci
+RUN: cd "%S/../../utils/exchange_schema" && "%npm" install
 RUN: "%nodejs" "%S/../../utils/exchange_schema/index.js" "%S/../../utils/exchange_schema/pstore.schema.json" "%t/export.json"
 
