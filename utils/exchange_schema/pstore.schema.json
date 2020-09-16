@@ -6,6 +6,94 @@
         "digest": {
             "type": "string",
             "pattern": "^[A-Fa-f0-9]{32}$"
+        },
+
+        "xfixups_array": {
+            "description" : "An array of external (extra-fragment) fixups",
+            "type": "array",
+            "items": {
+                "description": "An external (extra-fragment) fixup",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "number" },
+                    "type": { "type": "number" },
+                    "offset": { "type": "number" },
+                    "addend": { "type": "number" }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "ifixups_array": {
+            "description": "An array of internal (intra-fragment) fixups",
+            "type": "array",
+            "items": {
+                "description": "An internal (intra-fragment) fixup",
+                "type": "object",
+                "properties": {
+                    "section": {
+                        "description": "Type of the target section",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "data",
+                            "bss",
+                            "rel_ro",
+                            "mergeable_1_byte_c_string",
+                            "mergeable_2_byte_c_string",
+                            "mergeable_4_byte_c_string",
+                            "mergeable_const_4",
+                            "mergeable_const_8",
+                            "mergeable_const_16",
+                            "mergeable_const_32",
+                            "read_only",
+                            "thread_data",
+                            "thread_bss",
+                            "debug_line",
+                            "debug_string",
+                            "debug_ranges",
+                            "interp",
+                            "dependent"
+                        ]
+                    },
+                    "type": { "type": "number" },
+                    "offset": { "type": "number" },
+                    "addend": { "type": "number" }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "generic_section": {
+            "type": "object",
+            "properties": {
+                "align": { "type": "number" },
+                "data": {
+                    "description": "The section data",
+                    "type": "string",
+                    "contentEncoding": "base64"
+                },
+                "ifixups": { "$ref": "#/definitions/ifixups_array"},
+                "xfixups": { "$ref": "#/definitions/xfixups_array" }
+            },
+            "additionalProperties": false
+        },
+
+        "debug_line_section": {
+            "type": "object",
+            "properties": {
+                "header": {
+                    "description": "The DWARF line header to prefix this contribution",
+                    "$ref": "#/definitions/digest"
+                },
+                "data": {
+                    "description": "A DWARF line section contribution",
+                    "type": "string",
+                    "contentEncoding": "base64"
+                },
+                "ifixups": { "$ref":  "#/definitions/ifixups_array"}
+            },
+            "additionalProperties": false
         }
     },
 
@@ -49,7 +137,29 @@
                         "type": "object",
                         "patternProperties": {
                             "^[A-Fa-f0-9]{32}$": {
-                                "description": "A fragment"
+                                "description": "A fragment",
+                                "type": "object",
+                                "properties": {
+                                    "text": { "$ref": "#/definitions/generic_section" },
+                                    "data": {},
+                                    "bss": {},
+                                    "rel_ro": {},
+                                    "mergeable_1_byte_c_string": {},
+                                    "mergeable_2_byte_c_string": {},
+                                    "mergeable_4_byte_c_string": {},
+                                    "mergeable_const_4": {},
+                                    "mergeable_const_8": {},
+                                    "mergeable_const_16": {},
+                                    "mergeable_const_32": {},
+                                    "read_only": {},
+                                    "thread_data": {},
+                                    "thread_bss": {},
+                                    "debug_line": { "$ref":  "#/definitions/debug_line_section" },
+                                    "debug_string": {},
+                                    "debug_ranges": {},
+                                    "interp": {},
+                                    "dependent": {}
+                                }
                             }
                         },
                         "additionalProperties": false

@@ -96,7 +96,7 @@ BUILDS = [
         'addons': {
             'apt': {
                 'sources': ['ubuntu-toolchain-r-test'],
-                'packages': ['g++-9', 'ninja-build', 'valgrind'],
+                'packages': ['g++-9', 'ninja-build', 'valgrind', 'node', 'npm'],
             },
         },
         'env': [
@@ -110,7 +110,7 @@ BUILDS = [
         'addons': {
             'apt': {
                 'sources': ['ubuntu-toolchain-r-test'],
-                'packages': ['g++-5', 'ninja-build', 'valgrind'],
+                'packages': ['g++-5', 'ninja-build', 'valgrind', 'node', 'npm'],
             },
         },
         'env': [
