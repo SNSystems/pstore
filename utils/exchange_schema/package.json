@@ -9,7 +9,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "ajv": "^6.12.4",
-    "yargs": "^16.0.3"
+    "ajv": "^6.12.4"
   }
 }
