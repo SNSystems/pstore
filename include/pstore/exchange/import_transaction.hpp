@@ -105,8 +105,6 @@ namespace pstore {
                 return push_array_rule<names_array_members<TransactionLock>> (this, &transaction_,
                                                                               names_);
             }
-            // For these other keys, the collection of imported names is constant.
-            not_null<import_name_mapping const *> const cnames = names_.get ();
             if (s == "debugline") {
                 return push_object_rule<debug_line_index<TransactionLock>> (this, &transaction_);
             }
