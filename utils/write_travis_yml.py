@@ -91,20 +91,6 @@ BUILDS = [
         ],
         'before_script': [
             'nvm install node'
-        ],
-    },
-    {
-        'os': 'linux',
-        'dist': 'trusty',
-        'addons': {
-            'apt': {
-                'sources': ['ubuntu-toolchain-r-test'],
-                'packages': ['g++-9', 'ninja-build', 'valgrind', 'node', 'npm'],
-            },
-        },
-        'env': [
-            'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
-            'PSTORE_VALGRIND=Yes',
         ]
     },
     {
@@ -113,12 +99,32 @@ BUILDS = [
         'addons': {
             'apt': {
                 'sources': ['ubuntu-toolchain-r-test'],
-                'packages': ['g++-5', 'ninja-build', 'valgrind', 'node', 'npm'],
+                'packages': ['g++-9', 'ninja-build', 'valgrind'],
+            },
+        },
+        'env': [
+            'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
+            'PSTORE_VALGRIND=Yes',
+        ],
+        'before_script': [
+            'nvm install node'
+        ]
+    },
+    {
+        'os': 'linux',
+        'dist': 'trusty',
+        'addons': {
+            'apt': {
+                'sources': ['ubuntu-toolchain-r-test'],
+                'packages': ['g++-5', 'ninja-build', 'valgrind'],
             },
         },
         'env': [
             'MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"',
             'PSTORE_VALGRIND=Yes',
+        ],
+        'before_script': [
+            'nvm install node'
         ]
     },
     {

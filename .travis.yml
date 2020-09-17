@@ -75,10 +75,10 @@ jobs:
                 - g++-9
                 - ninja-build
                 - valgrind
-                - node
-                - npm
                 sources:
                 - ubuntu-toolchain-r-test
+        before_script:
+        - nvm install node
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
@@ -92,10 +92,10 @@ jobs:
                 - g++-9
                 - ninja-build
                 - valgrind
-                - node
-                - npm
                 sources:
                 - ubuntu-toolchain-r-test
+        before_script:
+        - nvm install node
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
@@ -109,10 +109,10 @@ jobs:
                 - g++-5
                 - ninja-build
                 - valgrind
-                - node
-                - npm
                 sources:
                 - ubuntu-toolchain-r-test
+        before_script:
+        - nvm install node
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
@@ -126,10 +126,10 @@ jobs:
                 - g++-5
                 - ninja-build
                 - valgrind
-                - node
-                - npm
                 sources:
                 - ubuntu-toolchain-r-test
+        before_script:
+        - nvm install node
         dist: trusty
         env:
         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
