@@ -122,7 +122,7 @@ namespace {
         static void check_error (std::string const & src, json::error_code err) {
             ASSERT_NE (err, json::error_code::none);
             json::parser<json_out_callbacks> p;
-            std::string res = p.input (src).eof ();
+            std::string const res = p.input (src).eof ();
             EXPECT_EQ (res, "");
             EXPECT_NE (p.last_error (), make_error_code (json::error_code::none));
         }

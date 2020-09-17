@@ -45,6 +45,7 @@ include (add_pstore)
 add_pstore_unit_test (pstore-json-unit-tests
     callbacks.cpp
     callbacks.hpp
+    test_comment.cpp
     test_json.cpp
     test_number.cpp
 )
