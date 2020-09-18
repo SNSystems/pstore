@@ -71,7 +71,7 @@ TEST_F (JsonComment, SingleLeading) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
-        pstore::json::make_parser (proxy_, pstore::json::extensions::bash_comments);
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::bash_comments);
     p.input ("# comment\nnull"s).eof ();
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
@@ -80,7 +80,7 @@ TEST_F (JsonComment, MultipleLeading) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
-        pstore::json::make_parser (proxy_, pstore::json::extensions::bash_comments);
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::bash_comments);
     p.input ("# comment\n\n    # remark\nnull"s).eof ();
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
@@ -89,7 +89,7 @@ TEST_F (JsonComment, Trailing) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
-        pstore::json::make_parser (proxy_, pstore::json::extensions::bash_comments);
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::bash_comments);
     p.input ("null # comment"s).eof ();
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
@@ -101,7 +101,7 @@ TEST_F (JsonComment, InsideArray) {
     EXPECT_CALL (callbacks_, end_array ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
-        pstore::json::make_parser (proxy_, pstore::json::extensions::bash_comments);
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::bash_comments);
     p.input (R"([#comment
 1,     # comment containing #
 2 # comment

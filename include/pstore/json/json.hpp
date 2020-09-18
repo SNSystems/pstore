@@ -122,7 +122,7 @@ namespace pstore {
             return os << '(' << c.row << ':' << c.column << ')';
         }
 
-        enum extensions : unsigned { none = 0U, bash_comments = 1U };
+        enum class parser_extensions : unsigned { none = 0U, bash_comments = 1U };
 
         // clang-format off
         /// \tparam Callbacks  Should be a type containing the following members:
@@ -152,7 +152,7 @@ namespace pstore {
             using result_type = typename Callbacks::result_type;
 
             explicit parser (Callbacks callbacks = Callbacks (),
-                             extensions enabled = extensions::none);
+                             parser_extensions enabled = parser_extensions::none);
 
             ///@{
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
@@ -202,7 +202,7 @@ namespace pstore {
             constexpr Callbacks const & callbacks () const noexcept { return callbacks_; }
             ///@}
 
-            constexpr enum extensions extensions () const noexcept { return extensions_; }
+            constexpr enum parser_extensions extensions () const noexcept { return extensions_; }
 
             /// Returns the parser's position in the input text.
             constexpr coord coordinate () const noexcept { return coordinate_; }
@@ -262,15 +262,16 @@ namespace pstore {
             std::stack<pointer> stack_;
             std::error_code error_;
             Callbacks callbacks_;
-            enum extensions const extensions_;
+            enum parser_extensions const extensions_;
 
             /// The column and row number of the parse within the input stream.
             coord coordinate_{1U, 1U};
         };
 
         template <typename Callbacks>
-        inline parser<Callbacks> make_parser (Callbacks const & callbacks,
-                                              extensions extensions = extensions::none) {
+        inline parser<Callbacks>
+        make_parser (Callbacks const & callbacks,
+                     parser_extensions extensions = parser_extensions::none) {
             return parser<Callbacks>{callbacks, extensions};
         }
 
@@ -1343,6 +1344,8 @@ namespace pstore {
             template <typename Callbacks>
             std::pair<typename matcher<Callbacks>::pointer, bool>
             whitespace_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch) {
+                using extensions_cast_type = std::underlying_type_t<parser_extensions>;
+
                 if (!ch) {
                     this->set_state (done_state);
                 } else {
@@ -1368,7 +1371,9 @@ namespace pstore {
                         case details::char_set::lf: parser.advance_row (); break;
 
                         case '#':
-                            if (parser.extensions () & extensions::bash_comments) {
+                            if (static_cast<extensions_cast_type> (parser.extensions ()) &
+                                static_cast<extensions_cast_type> (
+                                    parser_extensions::bash_comments)) {
                                 this->set_state (comment_state);
                                 break;
                             }
@@ -1387,6 +1392,7 @@ namespace pstore {
                             this->set_state (start_state);
                             return {nullptr, false};
                         }
+                        // Just consume the character.
                         break;
 
                     case done_state: assert (false); break;
@@ -1573,7 +1579,7 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename Callbacks>
-        parser<Callbacks>::parser (Callbacks callbacks, enum extensions const extensions)
+        parser<Callbacks>::parser (Callbacks callbacks, enum parser_extensions const extensions)
                 : callbacks_ (std::move (callbacks))
                 , extensions_{extensions} {
 
