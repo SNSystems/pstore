@@ -49,9 +49,9 @@ using namespace std::string_literals;
 
 namespace {
 
-    class JsonComment : public ::testing::Test {
+    class Comment : public ::testing::Test {
     public:
-        JsonComment ()
+        Comment ()
                 : proxy_{callbacks_} {}
 
     protected:
@@ -61,13 +61,13 @@ namespace {
 
 } // end anonymous namespace
 
-TEST_F (JsonComment, Disabled) {
+TEST_F (Comment, BashDisabled) {
     pstore::json::parser<decltype (proxy_)> p = pstore::json::make_parser (proxy_);
     p.input ("# comment\nnull"s).eof ();
-    EXPECT_TRUE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+    EXPECT_TRUE (p.has_error ());
 }
 
-TEST_F (JsonComment, SingleLeading) {
+TEST_F (Comment, BashSingleLeading) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
@@ -76,7 +76,7 @@ TEST_F (JsonComment, SingleLeading) {
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
 
-TEST_F (JsonComment, MultipleLeading) {
+TEST_F (Comment, BashMultipleLeading) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
@@ -85,7 +85,7 @@ TEST_F (JsonComment, MultipleLeading) {
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
 
-TEST_F (JsonComment, Trailing) {
+TEST_F (Comment, BashTrailing) {
     EXPECT_CALL (callbacks_, null_value ()).Times (1);
 
     pstore::json::parser<decltype (proxy_)> p =
@@ -94,7 +94,7 @@ TEST_F (JsonComment, Trailing) {
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
 }
 
-TEST_F (JsonComment, InsideArray) {
+TEST_F (Comment, BashInsideArray) {
     using testing::_;
     EXPECT_CALL (callbacks_, begin_array ()).Times (1);
     EXPECT_CALL (callbacks_, uint64_value (_)).Times (2);
@@ -109,4 +109,160 @@ TEST_F (JsonComment, InsideArray) {
 )"s)
         .eof ();
     EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, SingleLineDisabled) {
+    pstore::json::parser<decltype (proxy_)> p = pstore::json::make_parser (proxy_);
+    p.input ("// comment\nnull"s).eof ();
+    EXPECT_TRUE (p.has_error ());
+    EXPECT_EQ (p.last_error (), make_error_code (pstore::json::error_code::expected_token));
+}
+
+TEST_F (Comment, SingleLineSingleLeading) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::single_line_comments);
+    p.input ("// comment\nnull"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, SingleLineMultipleLeading) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::single_line_comments);
+    p.input ("// comment\n\n    // remark\nnull"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, SingleLineTrailing) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::single_line_comments);
+    p.input ("null // comment"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, SingleLineInsideArray) {
+    using testing::_;
+    EXPECT_CALL (callbacks_, begin_array ()).Times (1);
+    EXPECT_CALL (callbacks_, uint64_value (_)).Times (2);
+    EXPECT_CALL (callbacks_, end_array ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::single_line_comments);
+    p.input (R"([//comment
+1,    // comment containing //
+2 // comment
+]
+)"s)
+        .eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, SingleLineRowCounting) {
+    using testing::_;
+    EXPECT_CALL (callbacks_, begin_array ()).Times (1);
+    EXPECT_CALL (callbacks_, uint64_value (_)).Times (2);
+    EXPECT_CALL (callbacks_, end_array ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::single_line_comments);
+    p.input (R"([ //comment
+1, // comment
+2 // comment
+] // comment
+// comment
+)"s)
+        .eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+    EXPECT_EQ (p.coordinate (), (pstore::json::coord{1, 6}));
+}
+
+TEST_F (Comment, MultiLineDisabled) {
+    pstore::json::parser<decltype (proxy_)> p = pstore::json::make_parser (proxy_);
+    p.input ("// comment\nnull"s).eof ();
+    EXPECT_TRUE (p.has_error ());
+    EXPECT_EQ (p.last_error (), make_error_code (pstore::json::error_code::expected_token));
+}
+
+TEST_F (Comment, MultiLineSingleLeading) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input ("/* comment */\nnull"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, MultiLineMultipleLeading) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input ("/* comment\ncomment */\nnull"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, MultiLineTrailing) {
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input ("null\n/* comment */\n"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, MultiLineInsideArray) {
+    using testing::_;
+    EXPECT_CALL (callbacks_, begin_array ()).Times (1);
+    EXPECT_CALL (callbacks_, uint64_value (_)).Times (2);
+    EXPECT_CALL (callbacks_, end_array ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input (R"([ /* comment */
+1,    /* comment containing / * */
+2 /* comment */
+]
+)"s)
+        .eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+}
+
+TEST_F (Comment, MultiLineRowCounting) {
+    using testing::_;
+    EXPECT_CALL (callbacks_, begin_array ()).Times (1);
+    EXPECT_CALL (callbacks_, uint64_value (_)).Times (2);
+    EXPECT_CALL (callbacks_, end_array ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input (R"([ /*comment */
+1, /* comment
+comment
+*/
+2 /* comment */
+]
+/* comment
+comment */
+)"s)
+        .eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+    EXPECT_EQ (p.coordinate (), (pstore::json::coord{1, 9}));
+}
+
+// A missing multi-line comment close is currently ignored. It could reasonably raise an error, but
+// at this point I've chosen not to do so.
+TEST_F (Comment, MultiLineUnclosed) {
+    using testing::_;
+    EXPECT_CALL (callbacks_, null_value ()).Times (1);
+
+    pstore::json::parser<decltype (proxy_)> p =
+        pstore::json::make_parser (proxy_, pstore::json::parser_extensions::multi_line_comments);
+    p.input ("null /*comment"s).eof ();
+    EXPECT_FALSE (p.has_error ()) << "JSON error was: " << p.last_error ().message ();
+    EXPECT_EQ (p.coordinate (), (pstore::json::coord{15, 1}));
 }

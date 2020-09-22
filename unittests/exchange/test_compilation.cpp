@@ -184,7 +184,8 @@ TEST_F (ExchangeCompilation, Empty) {
                                               std::end (definitions));
 
         pstore::exchange::export_compilation (exported_compilation_stream, export_db_,
-                                              *export_db_.getro (compilation), exported_names);
+                                              *export_db_.getro (compilation), exported_names,
+                                              false);
         transaction.commit ();
     }
 
@@ -260,7 +261,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         pstore::extent<pstore::repo::fragment> const fext =
             build_fragment (transaction, fragment_digest);
         pstore::exchange::export_fragment (exported_fragment_stream, export_db_, exported_names,
-                                           export_db_.getro (fext));
+                                           export_db_.getro (fext), false);
 
         std::vector<pstore::repo::compilation_member> definitions{
             {fragment_digest, fext, indir_strings[name1], pstore::repo::linkage::external,
@@ -274,7 +275,8 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
                                               std::end (definitions));
 
         pstore::exchange::export_compilation (exported_compilation_stream, export_db_,
-                                              *export_db_.getro (compilation), exported_names);
+                                              *export_db_.getro (compilation), exported_names,
+                                              false);
         transaction.commit ();
     }
 

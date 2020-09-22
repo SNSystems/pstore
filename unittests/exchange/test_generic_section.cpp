@@ -98,7 +98,7 @@ TEST_F (GenericSection, RoundTripForAnEmptySection) {
     pstore::exchange::export_name_mapping exported_names;
     pstore::repo::section_content exported_content;
     std::string const exported_json =
-        export_section<kind> (export_db_, exported_names, exported_content);
+        export_section<kind> (export_db_, exported_names, exported_content, false);
 
 
 
@@ -170,8 +170,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
 
 
     std::string const exported_json =
-        export_section<kind> (export_db_, exported_names, exported_content);
-
+        export_section<kind> (export_db_, exported_names, exported_content, false);
 
 
 

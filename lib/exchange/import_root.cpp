@@ -136,7 +136,7 @@ namespace pstore {
         // create import parser
         // ~~~~~~~~~~~~~~~~~~~~
         json::parser<callbacks> create_import_parser (database & db) {
-            return json::make_parser (callbacks::make<root> (&db));
+            return json::make_parser (callbacks::make<root> (&db), json::parser_extensions::all);
         }
 
     } // end namespace exchange

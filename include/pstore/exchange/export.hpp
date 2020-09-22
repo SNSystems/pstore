@@ -50,7 +50,7 @@
 namespace pstore {
     namespace exchange {
 
-        void export_database (database & db, export_ostream & os);
+        void export_database (database & db, export_ostream & os, bool comments);
 
     } // end namespace exchange
 } // end namespace pstore

@@ -67,12 +67,12 @@ namespace pstore {
         template <typename OStream, typename XFixupIterator>
         OStream & export_external_fixups (OStream & os, database const & db,
                                           export_name_mapping const & names, XFixupIterator first,
-                                          XFixupIterator last) {
+                                          XFixupIterator last, bool comments) {
             emit_array (
                 os, first, last, indent6, [&] (OStream & os1, repo::external_fixup const & xfx) {
                     os1 << indent7 << "{\n";
                     os1 << indent8 << R"("name":)" << names.index (xfx.name) << ',';
-                    show_string (os1, db, xfx.name);
+                    show_string (os1, db, xfx.name, comments);
                     os1 << '\n';
                     os1 << indent8 << R"("type":)" << static_cast<unsigned> (xfx.type) << ",\n";
                     os1 << indent8 << R"("offset":)" << xfx.offset << ",\n";

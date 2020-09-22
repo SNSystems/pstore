@@ -55,7 +55,8 @@ namespace pstore {
 
         template <typename OStream>
         void export_fragment (OStream & os, database const & db, export_name_mapping const & names,
-                              std::shared_ptr<repo::fragment const> const & fragment) {
+                              std::shared_ptr<repo::fragment const> const & fragment,
+                              bool comments) {
             os << "{\n";
             auto const * section_sep = "";
             for (repo::section_kind const section : *fragment) {
@@ -63,7 +64,7 @@ namespace pstore {
 #define X(a)                                                                                       \
 case repo::section_kind::a:                                                                        \
     export_section<pstore::repo::section_kind::a> (                                                \
-        os, db, names, fragment->at<pstore::repo::section_kind::a> ());                            \
+        os, db, names, fragment->at<pstore::repo::section_kind::a> (), comments);                  \
     break;
                 switch (section) {
                     PSTORE_MCREPO_SECTION_KINDS
@@ -81,7 +82,7 @@ case repo::section_kind::a:                                                     
 
 
         void fragments (export_ostream & os, database const & db, unsigned const generation,
-                        export_name_mapping const & names);
+                        export_name_mapping const & names, bool comments);
 
     } // end namespace exchange
 } // end namespace pstore

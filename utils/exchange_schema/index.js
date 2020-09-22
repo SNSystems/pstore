@@ -46,6 +46,7 @@
 
 const Ajv = require ('ajv');
 const fs = require ('fs');
+const strip_json_comments = require ('strip-json-comments');
 const util = require ('util');
 
 // Convert `fs.readFile()` into a function that takes the
@@ -53,7 +54,7 @@ const util = require ('util');
 const read_file = util.promisify (fs.readFile);
 
 async function read_json (path) {
-    return JSON.parse (await read_file (path, 'utf-8'));
+    return JSON.parse(strip_json_comments (await read_file (path, 'utf-8')));
 }
 
 async function read_schema (schema_path) {

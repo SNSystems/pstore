@@ -107,7 +107,7 @@ namespace {
 namespace pstore {
     namespace exchange {
 
-        void export_database (database & db, export_ostream & os) {
+        void export_database (database & db, export_ostream & os, bool comments) {
             export_name_mapping string_table;
             os << "{\n";
             os << indent1 << R"("version":1,)" << '\n';
@@ -115,30 +115,29 @@ namespace pstore {
 
             auto const f = footers (db);
             assert (std::distance (std::begin (f), std::end (f)) >= 1);
-            emit_array (
-                os, std::next (std::begin (f)), std::end (f), indent1,
-                [&db, &string_table] (export_ostream & os1,
-                                      pstore::typed_address<pstore::trailer> const footer_pos) {
-                    auto const footer = db.getro (footer_pos);
-                    unsigned const generation = footer->a.generation;
-                    db.sync (generation);
-                    os1 << indent2 << "{\n";
-                    if (comments) {
-                        os1 << indent3 << "// generation " << generation << '\n';
-                    }
-                    os1 << indent3 << R"("names":)";
-                    export_names (os1, db, generation, &string_table);
-                    os1 << ",\n" << indent3 << R"("debugline":{)";
-                    debug_line (os1, db, generation);
-                    os1 << '\n' << indent3 << "},\n";
-                    os1 << indent3 << R"("fragments":{)";
-                    fragments (os1, db, generation, string_table);
-                    os1 << '\n' << indent3 << "},\n";
-                    os1 << indent3 << R"("compilations":{)";
-                    export_compilation_index (os1, db, generation, string_table);
-                    os1 << '\n' << indent3 << "}\n";
-                    os1 << indent2 << '}';
-                });
+            emit_array (os, std::next (std::begin (f)), std::end (f), indent1,
+                        [&] (export_ostream & os1,
+                             pstore::typed_address<pstore::trailer> const footer_pos) {
+                            auto const footer = db.getro (footer_pos);
+                            unsigned const generation = footer->a.generation;
+                            db.sync (generation);
+                            os1 << indent2 << "{\n";
+                            if (comments) {
+                                os1 << indent3 << "// generation " << generation << '\n';
+                            }
+                            os1 << indent3 << R"("names":)";
+                            export_names (os1, db, generation, &string_table);
+                            os1 << ",\n" << indent3 << R"("debugline":{)";
+                            debug_line (os1, db, generation);
+                            os1 << '\n' << indent3 << "},\n";
+                            os1 << indent3 << R"("fragments":{)";
+                            fragments (os1, db, generation, string_table, comments);
+                            os1 << '\n' << indent3 << "},\n";
+                            os1 << indent3 << R"("compilations":{)";
+                            export_compilation_index (os1, db, generation, string_table, comments);
+                            os1 << '\n' << indent3 << "}\n";
+                            os1 << indent2 << '}';
+                        });
             os << "\n}\n";
         }
 

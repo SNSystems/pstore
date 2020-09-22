@@ -81,7 +81,8 @@ namespace pstore {
 
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & db,
-                                      export_name_mapping const & names, Content const & content) {
+                                      export_name_mapping const & names, Content const & content,
+                                      bool comments) {
                     auto const * separator = "";
                     {
                         auto const align = content.align ();
@@ -109,7 +110,8 @@ namespace pstore {
                         repo::container<repo::external_fixup> const xfx = content.xfixups ();
                         if (!xfx.empty ()) {
                             os << ",\n" << indent6 << R"("xfixups":)";
-                            export_external_fixups (os, db, names, std::begin (xfx), std::end (xfx));
+                            export_external_fixups (os, db, names, std::begin (xfx), std::end (xfx),
+                                                    comments);
                         }
                     }
                     os << '\n';
@@ -126,7 +128,7 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
-                                      repo::bss_section const & content) {
+                                      repo::bss_section const & content, bool /*comments*/) {
                     auto const * separator = "";
                     {
                         auto const align = content.align ();
@@ -152,7 +154,7 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
-                                      repo::debug_line_section const & content) {
+                                      repo::debug_line_section const & content, bool /*comments*/) {
                     assert (content.align () == 1U);
                     assert (content.xfixups ().size () == 0U);
 
@@ -186,7 +188,7 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, database const & db,
                                       export_name_mapping const & names,
-                                      repo::dependents const & content) {
+                                      repo::dependents const & content, bool comments) {
                     return emit_array (
                         os, std::begin (content), std::end (content), indent6,
                         [] (OStream & os1, typed_address<repo::compilation_member> const & d) {
@@ -201,9 +203,10 @@ namespace pstore {
         template <repo::section_kind Kind, typename OStream,
                   typename Content = typename repo::enum_to_section<Kind>::type>
         OStream & export_section (OStream & os, database const & db,
-                                  export_name_mapping const & names, Content const & content) {
+                                  export_name_mapping const & names, Content const & content,
+                                  bool comments) {
             os << "{\n";
-            details::section_exporter<Kind>{}(os, db, names, content);
+            details::section_exporter<Kind>{}(os, db, names, content, comments);
             os << indent5 << '}';
             return os;
         }

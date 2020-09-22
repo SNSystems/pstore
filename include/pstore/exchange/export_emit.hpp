@@ -146,14 +146,14 @@ namespace pstore {
 
         } // namespace details
 
-        constexpr bool comments = false;
         template <typename OStream>
         OStream & show_string (OStream & os, pstore::database const & db,
-                               pstore::typed_address<pstore::indirect_string> const addr) {
+                               pstore::typed_address<pstore::indirect_string> const addr,
+                               bool comments) {
             if (comments) {
                 auto const str = serialize::read<pstore::indirect_string> (
                     serialize::archive::database_reader{db, addr.to_address ()});
-                os << "  // \"" << str << '"';
+                os << R"( //")" << str << '"';
             }
             return os;
         }

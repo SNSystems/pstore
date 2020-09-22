@@ -318,7 +318,7 @@ TEST_F (ExchangeExternalFixups, ExternalEmpty) {
     std::ostringstream os;
     pstore::exchange::export_name_mapping names;
     pstore::exchange::export_external_fixups (os, export_db_, names, std::begin (xfixups),
-                                              std::end (xfixups));
+                                              std::end (xfixups), false);
 
     // Setup the parse.
     xfixup_collection imported_xfixups;
@@ -367,7 +367,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     // Export the external fixup array to the 'exported_fixups' string-stream.
     std::ostringstream exported_fixups;
     pstore::exchange::export_external_fixups (exported_fixups, export_db_, exported_names,
-                                              std::begin (xfixups), std::end (xfixups));
+                                              std::begin (xfixups), std::end (xfixups), false);
 
 
 

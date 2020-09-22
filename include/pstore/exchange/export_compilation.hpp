@@ -80,19 +80,19 @@ case repo::linkage::a: return os << #a;
         template <typename OStream>
         void export_compilation (OStream & os, database const & db,
                                  pstore::repo::compilation const & compilation,
-                                 export_name_mapping const & names) {
+                                 export_name_mapping const & names, bool comments) {
             os << "{\n" << indent5 << R"("path":)" << names.index (compilation.path ()) << ',';
-            show_string (os, db, compilation.path ());
+            show_string (os, db, compilation.path (), comments);
             os << '\n' << indent5 << R"("triple":)" << names.index (compilation.triple ()) << ',';
-            show_string (os, db, compilation.triple ());
+            show_string (os, db, compilation.triple (), comments);
             os << '\n' << indent5 << R"("definitions":)";
             emit_array (os, compilation.begin (), compilation.end (), indent5,
-                        [&db, &names] (OStream & os1, repo::compilation_member const & d) {
+                        [&] (OStream & os1, repo::compilation_member const & d) {
                             os1 << indent6 << "{\n";
                             os1 << indent7 << R"("digest":")" << d.digest.to_hex_string ()
                                 << "\",\n";
                             os1 << indent7 << R"("name":)" << names.index (d.name) << ',';
-                            show_string (os1, db, d.name);
+                            show_string (os1, db, d.name, comments);
                             os1 << '\n';
                             os1 << indent7 << R"("linkage":")" << d.linkage () << "\",\n";
                             os1 << indent7 << R"("visibility":")" << d.visibility () << "\"\n";
@@ -104,7 +104,7 @@ case repo::linkage::a: return os << #a;
 
         template <typename OStream>
         void export_compilation_index (OStream & os, database const & db, unsigned const generation,
-                                       export_name_mapping const & names) {
+                                       export_name_mapping const & names, bool comments) {
             auto const compilations = index::get_index<trailer::indices::compilation> (db);
             if (!compilations || compilations->empty ()) {
                 return;
@@ -117,7 +117,7 @@ case repo::linkage::a: return os << #a;
             for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
                 os << sep << indent4 << '\"' << kvp.first.to_hex_string () << R"(":)";
-                export_compilation (os, db, *db.getro (kvp.second), names);
+                export_compilation (os, db, *db.getro (kvp.second), names, comments);
                 sep = ",\n";
             }
         }

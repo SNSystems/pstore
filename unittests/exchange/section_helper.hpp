@@ -78,14 +78,14 @@ decltype (auto) build_section (pstore::gsl::not_null<std::vector<std::uint8_t> *
 template <pstore::repo::section_kind Kind>
 std::string export_section (pstore::database const & db,
                             pstore::exchange::export_name_mapping const & exported_names,
-                            pstore::repo::section_content const & content) {
+                            pstore::repo::section_content const & content, bool comments) {
     // First build the section that we want to export.
     std::vector<std::uint8_t> buffer;
     auto const section = build_section<Kind> (&buffer, content);
 
     // Now export it.
     std::ostringstream os;
-    pstore::exchange::export_section<Kind> (os, db, exported_names, *section);
+    pstore::exchange::export_section<Kind> (os, db, exported_names, *section, comments);
     return os.str ();
 }
 

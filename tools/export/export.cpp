@@ -70,7 +70,7 @@ int main (int argc, char * argv[]) {
 
         pstore::exchange::export_ostream os{stdout};
         pstore::database db{db_path.get (), pstore::database::access_mode::read_only};
-        export_database (db, os);
+        export_database (db, os, true);
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
