@@ -62,6 +62,8 @@ namespace pstore {
             import_name_mapping (import_name_mapping const &) = delete;
             import_name_mapping (import_name_mapping &&) noexcept = delete;
 
+            ~import_name_mapping () noexcept = default;
+
             import_name_mapping & operator= (import_name_mapping const &) = delete;
             import_name_mapping & operator= (import_name_mapping &&) noexcept = delete;
 

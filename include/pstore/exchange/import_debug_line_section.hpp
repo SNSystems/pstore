@@ -47,11 +47,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LIINE_SECTION_HPP
-#define PSTORE_EXCHANGE_IMPORT_DEBUG_LIINE_SECTION_HPP
+#ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_SECTION_HPP
+#define PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_SECTION_HPP
 
-#include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/digest_from_string.hpp"
+#include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 
 namespace pstore {
@@ -81,6 +81,8 @@ namespace pstore {
             }
             import_debug_line_section (import_debug_line_section const &) = delete;
             import_debug_line_section (import_debug_line_section &&) noexcept = delete;
+
+            ~import_debug_line_section () noexcept override = default;
 
             import_debug_line_section & operator= (import_debug_line_section const &) = delete;
             import_debug_line_section & operator= (import_debug_line_section &&) noexcept = delete;
@@ -128,13 +130,14 @@ namespace pstore {
             }
             auto const header_extent = pos->second;
 
-            if (error_or<repo::section_content *> const content = this->content_object ()) {
-                *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (
-                    *digest, header_extent, content.get ());
-                return this->pop ();
-            } else {
+            error_or<repo::section_content *> const content = this->content_object ();
+            if (!content) {
                 return content.get_error ();
             }
+
+            *out_ = std::make_unique<repo::debug_line_section_creation_dispatcher> (
+                *digest, header_extent, content.get ());
+            return this->pop ();
         }
 
 
@@ -142,4 +145,4 @@ namespace pstore {
     } // end namespace exchange
 } // end namespace pstore
 
-#endif // PSTORE_EXCHANGE_IMPORT_DEBUG_LIINE_SECTION_HPP
+#endif // PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_SECTION_HPP

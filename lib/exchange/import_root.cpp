@@ -52,9 +52,6 @@
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/exchange/import_transaction.hpp"
 
-using namespace pstore;
-using namespace exchange;
-
 namespace {
 
     //*               _         _     _        _    *
@@ -62,24 +59,27 @@ namespace {
     //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
     //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
     //*                            |__/             *
-    class root_object final : public import_rule {
+    class import_root_object final : public pstore::exchange::import_rule {
     public:
-        root_object (parse_stack_pointer const stack, not_null<database *> const db)
+        using db_pointer = pstore::gsl::not_null<pstore::database *>;
+
+        import_root_object (parse_stack_pointer const stack, db_pointer const db)
                 : import_rule (stack)
                 , db_{db} {}
-        root_object (root_object const &) = delete;
-        root_object (root_object &&) noexcept = delete;
+        import_root_object (import_root_object const &) = delete;
+        import_root_object (import_root_object &&) noexcept = delete;
+        ~import_root_object () noexcept override = default;
 
-        root_object & operator= (root_object const &) = delete;
-        root_object & operator= (root_object &&) noexcept = delete;
+        import_root_object & operator= (import_root_object const &) = delete;
+        import_root_object & operator= (import_root_object &&) noexcept = delete;
 
-        gsl::czstring name () const noexcept override;
+        pstore::gsl::czstring name () const noexcept override;
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
 
     private:
-        not_null<database *> const db_;
-        import_name_mapping names_;
+        db_pointer const db_;
+        pstore::exchange::import_name_mapping names_;
 
         enum { version, transactions };
         std::bitset<transactions + 1> seen_;
@@ -88,28 +88,29 @@ namespace {
 
     // name
     // ~~~~
-    gsl::czstring root_object::name () const noexcept { return "root object"; }
+    pstore::gsl::czstring import_root_object::name () const noexcept { return "root object"; }
 
     // key
     // ~~~
-    std::error_code root_object::key (std::string const & k) {
+    std::error_code import_root_object::key (std::string const & k) {
         // TODO: check that 'version' is the first key that we see.
         if (k == "version") {
             seen_[version] = true;
-            return push<uint64_rule> (&version_);
+            return push<pstore::exchange::uint64_rule> (&version_);
         }
         if (k == "transactions") {
             seen_[transactions] = true;
-            return push<transaction_array<transaction_lock>> (db_, &names_);
+            return push<pstore::exchange::import_transaction_array<pstore::transaction_lock>> (
+                db_, &names_);
         }
-        return import_error::unrecognized_root_key;
+        return pstore::exchange::import_error::unrecognized_root_key;
     }
 
     // end object
     // ~~~~~~~~~~
-    std::error_code root_object::end_object () {
+    std::error_code import_root_object::end_object () {
         if (!seen_.all ()) {
-            return import_error::root_object_was_incomplete;
+            return pstore::exchange::import_error::root_object_was_incomplete;
         }
         return {};
     }
@@ -126,17 +127,18 @@ namespace pstore {
         //*                    *
         // name
         // ~~~~
-        gsl::czstring root::name () const noexcept { return "root"; }
+        gsl::czstring import_root::name () const noexcept { return "root"; }
 
         // begin object
         // ~~~~~~~~~~~~
-        std::error_code root::begin_object () { return push<root_object> (db_); }
+        std::error_code import_root::begin_object () { return push<import_root_object> (db_); }
 
 
         // create import parser
         // ~~~~~~~~~~~~~~~~~~~~
         json::parser<callbacks> create_import_parser (database & db) {
-            return json::make_parser (callbacks::make<root> (&db), json::parser_extensions::all);
+            return json::make_parser (callbacks::make<import_root> (&db),
+                                      json::parser_extensions::all);
         }
 
     } // end namespace exchange

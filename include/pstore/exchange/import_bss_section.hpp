@@ -52,8 +52,8 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 
@@ -77,6 +77,8 @@ namespace pstore {
 
             import_bss_section (import_bss_section const &) = delete;
             import_bss_section (import_bss_section &&) = delete;
+
+            ~import_bss_section () noexcept override = default;
 
             import_bss_section & operator= (import_bss_section const &) = delete;
             import_bss_section & operator= (import_bss_section &&) = delete;

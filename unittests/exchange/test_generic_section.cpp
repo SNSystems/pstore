@@ -82,7 +82,7 @@ namespace {
 
     template <typename ImportRule, typename... Args>
     decltype (auto) make_json_object_parser (Args... args) {
-        using rule = pstore::exchange::object_rule<ImportRule, Args...>;
+        using rule = pstore::exchange::import_object_rule<ImportRule, Args...>;
         return pstore::json::make_parser (pstore::exchange::callbacks::make<rule> (args...));
     }
 
@@ -184,7 +184,7 @@ TEST_F (GenericSection, RoundTripForPopulated) {
         auto transaction = begin (import_db_, transaction_lock{mutex});
 
         auto parser = pstore::json::make_parser (
-            pstore::exchange::callbacks::make<pstore::exchange::array_rule<
+            pstore::exchange::callbacks::make<pstore::exchange::import_array_rule<
                 pstore::exchange::names_array_members<transaction_lock>, decltype (&transaction),
                 decltype (&imported_names)>> (&transaction, &imported_names));
         parser.input (exported_names_stream.str ()).eof ();

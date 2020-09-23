@@ -107,21 +107,23 @@ namespace pstore {
         //*         |__/                              *
         //-MARK: object rule
         template <typename NextState, typename... Args>
-        class object_rule final : public import_rule {
+        class import_object_rule final : public import_rule {
         public:
-            explicit object_rule (parse_stack_pointer const stack, Args... args)
+            explicit import_object_rule (parse_stack_pointer const stack, Args... args)
                     : import_rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
-            object_rule (object_rule const &) = delete;
-            object_rule (object_rule &&) noexcept = delete;
+            import_object_rule (import_object_rule const &) = delete;
+            import_object_rule (import_object_rule &&) noexcept = delete;
 
-            object_rule & operator= (object_rule const &) = delete;
-            object_rule & operator= (object_rule &&) noexcept = delete;
+            ~import_object_rule () noexcept override = default;
+
+            import_object_rule & operator= (import_object_rule const &) = delete;
+            import_object_rule & operator= (import_object_rule &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "object rule"; }
 
             std::error_code begin_object () override {
-                cxx17shim::apply (&object_rule::replace_top<NextState, Args...>,
+                cxx17shim::apply (&import_object_rule::replace_top<NextState, Args...>,
                                   std::tuple_cat (std::make_tuple (this), args_));
                 return {};
             }
@@ -132,7 +134,7 @@ namespace pstore {
 
         template <typename Next, typename... Args>
         std::error_code push_object_rule (import_rule * const rule, Args... args) {
-            return rule->push<object_rule<Next, Args...>> (args...);
+            return rule->push<import_object_rule<Next, Args...>> (args...);
         }
 
 
@@ -143,19 +145,21 @@ namespace pstore {
         //*                    |__/                   *
         //-MARK: array rule
         template <typename NextRule, typename... Args>
-        class array_rule final : public import_rule {
+        class import_array_rule final : public import_rule {
         public:
-            explicit array_rule (parse_stack_pointer stack, Args... args)
+            explicit import_array_rule (parse_stack_pointer stack, Args... args)
                     : import_rule (stack)
                     , args_{std::forward_as_tuple (args...)} {}
-            array_rule (array_rule const &) = delete;
-            array_rule (array_rule &&) noexcept = delete;
+            import_array_rule (import_array_rule const &) = delete;
+            import_array_rule (import_array_rule &&) noexcept = delete;
 
-            array_rule & operator= (array_rule const &) = delete;
-            array_rule & operator= (array_rule &&) noexcept = delete;
+            ~import_array_rule () noexcept override = default;
+
+            import_array_rule & operator= (import_array_rule const &) = delete;
+            import_array_rule & operator= (import_array_rule &&) noexcept = delete;
 
             std::error_code begin_array () override {
-                cxx17shim::apply (&array_rule::replace_top<NextRule, Args...>,
+                cxx17shim::apply (&import_array_rule::replace_top<NextRule, Args...>,
                                   std::tuple_cat (std::make_tuple (this), args_));
                 return {};
             }
@@ -168,7 +172,7 @@ namespace pstore {
 
         template <typename NextRule, typename... Args>
         std::error_code push_array_rule (import_rule * const rule, Args... args) {
-            return rule->push<array_rule<NextRule, Args...>> (args...);
+            return rule->push<import_array_rule<NextRule, Args...>> (args...);
         }
 
     } // end namespace exchange

@@ -62,17 +62,18 @@ namespace pstore {
     namespace exchange {
 
         template <typename TransactionLock>
-        class debug_line_index final : public import_rule {
+        class import_debug_line_index final : public import_rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
+            using transaction_pointer = gsl::not_null<transaction<TransactionLock> *>;
 
-            debug_line_index (parse_stack_pointer const stack,
-                              transaction_pointer const transaction);
-            debug_line_index (debug_line_index const &) = delete;
-            debug_line_index (debug_line_index &&) noexcept = delete;
+            import_debug_line_index (parse_stack_pointer stack, transaction_pointer transaction);
+            import_debug_line_index (import_debug_line_index const &) = delete;
+            import_debug_line_index (import_debug_line_index &&) noexcept = delete;
 
-            debug_line_index & operator= (debug_line_index const &) = delete;
-            debug_line_index & operator= (debug_line_index &&) noexcept = delete;
+            ~import_debug_line_index () noexcept override = default;
+
+            import_debug_line_index & operator= (import_debug_line_index const &) = delete;
+            import_debug_line_index & operator= (import_debug_line_index &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override;
 
@@ -90,8 +91,8 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        debug_line_index<TransactionLock>::debug_line_index (parse_stack_pointer const stack,
-                                                             transaction_pointer const transaction)
+        import_debug_line_index<TransactionLock>::import_debug_line_index (
+            parse_stack_pointer const stack, transaction_pointer const transaction)
                 : import_rule (stack)
                 , index_{index::get_index<trailer::indices::debug_line_header> (transaction->db ())}
                 , transaction_{transaction} {}
@@ -99,14 +100,15 @@ namespace pstore {
         // name
         // ~~~~
         template <typename TransactionLock>
-        gsl::czstring debug_line_index<TransactionLock>::name () const noexcept {
+        gsl::czstring import_debug_line_index<TransactionLock>::name () const noexcept {
             return "debug line index";
         }
 
         // string value
         // ~~~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code debug_line_index<TransactionLock>::string_value (std::string const & s) {
+        std::error_code
+        import_debug_line_index<TransactionLock>::string_value (std::string const & s) {
             // Decode the received string to get the raw binary.
             std::vector<std::uint8_t> data;
             if (!from_base64 (std::begin (s), std::end (s), std::back_inserter (data))) {
@@ -130,7 +132,7 @@ namespace pstore {
         // key
         // ~~~
         template <typename TransactionLock>
-        std::error_code debug_line_index<TransactionLock>::key (std::string const & s) {
+        std::error_code import_debug_line_index<TransactionLock>::key (std::string const & s) {
             if (maybe<uint128> const digest = digest_from_string (s)) {
                 digest_ = *digest;
                 return {};
@@ -141,7 +143,7 @@ namespace pstore {
         // end object
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code debug_line_index<TransactionLock>::end_object () {
+        std::error_code import_debug_line_index<TransactionLock>::end_object () {
             return pop ();
         }
 

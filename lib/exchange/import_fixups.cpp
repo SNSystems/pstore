@@ -74,9 +74,9 @@ namespace pstore {
         //-MARK:import internal fixup
         // (ctor)
         // ~~~~~~
-        import_internal_fixup::import_internal_fixup (
-            parse_stack_pointer const stack, names_pointer const /*names*/,
-            not_null<std::vector<repo::internal_fixup> *> const fixups)
+        import_internal_fixup::import_internal_fixup (parse_stack_pointer const stack,
+                                                      names_pointer const /*names*/,
+                                                      fixups_pointer const fixups)
                 : import_rule (stack)
                 , fixups_{fixups} {}
 
@@ -128,9 +128,9 @@ namespace pstore {
         //-MARK:import external fixup
         // (ctor)
         // ~~~~~~
-        import_external_fixup::import_external_fixup (
-            parse_stack_pointer const stack, names_pointer const names,
-            not_null<std::vector<repo::external_fixup> *> const fixups)
+        import_external_fixup::import_external_fixup (parse_stack_pointer const stack,
+                                                      names_pointer const names,
+                                                      fixups_pointer const fixups)
                 : import_rule (stack)
                 , names_{names}
                 , fixups_{fixups} {}

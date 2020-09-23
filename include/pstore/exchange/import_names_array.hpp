@@ -51,8 +51,8 @@
 #define PSTORE_EXCHANGE_IMPORT_NAMES_ARRAY_HPP
 
 #include "pstore/core/transaction.hpp"
-#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -63,10 +63,12 @@ namespace pstore {
             using transaction_pointer = not_null<transaction<TransactionLock> *>;
             using names_pointer = not_null<import_name_mapping *>;
 
-            names_array_members (parse_stack_pointer const stack,
-                                 transaction_pointer const transaction, names_pointer const names);
+            names_array_members (parse_stack_pointer stack, transaction_pointer transaction,
+                                 names_pointer names);
             names_array_members (names_array_members const &) = delete;
             names_array_members (names_array_members &&) noexcept = delete;
+
+            ~names_array_members () noexcept override = default;
 
             names_array_members & operator= (names_array_members const &) = delete;
             names_array_members & operator= (names_array_members &&) noexcept = delete;

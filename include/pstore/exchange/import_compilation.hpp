@@ -79,8 +79,8 @@ namespace pstore {
             using names_pointer = not_null<import_name_mapping const *>;
             using db_pointer = not_null<database const *>;
 
-            import_definition (parse_stack_pointer const stack, container_pointer const definitions,
-                               names_pointer const names, db_pointer db,
+            import_definition (parse_stack_pointer stack, container_pointer definitions,
+                               names_pointer names, db_pointer db,
                                fragment_index_pointer const & fragments);
             import_definition (import_definition const &) = delete;
             import_definition (import_definition &&) noexcept = delete;
@@ -121,9 +121,9 @@ namespace pstore {
             using names_pointer = not_null<import_name_mapping const *>;
             using definition_container_pointer = not_null<import_definition::container *>;
 
-            import_definition_object (parse_stack_pointer const stack,
-                                      definition_container_pointer const definitions,
-                                      names_pointer const names, database const & db,
+            import_definition_object (parse_stack_pointer stack,
+                                      definition_container_pointer definitions, names_pointer names,
+                                      database const & db,
                                       fragment_index_pointer const & fragments);
             import_definition_object (import_definition_object const &) = delete;
             import_definition_object (import_definition_object &&) noexcept = delete;
@@ -170,7 +170,7 @@ namespace pstore {
             ~import_compilation () noexcept override = default;
 
             import_compilation & operator= (import_compilation const &) = delete;
-            import_compilation & operator== (import_compilation &&) noexcept = delete;
+            import_compilation & operator= (import_compilation &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override { return "compilation"; }
 
@@ -247,12 +247,11 @@ namespace pstore {
         template <typename TransactionLock>
         class import_compilations_index final : public import_rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = import_name_mapping const *;
+            using transaction_pointer = gsl::not_null<transaction<TransactionLock> *>;
+            using names_pointer = gsl::not_null<import_name_mapping const *>;
 
-            import_compilations_index (parse_stack_pointer const stack,
-                                       transaction_pointer const transaction,
-                                       names_pointer const names);
+            import_compilations_index (parse_stack_pointer stack, transaction_pointer transaction,
+                                       names_pointer names);
             import_compilations_index (import_compilations_index const &) = delete;
             import_compilations_index (import_compilations_index &&) noexcept = delete;
             ~import_compilations_index () noexcept override = default;

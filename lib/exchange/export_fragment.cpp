@@ -56,8 +56,9 @@
 namespace pstore {
     namespace exchange {
 
-        void fragments (export_ostream & os, pstore::database const & db, unsigned const generation,
-                        export_name_mapping const & names, bool comments) {
+        void export_fragments (export_ostream & os, pstore::database const & db,
+                               unsigned const generation, export_name_mapping const & names,
+                               bool comments) {
             auto const fragments =
                 pstore::index::get_index<pstore::trailer::indices::fragment> (db);
             if (!fragments->empty ()) {

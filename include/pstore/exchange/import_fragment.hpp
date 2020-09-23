@@ -156,18 +156,20 @@ case section_kind::a:                                                           
         //*              |___/                                          *
         //-MARK: fragment index
         template <typename TransactionLock>
-        class fragment_index final : public import_rule {
+        class import_fragment_index final : public import_rule {
         public:
-            using transaction_pointer = transaction<TransactionLock> *;
-            using names_pointer = import_name_mapping const *;
+            using transaction_pointer = gsl::not_null<transaction<TransactionLock> *>;
+            using names_pointer = gsl::not_null<import_name_mapping const *>;
 
-            fragment_index (parse_stack_pointer const stack, transaction_pointer const transaction,
-                            names_pointer const names);
-            fragment_index (fragment_index const &) = delete;
-            fragment_index (fragment_index &&) noexcept = delete;
+            import_fragment_index (parse_stack_pointer stack, transaction_pointer transaction,
+                                   names_pointer names);
+            import_fragment_index (import_fragment_index const &) = delete;
+            import_fragment_index (import_fragment_index &&) noexcept = delete;
 
-            fragment_index & operator= (fragment_index const &) = delete;
-            fragment_index & operator= (fragment_index &&) noexcept = delete;
+            ~import_fragment_index () noexcept override = default;
+
+            import_fragment_index & operator= (import_fragment_index const &) = delete;
+            import_fragment_index & operator= (import_fragment_index &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override;
             std::error_code key (std::string const & s) override;
@@ -184,9 +186,9 @@ case section_kind::a:                                                           
         // (ctor)
         // ~~~~~~
         template <typename TransactionLock>
-        fragment_index<TransactionLock>::fragment_index (parse_stack_pointer const stack,
-                                                         transaction_pointer const transaction,
-                                                         names_pointer const names)
+        import_fragment_index<TransactionLock>::import_fragment_index (
+            parse_stack_pointer const stack, transaction_pointer const transaction,
+            names_pointer const names)
                 : import_rule (stack)
                 , transaction_{transaction}
                 , names_{names} {
@@ -197,14 +199,14 @@ case section_kind::a:                                                           
         // name
         // ~~~~
         template <typename TransactionLock>
-        gsl::czstring fragment_index<TransactionLock>::name () const noexcept {
+        gsl::czstring import_fragment_index<TransactionLock>::name () const noexcept {
             return "fragment index";
         }
 
         // key
         // ~~~
         template <typename TransactionLock>
-        std::error_code fragment_index<TransactionLock>::key (std::string const & s) {
+        std::error_code import_fragment_index<TransactionLock>::key (std::string const & s) {
             if (maybe<index::digest> const digest = digest_from_string (s)) {
                 digest_ = *digest;
                 return push_object_rule<fragment_sections<TransactionLock>> (this, transaction_,
@@ -216,7 +218,7 @@ case section_kind::a:                                                           
         // end object
         // ~~~~~~~~~~
         template <typename TransactionLock>
-        std::error_code fragment_index<TransactionLock>::end_object () {
+        std::error_code import_fragment_index<TransactionLock>::end_object () {
             return pop ();
         }
 

@@ -48,8 +48,8 @@
 #include <string>
 
 #include "pstore/adt/sstring_view.hpp"
-#include "pstore/support/gsl.hpp"
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
 

@@ -71,10 +71,11 @@ namespace pstore {
         class import_generic_section : public import_rule {
         public:
             using content_pointer = not_null<repo::section_content *>;
+            using db_pointer = not_null<database *>;
             using names_pointer = not_null<import_name_mapping const *>;
 
             import_generic_section (parse_stack_pointer const stack, repo::section_kind const kind,
-                                    not_null<database *>, names_pointer const names,
+                                    db_pointer, names_pointer const names,
                                     content_pointer const content,
                                     not_null<OutputIterator *> const out) noexcept
                     : import_rule (stack)
@@ -85,6 +86,8 @@ namespace pstore {
 
             import_generic_section (import_generic_section const &) = delete;
             import_generic_section (import_generic_section &&) noexcept = delete;
+
+            ~import_generic_section () noexcept override = default;
 
             import_generic_section & operator= (import_generic_section const &) = delete;
             import_generic_section & operator= (import_generic_section &&) noexcept = delete;

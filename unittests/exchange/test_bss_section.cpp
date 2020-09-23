@@ -83,7 +83,7 @@ namespace {
 
     template <typename ImportRule, typename... Args>
     decltype (auto) make_json_object_parser (Args... args) {
-        using rule = pstore::exchange::object_rule<ImportRule, Args...>;
+        using rule = pstore::exchange::import_object_rule<ImportRule, Args...>;
         return pstore::json::make_parser (pstore::exchange::callbacks::make<rule> (args...));
     }
 

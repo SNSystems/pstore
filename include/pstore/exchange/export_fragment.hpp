@@ -79,10 +79,8 @@ case repo::section_kind::a:                                                     
             os << '\n' << indent4 << '}';
         }
 
-
-
-        void fragments (export_ostream & os, database const & db, unsigned const generation,
-                        export_name_mapping const & names, bool comments);
+        void export_fragments (export_ostream & os, database const & db, unsigned generation,
+                               export_name_mapping const & names, bool comments);
 
     } // end namespace exchange
 } // end namespace pstore

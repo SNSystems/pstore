@@ -71,7 +71,7 @@ namespace {
     template <typename ImportRule, typename... Args>
     auto make_json_array_parser (Args &&... args)
         -> pstore::json::parser<pstore::exchange::callbacks> {
-        using rule = pstore::exchange::array_rule<ImportRule, Args...>;
+        using rule = pstore::exchange::import_array_rule<ImportRule, Args...>;
         return pstore::json::make_parser (
             pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
     }
@@ -79,7 +79,7 @@ namespace {
     template <typename ImportRule, typename... Args>
     auto make_json_object_parser (Args &&... args)
         -> pstore::json::parser<pstore::exchange::callbacks> {
-        using rule = pstore::exchange::object_rule<ImportRule, Args...>;
+        using rule = pstore::exchange::import_object_rule<ImportRule, Args...>;
         return pstore::json::make_parser (
             pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
     }

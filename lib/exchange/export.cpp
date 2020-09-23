@@ -61,10 +61,7 @@
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 
-using namespace pstore::exchange;
-
 namespace {
-
 
     decltype (auto) footers (pstore::database const & db) {
         auto const num_transactions = db.get_current_revision () + 1;
@@ -79,10 +76,8 @@ namespace {
         return footers;
     }
 
-
-
-
-    void debug_line (export_ostream & os, pstore::database const & db, unsigned const generation) {
+    void export_debug_line (pstore::exchange::export_ostream & os, pstore::database const & db,
+                            unsigned const generation) {
         auto const debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
@@ -91,10 +86,12 @@ namespace {
             for (pstore::address const & addr :
                  pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
-                os << sep << indent4 << '"' << kvp.first.to_hex_string () << R"(":")";
+                os << sep << pstore::exchange::indent4 << '"' << kvp.first.to_hex_string ()
+                   << R"(":")";
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
                 auto const * const ptr = data.get ();
-                pstore::to_base64 (ptr, ptr + kvp.second.size, ostream_inserter{os});
+                pstore::to_base64 (ptr, ptr + kvp.second.size,
+                                   pstore::exchange::ostream_inserter{os});
                 os << '"';
 
                 sep = ",\n";
@@ -128,10 +125,10 @@ namespace pstore {
                             os1 << indent3 << R"("names":)";
                             export_names (os1, db, generation, &string_table);
                             os1 << ",\n" << indent3 << R"("debugline":{)";
-                            debug_line (os1, db, generation);
+                            export_debug_line (os1, db, generation);
                             os1 << '\n' << indent3 << "},\n";
                             os1 << indent3 << R"("fragments":{)";
-                            fragments (os1, db, generation, string_table, comments);
+                            export_fragments (os1, db, generation, string_table, comments);
                             os1 << '\n' << indent3 << "},\n";
                             os1 << indent3 << R"("compilations":{)";
                             export_compilation_index (os1, db, generation, string_table, comments);

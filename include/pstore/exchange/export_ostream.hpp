@@ -47,8 +47,8 @@
 #include <cstdio>
 #include <string>
 
-#include "pstore/support/gsl.hpp"
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -58,7 +58,12 @@ namespace pstore {
             explicit export_ostream (FILE * const os)
                     : os_ (os) {}
             export_ostream (export_ostream const &) = delete;
+            export_ostream (export_ostream &&) = delete;
+
+            ~export_ostream () noexcept = default;
+
             export_ostream & operator= (export_ostream const &) = delete;
+            export_ostream & operator= (export_ostream &&) = delete;
 
             export_ostream & write (char c);
             export_ostream & write (std::uint16_t v);

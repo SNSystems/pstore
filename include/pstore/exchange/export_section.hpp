@@ -44,11 +44,11 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_SECTION_HPP
 #define PSTORE_EXCHANGE_EXPORT_SECTION_HPP
 
+#include "pstore/exchange/export_fixups.hpp"
+#include "pstore/exchange/export_ostream.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/support/base64.hpp"
-#include "pstore/exchange/export_fixups.hpp"
-#include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
     namespace exchange {

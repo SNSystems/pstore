@@ -72,6 +72,8 @@ namespace pstore {
                 section_name (section_name const &) = delete;
                 section_name (section_name &&) noexcept = delete;
 
+                ~section_name () noexcept override = default;
+
                 section_name & operator= (section_name const &) = delete;
                 section_name & operator= (section_name &&) noexcept = delete;
 
@@ -94,11 +96,14 @@ namespace pstore {
         class import_internal_fixup final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
+            using fixups_pointer = not_null<std::vector<repo::internal_fixup> *>;
 
-            import_internal_fixup (parse_stack_pointer const stack, names_pointer const names,
-                                   not_null<std::vector<repo::internal_fixup> *> const fixups);
+            import_internal_fixup (parse_stack_pointer stack, names_pointer names,
+                                   fixups_pointer fixups);
             import_internal_fixup (import_internal_fixup const &) = delete;
             import_internal_fixup (import_internal_fixup &&) noexcept = delete;
+
+            ~import_internal_fixup () noexcept override = default;
 
             import_internal_fixup & operator= (import_internal_fixup const &) = delete;
             import_internal_fixup & operator= (import_internal_fixup &&) noexcept = delete;
@@ -111,7 +116,7 @@ namespace pstore {
             enum { section, type, offset, addend };
             std::bitset<addend + 1> seen_;
 
-            not_null<std::vector<repo::internal_fixup> *> const fixups_;
+            fixups_pointer const fixups_;
 
             repo::section_kind section_ = repo::section_kind::last;
             std::uint64_t type_ = 0;
@@ -129,11 +134,14 @@ namespace pstore {
         class import_external_fixup final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
+            using fixups_pointer = not_null<std::vector<repo::external_fixup> *>;
 
-            import_external_fixup (parse_stack_pointer const stack, names_pointer const names,
-                                   not_null<std::vector<repo::external_fixup> *> const fixups);
+            import_external_fixup (parse_stack_pointer stack, names_pointer names,
+                                   fixups_pointer fixups);
             import_external_fixup (import_external_fixup const &) = delete;
             import_external_fixup (import_external_fixup &&) noexcept = delete;
+
+            ~import_external_fixup () noexcept override = default;
 
             import_external_fixup & operator= (import_external_fixup const &) = delete;
             import_external_fixup & operator= (import_external_fixup &&) noexcept = delete;
@@ -146,7 +154,7 @@ namespace pstore {
             enum { name_index, type, offset, addend };
             names_pointer const names_;
             std::bitset<addend + 1> seen_;
-            not_null<std::vector<repo::external_fixup> *> const fixups_;
+            fixups_pointer const fixups_;
 
             std::uint64_t name_ = 0;
             std::uint64_t type_ = 0;
@@ -165,14 +173,17 @@ namespace pstore {
         class fixups_object final : public import_rule {
         public:
             using names_pointer = not_null<import_name_mapping const *>;
+            using fixups_pointer = not_null<std::vector<Fixup> *>;
 
             fixups_object (parse_stack_pointer const stack, names_pointer const names,
-                           not_null<std::vector<Fixup> *> const fixups)
+                           fixups_pointer const fixups)
                     : import_rule (stack)
                     , names_{names}
                     , fixups_{fixups} {}
             fixups_object (fixups_object const &) = delete;
             fixups_object (fixups_object &&) noexcept = delete;
+
+            ~fixups_object () noexcept override = default;
 
             fixups_object & operator= (fixups_object const &) = delete;
             fixups_object & operator= (fixups_object &&) noexcept = delete;
@@ -183,7 +194,7 @@ namespace pstore {
 
         private:
             names_pointer const names_;
-            not_null<std::vector<Fixup> *> const fixups_;
+            fixups_pointer const fixups_;
         };
 
         using ifixups_object = fixups_object<import_internal_fixup, repo::internal_fixup>;

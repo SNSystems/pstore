@@ -63,9 +63,9 @@ namespace {
 
     using internal_fixup_collection = std::vector<pstore::repo::internal_fixup>;
     using internal_fixup_array_root =
-        pstore::exchange::array_rule<pstore::exchange::ifixups_object,
-                                     pstore::exchange::import_name_mapping *,
-                                     internal_fixup_collection *>;
+        pstore::exchange::import_array_rule<pstore::exchange::ifixups_object,
+                                            pstore::exchange::import_name_mapping *,
+                                            internal_fixup_collection *>;
 
 } // end anonymous namespace
 
@@ -297,9 +297,9 @@ namespace {
 
         using transaction_lock = std::unique_lock<mock_mutex>;
         using xfixup_array_root =
-            pstore::exchange::array_rule<pstore::exchange::xfixups_object,
-                                         pstore::exchange::import_name_mapping *,
-                                         xfixup_collection *>;
+            pstore::exchange::import_array_rule<pstore::exchange::xfixups_object,
+                                                pstore::exchange::import_name_mapping *,
+                                                xfixup_collection *>;
 
         InMemoryStore export_store_;
         pstore::database export_db_;
@@ -378,7 +378,7 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     pstore::exchange::import_name_mapping imported_names;
     {
         auto parser = pstore::json::make_parser (
-            pstore::exchange::callbacks::make<pstore::exchange::array_rule<
+            pstore::exchange::callbacks::make<pstore::exchange::import_array_rule<
                 pstore::exchange::names_array_members<transaction_lock>, decltype (&transaction),
                 decltype (&imported_names)>> (&transaction, &imported_names));
 

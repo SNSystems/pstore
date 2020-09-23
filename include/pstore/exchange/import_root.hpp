@@ -53,16 +53,17 @@ namespace pstore {
 
     namespace exchange {
 
-        class root final : public import_rule {
+        class import_root final : public import_rule {
         public:
-            root (parse_stack_pointer const stack, not_null<database *> const db)
+            import_root (parse_stack_pointer const stack, not_null<database *> const db)
                     : import_rule (stack)
                     , db_{db} {}
-            root (root const &) = delete;
-            root (root &&) noexcept = delete;
+            import_root (import_root const &) = delete;
+            import_root (import_root &&) noexcept = delete;
+            ~import_root () noexcept override = default;
 
-            root & operator= (root const &) = delete;
-            root & operator= (root &&) noexcept = delete;
+            import_root & operator= (import_root const &) = delete;
+            import_root & operator= (import_root &&) noexcept = delete;
 
             gsl::czstring name () const noexcept override;
             std::error_code begin_object () override;
