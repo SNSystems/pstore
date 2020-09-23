@@ -165,14 +165,14 @@ TEST_F (MCRepoFixture, DumpFragment) {
                                name, linkage::internal, visibility::default_vis};
     }
 
-    std::array<pstore::typed_address<compilation_member>, 1> dependents{{addr}};
+    std::array<pstore::typed_address<compilation_member>, 1> linked_definitions{{addr}};
 
     // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
     // various sections.
     std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
     dispatchers.emplace_back (new generic_section_creation_dispatcher (data.kind, &data));
-    dispatchers.emplace_back (new dependents_creation_dispatcher (
-        dependents.data (), dependents.data () + dependents.size ()));
+    dispatchers.emplace_back (new linked_definitions_creation_dispatcher (
+        linked_definitions.data (), linked_definitions.data () + linked_definitions.size ()));
 
     auto fragment = fragment::load (
         *db_, fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
@@ -203,7 +203,8 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x3"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("-", "type", ":", "dependent"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("-", "type", ":", "linked_definitions"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));

@@ -59,8 +59,8 @@
 #include "pstore/core/transaction.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
-#include "pstore/mcrepo/dependents_section.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
+#include "pstore/mcrepo/linked_definitions_section.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/support/aligned.hpp"
@@ -137,8 +137,8 @@ namespace pstore {
             using type = debug_line_section;
         };
         template <>
-        struct enum_to_section<section_kind::dependent> {
-            using type = dependents;
+        struct enum_to_section<section_kind::linked_definitions> {
+            using type = linked_definitions;
         };
 
         //*   __                             _    *

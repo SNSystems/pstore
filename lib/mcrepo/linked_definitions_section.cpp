@@ -1,16 +1,16 @@
-//*      _                           _            _        *
-//*   __| | ___ _ __   ___ _ __   __| | ___ _ __ | |_ ___  *
-//*  / _` |/ _ \ '_ \ / _ \ '_ \ / _` |/ _ \ '_ \| __/ __| *
-//* | (_| |  __/ |_) |  __/ | | | (_| |  __/ | | | |_\__ \ *
-//*  \__,_|\___| .__/ \___|_| |_|\__,_|\___|_| |_|\__|___/ *
-//*            |_|                                         *
+//*  _ _       _            _       _       __ _       _ _   _                  *
+//* | (_)_ __ | | _____  __| |   __| | ___ / _(_)_ __ (_) |_(_) ___  _ __  ___  *
+//* | | | '_ \| |/ / _ \/ _` |  / _` |/ _ \ |_| | '_ \| | __| |/ _ \| '_ \/ __| *
+//* | | | | | |   <  __/ (_| | | (_| |  __/  _| | | | | | |_| | (_) | | | \__ \ *
+//* |_|_|_| |_|_|\_\___|\__,_|  \__,_|\___|_| |_|_| |_|_|\__|_|\___/|_| |_|___/ *
+//*                                                                             *
 //*                _   _              *
 //*  ___  ___  ___| |_(_) ___  _ __   *
 //* / __|/ _ \/ __| __| |/ _ \| '_ \  *
 //* \__ \  __/ (__| |_| | (_) | | | | *
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
-//===- lib/mcrepo/dependents_section.cpp ----------------------------------===//
+//===- lib/mcrepo/linked_definitions_section.cpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,38 +47,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/mcrepo/dependents_section.hpp"
+#include "pstore/mcrepo/linked_definitions_section.hpp"
 
 namespace pstore {
     namespace repo {
 
-        //*     _                       _         _        *
-        //*  __| |___ _ __  ___ _ _  __| |___ _ _| |_ ___  *
-        //* / _` / -_) '_ \/ -_) ' \/ _` / -_) ' \  _(_-<  *
-        //* \__,_\___| .__/\___|_||_\__,_\___|_||_\__/__/  *
-        //*          |_|                                   *
+        //*  _ _      _          _      _      __ _      _ _   _              *
+        //* | (_)_ _ | |_____ __| |  __| |___ / _(_)_ _ (_) |_(_)___ _ _  ___ *
+        //* | | | ' \| / / -_) _` | / _` / -_)  _| | ' \| |  _| / _ \ ' \(_-< *
+        //* |_|_|_||_|_\_\___\__,_| \__,_\___|_| |_|_||_|_|\__|_\___/_||_/__/ *
+        //*                                                                   *
         // size_bytes
         // ~~~~~~~~~~
-        std::size_t dependents::size_bytes (std::uint64_t const size) noexcept {
+        std::size_t linked_definitions::size_bytes (std::uint64_t const size) noexcept {
             if (size == 0) {
                 return 0;
             }
-            return sizeof (dependents) - sizeof (dependents::compilation_members_) +
-                   sizeof (dependents::compilation_members_[0]) * size;
+            return sizeof (linked_definitions) - sizeof (linked_definitions::compilation_members_) +
+                   sizeof (linked_definitions::compilation_members_[0]) * size;
         }
 
         // size_bytes
         // ~~~~~~~~~~
-        /// Returns the number of bytes of storage required for the dependents.
-        std::size_t dependents::size_bytes () const noexcept { return size_bytes (this->size ()); }
+        /// Returns the number of bytes of storage required for the linked definitions.
+        std::size_t linked_definitions::size_bytes () const noexcept {
+            return size_bytes (this->size ());
+        }
 
         // load
         // ~~~~
-        std::shared_ptr<dependents const>
-        dependents::load (database const & db, typed_address<dependents> const dependent) {
+        std::shared_ptr<linked_definitions const>
+        linked_definitions::load (database const & db, typed_address<linked_definitions> const ld) {
             // First work out its size, then read the full-size of the object.
-            std::shared_ptr<dependents const> const ln = db.getro (dependent);
-            return db.getro (dependent, dependents::size_bytes (ln->size ()));
+            std::shared_ptr<linked_definitions const> const ln = db.getro (ld);
+            return db.getro (ld, linked_definitions::size_bytes (ln->size ()));
         }
 
 
@@ -87,24 +89,25 @@ namespace pstore {
         //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
         //* \__|_| \___\__,_|\__|_\___/_||_| \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
         //*                                            |_|                              *
-        std::size_t dependents_creation_dispatcher::size_bytes () const {
+        std::size_t linked_definitions_creation_dispatcher::size_bytes () const {
             static_assert (sizeof (std::uint64_t) >= sizeof (std::uintptr_t),
                            "sizeof uint64_t should be at least sizeof uintptr_t");
-            return dependents::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
+            return linked_definitions::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
         }
 
-        std::uint8_t * dependents_creation_dispatcher::write (std::uint8_t * const out) const {
+        std::uint8_t *
+        linked_definitions_creation_dispatcher::write (std::uint8_t * const out) const {
             assert (this->aligned (out) == out);
             if (begin_ == end_) {
                 return out;
             }
-            auto * const dependent = new (out) dependents (begin_, end_);
+            auto * const dependent = new (out) linked_definitions (begin_, end_);
             return out + dependent->size_bytes ();
         }
 
         std::uintptr_t
-        dependents_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
-            return pstore::aligned<dependents> (in);
+        linked_definitions_creation_dispatcher::aligned_impl (std::uintptr_t const in) const {
+            return pstore::aligned<linked_definitions> (in);
         }
 
 
