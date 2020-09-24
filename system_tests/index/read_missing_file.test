@@ -1,5 +1,8 @@
 # Try to dump a missing data store.
 XFAIL: *
-RUN: mkdir -p "%T/read_missing_file"
-RUN: "%binaries/pstore-read" "%T/read_missing_file/foo.db"
+
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
+
+RUN: "%binaries/pstore-read" "%t/foo.db"
 

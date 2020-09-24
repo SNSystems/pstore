@@ -4,7 +4,6 @@
 ; type text.
 
 ; %S = the test source directory
-; %T = the test output directory
 ; %binaries = the directories containing the executable binaries
 ; %s = source path (path to the file currently being run)
 ; %t = temporary file name unique to the test

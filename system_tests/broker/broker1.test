@@ -2,13 +2,13 @@
 ## messages at it. We check that the broker responds correctly to those
 ## commands.
 
-# %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
 REQUIRES: broker
-RUN: %python "%S/broker1.py" "%binaries" > "%T/broker1_actual.txt"
-RUN: diff "%T/broker1_actual.txt" "%S/broker1_expected.txt"
+RUN: %python "%S/broker1.py" "%binaries" > "%t"
+RUN: diff "%t" "%S/broker1_expected.txt"
 
 #eof broker1.test
 

@@ -1,10 +1,12 @@
 # This test fuzzes input to the vacuumd utility.
 
-# %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
-RUN: "%python" "%S/fuzz.py" --temp-dir="%stores" --binary-dir="%binaries" -- vacuumd "%binaries/pstore-vacuumd"
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
+
+RUN: "%python" "%S/fuzz.py" --temp-dir="%t" --binary-dir="%binaries" -- vacuumd "%binaries/pstore-vacuumd"
 
 #eof vacuumd.test

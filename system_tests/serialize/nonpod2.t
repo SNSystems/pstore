@@ -1,6 +1,8 @@
-# %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
+
 REQUIRES: examples
-RUN: %binaries/example-nonpod2 > %T/nonpod2_actual.txt
-RUN: diff %T/nonpod2_actual.txt %S/nonpod2_expected.txt
+
+RUN: "%binaries/example-nonpod2" > "%t"
+RUN: diff "%t" "%S/nonpod2_expected.txt"

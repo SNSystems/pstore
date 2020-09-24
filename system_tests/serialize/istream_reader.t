@@ -1,6 +1,7 @@
-# %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
+
 REQUIRES: examples
-RUN: %binaries/example-istream-reader > %T/istream_reader_actual.txt
-RUN: diff %T/istream_reader_actual.txt %S/istream_reader_expected.txt
+RUN: "%binaries/example-istream-reader" > "%t"
+RUN: diff "%t" "%S/istream_reader_expected.txt"

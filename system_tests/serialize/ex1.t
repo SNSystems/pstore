@@ -1,6 +1,7 @@
-# %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
+
 REQUIRES: examples
-RUN: %binaries/example-write-integers > %T/ex1_actual.txt
-RUN: diff %T/ex1_actual.txt %S/ex1_expected.txt
+RUN: "%binaries/example-write-integers" > "%t"
+RUN: diff "%t" "%S/ex1_expected.txt"
