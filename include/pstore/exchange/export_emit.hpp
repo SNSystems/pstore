@@ -66,7 +66,7 @@ namespace pstore {
             constexpr unsigned distance () const noexcept { return distance_; }
 
         private:
-            explicit constexpr indent (unsigned distance) noexcept
+            explicit constexpr indent (unsigned const distance) noexcept
                     : distance_{distance} {}
             unsigned distance_ = 0U;
         };
@@ -154,7 +154,7 @@ namespace pstore {
         template <typename OStream>
         OStream & show_string (OStream & os, pstore::database const & db,
                                pstore::typed_address<pstore::indirect_string> const addr,
-                               bool comments) {
+                               bool const comments) {
             if (comments) {
                 auto const str = serialize::read<pstore::indirect_string> (
                     serialize::archive::database_reader{db, addr.to_address ()});

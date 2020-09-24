@@ -75,7 +75,7 @@ namespace pstore {
             using names_pointer = not_null<import_name_mapping const *>;
 
             import_generic_section (parse_stack_pointer const stack, repo::section_kind const kind,
-                                    db_pointer, names_pointer const names,
+                                    db_pointer const, names_pointer const names,
                                     content_pointer const content,
                                     not_null<OutputIterator *> const out) noexcept
                     : import_rule (stack)

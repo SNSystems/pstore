@@ -63,11 +63,12 @@ namespace pstore {
         template <typename OutputIterator>
         class import_bss_section : public import_rule {
         public:
-            using names_pointer = not_null<import_name_mapping const *>;
             using content_pointer = not_null<repo::section_content *>;
+            using db_pointer = not_null<database const *>;
+            using names_pointer = not_null<import_name_mapping const *>;
 
             import_bss_section (parse_stack_pointer const stack, repo::section_kind const kind,
-                                not_null<database const *> /*db*/, names_pointer const /*names*/,
+                                db_pointer const /*db*/, names_pointer const /*names*/,
                                 content_pointer const content,
                                 not_null<OutputIterator *> const out) noexcept
                     : import_rule (stack)

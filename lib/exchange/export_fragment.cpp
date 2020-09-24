@@ -58,7 +58,7 @@ namespace pstore {
 
         void export_fragments (export_ostream & os, indent const ind, pstore::database const & db,
                                unsigned const generation, export_name_mapping const & names,
-                               bool comments) {
+                               bool const comments) {
             auto const fragments =
                 pstore::index::get_index<pstore::trailer::indices::fragment> (db);
             if (!fragments->empty ()) {

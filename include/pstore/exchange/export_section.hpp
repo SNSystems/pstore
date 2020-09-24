@@ -128,7 +128,7 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, indent const ind, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
-                                      repo::bss_section const & content, bool /*comments*/) {
+                                      repo::bss_section const & content, bool const /*comments*/) {
                     auto const * separator = "";
                     {
                         auto const align = content.align ();
@@ -154,7 +154,8 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, indent const ind, database const & /*db*/,
                                       export_name_mapping const & /*names*/,
-                                      repo::debug_line_section const & content, bool /*comments*/) {
+                                      repo::debug_line_section const & content,
+                                      bool const /*comments*/) {
                     assert (content.align () == 1U);
                     assert (content.xfixups ().size () == 0U);
 
@@ -188,7 +189,7 @@ namespace pstore {
                 template <typename OStream>
                 OStream & operator() (OStream & os, indent const ind, database const & db,
                                       export_name_mapping const & names,
-                                      repo::dependents const & content, bool comments) {
+                                      repo::dependents const & content, bool const comments) {
                     return emit_array (os, ind, std::begin (content), std::end (content),
                                        [] (OStream & os1, indent const /*ind1*/,
                                            typed_address<repo::compilation_member> const & d) {
@@ -203,7 +204,7 @@ namespace pstore {
                   typename Content = typename repo::enum_to_section<Kind>::type>
         OStream & export_section (OStream & os, indent const ind, database const & db,
                                   export_name_mapping const & names, Content const & content,
-                                  bool comments) {
+                                  bool const comments) {
             os << "{\n";
             details::section_exporter<Kind>{}(os, ind.next (), db, names, content, comments);
             os << ind << '}';

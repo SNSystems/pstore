@@ -76,8 +76,9 @@ namespace {
         return footers;
     }
 
-    void export_debug_line (pstore::exchange::export_ostream & os, pstore::exchange::indent ind,
-                            pstore::database const & db, unsigned const generation) {
+    void export_debug_line (pstore::exchange::export_ostream & os,
+                            pstore::exchange::indent const ind, pstore::database const & db,
+                            unsigned const generation) {
         auto const debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
