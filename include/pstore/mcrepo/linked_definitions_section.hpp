@@ -125,21 +125,20 @@ namespace pstore {
             /// \name Storage
             ///@{
 
-            /// Returns the number of bytes of storage required for the dependents with
+            /// Returns the number of bytes of storage required for an instance of this class with
             /// 'size' children.
             static std::size_t size_bytes (std::uint64_t size) noexcept;
 
-            /// Returns the number of bytes of storage required for the dependents.
+            /// Returns the number of bytes of storage required for the linked_definitions instance.
             std::size_t size_bytes () const noexcept;
             ///@}
 
-            /// \brief Returns a pointer to the dependents instance.
+            /// \brief Returns a pointer to the linked_definitions instance.
             ///
-            /// \param db The database from which the dependents should be loaded.
-            /// \param dependent Address of the dependents in the store.
-            /// \result A pointer to the dependents in-store memory.
-            static auto load (database const & db,
-                              typed_address<linked_definitions> const dependent)
+            /// \param db The database from which the linked_definitions should be loaded.
+            /// \param ld Address of the linked definitions record in the store.
+            /// \result A pointer to the linked_definitions in-store memory.
+            static auto load (database const & db, typed_address<linked_definitions> const ld)
                 -> std::shared_ptr<linked_definitions const>;
 
         private:
@@ -223,11 +222,11 @@ namespace pstore {
             using type = linked_definitions_creation_dispatcher;
         };
 
-        class dependents_dispatcher final : public dispatcher {
+        class linked_definitions_dispatcher final : public dispatcher {
         public:
-            explicit dependents_dispatcher (linked_definitions const & d) noexcept
+            explicit linked_definitions_dispatcher (linked_definitions const & d) noexcept
                     : d_{d} {}
-            ~dependents_dispatcher () noexcept override;
+            ~linked_definitions_dispatcher () noexcept override;
 
             std::size_t size_bytes () const final { return d_.size_bytes (); }
             unsigned align () const final { error (); }
@@ -244,7 +243,7 @@ namespace pstore {
 
         template <>
         struct section_to_dispatcher<linked_definitions> {
-            using type = dependents_dispatcher;
+            using type = linked_definitions_dispatcher;
         };
 
     } // end namespace repo

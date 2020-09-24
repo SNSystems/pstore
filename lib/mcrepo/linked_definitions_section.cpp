@@ -116,9 +116,9 @@ namespace pstore {
         //* / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
         //* \__,_|_/__/ .__/\__,_|\__\__|_||_\___|_|   *
         //*           |_|                              *
-        dependents_dispatcher::~dependents_dispatcher () noexcept = default;
+        linked_definitions_dispatcher::~linked_definitions_dispatcher () noexcept = default;
 
-        PSTORE_NO_RETURN void dependents_dispatcher::error () const {
+        PSTORE_NO_RETURN void linked_definitions_dispatcher::error () const {
             pstore::raise_error_code (make_error_code (error_code::bad_fragment_type));
         }
 

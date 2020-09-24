@@ -57,7 +57,8 @@ namespace {
     /// The size and alignment necessary for a buffer into which any of the dispatcher subclasses
     /// can be successfully constructed. This must list all of the dispatcher subclasses.
     using dispatcher_characteristics =
-        pstore::characteristics<section_dispatcher, dependents_dispatcher>;
+        pstore::characteristics<section_dispatcher, bss_section_dispatcher, debug_line_dispatcher,
+                                linked_definitions_dispatcher>;
 
     /// A type which is suitable for holding an instance of any of the dispatcher subclasses.
     using dispatcher_buffer = std::aligned_storage<dispatcher_characteristics::size,

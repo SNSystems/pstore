@@ -213,7 +213,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
                                             external_fixup{indirect_string_address (5), 5, 5, 5}));
 }
 
-TEST_F (FragmentTest, MakeTextSectionWithDependents) {
+TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
 
