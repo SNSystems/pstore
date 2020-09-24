@@ -52,7 +52,6 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    // TODO: cl::desc is used as the short-form list of arguments. We're providing full help text!
     cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
                                   cl::desc ("Path of the pstore repository to be exported."),
                                   cl::required);
