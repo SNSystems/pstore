@@ -47,7 +47,6 @@ include (add_pstore)
 set (pstore_exchange_include_dir "${PSTORE_ROOT_DIR}/include/pstore/exchange/")
 set (pstore_exchange_includes
     array_helpers.hpp
-    digest_from_string.hpp
     export.hpp
     export_compilation.hpp
     export_emit.hpp
@@ -74,7 +73,6 @@ set (pstore_exchange_includes
     import_transaction.hpp
 )
 set (pstore_exchange_sources
-    digest_from_string.cpp
     export.cpp
     export_emit.cpp
     export_fixups.cpp

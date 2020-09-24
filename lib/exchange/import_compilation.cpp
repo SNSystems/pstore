@@ -107,7 +107,7 @@ namespace pstore {
                 return import_error::definition_was_incomplete;
             }
 
-            auto const digest = digest_from_string (digest_);
+            auto const digest = uint128::from_hex_string (digest_);
             if (!digest) {
                 return import_error::bad_digest;
             }

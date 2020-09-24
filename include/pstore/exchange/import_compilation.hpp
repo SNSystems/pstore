@@ -52,7 +52,6 @@
 
 #include <bitset>
 
-#include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_names.hpp"
@@ -296,7 +295,7 @@ namespace pstore {
         // ~~~
         template <typename TransactionLock>
         std::error_code import_compilations_index<TransactionLock>::key (std::string const & s) {
-            if (maybe<index::digest> const digest = digest_from_string (s)) {
+            if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
                 return push_object_rule<import_compilation<TransactionLock>> (
                     this, transaction_, names_, fragments_, index::digest{*digest});
             }

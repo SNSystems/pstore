@@ -50,7 +50,6 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_SECTION_HPP
 #define PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_SECTION_HPP
 
-#include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 
@@ -115,7 +114,7 @@ namespace pstore {
         // ~~~~~~~~~~
         template <typename OutputIterator>
         std::error_code import_debug_line_section<OutputIterator>::end_object () {
-            maybe<index::digest> const digest = exchange::digest_from_string (header_digest_);
+            maybe<index::digest> const digest = uint128::from_hex_string (header_digest_);
             if (!digest) {
                 return import_error::bad_digest;
             }

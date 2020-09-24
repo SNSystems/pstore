@@ -62,7 +62,7 @@ namespace pstore {
             public:
                 ~parser () noexcept override = default;
                 maybe<dump::digest_opt> operator() (std::string const & v) const {
-                    maybe<index::digest> const d = dump::digest_from_string (v);
+                    maybe<index::digest> const d = uint128::from_hex_string (v);
                     return d ? just (dump::digest_opt{*d}) : nothing<dump::digest_opt> ();
                 }
             };

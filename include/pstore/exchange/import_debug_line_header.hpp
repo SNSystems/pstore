@@ -53,7 +53,6 @@
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/transaction.hpp"
-#include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/support/base64.hpp"
@@ -133,7 +132,7 @@ namespace pstore {
         // ~~~
         template <typename TransactionLock>
         std::error_code import_debug_line_index<TransactionLock>::key (std::string const & s) {
-            if (maybe<uint128> const digest = digest_from_string (s)) {
+            if (maybe<uint128> const digest = uint128::from_hex_string (s)) {
                 digest_ = *digest;
                 return {};
             }

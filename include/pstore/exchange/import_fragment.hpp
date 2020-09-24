@@ -54,7 +54,6 @@
 #include <vector>
 
 #include "pstore/core/index_types.hpp"
-#include "pstore/exchange/digest_from_string.hpp"
 #include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/import_section_to_importer.hpp"
 #include "pstore/mcrepo/fragment.hpp"
@@ -207,7 +206,7 @@ case section_kind::a:                                                           
         // ~~~
         template <typename TransactionLock>
         std::error_code import_fragment_index<TransactionLock>::key (std::string const & s) {
-            if (maybe<index::digest> const digest = digest_from_string (s)) {
+            if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
                 digest_ = *digest;
                 return push_object_rule<fragment_sections<TransactionLock>> (this, transaction_,
                                                                              names_, &digest_);
