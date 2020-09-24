@@ -72,6 +72,11 @@ int main (int argc, char * argv[]) {
     PSTORE_TRY {
         cl::parse_command_line_options (argc, argv, "pstore import utility\n");
 
+        if (pstore::file::exists (db_path.get ())) {
+            std::cerr << "The import database must not be an existing file.\n";
+            return EXIT_FAILURE;
+        }
+
         // TODO: check that db_path does not exist.
         pstore::database db{db_path.get (), pstore::database::access_mode::writable};
         FILE * infile = json_source.get_num_occurrences () > 0
