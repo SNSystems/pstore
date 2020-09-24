@@ -82,14 +82,10 @@ set (pstore_exchange_sources
     import_compilation.cpp
     import_error.cpp
     import_fixups.cpp
-    import_fragment.cpp
     import_names.cpp
-    import_names_array.cpp
-    import_non_terminals.cpp
     import_root.cpp
     import_rule.cpp
     import_terminals.cpp
-    import_transaction.cpp
 )
 
 add_pstore_library (

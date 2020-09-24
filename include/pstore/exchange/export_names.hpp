@@ -47,7 +47,6 @@
 #include <cstdint>
 #include <unordered_map>
 
-
 #include "pstore/core/address.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
