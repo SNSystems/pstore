@@ -54,17 +54,19 @@ namespace pstore {
     namespace exchange {
 
         template <typename OStream>
-        void export_fragment (OStream & os, database const & db, export_name_mapping const & names,
+        void export_fragment (OStream & os, indent const ind, database const & db,
+                              export_name_mapping const & names,
                               std::shared_ptr<repo::fragment const> const & fragment,
                               bool comments) {
             os << "{\n";
             auto const * section_sep = "";
             for (repo::section_kind const section : *fragment) {
-                os << section_sep << indent5 << '"' << section_name (section) << R"(":)";
+                auto const object_indent = ind.next ();
+                os << section_sep << object_indent << '"' << section_name (section) << R"(":)";
 #define X(a)                                                                                       \
 case repo::section_kind::a:                                                                        \
     export_section<pstore::repo::section_kind::a> (                                                \
-        os, db, names, fragment->at<pstore::repo::section_kind::a> (), comments);                  \
+        os, object_indent, db, names, fragment->at<pstore::repo::section_kind::a> (), comments);   \
     break;
                 switch (section) {
                     PSTORE_MCREPO_SECTION_KINDS
@@ -76,11 +78,12 @@ case repo::section_kind::a:                                                     
 #undef X
                 section_sep = ",\n";
             }
-            os << '\n' << indent4 << '}';
+            os << '\n' << ind << '}';
         }
 
-        void export_fragments (export_ostream & os, database const & db, unsigned generation,
-                               export_name_mapping const & names, bool comments);
+        void export_fragments (export_ostream & os, indent ind, database const & db,
+                               unsigned generation, export_name_mapping const & names,
+                               bool comments);
 
     } // end namespace exchange
 } // end namespace pstore

@@ -59,20 +59,25 @@ namespace pstore {
 
         class export_ostream;
 
-#define PSTORE_INDENT "  "
-        constexpr auto indent1 = PSTORE_INDENT;
-        constexpr auto indent2 = PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent3 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent4 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent5 =
-            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent6 =
-            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent7 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT
-            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-        constexpr auto indent8 = PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT
-            PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT PSTORE_INDENT;
-#undef PSTORE_INDENT
+        class indent {
+        public:
+            constexpr indent () noexcept = default;
+            constexpr indent next () const noexcept { return indent{distance_ + 1U}; }
+            constexpr unsigned distance () const noexcept { return distance_; }
+
+        private:
+            explicit constexpr indent (unsigned distance) noexcept
+                    : distance_{distance} {}
+            unsigned distance_ = 0U;
+        };
+
+        template <typename OStream>
+        OStream & operator<< (OStream & os, indent const & i) {
+            for (unsigned d = i.distance (); d > 0U; --d) {
+                os << "  ";
+            }
+            return os;
+        }
 
         namespace details {
 
@@ -115,24 +120,24 @@ namespace pstore {
         /// \tparam Function  A callable whose signature should be equivalent to:
         ///     void fun(OStream &, std::iterator_traits<InputIt>::value_type const &a);
         /// \param os  An output stream to which values are written using the '<<' operator.
+        /// \param ind  The indentation to be applied to each member of the array.
         /// \param first  The start of the range denoting array elements to be emitted.
         /// \param last  The end of the range denoting array elements to be emitted.
-        /// \param indent  The indentation to be applied to each member of the array.
         /// \param fn  A function which is called to emit the contents of each object in the
         ///    iterator range denoted by [first, last).
         template <typename OStream, typename InputIt, typename Function>
-        OStream & emit_array (OStream & os, InputIt first, InputIt last, gsl::czstring const indent,
+        OStream & emit_array (OStream & os, indent const ind, InputIt first, InputIt last,
                               Function fn) {
             auto const * sep = "";
             auto const * tail_sep = "";
-            auto const * tail_sep_indent = "";
+            auto tail_sep_indent = indent{};
             os << "[";
             std::for_each (first, last, [&] (auto const & element) {
                 os << sep << '\n';
-                fn (os, element);
+                fn (os, ind.next (), element);
                 sep = ",";
                 tail_sep = "\n";
-                tail_sep_indent = indent;
+                tail_sep_indent = ind;
             });
             os << tail_sep << tail_sep_indent << "]";
             return os;

@@ -82,6 +82,9 @@ namespace pstore {
             case import_error::bss_section_was_incomplete:
                 result = "bss section was incomplete";
                 break;
+            case import_error::definition_was_incomplete:
+                result = "definition was incomplete";
+                break;
             case import_error::unrecognized_ifixup_key:
                 result = "unrecognized internal fixup object key";
                 break;

@@ -207,7 +207,7 @@
                                                     "enum": ["default", "hidden", "protected"]
                                                 }
                                             },
-                                            "required": ["digest", "linkage", "name", "visibility"]
+                                            "required": ["digest", "linkage", "name"]
                                         }
                                     }
                                 },

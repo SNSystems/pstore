@@ -85,7 +85,8 @@ std::string export_section (pstore::database const & db,
 
     // Now export it.
     std::ostringstream os;
-    pstore::exchange::export_section<Kind> (os, db, exported_names, *section, comments);
+    pstore::exchange::export_section<Kind> (os, pstore::exchange::indent{}, db, exported_names,
+                                            *section, comments);
     return os.str ();
 }
 

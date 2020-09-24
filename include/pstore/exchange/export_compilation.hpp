@@ -78,33 +78,42 @@ case repo::linkage::a: return os << #a;
 
 
         template <typename OStream>
-        void export_compilation (OStream & os, database const & db,
+        void export_compilation (OStream & os, indent const ind, database const & db,
                                  pstore::repo::compilation const & compilation,
                                  export_name_mapping const & names, bool comments) {
-            os << "{\n" << indent5 << R"("path":)" << names.index (compilation.path ()) << ',';
+            os << "{\n";
+            auto const object_indent = ind.next ();
+            os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
             show_string (os, db, compilation.path (), comments);
-            os << '\n' << indent5 << R"("triple":)" << names.index (compilation.triple ()) << ',';
+            os << '\n'
+               << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
             show_string (os, db, compilation.triple (), comments);
-            os << '\n' << indent5 << R"("definitions":)";
-            emit_array (os, compilation.begin (), compilation.end (), indent5,
-                        [&] (OStream & os1, repo::compilation_member const & d) {
-                            os1 << indent6 << "{\n";
-                            os1 << indent7 << R"("digest":")" << d.digest.to_hex_string ()
+            os << '\n' << object_indent << R"("definitions":)";
+            emit_array (os, object_indent, compilation.begin (), compilation.end (),
+                        [&] (OStream & os1, indent const ind1, repo::compilation_member const & d) {
+                            os1 << ind1 << "{\n";
+                            indent const object_indent = ind1.next ();
+                            os1 << object_indent << R"("digest":")" << d.digest.to_hex_string ()
                                 << "\",\n";
-                            os1 << indent7 << R"("name":)" << names.index (d.name) << ',';
+                            os1 << object_indent << R"("name":)" << names.index (d.name) << ',';
                             show_string (os1, db, d.name, comments);
                             os1 << '\n';
-                            os1 << indent7 << R"("linkage":")" << d.linkage () << "\",\n";
-                            os1 << indent7 << R"("visibility":")" << d.visibility () << "\"\n";
-                            os1 << indent6 << '}';
+                            os1 << object_indent << R"("linkage":")" << d.linkage () << '"';
+                            if (d.visibility () != repo::visibility::default_vis) {
+                                os1 << ",\n"
+                                    << object_indent << R"("visibility":")" << d.visibility ()
+                                    << "\"\n";
+                            }
+                            os1 << '\n' << ind1 << '}';
                         });
-            os << '\n' << indent4 << '}';
+            os << '\n' << ind << '}';
         }
 
 
         template <typename OStream>
-        void export_compilation_index (OStream & os, database const & db, unsigned const generation,
-                                       export_name_mapping const & names, bool comments) {
+        void export_compilation_index (OStream & os, indent const ind, database const & db,
+                                       unsigned const generation, export_name_mapping const & names,
+                                       bool comments) {
             auto const compilations = index::get_index<trailer::indices::compilation> (db);
             if (!compilations || compilations->empty ()) {
                 return;
@@ -116,8 +125,8 @@ case repo::linkage::a: return os << #a;
             auto const * sep = "\n";
             for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
-                os << sep << indent4 << '\"' << kvp.first.to_hex_string () << R"(":)";
-                export_compilation (os, db, *db.getro (kvp.second), names, comments);
+                os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
+                export_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
                 sep = ",\n";
             }
         }

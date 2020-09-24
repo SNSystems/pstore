@@ -84,6 +84,7 @@ namespace pstore {
                                fragment_index_pointer const & fragments);
             import_definition (import_definition const &) = delete;
             import_definition (import_definition &&) noexcept = delete;
+
             ~import_definition () noexcept override = default;
 
             import_definition & operator= (import_definition const &) = delete;
@@ -102,6 +103,9 @@ namespace pstore {
             names_pointer const names_;
             db_pointer const db_;
             fragment_index_pointer const fragments_;
+
+            enum { digest_index, name_index, linkage_index, visibility_index };
+            std::bitset<visibility_index + 1> seen_;
 
             std::string digest_;
             std::uint64_t name_ = 0;
@@ -127,6 +131,7 @@ namespace pstore {
                                       fragment_index_pointer const & fragments);
             import_definition_object (import_definition_object const &) = delete;
             import_definition_object (import_definition_object &&) noexcept = delete;
+
             ~import_definition_object () noexcept override = default;
 
             import_definition_object & operator= (import_definition_object const &) = delete;

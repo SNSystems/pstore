@@ -67,21 +67,26 @@ namespace pstore {
                 , definitions_{definitions}
                 , names_{names}
                 , db_{db}
-                , fragments_{fragments} {}
+                , fragments_{fragments}
+                , seen_{} {}
 
         // key
         // ~~~
         std::error_code import_definition::key (std::string const & k) {
             if (k == "digest") {
+                seen_[digest_index] = true;
                 return push<string_rule> (&digest_);
             }
             if (k == "name") {
+                seen_[name_index] = true;
                 return push<uint64_rule> (&name_);
             }
             if (k == "linkage") {
+                seen_[linkage_index] = true;
                 return push<string_rule> (&linkage_);
             }
             if (k == "visibility") {
+                seen_[visibility_index] = true;
                 return push<string_rule> (&visibility_);
             }
             return import_error::unknown_definition_object_key;
@@ -90,6 +95,18 @@ namespace pstore {
         // end object
         // ~~~~~~~~~~
         std::error_code import_definition::end_object () {
+            // The visibility key is optional (defaulting to "default_vis" unsurprisingly).
+            auto const visibility = seen_[visibility_index] ? decode_visibility (visibility_)
+                                                            : just (repo::visibility::default_vis);
+            if (!visibility) {
+                return import_error::bad_visibility;
+            }
+            seen_[visibility_index] = true;
+
+            if (!seen_.all ()) {
+                return import_error::definition_was_incomplete;
+            }
+
             auto const digest = digest_from_string (digest_);
             if (!digest) {
                 return import_error::bad_digest;
@@ -102,10 +119,6 @@ namespace pstore {
             auto const linkage = decode_linkage (linkage_);
             if (!linkage) {
                 return import_error::bad_linkage;
-            }
-            auto const visibility = decode_visibility (visibility_);
-            if (!visibility) {
-                return import_error::bad_visibility;
             }
 
             auto const name = names_->lookup (name_);

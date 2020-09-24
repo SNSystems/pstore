@@ -69,6 +69,7 @@ namespace pstore {
             unexpected_end_object,
 
             bss_section_was_incomplete,
+            definition_was_incomplete,
             unrecognized_ifixup_key,
             ifixup_object_was_incomplete,
             unrecognized_xfixup_key,

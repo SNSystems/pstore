@@ -54,31 +54,35 @@ namespace pstore {
         gsl::czstring section_name (repo::section_kind section) noexcept;
 
         template <typename OStream, typename IFixupIterator>
-        OStream & export_internal_fixups (OStream & os, IFixupIterator first, IFixupIterator last) {
-            emit_array (
-                os, first, last, indent6, [] (OStream & os1, repo::internal_fixup const & ifx) {
-                    os1 << indent7 << '{' << R"("section":")" << section_name (ifx.section)
-                        << R"(","type":)" << static_cast<unsigned> (ifx.type) << ',' << R"("offset":)"
-                        << ifx.offset << ',' << R"("addend":)" << ifx.addend << '}';
-                });
+        OStream & export_internal_fixups (OStream & os, indent const ind, IFixupIterator first,
+                                          IFixupIterator last) {
+            emit_array (os, ind, first, last,
+                        [] (OStream & os1, indent const ind1, repo::internal_fixup const & ifx) {
+                            os1 << ind1 << '{' << R"("section":")" << section_name (ifx.section)
+                                << R"(","type":)" << static_cast<unsigned> (ifx.type) << ','
+                                << R"("offset":)" << ifx.offset << ',' << R"("addend":)"
+                                << ifx.addend << '}';
+                        });
             return os;
         }
 
         template <typename OStream, typename XFixupIterator>
-        OStream & export_external_fixups (OStream & os, database const & db,
+        OStream & export_external_fixups (OStream & os, indent const ind, database const & db,
                                           export_name_mapping const & names, XFixupIterator first,
                                           XFixupIterator last, bool comments) {
-            emit_array (
-                os, first, last, indent6, [&] (OStream & os1, repo::external_fixup const & xfx) {
-                    os1 << indent7 << "{\n";
-                    os1 << indent8 << R"("name":)" << names.index (xfx.name) << ',';
-                    show_string (os1, db, xfx.name, comments);
-                    os1 << '\n';
-                    os1 << indent8 << R"("type":)" << static_cast<unsigned> (xfx.type) << ",\n";
-                    os1 << indent8 << R"("offset":)" << xfx.offset << ",\n";
-                    os1 << indent8 << R"("addend":)" << xfx.addend << '\n';
-                    os1 << indent7 << '}';
-                });
+            emit_array (os, ind, first, last,
+                        [&] (OStream & os1, indent const ind1, repo::external_fixup const & xfx) {
+                            os1 << ind1 << "{\n";
+                            auto const object_indent = ind1.next ();
+                            os1 << object_indent << R"("name":)" << names.index (xfx.name) << ',';
+                            show_string (os1, db, xfx.name, comments);
+                            os1 << '\n';
+                            os1 << object_indent << R"("type":)" << static_cast<unsigned> (xfx.type)
+                                << ",\n";
+                            os1 << object_indent << R"("offset":)" << xfx.offset << ",\n";
+                            os1 << object_indent << R"("addend":)" << xfx.addend << '\n';
+                            os1 << ind1 << '}';
+                        });
             return os;
         }
 

@@ -76,18 +76,19 @@ namespace pstore {
         //* \___/_\_\ .__/\___/_|  \__| |_||_\__,_|_|_|_\___/__/ *
         //*         |_|                                          *
         template <typename OStream>
-        void export_names (OStream & os, database const & db, unsigned const generation,
+        void export_names (OStream & os, indent ind, database const & db, unsigned const generation,
                            export_name_mapping * const string_table) {
 
             auto names_index = index::get_index<trailer::indices::name> (db);
             assert (generation > 0);
             auto const container = diff::diff (db, *names_index, generation - 1U);
-            emit_array (os, std::begin (container), std::end (container), indent3,
-                        [&names_index, &string_table, &db] (OStream & os1, address const addr) {
+            emit_array (os, ind, std::begin (container), std::end (container),
+                        [&names_index, &string_table, &db] (OStream & os1, indent ind1,
+                                                            address const addr) {
                             indirect_string const str = names_index->load_leaf_node (db, addr);
                             shared_sstring_view owner;
                             raw_sstring_view view = str.as_db_string_view (&owner);
-                            os1 << indent4;
+                            os1 << ind1;
                             emit_string (os1, view);
                             string_table->add (addr);
                         });

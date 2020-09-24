@@ -56,7 +56,7 @@
 namespace pstore {
     namespace exchange {
 
-        void export_fragments (export_ostream & os, pstore::database const & db,
+        void export_fragments (export_ostream & os, indent const ind, pstore::database const & db,
                                unsigned const generation, export_name_mapping const & names,
                                bool comments) {
             auto const fragments =
@@ -67,16 +67,19 @@ namespace pstore {
                 for (pstore::address const & addr :
                      pstore::diff::diff (db, *fragments, generation - 1U)) {
                     auto const & kvp = fragments->load_leaf_node (db, addr);
-                    os << fragment_sep << indent4 << '\"' << kvp.first.to_hex_string () << R"(":)";
+                    os << fragment_sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
                     os << "{\n";
                     auto const fragment = db.getro (kvp.second);
                     auto const * section_sep = "";
+                    auto const section_indent = ind.next ();
                     for (pstore::repo::section_kind const section : *fragment) {
-                        os << section_sep << indent5 << '"' << section_name (section) << R"(":)";
+                        os << section_sep << section_indent << '"' << section_name (section)
+                           << R"(":)";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a:                                                            \
         export_section<pstore::repo::section_kind::a> (                                            \
-            os, db, names, fragment->at<pstore::repo::section_kind::a> (), comments);              \
+            os, section_indent, db, names, fragment->at<pstore::repo::section_kind::a> (),         \
+            comments);                                                                             \
         break;
                         switch (section) {
                             PSTORE_MCREPO_SECTION_KINDS
@@ -88,7 +91,7 @@ namespace pstore {
 #undef X
                         section_sep = ",\n";
                     }
-                    os << '\n' << indent4 << '}';
+                    os << '\n' << ind << '}';
                     fragment_sep = ",\n";
                 }
             }

@@ -143,8 +143,8 @@ TEST_F (GenericSection, RoundTripForPopulated) {
     // Write the names that we just created as JSON.
     pstore::exchange::export_name_mapping exported_names;
     std::ostringstream exported_names_stream;
-    export_names (exported_names_stream, export_db_, export_db_.get_current_revision (),
-                  &exported_names);
+    export_names (exported_names_stream, pstore::exchange::indent{}, export_db_,
+                  export_db_.get_current_revision (), &exported_names);
 
 
     pstore::repo::section_content exported_content;

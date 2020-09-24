@@ -170,8 +170,8 @@ TEST_F (ExchangeCompilation, Empty) {
     // Write the names that we just created as JSON.
     pstore::exchange::export_name_mapping exported_names;
     std::ostringstream exported_names_stream;
-    export_names (exported_names_stream, export_db_, export_db_.get_current_revision (),
-                  &exported_names);
+    export_names (exported_names_stream, pstore::exchange::indent{}, export_db_,
+                  export_db_.get_current_revision (), &exported_names);
 
     std::ostringstream exported_compilation_stream;
     {
@@ -183,9 +183,9 @@ TEST_F (ExchangeCompilation, Empty) {
                                               indir_strings[triple], std::begin (definitions),
                                               std::end (definitions));
 
-        pstore::exchange::export_compilation (exported_compilation_stream, export_db_,
-                                              *export_db_.getro (compilation), exported_names,
-                                              false);
+        pstore::exchange::export_compilation (
+            exported_compilation_stream, pstore::exchange::indent{}, export_db_,
+            *export_db_.getro (compilation), exported_names, false);
         transaction.commit ();
     }
 
@@ -245,8 +245,8 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     // Write the names that we just created as JSON.
     pstore::exchange::export_name_mapping exported_names;
     std::ostringstream exported_names_stream;
-    export_names (exported_names_stream, export_db_, export_db_.get_current_revision (),
-                  &exported_names);
+    export_names (exported_names_stream, pstore::exchange::indent{}, export_db_,
+                  export_db_.get_current_revision (), &exported_names);
 
     // Now build a single fragment and a compilation that references it then export them.
     constexpr pstore::index::digest compilation_digest{0x12345678, 0x9ABCDEF0};
@@ -260,8 +260,9 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         auto transaction = begin (export_db_, transaction_lock{mutex});
         pstore::extent<pstore::repo::fragment> const fext =
             build_fragment (transaction, fragment_digest);
-        pstore::exchange::export_fragment (exported_fragment_stream, export_db_, exported_names,
-                                           export_db_.getro (fext), false);
+        pstore::exchange::export_fragment (exported_fragment_stream, pstore::exchange::indent{},
+                                           export_db_, exported_names, export_db_.getro (fext),
+                                           false);
 
         std::vector<pstore::repo::compilation_member> definitions{
             {fragment_digest, fext, indir_strings[name1], pstore::repo::linkage::external,
@@ -274,9 +275,9 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
                                               indir_strings[triple], std::begin (definitions),
                                               std::end (definitions));
 
-        pstore::exchange::export_compilation (exported_compilation_stream, export_db_,
-                                              *export_db_.getro (compilation), exported_names,
-                                              false);
+        pstore::exchange::export_compilation (
+            exported_compilation_stream, pstore::exchange::indent{}, export_db_,
+            *export_db_.getro (compilation), exported_names, false);
         transaction.commit ();
     }
 
