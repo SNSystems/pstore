@@ -84,25 +84,37 @@ int main (int argc, char * argv[]) {
 
         auto parser = pstore::exchange::create_import_parser (db);
 
-        for (int ch = std::getc (infile); ch != EOF; ch = std::getc (infile)) {
-            auto const c = static_cast<char> (ch);
-            // std::cout << c;
-            parser.input (&c, &c + 1);
+        std::vector<std::uint8_t> buffer;
+        buffer.resize (65535);
+
+        for (;;) {
+            auto * const ptr = reinterpret_cast<char *> (buffer.data ());
+            std::size_t const nread =
+                std::fread (ptr, sizeof (std::uint8_t), buffer.size (), infile);
+            if (nread < buffer.size ()) {
+                if (std::ferror (infile)) {
+                    std::cerr << "There was an error reading input\n";
+                    exit_code = EXIT_FAILURE;
+                    break;
+                }
+            }
+
+            parser.input (ptr, ptr + nread);
             if (parser.has_error ()) {
                 std::error_code const erc = parser.last_error ();
-                // raise (erc);
-                std::cerr << "Value: " << erc.value () << '\n';
-                std::cerr << "Error: " << erc.message () << '\n';
-                std::cout << "Line " << parser.coordinate ().row << ", column "
+                std::cerr << "Value: " << erc.value () << '\n'
+                          << "Error: " << erc.message () << '\n'
+                          << "Line " << parser.coordinate ().row << ", column "
                           << parser.coordinate ().column << '\n';
                 break;
             }
-        }
-        parser.eof ();
 
-        if (!std::feof (infile)) {
-            std::cout << "\nSomething went wrong.\n";
+            if (std::feof (infile)) {
+                parser.eof ();
+                break;
+            }
         }
+
         if (infile != nullptr && infile != stdin) {
             std::fclose (infile);
             infile = nullptr;
