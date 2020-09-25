@@ -58,7 +58,8 @@ namespace pstore {
 
         value_ptr make_section_value (database const & db, repo::generic_section const & section,
                                       repo::section_kind sk, gsl::czstring triple, bool hex_mode);
-        value_ptr make_section_value (database const & db, repo::dependents const & dependent,
+        value_ptr make_section_value (database const & db,
+                                      repo::linked_definitions const & linked_definitions,
                                       repo::section_kind sk, gsl::czstring triple, bool hex_mode);
         value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
                                       repo::section_kind sk, gsl::czstring triple, bool hex_mode);

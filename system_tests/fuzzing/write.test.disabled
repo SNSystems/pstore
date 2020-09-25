@@ -1,13 +1,12 @@
 # This test fuzzes input to the write utility.
 
 # %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %t = temporary file name unique to the test
 
 # Note that the first non-argument switch is the name of the test; subsequent
 # arguments form the command line to be run.
 
-RUN: "%python" "%S/fuzz.py" --temp-dir="%stores" --binary-dir="%binaries" -- write "%binaries/pstore-write" --compact=disabled --add=key3,value3
+RUN: "%python" "%S/fuzz.py" --temp-dir="%t" --binary-dir="%binaries" -- write "%binaries/pstore-write" --compact=disabled --add=key3,value3
 
 #eof write.test

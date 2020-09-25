@@ -54,7 +54,7 @@
 #include "pstore/exchange/import_debug_line_section.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
-#include "pstore/mcrepo/dependents_section.hpp"
+#include "pstore/mcrepo/linked_definitions_section.hpp"
 #include "pstore/mcrepo/generic_section.hpp"
 
 namespace pstore {
@@ -104,7 +104,7 @@ namespace pstore {
             using type = import_bss_section<OutputIterator>;
         };
         template <typename OutputIterator>
-        struct section_to_importer<repo::dependents, OutputIterator> {
+        struct section_to_importer<repo::linked_definitions, OutputIterator> {
             using type = details::import_dependents_section<OutputIterator>;
         };
         template <typename OutputIterator>

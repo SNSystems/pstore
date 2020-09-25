@@ -72,7 +72,7 @@ namespace pstore {
     X (debug_string)                                                                               \
     X (debug_ranges)                                                                               \
     X (interp)                                                                                     \
-    X (dependent)
+    X (linked_definitions)
 
 #define X(a) a,
         enum class section_kind : std::uint8_t {
@@ -84,7 +84,7 @@ namespace pstore {
 
         std::ostream & operator<< (std::ostream & os, section_kind kind);
 
-        constexpr auto first_repo_metadata_section = section_kind::dependent;
+        constexpr auto first_repo_metadata_section = section_kind::linked_definitions;
 
         constexpr bool is_target_section (section_kind const t) noexcept {
             using utype = std::underlying_type<section_kind>::type;

@@ -3,41 +3,34 @@
 # original files. All three files are added in a single transaction.
 
 
-# %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
 
-# Delete an existing data store (we don't want to end up appending to it)
-RUN: rm -f "%stores/large1.db"
-
-
-# Create a directory to hold the test outputs.
-RUN: rm -r -f "%T/large1"
-RUN: mkdir -p "%T/large1"
-
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
 
 
 # Generate test data: three files full of 32-bit big-endian primes.
-RUN: "%binaries/pstore-sieve" --endian=big --maximum=10000000 -o "%T/large1/p1e7.bin"
-RUN: "%binaries/pstore-sieve" --endian=big --maximum=20000000 -o "%T/large1/p2e7.bin"
-RUN: "%binaries/pstore-sieve" --endian=big --maximum=30000000 -o "%T/large1/p3e7.bin"
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=10000000 -o "%t/p1e7.bin"
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=20000000 -o "%t/p2e7.bin"
+RUN: "%binaries/pstore-sieve" --endian=big --maximum=30000000 -o "%t/p3e7.bin"
 
 # Copy the three files into the data store with the keys 'p1e7', 'p2e7', and
 # 'p3e7' respectively.
-RUN: "%binaries/pstore-write" "--add-file=p1e7,%T/large1/p1e7.bin" \
-RUN:                          "--add-file=p2e7,%T/large1/p2e7.bin" \
-RUN:                          "--add-file=p3e7,%T/large1/p3e7.bin" \
-RUN:                          "%stores/large1.db"
+RUN: "%binaries/pstore-write" "--add-file=p1e7,%t/p1e7.bin" \
+RUN:                          "--add-file=p2e7,%t/p2e7.bin" \
+RUN:                          "--add-file=p3e7,%t/p3e7.bin" \
+RUN:                          "%t/large1.db"
 
 # Read the threes keys and extract the resulting data in correspondingly named files
 # in the test output directory
-RUN: "%binaries/pstore-read" "%stores/large1.db" p1e7 > "%T/large1/p1e7"
-RUN: "%binaries/pstore-read" "%stores/large1.db" p2e7 > "%T/large1/p2e7"
-RUN: "%binaries/pstore-read" "%stores/large1.db" p3e7 > "%T/large1/p3e7"
+RUN: "%binaries/pstore-read" "%t/large1.db" p1e7 > "%t/p1e7"
+RUN: "%binaries/pstore-read" "%t/large1.db" p2e7 > "%t/p2e7"
+RUN: "%binaries/pstore-read" "%t/large1.db" p3e7 > "%t/p3e7"
 
 # Check that the data made the round trip successfully.
-RUN: diff "%T/large1/p1e7" "%T/large1/p1e7.bin"
-RUN: diff "%T/large1/p2e7" "%T/large1/p2e7.bin"
-RUN: diff "%T/large1/p3e7" "%T/large1/p3e7.bin"
+RUN: diff "%t/p1e7" "%t/p1e7.bin"
+RUN: diff "%t/p2e7" "%t/p2e7.bin"
+RUN: diff "%t/p3e7" "%t/p3e7.bin"

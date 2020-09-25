@@ -127,10 +127,11 @@ namespace pstore {
             });
         }
 
-        value_ptr make_section_value (database const & db, repo::dependents const & dependents,
+        value_ptr make_section_value (database const & db,
+                                      repo::linked_definitions const & linked_definitions,
                                       repo::section_kind const /*sk*/,
                                       gsl::czstring const /*triple*/, bool const /*hex_mode*/) {
-            return make_value (std::begin (dependents), std::end (dependents),
+            return make_value (std::begin (linked_definitions), std::end (linked_definitions),
                                [&db] (typed_address<repo::compilation_member> const & member) {
                                    return make_value (db, *db.getro (member));
                                });

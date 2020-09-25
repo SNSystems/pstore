@@ -181,15 +181,15 @@ namespace pstore {
             };
 
             template <>
-            struct section_exporter<repo::section_kind::dependent, repo::dependents> {
-                static_assert (std::is_same<repo::enum_to_section_t<repo::section_kind::dependent>,
-                                            repo::dependents>::value,
-                               "expected enum_to_section_t for dependent to yield dependents");
+            struct section_exporter<repo::section_kind::linked_definitions, repo::linked_definitions> {
+                static_assert (std::is_same<repo::enum_to_section_t<repo::section_kind::linked_definitions>,
+                                            repo::linked_definitions>::value,
+                               "expected enum_to_section_t for dependent to yield linked_definitions");
 
                 template <typename OStream>
                 OStream & operator() (OStream & os, indent const ind, database const & db,
                                       export_name_mapping const & names,
-                                      repo::dependents const & content, bool const comments) {
+                                      repo::linked_definitions const & content, bool const comments) {
                     return emit_array (os, ind, std::begin (content), std::end (content),
                                        [] (OStream & os1, indent const /*ind1*/,
                                            typed_address<repo::compilation_member> const & d) {

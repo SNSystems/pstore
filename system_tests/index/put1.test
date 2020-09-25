@@ -1,21 +1,23 @@
 # %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %t = temporary file name unique to the test
+
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
+
 
 # Generate test data: a file full of 16-bit big-endian primes.
-RUN: %binaries/pstore-sieve --endian=big -o %T/put1.bin
+RUN: %binaries/pstore-sieve --endian=big -o %t/put1.bin
 
-# Delete an existing data store.
-RUN: rm -f %stores/put1.db
 
 # Copy the put1.bin file into the data store with the key 'p1'
-RUN: "%binaries/pstore-write" "--add-file=p1,%T/put1.bin" "%stores/put1.db"
+RUN: "%binaries/pstore-write" "--add-file=p1,%t/put1.bin" "%t/put1.db"
 
-RUN: echo "%stores"
+
 # Read the 'p1' key and store the resulting data in a file named p1
 # in the test output directory
-RUN: "%binaries/pstore-read" "%stores/put1.db" p1 > "%T/p1"
+RUN: "%binaries/pstore-read" "%t/put1.db" p1 > "%t/p1"
+
 
 # Check that the data made the round trip successfully.
-RUN: diff "%T/p1" "%T/put1.bin"
+RUN: diff "%t/p1" "%t/put1.bin"

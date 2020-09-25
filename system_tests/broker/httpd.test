@@ -1,10 +1,10 @@
 ## A test which runs pstore broker and gets the root page from its HTTP server. We check for expected contents in the response.
 
-# %binaries = the directories containing the executable binaries
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
 REQUIRES: broker
-RUN: %python "%S/httpd.py" "%binaries" > "%T/http_actual.txt"
+RUN: %python "%S/httpd.py" "%binaries" > "%t"
 
 #eof http.test

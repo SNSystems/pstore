@@ -1,39 +1,38 @@
-# %binaries = the directories containing the executable binaries
-# %stores = a directory in which data stores may be created
-# %T = the test output directory
 # %S = the test source directory
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
 
-# Delete an existing data store.
-RUN: rm -f %stores/write.db
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
 
 # Write three values into the data store
-RUN: "%binaries/pstore-write" "--add=k1,value1" "%stores/write.db"
-RUN: "%binaries/pstore-write" "--add=k2,value2" "%stores/write.db"
-RUN: "%binaries/pstore-write" "--add=k3,value3" "%stores/write.db"
+RUN: "%binaries/pstore-write" "--add=k1,value1" "%t/write.db"
+RUN: "%binaries/pstore-write" "--add=k2,value2" "%t/write.db"
+RUN: "%binaries/pstore-write" "--add=k3,value3" "%t/write.db"
 
-RUN: echo "%stores"
+RUN: echo "%t"
 # Read the keys and store the resulting data in a file named write
 # in the test output directory
-RUN: "%binaries/pstore-read" "%stores/write.db" k1 > "%T/write"
-RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "%stores/write.db" k2 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "%stores/write.db" k3 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "%stores/write.db" k4 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "%stores/write.db" k5 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k1 > "%t/write"
+RUN: echo '.' >>  "%t/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k2 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k3 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k4 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k5 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
 
 # Write a new values into the data store
-RUN: "%binaries/pstore-write" "--add=k1,new_value1" "%stores/write.db"
+RUN: "%binaries/pstore-write" "--add=k1,new_value1" "%t/write.db"
 
 # Read the key and store the resulting data in a file named write
 # in the test output directory
-RUN: "%binaries/pstore-read" "%stores/write.db" k1 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
-RUN: "%binaries/pstore-read" "-r" "1" "%stores/write.db" k1 >> "%T/write"
-RUN: echo '.' >>  "%T/write"
+RUN: "%binaries/pstore-read" "%t/write.db" k1 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
+RUN: "%binaries/pstore-read" "-r" "1" "%t/write.db" k1 >> "%t/write"
+RUN: echo '.' >>  "%t/write"
 
 # Check that the data made the round trip successfully.
-RUN: diff "%T/write" "%S/write_expected.txt"
+RUN: diff "%t/write" "%S/write_expected.txt"
