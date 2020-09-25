@@ -48,7 +48,7 @@ add_pstore_library (
         bss_section.cpp
         compilation.cpp
         debug_line_section.cpp
-        dependents_section.cpp
+        linked_definitions_section.cpp
         fragment.cpp
         generic_section.cpp
         repo_error.cpp
@@ -59,7 +59,7 @@ add_pstore_library (
         bss_section.hpp
         compilation.hpp
         debug_line_section.hpp
-        dependents_section.hpp
+        linked_definitions_section.hpp
         fragment.hpp
         generic_section.hpp
         repo_error.hpp

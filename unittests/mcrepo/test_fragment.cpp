@@ -107,8 +107,8 @@ namespace {
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
             build_sections (section_begin, section_end);
 
-        dispatchers.emplace_back (
-            new dependents_creation_dispatcher (compilation_member_begin, compilation_member_end));
+        dispatchers.emplace_back (new linked_definitions_creation_dispatcher (
+            compilation_member_begin, compilation_member_end));
 
         return fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
                                 pstore::make_pointee_adaptor (dispatchers.end ()));
@@ -157,7 +157,7 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
     EXPECT_EQ (4U, s.align ());
     EXPECT_EQ (0U, s.ifixups ().size ());
     EXPECT_EQ (0U, s.xfixups ().size ());
-    EXPECT_EQ (f->atp<section_kind::dependent> (), nullptr);
+    EXPECT_EQ (f->atp<section_kind::linked_definitions> (), nullptr);
 }
 
 TEST_F (FragmentTest, MakeTextSectionWithFixups) {
@@ -213,7 +213,7 @@ TEST_F (FragmentTest, MakeTextSectionWithFixups) {
                                             external_fixup{indirect_string_address (5), 5, 5, 5}));
 }
 
-TEST_F (FragmentTest, MakeTextSectionWithDependents) {
+TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
     using ::testing::ElementsAre;
     using ::testing::ElementsAreArray;
 
@@ -230,16 +230,17 @@ TEST_F (FragmentTest, MakeTextSectionWithDependents) {
     auto f = reinterpret_cast<fragment const *> (transaction_.get_storage ().begin ()->first);
 
     std::vector<section_kind> const contents (f->begin (), f->end ());
-    EXPECT_THAT (contents, ::testing::ElementsAre (section_kind::dependent));
+    EXPECT_THAT (contents, ::testing::ElementsAre (section_kind::linked_definitions));
 
-    pstore::repo::dependents const * const dependent = f->atp<section_kind::dependent> ();
-    ASSERT_NE (dependent, nullptr);
+    pstore::repo::linked_definitions const * const linked_definitions =
+        f->atp<section_kind::linked_definitions> ();
+    ASSERT_NE (linked_definitions, nullptr);
 
-    EXPECT_EQ (1U, section_alignment (*dependent));
-    EXPECT_EQ (0U, section_size (*dependent));
+    EXPECT_EQ (1U, section_alignment (*linked_definitions));
+    EXPECT_EQ (0U, section_size (*linked_definitions));
 
-    EXPECT_EQ (1U, dependent->size ());
-    EXPECT_EQ ((*dependent)[0], addr1);
+    EXPECT_EQ (1U, linked_definitions->size ());
+    EXPECT_EQ ((*linked_definitions)[0], addr1);
 }
 
 namespace pstore {
