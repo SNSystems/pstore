@@ -2,13 +2,18 @@
 
 A small collection of useful utilities which simplify some common tasks or perform extra checks on the source code.
 
+## boilerplate
+
+See [the notes](boilerplate/) in the boilerplate directory.
+
+## exchange-schema
+
+See the [the notes](exchange_schema/) in the exchange_schema directory.
+
 ## layering
 
 See [the notes](layering/) in the layering directory.
 
-## boilerplate
-
-See [the notes](boilerplate/) in the boilerplate directory.
 
 ## make build
 

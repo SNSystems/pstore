@@ -46,6 +46,7 @@
 
 // Standard library includes
 #include <cstring>
+#include <sstream>
 
 // 3rd party
 #include <gmock/gmock.h>

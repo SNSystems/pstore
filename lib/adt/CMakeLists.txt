@@ -50,6 +50,7 @@ set (pstore_adt_lib_includes
     error_or.hpp
     small_vector.hpp
     sstring_view.hpp
+    utility.hpp
 )
       
 add_pstore_library (

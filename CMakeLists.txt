@@ -240,7 +240,7 @@ endif (PSTORE_IS_INSIDE_LLVM)
 # a python program rather than something to be opened with a random text editor.
 find_program (PYTHON_EXECUTABLE
     NAMES python
-    DOC "python executbale location"
+    DOC "python executable location"
 )
 set (LIT_PARAMS "")
 # Add the examples to the collection of tests.
@@ -254,6 +254,70 @@ endif ()
 if (PSTORE_IS_INSIDE_LLVM)
     list (APPEND LIT_PARAMS --param is_inside_llvm)
 endif ()
+
+
+# One or more tests uses Node.JS so let's check that it's available and work out which
+# version is installed.
+find_program (NODEJS_EXECUTABLE
+    NAMES node nodejs
+    DOC "node.js executable location"
+)
+if (NODEJS_EXECUTABLE)
+    # Figure out which version of Node.JS we've got. This will set NODE_VERSION_STRING to the
+    # entire version string and NODE_VERSION_MAJOR/MINOR/PATCH accordingly.
+    execute_process(
+        COMMAND ${NODEJS_EXECUTABLE} --version
+        OUTPUT_VARIABLE _VERSION
+        RESULT_VARIABLE _NODE_VERSION_RESULT
+    )
+
+    if (NOT _NODE_VERSION_RESULT)
+        string (REGEX REPLACE "^v(.*)\n$" "\\1" NODE_VERSION_STRING "${_VERSION}")
+        string (REPLACE "." ";" _VERSION_LIST "${NODE_VERSION_STRING}")
+        list (GET _VERSION_LIST 0 NODE_VERSION_MAJOR)
+        list (GET _VERSION_LIST 1 NODE_VERSION_MINOR)
+        list (GET _VERSION_LIST 2 NODE_VERSION_PATCH)
+    endif ()
+
+    message (STATUS "Node.JS version ${NODE_VERSION_STRING} was found at: ${NODEJS_EXECUTABLE}")
+else (NODEJS_EXECUTABLE)
+    message (STATUS "Node.JS was NOT found")
+endif (NODEJS_EXECUTABLE)
+
+
+if (NODEJS_EXECUTABLE AND NODE_VERSION_MAJOR GREATER_EQUAL 8)
+  list (APPEND LIT_PARAMS --param "nodejs=${NODEJS_EXECUTABLE}")
+endif ()
+
+
+find_program (NPM_EXECUTABLE
+    NAMES npm.cmd npm
+    DOC "npm executable location"
+)
+if (NPM_EXECUTABLE)
+    # Figure out which version of NPM we've got. This will set NPM_VERSION_STRING to the
+    # entire version string and NPM_VERSION_MAJOR/MINOR/PATCH accordingly.
+    execute_process(
+        COMMAND ${NPM_EXECUTABLE} --version
+        OUTPUT_VARIABLE _VERSION
+        RESULT_VARIABLE _NPM_VERSION_RESULT
+    )
+
+    if (NOT _NODE_VERSION_RESULT)
+        string (REGEX REPLACE "^(.*)\n$" "\\1" NPM_VERSION_STRING "${_VERSION}")
+        string (REPLACE "." ";" _VERSION_LIST "${NPM_VERSION_STRING}")
+        list (GET _VERSION_LIST 0 NPM_VERSION_MAJOR)
+        list (GET _VERSION_LIST 1 NPM_VERSION_MINOR)
+        list (GET _VERSION_LIST 2 NPM_VERSION_PATCH)
+    endif ()
+
+    message (STATUS "NPM version ${NODE_VERSION_STRING} was found at: ${NPM_EXECUTABLE}")
+
+    list (APPEND LIT_PARAMS --param "npm=${NPM_EXECUTABLE}")
+endif ()
+
+
+
 
 # Add a target to the build which will run the system tests.
 add_custom_target (pstore-system-tests
@@ -279,7 +343,9 @@ endif ()
 add_dependencies (pstore-system-tests
     pstore-broker-poker
     pstore-dump
+    pstore-export
     pstore-hamt-test
+    pstore-import
     pstore-lock-test
     pstore-mangle
     pstore-read

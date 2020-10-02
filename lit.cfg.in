@@ -52,6 +52,8 @@ config.suffixes = [
     '.test',
 ]
 
+is_windows = sys.platform in ['win32']
+
 # Choose between lit's internal shell pipeline runner and a real shell.  If
 # LIT_USE_INTERNAL_SHELL is in the environment, we use that as an override.
 use_lit_shell = os.environ.get("LIT_USE_INTERNAL_SHELL")
@@ -61,7 +63,7 @@ if use_lit_shell:
 else:
     # Otherwise we default to internal on Windows and external elsewhere, as
     # bash on Windows is usually very slow.
-    execute_external = (not sys.platform in ['win32'])
+    execute_external = (not is_windows)
 
 # testFormat: The test format to use to interpret tests.
 config.test_format = lit.formats.ShTest (execute_external)
@@ -96,8 +98,20 @@ if lit_config.params.get ('broker') is not None:
 if lit_config.params.get ('is_inside_llvm') is not None:
     config.available_features.add ('is_inside_llvm')
 
+if lit_config.params.get ('nodejs') is not None:
+    config.available_features.add ('nodejs')
+    config.substitutions.append (('%nodejs', lit_config.params['nodejs']))
+
+if lit_config.params.get ('npm') is not None:
+    config.available_features.add ('npm')
+    config.substitutions.append (('%npm', lit_config.params['npm']))
+
 config.substitutions.append (('%binaries', '@LIT_CONFIG_DIR@'))
 config.substitutions.append (('%foo', 'this-is-foo'))
 config.substitutions.append (('%stores', data_store_path ()))
 config.substitutions.append (('%python', sys.executable))
+
+if is_windows:
+    config.environment ['APPDATA'] = os.environ.get ('APPDATA')
+
 #eof lit.cfg

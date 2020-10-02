@@ -143,7 +143,12 @@ namespace pstore {
         };
     };
 
-    std::ostream & operator<< (std::ostream & os, indirect_string const & ind_str);
+    template <typename OStream>
+    OStream & operator<< (OStream & os, indirect_string const & ind_str) {
+        shared_sstring_view owner;
+        return os << ind_str.as_string_view (&owner);
+    }
+
 
     // write_string_and_patch_address
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -53,16 +53,14 @@
 #include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
 
-
-class EmptyStore : public ::testing::Test {
+class InMemoryStore {
 public:
     static std::size_t constexpr file_size = pstore::storage::min_region_size * 2;
 
     // Build an empty, in-memory database.
-    EmptyStore ();
-    ~EmptyStore () override;
+    InMemoryStore ();
+    ~InMemoryStore ();
 
-protected:
     std::shared_ptr<pstore::file::in_memory> const & file () const { return file_; }
     std::shared_ptr<std::uint8_t> const & buffer () const { return buffer_; }
 
@@ -70,6 +68,9 @@ private:
     std::shared_ptr<std::uint8_t> buffer_;
     std::shared_ptr<pstore::file::in_memory> file_;
     static constexpr std::size_t page_size_ = 4096;
+};
+
+class EmptyStore : public ::testing::Test, public InMemoryStore {
 };
 
 class EmptyStoreFile : public ::testing::Test {

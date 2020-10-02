@@ -77,6 +77,7 @@ namespace pstore {
 
             void option::set_description (std::string const & d) { description_ = d; }
             void option::set_positional () { positional_ = true; }
+            void option::set_usage (std::string const & d) { usage_ = d; }
             bool option::is_positional () const { return positional_; }
             bool option::is_alias () const { return false; }
 
@@ -88,7 +89,8 @@ namespace pstore {
                 assert ((name.empty () || name[0] != '-') && "Option can't start with '-");
                 name_ = name;
             }
-            std::string const & option::description () const { return description_; }
+            std::string const & option::usage () const noexcept { return usage_; }
+            std::string const & option::description () const noexcept { return description_; }
 
             bool option::add_occurrence () {
                 ++num_occurrences_;
@@ -155,6 +157,7 @@ namespace pstore {
                 assert (o != nullptr);
                 original_ = o;
             }
+            bool alias::add_occurrence () { return original_->add_occurrence (); }
             void alias::set_num_occurrences_flag (num_occurrences_flag const n) {
                 original_->set_num_occurrences_flag (n);
             }

@@ -88,6 +88,9 @@ BUILDS = [
         },
         'env': [
             'MATRIX_EVAL="CC=clang-9 && CXX=clang++-9"',
+        ],
+        'before_script': [
+            'nvm install node'
         ]
     },
     {
@@ -102,6 +105,9 @@ BUILDS = [
         'env': [
             'MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"',
             'PSTORE_VALGRIND=Yes',
+        ],
+        'before_script': [
+            'nvm install node'
         ]
     },
     {
@@ -116,6 +122,9 @@ BUILDS = [
         'env': [
             'MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"',
             'PSTORE_VALGRIND=Yes',
+        ],
+        'before_script': [
+            'nvm install node'
         ]
     },
     {

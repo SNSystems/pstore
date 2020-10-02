@@ -1,0 +1,24 @@
+# %binaries = the directories containing the executable binaries
+# %t = temporary file name unique to the test
+# %S = the test source directory
+
+REQUIRES: npm
+REQUIRES: nodejs
+
+# Delete any existing results.
+RUN: rm -rf "%t" && mkdir -p "%t"
+
+# Create a database from test.json
+RUN: "%binaries/pstore-import" "%t/db.db" "%S/test.json"
+
+# Export it.
+RUN: "%binaries/pstore-export" "%t/db.db" > "%t/export.json"
+
+# Now re-import what we just exported.
+RUN: "%binaries/pstore-import" "%t/db2.db" "%t/export.json"
+
+# Validate the exported file against the schema.
+RUN: cd "%S/../../utils/exchange_schema"
+RUN: "%npm" install
+RUN: "%nodejs" "%S/../../utils/exchange_schema/schema_check.js" "%S/../../utils/exchange_schema/pstore.schema.json" "%t/export.json"
+

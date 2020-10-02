@@ -57,7 +57,9 @@
 #include <utility>
 
 #include "pstore/config/config.hpp"
+#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
+
 
 namespace pstore {
     class uint128;
@@ -195,6 +197,7 @@ namespace pstore {
         uint128 & operator>>= (unsigned n) noexcept;
 
         std::string to_hex_string () const;
+        static maybe<uint128> from_hex_string (std::string const & str);
 
     private:
         static constexpr std::uint64_t max64 = std::numeric_limits<std::uint64_t>::max ();

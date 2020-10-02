@@ -45,16 +45,17 @@
 #include <cstdlib>
 #include "pstore/support/error.hpp"
 
-constexpr std::size_t EmptyStore::file_size;
-constexpr std::size_t EmptyStore::page_size_;
+constexpr std::size_t InMemoryStore::file_size;
+constexpr std::size_t InMemoryStore::page_size_;
 
-EmptyStore::EmptyStore ()
+InMemoryStore::InMemoryStore ()
         : buffer_{pstore::aligned_valloc (file_size, page_size_)}
         , file_{std::make_shared<pstore::file::in_memory> (buffer_, file_size)} {
     pstore::database::build_new_store (*file_);
 }
 
-EmptyStore::~EmptyStore () = default;
+InMemoryStore::~InMemoryStore () = default;
+
 
 EmptyStoreFile::EmptyStoreFile ()
         : file_{std::make_shared<pstore::file::file_handle> ()} {}

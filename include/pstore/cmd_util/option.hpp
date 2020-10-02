@@ -130,7 +130,10 @@ namespace pstore {
 
 
                 virtual void set_description (std::string const & d);
-                std::string const & description () const;
+                std::string const & description () const noexcept;
+
+                virtual void set_usage (std::string const & d);
+                std::string const & usage () const noexcept;
 
                 void set_comma_separated () noexcept { comma_separated_ = true; }
                 bool allow_comma_separated () const noexcept { return comma_separated_; }
@@ -167,6 +170,7 @@ namespace pstore {
 
             private:
                 std::string name_;
+                std::string usage_;
                 std::string description_;
                 num_occurrences_flag occurrences_ = num_occurrences_flag::optional;
                 bool positional_ = false;
@@ -408,6 +412,7 @@ namespace pstore {
                     return original_->category ();
                 }
 
+                bool add_occurrence () override;
                 void set_num_occurrences_flag (num_occurrences_flag n) override;
                 num_occurrences_flag get_num_occurrences_flag () const override;
                 void set_positional () override;

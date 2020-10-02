@@ -119,6 +119,8 @@ namespace pstore {
         static_assert (sizeof (internal_fixup) == 24,
                        "internal_fixup size differs from expected value");
 
+        std::ostream & operator<< (std::ostream & os, internal_fixup const & xfx);
+
         //*          _                     _    __ _                *
         //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
         //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
@@ -174,6 +176,7 @@ namespace pstore {
         static_assert (sizeof (external_fixup) == 32,
                        "external_fixup size differs from expected value");
 
+        std::ostream & operator<< (std::ostream & os, external_fixup const & xfx);
 
         //*                        _                 _   _           *
         //*  __ _ ___ _ _  ___ _ _(_)__   ___ ___ __| |_(_)___ _ _   *
@@ -398,13 +401,16 @@ namespace pstore {
         inline std::uint32_t generic_section::num_ifixups () const noexcept { return num_ifixups_; }
 
         struct section_content {
+            section_content () noexcept = default;
+            explicit section_content (section_kind const kind_) noexcept
+                    : kind{kind_} {}
             section_content (section_kind const kind_, std::uint8_t const align_) noexcept
                     : kind{kind_}
                     , align{align_} {}
             section_content (section_content const &) = delete;
-            section_content (section_content &&) = default;
+            section_content (section_content &&) noexcept = default;
             section_content & operator= (section_content const &) = delete;
-            section_content & operator= (section_content &&) = default;
+            section_content & operator= (section_content &&) noexcept = default;
 
             template <typename Iterator>
             using range = std::pair<Iterator, Iterator>;
@@ -414,8 +420,8 @@ namespace pstore {
                 return {begin, end};
             }
 
-            section_kind kind;
-            std::uint8_t align;
+            section_kind kind = section_kind::text;
+            std::uint8_t align = 1;
             small_vector<std::uint8_t, 128> data;
             std::vector<internal_fixup> ifixups;
             std::vector<external_fixup> xfixups;
@@ -432,6 +438,9 @@ namespace pstore {
             }
         };
 
+        bool operator== (section_content const & lhs, section_content const & rhs);
+        bool operator!= (section_content const & lhs, section_content const & rhs);
+        std::ostream & operator<< (std::ostream & os, section_content const & c);
 
         template <>
         inline unsigned section_alignment<pstore::repo::generic_section> (

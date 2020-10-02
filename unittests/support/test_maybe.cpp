@@ -67,6 +67,26 @@ namespace {
         std::shared_ptr<int> v_;
     };
 
+    class no_copy_value {
+    public:
+        explicit no_copy_value (int v)
+                : v_{std::make_shared<int> (v)} {}
+        no_copy_value (no_copy_value const &) = delete;
+        no_copy_value (no_copy_value && rhs) noexcept
+                : v_{std::move (rhs.v_)} {}
+        no_copy_value & operator= (no_copy_value const &) = delete;
+        no_copy_value & operator= (no_copy_value && rhs) noexcept {
+            v_ = std::move (rhs.v_);
+            return *this;
+        }
+
+        bool operator== (value const & rhs) const noexcept { return this->get () == rhs.get (); }
+        int get () const noexcept { return *v_; }
+
+    private:
+        std::shared_ptr<int> v_;
+    };
+
 } // end anonymous namespace
 
 TEST (Maybe, NoValue) {
@@ -142,6 +162,17 @@ TEST (Maybe, AssignZero) {
     EXPECT_TRUE (m2.has_value ());
     EXPECT_EQ (m2.value (), 0);
     EXPECT_EQ (*m2, 0);
+}
+
+TEST (Maybe, Emplace) {
+    maybe<no_copy_value> m;
+    EXPECT_EQ (m.emplace (13).get (), 13);
+    EXPECT_TRUE (m.has_value ());
+    EXPECT_EQ (m.value ().get (), 13);
+
+    EXPECT_EQ (m.emplace (17).get (), 17);
+    EXPECT_TRUE (m.has_value ());
+    EXPECT_EQ (m.value ().get (), 17);
 }
 
 TEST (Maybe, MoveCtor) {

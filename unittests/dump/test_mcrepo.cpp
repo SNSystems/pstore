@@ -61,6 +61,35 @@
 
 using namespace pstore::repo;
 
+TEST (MCRepoSectionContent, DefaultCtor) {
+    section_content c;
+    EXPECT_EQ (c.kind, section_kind::text);
+    EXPECT_EQ (c.align, 1U);
+    EXPECT_TRUE (c.data.empty ());
+    EXPECT_TRUE (c.ifixups.empty ());
+    EXPECT_TRUE (c.xfixups.empty ());
+}
+
+TEST (MCRepoSectionContent, Eq) {
+    auto const populate = [] (section_content * const sc) {
+        sc->kind = section_kind::data;
+        sc->align = 8U;
+        sc->data.clear ();
+        std::fill_n (std::back_inserter (sc->data), 7U, std::uint8_t{7});
+        sc->ifixups.clear ();
+        std::fill_n (std::back_inserter (sc->ifixups), 3U,
+                     internal_fixup (section_kind::read_only, relocation_type{1}, 5U /*offset*/,
+                                     13U /*addend*/));
+        // TODO: xfixups.
+    };
+
+    section_content c1;
+    populate (&c1);
+    section_content c2;
+    populate (&c2);
+    EXPECT_TRUE (operator== (c1, c2));
+}
+
 //*  __  __  ___ ___               ___ _     _                 *
 //* |  \/  |/ __| _ \___ _ __  ___| __(_)_ _| |_ _  _ _ _ ___  *
 //* | |\/| | (__|   / -_) '_ \/ _ \ _|| \ \ /  _| || | '_/ -_) *
@@ -142,8 +171,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
 
     transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
-    std::array<section_content, 1> c = {
-        {section_content (section_kind::data, std::uint8_t{0x10} /*alignment*/)}};
+    std::array<section_content, 1> c = {{{section_kind::data, std::uint8_t{0x10} /*alignment*/}}};
     section_content & data = c.back ();
     pstore::typed_address<pstore::indirect_string> name = this->store_str (transaction, "foo");
     {
@@ -295,7 +323,7 @@ TEST_F (MCRepoFixture, DumpBssSection) {
         transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
         std::array<section_content, 1> c = {
-            {section_content (section_kind::bss, std::uint8_t{0x10} /*alignment*/)}};
+            {{section_kind::bss, std::uint8_t{0x10} /*alignment*/}}};
 
         section_content & data = c.back ();
         // Build the bss section's data, no internal and external fixups. (Note that this is used by

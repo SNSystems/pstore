@@ -49,15 +49,11 @@
 #include <system_error>
 #include <tuple>
 
+#include "pstore/adt/utility.hpp"
 #include "pstore/support/inherit_const.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-
-    struct in_place_t {
-        explicit in_place_t () noexcept = default;
-    };
-    constexpr in_place_t in_place{};
 
     template <typename Error>
     struct is_error : std::integral_constant<bool, std::is_error_code_enum<Error>::value ||

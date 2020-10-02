@@ -44,12 +44,13 @@
 #ifndef PSTORE_MCREPO_SECTION_HPP
 #define PSTORE_MCREPO_SECTION_HPP
 
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <iosfwd>
 #include <type_traits>
 
 namespace pstore {
-
     namespace repo {
 
 #define PSTORE_MCREPO_SECTION_KINDS                                                                \
@@ -78,6 +79,10 @@ namespace pstore {
             PSTORE_MCREPO_SECTION_KINDS last // always last, never used.
         };
 #undef X
+        constexpr auto num_section_kinds =
+            static_cast<std::underlying_type<section_kind>::type> (section_kind::last);
+
+        std::ostream & operator<< (std::ostream & os, section_kind kind);
 
         constexpr auto first_repo_metadata_section = section_kind::linked_definitions;
 
@@ -196,10 +201,11 @@ namespace pstore {
 
             const_pointer data () const { return begin_; }
 
-            size_type size () const {
+            size_type size () const noexcept {
                 assert (end_ >= begin_);
                 return static_cast<size_type> (end_ - begin_);
             }
+            bool empty () const noexcept { return size () == 0U; }
 
         private:
             const_pointer begin_;

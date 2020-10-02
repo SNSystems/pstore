@@ -52,17 +52,17 @@ using namespace pstore::cmd_util;
 
 namespace {
 
-    cl::opt<std::string> db_path (cl::positional,
+    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
                                   cl::desc ("Path of the pstore repository to be read."),
                                   cl::required);
 
     cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
-        first_revision (cl::positional, cl::desc ("The first revision number (or 'HEAD')"),
-                        cl::optional);
+        first_revision (cl::positional, cl::usage ("[1st-revision]"),
+                        cl::desc ("The first revision number (or 'HEAD')"), cl::optional);
 
     cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
-        second_revision (cl::positional, cl::desc ("The second revision number (or 'HEAD')"),
-                         cl::optional);
+        second_revision (cl::positional, cl::usage ("[2nd-revision]"),
+                         cl::desc ("The second revision number (or 'HEAD')"), cl::optional);
 
     cl::option_category how_cat ("Options controlling how fields are emitted");
 

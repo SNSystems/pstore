@@ -66,7 +66,7 @@ using namespace pstore::cmd_util;
 namespace {
 
     cl::opt<std::string>
-        data_file (cl::positional,
+        data_file (cl::positional, cl::usage ("repository"),
                    cl::desc ("Path of the pstore repository to use for index test."), cl::required);
 
 } // end anonymous namespace

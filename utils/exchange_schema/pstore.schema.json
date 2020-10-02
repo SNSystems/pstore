@@ -1,0 +1,225 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://github.com/SNSystems/pstore.schema.json",
+
+    "definitions": {
+        "digest": {
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{32}$"
+        },
+
+        "xfixups_array": {
+            "description" : "An array of external (extra-fragment) fixups",
+            "type": "array",
+            "items": {
+                "description": "An external (extra-fragment) fixup",
+                "type": "object",
+                "properties": {
+                    "name": { "type": "number" },
+                    "type": { "type": "number" },
+                    "offset": { "type": "number" },
+                    "addend": { "type": "number" }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "ifixups_array": {
+            "description": "An array of internal (intra-fragment) fixups",
+            "type": "array",
+            "items": {
+                "description": "An internal (intra-fragment) fixup",
+                "type": "object",
+                "properties": {
+                    "section": {
+                        "description": "Type of the target section",
+                        "type": "string",
+                        "enum": [
+                            "text",
+                            "data",
+                            "bss",
+                            "rel_ro",
+                            "mergeable_1_byte_c_string",
+                            "mergeable_2_byte_c_string",
+                            "mergeable_4_byte_c_string",
+                            "mergeable_const_4",
+                            "mergeable_const_8",
+                            "mergeable_const_16",
+                            "mergeable_const_32",
+                            "read_only",
+                            "thread_data",
+                            "thread_bss",
+                            "debug_line",
+                            "debug_string",
+                            "debug_ranges",
+                            "interp",
+                            "dependent"
+                        ]
+                    },
+                    "type": { "type": "number" },
+                    "offset": { "type": "number" },
+                    "addend": { "type": "number" }
+                },
+                "additionalProperties": false
+            }
+        },
+
+        "bss_section": {
+            "type": "object",
+            "properties": {
+                "align": { "type": "number" },
+                "size": { "type": "number" }
+            },
+            "additionalProperties": false
+        },
+
+        "generic_section": {
+            "type": "object",
+            "properties": {
+                "align": { "type": "number" },
+                "data": {
+                    "description": "The section data",
+                    "type": "string",
+                    "contentEncoding": "base64"
+                },
+                "ifixups": { "$ref": "#/definitions/ifixups_array"},
+                "xfixups": { "$ref": "#/definitions/xfixups_array" }
+            },
+            "additionalProperties": false
+        },
+
+        "debug_line_section": {
+            "type": "object",
+            "properties": {
+                "header": {
+                    "description": "The DWARF line header to prefix this contribution",
+                    "$ref": "#/definitions/digest"
+                },
+                "data": {
+                    "description": "A DWARF line section contribution",
+                    "type": "string",
+                    "contentEncoding": "base64"
+                },
+                "ifixups": { "$ref":  "#/definitions/ifixups_array"}
+            },
+            "additionalProperties": false
+        }
+    },
+
+    "title": "pstore exchange",
+    "description": "A pstore repository",
+
+    "type": "object",
+    "properties": {
+        "version": {
+            "description": "The exchange format version number",
+            "type": "integer"
+        },
+        "transactions": {
+            "description": "Transactions",
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "names" : {
+                        "description": "The names defined by this transaction",
+                        "type": "array",
+                        "items": { "type": "string" },
+                        "uniqueItems": true
+                    },
+
+                    "debugline": {
+                        "description": "Index associating a digest with a DWARF debug-line header",
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A DWARF debug-line header",
+                                "type": "string",
+                                "contentEncoding": "base64"
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+
+                    "fragments": {
+                        "description": "Index associating a digest with a fragment",
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A fragment",
+                                "type": "object",
+                                "properties": {
+                                    "text": { "$ref": "#/definitions/generic_section" },
+                                    "data": {},
+                                    "bss": { "$ref": "#/definitions/bss_section" },
+                                    "rel_ro": {},
+                                    "mergeable_1_byte_c_string": {},
+                                    "mergeable_2_byte_c_string": {},
+                                    "mergeable_4_byte_c_string": {},
+                                    "mergeable_const_4": {},
+                                    "mergeable_const_8": {},
+                                    "mergeable_const_16": {},
+                                    "mergeable_const_32": {},
+                                    "read_only": {},
+                                    "thread_data": {},
+                                    "thread_bss": {},
+                                    "debug_line": { "$ref":  "#/definitions/debug_line_section" },
+                                    "debug_string": {},
+                                    "debug_ranges": {},
+                                    "interp": {},
+                                    "dependent": {}
+                                }
+                            }
+                        },
+                        "additionalProperties": false
+                    },
+
+                    "compilations": {
+                        "description": "Index associating a digest with compilation record",
+                        "type": "object",
+                        "patternProperties": {
+                            "^[A-Fa-f0-9]{32}$": {
+                                "description": "A compilation defining a collection of symbols",
+                                "type": "object",
+                                "properties": {
+                                    "path": { "type": "number" },
+                                    "triple": { "type": "number" },
+                                    "definitions": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "digest": { "$ref": "#/definitions/digest" },
+                                                "name": {
+                                                    "description": "The name of the symbol being defined",
+                                                    "type": "number"
+                                                },
+                                                "linkage": {
+                                                    "description": "The linkage type for this definition",
+                                                    "type": "string",
+                                                    "enum": ["append", "common", "external",
+                                                             "internal_no_symbol", "internal",
+                                                             "link_once_any", "link_once_ord",
+                                                             "weak_any", "weak_odr"]
+                                                },
+                                                "visibility": {
+                                                    "type": "string",
+                                                    "enum": ["default", "hidden", "protected"]
+                                                }
+                                            },
+                                            "required": ["digest", "linkage", "name"]
+                                        }
+                                    }
+                                },
+                                "required": ["definitions", "path", "triple" ]
+                            }
+                        },
+                        "additionalProperties": false
+                    }
+                },
+                "required": []
+            }
+        }
+    },
+    "required": ["version", "transactions"]
+}

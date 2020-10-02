@@ -62,8 +62,6 @@ namespace pstore {
             index::digest d_;
         };
 
-        maybe<index::digest> digest_from_string (std::string const & str);
-
     } // end namespace dump
 } // end namespace pstore
 

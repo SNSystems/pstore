@@ -44,6 +44,7 @@
 #ifndef PSTORE_SUPPORT_BASE64_HPP
 #define PSTORE_SUPPORT_BASE64_HPP
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -52,6 +53,7 @@
 #include <type_traits>
 
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
 
@@ -111,6 +113,61 @@ namespace pstore {
         assert (first == last);
         return out;
     }
+
+    namespace details {
+
+        template <typename OutputIterator>
+        OutputIterator decode4 (std::array<std::uint8_t, 4> const & in, OutputIterator out, unsigned count) {
+            std::array<std::uint8_t, 3> result;
+            result[0] = static_cast<std::uint8_t> (static_cast<std::uint8_t> (in[0] << 2) +
+                                                   ((in[1] & 0x30U) >> 4));
+            result[1] = static_cast<std::uint8_t> (((in[1] & 0xFU) << 4) + ((in[2] & 0x3CU) >> 2));
+            result[2] = static_cast<std::uint8_t> (((in[2] & 0x3U) << 6) + in[3]);
+            for (auto ctr = 0U; ctr < count; ++ctr) {
+                *out = result[ctr];
+                ++out;
+            }
+            return out;
+        }
+
+    } // end namespace details
+
+    template <typename InputIterator, typename OutputIterator>
+    maybe<OutputIterator> from_base64 (InputIterator first, InputIterator last,
+                                       OutputIterator out) {
+        auto count = 0U;
+        std::array<std::uint8_t, 4> buff;
+
+        for (; first != last; ++first) {
+            auto c = *first;
+            if (c >= 'A' && c <= 'Z') {
+                c = c - 'A';
+            } else if (c >= 'a' && c <= 'z') {
+                c = c - 'a' + 26;
+            } else if (c >= '0' && c <= '9') {
+                c = c - '0' + 26 * 2;
+            } else if (c == '+') {
+                c = 0x3E;
+            } else if (c == '/') {
+                c = 0x3F;
+            } else if (c == '=') {
+                continue;
+            } else {
+                break; // error.
+            }
+            buff[count++] = static_cast<std::uint8_t> (c);
+            if (count >= 4U) {
+                out = details::decode4 (buff, out, 3);
+                count = 0U;
+            }
+        }
+        if (count > 0) {
+            std::fill (buff.begin () + count, buff.end (), std::uint8_t{0});
+            out = details::decode4 (buff, out, count - 1);
+        }
+        return first == last ? just (out) : nothing<OutputIterator> ();
+    }
+
 
 } // end namespace pstore
 

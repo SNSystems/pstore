@@ -60,17 +60,19 @@ namespace {
     public:
         using result_type = std::shared_ptr<pstore::dump::value>;
 
-        void string_value (std::string const & s) { out_.emplace (new pstore::dump::string (s)); }
-        void integer_value (long v) { out_.emplace (pstore::dump::make_number (v)); }
-        void float_value (double v) { out_.emplace (pstore::dump::make_number (v)); }
-        void boolean_value (bool v) { out_.emplace (new pstore::dump::boolean (v)); }
-        void null_value () { out_.emplace (new pstore::dump::null ()); }
+        std::error_code null_value ();
+        std::error_code boolean_value (bool v);
+        std::error_code string_value (std::string const & s);
+        std::error_code int64_value (std::int64_t v);
+        std::error_code uint64_value (std::uint64_t v);
+        std::error_code double_value (double v);
 
-        void begin_array () { out_.emplace (nullptr); }
-        void end_array ();
+        std::error_code begin_array ();
+        std::error_code end_array ();
 
-        void begin_object () { out_.emplace (nullptr); }
-        void end_object ();
+        std::error_code begin_object ();
+        std::error_code key (std::string const & s);
+        std::error_code end_object ();
 
         result_type result () const {
             assert (out_.size () == 1U);
@@ -81,7 +83,42 @@ namespace {
         std::stack<result_type> out_;
     };
 
-    void yaml_output::end_array () {
+    std::error_code yaml_output::null_value () {
+        out_.emplace (new pstore::dump::null ());
+        return {};
+    }
+
+    std::error_code yaml_output::boolean_value (bool v) {
+        out_.emplace (new pstore::dump::boolean (v));
+        return {};
+    }
+
+    std::error_code yaml_output::string_value (std::string const & s) {
+        out_.emplace (new pstore::dump::string (s));
+        return {};
+    }
+
+    std::error_code yaml_output::int64_value (std::int64_t v) {
+        out_.emplace (pstore::dump::make_number (v));
+        return {};
+    }
+
+    std::error_code yaml_output::uint64_value (std::uint64_t v) {
+        out_.emplace (pstore::dump::make_number (v));
+        return {};
+    }
+
+    std::error_code yaml_output::double_value (double v) {
+        out_.emplace (pstore::dump::make_number (v));
+        return {};
+    }
+
+    std::error_code yaml_output::begin_array () {
+        out_.emplace (nullptr);
+        return {};
+    }
+
+    std::error_code yaml_output::end_array () {
         pstore::dump::array::container content;
         for (;;) {
             auto v = out_.top ();
@@ -93,9 +130,20 @@ namespace {
         }
         std::reverse (std::begin (content), std::end (content));
         out_.emplace (new pstore::dump::array (std::move (content)));
+        return {};
     }
 
-    void yaml_output::end_object () {
+    std::error_code yaml_output::begin_object () {
+        out_.emplace (nullptr);
+        return {};
+    }
+
+    std::error_code yaml_output::key (std::string const & s) {
+        string_value (s);
+        return {};
+    }
+
+    std::error_code yaml_output::end_object () {
         auto object = std::make_shared<pstore::dump::object> ();
         for (;;) {
             auto value = out_.top ();
@@ -112,6 +160,7 @@ namespace {
             object->insert (key_str->get (), value);
         }
         out_.emplace (std::move (object));
+        return {};
     }
 
     template <typename IStream>
@@ -136,9 +185,9 @@ namespace {
 
         auto err = p.last_error ();
         if (err) {
-            std::tuple<unsigned, unsigned> const position = p.coordinate ();
-            std::cerr << "Parse error: " << p.last_error ().message () << " (Line "
-                      << std::get<1> (position) << ", column " << std::get<0> (position) << ")\n";
+            pstore::json::coord const position = p.coordinate ();
+            std::cerr << "Parse error: " << p.last_error ().message () << " (Line " << position.row
+                      << ", column " << position.column << ")\n";
             return EXIT_FAILURE;
         }
 

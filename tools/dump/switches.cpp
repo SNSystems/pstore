@@ -62,7 +62,7 @@ namespace pstore {
             public:
                 ~parser () noexcept override = default;
                 maybe<dump::digest_opt> operator() (std::string const & v) const {
-                    maybe<index::digest> const d = dump::digest_from_string (v);
+                    maybe<index::digest> const d = uint128::from_hex_string (v);
                     return d ? just (dump::digest_opt{*d}) : nothing<dump::digest_opt> ();
                 }
             };
@@ -157,7 +157,7 @@ namespace {
         "triple", cl::desc{"The target triple to use for disassembly if one is not known"},
         cl::init ("x86_64-pc-linux-gnu-repo"), cl::cat (how_cat)};
 
-    cl::list<std::string> paths{cl::positional, cl::desc{"<filename>..."}};
+    cl::list<std::string> paths{cl::positional, cl::usage{"filename..."}};
 
 } // end anonymous namespace
 
