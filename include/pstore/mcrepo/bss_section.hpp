@@ -138,7 +138,7 @@ namespace pstore {
             bss_section_creation_dispatcher &
             operator= (bss_section_creation_dispatcher const &) = delete;
 
-            void set_content (gsl::not_null<section_content const *> const sec) noexcept {
+            void set_content (gsl::not_null<section_content const *> const sec) {
                 validate (sec);
                 section_ = sec;
             }
