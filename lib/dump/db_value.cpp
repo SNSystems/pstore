@@ -103,13 +103,13 @@ namespace pstore {
         //* make_value *
         // *************
         value_ptr make_value (header const & header) {
+            auto const & version = header.version ();
             return make_value (object::container{
                 {"signature1",
                  make_value (std::begin (header.a.signature1), std::end (header.a.signature1))},
                 {"signature2", make_value (header.a.signature2)},
-                {"version",
-                 make_value (std::begin (header.a.version), std::end (header.a.version))},
-                {"uuid", make_value (header.a.uuid.str ())},
+                {"version", make_value (std::begin (version), std::end (version))},
+                {"id", make_value (header.id ())},
                 {"crc", make_value (header.crc)},
                 {"footer_pos", make_value (header.footer_pos.load ())},
             });

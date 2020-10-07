@@ -109,6 +109,7 @@ namespace pstore {
             auto const ind = indent{}.next ();
             os << "{\n";
             os << ind << R"("version":1,)" << '\n';
+            os << ind << R"("id":")" << db.get_header ().id ().str () << "\",\n";
             os << ind << R"("transactions":)";
 
             auto const f = footers (db);

@@ -82,7 +82,6 @@ namespace {
         bad_digest = 1,
         no_fragment_index,
         fragment_not_found,
-        bad_uuid,
         no_compilation_index,
         compilation_not_found,
         debug_line_header_not_found,
@@ -106,7 +105,6 @@ namespace {
         case dump_error_code::bad_digest: result = "bad digest"; break;
         case dump_error_code::no_fragment_index: result = "no fragment index"; break;
         case dump_error_code::fragment_not_found: result = "fragment not found"; break;
-        case dump_error_code::bad_uuid: result = "bad UUID"; break;
         case dump_error_code::no_compilation_index: result = "no compilation index"; break;
         case dump_error_code::compilation_not_found: result = "compilation not found"; break;
         case dump_error_code::debug_line_header_not_found:

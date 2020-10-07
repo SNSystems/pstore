@@ -155,17 +155,17 @@ TEST_F (OpenCorruptStore, HeaderBadMinorVersion) {
     this->check_database_open (pstore::error_code::header_version_mismatch);
 }
 
-TEST_F (OpenCorruptStore, HeaderUUID) {
+TEST_F (OpenCorruptStore, HeaderID) {
     // This test is only valid if CRC checking is enabled.
     if (pstore::database::crc_checks_enabled ()) {
         auto h = this->get_header ();
-        pstore::uuid & uuid = h->a.uuid;
-        pstore::uuid::container_type old = uuid.array ();
+        pstore::uuid & id = h->a.id;
+        pstore::uuid::container_type old = id.array ();
         old[0] = !old[0];
 
         // Rebuild the UUID in place.
-        h->a.uuid.~uuid ();
-        new (&uuid) pstore::uuid (old);
+        h->a.id.~uuid ();
+        new (&id) pstore::uuid (old);
 
         // An inconsistency in the sync_name field is caught by the CRC value no longer matching.
         // If CRC checks are disabled, then it's caught by the sync-name alphabet check.

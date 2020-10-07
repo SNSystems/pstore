@@ -8,6 +8,13 @@
             "pattern": "^[A-Fa-f0-9]{32}$"
         },
 
+        "uuid": {
+            "desription": "A UUID as defined by RFC 4122",
+            "type": "string",
+            "pattern": "^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-4[A-Fa-f0-9]{3}-[89aAbB][A-Fa-f0-9]{3}-[A-Fa-f0-9]{12}$"
+        },
+
+
         "xfixups_array": {
             "description" : "An array of external (extra-fragment) fixups",
             "type": "array",
@@ -73,21 +80,6 @@
             "additionalProperties": false
         },
 
-        "generic_section": {
-            "type": "object",
-            "properties": {
-                "align": { "type": "number" },
-                "data": {
-                    "description": "The section data",
-                    "type": "string",
-                    "contentEncoding": "base64"
-                },
-                "ifixups": { "$ref": "#/definitions/ifixups_array"},
-                "xfixups": { "$ref": "#/definitions/xfixups_array" }
-            },
-            "additionalProperties": false
-        },
-
         "debug_line_section": {
             "type": "object",
             "properties": {
@@ -100,10 +92,26 @@
                     "type": "string",
                     "contentEncoding": "base64"
                 },
-                "ifixups": { "$ref":  "#/definitions/ifixups_array"}
+                "ifixups": { "$ref": "#/definitions/ifixups_array" }
+            },
+            "additionalProperties": false
+        },
+
+        "generic_section": {
+            "type": "object",
+            "properties": {
+                "align": { "type": "number" },
+                "data": {
+                    "description": "The section data",
+                    "type": "string",
+                    "contentEncoding": "base64"
+                },
+                "ifixups": { "$ref": "#/definitions/ifixups_array" },
+                "xfixups": { "$ref": "#/definitions/xfixups_array" }
             },
             "additionalProperties": false
         }
+
     },
 
     "title": "pstore exchange",
@@ -115,6 +123,12 @@
             "description": "The exchange format version number",
             "type": "integer"
         },
+
+        "id": {
+            "description": "The database identifier",
+            "$ref": "#/definitions/uuid"
+        },
+
         "transactions": {
             "description": "Transactions",
             "type": "array",
@@ -221,5 +235,6 @@
             }
         }
     },
-    "required": ["version", "transactions"]
+    "required": ["version", "transactions"],
+    "additionalProperties": false
 }

@@ -311,7 +311,7 @@ namespace pstore {
         /// \brief Returns the name of the store's synchronisation object.
         ///
         /// This is set of 20 letters (`sync_name_length`) from a 32 character alphabet whose value
-        /// is derived from the store's UUID. Assuming a truly uniform distribution, we have a
+        /// is derived from the store's ID. Assuming a truly uniform distribution, we have a
         /// collision probability of 1/32^20 which should be more than small enough for our
         /// purposes.
         std::string get_sync_name () const {

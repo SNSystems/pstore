@@ -51,6 +51,7 @@
 #include "pstore/exchange/import_non_terminals.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/exchange/import_transaction.hpp"
+#include "pstore/exchange/import_uuid.hpp"
 
 namespace {
 
@@ -81,9 +82,10 @@ namespace {
         db_pointer const db_;
         pstore::exchange::import_name_mapping names_;
 
-        enum { version, transactions };
+        enum { version, id, transactions };
         std::bitset<transactions + 1> seen_;
         std::uint64_t version_ = 0;
+        pstore::uuid id_;
     };
 
     // name
@@ -97,6 +99,10 @@ namespace {
         if (k == "version") {
             seen_[version] = true;
             return push<pstore::exchange::uint64_rule> (&version_);
+        }
+        if (k == "id") {
+            seen_[id] = true;
+            return push<pstore::exchange::import_uuid_rule> (&id_);
         }
         if (k == "transactions") {
             seen_[transactions] = true;

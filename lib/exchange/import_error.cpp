@@ -127,6 +127,7 @@ namespace pstore {
                 break;
 
             case import_error::bad_linkage: result = "unknown linkage type"; break;
+            case import_error::bad_uuid: result = "bad UUID"; break;
             case import_error::bad_base64_data: result = "bad Base64 data"; break;
             case import_error::bad_digest: result = "bad digest"; break;
             case import_error::bad_visibility: result = "unknown visibility"; break;

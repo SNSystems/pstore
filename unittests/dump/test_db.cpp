@@ -149,7 +149,7 @@ TEST (Database, Header) {
                  ElementsAre ("version", ":", "[",
                               to_hex_string (pstore::header::major_version) + ",",
                               to_hex_string (pstore::header::minor_version), "]"));
-    EXPECT_THAT (split_tokens (lines.at (3)), ElementsAre ("uuid", ":", _));
+    EXPECT_THAT (split_tokens (lines.at (3)), ElementsAre ("id", ":", _));
     EXPECT_THAT (split_tokens (lines.at (4)), ElementsAre ("crc", ":", _));
     EXPECT_THAT (split_tokens (lines.at (5)), ElementsAre ("footer_pos", ":", "0x0"));
 }

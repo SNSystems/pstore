@@ -107,10 +107,10 @@ int main (int argc, char * argv[]) {
             parser.input (ptr, ptr + nread);
             if (parser.has_error ()) {
                 std::error_code const erc = parser.last_error ();
-                std::cerr << "Value: " << erc.value () << '\n'
-                          << "Error: " << erc.message () << '\n'
+                std::cerr << "Error: " << erc.message () << '\n'
                           << "Line " << parser.coordinate ().row << ", column "
                           << parser.coordinate ().column << '\n';
+                exit_code = EXIT_FAILURE;
                 break;
             }
 

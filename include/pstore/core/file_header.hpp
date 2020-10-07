@@ -116,6 +116,14 @@ namespace pstore {
         /// Computes the CRC value for the header.
         std::uint32_t get_crc () const noexcept;
 
+        /// Returns the database ID. When created, each pstore file has a unique ID number. It is
+        /// preserved by import/export and strip/merge. External references may use this ID to
+        /// check that they are referring to the correct database.
+        uuid id () const noexcept { return a.id; }
+
+        /// Returns the file format version number (major, minor).
+        std::array<std::uint16_t, 2> const & version () const noexcept { return a.version; }
+
         static constexpr std::uint16_t major_version = 1;
         static constexpr std::uint16_t minor_version = 8;
 
@@ -136,9 +144,12 @@ namespace pstore {
             /// The second half of the file signature. This value is used to determine the
             /// endian-ness of the file.
             std::uint32_t signature2;
+
+            /// The file format version number (major, minor).
             std::array<std::uint16_t, 2> version;
             std::uint32_t header_size = sizeof (header);
-            class uuid uuid;
+            /// The database ID.
+            class uuid id;
         };
 
         body a;
@@ -163,7 +174,7 @@ namespace pstore {
     PSTORE_STATIC_ASSERT (offsetof (header::body, signature2) == 4);
     PSTORE_STATIC_ASSERT (offsetof (header::body, version) == 8);
     PSTORE_STATIC_ASSERT (offsetof (header::body, header_size) == 12);
-    PSTORE_STATIC_ASSERT (offsetof (header::body, uuid) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (header::body, id) == 16);
     PSTORE_STATIC_ASSERT (sizeof (header::body) == 32);
 
     PSTORE_STATIC_ASSERT (offsetof (header, a) == 0);

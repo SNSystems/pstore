@@ -1,40 +1,42 @@
 {
   "version":1,
+  "id":"e48857de-fba1-46f4-8465-4154019a7b4a",
   "transactions":[
     {
+      // generation 1
       "names":[
-        "/Users/paul/test/two_modules",
         "x86_64-pc-linux-gnu-repo",
         "main",
         "printf",
         "",
         ".str",
         "ultimate_answer",
+        "/media/psf/Home/test/two_modules",
         "foo"
       ],
       "debugline":{
         "8ef807d5066b78def2d99c69f2ff932d":"AAAAAAQAIAAAAAEBAfsODQABAQEBAAAAAQAAAQBzd2l0Y2guYwAAAAAA"
       },
       "fragments":{
-        "ebde5708d00fdd4fa5296970fdc50f73":{
+        "b16d0da6cdc0cf0da6c5efd87dd5e6e2":{
           "text":{
             "align":16,
             "data":"VUiJ5UiD7BC/BgAAAOgAAAAASL8AAAAAAAAAAInGsADoAAAAADHJiUX8ichIg8QQXcM=",
             "xfixups":[
               {
-                "name":7,
+                "name":7, //"foo"
                 "type":4,
                 "offset":14,
                 "addend":18446744073709551612
               },
               {
-                "name":5,
+                "name":4, //".str"
                 "type":1,
                 "offset":20,
                 "addend":0
               },
               {
-                "name":3,
+                "name":2, //"printf"
                 "type":4,
                 "offset":33,
                 "addend":18446744073709551612
@@ -49,7 +51,12 @@
             ]
           }
         },
-        "051ab7f60d113f9e77fd1589842b8dac":{
+        "54ac5aadc7a515d2d5b4ac01faad6554":{
+          "mergeable_1_byte_c_string":{
+            "data":"JWQKAA=="
+          }
+        },
+        "8ce2e4f4db01c11491d9ef8f29dc327b":{
           "text":{
             "align":16,
             "data":"VUiJ5bgrAAAAXcM="
@@ -61,47 +68,40 @@
               {"section":"text","type":1,"offset":3,"addend":0}
             ]
           }
-        },
-        "66c126a846deb93ac9538f122b3303ec":{
-          "mergeable_1_byte_c_string":{
-            "data":"JWQKAA=="
-          }
         }
       },
       "compilations":{
-        "e24e30de6e2784506e60ac4b90d3e252":{
-          "path":0,
-          "triple":1,
+        "c6567d3319bfdb1f94141670d6a21c69":{
+          "path":6, //"/media/psf/Home/test/two_modules"
+          "triple":0, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
-              "digest":"051ab7f60d113f9e77fd1589842b8dac",
-              "name":6,
-              "linkage":"external",
-              "visibility":"default"
+              "digest":"8ce2e4f4db01c11491d9ef8f29dc327b",
+              "name":5, //"ultimate_answer"
+              "linkage":"external"
             },
             {
-              "digest":"ebde5708d00fdd4fa5296970fdc50f73",
-              "name":2,
-              "linkage":"external",
-              "visibility":"default"
+              "digest":"b16d0da6cdc0cf0da6c5efd87dd5e6e2",
+              "name":1, //"main"
+              "linkage":"external"
             },
             {
-              "digest":"66c126a846deb93ac9538f122b3303ec",
-              "name":5,
-              "linkage":"internal_no_symbol",
-              "visibility":"default"
+              "digest":"54ac5aadc7a515d2d5b4ac01faad6554",
+              "name":4, //".str"
+              "linkage":"internal_no_symbol"
             }
           ]
         }
       }
     },
     {
+      // generation 2
       "names":[],
       "debugline":{
         "d443a810408f8803328682c01564d350":"AAAAAAQAHQAAAAEBAfsODQABAQEBAAAAAQAAAQBmb28uYwAAAAAA"
       },
       "fragments":{
-        "49f160fececc8383f3549d7b85380c48":{
+        "fb4bf1ae11056079cd08cfa52708375a":{
           "text":{
             "align":16,
             "data":"VUiJ5Yl9+ItF+IPA/4nBg+gDSIlN8A+HPgAAAEiLRfBIiwzFAAAAAP/hx0X8BQAAAOkrAAAAx0X8BgAAAOkfAAAAx0X8BwAAAOkTAAAAx0X8CAAAAOkHAAAAx0X8CQAAAItF/F3D",
@@ -129,15 +129,14 @@
         }
       },
       "compilations":{
-        "5c15a1a8829dcdd8e109ad7b08f4e961":{
-          "path":0,
-          "triple":1,
+        "cde6188bc64ccc24361ebc0d4fecdb18":{
+          "path":6, //"/media/psf/Home/test/two_modules"
+          "triple":0, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
-              "digest":"49f160fececc8383f3549d7b85380c48",
-              "name":7,
-              "linkage":"external",
-              "visibility":"default"
+              "digest":"fb4bf1ae11056079cd08cfa52708375a",
+              "name":7, //"foo"
+              "linkage":"external"
             }
           ]
         }

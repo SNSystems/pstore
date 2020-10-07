@@ -88,6 +88,7 @@ namespace pstore {
             bad_digest,
             bad_base64_data,
             bad_linkage,
+            bad_uuid,
             bad_visibility,
             unknown_section_name,
             debug_line_header_digest_not_found,

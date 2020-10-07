@@ -320,7 +320,7 @@ namespace pstore {
     // build_sync_name [static]
     // ~~~~~~~~~~~~~~~
     std::string database::build_sync_name (header const & header) {
-        auto name = base32::convert (uint128{header.a.uuid.array ()});
+        auto name = base32::convert (uint128{header.a.id.array ()});
         name.erase (std::min (sync_name_length, name.length ()));
         return name;
     }

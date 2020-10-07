@@ -71,6 +71,7 @@ set (pstore_exchange_includes
     import_section_to_importer.hpp
     import_terminals.hpp
     import_transaction.hpp
+    import_uuid.hpp
 )
 set (pstore_exchange_sources
     export.cpp
@@ -86,6 +87,7 @@ set (pstore_exchange_sources
     import_root.cpp
     import_rule.cpp
     import_terminals.cpp
+    import_uuid.cpp
 )
 
 add_pstore_library (

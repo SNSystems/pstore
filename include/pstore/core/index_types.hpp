@@ -48,7 +48,6 @@
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/core/uuid.hpp"
 #include "pstore/support/fnv.hpp"
 #include "pstore/support/uint128.hpp"
 
