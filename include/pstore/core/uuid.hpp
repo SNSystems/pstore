@@ -50,11 +50,12 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib> // abort
+#include <cstdlib>
 #include <string>
 
 #include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
+#include "pstore/support/uint128.hpp"
 
 #if defined(_WIN32)
 #    define WIN32_LEAN_AND_MEAN
@@ -121,6 +122,8 @@ namespace pstore {
 
         container_type const & array () const noexcept { return data_; }
 
+        uint128 as_uint128 () const noexcept { return uint128{data_.data ()}; }
+
         enum class variant_type {
             ncs,       // NCS backward compatibility
             rfc_4122,  // Defined by RFC 4122
@@ -186,6 +189,6 @@ namespace pstore {
         return lhs.data_ >= rhs.data_;
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #endif // PSTORE_CORE_UUID_HPP
