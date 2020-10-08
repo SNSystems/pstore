@@ -161,7 +161,7 @@ namespace {
         if (size <= 0) {
             return 0U;
         }
-        using usize = std::make_unsigned<decltype (size)>::type;
+        using usize = std::remove_cv_t<std::make_unsigned_t<decltype (size)>>;
         std::size_t const num_bytes =
             (sizeof (usize) * 8U - pstore::bit_count::clz (static_cast<usize> (size)) + 8U - 1U) /
             8U;
