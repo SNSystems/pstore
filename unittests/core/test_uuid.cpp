@@ -50,29 +50,11 @@
 namespace {
 
     class BasicUUID : public ::testing::Test {
-    public:
-        BasicUUID ()
-                : id_{array_} {}
-
     protected:
-        static pstore::uuid::container_type const array_;
-        pstore::uuid const id_;
+        pstore::uuid id_{
+            pstore::uuid::container_type{{0x84, 0x94, 0x9c, 0xc5, 0x47, 0x01, 0x4a, 0x84, 0x89,
+                                          0x5b, 0x35, 0x4c, 0x58, 0x4a, 0x98, 0x1b}}};
     };
-
-    pstore::uuid::container_type const BasicUUID::array_{{0x84, 0x94, 0x9c, 0xc5, 0x47, 0x01, 0x4a,
-                                                          0x84, 0x89, 0x5b, 0x35, 0x4c, 0x58, 0x4a,
-                                                          0x98, 0x1b}};
-
-    constexpr std::uint64_t bytes_to_uint64 (std::uint8_t const arr[]) noexcept {
-        return static_cast<std::uint64_t> (arr[0]) << 56U |
-               static_cast<std::uint64_t> (arr[1]) << 48U |
-               static_cast<std::uint64_t> (arr[2]) << 40U |
-               static_cast<std::uint64_t> (arr[3]) << 32U |
-               static_cast<std::uint64_t> (arr[4]) << 24U |
-               static_cast<std::uint64_t> (arr[5]) << 16U |
-               static_cast<std::uint64_t> (arr[6]) << 8U |
-               static_cast<std::uint64_t> (arr[7]) << 0U;
-    }
 
 } // end anonymous namespace
 
@@ -80,11 +62,6 @@ TEST_F (BasicUUID, Parse) {
     pstore::uuid const t1 ("84949cc5-4701-4a84-895b-354c584a981b");
     EXPECT_EQ (t1, id_);
     EXPECT_FALSE (t1.is_null ());
-}
-
-TEST_F (BasicUUID, AsUint128) {
-    EXPECT_EQ (id_.as_uint128 (),
-               (pstore::uint128{bytes_to_uint64 (&array_[0]), bytes_to_uint64 (&array_[8])}));
 }
 
 TEST_F (BasicUUID, Version) {
