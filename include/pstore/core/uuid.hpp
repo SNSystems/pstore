@@ -50,7 +50,6 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib> // abort
 #include <string>
 
 #include "pstore/support/maybe.hpp"
@@ -64,6 +63,7 @@
 #endif
 
 namespace pstore {
+
     /// The uuid class is used to represent Universally Unique Identifiers (UUID) as defined
     /// by RFC 4122. Specifically, it will generate version 4 (random) UUIDs but can be used to
     /// record all versions and variants.
@@ -98,14 +98,8 @@ namespace pstore {
         explicit uuid (std::string const & s);
 
         /// A constructor used to construct a specific UUID from its binary value.
-        explicit constexpr uuid (container_type c)
-                : data_ (std::move (c)) {}
-
-        /// Converts a string to a UUID following the convention defined by RFC4122. If the string
-        /// is not valid, returns nothing<uuid>. \param s  A string to be converted to a UUID.
-        /// \returns  just<uuid>() if the string \p s was valid according to the description in
-        /// RFC4122. If the string was invalid, nothing<uuid>.
-        static maybe<uuid> from_string (std::string const & s);
+        explicit constexpr uuid (container_type const & c)
+                : data_{c} {}
 
 #if defined(_WIN32)
         /// Convert from the native Win32 UUID type.
@@ -113,6 +107,14 @@ namespace pstore {
 #elif defined(__APPLE__)
         explicit uuid (uuid_t const & bytes);
 #endif
+
+        /// Converts a string to a UUID following the convention defined by RFC4122. If the string
+        /// is not valid, returns nothing<uuid>.
+        ///
+        /// \param s  A string to be converted to a UUID.
+        /// \returns  just<uuid>() if the string \p s was valid according to the description in
+        ///   RFC4122. If the string was invalid, nothing<uuid>.
+        static maybe<uuid> from_string (std::string const & s);
 
         iterator begin () noexcept { return std::begin (data_); }
         const_iterator begin () const noexcept { return std::begin (data_); }
@@ -160,6 +162,7 @@ namespace pstore {
             return static_cast<std::uint8_t> ((t >> (num * 8)) & 0xff);
         }
     };
+
     PSTORE_STATIC_ASSERT (std::is_standard_layout<uuid>::value);
     PSTORE_STATIC_ASSERT (sizeof (uuid) == 16);
 
@@ -186,6 +189,6 @@ namespace pstore {
         return lhs.data_ >= rhs.data_;
     }
 
-} // namespace pstore
+} // end namespace pstore
 
 #endif // PSTORE_CORE_UUID_HPP
