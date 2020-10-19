@@ -52,37 +52,11 @@
 
 #include "pstore/exchange/import_bss_section.hpp"
 #include "pstore/exchange/import_debug_line_section.hpp"
-#include "pstore/mcrepo/bss_section.hpp"
-#include "pstore/mcrepo/debug_line_section.hpp"
-#include "pstore/mcrepo/linked_definitions_section.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
+#include "pstore/exchange/import_generic_section.hpp"
+#include "pstore/exchange/import_linked_definitions_section.hpp"
 
 namespace pstore {
     namespace exchange {
-
-        namespace details {
-
-            // FIXME: This implementation is just a placeholder to allow the code to compile.
-            template <typename OutputIterator>
-            class import_dependents_section : public import_rule {
-            public:
-                using db_pointer = not_null<database const *>;
-                using names_pointer = not_null<import_name_mapping const *>;
-                using content_pointer = not_null<repo::section_content *>;
-
-                import_dependents_section (parse_stack_pointer const stack,
-                                           repo::section_kind const /*kind*/, db_pointer const,
-                                           names_pointer const /*names*/,
-                                           content_pointer const /*content*/,
-                                           not_null<OutputIterator *> const /*out*/) noexcept
-                        : import_rule (stack) {}
-
-                gsl::czstring name () const noexcept override { return "dependents section"; }
-            };
-
-        } // end namespace details
-
-
 
         /// We can map from the section_kind enum to the type of data used to represent a
         /// section of that kind. section_to_importer is used to convert from this type class
@@ -105,7 +79,7 @@ namespace pstore {
         };
         template <typename OutputIterator>
         struct section_to_importer<repo::linked_definitions, OutputIterator> {
-            using type = details::import_dependents_section<OutputIterator>;
+            using type = import_linked_definitions_section<OutputIterator>;
         };
         template <typename OutputIterator>
         struct section_to_importer<repo::debug_line_section, OutputIterator> {

@@ -69,19 +69,19 @@ namespace {
     using transaction = pstore::transaction<transaction_lock>;
 
     template <typename ImportRule, typename... Args>
-    auto make_json_array_parser (Args &&... args)
+    auto make_json_array_parser (Args... args)
         -> pstore::json::parser<pstore::exchange::callbacks> {
-        using rule = pstore::exchange::import_array_rule<ImportRule, Args...>;
         return pstore::json::make_parser (
-            pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
+            pstore::exchange::callbacks::make<
+                pstore::exchange::import_array_rule<ImportRule, Args...>> (args...));
     }
 
     template <typename ImportRule, typename... Args>
-    auto make_json_object_parser (Args &&... args)
+    auto make_json_object_parser (Args... args)
         -> pstore::json::parser<pstore::exchange::callbacks> {
-        using rule = pstore::exchange::import_object_rule<ImportRule, Args...>;
         return pstore::json::make_parser (
-            pstore::exchange::callbacks::make<rule> (std::forward<Args> (args)...));
+            pstore::exchange::callbacks::make<
+                pstore::exchange::import_object_rule<ImportRule, Args...>> (args...));
     }
 
 
@@ -97,10 +97,8 @@ namespace {
     decltype (auto) import_fragment_parser (transaction * const transaction,
                                             pstore::exchange::import_name_mapping * const names,
                                             pstore::index::digest const * const digest) {
-        using rule = pstore::exchange::fragment_sections<transaction_lock>;
-        return make_json_object_parser<rule> (rule::transaction_pointer{transaction},
-                                              rule::names_pointer{names},
-                                              rule::digest_pointer{digest});
+        return make_json_object_parser<pstore::exchange::fragment_sections<transaction_lock>> (
+            transaction, names, digest);
     }
 
     decltype (auto) import_compilation_parser (
@@ -284,7 +282,6 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
 
     // Now begin to export the three pieces: the names, the fragment, and finally the compilation.
     mock_mutex mutex;
-    using transaction_lock = std::unique_lock<mock_mutex>;
     auto transaction = begin (import_db_, transaction_lock{mutex});
 
 

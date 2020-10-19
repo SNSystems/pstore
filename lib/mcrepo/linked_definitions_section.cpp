@@ -63,8 +63,8 @@ namespace pstore {
             if (size == 0) {
                 return 0;
             }
-            return sizeof (linked_definitions) - sizeof (linked_definitions::compilation_members_) +
-                   sizeof (linked_definitions::compilation_members_[0]) * size;
+            return sizeof (linked_definitions) - sizeof (linked_definitions::definitions_) +
+                   sizeof (linked_definitions::definitions_[0]) * size;
         }
 
         // size_bytes
@@ -92,7 +92,9 @@ namespace pstore {
         std::size_t linked_definitions_creation_dispatcher::size_bytes () const {
             static_assert (sizeof (std::uint64_t) >= sizeof (std::uintptr_t),
                            "sizeof uint64_t should be at least sizeof uintptr_t");
-            return linked_definitions::size_bytes (static_cast<std::uint64_t> (end_ - begin_));
+            assert (std::distance (begin_, end_) >= 0);
+            return linked_definitions::size_bytes (
+                static_cast<std::uint64_t> (std::distance (begin_, end_)));
         }
 
         std::uint8_t *

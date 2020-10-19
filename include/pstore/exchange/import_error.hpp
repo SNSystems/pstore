@@ -84,6 +84,7 @@ namespace pstore {
 
             incomplete_compilation_object,
             incomplete_debug_line_section,
+            incomplete_linked_definition_object,
 
             bad_digest,
             bad_base64_data,

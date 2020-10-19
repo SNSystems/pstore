@@ -125,6 +125,9 @@ namespace pstore {
             case import_error::incomplete_compilation_object:
                 result = "compilation object was incomplete";
                 break;
+            case import_error::incomplete_linked_definition_object:
+                result = "linked-definition object was incomplete";
+                break;
 
             case import_error::bad_linkage: result = "unknown linkage type"; break;
             case import_error::bad_uuid: result = "bad UUID"; break;

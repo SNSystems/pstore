@@ -61,6 +61,17 @@
 namespace pstore {
     namespace repo {
 
+        namespace details {
+
+            template <typename InputIt>
+            auto udistance (InputIt first, InputIt last) {
+                auto d = std::distance (first, last);
+                assert (d >= 0);
+                return static_cast<std::make_unsigned_t<decltype (d)>> (d);
+            }
+
+        } // end namespace details
+
         //*  _ _      _          _      _      __ _      _ _   _              *
         //* | (_)_ _ | |_____ __| |  __| |___ / _(_)_ _ (_) |_(_)___ _ _  ___ *
         //* | | | ' \| / / -_) _` | / _` / -_)  _| | ' \| |  _| / _ \ ' \(_-< *
@@ -79,12 +90,36 @@ namespace pstore {
         /// record.
         class linked_definitions : public section_base {
         public:
-            using iterator = typed_address<compilation_member> *;
-            using const_iterator = typed_address<compilation_member> const *;
+            struct value_type {
+                value_type () noexcept = default;
+                constexpr value_type (index::digest compilation_, std::uint32_t index_,
+                                      typed_address<compilation_member> def_) noexcept
+                        : compilation{compilation_}
+                        , index{index_}
+                        , def{def_} {}
 
-            template <typename Iterator, typename = typename std::enable_if<std::is_same<
-                                             typename std::iterator_traits<Iterator>::value_type,
-                                             typed_address<compilation_member>>::value>::type>
+                bool operator== (value_type const & rhs) const noexcept {
+                    if (&rhs == this) {
+                        return true;
+                    }
+                    return compilation == rhs.compilation && index == rhs.index && def == rhs.def;
+                }
+                bool operator!= (value_type const & rhs) const noexcept {
+                    return !operator== (rhs);
+                }
+
+                index::digest compilation;
+                std::uint32_t index;
+                std::uint32_t unused = 0;
+                typed_address<compilation_member> def;
+            };
+
+            using iterator = value_type *;
+            using const_iterator = value_type const *;
+
+            template <typename Iterator,
+                      typename = typename std::enable_if_t<std::is_same<
+                          typename std::iterator_traits<Iterator>::value_type, value_type>::value>>
             linked_definitions (Iterator begin, Iterator end);
 
             linked_definitions (linked_definitions const &) = delete;
@@ -93,24 +128,22 @@ namespace pstore {
             /// \name Element access
             ///@{
 
-            typed_address<compilation_member> const & operator[] (std::size_t const i) const {
+            value_type const & operator[] (std::size_t const i) const {
                 return index_impl (*this, i);
             }
-            typed_address<compilation_member> & operator[] (std::size_t const i) {
-                return index_impl (*this, i);
-            }
+            value_type & operator[] (std::size_t const i) { return index_impl (*this, i); }
             ///@}
 
             /// \name Iterators
             ///@{
 
-            iterator begin () { return compilation_members_; }
-            const_iterator begin () const { return compilation_members_; }
-            const_iterator cbegin () const { return this->begin (); }
+            iterator begin () noexcept { return definitions_; }
+            const_iterator begin () const noexcept { return definitions_; }
+            const_iterator cbegin () const noexcept { return this->begin (); }
 
-            iterator end () { return compilation_members_ + size_; }
-            const_iterator end () const { return compilation_members_ + size_; }
-            const_iterator cend () const { return this->end (); }
+            iterator end () noexcept { return definitions_ + size_; }
+            const_iterator end () const noexcept { return definitions_ + size_; }
+            const_iterator cend () const noexcept { return this->end (); }
             ///@}
 
             /// \name Capacity
@@ -142,30 +175,37 @@ namespace pstore {
                 -> std::shared_ptr<linked_definitions const>;
 
         private:
-            template <typename LinkedDefinitions,
-                      typename ResultType = typename inherit_const<
-                          LinkedDefinitions, typed_address<compilation_member>>::type>
+            template <typename LinkedDefinitions, typename ResultType = typename inherit_const<
+                                                      LinkedDefinitions, value_type>::type>
             static ResultType & index_impl (LinkedDefinitions & v, std::size_t pos) {
                 assert (pos < v.size ());
-                return v.compilation_members_[pos];
+                return v.definitions_[pos];
             }
 
             std::uint64_t size_;
-            typed_address<compilation_member> compilation_members_[1];
+            std::uint64_t unused_ = 0;
+            value_type definitions_[1];
         };
 
+        PSTORE_STATIC_ASSERT (std::is_standard_layout<linked_definitions::value_type>::value);
+        PSTORE_STATIC_ASSERT (sizeof (linked_definitions::value_type) == 32);
+        PSTORE_STATIC_ASSERT (alignof (linked_definitions::value_type) == 16);
+        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, compilation) == 0);
+        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, index) == 16);
+        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, unused) == 20);
+        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, def) == 24);
+
         template <typename Iterator, typename>
-        linked_definitions::linked_definitions (Iterator begin, Iterator end) {
-            auto const size = std::distance (begin, end);
-            assert (size >= 0);
+        linked_definitions::linked_definitions (Iterator begin, Iterator end)
+                : size_{details::udistance (begin, end)} {
+            std::copy (begin, end, &definitions_[0]);
 
-            size_ = static_cast<std::uint64_t> (size);
-            std::copy (begin, end, &compilation_members_[0]);
-
+            unused_ = 0; // to suppress a warning about the field being unused.
             PSTORE_STATIC_ASSERT (std::is_standard_layout<linked_definitions>::value);
-            PSTORE_STATIC_ASSERT (alignof (linked_definitions) == 8);
+            PSTORE_STATIC_ASSERT (alignof (linked_definitions) == 16);
             PSTORE_STATIC_ASSERT (offsetof (linked_definitions, size_) == 0);
-            PSTORE_STATIC_ASSERT (offsetof (linked_definitions, compilation_members_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (linked_definitions, unused_) == 8);
+            PSTORE_STATIC_ASSERT (offsetof (linked_definitions, definitions_) == 16);
         }
 
 
@@ -187,7 +227,7 @@ namespace pstore {
         //*                                            |_|                              *
         class linked_definitions_creation_dispatcher final : public section_creation_dispatcher {
         public:
-            using const_iterator = typed_address<compilation_member> const *;
+            using const_iterator = linked_definitions::value_type const *;
 
             linked_definitions_creation_dispatcher (const_iterator const begin,
                                                     const_iterator const end)

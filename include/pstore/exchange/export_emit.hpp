@@ -118,7 +118,7 @@ namespace pstore {
         ///     operator.
         /// \tparam InputIt  An input iterator.
         /// \tparam Function  A callable whose signature should be equivalent to:
-        ///     void fun(OStream &, std::iterator_traits<InputIt>::value_type const &a);
+        ///     void fun(OStream &, indent, std::iterator_traits<InputIt>::value_type const &a);
         /// \param os  An output stream to which values are written using the '<<' operator.
         /// \param ind  The indentation to be applied to each member of the array.
         /// \param first  The start of the range denoting array elements to be emitted.
@@ -140,6 +140,27 @@ namespace pstore {
                 tail_sep_indent = ind;
             });
             os << tail_sep << tail_sep_indent << "]";
+            return os;
+        }
+
+        /// Writes a object to the output stream \p os. The output consists of a pair of braces with
+        /// appropriate whitespace. The function \p fn is called to write the properties and values
+        /// of the object.
+        ///
+        /// \tparam OStream  An output stream type to which values can be written using the '<<'
+        ///     operator.
+        /// \tparam Object  The type of the object to be written.
+        /// \tparam Function  A callable whose signature should be equivalent to:
+        ///     void fun(OStream &, indent, Object);
+        /// \param os  An output stream to which values are written using the '<<' operator.
+        /// \param ind  The indentation to be applied to each member of the object.
+        /// \param object  The object instance to be written.
+        /// \param fn  A function which is called to emit the properties and values of the object.
+        template <typename OStream, typename Object, typename Function>
+        OStream & emit_object (OStream & os, indent const ind, Object const & object, Function fn) {
+            os << "{\n";
+            fn (os, ind.next (), object);
+            os << ind << '}';
             return os;
         }
 

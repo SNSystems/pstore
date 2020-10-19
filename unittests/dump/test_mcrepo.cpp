@@ -193,7 +193,10 @@ TEST_F (MCRepoFixture, DumpFragment) {
                                name, linkage::internal, visibility::default_vis};
     }
 
-    std::array<pstore::typed_address<compilation_member>, 1> linked_definitions{{addr}};
+    std::array<linked_definitions::value_type, 1> linked_definitions{
+        {linked_definitions::value_type{
+            pstore::index::digest{UINT64_C (0x123456789ABCDEF), UINT64_C (0xFEDCBA9876543210)}, 13U,
+            addr}}};
 
     // Build the creation dispatchers. These tell fragment::alloc how to build the fragment's
     // various sections.
@@ -212,7 +215,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     value->write (out);
 
     auto const lines = split_lines (out.str ());
-    ASSERT_EQ (20U, lines.size ());
+    ASSERT_EQ (23U, lines.size ());
 
     auto line = 0U;
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ());
@@ -231,11 +234,16 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("type", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("offset", ":", "0x3"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("addend", ":", "0x3"));
+
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "type", ":", "linked_definitions"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("contents", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
-                 ElementsAre ("-", "digest", ":", "0000000000000000000000000000001c"));
+                 ElementsAre ("-", "compilation", ":", "0123456789abcdeffedcba9876543210"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("index", ":", "0xd"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("definition", ":"));
+    EXPECT_THAT (split_tokens (lines.at (line++)),
+                 ElementsAre ("digest", ":", "0000000000000000000000000000001c"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("fext", ":", "{", "addr:", "0x5,", "size:", "0x7", "}"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("name", ":", "foo"));

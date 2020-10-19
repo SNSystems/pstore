@@ -132,8 +132,12 @@ namespace pstore {
                                       repo::section_kind const /*sk*/,
                                       gsl::czstring const /*triple*/, bool const /*hex_mode*/) {
             return make_value (std::begin (linked_definitions), std::end (linked_definitions),
-                               [&db] (typed_address<repo::compilation_member> const & member) {
-                                   return make_value (db, *db.getro (member));
+                               [&db] (repo::linked_definitions::value_type const & member) {
+                                   return make_value (object::container{
+                                       {"compilation", make_value (member.compilation)},
+                                       {"index", make_value (member.index)},
+                                       {"definition", make_value (db, *db.getro (member.def))},
+                                   });
                                });
         }
 

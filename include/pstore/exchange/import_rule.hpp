@@ -44,9 +44,11 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_RULE_HPP
 #define PSTORE_EXCHANGE_IMPORT_RULE_HPP
 
+#include <sstream>
 #include <stack>
 #include <system_error>
 
+#include "pstore/os/logging.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -95,8 +97,7 @@ namespace pstore {
             template <typename T, typename... Args>
             std::error_code push (Args... args) {
                 stack_->push (std::make_unique<T> (stack_, args...));
-                // std::cout << std::string (stack_->size () * trace_indent, ' ') << '+'
-                //          << stack_->top ()->name () << '\n';
+                log_top (true);
                 return {};
             }
 
@@ -105,16 +106,16 @@ namespace pstore {
             std::error_code replace_top (Args... args) {
                 auto p = std::make_unique<T> (stack_, args...);
                 auto const stack = stack_;
-                // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
-
+                log_top (false);
                 stack->pop (); // Destroys this object.
+
                 stack->push (std::move (p));
-                // std::cout << indent (*stack) << '+' << stack->top ()->name () << '\n';
+                log_top (true);
                 return {};
             }
 
             std::error_code pop () {
-                // std::cout << indent (*stack_) << '-' << stack_->top ()->name () << '\n';
+                log_top (false);
                 stack_->pop ();
                 return {};
             }
@@ -124,6 +125,15 @@ namespace pstore {
             static std::string indent (parse_stack const & stack) {
                 return std::string (stack.size () * trace_indent, ' ');
             }
+
+            inline void log_top (bool is_push) const {
+                if (logging::enabled ()) {
+                    log_top_impl (is_push);
+                }
+            }
+
+            void log_top_impl (bool is_push) const;
+
             parse_stack_pointer const stack_;
         };
 

@@ -97,7 +97,7 @@ TEST (ExportEmitArray, Empty) {
     std::vector<int> values{};
     pstore::exchange::emit_array (
         os, pstore::exchange::indent{}, std::begin (values), std::end (values),
-        [] (std::ostringstream & os, pstore::exchange::indent ind, int v) { os << ind << v; });
+        [] (std::ostringstream & os1, pstore::exchange::indent ind, int v) { os1 << ind << v; });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[]");
 }
@@ -107,7 +107,7 @@ TEST (ExportEmitArray, Array) {
     std::vector<int> values{2, 3, 5};
     pstore::exchange::emit_array (
         os, pstore::exchange::indent{}, std::begin (values), std::end (values),
-        [] (std::ostringstream & os, pstore::exchange::indent ind, int v) { os << ind << v; });
+        [] (std::ostringstream & os1, pstore::exchange::indent ind, int v) { os1 << ind << v; });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[\n  2,\n  3,\n  5\n]");
 }

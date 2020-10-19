@@ -73,5 +73,12 @@ namespace pstore {
         }
         std::error_code import_rule::end_object () { return import_error::unexpected_end_object; }
 
+        void import_rule::log_top_impl (bool is_push) const {
+            assert (logging::enabled ());
+            std::ostringstream str;
+            str << indent (*stack_) << (is_push ? '+' : '-') << stack_->top ()->name ();
+            logging::log (logging::priority::notice, str.str ().c_str ());
+        }
+
     } // end namespace exchange
 } // end namespace pstore

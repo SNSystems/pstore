@@ -92,16 +92,16 @@ case repo::linkage::a: return os << #a;
             emit_array (os, object_indent, compilation.begin (), compilation.end (),
                         [&] (OStream & os1, indent const ind1, repo::compilation_member const & d) {
                             os1 << ind1 << "{\n";
-                            indent const object_indent = ind1.next ();
-                            os1 << object_indent << R"("digest":")" << d.digest.to_hex_string ()
+                            indent const object_indent1 = ind1.next ();
+                            os1 << object_indent1 << R"("digest":")" << d.digest.to_hex_string ()
                                 << "\",\n";
-                            os1 << object_indent << R"("name":)" << names.index (d.name) << ',';
+                            os1 << object_indent1 << R"("name":)" << names.index (d.name) << ',';
                             show_string (os1, db, d.name, comments);
                             os1 << '\n';
-                            os1 << object_indent << R"("linkage":")" << d.linkage () << '"';
+                            os1 << object_indent1 << R"("linkage":")" << d.linkage () << '"';
                             if (d.visibility () != repo::visibility::default_vis) {
                                 os1 << ",\n"
-                                    << object_indent << R"("visibility":")" << d.visibility ()
+                                    << object_indent1 << R"("visibility":")" << d.visibility ()
                                     << "\"\n";
                             }
                             os1 << '\n' << ind1 << '}';

@@ -71,35 +71,63 @@ namespace pstore {
         template <typename TransactionLock>
         class fragment_sections final : public import_rule {
         public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
-            using names_pointer = not_null<import_name_mapping const *>;
-            using digest_pointer = not_null<index::digest const *>;
-
             fragment_sections (parse_stack_pointer const stack,
-                               transaction_pointer const transaction, names_pointer const names,
-                               digest_pointer const digest)
+                               not_null<transaction<TransactionLock> *> const transaction,
+                               not_null<import_name_mapping const *> const names,
+                               not_null<index::digest const *> const digest)
                     : import_rule (stack)
                     , transaction_{transaction}
                     , names_{names}
                     , digest_{digest}
                     , oit_{dispatchers_} {}
+
             gsl::czstring name () const noexcept override { return "fragment sections"; }
             std::error_code key (std::string const & s) override;
             std::error_code end_object () override;
 
         private:
-            transaction_pointer const transaction_;
-            names_pointer const names_;
-            digest_pointer const digest_;
+            not_null<transaction<TransactionLock> *> const transaction_;
+            not_null<import_name_mapping const *> const names_;
+            not_null<index::digest const *> const digest_;
 
-            repo::section_content * section_contents (repo::section_kind const kind) noexcept {
+            std::array<repo::section_content, repo::num_section_kinds> contents_;
+            linked_definitions_container linked_definitions_;
+
+            std::vector<std::unique_ptr<repo::section_creation_dispatcher>> dispatchers_;
+            std::back_insert_iterator<decltype (dispatchers_)> oit_;
+
+            // (For explicit specialization, you need to specialize the outer class before the inner
+            // but I don't want to do that here. A workaround is to rely on partial specialization
+            // by adding the 'Dummy' template parameter.)
+            template <repo::section_kind Kind, typename Dummy = void>
+            struct section_importer_creator {
+                std::error_code operator() (fragment_sections * const fs) const {
+                    using importer =
+                        section_to_importer_t<repo::enum_to_section_t<Kind>, decltype (oit_)>;
+                    return push_object_rule<importer> (fs, Kind, &fs->transaction_->db (),
+                                                       fs->names_, fs->section_contents (Kind),
+                                                       &fs->oit_);
+                }
+            };
+
+            template <typename Dummy>
+            struct section_importer_creator<repo::section_kind::linked_definitions, Dummy> {
+                std::error_code operator() (fragment_sections * const fs) const {
+                    using importer = import_linked_definitions_section<decltype (oit_)>;
+                    return push_array_rule<importer> (fs, &fs->linked_definitions_, &fs->oit_);
+                }
+            };
+
+            template <repo::section_kind Kind>
+            std::error_code create_section_importer () {
+                return section_importer_creator<Kind>{}(this);
+            }
+
+            constexpr repo::section_content *
+            section_contents (repo::section_kind const kind) noexcept {
                 return &contents_[static_cast<std::underlying_type<repo::section_kind>::type> (
                     kind)];
             }
-
-            std::array<repo::section_content, repo::num_section_kinds> contents_;
-            std::vector<std::unique_ptr<repo::section_creation_dispatcher>> dispatchers_;
-            std::back_insert_iterator<decltype (dispatchers_)> oit_;
         };
 
         // key
@@ -118,11 +146,7 @@ namespace pstore {
             }
 
 #define X(a)                                                                                       \
-case section_kind::a:                                                                              \
-    return push_object_rule<                                                                       \
-        section_to_importer_t<repo::enum_to_section_t<section_kind::a>, decltype (oit_)>> (        \
-        this, pos->second, &transaction_->db (), names_, section_contents (pos->second), &oit_);
-
+case section_kind::a: return this->create_section_importer<section_kind::a> ();
             switch (pos->second) {
                 PSTORE_MCREPO_SECTION_KINDS
             case section_kind::last: assert (false && "Illegal section kind"); // unreachable
