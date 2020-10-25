@@ -46,22 +46,23 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        import_uuid_rule::import_uuid_rule (parse_stack_pointer const stack,
-                                            not_null<uuid *> const v) noexcept
-                : import_rule (stack)
-                , v_{v} {}
+            uuid_rule::uuid_rule (not_null<context *> const ctxt, not_null<uuid *> const v) noexcept
+                    : rule (ctxt)
+                    , v_{v} {}
 
-        std::error_code import_uuid_rule::string_value (std::string const & v) {
-            if (maybe<uuid> const value = uuid::from_string (v)) {
-                *v_ = *value;
-                return pop ();
+            std::error_code uuid_rule::string_value (std::string const & v) {
+                if (maybe<uuid> const value = uuid::from_string (v)) {
+                    *v_ = *value;
+                    return pop ();
+                }
+                return error::bad_uuid;
             }
-            return import_error::bad_uuid;
-        }
 
-        gsl::czstring import_uuid_rule::name () const noexcept { return "uuid"; }
+            gsl::czstring uuid_rule::name () const noexcept { return "uuid"; }
 
+        } // end namespace import
 
     } // end namespace exchange
 } // end namespace pstore

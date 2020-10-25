@@ -48,137 +48,139 @@
 #include <stack>
 #include <system_error>
 
+#include "pstore/exchange/import_context.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        template <typename T>
-        using not_null = gsl::not_null<T>;
+            template <typename T>
+            using not_null = gsl::not_null<T>;
 
-        //*  _                     _              _      *
-        //* (_)_ __  _ __  ___ _ _| |_   _ _ _  _| |___  *
-        //* | | '  \| '_ \/ _ \ '_|  _| | '_| || | / -_) *
-        //* |_|_|_|_| .__/\___/_|  \__| |_|  \_,_|_\___| *
-        //*         |_|                                  *
-        //-MARK: import rule
-        class import_rule {
-        public:
-            using parse_stack = std::stack<std::unique_ptr<import_rule>>;
-            using parse_stack_pointer = not_null<parse_stack *>;
+            //*           _      *
+            //*  _ _ _  _| |___  *
+            //* | '_| || | / -_) *
+            //* |_|  \_,_|_\___| *
+            //*                  *
+            //-MARK: rule
+            class rule {
+            public:
+                explicit rule (not_null<context *> const context) noexcept
+                        : context_{context} {}
+                rule (rule const &) = delete;
+                rule (rule &&) noexcept = delete;
 
-            explicit import_rule (parse_stack_pointer const stack) noexcept
-                    : stack_{stack} {}
-            import_rule (import_rule const &) = delete;
-            import_rule (import_rule &&) noexcept = delete;
+                virtual ~rule ();
 
-            virtual ~import_rule ();
+                rule & operator= (rule const &) = delete;
+                rule & operator= (rule &&) noexcept = delete;
 
-            import_rule & operator= (import_rule const &) = delete;
-            import_rule & operator= (import_rule &&) noexcept = delete;
+                virtual gsl::czstring name () const noexcept = 0;
 
-            virtual gsl::czstring name () const noexcept = 0;
+                virtual std::error_code int64_value (std::int64_t v);
+                virtual std::error_code uint64_value (std::uint64_t v);
+                virtual std::error_code double_value (double v);
+                virtual std::error_code string_value (std::string const & v);
+                virtual std::error_code boolean_value (bool v);
+                virtual std::error_code null_value ();
+                virtual std::error_code begin_array ();
+                virtual std::error_code end_array ();
+                virtual std::error_code begin_object ();
+                virtual std::error_code key (std::string const & k);
+                virtual std::error_code end_object ();
 
-            virtual std::error_code int64_value (std::int64_t v);
-            virtual std::error_code uint64_value (std::uint64_t v);
-            virtual std::error_code double_value (double v);
-            virtual std::error_code string_value (std::string const & v);
-            virtual std::error_code boolean_value (bool v);
-            virtual std::error_code null_value ();
-            virtual std::error_code begin_array ();
-            virtual std::error_code end_array ();
-            virtual std::error_code begin_object ();
-            virtual std::error_code key (std::string const & k);
-            virtual std::error_code end_object ();
-
-            /// Creates an instance of type T and pushes it onto the parse stack. The provided
-            /// arguments are forwarded to the T constructor in addition to the parse stack itself.
-            template <typename T, typename... Args>
-            std::error_code push (Args... args) {
-                stack_->push (std::make_unique<T> (stack_, args...));
-                log_top (true);
-                return {};
-            }
-
-        protected:
-            template <typename T, typename... Args>
-            std::error_code replace_top (Args... args) {
-                auto p = std::make_unique<T> (stack_, args...);
-                auto const stack = stack_;
-                log_top (false);
-                stack->pop (); // Destroys this object.
-
-                stack->push (std::move (p));
-                log_top (true);
-                return {};
-            }
-
-            std::error_code pop () {
-                log_top (false);
-                stack_->pop ();
-                return {};
-            }
-
-        private:
-            static constexpr auto trace_indent = std::size_t{2};
-            static std::string indent (parse_stack const & stack) {
-                return std::string (stack.size () * trace_indent, ' ');
-            }
-
-            inline void log_top (bool is_push) const {
-                if (logging::enabled ()) {
-                    log_top_impl (is_push);
+                /// Creates an instance of type T and pushes it onto the parse stack. The provided
+                /// arguments are forwarded to the T constructor in addition to the parse stack
+                /// itself.
+                template <typename T, typename... Args>
+                std::error_code push (Args... args) {
+                    context_->stack.push (std::make_unique<T> (context_, args...));
+                    log_top (true);
+                    return {};
                 }
-            }
 
-            void log_top_impl (bool is_push) const;
+            protected:
+                template <typename T, typename... Args>
+                std::error_code replace_top (Args... args) {
+                    auto p = std::make_unique<T> (context_, args...);
+                    log_top (false);
+                    // Remember the context pointer before we destroy 'this'.
+                    auto * const context = this->get_context ();
+                    context->stack.pop (); // Destroys this object.
+                    context->stack.push (std::move (p));
+                    log_top (true);
+                    return {};
+                }
 
-            parse_stack_pointer const stack_;
-        };
+                std::error_code pop () {
+                    log_top (false);
+                    context_->stack.pop ();
+                    return {};
+                }
+
+                context * get_context () noexcept { return context_; }
+
+            private:
+                inline void log_top (bool is_push) const {
+                    if (logging::enabled ()) {
+                        log_top_impl (is_push);
+                    }
+                }
+
+                void log_top_impl (bool is_push) const;
+
+                not_null<context *> const context_;
+            };
 
 
-        //-MARK: callbacks
-        class callbacks {
-        public:
-            using result_type = void;
-            result_type result () {}
+            //-MARK: callbacks
+            class callbacks {
+            public:
+                using result_type = void;
+                result_type result () {}
 
-            template <typename Rule, typename... Args>
-            static callbacks make (Args... args) {
-                auto stack = std::make_shared<import_rule::parse_stack> ();
-                return {stack, std::make_unique<Rule> (stack.get (), args...)};
-            }
+                template <typename Rule, typename... Args>
+                static callbacks make (gsl::not_null<database *> const db, Args... args) {
+                    auto ctxt = std::make_shared<context> (db);
+                    return {ctxt, std::make_unique<Rule> (ctxt.get (), args...)};
+                }
 
-            std::error_code int64_value (std::int64_t const v) { return top ()->int64_value (v); }
-            std::error_code uint64_value (std::uint64_t const v) {
-                return top ()->uint64_value (v);
-            }
-            std::error_code double_value (double const v) { return top ()->double_value (v); }
-            std::error_code string_value (std::string const & v) {
-                return top ()->string_value (v);
-            }
-            std::error_code boolean_value (bool const v) { return top ()->boolean_value (v); }
-            std::error_code null_value () { return top ()->null_value (); }
-            std::error_code begin_array () { return top ()->begin_array (); }
-            std::error_code end_array () { return top ()->end_array (); }
-            std::error_code begin_object () { return top ()->begin_object (); }
-            std::error_code key (std::string const & k) { return top ()->key (k); }
-            std::error_code end_object () { return top ()->end_object (); }
+                std::shared_ptr<context> & get_context () { return context_; }
 
-        private:
-            callbacks (std::shared_ptr<import_rule::parse_stack> const & stack,
-                       std::unique_ptr<import_rule> && root)
-                    : stack_{stack} {
-                stack_->push (std::move (root));
-            }
+                std::error_code int64_value (std::int64_t const v) {
+                    return top ()->int64_value (v);
+                }
+                std::error_code uint64_value (std::uint64_t const v) {
+                    return top ()->uint64_value (v);
+                }
+                std::error_code double_value (double const v) { return top ()->double_value (v); }
+                std::error_code string_value (std::string const & v) {
+                    return top ()->string_value (v);
+                }
+                std::error_code boolean_value (bool const v) { return top ()->boolean_value (v); }
+                std::error_code null_value () { return top ()->null_value (); }
+                std::error_code begin_array () { return top ()->begin_array (); }
+                std::error_code end_array () { return top ()->end_array (); }
+                std::error_code begin_object () { return top ()->begin_object (); }
+                std::error_code key (std::string const & k) { return top ()->key (k); }
+                std::error_code end_object () { return top ()->end_object (); }
 
-            std::unique_ptr<import_rule> & top () {
-                assert (!stack_->empty ());
-                return stack_->top ();
-            }
-            std::shared_ptr<import_rule::parse_stack> stack_;
-        };
+            private:
+                callbacks (std::shared_ptr<context> const & ctxt, std::unique_ptr<rule> && root)
+                        : context_{ctxt} {
+                    context_->stack.push (std::move (root));
+                }
+
+                std::unique_ptr<rule> & top () {
+                    assert (!context_->stack.empty ());
+                    return context_->stack.top ();
+                }
+                std::shared_ptr<context> context_;
+            };
+
+        } // end namespace import
 
     } // end namespace exchange
 } // end namespace pstore

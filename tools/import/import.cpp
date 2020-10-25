@@ -50,6 +50,7 @@
 #include "pstore/exchange/import_root.hpp"
 
 using namespace pstore::cmd_util;
+using namespace std::string_literals;
 
 namespace {
 
@@ -60,6 +61,14 @@ namespace {
     cl::opt<std::string>
         json_source (cl::positional, cl::usage ("[input]"),
                      cl::desc ("The export file to be read (stdin if not specified)."));
+
+    bool is_file_input () { return json_source.get_num_occurrences () > 0; }
+
+    FILE * open_input () {
+        return is_file_input () ? std::fopen (json_source.get ().c_str (), "r") : stdin;
+    }
+
+    std::string input_name () { return is_file_input () ? json_source.get () : "stdin"s; }
 
 } // end anonymous namespace
 
@@ -73,21 +82,28 @@ int main (int argc, char * argv[]) {
         cl::parse_command_line_options (argc, argv, "pstore import utility\n");
 
         if (pstore::file::exists (db_path.get ())) {
-            std::cerr << "The import database must not be an existing file.\n";
+            error_stream << NATIVE_TEXT ("error: the import database must not be an existing file.")
+                         << std::endl;
             return EXIT_FAILURE;
         }
 
-        // TODO: check that db_path does not exist.
         pstore::database db{db_path.get (), pstore::database::access_mode::writable};
-        FILE * infile = json_source.get_num_occurrences () > 0
-                            ? std::fopen (json_source.get ().c_str (), "r")
-                            : stdin;
-        if (infile == nullptr) {
-            std::perror ("File opening failed");
+
+        auto const close = [] (FILE * const file) {
+            if (file != stdin) {
+                std::fclose (file);
+            }
+        };
+        std::unique_ptr<FILE, decltype (close)> infile{open_input (), close};
+        if (infile.get () == nullptr) {
+            auto const err = errno;
+            error_stream << NATIVE_TEXT (R"(error: could not open ")")
+                         << pstore::utf::to_native_string (input_name ()) << R"(": )"
+                         << std::strerror (err) << std::endl;
             return EXIT_FAILURE;
         }
 
-        auto parser = pstore::exchange::create_import_parser (db);
+        auto parser = pstore::exchange::import::create_parser (db);
 
         std::vector<std::uint8_t> buffer;
         buffer.resize (65535);
@@ -95,10 +111,11 @@ int main (int argc, char * argv[]) {
         for (;;) {
             auto * const ptr = reinterpret_cast<char *> (buffer.data ());
             std::size_t const nread =
-                std::fread (ptr, sizeof (std::uint8_t), buffer.size (), infile);
+                std::fread (ptr, sizeof (std::uint8_t), buffer.size (), infile.get ());
             if (nread < buffer.size ()) {
-                if (std::ferror (infile)) {
-                    std::cerr << "There was an error reading input\n";
+                if (std::ferror (infile.get ())) {
+                    error_stream << NATIVE_TEXT ("error: there was an error reading input")
+                                 << std::endl;
                     exit_code = EXIT_FAILURE;
                     break;
                 }
@@ -106,33 +123,32 @@ int main (int argc, char * argv[]) {
 
             parser.input (ptr, ptr + nread);
             if (parser.has_error ()) {
-                std::error_code const erc = parser.last_error ();
-                std::cerr << "Error: " << erc.message () << '\n'
-                          << "Line " << parser.coordinate ().row << ", column "
-                          << parser.coordinate ().column << '\n';
+                auto const coord = parser.coordinate ();
+                error_stream << pstore::utf::to_native_string (input_name ()) << NATIVE_TEXT (":")
+                             << coord.row << NATIVE_TEXT (":") << coord.column
+                             << NATIVE_TEXT (": error: ")
+                             << pstore::utf::to_native_string (parser.last_error ().message ())
+                             << std::endl;
                 exit_code = EXIT_FAILURE;
                 break;
             }
 
-            if (std::feof (infile)) {
+            // Stop if we've reached the end of the file.
+            if (std::feof (infile.get ())) {
                 parser.eof ();
                 break;
             }
         }
-
-        if (infile != nullptr && infile != stdin) {
-            std::fclose (infile);
-            infile = nullptr;
-        }
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        std::cerr << "Error: " << ex.what () << '\n';
+        error_stream << NATIVE_TEXT ("error: ") << pstore::utf::to_native_string (ex.what ())
+                     << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        std::cerr << "Error: an unknown error occurred\n";
+        error_stream << NATIVE_TEXT ("error: an unknown error occurred") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

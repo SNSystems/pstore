@@ -49,9 +49,11 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        void export_database (database & db, export_ostream & os, bool comments);
+            void emit_database (database & db, ostream & os, bool comments);
 
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore
 

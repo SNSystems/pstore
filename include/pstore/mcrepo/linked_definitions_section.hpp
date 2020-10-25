@@ -91,18 +91,19 @@ namespace pstore {
         class linked_definitions : public section_base {
         public:
             struct value_type {
-                value_type () noexcept = default;
+                value_type () noexcept {}
                 constexpr value_type (index::digest compilation_, std::uint32_t index_,
-                                      typed_address<compilation_member> def_) noexcept
+                                      typed_address<compilation_member> pointer_) noexcept
                         : compilation{compilation_}
                         , index{index_}
-                        , def{def_} {}
+                        , pointer{pointer_} {}
 
                 bool operator== (value_type const & rhs) const noexcept {
                     if (&rhs == this) {
                         return true;
                     }
-                    return compilation == rhs.compilation && index == rhs.index && def == rhs.def;
+                    return compilation == rhs.compilation && index == rhs.index &&
+                           pointer == rhs.pointer;
                 }
                 bool operator!= (value_type const & rhs) const noexcept {
                     return !operator== (rhs);
@@ -111,7 +112,7 @@ namespace pstore {
                 index::digest compilation;
                 std::uint32_t index;
                 std::uint32_t unused = 0;
-                typed_address<compilation_member> def;
+                typed_address<compilation_member> pointer;
             };
 
             using iterator = value_type *;
@@ -193,7 +194,7 @@ namespace pstore {
         PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, compilation) == 0);
         PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, index) == 16);
         PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, unused) == 20);
-        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, def) == 24);
+        PSTORE_STATIC_ASSERT (offsetof (linked_definitions::value_type, pointer) == 24);
 
         template <typename Iterator, typename>
         linked_definitions::linked_definitions (Iterator begin, Iterator end)
@@ -220,6 +221,8 @@ namespace pstore {
             return 0U;
         }
 
+        std::ostream & operator<< (std::ostream & os, linked_definitions::value_type const & ld);
+
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *
         //* / _| '_/ -_) _` |  _| / _ \ ' \  / _` | (_-< '_ \/ _` |  _/ _| ' \/ -_) '_| *
@@ -234,7 +237,8 @@ namespace pstore {
                     : section_creation_dispatcher (section_kind::linked_definitions)
                     , begin_ (begin)
                     , end_ (end) {
-                assert (std::distance (begin, end) >= 0);
+                assert (std::distance (begin, end) > 0 && "a linked_definitions section must hold "
+                                                          "at least one reference to a definition");
             }
             linked_definitions_creation_dispatcher (
                 linked_definitions_creation_dispatcher const &) = delete;

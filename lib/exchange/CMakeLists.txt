@@ -56,6 +56,7 @@ set (pstore_exchange_includes
     export_section.hpp
     import_bss_section.hpp
     import_compilation.hpp
+    import_context.hpp
     import_debug_line_header.hpp
     import_debug_line_section.hpp
     import_error.hpp

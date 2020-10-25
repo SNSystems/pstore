@@ -114,7 +114,7 @@
             "additionalProperties": false
         },
 
-        "linked_definitionsions_section": {
+        "linked_definitions_section": {
             "description": "An array of linked definitions",
             "type": "array",
             "items": {

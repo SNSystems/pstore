@@ -62,158 +62,159 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        template <typename TransactionLock>
-        class import_transaction_contents final : public import_rule {
-        public:
-            using db_pointer = not_null<pstore::database *>;
-            using names_pointer = not_null<import_name_mapping *>;
+            template <typename TransactionLock>
+            class transaction_contents final : public rule {
+            public:
+                transaction_contents (not_null<context *> const ctxt,
+                                      not_null<name_mapping *> const names)
+                        : rule (ctxt)
+                        , transaction_{begin (*ctxt->db)}
+                        , names_{names} {}
+                transaction_contents (transaction_contents const &) = delete;
+                transaction_contents (transaction_contents &&) noexcept = delete;
 
-            import_transaction_contents (parse_stack_pointer const stack, db_pointer const db,
-                                         names_pointer const names)
-                    : import_rule (stack)
-                    , transaction_{begin (*db)}
+                ~transaction_contents () noexcept override = default;
+
+                transaction_contents & operator= (transaction_contents const &) = delete;
+                transaction_contents & operator= (transaction_contents &&) noexcept = delete;
+
+            private:
+                std::error_code key (std::string const & s) override;
+                std::error_code end_object () override;
+                gsl::czstring name () const noexcept override;
+
+                std::error_code apply_patches ();
+
+                transaction<TransactionLock> transaction_;
+                not_null<name_mapping *> names_;
+            };
+
+            // name
+            // ~~~~
+            template <typename TransactionLock>
+            gsl::czstring transaction_contents<TransactionLock>::name () const noexcept {
+                return "transaction contents";
+            }
+
+            // key
+            // ~~~
+            template <typename TransactionLock>
+            std::error_code transaction_contents<TransactionLock>::key (std::string const & s) {
+                // TODO: check that "names" is the first key that we see.
+                if (s == "names") {
+                    return push_array_rule<names_array_members<TransactionLock>> (
+                        this, &transaction_, names_);
+                }
+                if (s == "debugline") {
+                    return push_object_rule<debug_line_index<TransactionLock>> (this,
+                                                                                &transaction_);
+                }
+                if (s == "fragments") {
+                    return push_object_rule<fragment_index<TransactionLock>> (this, &transaction_,
+                                                                              names_.get ());
+                }
+                if (s == "compilations") {
+                    return push_object_rule<compilations_index<TransactionLock>> (
+                        this, &transaction_, names_.get ());
+                }
+                return error::unknown_transaction_object_key;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code transaction_contents<TransactionLock>::end_object () {
+                if (auto const erc = this->apply_patches ()) {
+                    return erc;
+                }
+                transaction_.commit ();
+                return pop ();
+            }
+
+            // apply patches
+            // ~~~~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code transaction_contents<TransactionLock>::apply_patches () {
+                return this->get_context ()->apply_patches (&transaction_);
+            }
+
+
+            template <typename TransactionLock>
+            class transaction_object final : public rule {
+            public:
+                transaction_object (not_null<context *> const ctxt,
+                                    not_null<name_mapping *> const names)
+                        : rule (ctxt)
+                        , names_{names} {}
+                transaction_object (transaction_object const &) = delete;
+                transaction_object (transaction_object &&) noexcept = delete;
+
+                ~transaction_object () noexcept override = default;
+
+                transaction_object & operator= (transaction_object const &) = delete;
+                transaction_object & operator= (transaction_object &&) noexcept = delete;
+
+                pstore::gsl::czstring name () const noexcept override {
+                    return "transaction object";
+                }
+                std::error_code begin_object () override {
+                    return push<transaction_contents<TransactionLock>> (names_);
+                }
+                std::error_code end_array () override { return pop (); }
+
+            private:
+                not_null<name_mapping *> const names_;
+            };
+
+            //*  _                             _   _                                    *
+            //* | |_ _ _ __ _ _ _  ___ __ _ __| |_(_)___ _ _    __ _ _ _ _ _ __ _ _  _  *
+            //* |  _| '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  / _` | '_| '_/ _` | || | *
+            //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| \__,_|_| |_| \__,_|\_, | *
+            //*                                                                   |__/  *
+            template <typename TransactionLock>
+            class transaction_array final : public rule {
+            public:
+                transaction_array (not_null<context *> ctxt, not_null<name_mapping *> names);
+                transaction_array (transaction_array const &) = delete;
+                transaction_array (transaction_array &&) noexcept = delete;
+
+                ~transaction_array () noexcept override = default;
+
+                transaction_array & operator= (transaction_array const &) = delete;
+                transaction_array & operator= (transaction_array &&) noexcept = delete;
+
+                gsl::czstring name () const noexcept override;
+                std::error_code begin_array () override;
+
+            private:
+                not_null<name_mapping *> const names_;
+            };
+
+            // (ctor)
+            // ~~~~~~
+            template <typename TransactionLock>
+            transaction_array<TransactionLock>::transaction_array (not_null<context *> const ctxt,
+                                                                   not_null<name_mapping *> names)
+                    : rule (ctxt)
                     , names_{names} {}
-            import_transaction_contents (import_transaction_contents const &) = delete;
-            import_transaction_contents (import_transaction_contents &&) noexcept = delete;
 
-            ~import_transaction_contents () noexcept override = default;
-
-            import_transaction_contents & operator= (import_transaction_contents const &) = delete;
-            import_transaction_contents &
-            operator= (import_transaction_contents &&) noexcept = delete;
-
-        private:
-            std::error_code key (std::string const & s) override;
-            std::error_code end_object () override;
-            gsl::czstring name () const noexcept override;
-
-            transaction<TransactionLock> transaction_;
-            names_pointer names_;
-        };
-
-        // name
-        // ~~~~
-        template <typename TransactionLock>
-        gsl::czstring import_transaction_contents<TransactionLock>::name () const noexcept {
-            return "transaction contents";
-        }
-
-        // key
-        // ~~~
-        template <typename TransactionLock>
-        std::error_code import_transaction_contents<TransactionLock>::key (std::string const & s) {
-            // TODO: check that "names" is the first key that we see.
-            if (s == "names") {
-                return push_array_rule<names_array_members<TransactionLock>> (this, &transaction_,
-                                                                              names_);
+            // name
+            // ~~~~
+            template <typename TransactionLock>
+            gsl::czstring transaction_array<TransactionLock>::name () const noexcept {
+                return "transaction array";
             }
-            if (s == "debugline") {
-                return push_object_rule<import_debug_line_index<TransactionLock>> (this,
-                                                                                   &transaction_);
+
+            // begin array
+            // ~~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code transaction_array<TransactionLock>::begin_array () {
+                return this->replace_top<transaction_object<TransactionLock>> (names_);
             }
-            if (s == "fragments") {
-                return push_object_rule<import_fragment_index<TransactionLock>> (
-                    this, &transaction_, names_.get ());
-            }
-            if (s == "compilations") {
-                return push_object_rule<import_compilations_index<TransactionLock>> (
-                    this, &transaction_, names_.get ());
-            }
-            return import_error::unknown_transaction_object_key;
-        }
 
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code import_transaction_contents<TransactionLock>::end_object () {
-            transaction_.commit ();
-            return pop ();
-        }
-
-
-        template <typename TransactionLock>
-        class import_transaction_object final : public import_rule {
-        public:
-            using db_pointer = not_null<pstore::database *>;
-            using names_pointer = not_null<import_name_mapping *>;
-
-            import_transaction_object (parse_stack_pointer const s, db_pointer const db,
-                                       names_pointer const names)
-                    : import_rule (s)
-                    , db_{db}
-                    , names_{names} {}
-            import_transaction_object (import_transaction_object const &) = delete;
-            import_transaction_object (import_transaction_object &&) noexcept = delete;
-
-            ~import_transaction_object () noexcept override = default;
-
-            import_transaction_object & operator= (import_transaction_object const &) = delete;
-            import_transaction_object & operator= (import_transaction_object &&) noexcept = delete;
-
-            pstore::gsl::czstring name () const noexcept override { return "transaction object"; }
-            std::error_code begin_object () override {
-                return push<import_transaction_contents<TransactionLock>> (db_, names_);
-            }
-            std::error_code end_array () override { return pop (); }
-
-        private:
-            db_pointer const db_;
-            names_pointer const names_;
-        };
-
-        //*  _                             _   _                                    *
-        //* | |_ _ _ __ _ _ _  ___ __ _ __| |_(_)___ _ _    __ _ _ _ _ _ __ _ _  _  *
-        //* |  _| '_/ _` | ' \(_-</ _` / _|  _| / _ \ ' \  / _` | '_| '_/ _` | || | *
-        //*  \__|_| \__,_|_||_/__/\__,_\__|\__|_\___/_||_| \__,_|_| |_| \__,_|\_, | *
-        //*                                                                   |__/  *
-        template <typename TransactionLock>
-        class import_transaction_array final : public import_rule {
-        public:
-            using db_pointer = not_null<pstore::database *>;
-            using names_pointer = not_null<import_name_mapping *>;
-
-            import_transaction_array (parse_stack_pointer stack, db_pointer db,
-                                      names_pointer names);
-            import_transaction_array (import_transaction_array const &) = delete;
-            import_transaction_array (import_transaction_array &&) noexcept = delete;
-
-            ~import_transaction_array () noexcept override = default;
-
-            import_transaction_array & operator= (import_transaction_array const &) = delete;
-            import_transaction_array & operator= (import_transaction_array &&) noexcept = delete;
-
-            gsl::czstring name () const noexcept override;
-            std::error_code begin_array () override;
-
-        private:
-            db_pointer const db_;
-            names_pointer const names_;
-        };
-
-        // (ctor)
-        // ~~~~~~
-        template <typename TransactionLock>
-        import_transaction_array<TransactionLock>::import_transaction_array (
-            parse_stack_pointer const stack, db_pointer const db, names_pointer const names)
-                : import_rule (stack)
-                , db_{db}
-                , names_{names} {}
-
-        // name
-        // ~~~~
-        template <typename TransactionLock>
-        gsl::czstring import_transaction_array<TransactionLock>::name () const noexcept {
-            return "transaction array";
-        }
-
-        // begin array
-        // ~~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code import_transaction_array<TransactionLock>::begin_array () {
-            return this->replace_top<import_transaction_object<TransactionLock>> (db_, names_);
-        }
-
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore
 

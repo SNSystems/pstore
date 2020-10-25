@@ -55,47 +55,24 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        void export_fragments (export_ostream & os, indent const ind, pstore::database const & db,
-                               unsigned const generation, export_name_mapping const & names,
-                               bool const comments) {
-            auto const fragments =
-                pstore::index::get_index<pstore::trailer::indices::fragment> (db);
-            if (!fragments->empty ()) {
-                auto const * fragment_sep = "\n";
-                assert (generation > 0U);
-                for (pstore::address const & addr :
-                     pstore::diff::diff (db, *fragments, generation - 1U)) {
-                    auto const & kvp = fragments->load_leaf_node (db, addr);
-                    os << fragment_sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
-                    os << "{\n";
-                    auto const fragment = db.getro (kvp.second);
-                    auto const * section_sep = "";
-                    auto const section_indent = ind.next ();
-                    for (pstore::repo::section_kind const section : *fragment) {
-                        os << section_sep << section_indent << '"' << section_name (section)
-                           << R"(":)";
-#define X(a)                                                                                       \
-    case pstore::repo::section_kind::a:                                                            \
-        export_section<pstore::repo::section_kind::a> (                                            \
-            os, section_indent, db, names, fragment->at<pstore::repo::section_kind::a> (),         \
-            comments);                                                                             \
-        break;
-                        switch (section) {
-                            PSTORE_MCREPO_SECTION_KINDS
-                        case pstore::repo::section_kind::last:
-                            // llvm_unreachable...
-                            assert (false);
-                            break;
-                        }
-#undef X
-                        section_sep = ",\n";
+            void emit_fragments (ostream & os, indent const ind, database const & db,
+                                 unsigned const generation, name_mapping const & names,
+                                 bool const comments) {
+                auto const fragments = index::get_index<trailer::indices::fragment> (db);
+                if (!fragments->empty ()) {
+                    auto const * fragment_sep = "\n";
+                    assert (generation > 0U);
+                    for (address const & addr : diff::diff (db, *fragments, generation - 1U)) {
+                        auto const & kvp = fragments->load_leaf_node (db, addr);
+                        os << fragment_sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
+                        emit_fragment (os, ind.next (), db, names, db.getro (kvp.second), comments);
+                        fragment_sep = ",\n";
                     }
-                    os << '\n' << ind << '}';
-                    fragment_sep = ",\n";
                 }
             }
-        }
 
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore

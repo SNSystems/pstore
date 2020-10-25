@@ -52,13 +52,13 @@ TEST (ExportEmitString, SimpleString) {
     {
         std::ostringstream os1;
         auto const empty = ""s;
-        pstore::exchange::emit_string (os1, std::begin (empty), std::end (empty));
+        pstore::exchange::export_ns::emit_string (os1, std::begin (empty), std::end (empty));
         EXPECT_EQ (os1.str (), R"("")");
     }
     {
         std::ostringstream os2;
         auto const hello = "hello"s;
-        pstore::exchange::emit_string (os2, std::begin (hello), std::end (hello));
+        pstore::exchange::export_ns::emit_string (os2, std::begin (hello), std::end (hello));
         EXPECT_EQ (os2.str (), R"("hello")");
     }
 }
@@ -68,7 +68,7 @@ TEST (ExportEmitString, EscapeQuotes) {
 
     std::ostringstream os;
     auto const str = R"(a " b)"s;
-    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    pstore::exchange::export_ns::emit_string (os, std::begin (str), std::end (str));
     constexpr auto * expected = R"("a \" b")";
     EXPECT_EQ (os.str (), expected);
 }
@@ -78,7 +78,7 @@ TEST (ExportEmitString, EscapeBackslash) {
 
     std::ostringstream os;
     auto const str = R"(\)"s;
-    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    pstore::exchange::export_ns::emit_string (os, std::begin (str), std::end (str));
     EXPECT_EQ (os.str (), R"("\\")");
 }
 
@@ -87,7 +87,7 @@ TEST (ExportEmitString, Multiple) {
 
     std::ostringstream os;
     auto const str = R"("abc\def")"s;
-    pstore::exchange::emit_string (os, std::begin (str), std::end (str));
+    pstore::exchange::export_ns::emit_string (os, std::begin (str), std::end (str));
     constexpr auto * expected = R"("\"abc\\def\"")";
     EXPECT_EQ (os.str (), expected);
 }
@@ -95,9 +95,10 @@ TEST (ExportEmitString, Multiple) {
 TEST (ExportEmitArray, Empty) {
     std::ostringstream os;
     std::vector<int> values{};
-    pstore::exchange::emit_array (
-        os, pstore::exchange::indent{}, std::begin (values), std::end (values),
-        [] (std::ostringstream & os1, pstore::exchange::indent ind, int v) { os1 << ind << v; });
+    emit_array (os, pstore::exchange::export_ns::indent{}, std::begin (values), std::end (values),
+                [] (std::ostringstream & os1, pstore::exchange::export_ns::indent ind, int v) {
+                    os1 << ind << v;
+                });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[]");
 }
@@ -105,9 +106,10 @@ TEST (ExportEmitArray, Empty) {
 TEST (ExportEmitArray, Array) {
     std::ostringstream os;
     std::vector<int> values{2, 3, 5};
-    pstore::exchange::emit_array (
-        os, pstore::exchange::indent{}, std::begin (values), std::end (values),
-        [] (std::ostringstream & os1, pstore::exchange::indent ind, int v) { os1 << ind << v; });
+    emit_array (os, pstore::exchange::export_ns::indent{}, std::begin (values), std::end (values),
+                [] (std::ostringstream & os1, pstore::exchange::export_ns::indent ind, int v) {
+                    os1 << ind << v;
+                });
     auto const actual = os.str ();
     EXPECT_EQ (actual, "[\n  2,\n  3,\n  5\n]");
 }

@@ -45,9 +45,10 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        gsl::czstring section_name (repo::section_kind const section) noexcept {
-            auto const * result = "unknown";
+            gsl::czstring emit_section_name (repo::section_kind const section) noexcept {
+                auto const * result = "unknown";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a: result = #a; break;
             switch (section) {
@@ -56,7 +57,8 @@ namespace pstore {
             }
 #undef X
             return result;
-        }
+            }
 
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore

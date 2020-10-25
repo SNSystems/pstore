@@ -136,7 +136,7 @@ namespace pstore {
                                    return make_value (object::container{
                                        {"compilation", make_value (member.compilation)},
                                        {"index", make_value (member.index)},
-                                       {"definition", make_value (db, *db.getro (member.def))},
+                                       {"pointer", make_value (db, *db.getro (member.pointer))},
                                    });
                                });
         }

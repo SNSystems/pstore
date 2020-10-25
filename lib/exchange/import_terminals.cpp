@@ -45,36 +45,38 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        //*       _     _    __ _ _             _      *
-        //*  _  _(_)_ _| |_ / /| | |   _ _ _  _| |___  *
-        //* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
-        //*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
-        //*                                            *
-        // uint64 value
-        // ~~~~~~~~~~~~
-        std::error_code uint64_rule::uint64_value (std::uint64_t const v) {
-            *v_ = v;
-            return pop ();
-        }
+            //*       _     _    __ _ _             _      *
+            //*  _  _(_)_ _| |_ / /| | |   _ _ _  _| |___  *
+            //* | || | | ' \  _/ _ \_  _| | '_| || | / -_) *
+            //*  \_,_|_|_||_\__\___/ |_|  |_|  \_,_|_\___| *
+            //*                                            *
+            // uint64 value
+            // ~~~~~~~~~~~~
+            std::error_code uint64_rule::uint64_value (std::uint64_t const v) {
+                *v_ = v;
+                return pop ();
+            }
 
-        gsl::czstring uint64_rule::name () const noexcept { return "uint64 rule"; }
+            gsl::czstring uint64_rule::name () const noexcept { return "uint64 rule"; }
 
-        //*     _       _                      _      *
-        //*  __| |_ _ _(_)_ _  __ _   _ _ _  _| |___  *
-        //* (_-<  _| '_| | ' \/ _` | | '_| || | / -_) *
-        //* /__/\__|_| |_|_||_\__, | |_|  \_,_|_\___| *
-        //*                   |___/                   *
-        // name
-        // ~~~~
-        gsl::czstring string_rule::name () const noexcept { return "string rule"; }
+            //*     _       _                      _      *
+            //*  __| |_ _ _(_)_ _  __ _   _ _ _  _| |___  *
+            //* (_-<  _| '_| | ' \/ _` | | '_| || | / -_) *
+            //* /__/\__|_| |_|_||_\__, | |_|  \_,_|_\___| *
+            //*                   |___/                   *
+            // name
+            // ~~~~
+            gsl::czstring string_rule::name () const noexcept { return "string rule"; }
 
-        // string value
-        // ~~~~~~~~~~~~
-        std::error_code string_rule::string_value (std::string const & v) {
-            *v_ = v;
-            return pop ();
-        }
+            // string value
+            // ~~~~~~~~~~~~
+            std::error_code string_rule::string_value (std::string const & v) {
+                *v_ = v;
+                return pop ();
+            }
 
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore

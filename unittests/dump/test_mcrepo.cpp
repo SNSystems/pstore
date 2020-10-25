@@ -241,7 +241,7 @@ TEST_F (MCRepoFixture, DumpFragment) {
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("-", "compilation", ":", "0123456789abcdeffedcba9876543210"));
     EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("index", ":", "0xd"));
-    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("definition", ":"));
+    EXPECT_THAT (split_tokens (lines.at (line++)), ElementsAre ("pointer", ":"));
     EXPECT_THAT (split_tokens (lines.at (line++)),
                  ElementsAre ("digest", ":", "0000000000000000000000000000001c"));
     EXPECT_THAT (split_tokens (lines.at (line++)),

@@ -46,15 +46,19 @@
 
 namespace pstore {
     namespace exchange {
-        namespace details {
+        namespace export_ns {
 
-            std::string get_string (database const & db,
-                                    typed_address<indirect_string> const addr) {
-                return serialize::read<pstore::indirect_string> (
-                           serialize::archive::database_reader{db, addr.to_address ()})
-                    .to_string ();
-            }
+            namespace details {
 
-        } // end namespace details
+                std::string get_string (database const & db,
+                                        typed_address<indirect_string> const addr) {
+                    return serialize::read<pstore::indirect_string> (
+                               serialize::archive::database_reader{db, addr.to_address ()})
+                        .to_string ();
+                }
+
+            } // end namespace details
+
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore

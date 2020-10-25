@@ -56,6 +56,7 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
 #define X(a)                                                                                       \
 case repo::linkage::a: return os << #a;
@@ -78,9 +79,9 @@ case repo::linkage::a: return os << #a;
 
 
         template <typename OStream>
-        void export_compilation (OStream & os, indent const ind, database const & db,
-                                 pstore::repo::compilation const & compilation,
-                                 export_name_mapping const & names, bool comments) {
+        void emit_compilation (OStream & os, indent const ind, database const & db,
+                               repo::compilation const & compilation,
+                               name_mapping const & names, bool comments) {
             os << "{\n";
             auto const object_indent = ind.next ();
             os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
@@ -111,9 +112,9 @@ case repo::linkage::a: return os << #a;
 
 
         template <typename OStream>
-        void export_compilation_index (OStream & os, indent const ind, database const & db,
-                                       unsigned const generation, export_name_mapping const & names,
-                                       bool comments) {
+        void emit_compilation_index (OStream & os, indent const ind, database const & db,
+                                     unsigned const generation, name_mapping const & names,
+                                     bool comments) {
             auto const compilations = index::get_index<trailer::indices::compilation> (db);
             if (!compilations || compilations->empty ()) {
                 return;
@@ -126,11 +127,12 @@ case repo::linkage::a: return os << #a;
             for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
                 auto const & kvp = compilations->load_leaf_node (db, addr);
                 os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
-                export_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
+                emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
                 sep = ",\n";
             }
         }
 
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore
 

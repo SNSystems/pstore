@@ -52,29 +52,30 @@ namespace pstore {
     class database;
 
     namespace exchange {
+        namespace import {
 
-        class import_root final : public import_rule {
-        public:
-            import_root (parse_stack_pointer const stack, not_null<database *> const db)
-                    : import_rule (stack)
-                    , db_{db} {}
-            import_root (import_root const &) = delete;
-            import_root (import_root &&) noexcept = delete;
-            ~import_root () noexcept override = default;
+            class root final : public rule {
+            public:
+                explicit root (not_null<context *> const ctxt) noexcept
+                        : rule (ctxt) {}
+                root (root const &) = delete;
+                root (root &&) noexcept = delete;
+                ~root () noexcept override = default;
 
-            import_root & operator= (import_root const &) = delete;
-            import_root & operator= (import_root &&) noexcept = delete;
+                root & operator= (root const &) = delete;
+                root & operator= (root &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override;
-            std::error_code begin_object () override;
+                gsl::czstring name () const noexcept override;
+                std::error_code begin_object () override;
 
-        private:
-            not_null<database *> const db_;
-        };
+            private:
+                std::error_code apply_patches ();
+            };
 
 
-        json::parser<callbacks> create_import_parser (database & db);
+            json::parser<callbacks> create_parser (database & db);
 
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore
 

@@ -181,12 +181,10 @@ namespace pstore {
             /// Provides a pointer to an individual fragment instance given a transaction and an
             /// extent describing its address and size.
             ///
-            /// \tparam LockType  The transaction lock type.
             /// \param transaction  The transaction from which the fragment is to be read.
             /// \param location  The address and size of the fragment data.
             /// \returns  A pointer to the fragment instance.
-            template <typename LockType>
-            static std::shared_ptr<fragment> load (transaction<LockType> & transaction,
+            static std::shared_ptr<fragment> load (transaction_base & transaction,
                                                    extent<fragment> const & location);
 
             /// Returns true if the fragment contains a section of the kind given by \p kind, false
@@ -498,9 +496,8 @@ case section_kind::k: name = #k; break;
 
         // load
         // ~~~~~
-        template <typename LockType>
-        auto fragment::load (transaction<LockType> & transaction,
-                             pstore::extent<fragment> const & location)
+        inline auto fragment::load (transaction_base & transaction,
+                                    pstore::extent<fragment> const & location)
             -> std::shared_ptr<fragment> {
             return load_impl<std::shared_ptr<fragment>> (
                 location,

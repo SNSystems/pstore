@@ -45,20 +45,21 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        namespace details {
+            namespace details {
 
-            // string value
-            // ~~~~~~~~~~~~
-            std::error_code section_name::string_value (std::string const & s) {
-                // TODO: this map appears both here and in the fragment code.
+                // string value
+                // ~~~~~~~~~~~~
+                std::error_code section_name::string_value (std::string const & s) {
+                    // TODO: this map appears both here and in the fragment code.
 #define X(a) {#a, pstore::repo::section_kind::a},
                 static std::unordered_map<std::string, pstore::repo::section_kind> map = {
                     PSTORE_MCREPO_SECTION_KINDS};
 #undef X
                 auto const pos = map.find (s);
                 if (pos == map.end ()) {
-                    return pstore::exchange::import_error::unknown_section_name;
+                    return import::error::unknown_section_name;
                 }
                 *section_ = pos->second;
                 return pop ();
@@ -71,24 +72,22 @@ namespace pstore {
         //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
         //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                |_|    *
-        //-MARK:import internal fixup
+        //-MARK:internal fixup
         // (ctor)
         // ~~~~~~
-        import_internal_fixup::import_internal_fixup (parse_stack_pointer const stack,
-                                                      names_pointer const /*names*/,
-                                                      fixups_pointer const fixups)
-                : import_rule (stack)
+        internal_fixup::internal_fixup (not_null<context *> const ctxt,
+                                        not_null<name_mapping const *> const /*names*/,
+                                        fixups_pointer const fixups)
+                : rule (ctxt)
                 , fixups_{fixups} {}
 
         // name
         // ~~~~
-        gsl::czstring import_internal_fixup::name () const noexcept {
-            return "import internal fixup";
-        }
+        gsl::czstring internal_fixup::name () const noexcept { return "internal fixup"; }
 
         // key
         // ~~~
-        std::error_code import_internal_fixup::key (std::string const & k) {
+        std::error_code internal_fixup::key (std::string const & k) {
             if (k == "section") {
                 seen_[section] = true;
                 return this->push<details::section_name> (&section_);
@@ -105,14 +104,14 @@ namespace pstore {
                 seen_[addend] = true;
                 return this->push<uint64_rule> (&addend_);
             }
-            return import_error::unrecognized_ifixup_key;
+            return error::unrecognized_ifixup_key;
         }
 
         // end object
         // ~~~~~~~~~~
-        std::error_code import_internal_fixup::end_object () {
+        std::error_code internal_fixup::end_object () {
             if (!seen_.all ()) {
-                return import_error::ifixup_object_was_incomplete;
+                return error::ifixup_object_was_incomplete;
             }
             // TODO: validate more values here.
             fixups_->emplace_back (section_, static_cast<pstore::repo::relocation_type> (type_),
@@ -125,25 +124,23 @@ namespace pstore {
         //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
         //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
         //*                                                  |_|    *
-        //-MARK:import external fixup
+        //-MARK:external fixup
         // (ctor)
         // ~~~~~~
-        import_external_fixup::import_external_fixup (parse_stack_pointer const stack,
-                                                      names_pointer const names,
-                                                      fixups_pointer const fixups)
-                : import_rule (stack)
+        external_fixup::external_fixup (not_null<context *> const ctxt,
+                                        not_null<name_mapping const *> names,
+                                        fixups_pointer const fixups)
+                : rule (ctxt)
                 , names_{names}
                 , fixups_{fixups} {}
 
         // name
         // ~~~~~
-        gsl::czstring import_external_fixup::name () const noexcept {
-            return "import external fixup";
-        }
+        gsl::czstring external_fixup::name () const noexcept { return "external fixup"; }
 
         // key
         // ~~~
-        std::error_code import_external_fixup::key (std::string const & k) {
+        std::error_code external_fixup::key (std::string const & k) {
             if (k == "name") {
                 seen_[name_index] = true;
                 return this->push<uint64_rule> (&name_);
@@ -160,14 +157,14 @@ namespace pstore {
                 seen_[addend] = true;
                 return this->push<uint64_rule> (&addend_);
             }
-            return import_error::unrecognized_xfixup_key;
+            return error::unrecognized_xfixup_key;
         }
 
         // end object
         // ~~~~~~~~~~
-        std::error_code import_external_fixup::end_object () {
+        std::error_code external_fixup::end_object () {
             if (!seen_.all ()) {
-                return import_error::xfixup_object_was_incomplete;
+                return error::xfixup_object_was_incomplete;
             }
 
             auto name = names_->lookup (name_);
@@ -181,5 +178,6 @@ namespace pstore {
             return pop ();
         }
 
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore

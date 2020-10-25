@@ -57,35 +57,38 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        /// We can map from the section_kind enum to the type of data used to represent a
-        /// section of that kind. section_to_importer is used to convert from this type class
-        /// that we use to import that data. For example, the text section is represented by the
-        /// generic_section type. We then use the import_generic_section class to import it.
-        /// There are template specializations for each of the section content types in the
-        /// database.
-        template <typename Section, typename OutputIterator>
-        struct section_to_importer {};
-        template <typename Section, typename OutputIterator>
-        using section_to_importer_t = typename section_to_importer<Section, OutputIterator>::type;
+            /// We can map from the section_kind enum to the type of data used to represent a
+            /// section of that kind. section_to_importer is used to convert from this type class
+            /// that we use to import that data. For example, the text section is represented by the
+            /// generic_section type. We then use the import_generic_section class to import it.
+            /// There are template specializations for each of the section content types in the
+            /// database.
+            template <typename Section, typename OutputIterator>
+            struct section_to_importer {};
+            template <typename Section, typename OutputIterator>
+            using section_to_importer_t =
+                typename section_to_importer<Section, OutputIterator>::type;
 
-        template <typename OutputIterator>
-        struct section_to_importer<repo::generic_section, OutputIterator> {
-            using type = import_generic_section<OutputIterator>;
-        };
-        template <typename OutputIterator>
-        struct section_to_importer<repo::bss_section, OutputIterator> {
-            using type = import_bss_section<OutputIterator>;
-        };
-        template <typename OutputIterator>
-        struct section_to_importer<repo::linked_definitions, OutputIterator> {
-            using type = import_linked_definitions_section<OutputIterator>;
-        };
-        template <typename OutputIterator>
-        struct section_to_importer<repo::debug_line_section, OutputIterator> {
-            using type = import_debug_line_section<OutputIterator>;
-        };
+            template <typename OutputIterator>
+            struct section_to_importer<repo::generic_section, OutputIterator> {
+                using type = generic_section<OutputIterator>;
+            };
+            template <typename OutputIterator>
+            struct section_to_importer<repo::bss_section, OutputIterator> {
+                using type = bss_section<OutputIterator>;
+            };
+            template <typename OutputIterator>
+            struct section_to_importer<repo::linked_definitions, OutputIterator> {
+                using type = linked_definitions_section<OutputIterator>;
+            };
+            template <typename OutputIterator>
+            struct section_to_importer<repo::debug_line_section, OutputIterator> {
+                using type = debug_line_section<OutputIterator>;
+            };
 
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore
 

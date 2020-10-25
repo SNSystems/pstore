@@ -47,33 +47,35 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        export_ostream & export_ostream::write (char const c) {
-            std::fputc (c, os_);
-            return *this;
-        }
-        export_ostream & export_ostream::write (std::uint16_t const v) {
-            std::fprintf (os_, "%" PRIu16, v);
-            return *this;
-        }
-        export_ostream & export_ostream::write (std::uint32_t const v) {
-            std::fprintf (os_, "%" PRIu32, v);
-            return *this;
-        }
-        export_ostream & export_ostream::write (std::uint64_t const v) {
-            std::fprintf (os_, "%" PRIu64, v);
-            return *this;
-        }
-        export_ostream & export_ostream::write (gsl::czstring const str) {
-            std::fputs (str, os_);
-            return *this;
-        }
-        export_ostream & export_ostream::write (std::string const & str) {
-            std::fputs (str.c_str (), os_);
-            return *this;
-        }
+            ostream & ostream::write (char const c) {
+                std::fputc (c, os_);
+                return *this;
+            }
+            ostream & ostream::write (std::uint16_t const v) {
+                std::fprintf (os_, "%" PRIu16, v);
+                return *this;
+            }
+            ostream & ostream::write (std::uint32_t const v) {
+                std::fprintf (os_, "%" PRIu32, v);
+                return *this;
+            }
+            ostream & ostream::write (std::uint64_t const v) {
+                std::fprintf (os_, "%" PRIu64, v);
+                return *this;
+            }
+            ostream & ostream::write (gsl::czstring const str) {
+                std::fputs (str, os_);
+                return *this;
+            }
+            ostream & ostream::write (std::string const & str) {
+                std::fputs (str.c_str (), os_);
+                return *this;
+            }
 
-        void export_ostream::flush () { std::fflush (os_); }
+            void ostream::flush () { std::fflush (os_); }
 
+        } // end namespace export_ns
     } // end namespace exchange
 } // end namespace pstore

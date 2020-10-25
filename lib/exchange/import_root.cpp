@@ -60,27 +60,24 @@ namespace {
     //* | '_/ _ \/ _ \  _| / _ \ '_ \| / -_) _|  _| *
     //* |_| \___/\___/\__| \___/_.__// \___\__|\__| *
     //*                            |__/             *
-    class import_root_object final : public pstore::exchange::import_rule {
+    class root_object final : public pstore::exchange::import::rule {
     public:
-        using db_pointer = pstore::gsl::not_null<pstore::database *>;
+        explicit root_object (pstore::gsl::not_null<pstore::exchange::import::context *> const ctxt)
+                : rule (ctxt) {}
+        root_object (root_object const &) = delete;
+        root_object (root_object &&) noexcept = delete;
 
-        import_root_object (parse_stack_pointer const stack, db_pointer const db)
-                : import_rule (stack)
-                , db_{db} {}
-        import_root_object (import_root_object const &) = delete;
-        import_root_object (import_root_object &&) noexcept = delete;
-        ~import_root_object () noexcept override = default;
+        ~root_object () noexcept override = default;
 
-        import_root_object & operator= (import_root_object const &) = delete;
-        import_root_object & operator= (import_root_object &&) noexcept = delete;
+        root_object & operator= (root_object const &) = delete;
+        root_object & operator= (root_object &&) noexcept = delete;
 
         pstore::gsl::czstring name () const noexcept override;
         std::error_code key (std::string const & k) override;
         std::error_code end_object () override;
 
     private:
-        db_pointer const db_;
-        pstore::exchange::import_name_mapping names_;
+        pstore::exchange::import::name_mapping names_;
 
         enum { version, id, transactions };
         std::bitset<transactions + 1> seen_;
@@ -90,33 +87,34 @@ namespace {
 
     // name
     // ~~~~
-    pstore::gsl::czstring import_root_object::name () const noexcept { return "root object"; }
+    pstore::gsl::czstring root_object::name () const noexcept { return "root object"; }
 
     // key
     // ~~~
-    std::error_code import_root_object::key (std::string const & k) {
+    std::error_code root_object::key (std::string const & k) {
+        using namespace pstore::exchange::import;
+
         // TODO: check that 'version' is the first key that we see.
         if (k == "version") {
             seen_[version] = true;
-            return push<pstore::exchange::uint64_rule> (&version_);
+            return push<uint64_rule> (&version_);
         }
         if (k == "id") {
             seen_[id] = true;
-            return push<pstore::exchange::import_uuid_rule> (&id_);
+            return push<uuid_rule> (&id_);
         }
         if (k == "transactions") {
             seen_[transactions] = true;
-            return push<pstore::exchange::import_transaction_array<pstore::transaction_lock>> (
-                db_, &names_);
+            return push<transaction_array<pstore::transaction_lock>> (&names_);
         }
-        return pstore::exchange::import_error::unrecognized_root_key;
+        return error::unrecognized_root_key;
     }
 
     // end object
     // ~~~~~~~~~~
-    std::error_code import_root_object::end_object () {
+    std::error_code root_object::end_object () {
         if (!seen_.all ()) {
-            return pstore::exchange::import_error::root_object_was_incomplete;
+            return pstore::exchange::import::error::root_object_was_incomplete;
         }
         return {};
     }
@@ -125,27 +123,29 @@ namespace {
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        //*               _    *
-        //*  _ _ ___  ___| |_  *
-        //* | '_/ _ \/ _ \  _| *
-        //* |_| \___/\___/\__| *
-        //*                    *
-        // name
-        // ~~~~
-        gsl::czstring import_root::name () const noexcept { return "root"; }
+            //*               _    *
+            //*  _ _ ___  ___| |_  *
+            //* | '_/ _ \/ _ \  _| *
+            //* |_| \___/\___/\__| *
+            //*                    *
+            // name
+            // ~~~~
+            gsl::czstring root::name () const noexcept { return "root"; }
 
-        // begin object
-        // ~~~~~~~~~~~~
-        std::error_code import_root::begin_object () { return push<import_root_object> (db_); }
+            // begin object
+            // ~~~~~~~~~~~~
+            std::error_code root::begin_object () { return this->push<root_object> (); }
 
 
-        // create import parser
-        // ~~~~~~~~~~~~~~~~~~~~
-        json::parser<callbacks> create_import_parser (database & db) {
-            return json::make_parser (callbacks::make<import_root> (&db),
-                                      json::parser_extensions::all);
-        }
+            // create parser
+            // ~~~~~~~~~~~~~
+            json::parser<callbacks> create_parser (database & db) {
+                return json::make_parser (callbacks::make<root> (&db),
+                                          json::parser_extensions::all);
+            }
 
+        } // end namespace import
     } // end namespace exchange
 } // end namespace pstore
