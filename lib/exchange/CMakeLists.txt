@@ -84,6 +84,7 @@ set (pstore_exchange_sources
     import_compilation.cpp
     import_error.cpp
     import_fixups.cpp
+    import_fragment.cpp
     import_names.cpp
     import_root.cpp
     import_rule.cpp

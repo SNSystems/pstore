@@ -63,12 +63,15 @@ namespace pstore {
     namespace exchange {
         namespace import {
 
+            //*          _    _                            _      _     *
+            //*  __ _ __| |__| |_ _ ___ ______  _ __  __ _| |_ __| |_   *
+            //* / _` / _` / _` | '_/ -_|_-<_-< | '_ \/ _` |  _/ _| ' \  *
+            //* \__,_\__,_\__,_|_| \___/__/__/ | .__/\__,_|\__\__|_||_| *
+            //*                                |_|                      *
             class address_patch final : public patcher {
             public:
                 address_patch (gsl::not_null<database *> const db,
-                               extent<repo::fragment> const & fragment_extent)
-                        : db_{db}
-                        , fragment_extent_{fragment_extent} {}
+                               extent<repo::fragment> const & ex) noexcept;
                 address_patch (address_patch const &) = delete;
                 address_patch (address_patch &&) = delete;
 
@@ -77,44 +80,12 @@ namespace pstore {
                 address_patch & operator= (address_patch const &) = delete;
                 address_patch & operator= (address_patch &&) = delete;
 
-                std::error_code operator() (transaction_base * const transaction) override {
-                    auto fragment = repo::fragment::load (*transaction, fragment_extent_);
-                    assert (fragment->has_section (repo::section_kind::linked_definitions));
-                    repo::linked_definitions & linked =
-                        fragment->template at<repo::section_kind::linked_definitions> ();
-
-                    auto const compilation_index =
-                        pstore::index::get_index<pstore::trailer::indices::compilation> (*db_);
-
-                    for (repo::linked_definitions::value_type & l : linked) {
-                        auto const pos = compilation_index->find (*db_, l.compilation);
-                        if (pos == compilation_index->end (*db_)) {
-                            // compilation was not found.
-                            return {error::no_such_compilation};
-                        }
-                        auto const compilation =
-                            repo::compilation::load (transaction->db (), pos->second);
-                        if (l.index >= compilation->size ()) {
-                            return {error::index_out_of_range};
-                        }
-                        // Compute the offset of the link.index definition from the start of the
-                        // compilation's storage (c).
-                        auto const offset =
-                            reinterpret_cast<std::uintptr_t> (&(*compilation)[l.index]) -
-                            reinterpret_cast<std::uintptr_t> (compilation.get ());
-                        // Compute the address of the link.index definition.
-                        l.pointer = typed_address<repo::compilation_member>::make (
-                            pos->second.addr.to_address () + offset);
-                    }
-                    return {};
-                }
+                std::error_code operator() (transaction_base * const transaction) override;
 
             private:
                 gsl::not_null<database *> const db_;
                 extent<repo::fragment> const fragment_extent_;
             };
-
-
 
             //*   __                             _                _   _              *
             //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_   ___ ___ __| |_(_)___ _ _  ___ *
@@ -192,127 +163,127 @@ namespace pstore {
                 using repo::section_kind;
 
 #define X(a) {#a, section_kind::a},
-            static std::unordered_map<std::string, section_kind> const map{
-                PSTORE_MCREPO_SECTION_KINDS};
+                static std::unordered_map<std::string, section_kind> const map{
+                    PSTORE_MCREPO_SECTION_KINDS};
 #undef X
-            auto const pos = map.find (s);
-            if (pos == map.end ()) {
-                return error::unknown_section_name;
-            }
+                auto const pos = map.find (s);
+                if (pos == map.end ()) {
+                    return error::unknown_section_name;
+                }
 
 #define X(a)                                                                                       \
 case section_kind::a: return this->create_section_importer<section_kind::a> ();
-            switch (pos->second) {
-                PSTORE_MCREPO_SECTION_KINDS
-            case section_kind::last: assert (false && "Illegal section kind"); // unreachable
-            }
+                switch (pos->second) {
+                    PSTORE_MCREPO_SECTION_KINDS
+                case section_kind::last: assert (false && "Illegal section kind"); // unreachable
+                }
 #undef X
-            return error::unknown_section_name;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code fragment_sections<TransactionLock>::end_object () {
-            context * const ctxt = this->get_context ();
-            assert (ctxt->db == &transaction_->db ());
-
-            auto const dispatchers_begin = make_pointee_adaptor (dispatchers_.begin ());
-            auto const dispatchers_end = make_pointee_adaptor (dispatchers_.end ());
-
-            auto const fext =
-                repo::fragment::alloc (*transaction_, dispatchers_begin, dispatchers_end);
-            auto const fragment_index =
-                index::get_index<trailer::indices::fragment> (*ctxt->db, true /* create */);
-            fragment_index->insert (*transaction_, std::make_pair (*digest_, fext));
-
-            // If this fragment has a linked-definitions section then we need to patch the addresses
-            // of the referenced definitions one we've imported everything.
-            if (std::find_if (dispatchers_begin, dispatchers_end,
-                              [] (repo::section_creation_dispatcher const & d) {
-                                  return d.kind () == repo::section_kind::linked_definitions;
-                              }) != dispatchers_end) {
-                ctxt->patches.emplace_back (new address_patch (ctxt->db, fext));
+                return error::unknown_section_name;
             }
-            return pop ();
-        }
 
+            // end object
+            // ~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code fragment_sections<TransactionLock>::end_object () {
+                context * const ctxt = this->get_context ();
+                assert (ctxt->db == &transaction_->db ());
 
-        //*   __                             _     _         _          *
-        //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  (_)_ _  __| |_____ __ *
-        //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| | | ' \/ _` / -_) \ / *
-        //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| |_|_||_\__,_\___/_\_\ *
-        //*              |___/                                          *
-        //-MARK: fragment index
-        template <typename TransactionLock>
-        class fragment_index final : public rule {
-        public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
-            using names_pointer = not_null<name_mapping const *>;
+                auto const dispatchers_begin = make_pointee_adaptor (dispatchers_.begin ());
+                auto const dispatchers_end = make_pointee_adaptor (dispatchers_.end ());
 
-            fragment_index (not_null<context *> ctxt, transaction_pointer transaction,
-                            names_pointer names);
-            fragment_index (fragment_index const &) = delete;
-            fragment_index (fragment_index &&) noexcept = delete;
+                auto const fext =
+                    repo::fragment::alloc (*transaction_, dispatchers_begin, dispatchers_end);
+                auto const fragment_index =
+                    index::get_index<trailer::indices::fragment> (*ctxt->db, true /* create */);
+                fragment_index->insert (*transaction_, std::make_pair (*digest_, fext));
 
-            ~fragment_index () noexcept override = default;
-
-            fragment_index & operator= (fragment_index const &) = delete;
-            fragment_index & operator= (fragment_index &&) noexcept = delete;
-
-            gsl::czstring name () const noexcept override;
-            std::error_code key (std::string const & s) override;
-            std::error_code end_object () override;
-
-        private:
-            transaction_pointer const transaction_;
-            names_pointer const names_;
-
-            std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
-            index::digest digest_;
-        };
-
-        // (ctor)
-        // ~~~~~~
-        template <typename TransactionLock>
-        fragment_index<TransactionLock>::fragment_index (not_null<context *> const ctxt,
-                                                         transaction_pointer const transaction,
-                                                         names_pointer const names)
-                : rule (ctxt)
-                , transaction_{transaction}
-                , names_{names} {
-            sections_.reserve (
-                static_cast<std::underlying_type_t<repo::section_kind>> (repo::section_kind::last));
-        }
-
-        // name
-        // ~~~~
-        template <typename TransactionLock>
-        gsl::czstring fragment_index<TransactionLock>::name () const noexcept {
-            return "fragment index";
-        }
-
-        // key
-        // ~~~
-        template <typename TransactionLock>
-        std::error_code fragment_index<TransactionLock>::key (std::string const & s) {
-            if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
-                digest_ = *digest;
-                return push_object_rule<fragment_sections<TransactionLock>> (this, transaction_,
-                                                                             names_, &digest_);
+                // If this fragment has a linked-definitions section then we need to patch the
+                // addresses of the referenced definitions one we've imported everything.
+                if (std::find_if (dispatchers_begin, dispatchers_end,
+                                  [] (repo::section_creation_dispatcher const & d) {
+                                      return d.kind () == repo::section_kind::linked_definitions;
+                                  }) != dispatchers_end) {
+                    ctxt->patches.emplace_back (new address_patch (ctxt->db, fext));
+                }
+                return pop ();
             }
-            return error::bad_digest;
-        }
 
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code fragment_index<TransactionLock>::end_object () {
-            return pop ();
-        }
+
+            //*   __                             _     _         _          *
+            //*  / _|_ _ __ _ __ _ _ __  ___ _ _| |_  (_)_ _  __| |_____ __ *
+            //* |  _| '_/ _` / _` | '  \/ -_) ' \  _| | | ' \/ _` / -_) \ / *
+            //* |_| |_| \__,_\__, |_|_|_\___|_||_\__| |_|_||_\__,_\___/_\_\ *
+            //*              |___/                                          *
+            //-MARK: fragment index
+            template <typename TransactionLock>
+            class fragment_index final : public rule {
+            public:
+                using transaction_pointer = not_null<transaction<TransactionLock> *>;
+                using names_pointer = not_null<name_mapping const *>;
+
+                fragment_index (not_null<context *> ctxt, transaction_pointer transaction,
+                                names_pointer names);
+                fragment_index (fragment_index const &) = delete;
+                fragment_index (fragment_index &&) noexcept = delete;
+
+                ~fragment_index () noexcept override = default;
+
+                fragment_index & operator= (fragment_index const &) = delete;
+                fragment_index & operator= (fragment_index &&) noexcept = delete;
+
+                gsl::czstring name () const noexcept override;
+                std::error_code key (std::string const & s) override;
+                std::error_code end_object () override;
+
+            private:
+                transaction_pointer const transaction_;
+                names_pointer const names_;
+
+                std::vector<std::unique_ptr<repo::section_creation_dispatcher>> sections_;
+                index::digest digest_;
+            };
+
+            // (ctor)
+            // ~~~~~~
+            template <typename TransactionLock>
+            fragment_index<TransactionLock>::fragment_index (not_null<context *> const ctxt,
+                                                             transaction_pointer const transaction,
+                                                             names_pointer const names)
+                    : rule (ctxt)
+                    , transaction_{transaction}
+                    , names_{names} {
+                sections_.reserve (static_cast<std::underlying_type_t<repo::section_kind>> (
+                    repo::section_kind::last));
+            }
+
+            // name
+            // ~~~~
+            template <typename TransactionLock>
+            gsl::czstring fragment_index<TransactionLock>::name () const noexcept {
+                return "fragment index";
+            }
+
+            // key
+            // ~~~
+            template <typename TransactionLock>
+            std::error_code fragment_index<TransactionLock>::key (std::string const & s) {
+                if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
+                    digest_ = *digest;
+                    return push_object_rule<fragment_sections<TransactionLock>> (this, transaction_,
+                                                                                 names_, &digest_);
+                }
+                return error::bad_digest;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code fragment_index<TransactionLock>::end_object () {
+                return pop ();
+            }
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_FRAGMENT_HPP
