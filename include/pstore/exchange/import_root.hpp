@@ -76,7 +76,7 @@ namespace pstore {
             json::parser<callbacks> create_parser (database & db);
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_ROOT_HPP

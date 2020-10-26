@@ -54,130 +54,130 @@ namespace pstore {
                 std::error_code section_name::string_value (std::string const & s) {
                     // TODO: this map appears both here and in the fragment code.
 #define X(a) {#a, pstore::repo::section_kind::a},
-                static std::unordered_map<std::string, pstore::repo::section_kind> map = {
-                    PSTORE_MCREPO_SECTION_KINDS};
+                    static std::unordered_map<std::string, pstore::repo::section_kind> map = {
+                        PSTORE_MCREPO_SECTION_KINDS};
 #undef X
-                auto const pos = map.find (s);
-                if (pos == map.end ()) {
-                    return import::error::unknown_section_name;
+                    auto const pos = map.find (s);
+                    if (pos == map.end ()) {
+                        return import::error::unknown_section_name;
+                    }
+                    *section_ = pos->second;
+                    return pop ();
                 }
-                *section_ = pos->second;
+
+            } // end namespace details
+
+            //*  _     _                     _    __ _                *
+            //* (_)_ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+            //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+            //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
+            //*                                                |_|    *
+            //-MARK:internal fixup
+            // (ctor)
+            // ~~~~~~
+            internal_fixup::internal_fixup (not_null<context *> const ctxt,
+                                            not_null<name_mapping const *> const /*names*/,
+                                            fixups_pointer const fixups)
+                    : rule (ctxt)
+                    , fixups_{fixups} {}
+
+            // name
+            // ~~~~
+            gsl::czstring internal_fixup::name () const noexcept { return "internal fixup"; }
+
+            // key
+            // ~~~
+            std::error_code internal_fixup::key (std::string const & k) {
+                if (k == "section") {
+                    seen_[section] = true;
+                    return this->push<details::section_name> (&section_);
+                }
+                if (k == "type") {
+                    seen_[type] = true;
+                    return this->push<uint64_rule> (&type_);
+                }
+                if (k == "offset") {
+                    seen_[offset] = true;
+                    return this->push<uint64_rule> (&offset_);
+                }
+                if (k == "addend") {
+                    seen_[addend] = true;
+                    return this->push<uint64_rule> (&addend_);
+                }
+                return error::unrecognized_ifixup_key;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            std::error_code internal_fixup::end_object () {
+                if (!seen_.all ()) {
+                    return error::ifixup_object_was_incomplete;
+                }
+                // TODO: validate more values here.
+                fixups_->emplace_back (section_, static_cast<pstore::repo::relocation_type> (type_),
+                                       offset_, addend_);
                 return pop ();
             }
 
-        } // end namespace details
+            //*          _                     _    __ _                *
+            //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
+            //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
+            //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
+            //*                                                  |_|    *
+            //-MARK:external fixup
+            // (ctor)
+            // ~~~~~~
+            external_fixup::external_fixup (not_null<context *> const ctxt,
+                                            not_null<name_mapping const *> const names,
+                                            fixups_pointer const fixups)
+                    : rule (ctxt)
+                    , names_{names}
+                    , fixups_{fixups} {}
 
-        //*  _     _                     _    __ _                *
-        //* (_)_ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
-        //* | | ' \  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
-        //* |_|_||_\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
-        //*                                                |_|    *
-        //-MARK:internal fixup
-        // (ctor)
-        // ~~~~~~
-        internal_fixup::internal_fixup (not_null<context *> const ctxt,
-                                        not_null<name_mapping const *> const /*names*/,
-                                        fixups_pointer const fixups)
-                : rule (ctxt)
-                , fixups_{fixups} {}
+            // name
+            // ~~~~~
+            gsl::czstring external_fixup::name () const noexcept { return "external fixup"; }
 
-        // name
-        // ~~~~
-        gsl::czstring internal_fixup::name () const noexcept { return "internal fixup"; }
-
-        // key
-        // ~~~
-        std::error_code internal_fixup::key (std::string const & k) {
-            if (k == "section") {
-                seen_[section] = true;
-                return this->push<details::section_name> (&section_);
-            }
-            if (k == "type") {
-                seen_[type] = true;
-                return this->push<uint64_rule> (&type_);
-            }
-            if (k == "offset") {
-                seen_[offset] = true;
-                return this->push<uint64_rule> (&offset_);
-            }
-            if (k == "addend") {
-                seen_[addend] = true;
-                return this->push<uint64_rule> (&addend_);
-            }
-            return error::unrecognized_ifixup_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        std::error_code internal_fixup::end_object () {
-            if (!seen_.all ()) {
-                return error::ifixup_object_was_incomplete;
-            }
-            // TODO: validate more values here.
-            fixups_->emplace_back (section_, static_cast<pstore::repo::relocation_type> (type_),
-                                   offset_, addend_);
-            return pop ();
-        }
-
-        //*          _                     _    __ _                *
-        //*  _____ _| |_ ___ _ _ _ _  __ _| |  / _(_)_ ___  _ _ __  *
-        //* / -_) \ /  _/ -_) '_| ' \/ _` | | |  _| \ \ / || | '_ \ *
-        //* \___/_\_\\__\___|_| |_||_\__,_|_| |_| |_/_\_\\_,_| .__/ *
-        //*                                                  |_|    *
-        //-MARK:external fixup
-        // (ctor)
-        // ~~~~~~
-        external_fixup::external_fixup (not_null<context *> const ctxt,
-                                        not_null<name_mapping const *> const names,
-                                        fixups_pointer const fixups)
-                : rule (ctxt)
-                , names_{names}
-                , fixups_{fixups} {}
-
-        // name
-        // ~~~~~
-        gsl::czstring external_fixup::name () const noexcept { return "external fixup"; }
-
-        // key
-        // ~~~
-        std::error_code external_fixup::key (std::string const & k) {
-            if (k == "name") {
-                seen_[name_index] = true;
-                return this->push<uint64_rule> (&name_);
-            }
-            if (k == "type") {
-                seen_[type] = true;
-                return this->push<uint64_rule> (&type_);
-            }
-            if (k == "offset") {
-                seen_[offset] = true;
-                return this->push<uint64_rule> (&offset_);
-            }
-            if (k == "addend") {
-                seen_[addend] = true;
-                return this->push<uint64_rule> (&addend_);
-            }
-            return error::unrecognized_xfixup_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        std::error_code external_fixup::end_object () {
-            if (!seen_.all ()) {
-                return error::xfixup_object_was_incomplete;
+            // key
+            // ~~~
+            std::error_code external_fixup::key (std::string const & k) {
+                if (k == "name") {
+                    seen_[name_index] = true;
+                    return this->push<uint64_rule> (&name_);
+                }
+                if (k == "type") {
+                    seen_[type] = true;
+                    return this->push<uint64_rule> (&type_);
+                }
+                if (k == "offset") {
+                    seen_[offset] = true;
+                    return this->push<uint64_rule> (&offset_);
+                }
+                if (k == "addend") {
+                    seen_[addend] = true;
+                    return this->push<uint64_rule> (&addend_);
+                }
+                return error::unrecognized_xfixup_key;
             }
 
-            auto name = names_->lookup (name_);
-            if (!name) {
-                return name.get_error ();
-            }
+            // end object
+            // ~~~~~~~~~~
+            std::error_code external_fixup::end_object () {
+                if (!seen_.all ()) {
+                    return error::xfixup_object_was_incomplete;
+                }
 
-            // TODO: validate some values here.
-            fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), offset_,
-                                   addend_);
-            return pop ();
-        }
+                auto name = names_->lookup (name_);
+                if (!name) {
+                    return name.get_error ();
+                }
+
+                // TODO: validate some values here.
+                fixups_->emplace_back (*name, static_cast<repo::relocation_type> (type_), offset_,
+                                       addend_);
+                return pop ();
+            }
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore

@@ -51,14 +51,14 @@ namespace pstore {
                 auto const * result = "unknown";
 #define X(a)                                                                                       \
     case pstore::repo::section_kind::a: result = #a; break;
-            switch (section) {
-                PSTORE_MCREPO_SECTION_KINDS
-            case pstore::repo::section_kind::last: break;
-            }
+                switch (section) {
+                    PSTORE_MCREPO_SECTION_KINDS
+                case pstore::repo::section_kind::last: break;
+                }
 #undef X
-            return result;
+                return result;
             }
 
         } // end namespace export_ns
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore

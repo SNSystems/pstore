@@ -201,7 +201,7 @@ namespace pstore {
             using xfixups_object = fixups_object<external_fixup, repo::external_fixup>;
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_FIXUPS_HPP

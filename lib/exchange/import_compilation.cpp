@@ -139,57 +139,57 @@ namespace pstore {
     if (linkage == #a) {                                                                           \
         return just (repo::linkage::a);                                                            \
     }
-            PSTORE_REPO_LINKAGES
+                PSTORE_REPO_LINKAGES
 #undef X
-            return nothing<repo::linkage> ();
+                return nothing<repo::linkage> ();
             }
 
-        // decode visibility
-        // ~~~~~~~~~~~~~~~~~
-        maybe<repo::visibility> definition::decode_visibility (std::string const & visibility) {
-            if (visibility == "default") {
-                return just (repo::visibility::default_vis);
+            // decode visibility
+            // ~~~~~~~~~~~~~~~~~
+            maybe<repo::visibility> definition::decode_visibility (std::string const & visibility) {
+                if (visibility == "default") {
+                    return just (repo::visibility::default_vis);
+                }
+                if (visibility == "hidden") {
+                    return just (repo::visibility::hidden_vis);
+                }
+                if (visibility == "protected") {
+                    return just (repo::visibility::protected_vis);
+                }
+                return nothing<repo::visibility> ();
             }
-            if (visibility == "hidden") {
-                return just (repo::visibility::hidden_vis);
+
+
+            //*     _      __ _      _ _   _                _     _        _    *
+            //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
+            //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
+            //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
+            //*                                                |__/             *
+            // ctor
+            // ~~~~
+            definition_object::definition_object (
+                not_null<context *> const ctxt, not_null<definition::container *> const definitions,
+                not_null<name_mapping const *> const names,
+                fragment_index_pointer const & fragments)
+                    : rule (ctxt)
+                    , definitions_{definitions}
+                    , names_{names}
+                    , fragments_{fragments} {}
+
+            // name
+            // ~~~~
+            gsl::czstring definition_object::name () const noexcept { return "definition object"; }
+
+            // begin object
+            // ~~~~~~~~~~~~
+            std::error_code definition_object::begin_object () {
+                return this->push<definition> (definitions_, names_, fragments_);
             }
-            if (visibility == "protected") {
-                return just (repo::visibility::protected_vis);
-            }
-            return nothing<repo::visibility> ();
-        }
 
-
-        //*     _      __ _      _ _   _                _     _        _    *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
-        //*                                                |__/             *
-        // ctor
-        // ~~~~
-        definition_object::definition_object (not_null<context *> const ctxt,
-                                              not_null<definition::container *> const definitions,
-                                              not_null<name_mapping const *> const names,
-                                              fragment_index_pointer const & fragments)
-                : rule (ctxt)
-                , definitions_{definitions}
-                , names_{names}
-                , fragments_{fragments} {}
-
-        // name
-        // ~~~~
-        gsl::czstring definition_object::name () const noexcept { return "definition object"; }
-
-        // begin object
-        // ~~~~~~~~~~~~
-        std::error_code definition_object::begin_object () {
-            return this->push<definition> (definitions_, names_, fragments_);
-        }
-
-        // end array
-        // ~~~~~~~~~
-        std::error_code definition_object::end_array () { return this->pop (); }
+            // end array
+            // ~~~~~~~~~
+            std::error_code definition_object::end_array () { return this->pop (); }
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore

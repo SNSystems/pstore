@@ -60,5 +60,5 @@ namespace pstore {
             } // end namespace details
 
         } // end namespace export_ns
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore

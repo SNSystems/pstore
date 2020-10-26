@@ -302,7 +302,7 @@ namespace pstore {
             }
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_COMPILATION_HPP

@@ -118,7 +118,7 @@ namespace pstore {
             }
 
         } // end namespace import
-    } // end namespace exchange
+    }     // end namespace exchange
 } // namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_NAMES_HPP

@@ -235,7 +235,7 @@ namespace pstore {
             }
 
         } // end namespace export_ns
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_SECTION_HPP
