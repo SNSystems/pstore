@@ -77,16 +77,16 @@ case repo::section_kind::a:                                                     
                         break;
                     }
 #undef X
-                section_sep = ",\n";
-            }
-            os << '\n' << ind << '}';
+                    section_sep = ",\n";
+                }
+                os << '\n' << ind << '}';
             }
 
             void emit_fragments (ostream & os, indent ind, class database const & db,
                                  unsigned generation, name_mapping const & names, bool comments);
 
         } // end namespace export_ns
-    } // end namespace exchange
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP

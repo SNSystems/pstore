@@ -110,7 +110,6 @@ namespace pstore {
             std::error_code make_error_code (error e) noexcept;
 
         } // end namespace import
-
     } // end namespace exchange
 } // end namespace pstore
 

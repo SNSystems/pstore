@@ -224,20 +224,33 @@ namespace pstore {
 
             /// Returns the number of bytes of storage required for a compilation with 'size'
             /// members.
-            static std::size_t size_bytes (size_type size) {
+            static std::size_t size_bytes (size_type size) noexcept {
                 size = std::max (size, size_type{1}); // Always at least enough for one member.
                 return sizeof (compilation) - sizeof (compilation::members_) +
                        sizeof (compilation::members_[0]) * size;
             }
 
             /// \returns The number of bytes needed to accommodate this compilation.
-            std::size_t size_bytes () const { return compilation::size_bytes (this->size ()); }
+            std::size_t size_bytes () const noexcept {
+                return compilation::size_bytes (this->size ());
+            }
             ///@}
 
             /// Returns the ticket file path.
-            typed_address<indirect_string> path () const { return path_; }
+            typed_address<indirect_string> path () const noexcept { return path_; }
             /// Returns the target triple.
-            typed_address<indirect_string> triple () const { return triple_; }
+            typed_address<indirect_string> triple () const noexcept { return triple_; }
+
+            /// Compute the address of the definition given by \p index within compilation \p c.
+            /// \param c  The address of a compilation.
+            /// \param index  The index of a definition within compilation \p c.
+            /// \result  The address of the definition \p index within compilation \p c.
+            static typed_address<compilation_member>
+            index_address (typed_address<compilation> const c, size_type index) noexcept {
+                return typed_address<compilation_member>::make (
+                    c.to_address () + offsetof (compilation, members_) +
+                    sizeof (compilation_member) * index);
+            }
 
         private:
             template <typename Iterator>

@@ -123,7 +123,7 @@ namespace pstore {
                 context * get_context () noexcept { return context_; }
 
             private:
-                inline void log_top (bool is_push) const {
+                void log_top (bool const is_push) const {
                     if (logging::enabled ()) {
                         log_top_impl (is_push);
                     }
@@ -181,7 +181,6 @@ namespace pstore {
             };
 
         } // end namespace import
-
     } // end namespace exchange
 } // end namespace pstore
 

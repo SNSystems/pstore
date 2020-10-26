@@ -60,8 +60,9 @@ namespace pstore {
             //*                                        *
             // ctor
             // ~~~~
-            definition::definition (not_null<context *> ctxt, not_null<container *> definitions,
-                                    not_null<name_mapping const *> names,
+            definition::definition (not_null<context *> const ctxt,
+                                    not_null<container *> const definitions,
+                                    not_null<name_mapping const *> const names,
                                     fragment_index_pointer const & fragments)
                     : rule (ctxt)
                     , definitions_{definitions}
@@ -166,9 +167,9 @@ namespace pstore {
         //*                                                |__/             *
         // ctor
         // ~~~~
-        definition_object::definition_object (not_null<context *> ctxt,
-                                              not_null<definition::container *> definitions,
-                                              not_null<name_mapping const *> names,
+        definition_object::definition_object (not_null<context *> const ctxt,
+                                              not_null<definition::container *> const definitions,
+                                              not_null<name_mapping const *> const names,
                                               fragment_index_pointer const & fragments)
                 : rule (ctxt)
                 , definitions_{definitions}

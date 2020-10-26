@@ -55,7 +55,6 @@ namespace pstore {
     class transaction_base;
 
     namespace exchange {
-
         namespace import {
 
             class patcher {

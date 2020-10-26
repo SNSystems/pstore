@@ -81,7 +81,8 @@ namespace pstore {
                     template <typename OStream>
                     OStream & operator() (OStream & os, indent const ind, class database const & db,
                                           name_mapping const & names,
-                                          repo::generic_section const & content, bool comments) {
+                                          repo::generic_section const & content,
+                                          bool const comments) {
                         return emit_object (
                             os, ind, content,
                             [&db, &names, comments] (OStream & os1, indent const ind1,

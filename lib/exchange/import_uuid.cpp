@@ -63,6 +63,5 @@ namespace pstore {
             gsl::czstring uuid_rule::name () const noexcept { return "uuid"; }
 
         } // end namespace import
-
     } // end namespace exchange
 } // end namespace pstore

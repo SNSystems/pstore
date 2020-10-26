@@ -49,7 +49,7 @@ namespace {
 
     class indent {
     public:
-        explicit constexpr indent (std::size_t depth) noexcept
+        explicit constexpr indent (std::size_t const depth) noexcept
                 : depth_{depth} {}
         std::ostream & write (std::ostream & os) const;
 
@@ -93,7 +93,7 @@ namespace pstore {
             std::error_code rule::key (std::string const &) { return error::unexpected_object_key; }
             std::error_code rule::end_object () { return error::unexpected_end_object; }
 
-            void rule::log_top_impl (bool is_push) const {
+            void rule::log_top_impl (bool const is_push) const {
                 assert (logging::enabled ());
                 std::ostringstream str;
                 auto const & stack = context_->stack;
@@ -102,6 +102,5 @@ namespace pstore {
             }
 
         } // end namespace import
-
     } // end namespace exchange
 } // end namespace pstore

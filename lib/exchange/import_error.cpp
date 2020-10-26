@@ -45,6 +45,15 @@
 
 #include <string>
 
+namespace {
+
+    std::error_category const & get_error_category () noexcept {
+        static pstore::exchange::import::error_category const cat;
+        return cat;
+    }
+
+} // end anonymous namespace
+
 namespace pstore {
     namespace exchange {
         namespace import {
@@ -138,11 +147,6 @@ namespace pstore {
                     break;
                 }
                 return result;
-            }
-
-            std::error_category const & get_error_category () noexcept {
-                static error_category const cat;
-                return cat;
             }
 
             std::error_code make_error_code (error const e) noexcept {

@@ -267,8 +267,9 @@ namespace pstore {
             // ~~~~~~
             template <typename TransactionLock>
             compilations_index<TransactionLock>::compilations_index (
-                not_null<context *> ctxt, gsl::not_null<transaction<TransactionLock> *> transaction,
-                gsl::not_null<name_mapping const *> names)
+                not_null<context *> const ctxt,
+                gsl::not_null<transaction<TransactionLock> *> const transaction,
+                gsl::not_null<name_mapping const *> const names)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}

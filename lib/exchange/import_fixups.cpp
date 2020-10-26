@@ -128,7 +128,7 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         external_fixup::external_fixup (not_null<context *> const ctxt,
-                                        not_null<name_mapping const *> names,
+                                        not_null<name_mapping const *> const names,
                                         fixups_pointer const fixups)
                 : rule (ctxt)
                 , names_{names}

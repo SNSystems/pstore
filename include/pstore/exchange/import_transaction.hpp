@@ -195,8 +195,8 @@ namespace pstore {
             // (ctor)
             // ~~~~~~
             template <typename TransactionLock>
-            transaction_array<TransactionLock>::transaction_array (not_null<context *> const ctxt,
-                                                                   not_null<name_mapping *> names)
+            transaction_array<TransactionLock>::transaction_array (
+                not_null<context *> const ctxt, not_null<name_mapping *> const names)
                     : rule (ctxt)
                     , names_{names} {}
 

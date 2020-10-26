@@ -92,8 +92,8 @@ namespace pstore {
         public:
             struct value_type {
                 value_type () noexcept {}
-                constexpr value_type (index::digest compilation_, std::uint32_t index_,
-                                      typed_address<compilation_member> pointer_) noexcept
+                constexpr value_type (index::digest const compilation_, std::uint32_t const index_,
+                                      typed_address<compilation_member> const pointer_) noexcept
                         : compilation{compilation_}
                         , index{index_}
                         , pointer{pointer_} {}

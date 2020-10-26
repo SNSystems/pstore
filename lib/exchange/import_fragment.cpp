@@ -72,7 +72,7 @@ namespace pstore {
             std::error_code address_patch::operator() (transaction_base * const transaction) {
                 auto const compilations = index::get_index<trailer::indices::compilation> (*db_);
 
-                auto fragment = repo::fragment::load (*transaction, fragment_extent_);
+                auto const fragment = repo::fragment::load (*transaction, fragment_extent_);
                 for (repo::linked_definitions::value_type & l :
                      fragment->template at<repo::section_kind::linked_definitions> ()) {
                     auto const pos = compilations->find (*db_, l.compilation);
@@ -87,15 +87,7 @@ namespace pstore {
                         return error::index_out_of_range;
                     }
 
-                    // Compute the offset of the link.index definition from the start of the
-                    // compilation's storage (c).
-                    auto const offset =
-                        reinterpret_cast<std::uintptr_t> (&(*compilation)[l.index]) -
-                        reinterpret_cast<std::uintptr_t> (compilation.get ());
-
-                    // Compute the address of the link.index definition.
-                    l.pointer = typed_address<repo::compilation_member>::make (
-                        pos->second.addr.to_address () + offset);
+                    l.pointer = repo::compilation::index_address (pos->second.addr, l.index);
                 }
                 return {};
             }
