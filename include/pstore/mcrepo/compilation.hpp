@@ -242,11 +242,12 @@ namespace pstore {
             typed_address<indirect_string> triple () const noexcept { return triple_; }
 
             /// Compute the address of the definition given by \p index within compilation \p c.
+            ///
             /// \param c  The address of a compilation.
             /// \param index  The index of a definition within compilation \p c.
             /// \result  The address of the definition \p index within compilation \p c.
-            static typed_address<compilation_member>
-            index_address (typed_address<compilation> const c, size_type index) noexcept {
+            static constexpr typed_address<compilation_member>
+            index_address (typed_address<compilation> const c, size_type const index) noexcept {
                 return typed_address<compilation_member>::make (
                     c.to_address () + offsetof (compilation, members_) +
                     sizeof (compilation_member) * index);
