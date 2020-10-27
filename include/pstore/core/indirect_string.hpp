@@ -342,8 +342,12 @@ namespace pstore {
     //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
     //*            |_|                                               *
 
-    auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
-        -> std::pair<shared_sstring_view, raw_sstring_view>;
+    /// \param db  The database containing the string to be read.
+    /// \param addr  The address of the indirect string pointer.
+    /// \param owner  A pointer to the object which will own the memory containing the string.
+    /// \result  A view of the requested string.
+    auto get_sstring_view (database const & db, typed_address<indirect_string> const addr,
+                           gsl::not_null<shared_sstring_view *> const owner) -> raw_sstring_view;
 
 } // end namespace pstore
 
