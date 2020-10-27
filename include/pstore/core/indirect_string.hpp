@@ -119,8 +119,7 @@ namespace pstore {
         /// \param address_to_patch  The in-store address of the indirect_string instance which will
         /// point to the string.
         /// \returns  The address at which the string body was written.
-        template <typename Transaction>
-        static address write_body_and_patch_address (Transaction & transaction,
+        static address write_body_and_patch_address (transaction_base & transaction,
                                                      raw_sstring_view const & str,
                                                      typed_address<address> address_to_patch);
 
@@ -150,30 +149,6 @@ namespace pstore {
     }
 
 
-    // write_string_and_patch_address
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    template <typename Transaction>
-    address
-    indirect_string::write_body_and_patch_address (Transaction & transaction,
-                                                   raw_sstring_view const & str,
-                                                   typed_address<address> address_to_patch) {
-        assert (address_to_patch != typed_address<address>::null ());
-
-        // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
-        constexpr auto aligned_to = std::size_t{1U << in_heap_mask};
-        transaction.allocate (0, aligned_to);
-
-        // Write the string body.
-        auto const body_address =
-            serialize::write (serialize::archive::make_writer (transaction), str);
-
-        // Modify the in-store address field so that it points to the string body.
-        auto addr = transaction.getrw (address_to_patch);
-        *addr = body_address;
-        return body_address;
-    }
-
-
     namespace serialize {
 
         /// \brief A serializer for indirect_string.
@@ -190,11 +165,8 @@ namespace pstore {
             /// \param value  The indirect_string instance to be serialized.
             /// \result  The address at which the data was written.
             /// \note This function only writes to a database.
-            template <typename Transaction>
-            static auto write (archive::database_writer<Transaction> && archive,
-                               value_type const & value)
-                -> archive_result_type<archive::database_writer<Transaction>> {
-
+            static auto write (archive::database_writer && archive, value_type const & value)
+                -> archive_result_type<archive::database_writer> {
                 return write_string_address (archive, value);
             }
 
@@ -204,11 +176,8 @@ namespace pstore {
             /// \param value  The indirect_string instance to be serialized.
             /// \result  The address at which the data was written.
             /// \note This function only writes to a database.
-            template <typename Transaction>
-            static auto write (archive::database_writer<Transaction> & archive,
-                               value_type const & value)
-                -> archive_result_type<archive::database_writer<Transaction>> {
-
+            static auto write (archive::database_writer & archive, value_type const & value)
+                -> archive_result_type<archive::database_writer> {
                 return write_string_address (archive, value);
             }
 
@@ -291,13 +260,12 @@ namespace pstore {
         /// patched once the string bodies have been written.
         explicit indirect_string_adder (std::size_t expected_size);
 
-        template <typename Transaction, typename Index>
-        std::pair<typename Index::iterator, bool> add (Transaction & transaction,
+        template <typename Index>
+        std::pair<typename Index::iterator, bool> add (transaction_base & transaction,
                                                        std::shared_ptr<Index> const & index,
                                                        gsl::not_null<raw_sstring_view const *> str);
 
-        template <typename Transaction>
-        void flush (Transaction & transaction);
+        void flush (transaction_base & transaction);
 
     private:
         std::vector<std::pair<raw_sstring_view const *, typed_address<address>>> views_;
@@ -305,9 +273,10 @@ namespace pstore {
 
     // add
     // ~~~
-    template <typename Transaction, typename Index>
+    template <typename Index>
     std::pair<typename Index::iterator, bool>
-    indirect_string_adder::add (Transaction & transaction, std::shared_ptr<Index> const & index,
+    indirect_string_adder::add (transaction_base & transaction,
+                                std::shared_ptr<Index> const & index,
                                 gsl::not_null<raw_sstring_view const *> str) {
 
         // Inserting into the index immediately writes the indirect_string instance to the store if
@@ -320,20 +289,6 @@ namespace pstore {
             views_.emplace_back (str, typed_address<address>::make (pos.get_address ()));
         }
         return res;
-    }
-
-    // flush
-    // ~~~~~
-    template <typename Transaction>
-    void indirect_string_adder::flush (Transaction & transaction) {
-        for (auto const & v : views_) {
-            assert (v.second != typed_address<address>::null ());
-            indirect_string::write_body_and_patch_address (transaction,
-                                                           *std::get<0> (v), // string body
-                                                           std::get<1> (v)   // address to patch
-            );
-        }
-        views_.clear ();
     }
 
     //*  _        _                  __              _   _           *

@@ -68,9 +68,8 @@ using pstore::cmd_util::error_stream;
 
 namespace {
 
-    bool add_file (pstore::transaction<pstore::transaction_lock> & transaction,
-                   pstore::index::write_index & names, std::string const & key,
-                   std::string const & path) {
+    bool add_file (pstore::transaction_base & transaction, pstore::index::write_index & names,
+                   std::string const & key, std::string const & path) {
 
         using namespace pstore::file;
         bool ok = true;
@@ -109,8 +108,7 @@ namespace {
         return ok;
     }
 
-    template <typename Transaction>
-    auto append_string (Transaction & transaction, std::string const & v)
+    auto append_string (pstore::transaction_base & transaction, std::string const & v)
         -> pstore::extent<std::string::value_type> {
         // Since the read utility prefers to get raw string value in the system tests, this function
         // is changed to store raw string into the store instead of using serialize write.
@@ -121,7 +119,7 @@ namespace {
         // Allocate space in the transaction for the value block
         auto addr = pstore::typed_address<element_type>::null ();
         std::shared_ptr<element_type> ptr;
-        std::tie (ptr, addr) = transaction.template alloc_rw<element_type> (size);
+        std::tie (ptr, addr) = transaction.alloc_rw<element_type> (size);
 
         // Copy the string to the store.
         std::copy (std::begin (v), std::end (v), ptr.get ());

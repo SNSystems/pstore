@@ -60,12 +60,11 @@
 
 namespace {
 
-    template <typename Transaction>
-    pstore::typed_address<std::uint64_t> append_uint64 (Transaction & transaction,
+    pstore::typed_address<std::uint64_t> append_uint64 (pstore::transaction_base & transaction,
                                                         std::uint64_t v) {
         auto addr = pstore::typed_address<std::uint64_t>::null ();
         std::shared_ptr<std::uint64_t> ptr;
-        std::tie (ptr, addr) = transaction.template alloc_rw<std::uint64_t> ();
+        std::tie (ptr, addr) = transaction.alloc_rw<std::uint64_t> ();
         *ptr = v;
         return addr;
     }

@@ -145,9 +145,8 @@ namespace {
 
     // Construct the string and the indirect string. Write the indirect pointer to the store.
     /// \returns A pair of the indirect-object address and the string-body address.
-    template <typename Transaction>
     std::pair<pstore::address, pstore::address>
-    write_indirected_string (Transaction & transaction, pstore::gsl::czstring str) {
+    write_indirected_string (pstore::transaction_base & transaction, pstore::gsl::czstring str) {
         using namespace pstore;
 
         raw_sstring_view const sstring = make_sstring_view (str);

@@ -97,9 +97,8 @@ namespace {
         pstore::database second;
     };
 
-    template <typename Transaction>
-    void append_int (Transaction & transaction, int v) {
-        *(transaction.template alloc_rw<int> ().first) = v;
+    void append_int (pstore::transaction_base & transaction, int v) {
+        *(transaction.alloc_rw<int> ().first) = v;
     }
 
 } // end anonymous namespace

@@ -43,8 +43,18 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/indirect_string.hpp"
 
+#include "pstore/core/transaction.hpp"
+
 namespace pstore {
 
+    //*  _         _ _            _        _       _            *
+    //* (_)_ _  __| (_)_ _ ___ __| |_   __| |_ _ _(_)_ _  __ _  *
+    //* | | ' \/ _` | | '_/ -_) _|  _| (_-<  _| '_| | ' \/ _` | *
+    //* |_|_||_\__,_|_|_| \___\__|\__| /__/\__|_| |_|_||_\__, | *
+    //*                                                  |___/  *
+
+    // as string view
+    // ~~~~~~~~~~~~~~
     raw_sstring_view
     indirect_string::as_string_view (gsl::not_null<shared_sstring_view *> const owner) const {
         if (is_pointer_) {
@@ -98,6 +108,28 @@ namespace pstore {
         return this->as_string_view (&lhs_owner) == rhs.as_string_view (&rhs_owner);
     }
 
+    // write string and patch address
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    address
+    indirect_string::write_body_and_patch_address (transaction_base & transaction,
+                                                   raw_sstring_view const & str,
+                                                   typed_address<address> address_to_patch) {
+        assert (address_to_patch != typed_address<address>::null ());
+
+        // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
+        constexpr auto aligned_to = std::size_t{1U << in_heap_mask};
+        transaction.allocate (0, aligned_to);
+
+        // Write the string body.
+        auto const body_address =
+            serialize::write (serialize::archive::make_writer (transaction), str);
+
+        // Modify the in-store address field so that it points to the string body.
+        auto addr = transaction.getrw (address_to_patch);
+        *addr = body_address;
+        return body_address;
+    }
+
 
     namespace serialize {
 
@@ -141,12 +173,25 @@ namespace pstore {
             serialize::archive::make_reader (db, addr.to_address ()));
     }
 
+    // flush
+    // ~~~~~
+    void indirect_string_adder::flush (transaction_base & transaction) {
+        for (auto const & v : views_) {
+            assert (v.second != typed_address<address>::null ());
+            indirect_string::write_body_and_patch_address (transaction,
+                                                           *std::get<0> (v), // string body
+                                                           std::get<1> (v)   // address to patch
+            );
+        }
+        views_.clear ();
+    }
+
     //*  _        _                  __              _   _           *
     //* | |_  ___| |_ __  ___ _ _   / _|_  _ _ _  __| |_(_)___ _ _   *
     //* | ' \/ -_) | '_ \/ -_) '_| |  _| || | ' \/ _|  _| / _ \ ' \  *
     //* |_||_\___|_| .__/\___|_|   |_|  \_,_|_||_\__|\__|_\___/_||_| *
     //*            |_|                                               *
-    // get_sstring_view
+    // get sstring view
     // ~~~~~~~~~~~~~~~~
     auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
         -> std::pair<shared_sstring_view, raw_sstring_view> {

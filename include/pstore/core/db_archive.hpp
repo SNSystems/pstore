@@ -49,7 +49,7 @@
 #define PSTORE_CORE_DB_ARCHIVE_HPP
 
 #include "pstore/core/address.hpp"
-#include "pstore/core/database.hpp"
+#include "pstore/core/transaction.hpp"
 #include "pstore/serialize/archive.hpp"
 #include "pstore/support/error.hpp"
 
@@ -63,12 +63,11 @@ namespace pstore {
             // *************************************
             namespace details {
 
-                template <typename Transaction>
                 class database_writer_policy {
                 public:
                     using result_type = pstore::address;
 
-                    explicit database_writer_policy (Transaction & trans) noexcept
+                    explicit constexpr database_writer_policy (transaction_base & trans) noexcept
                             : transaction_ (trans) {}
 
                     /// Writes an instance of a standard-layout type T to the database.
@@ -100,31 +99,27 @@ namespace pstore {
 
                 private:
                     /// The transaction to which data is written.
-                    Transaction & transaction_;
+                    transaction_base & transaction_;
                 };
 
             } // namespace details
 
-            template <typename Transaction>
-            class database_writer final
-                    : public writer_base<details::database_writer_policy<Transaction>> {
-                using policy = details::database_writer_policy<Transaction>;
+            class database_writer final : public writer_base<details::database_writer_policy> {
+                using policy = details::database_writer_policy;
 
             public:
                 /// \brief Constructs the writer using the transaction.
                 /// \param transaction The active transaction to the store to which the
                 ///                    database_writer will write.
-                explicit database_writer (Transaction & transaction)
+                explicit database_writer (transaction_base & transaction)
                         : writer_base<policy> (policy{transaction}) {}
             };
 
             /// A convenience function which simplifies the construction of a database_writer
             /// instance if the caller has an existing transaction object.
             /// \param transaction The transaction to which the database_writer will append.
-            template <typename Transaction>
-            inline auto make_writer (Transaction & transaction) noexcept
-                -> database_writer<Transaction> {
-                return database_writer<Transaction>{transaction};
+            inline auto make_writer (transaction_base & transaction) noexcept -> database_writer {
+                return database_writer{transaction};
             }
 
 
