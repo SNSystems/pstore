@@ -360,7 +360,7 @@ namespace {
     // find a node
     // ~~~
     bool GenericIndexFixture::is_found (test_trie const & index, std::string const & key) {
-        return index.find (*db_, key) != index.cend (*db_);
+        return index.contains (*db_, key);
     }
 
     // check a leaf node

@@ -114,8 +114,8 @@ namespace {
     // find
     // ~~~~
     bool SyncFixture::is_found (std::string const & key) {
-        auto index = pstore::index::get_index<pstore::trailer::indices::write> (*db_);
-        return index->find (*db_, key) != index->cend (*db_);
+        return pstore::index::get_index<pstore::trailer::indices::write> (*db_)->contains (*db_,
+                                                                                           key);
     }
 
     // read

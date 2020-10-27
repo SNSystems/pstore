@@ -341,6 +341,9 @@ namespace pstore {
                                    OtherValueType const & value) -> std::pair<iterator, bool>;
             ///@}
 
+            /// \name Lookup
+            ///@{
+
             /// Finds an element with key equivalent to \p key.
             ///
             /// \tparam OtherKeyType  A type whose serialized representation is compatible with
@@ -354,7 +357,23 @@ namespace pstore {
                           serialize::is_compatible<OtherKeyType, KeyType>::value>::type>
             const_iterator find (database const & db, OtherKeyType const & key) const;
 
+            /// Checks if there is an element with key equivalent to \p key in the container.
+            ///
+            /// \tparam OtherKeyType  A type whose serialized representation is compatible with
+            /// KeyType.
+            /// \param db  The database to which the index belongs.
+            /// \param key  The key value of the element to be check.
+            /// \return True if the element is present in the container, false otherwise.
+            template <typename OtherKeyType,
+                      typename = typename std::enable_if<
+                          serialize::is_compatible<OtherKeyType, KeyType>::value>::type>
+            bool contains (database const & db, OtherKeyType const & key) const {
+                return this->find (db, key) != this->end (db);
+            }
+            ///@}
+
             /// Flush any modified tree nodes to the store.
+            ///
             /// \param transaction  The transaction to which the map will be written.
             /// \param generation The generation number to which the map will be written.
             /// \returns The address of the tree root node.
