@@ -58,8 +58,6 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            class export_ostream;
-
             class indent {
             public:
                 constexpr indent () noexcept = default;
