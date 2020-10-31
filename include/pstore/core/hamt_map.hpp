@@ -483,6 +483,16 @@ namespace pstore {
             /// internal or linear node.
             void delete_node (index_pointer node, unsigned shifts);
 
+            /// \brief Write the index header.
+            /// The index header simply holds a check signature, the tree root, and remembers the
+            /// tree size for us on restore.
+            ///
+            /// \param transaction  The transaction to which the header block will be written.
+            /// \param root  The address of the tree's root element.
+            /// \result  The address at which the header block was written.
+            typed_address<header_block> write_header_block (transaction_base & transaction,
+                                                            address root);
+
             static constexpr auto internal_nodes_per_chunk =
                 std::size_t{256} * 1024 / sizeof (internal_node);
 
@@ -1042,18 +1052,14 @@ namespace pstore {
             // flush the tree.
             if (!root_.is_address ()) {
                 assert (root_.is_internal ());
-                auto internal = root_.untag_node<internal_node *> ();
-                root_ = internal->flush (transaction, 0 /* shifts */);
+                root_ = root_.untag_node<internal_node *> ()->flush (transaction, 0 /*shifts*/);
                 // Don't delete the internal node here. They are owned by internals_container_. If
                 // this ever changes, then use something like 'delete internal' here.
             }
 
-            // Write the index header. This simply holds a check signature, the tree root, and
-            // remembers the tree size for us on restore.
-            auto const pos = transaction.alloc_rw<header_block> ();
-            pos.first->signature = index_signature;
-            pos.first->size = this->size ();
-            pos.first->root = root_.addr;
+            auto const header_addr = this->size () > 0U
+                                         ? this->write_header_block (transaction, root_.addr)
+                                         : typed_address<header_block>::null ();
 
             // Release all of the in-heap internal nodes that we have now flushed.
             internals_container_->clear ();
@@ -1061,6 +1067,19 @@ namespace pstore {
             // Update the revision number into which the index will be flushed.
             revision_ = generation;
 
+            return header_addr;
+        }
+
+        // write header block
+        // ~~~~~~~~~~~~~~~~~~
+        template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
+        typed_address<header_block>
+        hamt_map<KeyType, ValueType, Hash, KeyEqual>::write_header_block (
+            transaction_base & transaction, address root) {
+            auto const pos = transaction.alloc_rw<header_block> ();
+            pos.first->signature = index_signature;
+            pos.first->size = this->size ();
+            pos.first->root = root_.addr;
             return pos.second;
         }
 

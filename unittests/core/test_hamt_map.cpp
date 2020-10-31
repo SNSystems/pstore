@@ -410,10 +410,11 @@ TEST_F (HamtRoundTrip, Empty) {
     index_type index1{*db_, pstore::typed_address<pstore::index::header_block>::null ()};
     {
         auto t1 = begin (*db_, std::unique_lock<mock_mutex>{mutex_});
+        auto const size_before_flush = db_->size ();
         addr = index1.flush (t1, db_->get_current_revision ());
+        EXPECT_EQ (db_->size (), size_before_flush);
         t1.commit ();
     }
-
     index_type index2{*db_, addr};
     EXPECT_EQ (index2.size (), 0U);
 }
