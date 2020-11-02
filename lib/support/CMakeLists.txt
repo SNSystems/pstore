@@ -316,7 +316,6 @@ if (NOT PSTORE_IS_INSIDE_LLVM)
     install (
         FILES "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
         DESTINATION include/pstore/config
-        COMPONENT pstore
     )
 endif ()
 

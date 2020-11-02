@@ -43,6 +43,7 @@
 #===----------------------------------------------------------------------===//
 include (CheckCSourceCompiles)
 include (CheckCXXCompilerFlag)
+include (GNUInstallDirs)
 
 set (pstore_cxx_version "14" CACHE STRING "The version of C++ used by pstore")
 
@@ -331,7 +332,7 @@ function (add_pstore_library)
         set_target_properties (${arg_TARGET} PROPERTIES
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
-            PUBLIC_HEADER "${arg_INCLUDES}"
+            PUBLIC_HEADER "${include_files}"
         )
 
         pstore_enable_warnings (TARGET ${arg_TARGET})
@@ -342,9 +343,9 @@ function (add_pstore_library)
 
     install (
         TARGETS ${arg_TARGET}
-        ARCHIVE DESTINATION lib/pstore
-        PUBLIC_HEADER DESTINATION "include/pstore/${arg_NAME}"
-        COMPONENT pstore
+        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/${arg_NAME}"
+        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
+        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
     )
     add_dependencies (install-pstore ${arg_TARGET})
 
@@ -392,7 +393,7 @@ endfunction (add_pstore_executable)
 function (add_pstore_tool name)
     add_pstore_executable (${name} ${ARGN})
 
-    install (TARGETS ${name} RUNTIME DESTINATION bin COMPONENT pstore)
+    install (TARGETS ${name} RUNTIME DESTINATION bin)
     add_dependencies (install-pstore ${name})
 endfunction (add_pstore_tool)
 
