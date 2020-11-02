@@ -332,7 +332,10 @@ function (add_pstore_library)
         set_target_properties (${arg_TARGET} PROPERTIES
             CXX_STANDARD "${pstore_cxx_version}"
             CXX_STANDARD_REQUIRED Yes
+            # Full path of all of the public include files.
             PUBLIC_HEADER "${include_files}"
+            # Produce PIC so that pstore static libraries can be used in a shared library.
+            POSITION_INDEPENDENT_CODE Yes
         )
 
         pstore_enable_warnings (TARGET ${arg_TARGET})
