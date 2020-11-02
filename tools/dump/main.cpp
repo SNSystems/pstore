@@ -237,26 +237,6 @@ namespace {
     }
 
 
-    std::uint64_t file_size (pstore::gsl::czstring path) {
-        errno = 0;
-#ifdef _WIN32
-        struct __stat64 buf;
-        int err = _stat64 (path, &buf);
-#else
-        struct stat buf;
-        int err = stat (path, &buf);
-#endif
-        if (err != 0) {
-            std::ostringstream str;
-            str << "Could not determine file size of \"" << path << '"';
-            raise (pstore::errno_erc{errno}, str.str ());
-        }
-
-        PSTORE_STATIC_ASSERT (sizeof (buf.st_size) == sizeof (std::uint64_t));
-        assert (buf.st_size >= 0);
-        return static_cast<std::uint64_t> (buf.st_size);
-    }
-
     template <dump_error_code NotFoundError, typename IndexType, typename RecordFunction>
     pstore::dump::value_ptr add_specified (pstore::database const & db, IndexType const & index,
                                            std::list<pstore::index::digest> const & items_to_show,
@@ -403,9 +383,9 @@ int main (int argc, char * argv[]) {
             db.sync (opt.revision);
 
             object::container file;
-            file.emplace_back ("file", make_value (object::container{
-                                           {"path", make_value (path)},
-                                           {"size", make_value (file_size (path.c_str ()))}}));
+            file.emplace_back ("file",
+                               make_value (object::container{{"path", make_value (path)},
+                                                             {"size", make_value (db.size ())}}));
 
             if (opt.show_contents) {
                 file.emplace_back (
