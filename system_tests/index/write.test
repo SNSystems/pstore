@@ -35,4 +35,4 @@ RUN: "%binaries/pstore-read" "-r" "1" "%t/write.db" k1 >> "%t/write"
 RUN: echo '.' >>  "%t/write"
 
 # Check that the data made the round trip successfully.
-RUN: diff "%t/write" "%S/write_expected.txt"
+RUN: diff -b "%t/write" "%S/write_expected.txt"

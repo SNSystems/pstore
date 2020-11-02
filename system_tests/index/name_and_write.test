@@ -32,4 +32,4 @@ RUN: "%binaries/pstore-read" --strings "%t/name_and_write.db" key4 >> "%t/name_a
 RUN: echo '.' >>  "%t/name_and_write"
 
 # Check that the data made the round trip successfully.
-RUN: diff "%t/name_and_write" "%S/name_and_write_expected.txt"
+RUN: diff -b "%t/name_and_write" "%S/name_and_write_expected.txt"

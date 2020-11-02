@@ -5,4 +5,4 @@
 REQUIRES: examples
 
 RUN: "%binaries/example-ostream-writer" > "%t"
-RUN: diff "%t" "%S/ostream_writer_expected.txt"
+RUN: diff -b "%t" "%S/ostream_writer_expected.txt"
