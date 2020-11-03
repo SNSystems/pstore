@@ -488,10 +488,8 @@ namespace pstore {
             /// tree size for us on restore.
             ///
             /// \param transaction  The transaction to which the header block will be written.
-            /// \param root  The address of the tree's root element.
             /// \result  The address at which the header block was written.
-            typed_address<header_block> write_header_block (transaction_base & transaction,
-                                                            address root);
+            typed_address<header_block> write_header_block (transaction_base & transaction);
 
             static constexpr auto internal_nodes_per_chunk =
                 std::size_t{256} * 1024 / sizeof (internal_node);
@@ -1053,13 +1051,13 @@ namespace pstore {
             if (!root_.is_address ()) {
                 assert (root_.is_internal ());
                 root_ = root_.untag_node<internal_node *> ()->flush (transaction, 0 /*shifts*/);
+                assert (root_.is_address ());
                 // Don't delete the internal node here. They are owned by internals_container_. If
                 // this ever changes, then use something like 'delete internal' here.
             }
 
-            auto const header_addr = this->size () > 0U
-                                         ? this->write_header_block (transaction, root_.addr)
-                                         : typed_address<header_block>::null ();
+            auto const header_addr = this->size () > 0U ? this->write_header_block (transaction)
+                                                        : typed_address<header_block>::null ();
 
             // Release all of the in-heap internal nodes that we have now flushed.
             internals_container_->clear ();
@@ -1075,11 +1073,12 @@ namespace pstore {
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         typed_address<header_block>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::write_header_block (
-            transaction_base & transaction, address root) {
+            transaction_base & transaction) {
+            assert (this->root ().is_address ());
             auto const pos = transaction.alloc_rw<header_block> ();
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
-            pos.first->root = root_.addr;
+            pos.first->root = this->root ().addr;
             return pos.second;
         }
 
