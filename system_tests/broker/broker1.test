@@ -7,6 +7,7 @@
 # %t = temporary file name unique to the test
 
 REQUIRES: broker
+ALLOW_RETRIES: 2
 RUN: %python "%S/broker1.py" "%binaries" > "%t"
 RUN: diff -b "%t" "%S/broker1_expected.txt"
 
