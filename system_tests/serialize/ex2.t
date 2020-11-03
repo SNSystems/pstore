@@ -8,4 +8,4 @@ REQUIRES: examples
 RUN: rm -rf "%t" && mkdir -p "%t"
 
 RUN: %binaries/example-write-pod-struct > "%t/ex2_actual.txt"
-RUN: diff "%t/ex2_actual.txt" "%S/ex2_expected.txt"
+RUN: diff -b "%t/ex2_actual.txt" "%S/ex2_expected.txt"

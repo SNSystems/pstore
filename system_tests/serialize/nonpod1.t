@@ -4,4 +4,4 @@
 
 REQUIRES: examples
 RUN: "%binaries/example-nonpod1" > "%t"
-RUN: diff "%t" "%S/nonpod1_expected.txt"
+RUN: diff -b "%t" "%S/nonpod1_expected.txt"

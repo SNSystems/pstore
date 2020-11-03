@@ -4,4 +4,4 @@
 
 REQUIRES: examples
 RUN: "%binaries/example-istream-reader" > "%t"
-RUN: diff "%t" "%S/istream_reader_expected.txt"
+RUN: diff -b "%t" "%S/istream_reader_expected.txt"

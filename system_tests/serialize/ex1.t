@@ -4,4 +4,4 @@
 
 REQUIRES: examples
 RUN: "%binaries/example-write-integers" > "%t"
-RUN: diff "%t" "%S/ex1_expected.txt"
+RUN: diff -b "%t" "%S/ex1_expected.txt"

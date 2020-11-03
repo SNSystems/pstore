@@ -8,7 +8,7 @@
 
 REQUIRES: broker
 RUN: %python "%S/broker1.py" "%binaries" > "%t"
-RUN: diff "%t" "%S/broker1_expected.txt"
+RUN: diff -b "%t" "%S/broker1_expected.txt"
 
 #eof broker1.test
 
