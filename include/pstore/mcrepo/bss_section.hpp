@@ -131,6 +131,7 @@ namespace pstore {
             bss_section_creation_dispatcher (section_kind kind,
                                              gsl::not_null<section_content const *> const sec)
                     : bss_section_creation_dispatcher (sec) {
+                (void) kind;
                 assert (kind == section_kind::bss);
             }
 
