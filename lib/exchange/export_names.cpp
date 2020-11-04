@@ -60,10 +60,11 @@ namespace pstore {
                 auto const index = static_cast<std::uint64_t> (names_.size ());
                 names_[addr] = index;
             }
+
             // index
             // ~~~~~
-            std::uint64_t name_mapping::index (address const addr) const {
-                auto const pos = names_.find (addr);
+            std::uint64_t name_mapping::index (typed_address<indirect_string> const addr) const {
+                auto const pos = names_.find (addr.to_address ());
                 assert (pos != names_.end ());
                 return pos->second;
             }

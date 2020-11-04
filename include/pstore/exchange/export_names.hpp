@@ -62,14 +62,24 @@ namespace pstore {
             //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
             //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
             //*                                  |_|  |_|         |___/  *
+
+            /// The name_mapping call is used to associate the addresses of a set of strings with an
+            /// index in the exported names array. The enables the exported JSON to simply reference
+            /// a string by index rather than having to emit the string each time.
             class name_mapping {
             public:
+                /// Record the address of a string at \p addr and assign it the next index in in the
+                /// exported names array.
+                ///
+                /// \param addr The address of a string beging exported.
                 void add (address addr);
 
-                std::uint64_t index (address addr) const;
-                std::uint64_t index (typed_address<indirect_string> const addr) const {
-                    return this->index (addr.to_address ());
-                }
+                /// Convert the address of the string at \p addr to the corresponding index in the
+                /// exported names array.
+                ///
+                /// \param addr  The address of a string previously passed to the add() method.
+                /// \result The index of the string at \p addr in the exported names array.
+                std::uint64_t index (typed_address<indirect_string> const addr) const;
 
             private:
                 std::unordered_map<address, std::uint64_t> names_;
