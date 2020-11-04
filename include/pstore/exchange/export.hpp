@@ -49,6 +49,9 @@
 
 namespace pstore {
     namespace exchange {
+        // Note that we'd really like to call this namespace "export", but this is a keyword
+        // in C++ meaning that we're not allowed to do so. The "_ns" suffix is an abbreviation of
+        // "namespace" to work around this restriction.
         namespace export_ns {
 
             void emit_database (database & db, ostream & os, bool comments);
