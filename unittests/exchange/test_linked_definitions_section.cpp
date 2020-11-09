@@ -193,9 +193,8 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
         auto transaction = begin (import_db_, transaction_lock{mutex});
         {
             exchange::import::name_mapping imported_names;
-            auto parser =
-                make_json_object_parser<exchange::import::fragment_sections<transaction_lock>> (
-                    &import_db_, &transaction, &imported_names, &imported_digest);
+            auto parser = make_json_object_parser<exchange::import::fragment_sections> (
+                &import_db_, &transaction, &imported_names, &imported_digest);
             parser.input (exported_json).eof ();
             ASSERT_FALSE (parser.has_error ())
                 << "JSON error was: " << parser.last_error ().message () << ' '

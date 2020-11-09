@@ -411,9 +411,9 @@ TEST_F (ExchangeExternalFixups, RoundTripForTwoFixups) {
     {
         using namespace pstore::exchange::import;
         auto parser = pstore::json::make_parser (
-            callbacks::make<array_rule<names_array_members<transaction_lock>,
-                                       decltype (&transaction), decltype (&imported_names)>> (
-                &import_db_, &transaction, &imported_names));
+            callbacks::make<array_rule<names_array_members, decltype (&transaction),
+                                       decltype (&imported_names)>> (&import_db_, &transaction,
+                                                                     &imported_names));
         parser.input (exported_names_stream.str ()).eof ();
         ASSERT_FALSE (parser.has_error ())
             << "Expected the JSON parse to succeed (" << parser.last_error ().message () << ')';

@@ -89,15 +89,14 @@ namespace {
     // imported_names.
     decltype (auto) import_name_parser (transaction * const transaction,
                                         pstore::exchange::import::name_mapping * const names) {
-        using rule = pstore::exchange::import::names_array_members<transaction_lock>;
-        return make_json_array_parser<rule> (&transaction->db (), transaction, names);
+        return make_json_array_parser<pstore::exchange::import::names_array_members> (
+            &transaction->db (), transaction, names);
     }
 
     decltype (auto) import_fragment_parser (transaction * const transaction,
                                             pstore::exchange::import::name_mapping * const names,
                                             pstore::index::digest const * const digest) {
-        return make_json_object_parser<
-            pstore::exchange::import::fragment_sections<transaction_lock>> (
+        return make_json_object_parser<pstore::exchange::import::fragment_sections> (
             &transaction->db (), transaction, names, digest);
     }
 
@@ -105,9 +104,9 @@ namespace {
         transaction * const transaction, pstore::exchange::import::name_mapping * const names,
         std::shared_ptr<pstore::index::fragment_index> const & fragment_index,
         pstore::index::digest const & digest) {
-        using rule = pstore::exchange::import::compilation<transaction_lock>;
-        return make_json_object_parser<rule> (&transaction->db (), transaction, names,
-                                              std::cref (fragment_index), std::cref (digest));
+        return make_json_object_parser<pstore::exchange::import::compilation> (
+            &transaction->db (), transaction, names, std::cref (fragment_index),
+            std::cref (digest));
     }
 
 

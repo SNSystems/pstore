@@ -4,7 +4,13 @@
 //* | | | | | | | |_) | (_) | |  | |_  | | | | (_| | | | | | |  __/\__ \ *
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*             |_|                                                      *
-//===- lib/exchange/import_names.cpp --------------------------------------===//
+//*                              *
+//*   __ _ _ __ _ __ __ _ _   _  *
+//*  / _` | '__| '__/ _` | | | | *
+//* | (_| | |  | | | (_| | |_| | *
+//*  \__,_|_|  |_|  \__,_|\__, | *
+//*                       |___/  *
+//===- lib/exchange/import_names_array.cpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,56 +47,40 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file import_names.cpp
-/// \brief Implements the class which maps from string indexes to their store address.
-
-#include "pstore/exchange/import_names.hpp"
+#include "pstore/exchange/import_names_array.hpp"
 
 namespace pstore {
     namespace exchange {
         namespace import {
 
-            // lookup
+            // (ctor)
             // ~~~~~~
-            error_or<typed_address<indirect_string>>
-            name_mapping::lookup (std::uint64_t const index) const {
-                using result_type = error_or<typed_address<indirect_string>>;
+            names_array_members::names_array_members (
+                not_null<context *> const ctxt, not_null<transaction_base *> const transaction,
+                not_null<name_mapping *> const names)
+                    : rule (ctxt)
+                    , transaction_{transaction}
+                    , names_{names} {}
 
-                auto const pos = lookup_.find (index);
-                return pos != std::end (lookup_) ? result_type{pos->second}
-                                                 : result_type{error::no_such_name};
+            // string value
+            // ~~~~~~~~~~~~
+            std::error_code names_array_members::string_value (std::string const & str) {
+                return names_->add_string (transaction_.get (), str);
             }
 
-            // add string
-            // ~~~~~~~~~~
-            std::error_code
-            name_mapping::add_string (not_null<transaction_base *> const transaction,
-                                      std::string const & str) {
-                strings_.push_back (str);
-                std::string const & x = strings_.back ();
-
-                views_.emplace_back (make_sstring_view (x));
-                auto & s = views_.back ();
-
-                std::shared_ptr<index::name_index> const names_index =
-                    index::get_index<trailer::indices::name> (transaction->db ());
-                std::pair<index::name_index::iterator, bool> const add_res =
-                    adder_.add (*transaction, names_index, &s);
-                if (!add_res.second) {
-                    return error::duplicate_name;
-                }
-
-                lookup_.emplace (lookup_.size (), typed_address<indirect_string>::make (
-                                                      add_res.first.get_address ()));
-                return {};
+            // end array
+            // ~~~~~~~~~
+            std::error_code names_array_members::end_array () {
+                names_->flush (transaction_);
+                return pop ();
             }
 
-            // flush
-            // ~~~~~
-            void name_mapping::flush (not_null<transaction_base *> const transaction) {
-                adder_.flush (*transaction);
+            // name
+            // ~~~~
+            gsl::czstring names_array_members::name () const noexcept {
+                return "names array members";
             }
 
         } // end namespace import
     }     // end namespace exchange
-} // namespace pstore
+} // end namespace pstore
