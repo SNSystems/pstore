@@ -4,12 +4,13 @@
 
     "definitions": {
         "digest": {
+            "description": "A 128 bit hash digest expressed as a hexadecimal value",
             "type": "string",
             "pattern": "^[A-Fa-f0-9]{32}$"
         },
 
         "uuid": {
-            "desription": "A UUID as defined by RFC 4122",
+            "description": "A UUID as defined by RFC 4122",
             "type": "string",
             "pattern": "^[A-Fa-f0-9]{8}-[A-Fa-f0-9]{4}-4[A-Fa-f0-9]{3}-[89aAbB][A-Fa-f0-9]{3}-[A-Fa-f0-9]{12}$"
         },
@@ -27,6 +28,7 @@
                     "offset": { "type": "number" },
                     "addend": { "type": "number" }
                 },
+                "required": ["name", "type", "offset", "addend"],
                 "additionalProperties": false
             }
         },
@@ -60,7 +62,7 @@
                             "debug_string",
                             "debug_ranges",
                             "interp",
-                            "dependent"
+                            "linked_definitions"
                         ]
                     },
                     "type": { "type": "number" },
@@ -110,8 +112,22 @@
                 "xfixups": { "$ref": "#/definitions/xfixups_array" }
             },
             "additionalProperties": false
-        }
+        },
 
+        "linked_definitions_section": {
+            "description": "An array of linked definitions",
+            "type": "array",
+            "items": {
+                "description": "An external (extra-fragment) fixup",
+                "type": "object",
+                "properties": {
+                    "compilation": { "$ref": "#/definitions/digest" },
+                    "index": { "type": "number" }
+                },
+                "required": ["compilation", "index"],
+                "additionalProperties": false
+            }
+        }
     },
 
     "title": "pstore exchange",
@@ -164,9 +180,9 @@
                                 "type": "object",
                                 "properties": {
                                     "text": { "$ref": "#/definitions/generic_section" },
-                                    "data": {},
+                                    "data": { "$ref": "#/definitions/generic_section" },
                                     "bss": { "$ref": "#/definitions/bss_section" },
-                                    "rel_ro": {},
+                                    "rel_ro": { "$ref": "#/definitions/generic_section" },
                                     "mergeable_1_byte_c_string": {},
                                     "mergeable_2_byte_c_string": {},
                                     "mergeable_4_byte_c_string": {},
@@ -174,14 +190,14 @@
                                     "mergeable_const_8": {},
                                     "mergeable_const_16": {},
                                     "mergeable_const_32": {},
-                                    "read_only": {},
-                                    "thread_data": {},
-                                    "thread_bss": {},
-                                    "debug_line": { "$ref":  "#/definitions/debug_line_section" },
+                                    "read_only": { "$ref": "#/definitions/generic_section" },
+                                    "thread_data": { "$ref": "#/definitions/generic_section" },
+                                    "thread_bss": { "$ref": "#/definitions/bss_section" },
+                                    "debug_line": { "$ref": "#/definitions/debug_line_section" },
                                     "debug_string": {},
                                     "debug_ranges": {},
                                     "interp": {},
-                                    "dependent": {}
+                                    "linked_definitions": { "$ref": "#/definitions/linked_definitions_section" }
                                 }
                             }
                         },

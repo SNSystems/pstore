@@ -49,26 +49,28 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        class import_uuid_rule final : public import_rule {
-        public:
-            import_uuid_rule (parse_stack_pointer const stack, not_null<uuid *> const v) noexcept;
-            import_uuid_rule (import_uuid_rule const &) = delete;
-            import_uuid_rule (import_uuid_rule &&) = delete;
+            class uuid_rule final : public rule {
+            public:
+                uuid_rule (not_null<context *> ctxt, not_null<uuid *> v) noexcept;
+                uuid_rule (uuid_rule const &) = delete;
+                uuid_rule (uuid_rule &&) = delete;
 
-            ~import_uuid_rule () noexcept override = default;
+                ~uuid_rule () noexcept override = default;
 
-            import_uuid_rule & operator= (import_uuid_rule const &) = delete;
-            import_uuid_rule & operator= (import_uuid_rule &&) = delete;
+                uuid_rule & operator= (uuid_rule const &) = delete;
+                uuid_rule & operator= (uuid_rule &&) = delete;
 
-            std::error_code string_value (std::string const & v) override;
-            gsl::czstring name () const noexcept override;
+                std::error_code string_value (std::string const & v) override;
+                gsl::czstring name () const noexcept override;
 
-        private:
-            not_null<uuid *> const v_;
-        };
+            private:
+                not_null<uuid *> const v_;
+            };
 
-    } // end namespace exchange
+        } // end namespace import
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_UUID_HPP

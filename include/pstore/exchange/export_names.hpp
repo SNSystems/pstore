@@ -55,45 +55,62 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        class export_name_mapping {
-        public:
-            void add (address addr);
+            //*                                             _            *
+            //*  _ _  __ _ _ __  ___   _ __  __ _ _ __ _ __(_)_ _  __ _  *
+            //* | ' \/ _` | '  \/ -_) | '  \/ _` | '_ \ '_ \ | ' \/ _` | *
+            //* |_||_\__,_|_|_|_\___| |_|_|_\__,_| .__/ .__/_|_||_\__, | *
+            //*                                  |_|  |_|         |___/  *
 
-            std::uint64_t index (address addr) const;
-            std::uint64_t index (typed_address<indirect_string> const addr) const {
-                return this->index (addr.to_address ());
+            /// The name_mapping call is used to associate the addresses of a set of strings with an
+            /// index in the exported names array. The enables the exported JSON to simply reference
+            /// a string by index rather than having to emit the string each time.
+            class name_mapping {
+            public:
+                /// Record the address of a string at \p addr and assign it the next index in in the
+                /// exported names array.
+                ///
+                /// \param addr The address of a string beging exported.
+                void add (address addr);
+
+                /// Convert the address of the string at \p addr to the corresponding index in the
+                /// exported names array.
+                ///
+                /// \param addr  The address of a string previously passed to the add() method.
+                /// \result The index of the string at \p addr in the exported names array.
+                std::uint64_t index (typed_address<indirect_string> const addr) const;
+
+            private:
+                std::unordered_map<address, std::uint64_t> names_;
+            };
+
+            //*            _ _                             *
+            //*  ___ _ __ (_) |_   _ _  __ _ _ __  ___ ___ *
+            //* / -_) '  \| |  _| | ' \/ _` | '  \/ -_|_-< *
+            //* \___|_|_|_|_|\__| |_||_\__,_|_|_|_\___/__/ *
+            //*                                            *
+            template <typename OStream>
+            void emit_names (OStream & os, indent ind, class database const & db,
+                             unsigned const generation, name_mapping * const string_table) {
+
+                auto names_index = index::get_index<trailer::indices::name> (db);
+                assert (generation > 0);
+                auto const container = diff::diff (db, *names_index, generation - 1U);
+                emit_array (os, ind, std::begin (container), std::end (container),
+                            [&names_index, &string_table, &db] (OStream & os1, indent ind1,
+                                                                address const addr) {
+                                indirect_string const str = names_index->load_leaf_node (db, addr);
+                                shared_sstring_view owner;
+                                raw_sstring_view view = str.as_db_string_view (&owner);
+                                os1 << ind1;
+                                emit_string (os1, view);
+                                string_table->add (addr);
+                            });
             }
 
-        private:
-            std::unordered_map<address, std::uint64_t> names_;
-        };
-
-        //*                        _                             *
-        //*  _____ ___ __  ___ _ _| |_   _ _  __ _ _ __  ___ ___ *
-        //* / -_) \ / '_ \/ _ \ '_|  _| | ' \/ _` | '  \/ -_|_-< *
-        //* \___/_\_\ .__/\___/_|  \__| |_||_\__,_|_|_|_\___/__/ *
-        //*         |_|                                          *
-        template <typename OStream>
-        void export_names (OStream & os, indent ind, database const & db, unsigned const generation,
-                           export_name_mapping * const string_table) {
-
-            auto names_index = index::get_index<trailer::indices::name> (db);
-            assert (generation > 0);
-            auto const container = diff::diff (db, *names_index, generation - 1U);
-            emit_array (os, ind, std::begin (container), std::end (container),
-                        [&names_index, &string_table, &db] (OStream & os1, indent ind1,
-                                                            address const addr) {
-                            indirect_string const str = names_index->load_leaf_node (db, addr);
-                            shared_sstring_view owner;
-                            raw_sstring_view view = str.as_db_string_view (&owner);
-                            os1 << ind1;
-                            emit_string (os1, view);
-                            string_table->add (addr);
-                        });
-        }
-
-    } // end namespace exchange
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_NAMES_HPP

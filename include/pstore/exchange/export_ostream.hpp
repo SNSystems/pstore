@@ -52,82 +52,82 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        class export_ostream {
-        public:
-            explicit export_ostream (FILE * const os)
-                    : os_ (os) {}
-            export_ostream (export_ostream const &) = delete;
-            export_ostream (export_ostream &&) = delete;
+            class ostream {
+            public:
+                explicit ostream (FILE * const os)
+                        : os_ (os) {}
+                ostream (ostream const &) = delete;
+                ostream (ostream &&) = delete;
 
-            ~export_ostream () noexcept = default;
+                ~ostream () noexcept = default;
 
-            export_ostream & operator= (export_ostream const &) = delete;
-            export_ostream & operator= (export_ostream &&) = delete;
+                ostream & operator= (ostream const &) = delete;
+                ostream & operator= (ostream &&) = delete;
 
-            export_ostream & write (char c);
-            export_ostream & write (std::uint16_t v);
-            export_ostream & write (std::uint32_t v);
-            export_ostream & write (std::uint64_t v);
-            export_ostream & write (gsl::czstring str);
-            export_ostream & write (std::string const & str);
+                ostream & write (char c);
+                ostream & write (std::uint16_t v);
+                ostream & write (std::uint32_t v);
+                ostream & write (std::uint64_t v);
+                ostream & write (gsl::czstring str);
+                ostream & write (std::string const & str);
 
-            template <typename T, typename = typename std::enable_if<true>::type>
-            export_ostream & write (T const * s, std::streamsize const length) {
-                assert (length >= 0 && static_cast<std::make_unsigned_t<std::streamsize>> (
-                                           length) <= std::numeric_limits<std::size_t>::max ());
-                std::fwrite (s, sizeof (T), static_cast<std::size_t> (length), os_);
-                return *this;
+                template <typename T, typename = typename std::enable_if<true>::type>
+                ostream & write (T const * s, std::streamsize const length) {
+                    assert (length >= 0 && static_cast<std::make_unsigned_t<std::streamsize>> (
+                                               length) <= std::numeric_limits<std::size_t>::max ());
+                    std::fwrite (s, sizeof (T), static_cast<std::size_t> (length), os_);
+                    return *this;
+                }
+
+                void flush ();
+
+            private:
+                FILE * os_;
+            };
+
+            inline ostream & operator<< (ostream & os, char const c) { return os.write (c); }
+            inline ostream & operator<< (ostream & os, std::uint16_t const v) {
+                return os.write (v);
+            }
+            inline ostream & operator<< (ostream & os, std::uint32_t const v) {
+                return os.write (v);
+            }
+            inline ostream & operator<< (ostream & os, std::uint64_t const v) {
+                return os.write (v);
+            }
+            inline ostream & operator<< (ostream & os, gsl::czstring const str) {
+                return os.write (str);
+            }
+            inline ostream & operator<< (ostream & os, std::string const & str) {
+                return os.write (str);
+            }
+            inline ostream & operator<< (ostream & os, indirect_string const & ind_str) {
+                shared_sstring_view owner;
+                return os << ind_str.as_string_view (&owner);
             }
 
-            void flush ();
 
-        private:
-            FILE * os_;
-        };
+            class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
+            public:
+                explicit ostream_inserter (ostream & os)
+                        : os_{os} {}
 
-        inline export_ostream & operator<< (export_ostream & os, char const c) {
-            return os.write (c);
-        }
-        inline export_ostream & operator<< (export_ostream & os, std::uint16_t const v) {
-            return os.write (v);
-        }
-        inline export_ostream & operator<< (export_ostream & os, std::uint32_t const v) {
-            return os.write (v);
-        }
-        inline export_ostream & operator<< (export_ostream & os, std::uint64_t const v) {
-            return os.write (v);
-        }
-        inline export_ostream & operator<< (export_ostream & os, gsl::czstring const str) {
-            return os.write (str);
-        }
-        inline export_ostream & operator<< (export_ostream & os, std::string const & str) {
-            return os.write (str);
-        }
-        inline export_ostream & operator<< (export_ostream & os, indirect_string const & ind_str) {
-            shared_sstring_view owner;
-            return os << ind_str.as_string_view (&owner);
-        }
+                ostream_inserter & operator= (char const c) {
+                    os_ << c;
+                    return *this;
+                }
+                ostream_inserter & operator* () noexcept { return *this; }
+                ostream_inserter & operator++ () noexcept { return *this; }
+                ostream_inserter operator++ (int) noexcept { return *this; }
 
+            private:
+                ostream & os_;
+            };
 
-        class ostream_inserter : public std::iterator<std::output_iterator_tag, char> {
-        public:
-            explicit ostream_inserter (export_ostream & os)
-                    : os_{os} {}
-
-            ostream_inserter & operator= (char const c) {
-                os_ << c;
-                return *this;
-            }
-            ostream_inserter & operator* () noexcept { return *this; }
-            ostream_inserter & operator++ () noexcept { return *this; }
-            ostream_inserter operator++ (int) noexcept { return *this; }
-
-        private:
-            export_ostream & os_;
-        };
-
-    } // end namespace exchange
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_OSTREAM_HPP

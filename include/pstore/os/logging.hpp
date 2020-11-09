@@ -215,6 +215,8 @@ namespace pstore {
         } // end namespace details
 
 
+        inline bool enabled () noexcept { return details::log_destinations != nullptr; }
+
         inline void log (priority const p, gsl::not_null<gsl::czstring> const message) {
             if (details::log_destinations != nullptr) {
                 for (std::unique_ptr<logger> & destination : *details::log_destinations) {

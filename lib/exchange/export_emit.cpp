@@ -41,20 +41,28 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export_emit.cpp
+/// \brief Implements types and functions used in the writing of JSON data such as indents, strings,
+/// arrays, and so on.
+
 #include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {
     namespace exchange {
-        namespace details {
+        namespace export_ns {
 
-            std::string get_string (database const & db,
-                                    typed_address<indirect_string> const addr) {
-                return serialize::read<pstore::indirect_string> (
-                           serialize::archive::database_reader{db, addr.to_address ()})
-                    .to_string ();
-            }
+            namespace details {
 
-        } // end namespace details
-    } // end namespace exchange
+                std::string get_string (database const & db,
+                                        typed_address<indirect_string> const addr) {
+                    return serialize::read<pstore::indirect_string> (
+                               serialize::archive::database_reader{db, addr.to_address ()})
+                        .to_string ();
+                }
+
+            } // end namespace details
+
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore

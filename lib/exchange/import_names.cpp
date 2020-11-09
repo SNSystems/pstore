@@ -45,17 +45,19 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        // lookup
-        // ~~~~~~
-        error_or<typed_address<indirect_string>>
-        import_name_mapping::lookup (std::uint64_t const index) const {
-            using result_type = error_or<typed_address<indirect_string>>;
+            // lookup
+            // ~~~~~~
+            error_or<typed_address<indirect_string>>
+            name_mapping::lookup (std::uint64_t const index) const {
+                using result_type = error_or<typed_address<indirect_string>>;
 
-            auto const pos = lookup_.find (index);
-            return pos != std::end (lookup_) ? result_type{pos->second}
-                                             : result_type{import_error::no_such_name};
-        }
+                auto const pos = lookup_.find (index);
+                return pos != std::end (lookup_) ? result_type{pos->second}
+                                                 : result_type{error::no_such_name};
+            }
 
-    } // end namespace exchange
+        } // end namespace import
+    }     // end namespace exchange
 } // namespace pstore

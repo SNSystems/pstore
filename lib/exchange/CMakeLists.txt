@@ -46,7 +46,6 @@ include (add_pstore)
 
 set (pstore_exchange_include_dir "${PSTORE_ROOT_DIR}/include/pstore/exchange/")
 set (pstore_exchange_includes
-    array_helpers.hpp
     export.hpp
     export_compilation.hpp
     export_emit.hpp
@@ -57,12 +56,14 @@ set (pstore_exchange_includes
     export_section.hpp
     import_bss_section.hpp
     import_compilation.hpp
+    import_context.hpp
     import_debug_line_header.hpp
     import_debug_line_section.hpp
     import_error.hpp
     import_fixups.hpp
     import_fragment.hpp
     import_generic_section.hpp
+    import_linked_definitions_section.hpp
     import_names.hpp
     import_names_array.hpp
     import_non_terminals.hpp
@@ -83,6 +84,7 @@ set (pstore_exchange_sources
     import_compilation.cpp
     import_error.cpp
     import_fixups.cpp
+    import_fragment.cpp
     import_names.cpp
     import_root.cpp
     import_rule.cpp

@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export.hpp
+/// \brief The top level entry point for exporting a pstore database.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_HPP
 #define PSTORE_EXCHANGE_EXPORT_HPP
 
@@ -49,10 +52,15 @@
 
 namespace pstore {
     namespace exchange {
+        // Note that we'd really like to call this namespace "export", but this is a keyword
+        // in C++ meaning that we're not allowed to do so. The "_ns" suffix is an abbreviation of
+        // "namespace" to work around this restriction.
+        namespace export_ns {
 
-        void export_database (database & db, export_ostream & os, bool comments);
+            void emit_database (database & db, ostream & os, bool comments);
 
-    } // end namespace exchange
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_HPP

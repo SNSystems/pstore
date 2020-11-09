@@ -67,9 +67,9 @@ int main (int argc, char * argv[]) {
     PSTORE_TRY {
         cl::parse_command_line_options (argc, argv, "pstore export utility\n");
 
-        pstore::exchange::export_ostream os{stdout};
+        pstore::exchange::export_ns::ostream os{stdout};
         pstore::database db{db_path.get (), pstore::database::access_mode::read_only};
-        export_database (db, os, true);
+        pstore::exchange::export_ns::emit_database (db, os, true);
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on

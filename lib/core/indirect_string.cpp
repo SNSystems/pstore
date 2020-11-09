@@ -193,11 +193,9 @@ namespace pstore {
     //*            |_|                                               *
     // get sstring view
     // ~~~~~~~~~~~~~~~~
-    auto get_sstring_view (pstore::database const & db, typed_address<indirect_string> const addr)
-        -> std::pair<shared_sstring_view, raw_sstring_view> {
-        auto const str = indirect_string::read (db, addr);
-        shared_sstring_view owner;
-        return {owner, str.as_db_string_view (&owner)};
+    auto get_sstring_view (database const & db, typed_address<indirect_string> const addr,
+                           gsl::not_null<shared_sstring_view *> const owner) -> raw_sstring_view {
+        return indirect_string::read (db, addr).as_db_string_view (owner);
     }
 
 } // end namespace pstore

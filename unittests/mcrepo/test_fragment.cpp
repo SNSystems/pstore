@@ -93,15 +93,14 @@ namespace {
                                 pstore::make_pointee_adaptor (fdata.end ()));
     }
 
-    template <typename SectionIterator, typename CompilationMemberIterator>
+    template <typename SectionIterator, typename CompilationMemberIterator,
+              typename = typename std::enable_if_t<
+                  std::is_same<typename std::iterator_traits<CompilationMemberIterator>::value_type,
+                               pstore::repo::linked_definitions::value_type>::value>>
     pstore::extent<fragment>
     build_fragment (transaction & transaction, SectionIterator section_begin,
                     SectionIterator section_end, CompilationMemberIterator compilation_member_begin,
                     CompilationMemberIterator compilation_member_end) {
-        static_assert (
-            (std::is_same<typename std::iterator_traits<CompilationMemberIterator>::value_type,
-                          pstore::typed_address<compilation_member>>::value),
-            "Iterator value_type should be typed_address<compilation_member>");
         assert (std::distance (compilation_member_begin, compilation_member_end) > 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
@@ -217,8 +216,10 @@ TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
 
     std::vector<section_content> c;
 
-    constexpr auto addr1 = pstore::typed_address<compilation_member>::make (32U);
-    std::vector<pstore::typed_address<compilation_member>> d{addr1};
+    constexpr linked_definitions::value_type ld{
+        pstore::index::digest{0, 0xffff}, 17U,
+        pstore::typed_address<compilation_member>::make (37U)};
+    std::vector<linked_definitions::value_type> d{ld};
 
     auto extent = build_fragment (transaction_, std::begin (c), std::end (c), d.data (),
                                   d.data () + d.size ());
@@ -238,7 +239,7 @@ TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
     EXPECT_EQ (0U, section_size (*linked_definitions));
 
     EXPECT_EQ (1U, linked_definitions->size ());
-    EXPECT_EQ ((*linked_definitions)[0], addr1);
+    EXPECT_EQ ((*linked_definitions)[0], ld);
 }
 
 namespace pstore {

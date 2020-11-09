@@ -1,93 +1,105 @@
 {
   "version":1,
-  "id":"e48857de-fba1-46f4-8465-4154019a7b4a",
+  "id":"2dedee5a-6992-49d5-b98b-9f6fa95418f3",
   "transactions":[
     {
       // generation 1
       "names":[
+        "/Users/paul/test/two_modules",
         "x86_64-pc-linux-gnu-repo",
+        "puts",
         "main",
         "printf",
-        "",
+        "str.3832e937033435e0077a688e7b9ec336",
+        ".str.1",
         ".str",
         "ultimate_answer",
-        "/media/psf/Home/test/two_modules",
         "foo"
       ],
       "debugline":{
-        "8ef807d5066b78def2d99c69f2ff932d":"AAAAAAQAIAAAAAEBAfsODQABAQEBAAAAAQAAAQBzd2l0Y2guYwAAAAAA"
       },
       "fragments":{
-        "b16d0da6cdc0cf0da6c5efd87dd5e6e2":{
+        "6754f6ae81754f024540e2278491a4eb":{
           "text":{
             "align":16,
-            "data":"VUiJ5UiD7BC/BgAAAOgAAAAASL8AAAAAAAAAAInGsADoAAAAADHJiUX8ichIg8QQXcM=",
+            "data":"UL8AAAAA6AAAAAC/BgAAAOgAAAAAvwAAAACJxjHA6AAAAAAxwFnD",
             "xfixups":[
               {
-                "name":7, //"foo"
-                "type":4,
-                "offset":14,
-                "addend":18446744073709551612
-              },
-              {
-                "name":4, //".str"
-                "type":1,
-                "offset":20,
+                "name":5, //"str.3832e937033435e0077a688e7b9ec336"
+                "type":10,
+                "offset":2,
                 "addend":0
               },
               {
-                "name":2, //"printf"
+                "name":2, //"puts"
                 "type":4,
-                "offset":33,
+                "offset":7,
+                "addend":18446744073709551612
+              },
+              {
+                "name":9, //"foo"
+                "type":4,
+                "offset":17,
+                "addend":18446744073709551612
+              },
+              {
+                "name":6, //".str.1"
+                "type":10,
+                "offset":22,
+                "addend":0
+              },
+              {
+                "name":4, //"printf"
+                "type":4,
+                "offset":31,
                 "addend":18446744073709551612
               }
             ]
           },
-          "debug_line":{
-            "header":"8ef807d5066b78def2d99c69f2ff932d",
-            "data":"AAkCAAAAAAAAAAAXBRUKgwUFBp4FAQYIdQIIAAEB",
-            "ifixups":[
-              {"section":"text","type":1,"offset":3,"addend":0}
-            ]
+          "linked_definitions":[
+            {"compilation":"ec261f9049865026bc721a944a51728d","index":3}
+          ]
+        },
+        "36c39e7b8e687a07e035340337e93238":{
+          "mergeable_1_byte_c_string":{
+            "data":"SGVsbG8sIHdvcmxkLgA="
           }
         },
-        "54ac5aadc7a515d2d5b4ac01faad6554":{
+        "8994913c7f70bae8ce714e979176185a":{
           "mergeable_1_byte_c_string":{
             "data":"JWQKAA=="
           }
         },
-        "8ce2e4f4db01c11491d9ef8f29dc327b":{
+        "c013773d4b1b506fab3b926d57223e5d":{
           "text":{
             "align":16,
-            "data":"VUiJ5bgrAAAAXcM="
-          },
-          "debug_line":{
-            "header":"8ef807d5066b78def2d99c69f2ff932d",
-            "data":"AAkCAAAAAAAAAAAUBQUKSwIHAAEB",
-            "ifixups":[
-              {"section":"text","type":1,"offset":3,"addend":0}
-            ]
+            "data":"uCsAAADD"
           }
         }
       },
       "compilations":{
-        "c6567d3319bfdb1f94141670d6a21c69":{
-          "path":6, //"/media/psf/Home/test/two_modules"
-          "triple":0, //"x86_64-pc-linux-gnu-repo"
+        "ec261f9049865026bc721a944a51728d":{
+          "path":0, //"/Users/paul/test/two_modules"
+          "triple":1, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
-              "digest":"8ce2e4f4db01c11491d9ef8f29dc327b",
-              "name":5, //"ultimate_answer"
+              "digest":"c013773d4b1b506fab3b926d57223e5d",
+              "name":8, //"ultimate_answer"
               "linkage":"external"
             },
             {
-              "digest":"b16d0da6cdc0cf0da6c5efd87dd5e6e2",
-              "name":1, //"main"
+              "digest":"6754f6ae81754f024540e2278491a4eb",
+              "name":3, //"main"
               "linkage":"external"
             },
             {
-              "digest":"54ac5aadc7a515d2d5b4ac01faad6554",
-              "name":4, //".str"
+              "digest":"8994913c7f70bae8ce714e979176185a",
+              "name":6, //".str.1"
+              "linkage":"internal_no_symbol"
+            },
+            {
+              "digest":"36c39e7b8e687a07e035340337e93238",
+              "name":5, //"str.3832e937033435e0077a688e7b9ec336"
               "linkage":"internal_no_symbol"
             }
           ]
@@ -98,44 +110,23 @@
       // generation 2
       "names":[],
       "debugline":{
-        "d443a810408f8803328682c01564d350":"AAAAAAQAHQAAAAEBAfsODQABAQEBAAAAAQAAAQBmb28uYwAAAAAA"
       },
       "fragments":{
-        "fb4bf1ae11056079cd08cfa52708375a":{
+        "e9ad970e83dcf9a95a6c822947278609":{
           "text":{
             "align":16,
-            "data":"VUiJ5Yl9+ItF+IPA/4nBg+gDSIlN8A+HPgAAAEiLRfBIiwzFAAAAAP/hx0X8BQAAAOkrAAAAx0X8BgAAAOkfAAAAx0X8BwAAAOkTAAAAx0X8CAAAAOkHAAAAx0X8CQAAAItF/F3D",
-            "ifixups":[
-              {"section":"read_only","type":11,"offset":36,"addend":0}
-            ]
-          },
-          "read_only":{
-            "align":8,
-            "data":"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
-            "ifixups":[
-              {"section":"text","type":1,"offset":0,"addend":42},
-              {"section":"text","type":1,"offset":8,"addend":54},
-              {"section":"text","type":1,"offset":16,"addend":66},
-              {"section":"text","type":1,"offset":24,"addend":78}
-            ]
-          },
-          "debug_line":{
-            "header":"d443a810408f8803328682c01564d350",
-            "data":"AAkCAAAAAAAAAAABBQ0KdQUFBjwIHgUNBtm7u7sFDrsFAXYCBQABAQ==",
-            "ifixups":[
-              {"section":"text","type":1,"offset":3,"addend":0}
-            ]
+            "data":"jUf/g/gDdwaDxwSJ+MO4CQAAAMM="
           }
         }
       },
       "compilations":{
-        "cde6188bc64ccc24361ebc0d4fecdb18":{
-          "path":6, //"/media/psf/Home/test/two_modules"
-          "triple":0, //"x86_64-pc-linux-gnu-repo"
+        "adb6caf1c6292f18934d1ec2c31d813b":{
+          "path":0, //"/Users/paul/test/two_modules"
+          "triple":1, //"x86_64-pc-linux-gnu-repo"
           "definitions":[
             {
-              "digest":"fb4bf1ae11056079cd08cfa52708375a",
-              "name":7, //"foo"
+              "digest":"e9ad970e83dcf9a95a6c822947278609",
+              "name":9, //"foo"
               "linkage":"external"
             }
           ]

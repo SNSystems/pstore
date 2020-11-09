@@ -56,82 +56,85 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
 #define X(a)                                                                                       \
 case repo::linkage::a: return os << #a;
-        template <typename OStream>
-        OStream & operator<< (OStream & os, repo::linkage const linkage) {
-            switch (linkage) { PSTORE_REPO_LINKAGES }
-            return os << "unknown";
-        }
+            template <typename OStream>
+            OStream & operator<< (OStream & os, repo::linkage const linkage) {
+                switch (linkage) { PSTORE_REPO_LINKAGES }
+                return os << "unknown";
+            }
 #undef X
 
-        template <typename OStream>
-        OStream & operator<< (OStream & os, repo::visibility const visibility) {
-            switch (visibility) {
-            case repo::visibility::default_vis: return os << "default";
-            case repo::visibility::hidden_vis: return os << "hidden";
-            case repo::visibility::protected_vis: return os << "protected";
+            template <typename OStream>
+            OStream & operator<< (OStream & os, repo::visibility const visibility) {
+                switch (visibility) {
+                case repo::visibility::default_vis: return os << "default";
+                case repo::visibility::hidden_vis: return os << "hidden";
+                case repo::visibility::protected_vis: return os << "protected";
+                }
+                return os << "unknown";
             }
-            return os << "unknown";
-        }
 
 
-        template <typename OStream>
-        void export_compilation (OStream & os, indent const ind, database const & db,
-                                 pstore::repo::compilation const & compilation,
-                                 export_name_mapping const & names, bool comments) {
-            os << "{\n";
-            auto const object_indent = ind.next ();
-            os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
-            show_string (os, db, compilation.path (), comments);
-            os << '\n'
-               << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
-            show_string (os, db, compilation.triple (), comments);
-            os << '\n' << object_indent << R"("definitions":)";
-            emit_array (os, object_indent, compilation.begin (), compilation.end (),
-                        [&] (OStream & os1, indent const ind1, repo::compilation_member const & d) {
-                            os1 << ind1 << "{\n";
-                            indent const object_indent = ind1.next ();
-                            os1 << object_indent << R"("digest":")" << d.digest.to_hex_string ()
-                                << "\",\n";
-                            os1 << object_indent << R"("name":)" << names.index (d.name) << ',';
-                            show_string (os1, db, d.name, comments);
-                            os1 << '\n';
-                            os1 << object_indent << R"("linkage":")" << d.linkage () << '"';
-                            if (d.visibility () != repo::visibility::default_vis) {
-                                os1 << ",\n"
-                                    << object_indent << R"("visibility":")" << d.visibility ()
-                                    << "\"\n";
-                            }
-                            os1 << '\n' << ind1 << '}';
-                        });
-            os << '\n' << ind << '}';
-        }
-
-
-        template <typename OStream>
-        void export_compilation_index (OStream & os, indent const ind, database const & db,
-                                       unsigned const generation, export_name_mapping const & names,
-                                       bool comments) {
-            auto const compilations = index::get_index<trailer::indices::compilation> (db);
-            if (!compilations || compilations->empty ()) {
-                return;
+            template <typename OStream>
+            void emit_compilation (OStream & os, indent const ind, database const & db,
+                                   repo::compilation const & compilation,
+                                   name_mapping const & names, bool comments) {
+                os << "{\n";
+                auto const object_indent = ind.next ();
+                os << object_indent << R"("path":)" << names.index (compilation.path ()) << ',';
+                show_string (os, db, compilation.path (), comments);
+                os << '\n'
+                   << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
+                show_string (os, db, compilation.triple (), comments);
+                os << '\n' << object_indent << R"("definitions":)";
+                emit_array (
+                    os, object_indent, compilation.begin (), compilation.end (),
+                    [&] (OStream & os1, indent const ind1, repo::compilation_member const & d) {
+                        os1 << ind1 << "{\n";
+                        indent const object_indent1 = ind1.next ();
+                        os1 << object_indent1 << R"("digest":")" << d.digest.to_hex_string ()
+                            << "\",\n";
+                        os1 << object_indent1 << R"("name":)" << names.index (d.name) << ',';
+                        show_string (os1, db, d.name, comments);
+                        os1 << '\n';
+                        os1 << object_indent1 << R"("linkage":")" << d.linkage () << '"';
+                        if (d.visibility () != repo::visibility::default_vis) {
+                            os1 << ",\n"
+                                << object_indent1 << R"("visibility":")" << d.visibility ()
+                                << "\"\n";
+                        }
+                        os1 << '\n' << ind1 << '}';
+                    });
+                os << '\n' << ind << '}';
             }
-            if (generation == 0) {
-                // The first (zeroth) transaction in the store is, by definition, empty.
-                return;
-            }
-            auto const * sep = "\n";
-            for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
-                auto const & kvp = compilations->load_leaf_node (db, addr);
-                os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
-                export_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
-                sep = ",\n";
-            }
-        }
 
-    } // end namespace exchange
+
+            template <typename OStream>
+            void emit_compilation_index (OStream & os, indent const ind, database const & db,
+                                         unsigned const generation, name_mapping const & names,
+                                         bool comments) {
+                auto const compilations = index::get_index<trailer::indices::compilation> (db);
+                if (!compilations || compilations->empty ()) {
+                    return;
+                }
+                if (generation == 0) {
+                    // The first (zeroth) transaction in the store is, by definition, empty.
+                    return;
+                }
+                auto const * sep = "\n";
+                for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
+                    auto const & kvp = compilations->load_leaf_node (db, addr);
+                    os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
+                    emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
+                    sep = ",\n";
+                }
+            }
+
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP

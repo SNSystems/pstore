@@ -51,147 +51,145 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        //*     _      __ _      _ _   _           *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
-        //*                                        *
-        // ctor
-        // ~~~~
-        import_definition::import_definition (parse_stack_pointer const stack,
-                                              container_pointer const definitions,
-                                              names_pointer const names, db_pointer const db,
-                                              fragment_index_pointer const & fragments)
-                : import_rule (stack)
-                , definitions_{definitions}
-                , names_{names}
-                , db_{db}
-                , fragments_{fragments}
-                , seen_{} {}
+            //*     _      __ _      _ _   _           *
+            //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
+            //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
+            //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
+            //*                                        *
+            // ctor
+            // ~~~~
+            definition::definition (not_null<context *> const ctxt,
+                                    not_null<container *> const definitions,
+                                    not_null<name_mapping const *> const names,
+                                    fragment_index_pointer const & fragments)
+                    : rule (ctxt)
+                    , definitions_{definitions}
+                    , names_{names}
+                    , fragments_{fragments} {}
 
-        // key
-        // ~~~
-        std::error_code import_definition::key (std::string const & k) {
-            if (k == "digest") {
-                seen_[digest_index] = true;
-                return push<string_rule> (&digest_);
+            // key
+            // ~~~
+            std::error_code definition::key (std::string const & k) {
+                if (k == "digest") {
+                    seen_[digest_index] = true;
+                    return push<string_rule> (&digest_);
+                }
+                if (k == "name") {
+                    seen_[name_index] = true;
+                    return push<uint64_rule> (&name_);
+                }
+                if (k == "linkage") {
+                    seen_[linkage_index] = true;
+                    return push<string_rule> (&linkage_);
+                }
+                if (k == "visibility") {
+                    seen_[visibility_index] = true;
+                    return push<string_rule> (&visibility_);
+                }
+                return error::unknown_definition_object_key;
             }
-            if (k == "name") {
-                seen_[name_index] = true;
-                return push<uint64_rule> (&name_);
-            }
-            if (k == "linkage") {
-                seen_[linkage_index] = true;
-                return push<string_rule> (&linkage_);
-            }
-            if (k == "visibility") {
+
+            // end object
+            // ~~~~~~~~~~
+            std::error_code definition::end_object () {
+                // The visibility key is optional (defaulting to "default_vis" unsurprisingly).
+                auto const visibility = seen_[visibility_index]
+                                            ? decode_visibility (visibility_)
+                                            : just (repo::visibility::default_vis);
+                if (!visibility) {
+                    return error::bad_visibility;
+                }
                 seen_[visibility_index] = true;
-                return push<string_rule> (&visibility_);
-            }
-            return import_error::unknown_definition_object_key;
-        }
 
-        // end object
-        // ~~~~~~~~~~
-        std::error_code import_definition::end_object () {
-            // The visibility key is optional (defaulting to "default_vis" unsurprisingly).
-            auto const visibility = seen_[visibility_index] ? decode_visibility (visibility_)
-                                                            : just (repo::visibility::default_vis);
-            if (!visibility) {
-                return import_error::bad_visibility;
-            }
-            seen_[visibility_index] = true;
+                if (!seen_.all ()) {
+                    return error::definition_was_incomplete;
+                }
 
-            if (!seen_.all ()) {
-                return import_error::definition_was_incomplete;
-            }
+                auto const digest = uint128::from_hex_string (digest_);
+                if (!digest) {
+                    return error::bad_digest;
+                }
+                context * const ctxt = this->get_context ();
+                auto const fpos = fragments_->find (*ctxt->db, *digest);
+                if (fpos == fragments_->end (*ctxt->db)) {
+                    return error::no_such_fragment;
+                }
 
-            auto const digest = uint128::from_hex_string (digest_);
-            if (!digest) {
-                return import_error::bad_digest;
-            }
-            auto const fpos = fragments_->find (*db_, *digest);
-            if (fpos == fragments_->end (*db_)) {
-                return import_error::no_such_fragment;
-            }
+                auto const linkage = decode_linkage (linkage_);
+                if (!linkage) {
+                    return error::bad_linkage;
+                }
 
-            auto const linkage = decode_linkage (linkage_);
-            if (!linkage) {
-                return import_error::bad_linkage;
+                auto const name = names_->lookup (name_);
+                if (!name) {
+                    return name.get_error ();
+                }
+
+                definitions_->emplace_back (*digest, fpos->second, *name, *linkage, *visibility);
+
+                return pop ();
             }
 
-            auto const name = names_->lookup (name_);
-            if (!name) {
-                return name.get_error ();
-            }
-
-            definitions_->emplace_back (*digest, fpos->second, *name, *linkage, *visibility);
-
-            return pop ();
-        }
-
-        // decode linkage
-        // ~~~~~~~~~~~~~~
-        maybe<repo::linkage> import_definition::decode_linkage (std::string const & linkage) {
+            // decode linkage
+            // ~~~~~~~~~~~~~~
+            maybe<repo::linkage> definition::decode_linkage (std::string const & linkage) {
 #define X(a)                                                                                       \
     if (linkage == #a) {                                                                           \
         return just (repo::linkage::a);                                                            \
     }
-            PSTORE_REPO_LINKAGES
+                PSTORE_REPO_LINKAGES
 #undef X
-            return nothing<repo::linkage> ();
-        }
-
-        // decode visibility
-        // ~~~~~~~~~~~~~~~~~
-        maybe<repo::visibility>
-        import_definition::decode_visibility (std::string const & visibility) {
-            if (visibility == "default") {
-                return just (repo::visibility::default_vis);
+                return nothing<repo::linkage> ();
             }
-            if (visibility == "hidden") {
-                return just (repo::visibility::hidden_vis);
+
+            // decode visibility
+            // ~~~~~~~~~~~~~~~~~
+            maybe<repo::visibility> definition::decode_visibility (std::string const & visibility) {
+                if (visibility == "default") {
+                    return just (repo::visibility::default_vis);
+                }
+                if (visibility == "hidden") {
+                    return just (repo::visibility::hidden_vis);
+                }
+                if (visibility == "protected") {
+                    return just (repo::visibility::protected_vis);
+                }
+                return nothing<repo::visibility> ();
             }
-            if (visibility == "protected") {
-                return just (repo::visibility::protected_vis);
+
+
+            //*     _      __ _      _ _   _                _     _        _    *
+            //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
+            //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
+            //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
+            //*                                                |__/             *
+            // ctor
+            // ~~~~
+            definition_object::definition_object (
+                not_null<context *> const ctxt, not_null<definition::container *> const definitions,
+                not_null<name_mapping const *> const names,
+                fragment_index_pointer const & fragments)
+                    : rule (ctxt)
+                    , definitions_{definitions}
+                    , names_{names}
+                    , fragments_{fragments} {}
+
+            // name
+            // ~~~~
+            gsl::czstring definition_object::name () const noexcept { return "definition object"; }
+
+            // begin object
+            // ~~~~~~~~~~~~
+            std::error_code definition_object::begin_object () {
+                return this->push<definition> (definitions_, names_, fragments_);
             }
-            return nothing<repo::visibility> ();
-        }
 
+            // end array
+            // ~~~~~~~~~
+            std::error_code definition_object::end_array () { return this->pop (); }
 
-        //*     _      __ _      _ _   _                _     _        _    *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
-        //*                                                |__/             *
-        // ctor
-        // ~~~~
-        import_definition_object::import_definition_object (
-            parse_stack_pointer const stack, definition_container_pointer const definitions,
-            names_pointer const names, database const & db,
-            fragment_index_pointer const & fragments)
-                : import_rule (stack)
-                , definitions_{definitions}
-                , names_{names}
-                , db_{db}
-                , fragments_{fragments} {}
-
-        // name
-        // ~~~~
-        gsl::czstring import_definition_object::name () const noexcept {
-            return "definition object";
-        }
-
-        // begin object
-        // ~~~~~~~~~~~~
-        std::error_code import_definition_object::begin_object () {
-            return this->push<import_definition> (definitions_, names_, &db_, fragments_);
-        }
-
-        // end array
-        // ~~~~~~~~~
-        std::error_code import_definition_object::end_array () { return this->pop (); }
-
-    } // end namespace exchange
+        } // end namespace import
+    }     // end namespace exchange
 } // end namespace pstore

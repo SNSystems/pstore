@@ -62,254 +62,247 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        using fragment_index_pointer = std::shared_ptr<index::fragment_index>;
+            using fragment_index_pointer = std::shared_ptr<index::fragment_index>;
 
-        //*     _      __ _      _ _   _           *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
-        //*                                        *
-        //-MARK: import definition
-        class import_definition final : public import_rule {
-        public:
-            using container = std::vector<repo::compilation_member>;
-            using container_pointer = not_null<container *>;
-            using names_pointer = not_null<import_name_mapping const *>;
-            using db_pointer = not_null<database const *>;
+            //*     _      __ _      _ _   _           *
+            //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
+            //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
+            //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
+            //*                                        *
+            //-MARK: definition
+            class definition final : public rule {
+            public:
+                using container = std::vector<repo::compilation_member>;
 
-            import_definition (parse_stack_pointer stack, container_pointer definitions,
-                               names_pointer names, db_pointer db,
-                               fragment_index_pointer const & fragments);
-            import_definition (import_definition const &) = delete;
-            import_definition (import_definition &&) noexcept = delete;
+                definition (not_null<context *> ctxt, not_null<container *> definitions,
+                            not_null<name_mapping const *> names,
+                            fragment_index_pointer const & fragments);
+                definition (definition const &) = delete;
+                definition (definition &&) noexcept = delete;
 
-            ~import_definition () noexcept override = default;
+                ~definition () noexcept override = default;
 
-            import_definition & operator= (import_definition const &) = delete;
-            import_definition & operator= (import_definition &&) noexcept = delete;
+                definition & operator= (definition const &) = delete;
+                definition & operator= (definition &&) noexcept = delete;
 
-            gsl::czstring name () const noexcept override { return "definition"; }
+                gsl::czstring name () const noexcept override { return "definition"; }
 
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
+                std::error_code key (std::string const & k) override;
+                std::error_code end_object () override;
 
-            static maybe<repo::linkage> decode_linkage (std::string const & linkage);
-            static maybe<repo::visibility> decode_visibility (std::string const & visibility);
+                static maybe<repo::linkage> decode_linkage (std::string const & linkage);
+                static maybe<repo::visibility> decode_visibility (std::string const & visibility);
 
-        private:
-            container_pointer const definitions_;
-            names_pointer const names_;
-            db_pointer const db_;
-            fragment_index_pointer const fragments_;
+            private:
+                not_null<container *> const definitions_;
+                not_null<name_mapping const *> const names_;
+                fragment_index_pointer const fragments_;
 
-            enum { digest_index, name_index, linkage_index, visibility_index };
-            std::bitset<visibility_index + 1> seen_;
+                enum { digest_index, name_index, linkage_index, visibility_index };
+                std::bitset<visibility_index + 1> seen_;
 
-            std::string digest_;
-            std::uint64_t name_ = 0;
-            std::string linkage_;
-            std::string visibility_;
-        };
+                std::string digest_;
+                std::uint64_t name_ = 0;
+                std::string linkage_;
+                std::string visibility_;
+            };
 
 
-        //*     _      __ _      _ _   _                _     _        _    *
-        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
-        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
-        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
-        //*                                                |__/             *
-        //-MARK: import definition object
-        class import_definition_object final : public import_rule {
-        public:
-            using names_pointer = not_null<import_name_mapping const *>;
-            using definition_container_pointer = not_null<import_definition::container *>;
+            //*     _      __ _      _ _   _                _     _        _    *
+            //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _    ___| |__ (_)___ __| |_  *
+            //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
+            //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
+            //*                                                |__/             *
+            //-MARK: definition object
+            class definition_object final : public rule {
+            public:
+                definition_object (not_null<context *> ctxt,
+                                   not_null<definition::container *> definitions,
+                                   not_null<name_mapping const *> names,
+                                   fragment_index_pointer const & fragments);
+                definition_object (definition_object const &) = delete;
+                definition_object (definition_object &&) noexcept = delete;
 
-            import_definition_object (parse_stack_pointer stack,
-                                      definition_container_pointer definitions, names_pointer names,
-                                      database const & db,
-                                      fragment_index_pointer const & fragments);
-            import_definition_object (import_definition_object const &) = delete;
-            import_definition_object (import_definition_object &&) noexcept = delete;
+                ~definition_object () noexcept override = default;
 
-            ~import_definition_object () noexcept override = default;
+                definition_object & operator= (definition_object const &) = delete;
+                definition_object & operator= (definition_object &&) noexcept = delete;
 
-            import_definition_object & operator= (import_definition_object const &) = delete;
-            import_definition_object & operator= (import_definition_object &&) noexcept = delete;
+                gsl::czstring name () const noexcept override;
 
-            gsl::czstring name () const noexcept override;
+                std::error_code begin_object () override;
+                std::error_code end_array () override;
 
-            std::error_code begin_object () override;
-            std::error_code end_array () override;
+            private:
+                not_null<definition::container *> const definitions_;
+                not_null<name_mapping const *> const names_;
+                fragment_index_pointer const fragments_;
+            };
 
-        private:
-            definition_container_pointer const definitions_;
-            names_pointer const names_;
-            database const & db_;
-            fragment_index_pointer const fragments_;
-        };
+            //*                    _ _      _   _           *
+            //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
+            //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
+            //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
+            //*              |_|                            *
+            //-MARK: compilation
+            template <typename TransactionLock>
+            class compilation final : public rule {
+            public:
+                compilation (not_null<context *> const ctxt,
+                             not_null<transaction<TransactionLock> *> const transaction,
+                             not_null<name_mapping const *> const names,
+                             fragment_index_pointer const & fragments, index::digest const digest)
+                        : rule (ctxt)
+                        , transaction_{transaction}
+                        , names_{names}
+                        , fragments_{fragments}
+                        , digest_{digest} {}
+                compilation (compilation const &) = delete;
+                compilation (compilation &&) noexcept = delete;
+                ~compilation () noexcept override = default;
 
-        //*                    _ _      _   _           *
-        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
-        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
-        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
-        //*              |_|                            *
-        //-MARK: import compilation
-        template <typename TransactionLock>
-        class import_compilation final : public import_rule {
-        public:
-            using transaction_pointer = not_null<transaction<TransactionLock> *>;
-            using names_pointer = not_null<import_name_mapping const *>;
+                compilation & operator= (compilation const &) = delete;
+                compilation & operator= (compilation &&) noexcept = delete;
 
-            import_compilation (parse_stack_pointer const stack,
-                                transaction_pointer const transaction, names_pointer const names,
-                                fragment_index_pointer const & fragments,
-                                index::digest const digest)
-                    : import_rule (stack)
+                gsl::czstring name () const noexcept override { return "compilation"; }
+
+                std::error_code key (std::string const & k) override;
+                std::error_code end_object () override;
+
+            private:
+                not_null<transaction<TransactionLock> *> const transaction_;
+                not_null<name_mapping const *> const names_;
+                fragment_index_pointer const fragments_;
+                index::digest const digest_;
+
+                enum { path_index, triple_index };
+                std::bitset<triple_index + 1> seen_;
+
+                std::uint64_t path_ = 0;
+                std::uint64_t triple_ = 0;
+                definition::container definitions_;
+            };
+
+            // key
+            // ~~~
+            template <typename TransactionLock>
+            std::error_code compilation<TransactionLock>::key (std::string const & k) {
+                if (k == "path") {
+                    seen_[path_index] = true;
+                    return push<uint64_rule> (&path_);
+                }
+                if (k == "triple") {
+                    seen_[triple_index] = true;
+                    return push<uint64_rule> (&triple_);
+                }
+                if (k == "definitions") {
+                    return push_array_rule<definition_object> (this, &definitions_, names_,
+                                                               fragments_);
+                }
+                return error::unknown_compilation_object_key;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code compilation<TransactionLock>::end_object () {
+                if (!seen_.all ()) {
+                    return error::incomplete_compilation_object;
+                }
+                auto const path = names_->lookup (path_);
+                if (!path) {
+                    return path.get_error ();
+                }
+                auto const triple = names_->lookup (triple_);
+                if (!triple) {
+                    return triple.get_error ();
+                }
+
+                // Create the compilation record in the store.
+                extent<repo::compilation> const compilation_extent =
+                    repo::compilation::alloc (*transaction_, *path, *triple,
+                                              std::begin (definitions_), std::end (definitions_));
+
+                // Insert this compilation into the compilations index.
+                auto compilations =
+                    pstore::index::get_index<pstore::trailer::indices::compilation> (
+                        transaction_->db ());
+                compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
+
+                return pop ();
+            }
+
+            //*                    _ _      _   _               _         _          *
+            //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _  ___ (_)_ _  __| |_____ __ *
+            //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
+            //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
+            //*              |_|                                                     *
+            //-MARK: compilation index
+            template <typename TransactionLock>
+            class compilations_index final : public rule {
+            public:
+                compilations_index (not_null<context *> ctxt,
+                                    gsl::not_null<transaction<TransactionLock> *> transaction,
+                                    gsl::not_null<name_mapping const *> names);
+                compilations_index (compilations_index const &) = delete;
+                compilations_index (compilations_index &&) noexcept = delete;
+                ~compilations_index () noexcept override = default;
+
+                compilations_index & operator= (compilations_index const &) = delete;
+                compilations_index & operator= (compilations_index &&) = delete;
+
+                gsl::czstring name () const noexcept override;
+                std::error_code key (std::string const & s) override;
+                std::error_code end_object () override;
+
+            private:
+                gsl::not_null<transaction<TransactionLock> *> const transaction_;
+                gsl::not_null<name_mapping const *> const names_;
+                fragment_index_pointer const fragments_;
+            };
+
+            // (ctor)
+            // ~~~~~~
+            template <typename TransactionLock>
+            compilations_index<TransactionLock>::compilations_index (
+                not_null<context *> const ctxt,
+                gsl::not_null<transaction<TransactionLock> *> const transaction,
+                gsl::not_null<name_mapping const *> const names)
+                    : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}
-                    , fragments_{fragments}
-                    , digest_{digest} {}
-            import_compilation (import_compilation const &) = delete;
-            import_compilation (import_compilation &&) noexcept = delete;
-            ~import_compilation () noexcept override = default;
+                    , fragments_{
+                          index::get_index<trailer::indices::fragment> (transaction->db ())} {}
 
-            import_compilation & operator= (import_compilation const &) = delete;
-            import_compilation & operator= (import_compilation &&) noexcept = delete;
-
-            gsl::czstring name () const noexcept override { return "compilation"; }
-
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
-
-        private:
-            transaction_pointer const transaction_;
-            names_pointer const names_;
-            fragment_index_pointer const fragments_;
-            index::digest const digest_;
-
-            enum { path_index, triple_index };
-            std::bitset<triple_index + 1> seen_;
-
-            std::uint64_t path_ = 0;
-            std::uint64_t triple_ = 0;
-            import_definition::container definitions_;
-        };
-
-        // key
-        // ~~~
-        template <typename TransactionLock>
-        std::error_code import_compilation<TransactionLock>::key (std::string const & k) {
-            if (k == "path") {
-                seen_[path_index] = true;
-                return push<uint64_rule> (&path_);
-            }
-            if (k == "triple") {
-                seen_[triple_index] = true;
-                return push<uint64_rule> (&triple_);
-            }
-            if (k == "definitions") {
-                return push_array_rule<import_definition_object> (
-                    this, &definitions_, names_, std::ref (transaction_->db ()), fragments_);
-            }
-            return import_error::unknown_compilation_object_key;
-        }
-
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code import_compilation<TransactionLock>::end_object () {
-            if (!seen_.all ()) {
-                return import_error::incomplete_compilation_object;
-            }
-            auto const path = names_->lookup (path_);
-            if (!path) {
-                return path.get_error ();
-            }
-            auto const triple = names_->lookup (triple_);
-            if (!triple) {
-                return triple.get_error ();
+            // name
+            // ~~~~
+            template <typename TransactionLock>
+            gsl::czstring compilations_index<TransactionLock>::name () const noexcept {
+                return "compilations index";
             }
 
-            // Create the compilation record in the store.
-            extent<repo::compilation> const compilation_extent = repo::compilation::alloc (
-                *transaction_, *path, *triple, std::begin (definitions_), std::end (definitions_));
-
-            // Insert this compilation into the compilations index.
-            auto compilations = pstore::index::get_index<pstore::trailer::indices::compilation> (
-                transaction_->db ());
-            compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
-
-            return pop ();
-        }
-
-        //*                    _ _      _   _               _         _          *
-        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _  ___ (_)_ _  __| |_____ __ *
-        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
-        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
-        //*              |_|                                                     *
-        //-MARK: compilation index
-        template <typename TransactionLock>
-        class import_compilations_index final : public import_rule {
-        public:
-            using transaction_pointer = gsl::not_null<transaction<TransactionLock> *>;
-            using names_pointer = gsl::not_null<import_name_mapping const *>;
-
-            import_compilations_index (parse_stack_pointer stack, transaction_pointer transaction,
-                                       names_pointer names);
-            import_compilations_index (import_compilations_index const &) = delete;
-            import_compilations_index (import_compilations_index &&) noexcept = delete;
-            ~import_compilations_index () noexcept override = default;
-
-            import_compilations_index & operator= (import_compilations_index const &) = delete;
-            import_compilations_index & operator= (import_compilations_index &&) = delete;
-
-            gsl::czstring name () const noexcept override;
-            std::error_code key (std::string const & s) override;
-            std::error_code end_object () override;
-
-        private:
-            transaction_pointer const transaction_;
-            names_pointer const names_;
-            fragment_index_pointer const fragments_;
-        };
-
-        // (ctor)
-        // ~~~~~~
-        template <typename TransactionLock>
-        import_compilations_index<TransactionLock>::import_compilations_index (
-            parse_stack_pointer const stack, transaction_pointer const transaction,
-            names_pointer const names)
-                : import_rule (stack)
-                , transaction_{transaction}
-                , names_{names}
-                , fragments_{index::get_index<trailer::indices::fragment> (transaction->db ())} {}
-
-        // name
-        // ~~~~
-        template <typename TransactionLock>
-        gsl::czstring import_compilations_index<TransactionLock>::name () const noexcept {
-            return "compilations index";
-        }
-
-        // key
-        // ~~~
-        template <typename TransactionLock>
-        std::error_code import_compilations_index<TransactionLock>::key (std::string const & s) {
-            if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
-                return push_object_rule<import_compilation<TransactionLock>> (
-                    this, transaction_, names_, fragments_, index::digest{*digest});
+            // key
+            // ~~~
+            template <typename TransactionLock>
+            std::error_code compilations_index<TransactionLock>::key (std::string const & s) {
+                if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
+                    return push_object_rule<compilation<TransactionLock>> (
+                        this, transaction_, names_, fragments_, index::digest{*digest});
+                }
+                return error::bad_digest;
             }
-            return import_error::bad_digest;
-        }
 
-        // end object
-        // ~~~~~~~~~~
-        template <typename TransactionLock>
-        std::error_code import_compilations_index<TransactionLock>::end_object () {
-            return pop ();
-        }
+            // end object
+            // ~~~~~~~~~~
+            template <typename TransactionLock>
+            std::error_code compilations_index<TransactionLock>::end_object () {
+                return pop ();
+            }
 
-    } // end namespace exchange
+        } // end namespace import
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_COMPILATION_HPP

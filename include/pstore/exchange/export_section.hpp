@@ -52,166 +52,190 @@
 
 namespace pstore {
     namespace exchange {
+        namespace export_ns {
 
-        namespace details {
+            namespace details {
 
-            /// Maps from a stream type to the corresponding OutputIterator that writes successive
-            /// objects of type T into stream object for which it was constructed, using operator<<.
-            template <typename OStream, typename T>
-            struct output_iterator {};
-            template <typename T>
-            struct output_iterator<std::ostream, T> {
-                using type = std::ostream_iterator<T>;
-            };
-            template <typename T>
-            struct output_iterator<std::ostringstream, T> {
-                using type = std::ostream_iterator<T>;
-            };
-            template <typename T>
-            struct output_iterator<export_ostream, T> {
-                using type = ostream_inserter;
-            };
+                /// Maps from a stream type to the corresponding OutputIterator that writes
+                /// successive objects of type T into stream object for which it was constructed,
+                /// using operator<<.
+                template <typename OStream, typename T>
+                struct output_iterator {};
+                template <typename T>
+                struct output_iterator<std::ostream, T> {
+                    using type = std::ostream_iterator<T>;
+                };
+                template <typename T>
+                struct output_iterator<std::ostringstream, T> {
+                    using type = std::ostream_iterator<T>;
+                };
+                template <typename T>
+                struct output_iterator<ostream, T> {
+                    using type = ostream_inserter;
+                };
 
-            template <repo::section_kind Kind,
+                template <typename Content>
+                struct section_content_exporter;
+                template <>
+                struct section_content_exporter<repo::generic_section> {
+                    template <typename OStream>
+                    OStream & operator() (OStream & os, indent const ind, class database const & db,
+                                          name_mapping const & names,
+                                          repo::generic_section const & content,
+                                          bool const comments) {
+                        return emit_object (
+                            os, ind, content,
+                            [&db, &names, comments] (OStream & os1, indent const ind1,
+                                                     repo::generic_section const & content1) {
+                                auto const * separator = "";
+                                {
+                                    auto const align = content1.align ();
+                                    if (align != 1U) {
+                                        os1 << ind1 << R"("align":)" << align;
+                                        separator = ",\n";
+                                    }
+                                }
+                                {
+                                    os1 << separator << ind1 << R"("data":")";
+                                    repo::container<std::uint8_t> const payload =
+                                        content1.payload ();
+                                    using output_iterator =
+                                        typename details::output_iterator<OStream, char>::type;
+                                    to_base64 (std::begin (payload), std::end (payload),
+                                               output_iterator{os1});
+                                    os1 << '"';
+                                }
+                                {
+                                    repo::container<repo::internal_fixup> const ifx =
+                                        content1.ifixups ();
+                                    if (!ifx.empty ()) {
+                                        os1 << ",\n" << ind1 << R"("ifixups":)";
+                                        emit_internal_fixups (os1, ind1, std::begin (ifx),
+                                                              std::end (ifx));
+                                    }
+                                }
+                                {
+                                    repo::container<repo::external_fixup> const xfx =
+                                        content1.xfixups ();
+                                    if (!xfx.empty ()) {
+                                        os1 << ",\n" << ind1 << R"("xfixups":)";
+                                        emit_external_fixups (os1, ind1, db, names,
+                                                              std::begin (xfx), std::end (xfx),
+                                                              comments);
+                                    }
+                                }
+                                os1 << '\n';
+                            });
+                    }
+                };
+
+                template <>
+                struct section_content_exporter<repo::bss_section> {
+                    using bsss = repo::bss_section;
+
+                    template <typename OStream>
+                    OStream & operator() (OStream & os, indent const ind,
+                                          class database const & /*db*/,
+                                          name_mapping const & /*names*/, bsss const & content,
+                                          bool const /*comments*/) {
+                        return emit_object (
+                            os, ind, content,
+                            [] (OStream & os1, indent const ind1, bsss const & content1) {
+                                auto const * separator = "";
+                                {
+                                    auto const align = content1.align ();
+                                    if (align != 1U) {
+                                        os1 << ind1 << R"("align":)" << align;
+                                        separator = ",\n";
+                                    }
+                                }
+                                os1 << separator << ind1 << R"("size":)" << content1.size ()
+                                    << '\n';
+                                assert (content1.ifixups ().empty ());
+                                assert (content1.xfixups ().empty ());
+                            });
+                    }
+                };
+
+                template <>
+                struct section_content_exporter<repo::debug_line_section> {
+                    using dls = repo::debug_line_section;
+
+                    template <typename OStream>
+                    OStream & operator() (OStream & os, indent const ind,
+                                          class database const & /*db*/,
+                                          name_mapping const & /*names*/, dls const & content,
+                                          bool const /*comments*/) {
+                        return emit_object (
+                            os, ind, content,
+                            [] (OStream & os1, indent const ind1, dls const & content1) {
+                                assert (content1.align () == 1U);
+                                assert (content1.xfixups ().size () == 0U);
+                                os1 << ind1 << R"("header":")"
+                                    << content1.header_digest ().to_hex_string () << "\",\n";
+                                {
+                                    os1 << ind1 << R"("data":")";
+                                    repo::container<std::uint8_t> const payload =
+                                        content1.payload ();
+                                    using output_iterator =
+                                        typename details::output_iterator<OStream, char>::type;
+                                    to_base64 (std::begin (payload), std::end (payload),
+                                               output_iterator{os1});
+                                    os1 << "\",\n";
+                                }
+                                {
+                                    repo::container<repo::internal_fixup> const ifixups =
+                                        content1.ifixups ();
+                                    os1 << ind1 << R"("ifixups":)";
+                                    emit_internal_fixups (os1, ind1, std::begin (ifixups),
+                                                          std::end (ifixups));
+                                    os1 << '\n';
+                                }
+                            });
+                    }
+                };
+
+                template <>
+                struct section_content_exporter<repo::linked_definitions> {
+                    template <typename OStream>
+                    OStream &
+                    operator() (OStream & os, indent const ind, class database const & /*db*/,
+                                name_mapping const & /*names*/,
+                                repo::linked_definitions const & content, bool const /*comments*/) {
+                        return emit_array (os, ind, std::begin (content), std::end (content),
+                                           [] (OStream & os1, indent const ind1,
+                                               repo::linked_definitions::value_type const & d) {
+                                               os1 << ind1 << '{' << R"("compilation":")"
+                                                   << d.compilation.to_hex_string ()
+                                                   << R"(","index":)" << d.index << '}';
+                                           });
+                    }
+                };
+
+                template <repo::section_kind Kind,
+                          typename Content = typename repo::enum_to_section<Kind>::type>
+                struct section_exporter {
+                    template <typename OStream>
+                    OStream & operator() (OStream & os, indent const ind, class database const & db,
+                                          name_mapping const & names, Content const & content,
+                                          bool comments) {
+                        return section_content_exporter<Content>{}(os, ind, db, names, content,
+                                                                   comments);
+                    }
+                };
+
+            } // end namespace details
+
+            template <repo::section_kind Kind, typename OStream,
                       typename Content = typename repo::enum_to_section<Kind>::type>
-            struct section_exporter {
-                static_assert (
-                    std::is_same<repo::enum_to_section_t<Kind>, repo::generic_section>::value,
-                    "expected enum_to_section_t for Kind to yield generic_section");
+            OStream & emit_section (OStream & os, indent const ind, class database const & db,
+                                    name_mapping const & names, Content const & content,
+                                    bool const comments) {
+                return details::section_exporter<Kind>{}(os, ind, db, names, content, comments);
+            }
 
-                template <typename OStream>
-                OStream & operator() (OStream & os, indent const ind, database const & db,
-                                      export_name_mapping const & names, Content const & content,
-                                      bool comments) {
-                    auto const * separator = "";
-                    {
-                        auto const align = content.align ();
-                        if (align != 1U) {
-                            os << ind << R"("align":)" << align;
-                            separator = ",\n";
-                        }
-                    }
-                    {
-                        os << separator << ind << R"("data":")";
-                        repo::container<std::uint8_t> const payload = content.payload ();
-                        using output_iterator =
-                            typename details::output_iterator<OStream, char>::type;
-                        to_base64 (std::begin (payload), std::end (payload), output_iterator{os});
-                        os << '"';
-                    }
-                    {
-                        repo::container<repo::internal_fixup> const ifx = content.ifixups ();
-                        if (!ifx.empty ()) {
-                            os << ",\n" << ind << R"("ifixups":)";
-                            export_internal_fixups (os, ind, std::begin (ifx), std::end (ifx));
-                        }
-                    }
-                    {
-                        repo::container<repo::external_fixup> const xfx = content.xfixups ();
-                        if (!xfx.empty ()) {
-                            os << ",\n" << ind << R"("xfixups":)";
-                            export_external_fixups (os, ind, db, names, std::begin (xfx),
-                                                    std::end (xfx), comments);
-                        }
-                    }
-                    os << '\n';
-                    return os;
-                }
-            };
-
-            template <>
-            struct section_exporter<repo::section_kind::bss, repo::bss_section> {
-                static_assert (std::is_same<repo::enum_to_section_t<repo::section_kind::bss>,
-                                            repo::bss_section>::value,
-                               "expected enum_to_section_t for bss to yield bss_section");
-
-                template <typename OStream>
-                OStream & operator() (OStream & os, indent const ind, database const & /*db*/,
-                                      export_name_mapping const & /*names*/,
-                                      repo::bss_section const & content, bool const /*comments*/) {
-                    auto const * separator = "";
-                    {
-                        auto const align = content.align ();
-                        if (align != 1U) {
-                            os << ind << R"("align":)" << align;
-                            separator = ",\n";
-                        }
-                    }
-                    os << separator << ind << R"("size":)" << content.size () << '\n';
-                    assert (content.ifixups ().empty ());
-                    assert (content.xfixups ().empty ());
-                    return os;
-                }
-            };
-
-            template <>
-            struct section_exporter<repo::section_kind::debug_line, repo::debug_line_section> {
-                static_assert (
-                    std::is_same<repo::enum_to_section_t<repo::section_kind::debug_line>,
-                                 repo::debug_line_section>::value,
-                    "expected enum_to_section_t for debug_line to yield debug_line_section");
-
-                template <typename OStream>
-                OStream & operator() (OStream & os, indent const ind, database const & /*db*/,
-                                      export_name_mapping const & /*names*/,
-                                      repo::debug_line_section const & content,
-                                      bool const /*comments*/) {
-                    assert (content.align () == 1U);
-                    assert (content.xfixups ().size () == 0U);
-
-                    os << ind << R"("header":")" << content.header_digest ().to_hex_string ()
-                       << "\",\n";
-
-                    {
-                        os << ind << R"("data":")";
-                        repo::container<std::uint8_t> const payload = content.payload ();
-                        using output_iterator =
-                            typename details::output_iterator<OStream, char>::type;
-                        to_base64 (std::begin (payload), std::end (payload), output_iterator{os});
-                        os << "\",\n";
-                    }
-                    {
-                        repo::container<repo::internal_fixup> const ifixups = content.ifixups ();
-                        os << ind << R"("ifixups":)";
-                        export_internal_fixups (os, ind, std::begin (ifixups), std::end (ifixups));
-                        os << '\n';
-                    }
-                    return os;
-                }
-            };
-
-            template <>
-            struct section_exporter<repo::section_kind::linked_definitions, repo::linked_definitions> {
-                static_assert (std::is_same<repo::enum_to_section_t<repo::section_kind::linked_definitions>,
-                                            repo::linked_definitions>::value,
-                               "expected enum_to_section_t for dependent to yield linked_definitions");
-
-                template <typename OStream>
-                OStream & operator() (OStream & os, indent const ind, database const & db,
-                                      export_name_mapping const & names,
-                                      repo::linked_definitions const & content, bool const comments) {
-                    return emit_array (os, ind, std::begin (content), std::end (content),
-                                       [] (OStream & os1, indent const /*ind1*/,
-                                           typed_address<repo::compilation_member> const & d) {
-                                           // FIXME: represent somehow!
-                                       });
-                }
-            };
-
-        } // end namespace details
-
-        template <repo::section_kind Kind, typename OStream,
-                  typename Content = typename repo::enum_to_section<Kind>::type>
-        OStream & export_section (OStream & os, indent const ind, database const & db,
-                                  export_name_mapping const & names, Content const & content,
-                                  bool const comments) {
-            os << "{\n";
-            details::section_exporter<Kind>{}(os, ind.next (), db, names, content, comments);
-            os << ind << '}';
-            return os;
-        }
-
-    } // end namespace exchange
+        } // end namespace export_ns
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_EXPORT_SECTION_HPP

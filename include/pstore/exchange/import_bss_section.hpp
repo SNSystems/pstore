@@ -59,106 +59,103 @@
 
 namespace pstore {
     namespace exchange {
+        namespace import {
 
-        template <typename OutputIterator>
-        class import_bss_section : public import_rule {
-        public:
-            using content_pointer = not_null<repo::section_content *>;
-            using db_pointer = not_null<database const *>;
-            using names_pointer = not_null<import_name_mapping const *>;
+            template <typename OutputIterator>
+            class bss_section : public rule {
+            public:
+                bss_section (not_null<context *> const ctxt, repo::section_kind const kind,
+                             not_null<name_mapping const *> const /*names*/,
+                             not_null<repo::section_content *> const content,
+                             not_null<OutputIterator *> const out) noexcept
+                        : rule (ctxt)
+                        , kind_{kind}
+                        , content_{content}
+                        , out_{out} {}
 
-            import_bss_section (parse_stack_pointer const stack, repo::section_kind const kind,
-                                db_pointer const /*db*/, names_pointer const /*names*/,
-                                content_pointer const content,
-                                not_null<OutputIterator *> const out) noexcept
-                    : import_rule (stack)
-                    , kind_{kind}
-                    , content_{content}
-                    , out_{out} {}
+                bss_section (bss_section const &) = delete;
+                bss_section (bss_section &&) = delete;
 
-            import_bss_section (import_bss_section const &) = delete;
-            import_bss_section (import_bss_section &&) = delete;
+                ~bss_section () noexcept override = default;
 
-            ~import_bss_section () noexcept override = default;
+                bss_section & operator= (bss_section const &) = delete;
+                bss_section & operator= (bss_section &&) = delete;
 
-            import_bss_section & operator= (import_bss_section const &) = delete;
-            import_bss_section & operator= (import_bss_section &&) = delete;
+                std::error_code key (std::string const & k) override;
+                std::error_code end_object () override;
 
-            std::error_code key (std::string const & k) override;
-            std::error_code end_object () override;
+                gsl::czstring name () const noexcept override { return "bss section"; }
 
-            gsl::czstring name () const noexcept override { return "bss section"; }
+            private:
+                error_or<repo::section_content *> content_object ();
 
-        private:
-            error_or<repo::section_content *> content_object ();
+                repo::section_kind const kind_;
+                not_null<repo::section_content *> const content_;
+                not_null<OutputIterator *> const out_;
 
-            repo::section_kind const kind_;
-            content_pointer const content_;
-            not_null<OutputIterator *> const out_;
+                enum { align, size };
+                std::bitset<size + 1> seen_;
 
-            enum { align, size };
-            std::bitset<size + 1> seen_;
+                std::uint64_t size_ = 0U;
+                std::uint64_t align_ = 1U;
+            };
 
-            std::uint64_t size_ = 0U;
-            std::uint64_t align_ = 1U;
-        };
-
-        // key
-        // ~~~
-        template <typename OutputIterator>
-        std::error_code import_bss_section<OutputIterator>::key (std::string const & k) {
-            if (k == "align") {
-                seen_[align] = true; // integer
-                return this->push<uint64_rule> (&align_);
+            // key
+            // ~~~
+            template <typename OutputIterator>
+            std::error_code bss_section<OutputIterator>::key (std::string const & k) {
+                if (k == "align") {
+                    seen_[align] = true; // integer
+                    return this->push<uint64_rule> (&align_);
+                }
+                if (k == "size") {
+                    seen_[size] = true;
+                    return this->push<uint64_rule> (&size_);
+                }
+                return error::unrecognized_section_object_key;
             }
-            if (k == "size") {
-                seen_[size] = true;
-                return this->push<uint64_rule> (&size_);
-            }
-            return import_error::unrecognized_section_object_key;
-        }
 
-        template <typename OutputIterator>
-        error_or<repo::section_content *> import_bss_section<OutputIterator>::content_object () {
-            using return_type = error_or<repo::section_content *>;
+            template <typename OutputIterator>
+            error_or<repo::section_content *> bss_section<OutputIterator>::content_object () {
+                using return_type = error_or<repo::section_content *>;
 
-            // The 'align' key may be omitted if the alignment is 1.
-            seen_[align] = true;
+                // The 'align' key may be omitted if the alignment is 1.
+                seen_[align] = true;
 
-            // Issue an error is any of the required fields were missing.
-            if (!seen_.all ()) {
-                return return_type{import_error::bss_section_was_incomplete};
+                // Issue an error is any of the required fields were missing.
+                if (!seen_.all ()) {
+                    return return_type{error::bss_section_was_incomplete};
+                }
+                if (!is_power_of_two (align_)) {
+                    return return_type{error::alignment_must_be_power_of_2};
+                }
+                using align_type = decltype (content_->align);
+                static_assert (std::is_unsigned<align_type>::value,
+                               "Expected alignment to be unsigned");
+                if (align_ > std::numeric_limits<align_type>::max ()) {
+                    return return_type{error::alignment_is_too_great};
+                }
+                content_->kind = kind_;
+                content_->align = static_cast<align_type> (align_);
+                content_->data.resize (size_);
+                return return_type{content_};
             }
-            if (!is_power_of_two (align_)) {
-                return return_type{import_error::alignment_must_be_power_of_2};
-            }
-            using align_type = decltype (content_->align);
-            static_assert (std::is_unsigned<align_type>::value,
-                           "Expected alignment to be unsigned");
-            if (align_ > std::numeric_limits<align_type>::max ()) {
-                return return_type{import_error::alignment_is_too_great};
-            }
-            content_->kind = kind_;
-            content_->align = static_cast<align_type> (align_);
-            content_->data.resize (size_);
-            return return_type{content_};
-        }
 
-        // end object
-        // ~~~~~~~~~~
-        template <typename OutputIterator>
-        std::error_code import_bss_section<OutputIterator>::end_object () {
-            error_or<repo::section_content *> const c = this->content_object ();
-            if (!c) {
-                return c.get_error ();
+            // end object
+            // ~~~~~~~~~~
+            template <typename OutputIterator>
+            std::error_code bss_section<OutputIterator>::end_object () {
+                error_or<repo::section_content *> const c = this->content_object ();
+                if (!c) {
+                    return c.get_error ();
+                }
+                *out_ = std::make_unique<
+                    repo::section_to_creation_dispatcher<repo::bss_section>::type> (c.get ());
+                return pop ();
             }
-            *out_ =
-                std::make_unique<repo::section_to_creation_dispatcher<repo::bss_section>::type> (
-                    c.get ());
-            return pop ();
-        }
 
-    } // end namespace exchange
+        } // end namespace import
+    }     // end namespace exchange
 } // end namespace pstore
 
 #endif // PSTORE_EXCHANGE_IMPORT_BSS_SECTION_HPP
