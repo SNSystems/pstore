@@ -41,6 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export_emit.cpp
+/// \brief Implements types and functions used in the writing of JSON data such as indents, strings,
+/// arrays, and so on.
+
 #include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 

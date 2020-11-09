@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export.hpp
+/// \brief The top level entry point for exporting a pstore database.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_HPP
 #define PSTORE_EXCHANGE_EXPORT_HPP
 

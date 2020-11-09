@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export.cpp
+/// \brief Implements the top level entry point for exporting a pstore database.
+
 #include "pstore/exchange/export.hpp"
 
 #include <type_traits>

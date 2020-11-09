@@ -41,6 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file export_emit.hpp
+/// \brief Types and functions used in the writing of JSON data such as indents, strings, arrays,
+/// and so on.
+
 #ifndef PSTORE_EXCHANGE_EXPORT_EMIT_HPP
 #define PSTORE_EXCHANGE_EXPORT_EMIT_HPP
 
