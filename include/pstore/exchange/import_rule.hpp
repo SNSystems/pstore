@@ -41,16 +41,17 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file import_rule.hpp
+/// \brief Declares the "rule" class which models a production in the import grammar and its
+/// interface with the JSON parser.
+
 #ifndef PSTORE_EXCHANGE_IMPORT_RULE_HPP
 #define PSTORE_EXCHANGE_IMPORT_RULE_HPP
 
 #include <sstream>
-#include <stack>
-#include <system_error>
 
 #include "pstore/exchange/import_context.hpp"
 #include "pstore/os/logging.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -65,6 +66,9 @@ namespace pstore {
             //* |_|  \_,_|_\___| *
             //*                  *
             //-MARK: rule
+            /// This class models a production rule in the import grammar. Subclasses are used to
+            /// specialize for different classes of input (such as compilations, fragments, and so
+            /// on).
             class rule {
             public:
                 explicit rule (not_null<context *> const context) noexcept
@@ -94,6 +98,11 @@ namespace pstore {
                 /// Creates an instance of type T and pushes it onto the parse stack. The provided
                 /// arguments are forwarded to the T constructor in addition to the parse stack
                 /// itself.
+                ///
+                /// \tparam T  The type of the new rule to instantiate.
+                /// \tparam Args The types of the arguments for the constructor of type T.
+                /// \param args The parameters to be passed to the contructor of the new instance of
+                /// type T.
                 template <typename T, typename... Args>
                 std::error_code push (Args... args) {
                     context_->stack.push (std::make_unique<T> (context_, args...));
@@ -102,6 +111,13 @@ namespace pstore {
                 }
 
             protected:
+                /// Removes the top-most element from the parse-stack and replaces it with a newly
+                /// instantiate object.
+                ///
+                /// \tparam T  The type of the new rule to instantiate.
+                /// \tparam Args The types of the arguments for the constructor of type T.
+                /// \param args The parameters to be passed to the contructor of the new instance of
+                /// type T.
                 template <typename T, typename... Args>
                 std::error_code replace_top (Args... args) {
                     auto p = std::make_unique<T> (context_, args...);
@@ -114,6 +130,9 @@ namespace pstore {
                     return {};
                 }
 
+                /// Removes the top-most element from the parse-stack and returns "no-error".
+                /// This member function is usually called to signal the end of the current grammar
+                /// rule.
                 std::error_code pop () {
                     log_top (false);
                     context_->stack.pop ();
@@ -136,6 +155,9 @@ namespace pstore {
 
 
             //-MARK: callbacks
+            /// Implements the callback interface required by the JSON parser. Each member function
+            /// forwards to the top-most element on the parse-stack (an instance of a subclass of
+            /// pstore::exchange::import::rule).
             class callbacks {
             public:
                 using result_type = void;

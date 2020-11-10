@@ -41,6 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file import_rule.cpp
+/// \brief Defines the "rule" class which models a production in the import grammar and its
+/// interface with the JSON parser.
+
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/support/array_elements.hpp"
