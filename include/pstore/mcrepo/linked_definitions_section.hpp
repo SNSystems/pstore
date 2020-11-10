@@ -91,7 +91,7 @@ namespace pstore {
         class linked_definitions : public section_base {
         public:
             struct value_type {
-                value_type () noexcept {}
+                value_type () noexcept = default;
                 constexpr value_type (index::digest const compilation_, std::uint32_t const index_,
                                       typed_address<compilation_member> const pointer_) noexcept
                         : compilation{compilation_}
@@ -109,7 +109,7 @@ namespace pstore {
                 /// The index of the definition within the compilation whose digest is given by \ref
                 /// value_type.compilation. This value must be less than the number of definitions
                 /// in this compilation.
-                std::uint32_t index;
+                std::uint32_t index = 0;
                 std::uint32_t unused = 0;
                 /// The address of the definition given by \ref value_type.compilation and \ref
                 /// value_type.index. This is used as a shortcut by consumers to eliminate the need
