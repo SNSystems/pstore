@@ -65,8 +65,8 @@
 #    include <Windows.h>
 #endif
 
-#include "pstore/config/config.hpp"
 #include "pstore/adt/error_or.hpp"
+#include "pstore/config/config.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"

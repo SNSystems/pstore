@@ -46,8 +46,8 @@
 
 #include <cassert>
 #include <cctype>
-#include <cstdint>
 #include <cmath>
+#include <cstdint>
 #include <cstring>
 #include <limits>
 #include <memory>
