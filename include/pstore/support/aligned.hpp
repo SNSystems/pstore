@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file aligned.hpp
+/// \brief Functions for aligning values and pointers.
+
 #ifndef PSTORE_SUPPORT_ALIGNED_HPP
 #define PSTORE_SUPPORT_ALIGNED_HPP
 
