@@ -188,6 +188,7 @@ namespace pstore {
             ///
             /// \tparam OtherKeyType  A type whose serialized representation is compatible with
             /// KeyType.
+            /// \param db A database to which the index belongs.
             /// \param key  The key value of the element to search for.
             /// \return Iterator an an element with key equivalent to \p key. If no such element
             /// is found, the past-the-end iterator is returned.
@@ -198,6 +199,11 @@ namespace pstore {
                 return const_iterator{map_.find (db, key)};
             }
 
+            /// Flush any modified index nodes to the store.
+            ///
+            /// \param transaction  The transaction to which the set will be written.
+            /// \param generation The generation number to which the set will be written.
+            /// \returns The address of the index root node.
             typed_address<header_block> flush (transaction_base & transaction,
                                                unsigned generation) {
                 return map_.flush (transaction, generation);

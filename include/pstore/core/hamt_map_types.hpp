@@ -629,6 +629,10 @@ namespace pstore {
                 /// \note It is expected that both \p node and \p internal are references to the
                 /// same node.
                 ///
+                /// \tparam SequenceContainer A container of internal_node instances which supports
+                ///   emplace_back().
+                /// \param container Points to the container which will own the new internal node
+                ///   instance.
                 /// \param node A reference to an internal node. This may be either in-store on the
                 /// heap. If on the heap the returned value is the underlying pointer.
                 /// \param internal  A read-only instance of an internal node. If the \p node

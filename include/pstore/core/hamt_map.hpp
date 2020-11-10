@@ -372,11 +372,11 @@ namespace pstore {
             }
             ///@}
 
-            /// Flush any modified tree nodes to the store.
+            /// Flush any modified index nodes to the store.
             ///
             /// \param transaction  The transaction to which the map will be written.
             /// \param generation The generation number to which the map will be written.
-            /// \returns The address of the tree root node.
+            /// \returns The address of the index root node.
             typed_address<header_block> flush (transaction_base & transaction, unsigned generation);
 
             /// \name Accessors
