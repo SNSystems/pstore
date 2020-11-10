@@ -110,6 +110,7 @@ namespace pstore {
         ///
         /// On Windows, the drive letter is not reset when an absolute path component (e.g.,
         /// "\\foo") is encountered. If a component contains a drive letter, all previous components
+        ///@{
 
         inline std::string join (std::string const & path,
                                  std::initializer_list<std::string> const & paths) {
