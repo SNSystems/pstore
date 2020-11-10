@@ -97,10 +97,10 @@ namespace pstore {
 
 
         template <typename T>
-        unsigned section_alignment (T const & t) noexcept;
+        unsigned section_alignment (T const & section) noexcept;
 
         template <typename T>
-        std::uint64_t section_size (T const & t) noexcept;
+        std::uint64_t section_size (T const & section) noexcept;
 
         //*                  _   _               _ _               _      _             *
         //*  __ _ _ ___ __ _| |_(_)___ _ _    __| (_)____ __  __ _| |_ __| |_  ___ _ _  *

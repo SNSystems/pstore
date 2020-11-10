@@ -124,9 +124,9 @@ namespace pstore {
 
         enum parser_extensions : unsigned {
             none = 0U,
-            bash_comments = 1U << 0,
-            single_line_comments = 1U << 1,
-            multi_line_comments = 1U << 2,
+            bash_comments = 1U << 0U,
+            single_line_comments = 1U << 1U,
+            multi_line_comments = 1U << 2U,
             all = ~none,
         };
 
@@ -174,7 +174,7 @@ namespace pstore {
         public:
             using result_type = typename Callbacks::result_type;
 
-            explicit parser (Callbacks callbacks = Callbacks (), parser_extensions enabled = none);
+            explicit parser (Callbacks callbacks = Callbacks{}, parser_extensions extensions = none);
 
             ///@{
             /// Parses a chunk of JSON input. This function may be called repeatedly with portions
@@ -320,7 +320,13 @@ namespace pstore {
             public:
                 using pointer = std::unique_ptr<matcher, deleter<matcher>>;
 
+                matcher (matcher const & ) = delete;
+                matcher (matcher && ) noexcept = delete;
+
                 virtual ~matcher () = default;
+
+                matcher & operator= (matcher const & ) = delete;
+                matcher & operator= (matcher && ) noexcept = delete;
 
                 /// Called for each character as it is consumed from the input.
                 ///
@@ -441,7 +447,7 @@ namespace pstore {
                     break;
                 case last_state:
                     if (ch) {
-                        if (std::isalnum (*ch)) {
+                        if (std::isalnum (*ch) != 0) {
                             this->set_error (parser, error_code::unrecognized_token);
                             return {nullptr, true};
                         }
@@ -1718,7 +1724,7 @@ namespace pstore {
             };
             template <>
             struct default_return<void> {
-                static void get () { return; }
+                static void get () {}
             };
 
         } // end namespace details

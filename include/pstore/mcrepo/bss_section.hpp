@@ -78,17 +78,19 @@ namespace pstore {
             bss_section (bss_section const &) = delete;
             bss_section (bss_section &&) = delete;
 
+            ~bss_section () noexcept = default;
+
             bss_section & operator= (bss_section const &) = delete;
             bss_section & operator= (bss_section &&) = delete;
 
             unsigned align () const noexcept { return 1U << align_.value (); }
             size_type size () const noexcept { return static_cast<size_type> (size_.value ()); }
 
-            container<internal_fixup> ifixups () const { return {}; }
-            container<external_fixup> xfixups () const { return {}; }
+            static container<internal_fixup> ifixups () { return {}; }
+            static container<external_fixup> xfixups () { return {}; }
 
             /// Returns the number of bytes occupied by this section.
-            std::size_t size_bytes () const noexcept { return sizeof (bss_section); }
+            static std::size_t size_bytes () noexcept { return sizeof (bss_section); }
 
         private:
             union {
@@ -104,13 +106,13 @@ namespace pstore {
 
         template <>
         inline unsigned section_alignment<pstore::repo::bss_section> (
-            pstore::repo::bss_section const & s) noexcept {
-            return s.align ();
+            pstore::repo::bss_section const & section) noexcept {
+            return section.align ();
         }
         template <>
         inline std::uint64_t
-        section_size<pstore::repo::bss_section> (pstore::repo::bss_section const & s) noexcept {
-            return s.size ();
+        section_size<pstore::repo::bss_section> (pstore::repo::bss_section const & section) noexcept {
+            return section.size ();
         }
 
         //*                  _   _               _ _               _      _             *
@@ -136,8 +138,12 @@ namespace pstore {
             }
 
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
-            bss_section_creation_dispatcher &
-            operator= (bss_section_creation_dispatcher const &) = delete;
+            bss_section_creation_dispatcher (bss_section_creation_dispatcher && ) noexcept =  delete;
+
+            ~bss_section_creation_dispatcher () noexcept = default;
+
+            bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher const &) = delete;
+            bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher && ) noexcept = delete;
 
             void set_content (gsl::not_null<section_content const *> const sec) {
                 validate (sec);
@@ -177,9 +183,15 @@ namespace pstore {
                     : b_{b} {}
             bss_section_dispatcher (unsigned const align, bss_section::size_type const size)
                     : bss_section_dispatcher (bss_section{align, size}) {}
+            bss_section_dispatcher (bss_section_dispatcher const & ) = delete;
+            bss_section_dispatcher (bss_section_dispatcher && ) noexcept = delete;
+
             ~bss_section_dispatcher () noexcept override;
 
-            std::size_t size_bytes () const final { return b_.size_bytes (); }
+            bss_section_dispatcher & operator= (bss_section_dispatcher const & ) = delete;
+            bss_section_dispatcher & operator= (bss_section_dispatcher && ) = delete;
+
+            std::size_t size_bytes () const final { return bss_section::size_bytes (); }
             unsigned align () const final { return b_.align (); }
             std::size_t size () const final { return b_.size (); }
             container<internal_fixup> ifixups () const final { return {}; }
