@@ -44,13 +44,8 @@
 #ifndef PSTORE_CMD_UTIL_OPTION_HPP
 #define PSTORE_CMD_UTIL_OPTION_HPP
 
-#include <cassert>
-#include <list>
-#include <type_traits>
-
 #include "pstore/cmd_util/csv.hpp"
 #include "pstore/cmd_util/parser.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace cmd_util {

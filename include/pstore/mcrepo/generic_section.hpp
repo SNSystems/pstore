@@ -45,10 +45,7 @@
 #define PSTORE_MCREPO_GENERIC_SECTION_HPP
 
 #include <algorithm>
-#include <cstdint>
 #include <cstring>
-#include <new>
-#include <type_traits>
 
 #include "pstore/adt/small_vector.hpp"
 #include "pstore/core/address.hpp"

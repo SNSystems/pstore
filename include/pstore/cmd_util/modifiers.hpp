@@ -44,14 +44,9 @@
 #ifndef PSTORE_CMD_UTIL_MODIFIERS_HPP
 #define PSTORE_CMD_UTIL_MODIFIERS_HPP
 
-#include <cassert>
-#include <string>
-#include <utility>
-
 #include "pstore/adt/small_vector.hpp"
 #include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/option.hpp"
-#include "pstore/cmd_util/parser.hpp"
 
 namespace pstore {
     namespace cmd_util {

@@ -46,16 +46,11 @@
 #ifndef PSTORE_OS_LOGGING_HPP
 #define PSTORE_OS_LOGGING_HPP
 
-#include <cassert>
-#include <ctime>
 #include <fstream>
-#include <memory>
 #include <mutex>
-#include <string>
 
 #include "pstore/os/file.hpp"
 #include "pstore/os/thread.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace logging {

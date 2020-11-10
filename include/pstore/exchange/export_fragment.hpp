@@ -44,9 +44,7 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP
 #define PSTORE_EXCHANGE_EXPORT_FRAGMENT_HPP
 
-#include "pstore/exchange/export_names.hpp"
 #include "pstore/exchange/export_section.hpp"
-#include "pstore/mcrepo/fragment.hpp"
 #include "pstore/mcrepo/section.hpp"
 
 namespace pstore {

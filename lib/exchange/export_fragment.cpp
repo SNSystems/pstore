@@ -44,12 +44,7 @@
 #include "pstore/exchange/export_fragment.hpp"
 
 #include "pstore/core/hamt_map.hpp"
-#include "pstore/core/index_types.hpp"
 #include "pstore/diff/diff.hpp"
-#include "pstore/exchange/export_emit.hpp"
-#include "pstore/exchange/export_fixups.hpp"
-#include "pstore/exchange/export_ostream.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 

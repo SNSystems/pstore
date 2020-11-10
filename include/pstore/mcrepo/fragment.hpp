@@ -59,7 +59,6 @@
 #include "pstore/core/transaction.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"

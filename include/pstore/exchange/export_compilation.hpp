@@ -50,7 +50,6 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 #define PSTORE_EXCHANGE_EXPORT_COMPILATION_HPP
 
-#include "pstore/exchange/export_emit.hpp"
 #include "pstore/exchange/export_names.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 

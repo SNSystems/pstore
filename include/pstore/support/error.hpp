@@ -48,9 +48,7 @@
 #define PSTORE_SUPPORT_ERROR_HPP
 
 #include <cstdlib>
-#include <string>
 #include <system_error>
-#include <type_traits>
 
 #ifdef _WIN32
 #    define NOMINMAX
@@ -58,7 +56,6 @@
 #    include <Windows.h>
 #endif
 
-#include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
 #ifndef PSTORE_EXCEPTIONS

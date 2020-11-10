@@ -51,10 +51,8 @@
 #define PSTORE_EXCHANGE_IMPORT_GENERIC_SECTION_HPP
 
 #include "pstore/exchange/import_fixups.hpp"
-#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
 #include "pstore/exchange/import_rule.hpp"
-#include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/support/base64.hpp"
 

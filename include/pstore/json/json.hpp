@@ -60,7 +60,6 @@
 #include "pstore/json/json_error.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/max.hpp"
-#include "pstore/support/maybe.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 

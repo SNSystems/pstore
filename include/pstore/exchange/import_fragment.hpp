@@ -50,11 +50,8 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_FRAGMENT_HPP
 #define PSTORE_EXCHANGE_IMPORT_FRAGMENT_HPP
 
-#include <cassert>
 #include <vector>
 
-#include "pstore/core/index_types.hpp"
-#include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/import_section_to_importer.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 #include "pstore/support/base64.hpp"

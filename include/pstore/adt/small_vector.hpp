@@ -52,7 +52,6 @@
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
-#include <type_traits>
 #include <vector>
 
 #include "pstore/support/inherit_const.hpp"

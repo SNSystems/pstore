@@ -46,20 +46,15 @@
 #define PSTORE_SUPPORT_UINT128_HPP
 
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <limits>
 #include <ostream>
 #include <string>
-#include <type_traits>
 #include <utility>
 
-#include "pstore/config/config.hpp"
 #include "pstore/support/maybe.hpp"
-#include "pstore/support/portab.hpp"
-
 
 namespace pstore {
     class uint128;

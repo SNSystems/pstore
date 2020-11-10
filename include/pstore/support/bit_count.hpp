@@ -48,8 +48,6 @@
 #ifndef PSTORE_SUPPORT_BIT_COUNT_HPP
 #define PSTORE_SUPPORT_BIT_COUNT_HPP
 
-#include <cassert>
-#include <cstdint>
 #ifdef _MSC_VER
 #    include <intrin.h>
 #endif

@@ -47,10 +47,7 @@
 
 #include <memory>
 
-#include "pstore/core/db_archive.hpp"
 #include "pstore/core/sstring_view_archive.hpp"
-#include "pstore/serialize/types.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
 

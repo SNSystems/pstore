@@ -53,7 +53,6 @@
 #include <bitset>
 
 #include "pstore/exchange/import_names.hpp"
-#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 

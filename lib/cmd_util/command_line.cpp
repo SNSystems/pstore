@@ -43,7 +43,6 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/cmd_util/command_line.hpp"
 
-#include "pstore/cmd_util/option.hpp"
 #include "pstore/cmd_util/string_distance.hpp"
 
 namespace pstore {

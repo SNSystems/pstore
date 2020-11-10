@@ -44,9 +44,6 @@
 #ifndef PSTORE_SUPPORT_UNSIGNED_CAST_HPP
 #define PSTORE_SUPPORT_UNSIGNED_CAST_HPP
 
-#include <cassert>
-#include <type_traits>
-
 #include "pstore/support/error.hpp"
 
 namespace pstore {

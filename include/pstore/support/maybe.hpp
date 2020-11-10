@@ -55,7 +55,6 @@
 #include <cassert>
 #include <new>
 #include <stdexcept>
-#include <type_traits>
 
 #include "pstore/adt/utility.hpp"
 #include "pstore/support/inherit_const.hpp"

@@ -47,14 +47,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file linked_definitions_section.hpp
+/// \brief Contains declarations for the "linked-definition" section type.
+
 #ifndef PSTORE_MCREPO_LINKED_DEFINITIONS_SECTION_HPP
 #define PSTORE_MCREPO_LINKED_DEFINITIONS_SECTION_HPP
 
-#include <cstdlib>
-
-#include "pstore/core/address.hpp"
 #include "pstore/mcrepo/compilation.hpp"
-#include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/section.hpp"
 #include "pstore/support/inherit_const.hpp"
 

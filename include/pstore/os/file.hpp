@@ -47,17 +47,9 @@
 #ifndef PSTORE_OS_FILE_HPP
 #define PSTORE_OS_FILE_HPP
 
-#include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <ctime>
 #include <functional>
-#include <limits>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <system_error>
-#include <type_traits>
 
 #ifdef _WIN32
 #    define NOMINMAX
@@ -66,10 +58,8 @@
 #endif
 
 #include "pstore/adt/error_or.hpp"
-#include "pstore/config/config.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
 
@@ -81,7 +71,7 @@ namespace pstore {
     namespace file {
         namespace details {
 
-            // name_from_template
+            // name from template
             // ~~~~~~~~~~~~~~~~~~
             /// \brief The name_from_template() function takes the given file name template and
             /// returns a string in which a portion of the template is overwritten to create a file

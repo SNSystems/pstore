@@ -44,12 +44,10 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_NAMES_HPP
 #define PSTORE_EXCHANGE_IMPORT_NAMES_HPP
 
-#include <list>
 #include <unordered_map>
 
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
-#include "pstore/core/indirect_string.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 

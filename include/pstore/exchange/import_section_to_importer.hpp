@@ -52,7 +52,6 @@
 
 #include "pstore/exchange/import_bss_section.hpp"
 #include "pstore/exchange/import_debug_line_section.hpp"
-#include "pstore/exchange/import_generic_section.hpp"
 #include "pstore/exchange/import_linked_definitions_section.hpp"
 
 namespace pstore {

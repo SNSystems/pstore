@@ -57,10 +57,8 @@
 #define PSTORE_EXCHANGE_IMPORT_LINKED_DEFINITIONS_SECTION_HPP
 
 #include <bitset>
-#include <vector>
 
 #include "pstore/exchange/import_names.hpp"
-#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
 

@@ -49,16 +49,11 @@
 #define PSTORE_SUPPORT_UTF_HPP
 
 #include <algorithm>
-#include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <iosfwd>
-#include <string>
-#include <type_traits>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"
-#include "pstore/support/portab.hpp"
 
 #if defined(_WIN32)
 

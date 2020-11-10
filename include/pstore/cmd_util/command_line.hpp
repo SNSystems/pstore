@@ -44,18 +44,10 @@
 #ifndef PSTORE_CMD_UTIL_COMMAND_LINE_HPP
 #define PSTORE_CMD_UTIL_COMMAND_LINE_HPP
 
-#include <string>
-#include <tuple>
-
-#include "pstore/cmd_util/category.hpp"
 #include "pstore/cmd_util/help.hpp"
 #include "pstore/cmd_util/modifiers.hpp"
-#include "pstore/cmd_util/stream_traits.hpp"
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/os/path.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/support/maybe.hpp"
-#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace cmd_util {
