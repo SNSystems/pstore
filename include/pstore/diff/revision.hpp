@@ -59,4 +59,4 @@ namespace pstore {
     } // namespace diff
 } // namespace pstore
 
-#endif // DUMP_DIFF_VALUE_HPP
+#endif // PSTORE_DIFF_REVISION_HPP

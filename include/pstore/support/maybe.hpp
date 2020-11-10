@@ -49,8 +49,8 @@
 /// methods of that type, so we should switch to the standard type once we're able to migrate to
 /// C++17.
 
-#ifndef PSTORE_ADT_MAYBE_HPP
-#define PSTORE_ADT_MAYBE_HPP
+#ifndef PSTORE_SUPPORT_MAYBE_HPP
+#define PSTORE_SUPPORT_MAYBE_HPP
 
 #include <cassert>
 #include <new>
@@ -286,4 +286,4 @@ namespace pstore {
 
 } // namespace pstore
 
-#endif // PSTORE_ADT_MAYBE_HPP
+#endif // PSTORE_SUPPORT_MAYBE_HPP

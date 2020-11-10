@@ -41,8 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_MCREPO_ERROR_HPP
-#define PSTORE_MCREPO_ERROR_HPP
+#ifndef PSTORE_MCREPO_REPO_ERROR_HPP
+#define PSTORE_MCREPO_REPO_ERROR_HPP
 
 #include <string>
 #include <system_error>
@@ -82,4 +82,4 @@ namespace std {
 
 } // end namespace std
 
-#endif // PSTORE_MCREPO_ERROR_HPP
+#endif // PSTORE_MCREPO_REPO_ERROR_HPP
