@@ -44,10 +44,8 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_NAMES_HPP
 #define PSTORE_EXCHANGE_EXPORT_NAMES_HPP
 
-#include <cstdint>
 #include <unordered_map>
 
-#include "pstore/core/address.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/core/indirect_string.hpp"
 #include "pstore/diff/diff.hpp"

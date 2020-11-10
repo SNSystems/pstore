@@ -52,11 +52,8 @@
 
 #include <bitset>
 
-#include "pstore/exchange/import_error.hpp"
-#include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_names.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
-#include "pstore/exchange/import_rule.hpp"
 #include "pstore/exchange/import_terminals.hpp"
 #include "pstore/mcrepo/compilation.hpp"
 

@@ -48,7 +48,6 @@
 #ifndef PSTORE_CORE_DB_ARCHIVE_HPP
 #define PSTORE_CORE_DB_ARCHIVE_HPP
 
-#include "pstore/core/address.hpp"
 #include "pstore/core/transaction.hpp"
 #include "pstore/serialize/archive.hpp"
 #include "pstore/support/error.hpp"

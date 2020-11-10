@@ -48,11 +48,8 @@
 
 #include "pstore/config/config.hpp"
 #include "pstore/core/database.hpp"
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/hamt_map_types.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/diff/revision.hpp"
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {

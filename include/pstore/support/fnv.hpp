@@ -56,7 +56,6 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <string>
 
 #include "pstore/support/gsl.hpp"
 

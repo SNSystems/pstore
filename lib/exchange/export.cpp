@@ -48,10 +48,7 @@
 
 #include <type_traits>
 
-#include "pstore/adt/sstring_view.hpp"
-#include "pstore/core/database.hpp"
 #include "pstore/core/generation_iterator.hpp"
-#include "pstore/diff/diff.hpp"
 #include "pstore/exchange/export_compilation.hpp"
 #include "pstore/exchange/export_fragment.hpp"
 #include "pstore/mcrepo/generic_section.hpp"

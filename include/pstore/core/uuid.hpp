@@ -48,12 +48,10 @@
 #define PSTORE_CORE_UUID_HPP
 
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <string>
 
 #include "pstore/support/maybe.hpp"
-#include "pstore/support/portab.hpp"
 
 #if defined(_WIN32)
 #    define WIN32_LEAN_AND_MEAN

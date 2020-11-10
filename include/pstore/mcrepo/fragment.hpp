@@ -50,20 +50,17 @@
 #include <cstdint>
 #include <iterator>
 #include <limits>
-#include <type_traits>
 #include <vector>
 
 #include "pstore/adt/small_vector.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/address.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/mcrepo/bss_section.hpp"
 #include "pstore/mcrepo/debug_line_section.hpp"
 #include "pstore/mcrepo/linked_definitions_section.hpp"
 #include "pstore/mcrepo/repo_error.hpp"
 #include "pstore/mcrepo/sparse_array.hpp"
 #include "pstore/support/aligned.hpp"
-#include "pstore/support/inherit_const.hpp"
 #include "pstore/support/pointee_adaptor.hpp"
 
 namespace pstore {

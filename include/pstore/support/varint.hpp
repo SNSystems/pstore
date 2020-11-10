@@ -83,10 +83,7 @@
 #ifndef PSTORE_SUPPORT_VARINT_HPP
 #define PSTORE_SUPPORT_VARINT_HPP
 
-#include <utility>
-
 #include "pstore/support/bit_count.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace varint {

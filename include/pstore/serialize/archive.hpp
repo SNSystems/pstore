@@ -132,20 +132,10 @@
 #ifndef PSTORE_SERIALIZE_ARCHIVE_HPP
 #define PSTORE_SERIALIZE_ARCHIVE_HPP
 
-#include <algorithm>
-#include <cassert>
-#include <cstdlib>
 #include <cstring>
-#include <iosfwd>
-#include <iterator>
-#include <stdexcept>
-#include <system_error>
-#include <type_traits>
-#include <vector>
 
 #include "pstore/serialize/common.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace serialize {

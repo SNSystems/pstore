@@ -45,7 +45,6 @@
 
 #include <bitset>
 
-#include "pstore/core/database.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
 #include "pstore/exchange/import_transaction.hpp"
 #include "pstore/exchange/import_uuid.hpp"

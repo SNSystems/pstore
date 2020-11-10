@@ -48,8 +48,6 @@
 #include "pstore/dump/mcdebugline_value.hpp"
 #include "pstore/dump/mcdisassembler_value.hpp"
 #include "pstore/dump/value.hpp"
-#include "pstore/core/db_archive.hpp"
-#include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 
 namespace pstore {

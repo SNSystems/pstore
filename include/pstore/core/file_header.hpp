@@ -67,15 +67,11 @@
 #ifndef PSTORE_CORE_FILE_HEADER_HPP
 #define PSTORE_CORE_FILE_HEADER_HPP
 
-#include <array>
 #include <atomic>
-#include <cstddef>
-#include <cstdint>
 
 #include "pstore/core/address.hpp"
 #include "pstore/core/uuid.hpp"
 #include "pstore/serialize/types.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
 

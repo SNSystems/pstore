@@ -46,12 +46,6 @@
 #ifndef PSTORE_CORE_REGION_HPP
 #define PSTORE_CORE_REGION_HPP
 
-#include <cassert>
-#include <cstdint>
-#include <memory>
-#include <vector>
-
-#include "pstore/config/config.hpp"
 #include "pstore/os/memory_mapper.hpp"
 
 namespace pstore {

@@ -46,7 +46,6 @@
 
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/dump/value.hpp"
-#include "pstore/mcrepo/compilation.hpp"
 #include "pstore/mcrepo/fragment.hpp"
 
 namespace pstore {

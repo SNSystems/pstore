@@ -44,7 +44,6 @@
 #ifndef PSTORE_DUMP_INDEX_VALUE_HPP
 #define PSTORE_DUMP_INDEX_VALUE_HPP
 
-#include "pstore/core/database.hpp"
 #include "pstore/core/index_types.hpp"
 #include "pstore/dump/mcrepo_value.hpp"
 

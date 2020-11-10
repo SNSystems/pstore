@@ -44,12 +44,6 @@
 
 #include "pstore/diff/diff_value.hpp"
 
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/hamt_set.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/core/sstring_view_archive.hpp"
-
-
 namespace pstore {
     namespace diff {
 

@@ -43,8 +43,6 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/export_fragment.hpp"
 
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/diff/diff.hpp"
 #include "pstore/support/base64.hpp"
 #include "pstore/support/gsl.hpp"
 

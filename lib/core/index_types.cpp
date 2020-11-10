@@ -44,9 +44,7 @@
 
 #include "pstore/core/index_types.hpp"
 
-#include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
-#include "pstore/core/transaction.hpp"
 
 namespace {
 

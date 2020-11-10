@@ -46,9 +46,7 @@
 
 #include "pstore/serialize/archive.hpp"
 
-#include <algorithm>
 #include <iomanip>
-#include <iterator>
 #include <ostream>
 
 #include "pstore/support/ios_state.hpp"

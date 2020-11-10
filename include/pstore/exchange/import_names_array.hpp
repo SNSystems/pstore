@@ -52,7 +52,6 @@
 
 #include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_names.hpp"
-#include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {
     namespace exchange {

@@ -46,13 +46,9 @@
 #ifndef PSTORE_CORE_STORAGE_HPP
 #define PSTORE_CORE_STORAGE_HPP
 
-#include <cassert>
-#include <memory>
-
 #include "pstore/core/address.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/support/aligned.hpp"
-#include "pstore/support/inherit_const.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {

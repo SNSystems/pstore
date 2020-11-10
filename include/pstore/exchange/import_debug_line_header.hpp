@@ -52,7 +52,6 @@
 
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_rule.hpp"
 #include "pstore/support/base64.hpp"

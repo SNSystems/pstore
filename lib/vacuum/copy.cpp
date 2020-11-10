@@ -50,10 +50,8 @@
 #include <sstream>
 #include <thread>
 
-#include "pstore/core/database.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/thread.hpp"
 #include "pstore/support/portab.hpp"

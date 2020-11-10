@@ -44,11 +44,9 @@
 #ifndef PSTORE_DIFF_VALUE_HPP
 #define PSTORE_DIFF_VALUE_HPP
 
-#include "pstore/core/database.hpp"
 #include "pstore/diff/diff.hpp"
 #include "pstore/diff/revision.hpp"
 #include "pstore/dump/db_value.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace diff {

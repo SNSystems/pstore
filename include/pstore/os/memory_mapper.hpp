@@ -55,10 +55,6 @@
 #ifndef PSTORE_OS_MEMORY_MAPPER_HPP
 #define PSTORE_OS_MEMORY_MAPPER_HPP
 
-#include <cstdint>
-#include <iosfwd>
-#include <memory>
-
 #include "pstore/os/file.hpp"
 
 namespace pstore {

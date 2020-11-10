@@ -52,22 +52,9 @@
 #ifndef PSTORE_ADT_SSTRING_VIEW_HPP
 #define PSTORE_ADT_SSTRING_VIEW_HPP
 
-#include <array>
-#include <cassert>
 #include <cstring>
-#include <functional>
-#include <iterator>
-#include <limits>
-#include <memory>
-#include <ostream>
-#include <string>
-#include <type_traits>
-#include <utility>
 
-#include "pstore/config/config.hpp"
 #include "pstore/support/fnv.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/support/portab.hpp"
 #include "pstore/support/varint.hpp"
 
 namespace pstore {

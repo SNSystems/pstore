@@ -47,14 +47,11 @@
 #define PSTORE_CORE_HAMT_MAP_HPP
 
 #include <iterator>
-#include <type_traits>
 
 #include "pstore/adt/chunked_vector.hpp"
-#include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/hamt_map_types.hpp"
-#include "pstore/core/transaction.hpp"
 #include "pstore/serialize/standard_types.hpp"
 #include "pstore/support/portab.hpp"
 

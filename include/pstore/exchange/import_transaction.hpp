@@ -53,7 +53,6 @@
 #include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_compilation.hpp"
 #include "pstore/exchange/import_debug_line_header.hpp"
-#include "pstore/exchange/import_error.hpp"
 #include "pstore/exchange/import_fragment.hpp"
 #include "pstore/exchange/import_names_array.hpp"
 

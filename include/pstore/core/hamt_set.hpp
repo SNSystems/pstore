@@ -46,9 +46,6 @@
 #ifndef PSTORE_CORE_HAMT_SET_HPP
 #define PSTORE_CORE_HAMT_SET_HPP
 
-// standard library
-#include <iterator>
-
 // pstore includes
 #include "pstore/core/hamt_map.hpp"
 

@@ -62,7 +62,6 @@
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/endian.hpp"
 #include "pstore/http/send.hpp"
-#include "pstore/os/logging.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/utf.hpp"
 

@@ -46,8 +46,6 @@
 
 #include <new>
 
-#include "pstore/core/transaction.hpp"
-
 namespace pstore {
     namespace index {
         namespace details {

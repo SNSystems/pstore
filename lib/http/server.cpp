@@ -84,7 +84,6 @@
 #include "pstore/http/server_status.hpp"
 #include "pstore/http/ws_server.hpp"
 #include "pstore/http/wskey.hpp"
-#include "pstore/os/logging.hpp"
 
 namespace {
 

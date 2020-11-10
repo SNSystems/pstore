@@ -121,9 +121,7 @@
 #define PSTORE_SERIALIZE_TYPES_HPP
 
 #include <algorithm>
-#include <cassert>
 #include <cstring>
-#include <type_traits>
 
 #include "pstore/serialize/common.hpp"
 #include "pstore/support/gsl.hpp"
