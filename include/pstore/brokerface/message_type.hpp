@@ -4,7 +4,7 @@
 //* | | | | | |  __/\__ \__ \ (_| | (_| |  __/ | |_| |_| | |_) |  __/ *
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___|  \__|\__, | .__/ \___| *
 //*                                |___/            |___/|_|          *
-//===- include/pstore/broker_intf/message_type.hpp ------------------------===//
+//===- include/pstore/brokerface/message_type.hpp -------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,11 +42,11 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file message_type.hpp
-/// \brief Declares the pstore::broker::message_type class. Instances of this type are pushed into
-/// the named pipe by clients; the broker then reassembles complete messages from these pieces.
+/// \brief Declares the pstore::brokerface::message_type class. Instances of this type are pushed
+/// into the named pipe by clients; the broker then reassembles complete messages from these pieces.
 
-#ifndef PSTORE_MESSAGE_TYPE_HPP
-#define PSTORE_MESSAGE_TYPE_HPP
+#ifndef PSTORE_BROKERFACE_MESSAGE_TYPE_HPP
+#define PSTORE_BROKERFACE_MESSAGE_TYPE_HPP
 
 #include <algorithm>
 #include <array>
@@ -66,7 +66,7 @@
 #include "pstore/support/error.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         constexpr std::size_t message_size = 256;
 
@@ -170,6 +170,7 @@ namespace pstore {
 
         using message_ptr = std::unique_ptr<message_type>;
 
-    } // namespace broker
-} // namespace pstore
-#endif // PSTORE_MESSAGE_TYPE_HPP
+    } // end namespace brokerface
+} // end namespace pstore
+
+#endif // PSTORE_BROKERFACE_MESSAGE_TYPE_HPP

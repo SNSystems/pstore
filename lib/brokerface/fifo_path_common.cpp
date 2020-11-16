@@ -10,7 +10,7 @@
 //* | (_| (_) | | | | | | | | | | | (_) | | | | *
 //*  \___\___/|_| |_| |_|_| |_| |_|\___/|_| |_| *
 //*                                             *
-//===- lib/broker_intf/fifo_path_common.cpp -------------------------------===//
+//===- lib/brokerface/fifo_path_common.cpp --------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -51,7 +51,7 @@
 /// \brief Portions of the implementation of the broker::fifo_path class that are common to all
 ///   target platforms.
 
-#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 
 #include <sstream>
 #include <thread>
@@ -61,7 +61,7 @@
 #include "pstore/support/quoted.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         char const * const fifo_path::default_pipe_name = PSTORE_VENDOR_ID ".pstore_broker.fifo";
 
@@ -100,5 +100,5 @@ namespace pstore {
             return fd;
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore

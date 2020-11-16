@@ -4,7 +4,7 @@
 //*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
 //*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
 //*                                                  |_|     *
-//===- include/pstore/broker_intf/wsa_startup.hpp -------------------------===//
+//===- lib/brokerface/wsa_startup.cpp -------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,33 +41,26 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
-#ifndef PSTORE_BROKER_WSA_STARTUP_HPP
-#define PSTORE_BROKER_WSA_STARTUP_HPP
+#include "pstore/brokerface/wsa_startup.hpp"
 
 #ifdef _WIN32
+#    include <Winsock2.h>
 
 namespace pstore {
+    namespace brokerface {
 
-    class wsa_startup {
-    public:
-        wsa_startup () noexcept
-                : started_{start ()} {}
-        // no copy or assignment
-        wsa_startup (wsa_startup const &) = delete;
-        wsa_startup & operator= (wsa_startup const &) = delete;
+        wsa_startup::~wsa_startup () {
+            if (started_) {
+                WSACleanup ();
+            }
+        }
 
-        ~wsa_startup ();
+        bool wsa_startup::start () noexcept {
+            WSAData wsa_data;
+            return WSAStartup (MAKEWORD (2, 2), &wsa_data) == 0;
+        }
 
-        bool started () const noexcept { return started_; }
-
-    private:
-        static bool start () noexcept;
-        bool started_;
-    };
-
+    } // end namespace brokerface
 } // end namespace pstore
 
 #endif // _WIN32
-
-#endif // PSTORE_BROKER_WSA_STARTUP_HPP

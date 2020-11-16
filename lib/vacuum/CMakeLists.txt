@@ -62,4 +62,4 @@ add_pstore_library (
         watch.hpp
         user_options.hpp
 )
-target_link_libraries (pstore-vacuum-lib PUBLIC pstore-broker-intf pstore-core)
+target_link_libraries (pstore-vacuum-lib PUBLIC pstore-brokerface pstore-core)

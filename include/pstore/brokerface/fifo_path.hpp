@@ -4,7 +4,7 @@
 //* |  _| |  _| (_) | | |_) | (_| | |_| | | | *
 //* |_| |_|_|  \___/  | .__/ \__,_|\__|_| |_| *
 //*                   |_|                     *
-//===- include/pstore/broker_intf/fifo_path.hpp ---------------------------===//
+//===- include/pstore/brokerface/fifo_path.hpp ----------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -43,8 +43,8 @@
 //===----------------------------------------------------------------------===//
 /// \file fifo_path.hpp
 
-#ifndef PSTORE_BROKER_INTF_FIFO_PATH_HPP
-#define PSTORE_BROKER_INTF_FIFO_PATH_HPP
+#ifndef PSTORE_BROKERFACE_FIFO_PATH_HPP
+#define PSTORE_BROKERFACE_FIFO_PATH_HPP
 
 #include <atomic>
 #include <chrono>
@@ -53,12 +53,12 @@
 #include <string>
 #include <tuple>
 
-#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         class fifo_path {
         public:
@@ -142,7 +142,7 @@ namespace pstore {
             update_callback const update_cb_;
         };
 
-    } // end namespace broker
+    } // end namespace brokerface
 } // end namespace pstore
 
-#endif // PSTORE_BROKER_INTF_FIFO_PATH_HPP
+#endif // PSTORE_BROKERFACE_FIFO_PATH_HPP

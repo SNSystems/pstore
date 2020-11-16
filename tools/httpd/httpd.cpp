@@ -50,8 +50,8 @@
 #    include <signal.h>
 #endif
 
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/wsa_startup.hpp"
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/http/buffered_reader.hpp"
@@ -83,7 +83,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
 #ifdef _WIN32
-    pstore::wsa_startup startup;
+    pstore::brokerface::wsa_startup startup;
     if (!startup.started ()) {
         std::cerr << "WSAStartup() failed\n";
         return EXIT_FAILURE;

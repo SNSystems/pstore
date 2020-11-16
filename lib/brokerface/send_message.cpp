@@ -4,7 +4,7 @@
 //* \__ \  __/ | | | (_| | | | | | | |  __/\__ \__ \ (_| | (_| |  __/ *
 //* |___/\___|_| |_|\__,_| |_| |_| |_|\___||___/___/\__,_|\__, |\___| *
 //*                                                       |___/       *
-//===- lib/broker_intf/send_message.cpp -----------------------------------===//
+//===- lib/brokerface/send_message.cpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -43,13 +43,13 @@
 //===----------------------------------------------------------------------===//
 /// \file send_message.cpp
 
-#include "pstore/broker_intf/send_message.hpp"
+#include "pstore/brokerface/send_message.hpp"
 
 #include <iterator>
 #include <string>
 
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/message_type.hpp"
+#include "pstore/brokerface/writer.hpp"
 
 namespace {
 
@@ -58,7 +58,7 @@ namespace {
 } // end anonymous namespace
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         void send_message (writer & wr, bool const error_on_timeout, gsl::czstring const verb,
                            gsl::czstring const path) {
@@ -103,5 +103,5 @@ namespace pstore {
 
         std::uint32_t next_message_id () { return message_id.load (); }
 
-    } // end namespace broker
+    } // end namespace brokerface
 } // end namespace pstore

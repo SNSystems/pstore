@@ -71,9 +71,9 @@
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker/internal_commands.hpp"
 #include "pstore/broker/scavenger.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/message_type.hpp"
+#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/http/quit.hpp"
 #include "pstore/http/server.hpp"
 #include "pstore/os/logging.hpp"
@@ -93,9 +93,9 @@ namespace {
         log (pstore::logging::priority::info, "push command ",
              pstore::logging::quoted (message.c_str ()));
 
-        assert (message.length () <= pstore::broker::message_type::payload_chars);
-        auto msg = std::make_unique<pstore::broker::message_type> (mid++, std::uint16_t{0},
-                                                                   std::uint16_t{1}, message);
+        assert (message.length () <= pstore::brokerface::message_type::payload_chars);
+        auto msg = std::make_unique<pstore::brokerface::message_type> (mid++, std::uint16_t{0},
+                                                                       std::uint16_t{1}, message);
         cp->push_command (std::move (msg), nullptr);
     }
 
@@ -203,7 +203,7 @@ namespace {
 
 namespace {
 
-    pstore::signal_cv quit_info;
+    pstore::brokerface::signal_cv quit_info;
 
     //***************
     //* quit thread *

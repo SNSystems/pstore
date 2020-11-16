@@ -50,7 +50,7 @@
 #    include <sys/types.h>
 #endif
 
-#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/http/net_txrx.hpp"
@@ -68,7 +68,7 @@ namespace pstore {
             }
             if (http_status->shutdown () == server_status::http_state::listening) {
                 // Wake up the server by connecting to it.
-                broker::socket_descriptor const fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
+                brokerface::socket_descriptor const fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
                 if (!fd.valid ()) {
                     log (logging::priority::error,
                          "Could not open socket: ", get_last_error ().message ());

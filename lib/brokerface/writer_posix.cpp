@@ -1,10 +1,10 @@
-//*      _                     _       _              *
-//*   __| | ___  ___  ___ _ __(_)_ __ | |_ ___  _ __  *
-//*  / _` |/ _ \/ __|/ __| '__| | '_ \| __/ _ \| '__| *
-//* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
-//*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
-//*                             |_|                   *
-//===- lib/broker_intf/descriptor.cpp -------------------------------------===//
+//*                _ _             *
+//* __      ___ __(_) |_ ___ _ __  *
+//* \ \ /\ / / '__| | __/ _ \ '__| *
+//*  \ V  V /| |  | | ||  __/ |    *
+//*   \_/\_/ |_|  |_|\__\___|_|    *
+//*                                *
+//===- lib/brokerface/writer_posix.cpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,22 +41,33 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file writer_posix.cpp
+/// \brief Implements the parts of the class which enables a client to send messages to the broker
+/// which are POSIX-specific.
 
-#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/brokerface/writer.hpp"
 
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifndef _WIN32
+
+#    include <unistd.h>
+#    include "pstore/brokerface/message_type.hpp"
+#    include "pstore/support/error.hpp"
 
 namespace pstore {
-    namespace broker {
-        namespace details {
+    namespace brokerface {
 
-            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::invalid =
-                INVALID_HANDLE_VALUE;
-            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::error =
-                INVALID_HANDLE_VALUE;
+        bool writer::write_impl (message_type const & msg) {
+            bool const ok = ::write (fd_.native_handle (), &msg, sizeof (msg)) == sizeof (msg);
+            if (!ok) {
+                int const err = errno;
+                if (err != EAGAIN && err != EWOULDBLOCK && err != EPIPE) {
+                    raise (errno_erc{err}, "write to broker pipe");
+                }
+            }
+            return ok;
+        }
 
-        } // namespace details
-    }     // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore
 
-#endif
+#endif // _WIN32

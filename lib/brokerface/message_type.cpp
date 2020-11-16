@@ -4,7 +4,7 @@
 //* | | | | | |  __/\__ \__ \ (_| | (_| |  __/ | |_| |_| | |_) |  __/ *
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___|  \__|\__, | .__/ \___| *
 //*                                |___/            |___/|_|          *
-//===- lib/broker_intf/message_type.cpp -----------------------------------===//
+//===- lib/brokerface/message_type.cpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,7 +44,7 @@
 /// \file message_type.cpp
 /// \brief Contains the definition of the broker::message_type class.
 
-#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/brokerface/message_type.hpp"
 
 #include <iterator>
 
@@ -57,13 +57,17 @@
 #endif
 
 #ifdef _WIN32
+
 namespace {
+
     inline DWORD getpid () { return ::GetCurrentProcessId (); }
+
 } // end anonymous namespace
+
 #endif
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         constexpr std::size_t message_type::payload_chars;
 
@@ -82,5 +86,5 @@ namespace pstore {
                    part_no == rhs.part_no && num_parts == rhs.num_parts && payload == rhs.payload;
         }
 
-    } // end namespace broker
+    } // end namespace brokerface
 } // end namespace pstore

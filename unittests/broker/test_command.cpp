@@ -49,7 +49,7 @@
 
 #include "gmock/gmock.h"
 
-#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/http/server_status.hpp"
 
 using namespace std::chrono_literals;
@@ -63,17 +63,17 @@ namespace {
                           std::atomic<bool> * const uptime_done)
                 : command_processor (num_read_threads, status, uptime_done, 4h) {}
 
-        MOCK_METHOD2 (suicide, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (suicide, void (pstore::brokerface::fifo_path const &,
                                      pstore::broker::broker_command const &));
-        MOCK_METHOD2 (quit, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (quit, void (pstore::brokerface::fifo_path const &,
                                   pstore::broker::broker_command const &));
-        MOCK_METHOD2 (cquit, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (cquit, void (pstore::brokerface::fifo_path const &,
                                    pstore::broker::broker_command const &));
-        MOCK_METHOD2 (gc, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (gc, void (pstore::brokerface::fifo_path const &,
                                 pstore::broker::broker_command const &));
-        MOCK_METHOD2 (echo, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (echo, void (pstore::brokerface::fifo_path const &,
                                   pstore::broker::broker_command const &));
-        MOCK_METHOD2 (nop, void (pstore::broker::fifo_path const &,
+        MOCK_METHOD2 (nop, void (pstore::brokerface::fifo_path const &,
                                  pstore::broker::broker_command const &));
         MOCK_CONST_METHOD1 (unknown, void (pstore::broker::broker_command const &));
 
@@ -92,7 +92,7 @@ namespace {
                 , fifo_{nullptr} {}
 
         mock_cp & cp () { return cp_; }
-        pstore::broker::fifo_path & fifo () { return fifo_; }
+        pstore::brokerface::fifo_path & fifo () { return fifo_; }
 
         static constexpr std::uint32_t message_id = 0;
         static constexpr std::uint16_t part_no = 0;
@@ -103,7 +103,7 @@ namespace {
         std::atomic<bool> uptime_done_;
 
         mock_cp cp_;
-        pstore::broker::fifo_path fifo_;
+        pstore::brokerface::fifo_path fifo_;
     };
 } // namespace
 
@@ -123,13 +123,13 @@ TEST_F (Command, Nop) {
     using ::testing::_;
 
     EXPECT_CALL (cp (), nop (_, _)).Times (1);
-    pstore::broker::message_type msg{message_id, part_no, num_parts, "NOP"};
+    pstore::brokerface::message_type msg{message_id, part_no, num_parts, "NOP"};
     cp ().process_command (fifo (), msg);
 }
 
 TEST_F (Command, Bad) {
     EXPECT_CALL (cp (), unknown (pstore::broker::broker_command{"bad", "command"})).Times (1);
 
-    pstore::broker::message_type msg{message_id, part_no, num_parts, "bad command"};
+    pstore::brokerface::message_type msg{message_id, part_no, num_parts, "bad command"};
     cp ().process_command (fifo (), msg);
 }

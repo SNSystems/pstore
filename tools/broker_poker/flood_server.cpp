@@ -46,9 +46,9 @@
 
 #include <string>
 
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/send_message.hpp"
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/send_message.hpp"
+#include "pstore/brokerface/writer.hpp"
 #include "pstore/support/parallel_for_each.hpp"
 
 #include "iota_generator.hpp"
@@ -57,10 +57,10 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
                    unsigned long num) {
     pstore::parallel_for_each (
         iota_generator (), iota_generator (num), [pipe_path, retry_timeout] (unsigned long count) {
-            pstore::broker::fifo_path fifo (pipe_path, retry_timeout,
-                                            pstore::broker::fifo_path::infinite_retries);
-            pstore::broker::writer wr (fifo, retry_timeout,
-                                       pstore::broker::writer::infinite_retries);
+            pstore::brokerface::fifo_path fifo (pipe_path, retry_timeout,
+                                                pstore::brokerface::fifo_path::infinite_retries);
+            pstore::brokerface::writer wr (fifo, retry_timeout,
+                                           pstore::brokerface::writer::infinite_retries);
 
             std::string path;
             path.reserve (count);
@@ -69,6 +69,6 @@ void flood_server (pstore::gsl::czstring pipe_path, std::chrono::milliseconds re
             }
 
             constexpr bool error_on_timeout = true;
-            pstore::broker::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
+            pstore::brokerface::send_message (wr, error_on_timeout, "ECHO", path.c_str ());
         });
 }

@@ -4,7 +4,7 @@
 //*  \ V  V /| |  | | ||  __/ |    *
 //*   \_/\_/ |_|  |_|\__\___|_|    *
 //*                                *
-//===- include/pstore/broker_intf/writer.hpp ------------------------------===//
+//===- include/pstore/brokerface/writer.hpp -------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,8 +44,8 @@
 /// \file writer.hpp
 /// \brief Provides a simple interface to enable a client to send messages to the pstore broker.
 
-#ifndef PSTORE_BROKER_INTF_WRITER_HPP
-#define PSTORE_BROKER_INTF_WRITER_HPP
+#ifndef PSTORE_BROKERFACE_WRITER_HPP
+#define PSTORE_BROKERFACE_WRITER_HPP
 
 #include <chrono>
 #include <cstdlib>
@@ -53,13 +53,13 @@
 #include <functional>
 
 // pstore broker-interface
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 // pstore support
 #include "pstore/support/portab.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         class message_type;
 
@@ -104,7 +104,7 @@ namespace pstore {
             update_callback update_cb_;
         };
 
-    } // namespace broker
+    } // namespace brokerface
 } // namespace pstore
 
-#endif // PSTORE_BROKER_INTF_WRITER_HPP
+#endif // PSTORE_BROKERFACE_WRITER_HPP

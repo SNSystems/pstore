@@ -55,10 +55,11 @@
 // pstore includes
 #include "pstore/broker/message_queue.hpp"
 #include "pstore/broker/parser.hpp"
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/broker_intf/pubsub.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/message_type.hpp"
+#include "pstore/brokerface/pubsub.hpp"
+#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
@@ -68,7 +69,6 @@ namespace pstore {
 
     namespace broker {
 
-        class fifo_path;
         class recorder;
         class scavenger;
 
@@ -96,7 +96,7 @@ namespace pstore {
             command_processor & operator= (command_processor const &) = delete;
             command_processor & operator= (command_processor &&) noexcept = delete;
 
-            void thread_entry (fifo_path const & fifo);
+            void thread_entry (brokerface::fifo_path const & fifo);
 
             void attach_scavenger (std::shared_ptr<scavenger> & scav) { scavenger_.set (scav); }
 
@@ -105,13 +105,14 @@ namespace pstore {
             /// \param cmd  The message to which this parameter points is moved to the end of the
             /// command queue.
             /// \param record_file  If not null, this object is used to record the command.
-            void push_command (message_ptr && cmd, recorder * record_file);
+            void push_command (brokerface::message_ptr && cmd, recorder * record_file);
             void clear_queue ();
 
             void scavenge ();
 
             /// \note Public for unit testing.
-            void process_command (fifo_path const & fifo, message_type const & msg);
+            void process_command (brokerface::fifo_path const & fifo,
+                                  brokerface::message_type const & msg);
 
         private:
             template <typename T>
@@ -148,7 +149,7 @@ namespace pstore {
 
             atomic_weak_ptr<scavenger> scavenger_;
 
-            message_queue<message_ptr> messages_;
+            message_queue<brokerface::message_ptr> messages_;
 
             std::mutex cmds_mut_;
             partial_cmds cmds_;
@@ -160,10 +161,10 @@ namespace pstore {
             /// The nuber of commit ("GC") commands processed.
             unsigned commits_ = 0;
 
-            auto parse (message_type const & msg) -> std::unique_ptr<broker_command>;
+            auto parse (brokerface::message_type const & msg) -> std::unique_ptr<broker_command>;
 
-            using handler = std::function<void (command_processor *, fifo_path const & fifo,
-                                                broker_command const &)>;
+            using handler = std::function<void (
+                command_processor *, brokerface::fifo_path const & fifo, broker_command const &)>;
             using command_entry = std::tuple<gsl::czstring, handler>;
             /// A predicate function used to sort and search a container of command_entry instances.
             static bool command_entry_compare (command_entry const & a, command_entry const & b) {
@@ -178,24 +179,24 @@ namespace pstore {
             /// \note Virtual to enable unit testing.
 
             /// Initiates the shut-down of the broker process.
-            virtual void suicide (fifo_path const & fifo, broker_command const & c);
+            virtual void suicide (brokerface::fifo_path const & fifo, broker_command const & c);
 
             /// Shuts down a single pipe-reader thread if the 'done' flag has been set by a call to
             /// ::shutdown().
-            virtual void quit (fifo_path const & fifo, broker_command const & c);
+            virtual void quit (brokerface::fifo_path const & fifo, broker_command const & c);
 
             /// Calling this function causes the command_processor thread to exit.
-            virtual void cquit (fifo_path const & fifo, broker_command const & c);
+            virtual void cquit (brokerface::fifo_path const & fifo, broker_command const & c);
 
             /// Starts the garbage collection for a path (specified in the command path) if not
             /// already running.
-            virtual void gc (fifo_path const & fifo, broker_command const & c);
+            virtual void gc (brokerface::fifo_path const & fifo, broker_command const & c);
 
             /// Echoes the command path text to stdout.
-            virtual void echo (fifo_path const & fifo, broker_command const & c);
+            virtual void echo (brokerface::fifo_path const & fifo, broker_command const & c);
 
             /// A simple no-op command.
-            virtual void nop (fifo_path const & fifo, broker_command const & c);
+            virtual void nop (brokerface::fifo_path const & fifo, broker_command const & c);
             ///@}
 
             /// Called to report the receipt of an unknown command verb.
@@ -209,8 +210,8 @@ namespace pstore {
             ///@}
         };
 
-        extern descriptor_condition_variable commits_cv;
-        extern channel<descriptor_condition_variable> commits_channel;
+        extern brokerface::descriptor_condition_variable commits_cv;
+        extern brokerface::channel<brokerface::descriptor_condition_variable> commits_channel;
 
     } // end namespace broker
 } // end namespace pstore

@@ -4,7 +4,7 @@
 //*  \ V  V /| |  | | ||  __/ |    | (_| (_) | | | | | | | | | | | (_) | | | | *
 //*   \_/\_/ |_|  |_|\__\___|_|     \___\___/|_| |_| |_|_| |_| |_|\___/|_| |_| *
 //*                                                                            *
-//===- lib/broker_intf/writer_common.cpp ----------------------------------===//
+//===- lib/brokerface/writer_common.cpp -----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -45,13 +45,15 @@
 /// \brief Implements the parts of the class which enables a client to send messages to the broker
 /// which are common to all target operating systems.
 
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/writer.hpp"
+
 #include <thread>
 #include <utility>
+
 #include "pstore/support/error.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         // (ctor)
         // ~~~~~~
@@ -97,5 +99,5 @@ namespace pstore {
             }
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore

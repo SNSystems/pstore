@@ -86,7 +86,7 @@ add_pstore_library (
 )
 target_link_libraries (pstore-http PUBLIC
     pstore-adt
-    pstore-broker-intf
+    pstore-brokerface
     pstore-json-lib
     pstore-romfs
     pstore-os
@@ -113,7 +113,7 @@ if (NOT PSTORE_EXCEPTIONS)
 
     target_link_libraries (pstore-http-ex PUBLIC
         pstore-adt-ex
-        pstore-broker-intf-ex
+        pstore-brokerface-ex
         pstore-json-lib-ex
         pstore-romfs-ex
         pstore-os-ex
@@ -137,7 +137,7 @@ if (PSTORE_BITCODE)
         -fno-threadsafe-statics
     )
     target_link_libraries (pstore-http-bc PUBLIC
-        pstore-broker-intf-bc
+        pstore-brokerface-bc
         pstore-romfs-bc
         pstore-os-bc
         pstore-support-bc

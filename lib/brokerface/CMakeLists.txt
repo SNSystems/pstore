@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/broker_intf/CMakeLists.txt --------------------------------------===//
+#===- lib/brokerface/CMakeLists.txt ---------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,9 +42,9 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/broker_intf")
+set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/brokerface")
 
-set (pstore_broker_intf_includes
+set (pstore_brokerface_includes
     descriptor.hpp
     fifo_path.hpp
     message_type.hpp
@@ -55,7 +55,7 @@ set (pstore_broker_intf_includes
     wsa_startup.hpp
 )
 
-set (pstore_broker_intf_src
+set (pstore_brokerface_src
     descriptor.cpp
     fifo_path_common.cpp
     fifo_path_posix.cpp
@@ -71,36 +71,36 @@ set (pstore_broker_intf_src
 )
 
 include (add_pstore)
-add_pstore_library (TARGET pstore-broker-intf
-    NAME broker_intf
-    SOURCES "${pstore_broker_intf_src}"
+add_pstore_library (TARGET pstore-brokerface
+    NAME brokerface
+    SOURCES "${pstore_brokerface_src}"
     HEADER_DIR "${pstore_broker_include_dir}"
-    INCLUDES "${pstore_broker_intf_includes}"
+    INCLUDES "${pstore_brokerface_includes}"
 )
-target_link_libraries (pstore-broker-intf PUBLIC pstore-adt pstore-support)
+target_link_libraries (pstore-brokerface PUBLIC pstore-adt pstore-support)
 
 if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
     set (LLVM_REQUIRES_RTTI Yes)
     set (PSTORE_EXCEPTIONS Yes)
 
-    add_pstore_library (TARGET pstore-broker-intf-ex
-        NAME broker-intf-ex
-        SOURCES "${pstore_broker_intf_src}"
+    add_pstore_library (TARGET pstore-brokerface-ex
+        NAME brokerface-ex
+        SOURCES "${pstore_brokerface_src}"
         HEADER_DIR "${pstore_broker_include_dir}"
-        INCLUDES "${pstore_broker_intf_includes}"
+        INCLUDES "${pstore_brokerface_includes}"
     )
 
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-broker-intf-ex PUBLIC pstore-adt-ex pstore-support-ex)
+    target_link_libraries (pstore-brokerface-ex PUBLIC pstore-adt-ex pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)
 
 if (WIN32)
-    target_link_libraries (pstore-broker-intf PUBLIC Ws2_32.dll)
+    target_link_libraries (pstore-brokerface PUBLIC Ws2_32.dll)
     if (NOT PSTORE_EXCEPTIONS)
-        target_link_libraries (pstore-broker-intf-ex PUBLIC Ws2_32.dll)
+        target_link_libraries (pstore-brokerface-ex PUBLIC Ws2_32.dll)
     endif ()
 endif (WIN32)

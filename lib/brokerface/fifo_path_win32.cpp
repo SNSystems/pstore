@@ -4,7 +4,7 @@
 //* |  _| |  _| (_) | | |_) | (_| | |_| | | | *
 //* |_| |_|_|  \___/  | .__/ \__,_|\__|_| |_| *
 //*                   |_|                     *
-//===- lib/broker_intf/fifo_path_win32.cpp --------------------------------===//
+//===- lib/brokerface/fifo_path_win32.cpp ---------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,7 +44,7 @@
 /// \file fifo_path_win32.cpp
 /// \brief Portions of the implementation of the broker::fifo_path class that are Windows-specific.
 
-#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 
 #ifdef _WIN32
 
@@ -55,7 +55,7 @@
 #    include "pstore/support/utf.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         // (dtor)
         // ~~~~~~
@@ -117,6 +117,6 @@ namespace pstore {
                 }
             }
         }
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore
 #endif //_WIN32

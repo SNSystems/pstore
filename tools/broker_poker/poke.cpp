@@ -63,9 +63,9 @@
 #    include <unistd.h>
 #endif
 
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/send_message.hpp"
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/send_message.hpp"
+#include "pstore/brokerface/writer.hpp"
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/support/gsl.hpp"
@@ -101,18 +101,18 @@ int main (int argc, char * argv[]) {
             flood_server (pipe_path, opt.retry_timeout, opt.flood);
         }
 
-        pstore::broker::fifo_path fifo (pipe_path, opt.retry_timeout,
-                                        pstore::broker::fifo_path::infinite_retries);
-        pstore::broker::writer wr (fifo, opt.retry_timeout,
-                                   pstore::broker::writer::infinite_retries);
+        pstore::brokerface::fifo_path fifo (pipe_path, opt.retry_timeout,
+                                            pstore::brokerface::fifo_path::infinite_retries);
+        pstore::brokerface::writer wr (fifo, opt.retry_timeout,
+                                       pstore::brokerface::writer::infinite_retries);
 
         if (opt.verb.length () > 0) {
             char const * path_str = (opt.path.length () > 0) ? opt.path.c_str () : nullptr;
-            pstore::broker::send_message (wr, error_on_timeout, opt.verb.c_str (), path_str);
+            pstore::brokerface::send_message (wr, error_on_timeout, opt.verb.c_str (), path_str);
         }
 
         if (opt.kill) {
-            pstore::broker::send_message (wr, error_on_timeout, "SUICIDE", nullptr);
+            pstore::brokerface::send_message (wr, error_on_timeout, "SUICIDE", nullptr);
         }
     }
     // clang-format off

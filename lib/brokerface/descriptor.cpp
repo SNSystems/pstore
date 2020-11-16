@@ -1,10 +1,10 @@
-//*                           _             _                *
-//* __      _____  __ _   ___| |_ __ _ _ __| |_ _   _ _ __   *
-//* \ \ /\ / / __|/ _` | / __| __/ _` | '__| __| | | | '_ \  *
-//*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
-//*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
-//*                                                  |_|     *
-//===- lib/broker_intf/wsa_startup.cpp ------------------------------------===//
+//*      _                     _       _              *
+//*   __| | ___  ___  ___ _ __(_)_ __ | |_ ___  _ __  *
+//*  / _` |/ _ \/ __|/ __| '__| | '_ \| __/ _ \| '__| *
+//* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
+//*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
+//*                             |_|                   *
+//===- lib/brokerface/descriptor.cpp --------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,21 +41,22 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/broker_intf/wsa_startup.hpp"
 
-#ifdef _WIN32
-#    include <Winsock2.h>
+#include "pstore/brokerface/descriptor.hpp"
+
+#if defined(_WIN32) && defined(_MSC_VER)
 
 namespace pstore {
-    wsa_startup::~wsa_startup () {
-        if (started_) {
-            WSACleanup ();
-        }
-    }
+    namespace brokerface {
+        namespace details {
 
-    bool wsa_startup::start () noexcept {
-        WSAData wsa_data;
-        return WSAStartup (MAKEWORD (2, 2), &wsa_data) == 0;
-    }
-} // namespace pstore
-#endif // _WIN32
+            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::invalid =
+                INVALID_HANDLE_VALUE;
+            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::error =
+                INVALID_HANDLE_VALUE;
+
+        } // end namespace details
+    }     // end namespace brokerface
+} // end namespace pstore
+
+#endif // defined(_WIN32) && defined(_MSC_VER)

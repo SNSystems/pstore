@@ -65,10 +65,10 @@
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker/uptime.hpp"
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/message_type.hpp"
-#include "pstore/broker_intf/wsa_startup.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/message_type.hpp"
+#include "pstore/brokerface/wsa_startup.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/http/server.hpp"
 #include "pstore/http/server_status.hpp"
@@ -115,7 +115,7 @@ namespace {
 
     std::vector<std::future<void>>
     create_worker_threads (std::shared_ptr<pstore::broker::command_processor> const & commands,
-                           pstore::broker::fifo_path & fifo,
+                           pstore::brokerface::fifo_path & fifo,
                            std::shared_ptr<pstore::broker::scavenger> const & scav,
                            std::unique_ptr<pstore::httpd::server_status> const & http_status,
                            std::atomic<bool> * const uptime_done) {
@@ -186,7 +186,7 @@ int main (int argc, char * argv[]) {
         }
 
 #ifdef _WIN32
-        pstore::wsa_startup startup;
+        pstore::brokerface::wsa_startup startup;
         if (!startup.started ()) {
             log (logging::priority::error, "WSAStartup() failed");
             log (pstore::logging::priority::info, "broker exited");
@@ -205,7 +205,7 @@ int main (int argc, char * argv[]) {
         // auto const path = std::make_unique<fifo_path> ();
         log (logging::priority::notice, "opening pipe");
 
-        broker::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
+        pstore::brokerface::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
         std::thread quit;

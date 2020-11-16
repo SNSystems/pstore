@@ -45,7 +45,7 @@
 #ifndef PSTORE_HTTP_SERVER_HPP
 #define PSTORE_HTTP_SERVER_HPP
 
-#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
+#include "pstore/brokerface/descriptor.hpp" // for in_port_t
 #include "pstore/http/ws_server.hpp"
 #include "pstore/romfs/romfs.hpp"
 #include "pstore/support/gsl.hpp"

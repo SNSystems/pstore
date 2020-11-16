@@ -69,8 +69,8 @@
 #endif
 
 // Local includes
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/pubsub.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/pubsub.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/http/headers.hpp"
@@ -87,7 +87,7 @@
 
 namespace {
 
-    using socket_descriptor = pstore::broker::socket_descriptor;
+    using socket_descriptor = pstore::brokerface::socket_descriptor;
 
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,

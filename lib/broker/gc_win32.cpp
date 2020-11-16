@@ -62,7 +62,7 @@
 #    include "pstore/broker/bimap.hpp"
 #    include "pstore/broker/pointer_compare.hpp"
 #    include "pstore/broker/spawn.hpp"
-#    include "pstore/broker_intf/signal_cv.hpp"
+#    include "pstore/brokerface/signal_cv.hpp"
 #    include "pstore/os/logging.hpp"
 #    include "pstore/os/thread.hpp"
 
@@ -101,7 +101,8 @@ namespace {
     /// \p processes collection and the \p cv condition-variable. An existing contents are
     /// destroyed.
     template <typename ProcessBimap>
-    void build_object_vector (ProcessBimap const & processes, pstore::signal_cv const & cv,
+    void build_object_vector (ProcessBimap const & processes,
+                              pstore::brokerface::signal_cv const & cv,
                               pstore::gsl::not_null<std::vector<HANDLE> *> v) {
         // The size of the vector is rounded up in order to reduce the probability of a memory
         // allocation being required when the vector is resized. In typical use, the number of

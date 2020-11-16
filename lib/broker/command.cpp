@@ -64,8 +64,8 @@
 #include "pstore/broker/message_pool.hpp"
 #include "pstore/broker/quit.hpp"
 #include "pstore/broker/recorder.hpp"
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/writer.hpp"
 #include "pstore/json/utility.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/time.hpp"
@@ -97,8 +97,9 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        descriptor_condition_variable commits_cv;
-        channel<descriptor_condition_variable> commits_channel (&commits_cv);
+        brokerface::descriptor_condition_variable commits_cv;
+        brokerface::channel<brokerface::descriptor_condition_variable>
+            commits_channel (&commits_cv);
 
         // ctor
         // ~~~~
@@ -116,7 +117,7 @@ namespace pstore {
 
         // suicide
         // ~~~~~~~
-        void command_processor::suicide (fifo_path const &, broker_command const &) {
+        void command_processor::suicide (brokerface::fifo_path const &, broker_command const &) {
             std::shared_ptr<scavenger> const scav = scavenger_.get ();
             shutdown (this, scav.get (), sig_self_quit, num_read_threads_, http_status_,
                       uptime_done_);
@@ -124,7 +125,7 @@ namespace pstore {
 
         // quit
         // ~~~~
-        void command_processor::quit (fifo_path const & fifo, broker_command const &) {
+        void command_processor::quit (brokerface::fifo_path const & fifo, broker_command const &) {
             // Shut down a single pipe-reader thread if the 'done' flag has been set by a call to
             // shutdown().
             if (!done) {
@@ -135,20 +136,20 @@ namespace pstore {
                 // Post a message back to one of the read-loop threads. Since 'done' is now true, it
                 // will exit as soon as it is woken up by the presence of the new data (the content
                 // of the message doesn't matter at all).
-                writer wr (fifo);
-                wr.write (message_type{}, true /*issue error on timeout*/);
+                brokerface::writer wr (fifo);
+                wr.write (brokerface::message_type{}, true /*issue error on timeout*/);
             }
         }
 
         // cquit
         // ~~~~~
-        void command_processor::cquit (fifo_path const &, broker_command const &) {
+        void command_processor::cquit (brokerface::fifo_path const &, broker_command const &) {
             commands_done_ = true;
         }
 
         // gc
         // ~~
-        void command_processor::gc (fifo_path const &, broker_command const & c) {
+        void command_processor::gc (brokerface::fifo_path const &, broker_command const & c) {
             start_vacuum (c.path);
 
             ++commits_;
@@ -163,13 +164,13 @@ namespace pstore {
 
         // echo
         // ~~~~
-        void command_processor::echo (fifo_path const &, broker_command const & c) {
+        void command_processor::echo (brokerface::fifo_path const &, broker_command const & c) {
             std::printf ("ECHO:%s\n", c.path.c_str ());
         }
 
         // nop
         // ~~~
-        void command_processor::nop (fifo_path const &, broker_command const &) {}
+        void command_processor::nop (brokerface::fifo_path const &, broker_command const &) {}
 
         // unknown
         // ~~~~~~~
@@ -221,7 +222,8 @@ namespace pstore {
 
         // process_command
         // ~~~~~~~~~~~~~~~
-        void command_processor::process_command (fifo_path const & fifo, message_type const & msg) {
+        void command_processor::process_command (brokerface::fifo_path const & fifo,
+                                                 brokerface::message_type const & msg) {
             auto const command = this->parse (msg);
             if (broker_command const * const c = command.get ()) {
                 this->log (*c);
@@ -238,7 +240,7 @@ namespace pstore {
 
         // parse
         // ~~~~~
-        auto command_processor::parse (message_type const & msg)
+        auto command_processor::parse (brokerface::message_type const & msg)
             -> std::unique_ptr<broker_command> {
             std::lock_guard<decltype (cmds_mut_)> const lock{cmds_mut_};
             return ::pstore::broker::parse (msg, cmds_);
@@ -246,11 +248,11 @@ namespace pstore {
 
         // thread_entry
         // ~~~~~~~~~~~~
-        void command_processor::thread_entry (fifo_path const & fifo) {
+        void command_processor::thread_entry (brokerface::fifo_path const & fifo) {
             try {
                 logging::log (logging::priority::info, "Waiting for commands");
                 while (!commands_done_) {
-                    message_ptr msg = messages_.pop ();
+                    brokerface::message_ptr msg = messages_.pop ();
                     assert (msg);
                     this->process_command (fifo, *msg);
                     pool.return_to_pool (std::move (msg));
@@ -265,7 +267,8 @@ namespace pstore {
 
         // push_command
         // ~~~~~~~~~~~~
-        void command_processor::push_command (message_ptr && cmd, recorder * const record_file) {
+        void command_processor::push_command (brokerface::message_ptr && cmd,
+                                              recorder * const record_file) {
             if (record_file != nullptr) {
                 record_file->record (*cmd);
             }

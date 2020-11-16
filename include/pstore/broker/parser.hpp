@@ -55,10 +55,10 @@
 #include <utility>
 #include <vector>
 
+#include "pstore/brokerface/message_type.hpp"
+
 namespace pstore {
     namespace broker {
-
-        class message_type;
 
         class part_number_too_large : public std::runtime_error {
         public:
@@ -102,8 +102,8 @@ namespace pstore {
 
         using size_pair = std::pair<std::size_t, std::size_t>;
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 // NOLINTNEXTLINE(cert-dcl58-cpp)
 namespace std {
@@ -114,16 +114,17 @@ namespace std {
             return h (p.first) ^ h (p.second);
         }
     };
-} // namespace std
+} // end namespace std
 
 namespace pstore {
     namespace broker {
 
         using partial_cmds = std::unordered_map<size_pair, pieces>;
 
-        std::unique_ptr<broker_command> parse (message_type const & msg, partial_cmds & cmds);
+        std::unique_ptr<broker_command> parse (brokerface::message_type const & msg,
+                                               partial_cmds & cmds);
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_PARSER_HPP

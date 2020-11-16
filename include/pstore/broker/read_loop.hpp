@@ -48,9 +48,10 @@
 
 #include <memory>
 
+#include "pstore/brokerface/fifo_path.hpp"
+
 namespace pstore {
     namespace broker {
-        class fifo_path;
         class command_processor;
         class recorder;
 
@@ -60,10 +61,10 @@ namespace pstore {
 
         } // end namespace details
 
-        void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
+        void read_loop (brokerface::fifo_path & path, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> cp);
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_READ_LOOP_HPP

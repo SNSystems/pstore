@@ -62,7 +62,6 @@ namespace pstore {
 
     namespace broker {
 
-        class fifo_path;
         class command_processor;
         class scavenger;
 

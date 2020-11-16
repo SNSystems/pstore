@@ -45,7 +45,7 @@ add_subdirectory (support)
 
 add_subdirectory (adt)
 add_subdirectory (broker)
-add_subdirectory (broker_intf)
+add_subdirectory (brokerface)
 add_subdirectory (cmd_util)
 add_subdirectory (core)
 add_subdirectory (diff)

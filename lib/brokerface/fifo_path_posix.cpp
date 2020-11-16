@@ -4,7 +4,7 @@
 //* |  _| |  _| (_) | | |_) | (_| | |_| | | | *
 //* |_| |_|_|  \___/  | .__/ \__,_|\__|_| |_| *
 //*                   |_|                     *
-//===- lib/broker_intf/fifo_path_posix.cpp --------------------------------===//
+//===- lib/brokerface/fifo_path_posix.cpp ---------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,7 +44,7 @@
 /// \file fifo_path_posix.cpp
 /// \brief Portions of the implementation of the broker::fifo_path class that are POSIX-specific.
 
-#include "pstore/broker_intf/fifo_path.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
 
 #include <sstream>
 #include <thread>
@@ -85,8 +85,9 @@ namespace {
         return ::mkfifo (path, mode);
     }
 
-    pstore::broker::pipe_descriptor open_fifo (pstore::gsl::czstring const path, int const flags) {
-        pstore::broker::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
+    pstore::brokerface::pipe_descriptor open_fifo (pstore::gsl::czstring const path,
+                                                   int const flags) {
+        pstore::brokerface::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
         if (pipe.native_handle () < 0) {
             return pipe;
         }
@@ -117,7 +118,7 @@ namespace {
 } // end anonymous namespace
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
         // (dtor)
         // ~~~~~~
@@ -142,7 +143,7 @@ namespace pstore {
             // POSIX.1 specifically states that opening a FIFO for read–write is undefined. Although
             // most UNIX systems allow this, we use two open() calls instead.
 
-            pstore::broker::pipe_descriptor fdread = open_fifo (path, O_RDONLY);
+            pipe_descriptor fdread = open_fifo (path, O_RDONLY);
             if (fdread.native_handle () < 0) {
                 // If the file open failed, we create the FIFO and try again.
                 constexpr mode_t mode =
@@ -209,7 +210,7 @@ namespace pstore {
             return "/var/tmp/"s + default_pipe_name;
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore
 
 #endif //_WIN32

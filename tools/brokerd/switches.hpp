@@ -50,7 +50,7 @@
 #include <string>
 #include <tuple>
 
-#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
+#include "pstore/brokerface/descriptor.hpp" // for in_port_t
 #include "pstore/cmd_util/tchar.hpp"
 
 struct switches {

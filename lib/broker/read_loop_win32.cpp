@@ -70,9 +70,9 @@
 #    include "pstore/broker/message_pool.hpp"
 #    include "pstore/broker/quit.hpp"
 #    include "pstore/broker/recorder.hpp"
-#    include "pstore/broker_intf/descriptor.hpp"
-#    include "pstore/broker_intf/fifo_path.hpp"
-#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/brokerface/descriptor.hpp"
+#    include "pstore/brokerface/fifo_path.hpp"
+#    include "pstore/brokerface/message_type.hpp"
 #    include "pstore/os/logging.hpp"
 #    include "pstore/support/gsl.hpp"
 #    include "pstore/support/utf.hpp"
@@ -126,7 +126,7 @@ namespace {
     class reader {
     public:
         reader () = default;
-        reader (pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
+        reader (brokerface::pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
                 recorder * record_file);
         reader (reader const &) = delete;
         reader (reader &&) = delete;
@@ -147,8 +147,8 @@ namespace {
 
         list_member<reader> listm_;
 
-        pipe_descriptor pipe_handle_;
-        message_ptr request_;
+        brokerface::pipe_descriptor pipe_handle_;
+        brokerface::message_ptr request_;
 
         command_processor * command_processor_ = nullptr;
         recorder * record_file_ = nullptr;
@@ -174,7 +174,7 @@ namespace {
 
     // (ctor)
     // ~~~~~~
-    reader::reader (pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
+    reader::reader (brokerface::pipe_descriptor && ph, gsl::not_null<command_processor *> cp,
                     recorder * record_file)
             : pipe_handle_{std::move (ph)}
             , command_processor_{cp}
@@ -264,7 +264,7 @@ namespace {
             r->is_in_flight_ = false;
 
             if (errcode == ERROR_SUCCESS && bytes_read != 0) {
-                if (bytes_read != message_size) {
+                if (bytes_read != brokerface::message_size) {
                     log (logging::priority::error, "Partial message received. Length ", bytes_read);
                     r->completed_with_error ();
                 } else {
@@ -316,7 +316,7 @@ namespace {
     public:
         request (gsl::not_null<command_processor *> cp, recorder * record_file);
 
-        void attach_pipe (pipe_descriptor && p);
+        void attach_pipe (brokerface::pipe_descriptor && p);
 
         void cancel ();
 
@@ -363,7 +363,7 @@ namespace {
     // attach_pipe
     // ~~~~~~~~~~~
     /// Associates the given pipe handle with this request object and starts a read operation.
-    void request::attach_pipe (pipe_descriptor && pipe) {
+    void request::attach_pipe (brokerface::pipe_descriptor && pipe) {
         auto r = std::make_unique<reader> (std::move (pipe), command_processor_, record_file_);
 
         // Insert this new object into the list of active reads. We now have two pointers to it:
@@ -432,24 +432,24 @@ namespace {
     ///   pipe creation.
     /// \return  A pair containing both the pipe handle and a boolean which will be true if the
     ///   connect operation is pending, and false if the connection has been completed.
-    std::pair<pipe_descriptor, bool> create_and_connect_instance (std::wstring const & pipe_name,
-                                                                  OVERLAPPED & overlap) {
+    std::pair<brokerface::pipe_descriptor, bool>
+    create_and_connect_instance (std::wstring const & pipe_name, OVERLAPPED & overlap) {
         // The default time-out value, in milliseconds,
         static constexpr auto default_pipe_timeout =
             DWORD{5 * 1000}; // TODO: make this user-configurable.
 
-        auto pipe =
-            pipe_descriptor{::CreateNamedPipeW (pipe_name.c_str (),
-                                                PIPE_ACCESS_INBOUND |     // read/write access
-                                                    FILE_FLAG_OVERLAPPED, // overlapped mode
-                                                PIPE_TYPE_BYTE |          // message-type pipe
-                                                    PIPE_READMODE_BYTE |  // message-read mode
-                                                    PIPE_WAIT,            // blocking mode
-                                                PIPE_UNLIMITED_INSTANCES, // unlimited instances
-                                                0,                        // output buffer size
-                                                message_size * 4,         // input buffer size
-                                                default_pipe_timeout,     // client time-out
-                                                nullptr)}; // default security attributes
+        auto pipe = brokerface::pipe_descriptor{
+            ::CreateNamedPipeW (pipe_name.c_str (),
+                                PIPE_ACCESS_INBOUND |         // read/write access
+                                    FILE_FLAG_OVERLAPPED,     // overlapped mode
+                                PIPE_TYPE_BYTE |              // message-type pipe
+                                    PIPE_READMODE_BYTE |      // message-read mode
+                                    PIPE_WAIT,                // blocking mode
+                                PIPE_UNLIMITED_INSTANCES,     // unlimited instances
+                                0,                            // output buffer size
+                                brokerface::message_size * 4, // input buffer size
+                                default_pipe_timeout,         // client time-out
+                                nullptr)};                    // default security attributes
         if (pipe.native_handle () == INVALID_HANDLE_VALUE) {
             raise (win32_erc (::GetLastError ()), "CreateNamedPipeW");
         }
@@ -462,9 +462,9 @@ namespace {
     // create_event
     // ~~~~~~~~~~~~
     /// Creates a manual-reset event which is initially signaled.
-    pipe_descriptor create_event () {
+    brokerface::pipe_descriptor create_event () {
         if (HANDLE h = ::CreateEvent (nullptr, true, true, nullptr)) {
-            return pipe_descriptor{h};
+            return brokerface::pipe_descriptor{h};
         }
         raise (win32_erc (::GetLastError ()), "CreateEvent");
     }
@@ -477,21 +477,21 @@ namespace pstore {
 
         // read_loop
         // ~~~~~~~~~
-        void read_loop (fifo_path & path, std::shared_ptr<recorder> & record_file,
+        void read_loop (brokerface::fifo_path & path, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> cp) {
             try {
                 log (logging::priority::notice, "listening to named pipe ",
                      logging::quoted (path.get ().c_str ()));
                 auto const pipe_name = utf::win32::to16 (path.get ());
                 // Create one event object for the connect operation.
-                unique_handle connect_event = create_event ();
+                brokerface::unique_handle connect_event = create_event ();
 
                 OVERLAPPED connect{0};
                 connect.hEvent = connect_event.native_handle ();
 
                 // Create a pipe instance and and wait for a the client to connect.
                 bool pending_io;
-                pipe_descriptor pipe;
+                brokerface::pipe_descriptor pipe;
                 std::tie (pipe, pending_io) = create_and_connect_instance (pipe_name, connect);
 
                 request req (cp.get (), record_file.get ());

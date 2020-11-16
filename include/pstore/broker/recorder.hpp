@@ -52,7 +52,7 @@
 #include <cstdio>
 #include <mutex>
 
-#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/brokerface/message_type.hpp"
 #include "pstore/os/file.hpp"
 
 namespace pstore {
@@ -71,7 +71,7 @@ namespace pstore {
             recorder & operator= (recorder const &) = delete;
             recorder & operator= (recorder &&) noexcept = delete;
 
-            void record (message_type const & cmd);
+            void record (brokerface::message_type const & cmd);
 
         private:
             std::mutex mut_;
@@ -91,7 +91,7 @@ namespace pstore {
             player & operator= (player const &) = delete;
             player & operator= (player &&) noexcept = delete;
 
-            message_ptr read ();
+            brokerface::message_ptr read ();
 
         private:
             std::mutex mut_;

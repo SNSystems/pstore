@@ -4,7 +4,7 @@
 //* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
 //*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
 //*                             |_|                   *
-//===- include/pstore/broker_intf/descriptor.hpp --------------------------===//
+//===- include/pstore/brokerface/descriptor.hpp ---------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,9 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-
-#ifndef PSTORE_BROKER_INTF_DESCRIPTOR_HPP
-#define PSTORE_BROKER_INTF_DESCRIPTOR_HPP
+/// \file descriptor.hpp
+/// \brief  Provides a platorm-independent "descriptor" class for accessing pipes and sockets.
+#ifndef PSTORE_BROKERFACE_DESCRIPTOR_HPP
+#define PSTORE_BROKERFACE_DESCRIPTOR_HPP
 
 #include <cerrno>
 #include <ostream>
@@ -59,7 +60,8 @@ using in_port_t = unsigned short;
 
 
 namespace pstore {
-    namespace broker {
+    /// Contains the types and functions provided by the broker interface.
+    namespace brokerface {
         namespace details {
 
             /// DescriptorTraits is a traits structure of the following form:
@@ -219,7 +221,7 @@ namespace pstore {
 
 #endif
 
-        } // namespace details
+        } // end namespace details
 
         using socket_descriptor = details::socket_descriptor;
         using pipe_descriptor = details::pipe_descriptor;
@@ -227,14 +229,14 @@ namespace pstore {
         using unique_handle = pipe_descriptor;
 #endif
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore
 
 namespace std {
 
     template <typename DescriptorTraits>
-    struct hash<pstore::broker::details::descriptor<DescriptorTraits>> {
-        using argument_type = pstore::broker::details::descriptor<DescriptorTraits>;
+    struct hash<pstore::brokerface::details::descriptor<DescriptorTraits>> {
+        using argument_type = pstore::brokerface::details::descriptor<DescriptorTraits>;
         using result_type = std::size_t;
 
         result_type operator() (argument_type const & s) const noexcept {
@@ -244,4 +246,4 @@ namespace std {
 
 } // end namespace std
 
-#endif // PSTORE_BROKER_INTF_DESCRIPTOR_HPP
+#endif // PSTORE_BROKERFACE_DESCRIPTOR_HPP

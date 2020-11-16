@@ -65,8 +65,8 @@
 #    include "pstore/broker/message_pool.hpp"
 #    include "pstore/broker/quit.hpp"
 #    include "pstore/broker/recorder.hpp"
-#    include "pstore/broker_intf/fifo_path.hpp"
-#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/brokerface/fifo_path.hpp"
+#    include "pstore/brokerface/message_type.hpp"
 #    include "pstore/os/logging.hpp"
 #    include "pstore/support/error.hpp"
 
@@ -99,14 +99,14 @@ namespace pstore {
 
         // read_loop
         // ~~~~~~~~~
-        void read_loop (fifo_path & fifo, std::shared_ptr<recorder> & record_file,
+        void read_loop (brokerface::fifo_path & fifo, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> const cp) {
             try {
                 log (logging::priority::notice, "listening to FIFO ",
                      logging::quoted{fifo.get ().c_str ()});
                 auto const fd = fifo.open_server_pipe ();
 
-                message_ptr readbuf = pool.get_from_pool ();
+                brokerface::message_ptr readbuf = pool.get_from_pool ();
 
                 for (;;) {
                     while (ssize_t const bytes_read =
@@ -125,7 +125,7 @@ namespace pstore {
                             return;
                         }
 
-                        if (bytes_read != message_size) {
+                        if (bytes_read != brokerface::message_size) {
                             log (logging::priority::error, "Partial message received. Length ",
                                  bytes_read);
                         } else {

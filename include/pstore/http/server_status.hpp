@@ -46,7 +46,7 @@
 
 #include <atomic>
 
-#include "pstore/broker_intf/descriptor.hpp" // for in_port_t
+#include "pstore/brokerface/descriptor.hpp" // for in_port_t
 
 namespace pstore {
     namespace httpd {

@@ -4,7 +4,7 @@
 //*  \ V  V /| |  | | ||  __/ |    *
 //*   \_/\_/ |_|  |_|\__\___|_|    *
 //*                                *
-//===- lib/broker_intf/writer_posix.cpp -----------------------------------===//
+//===- lib/brokerface/writer_win32.cpp ------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,33 +41,38 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \file writer_posix.cpp
+/// \file writer_win32.cpp
 /// \brief Implements the parts of the class which enables a client to send messages to the broker
-/// which are POSIX-specific.
+/// which are Win32-specific.
 
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/writer.hpp"
 
-#ifndef _WIN32
+#ifdef _WIN32
 
-#    include <unistd.h>
-#    include "pstore/broker_intf/message_type.hpp"
+#    include "pstore/brokerface/message_type.hpp"
 #    include "pstore/support/error.hpp"
 
 namespace pstore {
-    namespace broker {
+    namespace brokerface {
 
+        // write_impl
+        // ~~~~~~~~~~
         bool writer::write_impl (message_type const & msg) {
-            bool const ok = ::write (fd_.native_handle (), &msg, sizeof (msg)) == sizeof (msg);
+            // Send a message to the pipe server.
+            auto bytes_written = DWORD{0};
+            BOOL ok = ::WriteFile (fd_.native_handle (), // pipe handle
+                                   &msg,                 // message
+                                   sizeof (msg),         // message length
+                                   &bytes_written,       // bytes written
+                                   nullptr);             // not overlapped
             if (!ok) {
-                int const err = errno;
-                if (err != EAGAIN && err != EWOULDBLOCK && err != EPIPE) {
-                    raise (errno_erc{err}, "write to broker pipe");
-                }
+                DWORD const errcode = ::GetLastError ();
+                raise (::pstore::win32_erc (errcode), "WriteFile to pipe failed");
             }
-            return ok;
+            return true;
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace brokerface
+} // end namespace pstore
 
 #endif // _WIN32

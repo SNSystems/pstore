@@ -61,7 +61,7 @@
 #endif
 #include <signal.h>
 
-#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/signal_helpers.hpp"
@@ -71,7 +71,7 @@
 
 namespace {
 
-    pstore::signal_cv quit_info;
+    pstore::brokerface::signal_cv quit_info;
 
     //***************
     //* quit thread *
@@ -117,7 +117,7 @@ namespace {
         quit_info.notify_all (sig);
     }
 
-} // namespace
+} // end anonymous namespace
 
 
 // notify_quit_thread

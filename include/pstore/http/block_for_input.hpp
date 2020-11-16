@@ -54,7 +54,7 @@
 #    include <sys/select.h>
 #endif
 
-#include "pstore/broker_intf/descriptor.hpp"
+#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/os/logging.hpp"
 
 namespace pstore {
@@ -74,8 +74,8 @@ namespace pstore {
         // Watch fd to be notified when it has input.
         template <typename Reader>
         inputs_ready block_for_input (Reader const & reader,
-                                      broker::socket_descriptor const & socket_fd,
-                                      broker::pipe_descriptor const * const cv_fd) {
+                                      brokerface::socket_descriptor const & socket_fd,
+                                      brokerface::pipe_descriptor const * const cv_fd) {
             // If the reader has data buffered, then we won't block.
             if (reader.available () > 0) {
                 return {true, false};

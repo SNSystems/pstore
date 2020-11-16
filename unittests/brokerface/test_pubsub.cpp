@@ -4,7 +4,7 @@
 //* | |_) | |_| | |_) \__ \ |_| | |_) | *
 //* | .__/ \__,_|_.__/|___/\__,_|_.__/  *
 //* |_|                                 *
-//===- unittests/broker_intf/test_pubsub.cpp ------------------------------===//
+//===- unittests/brokerface/test_pubsub.cpp -------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/broker_intf/pubsub.hpp"
+#include "pstore/brokerface/pubsub.hpp"
 
 #include <condition_variable>
 #include <thread>
@@ -100,7 +100,7 @@ namespace {
 
 TEST (PubSub, PubSub) {
     std::condition_variable cv;
-    pstore::channel<decltype (cv)> chan{&cv};
+    pstore::brokerface::channel<decltype (cv)> chan{&cv};
 
     counter listening_counter;
     counter received_counter;
@@ -109,7 +109,7 @@ TEST (PubSub, PubSub) {
     EXPECT_CALL (received, call ("message 1"s));
     EXPECT_CALL (received, call ("message 2"s));
 
-    std::unique_ptr<pstore::subscriber<decltype (cv)>> sub = chan.new_subscriber ();
+    std::unique_ptr<pstore::brokerface::subscriber<decltype (cv)>> sub = chan.new_subscriber ();
 
     std::thread thread{[&] () {
         listening_counter.increment ();

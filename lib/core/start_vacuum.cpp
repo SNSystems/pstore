@@ -45,17 +45,17 @@
 #include "pstore/core/start_vacuum.hpp"
 
 // Local (public) includes
-#include "pstore/broker_intf/fifo_path.hpp"
-#include "pstore/broker_intf/send_message.hpp"
-#include "pstore/broker_intf/writer.hpp"
+#include "pstore/brokerface/fifo_path.hpp"
+#include "pstore/brokerface/send_message.hpp"
+#include "pstore/brokerface/writer.hpp"
 #include "pstore/core/database.hpp"
 
 namespace pstore {
 
     void start_vacuum (database const & db) {
-        broker::fifo_path const fifo (nullptr);
-        broker::writer wr (fifo);
-        broker::send_message (wr, false /*error on timeout*/, "GC", db.path ().c_str ());
+        brokerface::fifo_path const fifo (nullptr);
+        brokerface::writer wr (fifo);
+        brokerface::send_message (wr, false /*error on timeout*/, "GC", db.path ().c_str ());
     }
 
-} // namespace pstore
+} // end namespace pstore

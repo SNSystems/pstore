@@ -66,32 +66,32 @@
 #include <queue>
 #include <utility>
 
-#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/brokerface/message_type.hpp"
 
 namespace pstore {
     namespace broker {
 
         class message_pool {
         public:
-            void return_to_pool (message_ptr && ptr);
-            message_ptr get_from_pool ();
+            void return_to_pool (brokerface::message_ptr && ptr);
+            brokerface::message_ptr get_from_pool ();
 
         private:
             std::mutex mut_;
-            std::queue<message_ptr> queue_;
+            std::queue<brokerface::message_ptr> queue_;
         };
 
-        inline void message_pool::return_to_pool (message_ptr && ptr) {
+        inline void message_pool::return_to_pool (brokerface::message_ptr && ptr) {
             std::unique_lock<std::mutex> const lock (mut_);
             assert (ptr.get () != nullptr);
             queue_.push (std::move (ptr));
         }
 
-        inline message_ptr message_pool::get_from_pool () {
+        inline brokerface::message_ptr message_pool::get_from_pool () {
             std::unique_lock<std::mutex> lock (mut_);
             if (queue_.empty ()) {
                 lock.unlock ();
-                return std::make_unique<message_type> ();
+                return std::make_unique<brokerface::message_type> ();
             }
 
             auto res = std::move (queue_.front ());

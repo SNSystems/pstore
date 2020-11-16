@@ -52,7 +52,7 @@
 #include <stdexcept>
 
 #include "pstore/broker/globals.hpp"
-#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/brokerface/message_type.hpp"
 
 namespace {
 
@@ -84,7 +84,7 @@ namespace {
     auto substr (range const & range) -> std::string { return {range.first, range.second}; }
 
 
-    auto extract_payload (pstore::broker::message_type const & msg)
+    auto extract_payload (pstore::brokerface::message_type const & msg)
         -> std::unique_ptr<std::string> {
         auto const pos = std::find_if (msg.payload.rbegin (), msg.payload.rend (),
                                        [] (char const c) { return c != '\0'; });
@@ -97,7 +97,8 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        std::unique_ptr<broker_command> parse (message_type const & msg, partial_cmds & cmds) {
+        std::unique_ptr<broker_command> parse (brokerface::message_type const & msg,
+                                               partial_cmds & cmds) {
 
             if (msg.part_no >= msg.num_parts) {
                 throw part_number_too_large ();

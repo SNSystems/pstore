@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/broker_intf/CMakeLists.txt --------------------------------===//
+#===- unittests/core/brokerface/CMakeLists.txt ----------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -41,7 +41,8 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_pstore_unit_test (pstore-broker-intf-unit-tests
-    test_pubsub.cpp
+set (BROKER_INTF_UNIT_TEST_SRC
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_message_type.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/test_send_message.cpp"
 )
-target_link_libraries (pstore-broker-intf-unit-tests PRIVATE pstore-broker-intf)
+target_sources (pstore-core-unit-tests PUBLIC ${BROKER_INTF_UNIT_TEST_SRC})

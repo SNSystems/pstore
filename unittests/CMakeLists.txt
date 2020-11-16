@@ -80,7 +80,7 @@ add_subdirectory (klee EXCLUDE_FROM_ALL)
 
 add_subdirectory (adt)
 add_subdirectory (broker)
-add_subdirectory (broker_intf)
+add_subdirectory (brokerface)
 add_subdirectory (broker_poker)
 add_subdirectory (cmd_util)
 add_subdirectory (common)

@@ -55,9 +55,9 @@
 #    include <arpa/inet.h>
 #endif //_WIN32
 
-#include "pstore/broker_intf/descriptor.hpp"
-#include "pstore/broker_intf/pubsub.hpp"
-#include "pstore/broker_intf/signal_cv.hpp"
+#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/brokerface/pubsub.hpp"
+#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/http/block_for_input.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/endian.hpp"
@@ -599,9 +599,9 @@ namespace pstore {
         }
 
 
-        using channel_container_entry =
-            std::tuple<gsl::not_null<channel<descriptor_condition_variable> *>,
-                       gsl::not_null<descriptor_condition_variable *>>;
+        using channel_container_entry = std::tuple<
+            gsl::not_null<brokerface::channel<brokerface::descriptor_condition_variable> *>,
+            gsl::not_null<brokerface::descriptor_condition_variable *>>;
         using channel_container = std::unordered_map<std::string, channel_container_entry>;
 
         // ws_server_loop
@@ -611,8 +611,9 @@ namespace pstore {
                              channel_container const & channels) {
 
             ws_command command;
-            channel<descriptor_condition_variable>::subscriber_pointer subscription;
-            descriptor_condition_variable * cv = nullptr;
+            brokerface::channel<brokerface::descriptor_condition_variable>::subscriber_pointer
+                subscription;
+            brokerface::descriptor_condition_variable * cv = nullptr;
 
             if (uri.length () > 0 && uri[0] == '/') {
                 std::string const name = uri.substr (1);

@@ -45,7 +45,7 @@
 
 #include <gmock/gmock.h>
 
-#include "pstore/broker_intf/message_type.hpp"
+#include "pstore/brokerface/message_type.hpp"
 
 using namespace std::string_literals;
 
@@ -53,7 +53,7 @@ TEST (MessageParse, SinglePartCommand) {
     using namespace pstore::broker;
     pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> command =
-        parse (message_type (1234, 0, 1, "HELO hello world"s), cmds);
+        parse (pstore::brokerface::message_type (1234, 0, 1, "HELO hello world"s), cmds);
     ASSERT_NE (command.get (), nullptr);
     EXPECT_EQ (command->verb, "HELO");
     EXPECT_EQ (command->path, "hello world");
@@ -66,11 +66,11 @@ TEST (MessageParse, TwoPartCommandInOrder) {
 
     pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> c1 =
-        parse (message_type (message_id, 0, 2, "HELO to be"s), cmds);
+        parse (pstore::brokerface::message_type (message_id, 0, 2, "HELO to be"s), cmds);
     EXPECT_EQ (cmds.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
     std::unique_ptr<broker_command> c2 =
-        parse (message_type (message_id, 1, 2, " or not to be"s), cmds);
+        parse (pstore::brokerface::message_type (message_id, 1, 2, " or not to be"s), cmds);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");
@@ -83,11 +83,11 @@ TEST (MessageParse, TwoPartCommandOutOfOrder) {
 
     pstore::broker::partial_cmds cmds;
     std::unique_ptr<broker_command> c1 =
-        parse (message_type (message_id, 1, 2, " or not to be"s), cmds);
+        parse (pstore::brokerface::message_type (message_id, 1, 2, " or not to be"s), cmds);
     EXPECT_EQ (cmds.size (), 1U);
     EXPECT_EQ (c1.get (), nullptr);
     std::unique_ptr<broker_command> c2 =
-        parse (message_type (message_id, 0, 2, "HELO to be"s), cmds);
+        parse (pstore::brokerface::message_type (message_id, 0, 2, "HELO to be"s), cmds);
     ASSERT_NE (c2.get (), nullptr);
     EXPECT_EQ (c2->verb, "HELO");
     EXPECT_EQ (c2->path, "to be or not to be");

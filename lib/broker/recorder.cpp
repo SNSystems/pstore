@@ -72,7 +72,7 @@ namespace pstore {
 
         // record
         // ~~~~~~
-        void recorder::record (message_type const & cmd) {
+        void recorder::record (brokerface::message_type const & cmd) {
             std::unique_lock<decltype (mut_)> const lock (mut_);
             file_.write (cmd);
         }
@@ -97,8 +97,8 @@ namespace pstore {
 
         // read
         // ~~~~
-        message_ptr player::read () {
-            message_ptr msg = pool.get_from_pool ();
+        brokerface::message_ptr player::read () {
+            brokerface::message_ptr msg = pool.get_from_pool ();
             std::unique_lock<decltype (mut_)> const lock (mut_);
             file_.read (msg.get ());
             return msg;
