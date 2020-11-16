@@ -144,18 +144,11 @@ namespace pstore {
             //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
             //*              |_|                            *
             //-MARK: compilation
-            template <typename TransactionLock>
             class compilation final : public rule {
             public:
-                compilation (not_null<context *> const ctxt,
-                             not_null<transaction<TransactionLock> *> const transaction,
-                             not_null<name_mapping const *> const names,
-                             fragment_index_pointer const & fragments, index::digest const digest)
-                        : rule (ctxt)
-                        , transaction_{transaction}
-                        , names_{names}
-                        , fragments_{fragments}
-                        , digest_{digest} {}
+                compilation (not_null<context *> ctxt, not_null<transaction_base *> transaction,
+                             not_null<name_mapping const *> names,
+                             fragment_index_pointer const & fragments, index::digest digest);
                 compilation (compilation const &) = delete;
                 compilation (compilation &&) noexcept = delete;
                 ~compilation () noexcept override = default;
@@ -169,7 +162,7 @@ namespace pstore {
                 std::error_code end_object () override;
 
             private:
-                not_null<transaction<TransactionLock> *> const transaction_;
+                not_null<transaction_base *> const transaction_;
                 not_null<name_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
                 index::digest const digest_;
@@ -182,67 +175,17 @@ namespace pstore {
                 definition::container definitions_;
             };
 
-            // key
-            // ~~~
-            template <typename TransactionLock>
-            std::error_code compilation<TransactionLock>::key (std::string const & k) {
-                if (k == "path") {
-                    seen_[path_index] = true;
-                    return push<uint64_rule> (&path_);
-                }
-                if (k == "triple") {
-                    seen_[triple_index] = true;
-                    return push<uint64_rule> (&triple_);
-                }
-                if (k == "definitions") {
-                    return push_array_rule<definition_object> (this, &definitions_, names_,
-                                                               fragments_);
-                }
-                return error::unknown_compilation_object_key;
-            }
-
-            // end object
-            // ~~~~~~~~~~
-            template <typename TransactionLock>
-            std::error_code compilation<TransactionLock>::end_object () {
-                if (!seen_.all ()) {
-                    return error::incomplete_compilation_object;
-                }
-                auto const path = names_->lookup (path_);
-                if (!path) {
-                    return path.get_error ();
-                }
-                auto const triple = names_->lookup (triple_);
-                if (!triple) {
-                    return triple.get_error ();
-                }
-
-                // Create the compilation record in the store.
-                extent<repo::compilation> const compilation_extent =
-                    repo::compilation::alloc (*transaction_, *path, *triple,
-                                              std::begin (definitions_), std::end (definitions_));
-
-                // Insert this compilation into the compilations index.
-                auto compilations =
-                    pstore::index::get_index<pstore::trailer::indices::compilation> (
-                        transaction_->db ());
-                compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
-
-                return pop ();
-            }
-
             //*                    _ _      _   _               _         _          *
             //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _  ___ (_)_ _  __| |_____ __ *
             //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
             //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
             //*              |_|                                                     *
             //-MARK: compilation index
-            template <typename TransactionLock>
             class compilations_index final : public rule {
             public:
                 compilations_index (not_null<context *> ctxt,
-                                    gsl::not_null<transaction<TransactionLock> *> transaction,
-                                    gsl::not_null<name_mapping const *> names);
+                                    not_null<transaction_base *> transaction,
+                                    not_null<name_mapping const *> names);
                 compilations_index (compilations_index const &) = delete;
                 compilations_index (compilations_index &&) noexcept = delete;
                 ~compilations_index () noexcept override = default;
@@ -255,48 +198,10 @@ namespace pstore {
                 std::error_code end_object () override;
 
             private:
-                gsl::not_null<transaction<TransactionLock> *> const transaction_;
-                gsl::not_null<name_mapping const *> const names_;
+                not_null<transaction_base *> const transaction_;
+                not_null<name_mapping const *> const names_;
                 fragment_index_pointer const fragments_;
             };
-
-            // (ctor)
-            // ~~~~~~
-            template <typename TransactionLock>
-            compilations_index<TransactionLock>::compilations_index (
-                not_null<context *> const ctxt,
-                gsl::not_null<transaction<TransactionLock> *> const transaction,
-                gsl::not_null<name_mapping const *> const names)
-                    : rule (ctxt)
-                    , transaction_{transaction}
-                    , names_{names}
-                    , fragments_{
-                          index::get_index<trailer::indices::fragment> (transaction->db ())} {}
-
-            // name
-            // ~~~~
-            template <typename TransactionLock>
-            gsl::czstring compilations_index<TransactionLock>::name () const noexcept {
-                return "compilations index";
-            }
-
-            // key
-            // ~~~
-            template <typename TransactionLock>
-            std::error_code compilations_index<TransactionLock>::key (std::string const & s) {
-                if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
-                    return push_object_rule<compilation<TransactionLock>> (
-                        this, transaction_, names_, fragments_, index::digest{*digest});
-                }
-                return error::bad_digest;
-            }
-
-            // end object
-            // ~~~~~~~~~~
-            template <typename TransactionLock>
-            std::error_code compilations_index<TransactionLock>::end_object () {
-                return pop ();
-            }
 
         } // end namespace import
     }     // end namespace exchange

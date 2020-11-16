@@ -57,11 +57,10 @@ namespace pstore {
     namespace exchange {
         namespace import {
 
-            template <typename TransactionLock>
             class names_array_members final : public rule {
             public:
                 names_array_members (not_null<context *> ctxt,
-                                     not_null<transaction<TransactionLock> *> transaction,
+                                     not_null<transaction_base *> transaction,
                                      not_null<name_mapping *> names);
                 names_array_members (names_array_members const &) = delete;
                 names_array_members (names_array_members &&) noexcept = delete;
@@ -76,43 +75,9 @@ namespace pstore {
                 std::error_code end_array () override;
                 gsl::czstring name () const noexcept override;
 
-                not_null<transaction<TransactionLock> *> const transaction_;
+                not_null<transaction_base *> const transaction_;
                 not_null<name_mapping *> const names_;
             };
-
-            // (ctor)
-            // ~~~~~~
-            template <typename TransactionLock>
-            names_array_members<TransactionLock>::names_array_members (
-                not_null<context *> const ctxt,
-                not_null<transaction<TransactionLock> *> const transaction,
-                not_null<name_mapping *> const names)
-                    : rule (ctxt)
-                    , transaction_{transaction}
-                    , names_{names} {}
-
-            // string value
-            // ~~~~~~~~~~~~
-            template <typename TransactionLock>
-            std::error_code
-            names_array_members<TransactionLock>::string_value (std::string const & str) {
-                return names_->add_string (transaction_.get (), str);
-            }
-
-            // end array
-            // ~~~~~~~~~
-            template <typename TransactionLock>
-            std::error_code names_array_members<TransactionLock>::end_array () {
-                names_->flush (transaction_);
-                return pop ();
-            }
-
-            // name
-            // ~~~~
-            template <typename TransactionLock>
-            gsl::czstring names_array_members<TransactionLock>::name () const noexcept {
-                return "names array members";
-            }
 
         } // end namespace import
     }     // end namespace exchange

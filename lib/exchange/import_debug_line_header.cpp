@@ -10,7 +10,7 @@
 //* | | | | | |  __/ | | | |  __/ (_| | (_| |  __/ |    *
 //* |_|_|_| |_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
 //*                                                     *
-//===- include/pstore/exchange/import_debug_line_header.hpp ---------------===//
+//===- lib/exchange/import_debug_line_header.cpp --------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -47,46 +47,63 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
-#define PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP
-
-#include "pstore/core/hamt_map.hpp"
-#include "pstore/core/index_types.hpp"
-#include "pstore/exchange/import_error.hpp"
-#include "pstore/exchange/import_rule.hpp"
-#include "pstore/support/base64.hpp"
+#include "pstore/exchange/import_debug_line_header.hpp"
 
 namespace pstore {
     namespace exchange {
         namespace import {
 
-            class debug_line_index final : public rule {
-            public:
-                debug_line_index (not_null<context *> ctxt,
-                                  not_null<transaction_base *> transaction);
-                debug_line_index (debug_line_index const &) = delete;
-                debug_line_index (debug_line_index &&) noexcept = delete;
+            // (ctor)
+            // ~~~~~~
+            debug_line_index::debug_line_index (not_null<context *> const ctxt,
+                                                not_null<transaction_base *> const transaction)
+                    : rule (ctxt)
+                    , index_{index::get_index<trailer::indices::debug_line_header> (
+                          transaction->db ())}
+                    , transaction_{transaction} {}
 
-                ~debug_line_index () noexcept override = default;
+            // name
+            // ~~~~
+            gsl::czstring debug_line_index::name () const noexcept { return "debug line index"; }
 
-                debug_line_index & operator= (debug_line_index const &) = delete;
-                debug_line_index & operator= (debug_line_index &&) noexcept = delete;
+            // string value
+            // ~~~~~~~~~~~~
+            std::error_code debug_line_index::string_value (std::string const & s) {
+                // Decode the received string to get the raw binary.
+                std::vector<std::uint8_t> data;
+                if (!from_base64 (std::begin (s), std::end (s), std::back_inserter (data))) {
+                    return error::bad_base64_data;
+                }
 
-                gsl::czstring name () const noexcept override;
+                // Create space for this data in the store.
+                std::shared_ptr<std::uint8_t> out;
+                typed_address<std::uint8_t> where;
+                std::tie (out, where) =
+                    transaction_->template alloc_rw<std::uint8_t> (data.size ());
 
-                std::error_code string_value (std::string const & s) override;
-                std::error_code key (std::string const & s) override;
-                std::error_code end_object () override;
+                // Copy the data to the store.
+                std::copy (std::begin (data), std::end (data), out.get ());
 
-            private:
-                std::shared_ptr<index::debug_line_header_index> index_;
-                index::digest digest_;
+                // Add an index entry for this data.
+                index_->insert (*transaction_, std::make_pair (digest_, extent<std::uint8_t>{
+                                                                            where, data.size ()}));
+                return {};
+            }
 
-                not_null<transaction_base *> transaction_;
-            };
+            // key
+            // ~~~
+            std::error_code debug_line_index::key (std::string const & s) {
+                if (maybe<uint128> const digest = uint128::from_hex_string (s)) {
+                    digest_ = *digest;
+                    return {};
+                }
+                return error::bad_digest;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            std::error_code debug_line_index::end_object () { return pop (); }
 
         } // end namespace import
     }     // end namespace exchange
 } // end namespace pstore
-
-#endif // PSTORE_EXCHANGE_IMPORT_DEBUG_LINE_HEADER_HPP

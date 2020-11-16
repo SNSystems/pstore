@@ -165,8 +165,9 @@ namespace pstore {
             //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  / _ \ '_ \| / -_) _|  _| *
             //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| \___/_.__// \___\__|\__| *
             //*                                                |__/             *
-            // ctor
-            // ~~~~
+            //-MARK: definition object
+            // (ctor)
+            // ~~~~~~
             definition_object::definition_object (
                 not_null<context *> const ctxt, not_null<definition::container *> const definitions,
                 not_null<name_mapping const *> const names,
@@ -189,6 +190,110 @@ namespace pstore {
             // end array
             // ~~~~~~~~~
             std::error_code definition_object::end_array () { return this->pop (); }
+
+            //*                    _ _      _   _           *
+            //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _   *
+            //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
+            //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
+            //*              |_|                            *
+            //-MARK: compilation
+            // (ctor)
+            // ~~~~~~
+            compilation::compilation (not_null<context *> const ctxt,
+                                      not_null<transaction_base *> const transaction,
+                                      not_null<name_mapping const *> const names,
+                                      fragment_index_pointer const & fragments,
+                                      index::digest const digest)
+                    : rule (ctxt)
+                    , transaction_{transaction}
+                    , names_{names}
+                    , fragments_{fragments}
+                    , digest_{digest} {}
+
+            // key
+            // ~~~
+            std::error_code compilation::key (std::string const & k) {
+                if (k == "path") {
+                    seen_[path_index] = true;
+                    return push<uint64_rule> (&path_);
+                }
+                if (k == "triple") {
+                    seen_[triple_index] = true;
+                    return push<uint64_rule> (&triple_);
+                }
+                if (k == "definitions") {
+                    return push_array_rule<definition_object> (this, &definitions_, names_,
+                                                               fragments_);
+                }
+                return error::unknown_compilation_object_key;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            std::error_code compilation::end_object () {
+                if (!seen_.all ()) {
+                    return error::incomplete_compilation_object;
+                }
+                auto const path = names_->lookup (path_);
+                if (!path) {
+                    return path.get_error ();
+                }
+                auto const triple = names_->lookup (triple_);
+                if (!triple) {
+                    return triple.get_error ();
+                }
+
+                // Create the compilation record in the store.
+                extent<repo::compilation> const compilation_extent =
+                    repo::compilation::alloc (*transaction_, *path, *triple,
+                                              std::begin (definitions_), std::end (definitions_));
+
+                // Insert this compilation into the compilations index.
+                auto compilations =
+                    pstore::index::get_index<pstore::trailer::indices::compilation> (
+                        transaction_->db ());
+                compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
+
+                return pop ();
+            }
+
+            //*                    _ _      _   _               _         _          *
+            //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _  ___ (_)_ _  __| |_____ __ *
+            //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
+            //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
+            //*              |_|                                                     *
+            //-MARK: compilation index
+            // (ctor)
+            // ~~~~~~
+            compilations_index::compilations_index (not_null<context *> ctxt,
+                                                    not_null<transaction_base *> transaction,
+                                                    not_null<name_mapping const *> names)
+                    : rule (ctxt)
+                    , transaction_{transaction}
+                    , names_{names}
+                    , fragments_{
+                          index::get_index<trailer::indices::fragment> (transaction->db ())} {}
+
+            // name
+            // ~~~~
+            gsl::czstring compilations_index::name () const noexcept {
+                return "compilations index";
+            }
+
+            // key
+            // ~~~
+            std::error_code compilations_index::key (std::string const & s) {
+                if (maybe<index::digest> const digest = uint128::from_hex_string (s)) {
+                    return push_object_rule<compilation> (this, transaction_, names_, fragments_,
+                                                          index::digest{*digest});
+                }
+                return error::bad_digest;
+            }
+
+            // end object
+            // ~~~~~~~~~~
+            std::error_code compilations_index::end_object () { return pop (); }
+
 
         } // end namespace import
     }     // end namespace exchange

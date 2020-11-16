@@ -100,20 +100,17 @@ namespace pstore {
             std::error_code transaction_contents<TransactionLock>::key (std::string const & s) {
                 // TODO: check that "names" is the first key that we see.
                 if (s == "names") {
-                    return push_array_rule<names_array_members<TransactionLock>> (
-                        this, &transaction_, names_);
+                    return push_array_rule<names_array_members> (this, &transaction_, names_);
                 }
                 if (s == "debugline") {
-                    return push_object_rule<debug_line_index<TransactionLock>> (this,
-                                                                                &transaction_);
+                    return push_object_rule<debug_line_index> (this, &transaction_);
                 }
                 if (s == "fragments") {
-                    return push_object_rule<fragment_index<TransactionLock>> (this, &transaction_,
-                                                                              names_.get ());
+                    return push_object_rule<fragment_index> (this, &transaction_, names_.get ());
                 }
                 if (s == "compilations") {
-                    return push_object_rule<compilations_index<TransactionLock>> (
-                        this, &transaction_, names_.get ());
+                    return push_object_rule<compilations_index> (this, &transaction_,
+                                                                 names_.get ());
                 }
                 return error::unknown_transaction_object_key;
             }

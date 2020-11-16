@@ -41,6 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file import_names.hpp
+/// \brief Contains the class which maps from string indexes to their store address.
+///
+/// Names are exported as an array of their own. We then refer to strings by their index in
+/// that array. This has the advantage that we know that each string will appear only once
+/// in the exported output.
+///
+/// The class in this module is responsible for gathering the strings in that exported array and
+/// then for converting a reference index to the string's indirect address in the store.
+
 #ifndef PSTORE_EXCHANGE_IMPORT_NAMES_HPP
 #define PSTORE_EXCHANGE_IMPORT_NAMES_HPP
 
@@ -66,12 +76,10 @@ namespace pstore {
                 name_mapping & operator= (name_mapping const &) = delete;
                 name_mapping & operator= (name_mapping &&) noexcept = delete;
 
-                template <typename TransactionLock>
-                std::error_code add_string (transaction<TransactionLock> * transaction,
+                std::error_code add_string (not_null<transaction_base *> transaction,
                                             std::string const & str);
 
-                template <typename TransactionLock>
-                void flush (not_null<transaction<TransactionLock> *> transaction);
+                void flush (not_null<transaction_base *> transaction);
 
                 error_or<typed_address<indirect_string>> lookup (std::uint64_t index) const;
 
@@ -82,38 +90,6 @@ namespace pstore {
 
                 std::unordered_map<std::uint64_t, typed_address<indirect_string>> lookup_;
             };
-
-            // add string
-            // ~~~~~~~~~~
-            template <typename TransactionLock>
-            std::error_code
-            name_mapping::add_string (transaction<TransactionLock> * const transaction,
-                                      std::string const & str) {
-                strings_.push_back (str);
-                std::string const & x = strings_.back ();
-
-                views_.emplace_back (make_sstring_view (x));
-                auto & s = views_.back ();
-
-                std::shared_ptr<index::name_index> const names_index =
-                    index::get_index<trailer::indices::name> (transaction->db ());
-                std::pair<index::name_index::iterator, bool> const add_res =
-                    adder_.add (*transaction, names_index, &s);
-                if (!add_res.second) {
-                    return error::duplicate_name;
-                }
-
-                lookup_.emplace (lookup_.size (), typed_address<indirect_string>::make (
-                                                      add_res.first.get_address ()));
-                return {};
-            }
-
-            // flush
-            // ~~~~~
-            template <typename TransactionLock>
-            void name_mapping::flush (not_null<transaction<TransactionLock> *> const transaction) {
-                adder_.flush (*transaction);
-            }
 
         } // end namespace import
     }     // end namespace exchange
