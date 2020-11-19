@@ -16,12 +16,10 @@ Its design goals are:
 
 # Table of Contents
 
--   [Table of Contents](#table-of-contents)
 -   [Building pstore](#building-pstore)
     -   [Prerequisites](#prerequisites)
     -   [Building](#building)
         -   [Standalone](#standalone)
-            -   [Installing](#installing)
         -   [Inside LLVM](#inside-llvm)
 -   [Getting started](#getting-started)
     -   [Using the read and write utilities](#using-the-read-and-write-utilities)
@@ -65,16 +63,6 @@ $ cmake ‑‑build build_linux
 ~~~
 
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
-
-#### Installing
-
-After pstore has finished building, install it from the build directory:
-
-~~~bash
-$ cmake --build build_linux --target install-pstore
-~~~
-
-The `‑‑target install-pstore` option in addition to the `‑‑build` option tells cmake to build the install-pstore target. Note that the `CMAKE_INSTALL_PREFIX` variable can be used to change the installation path.
 
 ### Inside LLVM
 
@@ -120,13 +108,13 @@ foo
 $ pstore-dump --log pstore.db
 ---
 
-- file :
+- file : 
       path : pstore.db
-      size : 4194304
-  log  :
-      - { number: 2, size: 80, time: 2020-06-26T08:44:45Z }
-      - { number: 1, size: 80, time: 2020-06-26T08:44:15Z }
-      - { number: 0, size: 0, time: 2020-06-26T08:44:15Z }
+      size : 488
+  log  : 
+      - { number: 2, size: 56, time: 2020-11-19T15:24:04Z }
+      - { number: 1, size: 56, time: 2020-11-19T15:23:52Z }
+      - { number: 0, size: 0, time: 2020-11-19T15:23:52Z }
 ...
 $
 ~~~~
