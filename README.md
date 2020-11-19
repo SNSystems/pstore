@@ -1,4 +1,4 @@
-<img alt="pstore logo" src="doc_sources/logo.svg" height="" height="80" width="150" />
+<img alt="pstore logo" src="doc_sources/logo.svg" height="80" width="150">
 
 [![Build Status](https://travis-ci.org/SNSystems/pstore.svg?branch=master)](https://travis-ci.org/SNSystems/pstore)
 [![Coverity Scan Build Status](https://scan.coverity.com/projects/15170/badge.svg)](https://scan.coverity.com/projects/snsystems-pstore)
