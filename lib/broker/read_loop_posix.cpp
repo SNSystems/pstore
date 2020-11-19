@@ -47,17 +47,10 @@
 
 #ifndef _WIN32
 
-// Standard library includes
-#    include <algorithm>
-#    include <cassert>
-#    include <cerrno>
-#    include <string>
-
 // Platform includes
 #    include <sys/select.h>
 #    include <sys/types.h>
 #    include <sys/uio.h>
-#    include <unistd.h>
 
 // pstore includes
 #    include "pstore/broker/command.hpp"
@@ -65,14 +58,13 @@
 #    include "pstore/broker/message_pool.hpp"
 #    include "pstore/broker/quit.hpp"
 #    include "pstore/broker/recorder.hpp"
-#    include "pstore/brokerface/fifo_path.hpp"
-#    include "pstore/brokerface/message_type.hpp"
 #    include "pstore/os/logging.hpp"
-#    include "pstore/support/error.hpp"
 
 namespace {
 
-    // Watch fd to be notified when it has input.
+    // block for input
+    // ~~~~~~~~~~~~~~~
+    /// Watch fd to be notified when it has input.
     void block_for_input (int const fd) {
         timeval timeout{pstore::broker::details::timeout_seconds, 0};
         fd_set rfds;
@@ -97,7 +89,7 @@ namespace {
 namespace pstore {
     namespace broker {
 
-        // read_loop
+        // read loop
         // ~~~~~~~~~
         void read_loop (brokerface::fifo_path & fifo, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> const cp) {
@@ -156,7 +148,7 @@ namespace pstore {
             log (logging::priority::notice, "exiting read loop");
         }
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // _WIN32

@@ -43,8 +43,6 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/support/uint128.hpp"
 
-#include <cassert>
-
 using pstore::just;
 using pstore::maybe;
 using pstore::nothing;

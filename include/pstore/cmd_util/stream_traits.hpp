@@ -44,9 +44,6 @@
 #ifndef PSTORE_CMD_UTIL_STREAM_TRAITS_HPP
 #define PSTORE_CMD_UTIL_STREAM_TRAITS_HPP
 
-#include <string>
-
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {

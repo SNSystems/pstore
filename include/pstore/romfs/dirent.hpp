@@ -44,7 +44,6 @@
 #ifndef PSTORE_ROMFS_DIRENT_HPP
 #define PSTORE_ROMFS_DIRENT_HPP
 
-#include <cassert>
 #include <cstdint>
 #include <ctime>
 
@@ -52,7 +51,6 @@
 
 #include "pstore/adt/error_or.hpp"
 #include "pstore/support/gsl.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace romfs {

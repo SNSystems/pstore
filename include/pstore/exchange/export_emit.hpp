@@ -48,11 +48,7 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_EMIT_HPP
 #define PSTORE_EXCHANGE_EXPORT_EMIT_HPP
 
-#include <algorithm>
-#include <string>
-
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
 

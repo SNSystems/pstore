@@ -45,12 +45,6 @@
 
 #include <algorithm>
 #include <cstring>
-#include <memory>
-#include <stdexcept>
-#include <string>
-
-#include "pstore/romfs/directory.hpp"
-#include "pstore/romfs/dirent.hpp"
 
 namespace {
 

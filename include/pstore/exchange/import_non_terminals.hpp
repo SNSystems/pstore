@@ -50,8 +50,6 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_NON_TERMINALS_HPP
 #define PSTORE_EXCHANGE_IMPORT_NON_TERMINALS_HPP
 
-#include <functional>
-
 #include "pstore/exchange/import_rule.hpp"
 
 namespace pstore {

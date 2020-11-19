@@ -47,18 +47,10 @@
 
 #include "pstore/cmd_util/str_to_revision.hpp"
 
-#include <algorithm>
-#include <cassert>
-#include <cctype>
 #include <climits>
-#include <cstdlib>
-#include <iterator>
-#include <type_traits>
 
 #include "pstore/support/ctype.hpp"
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/head_revision.hpp"
-#include "pstore/support/maybe.hpp"
 #include "pstore/support/unsigned_cast.hpp"
 
 namespace {

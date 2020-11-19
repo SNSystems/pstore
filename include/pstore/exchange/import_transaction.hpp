@@ -50,7 +50,6 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_TRANSACTION_HPP
 #define PSTORE_EXCHANGE_IMPORT_TRANSACTION_HPP
 
-#include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_compilation.hpp"
 #include "pstore/exchange/import_debug_line_header.hpp"
 #include "pstore/exchange/import_fragment.hpp"

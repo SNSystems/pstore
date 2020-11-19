@@ -49,12 +49,9 @@
 #ifndef PSTORE_BROKERFACE_PUBSUB_HPP
 #define PSTORE_BROKERFACE_PUBSUB_HPP
 
-#include <cassert>
 #include <mutex>
 #include <queue>
-#include <string>
 #include <unordered_set>
-#include <utility>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"

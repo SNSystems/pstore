@@ -47,7 +47,6 @@
 #include "pstore/exchange/export_fixups.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 #include "pstore/mcrepo/fragment.hpp"
-#include "pstore/mcrepo/section.hpp"
 #include "pstore/support/base64.hpp"
 
 namespace pstore {

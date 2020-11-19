@@ -47,8 +47,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstdlib>
-#include <string>
-#include <vector>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"

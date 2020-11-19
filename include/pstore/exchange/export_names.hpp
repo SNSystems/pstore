@@ -47,7 +47,6 @@
 #include <unordered_map>
 
 #include "pstore/core/index_types.hpp"
-#include "pstore/core/indirect_string.hpp"
 #include "pstore/diff/diff.hpp"
 #include "pstore/exchange/export_emit.hpp"
 

@@ -44,22 +44,9 @@
 /// \file database.cpp
 #include "pstore/core/database.hpp"
 
-#include <cassert>
-#include <cstddef>
-#include <iterator>
-#include <limits>
-#include <new>
-#include <sstream>
-#include <system_error>
-#include <type_traits>
-
-#include "pstore/config/config.hpp"
 #include "pstore/core/start_vacuum.hpp"
 #include "pstore/core/time.hpp"
 #include "pstore/os/path.hpp"
-#include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
-#include "pstore/support/utf.hpp"
 
 #include "base32.hpp"
 #include "heartbeat.hpp"

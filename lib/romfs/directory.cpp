@@ -44,12 +44,9 @@
 #include "pstore/romfs/directory.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cstring>
-#include <string>
 
 #include "pstore/romfs/dirent.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace {
 

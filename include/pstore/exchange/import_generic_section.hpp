@@ -52,7 +52,6 @@
 
 #include "pstore/exchange/import_fixups.hpp"
 #include "pstore/exchange/import_non_terminals.hpp"
-#include "pstore/mcrepo/section.hpp"
 #include "pstore/support/base64.hpp"
 
 namespace pstore {

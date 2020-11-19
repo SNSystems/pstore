@@ -43,19 +43,12 @@
 //===----------------------------------------------------------------------===//
 /// \file base32.hpp
 
-#ifndef PSTORE_SUPPORT_BASE32_HPP
-#define PSTORE_SUPPORT_BASE32_HPP
+#ifndef PSTORE_CORE_BASE32_HPP
+#define PSTORE_CORE_BASE32_HPP
 
 #include <algorithm>
-#include <array>
-#include <cassert>
 #include <cmath>
-#include <cstdint>
-#include <limits>
-#include <string>
-#include <type_traits>
 
-#include "pstore/support/portab.hpp"
 #include "pstore/support/uint128.hpp"
 
 namespace pstore {
@@ -109,4 +102,4 @@ namespace pstore {
     } // namespace base32
 } // namespace pstore
 
-#endif // PSTORE_SUPPORT_BASE32_HPP
+#endif // PSTORE_CORE_BASE32_HPP

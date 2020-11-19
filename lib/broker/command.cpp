@@ -45,18 +45,8 @@
 
 #include "pstore/broker/command.hpp"
 
-#include <algorithm>
-#include <condition_variable>
-#include <cstdio>
 #include <iomanip>
-#include <mutex>
-#include <queue>
 #include <sstream>
-
-// platform includes
-#ifndef _WIN32
-#    include <unistd.h>
-#endif
 
 #include "pstore/broker/gc.hpp"
 #include "pstore/broker/globals.hpp"
@@ -64,12 +54,10 @@
 #include "pstore/broker/message_pool.hpp"
 #include "pstore/broker/quit.hpp"
 #include "pstore/broker/recorder.hpp"
-#include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/brokerface/writer.hpp"
 #include "pstore/json/utility.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/time.hpp"
-#include "pstore/support/array_elements.hpp"
 
 namespace {
 

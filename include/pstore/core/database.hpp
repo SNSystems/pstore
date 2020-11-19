@@ -46,16 +46,12 @@
 #ifndef PSTORE_CORE_DATABASE_HPP
 #define PSTORE_CORE_DATABASE_HPP
 
-#include <map>
-#include <tuple>
-
 #include "pstore/adt/sstring_view.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map_fwd.hpp"
 #include "pstore/core/storage.hpp"
 #include "pstore/core/vacuum_intf.hpp"
 #include "pstore/os/shared_memory.hpp"
-#include "pstore/support/fnv.hpp"
 #include "pstore/support/head_revision.hpp"
 
 namespace pstore {

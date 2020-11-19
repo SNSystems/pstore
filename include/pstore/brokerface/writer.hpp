@@ -47,16 +47,10 @@
 #ifndef PSTORE_BROKERFACE_WRITER_HPP
 #define PSTORE_BROKERFACE_WRITER_HPP
 
-#include <chrono>
 #include <cstdlib>
-#include <limits>
-#include <functional>
 
 // pstore broker-interface
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/fifo_path.hpp"
-// pstore support
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
     namespace brokerface {

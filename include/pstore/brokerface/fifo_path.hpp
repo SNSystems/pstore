@@ -50,7 +50,6 @@
 #include <chrono>
 #include <functional>
 #include <mutex>
-#include <string>
 #include <tuple>
 
 #include "pstore/brokerface/descriptor.hpp"

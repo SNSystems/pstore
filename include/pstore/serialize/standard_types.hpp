@@ -47,16 +47,10 @@
 #ifndef PSTORE_SERIALIZE_STANDARD_TYPES_HPP
 #define PSTORE_SERIALIZE_STANDARD_TYPES_HPP
 
-#include <array>
 #include <atomic>
-#include <functional>
 #include <map>
 #include <set>
-#include <string>
-#include <type_traits>
 
-#include "pstore/config/config.hpp"
-#include "pstore/serialize/common.hpp"
 #include "pstore/serialize/types.hpp"
 #include "pstore/support/varint.hpp"
 

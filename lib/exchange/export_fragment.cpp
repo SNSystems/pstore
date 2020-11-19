@@ -43,9 +43,6 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/exchange/export_fragment.hpp"
 
-#include "pstore/support/base64.hpp"
-#include "pstore/support/gsl.hpp"
-
 namespace pstore {
     namespace exchange {
         namespace export_ns {

@@ -41,18 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-/// \brief Functions for converting to and from
+/// \file query_to_kvp.hpp
+/// \brief Functions for converting key/value pairs to and from the query component of a URI.
 #ifndef PSTORE_HTTP_QUERY_TO_KVP_HPP
 #define PSTORE_HTTP_QUERY_TO_KVP_HPP
 
 #include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <cstring>
-#include <iterator>
-#include <string>
 #include <tuple>
-#include <utility>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"

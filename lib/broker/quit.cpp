@@ -46,22 +46,12 @@
 #include "pstore/broker/quit.hpp"
 
 // Standard includes
-#include <atomic>
-#include <cassert>
-#include <cerrno>
-#include <condition_variable>
-#include <cstring>
 #include <iostream>
-#include <memory>
-#include <mutex>
 
 // Platform includes
 #include <fcntl.h>
-#ifdef _WIN32
-#    include <winsock2.h>
-#else
+#ifndef _WIN32
 #    include <sys/socket.h>
-#    include <unistd.h>
 #endif
 #include <signal.h>
 
@@ -71,15 +61,9 @@
 #include "pstore/broker/globals.hpp"
 #include "pstore/broker/internal_commands.hpp"
 #include "pstore/broker/scavenger.hpp"
-#include "pstore/brokerface/fifo_path.hpp"
-#include "pstore/brokerface/message_type.hpp"
-#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/http/quit.hpp"
 #include "pstore/http/server.hpp"
-#include "pstore/os/logging.hpp"
 #include "pstore/os/signal_helpers.hpp"
-#include "pstore/os/thread.hpp"
-#include "pstore/support/array_elements.hpp"
 
 namespace {
 

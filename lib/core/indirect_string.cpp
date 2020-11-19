@@ -43,8 +43,6 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/core/indirect_string.hpp"
 
-#include "pstore/core/transaction.hpp"
-
 namespace pstore {
 
     //*  _         _ _            _        _       _            *

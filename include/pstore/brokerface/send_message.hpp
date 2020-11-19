@@ -49,11 +49,8 @@
 #define PSTORE_BROKERFACE_SEND_MESSAGE_HPP
 
 #include <cstdint>
-#include <string>
 
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/writer.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace brokerface {

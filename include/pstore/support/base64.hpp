@@ -45,12 +45,8 @@
 #define PSTORE_SUPPORT_BASE64_HPP
 
 #include <algorithm>
-#include <array>
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
-#include <iterator>
-#include <type_traits>
 
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/maybe.hpp"

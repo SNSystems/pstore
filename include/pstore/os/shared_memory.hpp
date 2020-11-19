@@ -46,35 +46,22 @@
 #ifndef PSTORE_OS_SHARED_MEMORY_HPP
 #define PSTORE_OS_SHARED_MEMORY_HPP
 
-#include <algorithm>
 #include <atomic>
-#include <cstdlib>
 #include <cstring>
-#include <memory>
 #include <mutex>
 #include <sstream>
-#include <stdexcept>
-#include <string>
 
-#ifdef _WIN32
-#    define NOMINMAX
-#    define WIN32_LEAN_AND_MEAN
-#    include <Windows.h>
-#else // !_WIN32
+#ifndef _WIN32
 #    include <cerrno>
 #    include <fcntl.h>
 #    include <sys/mman.h>
 #    include <sys/stat.h>
-#    include <system_error>
 #    include <unistd.h>
 #endif // !_WIN32
 
 #include "pstore/os/uint64.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/gsl.hpp"
-#include "pstore/support/portab.hpp"
 #include "pstore/support/quoted.hpp"
-#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace posix {

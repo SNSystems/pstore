@@ -44,24 +44,10 @@
 #ifndef PSTORE_MCREPO_SPARSE_ARRAY_HPP
 #define PSTORE_MCREPO_SPARSE_ARRAY_HPP
 
-#include <algorithm>
-#include <array>
-#include <cassert>
-#include <iterator>
-#include <memory>
 #include <numeric>
-#include <stdexcept>
-#include <type_traits>
-#include <utility>
-
-#ifdef _MSC_VER
-#    include <intrin.h>
-#endif
 
 #include "pstore/support/bit_count.hpp"
 #include "pstore/support/error.hpp"
-#include "pstore/support/inherit_const.hpp"
-#include "pstore/support/uint128.hpp"
 
 namespace pstore {
     namespace repo {

@@ -49,18 +49,12 @@
 
 #ifndef _WIN32
 
-#    include <atomic>
-#    include <cassert>
-#    include <csignal>
 #    include <cstring>
 #    include <chrono>
 #    include <condition_variable>
-#    include <memory>
-#    include <mutex>
 #    include <thread>
 
 #    include <sys/wait.h>
-#    include <unistd.h>
 
 #    include "pstore/os/logging.hpp"
 #    include "pstore/os/signal_helpers.hpp"

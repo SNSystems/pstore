@@ -44,45 +44,23 @@
 #include "pstore/http/server.hpp"
 
 // Standard library includes
-#include <algorithm>
-#include <cstdio>
 #include <cstring>
-#include <limits>
-#include <sstream>
-#include <string>
 #include <thread>
-#include <unordered_map>
 
 // OS-specific includes
 #ifdef _WIN32
-
-#    include <io.h>
-#    include <winsock2.h>
 #    include <ws2tcpip.h>
-
 #else
-
 #    include <netdb.h>
 #    include <sys/socket.h>
-#    include <sys/types.h>
-
 #endif
 
 // Local includes
-#include "pstore/brokerface/descriptor.hpp"
-#include "pstore/brokerface/pubsub.hpp"
-#include "pstore/http/buffered_reader.hpp"
-#include "pstore/http/error.hpp"
 #include "pstore/http/headers.hpp"
 #include "pstore/http/net_txrx.hpp"
-#include "pstore/http/query_to_kvp.hpp"
-#include "pstore/http/quit.hpp"
 #include "pstore/http/request.hpp"
-#include "pstore/http/send.hpp"
 #include "pstore/http/serve_dynamic_content.hpp"
 #include "pstore/http/serve_static_content.hpp"
-#include "pstore/http/server_status.hpp"
-#include "pstore/http/ws_server.hpp"
 #include "pstore/http/wskey.hpp"
 
 namespace {

@@ -41,13 +41,13 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file quoted.hpp
 /// \brief Wrapping quotation marks around strings for output to the user.
 
 #ifndef PSTORE_SUPPORT_QUOTED_HPP
 #define PSTORE_SUPPORT_QUOTED_HPP
 
 #include <iomanip>
-#include <string>
 
 #include "pstore/support/gsl.hpp"
 

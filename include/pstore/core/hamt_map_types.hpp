@@ -46,15 +46,9 @@
 #ifndef PSTORE_CORE_HAMT_MAP_TYPES_HPP
 #define PSTORE_CORE_HAMT_MAP_TYPES_HPP
 
-#include <array>
-#include <vector>
-
 #include "pstore/adt/chunked_vector.hpp"
 #include "pstore/core/array_stack.hpp"
-#include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
-#include "pstore/support/bit_count.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     class transaction_base;

@@ -47,15 +47,10 @@
 
 #include "pstore/core/uuid.hpp"
 
-#include <algorithm>
-#include <array>
-#include <cassert>
 #include <iomanip>
-#include <iterator>
 #include <ostream>
 
 #include "pstore/support/error.hpp"
-#include "pstore/support/portab.hpp"
 #include "pstore/support/random.hpp"
 
 namespace {

@@ -46,15 +46,9 @@
 
 #include "pstore/exchange/export.hpp"
 
-#include <type_traits>
-
 #include "pstore/core/generation_iterator.hpp"
 #include "pstore/exchange/export_compilation.hpp"
 #include "pstore/exchange/export_fragment.hpp"
-#include "pstore/mcrepo/generic_section.hpp"
-#include "pstore/mcrepo/section.hpp"
-#include "pstore/support/base64.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace {
 

@@ -45,14 +45,10 @@
 
 #include "pstore/broker/parser.hpp"
 
-#include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <mutex>
-#include <stdexcept>
 
 #include "pstore/broker/globals.hpp"
-#include "pstore/brokerface/message_type.hpp"
 
 namespace {
 

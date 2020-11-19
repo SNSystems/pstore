@@ -44,23 +44,15 @@
 #ifndef PSTORE_JSON_JSON_HPP
 #define PSTORE_JSON_JSON_HPP
 
-#include <cassert>
 #include <cctype>
 #include <cmath>
-#include <cstdint>
 #include <cstring>
-#include <limits>
-#include <memory>
 #include <ostream>
 #include <stack>
-#include <system_error>
 #include <tuple>
-#include <type_traits>
 
 #include "pstore/json/json_error.hpp"
-#include "pstore/support/gsl.hpp"
 #include "pstore/support/max.hpp"
-#include "pstore/support/portab.hpp"
 #include "pstore/support/utf.hpp"
 
 namespace pstore {

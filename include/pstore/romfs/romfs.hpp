@@ -45,20 +45,9 @@
 #define PSTORE_ROMFS_ROMFS_HPP
 
 #include <cerrno>
-#include <cstdlib>
-#include <memory>
-#include <string>
-#include <system_error>
-#include <tuple>
 
-#ifndef _WIN32
-#    include <sys/types.h>
-#endif
-
-#include "pstore/adt/error_or.hpp"
 #include "pstore/romfs/directory.hpp"
 #include "pstore/romfs/dirent.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace romfs {

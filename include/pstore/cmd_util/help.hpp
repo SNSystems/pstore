@@ -45,7 +45,6 @@
 #define PSTORE_CMD_UTIL_HELP_HPP
 
 #include <iomanip>
-#include <limits>
 #include <map>
 #include <set>
 #include <tuple>
@@ -56,7 +55,6 @@
 #include "pstore/cmd_util/word_wrapper.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/unsigned_cast.hpp"
-#include "pstore/support/utf.hpp"
 
 namespace pstore {
     namespace cmd_util {

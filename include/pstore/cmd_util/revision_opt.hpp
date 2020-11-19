@@ -44,8 +44,6 @@
 #ifndef PSTORE_CMD_UTIL_REVISION_OPT_HPP
 #define PSTORE_CMD_UTIL_REVISION_OPT_HPP
 
-#include <string>
-
 #include "pstore/cmd_util/option.hpp"
 #include "pstore/support/head_revision.hpp"
 

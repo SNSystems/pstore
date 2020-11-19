@@ -46,21 +46,14 @@
 #ifndef PSTORE_BROKER_COMMAND_HPP
 #define PSTORE_BROKER_COMMAND_HPP
 
-#include <array>
-#include <atomic>
 #include <cstring>
-#include <mutex>
-#include <tuple>
 
 // pstore includes
 #include "pstore/broker/message_queue.hpp"
 #include "pstore/broker/parser.hpp"
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/fifo_path.hpp"
-#include "pstore/brokerface/message_type.hpp"
 #include "pstore/brokerface/pubsub.hpp"
 #include "pstore/brokerface/signal_cv.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {

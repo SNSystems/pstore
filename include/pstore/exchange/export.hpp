@@ -47,7 +47,6 @@
 #ifndef PSTORE_EXCHANGE_EXPORT_HPP
 #define PSTORE_EXCHANGE_EXPORT_HPP
 
-#include "pstore/core/database.hpp"
 #include "pstore/exchange/export_ostream.hpp"
 
 namespace pstore {

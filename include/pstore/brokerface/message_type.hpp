@@ -48,13 +48,7 @@
 #ifndef PSTORE_BROKERFACE_MESSAGE_TYPE_HPP
 #define PSTORE_BROKERFACE_MESSAGE_TYPE_HPP
 
-#include <algorithm>
-#include <array>
-#include <cstddef>
 #include <cstdint>
-#include <memory>
-#include <string>
-#include <type_traits>
 
 #ifndef _WIN32
 #    include <limits.h> // POSIX definition of PIPE_BUF

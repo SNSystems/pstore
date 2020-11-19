@@ -41,6 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file max.hpp
 /// \brief A template implementation of helper types for determining the maximum size and alignment
 /// of a collection of types.
 #ifndef PSTORE_SUPPORT_MAX_HPP

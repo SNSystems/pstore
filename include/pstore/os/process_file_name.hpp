@@ -47,15 +47,9 @@
 #ifndef PSTORE_OS_PROCESS_FILE_NAME_HPP
 #define PSTORE_OS_PROCESS_FILE_NAME_HPP
 
-#include <algorithm>
-#include <cassert>
 #include <cerrno>
-#include <stdexcept>
-#include <string>
-#include <type_traits>
 
 #include "pstore/support/error.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     /// Returns the path of the current process image.

@@ -50,7 +50,6 @@
 #ifndef PSTORE_EXCHANGE_IMPORT_NAMES_ARRAY_HPP
 #define PSTORE_EXCHANGE_IMPORT_NAMES_ARRAY_HPP
 
-#include "pstore/core/transaction.hpp"
 #include "pstore/exchange/import_names.hpp"
 
 namespace pstore {

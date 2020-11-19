@@ -46,16 +46,11 @@
 
 #include "pstore/core/file_header.hpp"
 
-#include <algorithm>
 #include <chrono>
-#include <cstring>
-#include <iterator>
 #include <random>
 #include <set>
-#include <utility>
 
 // pstore includes
-#include "pstore/config/config.hpp"
 #include "pstore/core/crc32.hpp"
 #include "pstore/core/database.hpp"
 

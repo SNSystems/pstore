@@ -47,14 +47,14 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file import_fragment.hpp
+/// \brief Rules for importing the fragment index.
+
 #ifndef PSTORE_EXCHANGE_IMPORT_FRAGMENT_HPP
 #define PSTORE_EXCHANGE_IMPORT_FRAGMENT_HPP
 
-#include <vector>
-
 #include "pstore/exchange/import_section_to_importer.hpp"
 #include "pstore/mcrepo/fragment.hpp"
-#include "pstore/support/base64.hpp"
 
 namespace pstore {
     namespace exchange {

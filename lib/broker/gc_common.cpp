@@ -45,9 +45,6 @@
 
 #include "pstore/broker/gc.hpp"
 
-#include <algorithm>
-
-#include "pstore/broker/spawn.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/path.hpp"
 #include "pstore/os/process_file_name.hpp"

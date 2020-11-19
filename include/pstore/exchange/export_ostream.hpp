@@ -45,10 +45,8 @@
 #define PSTORE_EXCHANGE_EXPORT_OSTREAM_HPP
 
 #include <cstdio>
-#include <string>
 
 #include "pstore/core/indirect_string.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace exchange {

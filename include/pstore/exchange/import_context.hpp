@@ -45,7 +45,6 @@
 #define PSTORE_EXCHANGE_IMPORT_CONTEXT_HPP
 
 #include <list>
-#include <memory>
 #include <stack>
 
 #include "pstore/support/gsl.hpp"
