@@ -346,9 +346,15 @@ function (add_pstore_library)
 
     install (
         TARGETS ${arg_TARGET}
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/${arg_NAME}"
-        LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
-        ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
+        PUBLIC_HEADER
+            DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/pstore/${arg_NAME}"
+            COMPONENT pstore
+        LIBRARY
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
+            COMPONENT pstore
+        ARCHIVE
+            DESTINATION "${CMAKE_INSTALL_LIBDIR}/pstore"
+            COMPONENT pstore
     )
     add_dependencies (install-pstore ${arg_TARGET})
 
@@ -396,7 +402,12 @@ endfunction (add_pstore_executable)
 function (add_pstore_tool name)
     add_pstore_executable (${name} ${ARGN})
 
-    install (TARGETS ${name} RUNTIME DESTINATION bin)
+    install (
+        TARGETS ${name}
+        RUNTIME
+            DESTINATION "${CMAKE_INSTALL_BINDIR}"
+            COMPONENT pstore
+    )
     add_dependencies (install-pstore ${name})
 endfunction (add_pstore_tool)
 
