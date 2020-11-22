@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file unsigned_cast.hpp
+/// \brief unsigned_cast() (and its runtime-checked version) allow for simple integral unsigned
+///  casts.
 #ifndef PSTORE_SUPPORT_UNSIGNED_CAST_HPP
 #define PSTORE_SUPPORT_UNSIGNED_CAST_HPP
 
@@ -49,18 +52,13 @@
 namespace pstore {
 
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    struct unsigned_castable {
-        using type = typename std::make_unsigned<typename std::remove_cv<T>::type>::type;
-    };
-
-    template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    constexpr auto unsigned_cast (T const value) noexcept -> typename unsigned_castable<T>::type {
+    constexpr decltype (auto) unsigned_cast (T const value) noexcept {
         assert (value >= T{0});
-        return static_cast<typename unsigned_castable<T>::type> (value);
+        return static_cast<typename std::make_unsigned_t<typename std::remove_cv_t<T>>> (value);
     }
 
     template <typename T, typename = typename std::enable_if<std::is_integral<T>::value>::type>
-    constexpr auto checked_unsigned_cast (T const value) -> typename unsigned_castable<T>::type {
+    constexpr decltype (auto) checked_unsigned_cast (T const value) {
         if (value < 0) {
             raise (std::errc::invalid_argument, "bad cast to unsigned");
         }
