@@ -82,14 +82,12 @@ namespace pstore {
 
         template <typename ErrorCode,
                   typename = typename std::enable_if<is_error<ErrorCode>::value>::type>
-        explicit error_or (ErrorCode erc)
-                : has_error_{true} {
+        explicit error_or (ErrorCode const erc) {
             new (get_error_storage ()) std::error_code (make_error_code (erc));
         }
 
-        explicit error_or (std::error_code erc)
-                : has_error_{true} {
-            new (get_error_storage ()) std::error_code (std::move (erc));
+        explicit error_or (std::error_code const erc) {
+            new (get_error_storage ()) std::error_code (erc);
         }
 
         template <typename Other,
@@ -113,11 +111,11 @@ namespace pstore {
             copy_construct (rhs);
         }
 
-        error_or (error_or && rhs) { move_construct (std::move (rhs)); }
+        error_or (error_or && rhs) noexcept { move_construct (std::move (rhs)); }
 
         template <typename Other,
                   typename = typename std::enable_if<std::is_convertible<Other, T>::value>::type>
-        error_or (error_or<Other> && rhs) {
+        error_or (error_or<Other> && rhs) noexcept {
             move_construct (std::move (rhs));
         }
 
@@ -203,7 +201,7 @@ namespace pstore {
         error_or & copy_assign (error_or<Other> const & rhs);
 
         template <typename Other>
-        void move_construct (error_or<Other> && rhs);
+        void move_construct (error_or<Other> && rhs) noexcept;
 
         template <typename Other>
         error_or & move_assign (error_or<Other> && rhs);
@@ -295,7 +293,7 @@ namespace pstore {
     // ~~~~~~~~~~~~~~
     template <typename T>
     template <typename Other>
-    void error_or<T>::move_construct (error_or<Other> && rhs) {
+    void error_or<T>::move_construct (error_or<Other> && rhs) noexcept {
         has_error_ = rhs.has_error_;
         if (has_error_) {
             new (get_error_storage ()) std::error_code (rhs.get_error ());
