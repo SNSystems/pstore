@@ -99,7 +99,7 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
-            void emit_database (database & db, ostream & os, bool comments) {
+            void emit_database (database & db, ostream & os, bool const comments) {
                 name_mapping string_table;
                 auto const ind = indent{}.next ();
                 os << "{\n";

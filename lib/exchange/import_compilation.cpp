@@ -249,7 +249,7 @@ namespace pstore {
                                               std::begin (definitions_), std::end (definitions_));
 
                 // Insert this compilation into the compilations index.
-                auto compilations =
+                auto const compilations =
                     pstore::index::get_index<pstore::trailer::indices::compilation> (
                         transaction_->db ());
                 compilations->insert (*transaction_, std::make_pair (digest_, compilation_extent));
@@ -262,12 +262,12 @@ namespace pstore {
             //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \(_-< | | ' \/ _` / -_) \ / *
             //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_/__/ |_|_||_\__,_\___/_\_\ *
             //*              |_|                                                     *
-            //-MARK: compilation index
+            //-MARK: compilations index
             // (ctor)
             // ~~~~~~
-            compilations_index::compilations_index (not_null<context *> ctxt,
-                                                    not_null<transaction_base *> transaction,
-                                                    not_null<name_mapping const *> names)
+            compilations_index::compilations_index (not_null<context *> const ctxt,
+                                                    not_null<transaction_base *> const transaction,
+                                                    not_null<name_mapping const *> const names)
                     : rule (ctxt)
                     , transaction_{transaction}
                     , names_{names}
