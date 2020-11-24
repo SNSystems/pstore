@@ -51,14 +51,18 @@
 
 function (pstore_can_tidy result)
     set (${result} No PARENT_SCOPE)
-    if (NOT WIN32)
-        # (Note that I allow for "Clang" and "AppleClang" and any other clang
-        # variants out there.)
 
-        if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang$"))
-           set (${result} Yes PARENT_SCOPE)
-        endif ()
-    endif (NOT WIN32)
+    if (PSTORE_CLANG_TIDY_ENABLED)
+        if (NOT WIN32)
+            # (Note that I allow for "Clang" and "AppleClang" and any other clang
+            # variants out there.)
+
+            if ((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang$"))
+                set (${result} Yes PARENT_SCOPE)
+            endif ()
+        endif (NOT WIN32)
+    endif (PSTORE_CLANG_TIDY_ENABLED)
+
 endfunction (pstore_can_tidy)
 
 
@@ -104,10 +108,7 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
     set (${sys_includes} "${sys_includes}-NOTFOUND" PARENT_SCOPE)
 
     pstore_can_tidy (can_tidy)
-
-    if (NOT can_tidy)
-        message (STATUS "clang-tidy not yet supported on this platform/compiler")
-    else ()
+    if (can_tidy)
         find_program (PSTORE_CLANG_TIDY "clang-tidy")
         if (NOT PSTORE_CLANG_TIDY STREQUAL "PSTORE_CLANG_TIDY-NOTFOUND")
             set (${tidy_path} "${PSTORE_CLANG_TIDY}" PARENT_SCOPE)
@@ -163,7 +164,7 @@ function (pstore_find_clang_tidy tidy_path sys_includes)
         endif (NOT PSTORE_SYS_INCLUDES)
 
         set (${sys_includes} "${PSTORE_SYS_INCLUDES}" PARENT_SCOPE)
-    endif (NOT can_tidy)
+    endif (can_tidy)
 
 endfunction (pstore_find_clang_tidy)
 
@@ -176,29 +177,33 @@ function (add_clang_tidy_target source_target)
     if (NOT tidy_path STREQUAL "tidy_path-NOTFOUND")
         set (clang_tidy_checks "*,\
 -cert-dcl21-cpp,\
+-cppcoreguidelines-avoid-c-arrays,\
 -cppcoreguidelines-avoid-magic-numbers,\
+-cppcoreguidelines-init-variables,\
 -cppcoreguidelines-macro-usage,\
 -cppcoreguidelines-owning-memory,\
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
 -cppcoreguidelines-pro-bounds-constant-array-index,\
 -cppcoreguidelines-pro-bounds-pointer-arithmetic,\
+-cppcoreguidelines-pro-type-member-init,\
 -cppcoreguidelines-pro-type-reinterpret-cast,\
 -cppcoreguidelines-pro-type-union-access,\
--cppcoreguidelines-avoid-c-arrays,\
--cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
--cppcoreguidelines-init-variables,\
--cppcoreguidelines-pro-type-member-init,\
 -fuchsia-*,\
--google-runtime-int,\
--google-readability-todo,\
 -google-explicit-constructor,\
+-google-readability-todo,\
+-google-runtime-int,\
 -hicpp-avoid-c-arrays,\
--hicpp-no-array-decay,\
 -hicpp-member-init,\
+-hicpp-no-array-decay,\
+-llvmlibc-*,\
+-misc-no-recursion,\
+-misc-non-private-member-variables-in-classes,\
 -modernize-avoid-c-arrays,\
--modernize-use-trailing-return-type,\
 -modernize-pass-by-value,\
+-modernize-use-trailing-return-type,\
 -readability-magic-numbers,\
--readability-named-parameter")
+-readability-named-parameter"
+)
 
         # Collect the *.cpp files: clang-tidy will scan these.
         get_target_property (source_files "${source_target}" SOURCES)
