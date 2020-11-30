@@ -46,9 +46,9 @@
 
 #include <utility>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/vacuum/user_options.hpp"
 
-std::pair<vacuum::user_options, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+std::pair<vacuum::user_options, int> get_switches (int argc, pstore::command_line::tchar * argv[]);
 
 #endif // PSTORE_VACUUM_SWITCHES_HPP

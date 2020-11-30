@@ -139,13 +139,13 @@ int main (int argc, char * argv[]) {
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
+        pstore::command_line::error_stream << NATIVE_TEXT ("An error occurred: ")
                                        << pstore::utf::to_native_string (ex.what ())
                                        << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown exception") << std::endl;
+        pstore::command_line::error_stream << NATIVE_TEXT ("Unknown exception") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

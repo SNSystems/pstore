@@ -47,5 +47,5 @@ add_pstore_tool (pstore-diff
     switches.cpp
     switches.hpp
 )
-target_link_libraries (pstore-diff PRIVATE pstore-diff-lib pstore-cmd-util)
+target_link_libraries (pstore-diff PRIVATE pstore-diff-lib pstore-command-line)
 run_pstore_unit_test (pstore-diff pstore-diff-unit-tests)

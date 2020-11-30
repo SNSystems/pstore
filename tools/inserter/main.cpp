@@ -55,8 +55,8 @@
 #include <thread>
 #include <unordered_set>
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/db_archive.hpp"
@@ -98,7 +98,7 @@ namespace {
             [&database, &index] (pstore::index::digest key) { index.find (database, key); });
     }
 
-    using namespace pstore::cmd_util;
+    using namespace pstore::command_line;
 
     cl::opt<std::string> data_file{
         cl::positional, cl::usage ("repository"),
@@ -182,14 +182,14 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
         auto what = ex.what ();
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
-                                       << to_native_string (what)
-                                       << std::endl;
+        pstore::command_line::error_stream << NATIVE_TEXT ("An error occurred: ")
+                                           << to_native_string (what) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
+        pstore::command_line::error_stream << NATIVE_TEXT ("An unknown error occurred.")
+                                           << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

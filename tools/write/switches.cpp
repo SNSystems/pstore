@@ -43,7 +43,7 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#include "pstore/cmd_util/command_line.hpp"
+#include "pstore/command_line/command_line.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/utf.hpp"
@@ -51,7 +51,7 @@
 #include "error.hpp"
 #include "to_value_pair.hpp"
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 

@@ -47,7 +47,7 @@
 #include <string>
 #include <utility>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/diff/diff_value.hpp"
 #include "pstore/diff/revision.hpp"
 
@@ -58,6 +58,6 @@ struct switches {
     bool hex = false;
 };
 
-std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::command_line::tchar * argv[]);
 
 #endif // PSTORE_DIFF_SWITCHES_HPP

@@ -64,7 +64,7 @@
 // Local includes
 #include "switches.hpp"
 
-using pstore::cmd_util::error_stream;
+using pstore::command_line::error_stream;
 
 namespace {
 

@@ -66,7 +66,7 @@
 #include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/brokerface/send_message.hpp"
 #include "pstore/brokerface/writer.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
@@ -118,12 +118,12 @@ int main (int argc, char * argv[]) {
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
         auto what = ex.what ();
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An error occurred: ")
+        pstore::command_line::error_stream << NATIVE_TEXT ("An error occurred: ")
                     << pstore::utf::to_native_string (what) << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
+        pstore::command_line::error_stream << NATIVE_TEXT ("An unknown error occurred.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on
