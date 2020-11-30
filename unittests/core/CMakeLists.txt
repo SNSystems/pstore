@@ -67,7 +67,7 @@ add_pstore_unit_test (pstore-core-unit-tests
     test_two_connections.cpp
     test_uuid.cpp
 )
-target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)
+target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-unit-test-common)
 
 # Access the library's private include directory.
 target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")

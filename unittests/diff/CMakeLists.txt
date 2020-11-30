@@ -48,4 +48,8 @@ add_pstore_unit_test (pstore-diff-unit-tests
     test_indices.cpp
     test_revision.cpp
 )
-target_link_libraries (pstore-diff-unit-tests PRIVATE pstore-diff-lib pstore-common)
+target_link_libraries (pstore-diff-unit-tests
+    PRIVATE
+        pstore-diff-lib
+        pstore-unit-test-common
+)
