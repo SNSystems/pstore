@@ -45,7 +45,7 @@ add_pstore_tool (pstore-import
     import.cpp
 )
 target_link_libraries (pstore-import PRIVATE
-    pstore-cmd-util
+    pstore-command-line
     pstore-exchange
 )
 run_pstore_unit_test (pstore-import pstore-exchange-unit-tests)

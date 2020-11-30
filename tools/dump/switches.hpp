@@ -48,7 +48,7 @@
 #include <string>
 #include <utility>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/index_types.hpp"
@@ -86,6 +86,6 @@ struct switches {
     std::list<std::string> paths;
 };
 
-std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::command_line::tchar * argv[]);
 
 #endif // PSTORE_DUMP_SWITCHES_HPP

@@ -46,9 +46,9 @@
 
 #include "pstore/exchange/export.hpp"
 #include "pstore/core/database.hpp"
-#include "pstore/cmd_util/command_line.hpp"
+#include "pstore/command_line/command_line.hpp"
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 

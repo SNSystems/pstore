@@ -43,10 +43,10 @@
 //===----------------------------------------------------------------------===//
 /// \file main.cpp
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/modifiers.hpp"
-#include "pstore/cmd_util/revision_opt.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/modifiers.hpp"
+#include "pstore/command_line/revision_opt.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/file_header.hpp"
 #include "pstore/core/hamt_map.hpp"
@@ -58,19 +58,14 @@ using namespace pstore;
 
 namespace {
 
-    cmd_util::cl::opt<cmd_util::revision_opt, cmd_util::cl::parser<std::string>> revision{
-        "revision",
-        cmd_util::cl::desc ("The starting revision number (or 'HEAD')")
-    };
-    cmd_util::cl::alias revision2{
-        "r",
-        cmd_util::cl::desc ("Alias for --revision"),
-        cmd_util::cl::aliasopt (revision)
-    };
+    command_line::cl::opt<command_line::revision_opt, command_line::cl::parser<std::string>>
+        revision{"revision", command_line::cl::desc ("The starting revision number (or 'HEAD')")};
+    command_line::cl::alias revision2{"r", command_line::cl::desc ("Alias for --revision"),
+                                      command_line::cl::aliasopt (revision)};
 
-    cmd_util::cl::opt<std::string> db_path{cmd_util::cl::positional, cmd_util::cl::required,
-                                           cmd_util::cl::usage ("repository"),
-                                           cmd_util::cl::desc ("Database path")};
+    command_line::cl::opt<std::string> db_path{
+        command_line::cl::positional, command_line::cl::required,
+        command_line::cl::usage ("repository"), command_line::cl::desc ("Database path")};
 
 } // end anonymous namespace
 
@@ -182,10 +177,10 @@ namespace {
 
             static constexpr auto newline = NATIVE_TEXT ("\n");
             static constexpr auto comma = NATIVE_TEXT (",");
-            cmd_util::out_stream << utf::to_native_string (index_name<Index>::name)
-                                         << comma << s.branching_factor () << comma
-                                         << s.mean_leaf_depth () << comma << s.max_depth () << comma
-                                         << index->size () << newline;
+            command_line::out_stream << utf::to_native_string (index_name<Index>::name) << comma
+                                     << s.branching_factor () << comma << s.mean_leaf_depth ()
+                                     << comma << s.max_depth () << comma << index->size ()
+                                     << newline;
         }
     }
 
@@ -199,26 +194,27 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {
-        cmd_util::cl::parse_command_line_options (argc, argv,
-                                        "Dumps statistics for the indexes in a pstore database");
+        command_line::cl::parse_command_line_options (
+            argc, argv, "Dumps statistics for the indexes in a pstore database");
 
         database db{db_path.get (), database::access_mode::read_only};
         db.sync (static_cast<unsigned> (revision.get ()));
 
-        cmd_util::out_stream
-            << NATIVE_TEXT ("name,branching-factor,mean-leaf-depth,max-depth,size\n");
+        command_line::out_stream << NATIVE_TEXT (
+            "name,branching-factor,mean-leaf-depth,max-depth,size\n");
 #define X(a) dump_index_stats<trailer::indices::a> (db);
         PSTORE_INDICES
 #undef X
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
-        cmd_util::error_stream << NATIVE_TEXT ("Error: ") << utf::to_native_string (ex.what ()) << std::endl;
+        command_line::error_stream << NATIVE_TEXT ("Error: ") << utf::to_native_string (ex.what ())
+                                   << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
-        cmd_util::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        command_line::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

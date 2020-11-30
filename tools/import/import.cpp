@@ -43,13 +43,13 @@
 //===----------------------------------------------------------------------===//
 #include <bitset>
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/revision_opt.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/revision_opt.hpp"
+#include "pstore/command_line/str_to_revision.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/exchange/import_root.hpp"
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 using namespace std::string_literals;
 
 namespace {

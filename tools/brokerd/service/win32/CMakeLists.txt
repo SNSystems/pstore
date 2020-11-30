@@ -60,9 +60,9 @@ add_pstore_tool (pstore-broker-service
 )
 
 if (PSTORE_IS_INSIDE_LLVM)
-    target_link_libraries (pstore-broker-service PRIVATE pstore-cmd-util-ex)
+    target_link_libraries (pstore-broker-service PRIVATE pstore-command-line-ex)
     set (LLVM_REQUIRES_EH No)
     set (LLVM_REQUIRES_RTTI No)
 else ()
-    target_link_libraries (pstore-broker-service PRIVATE pstore-cmd-util)
+    target_link_libraries (pstore-broker-service PRIVATE pstore-command-line)
 endif ()

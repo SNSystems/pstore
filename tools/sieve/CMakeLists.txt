@@ -48,4 +48,4 @@ add_pstore_executable (pstore-sieve
     switches.hpp
     write_output.hpp
 )
-target_link_libraries (pstore-sieve PRIVATE pstore-support pstore-cmd-util)
+target_link_libraries (pstore-sieve PRIVATE pstore-support pstore-command-line)

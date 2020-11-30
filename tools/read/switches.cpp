@@ -43,16 +43,16 @@
 //===----------------------------------------------------------------------===//
 #include "switches.hpp"
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
-#include "pstore/cmd_util/revision_opt.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/str_to_revision.hpp"
+#include "pstore/command_line/revision_opt.hpp"
 #include "pstore/support/error.hpp"
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>>
+    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>>
         revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
     cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
 

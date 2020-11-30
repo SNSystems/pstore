@@ -50,7 +50,7 @@
 #include <string>
 #include <tuple>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/os/descriptor.hpp" // for in_port_t
 
 struct switches {
@@ -62,6 +62,6 @@ struct switches {
     std::chrono::seconds scavenge_time;
 };
 
-std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::command_line::tchar * argv[]);
 
 #endif // SWITCHES_HPP

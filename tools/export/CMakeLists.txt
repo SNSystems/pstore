@@ -42,4 +42,4 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_tool (pstore-export export.cpp)
-target_link_libraries (pstore-export PRIVATE pstore-cmd-util pstore-exchange)
+target_link_libraries (pstore-export PRIVATE pstore-command-line pstore-exchange)

@@ -50,8 +50,8 @@
 #    include <signal.h>
 #endif
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/net_txrx.hpp"
 #include "pstore/http/server.hpp"
@@ -64,7 +64,7 @@
 
 extern pstore::romfs::romfs fs;
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 

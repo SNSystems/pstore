@@ -46,13 +46,13 @@
 
 #include <iterator>
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/revision_opt.hpp"
-#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/revision_opt.hpp"
+#include "pstore/command_line/str_to_revision.hpp"
 #include "pstore/dump/digest_opt.hpp"
 
 namespace pstore {
-    namespace cmd_util {
+    namespace command_line {
         namespace cl {
 
             // parser<digest_opt>
@@ -77,10 +77,10 @@ namespace pstore {
             gsl::czstring type_description<dump::digest_opt>::value = "digest";
 
         } // end namespace cl
-    }     // end namespace cmd_util
+    }     // end namespace command_line
 } // end namespace pstore
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 
@@ -135,7 +135,7 @@ namespace {
                              cl::aliasopt{shared_memory}};
 
 
-    cl::opt<pstore::cmd_util::revision_opt, cl::parser<std::string>> revision{
+    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>> revision{
         "revision", cl::desc{"The starting revision number (or 'HEAD')"}};
     cl::alias revision2{"r", cl::desc{"Alias for --revision"}, cl::aliasopt{revision}};
 
