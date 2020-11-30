@@ -75,9 +75,9 @@ else ()
     set (PSTORE_EXCEPTIONS ${old_pstore_exceptions})
 
     if (PSTORE_EXCEPTIONS)
-        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util)
+        target_link_libraries (pstore-brokerd PRIVATE pstore-command-line)
     else ()
-        target_link_libraries (pstore-brokerd PRIVATE pstore-cmd-util-ex)
+        target_link_libraries (pstore-brokerd PRIVATE pstore-command-line-ex)
     endif ()
     target_link_libraries (pstore-brokerd PRIVATE pstore-broker)
 

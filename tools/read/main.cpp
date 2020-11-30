@@ -55,7 +55,7 @@
 #    endif
 #endif
 
-#include "pstore/cmd_util/str_to_revision.hpp"
+#include "pstore/command_line/str_to_revision.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/core/index_types.hpp"
@@ -65,8 +65,8 @@
 
 #include "switches.hpp"
 
-using pstore::cmd_util::error_stream;
-using pstore::cmd_util::out_stream;
+using pstore::command_line::error_stream;
+using pstore::command_line::out_stream;
 
 namespace {
 

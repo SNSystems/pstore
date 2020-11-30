@@ -48,7 +48,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 
 enum class endian {
     native,
@@ -61,7 +61,7 @@ struct user_options {
     endian endianness;
     unsigned long maximum;
 
-    static user_options get (int argc, pstore::cmd_util::tchar * argv[]);
+    static user_options get (int argc, pstore::command_line::tchar * argv[]);
 };
 
 #endif // SIEVE_SWITCHES_HPP

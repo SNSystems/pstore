@@ -65,7 +65,7 @@
 #    include "llvm/ADT/StringRef.h"
 #endif
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/core/generation_iterator.hpp"
 #include "pstore/core/hamt_set.hpp"
 #include "pstore/dump/db_value.hpp"
@@ -311,7 +311,7 @@ namespace {
     }
 #endif // PSTORE_IS_INSIDE_LLVM && _WIN32 && _UNICODE
 
-    void initialize (int argc, pstore::cmd_util::tchar * argv[]) {
+    void initialize (int argc, pstore::command_line::tchar * argv[]) {
 #ifdef PSTORE_IS_INSIDE_LLVM
 
 #    if defined(_WIN32) && defined(_UNICODE)
@@ -433,17 +433,17 @@ int main (int argc, char * argv[]) {
         }
 
         pstore::dump::value_ptr v = make_value (output);
-        pstore::cmd_util::out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
+        pstore::command_line::out_stream << NATIVE_TEXT ("---\n") << *v << NATIVE_TEXT ("\n...\n");
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ")
+        pstore::command_line::error_stream << NATIVE_TEXT ("Error: ")
                                        << pstore::utf::to_native_string (ex.what ())
                                        << std::endl;
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
+        pstore::command_line::error_stream << NATIVE_TEXT ("Unknown error.") << std::endl;
         exit_code = EXIT_FAILURE;
     })
     // clang-format on

@@ -52,10 +52,10 @@ add_pstore_tool (pstore-write
     to_value_pair.cpp
     to_value_pair.hpp
 )
-target_link_libraries (pstore-write PRIVATE pstore-core pstore-cmd-util)
+target_link_libraries (pstore-write PRIVATE pstore-core pstore-command-line)
 
 run_pstore_unit_test (pstore-write pstore-adt-unit-tests)
-run_pstore_unit_test (pstore-write pstore-cmd-util-unit-tests)
+run_pstore_unit_test (pstore-write pstore-command-line-unit-tests)
 run_pstore_unit_test (pstore-write pstore-core-unit-tests)
 run_pstore_unit_test (pstore-write pstore-mcrepo-unit-tests)
 run_pstore_unit_test (pstore-write pstore-os-unit-tests)

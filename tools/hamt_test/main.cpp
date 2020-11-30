@@ -48,8 +48,8 @@
 #include <future>
 #include <vector>
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/hamt_map.hpp"
 #include "pstore/core/index_types.hpp"
@@ -61,7 +61,7 @@
 // Local includes
 #include "./print.hpp"
 
-using namespace pstore::cmd_util;
+using namespace pstore::command_line;
 
 namespace {
 

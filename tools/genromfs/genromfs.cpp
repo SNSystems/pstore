@@ -59,8 +59,8 @@
 #endif
 
 // pstore includes
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/support/array_elements.hpp"
 #include "pstore/support/error.hpp"
 #include "pstore/support/portab.hpp"
@@ -113,7 +113,7 @@ namespace std {
 
 namespace {
 
-    using namespace pstore::cmd_util;
+    using namespace pstore::command_line;
     cl::opt<std::string> src_path (cl::positional, ".", cl::desc ("source-path"));
 
     cl::opt<std::string> root_var (
@@ -201,13 +201,13 @@ int main (int argc, char * argv[]) {
         write_definition (os, root_var.get (), directory_var (root_id).as_string ());
     }
     PSTORE_CATCH (std::exception const & ex, {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("Error: ")
-                                       << pstore::utf::to_native_string (ex.what ())
-                                       << NATIVE_TEXT ('\n');
+        pstore::command_line::error_stream << NATIVE_TEXT ("Error: ")
+                                           << pstore::utf::to_native_string (ex.what ())
+                                           << NATIVE_TEXT ('\n');
         exit_code = EXIT_FAILURE;
     })
     PSTORE_CATCH (..., {
-        pstore::cmd_util::error_stream << NATIVE_TEXT ("An unknown error occurred\n");
+        pstore::command_line::error_stream << NATIVE_TEXT ("An unknown error occurred\n");
         exit_code = EXIT_FAILURE;
     })
     return exit_code;

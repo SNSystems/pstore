@@ -53,7 +53,7 @@ add_pstore_executable (pstore-broker-poker
 target_link_libraries (pstore-broker-poker PRIVATE
     pstore-adt
     pstore-brokerface
-    pstore-cmd-util
+    pstore-command-line
 )
 
 run_pstore_unit_test (pstore-broker-poker pstore-broker-poker-unit-tests)

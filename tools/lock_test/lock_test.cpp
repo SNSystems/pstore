@@ -58,19 +58,19 @@
 #include <mutex>
 #include <thread>
 
-#include "pstore/cmd_util/command_line.hpp"
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/command_line.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/core/transaction.hpp"
 
-using pstore::cmd_util::error_stream;
-using pstore::cmd_util::out_stream;
+using pstore::command_line::error_stream;
+using pstore::command_line::out_stream;
 
 namespace {
 
-    pstore::cmd_util::cl::opt<std::string> path (pstore::cmd_util::cl::positional,
-                                                 pstore::cmd_util::cl::required,
-                                                 pstore::cmd_util::cl::usage ("repository"));
+    pstore::command_line::cl::opt<std::string>
+        path (pstore::command_line::cl::positional, pstore::command_line::cl::required,
+              pstore::command_line::cl::usage ("repository"));
 
     //*                 *
     //*  ___ __ _ _  _  *
@@ -176,7 +176,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
-        pstore::cmd_util::cl::parse_command_line_options (
+        pstore::command_line::cl::parse_command_line_options (
             argc, argv, "pstore lock test: A simple test for the transaction lock.\n");
 
         say (out_stream, NATIVE_TEXT ("start"));

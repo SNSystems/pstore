@@ -55,6 +55,6 @@ add_pstore_executable (pstore-genromfs
     vars.cpp
     vars.hpp
 )
-target_link_libraries (pstore-genromfs PRIVATE pstore-romfs pstore-cmd-util)
+target_link_libraries (pstore-genromfs PRIVATE pstore-romfs pstore-command-line)
 add_clang_tidy_target (pstore-genromfs)
 run_pstore_unit_test (pstore-genromfs pstore-romfs-unit-tests)

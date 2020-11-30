@@ -47,7 +47,7 @@
 #include <bitset>
 #include <string>
 
-#include "pstore/cmd_util/tchar.hpp"
+#include "pstore/command_line/tchar.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/config/config.hpp"
 
@@ -66,6 +66,6 @@ struct switches {
     }
 };
 
-std::pair<switches, int> get_switches (int argc, pstore::cmd_util::tchar * argv[]);
+std::pair<switches, int> get_switches (int argc, pstore::command_line::tchar * argv[]);
 
 #endif // PSTORE_INDEX_STRUCTURE_SWITCHES_HPP
