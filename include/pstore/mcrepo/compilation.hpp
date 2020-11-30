@@ -81,24 +81,23 @@ namespace pstore {
         enum class visibility : std::uint8_t { PSTORE_REPO_VISIBILITIES };
 #undef X
 
-        //*                    _ _      _   _                            _              *
-        //*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
-        //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
-        //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| |_|_|_\___|_|_|_|_.__/\___|_|   *
-        //*              |_|                                                            *
+        //*     _      __ _      _ _   _           *
+        //*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
+        //* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
+        //* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
+        //*                                        *
         /// \brief Represents an individual symbol in a compilation.
         ///
-        /// The compilation member provides the connection between a symbol name, its linkage, and
+        /// A definition provides the connection between a symbol name, its linkage, and
         /// the fragment which holds the associated data.
-        struct compilation_member {
+        struct definition {
             /// \param d  The fragment digest for this compilation symbol.
             /// \param x  The fragment extent for this compilation symbol.
             /// \param n  Symbol name address.
             /// \param l  The symbol linkage.
             /// \param v  The symbol visibility.
-            compilation_member (index::digest d, extent<fragment> x,
-                                typed_address<indirect_string> n, linkage l,
-                                visibility v = repo::visibility::default_vis) noexcept;
+            definition (index::digest d, extent<fragment> x, typed_address<indirect_string> n,
+                        linkage l, visibility v = repo::visibility::default_vis) noexcept;
             /// The digest of the fragment referenced by this compilation symbol.
             index::digest digest;
             /// The extent of the fragment referenced by this compilation symbol.
@@ -125,23 +124,22 @@ namespace pstore {
                 return static_cast<enum visibility> (visibility_.value ());
             }
 
-            /// \brief Returns a pointer to an in-store compilation member instance.
+            /// \brief Returns a pointer to an in-store definition instance.
             ///
             /// \param db  The database from which the ticket_member should be loaded.
-            /// \param addr  Address of the compilation member.
-            /// \result  A pointer to the in-store compilation member.
-            static auto load (database const & db, typed_address<compilation_member> addr)
-                -> std::shared_ptr<compilation_member const>;
+            /// \param addr  Address of the definition.
+            /// \result  A pointer to the in-store definition.
+            static auto load (database const & db, typed_address<definition> addr)
+                -> std::shared_ptr<definition const>;
 
         private:
             friend class compilation;
-            compilation_member () noexcept {}
+            definition () noexcept {}
         };
         // load
         // ~~~~
-        inline auto compilation_member::load (database const & db,
-                                              typed_address<compilation_member> const addr)
-            -> std::shared_ptr<compilation_member const> {
+        inline auto definition::load (database const & db, typed_address<definition> const addr)
+            -> std::shared_ptr<definition const> {
             return db.getro (addr);
         }
 
@@ -150,13 +148,12 @@ namespace pstore {
         //* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  *
         //* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| *
         //*              |_|                            *
-        /// A compilation is a holder for zero or more `compilation_member` instances. It is the
-        /// top-level object representing the result of processing of a transaction unit by the
-        /// compiler.
+        /// A compilation is a holder for zero or more definitions. It is the top-level object
+        /// representing the result of processing of a transaction unit by the compiler.
         class compilation {
         public:
-            using iterator = compilation_member *;
-            using const_iterator = compilation_member const *;
+            using iterator = definition *;
+            using const_iterator = definition const *;
             using size_type = std::uint32_t;
 
             void operator delete (void * p);
@@ -165,15 +162,15 @@ namespace pstore {
             ///@{
 
             /// Allocates a new compilation in-store and copy the ticket file path and the contents
-            /// of a vector of compilation_members into it.
+            /// of a vector of definitions into it.
             ///
             /// \param transaction  The transaction to which the compilation will be appended.
             /// \param path  A ticket file path address in the store.
             /// \param triple  The target-triple associated with this compilation.
-            /// \param first_member  The first of a sequence of compilation_member instances. The
+            /// \param first_member  The first of a sequence of definition instances. The
             ///   range defined by \p first_member and \p last_member will be copied into the newly
             ///   allocated compilation.
-            /// \param last_member  The end of the range of compilation_member instances.
+            /// \param last_member  The end of the range of definition instances.
             /// \result A pair of a pointer and an extent which describes
             ///   the in-store location of the allocated compilation.
             template <typename TransactionType, typename Iterator>
@@ -193,7 +190,7 @@ namespace pstore {
 
             /// \name Element access
             ///@{
-            compilation_member const & operator[] (std::size_t const i) const {
+            definition const & operator[] (std::size_t const i) const {
                 assert (i < size_);
                 return members_[i];
             }
@@ -246,11 +243,11 @@ namespace pstore {
             /// \param c  The address of a compilation.
             /// \param index  The index of a definition within compilation \p c.
             /// \result  The address of the definition \p index within compilation \p c.
-            static constexpr typed_address<compilation_member>
+            static constexpr typed_address<definition>
             index_address (typed_address<compilation> const c, size_type const index) noexcept {
-                return typed_address<compilation_member>::make (
-                    c.to_address () + offsetof (compilation, members_) +
-                    sizeof (compilation_member) * index);
+                return typed_address<definition>::make (c.to_address () +
+                                                        offsetof (compilation, members_) +
+                                                        sizeof (definition) * index);
             }
 
         private:
@@ -282,10 +279,10 @@ namespace pstore {
             /// The number of entries in the members_ array.
             size_type size_ = 0;
             std::uint32_t padding1_ = 0;
-            compilation_member members_[1];
+            definition members_[1];
         };
         PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation>::value);
-        PSTORE_STATIC_ASSERT (sizeof (compilation) == 32 + sizeof (compilation_member));
+        PSTORE_STATIC_ASSERT (sizeof (compilation) == 32 + sizeof (definition));
         PSTORE_STATIC_ASSERT (alignof (compilation) == 16);
 
         template <typename Iterator>

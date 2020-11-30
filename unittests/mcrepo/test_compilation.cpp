@@ -62,7 +62,7 @@ namespace {
 } // namespace
 
 TEST_F (CompilationTest, Empty) {
-    std::vector<compilation_member> m;
+    std::vector<definition> m;
     pstore::extent<compilation> extent =
         compilation::alloc (transaction_, indirect_string_address (0U),
                             indirect_string_address (0U), std::begin (m), std::end (m));
@@ -86,9 +86,9 @@ TEST_F (CompilationTest, SingleMember) {
     constexpr auto linkage = pstore::repo::linkage::weak_odr;
     constexpr auto visibility = pstore::repo::visibility::protected_vis;
 
-    compilation_member sm{digest, extent, name, linkage, visibility};
+    definition sm{digest, extent, name, linkage, visibility};
 
-    std::vector<compilation_member> v{sm};
+    std::vector<definition> v{sm};
     compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);
@@ -118,10 +118,10 @@ TEST_F (CompilationTest, MultipleMembers) {
     constexpr auto linkage = pstore::repo::linkage::external;
     constexpr auto visibility = pstore::repo::visibility::default_vis;
 
-    compilation_member mm1{digest1, extent1, name, linkage, visibility};
-    compilation_member mm2{digest2, extent2, name + 24U, linkage, visibility};
+    definition mm1{digest1, extent1, name, linkage, visibility};
+    definition mm2{digest2, extent2, name + 24U, linkage, visibility};
 
-    std::vector<compilation_member> v{mm1, mm2};
+    std::vector<definition> v{mm1, mm2};
     compilation::alloc (transaction_, output_file_path, triple, std::begin (v), std::end (v));
 
     auto t = reinterpret_cast<compilation const *> (transaction_.get_storage ().begin ()->first);

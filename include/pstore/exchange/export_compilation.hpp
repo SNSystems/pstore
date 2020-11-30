@@ -91,7 +91,7 @@ case repo::linkage::a: return os << #a;
                 os << '\n' << object_indent << R"("definitions":)";
                 emit_array (
                     os, object_indent, compilation.begin (), compilation.end (),
-                    [&] (OStream & os1, indent const ind1, repo::compilation_member const & d) {
+                    [&] (OStream & os1, indent const ind1, repo::definition const & d) {
                         os1 << ind1 << "{\n";
                         indent const object_indent1 = ind1.next ();
                         os1 << object_indent1 << R"("digest":")" << d.digest.to_hex_string ()

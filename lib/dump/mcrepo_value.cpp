@@ -207,7 +207,7 @@ namespace pstore {
             return make_value (name);
         }
 
-        value_ptr make_value (database const & db, repo::compilation_member const & member) {
+        value_ptr make_value (database const & db, repo::definition const & member) {
             using namespace serialize;
             using archive::make_reader;
             return make_value (object::container{

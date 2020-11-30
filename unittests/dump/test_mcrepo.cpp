@@ -181,16 +181,14 @@ TEST_F (MCRepoFixture, DumpFragment) {
         data.xfixups.emplace_back (external_fixup{name, 3, 3, 3});
     }
 
-    // Build the compilation member 'foo'
-    auto const addr =
-        pstore::typed_address<compilation_member>{transaction.allocate<compilation_member> ()};
+    // Build the definition for 'foo'
+    auto const addr = pstore::typed_address<definition>{transaction.allocate<definition> ()};
     {
-        auto ptr = transaction.getrw (make_extent (addr, sizeof (compilation_member)));
-        (*ptr) =
-            compilation_member{pstore::index::digest{28U},
-                               pstore::extent<pstore::repo::fragment> (
-                                   pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-                               name, linkage::internal, visibility::default_vis};
+        auto ptr = transaction.getrw (make_extent (addr, sizeof (definition)));
+        (*ptr) = definition{pstore::index::digest{28U},
+                            pstore::extent<pstore::repo::fragment> (
+                                pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
+                            name, linkage::internal, visibility::default_vis};
     }
 
     std::array<linked_definitions::value_type, 1> linked_definitions{
@@ -257,11 +255,11 @@ TEST_F (MCRepoFixture, DumpCompilation) {
     // Write output file path "/home/user/test.c"
     transaction_type transaction = begin (*db_, lock_guard{mutex_});
 
-    std::vector<compilation_member> v{
-        {pstore::index::digest{28U},
-         pstore::extent<pstore::repo::fragment> (
-             pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
-         this->store_str (transaction, "main"), linkage::external, visibility::hidden_vis}};
+    std::vector<definition> v{{pstore::index::digest{28U},
+                               pstore::extent<pstore::repo::fragment> (
+                                   pstore::typed_address<pstore::repo::fragment>::make (5), 7U),
+                               this->store_str (transaction, "main"), linkage::external,
+                               visibility::hidden_vis}};
     auto compilation = compilation::load (
         *db_, compilation::alloc (transaction, this->store_str (transaction, "/home/user/"),
                                   this->store_str (transaction, "machine-vendor-os"),

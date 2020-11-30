@@ -77,32 +77,31 @@ namespace {
 
 } // end anonymous namespace
 
-//*                    _ _      _   _                            _              *
-//*  __ ___ _ __  _ __(_) |__ _| |_(_)___ _ _    _ __  ___ _ __ | |__  ___ _ _  *
-//* / _/ _ \ '  \| '_ \ | / _` |  _| / _ \ ' \  | '  \/ -_) '  \| '_ \/ -_) '_| *
-//* \__\___/_|_|_| .__/_|_\__,_|\__|_\___/_||_| |_|_|_\___|_|_|_|_.__/\___|_|   *
-//*              |_|                                                            *
 
+//*     _      __ _      _ _   _           *
+//*  __| |___ / _(_)_ _ (_) |_(_)___ _ _   *
+//* / _` / -_)  _| | ' \| |  _| / _ \ ' \  *
+//* \__,_\___|_| |_|_||_|_|\__|_\___/_||_| *
+//*                                        *
 // ctor
 // ~~~~
-compilation_member::compilation_member (pstore::index::digest const d,
-                                        pstore::extent<fragment> const x,
-                                        pstore::typed_address<pstore::indirect_string> const n,
-                                        enum linkage const l, enum visibility const v) noexcept
+definition::definition (pstore::index::digest const d, pstore::extent<fragment> const x,
+                        pstore::typed_address<pstore::indirect_string> const n,
+                        enum linkage const l, enum visibility const v) noexcept
         : digest{d}
         , fext{x}
         , name{n} {
 
-    PSTORE_STATIC_ASSERT (std::is_standard_layout<compilation_member>::value);
-    PSTORE_STATIC_ASSERT (alignof (compilation_member) == 16);
-    PSTORE_STATIC_ASSERT (sizeof (compilation_member) == 48);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, digest) == 0);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, fext) == 16);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, name) == 32);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, bf) == 40);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding1) == 41);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding2) == 42);
-    PSTORE_STATIC_ASSERT (offsetof (compilation_member, padding3) == 44);
+    PSTORE_STATIC_ASSERT (std::is_standard_layout<definition>::value);
+    PSTORE_STATIC_ASSERT (alignof (definition) == 16);
+    PSTORE_STATIC_ASSERT (sizeof (definition) == 48);
+    PSTORE_STATIC_ASSERT (offsetof (definition, digest) == 0);
+    PSTORE_STATIC_ASSERT (offsetof (definition, fext) == 16);
+    PSTORE_STATIC_ASSERT (offsetof (definition, name) == 32);
+    PSTORE_STATIC_ASSERT (offsetof (definition, bf) == 40);
+    PSTORE_STATIC_ASSERT (offsetof (definition, padding1) == 41);
+    PSTORE_STATIC_ASSERT (offsetof (definition, padding2) == 42);
+    PSTORE_STATIC_ASSERT (offsetof (definition, padding3) == 44);
 
 #define X(a) repo::linkage::a,
     assert_enum_field_width<enum linkage, decltype (linkage_)> ({PSTORE_REPO_LINKAGES});
