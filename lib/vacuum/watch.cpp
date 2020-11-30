@@ -86,17 +86,18 @@ namespace vacuum {
     void watch (std::shared_ptr<pstore::database> from,
                 std::unique_lock<pstore::file::range_lock> & lock, status * const st) {
         pstore::threads::set_name ("watch");
-        pstore::logging::create_log_stream ("vacuumd");
+        pstore::create_log_stream ("vacuumd");
 
         st->watch_running = true;
+        using priority = pstore::logger::priority;
+
         PSTORE_TRY {
             std::unique_lock<decltype (wst.start_watch_mutex)> mlock (wst.start_watch_mutex);
             while (!st->done) {
                 // Block until the start_watch condition variable is signaled.
                 auto start_time = from->latest_time ();
                 while (!wst.start_watch && !st->done) {
-                    log (pstore::logging::priority::notice,
-                         "Waiting until asked to watch by the copy thread...");
+                    log (priority::notice, "Waiting until asked to watch by the copy thread...");
                     wst.start_watch_cv.wait_for (mlock, watch_interval,
                                                  [st] () { return wst.start_watch || st->done; });
                 }
@@ -105,7 +106,7 @@ namespace vacuum {
                 auto count = 0U;
 
                 while (!st->done && !st->modified) {
-                    log (pstore::logging::priority::notice, "watch ... ", count);
+                    log (priority::notice, "watch ... ", count);
                     ++count;
 
                     auto const current_time = from->latest_time ();
@@ -113,8 +114,7 @@ namespace vacuum {
                     start_time = current_time;
 
                     if (file_modified || !can_lock (lock)) {
-                        log (pstore::logging::priority::notice,
-                             "Store touched by another process!");
+                        log (priority::notice, "Store touched by another process!");
                         st->modified = true;
                     }
 
@@ -123,17 +123,17 @@ namespace vacuum {
             }
         }
         // clang-format off
-        PSTORE_CATCH (std::exception const & ex, {
-            log (pstore::logging::priority::error,
-                 "An error occurred: ", ex.what ());
+        PSTORE_CATCH (std::exception const & ex, { // clang-format off
+            log (priority::error, "An error occurred: ", ex.what ());
         })
-        PSTORE_CATCH (..., {
-            log (pstore::logging::priority::error, "Unknown error");
+        // clang-format off
+        PSTORE_CATCH (..., {// clang-format off
+            log (priority::error, "Unknown error");
         })
         // clang-format on
 
         from.reset ();
-        log (pstore::logging::priority::notice, "Watch thread exiting");
+        log (priority::notice, "Watch thread exiting");
         st->watch_running = false;
     }
 } // end namespace vacuum

@@ -332,7 +332,7 @@ namespace pstore {
         // parse_path
         // ~~~~~~~~~~
         auto romfs::parse_path (gsl::czstring const path, directory const * dir) const
-            -> error_or<dirent const *> {
+            -> error_or<dirent_ptr> {
 
             if (!path || !dir) {
                 return error_or<dirent_ptr> (make_error_code (error_code::enoent));

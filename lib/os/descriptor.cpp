@@ -1,10 +1,10 @@
-//*                           _             _                *
-//* __      _____  __ _   ___| |_ __ _ _ __| |_ _   _ _ __   *
-//* \ \ /\ / / __|/ _` | / __| __/ _` | '__| __| | | | '_ \  *
-//*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
-//*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
-//*                                                  |_|     *
-//===- include/pstore/brokerface/wsa_startup.hpp --------------------------===//
+//*      _                     _       _              *
+//*   __| | ___  ___  ___ _ __(_)_ __ | |_ ___  _ __  *
+//*  / _` |/ _ \/ __|/ __| '__| | '_ \| __/ _ \| '__| *
+//* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
+//*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
+//*                             |_|                   *
+//===- lib/os/descriptor.cpp ----------------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,34 +42,19 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#ifndef PSTORE_BROKERFACE_WSA_STARTUP_HPP
-#define PSTORE_BROKERFACE_WSA_STARTUP_HPP
+#include "pstore/os/descriptor.hpp"
 
-#ifdef _WIN32
+#if defined(_WIN32) && defined(_MSC_VER)
 
 namespace pstore {
-    namespace brokerface {
+    namespace details {
 
-        class wsa_startup {
-        public:
-            wsa_startup () noexcept
-                    : started_{start ()} {}
-            // no copy or assignment
-            wsa_startup (wsa_startup const &) = delete;
-            wsa_startup & operator= (wsa_startup const &) = delete;
+        win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::invalid =
+            INVALID_HANDLE_VALUE;
+        win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::error =
+            INVALID_HANDLE_VALUE;
 
-            ~wsa_startup ();
-
-            bool started () const noexcept { return started_; }
-
-        private:
-            static bool start () noexcept;
-            bool started_;
-        };
-
-    } // end namespace brokerface
+    } // end namespace details
 } // end namespace pstore
 
-#endif // _WIN32
-
-#endif // PSTORE_BROKERFACE_WSA_STARTUP_HPP
+#endif // defined(_WIN32) && defined(_MSC_VER)

@@ -54,7 +54,6 @@
 #include "pstore/os/logging.hpp"
 
 namespace pstore {
-    namespace logging {
 
         //*                                          *
         //* |_  _. _o _ .___|_ _._|_o._  _  | _  _   *
@@ -254,7 +253,6 @@ namespace pstore {
 
         using rotating_log = basic_rotating_log<fstream_traits, file_system_traits>;
 
-    } // end namespace logging
 } // end namespace pstore
 
 #endif // PSTORE_OS_ROTATING_LOG_HPP

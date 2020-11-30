@@ -50,8 +50,6 @@
 #    include <signal.h>
 #endif
 
-#include "pstore/brokerface/descriptor.hpp"
-#include "pstore/brokerface/wsa_startup.hpp"
 #include "pstore/cmd_util/command_line.hpp"
 #include "pstore/cmd_util/tchar.hpp"
 #include "pstore/http/buffered_reader.hpp"
@@ -59,7 +57,9 @@
 #include "pstore/http/server.hpp"
 #include "pstore/http/server_status.hpp"
 #include "pstore/http/ws_server.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/wsa_startup.hpp"
 #include "pstore/romfs/romfs.hpp"
 
 extern pstore::romfs::romfs fs;
@@ -83,7 +83,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
 #ifdef _WIN32
-    pstore::brokerface::wsa_startup startup;
+    pstore::wsa_startup startup;
     if (!startup.started ()) {
         std::cerr << "WSAStartup() failed\n";
         return EXIT_FAILURE;
@@ -99,13 +99,13 @@ int main (int argc, char * argv[]) {
 
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);
-        pstore::logging::create_log_stream (ident);
+        pstore::create_log_stream (ident);
 
         pstore::httpd::server_status status{port.get ()};
         std::thread ([&status] () {
             static constexpr auto name = "http";
             pstore::threads::set_name (name);
-            pstore::logging::create_log_stream (name);
+            pstore::create_log_stream (name);
             pstore::httpd::server (fs, &status, pstore::httpd::channel_container{});
         }).join ();
     }

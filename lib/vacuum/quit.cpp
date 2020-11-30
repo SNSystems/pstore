@@ -61,9 +61,9 @@
 #endif
 #include <signal.h>
 
-#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/core/database.hpp"
 #include "pstore/os/logging.hpp"
+#include "pstore/os/signal_cv.hpp"
 #include "pstore/os/signal_helpers.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/vacuum/status.hpp"
@@ -71,39 +71,38 @@
 
 namespace {
 
-    pstore::brokerface::signal_cv quit_info;
+    pstore::signal_cv quit_info;
 
     //***************
     //* quit thread *
     //***************
     void quit_thread (vacuum::status & status, std::weak_ptr<pstore::database> const /*src_db*/) {
+        using priority = pstore::logger::priority;
         PSTORE_TRY {
             pstore::threads::set_name ("quit");
-            pstore::logging::create_log_stream ("vacuum.quit");
+            pstore::create_log_stream ("vacuum.quit");
 
             // Wait for to be told that we are in the process of shutting down. This
             // call will block until signal_handler() [below] is called by, for example,
             // the user typing Control-C.
             quit_info.wait ();
 
-            log (
-                pstore::logging::priority::info,
-                "Signal received. Will terminate after current command. Num=", quit_info.signal ());
+            log (priority::info, "Signal received. Will terminate after current command. Num=",
+                 quit_info.signal ());
             status.done = true;
 
             // Wake up the watch thread immediately.
             vacuum::wst.start_watch_cv.notify_one ();
             // vacuum::wst.complete_cv.notify_all ();
-            log (pstore::logging::priority::notice,
-                 "Marked job as done. Notified start_watch_cv and complete_cv.");
+            log (priority::notice, "Marked job as done. Notified start_watch_cv and complete_cv.");
         }
         // clang-format off
         PSTORE_CATCH (std::exception const & ex, { // clang-format on
-            log (pstore::logging::priority::error, "error:", ex.what ());
+            log (priority::error, "error:", ex.what ());
         })
         // clang-format off
         PSTORE_CATCH (..., { // clang-format on
-            log (pstore::logging::priority::error, "unknown exception");
+            log (priority::error, "unknown exception");
         })
         // clang-format on
     }

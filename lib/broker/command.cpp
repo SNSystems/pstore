@@ -80,14 +80,15 @@ namespace {
         return buffer->data ();
     }
 
+    using priority = pstore::logger::priority;
+
 } // end anonymous namespace
 
 namespace pstore {
     namespace broker {
 
-        brokerface::descriptor_condition_variable commits_cv;
-        brokerface::channel<brokerface::descriptor_condition_variable>
-            commits_channel (&commits_cv);
+        descriptor_condition_variable commits_cv;
+        brokerface::channel<descriptor_condition_variable> commits_channel{&commits_cv};
 
         // ctor
         // ~~~~
@@ -163,7 +164,7 @@ namespace pstore {
         // unknown
         // ~~~~~~~
         void command_processor::unknown (broker_command const & c) const {
-            logging::log (logging::priority::error, "unknown verb:", c.verb);
+            pstore::log (priority::error, "unknown verb:", c.verb);
         }
 
         // log
@@ -185,11 +186,11 @@ namespace pstore {
             message += (c.path.length () < max_path_length)
                            ? c.path
                            : (c.path.substr (0, max_path_length) + ellipsis);
-            logging::log (logging::priority::info, message.c_str ());
+            pstore::log (priority::info, message.c_str ());
         }
 
         void command_processor::log (gsl::czstring const str) const {
-            logging::log (logging::priority::info, str);
+            pstore::log (priority::info, str);
         }
 
         std::array<command_processor::command_entry, 6> const command_processor::commands_{{
@@ -238,7 +239,7 @@ namespace pstore {
         // ~~~~~~~~~~~~
         void command_processor::thread_entry (brokerface::fifo_path const & fifo) {
             try {
-                logging::log (logging::priority::info, "Waiting for commands");
+                pstore::log (priority::info, "Waiting for commands");
                 while (!commands_done_) {
                     brokerface::message_ptr msg = messages_.pop ();
                     assert (msg);
@@ -246,11 +247,11 @@ namespace pstore {
                     pool.return_to_pool (std::move (msg));
                 }
             } catch (std::exception const & ex) {
-                logging::log (logging::priority::error, "An error occurred: ", ex.what ());
+                pstore::log (priority::error, "An error occurred: ", ex.what ());
             } catch (...) {
-                logging::log (logging::priority::error, "Unknown error");
+                pstore::log (priority::error, "Unknown error");
             }
-            logging::log (logging::priority::info, "Exiting command thread");
+            pstore::log (priority::info, "Exiting command thread");
         }
 
         // push_command
@@ -270,7 +271,7 @@ namespace pstore {
         // scavenge
         // ~~~~~~~~
         void command_processor::scavenge () {
-            logging::log (logging::priority::info, "Scavenging zombie commands");
+            pstore::log (priority::info, "Scavenging zombie commands");
 
             // After this function is complete, no partial messages older than 'earliest time' will
             // be in the partial command map (cmds_).
@@ -286,8 +287,8 @@ namespace pstore {
                 auto const arrival_time = it->second.arrive_time_;
                 if (arrival_time < earliest_time) {
                     std::array<char, 100> buffer;
-                    logging::log (logging::priority::info, "Deleted old partial message. Arrived ",
-                                  time_to_string (arrival_time, &buffer));
+                    pstore::log (priority::info, "Deleted old partial message. Arrived ",
+                                 time_to_string (arrival_time, &buffer));
                     it = cmds_.erase (it);
                 } else {
                     ++it;

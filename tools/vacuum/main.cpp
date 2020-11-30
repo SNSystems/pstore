@@ -103,9 +103,10 @@ int _tmain (int argc, TCHAR * argv[]) {
 int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
+    using priority = pstore::logger::priority;
     PSTORE_TRY {
         pstore::threads::set_name ("main");
-        pstore::logging::create_log_stream ("vacuumd");
+        pstore::create_log_stream ("vacuumd");
 
         vacuum::user_options user_opt;
         std::tie (user_opt, exit_code) = get_switches (argc, argv);
@@ -135,8 +136,7 @@ int main (int argc, char * argv[]) {
         std::string const src_path = user_opt.src_path;
         std::string const src_dir = pstore::path::dir_name (src_path);
 
-        log (pstore::logging::priority::notice, "Start ",
-             pstore::logging::quoted (src_path.c_str ()));
+        log (priority::notice, "Start ", pstore::logger::quoted{src_path.c_str ()});
 
         // Superficially, we shouldn't need write access to the data store, but we do so because
         // once the collection is complete, we'll rename the temporary file that has been created
@@ -154,7 +154,7 @@ int main (int argc, char * argv[]) {
         }
 
         if (file_lock->try_lock ()) {
-            log (pstore::logging::priority::info, "Got the file lock. No-one has the file open.");
+            log (priority::info, "Got the file lock. No-one has the file open.");
             file_lock->unlock ();
         }
 
@@ -174,21 +174,20 @@ int main (int argc, char * argv[]) {
         // On macOS we can do better than rename() [see man 2 exchangedata].
         // Similar elsewhere?
 
-        log (pstore::logging::priority::notice,
-             "main () exiting: ", pstore::logging::quoted (src_path.c_str ()));
+        log (priority::notice, "main () exiting: ", pstore::logger::quoted{src_path.c_str ()});
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
         char const * what = ex.what ();
         error_stream << NATIVE_TEXT ("vacuumd: An error occurred: ")
                      << pstore::utf::to_native_string (what) << std::endl;
-        log (pstore::logging::priority::error, "An error occurred: ", what);
+        log (priority::error, "An error occurred: ", what);
         exit_code = EXIT_FAILURE;
     })
     // clang-format off
     PSTORE_CATCH (..., { // clang-format on
         std::cerr << "vacuumd: An unknown error occurred." << std::endl;
-        log (pstore::logging::priority::error, "Unknown error");
+        log (priority::error, "Unknown error");
         exit_code = EXIT_FAILURE;
     })
 

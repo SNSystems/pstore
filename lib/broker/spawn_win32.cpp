@@ -51,7 +51,7 @@
 #    include <cstring>
 
 // pstore includes
-#    include "pstore/brokerface/descriptor.hpp"
+#    include "pstore/os/descriptor.hpp"
 #    include "pstore/support/error.hpp"
 #    include "pstore/support/utf.hpp"
 
@@ -94,7 +94,7 @@ namespace pstore {
                 res.push_back ('"');
 
                 for (auto it = std::begin (in_arg), end = std::end (in_arg); it != end; ++it) {
-                    auto num_backslashes = 0U;
+                    auto num_backslashes = std::size_t{0};
 
                     // Count the number of sequential backslashes.
                     while (it != end && *it == '\\') {

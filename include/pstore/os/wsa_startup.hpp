@@ -4,7 +4,7 @@
 //*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
 //*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
 //*                                                  |_|     *
-//===- lib/brokerface/wsa_startup.cpp -------------------------------------===//
+//===- include/pstore/os/wsa_startup.hpp ----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,26 +41,53 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/brokerface/wsa_startup.hpp"
 
-#ifdef _WIN32
-#    include <Winsock2.h>
+#ifndef PSTORE_OS_WSA_STARTUP_HPP
+#define PSTORE_OS_WSA_STARTUP_HPP
+
 
 namespace pstore {
-    namespace brokerface {
 
-        wsa_startup::~wsa_startup () {
-            if (started_) {
-                WSACleanup ();
-            }
-        }
+#ifdef _WIN32
 
-        bool wsa_startup::start () noexcept {
-            WSAData wsa_data;
-            return WSAStartup (MAKEWORD (2, 2), &wsa_data) == 0;
-        }
+    class wsa_startup {
+    public:
+        wsa_startup () noexcept
+                : started_{start ()} {}
+        // no copy or assignment
+        wsa_startup (wsa_startup const &) = delete;
+        wsa_startup (wsa_startup &&) noexcept = delete;
 
-    } // end namespace brokerface
+        ~wsa_startup () noexcept;
+
+        wsa_startup & operator= (wsa_startup const &) = delete;
+        wsa_startup & operator= (wsa_startup &&) = delete;
+
+        bool started () const noexcept { return started_; }
+
+    private:
+        static bool start () noexcept;
+        bool started_;
+    };
+
+#else // _WIN32
+
+    class wsa_startup {
+    public:
+        wsa_startup () noexcept = default;
+        wsa_startup (wsa_startup const &) = delete;
+        wsa_startup (wsa_startup &&) noexcept = delete;
+
+        ~wsa_startup () noexcept = default;
+
+        wsa_startup & operator= (wsa_startup const &) = delete;
+        wsa_startup & operator= (wsa_startup &&) noexcept = delete;
+
+        constexpr bool started () const noexcept { return true; }
+    };
+
+#endif
 } // end namespace pstore
 
-#endif // _WIN32
+
+#endif // PSTORE_OS_WSA_STARTUP_HPP

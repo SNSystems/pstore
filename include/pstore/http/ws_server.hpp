@@ -55,13 +55,13 @@
 #    include <arpa/inet.h>
 #endif //_WIN32
 
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/pubsub.hpp"
-#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/http/block_for_input.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/endian.hpp"
 #include "pstore/http/send.hpp"
+#include "pstore/os/descriptor.hpp"
+#include "pstore/os/signal_cv.hpp"
 #include "pstore/support/bit_field.hpp"
 #include "pstore/support/utf.hpp"
 
@@ -278,12 +278,12 @@ namespace pstore {
                 part1.raw = network_to_host (part1.raw);
 
                 if (log_frame_info) {
-                    log (pstore::logging::priority::info, "fin: ", part1.fin);
-                    log (pstore::logging::priority::info, "rsv: ", part1.rsv);
-                    log (pstore::logging::priority::info,
+                    log (logger::priority::info, "fin: ", part1.fin);
+                    log (logger::priority::info, "rsv: ", part1.rsv);
+                    log (logger::priority::info,
                          "opcode: ", opcode_name (static_cast<opcode> (part1.opcode.value ())));
-                    log (pstore::logging::priority::info, "mask: ", part1.mask);
-                    log (pstore::logging::priority::info, "payload_length: ", part1.payload_length);
+                    log (logger::priority::info, "mask: ", part1.mask);
+                    log (logger::priority::info, "payload_length: ", part1.payload_length);
                 }
 
                 // "The rsv[n] fields MUST be 0 unless an extension is negotiated that defines
@@ -301,8 +301,7 @@ namespace pstore {
 
                 return details::read_payload_length (reader, io1, part1.payload_length) >>=
                        [&] (IO io2, std::uint64_t const payload_length) {
-                           log (pstore::logging::priority::info,
-                                "Payload length: ", payload_length);
+                           log (logger::priority::info, "Payload length: ", payload_length);
                            if ((payload_length & (std::uint64_t{1} << 63U)) != 0U) {
                                // "The most significant bit MUST be 0."
                                return return_type{ws_error::payload_too_long};
@@ -401,7 +400,7 @@ namespace pstore {
         template <typename Sender, typename IO>
         error_or<IO> pong (Sender const sender, IO const io,
                            gsl::span<std::uint8_t const> const & payload) {
-            log (logging::priority::info, "Sending pong. Length=", payload.size ());
+            log (logger::priority::info, "Sending pong. Length=", payload.size ());
             return send_message (sender, io, opcode::pong, payload);
         }
 
@@ -411,7 +410,7 @@ namespace pstore {
         template <typename Sender, typename IO>
         error_or<IO> send_close_frame (Sender const sender, IO const io,
                                        close_status_code const status) {
-            log (logging::priority::info,
+            log (logger::priority::info,
                  "Sending close frame code=", static_cast<std::uint16_t> (status));
             PSTORE_STATIC_ASSERT ((
                 std::is_same<std::underlying_type<close_status_code>::type, std::uint16_t>::value));
@@ -490,13 +489,13 @@ namespace pstore {
                     std::transform (std::begin (payload), std::end (payload),
                                     std::back_inserter (str),
                                     [] (std::uint8_t const v) { return static_cast<char> (v); });
-                    log (logging::priority::info, "Received: ", str);
+                    log (logger::priority::info, "Received: ", str);
                 }
 
                 // This implements a simple echo server ATM.
                 error_or<IO> const eo3 = send_message (sender, io, op, gsl::make_span (payload));
                 if (!eo3) {
-                    log (logging::priority::error, "Send error: ", eo3.get_error ().message ());
+                    log (logger::priority::error, "Send error: ", eo3.get_error ().message ());
                 }
 
                 payload.clear ();
@@ -516,7 +515,7 @@ namespace pstore {
                                           gsl::not_null<ws_command *> const command) {
             error_or_n<IO, frame> const eo = read_frame (reader, io);
             if (!eo) {
-                log (logging::priority::error, "Error: ", eo.get_error ().message ());
+                log (logger::priority::error, "Error: ", eo.get_error ().message ());
                 auto const error = eo.get_error ();
                 if (error == make_error_code (ws_error::unmasked_frame)) {
                     // "The server MUST close the connection upon receiving a frame that is not
@@ -599,9 +598,9 @@ namespace pstore {
         }
 
 
-        using channel_container_entry = std::tuple<
-            gsl::not_null<brokerface::channel<brokerface::descriptor_condition_variable> *>,
-            gsl::not_null<brokerface::descriptor_condition_variable *>>;
+        using channel_container_entry =
+            std::tuple<gsl::not_null<brokerface::channel<descriptor_condition_variable> *>,
+                       gsl::not_null<descriptor_condition_variable *>>;
         using channel_container = std::unordered_map<std::string, channel_container_entry>;
 
         // ws_server_loop
@@ -611,9 +610,8 @@ namespace pstore {
                              channel_container const & channels) {
 
             ws_command command;
-            brokerface::channel<brokerface::descriptor_condition_variable>::subscriber_pointer
-                subscription;
-            brokerface::descriptor_condition_variable * cv = nullptr;
+            brokerface::channel<descriptor_condition_variable>::subscriber_pointer subscription;
+            descriptor_condition_variable * cv = nullptr;
 
             if (uri.length () > 0 && uri[0] == '/') {
                 std::string const name = uri.substr (1);
@@ -622,7 +620,7 @@ namespace pstore {
                     subscription = std::get<0> (pos->second)->new_subscriber ();
                     cv = std::get<1> (pos->second);
                 } else {
-                    log (logging::priority::error, "No channel named: ", name);
+                    log (logger::priority::error, "No channel named: ", name);
                 }
             }
 
@@ -639,11 +637,11 @@ namespace pstore {
                     cv->reset ();
                     if (subscription) {
                         while (maybe<std::string> const message = subscription->pop ()) {
-                            log (logging::priority::info, "sending:", *message);
+                            log (logger::priority::info, "sending:", *message);
                             error_or<IO> const eo3 = send_message (
                                 sender, io, opcode::text, as_bytes (gsl::make_span (*message)));
                             if (!eo3) {
-                                log (logging::priority::error,
+                                log (logger::priority::error,
                                      "Send error: ", eo3.get_error ().message ());
                             }
                         }

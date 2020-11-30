@@ -52,9 +52,11 @@
 #include "pstore/support/error.hpp"
 
 namespace pstore {
+
     /// Returns the path of the current process image.
     std::string process_file_name ();
-} // namespace pstore
+
+} // end namespace pstore
 
 
 namespace pstore {
@@ -128,7 +130,6 @@ namespace pstore {
             };
             return pstore::process_file_name (read_link, buffer);
         }
-    } // namespace freebsd
-
-} // namespace pstore
+    } // end namespace freebsd
+} // end namespace pstore
 #endif // PSTORE_OS_PROCESS_FILE_NAME_HPP

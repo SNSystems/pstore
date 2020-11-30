@@ -54,7 +54,7 @@
 #    include <sys/select.h>
 #endif
 
-#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/os/logging.hpp"
 
 namespace pstore {
@@ -73,9 +73,8 @@ namespace pstore {
 
         // Watch fd to be notified when it has input.
         template <typename Reader>
-        inputs_ready block_for_input (Reader const & reader,
-                                      brokerface::socket_descriptor const & socket_fd,
-                                      brokerface::pipe_descriptor const * const cv_fd) {
+        inputs_ready block_for_input (Reader const & reader, socket_descriptor const & socket_fd,
+                                      pipe_descriptor const * const cv_fd) {
             // If the reader has data buffered, then we won't block.
             if (reader.available () > 0) {
                 return {true, false};
@@ -108,7 +107,7 @@ namespace pstore {
                 if (cause == WSA_WAIT_IO_COMPLETION) {
                     continue;
                 } else if (cause == WSA_WAIT_TIMEOUT) {
-                    log (logging::priority::notice, "wait timeout");
+                    log (logger::priority::notice, "wait timeout");
                     return {false, false};
                 } else if (cause >= WSA_WAIT_EVENT_0) {
                     auto const index = cause - WSA_WAIT_EVENT_0;
@@ -144,7 +143,7 @@ namespace pstore {
             if (err == -1) {
                 raise (errno_erc{errno}, "select");
             } else if (err == 0) {
-                log (logging::priority::notice, "no data within timeout");
+                log (logger::priority::notice, "no data within timeout");
             }
 
             auto const isset = [&read_fds, &error_fds] (int const fd) {

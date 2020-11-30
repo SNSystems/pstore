@@ -53,7 +53,7 @@
 #include "pstore/broker/parser.hpp"
 #include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/brokerface/pubsub.hpp"
-#include "pstore/brokerface/signal_cv.hpp"
+#include "pstore/os/signal_cv.hpp"
 
 namespace pstore {
     namespace httpd {
@@ -203,8 +203,8 @@ namespace pstore {
             ///@}
         };
 
-        extern brokerface::descriptor_condition_variable commits_cv;
-        extern brokerface::channel<brokerface::descriptor_condition_variable> commits_channel;
+        extern descriptor_condition_variable commits_cv;
+        extern brokerface::channel<descriptor_condition_variable> commits_channel;
 
     } // end namespace broker
 } // end namespace pstore

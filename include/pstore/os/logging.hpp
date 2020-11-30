@@ -53,28 +53,6 @@
 #include "pstore/os/thread.hpp"
 
 namespace pstore {
-    namespace logging {
-
-        enum class priority {
-            emergency, ///< system is unusable
-            alert,     ///< action must be taken immediately
-            critical,  ///< critical conditions
-            error,     ///< error conditions
-            warning,   ///< warning conditions
-            notice,    ///< normal, but significant, condition
-            info,      ///< informational message
-            debug      ///< debug-level message
-        };
-
-        class quoted {
-        public:
-            constexpr explicit quoted (gsl::not_null<gsl::czstring> const str) noexcept
-                    : str_{str} {}
-            constexpr explicit operator gsl::czstring () const noexcept { return str_; }
-
-        private:
-            gsl::czstring str_;
-        };
 
         //*  _                         *
         //* | |___  __ _ __ _ ___ _ _  *
@@ -84,6 +62,27 @@ namespace pstore {
         /// \brief The base class for logging streams.
         class logger {
         public:
+            enum class priority {
+                emergency, ///< system is unusable
+                alert,     ///< action must be taken immediately
+                critical,  ///< critical conditions
+                error,     ///< error conditions
+                warning,   ///< warning conditions
+                notice,    ///< normal, but significant, condition
+                info,      ///< informational message
+                debug      ///< debug-level message
+            };
+
+            class quoted {
+            public:
+                constexpr explicit quoted (gsl::not_null<gsl::czstring> const str) noexcept
+                        : str_{str} {}
+                constexpr explicit operator gsl::czstring () const noexcept { return str_; }
+
+            private:
+                gsl::czstring str_;
+            };
+
             logger () = default;
             virtual ~logger () = default;
 
@@ -205,14 +204,14 @@ namespace pstore {
 
 
         namespace details {
-            using logger_collection = std::vector<std::unique_ptr<logging::logger>>;
+            using logger_collection = std::vector<std::unique_ptr<logger>>;
             extern PSTORE_THREAD_LOCAL logger_collection * log_destinations;
         } // end namespace details
 
 
-        inline bool enabled () noexcept { return details::log_destinations != nullptr; }
+        inline bool logging_enabled () noexcept { return details::log_destinations != nullptr; }
 
-        inline void log (priority const p, gsl::not_null<gsl::czstring> const message) {
+        inline void log (logger::priority const p, gsl::not_null<gsl::czstring> const message) {
             if (details::log_destinations != nullptr) {
                 for (std::unique_ptr<logger> & destination : *details::log_destinations) {
                     destination->log (p, message);
@@ -220,7 +219,7 @@ namespace pstore {
             }
         }
         template <typename T>
-        inline void log (priority p, gsl::czstring message, T d) {
+        inline void log (logger::priority p, gsl::czstring message, T d) {
             if (details::log_destinations != nullptr) {
                 for (std::unique_ptr<logger> & destination : *details::log_destinations) {
                     destination->log (p, message, d);
@@ -228,6 +227,5 @@ namespace pstore {
             }
         }
 
-    } // end namespace logging
 } // end namespace pstore
 #endif // PSTORE_OS_LOGGING_HPP

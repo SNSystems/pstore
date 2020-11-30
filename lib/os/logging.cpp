@@ -68,7 +68,6 @@
 #endif
 
 namespace pstore {
-    namespace logging {
 
         //*  _                         *
         //* | |___  __ _ __ _ ___ _ _  *
@@ -131,7 +130,6 @@ namespace pstore {
             return r;
         }
 
-    } // end namespace logging
 } // end namespace pstore
 
 namespace {
@@ -145,7 +143,7 @@ namespace {
     //* (_|_>| |(_)(_|(_|(/_|   *
     //*             _| _|       *
     // Apple OS Log
-    class asl_logger final : public logging::logger {
+    class asl_logger final : public logger {
     public:
         explicit asl_logger (std::string const & ident);
         ~asl_logger () override;
@@ -155,22 +153,22 @@ namespace {
         asl_logger & operator= (asl_logger &&) = delete;
         asl_logger & operator= (asl_logger const &) = delete;
 
-        void log (logging::priority p, std::string const & message) override;
+        void log (priority p, std::string const & message) override;
 
-        void log (logging::priority p, gsl::czstring message, int d) override;
-        void log (logging::priority p, gsl::czstring message, unsigned d) override;
-        void log (logging::priority p, gsl::czstring message, long d) override;
-        void log (logging::priority p, gsl::czstring message, unsigned long d) override;
-        void log (logging::priority p, gsl::czstring message, long long d) override;
-        void log (logging::priority p, gsl::czstring message, unsigned long long d) override;
+        void log (priority p, gsl::czstring message, int d) override;
+        void log (priority p, gsl::czstring message, unsigned d) override;
+        void log (priority p, gsl::czstring message, long d) override;
+        void log (priority p, gsl::czstring message, unsigned long d) override;
+        void log (priority p, gsl::czstring message, long long d) override;
+        void log (priority p, gsl::czstring message, unsigned long long d) override;
 
-        void log (logging::priority p, gsl::czstring message) override;
-        void log (logging::priority p, gsl::czstring part1, gsl::czstring part2) override;
-        void log (logging::priority p, gsl::czstring part1, logging::quoted part2) override;
+        void log (priority p, gsl::czstring message) override;
+        void log (priority p, gsl::czstring part1, gsl::czstring part2) override;
+        void log (priority p, gsl::czstring part1, quoted part2) override;
 
     private:
         os_log_t log_;
-        static os_log_type_t priority_code (logging::priority p) noexcept;
+        static os_log_type_t priority_code (priority p) noexcept;
     };
 
     // (ctor)
@@ -188,47 +186,44 @@ namespace {
 
     // log
     // ~~~
-    void asl_logger::log (logging::priority const p, std::string const & message) {
+    void asl_logger::log (priority const p, std::string const & message) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%{public}s", message.c_str ()); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring message, int const d) {
+    void asl_logger::log (priority const p, gsl::czstring message, int const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%d", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned const d) {
+    void asl_logger::log (priority const p, gsl::czstring message, unsigned const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%u", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring message, long const d) {
+    void asl_logger::log (priority const p, gsl::czstring message, long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%ld", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring message, unsigned long const d) {
+    void asl_logger::log (priority const p, gsl::czstring message, unsigned long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lu", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring const message,
-                          long long const d) {
+    void asl_logger::log (priority const p, gsl::czstring const message, long long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%lld", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring const message,
+    void asl_logger::log (priority const p, gsl::czstring const message,
                           unsigned long long const d) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%llu", message, d); //! OCLINT
     }
-    void asl_logger::log (logging::priority p, gsl::czstring const message) {
+    void asl_logger::log (priority p, gsl::czstring const message) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s", message); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring const part1,
-                          gsl::czstring const part2) {
+    void asl_logger::log (priority const p, gsl::czstring const part1, gsl::czstring const part2) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s%s", part1, part2); //! OCLINT
     }
-    void asl_logger::log (logging::priority const p, gsl::czstring const part1,
-                          logging::quoted const part2) {
+    void asl_logger::log (priority const p, gsl::czstring const part1, quoted const part2) {
         // NOLINTNEXTLINE
         os_log_with_type (log_, priority_code (p), "%s\"%s\"", part1,
                           static_cast<gsl::czstring> (part2)); //! OCLINT
@@ -236,8 +231,7 @@ namespace {
 
     // priority_code
     // ~~~~~~~~~~~~~
-    os_log_type_t asl_logger::priority_code (logging::priority const p) noexcept {
-        using logging::priority;
+    os_log_type_t asl_logger::priority_code (priority const p) noexcept {
         switch (p) {
         case priority::emergency:
         case priority::alert:
@@ -260,13 +254,13 @@ namespace {
     //*  _   _| _  _  | _  _  _  _ ._  *
     //* _>\/_>|(_)(_| |(_)(_|(_|(/_|   *
     //*   /        _|      _| _|       *
-    class syslog_logger final : public logging::logger {
+    class syslog_logger final : public logger {
     public:
         syslog_logger (std::string const & ident, int facility);
 
     private:
-        void log (logging::priority p, std::string const & message) override;
-        static int priority_code (logging::priority p) noexcept;
+        void log (priority p, std::string const & message) override;
+        static int priority_code (priority p) noexcept;
 
         int facility_;
         std::array<char, 50> ident_{{0}};
@@ -285,23 +279,23 @@ namespace {
 
     // log
     // ~~~
-    void syslog_logger::log (logging::priority const p, std::string const & message) {
+    void syslog_logger::log (priority const p, std::string const & message) {
         // NOLINTNEXTLINE
         syslog (priority_code (p), "%s", message.c_str ());
     }
 
     // priority_code
     // ~~~~~~~~~~~~~
-    int syslog_logger::priority_code (logging::priority const p) noexcept {
+    int syslog_logger::priority_code (priority const p) noexcept {
         switch (p) {
-        case logging::priority::emergency: return LOG_EMERG;
-        case logging::priority::alert: return LOG_ALERT;
-        case logging::priority::critical: return LOG_CRIT;
-        case logging::priority::error: return LOG_ERR;
-        case logging::priority::warning: return LOG_WARNING;
-        case logging::priority::notice: return LOG_NOTICE;
-        case logging::priority::info: return LOG_INFO;
-        case logging::priority::debug: return LOG_DEBUG;
+        case priority::emergency: return LOG_EMERG;
+        case priority::alert: return LOG_ALERT;
+        case priority::critical: return LOG_CRIT;
+        case priority::error: return LOG_ERR;
+        case priority::warning: return LOG_WARNING;
+        case priority::notice: return LOG_NOTICE;
+        case priority::info: return LOG_INFO;
+        case priority::debug: return LOG_DEBUG;
         }
         return LOG_EMERG;
     }
@@ -320,7 +314,6 @@ namespace {
 } // namespace
 
 namespace pstore {
-    namespace logging {
 
         namespace details {
             PSTORE_THREAD_LOCAL logger_collection * log_destinations = nullptr;
@@ -361,8 +354,7 @@ namespace pstore {
             if (enabled.test (handlers::rotating_file)) {
                 constexpr auto max_size = std::streamoff{1024 * 1024};
                 constexpr auto num_backups = 10U;
-                loggers->emplace_back (
-                    new logging::rotating_log (ident + ".log", max_size, num_backups));
+                loggers->emplace_back (new rotating_log (ident + ".log", max_size, num_backups));
             }
 
             if (enabled.test (handlers::standard_error)) {
@@ -445,5 +437,4 @@ namespace pstore {
         stdout_logger::~stdout_logger () noexcept = default;
         stderr_logger::~stderr_logger () noexcept = default;
 
-    } // end namespace logging
 } // end namespace pstore

@@ -65,15 +65,15 @@
 #include "pstore/broker/recorder.hpp"
 #include "pstore/broker/scavenger.hpp"
 #include "pstore/broker/uptime.hpp"
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/brokerface/message_type.hpp"
-#include "pstore/brokerface/wsa_startup.hpp"
 #include "pstore/config/config.hpp"
 #include "pstore/http/server.hpp"
 #include "pstore/http/server_status.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/os/thread.hpp"
+#include "pstore/os/wsa_startup.hpp"
 #include "pstore/support/utf.hpp"
 
 #include "switches.hpp"
@@ -109,7 +109,7 @@ namespace {
 
     void thread_init (std::string const & name) {
         pstore::threads::set_name (name.c_str ());
-        pstore::logging::create_log_stream ("broker." + name);
+        pstore::create_log_stream ("broker." + name);
     }
 
 
@@ -173,11 +173,12 @@ int _tmain (int argc, TCHAR * argv[]) {
 int main (int argc, char * argv[]) {
 #endif
     using namespace pstore;
+    using priority = logger::priority;
 
     try {
         threads::set_name ("main");
-        logging::create_log_stream ("broker.main");
-        log (logging::priority::notice, "broker starting");
+        create_log_stream ("broker.main");
+        log (priority::notice, "broker starting");
 
         switches opt;
         std::tie (opt, broker::exit_code) = get_switches (argc, argv);
@@ -186,10 +187,10 @@ int main (int argc, char * argv[]) {
         }
 
 #ifdef _WIN32
-        pstore::brokerface::wsa_startup startup;
+        pstore::wsa_startup startup;
         if (!startup.started ()) {
-            log (logging::priority::error, "WSAStartup() failed");
-            log (pstore::logging::priority::info, "broker exited");
+            log (priority::error, "WSAStartup() failed");
+            log (priority::info, "broker exited");
             return EXIT_FAILURE;
         }
 #endif // _WIN32
@@ -203,7 +204,7 @@ int main (int argc, char * argv[]) {
 
         // TODO: ensure that this is a singleton process?
         // auto const path = std::make_unique<fifo_path> ();
-        log (logging::priority::notice, "opening pipe");
+        log (priority::notice, "opening pipe");
 
         pstore::brokerface::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
 
@@ -222,7 +223,7 @@ int main (int argc, char * argv[]) {
             commands->attach_scavenger (scav);
 
 
-            log (logging::priority::notice, "starting threads");
+            log (priority::notice, "starting threads");
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
                                        http_status.get (), &uptime_done);
 
@@ -240,27 +241,27 @@ int main (int argc, char * argv[]) {
                     futures.push_back (create_thread ([ctr, &fifo, &record_file, commands] () {
                         auto const name = "read"s + std::to_string (ctr);
                         threads::set_name (name.c_str ());
-                        logging::create_log_stream ("broker." + name);
+                        create_log_stream ("broker." + name);
                         read_loop (fifo, record_file, commands);
                     }));
                 }
             }
         }
 
-        log (logging::priority::notice, "waiting");
+        log (priority::notice, "waiting");
         for (auto & f : futures) {
             assert (f.valid ());
             f.get ();
         }
-        log (logging::priority::notice, "worker threads done: stopping quit thread");
+        log (priority::notice, "worker threads done: stopping quit thread");
         broker::notify_quit_thread ();
         quit.join ();
-        log (logging::priority::notice, "exiting");
+        log (priority::notice, "exiting");
     } catch (std::exception const & ex) {
-        log (logging::priority::error, "error: ", ex.what ());
+        log (priority::error, "error: ", ex.what ());
         broker::exit_code = EXIT_FAILURE;
     } catch (...) {
-        log (logging::priority::error, "unknown error");
+        log (priority::error, "unknown error");
         broker::exit_code = EXIT_FAILURE;
     }
     return broker::exit_code;

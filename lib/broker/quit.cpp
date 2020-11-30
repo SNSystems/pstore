@@ -67,6 +67,8 @@
 
 namespace {
 
+    using priority = pstore::logger::priority;
+
     // push
     // ~~~~
     /// Push a simple message onto the command queue.
@@ -74,8 +76,7 @@ namespace {
                std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
-        log (pstore::logging::priority::info, "push command ",
-             pstore::logging::quoted (message.c_str ()));
+        log (priority::info, "push command ", pstore::logger::quoted{message.c_str ()});
 
         assert (message.length () <= pstore::brokerface::message_type::payload_chars);
         auto msg = std::make_unique<pstore::brokerface::message_type> (mid++, std::uint16_t{0},
@@ -101,7 +102,7 @@ namespace pstore {
             bool expected = false;
             if (done.compare_exchange_strong (expected, true)) {
                 std::cerr << "pstore broker is exiting.\n";
-                log (logging::priority::info, "performing shutdown");
+                log (priority::info, "performing shutdown");
 
                 // Tell the gcwatcher thread to exit.
                 broker::gc_sigint (signum);
@@ -122,7 +123,7 @@ namespace pstore {
                 pstore::httpd::quit (http_status);
                 *uptime_done = true;
 
-                log (logging::priority::info, "shutdown requests complete");
+                log (priority::info, "shutdown requests complete");
             }
         }
 
@@ -187,7 +188,7 @@ namespace {
 
 namespace {
 
-    pstore::brokerface::signal_cv quit_info;
+    pstore::signal_cv quit_info;
 
     //***************
     //* quit thread *
@@ -197,9 +198,12 @@ namespace {
                       unsigned const num_read_threads,
                       pstore::httpd::server_status * const http_status,
                       pstore::gsl::not_null<std::atomic<bool> *> const uptime_done) {
+
+        using priority = pstore::logger::priority;
+
         try {
             pstore::threads::set_name ("quit");
-            pstore::logging::create_log_stream ("broker.quit");
+            pstore::create_log_stream ("broker.quit");
 
             // Wait for to be told that we are in the process of shutting down. This
             // call will block until signal_handler() [below] is called by, for example,
@@ -207,7 +211,7 @@ namespace {
             quit_info.wait ();
 
             std::array<char, 16> buffer;
-            log (pstore::logging::priority::info, "Signal received: shutting down. Signal: ",
+            log (priority::info, "Signal received: shutting down. Signal: ",
                  signal_name (quit_info.signal (), pstore::gsl::make_span (buffer)));
 
             auto const cp_sptr = cp.lock ();
@@ -222,12 +226,12 @@ namespace {
             shutdown (cp_sptr.get (), scav_sptr.get (), quit_info.signal (), num_read_threads,
                       http_status, uptime_done);
         } catch (std::exception const & ex) {
-            log (pstore::logging::priority::error, "error:", ex.what ());
+            log (priority::error, "error:", ex.what ());
         } catch (...) {
-            log (pstore::logging::priority::error, "unknown exception");
+            log (priority::error, "unknown exception");
         }
 
-        log (pstore::logging::priority::info, "quit thread exiting");
+        log (priority::info, "quit thread exiting");
     }
 
 

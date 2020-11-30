@@ -62,7 +62,7 @@ namespace pstore {
         /// A specialization of block_for_input() which always returns a result indicating that
         /// data is available on the input socket.
         template <typename Reader>
-        inputs_ready block_for_input (Reader const &, int, brokerface::pipe_descriptor const *) {
+        inputs_ready block_for_input (Reader const &, int, pipe_descriptor const *) {
             return {true, false};
         }
 

@@ -59,9 +59,9 @@
 #    include "pstore/os/logging.hpp"
 #    include "pstore/os/signal_helpers.hpp"
 
-using pstore::logging::priority;
-
 namespace {
+
+    using priority = pstore::logger::priority;
 
     // (Making 'status' const here would introduce warnings because of the way that WCOREDUMP is
     // implemented on some platforms.)

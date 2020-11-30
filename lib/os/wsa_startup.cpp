@@ -1,10 +1,10 @@
-//*      _                     _       _              *
-//*   __| | ___  ___  ___ _ __(_)_ __ | |_ ___  _ __  *
-//*  / _` |/ _ \/ __|/ __| '__| | '_ \| __/ _ \| '__| *
-//* | (_| |  __/\__ \ (__| |  | | |_) | || (_) | |    *
-//*  \__,_|\___||___/\___|_|  |_| .__/ \__\___/|_|    *
-//*                             |_|                   *
-//===- lib/brokerface/descriptor.cpp --------------------------------------===//
+//*                           _             _                *
+//* __      _____  __ _   ___| |_ __ _ _ __| |_ _   _ _ __   *
+//* \ \ /\ / / __|/ _` | / __| __/ _` | '__| __| | | | '_ \  *
+//*  \ V  V /\__ \ (_| | \__ \ || (_| | |  | |_| |_| | |_) | *
+//*   \_/\_/ |___/\__,_| |___/\__\__,_|_|   \__|\__,_| .__/  *
+//*                                                  |_|     *
+//===- lib/os/wsa_startup.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,22 +41,24 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+#include "pstore/os/wsa_startup.hpp"
 
-#include "pstore/brokerface/descriptor.hpp"
-
-#if defined(_WIN32) && defined(_MSC_VER)
+#ifdef _WIN32
+#    include <Winsock2.h>
 
 namespace pstore {
-    namespace brokerface {
-        namespace details {
 
-            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::invalid =
-                INVALID_HANDLE_VALUE;
-            win32_pipe_descriptor_traits::type const win32_pipe_descriptor_traits::error =
-                INVALID_HANDLE_VALUE;
+    wsa_startup::~wsa_startup () noexcept {
+        if (started_) {
+            WSACleanup ();
+        }
+    }
 
-        } // end namespace details
-    }     // end namespace brokerface
+    bool wsa_startup::start () noexcept {
+        WSAData wsa_data;
+        return WSAStartup (MAKEWORD (2, 2), &wsa_data) == 0;
+    }
+
 } // end namespace pstore
 
-#endif // defined(_WIN32) && defined(_MSC_VER)
+#endif // _WIN32

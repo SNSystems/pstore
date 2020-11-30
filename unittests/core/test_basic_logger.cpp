@@ -149,7 +149,7 @@ namespace {
     //***************************************************
     class BasicLoggerTimeFixture : public testing::Test {
     public:
-        std::array<char, pstore::logging::basic_logger::time_buffer_size> buffer_;
+        std::array<char, pstore::basic_logger::time_buffer_size> buffer_;
         static constexpr unsigned const sign_index_ = 19;
 
         // If the time zone offset is 0, the standard library could legimately describe that
@@ -160,9 +160,9 @@ namespace {
     // canonicalize_sign
     // ~~~~~~~~~~~~~~~~~
     void BasicLoggerTimeFixture::canonicalize_sign () {
-        static_assert (pstore::logging::basic_logger::time_buffer_size >= sign_index_,
+        static_assert (pstore::basic_logger::time_buffer_size >= sign_index_,
                        "sign index is too large for time_buffer");
-        ASSERT_EQ ('\0', buffer_[pstore::logging::basic_logger::time_buffer_size - 1]);
+        ASSERT_EQ ('\0', buffer_[pstore::basic_logger::time_buffer_size - 1]);
         if (std::strcmp (&buffer_[sign_index_], "+0000") == 0) {
             buffer_[sign_index_] = '-';
         }
@@ -172,8 +172,8 @@ namespace {
 
 TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
     time_zone_setter tzs ("UTC0");
-    std::size_t const r = pstore::logging::basic_logger::time_string (
-        std::time_t{0}, pstore::gsl::make_span (buffer_));
+    std::size_t const r =
+        pstore::basic_logger::time_string (std::time_t{0}, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     this->canonicalize_sign ();
@@ -182,8 +182,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInUTC) {
 
 TEST_F (BasicLoggerTimeFixture, EpochInJST) {
     time_zone_setter tzs ("JST-9"); // Japan
-    std::size_t const r = pstore::logging::basic_logger::time_string (
-        std::time_t{0}, pstore::gsl::make_span (buffer_));
+    std::size_t const r =
+        pstore::basic_logger::time_string (std::time_t{0}, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1970-01-01T09:00:00+0900", buffer_.data ());
@@ -196,8 +196,8 @@ TEST_F (BasicLoggerTimeFixture, EpochInPST) {
     // Since it isn't specified, daylight saving time starts on the first Sunday of April at 2:00
     // A.M., and ends on the last Sunday of October at 2:00 A.M.
     time_zone_setter tzs ("PST8PDT");
-    std::size_t r = pstore::logging::basic_logger::time_string (std::time_t{0},
-                                                                pstore::gsl::make_span (buffer_));
+    std::size_t r =
+        pstore::basic_logger::time_string (std::time_t{0}, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     EXPECT_EQ ('\0', buffer_[24]);
     EXPECT_STREQ ("1969-12-31T16:00:00-0800", buffer_.data ());
@@ -207,7 +207,7 @@ TEST_F (BasicLoggerTimeFixture, ArbitraryPointInTime) {
     time_zone_setter tzs ("UTC0");
     std::time_t const time{1447134860};
     std::size_t const r =
-        pstore::logging::basic_logger::time_string (time, pstore::gsl::make_span (buffer_));
+        pstore::basic_logger::time_string (time, pstore::gsl::make_span (buffer_));
     EXPECT_EQ (std::size_t{24}, r);
     this->canonicalize_sign ();
     EXPECT_STREQ ("2015-11-10T05:54:20-0000", buffer_.data ());
@@ -244,8 +244,7 @@ namespace {
 TEST_F (BasicLoggerThreadNameFixture, ThreadNameSet) {
     using testing::StrEq;
     pstore::threads::set_name ("mythreadname");
-    EXPECT_THAT (pstore::logging::basic_logger::get_current_thread_name ().c_str (),
-                 StrEq ("mythreadname"));
+    EXPECT_THAT (pstore::basic_logger::get_current_thread_name ().c_str (), StrEq ("mythreadname"));
 }
 
 TEST_F (BasicLoggerThreadNameFixture, ThreadNameEmpty) {
@@ -255,7 +254,7 @@ TEST_F (BasicLoggerThreadNameFixture, ThreadNameEmpty) {
 
     pstore::threads::set_name ("");
 
-    std::string const name = pstore::logging::basic_logger::get_current_thread_name ();
+    std::string const name = pstore::basic_logger::get_current_thread_name ();
 
     // Here we're looking for '\([0-9]+\)'. Sadly regular expression support is extremely
     // limited on Windows, so it has to be done the hard way.

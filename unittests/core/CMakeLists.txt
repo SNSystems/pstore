@@ -71,5 +71,3 @@ target_link_libraries (pstore-core-unit-tests PRIVATE pstore-core pstore-common)
 
 # Access the library's private include directory.
 target_include_directories (pstore-core-unit-tests PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/../../lib/core")
-
-add_subdirectory (brokerface)

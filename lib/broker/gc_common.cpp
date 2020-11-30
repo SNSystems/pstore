@@ -51,10 +51,9 @@
 #include "pstore/os/signal_helpers.hpp"
 
 namespace pstore {
-
-    using logging::priority;
-
     namespace broker {
+
+        using priority = logger::priority;
 
         gc_watch_thread::~gc_watch_thread () noexcept = default;
 
@@ -70,17 +69,17 @@ namespace pstore {
             std::unique_lock<decltype (mut_)> const lock{mut_};
             if (processes_.presentl (db_path)) {
                 log (priority::info, "GC process is already running for ",
-                     logging::quoted (db_path.c_str ()));
+                     logger::quoted{db_path.c_str ()});
                 return;
             }
 
             if (processes_.size () >= max_gc_processes) {
                 log (priority::info,
                      "Maximum number of GC processes are running. Ignoring request for ",
-                     logging::quoted (db_path.c_str ()));
+                     logger::quoted{db_path.c_str ()});
                 return;
             }
-            log (priority::info, "Starting GC process for ", logging::quoted{db_path.c_str ()});
+            log (priority::info, "Starting GC process for ", logger::quoted{db_path.c_str ()});
             processes_.set (db_path,
                             this->spawn ({vacuumd_path ().c_str (), db_path.c_str (), nullptr}));
 
@@ -103,12 +102,12 @@ namespace pstore {
         // ~~~~~~~~~~~
         bool gc_watch_thread::stop_vacuum (std::string const & path) {
             if (maybe<process_identifier> const pid = this->get_pid (path)) {
-                log (priority::info, "Killing GC for ", logging::quoted (path.c_str ()));
+                log (priority::info, "Killing GC for ", logger::quoted{path.c_str ()});
                 this->kill (*pid);
                 processes_.erasel (path);
                 return true;
             }
-            log (priority::info, "No GC process running for ", logging::quoted (path.c_str ()));
+            log (priority::info, "No GC process running for ", logger::quoted{path.c_str ()});
             return false;
         }
 

@@ -85,9 +85,8 @@ namespace {
         return ::mkfifo (path, mode);
     }
 
-    pstore::brokerface::pipe_descriptor open_fifo (pstore::gsl::czstring const path,
-                                                   int const flags) {
-        pstore::brokerface::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
+    pstore::pipe_descriptor open_fifo (pstore::gsl::czstring const path, int const flags) {
+        pstore::pipe_descriptor pipe{::open (path, flags | O_NONBLOCK)};
         if (pipe.native_handle () < 0) {
             return pipe;
         }

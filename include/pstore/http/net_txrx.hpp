@@ -45,14 +45,12 @@
 #define PSTORE_HTTP_NET_TXRX_HPP
 
 #include "pstore/adt/error_or.hpp"
-#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {
         namespace net {
-
-            using socket_descriptor = brokerface::socket_descriptor;
 
             // refiller
             // ~~~~~~~~

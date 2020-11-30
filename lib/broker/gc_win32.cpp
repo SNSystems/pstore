@@ -62,8 +62,8 @@
 #    include "pstore/broker/bimap.hpp"
 #    include "pstore/broker/pointer_compare.hpp"
 #    include "pstore/broker/spawn.hpp"
-#    include "pstore/brokerface/signal_cv.hpp"
 #    include "pstore/os/logging.hpp"
+#    include "pstore/os/signal_cv.hpp"
 #    include "pstore/os/thread.hpp"
 
 namespace {
@@ -76,7 +76,8 @@ namespace {
             raise (pstore::win32_erc (::GetLastError ()), "GetExitCodeProcess");
         }
 
-        using pstore::logging::priority;
+        using priority = pstore::logger::priority;
+
         log (priority::info, "GC process exited pid ", pid);
         if ((child_exit_code == EXIT_SUCCESS) || (child_exit_code == EXIT_FAILURE)) {
             log (priority::info, "Normal termination, exit status = ", child_exit_code);
@@ -101,8 +102,7 @@ namespace {
     /// \p processes collection and the \p cv condition-variable. An existing contents are
     /// destroyed.
     template <typename ProcessBimap>
-    void build_object_vector (ProcessBimap const & processes,
-                              pstore::brokerface::signal_cv const & cv,
+    void build_object_vector (ProcessBimap const & processes, pstore::signal_cv const & cv,
                               pstore::gsl::not_null<std::vector<HANDLE> *> v) {
         // The size of the vector is rounded up in order to reduce the probability of a memory
         // allocation being required when the vector is resized. In typical use, the number of
@@ -126,26 +126,23 @@ namespace pstore {
         // kill
         // ~~~~
         void gc_watch_thread::kill (process_identifier const & pid) {
-            using logging::priority;
-
-            log (priority::info, "sending CTRL_BREAK_EVENT to ", pid->group ());
+            log (logger::priority::info, "sending CTRL_BREAK_EVENT to ", pid->group ());
             if (!::GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, pid->group ())) {
-                log (priority::error, "An error occurred: ", ::GetLastError ());
+                log (logger::priority::error, "An error occurred: ", ::GetLastError ());
             }
         }
 
         // watcher
         // ~~~~~~~
         void gc_watch_thread::watcher () {
-            using logging::priority;
-            log (priority::info, "starting gc process watch thread");
+            log (logger::priority::info, "starting gc process watch thread");
 
             std::vector<HANDLE> object_vector;
             std::unique_lock<decltype (mut_)> lock (mut_);
 
             for (;;) {
                 try {
-                    log (priority::info, "waiting for a GC process to complete");
+                    log (logger::priority::info, "waiting for a GC process to complete");
 
                     build_object_vector (processes_, cv_, &object_vector);
                     auto const num_objects = object_vector.size ();
@@ -170,7 +167,7 @@ namespace pstore {
                     if (wmo_res == WAIT_FAILED) {
                         raise (pstore::win32_erc{last_error}, "WaitForMultipleObjects failed");
                     } else if (wmo_res == WAIT_TIMEOUT) {
-                        log (priority::info, "WaitForMultipleObjects timeout");
+                        log (logger::priority::info, "WaitForMultipleObjects timeout");
                     } else if (wmo_res >= WAIT_OBJECT_0) {
                         // Extract the handle that caused us to wake.
                         HANDLE const h = object_vector.at (wmo_res - WAIT_OBJECT_0);
@@ -186,23 +183,24 @@ namespace pstore {
                         // "If a thread terminates without releasing its ownership of a mutex
                         // object, the mutex object is considered to be abandoned." We don't expect
                         // that to ever happen here.
-                        log (priority::error, "WaitForMultipleObjects WAIT_ABANDONED error n=",
+                        log (logger::priority::error,
+                             "WaitForMultipleObjects WAIT_ABANDONED error n=",
                              wmo_res - WAIT_ABANDONED_0);
                     } else {
-                        log (priority::error, "Unknown WaitForMultipleObjects return value ",
-                             wmo_res);
+                        log (logger::priority::error,
+                             "Unknown WaitForMultipleObjects return value ", wmo_res);
                     }
                 } catch (std::exception const & ex) {
-                    log (priority::error, "An error occurred: ", ex.what ());
+                    log (logger::priority::error, "An error occurred: ", ex.what ());
                     // TODO: delay before restarting. Don't restart after e.g. bad_alloc?
                 } catch (...) {
-                    log (priority::error, "Unknown error");
+                    log (logger::priority::error, "Unknown error");
                     // TODO: delay before restarting
                 }
             }
 
             // Tell any child GC processes to quit.
-            log (priority::info, "cleaning up");
+            log (logger::priority::info, "cleaning up");
             std::for_each (processes_.right_begin (), processes_.right_end (),
                            [this] (broker::process_identifier const & pid) { this->kill (pid); });
         }

@@ -42,6 +42,8 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 add_pstore_unit_test (pstore-brokerface-unit-tests
+    test_message_type.cpp
     test_pubsub.cpp
+    test_send_message.cpp
 )
-target_link_libraries (pstore-brokerface-unit-tests PRIVATE pstore-brokerface)
+target_link_libraries (pstore-brokerface-unit-tests PRIVATE pstore-brokerface pstore-common)

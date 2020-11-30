@@ -51,8 +51,8 @@
 #include "pstore/broker/bimap.hpp"
 #include "pstore/broker/pointer_compare.hpp"
 #include "pstore/broker/spawn.hpp"
-#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/config/config.hpp"
+#include "pstore/os/signal_cv.hpp"
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
@@ -114,7 +114,7 @@ namespace pstore {
 #endif
 
             mutable std::mutex mut_;
-            brokerface::signal_cv cv_;
+            signal_cv cv_;
             process_bimap processes_;
             bool done_ = false;
         };

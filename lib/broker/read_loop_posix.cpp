@@ -62,6 +62,8 @@
 
 namespace {
 
+    using priority = pstore::logger::priority;
+
     // block for input
     // ~~~~~~~~~~~~~~~
     /// Watch fd to be notified when it has input.
@@ -79,7 +81,7 @@ namespace {
         if (retval == -1) {
             raise (pstore::errno_erc{errno}, "select");
         } else if (retval == 0) {
-            log (pstore::logging::priority::notice, "no data within timeout");
+            log (priority::notice, "no data within timeout");
         }
     }
 
@@ -94,8 +96,7 @@ namespace pstore {
         void read_loop (brokerface::fifo_path & fifo, std::shared_ptr<recorder> & record_file,
                         std::shared_ptr<command_processor> const cp) {
             try {
-                log (logging::priority::notice, "listening to FIFO ",
-                     logging::quoted{fifo.get ().c_str ()});
+                log (priority::notice, "listening to FIFO ", logger::quoted{fifo.get ().c_str ()});
                 auto const fd = fifo.open_server_pipe ();
 
                 brokerface::message_ptr readbuf = pool.get_from_pool ();
@@ -113,13 +114,12 @@ namespace pstore {
                         }
 
                         if (done) {
-                            log (logging::priority::notice, "exiting read loop");
+                            log (priority::notice, "exiting read loop");
                             return;
                         }
 
                         if (bytes_read != brokerface::message_size) {
-                            log (logging::priority::error, "Partial message received. Length ",
-                                 bytes_read);
+                            log (priority::error, "Partial message received. Length ", bytes_read);
                         } else {
                             // Push the command buffer on to the queue for processing and pull
                             // an new read buffer from the pool.
@@ -137,15 +137,15 @@ namespace pstore {
                     block_for_input (fd.native_handle ());
                 }
             } catch (std::exception const & ex) {
-                log (logging::priority::error, "error: ", ex.what ());
+                log (priority::error, "error: ", ex.what ());
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             } catch (...) {
-                log (logging::priority::error, "unknown error");
+                log (priority::error, "unknown error");
                 exit_code = EXIT_FAILURE;
                 notify_quit_thread ();
             }
-            log (logging::priority::notice, "exiting read loop");
+            log (priority::notice, "exiting read loop");
         }
 
     } // end namespace broker

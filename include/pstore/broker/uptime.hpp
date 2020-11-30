@@ -46,15 +46,15 @@
 
 #include <atomic>
 
-#include "pstore/brokerface/signal_cv.hpp"
 #include "pstore/brokerface/pubsub.hpp"
+#include "pstore/os/signal_cv.hpp"
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace broker {
 
-        extern brokerface::descriptor_condition_variable uptime_cv;
-        extern brokerface::channel<brokerface::descriptor_condition_variable> uptime_channel;
+        extern descriptor_condition_variable uptime_cv;
+        extern brokerface::channel<descriptor_condition_variable> uptime_channel;
 
         void uptime (gsl::not_null<std::atomic<bool> *> done);
 

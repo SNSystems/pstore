@@ -143,7 +143,7 @@ namespace pstore {
 
             private:
                 void log_top (bool const is_push) const {
-                    if (logging::enabled ()) {
+                    if (logging_enabled ()) {
                         log_top_impl (is_push);
                     }
                 }

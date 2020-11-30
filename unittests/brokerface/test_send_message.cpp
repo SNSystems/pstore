@@ -4,7 +4,7 @@
 //* \__ \  __/ | | | (_| | | | | | | |  __/\__ \__ \ (_| | (_| |  __/ *
 //* |___/\___|_| |_|\__,_| |_| |_| |_|\___||___/___/\__,_|\__, |\___| *
 //*                                                       |___/       *
-//===- unittests/core/brokerface/test_send_message.cpp --------------------===//
+//===- unittests/brokerface/test_send_message.cpp -------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -45,12 +45,11 @@
 
 #include "pstore/brokerface/send_message.hpp"
 
-#include "pstore/support/portab.hpp"
-#include "gmock/gmock.h"
+#include <gmock/gmock.h>
 
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/brokerface/message_type.hpp"
 #include "pstore/brokerface/writer.hpp"
+#include "pstore/os/descriptor.hpp"
 
 namespace {
 

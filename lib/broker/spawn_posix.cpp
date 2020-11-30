@@ -63,6 +63,7 @@ namespace pstore {
 
         process_identifier spawn (gsl::czstring const exe_path,
                                   gsl::not_null<gsl::czstring const *> const argv) {
+            using priority = logger::priority;
             auto const child_pid = ::fork ();
             switch (child_pid) {
             // When fork() returns -1, an error happened.
@@ -70,13 +71,13 @@ namespace pstore {
             // When fork() returns 0, we are in the child process.
             case 0: {
                 try {
-                    log (logging::priority::info, "starting vacuum ", logging::quoted (exe_path));
+                    log (priority::info, "starting vacuum ", logger::quoted{exe_path});
                     ::execv (exe_path, const_cast<char **> (argv.get ()));
                     raise (errno_erc{errno}, "execv"); // If execv returns, it must have failed.
                 } catch (std::exception const & ex) {
-                    log (logging::priority::error, "fork error: ", ex.what ());
+                    log (priority::error, "fork error: ", ex.what ());
                 } catch (...) {
-                    log (logging::priority::error, "fork unknown error");
+                    log (priority::error, "fork unknown error");
                 }
                 std::exit (EXIT_FAILURE);
             }
@@ -87,7 +88,7 @@ namespace pstore {
                 // we got here, so record the child PID if we're still in the "starting"
                 // state.
 
-                log (logging::priority::info, "vacuum is now running: pid ", child_pid);
+                log (priority::info, "vacuum is now running: pid ", child_pid);
                 break;
             }
             return child_pid;

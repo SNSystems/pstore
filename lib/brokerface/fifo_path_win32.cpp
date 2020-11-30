@@ -67,12 +67,6 @@ namespace pstore {
             return std::string{R"(\\.\pipe\)"} + default_pipe_name;
         }
 
-#    if 0
-        // create
-        // ~~~~~~
-        void fifo_path::create () {}
-#    endif
-
         // open_impl
         // ~~~~~~~~~
         auto fifo_path::open_impl () const -> client_pipe {

@@ -50,11 +50,11 @@
 #    include <sys/types.h>
 #endif
 
-#include "pstore/brokerface/descriptor.hpp"
 #include "pstore/http/buffered_reader.hpp"
 #include "pstore/http/error.hpp"
 #include "pstore/http/net_txrx.hpp"
 #include "pstore/http/send.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/os/logging.hpp"
 #include "pstore/support/portab.hpp"
 #include "pstore/support/random.hpp"
@@ -68,9 +68,9 @@ namespace pstore {
             }
             if (http_status->shutdown () == server_status::http_state::listening) {
                 // Wake up the server by connecting to it.
-                brokerface::socket_descriptor const fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
+                socket_descriptor const fd{::socket (AF_INET, SOCK_STREAM, IPPROTO_IP)};
                 if (!fd.valid ()) {
-                    log (logging::priority::error,
+                    log (logger::priority::error,
                          "Could not open socket: ", get_last_error ().message ());
                     return;
                 }
@@ -82,17 +82,17 @@ namespace pstore {
                 // NOLINTNEXTLINE
                 sock_addr.sin_addr.s_addr = htonl (INADDR_LOOPBACK); //! OCLINT
 
-                log (logging::priority::info, "Connecting");
+                log (logger::priority::info, "Connecting");
 
                 if (::connect (fd.native_handle (),
                                reinterpret_cast<struct sockaddr *> (&sock_addr),
                                sizeof (sock_addr)) != 0) {
-                    log (logging::priority::error,
+                    log (logger::priority::error,
                          "Could not connect to localhost: ", get_last_error ().message ());
                     return;
                 }
 
-                log (logging::priority::info, "Connected");
+                log (logger::priority::info, "Connected");
             }
         }
 

@@ -53,6 +53,7 @@
 #include "pstore/brokerface/writer.hpp"
 
 namespace pstore {
+    /// Contains the types and functions provided by the broker interface.
     namespace brokerface {
 
         /// Intended for use in unit tests, returns the ID of the next message that will be

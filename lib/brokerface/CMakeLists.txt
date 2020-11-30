@@ -45,29 +45,22 @@
 set (pstore_broker_include_dir "${PSTORE_ROOT_DIR}/include/pstore/brokerface")
 
 set (pstore_brokerface_includes
-    descriptor.hpp
     fifo_path.hpp
     message_type.hpp
     pubsub.hpp
     send_message.hpp
-    signal_cv.hpp
     writer.hpp
-    wsa_startup.hpp
 )
 
 set (pstore_brokerface_src
-    descriptor.cpp
     fifo_path_common.cpp
     fifo_path_posix.cpp
     fifo_path_win32.cpp
     message_type.cpp
     send_message.cpp
-    signal_cv_posix.cpp
-    signal_cv_win32.cpp
     writer_common.cpp
     writer_posix.cpp
     writer_win32.cpp
-    wsa_startup.cpp
 )
 
 include (add_pstore)
@@ -77,7 +70,7 @@ add_pstore_library (TARGET pstore-brokerface
     HEADER_DIR "${pstore_broker_include_dir}"
     INCLUDES "${pstore_brokerface_includes}"
 )
-target_link_libraries (pstore-brokerface PUBLIC pstore-adt pstore-support)
+target_link_libraries (pstore-brokerface PUBLIC pstore-adt pstore-os pstore-support)
 
 if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_EH Yes)
@@ -95,12 +88,5 @@ if (NOT PSTORE_EXCEPTIONS)
     set (LLVM_REQUIRES_RTTI No)
     set (PSTORE_EXCEPTIONS No)
 
-    target_link_libraries (pstore-brokerface-ex PUBLIC pstore-adt-ex pstore-support-ex)
+    target_link_libraries (pstore-brokerface-ex PUBLIC pstore-adt-ex pstore-os-ex pstore-support-ex)
 endif (NOT PSTORE_EXCEPTIONS)
-
-if (WIN32)
-    target_link_libraries (pstore-brokerface PUBLIC Ws2_32.dll)
-    if (NOT PSTORE_EXCEPTIONS)
-        target_link_libraries (pstore-brokerface-ex PUBLIC Ws2_32.dll)
-    endif ()
-endif (WIN32)

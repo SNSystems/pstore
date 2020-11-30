@@ -63,7 +63,7 @@ namespace pstore {
                     std::chrono::seconds (10 * 60); // TODO: make this configurable by the user.
                 for (;;) {
                     cv_.wait_for (lock, sleep_time);
-                    log (logging::priority::info, "begin scavenging");
+                    log (logger::priority::info, "begin scavenging");
                     if (done) {
                         break;
                     }
@@ -73,14 +73,14 @@ namespace pstore {
                         scp->scavenge ();
                     }
 
-                    log (logging::priority::info, "scavenging done");
+                    log (logger::priority::info, "scavenging done");
                 }
             } catch (std::exception const & ex) {
-                log (logging::priority::error, "error:", ex.what ());
+                log (logger::priority::error, "error:", ex.what ());
             } catch (...) {
-                log (logging::priority::error, "unknown exception");
+                log (logger::priority::error, "unknown exception");
             }
-            log (logging::priority::info, "scavenger thread exiting");
+            log (logger::priority::info, "scavenger thread exiting");
         }
 
         // shutdown

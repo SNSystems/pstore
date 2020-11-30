@@ -65,7 +65,7 @@
 
 namespace {
 
-    using socket_descriptor = pstore::brokerface::socket_descriptor;
+    using socket_descriptor = pstore::socket_descriptor;
 
     template <typename Sender, typename IO>
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
@@ -115,7 +115,7 @@ namespace {
     pstore::error_or<socket_descriptor> initialize_socket (in_port_t const port_number) {
         using eo = pstore::error_or<socket_descriptor>;
 
-        log (pstore::logging::priority::info, "initializing on port: ", port_number);
+        log (pstore::logger::priority::info, "initializing on port: ", port_number);
         socket_descriptor fd{::socket (AF_INET, SOCK_STREAM, 0)};
         if (!fd.valid ()) {
             return eo{pstore::httpd::get_last_error ()};
@@ -176,7 +176,7 @@ namespace {
                     error.message ().c_str ());
         };
 
-        log (pstore::logging::priority::error, "Error:", error.message ());
+        log (pstore::logger::priority::error, "Error:", error.message ());
         if (error.category () == pstore::httpd::get_error_category ()) {
             switch (static_cast<pstore::httpd::error_code> (error.value ())) {
             case pstore::httpd::error_code::bad_request: report (400, "Bad request"); return;
@@ -225,7 +225,7 @@ namespace {
                    pstore::httpd::header_info const & header_contents,
                    pstore::httpd::channel_container const & channels) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
-        using pstore::logging::priority;
+        using priority = pstore::logger::priority;
         assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
 
         log (priority::info, "WebSocket upgrade requested");
@@ -269,7 +269,7 @@ namespace {
             PSTORE_TRY {
                 constexpr auto ident = "websocket";
                 pstore::threads::set_name (ident);
-                pstore::logging::create_log_stream (ident);
+                pstore::create_log_stream (ident);
 
                 log (priority::info, "Started WebSockets session");
 
@@ -320,7 +320,7 @@ namespace {
                                     static_cast<int> (buf.size ()), MSG_PEEK /*flags*/);
         int const err = errno;
         if (nread == -1) {
-            log (pstore::logging::priority::error, "error:", err);
+            log (pstore::logger::priority::error, "error:", err);
         }
         return nread == 0 || nread == -1;
 #    endif
@@ -332,7 +332,7 @@ namespace {
     pstore::error_or<socket_descriptor> wait_for_connection (socket_descriptor const & parentfd) {
         using return_type = pstore::error_or<socket_descriptor>;
 
-        using pstore::logging::priority;
+        using priority = pstore::logger::priority;
 
         sockaddr_in client_addr{}; // client address.
         auto clientlen = static_cast<socklen_t> (sizeof (client_addr));
@@ -360,14 +360,16 @@ namespace pstore {
 
         int server (romfs::romfs & file_system, gsl::not_null<server_status *> const status,
                     channel_container const & channels) {
-            pstore::error_or<socket_descriptor> eparentfd = initialize_socket (status->port ());
+            using priority = logger::priority;
+
+            error_or<socket_descriptor> const eparentfd = initialize_socket (status->port ());
             if (!eparentfd) {
-                log (logging::priority::error, "opening socket", eparentfd.get_error ().message ());
+                log (priority::error, "opening socket", eparentfd.get_error ().message ());
                 return 0;
             }
             socket_descriptor const & parentfd = eparentfd.get ();
 
-            log (logging::priority::info, "starting server-loop");
+            log (priority::info, "starting server-loop");
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
 
@@ -378,8 +380,7 @@ namespace pstore {
                 // Wait for a connection request.
                 pstore::error_or<socket_descriptor> echildfd = wait_for_connection (parentfd);
                 if (!echildfd) {
-                    log (logging::priority::error, "wait_for_connection",
-                         echildfd.get_error ().message ());
+                    log (priority::error, "wait_for_connection", echildfd.get_error ().message ());
                     continue;
                 }
                 socket_descriptor & childfd = *echildfd;
@@ -391,13 +392,13 @@ namespace pstore {
                 pstore::error_or_n<socket_descriptor &, request_info> eri =
                     read_request (reader, std::ref (childfd));
                 if (!eri) {
-                    log (logging::priority::error,
+                    log (priority::error,
                          "Failed reading HTTP request: ", eri.get_error ().message ());
                     continue;
                 }
                 childfd = std::move (std::get<0> (eri));
                 request_info const & request = std::get<1> (eri);
-                log (logging::priority::info, "Request: ",
+                log (priority::info, "Request: ",
                      request.method () + ' ' + request.version () + ' ' + request.uri ());
 
                 // We only currently support the GET method.

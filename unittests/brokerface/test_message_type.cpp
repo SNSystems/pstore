@@ -4,7 +4,7 @@
 //* | | | | | |  __/\__ \__ \ (_| | (_| |  __/ | |_| |_| | |_) |  __/ *
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___|  \__|\__, | .__/ \___| *
 //*                                |___/            |___/|_|          *
-//===- unittests/core/brokerface/test_message_type.cpp --------------------===//
+//===- unittests/brokerface/test_message_type.cpp -------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //

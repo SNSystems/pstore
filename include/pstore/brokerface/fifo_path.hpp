@@ -52,7 +52,7 @@
 #include <mutex>
 #include <tuple>
 
-#include "pstore/brokerface/descriptor.hpp"
+#include "pstore/os/descriptor.hpp"
 #include "pstore/support/gsl.hpp"
 #include "pstore/support/portab.hpp"
 

@@ -76,8 +76,7 @@ namespace {
 } // end anonymous namespace
 
 TEST (RotatingLog, NothingIsLogged) {
-    using log_type =
-        pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
+    using log_type = pstore::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
     log_type log ("base_name", std::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
     EXPECT_FALSE (log.is_open ()) << "Expected the log file to be initially closed";
     EXPECT_EQ ("", log.stream ().str ());
@@ -90,8 +89,7 @@ TEST (RotatingLog, OneFile) {
     using ::testing::Invoke;
     using ::testing::StrEq;
 
-    using log_type =
-        pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
+    using log_type = pstore::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
     log_type log ("base_name", std::streamoff{0} /*max_bytes*/, 0U /*num_backups*/);
 
     Expectation open =
@@ -118,8 +116,7 @@ TEST (RotatingLog, TwoRotations) {
     using ::testing::Return;
     using ::testing::StrEq;
 
-    using log_type =
-        pstore::logging::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
+    using log_type = pstore::basic_rotating_log<mock_string_stream_traits, mock_file_system_traits>;
 
     // We'll contrive two rollovers by generating at least max_size * num_backups
     // worth of output.

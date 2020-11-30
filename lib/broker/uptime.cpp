@@ -53,11 +53,11 @@
 namespace pstore {
     namespace broker {
 
-        brokerface::descriptor_condition_variable uptime_cv;
-        brokerface::channel<brokerface::descriptor_condition_variable> uptime_channel (&uptime_cv);
+        descriptor_condition_variable uptime_cv;
+        brokerface::channel<descriptor_condition_variable> uptime_channel (&uptime_cv);
 
         void uptime (gsl::not_null<std::atomic<bool> *> const done) {
-            log (logging::priority::info, "uptime 1 second tick starting");
+            log (logger::priority::info, "uptime 1 second tick starting");
 
             auto seconds = std::uint64_t{0};
             auto until = std::chrono::system_clock::now ();
@@ -75,7 +75,7 @@ namespace pstore {
                 });
             }
 
-            log (logging::priority::info, "uptime thread exiting");
+            log (logger::priority::info, "uptime thread exiting");
         }
 
     } // namespace broker
