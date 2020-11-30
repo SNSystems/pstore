@@ -49,7 +49,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include "pstore/cmd_util/command_line.hpp"
+#include "pstore/command_line/command_line.hpp"
 #include "pstore/support/utf.hpp"
 
 // Local includes
@@ -67,7 +67,7 @@ namespace {
     constexpr auto account_password = nullptr;
 
 
-    using namespace pstore::cmd_util;
+    using namespace pstore::command_line;
 
     cl::opt<bool> install_opt ("install", cl::desc ("Install the service"));
     cl::opt<bool> remove_opt ("remove", cl::desc ("Remove the service"));
