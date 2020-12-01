@@ -49,32 +49,59 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            // write
+            // ~~~~~
             ostream & ostream::write (char const c) {
                 std::fputc (c, os_);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
             ostream & ostream::write (std::uint16_t const v) {
                 std::fprintf (os_, "%" PRIu16, v);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
             ostream & ostream::write (std::uint32_t const v) {
                 std::fprintf (os_, "%" PRIu32, v);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
             ostream & ostream::write (std::uint64_t const v) {
                 std::fprintf (os_, "%" PRIu64, v);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
             ostream & ostream::write (gsl::czstring const str) {
                 std::fputs (str, os_);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
             ostream & ostream::write (std::string const & str) {
                 std::fputs (str.c_str (), os_);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
                 return *this;
             }
 
-            void ostream::flush () { std::fflush (os_); }
+            // flush
+            // ~~~~~
+            void ostream::flush () {
+                std::fflush (os_);
+                if (ferror (os_)) {
+                    raise (error_code::write_failed);
+                }
+            }
 
         } // end namespace export_ns
     }     // end namespace exchange

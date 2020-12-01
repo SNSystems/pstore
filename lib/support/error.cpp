@@ -99,6 +99,7 @@ std::string pstore::error_category::message (int const error) const {
     case error_code::bad_message_part_number: result = "bad message part number"; break;
     case error_code::unable_to_open_named_pipe: result = "unable to open named pipe"; break;
     case error_code::pipe_write_timeout: result = "pipe write timeout"; break;
+    case error_code::write_failed: result = "write failed"; break;
     }
     return result;
 }

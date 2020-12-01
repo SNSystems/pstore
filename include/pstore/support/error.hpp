@@ -85,7 +85,9 @@ namespace pstore {
     X (uuid_parse_error)                                                                           \
     X (bad_message_part_number)                                                                    \
     X (unable_to_open_named_pipe)                                                                  \
-    X (pipe_write_timeout)
+    X (pipe_write_timeout)                                                                         \
+    X (write_failed)
+
     // Add more error values here
 
     // **************

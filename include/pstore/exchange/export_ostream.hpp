@@ -47,6 +47,7 @@
 #include <cstdio>
 
 #include "pstore/core/indirect_string.hpp"
+#include "pstore/support/unsigned_cast.hpp"
 
 namespace pstore {
     namespace exchange {
@@ -71,11 +72,14 @@ namespace pstore {
                 ostream & write (gsl::czstring str);
                 ostream & write (std::string const & str);
 
-                template <typename T, typename = typename std::enable_if<true>::type>
+                template <typename T, typename = typename std::enable_if<
+                                          std::is_trivially_copyable<T>::value>::type>
                 ostream & write (T const * s, std::streamsize const length) {
-                    assert (length >= 0 && static_cast<std::make_unsigned_t<std::streamsize>> (
-                                               length) <= std::numeric_limits<std::size_t>::max ());
-                    std::fwrite (s, sizeof (T), static_cast<std::size_t> (length), os_);
+                    std::fwrite (s, sizeof (T),
+                                 unsigned_cast<decltype (length), std::size_t> (length), os_);
+                    if (ferror (os_)) {
+                        raise (error_code::write_failed);
+                    }
                     return *this;
                 }
 
