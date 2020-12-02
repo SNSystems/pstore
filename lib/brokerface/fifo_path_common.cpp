@@ -68,14 +68,14 @@ namespace pstore {
         // (ctor)
         // ~~~~~~
         fifo_path::fifo_path (gsl::czstring const pipe_path, duration_type const retry_timeout,
-                              unsigned const max_retries, update_callback const cb)
+                              unsigned const max_retries, update_callback cb)
                 : path_{pipe_path == nullptr ? get_default_path () : pipe_path}
                 , retry_timeout_{retry_timeout}
                 , max_retries_{max_retries}
                 , update_cb_{std::move (cb)} {}
 
-        fifo_path::fifo_path (gsl::czstring const pipe_path, update_callback const cb)
-                : fifo_path (pipe_path, duration_type{0}, 0, cb) {}
+        fifo_path::fifo_path (gsl::czstring const pipe_path, update_callback cb)
+                : fifo_path (pipe_path, duration_type{0}, 0, std::move (cb)) {}
 
         // open
         // ~~~~
