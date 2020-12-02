@@ -185,11 +185,11 @@ namespace pstore {
         bool empty () const noexcept { return size_ == 0; }
 
         // 7.6, sstring_view element access
-        const_reference operator[] (size_type pos) const {
+        const_reference operator[] (size_type const pos) const {
             assert (pos < size_);
             return (this->data ())[pos];
         }
-        const_reference at (size_type pos) const {
+        const_reference at (size_type const pos) const {
 #ifdef PSTORE_EXCEPTIONS
             if (pos >= size_) {
                 throw std::out_of_range ("sstring_view access out of range");
@@ -228,7 +228,7 @@ namespace pstore {
         /// of \p n and size() - \p pos.
         /// \param pos position of the first character
         /// \param n requested length
-        sstring_view<gsl::czstring> substr (size_type pos = 0, size_type n = npos) const {
+        sstring_view<gsl::czstring> substr (size_type pos = 0, size_type const n = npos) const {
             pos = std::min (pos, size_);
             return {data () + pos, std::min (n, size_ - pos)};
         }
