@@ -126,7 +126,7 @@ namespace pstore {
 
             /// \brief Returns a pointer to an in-store definition instance.
             ///
-            /// \param db  The database from which the ticket_member should be loaded.
+            /// \param db  The database from which the definition should be loaded.
             /// \param addr  Address of the definition.
             /// \result  A pointer to the in-store definition.
             static auto load (database const & db, typed_address<definition> addr)
