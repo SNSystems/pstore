@@ -88,8 +88,8 @@ namespace pstore {
         //*                                        *
         /// \brief Represents an individual symbol in a compilation.
         ///
-        /// A definition provides the connection between a symbol name, its linkage, and
-        /// the fragment which holds the associated data.
+        /// A definition provides the connection between a symbol name, its linkage, and the
+        /// fragment which holds the associated data.
         struct definition {
             /// \param d  The fragment digest for this compilation symbol.
             /// \param x  The fragment extent for this compilation symbol.
