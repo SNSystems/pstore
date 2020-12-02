@@ -203,7 +203,7 @@ TEST_F (JsonNumber, OneExpMinusZero2) {
 }
 
 TEST_F (JsonNumber, IntegerMax) {
-    auto const long_max = std::numeric_limits<std::int64_t>::max ();
+    constexpr auto long_max = std::numeric_limits<std::int64_t>::max ();
     auto const str_max = std::to_string (long_max);
 
     EXPECT_CALL (callbacks_, uint64_value (long_max)).Times (1);

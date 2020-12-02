@@ -519,7 +519,7 @@ TEST_F (MemoryFile, CrazyWriteSize) {
 
     mf.write (std::numeric_limits<std::uint32_t>::max ());
     mf.seek (4);
-    auto const length = std::numeric_limits<std::size_t>::max () - std::size_t{2};
+    constexpr auto length = std::numeric_limits<std::size_t>::max () - std::size_t{2};
     char const * source = "Hello";
     check_for_error ([&] { mf.write_buffer (source, length); }, std::errc::invalid_argument);
 }
