@@ -101,6 +101,52 @@ namespace pstore {
                 unsigned const old_revision_;
             };
 
+            /// An OutputIterator which converts the address of objects in a known index into their
+            /// value_ptr representation for display to the user.
+            template <typename Index, typename DestOutputIterator>
+            class value_output_iterator {
+            public:
+                using iterator_category = std::output_iterator_tag;
+
+                using container_type = typename DestOutputIterator::container_type;
+                using value_type = void;
+                using difference_type = void;
+                using reference = void;
+                using pointer = void;
+
+                value_output_iterator (database const * db, Index const & index,
+                                       DestOutputIterator out)
+                        : db_{db}
+                        , index_{index}
+                        , out_{out} {}
+                value_output_iterator & operator= (pstore::address addr) {
+                    *out_ = dump::make_value (get_key (index_->load_leaf_node (*db_, addr)));
+                    return *this;
+                }
+                value_output_iterator & operator* () { return *this; }
+                value_output_iterator & operator++ () {
+                    ++out_;
+                    return *this;
+                }
+                value_output_iterator operator++ (int) {
+                    value_output_iterator old = *this;
+                    ++(*this);
+                    return old;
+                }
+
+            private:
+                database const * db_;
+                Index index_;
+                DestOutputIterator out_;
+            };
+
+            template <typename Index, typename DestOutputIterator>
+            value_output_iterator<Index, DestOutputIterator>
+            make_value_output_iterator (database const * db, Index const & index,
+                                        DestOutputIterator out) {
+                return {db, index, out};
+            }
+
         } // namespace details
 
         /// Make a value pointer which contains the keys that are different between two database
@@ -116,13 +162,8 @@ namespace pstore {
                                    GetIndexFunction get_index) {
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
-
-            auto const differences = diff (db, *index, old_revision);
-            std::transform (std::begin (differences), std::end (differences),
-                            std::back_inserter (members), [&db, &index] (pstore::address addr) {
-                                return dump::make_value (
-                                    get_key (index->load_leaf_node (db, addr)));
-                            });
+            diff (db, *index, old_revision,
+                  details::make_value_output_iterator (&db, index, std::back_inserter (members)));
             return dump::make_value (members);
         }
 
