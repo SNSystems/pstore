@@ -131,7 +131,7 @@ namespace pstore {
                 }
                 auto const index = static_cast<std::uint32_t> (index_);
                 **out_ = repo::linked_definitions::value_type (
-                    *compilation, index, typed_address<repo::compilation_member>::make (index_));
+                    *compilation, index, typed_address<repo::definition>::make (index_));
                 return pop ();
             }
 

@@ -93,21 +93,21 @@ namespace {
                                 pstore::make_pointee_adaptor (fdata.end ()));
     }
 
-    template <typename SectionIterator, typename CompilationMemberIterator,
+    template <typename SectionIterator, typename DefinitionIterator,
               typename = typename std::enable_if_t<
-                  std::is_same<typename std::iterator_traits<CompilationMemberIterator>::value_type,
+                  std::is_same<typename std::iterator_traits<DefinitionIterator>::value_type,
                                pstore::repo::linked_definitions::value_type>::value>>
     pstore::extent<fragment>
     build_fragment (transaction & transaction, SectionIterator section_begin,
-                    SectionIterator section_end, CompilationMemberIterator compilation_member_begin,
-                    CompilationMemberIterator compilation_member_end) {
-        assert (std::distance (compilation_member_begin, compilation_member_end) > 0);
+                    SectionIterator section_end, DefinitionIterator definition_begin,
+                    DefinitionIterator definition_end) {
+        assert (std::distance (definition_begin, definition_end) > 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
             build_sections (section_begin, section_end);
 
-        dispatchers.emplace_back (new linked_definitions_creation_dispatcher (
-            compilation_member_begin, compilation_member_end));
+        dispatchers.emplace_back (
+            new linked_definitions_creation_dispatcher (definition_begin, definition_end));
 
         return fragment::alloc (transaction, pstore::make_pointee_adaptor (dispatchers.begin ()),
                                 pstore::make_pointee_adaptor (dispatchers.end ()));
@@ -216,9 +216,8 @@ TEST_F (FragmentTest, MakeTextSectionWithLinkedDefinitions) {
 
     std::vector<section_content> c;
 
-    constexpr linked_definitions::value_type ld{
-        pstore::index::digest{0, 0xffff}, 17U,
-        pstore::typed_address<compilation_member>::make (37U)};
+    constexpr linked_definitions::value_type ld{pstore::index::digest{0, 0xffff}, 17U,
+                                                pstore::typed_address<definition>::make (37U)};
     std::vector<linked_definitions::value_type> d{ld};
 
     auto extent = build_fragment (transaction_, std::begin (c), std::end (c), d.data (),

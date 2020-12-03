@@ -151,7 +151,7 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
     constexpr auto referenced_compilation_digest = pstore::index::digest{0x12345678, 0x9ABCDEF0};
 
     constexpr auto max_addr =
-        typed_address<repo::compilation_member>::make (std::numeric_limits<std::uint64_t>::max ());
+        typed_address<repo::definition>::make (std::numeric_limits<std::uint64_t>::max ());
     std::vector<repo::linked_definitions::value_type> exported_content{
         {referenced_compilation_digest, UINT32_C (0), max_addr},
         {referenced_compilation_digest, UINT32_C (1), max_addr},
@@ -171,7 +171,7 @@ TEST_F (LinkedDefinitionsSection, RoundTripForPopulated) {
             constexpr index::digest fragment_digest{0x9ABCDEF0, 0x12345678};
             pstore::extent<repo::fragment> const fext;
             constexpr auto str = pstore::typed_address<pstore::indirect_string>::make (0U);
-            std::vector<repo::compilation_member> definitions{
+            std::vector<repo::definition> definitions{
                 {fragment_digest, fext, str, pstore::repo::linkage::external},
                 {fragment_digest, fext, str, pstore::repo::linkage::external},
             };
