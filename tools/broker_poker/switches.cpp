@@ -53,25 +53,24 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<std::string>
-        pipe_path ("pipe-path", cl::desc ("Overrides the FIFO path to which messages are written."),
-                   cl::init (""));
+    opt<std::string> pipe_path ("pipe-path",
+                                desc ("Overrides the FIFO path to which messages are written."),
+                                init (""));
 
-    cl::opt<unsigned> flood ("flood", cl::desc ("Flood the broker with a number of ECHO messages."),
-                             cl::init (0U));
-    cl::alias flood2 ("m", cl::desc ("Alias for --flood"), cl::aliasopt (flood));
+    opt<unsigned> flood ("flood", desc ("Flood the broker with a number of ECHO messages."),
+                         init (0U));
+    alias flood2 ("m", desc ("Alias for --flood"), aliasopt (flood));
 
-    cl::opt<std::chrono::milliseconds::rep>
+    opt<std::chrono::milliseconds::rep>
         retry_timeout ("retry-timeout",
-                       cl::desc ("The timeout for connection retries to the broker (ms)."),
-                       cl::init (switches{}.retry_timeout.count ()));
+                       desc ("The timeout for connection retries to the broker (ms)."),
+                       init (switches{}.retry_timeout.count ()));
 
-    cl::opt<bool> kill ("kill",
-                        cl::desc ("Ask the broker to quit after commands have been processed."));
-    cl::alias kill2 ("k", cl::desc ("Alias for --kill"), cl::aliasopt (kill));
+    opt<bool> kill ("kill", desc ("Ask the broker to quit after commands have been processed."));
+    alias kill2 ("k", desc ("Alias for --kill"), aliasopt (kill));
 
-    cl::opt<std::string> verb (cl::positional, cl::optional, cl::usage ("[verb]"));
-    cl::opt<std::string> path (cl::positional, cl::optional, cl::usage ("[path]"));
+    opt<std::string> verb (positional, optional, usage ("[verb]"));
+    opt<std::string> path (positional, optional, usage ("[path]"));
 
     pstore::maybe<std::string> path_option (std::string const & p) {
         if (p.length () > 0) {
@@ -83,7 +82,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, "pstore broker poker\n");
+    parse_command_line_options (argc, argv, "pstore broker poker\n");
 
     switches result;
     result.verb = verb.get ();

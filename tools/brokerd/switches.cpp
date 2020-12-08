@@ -54,32 +54,30 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<std::string>
-        record_path ("record", cl::desc ("Record received messages in the named output file"));
-    cl::alias record_path2 ("r", cl::desc ("Alias for --record"), cl::aliasopt (record_path));
+    opt<std::string> record_path ("record",
+                                  desc ("Record received messages in the named output file"));
+    alias record_path2 ("r", desc ("Alias for --record"), aliasopt (record_path));
 
-    cl::opt<std::string> playback_path ("playback",
-                                        cl::desc ("Play back messages from the named file"));
-    cl::alias playback_path2 ("p", cl::desc ("Alias for --playback"), cl::aliasopt (playback_path));
+    opt<std::string> playback_path ("playback", desc ("Play back messages from the named file"));
+    alias playback_path2 ("p", desc ("Alias for --playback"), aliasopt (playback_path));
 
-    cl::opt<std::string>
+    opt<std::string>
         pipe_path ("pipe-path",
-                   cl::desc ("Overrides the path of the FIFO from which commands will be read"));
+                   desc ("Overrides the path of the FIFO from which commands will be read"));
 
-    cl::opt<unsigned> num_read_threads ("read-threads",
-                                        cl::desc ("The number of pipe reading threads"),
-                                        cl::init (2U));
+    opt<unsigned> num_read_threads ("read-threads", desc ("The number of pipe reading threads"),
+                                    init (2U));
 
-    cl::opt<std::uint16_t>
+    opt<std::uint16_t>
         http_port ("http-port",
-                   cl::desc ("The port on which to listen for HTTP connections (0 to disable)"),
-                   cl::init (in_port_t{8080}));
+                   desc ("The port on which to listen for HTTP connections (0 to disable)"),
+                   init (in_port_t{8080}));
 
-    cl::opt<unsigned>
+    opt<unsigned>
         scavenge_time ("scavenge-time",
-                       cl::desc ("The time in seconds that a message will spend in the command "
-                                 "queue before being removed by the scavenger"),
-                       cl::init (4U * 60U * 60U));
+                       desc ("The time in seconds that a message will spend in the command "
+                             "queue before being removed by the scavenger"),
+                       init (4U * 60U * 60U));
 
     std::unique_ptr<std::string> path_option (std::string const & path) {
         std::unique_ptr<std::string> result;
@@ -89,7 +87,7 @@ namespace {
         return result;
     }
 
-    std::unique_ptr<std::string> path_option (cl::opt<std::string> const & o) {
+    std::unique_ptr<std::string> path_option (opt<std::string> const & o) {
         return path_option (o.get ());
     }
 
@@ -97,7 +95,7 @@ namespace {
 
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, "pstore broker agent");
+    parse_command_line_options (argc, argv, "pstore broker agent");
 
     switches result;
     result.playback_path = path_option (playback_path);

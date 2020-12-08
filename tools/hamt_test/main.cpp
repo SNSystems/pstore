@@ -65,9 +65,9 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<std::string>
-        data_file (cl::positional, cl::usage ("repository"),
-                   cl::desc ("Path of the pstore repository to use for index test."), cl::required);
+    opt<std::string> data_file (positional, usage ("repository"),
+                                desc ("Path of the pstore repository to use for index test."),
+                                required);
 
 } // end anonymous namespace
 
@@ -218,7 +218,7 @@ int main (int argc, char * argv[]) {
     int exit_code = EXIT_SUCCESS;
 
     PSTORE_TRY {
-        cl::parse_command_line_options (argc, argv, "Tests the pstore index code");
+        parse_command_line_options (argc, argv, "Tests the pstore index code");
 
         pstore::database database (data_file.get (), pstore::database::access_mode::writable);
         database.set_vacuum_mode (pstore::database::vacuum_mode::disabled);

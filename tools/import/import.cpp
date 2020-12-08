@@ -54,13 +54,10 @@ using namespace std::string_literals;
 
 namespace {
 
-    // TODO: cl::desc is used as the short-form list of arguments. We're providing full help text!
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Path of the pstore repository to be created."),
-                                  cl::required);
-    cl::opt<std::string>
-        json_source (cl::positional, cl::usage ("[input]"),
-                     cl::desc ("The export file to be read (stdin if not specified)."));
+    opt<std::string> db_path (positional, usage ("repository"),
+                              desc ("Path of the pstore repository to be created."), required);
+    opt<std::string> json_source (positional, usage ("[input]"),
+                                  desc ("The export file to be read (stdin if not specified)."));
 
     bool is_file_input () { return json_source.get_num_occurrences () > 0; }
 
@@ -79,7 +76,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
-        cl::parse_command_line_options (argc, argv, "pstore import utility\n");
+        parse_command_line_options (argc, argv, "pstore import utility\n");
 
         if (pstore::file::exists (db_path.get ())) {
             error_stream << NATIVE_TEXT ("error: the import database must not be an existing file.")

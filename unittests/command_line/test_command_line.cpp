@@ -75,17 +75,17 @@ namespace {
         }
 
         bool parse_command_line_options (string_stream & output, string_stream & errors) {
-            return cl::details::parse_command_line_options (
-                std::begin (strings_), std::end (strings_), "overview", output, errors);
+            return details::parse_command_line_options (std::begin (strings_), std::end (strings_),
+                                                        "overview", output, errors);
         }
 
     private:
         std::list<std::string> strings_;
     };
 
-    ClCommandLine::ClCommandLine () { cl::option::reset_container (); }
+    ClCommandLine::ClCommandLine () { option::reset_container (); }
     ClCommandLine::~ClCommandLine () {
-        cl::option::reset_container ();
+        option::reset_container ();
         strings_.clear ();
     }
 
@@ -93,7 +93,7 @@ namespace {
 
 
 TEST_F (ClCommandLine, SingleLetterStringOption) {
-    cl::opt<std::string> option ("S");
+    opt<std::string> option ("S");
     this->add ("progname", "-Svalue");
 
     string_stream output;
@@ -109,7 +109,7 @@ TEST_F (ClCommandLine, SingleLetterStringOption) {
 }
 
 TEST_F (ClCommandLine, SingleLetterStringOptionSeparateValue) {
-    cl::opt<std::string> option ("S");
+    opt<std::string> option ("S");
     this->add ("progname", "-S", "value");
 
     string_stream output;
@@ -125,7 +125,7 @@ TEST_F (ClCommandLine, SingleLetterStringOptionSeparateValue) {
 }
 
 TEST_F (ClCommandLine, BooleanOption) {
-    cl::opt<bool> option ("arg");
+    opt<bool> option ("arg");
     EXPECT_EQ (option.get (), false);
 
     this->add ("progname", "--arg");
@@ -143,9 +143,9 @@ TEST_F (ClCommandLine, BooleanOption) {
 }
 
 TEST_F (ClCommandLine, SingleLetterBooleanOptions) {
-    cl::opt<bool> opt_a ("a");
-    cl::opt<bool> opt_b ("b");
-    cl::opt<bool> opt_c ("c");
+    opt<bool> opt_a ("a");
+    opt<bool> opt_b ("b");
+    opt<bool> opt_c ("c");
     EXPECT_EQ (opt_a.get (), false);
     EXPECT_EQ (opt_b.get (), false);
     EXPECT_EQ (opt_c.get (), false);
@@ -170,7 +170,7 @@ TEST_F (ClCommandLine, SingleLetterBooleanOptions) {
 }
 
 TEST_F (ClCommandLine, DoubleDashStringOption) {
-    cl::opt<std::string> option ("arg");
+    opt<std::string> option ("arg");
     this->add ("progname", "--arg", "value");
 
     string_stream output;
@@ -185,7 +185,7 @@ TEST_F (ClCommandLine, DoubleDashStringOption) {
 }
 
 TEST_F (ClCommandLine, DoubleDashStringOptionWithSingleDash) {
-    cl::opt<bool> option ("arg");
+    opt<bool> option ("arg");
     this->add ("progname", "-arg");
 
     string_stream output;
@@ -198,7 +198,7 @@ TEST_F (ClCommandLine, DoubleDashStringOptionWithSingleDash) {
 }
 
 TEST_F (ClCommandLine, StringOptionEquals) {
-    cl::opt<std::string> option ("arg");
+    opt<std::string> option ("arg");
     this->add ("progname", "--arg=value");
 
     string_stream output;
@@ -223,9 +223,9 @@ TEST_F (ClCommandLine, UnknownArgument) {
 }
 
 TEST_F (ClCommandLine, NearestName) {
-    cl::opt<std::string> option1 ("aa");
-    cl::opt<std::string> option2 ("xx");
-    cl::opt<std::string> option3 ("yy");
+    opt<std::string> option1 ("aa");
+    opt<std::string> option2 ("xx");
+    opt<std::string> option3 ("yy");
     this->add ("progname", "--xxx=value");
 
     string_stream output;
@@ -246,7 +246,7 @@ TEST_F (ClCommandLine, MissingOptionName) {
 }
 
 TEST_F (ClCommandLine, StringPositional) {
-    cl::opt<std::string> option ("arg", cl::positional);
+    opt<std::string> option ("arg", positional);
     EXPECT_EQ (option.get (), "") << "Expected inital string value to be empty";
 
     this->add ("progname", "hello");
@@ -263,7 +263,7 @@ TEST_F (ClCommandLine, StringPositional) {
 }
 
 TEST_F (ClCommandLine, RequiredStringPositional) {
-    cl::opt<std::string> option ("arg", cl::positional, cl::required);
+    opt<std::string> option ("arg", positional, required);
 
     this->add ("progname");
 
@@ -280,8 +280,8 @@ TEST_F (ClCommandLine, RequiredStringPositional) {
 }
 
 TEST_F (ClCommandLine, TwoPositionals) {
-    cl::opt<std::string> opt1 ("opt1", cl::positional);
-    cl::opt<std::string> opt2 ("opt2", cl::positional);
+    opt<std::string> opt1 ("opt1", positional);
+    opt<std::string> opt2 ("opt2", positional);
 
     this->add ("progname", "arg1", "arg2");
 
@@ -298,7 +298,7 @@ TEST_F (ClCommandLine, TwoPositionals) {
 }
 
 TEST_F (ClCommandLine, List) {
-    cl::list<std::string> opt{"opt"};
+    list<std::string> opt{"opt"};
 
     this->add ("progname", "--opt", "foo", "--opt", "bar");
 
@@ -330,10 +330,10 @@ namespace {
 } // namespace
 
 TEST_F (ClCommandLine, ListOfEnums) {
-    cl::list<enumeration> opt{
-        "opt", cl::values (cl::literal{"a", static_cast<int> (enumeration::a), "a description"},
-                           cl::literal{"b", static_cast<int> (enumeration::b), "b description"},
-                           cl::literal{"c", static_cast<int> (enumeration::c), "c description"})};
+    list<enumeration> opt{
+        "opt", values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                       literal{"b", static_cast<int> (enumeration::b), "b description"},
+                       literal{"c", static_cast<int> (enumeration::c), "c description"})};
     this->add ("progname", "--opt", "a", "--opt", "b");
 
     string_stream output;
@@ -348,7 +348,7 @@ TEST_F (ClCommandLine, ListOfEnums) {
 }
 
 TEST_F (ClCommandLine, ListSingleDash) {
-    cl::list<std::string> opt{"o"};
+    list<std::string> opt{"o"};
 
     this->add ("progname", "-oa", "-o", "b", "-oc");
 
@@ -364,7 +364,7 @@ TEST_F (ClCommandLine, ListSingleDash) {
 }
 
 TEST_F (ClCommandLine, ListPositional) {
-    cl::list<std::string> opt ("opt", cl::positional);
+    list<std::string> opt ("opt", positional);
 
     this->add ("progname", "foo", "bar");
 
@@ -380,7 +380,7 @@ TEST_F (ClCommandLine, ListPositional) {
 }
 
 TEST_F (ClCommandLine, ListCsvEnabled) {
-    cl::list<std::string> opt ("opt", cl::positional, cl::comma_separated);
+    list<std::string> opt ("opt", positional, comma_separated);
 
     this->add ("progname", "a,b", "c,d");
 
@@ -396,7 +396,7 @@ TEST_F (ClCommandLine, ListCsvEnabled) {
 }
 
 TEST_F (ClCommandLine, ListCsvDisabled) {
-    cl::list<std::string> opt ("opt", cl::positional);
+    list<std::string> opt{"opt", positional};
 
     this->add ("progname", "a,b");
 
@@ -413,7 +413,7 @@ TEST_F (ClCommandLine, ListCsvDisabled) {
 
 
 TEST_F (ClCommandLine, MissingRequired) {
-    cl::opt<std::string> opt ("opt", cl::required);
+    opt<std::string> opt{"opt", required};
 
     this->add ("progname");
 
@@ -431,7 +431,7 @@ TEST_F (ClCommandLine, MissingRequired) {
 }
 
 TEST_F (ClCommandLine, MissingValue) {
-    cl::opt<std::string> opt{"opt", cl::required};
+    opt<std::string> opt{"opt", required};
 
     this->add ("progname", "--opt");
 
@@ -447,7 +447,7 @@ TEST_F (ClCommandLine, MissingValue) {
 }
 
 TEST_F (ClCommandLine, UnwantedValue) {
-    cl::opt<bool> opt{"opt"};
+    opt<bool> opt{"opt"};
 
     this->add ("progname", "--opt=true");
 
@@ -460,8 +460,8 @@ TEST_F (ClCommandLine, UnwantedValue) {
 }
 
 TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
-    cl::opt<std::string> opt ("opt");
-    cl::list<std::string> positional ("names", cl::positional);
+    opt<std::string> opt{"opt"};
+    list<std::string> p{"names", positional};
 
     this->add ("progname", "--", "-opt", "foo");
 
@@ -475,12 +475,12 @@ TEST_F (ClCommandLine, DoubleDashSwitchToPositional) {
 
     EXPECT_EQ (opt.get_num_occurrences (), 0U);
     EXPECT_EQ (opt.get (), "");
-    EXPECT_THAT (positional, ::testing::ElementsAre ("-opt", "foo"));
+    EXPECT_THAT (p, ::testing::ElementsAre ("-opt", "foo"));
 }
 
 TEST_F (ClCommandLine, AliasBool) {
-    cl::opt<bool> opt ("opt");
-    cl::alias opt2 ("o", cl::aliasopt (opt));
+    opt<bool> opt{"opt"};
+    alias opt2{"o", aliasopt{opt}};
 
     this->add ("progname", "-o");
 

@@ -41,6 +41,8 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file category.hpp
+/// \brief Defines option_category; a means to group switches in command-line help text.
 
 #ifndef PSTORE_COMMAND_LINE_CATEGORY_HPP
 #define PSTORE_COMMAND_LINE_CATEGORY_HPP
@@ -49,19 +51,17 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
-            class option_category {
-            public:
-                explicit option_category (std::string const & title);
-                std::string const & title () const noexcept { return title_; }
+        class option_category {
+        public:
+            explicit option_category (std::string const & title);
+            std::string const & title () const noexcept { return title_; }
 
-            private:
-                std::string title_;
-            };
+        private:
+            std::string title_;
+        };
 
-        } // namespace cl
-    }     // namespace command_line
-} // namespace pstore
+    } // end namespace command_line
+} // end namespace pstore
 
 #endif // PSTORE_COMMAND_LINE_CATEGORY_HPP

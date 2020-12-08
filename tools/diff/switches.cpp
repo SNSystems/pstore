@@ -52,29 +52,27 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Path of the pstore repository to be read."),
-                                  cl::required);
+    opt<std::string> db_path (positional, usage ("repository"),
+                              desc ("Path of the pstore repository to be read."), required);
 
-    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>>
-        first_revision (cl::positional, cl::usage ("[1st-revision]"),
-                        cl::desc ("The first revision number (or 'HEAD')"), cl::optional);
+    opt<pstore::command_line::revision_opt, parser<std::string>>
+        first_revision (positional, usage ("[1st-revision]"),
+                        desc ("The first revision number (or 'HEAD')"), optional);
 
-    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>>
-        second_revision (cl::positional, cl::usage ("[2nd-revision]"),
-                         cl::desc ("The second revision number (or 'HEAD')"), cl::optional);
+    opt<pstore::command_line::revision_opt, parser<std::string>>
+        second_revision (positional, usage ("[2nd-revision]"),
+                         desc ("The second revision number (or 'HEAD')"), optional);
 
-    cl::option_category how_cat ("Options controlling how fields are emitted");
+    option_category how_cat ("Options controlling how fields are emitted");
 
-    cl::opt<bool> hex ("hex", cl::desc ("Emit number values in hexadecimal notation"),
-                       cl::cat (how_cat));
-    cl::alias hex2 ("x", cl::desc ("Alias for --hex"), cl::aliasopt (hex));
+    opt<bool> hex ("hex", desc ("Emit number values in hexadecimal notation"), cat (how_cat));
+    alias hex2 ("x", desc ("Alias for --hex"), aliasopt (hex));
 
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     using namespace pstore;
-    cl::parse_command_line_options (argc, argv, "pstore diff utility\n");
+    parse_command_line_options (argc, argv, "pstore diff utility\n");
 
     switches result;
     result.db_path = db_path.get ();

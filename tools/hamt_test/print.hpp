@@ -112,11 +112,11 @@ namespace details {
 // ~~~~~~~~~~~~~~~~
 template <class... Args>
 std::ostream & print_cout (Args const &... args) {
-    return details::cout.print (args...);
+    return ::details::cout.print (args...);
 }
 template <class... Args>
 std::ostream & print_cout_flush (Args const &... args) {
-    return details::cout.print_flush (args...);
+    return ::details::cout.print_flush (args...);
 }
 
 
@@ -124,11 +124,11 @@ std::ostream & print_cout_flush (Args const &... args) {
 // ~~~~~~~~~~~~~~~~
 template <class... Args>
 std::ostream & print_cerr (Args const &... args) {
-    return details::cerr.print (args...);
+    return ::details::cerr.print (args...);
 }
 template <class... Args>
 std::ostream & print_cerr_flush (Args const &... args) {
-    return details::cerr.print_flush (args...);
+    return ::details::cerr.print_flush (args...);
 }
 
 #endif // PRINT_HPP

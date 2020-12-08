@@ -48,7 +48,6 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
             constexpr std::size_t word_wrapper::default_width;
 
@@ -117,6 +116,5 @@ namespace pstore {
                 start_pos_ = end_pos;
             }
 
-        } // namespace cl
-    }     // namespace command_line
-} // namespace pstore
+    } // end namespace command_line
+} // end namespace pstore

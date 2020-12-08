@@ -59,18 +59,16 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>>
-        revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
-    cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
+    opt<pstore::command_line::revision_opt, parser<std::string>>
+        revision ("revision", desc ("The starting revision number (or 'HEAD')"));
+    alias revision2 ("r", desc ("Alias for --revision"), aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Database path"));
+    opt<std::string> db_path (positional, usage ("repository"), desc ("Database path"));
 
-#define X(a) cl::literal (#a, static_cast<int> (pstore::trailer::indices::a), #a),
-    cl::list<pstore::trailer::indices> index_names_opt (cl::positional, cl::optional,
-                                                        cl::one_or_more,
-                                                        cl::desc ("[index-name]..."),
-                                                        cl::values ({PSTORE_INDICES}));
+#define X(a) literal (#a, static_cast<int> (pstore::trailer::indices::a), #a),
+    list<pstore::trailer::indices> index_names_opt (positional, optional, one_or_more,
+                                                    desc ("[index-name]..."),
+                                                    values ({PSTORE_INDICES}));
 #undef X
 
     std::string usage_help () {
@@ -79,7 +77,7 @@ namespace {
                  "Dumps the internal structure of one of more pstore indexes. index-name may be "
                  "any of: ";
         pstore::gsl::czstring separator = "";
-        for (cl::literal const & lit : *index_names_opt.get_parser ()) {
+        for (literal const & lit : *index_names_opt.get_parser ()) {
             usage << separator << '\'' << lit.name << '\'';
             separator = ", ";
         }
@@ -89,7 +87,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, usage_help ());
+    parse_command_line_options (argc, argv, usage_help ());
 
     switches sw;
     sw.revision = static_cast<unsigned> (revision.get ());

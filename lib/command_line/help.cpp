@@ -84,7 +84,7 @@ namespace {
 
 #endif //_WIN32
 
-    auto option_string (pstore::command_line::cl::option const & op)
+    auto option_string (pstore::command_line::option const & op)
         -> std::pair<std::string, std::size_t> {
 
         std::string const & name = op.name ();
@@ -120,7 +120,6 @@ namespace {
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
             namespace details {
 
                 bool less_name::operator() (gsl::not_null<option const *> const x,
@@ -218,6 +217,5 @@ namespace pstore {
                 }
 
             } // end namespace details
-        }     // end namespace cl
     }         // end namespace command_line
 } // end namespace pstore

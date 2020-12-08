@@ -53,30 +53,28 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
-            // parser<digest_opt>
-            // ~~~~~~~~~~~~~~~~~~
-            template <>
-            class parser<dump::digest_opt> : public parser_base {
-            public:
-                ~parser () noexcept override = default;
-                maybe<dump::digest_opt> operator() (std::string const & v) const {
-                    maybe<index::digest> const d = uint128::from_hex_string (v);
-                    return d ? just (dump::digest_opt{*d}) : nothing<dump::digest_opt> ();
-                }
-            };
+        // parser<digest_opt>
+        // ~~~~~~~~~~~~~~~~~~
+        template <>
+        class parser<dump::digest_opt> : public parser_base {
+        public:
+            ~parser () noexcept override = default;
+            maybe<dump::digest_opt> operator() (std::string const & v) const {
+                maybe<index::digest> const d = uint128::from_hex_string (v);
+                return d ? just (dump::digest_opt{*d}) : nothing<dump::digest_opt> ();
+            }
+        };
 
-            // type_description<digest_opt>
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-            template <>
-            struct type_description<dump::digest_opt> {
-                static gsl::czstring value;
-            };
+        // type_description<digest_opt>
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        template <>
+        struct type_description<dump::digest_opt> {
+            static gsl::czstring value;
+        };
 
-            gsl::czstring type_description<dump::digest_opt>::value = "digest";
+        gsl::czstring type_description<dump::digest_opt>::value = "digest";
 
-        } // end namespace cl
     }     // end namespace command_line
 } // end namespace pstore
 
@@ -84,85 +82,80 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::option_category what_cat{"Options controlling what is dumped"};
+    option_category what_cat{"Options controlling what is dumped"};
 
-    cl::opt<bool> contents{"contents", cl::desc{"Emit a raw dump of the transaction contents"},
-                           cl::cat (what_cat)};
-    cl::alias contents2{"c", cl::desc{"Alias for --contents"}, cl::aliasopt{contents}};
+    opt<bool> contents{"contents", desc{"Emit a raw dump of the transaction contents"},
+                       cat (what_cat)};
+    alias contents2{"c", desc{"Alias for --contents"}, aliasopt{contents}};
 
-    cl::list<pstore::dump::digest_opt> fragment{
-        "fragment", cl::desc{"Dump the contents of a specific fragment"}, cl::comma_separated,
-        cl::cat (what_cat)};
-    cl::alias fragment2{"F", cl::aliasopt{fragment}};
-    cl::opt<bool> all_fragments{
-        "all-fragments", cl::desc{"Dump the contents of the fragments index"}, cl::cat (what_cat)};
+    list<pstore::dump::digest_opt> fragment{"fragment",
+                                            desc{"Dump the contents of a specific fragment"},
+                                            comma_separated, cat (what_cat)};
+    alias fragment2{"F", aliasopt{fragment}};
+    opt<bool> all_fragments{"all-fragments", desc{"Dump the contents of the fragments index"},
+                            cat (what_cat)};
 
-    cl::list<pstore::dump::digest_opt> compilation{
-        "compilation", cl::desc{"Dump the contents of a specific compilation"}, cl::comma_separated,
-        cl::cat (what_cat)};
-    cl::alias compilation2{"C", cl::aliasopt{compilation}};
+    list<pstore::dump::digest_opt> compilation{"compilation",
+                                               desc{"Dump the contents of a specific compilation"},
+                                               comma_separated, cat (what_cat)};
+    alias compilation2{"C", aliasopt{compilation}};
 
-    cl::opt<bool> all_compilations{"all-compilations",
-                                   cl::desc{"Dump the contents of the compilations index"},
-                                   cl::cat (what_cat)};
+    opt<bool> all_compilations{"all-compilations",
+                               desc{"Dump the contents of the compilations index"}, cat (what_cat)};
 
-    cl::list<pstore::dump::digest_opt> debug_line_header{
-        "debug-line-header", cl::desc{"Dump the contents of a specific debug line header"},
-        cl::comma_separated, cl::cat (what_cat)};
-    cl::opt<bool> all_debug_line_headers{
-        "all-debug-line-headers", cl::desc{"Dump the contents of the debug line headers index"},
-        cl::cat (what_cat)};
+    list<pstore::dump::digest_opt> debug_line_header{
+        "debug-line-header", desc{"Dump the contents of a specific debug line header"},
+        comma_separated, cat (what_cat)};
+    opt<bool> all_debug_line_headers{"all-debug-line-headers",
+                                     desc{"Dump the contents of the debug line headers index"},
+                                     cat (what_cat)};
 
 
-    cl::opt<bool> header{"header", cl::desc{"Dump the file header"}, cl::cat (what_cat)};
-    cl::alias header2{"h", cl::desc{"Alias for --header"}, cl::aliasopt{header}};
+    opt<bool> header{"header", desc{"Dump the file header"}, cat (what_cat)};
+    alias header2{"h", desc{"Alias for --header"}, aliasopt{header}};
 
-    cl::opt<bool> indices{"indices", cl::desc{"Dump the indices"}, cl::cat (what_cat)};
-    cl::alias indices2{"i", cl::desc{"Alias for --indices"}, cl::aliasopt{indices}};
+    opt<bool> indices{"indices", desc{"Dump the indices"}, cat (what_cat)};
+    alias indices2{"i", desc{"Alias for --indices"}, aliasopt{indices}};
 
-    cl::opt<bool> log_opt{"log", cl::desc{"List the generations"}, cl::cat (what_cat)};
-    cl::alias log2{"l", cl::desc{"Alias for --log"}, cl::aliasopt{log_opt}};
+    opt<bool> log_opt{"log", desc{"List the generations"}, cat (what_cat)};
+    alias log2{"l", desc{"Alias for --log"}, aliasopt{log_opt}};
 
-    cl::opt<bool> all{
+    opt<bool> all{
         "all",
-        cl::desc{"Show store-related output. Equivalent to: --contents --header --indices --log"},
-        cl::cat (what_cat)};
-    cl::alias all2{"a", cl::desc{"Alias for --all"}, cl::aliasopt{all}};
+        desc{"Show store-related output. Equivalent to: --contents --header --indices --log"},
+        cat (what_cat)};
+    alias all2{"a", desc{"Alias for --all"}, aliasopt{all}};
 
-    cl::opt<bool> shared_memory{"shared-memory", cl::desc{"Dumps the shared-memory block"},
-                                cl::cat (what_cat)};
-    cl::alias shared_memory2{"s", cl::desc{"Alias for --shared-memory"},
-                             cl::aliasopt{shared_memory}};
+    opt<bool> shared_memory{"shared-memory", desc{"Dumps the shared-memory block"}, cat (what_cat)};
+    alias shared_memory2{"s", desc{"Alias for --shared-memory"}, aliasopt{shared_memory}};
 
 
-    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>> revision{
-        "revision", cl::desc{"The starting revision number (or 'HEAD')"}};
-    cl::alias revision2{"r", cl::desc{"Alias for --revision"}, cl::aliasopt{revision}};
+    opt<pstore::command_line::revision_opt, parser<std::string>> revision{
+        "revision", desc{"The starting revision number (or 'HEAD')"}};
+    alias revision2{"r", desc{"Alias for --revision"}, aliasopt{revision}};
 
 
-    cl::option_category how_cat{"Options controlling how fields are emitted"};
+    option_category how_cat{"Options controlling how fields are emitted"};
 
-    cl::opt<bool> no_times{"no-times",
-                           cl::desc{"Times are displayed as a fixed value (for testing)"},
-                           cl::cat (how_cat)};
-    cl::opt<bool> hex{"hex", cl::desc{"Emit number values in hexadecimal notation"},
-                      cl::cat (how_cat)};
-    cl::alias hex2{"x", cl::desc{"Alias for --hex"}, cl::aliasopt{hex}};
+    opt<bool> no_times{"no-times", desc{"Times are displayed as a fixed value (for testing)"},
+                       cat (how_cat)};
+    opt<bool> hex{"hex", desc{"Emit number values in hexadecimal notation"}, cat (how_cat)};
+    alias hex2{"x", desc{"Alias for --hex"}, aliasopt{hex}};
 
-    cl::opt<bool> expanded_addresses{
-        "expanded-addresses", cl::desc{"Emit address values as an explicit segment/offset object"},
-        cl::cat (how_cat)};
+    opt<bool> expanded_addresses{"expanded-addresses",
+                                 desc{"Emit address values as an explicit segment/offset object"},
+                                 cat (how_cat)};
 
-    cl::opt<std::string> triple{
-        "triple", cl::desc{"The target triple to use for disassembly if one is not known"},
-        cl::init ("x86_64-pc-linux-gnu-repo"), cl::cat (how_cat)};
+    opt<std::string> triple{"triple",
+                            desc{"The target triple to use for disassembly if one is not known"},
+                            init ("x86_64-pc-linux-gnu-repo"), cat (how_cat)};
 
-    cl::list<std::string> paths{cl::positional, cl::usage{"filename..."}};
+    list<std::string> paths{positional, usage{"filename..."}};
 
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, "pstore dump utility\n");
+    parse_command_line_options (argc, argv, "pstore dump utility\n");
 
     switches result;
     result.show_contents = contents.get ();

@@ -45,11 +45,9 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
-            option_category::option_category (std::string const & title)
-                    : title_{title} {}
+        option_category::option_category (std::string const & title)
+                : title_{title} {}
 
-        } // namespace cl
     }     // namespace command_line
 } // namespace pstore

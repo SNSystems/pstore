@@ -68,10 +68,10 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<in_port_t> port ("port", cl::desc ("The port number on which the server will listen"),
-                             cl::init (in_port_t{8080}));
+    opt<in_port_t> port ("port", desc ("The port number on which the server will listen"),
+                         init (in_port_t{8080}));
 
-    cl::alias port2 ("p", cl::desc ("Alias for --port"), cl::aliasopt (port));
+    alias port2 ("p", desc ("Alias for --port"), aliasopt (port));
 
 } // end anonymous namespace
 
@@ -93,7 +93,7 @@ int main (int argc, char * argv[]) {
 #endif // _WIN32
 
     PSTORE_TRY {
-        cl::parse_command_line_options (
+        parse_command_line_options (
             argc, argv,
             "pstore httpd: A basic HTTP/WS server for testing the pstore-httpd library.\n");
 

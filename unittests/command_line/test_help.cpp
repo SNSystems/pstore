@@ -61,11 +61,11 @@ namespace {
     public:
         bool parse_command_line_options (string_stream & output, string_stream & errors) {
             std::array<std::string, 2> argv{{"program", "--help"}};
-            return cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                            "overview", output, errors);
+            return details::parse_command_line_options (std::begin (argv), std::end (argv),
+                                                        "overview", output, errors);
         }
 
-        ~Help () { cl::option::reset_container (); }
+        ~Help () { option::reset_container (); }
     };
 
 } // end anonymous namespace
@@ -81,15 +81,15 @@ TEST_F (Help, Empty) {
 
 TEST_F (Help, HasSwitches) {
     {
-        cl::opt<std::string> option1{"arg1", cl::positional};
-        cl::alias option2 ("alias1", cl::aliasopt{option1});
-        cl::option::options_container container{&option1, &option2};
-        EXPECT_FALSE (cl::details::has_switches (nullptr, container));
+        opt<std::string> option1{"arg1", positional};
+        alias option2 ("alias1", aliasopt{option1});
+        option::options_container container{&option1, &option2};
+        EXPECT_FALSE (details::has_switches (nullptr, container));
     }
     {
-        cl::opt<std::string> option3{"arg2"};
-        cl::option::options_container container{&option3};
-        EXPECT_TRUE (cl::details::has_switches (nullptr, container));
+        opt<std::string> option3{"arg2"};
+        option::options_container container{&option3};
+        EXPECT_TRUE (details::has_switches (nullptr, container));
     }
 }
 
@@ -98,11 +98,11 @@ TEST_F (Help, HasSwitches) {
 
 TEST_F (Help, BuildDefaultCategoryOnly) {
     {
-        cl::opt<std::string> option1{"arg1", cl::positional};
-        cl::opt<std::string> option2{"arg2"};
-        cl::option::options_container container{&option1, &option2};
-        cl::details::categories_collection const actual =
-            cl::details::build_categories (nullptr, container);
+        opt<std::string> option1{"arg1", positional};
+        opt<std::string> option2{"arg2"};
+        option::options_container container{&option1, &option2};
+        details::categories_collection const actual =
+            details::build_categories (nullptr, container);
 
         ASSERT_EQ (actual.size (), 1U);
         auto const & first = *actual.begin ();
@@ -112,14 +112,13 @@ TEST_F (Help, BuildDefaultCategoryOnly) {
 }
 
 TEST_F (Help, BuildTwoCategories) {
-    cl::opt<std::string> option1{"arg1", cl::positional};
-    cl::opt<std::string> option2{"arg2"};
-    cl::option_category category{"category"};
-    cl::opt<std::string> option3{"arg3", cl::cat (category)};
+    opt<std::string> option1{"arg1", positional};
+    opt<std::string> option2{"arg2"};
+    option_category category{"category"};
+    opt<std::string> option3{"arg3", cat (category)};
 
-    cl::option::options_container container{&option1, &option2, &option3};
-    cl::details::categories_collection const actual =
-        cl::details::build_categories (nullptr, container);
+    option::options_container container{&option1, &option2, &option3};
+    details::categories_collection const actual = details::build_categories (nullptr, container);
 
     ASSERT_EQ (actual.size (), 2U);
     auto it = std::begin (actual);
@@ -140,9 +139,9 @@ TEST_F (Help, SwitchStrings) {
                                        "\xE3\x82\xB7"  // KATAKANA LETTER SI
                                        "\xE3\x83\xA7"  // KATAKANA LETTER SMALL YO
                                        "\xE3\x83\xB3"; // KATAKANA LETTER N
-    cl::opt<std::string> option1{name};
-    cl::details::options_set options{&option1};
-    cl::details::switch_strings const actual = cl::details::get_switch_strings (options);
+    opt<std::string> option1{name};
+    details::options_set options{&option1};
+    details::switch_strings const actual = details::get_switch_strings (options);
 
     ASSERT_EQ (actual.size (), 1U);
     auto it = std::begin (actual);

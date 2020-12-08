@@ -55,32 +55,31 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::list<std::string>
-        add ("add", cl::desc ("Add key with corresponding string value. Specified as 'key,value'."
-                              " May be repeated to add several keys."));
-    cl::alias add2 ("a", cl::desc ("Alias for --add"), cl::aliasopt (add));
+    list<std::string>
+        add ("add", desc ("Add key with corresponding string value. Specified as 'key,value'."
+                          " May be repeated to add several keys."));
+    alias add2 ("a", desc ("Alias for --add"), aliasopt (add));
 
-    cl::list<std::string>
+    list<std::string>
         add_string ("add-string",
-                    cl::desc ("Add key to string set. May be repeated to add several strings."));
-    cl::alias add_string2 ("s", cl::desc ("Alias for --add-string"), cl::aliasopt (add_string));
+                    desc ("Add key to string set. May be repeated to add several strings."));
+    alias add_string2 ("s", desc ("Alias for --add-string"), aliasopt (add_string));
 
-    cl::list<std::string>
+    list<std::string>
         add_file ("add-file",
-                  cl::desc ("Add key with the named file's contents as the corresponding value."
-                            " Specified as 'key,filename'. May be repeated to add several files."));
-    cl::alias add_file2 ("f", cl::desc ("Alias for --add-file"), cl::aliasopt (add_file));
+                  desc ("Add key with the named file's contents as the corresponding value."
+                        " Specified as 'key,filename'. May be repeated to add several files."));
+    alias add_file2 ("f", desc ("Alias for --add-file"), aliasopt (add_file));
 
 
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Path of the pstore repository to be written"),
-                                  cl::required);
-    cl::list<std::string> files (cl::positional, cl::usage ("[filename]..."));
+    opt<std::string> db_path (positional, usage ("repository"),
+                              desc ("Path of the pstore repository to be written"), required);
+    list<std::string> files (positional, usage ("[filename]..."));
 
-    cl::opt<std::string> vacuum_mode ("compact", cl::optional,
-                                      cl::desc ("Set the compaction mode. Argument must one of: "
-                                                "'disabled', 'immediate', 'background'."));
-    cl::alias vacuum_mode2 ("c", cl::desc ("Alias for --compact"), cl::aliasopt (vacuum_mode));
+    opt<std::string> vacuum_mode ("compact", optional,
+                                  desc ("Set the compaction mode. Argument must one of: "
+                                        "'disabled', 'immediate', 'background'."));
+    alias vacuum_mode2 ("c", desc ("Alias for --compact"), aliasopt (vacuum_mode));
 
     pstore::database::vacuum_mode to_vacuum_mode (std::string const & opt) {
         if (opt == "disabled") {
@@ -97,7 +96,7 @@ namespace {
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, "pstore write utility\n");
+    parse_command_line_options (argc, argv, "pstore write utility\n");
 
     auto const make_value_pair = [] (std::string const & arg) { return to_value_pair (arg); };
 

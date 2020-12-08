@@ -59,15 +59,12 @@ namespace pstore {
             unsigned r_ = pstore::head_revision;
         };
 
-        namespace cl {
+        template <>
+        struct type_description<revision_opt> {
+            static gsl::czstring value;
+        };
 
-            template <>
-            struct type_description<revision_opt> {
-                static gsl::czstring value;
-            };
-
-        } // end namespace cl
-    }     // end namespace command_line
+    } // end namespace command_line
 } // end namespace pstore
 
 #endif // PSTORE_COMMAND_LINE_REVISION_OPT_HPP
