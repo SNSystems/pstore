@@ -89,24 +89,18 @@ case repo::linkage::a: return os << #a;
                    << object_indent << R"("triple":)" << names.index (compilation.triple ()) << ',';
                 show_string (os, db, compilation.triple (), comments);
                 os << '\n' << object_indent << R"("definitions":)";
-                emit_array (
-                    os, object_indent, compilation.begin (), compilation.end (),
-                    [&] (OStream & os1, indent const ind1, repo::definition const & d) {
-                        os1 << ind1 << "{\n";
-                        indent const object_indent1 = ind1.next ();
-                        os1 << object_indent1 << R"("digest":")" << d.digest.to_hex_string ()
-                            << "\",\n";
-                        os1 << object_indent1 << R"("name":)" << names.index (d.name) << ',';
-                        show_string (os1, db, d.name, comments);
-                        os1 << '\n';
-                        os1 << object_indent1 << R"("linkage":")" << d.linkage () << '"';
-                        if (d.visibility () != repo::visibility::default_vis) {
-                            os1 << ",\n"
-                                << object_indent1 << R"("visibility":")" << d.visibility ()
-                                << "\"\n";
-                        }
-                        os1 << '\n' << ind1 << '}';
-                    });
+                emit_array_with_name (os, object_indent, db, compilation.begin (),
+                                      compilation.end (), comments,
+                                      [&] (OStream & os1, repo::definition const & d) {
+                                          os1 << R"({"digest":")" << d.digest.to_hex_string ()
+                                              << R"(","name":)" << names.index (d.name)
+                                              << R"(,"linkage":")" << d.linkage () << '"';
+                                          if (d.visibility () != repo::visibility::default_vis) {
+                                              os1 << R"(,"visibility":")" << d.visibility () << '"';
+                                          }
+                                          os1 << '}';
+                                          return d.name;
+                                      });
                 os << '\n' << ind << '}';
             }
 
