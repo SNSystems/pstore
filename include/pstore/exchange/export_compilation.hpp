@@ -124,12 +124,14 @@ case repo::linkage::a: return os << #a;
                     return;
                 }
                 auto const * sep = "\n";
-                for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
+
+                auto const out_fn = [&] (address addr) {
                     auto const & kvp = compilations->load_leaf_node (db, addr);
                     os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
                     emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
                     sep = ",\n";
-                }
+                };
+                diff::diff (db, *compilations, generation - 1U, make_diff_out (&out_fn));
             }
 
         } // end namespace export_ns

@@ -70,16 +70,17 @@ namespace {
     //* / -_) '  \| |  _| / _` / -_) '_ \ || / _` | | | | ' \/ -_) *
     //* \___|_|_|_|_|\__| \__,_\___|_.__/\_,_\__, | |_|_|_||_\___| *
     //*                                      |___/                 *
-    void emit_debug_line (pstore::exchange::export_ns::ostream & os,
-                          pstore::exchange::export_ns::indent const ind,
-                          pstore::database const & db, unsigned const generation) {
+
+    void emit_debug_line_headers (pstore::exchange::export_ns::ostream & os,
+                                  pstore::exchange::export_ns::indent const ind,
+                                  pstore::database const & db, unsigned const generation) {
         auto const debug_line_headers =
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
             auto const * sep = "\n";
             assert (generation > 0);
-            for (pstore::address const & addr :
-                 pstore::diff::diff (db, *debug_line_headers, generation - 1U)) {
+
+            auto const out_fn = [&] (pstore::address addr) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
                 os << sep << ind << '"' << kvp.first.to_hex_string () << R"(":")";
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
@@ -89,7 +90,10 @@ namespace {
                 os << '"';
 
                 sep = ",\n";
-            }
+            };
+
+            pstore::diff::diff (db, *debug_line_headers, generation - 1U,
+                                pstore::exchange::export_ns::make_diff_out (&out_fn));
         }
     }
 
@@ -123,7 +127,8 @@ namespace pstore {
                                 os1 << object_indent << R"("names":)";
                                 emit_names (os1, object_indent, db, generation, &string_table);
                                 os1 << ",\n" << object_indent << R"("debugline":{)";
-                                emit_debug_line (os1, object_indent.next (), db, generation);
+                                emit_debug_line_headers (os1, object_indent.next (), db,
+                                                         generation);
                                 os1 << '\n' << object_indent << "},\n";
                                 os1 << object_indent << R"("fragments":{)";
                                 emit_fragments (os1, object_indent.next (), db, generation,

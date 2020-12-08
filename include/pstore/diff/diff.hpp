@@ -183,23 +183,6 @@ namespace pstore {
             return t (out);
         }
 
-        using result_type = chunked_vector<address>;
-
-        /// Produces a collection of address which are those objects that were added to an \p index
-        /// between the current revision and the revision number given by \p old.
-        ///
-        /// \param db  The owning database instance.
-        /// \param index  The index to be traversed.
-        /// \param old  The revision number against which the index is to be compared.
-        /// \result A collection of address which were added to the index since the given old
-        ///    revision.
-        template <typename Index>
-        result_type diff (database const & db, Index const & index, revision_number const old) {
-            result_type result;
-            diff (db, index, old, std::back_inserter (result));
-            return result;
-        }
-
     } // end namespace diff
 } // end namespace pstore
 

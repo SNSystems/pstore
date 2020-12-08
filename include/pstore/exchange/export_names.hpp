@@ -93,7 +93,8 @@ namespace pstore {
 
                 auto names_index = index::get_index<trailer::indices::name> (db);
                 assert (generation > 0);
-                auto const container = diff::diff (db, *names_index, generation - 1U);
+                chunked_vector<address> container;
+                diff::diff (db, *names_index, generation - 1U, std::back_inserter (container));
                 emit_array (os, ind, std::begin (container), std::end (container),
                             [&names_index, &string_table, &db] (OStream & os1, indent ind1,
                                                                 address const addr) {

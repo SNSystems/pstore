@@ -103,51 +103,46 @@ namespace pstore {
 
             /// An OutputIterator which converts the address of objects in a known index into their
             /// value_ptr representation for display to the user.
-            template <typename Index, typename DestOutputIterator>
-            class value_output_iterator {
+            template <typename Index>
+            class diff_out {
             public:
                 using iterator_category = std::output_iterator_tag;
-
-                using container_type = typename DestOutputIterator::container_type;
                 using value_type = void;
                 using difference_type = void;
-                using reference = void;
                 using pointer = void;
+                using reference = void;
 
-                value_output_iterator (database const * db, Index const & index,
-                                       DestOutputIterator out)
-                        : db_{db}
-                        , index_{index}
-                        , out_{out} {}
-                value_output_iterator & operator= (pstore::address addr) {
-                    *out_ = dump::make_value (get_key (index_->load_leaf_node (*db_, addr)));
+                struct params {
+                    params (gsl::not_null<database const *> const db,
+                            gsl::not_null<Index const *> const index,
+                            gsl::not_null<dump::array::container *> const members) noexcept
+                            : db_{db}
+                            , index_{index}
+                            , members_{members} {}
+
+                    gsl::not_null<database const *> const db_;
+                    gsl::not_null<Index const *> const index_;
+                    gsl::not_null<dump::array::container *> const members_;
+                };
+
+                explicit diff_out (gsl::not_null<params *> const p) noexcept
+                        : p_{p} {}
+
+                diff_out & operator= (pstore::address addr) {
+                    p_->members_->emplace_back (
+                        dump::make_value (get_key (p_->index_->load_leaf_node (*p_->db_, addr))));
                     return *this;
                 }
-                value_output_iterator & operator* () { return *this; }
-                value_output_iterator & operator++ () {
-                    ++out_;
-                    return *this;
-                }
-                value_output_iterator operator++ (int) {
-                    value_output_iterator old = *this;
-                    ++(*this);
-                    return old;
-                }
+
+                diff_out & operator* () noexcept { return *this; }
+                diff_out & operator++ () noexcept { return *this; }
+                diff_out operator++ (int) noexcept { return *this; }
 
             private:
-                database const * db_;
-                Index index_;
-                DestOutputIterator out_;
+                gsl::not_null<params *> p_;
             };
 
-            template <typename Index, typename DestOutputIterator>
-            value_output_iterator<Index, DestOutputIterator>
-            make_value_output_iterator (database const * db, Index const & index,
-                                        DestOutputIterator out) {
-                return {db, index, out};
-            }
-
-        } // namespace details
+        } // end namespace details
 
         /// Make a value pointer which contains the keys that are different between two database
         /// revisions.
@@ -162,8 +157,8 @@ namespace pstore {
                                    GetIndexFunction get_index) {
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
-            diff (db, *index, old_revision,
-                  details::make_value_output_iterator (&db, index, std::back_inserter (members)));
+            typename details::diff_out<Index>::params params{&db, index.get (), &members};
+            diff (db, *index, old_revision, details::diff_out<Index>{&params});
             return dump::make_value (members);
         }
 
