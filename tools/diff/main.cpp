@@ -75,11 +75,11 @@ int main (int argc, char * argv[]) {
         }
 
         pstore::database db (opt.db_path, pstore::database::access_mode::read_only);
-        std::tie (opt.first_revision, opt.second_revision) = pstore::diff::update_revisions (
+        std::tie (opt.first_revision, opt.second_revision) = pstore::diff_dump::update_revisions (
             std::make_pair (opt.first_revision, opt.second_revision), db.get_current_revision ());
 
         pstore::dump::object::container file;
-        file.emplace_back ("indices", pstore::diff::make_indices_diff (db, opt.first_revision,
+        file.emplace_back ("indices", pstore::diff_dump::make_indices_diff (db, opt.first_revision,
                                                                        *opt.second_revision));
 
         auto output = pstore::dump::make_value (file);

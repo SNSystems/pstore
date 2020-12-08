@@ -41,8 +41,10 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/diff/revision.hpp"
+#include "pstore/diff_dump/revision.hpp"
+
 #include "pstore/support/head_revision.hpp"
+
 #include "gtest/gtest.h"
 
 using namespace pstore;
@@ -51,89 +53,87 @@ namespace {
 
     class RevisionsFixture : public ::testing::Test {
     public:
-        diff::revisions_type expected_revisions (diff::revision_number r1,
-                                                 diff::revision_number r2) const {
+        diff_dump::revisions_type expected_revisions (revision_number r1,
+                                                 revision_number r2) const {
             return std::make_pair (r1, just (r2));
         }
-        static constexpr diff::revision_number db_head_revision = 8;
+        static constexpr revision_number db_head_revision = 8U;
     };
 
-    constexpr diff::revision_number RevisionsFixture::db_head_revision;
+    constexpr revision_number RevisionsFixture::db_head_revision;
 
 } // namespace
 
 TEST_F (RevisionsFixture, InitNothing) {
-
-    diff::revisions_type const expected =
+    diff_dump::revisions_type const expected =
         this->expected_revisions (db_head_revision, db_head_revision - 1);
-    diff::revisions_type const actual = diff::update_revisions (
-        std::make_pair (head_revision, nothing<diff::revision_number> ()), db_head_revision);
+    diff_dump::revisions_type const actual = diff_dump::update_revisions (
+        std::make_pair (head_revision, nothing<revision_number> ()), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitOneOnly) {
-    constexpr auto r1 = diff::revision_number{5};
+    constexpr auto r1 = revision_number{5};
 
-    diff::revisions_type const expected = this->expected_revisions (r1, r1 - 1);
-    diff::revisions_type const actual = diff::update_revisions (
-        std::make_pair (r1, nothing<diff::revision_number> ()), db_head_revision);
+    diff_dump::revisions_type const expected = this->expected_revisions (r1, r1 - 1);
+    diff_dump::revisions_type const actual = diff_dump::update_revisions (
+        std::make_pair (r1, nothing<revision_number> ()), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitZeroOnly) {
-    constexpr auto r1 = diff::revision_number{0};
+    constexpr auto r1 = revision_number{0};
 
-    diff::revisions_type const expected = this->expected_revisions (r1, r1);
-    diff::revisions_type const actual = diff::update_revisions (
-        std::make_pair (r1, nothing<diff::revision_number> ()), db_head_revision);
+    diff_dump::revisions_type const expected = this->expected_revisions (r1, r1);
+    diff_dump::revisions_type const actual = diff_dump::update_revisions (
+        std::make_pair (r1, nothing<revision_number> ()), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
-
 TEST_F (RevisionsFixture, InitOne5Two3) {
-    constexpr auto r1 = diff::revision_number{5};
-    auto r2 = just (diff::revision_number{3});
+    constexpr auto r1 = revision_number{5};
+    auto r2 = just (revision_number{3});
 
-    diff::revisions_type const expected = this->expected_revisions (r1, r2.value ());
-    diff::revisions_type const actual =
-        diff::update_revisions (std::make_pair (r1, r2), db_head_revision);
+    diff_dump::revisions_type const expected = this->expected_revisions (r1, r2.value ());
+    diff_dump::revisions_type const actual =
+        diff_dump::update_revisions (std::make_pair (r1, r2), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitOne4Two7) {
-    constexpr auto r1 = diff::revision_number{4};
-    auto const r2 = just (diff::revision_number{7});
+    constexpr auto r1 = revision_number{4};
+    auto const r2 = just (revision_number{7});
 
-    diff::revisions_type const expected = this->expected_revisions (r2.value (), r1);
-    diff::revisions_type const actual =
-        diff::update_revisions (std::make_pair (r1, r2), db_head_revision);
+    diff_dump::revisions_type const expected = this->expected_revisions (r2.value (), r1);
+    diff_dump::revisions_type const actual =
+        diff_dump::update_revisions (std::make_pair (r1, r2), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitOne4Two4) {
-    constexpr auto r1 = diff::revision_number{4};
-    auto r2 = just (diff::revision_number{4});
+    constexpr auto r1 = revision_number{4};
+    auto r2 = just (revision_number{4});
 
-    diff::revisions_type const expected = this->expected_revisions (r1, r2.value ());
-    diff::revisions_type const actual =
-        diff::update_revisions (std::make_pair (r1, r2), db_head_revision);
+    diff_dump::revisions_type const expected = this->expected_revisions (r1, r2.value ());
+    diff_dump::revisions_type const actual =
+        diff_dump::update_revisions (std::make_pair (r1, r2), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }
 
 TEST_F (RevisionsFixture, InitOneHeadTwoHead) {
-    constexpr auto r1 = diff::revision_number{head_revision};
-    auto r2 = just (diff::revision_number{head_revision});
+    constexpr auto r1 = revision_number{head_revision};
+    auto r2 = just (revision_number{head_revision});
 
-    diff::revisions_type const expected =
+    diff_dump::revisions_type const expected =
         this->expected_revisions (db_head_revision, db_head_revision);
-    diff::revisions_type const actual =
-        diff::update_revisions (std::make_pair (r1, r2), db_head_revision);
+    diff_dump::revisions_type const actual =
+        diff_dump::update_revisions (std::make_pair (r1, r2), db_head_revision);
 
     EXPECT_EQ (expected, actual);
 }

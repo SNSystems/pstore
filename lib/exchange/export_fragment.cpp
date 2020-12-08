@@ -62,7 +62,7 @@ namespace pstore {
                         fragment_sep = ",\n";
                     };
 
-                    diff::diff (db, *fragments, generation - 1U, make_diff_out (&out_fn));
+                    diff (db, *fragments, generation - 1U, make_diff_out (&out_fn));
                 }
             }
 

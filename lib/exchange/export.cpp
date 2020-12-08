@@ -92,7 +92,7 @@ namespace {
                 sep = ",\n";
             };
 
-            pstore::diff::diff (db, *debug_line_headers, generation - 1U,
+            pstore::diff (db, *debug_line_headers, generation - 1U,
                                 pstore::exchange::export_ns::make_diff_out (&out_fn));
         }
     }

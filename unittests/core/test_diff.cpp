@@ -4,7 +4,7 @@
 //* | (_| | |  _|  _| *
 //*  \__,_|_|_| |_|   *
 //*                   *
-//===- unittests/diff/test_diff.cpp ---------------------------------------===//
+//===- unittests/core/test_diff.cpp ---------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,7 +41,7 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/diff/diff.hpp"
+#include "pstore/core/diff.hpp"
 
 #include <functional>
 #include <memory>
@@ -149,7 +149,7 @@ TEST_F (Diff, BuildWriteIndexValues) {
         ASSERT_NE (index, nullptr);
 
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *index, 0U, std::back_inserter (actual));
+        pstore::diff (*db_, *index, 0U, std::back_inserter (actual));
         auto const actual_values =
             addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, ::testing::UnorderedElementsAre (v1, v2));
@@ -161,7 +161,7 @@ TEST_F (Diff, BuildWriteIndexValues) {
         ASSERT_NE (index, nullptr);
 
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *index, 1U, std::back_inserter (actual));
+        pstore::diff (*db_, *index, 1U, std::back_inserter (actual));
         auto const actual_values =
             addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, ::testing::UnorderedElementsAre (v2));
@@ -170,7 +170,7 @@ TEST_F (Diff, BuildWriteIndexValues) {
     {
         // Check the diff between r2 and r2.
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_),
+        pstore::diff (*db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_),
                             2U, std::back_inserter (actual));
         EXPECT_EQ (actual.size (), 0U);
     }
@@ -200,7 +200,7 @@ TEST_F (Diff, UncomittedTransaction) {
         ASSERT_NE (index, nullptr);
 
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *index, 0U, std::back_inserter (actual));
+        pstore::diff (*db_, *index, 0U, std::back_inserter (actual));
         auto const actual_values =
             addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, UnorderedElementsAre (v1, v2));
@@ -212,7 +212,7 @@ TEST_F (Diff, UncomittedTransaction) {
         ASSERT_NE (index, nullptr);
 
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *index, 1U, std::back_inserter (actual));
+        pstore::diff (*db_, *index, 1U, std::back_inserter (actual));
         auto const actual_values =
             addresses_to_values (*db_, *index, std::begin (actual), std::end (actual));
         EXPECT_THAT (actual_values, UnorderedElementsAre (v2));
@@ -222,7 +222,7 @@ TEST_F (Diff, UncomittedTransaction) {
         // Note that get_current_revision() still reports 1 even though a transaction is open.
         EXPECT_EQ (db_->get_current_revision (), 1U);
         std::vector<pstore::address> actual;
-        pstore::diff::diff (*db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_),
+        pstore::diff (*db_, *pstore::index::get_index<pstore::trailer::indices::write> (*db_),
                             2U, std::back_inserter (actual));
         EXPECT_EQ (actual.size (), 0U);
     }

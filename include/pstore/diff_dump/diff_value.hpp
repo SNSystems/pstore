@@ -4,7 +4,7 @@
 //* | (_| | |  _|  _|  \ V / (_| | | |_| |  __/ *
 //*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
 //*                                             *
-//===- include/pstore/diff/diff_value.hpp ---------------------------------===//
+//===- include/pstore/diff_dump/diff_value.hpp ----------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,15 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_DIFF_VALUE_HPP
-#define PSTORE_DIFF_VALUE_HPP
+#ifndef PSTORE_DIFF_DUMP_DIFF_VALUE_HPP
+#define PSTORE_DIFF_DUMP_DIFF_VALUE_HPP
 
-#include "pstore/diff/diff.hpp"
-#include "pstore/diff/revision.hpp"
+#include "pstore/core/diff.hpp"
+#include "pstore/diff_dump/revision.hpp"
 #include "pstore/dump/db_value.hpp"
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
         /// Get the key from a given element of a container such as pstore::hamt_set.
         template <typename KeyType>
@@ -74,11 +74,11 @@ namespace pstore {
             return kvp.second;
         }
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
         namespace details {
 
@@ -153,7 +153,7 @@ namespace pstore {
         ///                  database. It should have the signature: Index * (database &, bool).
         /// \returns  A value pointer which contains all different keys between two revisions.
         template <typename Index, typename GetIndexFunction>
-        dump::value_ptr make_diff (database & db, diff::revision_number const old_revision,
+        dump::value_ptr make_diff (database & db, revision_number const old_revision,
                                    GetIndexFunction get_index) {
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
@@ -200,10 +200,10 @@ namespace pstore {
         /// \param new_revision  A new database revision number.
         /// \param old_revision  An old database revision number.
         /// \returns  A value pointer which contains all different indices keys.
-        dump::value_ptr make_indices_diff (database & db, diff::revision_number const new_revision,
-                                           diff::revision_number const old_revision);
+        dump::value_ptr make_indices_diff (database & db, revision_number const new_revision,
+                                           revision_number const old_revision);
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore
 
-#endif // PSTORE_DIFF_VALUE_HPP
+#endif // PSTORE_DIFF_DUMP_DIFF_VALUE_HPP

@@ -131,7 +131,7 @@ case repo::linkage::a: return os << #a;
                     emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
                     sep = ",\n";
                 };
-                diff::diff (db, *compilations, generation - 1U, make_diff_out (&out_fn));
+                diff (db, *compilations, generation - 1U, make_diff_out (&out_fn));
             }
 
         } // end namespace export_ns
