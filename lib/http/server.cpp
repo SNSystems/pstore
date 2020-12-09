@@ -165,7 +165,7 @@ namespace {
 
 
     // Here we bridge from the std::error_code world to HTTP status codes.
-    void report_error (std::error_code error, pstore::httpd::request_info const & request,
+    void report_error (std::error_code const error, pstore::httpd::request_info const & request,
                        socket_descriptor & socket) {
         static constexpr auto crlf = pstore::httpd::crlf;
         static constexpr auto sender = pstore::httpd::net::network_sender;

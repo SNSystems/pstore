@@ -61,7 +61,7 @@ namespace pstore {
                 /// \param index  The index to be traversed.
                 /// \param threshold  Addresses less than the threshold value are "old".
                 constexpr traverser (database const & db, Index const & index,
-                                     address threshold) noexcept
+                                     address const threshold) noexcept
                         : db_{db}
                         , index_{index}
                         , threshold_{threshold} {}
@@ -119,7 +119,7 @@ namespace pstore {
             // ~~~~~~~~~~
             template <typename Index>
             template <typename OutputIterator>
-            OutputIterator traverser<Index>::visit_node (index_pointer node, unsigned shifts,
+            OutputIterator traverser<Index>::visit_node (index_pointer node, unsigned const shifts,
                                                          OutputIterator out) const {
                 if (node.is_leaf ()) {
                     assert (node.is_address ());

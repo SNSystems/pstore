@@ -91,7 +91,7 @@ namespace pstore {
             void emit_names (OStream & os, indent ind, class database const & db,
                              unsigned const generation, name_mapping * const string_table) {
 
-                auto names_index = index::get_index<trailer::indices::name> (db);
+                auto const names_index = index::get_index<trailer::indices::name> (db);
                 assert (generation > 0);
                 auto const container = diff::diff (db, *names_index, generation - 1U);
                 emit_array (os, ind, std::begin (container), std::end (container),

@@ -240,7 +240,7 @@ namespace pstore {
                 // If we have bytes in the buffer, copy as many as we can.
 
                 this->check_invariants ();
-                auto to_copy = std::min (std::distance (pos_, end_), available.size ());
+                auto const to_copy = std::min (std::distance (pos_, end_), available.size ());
                 std::copy_n (pos_, to_copy, available.data ());
                 pos_ += to_copy;
                 available = available.subspan (to_copy);

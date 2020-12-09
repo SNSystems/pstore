@@ -149,7 +149,7 @@ namespace pstore {
             ///
             /// \param message  The message to be published.
             void publish (std::string const & message);
-            void publish (char const * message);
+            void publish (gsl::czstring message);
 
             /// \brief Broadcasts a message to all subscribers.
             ///
@@ -255,7 +255,7 @@ namespace pstore {
             this->publish ([&message] () { return message; });
         }
         template <typename ConditionVariable>
-        void channel<ConditionVariable>::publish (char const * message) {
+        void channel<ConditionVariable>::publish (gsl::czstring message) {
             this->publish ([&message] () { return std::string{message}; });
         }
 

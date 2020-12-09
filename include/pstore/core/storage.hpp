@@ -170,19 +170,20 @@ namespace pstore {
         /// Returns the base address of a segment given its index.
         /// \param segment The segment number whose base address it to be returned. The segment
         ///                number must lie within the memory mapped regions.
-        std::shared_ptr<void const> segment_base (address::segment_type segment) const noexcept {
+        std::shared_ptr<void const>
+        segment_base (address::segment_type const segment) const noexcept {
             return segment_base_impl (*this, segment);
         }
-        std::shared_ptr<void> const & segment_base (address::segment_type segment) noexcept {
+        std::shared_ptr<void> const & segment_base (address::segment_type const segment) noexcept {
             return segment_base_impl (*this, segment);
         }
         ///@}
 
         ///@{
-        std::shared_ptr<void const> address_to_pointer (address addr) const noexcept {
+        std::shared_ptr<void const> address_to_pointer (address const addr) const noexcept {
             return address_to_pointer_impl (*this, addr);
         }
-        std::shared_ptr<void> address_to_pointer (address addr) noexcept {
+        std::shared_ptr<void> address_to_pointer (address const addr) noexcept {
             return address_to_pointer_impl (*this, addr);
         }
 

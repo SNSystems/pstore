@@ -376,7 +376,7 @@ namespace pstore {
             }
         }
 #else
-        inline void parse_command_line_options (int const argc, char * const argv[],
+        inline void parse_command_line_options (int const argc, gsl::zstring const argv[],
                                                 std::string const & overview) {
             if (!details::parse_command_line_options (argv, argv + argc, overview, out_stream,
                                                       error_stream)) {

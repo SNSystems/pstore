@@ -57,8 +57,8 @@ namespace pstore {
             using result_type = void;
 
             std::error_code string_value (std::string const &) const noexcept { return {}; }
-            std::error_code int64_value (std::int64_t) const noexcept { return {}; }
-            std::error_code uint64_value (std::uint64_t) const noexcept { return {}; }
+            std::error_code int64_value (std::int64_t const) const noexcept { return {}; }
+            std::error_code uint64_value (std::uint64_t const) const noexcept { return {}; }
             std::error_code double_value (double const) const noexcept { return {}; }
             std::error_code boolean_value (bool const) const noexcept { return {}; }
             std::error_code null_value () const noexcept { return {}; }

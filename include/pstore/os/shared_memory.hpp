@@ -149,7 +149,7 @@ namespace pstore {
         public:
             /// Constructs the mutex. The mutex is in unlocked state after the constructor
             /// completes.
-            explicit spin_lock (::pstore::gsl::not_null<std::atomic_flag *> lock)
+            explicit spin_lock (gsl::not_null<std::atomic_flag *> const lock)
                     : lock_ (lock) {}
 
             // No copying or assignment.
