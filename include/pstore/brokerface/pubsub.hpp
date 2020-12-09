@@ -220,7 +220,7 @@ namespace pstore {
         template <typename ConditionVariable>
         maybe<std::string> subscriber<ConditionVariable>::pop () {
             std::unique_lock<std::mutex> const lock{this->owner ().mut_};
-            if (queue_.size () == 0) {
+            if (queue_.empty ()) {
                 return {};
             }
             std::string const message = std::move (queue_.front ());
