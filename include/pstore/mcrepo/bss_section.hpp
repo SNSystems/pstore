@@ -140,7 +140,7 @@ namespace pstore {
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher (bss_section_creation_dispatcher && ) noexcept =  delete;
 
-            ~bss_section_creation_dispatcher () noexcept = default;
+            ~bss_section_creation_dispatcher () noexcept override = default;
 
             bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher && ) noexcept = delete;
