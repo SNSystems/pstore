@@ -132,7 +132,8 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~~~~
         void sha1::process_message_block () noexcept {
             // Constants defined in SHA-1.
-            static constexpr std::uint32_t k[] = {0x5A827999, 0x6ED9EBA1, 0x8F1BBCDC, 0xCA62C1D6};
+            static constexpr std::uint32_t k[] = {UINT32_C (0x5A827999), UINT32_C (0x6ED9EBA1),
+                                                  UINT32_C (0x8F1BBCDC), UINT32_C (0xCA62C1D6)};
             std::array<std::uint32_t, 80> w; // Word sequence.
 
             for (auto t = 0U; t < 16U; ++t) {

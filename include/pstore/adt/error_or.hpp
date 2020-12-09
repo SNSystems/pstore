@@ -409,14 +409,14 @@ namespace pstore {
         struct applier {
             template <typename Function, typename Tuple, typename... Args>
             static auto apply (Function && f, Tuple && t, Args &&... a)
-                -> decltype (applier<N - 1>::apply (std::forward<Function> (f),
-                                                    std::forward<Tuple> (t),
-                                                    std::get<N - 1> (std::forward<Tuple> (t)),
-                                                    std::forward<Args> (a)...)) {
+                -> decltype (applier<N - 1U>::apply (std::forward<Function> (f),
+                                                     std::forward<Tuple> (t),
+                                                     std::get<N - 1U> (std::forward<Tuple> (t)),
+                                                     std::forward<Args> (a)...)) {
 
-                return applier<N - 1>::apply (std::forward<Function> (f), std::forward<Tuple> (t),
-                                              std::get<N - 1> (std::forward<Tuple> (t)),
-                                              std::forward<Args> (a)...);
+                return applier<N - 1U>::apply (std::forward<Function> (f), std::forward<Tuple> (t),
+                                               std::get<N - 1U> (std::forward<Tuple> (t)),
+                                               std::forward<Args> (a)...);
             }
         };
 
