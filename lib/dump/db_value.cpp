@@ -132,7 +132,11 @@ namespace pstore {
         }
 
         value_ptr make_value (uuid const & u) { return make_value (u.str ()); }
-        value_ptr make_value (index::digest const & d) { return make_value (d.to_hex_string ()); }
+        value_ptr make_value (index::digest const & d) {
+            std::string str;
+            d.to_hex (std::back_inserter (str));
+            return make_value (str);
+        }
         value_ptr make_value (indirect_string const & str) {
             pstore::shared_sstring_view owner;
             return make_value (str.as_db_string_view (&owner));

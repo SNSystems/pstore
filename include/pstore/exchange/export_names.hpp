@@ -65,6 +65,8 @@ namespace pstore {
             /// a string by index rather than having to emit the string each time.
             class name_mapping {
             public:
+                explicit name_mapping (database const & db);
+
                 /// Record the address of a string at \p addr and assign it the next index in in the
                 /// exported names array.
                 ///

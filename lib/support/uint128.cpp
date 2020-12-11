@@ -49,13 +49,6 @@ using pstore::nothing;
 
 namespace {
 
-    constexpr auto expected_length = std::size_t{32};
-
-    constexpr char digit_to_hex (unsigned const v) noexcept {
-        assert (v < 0x10);
-        return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
-    }
-
     maybe<unsigned> hex_to_digit (char const digit) noexcept {
         if (digit >= 'a' && digit <= 'f') {
             return just (static_cast<unsigned> (digit) - ('a' - 10));
@@ -86,39 +79,6 @@ namespace {
 
 namespace pstore {
 
-#ifdef PSTORE_HAVE_UINT128_T
-
-    std::string uint128::to_hex_string () const {
-        std::string str;
-        str.reserve (expected_length);
-
-        for (auto shift = 4U; shift <= 128U; shift += 4U) {
-            str += digit_to_hex ((v_ >> (128U - shift)) & 0x0FU);
-        }
-
-        assert (str.length () == expected_length);
-        return str;
-    }
-
-#else
-
-    std::string uint128::to_hex_string () const {
-        std::string str;
-        str.reserve (expected_length);
-
-        for (auto shift = 4U; shift <= 64; shift += 4U) {
-            str += digit_to_hex ((high_ >> (64U - shift)) & 0x0FU);
-        }
-        for (auto shift = 4U; shift <= 64; shift += 4U) {
-            str += digit_to_hex ((low_ >> (64U - shift)) & 0x0FU);
-        }
-
-        assert (str.length () == expected_length);
-        return str;
-    }
-
-#endif // PSTORE_HAVE_UINT128_T
-
     maybe<uint128> uint128::from_hex_string (std::string const & str) {
         if (str.length () != 32) {
             return nothing<uint128> ();
@@ -130,4 +90,4 @@ namespace pstore {
         };
     }
 
-} // namespace pstore
+} // end namespace pstore

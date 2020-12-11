@@ -52,6 +52,13 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            // ctor
+            // ~~~~
+            name_mapping::name_mapping (database const & db) {
+                auto const index = index::get_index<trailer::indices::name> (db);
+                names_.reserve (index->size ());
+            }
+
             // add
             // ~~~
             void name_mapping::add (address const addr) {

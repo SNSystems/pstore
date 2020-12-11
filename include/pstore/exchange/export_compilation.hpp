@@ -75,8 +75,6 @@ case repo::linkage::a: return os << #a;
                 }
                 return os << "unknown";
             }
-
-
             template <typename OStream>
             void emit_compilation (OStream & os, indent const ind, database const & db,
                                    repo::compilation const & compilation,
@@ -92,8 +90,9 @@ case repo::linkage::a: return os << #a;
                 emit_array_with_name (os, object_indent, db, compilation.begin (),
                                       compilation.end (), comments,
                                       [&] (OStream & os1, repo::definition const & d) {
-                                          os1 << R"({"digest":")" << d.digest.to_hex_string ()
-                                              << R"(","name":)" << names.index (d.name)
+                                          os1 << R"({"digest":)";
+                                          emit_digest (os1, d.digest);
+                                          os1 << R"(,"name":)" << names.index (d.name)
                                               << R"(,"linkage":")" << d.linkage () << '"';
                                           if (d.visibility () != repo::visibility::default_vis) {
                                               os1 << R"(,"visibility":")" << d.visibility () << '"';
@@ -120,7 +119,9 @@ case repo::linkage::a: return os << #a;
                 auto const * sep = "\n";
                 for (address const & addr : diff::diff (db, *compilations, generation - 1U)) {
                     auto const & kvp = compilations->load_leaf_node (db, addr);
-                    os << sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
+                    os << sep << ind;
+                    emit_digest (os, kvp.first);
+                    os << ':';
                     emit_compilation (os, ind, db, *db.getro (kvp.second), names, comments);
                     sep = ",\n";
                 }

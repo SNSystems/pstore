@@ -79,12 +79,24 @@ namespace pstore {
 
             namespace details {
 
-                template <typename OSStream, typename T>
-                void write_span (OSStream & os, gsl::span<T> const & sp) {
+                template <typename OSStream, typename ElementType, std::ptrdiff_t Extent>
+                void write_span (OSStream & os, gsl::span<ElementType, Extent> const & sp) {
                     os.write (sp.data (), sp.length ());
                 }
 
             } // end namespace details
+
+            template <typename OStream>
+            void emit_digest (OStream & os, uint128 const d) {
+                std::array<char, uint128::hex_string_length> hex;
+                auto const out = d.to_hex (hex.begin ());
+                (void) out;
+                assert (out == hex.end ());
+                os << '"';
+                details::write_span (os, gsl::make_span (hex));
+                os << '"';
+            }
+
 
             template <typename OStream, typename Iterator>
             void emit_string (OStream & os, Iterator first, Iterator last) {
