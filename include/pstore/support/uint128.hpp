@@ -447,13 +447,13 @@ namespace pstore {
         }
 #else
         for (auto shift = 4U; shift <= 64; shift += 4U) {
-            *(out++) += digit_to_hex ((high_ >> (64U - shift)) & 0x0FU);
+            *(out++) = digit_to_hex ((high_ >> (64U - shift)) & 0x0FU);
 #    ifndef NDEBUG
             ++emitted;
 #    endif
         }
         for (auto shift = 4U; shift <= 64; shift += 4U) {
-            *(out++) += digit_to_hex ((low_ >> (64U - shift)) & 0x0FU);
+            *(out++) = digit_to_hex ((low_ >> (64U - shift)) & 0x0FU);
 #    ifndef NDEBUG
             ++emitted;
 #    endif
