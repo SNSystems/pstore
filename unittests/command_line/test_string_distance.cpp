@@ -45,7 +45,7 @@
 
 #include "gtest/gtest.h"
 
-using pstore::command_line::cl::string_distance;
+using pstore::command_line::string_distance;
 using namespace std::string_literals;
 
 TEST (StringDistance, EmptyStrings) {

@@ -170,8 +170,9 @@ namespace pstore {
                             [] (OStream & os1, indent const ind1, dls const & content1) {
                                 assert (content1.align () == 1U);
                                 assert (content1.xfixups ().size () == 0U);
-                                os1 << ind1 << R"("header":")"
-                                    << content1.header_digest ().to_hex_string () << "\",\n";
+                                os1 << ind1 << R"("header":)";
+                                emit_digest (os1, content1.header_digest ());
+                                os1 << ",\n";
                                 {
                                     os1 << ind1 << R"("data":")";
                                     repo::container<std::uint8_t> const payload =
@@ -204,9 +205,9 @@ namespace pstore {
                         return emit_array (os, ind, std::begin (content), std::end (content),
                                            [] (OStream & os1, indent const ind1,
                                                repo::linked_definitions::value_type const & d) {
-                                               os1 << ind1 << '{' << R"("compilation":")"
-                                                   << d.compilation.to_hex_string ()
-                                                   << R"(","index":)" << d.index << '}';
+                                               os1 << ind1 << '{' << R"("compilation":)";
+                                               emit_digest (os1, d.compilation);
+                                               os1 << R"(,"index":)" << d.index << '}';
                                            });
                     }
                 };

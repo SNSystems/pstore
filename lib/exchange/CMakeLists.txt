@@ -76,7 +76,6 @@ set (pstore_exchange_includes
 )
 set (pstore_exchange_sources
     export.cpp
-    export_emit.cpp
     export_fixups.cpp
     export_fragment.cpp
     export_names.cpp

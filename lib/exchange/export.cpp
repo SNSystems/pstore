@@ -82,7 +82,9 @@ namespace {
 
             auto const out_fn = [&] (pstore::address addr) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
-                os << sep << ind << '"' << kvp.first.to_hex_string () << R"(":")";
+                os << sep << ind;
+                pstore::exchange::export_ns::emit_digest (os, kvp.first);
+                os << ':';
                 std::shared_ptr<std::uint8_t const> const data = db.getro (kvp.second);
                 auto const * const ptr = data.get ();
                 pstore::to_base64 (ptr, ptr + kvp.second.size,
@@ -104,7 +106,7 @@ namespace pstore {
         namespace export_ns {
 
             void emit_database (database & db, ostream & os, bool const comments) {
-                name_mapping string_table;
+                name_mapping string_table{db};
                 auto const ind = indent{}.next ();
                 os << "{\n";
                 os << ind << R"("version":1,)" << '\n';

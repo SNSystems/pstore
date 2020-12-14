@@ -47,7 +47,7 @@
 
 #include "gmock/gmock.h"
 
-using namespace pstore::command_line::cl;
+using namespace pstore::command_line;
 
 TEST (WordWrapper, NoWrap) {
     std::string const text = "text";

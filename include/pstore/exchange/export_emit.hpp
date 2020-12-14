@@ -79,8 +79,8 @@ namespace pstore {
 
             namespace details {
 
-                template <typename OSStream, typename T>
-                void write_span (OSStream & os, gsl::span<T> const & sp) {
+                template <typename OSStream, typename ElementType, std::ptrdiff_t Extent>
+                void write_span (OSStream & os, gsl::span<ElementType, Extent> const & sp) {
                     os.write (sp.data (), sp.length ());
                 }
 
@@ -123,6 +123,17 @@ namespace pstore {
             diff_out<OutputFunction> make_diff_out (OutputFunction const * const fn) {
                 return diff_out<OutputFunction>{fn};
             }
+                
+            template <typename OStream>
+            void emit_digest (OStream & os, uint128 const d) {
+                std::array<char, uint128::hex_string_length> hex;
+                auto const out = d.to_hex (hex.begin ());
+                (void) out;
+                assert (out == hex.end ());
+                os << '"';
+                details::write_span (os, gsl::make_span (hex));
+                os << '"';
+            }
 
 
             template <typename OStream, typename Iterator>
@@ -145,6 +156,26 @@ namespace pstore {
             template <typename OStream>
             void emit_string (OStream & os, raw_sstring_view const & view) {
                 emit_string (os, std::begin (view), std::end (view));
+            }
+
+            /// If \p comments is true, emits a comment containing the body of the string at address
+            /// \p addr.
+            ///
+            /// \param os  The output stream to which the comment will be emitted.
+            /// \param db  The database containing the string to be emitted.
+            /// \param addr  The address of the indirect-string to be emitted.
+            /// \param comments  A value indicating whether comment emission is enabled.
+            /// \returns A reference to \p os.
+            template <typename OStream>
+            OStream & show_string (OStream & os, pstore::database const & db,
+                                   pstore::typed_address<pstore::indirect_string> const addr,
+                                   bool const comments) {
+                if (comments) {
+                    auto const str = serialize::read<pstore::indirect_string> (
+                        serialize::archive::database_reader{db, addr.to_address ()});
+                    os << R"( //")" << str << '"';
+                }
+                return os;
             }
 
             /// Writes an array of values given by the range \p first to \p last to the output
@@ -181,6 +212,51 @@ namespace pstore {
                 return os;
             }
 
+            /// Writes an array of values given by the range \p first to \p last to the output
+            /// stream \p os. The output follows the JSON syntax of "[ a, b ]" except that each
+            /// object is written on a new line.
+            ///
+            /// \tparam OStream  An output stream type to which values can be written using the '<<'
+            ///     operator.
+            /// \tparam InputIt  An input iterator.
+            /// \tparam Function  A callable whose signature should be equivalent to:
+            ///
+            ///     typed_address<indirect_string>
+            ///     (OStream &, std::iterator_traits<InputIt>::value_type const &a)
+            ///
+            /// \param os  An output stream to which values are written using the '<<' operator.
+            /// \param ind  The indentation to be applied to each member of the array.
+            /// \param first  The start of the range denoting array elements to be emitted.
+            /// \param last  The end of the range denoting array elements to be emitted.
+            /// \param fn  A function which is called to emit the contents of each object in the
+            ///    iterator range denoted by [first, last).
+            template <typename OStream, typename InputIt, typename Function>
+            OStream & emit_array_with_name (OStream & os, indent const ind, database const & db,
+                                            InputIt const first, InputIt const last,
+                                            bool const comments, Function const fn) {
+                auto const * sep = "\n";
+                os << "[";
+                maybe<typed_address<indirect_string>> prev_name;
+                indent const ind1 = ind.next ();
+
+                std::for_each (first, last, [&] (auto const & element) {
+                    os << sep;
+                    if (prev_name) {
+                        show_string (os, db, *prev_name, comments);
+                        os << '\n';
+                    }
+                    os << ind1;
+                    prev_name = fn (os, element);
+                    sep = ",";
+                });
+                if (prev_name) {
+                    show_string (os, db, *prev_name, comments);
+                    os << '\n' << ind;
+                }
+                os << ']';
+                return os;
+            }
+
             /// Writes a object to the output stream \p os. The output consists of a pair of braces
             /// with appropriate whitespace. The function \p fn is called to write the properties
             /// and values of the object.
@@ -201,26 +277,6 @@ namespace pstore {
                 os << "{\n";
                 fn (os, ind.next (), object);
                 os << ind << '}';
-                return os;
-            }
-
-
-            namespace details {
-
-                std::string get_string (pstore::database const & db,
-                                        pstore::typed_address<pstore::indirect_string> addr);
-
-            } // namespace details
-
-            template <typename OStream>
-            OStream & show_string (OStream & os, pstore::database const & db,
-                                   pstore::typed_address<pstore::indirect_string> const addr,
-                                   bool const comments) {
-                if (comments) {
-                    auto const str = serialize::read<pstore::indirect_string> (
-                        serialize::archive::database_reader{db, addr.to_address ()});
-                    os << R"( //")" << str << '"';
-                }
                 return os;
             }
 

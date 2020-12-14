@@ -202,7 +202,7 @@ namespace pstore {
         /// The const- and non-const implementation of operator[].
         template <typename SmallVector,
                   typename ResultType = typename inherit_const<SmallVector, ElementType>::type>
-        static ResultType & index (SmallVector && sm, std::size_t n) noexcept {
+        static ResultType & index (SmallVector && sm, std::size_t const n) noexcept {
             assert (n < sm.size ());
             return sm.buffer_[n];
         }

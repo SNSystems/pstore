@@ -307,12 +307,23 @@ TEST_F (UInt128, BitwiseAnd) {
 }
 
 TEST_F (UInt128, ToHexString) {
-    EXPECT_EQ (pstore::uint128 (0, 0).to_hex_string (), "00000000000000000000000000000000");
-    EXPECT_EQ (pstore::uint128 (1, 2).to_hex_string (), "00000000000000010000000000000002");
-    EXPECT_EQ (pstore::uint128 (std::numeric_limits<std::uint64_t>::max (),
-                                std::numeric_limits<std::uint64_t>::max ())
-                   .to_hex_string (),
-               "ffffffffffffffffffffffffffffffff");
+    {
+        std::string str1;
+        pstore::uint128 (0, 0).to_hex (std::back_inserter (str1));
+        EXPECT_EQ (str1, "00000000000000000000000000000000");
+    }
+    {
+        std::string str2;
+        pstore::uint128 (1, 2).to_hex (std::back_inserter (str2));
+        EXPECT_EQ (str2, "00000000000000010000000000000002");
+    }
+    {
+        std::string str3;
+        pstore::uint128 (std::numeric_limits<std::uint64_t>::max (),
+                         std::numeric_limits<std::uint64_t>::max ())
+            .to_hex (std::back_inserter (str3));
+        EXPECT_EQ (str3, "ffffffffffffffffffffffffffffffff");
+    }
 }
 
 TEST_F (UInt128, FromBytes) {

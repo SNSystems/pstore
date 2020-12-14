@@ -52,23 +52,21 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<pstore::command_line::revision_opt, cl::parser<std::string>>
-        revision ("revision", cl::desc ("The starting revision number (or 'HEAD')"));
-    cl::alias revision2 ("r", cl::desc ("Alias for --revision"), cl::aliasopt (revision));
+    opt<pstore::command_line::revision_opt, parser<std::string>>
+        revision ("revision", desc ("The starting revision number (or 'HEAD')"));
+    alias revision2 ("r", desc ("Alias for --revision"), aliasopt (revision));
 
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Path of the pstore repository to be read"),
-                                  cl::required);
-    cl::opt<std::string> key (cl::positional, cl::usage ("key"), cl::required);
-    cl::opt<bool>
-        string_mode ("strings", cl::init (false),
-                     cl::desc ("Reads from the 'strings' index rather than the 'names' index."));
-    cl::alias string_mode2 ("s", cl::desc ("Alias for --strings"), cl::aliasopt (string_mode));
+    opt<std::string> db_path (positional, usage ("repository"),
+                              desc ("Path of the pstore repository to be read"), required);
+    opt<std::string> key (positional, usage ("key"), required);
+    opt<bool> string_mode ("strings", init (false),
+                           desc ("Reads from the 'strings' index rather than the 'names' index."));
+    alias string_mode2 ("s", desc ("Alias for --strings"), aliasopt (string_mode));
 
 } // end anonymous namespace
 
 std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
-    cl::parse_command_line_options (argc, argv, "pstore read utility\n");
+    parse_command_line_options (argc, argv, "pstore read utility\n");
 
     switches result;
     result.revision = static_cast<unsigned> (revision.get ());

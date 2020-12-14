@@ -198,9 +198,6 @@ namespace {
                       unsigned const num_read_threads,
                       pstore::httpd::server_status * const http_status,
                       pstore::gsl::not_null<std::atomic<bool> *> const uptime_done) {
-
-        using priority = pstore::logger::priority;
-
         try {
             pstore::threads::set_name ("quit");
             pstore::create_log_stream ("broker.quit");

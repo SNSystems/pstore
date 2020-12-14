@@ -191,7 +191,12 @@ namespace pstore {
         uint128 operator<< (T n) const noexcept;
         uint128 & operator>>= (unsigned n) noexcept;
 
+        static constexpr std::size_t hex_string_length = std::size_t{32};
+
+        template <typename OutputIterator>
+        OutputIterator to_hex (OutputIterator out) const noexcept;
         std::string to_hex_string () const;
+
         static maybe<uint128> from_hex_string (std::string const & str);
 
     private:
@@ -204,6 +209,11 @@ namespace pstore {
         std::uint64_t high_ = 0U;
         static constexpr std::uint64_t bytes_to_uint64 (std::uint8_t const * bytes) noexcept;
 #endif // PSTORE_HAVE_UINT128_T
+
+        static constexpr char digit_to_hex (unsigned const v) noexcept {
+            assert (v < 0x10);
+            return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
+        }
     };
 
     PSTORE_STATIC_ASSERT (sizeof (uint128) == 16);
@@ -422,6 +432,36 @@ namespace pstore {
                std::uint64_t{bytes[6]} << 8 | std::uint64_t{bytes[7]};
     }
 #endif // PSTORE_HAVE_UINT128_T
+
+    template <typename OutputIterator>
+    OutputIterator uint128::to_hex (OutputIterator out) const noexcept {
+#ifndef NDEBUG
+        auto emitted = 0U;
+#endif
+#ifdef PSTORE_HAVE_UINT128_T
+        for (auto shift = 4U; shift <= 128U; shift += 4U) {
+            *(out++) = digit_to_hex ((v_ >> (128U - shift)) & 0x0FU);
+#    ifndef NDEBUG
+            ++emitted;
+#    endif
+        }
+#else
+        for (auto shift = 4U; shift <= 64; shift += 4U) {
+            *(out++) = digit_to_hex ((high_ >> (64U - shift)) & 0x0FU);
+#    ifndef NDEBUG
+            ++emitted;
+#    endif
+        }
+        for (auto shift = 4U; shift <= 64; shift += 4U) {
+            *(out++) = digit_to_hex ((low_ >> (64U - shift)) & 0x0FU);
+#    ifndef NDEBUG
+            ++emitted;
+#    endif
+        }
+#endif
+        assert (emitted == hex_string_length);
+        return out;
+    }
 
     inline std::ostream & operator<< (std::ostream & os, uint128 const & value) {
         return os << '{' << value.high () << ',' << value.low () << '}';

@@ -69,8 +69,8 @@ namespace {
 
     using namespace pstore::command_line;
 
-    cl::opt<bool> install_opt ("install", cl::desc ("Install the service"));
-    cl::opt<bool> remove_opt ("remove", cl::desc ("Remove the service"));
+    opt<bool> install_opt ("install", desc ("Install the service"));
+    opt<bool> remove_opt ("remove", desc ("Remove the service"));
 
 } // end anonymous namespace
 
@@ -78,7 +78,7 @@ namespace {
 int _tmain (int argc, TCHAR * argv[]) {
     int exit_code = EXIT_SUCCESS;
     try {
-        cl::parse_command_line_options (argc, argv, "pstore broker server");
+        parse_command_line_options (argc, argv, "pstore broker server");
 
         if (install_opt && remove_opt) {
             std::wcerr << L"--install and --remove cannot be specified together!\n";

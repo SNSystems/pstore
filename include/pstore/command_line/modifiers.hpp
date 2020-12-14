@@ -50,257 +50,252 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
-            //*           _              *
-            //* __ ____ _| |_  _ ___ ___ *
-            //* \ V / _` | | || / -_|_-< *
-            //*  \_/\__,_|_|\_,_\___/__/ *
-            //*                          *
-            //===----------------------------------------------------------------------===//
-            // Enum valued command line option
-            //
+        //*           _              *
+        //* __ ____ _| |_  _ ___ ___ *
+        //* \ V / _` | | || / -_|_-< *
+        //*  \_/\__,_|_|\_,_\___/__/ *
+        //*                          *
+        //===----------------------------------------------------------------------===//
+        // Enum valued command line option
+        //
 
-            // values - For custom data types, allow specifying a group of values together
-            // as the values that go into the mapping that the option handler uses.
-            namespace details {
+        // values - For custom data types, allow specifying a group of values together
+        // as the values that go into the mapping that the option handler uses.
+        namespace details {
 
-                class values {
-                public:
-                    explicit values (std::initializer_list<literal> options);
+            class values {
+            public:
+                explicit values (std::initializer_list<literal> options);
 
-                    template <class Opt>
-                    void apply (Opt & o) const {
-                        if (parser_base * const p = o.get_parser ()) {
-                            for (auto const & v : values_) {
-                                p->add_literal_option (v.name, v.value, v.description);
-                            }
+                template <class Opt>
+                void apply (Opt & o) const {
+                    if (parser_base * const p = o.get_parser ()) {
+                        for (auto const & v : values_) {
+                            p->add_literal_option (v.name, v.value, v.description);
                         }
                     }
+                }
 
-                private:
-                    small_vector<literal, 3> values_;
-                };
+            private:
+                small_vector<literal, 3> values_;
+            };
 
-            } // end namespace details
+        } // end namespace details
 
-            /// Helper to build a details::values by forwarding a variable number of arguments
-            /// as an initializer list to the details::values constructor.
-            template <typename... OptsTy>
-            details::values values (OptsTy &&... options) {
-                return details::values{std::forward<OptsTy> (options)...};
+        /// Helper to build a details::values by forwarding a variable number of arguments
+        /// as an initializer list to the details::values constructor.
+        template <typename... OptsTy>
+        details::values values (OptsTy &&... options) {
+            return details::values{std::forward<OptsTy> (options)...};
+        }
+
+        inline details::values values (std::initializer_list<literal> options) {
+            return details::values (options);
+        }
+
+        class name {
+        public:
+            explicit name (std::string name);
+
+            template <typename Opt>
+            void apply (Opt & o) const {
+                o.set_name (name_);
             }
 
-            inline details::values values (std::initializer_list<literal> options) {
-                return details::values (options);
+        private:
+            std::string const name_;
+        };
+
+        inline name make_modifier (gsl::czstring const n) { return name (n); }
+        inline name make_modifier (std::string const & n) { return name (n); }
+
+
+        /// A modifier to set the usage information shown in the -help output.
+        /// Only applicable to positional arguments.
+        class usage {
+        public:
+            explicit usage (std::string str);
+
+            template <typename Opt>
+            void apply (Opt & o) const {
+                o.set_usage (desc_);
             }
 
-            class name {
-            public:
-                explicit name (std::string name);
+        private:
+            std::string const desc_;
+        };
 
-                template <typename Opt>
-                void apply (Opt & o) const {
-                    o.set_name (name_);
-                }
+        //*     _             *
+        //*  __| |___ ___ __  *
+        //* / _` / -_|_-</ _| *
+        //* \__,_\___/__/\__| *
+        //*                   *
+        /// A modifier to set the description shown in the -help output...
+        class desc {
+        public:
+            explicit desc (std::string str);
 
-            private:
-                std::string const name_;
-            };
+            template <typename Opt>
+            void apply (Opt & o) const {
+                o.set_description (desc_);
+            }
 
-            inline name make_modifier (gsl::czstring const n) { return name (n); }
-            inline name make_modifier (std::string const & n) { return name (n); }
+        private:
+            std::string const desc_;
+        };
 
+        //*       _ _                   _    *
+        //*  __ _| (_)__ _ ___ ___ _ __| |_  *
+        //* / _` | | / _` (_-</ _ \ '_ \  _| *
+        //* \__,_|_|_\__,_/__/\___/ .__/\__| *
+        //*                       |_|        *
+        class aliasopt {
+        public:
+            explicit aliasopt (option & o);
+            void apply (alias & o) const;
 
-            /// A modifier to set the usage information shown in the -help output.
-            /// Only applicable to positional arguments.
-            class usage {
-            public:
-                explicit usage (std::string str);
+        private:
+            option & original_;
+        };
 
-                template <typename Opt>
-                void apply (Opt & o) const {
-                    o.set_usage (desc_);
-                }
-
-            private:
-                std::string const desc_;
-            };
-
-            //*     _             *
-            //*  __| |___ ___ __  *
-            //* / _` / -_|_-</ _| *
-            //* \__,_\___/__/\__| *
-            //*                   *
-            /// A modifier to set the description shown in the -help output...
-            class desc {
-            public:
-                explicit desc (std::string str);
-
-                template <typename Opt>
-                void apply (Opt & o) const {
-                    o.set_description (desc_);
-                }
-
-            private:
-                std::string const desc_;
-            };
-
-            //*       _ _                   _    *
-            //*  __ _| (_)__ _ ___ ___ _ __| |_  *
-            //* / _` | | / _` (_-</ _ \ '_ \  _| *
-            //* \__,_|_|_\__,_/__/\___/ .__/\__| *
-            //*                       |_|        *
-            class aliasopt {
-            public:
-                explicit aliasopt (option & o);
-                void apply (alias & o) const;
-
-            private:
-                option & original_;
-            };
-
-            //*  _      _ _    *
-            //* (_)_ _ (_) |_  *
-            //* | | ' \| |  _| *
-            //* |_|_||_|_|\__| *
-            //*                *
-            namespace details {
-
-                template <typename T>
-                class initializer {
-                public:
-                    template <typename U>
-                    explicit initializer (U && t)
-                            : init_{std::forward<U> (t)} {}
-                    template <class Opt>
-                    void apply (Opt & o) const {
-                        o.set_initial_value (init_);
-                    }
-
-                private:
-                    T const & init_;
-                };
-
-            } // end namespace details
+        //*  _      _ _    *
+        //* (_)_ _ (_) |_  *
+        //* | | ' \| |  _| *
+        //* |_|_||_|_|\__| *
+        //*                *
+        namespace details {
 
             template <typename T>
-            details::initializer<T> init (T && t) {
-                return details::initializer<T>{std::forward<T> (t)};
-            }
+            class initializer {
+            public:
+                template <typename U>
+                explicit initializer (U && t)
+                        : init_{std::forward<U> (t)} {}
+                template <class Opt>
+                void apply (Opt & o) const {
+                    o.set_initial_value (init_);
+                }
 
-            namespace details {
+            private:
+                T const & init_;
+            };
 
-                struct comma_separated {
-                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
-                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr comma_separated () noexcept {} // NOLINT
+        } // end namespace details
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        o.set_comma_separated ();
-                    }
-                };
+        template <typename T>
+        details::initializer<T> init (T && t) {
+            return details::initializer<T>{std::forward<T> (t)};
+        }
 
-            } // end namespace details
+        namespace details {
 
-            /// When this modifier is added to a list option, it will consider each of the argument
-            /// strings to be a sequence of one or more comma-separated values. These are broken
-            /// apart before being passed to the argument parser. The modifier has no effect on
-            /// other option types.
-            ///
-            /// For example, a list option named "opt" with comma-separated
-            /// enabled will consider command-lines such as "--opt a,b,c", "--opt a,b --opt c", and
-            /// "--opt a --opt b --opt c" to be equivalent. Without the option "--opt a,b" is has a
-            /// single value "a,b".
-            extern details::comma_separated const comma_separated;
+            struct comma_separated {
+                // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                constexpr comma_separated () noexcept {} // NOLINT
 
-            //*                                              *
-            //*  ___  __ __ _  _ _ _ _ _ ___ _ _  __ ___ ___ *
-            //* / _ \/ _/ _| || | '_| '_/ -_) ' \/ _/ -_|_-< *
-            //* \___/\__\__|\_,_|_| |_| \___|_||_\__\___/__/ *
-            //*                                              *
-            namespace details {
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_comma_separated ();
+                }
+            };
 
-                struct positional {
-                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
-                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr positional () noexcept {} // NOLINT
+        } // end namespace details
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        o.set_positional ();
-                    }
-                };
+        /// When this modifier is added to a list option, it will consider each of the argument
+        /// strings to be a sequence of one or more comma-separated values. These are broken
+        /// apart before being passed to the argument parser. The modifier has no effect on
+        /// other option types.
+        ///
+        /// For example, a list option named "opt" with comma-separated
+        /// enabled will consider command-lines such as "--opt a,b,c", "--opt a,b --opt c", and
+        /// "--opt a --opt b --opt c" to be equivalent. Without the option "--opt a,b" is has a
+        /// single value "a,b".
+        extern details::comma_separated const comma_separated;
 
-                struct required {
-                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
-                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr required () noexcept {} // NOLINT
+        //*                                              *
+        //*  ___  __ __ _  _ _ _ _ _ ___ _ _  __ ___ ___ *
+        //* / _ \/ _/ _| || | '_| '_/ -_) ' \/ _/ -_|_-< *
+        //* \___/\__\__|\_,_|_| |_| \___|_||_\__\___/__/ *
+        //*                                              *
+        namespace details {
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        o.set_num_occurrences_flag (num_occurrences_flag::required);
-                    }
-                };
+            struct positional {
+                // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                constexpr positional () noexcept {} // NOLINT
 
-                struct optional {
-                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
-                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr optional () noexcept {} // NOLINT
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_positional ();
+                }
+            };
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        o.set_num_occurrences_flag (num_occurrences_flag::optional);
-                    }
-                };
+            struct required {
+                // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                constexpr required () noexcept {} // NOLINT
 
-                struct one_or_more {
-                    // The need for this constructor was removed by CWG defect 253 but Clang (prior
-                    // to 3.9.0) and GCC (before 4.6.4) require its presence.
-                    constexpr one_or_more () noexcept {} // NOLINT
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_num_occurrences_flag (num_occurrences_flag::required);
+                }
+            };
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        bool const is_optional =
-                            o.get_num_occurrences_flag () == num_occurrences_flag::optional;
-                        o.set_num_occurrences_flag (is_optional
-                                                        ? num_occurrences_flag::zero_or_more
-                                                        : num_occurrences_flag::one_or_more);
-                    }
-                };
+            struct optional {
+                // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                constexpr optional () noexcept {} // NOLINT
 
-            } // end namespace details
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_num_occurrences_flag (num_occurrences_flag::optional);
+                }
+            };
 
-            extern details::one_or_more const one_or_more;
-            extern details::optional const optional;
-            extern details::positional const positional;
-            extern details::required const required;
+            struct one_or_more {
+                // The need for this constructor was removed by CWG defect 253 but Clang (prior
+                // to 3.9.0) and GCC (before 4.6.4) require its presence.
+                constexpr one_or_more () noexcept {} // NOLINT
 
-            namespace details {
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    bool const is_optional =
+                        o.get_num_occurrences_flag () == num_occurrences_flag::optional;
+                    o.set_num_occurrences_flag (is_optional ? num_occurrences_flag::zero_or_more
+                                                            : num_occurrences_flag::one_or_more);
+                }
+            };
 
-                class category {
-                public:
-                    explicit constexpr category (option_category const & cat) noexcept
-                            : cat_{cat} {}
+        } // end namespace details
 
-                    template <typename Opt>
-                    void apply (Opt & o) const {
-                        o.set_category (&cat_);
-                    }
+        extern details::one_or_more const one_or_more;
+        extern details::optional const optional;
+        extern details::positional const positional;
+        extern details::required const required;
 
-                private:
-                    option_category const & cat_;
-                };
+        namespace details {
 
-            } // end namespace details
+            class category {
+            public:
+                explicit constexpr category (option_category const & cat) noexcept
+                        : cat_{cat} {}
 
-            inline details::category cat (option_category const & c) {
-                return details::category{c};
-            }
+                template <typename Opt>
+                void apply (Opt & o) const {
+                    o.set_category (&cat_);
+                }
 
-        } // namespace cl
-    }     // namespace command_line
+            private:
+                option_category const & cat_;
+            };
+
+        } // end namespace details
+
+        inline details::category cat (option_category const & c) { return details::category{c}; }
+
+    } // namespace command_line
 } // namespace pstore
 
 #endif // PSTORE_COMMAND_LINE_MODIFIERS_HPP

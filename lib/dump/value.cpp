@@ -623,7 +623,7 @@ namespace pstore {
         template <typename OStream>
         OStream & binary16::writer (OStream & os, indent const & ind) const {
             os << "!!binary16 |";
-            if (v_.size () == 0) {
+            if (v_.empty ()) {
                 os << '\n' << ind;
             } else {
                 using char_type = typename OStream::char_type;

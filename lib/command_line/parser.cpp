@@ -45,7 +45,6 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
             //*                               _                   *
             //*  _ __  __ _ _ _ ___ ___ _ _  | |__  __ _ ___ ___  *
@@ -81,6 +80,5 @@ namespace pstore {
                 return just (v);
             }
 
-        } // end namespace cl
     }     // end namespace command_line
 } // end namespace pstore

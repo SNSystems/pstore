@@ -130,7 +130,7 @@ namespace pstore {
                     , section_{sec} {
                 validate (sec);
             }
-            bss_section_creation_dispatcher (section_kind kind,
+            bss_section_creation_dispatcher (section_kind const kind,
                                              gsl::not_null<section_content const *> const sec)
                     : bss_section_creation_dispatcher (sec) {
                 (void) kind;
@@ -140,7 +140,7 @@ namespace pstore {
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher (bss_section_creation_dispatcher && ) noexcept =  delete;
 
-            ~bss_section_creation_dispatcher () noexcept = default;
+            ~bss_section_creation_dispatcher () noexcept override = default;
 
             bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher const &) = delete;
             bss_section_creation_dispatcher & operator= (bss_section_creation_dispatcher && ) noexcept = delete;

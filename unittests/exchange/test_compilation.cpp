@@ -164,7 +164,7 @@ TEST_F (ExchangeCompilation, Empty) {
                         std::inserter (indir_strings, std::end (indir_strings)));
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names;
+    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
     std::ostringstream exported_names_stream;
     emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
                 export_db_.get_current_revision (), &exported_names);
@@ -173,7 +173,7 @@ TEST_F (ExchangeCompilation, Empty) {
     {
         mock_mutex mutex;
         auto transaction = begin (export_db_, transaction_lock{mutex});
-        std::vector<pstore::repo::compilation_member> definitions;
+        std::vector<pstore::repo::definition> definitions;
         pstore::extent<pstore::repo::compilation> const compilation =
             pstore::repo::compilation::alloc (transaction, indir_strings[path],
                                               indir_strings[triple], std::begin (definitions),
@@ -238,7 +238,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
                         std::inserter (indir_strings, std::end (indir_strings)));
 
     // Write the names that we just created as JSON.
-    pstore::exchange::export_ns::name_mapping exported_names;
+    pstore::exchange::export_ns::name_mapping exported_names{export_db_};
     std::ostringstream exported_names_stream;
     emit_names (exported_names_stream, pstore::exchange::export_ns::indent{}, export_db_,
                 export_db_.get_current_revision (), &exported_names);
@@ -258,7 +258,7 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
         emit_fragment (exported_fragment_stream, pstore::exchange::export_ns::indent{}, export_db_,
                        exported_names, export_db_.getro (fext), false);
 
-        std::vector<pstore::repo::compilation_member> definitions{
+        std::vector<pstore::repo::definition> definitions{
             {fragment_digest, fext, indir_strings[name1], pstore::repo::linkage::external,
              pstore::repo::visibility::hidden_vis},
             {fragment_digest, fext, indir_strings[name2], pstore::repo::linkage::link_once_any,
@@ -322,14 +322,14 @@ TEST_F (ExchangeCompilation, TwoDefinitions) {
     EXPECT_EQ (load_string (import_db_, compilation->triple ()), triple);
     ASSERT_EQ (compilation->size (), 2U);
     {
-        pstore::repo::compilation_member const & def1 = (*compilation)[0];
+        pstore::repo::definition const & def1 = (*compilation)[0];
         EXPECT_EQ (def1.digest, fragment_digest);
         EXPECT_EQ (load_string (import_db_, def1.name), name1);
         EXPECT_EQ (def1.linkage (), pstore::repo::linkage::external);
         EXPECT_EQ (def1.visibility (), pstore::repo::visibility::hidden_vis);
     }
     {
-        pstore::repo::compilation_member const & def2 = (*compilation)[1];
+        pstore::repo::definition const & def2 = (*compilation)[1];
         EXPECT_EQ (def2.digest, fragment_digest);
         EXPECT_EQ (load_string (import_db_, def2.name), name2);
         EXPECT_EQ (def2.linkage (), pstore::repo::linkage::link_once_any);

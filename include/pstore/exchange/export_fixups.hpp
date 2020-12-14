@@ -71,21 +71,15 @@ namespace pstore {
             OStream & emit_external_fixups (OStream & os, indent const ind, database const & db,
                                             name_mapping const & names, XFixupIterator first,
                                             XFixupIterator last, bool comments) {
-                emit_array (
-                    os, ind, first, last,
-                    [&] (OStream & os1, indent const ind1, repo::external_fixup const & xfx) {
-                        os1 << ind1 << "{\n";
-                        auto const object_indent = ind1.next ();
-                        os1 << object_indent << R"("name":)" << names.index (xfx.name) << ',';
-                        show_string (os1, db, xfx.name, comments);
-                        os1 << '\n';
-                        os1 << object_indent << R"("type":)" << static_cast<unsigned> (xfx.type)
-                            << ",\n";
-                        os1 << object_indent << R"("offset":)" << xfx.offset << ",\n";
-                        os1 << object_indent << R"("addend":)" << xfx.addend << '\n';
-                        os1 << ind1 << '}';
-                    });
-                return os;
+                return emit_array_with_name (os, ind, db, first, last, comments,
+                                             [&] (OStream & os1, repo::external_fixup const & xfx) {
+                                                 os1 << R"({"name":)" << names.index (xfx.name)
+                                                     << R"(,"type":)"
+                                                     << static_cast<unsigned> (xfx.type)
+                                                     << R"(,"offset":)" << xfx.offset
+                                                     << R"(,"addend":)" << xfx.addend << '}';
+                                                 return xfx.name;
+                                             });
             }
 
         } // end namespace export_ns

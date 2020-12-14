@@ -106,7 +106,8 @@ namespace pstore {
             }
 
             static constexpr std::array<std::uint32_t, hash_size / 4> initial_intermediate = {
-                {0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0}};
+                {UINT32_C (0x67452301), UINT32_C (0xEFCDAB89), UINT32_C (0x98BADCFE),
+                 UINT32_C (0x10325476), UINT32_C (0xC3D2E1F0)}};
         };
 
         std::string source_key (std::string const & k);

@@ -113,7 +113,8 @@ namespace pstore {
     namespace details {
 
         template <typename OutputIterator>
-        OutputIterator decode4 (std::array<std::uint8_t, 4> const & in, OutputIterator out, unsigned count) {
+        OutputIterator decode4 (std::array<std::uint8_t, 4> const & in, OutputIterator out,
+                                unsigned const count) {
             std::array<std::uint8_t, 3> result;
             result[0] = static_cast<std::uint8_t> (static_cast<std::uint8_t> (in[0] << 2) +
                                                    ((in[1] & 0x30U) >> 4));

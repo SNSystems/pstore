@@ -57,7 +57,9 @@ namespace pstore {
 
                     auto const out_fn = [&] (address addr) {
                         auto const & kvp = fragments->load_leaf_node (db, addr);
-                        os << fragment_sep << ind << '\"' << kvp.first.to_hex_string () << R"(":)";
+                        os << fragment_sep << ind;
+                        emit_digest (os, kvp.first);
+                        os << ':';
                         emit_fragment (os, ind.next (), db, names, db.getro (kvp.second), comments);
                         fragment_sep = ",\n";
                     };

@@ -92,7 +92,7 @@ namespace pstore {
             struct value_type {
                 value_type () noexcept = default;
                 constexpr value_type (index::digest const compilation_, std::uint32_t const index_,
-                                      typed_address<compilation_member> const pointer_) noexcept
+                                      typed_address<definition> const pointer_) noexcept
                         : compilation{compilation_}
                         , index{index_}
                         , pointer{pointer_} {}
@@ -115,7 +115,7 @@ namespace pstore {
                 /// to search the compilation index. Its value must be identical to the result of
                 /// searching for the digest \ref value_type.compilation and taking the address of
                 /// \ref value_type.index definition.
-                typed_address<compilation_member> pointer;
+                typed_address<definition> pointer;
             };
 
             using iterator = value_type *;
@@ -252,9 +252,9 @@ namespace pstore {
 
             std::uint8_t * write (std::uint8_t * out) const final;
 
-            /// Returns a const_iterator for the beginning of the compilation_member address range.
+            /// Returns a const_iterator for the beginning of the definition address range.
             const_iterator begin () const { return begin_; }
-            /// Returns a const_iterator for the end of compilation_member address range.
+            /// Returns a const_iterator for the end of definition address range.
             const_iterator end () const { return end_; }
 
         private:

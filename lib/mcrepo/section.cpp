@@ -48,7 +48,7 @@
 namespace pstore {
     namespace repo {
 
-        std::ostream & operator<< (std::ostream & os, section_kind kind) {
+        std::ostream & operator<< (std::ostream & os, section_kind const kind) {
             auto str = "unknown section_kind";
 #define X(a)                                                                                       \
     case section_kind::a: str = #a; break;

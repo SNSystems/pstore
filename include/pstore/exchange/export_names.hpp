@@ -65,6 +65,8 @@ namespace pstore {
             /// a string by index rather than having to emit the string each time.
             class name_mapping {
             public:
+                explicit name_mapping (database const & db);
+
                 /// Record the address of a string at \p addr and assign it the next index in in the
                 /// exported names array.
                 ///
@@ -100,7 +102,7 @@ namespace pstore {
             template <typename OStream>
             void emit_names (OStream & os, indent ind, database const & db,
                              unsigned const generation, name_mapping * const string_table) {
-                auto names_index = index::get_index<trailer::indices::name> (db);
+                auto const names_index = index::get_index<trailer::indices::name> (db);
                 assert (generation > 0);
 
                 auto const * separator = "";

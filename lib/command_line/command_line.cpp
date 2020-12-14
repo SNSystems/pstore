@@ -47,7 +47,7 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
+
             namespace details {
 
                 // lookup_nearest_option
@@ -86,8 +86,6 @@ namespace pstore {
                 // find_handler
                 // ~~~~~~~~~~~~
                 maybe<option *> find_handler (std::string const & name) {
-                    using pstore::command_line::cl::option;
-
                     auto const & all_options = option::all ();
                     auto const end = std::end (all_options);
                     auto const it =
@@ -143,6 +141,5 @@ namespace pstore {
                 }
 
             } // end namespace details
-        }     // end namespace cl
     }         // end namespace command_line
 } // end namespace pstore

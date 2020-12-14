@@ -45,7 +45,6 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
             gsl::czstring type_description<std::string>::value = "str";
             gsl::czstring type_description<int>::value = "int";
@@ -174,6 +173,5 @@ namespace pstore {
             bool alias::takes_argument () const { return original_->takes_argument (); }
             bool alias::value (std::string const & v) { return original_->value (v); }
 
-        } // end namespace cl
     }     // end namespace command_line
 } // end namespace pstore

@@ -52,9 +52,8 @@ using namespace pstore::command_line;
 
 namespace {
 
-    cl::opt<std::string> db_path (cl::positional, cl::usage ("repository"),
-                                  cl::desc ("Path of the pstore repository to be exported."),
-                                  cl::required);
+    opt<std::string> db_path (positional, usage ("repository"),
+                              desc ("Path of the pstore repository to be exported."), required);
 
 } // end anonymous namespace.
 
@@ -65,7 +64,7 @@ int main (int argc, char * argv[]) {
 #endif
     int exit_code = EXIT_SUCCESS;
     PSTORE_TRY {
-        cl::parse_command_line_options (argc, argv, "pstore export utility\n");
+        parse_command_line_options (argc, argv, "pstore export utility\n");
 
         pstore::exchange::export_ns::ostream os{stdout};
         pstore::database db{db_path.get (), pstore::database::access_mode::read_only};

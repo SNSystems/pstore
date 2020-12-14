@@ -97,7 +97,7 @@ namespace pstore {
         } // end namespace details
 
         struct coord {
-            constexpr coord (unsigned x, unsigned y) noexcept
+            constexpr coord (unsigned const x, unsigned const y) noexcept
                     : column{x}
                     , row{y} {}
             bool operator== (coord const & rhs) const noexcept {
@@ -121,18 +121,18 @@ namespace pstore {
             all = ~none,
         };
 
-        constexpr bool bash_comments_enabled (parser_extensions x) noexcept {
+        constexpr bool bash_comments_enabled (parser_extensions const x) noexcept {
             return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
                     static_cast<std::underlying_type_t<parser_extensions>> (bash_comments)) != 0U;
         }
 
-        constexpr bool single_line_comments_enabled (parser_extensions x) noexcept {
+        constexpr bool single_line_comments_enabled (parser_extensions const x) noexcept {
             return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
                     static_cast<std::underlying_type_t<parser_extensions>> (
                         single_line_comments)) != 0U;
         }
 
-        constexpr bool multi_line_comments_enabled (parser_extensions x) noexcept {
+        constexpr bool multi_line_comments_enabled (parser_extensions const x) noexcept {
             return (static_cast<std::underlying_type_t<parser_extensions>> (x) &
                     static_cast<std::underlying_type_t<parser_extensions>> (multi_line_comments)) !=
                    0U;
@@ -920,7 +920,7 @@ namespace pstore {
             // append32
             // ~~~~~~~~
             template <typename Callbacks>
-            bool string_matcher<Callbacks>::appender::append32 (char32_t code_point) {
+            bool string_matcher<Callbacks>::appender::append32 (char32_t const code_point) {
                 bool ok = true;
                 if (this->has_high_surrogate ()) {
                     // A high surrogate followed by something other than a low surrogate.
@@ -934,7 +934,7 @@ namespace pstore {
             // append16
             // ~~~~~~~~
             template <typename Callbacks>
-            bool string_matcher<Callbacks>::appender::append16 (char16_t cu) {
+            bool string_matcher<Callbacks>::appender::append16 (char16_t const cu) {
                 bool ok = true;
                 if (utf::is_utf16_high_surrogate (cu)) {
                     if (!this->has_high_surrogate ()) {
@@ -950,7 +950,7 @@ namespace pstore {
                     } else {
                         char16_t const surrogates[] = {high_surrogate_, cu};
                         auto first = std::begin (surrogates);
-                        auto last = std::end (surrogates);
+                        auto const last = std::end (surrogates);
                         auto code_point = char32_t{0};
                         std::tie (first, code_point) =
                             utf::utf16_to_code_point (first, last, utf::nop_swapper);

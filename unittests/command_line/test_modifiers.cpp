@@ -68,23 +68,23 @@ namespace {
 
     class Modifiers : public testing::Test {
     public:
-        ~Modifiers () { cl::option::reset_container (); }
+        ~Modifiers () { option::reset_container (); }
     };
 
 } // end anonymous namespace
 
 TEST_F (Modifiers, DefaultConstruction) {
-    cl::opt<enumeration> opt;
+    opt<enumeration> opt;
     EXPECT_EQ (opt.get (), enumeration::a);
 }
 
 TEST_F (Modifiers, Init) {
-    // cl::init() allows the initial (default) value of the option to be described.
-    cl::opt<enumeration> opt_a (cl::init (enumeration::a));
+    // init() allows the initial (default) value of the option to be described.
+    opt<enumeration> opt_a (init (enumeration::a));
 
     EXPECT_EQ (opt_a.get (), enumeration::a);
 
-    cl::opt<enumeration> opt_b (cl::init (enumeration::b));
+    opt<enumeration> opt_b (init (enumeration::b));
     EXPECT_EQ (opt_b.get (), enumeration::b);
 }
 
@@ -96,14 +96,13 @@ namespace {
         EnumerationParse ()
                 : enum_opt_{
                       "enumeration",
-                      cl::values (
-                          cl::literal{"a", static_cast<int> (enumeration::a), "a description"},
-                          cl::literal{"b", static_cast<int> (enumeration::b), "b description"},
-                          cl::literal{"c", static_cast<int> (enumeration::c), "c description"})} {}
-        ~EnumerationParse () { cl::option::reset_container (); }
+                      values (literal{"a", static_cast<int> (enumeration::a), "a description"},
+                              literal{"b", static_cast<int> (enumeration::b), "b description"},
+                              literal{"c", static_cast<int> (enumeration::c), "c description"})} {}
+        ~EnumerationParse () { option::reset_container (); }
 
     protected:
-        cl::opt<enumeration> enum_opt_;
+        opt<enumeration> enum_opt_;
     };
 
 } // end anonymous namespace
@@ -112,8 +111,8 @@ TEST_F (EnumerationParse, SetA) {
     std::vector<std::string> argv{"progname", "--enumeration=a"};
     string_stream output;
     string_stream errors;
-    bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", output, errors);
+    bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
+                                                   output, errors);
     ASSERT_TRUE (ok);
     ASSERT_EQ (enum_opt_.get (), enumeration::a);
 }
@@ -122,8 +121,8 @@ TEST_F (EnumerationParse, SetC) {
     std::vector<std::string> argv{"progname", "--enumeration=c"};
     string_stream output;
     string_stream errors;
-    bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", output, errors);
+    bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
+                                                   output, errors);
     ASSERT_TRUE (ok);
     ASSERT_EQ (enum_opt_.get (), enumeration::c);
 }
@@ -132,8 +131,8 @@ TEST_F (EnumerationParse, ErrorBadValue) {
     std::vector<std::string> argv{"progname", "--enumeration=bad"};
     string_stream output;
     string_stream errors;
-    bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", output, errors);
+    bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
+                                                   output, errors);
     ASSERT_FALSE (ok);
     EXPECT_THAT (errors.str (), HasSubstr (NATIVE_TEXT ("'bad'")));
 }
@@ -142,8 +141,8 @@ TEST_F (EnumerationParse, GoodValueAfterError) {
     std::vector<std::string> argv{"progname", "--unknown", "--enumeration=a"};
     string_stream output;
     string_stream errors;
-    bool ok = cl::details::parse_command_line_options (std::begin (argv), std::end (argv),
-                                                       "overview", output, errors);
+    bool ok = details::parse_command_line_options (std::begin (argv), std::end (argv), "overview",
+                                                   output, errors);
     ASSERT_FALSE (ok);
     EXPECT_THAT (errors.str (), Not (HasSubstr (NATIVE_TEXT ("'a'"))));
 }

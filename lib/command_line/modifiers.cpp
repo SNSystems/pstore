@@ -47,7 +47,6 @@
 
 namespace pstore {
     namespace command_line {
-        namespace cl {
 
             details::values::values (std::initializer_list<literal> options)
                     : values_{std::move (options)} {}
@@ -72,6 +71,5 @@ namespace pstore {
             details::positional const positional;
             details::required const required;
 
-        } // namespace cl
-    }     // namespace command_line
-} // namespace pstore
+    } // end namespace command_line
+} // end namespace pstore

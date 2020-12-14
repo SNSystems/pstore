@@ -71,7 +71,7 @@ namespace pstore {
             //-MARK: definition
             class definition final : public rule {
             public:
-                using container = std::vector<repo::compilation_member>;
+                using container = std::vector<repo::definition>;
 
                 definition (not_null<context *> ctxt, not_null<container *> definitions,
                             not_null<name_mapping const *> names,
