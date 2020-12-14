@@ -195,6 +195,7 @@ namespace pstore {
 
         template <typename OutputIterator>
         OutputIterator to_hex (OutputIterator out) const noexcept;
+        std::string to_hex_string () const;
 
         static maybe<uint128> from_hex_string (std::string const & str);
 
