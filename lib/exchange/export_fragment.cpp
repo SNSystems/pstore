@@ -59,7 +59,7 @@ namespace pstore {
                         os << fragment_sep << ind;
                         emit_digest (os, kvp.first);
                         os << ':';
-                        emit_fragment (os, ind.next (), db, names, db.getro (kvp.second), comments);
+                        emit_fragment (os, ind, db, names, db.getro (kvp.second), comments);
                         fragment_sep = ",\n";
                     }
                 }

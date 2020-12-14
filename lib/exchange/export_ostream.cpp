@@ -49,57 +49,67 @@ namespace pstore {
     namespace exchange {
         namespace export_ns {
 
+            //*         _                        _                   *
+            //*  ___ __| |_ _ _ ___ __ _ _ __   | |__  __ _ ___ ___  *
+            //* / _ (_-<  _| '_/ -_) _` | '  \  | '_ \/ _` (_-</ -_) *
+            //* \___/__/\__|_| \___\__,_|_|_|_| |_.__/\__,_/__/\___| *
+            //*                                                      *
+            // ctor
+            // ~~~~
+            ostream_base::ostream_base () {
+                buffer_.resize (buffer_size_);
+                ptr_ = buffer_.data ();
+                end_ = ptr_ + buffer_.size ();
+            }
+
             // write
             // ~~~~~
-            ostream & ostream::write (char const c) {
-                std::fputc (c, os_);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
+            ostream_base & ostream_base::write (char const c) {
+                if (ptr_ == end_) {
+                    this->flush ();
+                }
+                *(ptr_++) = c;
+                return *this;
+            }
+
+            ostream_base & ostream_base::write (gsl::czstring str) {
+                for (; *str != '\0'; ++str) {
+                    this->write (*str);
                 }
                 return *this;
             }
-            ostream & ostream::write (std::uint16_t const v) {
-                std::fprintf (os_, "%" PRIu16, v);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
-                }
-                return *this;
-            }
-            ostream & ostream::write (std::uint32_t const v) {
-                std::fprintf (os_, "%" PRIu32, v);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
-                }
-                return *this;
-            }
-            ostream & ostream::write (std::uint64_t const v) {
-                std::fprintf (os_, "%" PRIu64, v);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
-                }
-                return *this;
-            }
-            ostream & ostream::write (gsl::czstring const str) {
-                std::fputs (str, os_);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
-                }
-                return *this;
-            }
-            ostream & ostream::write (std::string const & str) {
-                std::fputs (str.c_str (), os_);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
-                }
-                return *this;
+            ostream_base & ostream_base::write (std::string const & str) {
+                return this->write (gsl::make_span (str));
             }
 
             // flush
             // ~~~~~
-            void ostream::flush () {
-                std::fflush (os_);
-                if (ferror (os_)) {
-                    raise (error_code::write_failed);
+            std::size_t ostream_base::flush () {
+                this->flush_buffer (buffer_, this->buffered_chars ());
+                ptr_ = buffer_.data ();
+                return buffer_.size ();
+            }
+
+            //*         _                       *
+            //*  ___ __| |_ _ _ ___ __ _ _ __   *
+            //* / _ (_-<  _| '_/ -_) _` | '  \  *
+            //* \___/__/\__|_| \___\__,_|_|_|_| *
+            //*                                 *
+            // ctor
+            // ~~~~
+            ostream::ostream (FILE * const os)
+                    : ostream_base ()
+                    , os_ (os) {}
+
+            // flush buffer
+            // ~~~~~~~~~~~~
+            void ostream::flush_buffer (std::vector<char> const & buffer, std::size_t const size) {
+                auto * const begin = buffer.data ();
+                if (size > 0U) {
+                    std::fwrite (begin, sizeof (char), size, os_);
+                    if (ferror (os_)) {
+                        raise (error_code::write_failed);
+                    }
                 }
             }
 
