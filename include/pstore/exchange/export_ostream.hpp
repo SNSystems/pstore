@@ -126,10 +126,8 @@ namespace pstore {
 
             private:
                 /// Returns the number of characters held in the output buffer.
-                constexpr std::size_t buffered_chars () const noexcept {
-                    return ptr_ - buffer_.data ();
-                }
-                constexpr std::size_t available_space () const noexcept {
+                std::size_t buffered_chars () const noexcept { return ptr_ - buffer_.data (); }
+                std::size_t available_space () const noexcept {
                     return buffer_.size () - this->buffered_chars ();
                 }
 
