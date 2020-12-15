@@ -119,7 +119,7 @@ def get_process_output(state, process, watchdog):
     watchdog.restart()
     logging.debug('process readline')
     state.check_companion_thread()
-    line = process.stdout.readline(1024)
+    line = process.stdout.readline(1024).decode('utf-8')
     state.check_companion_thread()
     rc = process.poll()
     if line == '' and rc is not None:
