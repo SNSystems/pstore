@@ -55,6 +55,7 @@ list (APPEND pstore_core_includes
     address.hpp
     database.hpp
     db_archive.hpp
+    diff.hpp
     file_header.hpp
     generation_iterator.hpp
     index_types.hpp

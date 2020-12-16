@@ -47,7 +47,10 @@
 #include <limits>
 
 namespace pstore {
-    constexpr unsigned head_revision = std::numeric_limits<unsigned>::max ();
+
+    using revision_number = unsigned;
+    constexpr revision_number head_revision = std::numeric_limits<revision_number>::max ();
+
 } // namespace pstore
 
 #endif // PSTORE_SUPPORT_HEAD_REVISION_HPP

@@ -4,7 +4,7 @@
 //* | (_| | |  _|  _|  \ V / (_| | | |_| |  __/ *
 //*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
 //*                                             *
-//===- include/pstore/diff/diff_value.hpp ---------------------------------===//
+//===- include/pstore/diff_dump/diff_value.hpp ----------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,15 +41,15 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_DIFF_VALUE_HPP
-#define PSTORE_DIFF_VALUE_HPP
+#ifndef PSTORE_DIFF_DUMP_DIFF_VALUE_HPP
+#define PSTORE_DIFF_DUMP_DIFF_VALUE_HPP
 
-#include "pstore/diff/diff.hpp"
-#include "pstore/diff/revision.hpp"
+#include "pstore/core/diff.hpp"
+#include "pstore/diff_dump/revision.hpp"
 #include "pstore/dump/db_value.hpp"
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
         /// Get the key from a given element of a container such as pstore::hamt_set.
         template <typename KeyType>
@@ -74,11 +74,11 @@ namespace pstore {
             return kvp.second;
         }
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
         namespace details {
 
@@ -101,7 +101,48 @@ namespace pstore {
                 unsigned const old_revision_;
             };
 
-        } // namespace details
+            /// An OutputIterator which converts the address of objects in a known index into their
+            /// value_ptr representation for display to the user.
+            template <typename Index>
+            class diff_out {
+            public:
+                using iterator_category = std::output_iterator_tag;
+                using value_type = void;
+                using difference_type = void;
+                using pointer = void;
+                using reference = void;
+
+                struct params {
+                    params (gsl::not_null<database const *> const db,
+                            gsl::not_null<Index const *> const index,
+                            gsl::not_null<dump::array::container *> const members) noexcept
+                            : db_{db}
+                            , index_{index}
+                            , members_{members} {}
+
+                    gsl::not_null<database const *> const db_;
+                    gsl::not_null<Index const *> const index_;
+                    gsl::not_null<dump::array::container *> const members_;
+                };
+
+                explicit diff_out (gsl::not_null<params *> const p) noexcept
+                        : p_{p} {}
+
+                diff_out & operator= (pstore::address addr) {
+                    p_->members_->emplace_back (
+                        dump::make_value (get_key (p_->index_->load_leaf_node (*p_->db_, addr))));
+                    return *this;
+                }
+
+                diff_out & operator* () noexcept { return *this; }
+                diff_out & operator++ () noexcept { return *this; }
+                diff_out operator++ (int) noexcept { return *this; }
+
+            private:
+                gsl::not_null<params *> p_;
+            };
+
+        } // end namespace details
 
         /// Make a value pointer which contains the keys that are different between two database
         /// revisions.
@@ -112,17 +153,12 @@ namespace pstore {
         ///                  database. It should have the signature: Index * (database &, bool).
         /// \returns  A value pointer which contains all different keys between two revisions.
         template <typename Index, typename GetIndexFunction>
-        dump::value_ptr make_diff (database & db, diff::revision_number const old_revision,
+        dump::value_ptr make_diff (database & db, revision_number const old_revision,
                                    GetIndexFunction get_index) {
             dump::array::container members;
             std::shared_ptr<Index const> const index = get_index (db, true /* create */);
-
-            auto const differences = diff (db, *index, old_revision);
-            std::transform (std::begin (differences), std::end (differences),
-                            std::back_inserter (members), [&db, &index] (pstore::address addr) {
-                                return dump::make_value (
-                                    get_key (index->load_leaf_node (db, addr)));
-                            });
+            typename details::diff_out<Index>::params params{&db, index.get (), &members};
+            diff (db, *index, old_revision, details::diff_out<Index>{&params});
             return dump::make_value (members);
         }
 
@@ -164,10 +200,10 @@ namespace pstore {
         /// \param new_revision  A new database revision number.
         /// \param old_revision  An old database revision number.
         /// \returns  A value pointer which contains all different indices keys.
-        dump::value_ptr make_indices_diff (database & db, diff::revision_number const new_revision,
-                                           diff::revision_number const old_revision);
+        dump::value_ptr make_indices_diff (database & db, revision_number const new_revision,
+                                           revision_number const old_revision);
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore
 
-#endif // PSTORE_DIFF_VALUE_HPP
+#endif // PSTORE_DIFF_DUMP_DIFF_VALUE_HPP

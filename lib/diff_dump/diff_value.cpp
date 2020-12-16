@@ -1,10 +1,10 @@
-//*                 _     _              *
-//*  _ __ _____   _(_)___(_) ___  _ __   *
-//* | '__/ _ \ \ / / / __| |/ _ \| '_ \  *
-//* | | |  __/\ V /| \__ \ | (_) | | | | *
-//* |_|  \___| \_/ |_|___/_|\___/|_| |_| *
-//*                                      *
-//===- lib/diff/revision.cpp ----------------------------------------------===//
+//*      _ _  __  __              _             *
+//*   __| (_)/ _|/ _| __   ____ _| |_   _  ___  *
+//*  / _` | | |_| |_  \ \ / / _` | | | | |/ _ \ *
+//* | (_| | |  _|  _|  \ V / (_| | | |_| |  __/ *
+//*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
+//*                                             *
+//===- lib/diff_dump/diff_value.cpp ---------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -42,32 +42,27 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/diff/revision.hpp"
-#include "pstore/support/head_revision.hpp"
+#include "pstore/diff_dump/diff_value.hpp"
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
-        revisions_type update_revisions (revisions_type const & revisions,
-                                         revision_number const actual_head) {
-            revision_number r1 = revisions.first;
-            maybe<revision_number> r2 = revisions.second;
-
-            if (r1 == pstore::head_revision) {
-                r1 = actual_head;
-            }
-            if (r2) {
-                if (*r2 == pstore::head_revision) {
-                    r2 = actual_head;
-                }
-            } else {
-                r2 = r1 > 0 ? r1 - 1 : 0;
-            }
-            if (r1 < *r2) {
-                std::swap (r1, *r2);
-            }
-            return std::make_pair (r1, r2);
+        dump::value_ptr make_indices_diff (database & db, revision_number const new_revision,
+                                           revision_number const old_revision) {
+            assert (new_revision >= old_revision);
+            return dump::make_value (
+                {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
+                                                     index::get_index<trailer::indices::name>),
+                 make_index_diff<index::fragment_index> (
+                     "fragments", db, new_revision, old_revision,
+                     index::get_index<trailer::indices::fragment>),
+                 make_index_diff<index::compilation_index> (
+                     "compilations", db, new_revision, old_revision,
+                     index::get_index<trailer::indices::compilation>),
+                 make_index_diff<index::debug_line_header_index> (
+                     "debug_line_headers", db, new_revision, old_revision,
+                     index::get_index<trailer::indices::debug_line_header>)});
         }
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore

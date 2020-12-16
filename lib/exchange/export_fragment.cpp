@@ -54,14 +54,17 @@ namespace pstore {
                 if (!fragments->empty ()) {
                     auto const * fragment_sep = "\n";
                     assert (generation > 0U);
-                    for (address const & addr : diff::diff (db, *fragments, generation - 1U)) {
+
+                    auto const out_fn = [&] (address addr) {
                         auto const & kvp = fragments->load_leaf_node (db, addr);
                         os << fragment_sep << ind;
                         emit_digest (os, kvp.first);
                         os << ':';
                         emit_fragment (os, ind.next (), db, names, db.getro (kvp.second), comments);
                         fragment_sep = ",\n";
-                    }
+                    };
+
+                    diff (db, *fragments, generation - 1U, make_diff_out (&out_fn));
                 }
             }
 
