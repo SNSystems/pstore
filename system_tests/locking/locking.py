@@ -134,6 +134,7 @@ def get_process_output(state, process, watchdog):
 def send(process):
     logging.info('sending to stdin')
     process.stdin.write('a\n')
+    process.stdin.flush()
     logging.info('sent')
 
 
@@ -196,7 +197,7 @@ def run_p1(state, binaries, database):
         finally:
             watchdog.cancel()
     except Exception as ex:
-        logging.error(str(ex))
+        logging.error(str(ex), exc_info=ex)
         state.exit_code = EXIT_FAILURE
 
 
@@ -244,7 +245,7 @@ def run_p2(state, binaries, database):
         finally:
             watchdog.cancel()
     except Exception as ex:
-        logging.error(str(ex))
+        logging.error(str(ex), exc_info=ex)
         state.exit_code = EXIT_FAILURE
 
 

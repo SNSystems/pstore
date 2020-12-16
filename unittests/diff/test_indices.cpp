@@ -42,7 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 
-#include "pstore/diff/diff_value.hpp"
+#include "pstore/diff_dump/diff_value.hpp"
 
 #include <functional>
 #include <memory>
@@ -156,7 +156,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
     constexpr auto new_revision = 2U;
     constexpr auto old_revision = 1U;
 
-    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff_dump::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
@@ -164,7 +164,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old1) {
 
     out.clear ();
     out.str ("");
-    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff_dump::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
@@ -222,7 +222,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
     constexpr auto new_revision = 2U;
     constexpr auto old_revision = 0U;
 
-    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff_dump::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
@@ -230,7 +230,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew2Old0) {
 
     out.clear ();
     out.str ("");
-    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff_dump::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
@@ -265,7 +265,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
     constexpr auto new_revision = 1U;
     constexpr auto old_revision = 1U;
 
-    pstore::dump::value_ptr addr = pstore::diff::make_index_diff<pstore::index::name_index> (
+    pstore::dump::value_ptr addr = pstore::diff_dump::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
@@ -273,7 +273,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
 
     out.clear ();
     out.str ("");
-    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff_dump::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);
@@ -281,7 +281,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
 
     out.clear ();
     out.str ("");
-    addr = pstore::diff::make_index_diff<pstore::index::name_index> (
+    addr = pstore::diff_dump::make_index_diff<pstore::index::name_index> (
         "names", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::name>);
     addr->write (out);
@@ -289,7 +289,7 @@ TEST_F (DiffFixture, MakeIndexDiffNew1Old1) {
 
     out.clear ();
     out.str ("");
-    addr = pstore::diff::make_index_diff<pstore::index::write_index> (
+    addr = pstore::diff_dump::make_index_diff<pstore::index::write_index> (
         "write", *db_, new_revision, old_revision,
         pstore::index::get_index<pstore::trailer::indices::write>);
     addr->write (out);

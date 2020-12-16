@@ -46,8 +46,8 @@
 
 #include <unordered_map>
 
+#include "pstore/core/diff.hpp"
 #include "pstore/core/index_types.hpp"
-#include "pstore/diff/diff.hpp"
 #include "pstore/exchange/export_emit.hpp"
 
 namespace pstore {
@@ -89,23 +89,43 @@ namespace pstore {
             //* / -_) '  \| |  _| | ' \/ _` | '  \/ -_|_-< *
             //* \___|_|_|_|_|\__| |_||_\__,_|_|_|_\___/__/ *
             //*                                            *
+            /// Writes the array of names defined in transaction \p generation to output stream
+            /// \p os.
+            ///
+            /// \tparam OStream An iostreams-style output type.
+            /// \p os  The stream to which output is written.
+            /// \p ind  The indentation of the output.
+            /// \p db  The database instance whose strings are to be dumped.
+            /// \p generation  The database generation number whose strings are to be dumped.
+            /// \p string_table  The string table accumulates the address-to-index mapping of each
+            /// string as it is dumped.
             template <typename OStream>
-            void emit_names (OStream & os, indent ind, class database const & db,
+            void emit_names (OStream & os, indent ind, database const & db,
                              unsigned const generation, name_mapping * const string_table) {
-
                 auto const names_index = index::get_index<trailer::indices::name> (db);
                 assert (generation > 0);
-                auto const container = diff::diff (db, *names_index, generation - 1U);
-                emit_array (os, ind, std::begin (container), std::end (container),
-                            [&names_index, &string_table, &db] (OStream & os1, indent ind1,
-                                                                address const addr) {
-                                indirect_string const str = names_index->load_leaf_node (db, addr);
-                                shared_sstring_view owner;
-                                raw_sstring_view view = str.as_db_string_view (&owner);
-                                os1 << ind1;
-                                emit_string (os1, view);
-                                string_table->add (addr);
-                            });
+
+                auto const * separator = "";
+                auto const * tail_separator = "";
+                auto close_bracket_indent = indent{};
+
+                auto member_indent = ind.next ();
+                auto const out_fn = [&] (pstore::address const addr) {
+                    os << separator << '\n' << member_indent;
+                    {
+                        indirect_string const str = names_index->load_leaf_node (db, addr);
+                        shared_sstring_view owner;
+                        raw_sstring_view view = str.as_db_string_view (&owner);
+                        emit_string (os, view);
+                        string_table->add (addr);
+                    }
+                    separator = ",";
+                    tail_separator = "\n";
+                    close_bracket_indent = ind;
+                };
+                os << '[';
+                diff (db, *names_index, generation - 1U, make_diff_out (&out_fn));
+                os << tail_separator << close_bracket_indent << ']';
             }
 
         } // end namespace export_ns

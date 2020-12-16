@@ -41,11 +41,13 @@
 #  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 #  SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 # ===----------------------------------------------------------------------===//
+
+import errno
 import subprocess
 import threading
 
 # The default process timeout in seconds
-DEFAULT_PROCESS_TIMEOUT = 2 * 60.0
+DEFAULT_PROCESS_TIMEOUT = 3 * 60.0
 
 
 class TimedProcess(threading.Thread):
@@ -85,8 +87,8 @@ class TimedProcess(threading.Thread):
                 self.__timer.cancel()
 
     def output(self):
-        '''After the thread has joined (and hence the process has exited),
-        returns everything that it wrote to stdout.'''
+        """After the thread has joined (and hence the process has exited),
+        returns everything that it wrote to stdout."""
 
         return self.__stdout
 
@@ -97,7 +99,7 @@ class TimedProcess(threading.Thread):
         return self.__did_timeout
 
     def timeout(self):
-        '''Injects a timeout to a running process, forcing it to exit.'''
+        """Injects a timeout to a running process, forcing it to exit."""
 
         self.__timer.cancel()
         if self.__process is not None and self.__process.poll() is None:
@@ -109,7 +111,8 @@ class TimedProcess(threading.Thread):
                     raise
 
     def send_signal(self, signal):
-        '''Sends a signal to the child process.'''
+        """Sends a signal to the child process."""
+
         if self.__process:
             self.__process.send_signal(signal)
 

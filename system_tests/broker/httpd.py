@@ -171,7 +171,7 @@ def main(broker_path, host, port, timeout):
     print('Using HTTP port %d' % port, file=sys.stderr)
     broker_process = start_broker(broker_path, port, timeout)
     try:
-        reply = http_get(host, port)
+        reply = http_get(host, port).decode("utf-8")
         print("Reply was: {0}".format (reply), file=sys.stderr)
         if not check_reply (reply):
             exit_code = EXIT_FAILURE

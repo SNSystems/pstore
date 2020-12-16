@@ -86,6 +86,44 @@ namespace pstore {
 
             } // end namespace details
 
+
+            /// \brief An OutputIterator intended for use with the diff() API.
+            ///
+            /// When the diff() function finds an index entry that it wants to report as new, it
+            /// does so by writing to an OutputIterator. This implementation forwards the address of
+            /// the new object to a function for processing.
+            ///
+            /// \tparam OutputFunction A function with signature equivalent to 'void(address').
+            template <typename OutputFunction>
+            class diff_out {
+            public:
+                using iterator_category = std::output_iterator_tag;
+                using value_type = void;
+                using difference_type = void;
+                using pointer = void;
+                using reference = void;
+
+                explicit diff_out (OutputFunction const * const fn) noexcept
+                        : fn_{fn} {}
+
+                diff_out & operator= (pstore::address const addr) {
+                    (*fn_) (addr);
+                    return *this;
+                }
+
+                diff_out & operator* () noexcept { return *this; }
+                diff_out & operator++ () noexcept { return *this; }
+                diff_out operator++ (int) noexcept { return *this; }
+
+            private:
+                OutputFunction const * fn_;
+            };
+
+            template <typename OutputFunction>
+            diff_out<OutputFunction> make_diff_out (OutputFunction const * const fn) {
+                return diff_out<OutputFunction>{fn};
+            }
+                
             template <typename OStream>
             void emit_digest (OStream & os, uint128 const d) {
                 std::array<char, uint128::hex_string_length> hex;

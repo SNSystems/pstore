@@ -70,7 +70,7 @@ namespace {
 
     pstore::command_line::opt<std::string> path (pstore::command_line::positional,
                                                  pstore::command_line::required,
-                                                 pstore::command_line::usage ("repository"));
+                                                 pstore::command_line::usage ("<repository>"));
 
     //*                 *
     //*  ___ __ _ _  _  *
@@ -88,9 +88,8 @@ namespace {
         say_impl (os, args...);
     }
 
-
-    // A wrapper around ostream operator<< which takes a lock to prevent output from different
-    // threads from being interleaved.
+    /// A wrapper around ostream operator<< which takes a lock to prevent output from different
+    /// threads from being interleaved.
     template <typename OStream, typename... Args>
     void say (OStream & os, Args... args) {
         static std::mutex io_mut;
@@ -108,13 +107,13 @@ namespace {
     class blocked_notifier {
     public:
         blocked_notifier ();
-        ~blocked_notifier ();
-
-        // No assignment or copying.
         blocked_notifier (blocked_notifier const &) = delete;
-        blocked_notifier (blocked_notifier &&) = delete;
+        blocked_notifier (blocked_notifier &&) noexcept = delete;
+
+        ~blocked_notifier () noexcept;
+
         blocked_notifier & operator= (blocked_notifier const &) = delete;
-        blocked_notifier & operator= (blocked_notifier &&) = delete;
+        blocked_notifier & operator= (blocked_notifier &&) noexcept = delete;
 
         void not_blocked ();
 
@@ -140,11 +139,13 @@ namespace {
     blocked_notifier::blocked_notifier ()
             : thread_{[this] () { this->blocked (); }} {}
 
-    // ~dtor
-    // ~~~~~
-    blocked_notifier::~blocked_notifier () {
-        not_blocked ();
-        thread_.join ();
+    // dtor
+    // ~~~~
+    blocked_notifier::~blocked_notifier () noexcept {
+        pstore::no_ex_escape ([this] () {
+            not_blocked ();
+            thread_.join ();
+        });
     }
 
     // blocked
@@ -159,7 +160,7 @@ namespace {
         }
     }
 
-    // not_blocked
+    // not blocked
     // ~~~~~~~~~~~
     void blocked_notifier::not_blocked () {
         std::lock_guard<std::mutex> _{mut_}; //! OCLint(PH - meant to be unused)

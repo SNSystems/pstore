@@ -48,13 +48,13 @@
 #include <utility>
 
 #include "pstore/command_line/tchar.hpp"
-#include "pstore/diff/diff_value.hpp"
-#include "pstore/diff/revision.hpp"
+#include "pstore/diff_dump/diff_value.hpp"
+#include "pstore/diff_dump/revision.hpp"
 
 struct switches {
     std::string db_path;
-    pstore::diff::revision_number first_revision = pstore::head_revision;
-    pstore::maybe<pstore::diff::revision_number> second_revision;
+    pstore::revision_number first_revision = pstore::head_revision;
+    pstore::maybe<pstore::revision_number> second_revision;
     bool hex = false;
 };
 

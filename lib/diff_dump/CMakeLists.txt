@@ -4,7 +4,7 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- lib/diff/CMakeLists.txt ---------------------------------------------===//
+#===- lib/diff_dump/CMakeLists.txt ----------------------------------------===//
 # Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
@@ -42,22 +42,21 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
 
-#####################
-# pstore diff library
-#####################
+##########################
+# pstore diff-dump library
+##########################
 
 add_pstore_library (
-    TARGET pstore-diff-lib
-    NAME diff
+    TARGET pstore-diff-dump
+    NAME diff-dump
     SOURCES
         revision.cpp
         diff_value.cpp
     HEADER_DIR
-        "${PSTORE_ROOT_DIR}/include/pstore/diff"
+        "${PSTORE_ROOT_DIR}/include/pstore/diff_dump"
     INCLUDES
         revision.hpp
-        diff.hpp
         diff_value.hpp
 )
-target_link_libraries (pstore-diff-lib PUBLIC pstore-adt pstore-core pstore-dump-lib)
-add_clang_tidy_target (pstore-diff-lib)
+target_link_libraries (pstore-diff-dump PUBLIC pstore-adt pstore-core pstore-dump-lib)
+add_clang_tidy_target (pstore-diff-dump)

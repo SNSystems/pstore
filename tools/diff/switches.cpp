@@ -79,9 +79,7 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.first_revision = static_cast<unsigned> (first_revision.get ());
     result.second_revision = second_revision.get_num_occurrences () > 0
                                  ? just (static_cast<unsigned> (second_revision.get ()))
-                                 : nothing<diff::revision_number> ();
-
+                                 : nothing<revision_number> ();
     result.hex = hex.get ();
-
     return {result, EXIT_SUCCESS};
 }

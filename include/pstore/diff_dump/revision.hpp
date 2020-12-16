@@ -4,7 +4,7 @@
 //* | | |  __/\ V /| \__ \ | (_) | | | | *
 //* |_|  \___| \_/ |_|___/_|\___/|_| |_| *
 //*                                      *
-//===- include/pstore/diff/revision.hpp -----------------------------------===//
+//===- include/pstore/diff_dump/revision.hpp ------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,22 +41,22 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#ifndef PSTORE_DIFF_REVISION_HPP
-#define PSTORE_DIFF_REVISION_HPP
+#ifndef PSTORE_DIFF_DUMP_REVISION_HPP
+#define PSTORE_DIFF_DUMP_REVISION_HPP
 
 #include <utility>
 
+#include "pstore/core/diff.hpp"
 #include "pstore/support/maybe.hpp"
 
 namespace pstore {
-    namespace diff {
+    namespace diff_dump {
 
-        using revision_number = unsigned;
         using revisions_type = std::pair<revision_number, maybe<revision_number>>;
         revisions_type update_revisions (revisions_type const & revisions,
                                          revision_number const actual_head);
 
-    } // namespace diff
-} // namespace pstore
+    } // end namespace diff_dump
+} // end namespace pstore
 
-#endif // PSTORE_DIFF_REVISION_HPP
+#endif // PSTORE_DIFF_DUMP_REVISION_HPP

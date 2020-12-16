@@ -79,6 +79,17 @@ namespace {
 
 namespace pstore {
 
+    // to hex string
+    // ~~~~~~~~~~~~~
+    std::string uint128::to_hex_string () const {
+        std::string result;
+        result.reserve (hex_string_length);
+        this->to_hex (std::back_inserter (result));
+        return result;
+    }
+
+    // from hex string
+    // ~~~~~~~~~~~~~~~
     maybe<uint128> uint128::from_hex_string (std::string const & str) {
         if (str.length () != 32) {
             return nothing<uint128> ();
