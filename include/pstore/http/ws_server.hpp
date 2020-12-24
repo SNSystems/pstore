@@ -345,7 +345,7 @@ namespace pstore {
                                                        gsl::span<std::uint8_t const> const & span) {
                 auto send_length = [&] (IO io2) {
                     auto const size = span.size ();
-                    assert (
+                    PSTORE_ASSERT (
                         size >= 0 &&
                         static_cast<
                             std::make_unsigned<std::remove_const<decltype (size)>::type>::type> (
@@ -449,7 +449,7 @@ namespace pstore {
                 state = close_status_code::protocol_error;
             } else {
                 // Extract the close state from the message payload.
-                assert (payload_size >= sizeof (std::uint16_t));
+                PSTORE_ASSERT (payload_size >= sizeof (std::uint16_t));
                 state = static_cast<close_status_code> (network_to_host (
                     *reinterpret_cast<std::uint16_t const *> (wsp.payload.data ())));
 
@@ -592,7 +592,7 @@ namespace pstore {
                 // TODO: A reply to a ping that we sent.
                 break;
 
-            case opcode::unknown: assert (0); break;
+            case opcode::unknown: PSTORE_ASSERT (0); break;
             }
             return std::tuple<IO, bool>{std::move (io), false};
         }
@@ -633,7 +633,7 @@ namespace pstore {
                 }
                 if (avail.cv) {
                     // There's a message to push to our peer.
-                    assert (cv != nullptr);
+                    PSTORE_ASSERT (cv != nullptr);
                     cv->reset ();
                     if (subscription) {
                         while (maybe<std::string> const message = subscription->pop ()) {

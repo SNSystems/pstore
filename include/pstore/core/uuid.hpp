@@ -156,7 +156,7 @@ namespace pstore {
         /// N is the number of bytes in Ty).
         template <typename Ty>
         static std::uint8_t get_byte (Ty const t, unsigned const num) noexcept {
-            assert (num < sizeof (Ty));
+            PSTORE_ASSERT (num < sizeof (Ty));
             return static_cast<std::uint8_t> ((t >> (num * 8)) & 0xff);
         }
     };

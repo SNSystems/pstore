@@ -70,9 +70,10 @@ namespace {
     template <typename Enum, typename Bitfield>
     void assert_enum_field_width (std::initializer_list<Enum> init) noexcept {
         (void) init;
-        assert (pstore::round_to_power_of_2 (
-                    static_cast<typename std::underlying_type<Enum>::type> (std::max (init)) +
-                    1U) == Bitfield::max () + 1U);
+        PSTORE_ASSERT (
+            pstore::round_to_power_of_2 (
+                static_cast<typename std::underlying_type<Enum>::type> (std::max (init)) + 1U) ==
+            Bitfield::max () + 1U);
     }
 
 } // end anonymous namespace
@@ -126,7 +127,7 @@ constexpr std::array<char, 8> compilation::compilation_signature_;
 void * compilation::operator new (std::size_t const s, nmembers const size) {
     (void) s;
     std::size_t const actual_bytes = compilation::size_bytes (size.n);
-    assert (actual_bytes >= s);
+    PSTORE_ASSERT (actual_bytes >= s);
     return ::operator new (actual_bytes);
 }
 

@@ -295,7 +295,7 @@ namespace {
                 : map_ (map) {}
         std::uint64_t operator() (std::string const & str) const {
             auto it = map_.find (str);
-            assert (it != map_.end ());
+            PSTORE_ASSERT (it != map_.end ());
             return it->second;
         }
 
@@ -1735,7 +1735,7 @@ namespace {
     // load_inode
     // ~~~~~~~~~~
     std::shared_ptr<internal_node> CorruptInternalNodes::load_inode (index_pointer ptr) {
-        assert (ptr.is_internal ());
+        PSTORE_ASSERT (ptr.is_internal ());
         return std::static_pointer_cast<internal_node> (
             db_->getrw (ptr.untag_internal_address ().to_address (),
                         internal_node::size_bytes (internal_node_children)));

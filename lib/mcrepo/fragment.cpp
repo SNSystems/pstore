@@ -94,7 +94,7 @@ namespace {
     /// this buffer. The lifetime of this buffer must be greater than that of the result pointer.
     dispatcher_ptr make_dispatcher (fragment const & f, section_kind const kind,
                                     pstore::gsl::not_null<dispatcher_buffer *> const buffer) {
-        assert (f.has_section (kind));
+        PSTORE_ASSERT (f.has_section (kind));
 
 #define X(k)                                                                                       \
     case section_kind::k: return make_dispatcher_for_kind<section_kind::k> (f, buffer);
@@ -168,7 +168,7 @@ bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragme
         }
 
         section_kind const kind = static_cast<section_kind> (index);
-        assert (f.has_section (kind));
+        PSTORE_ASSERT (f.has_section (kind));
 #define X(k)                                                                                       \
     case section_kind::k:                                                                          \
         offset = fragment::section_offset_is_valid<section_kind::k> (f, fext, offset, this_offset, \
@@ -177,7 +177,7 @@ bool fragment::fragment_appears_valid (fragment const & f, pstore::extent<fragme
 
         switch (kind) {
             PSTORE_MCREPO_SECTION_KINDS
-        case repo::section_kind::last: assert (false); break;
+        case repo::section_kind::last: PSTORE_ASSERT (false); break;
         }
 #undef X
         if (offset == 0) {

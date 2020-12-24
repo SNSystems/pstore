@@ -60,7 +60,7 @@
 namespace {
 
     DWORD get_module_file_name (pstore::small_vector<wchar_t> & buffer) {
-        assert (buffer.size () <= std::numeric_limits<DWORD>::max ());
+        PSTORE_ASSERT (buffer.size () <= std::numeric_limits<DWORD>::max ());
         DWORD const num_wchars =
             ::GetModuleFileNameW (nullptr, buffer.data (), static_cast<DWORD> (buffer.size ()));
         if (num_wchars == 0) {

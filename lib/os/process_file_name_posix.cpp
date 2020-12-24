@@ -71,7 +71,7 @@ namespace pstore {
             buffer.resize (buffer_size);
             ::_NSGetExecutablePath (buffer.data (), &buffer_size);
         }
-        assert (buffer_size > 1U);
+        PSTORE_ASSERT (buffer_size > 1U);
         buffer[buffer_size - 1] = '\0'; // guarantee null termination.
         return {buffer.data ()};
     }
@@ -140,7 +140,7 @@ namespace pstore {
         std::string const path = link_path ();
         auto read_link = [&path] (gsl::span<char> const buffer) {
             auto const buffer_size = buffer.size ();
-            assert (buffer_size >= 0);
+            PSTORE_ASSERT (buffer_size >= 0);
             ssize_t const num_chars = ::readlink (path.c_str (), buffer.data (),
                                                   clamp (static_cast<std::size_t> (buffer_size),
                                                          std::size_t{0}, std::size_t{SSIZE_MAX}));

@@ -70,7 +70,7 @@ namespace pstore {
                     std::ostringstream os;
                     os << "{ \"uptime\": " << seconds << " }";
                     std::string const & str = os.str ();
-                    assert (json::is_valid (str));
+                    PSTORE_ASSERT (json::is_valid (str));
                     return str;
                 });
             }

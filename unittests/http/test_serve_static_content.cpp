@@ -122,9 +122,9 @@ namespace {
             static auto const crlf = pstore::httpd::crlf;
             static auto const crlf_len = std::strlen (crlf);
 
-            assert (start != std::string::npos);
+            PSTORE_ASSERT (start != std::string::npos);
             auto const pos = src_.find (crlf, start);
-            assert (pos != std::string::npos);
+            PSTORE_ASSERT (pos != std::string::npos);
             return {pstore::in_place, pos + crlf_len,
                     pstore::just (src_.substr (start, pos - start))};
         }

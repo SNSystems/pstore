@@ -150,8 +150,8 @@ namespace pstore {
                                 }
                                 os1 << separator << ind1 << R"("size":)" << content1.size ()
                                     << '\n';
-                                assert (content1.ifixups ().empty ());
-                                assert (content1.xfixups ().empty ());
+                                PSTORE_ASSERT (content1.ifixups ().empty ());
+                                PSTORE_ASSERT (content1.xfixups ().empty ());
                             });
                     }
                 };
@@ -168,8 +168,8 @@ namespace pstore {
                         return emit_object (
                             os, ind, content,
                             [] (OStream & os1, indent const ind1, dls const & content1) {
-                                assert (content1.align () == 1U);
-                                assert (content1.xfixups ().size () == 0U);
+                                PSTORE_ASSERT (content1.align () == 1U);
+                                PSTORE_ASSERT (content1.xfixups ().size () == 0U);
                                 os1 << ind1 << R"("header":)";
                                 emit_digest (os1, content1.header_digest ());
                                 os1 << ",\n";

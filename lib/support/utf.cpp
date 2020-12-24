@@ -47,10 +47,11 @@
 #include "pstore/support/utf.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <cstring>
 #include <type_traits>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace utf {

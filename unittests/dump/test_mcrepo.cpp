@@ -136,7 +136,7 @@ namespace {
     // ~~~~~~~~~
     pstore::typed_address<pstore::indirect_string>
     MCRepoFixture::store_str (transaction_type & transaction, std::string const & str) {
-        assert (db_.get () == &transaction.db ());
+        PSTORE_ASSERT (db_.get () == &transaction.db ());
         pstore::raw_sstring_view const sstring = pstore::make_sstring_view (str);
         pstore::indirect_string_adder adder;
         auto const pos =
@@ -154,7 +154,7 @@ namespace {
                                                             std::uint8_t const * first,
                                                             std::size_t size) {
 
-        assert (db_.get () == &transaction.db ());
+        PSTORE_ASSERT (db_.get () == &transaction.db ());
         // Allocate space in the transaction for 'Size' bytes.
         auto addr = pstore::typed_address<std::uint8_t>::null ();
         std::shared_ptr<std::uint8_t> ptr;

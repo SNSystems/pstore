@@ -238,8 +238,8 @@ namespace pstore {
                               << ostream_traits::out_string (std::get<std::string> (name));
 
                         is_first = false;
-                        assert (pstore::utf::length (std::get<std::string> (name)) ==
-                                std::get<std::size_t> (name));
+                        PSTORE_ASSERT (pstore::utf::length (std::get<std::string> (name)) ==
+                                       std::get<std::size_t> (name));
                         is_overlong = std::get<std::size_t> (name) > details::overlong_opt_max;
                     }
                     outs_ << separator;

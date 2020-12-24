@@ -128,7 +128,7 @@ namespace pstore {
                 if (std::all_of (std::begin (value), std::end (value), not_null)) {
                     std::string complete_command;
                     for (auto const & c : value) {
-                        assert (c.get () != nullptr);
+                        PSTORE_ASSERT (c.get () != nullptr);
                         complete_command += *c;
                     }
 

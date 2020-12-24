@@ -156,7 +156,7 @@ namespace pstore {
 
             template <typename CharType>
             int hex_digit (CharType c) noexcept {
-                assert (std::isxdigit (c));
+                PSTORE_ASSERT (std::isxdigit (c));
                 if (c >= '0' && c <= '9') {
                     return c - '0';
                 }
@@ -166,7 +166,7 @@ namespace pstore {
                 if (c >= 'A' && c <= 'F') {
                     return c - 'A' + 10;
                 }
-                assert (false);
+                PSTORE_ASSERT (false);
                 return 0;
             }
 

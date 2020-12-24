@@ -53,7 +53,7 @@ namespace pstore {
                 auto const fragments = index::get_index<trailer::indices::fragment> (db);
                 if (!fragments->empty ()) {
                     auto const * fragment_sep = "\n";
-                    assert (generation > 0U);
+                    PSTORE_ASSERT (generation > 0U);
 
                     auto const out_fn = [&] (address addr) {
                         auto const & kvp = fragments->load_leaf_node (db, addr);

@@ -182,13 +182,13 @@ namespace {
         using T = std::remove_pointer<decltype (this)>::type;
         static_assert (offsetof (T, overlap_) == 0,
                        "OVERLAPPED must be the first member of the request structure");
-        assert (pipe_handle_.valid ());
+        PSTORE_ASSERT (pipe_handle_.valid ());
     }
 
     // (dtor)
     // ~~~~~~
     reader::~reader () noexcept {
-        assert (!is_in_flight_);
+        PSTORE_ASSERT (!is_in_flight_);
         // Close this pipe instance.
         if (pipe_handle_.valid ()) {
             ::DisconnectNamedPipe (pipe_handle_.native_handle ());
@@ -198,7 +198,7 @@ namespace {
     // done
     // ~~~~
     reader * reader::done (reader * r) noexcept {
-        assert (!r->is_in_flight_);
+        PSTORE_ASSERT (!r->is_in_flight_);
         intrusive_list<reader>::erase (r);
         delete r;
         return nullptr;
@@ -222,13 +222,13 @@ namespace {
     /// \return True if the pipe read does not return an error. If false is returned, the client has
     /// gone away and this pipe instance should be closed.
     bool reader::read () {
-        assert (!is_in_flight_);
+        PSTORE_ASSERT (!is_in_flight_);
 
         // Pull a buffer from pool to use for storing the data read from the pipe connection.
-        assert (request_.get () == nullptr);
+        PSTORE_ASSERT (request_.get () == nullptr);
         request_ = pool.get_from_pool ();
 
-        assert (sizeof (*request_) <= std::numeric_limits<DWORD>::max ());
+        PSTORE_ASSERT (sizeof (*request_) <= std::numeric_limits<DWORD>::max ());
 
         // Start the read and call read_completed() when it finishes.
         is_in_flight_ =
@@ -257,10 +257,10 @@ namespace {
     ///   function.
     VOID WINAPI reader::read_completed (DWORD errcode, DWORD bytes_read, LPOVERLAPPED overlap) {
         auto * r = reinterpret_cast<reader *> (overlap);
-        assert (r != nullptr);
+        PSTORE_ASSERT (r != nullptr);
 
         try {
-            assert (r->is_in_flight_);
+            PSTORE_ASSERT (r->is_in_flight_);
             r->is_in_flight_ = false;
 
             if (errcode == ERROR_SUCCESS && bytes_read != 0) {
@@ -297,7 +297,7 @@ namespace {
     // completed
     // ~~~~~~~~~
     void reader::completed () {
-        assert (command_processor_ != nullptr);
+        PSTORE_ASSERT (command_processor_ != nullptr);
         command_processor_->push_command (std::move (request_), record_file_);
     }
 

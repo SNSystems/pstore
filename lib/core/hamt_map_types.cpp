@@ -64,7 +64,7 @@ namespace pstore {
             void * linear_node::operator new (std::size_t const s, nchildren const size) {
                 (void) s;
                 std::size_t const actual_bytes = linear_node::size_bytes (size.n);
-                assert (actual_bytes >= s);
+                PSTORE_ASSERT (actual_bytes >= s);
                 return ::operator new (actual_bytes);
             }
 
@@ -139,7 +139,7 @@ namespace pstore {
                                         std::size_t const extra_children) {
                 std::pair<std::shared_ptr<linear_node const>, linear_node const *> const p =
                     linear_node::get_node (db, node);
-                assert (p.second != nullptr);
+                PSTORE_ASSERT (p.second != nullptr);
                 return linear_node::allocate_from (*p.second, extra_children);
             }
 
@@ -150,7 +150,7 @@ namespace pstore {
 
                 if (node.is_heap ()) {
                     auto const * ptr = node.untag_node<linear_node const *> ();
-                    assert (ptr->signature_ == node_signature_);
+                    PSTORE_ASSERT (ptr->signature_ == node_signature_);
                     return {nullptr, ptr};
                 }
 
@@ -224,9 +224,11 @@ namespace pstore {
                 auto const index_a = get_new_index (new_hash, existing_hash);
                 auto const index_b = static_cast<unsigned> (index_a == 0);
 
-                assert ((index_a & 1) == index_a); //! OCLINT(PH - bitwise in conditional is ok)
-                assert ((index_b & 1) == index_b); //! OCLINT(PH - bitwise in conditional is ok)
-                assert (index_a != index_b);
+                PSTORE_ASSERT ((index_a & 1) ==
+                               index_a); //! OCLINT(PH - bitwise in conditional is ok)
+                PSTORE_ASSERT ((index_b & 1) ==
+                               index_b); //! OCLINT(PH - bitwise in conditional is ok)
+                PSTORE_ASSERT (index_a != index_b);
 
                 children_[index_a] = index_pointer{new_leaf};
                 children_[index_b] = existing_leaf;
@@ -294,7 +296,8 @@ namespace pstore {
                 std::size_t const actual_size = internal_node::size_bytes (base->size ());
                 base.reset ();
 
-                assert (actual_size > sizeof (internal_node) - sizeof (internal_node::children_));
+                PSTORE_ASSERT (actual_size >
+                               sizeof (internal_node) - sizeof (internal_node::children_));
                 auto resl = std::static_pointer_cast<internal_node const> (
                     db.getro (addr.to_address (), actual_size));
 
@@ -326,15 +329,16 @@ namespace pstore {
                                               gsl::not_null<parent_stack *> const parents) {
                 auto const hash_index = hash & details::hash_index_mask;
                 auto const bit_pos = hash_type{1} << hash_index;
-                assert (bit_pos != 0); // guarantee that we didn't shift the bit to oblivion
+                PSTORE_ASSERT (bit_pos != 0); // guarantee that we didn't shift the bit to oblivion
                 // check that this slot is free.
-                assert ((this->bitmap_ & bit_pos) == 0); //! OCLINT(PH - bitwise in conditional)
+                PSTORE_ASSERT ((this->bitmap_ & bit_pos) ==
+                               0); //! OCLINT(PH - bitwise in conditional)
 
                 // Compute the child index by counting the number of 1 bits below bit_pos.
                 unsigned const index = bit_count::pop_count (this->bitmap_ & (bit_pos - 1));
                 unsigned const old_size = bit_count::pop_count (this->bitmap_);
-                assert (old_size < hash_size);
-                assert (index <= old_size);
+                PSTORE_ASSERT (old_size < hash_size);
+                PSTORE_ASSERT (index <= old_size);
 
                 // Move elements from [index..old_size) to [index+1..old_size+1)
                 {
@@ -343,7 +347,7 @@ namespace pstore {
 
                     auto const span = children_span.subspan (index, num_to_move);
                     auto const d_span = children_span.subspan (index + 1, num_to_move);
-                    assert (d_span.last (0).data () <= children_span.last (0).data ());
+                    PSTORE_ASSERT (d_span.last (0).data () <= children_span.last (0).data ());
 
                     std::move_backward (std::begin (span), std::end (span), std::end (d_span));
                 }
@@ -351,7 +355,7 @@ namespace pstore {
                 children_[index] = leaf;
 
                 this->bitmap_ = this->bitmap_ | bit_pos;
-                assert (bit_count::pop_count (this->bitmap_) == old_size + 1);
+                PSTORE_ASSERT (bit_count::pop_count (this->bitmap_) == old_size + 1);
                 parents->push ({index_pointer{this}, index});
             }
 
@@ -375,14 +379,14 @@ namespace pstore {
                     // If it is a heap node, flush its children first (depth-first search).
                     if (p.is_heap ()) {
                         if (shifts < max_hash_bits) { // internal node
-                            assert (p.is_internal ());
+                            PSTORE_ASSERT (p.is_internal ());
                             auto * const internal = p.untag_node<internal_node *> ();
                             p = internal->flush (transaction, shifts);
                             // This node is owned by a container in the outer HAMT structure. Don't
                             // delete it here. If this ever changes, then add a 'delete internal;'
                             // here.
                         } else { // linear node
-                            assert (p.is_linear ());
+                            PSTORE_ASSERT (p.is_linear ());
                             auto * const linear = p.untag_node<linear_node *> ();
                             p = linear->flush (transaction) | internal_node_bit;
                             delete linear;

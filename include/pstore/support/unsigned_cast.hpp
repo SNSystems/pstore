@@ -59,7 +59,7 @@ namespace pstore {
             std::numeric_limits<DestT>::max () >=
                 std::numeric_limits<std::make_unsigned_t<typename std::remove_cv_t<SrcT>>>::max (),
             "DestT cannot hold all of the values of SrcT");
-        assert (value >= SrcT{0});
+        PSTORE_ASSERT (value >= SrcT{0});
         return static_cast<DestT> (value);
     }
 

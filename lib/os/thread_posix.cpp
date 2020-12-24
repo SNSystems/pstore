@@ -134,7 +134,7 @@ namespace pstore {
 #    ifdef __FreeBSD__
             std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
 #    else
-            assert (length == name.size_bytes ());
+            PSTORE_ASSERT (length == name.size_bytes ());
             int const err = pthread_getname_np (pthread_self (), name.data (),
                                                 static_cast<std::size_t> (length));
             if (err != 0) {

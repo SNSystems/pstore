@@ -138,7 +138,7 @@ namespace {
 
         while ((end = s.find (two_colons, start)) != std::string::npos) {
             ++part;
-            assert (end >= start);
+            PSTORE_ASSERT (end >= start);
             auto const length = end - start;
             if (length == 0 && part > 1U) {
                 pstore::raise (genromfs_erc::empty_name_component);

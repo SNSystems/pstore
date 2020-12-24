@@ -145,7 +145,7 @@ namespace pstore {
             template <typename T>
             auto unsigned_cast (T const & t) -> typename std::make_unsigned<T>::type {
                 using unsigned_type = typename std::make_unsigned<T>::type;
-                assert (t >= 0);
+                PSTORE_ASSERT (t >= 0);
                 return static_cast<unsigned_type> (t);
             }
 
@@ -188,7 +188,7 @@ namespace pstore {
                 auto put (Ty const & t) -> result_type {
                     static_assert (std::is_standard_layout<Ty>::value,
                                    "writer_base can only write standard-layout types!");
-                    assert (!flushed_);
+                    PSTORE_ASSERT (!flushed_);
                     result_type r = policy_.put (t);
                     bytes_consumed_ += sizeof (t);
                     return r;
@@ -206,7 +206,7 @@ namespace pstore {
                     using element_type = typename Span::element_type;
                     static_assert (std::is_standard_layout<element_type>::value,
                                    "writer_base can only write standard-layout types!");
-                    assert (!flushed_);
+                    PSTORE_ASSERT (!flushed_);
                     auto r = putn_helper::template putn<Span> (policy_, sp);
                     bytes_consumed_ += unsigned_cast (sp.size_bytes ());
                     return r;
@@ -401,7 +401,7 @@ namespace pstore {
                             , it_ (static_cast<std::uint8_t *> (first)) {
 
                         (void) last;
-                        assert (end_ >= it_);
+                        PSTORE_ASSERT (end_ >= it_);
                     }
 
                     /// Writes an object to the output buffer.
@@ -409,17 +409,17 @@ namespace pstore {
                     template <typename Ty>
                     auto put (Ty const & v) -> result_type {
                         auto const size = sizeof (v);
-                        assert (it_ + size <= end_);
+                        PSTORE_ASSERT (it_ + size <= end_);
                         auto const result = it_;
                         std::memcpy (it_, &v, size);
                         it_ += size;
-                        assert (it_ <= end_);
+                        PSTORE_ASSERT (it_ <= end_);
                         return result;
                     }
 
                     /// Returns the number of bytes written to the buffer.
                     std::size_t size () const noexcept {
-                        assert (it_ >= begin_);
+                        PSTORE_ASSERT (it_ >= begin_);
                         static_assert (sizeof (std::size_t) >= sizeof (std::ptrdiff_t),
                                        "sizeof size_t should be at least sizeof ptrdiff_t");
                         return static_cast<std::size_t> (it_ - begin_);

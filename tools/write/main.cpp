@@ -92,7 +92,7 @@ namespace {
             std::size_t const bytes_read = file.read_span (span);
 
             auto const expected_size = span.size_bytes ();
-            assert (expected_size >= 0);
+            PSTORE_ASSERT (expected_size >= 0);
             if (bytes_read !=
                 static_cast<
                     std::make_unsigned<std::remove_const<decltype (expected_size)>::type>::type> (

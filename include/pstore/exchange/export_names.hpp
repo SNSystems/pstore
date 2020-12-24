@@ -103,7 +103,7 @@ namespace pstore {
             void emit_names (OStream & os, indent ind, database const & db,
                              unsigned const generation, name_mapping * const string_table) {
                 auto const names_index = index::get_index<trailer::indices::name> (db);
-                assert (generation > 0);
+                PSTORE_ASSERT (generation > 0);
 
                 auto const * separator = "";
                 auto const * tail_separator = "";

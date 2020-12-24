@@ -1,10 +1,10 @@
-//*                  *
-//*   ___ _____   __ *
-//*  / __/ __\ \ / / *
-//* | (__\__ \\ V /  *
-//*  \___|___/ \_/   *
-//*                  *
-//===- lib/command_line/csv.cpp -------------------------------------------===//
+//*  _                _    _                       *
+//* | |__   __ _  ___| | _| |_ _ __ __ _  ___ ___  *
+//* | '_ \ / _` |/ __| |/ / __| '__/ _` |/ __/ _ \ *
+//* | |_) | (_| | (__|   <| |_| | | (_| | (_|  __/ *
+//* |_.__/ \__,_|\___|_|\_\\__|_|  \__,_|\___\___| *
+//*                                                *
+//===- lib/support/backtrace.hpp ------------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,18 +41,12 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/command_line/csv.hpp"
+#ifndef PSTORE_SUPPORT_BACKTRACE_HPP
+#define PSTORE_SUPPORT_BACKTRACE_HPP
 
-#include "pstore/support/assert.hpp"
+#cmakedefine01 PSTORE_HAVE_BACKTRACE
+#if PSTORE_HAVE_BACKTRACE
+# include <${Backtrace_HEADER}>
+#endif
 
-std::list<std::string> pstore::command_line::csv (std::string const & s) {
-    std::list<std::string> result;
-    auto spos = std::string::size_type{0};
-    while (spos != std::string::npos) {
-        auto const epos = s.find (',', spos);
-        PSTORE_ASSERT (epos >= spos);
-        result.emplace_back (s.substr (spos, epos - spos));
-        spos = (epos == std::string::npos) ? epos : epos + 1;
-    }
-    return result;
-}
+#endif // PSTORE_SUPPORT_BACKTRACE_HPP

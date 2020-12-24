@@ -312,7 +312,7 @@ namespace pstore {
                 int const err = errno;
                 raise_file_error (err, "lseek/SEEK_CUR failed", this->path ());
             }
-            assert (r >= 0);
+            PSTORE_ASSERT (r >= 0);
             return static_cast<std::uint64_t> (r);
         }
 
@@ -345,7 +345,7 @@ namespace pstore {
             }
 
             // If the write call succeeded, then the file must have been writable!
-            assert (is_writable_);
+            PSTORE_ASSERT (is_writable_);
         }
 
         // size
@@ -361,7 +361,7 @@ namespace pstore {
             static_assert (std::numeric_limits<std::uint64_t>::max () >=
                                unsigned_cast (std::numeric_limits<decltype (buf.st_size)>::max ()),
                            "stat.st_size is too large for uint64_t");
-            assert (buf.st_size >= 0);
+            PSTORE_ASSERT (buf.st_size >= 0);
             return static_cast<std::uint64_t> (buf.st_size);
         }
 

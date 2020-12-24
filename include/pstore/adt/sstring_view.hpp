@@ -186,7 +186,7 @@ namespace pstore {
 
         // 7.6, sstring_view element access
         const_reference operator[] (size_type const pos) const {
-            assert (pos < size_);
+            PSTORE_ASSERT (pos < size_);
             return (this->data ())[pos];
         }
         const_reference at (size_type const pos) const {
@@ -198,11 +198,11 @@ namespace pstore {
             return (*this)[pos];
         }
         const_reference front () const {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return (*this)[0];
         }
         const_reference back () const {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return (*this)[size_ - 1];
         }
         const_pointer data () const noexcept { return pointer_traits<PointerType>::as_raw (ptr_); }

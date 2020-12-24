@@ -117,7 +117,7 @@ namespace pstore {
                 // Encode the number of bytes in the low bits of the value itself.
                 x = (2U * x + 1U) << (bytes - 1U);
             }
-            assert (bytes < 9);
+            PSTORE_ASSERT (bytes < 9);
             // clang-format off
             switch (bytes) {
             case 8: *(out++) = x & 0xFFU; x >>= 8U; PSTORE_FALLTHROUGH;
@@ -158,7 +158,7 @@ namespace pstore {
 
         template <typename InputIterator>
         std::uint64_t decode (InputIterator in, unsigned size) {
-            assert (size > 0 && size == decode_size (in));
+            PSTORE_ASSERT (size > 0 && size == decode_size (in));
             if (size == 9) {
                 return details::decode9 (in);
             }

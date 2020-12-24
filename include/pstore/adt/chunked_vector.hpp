@@ -49,8 +49,8 @@
 #include <cassert>
 #include <list>
 
+#include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
 
@@ -105,7 +105,7 @@ namespace pstore {
 
         iterator begin () noexcept { return {chunks_.begin (), 0U}; }
         const_iterator begin () const noexcept {
-            assert (empty () || chunks_.front ().size () > 0);
+            PSTORE_ASSERT (empty () || chunks_.front ().size () > 0);
             return {chunks_.begin (), 0U};
         }
         const_iterator cbegin () const noexcept { return begin (); }
@@ -134,26 +134,26 @@ namespace pstore {
         /// Returns a reference to the first element in the container. Calling front
         /// on an empty container is undefined.
         reference front () {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return chunks_.front ().front ();
         }
         /// Returns a reference to the first element in the container. Calling front
         /// on an empty container is undefined.
         const_reference front () const {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return chunks_.front ().front ();
         }
 
         /// Returns a reference to the last element in the container. Calling back
         /// on an empty container is undefined.
         reference back () {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return chunks_.back ().back ();
         }
         /// Returns a reference to the last element in the container. Calling back
         /// on an empty container is undefined.
         const_reference back () const {
-            assert (size_ > 0);
+            PSTORE_ASSERT (size_ > 0);
             return chunks_.back ().back ();
         }
 
@@ -239,7 +239,7 @@ namespace pstore {
     auto
     chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::emplace_back (Args &&... args)
         -> reference {
-        assert (chunks_.size () > 0U);
+        PSTORE_ASSERT (chunks_.size () > 0U);
         auto * tail = &chunks_.back ();
         if (PSTORE_UNLIKELY (tail->size () >= ElementsPerChunk)) {
             // Append a new chunk.
@@ -261,7 +261,7 @@ namespace pstore {
         ChunkedVector & cv) noexcept {
         // We always have at least 1 chunk. If the container is empty then return the begin iterator
         // otherwise an iterator referencing end and of the last member of the last chunk.
-        assert (cv.chunks_.size () > 0U);
+        PSTORE_ASSERT (cv.chunks_.size () > 0U);
         if (cv.size () > 0U) {
             return {cv.chunks_.end (), 0U};
         }
@@ -293,11 +293,11 @@ namespace pstore {
         T const * data () const noexcept { return membs_.data (); }
 
         T & operator[] (std::size_t const index) noexcept {
-            assert (index < ElementsPerChunk);
+            PSTORE_ASSERT (index < ElementsPerChunk);
             return reinterpret_cast<T &> (membs_[index]);
         }
         T const & operator[] (std::size_t const index) const noexcept {
-            assert (index < ElementsPerChunk);
+            PSTORE_ASSERT (index < ElementsPerChunk);
             return reinterpret_cast<T const &> (membs_[index]);
         }
         std::size_t size () const noexcept { return size_; }
@@ -334,7 +334,7 @@ namespace pstore {
     template <typename... Args>
     auto chunked_vector<T, ElementsPerChunk, ActualSize, ActualAlign>::chunk::emplace_back (
         Args &&... args) -> reference {
-        assert (size_ < membs_.size ());
+        PSTORE_ASSERT (size_ < membs_.size ());
         T & place = (*this)[size_];
         new (&place) T (std::forward<Args> (args)...);
         ++size_;
@@ -446,7 +446,7 @@ namespace pstore {
             --index_;
         } else {
             --it_;
-            assert (it_->size () > 0);
+            PSTORE_ASSERT (it_->size () > 0);
             index_ = it_->size () - 1U;
         }
         return *this;

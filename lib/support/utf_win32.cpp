@@ -123,8 +123,8 @@ namespace {
                 output->data (),             // output buffer
                 length_as_int (output_size)) // size (in code units) of the output buffer
         );
-        assert (wchars_written <= output_size * sizeof (output_char_type));
-        assert (wchars_written == from_8_to_16_traits::output_size (wstr, wstr_length));
+        PSTORE_ASSERT (wchars_written <= output_size * sizeof (output_char_type));
+        PSTORE_ASSERT (wchars_written == from_8_to_16_traits::output_size (wstr, wstr_length));
     }
 
 
@@ -172,8 +172,8 @@ namespace {
                                    nullptr, // missing character (must be NULL for UTF8)
                                    nullptr) // missing character was used? (must be NULL for UTF8)
         );
-        assert (bytes_written <= output_size);
-        assert (bytes_written == from_16_to_8_traits::output_size (wstr, wstr_length));
+        PSTORE_ASSERT (bytes_written <= output_size);
+        PSTORE_ASSERT (bytes_written == from_16_to_8_traits::output_size (wstr, wstr_length));
     }
 
 } // end anonymous namespace

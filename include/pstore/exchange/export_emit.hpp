@@ -129,7 +129,7 @@ namespace pstore {
                 std::array<char, uint128::hex_string_length> hex;
                 auto const out = d.to_hex (hex.begin ());
                 (void) out;
-                assert (out == hex.end ());
+                PSTORE_ASSERT (out == hex.end ());
                 os << '"';
                 details::write_span (os, gsl::make_span (hex));
                 os << '"';

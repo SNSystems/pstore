@@ -90,7 +90,7 @@ namespace pstore {
             /// read.
             template <typename Archive>
             static void read (Archive && archive, uint128 & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
+                PSTORE_ASSERT (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
                 archive.get (out);
             }
 
@@ -169,8 +169,8 @@ namespace pstore {
             }
 
 #ifdef PSTORE_CPP_RTTI
-            assert ((!create && dx.get () == nullptr) ||
-                    dynamic_cast<Return *> (dx.get ()) != nullptr);
+            PSTORE_ASSERT ((!create && dx.get () == nullptr) ||
+                           dynamic_cast<Return *> (dx.get ()) != nullptr);
 #endif
             return std::static_pointer_cast<Return> (dx);
         }

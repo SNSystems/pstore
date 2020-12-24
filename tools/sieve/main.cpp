@@ -70,7 +70,7 @@ namespace {
     struct check_range {
         void operator() (R value) const {
             (void) value;
-            assert (value <= std::numeric_limits<T>::max ());
+            PSTORE_ASSERT (value <= std::numeric_limits<T>::max ());
         }
     };
     template <typename T>

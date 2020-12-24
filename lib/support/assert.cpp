@@ -1,10 +1,10 @@
-//*                  *
-//*   ___ _____   __ *
-//*  / __/ __\ \ / / *
-//* | (__\__ \\ V /  *
-//*  \___|___/ \_/   *
-//*                  *
-//===- lib/command_line/csv.cpp -------------------------------------------===//
+//*                          _    *
+//*   __ _ ___ ___  ___ _ __| |_  *
+//*  / _` / __/ __|/ _ \ '__| __| *
+//* | (_| \__ \__ \  __/ |  | |_  *
+//*  \__,_|___/___/\___|_|   \__| *
+//*                               *
+//===- lib/support/assert.cpp ---------------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,18 +41,37 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/command_line/csv.hpp"
-
 #include "pstore/support/assert.hpp"
 
-std::list<std::string> pstore::command_line::csv (std::string const & s) {
-    std::list<std::string> result;
-    auto spos = std::string::size_type{0};
-    while (spos != std::string::npos) {
-        auto const epos = s.find (',', spos);
-        PSTORE_ASSERT (epos >= spos);
-        result.emplace_back (s.substr (spos, epos - spos));
-        spos = (epos == std::string::npos) ? epos : epos + 1;
+#include <array>
+#include <iostream>
+#include <cstdlib>
+
+#include "pstore/support/gsl.hpp"
+#include "backtrace.hpp"
+
+namespace pstore {
+
+    void assert_failed (char const * str, char const * file, int line) {
+        std::cerr << "Assert failed: (" << str << "), file " << file << ", line " << line
+                  << std::endl;
+#if PSTORE_HAVE_BACKTRACE
+        std::array<void *, 64U> callstack;
+        void ** const out = callstack.data ();
+        int const frames = ::backtrace (out, static_cast<int> (callstack.size ()));
+
+        auto const deleter = [] (void * p) {
+            if (p != nullptr) {
+                std::free (p);
+            }
+        };
+        std::unique_ptr<char *, decltype (deleter)> strs{::backtrace_symbols (out, frames),
+                                                         deleter};
+        for (auto ctr = 0; ctr < frames; ++ctr) {
+            std::cerr << strs.get ()[ctr] << '\n';
+        }
+#endif
+        std::abort ();
     }
-    return result;
-}
+
+} // end namespace pstore

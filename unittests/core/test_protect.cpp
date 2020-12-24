@@ -78,9 +78,9 @@ namespace {
                 : pstore::region::factory (full_size, min_size)
                 , file_ (std::move (file)) {
 
-            assert (full_size >= min_size);
-            assert (full_size % pstore::address::segment_size == 0);
-            assert (min_size % pstore::address::segment_size == 0);
+            PSTORE_ASSERT (full_size >= min_size);
+            PSTORE_ASSERT (full_size % pstore::address::segment_size == 0);
+            PSTORE_ASSERT (min_size % pstore::address::segment_size == 0);
         }
 
         auto init () -> std::vector<pstore::region::memory_mapper_ptr> override {

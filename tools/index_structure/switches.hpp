@@ -61,7 +61,7 @@ struct switches {
     bool test (pstore::trailer::indices idx) const {
         auto const position =
             static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
-        assert (idx < pstore::trailer::indices::last);
+        PSTORE_ASSERT (idx < pstore::trailer::indices::last);
         return selected.test (position);
     }
 };

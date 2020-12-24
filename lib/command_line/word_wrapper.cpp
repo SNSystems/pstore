@@ -44,7 +44,8 @@
 #include "pstore/command_line/word_wrapper.hpp"
 
 #include <algorithm>
-#include <cassert>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace command_line {
@@ -107,7 +108,7 @@ namespace pstore {
                     }
                 }
 
-                assert (end_pos >= start_pos_);
+                PSTORE_ASSERT (end_pos >= start_pos_);
                 substr_ = text_.substr (start_pos_, end_pos - start_pos_);
 
                 while (end_pos < length && text_[end_pos] == ' ') {

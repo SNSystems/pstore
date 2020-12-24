@@ -45,10 +45,11 @@
 #include "pstore/os/path.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <iterator>
 #include <tuple>
+
+#include "pstore/support/assert.hpp"
 
 namespace {
 
@@ -164,9 +165,9 @@ namespace pstore {
                     }
 
                     if (!p_drive.empty () && p_drive != result_drive) {
-                        assert (p_drive.length () == 2 && p_drive[1] == ':');
-                        assert (result_drive.length () == 0 ||
-                                (result_drive.length () == 2 && result_drive[1] == ':'));
+                        PSTORE_ASSERT (p_drive.length () == 2 && p_drive[1] == ':');
+                        PSTORE_ASSERT (result_drive.length () == 0 ||
+                                       (result_drive.length () == 2 && result_drive[1] == ':'));
 
                         if (result_drive.length () == 0 ||
                             std::tolower (p_drive[0]) != std::tolower (result_drive[0])) {

@@ -196,7 +196,7 @@ namespace pstore {
                 }
 
                 std::unique_ptr<rule> & top () {
-                    assert (!context_->stack.empty ());
+                    PSTORE_ASSERT (!context_->stack.empty ());
                     return context_->stack.top ();
                 }
                 std::shared_ptr<context> context_;

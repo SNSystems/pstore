@@ -86,7 +86,7 @@ namespace pstore {
                 }
             }
 #undef X
-            assert (locations->size () == index_integral (trailer::indices::last));
+            PSTORE_ASSERT (locations->size () == index_integral (trailer::indices::last));
         }
 
     } // end namespace index

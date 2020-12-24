@@ -94,7 +94,7 @@ namespace pstore {
                     value_ = make_value (addr_.absolute ());
                 }
             }
-            assert (value_.get () != nullptr);
+            PSTORE_ASSERT (value_.get () != nullptr);
             return value_;
         }
 

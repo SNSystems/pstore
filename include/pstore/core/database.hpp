@@ -296,7 +296,7 @@ namespace pstore {
         /// collision probability of 1/32^20 which should be more than small enough for our
         /// purposes.
         std::string get_sync_name () const {
-            assert (sync_name_.length () > 0);
+            PSTORE_ASSERT (sync_name_.length () > 0);
             return sync_name_;
         }
 
@@ -378,18 +378,18 @@ namespace pstore {
             std::uint64_t logical_size () const noexcept { return logical_; }
 
             void update_footer_pos (typed_address<trailer> const new_footer_pos) noexcept {
-                assert (new_footer_pos.absolute () >= leader_size);
+                PSTORE_ASSERT (new_footer_pos.absolute () >= leader_size);
                 footer_pos_ = new_footer_pos;
                 logical_ = std::max (logical_, footer_pos_.absolute () + sizeof (trailer));
             }
 
             void update_logical_size (std::uint64_t const new_logical_size) noexcept {
-                assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
+                PSTORE_ASSERT (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = std::max (logical_, new_logical_size);
             }
 
             void truncate_logical_size (std::uint64_t const new_logical_size) noexcept {
-                assert (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
+                PSTORE_ASSERT (new_logical_size >= footer_pos_.absolute () + sizeof (trailer));
                 logical_ = new_logical_size;
             }
 
@@ -475,7 +475,7 @@ namespace pstore {
     auto database::get_footer_pos (File & file) -> typed_address<trailer> {
         static_assert (std::is_base_of<file::file_base, File>::value,
                        "File type must be derived from file::file_base");
-        assert (file.is_open ());
+        PSTORE_ASSERT (file.is_open ());
 
         std::aligned_storage<sizeof (header), alignof (header)>::type header_storage{};
         auto h = reinterpret_cast<header *> (&header_storage);

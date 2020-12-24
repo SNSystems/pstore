@@ -245,7 +245,7 @@ namespace pstore {
         template <typename ConditionVariable>
         channel<ConditionVariable>::~channel () noexcept {
             // Check that this channel has no subscribers.
-            assert (subscribers_.empty ());
+            PSTORE_ASSERT (subscribers_.empty ());
         }
 
         // publish
@@ -322,7 +322,7 @@ namespace pstore {
         template <typename ConditionVariable>
         void channel<ConditionVariable>::remove (subscriber_type * sub) noexcept {
             std::lock_guard<std::mutex> const lock{mut_};
-            assert (subscribers_.find (sub) != subscribers_.end ());
+            PSTORE_ASSERT (subscribers_.find (sub) != subscribers_.end ());
             subscribers_.erase (sub);
         }
 

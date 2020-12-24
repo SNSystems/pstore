@@ -49,12 +49,13 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/sstring_view_archive.hpp"
-#include <cassert>
+
 #include <vector>
 #include <gmock/gmock.h>
 
 #include "pstore/core/transaction.hpp"
 #include "pstore/core/db_archive.hpp"
+#include "pstore/support/assert.hpp"
 
 #include "empty_store.hpp"
 
@@ -90,7 +91,7 @@ namespace {
 
     std::vector<char> SStringViewArchive::as_vector (pstore::typed_address<char> first,
                                                      pstore::typed_address<char> last) const {
-        assert (last >= first);
+        PSTORE_ASSERT (last >= first);
         if (last < first) {
             return {};
         }

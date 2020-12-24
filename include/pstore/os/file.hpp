@@ -114,10 +114,10 @@ namespace pstore {
                     static constexpr auto length =
                         static_cast<unsigned> (array_elements (alphabet)) - 1U;
                     auto const index = rng (length);
-                    assert (index >= 0 && index < length);
+                    PSTORE_ASSERT (index >= 0 && index < length);
                     path.push_back (alphabet[index]);
                 }
-                assert (path.length () == tmpl.length ());
+                PSTORE_ASSERT (path.length () == tmpl.length ());
                 return path;
             }
 
@@ -246,7 +246,7 @@ namespace pstore {
                                              typename SpanType::element_type>::value>::type>
             std::size_t read_span (SpanType const & s) {
                 auto const size = s.size_bytes ();
-                assert (size >= 0);
+                PSTORE_ASSERT (size >= 0);
                 using utype = typename std::make_unsigned<decltype (size)>::type;
                 return this->read_buffer (s.data (), static_cast<utype> (s.size_bytes ()));
             }
@@ -255,7 +255,7 @@ namespace pstore {
             template <typename T,
                       typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
             void read (T * const t) {
-                assert (t != nullptr);
+                PSTORE_ASSERT (t != nullptr);
                 if (this->read_buffer (t, sizeof (T)) != sizeof (T)) {
                     raise (error_code::did_not_read_number_of_bytes_requested);
                 }
@@ -268,7 +268,7 @@ namespace pstore {
                                              typename SpanType::element_type>::value>::type>
             void write_span (SpanType const & s) {
                 auto const bytes = s.size_bytes ();
-                assert (bytes >= 0);
+                PSTORE_ASSERT (bytes >= 0);
                 auto const ubytes =
                     static_cast<typename std::make_unsigned<decltype (bytes)>::type> (bytes);
                 this->write_buffer (s.data (), ubytes);
@@ -519,8 +519,8 @@ namespace pstore {
                     , eof_ (eof)
                     , writable_ (writable) {
 
-                assert (buffer != nullptr);
-                assert (eof <= length);
+                PSTORE_ASSERT (buffer != nullptr);
+                PSTORE_ASSERT (eof <= length);
             }
 
             void close () override {}

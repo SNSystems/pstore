@@ -68,7 +68,7 @@ namespace pstore {
                 PSTORE_STATIC_ASSERT (sizeof (bss_section) == 8);
                 PSTORE_STATIC_ASSERT (alignof (bss_section) == 8);
 
-                assert (bit_count::pop_count (align) == 1);
+                PSTORE_ASSERT (bit_count::pop_count (align) == 1);
                 align_ = bit_count::ctz (align);
                 PSTORE_STATIC_ASSERT (decltype (size_)::last_bit - decltype (size_)::first_bit ==
                                       sizeof (size_type) * 8);
@@ -134,7 +134,7 @@ namespace pstore {
                                              gsl::not_null<section_content const *> const sec)
                     : bss_section_creation_dispatcher (sec) {
                 (void) kind;
-                assert (kind == section_kind::bss);
+                PSTORE_ASSERT (kind == section_kind::bss);
             }
 
             bss_section_creation_dispatcher (bss_section_creation_dispatcher const &) = delete;
@@ -160,7 +160,7 @@ namespace pstore {
             std::uintptr_t aligned_impl (std::uintptr_t in) const final;
 
             static void validate (gsl::not_null<section_content const *> const sec) {
-                assert (sec->ifixups.empty () && sec->xfixups.empty ());
+                PSTORE_ASSERT (sec->ifixups.empty () && sec->xfixups.empty ());
                 if (sec->data.size () > std::numeric_limits<bss_section::size_type>::max ()) {
                     raise (error_code::bss_section_too_large);
                 }

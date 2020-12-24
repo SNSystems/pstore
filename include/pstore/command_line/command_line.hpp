@@ -222,7 +222,7 @@ namespace pstore {
             std::tuple<maybe<option *>, bool> process_single_dash (std::string arg_name,
                                                                    std::string const & program_name,
                                                                    ErrorStream & errs) {
-                assert (starts_with (arg_name, "-"));
+                PSTORE_ASSERT (starts_with (arg_name, "-"));
                 arg_name.erase (0, 1U); // Remove the leading dash.
 
                 auto handler = nothing<option *> ();
@@ -325,7 +325,7 @@ namespace pstore {
                 auto it = std::find_if (std::begin (all_options), end, is_positional);
                 for (; first_arg != last_arg && it != end; ++first_arg) {
                     option * const handler = *it;
-                    assert (handler->is_positional ());
+                    PSTORE_ASSERT (handler->is_positional ());
                     ok = handler->add_occurrence ();
                     if (!handler->value (*first_arg)) {
                         ok = false;

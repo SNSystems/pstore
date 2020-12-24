@@ -152,7 +152,7 @@ namespace {
                 if (num > std::numeric_limits<unsigned>::max () / 10U - 10U) {
                     break; // overflow.
                 }
-                assert (v[pos] >= '0');
+                PSTORE_ASSERT (v[pos] >= '0');
                 num = num * 10U + static_cast<unsigned> (v[pos] - '0');
             }
             return pos == last ? pstore::just (num) : pstore::nothing<unsigned> ();

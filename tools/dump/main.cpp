@@ -264,7 +264,7 @@ namespace {
 
         switch (kind) {
             PSTORE_INDICES
-        case pstore::trailer::indices::last: assert (false); break;
+        case pstore::trailer::indices::last: PSTORE_ASSERT (false); break;
         }
 #undef X
         return name;

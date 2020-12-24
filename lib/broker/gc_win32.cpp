@@ -146,7 +146,7 @@ namespace pstore {
 
                     build_object_vector (processes_, cv_, &object_vector);
                     auto const num_objects = object_vector.size ();
-                    assert (num_objects > 0 && num_objects <= MAXIMUM_WAIT_OBJECTS);
+                    PSTORE_ASSERT (num_objects > 0 && num_objects <= MAXIMUM_WAIT_OBJECTS);
 
                     lock.unlock ();
                     constexpr DWORD wmo_timeout = 60 * 1000; // 60 second timeout.

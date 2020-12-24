@@ -52,13 +52,12 @@
 #ifndef PSTORE_SUPPORT_MAYBE_HPP
 #define PSTORE_SUPPORT_MAYBE_HPP
 
-#include <cassert>
 #include <new>
 #include <stdexcept>
 
 #include "pstore/adt/utility.hpp"
+#include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
-#include "pstore/support/portab.hpp"
 
 
 namespace pstore {
@@ -216,12 +215,12 @@ namespace pstore {
         T & operator* () noexcept { return *(operator-> ()); }
         /// accesses the contained value
         T const * operator-> () const noexcept {
-            assert (valid_);
+            PSTORE_ASSERT (valid_);
             return reinterpret_cast<T const *> (&storage_);
         }
         /// accesses the contained value
         T * operator-> () noexcept {
-            assert (valid_);
+            PSTORE_ASSERT (valid_);
             return reinterpret_cast<T *> (&storage_);
         }
 
@@ -241,7 +240,7 @@ namespace pstore {
     private:
         template <typename Maybe, typename ResultType = typename inherit_const<Maybe, T>::type>
         static ResultType & value_impl (Maybe && m) noexcept {
-            assert (m.has_value ());
+            PSTORE_ASSERT (m.has_value ());
             return *m;
         }
 

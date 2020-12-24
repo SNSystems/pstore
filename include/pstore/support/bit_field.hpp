@@ -81,11 +81,12 @@
 #ifndef PSTORE_SUPPORT_BIT_FIELD_HPP
 #define PSTORE_SUPPORT_BIT_FIELD_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 

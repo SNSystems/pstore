@@ -153,7 +153,7 @@ namespace pstore {
         private:
             void check_invariants () noexcept;
             std::ptrdiff_t pos (gsl::span<std::uint8_t>::iterator const & s) noexcept {
-                assert (s >= span_.begin () && s <= span_.end ());
+                PSTORE_ASSERT (s >= span_.begin () && s <= span_.end ());
                 return s - span_.begin ();
             }
 
@@ -324,7 +324,7 @@ namespace pstore {
                         if (*mc2 != lf) {
                             // We had a CR followed by something that's NOT an LF. Save it so
                             // that the next call to getc() will yield it again.
-                            assert (!push_);
+                            PSTORE_ASSERT (!push_);
                             // TODO: the conversion below assumes that we're only dealing
                             // with ASCII.
                             push_ = static_cast<std::uint8_t> (*mc2);
@@ -352,7 +352,7 @@ namespace pstore {
         template <typename IO, typename RefillFunction>
         std::size_t buffered_reader<IO, RefillFunction>::available () const {
             auto result = std::distance (pos_, end_);
-            assert (result >= 0);
+            PSTORE_ASSERT (result >= 0);
             if (push_) {
                 ++result;
             }
@@ -369,9 +369,9 @@ namespace pstore {
                 return p >= 0 &&
                        static_cast<std::make_unsigned<ptrdiff_t>::type> (p) <= buf_.size ();
             };
-            assert (pos_ <= end_);
-            assert (is_valid (pos_));
-            assert (is_valid (end_));
+            PSTORE_ASSERT (pos_ <= end_);
+            PSTORE_ASSERT (is_valid (pos_));
+            PSTORE_ASSERT (is_valid (end_));
 #endif
         }
 

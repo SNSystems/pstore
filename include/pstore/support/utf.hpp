@@ -98,7 +98,7 @@ namespace pstore {
             /// \param length The number of bytes in the 'str' buffer.
             std::string to_mbcs (char const * str, std::size_t length);
             inline std::string to_mbcs (char const * str) {
-                assert (str != nullptr);
+                PSTORE_ASSERT (str != nullptr);
                 return to_mbcs (str, std::strlen (str));
             }
             inline std::string to_mbcs (std::string const & str) {
@@ -124,7 +124,7 @@ namespace pstore {
             /// \param str A null-terminating string of "multi-byte" characters to be converted
             ///            to UTF-8.
             inline std::string mbcs_to8 (char const * str) {
-                assert (str != nullptr);
+                PSTORE_ASSERT (str != nullptr);
                 return mbcs_to8 (str, std::strlen (str));
             }
 
@@ -196,7 +196,7 @@ namespace pstore {
                 *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
                 *(out++) = static_cast<CharType> ((c % 64U) | 0x80U);
             } else {
-                assert (c < 0x110000);
+                PSTORE_ASSERT (c < 0x110000);
                 *(out++) = static_cast<CharType> ((c / 0x40000U) | 0xF0U);
                 *(out++) = static_cast<CharType> ((c / 0x1000U % 64U) | 0x80U);
                 *(out++) = static_cast<CharType> ((c / 64U % 64U) | 0x80U);
@@ -238,7 +238,7 @@ namespace pstore {
             static_assert (std::is_same<value_type, char16_t>::value,
                            "iterator must produce char16_t");
 
-            assert (first != last);
+            PSTORE_ASSERT (first != last);
             char32_t code_point = 0;
             char16_t const code_unit = swapper (*(first++));
             if (!is_utf16_high_surrogate (code_unit)) {
@@ -294,7 +294,7 @@ namespace pstore {
             auto end = std::end (src);
             char32_t cp;
             std::tie (end, cp) = utf16_to_code_point (std::begin (src), end, swapper);
-            assert (end == std::end (src));
+            PSTORE_ASSERT (end == std::end (src));
             return cp;
         }
 
@@ -347,7 +347,7 @@ namespace pstore {
         auto length (Iterator first, Iterator last) -> std::size_t {
             auto const result =
                 std::count_if (first, last, [] (char const c) { return is_utf_char_start (c); });
-            assert (result >= 0);
+            PSTORE_ASSERT (result >= 0);
             using utype = typename std::make_unsigned<decltype (result)>::type;
             static_assert (std::numeric_limits<utype>::max () <=
                                std::numeric_limits<std::size_t>::max (),

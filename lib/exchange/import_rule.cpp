@@ -98,7 +98,7 @@ namespace pstore {
             std::error_code rule::end_object () { return error::unexpected_end_object; }
 
             void rule::log_top_impl (bool const is_push) const {
-                assert (logging_enabled ());
+                PSTORE_ASSERT (logging_enabled ());
                 std::ostringstream str;
                 auto const & stack = context_->stack;
                 str << indent{stack.size ()} << (is_push ? '+' : '-') << stack.top ()->name ();

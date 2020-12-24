@@ -89,14 +89,15 @@ namespace pstore {
 
                 auto size = s.size ();
                 size = std::max (size, decltype (size){0});
-                assert (sizeof (size_type) < sizeof (size) ||
-                        static_cast<size_type> (size) < std::numeric_limits<size_type>::max ());
+                PSTORE_ASSERT (sizeof (size_type) < sizeof (size) ||
+                               static_cast<size_type> (size) <
+                                   std::numeric_limits<size_type>::max ());
 
                 errno = 0;
                 ssize_t const nread =
                     ::recv (socket.native_handle (), reinterpret_cast<char *> (s.data ()),
                             static_cast<size_type> (size), 0 /*flags*/);
-                assert (is_recv_error (nread) || (nread >= 0 && nread <= size));
+                PSTORE_ASSERT (is_recv_error (nread) || (nread >= 0 && nread <= size));
                 if (is_recv_error (nread)) {
                     return result_type{get_last_error ()};
                 }
@@ -109,8 +110,9 @@ namespace pstore {
 
                 auto size = s.size ();
                 size = std::max (size, decltype (size){0});
-                assert (sizeof (size_type) < sizeof (size) ||
-                        static_cast<size_type> (size) < std::numeric_limits<size_type>::max ());
+                PSTORE_ASSERT (sizeof (size_type) < sizeof (size) ||
+                               static_cast<size_type> (size) <
+                                   std::numeric_limits<size_type>::max ());
 
                 if (::send (socket.native_handle (), reinterpret_cast<data_type> (s.data ()),
                             static_cast<size_type> (size), 0 /*flags*/) < 0) {

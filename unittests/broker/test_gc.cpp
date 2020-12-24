@@ -164,7 +164,7 @@ namespace {
         std::vector<spawn_params> calls;
         calls.reserve (num);
 
-        assert (num <= static_cast<unsigned> (std::numeric_limits<int>::max ()));
+        PSTORE_ASSERT (num <= static_cast<unsigned> (std::numeric_limits<int>::max ()));
         for (auto count = 0; count < static_cast<int> (num); ++count) {
             calls.push_back (call_params (static_cast<int> (count)));
             expect_call (gc, calls.back ());

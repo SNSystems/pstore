@@ -72,7 +72,7 @@ namespace pstore {
                                     OutputIterator * const out)
                         : generic_section<OutputIterator> (ctxt, kind, names, content, out)
                         , out_{out} {
-                    assert (kind == repo::section_kind::debug_line);
+                    PSTORE_ASSERT (kind == repo::section_kind::debug_line);
                 }
                 debug_line_section (debug_line_section const &) = delete;
                 debug_line_section (debug_line_section &&) noexcept = delete;

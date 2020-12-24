@@ -62,7 +62,7 @@ namespace pstore {
         {
             auto * const addr8 = static_cast<std::uint8_t *> (addr);
             auto * const data8 = static_cast<std::uint8_t *> (this->data ().get ());
-            assert (addr8 >= data8 && addr8 + len <= data8 + this->size ());
+            PSTORE_ASSERT (addr8 >= data8 && addr8 + len <= data8 + this->size ());
         }
 #endif
         this->read_only_impl (addr, len);

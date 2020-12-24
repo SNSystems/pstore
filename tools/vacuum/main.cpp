@@ -150,7 +150,7 @@ int main (int argc, char * argv[]) {
 
         std::unique_lock<pstore::file::range_lock> * file_lock = src_db->upgrade_to_write_lock ();
         if (file_lock == nullptr) {
-            assert (0);
+            PSTORE_ASSERT (0);
         }
 
         if (file_lock->try_lock ()) {

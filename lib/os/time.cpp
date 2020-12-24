@@ -67,7 +67,7 @@ namespace pstore {
         if (res == nullptr) {
             raise (errno_erc{errno}, "localtime_r");
         }
-        assert (res == &result);
+        PSTORE_ASSERT (res == &result);
         return result;
     }
 #else
@@ -90,7 +90,7 @@ namespace pstore {
         if (res == nullptr) {
             raise (errno_erc{errno}, "gmtime_r");
         }
-        assert (res == &result);
+        PSTORE_ASSERT (res == &result);
         return result;
     }
 #else

@@ -259,8 +259,18 @@ configure_file (
 set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 
 #
-# -- Thats's the end of the code setting up config.hpp
+# -- That's the end of the code setting up config.hpp
 #
+
+find_package (Backtrace)
+set (PSTORE_HAVE_BACKTRACE  ${Backtrace_FOUND})
+message (STATUS "Backtrace=${PSTORE_HAVE_BACKTRACE}")
+
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/backtrace.hpp"
+    ESCAPE_QUOTES
+    )
 
 include (add_pstore)
 include (clang_tidy)
@@ -268,6 +278,7 @@ include (clang_tidy)
 set (PSTORE_SUPPORT_INCLUDES
     aligned.hpp
     array_elements.hpp
+    assert.hpp
     base64.hpp
     bit_count.hpp
     bit_field.hpp
@@ -296,6 +307,10 @@ set (PSTORE_SUPPORT_LIB_SRC
     config.hpp.in
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/backtrace.hpp"
+
+    assert.cpp
     error.cpp
     fnv.cpp
     uint128.cpp
@@ -310,6 +325,7 @@ add_pstore_library (
     INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
 )
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories (pstore-support PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM

@@ -120,13 +120,13 @@ namespace pstore {
     unsigned system_page_size::sysconf () {
 #    ifdef PSTORE_HAVE_GETPAGESIZE
         int const result = getpagesize ();
-        assert (result > 0);
+        PSTORE_ASSERT (result > 0);
 #    else
         long const result = ::sysconf (_SC_PAGESIZE);
         if (result == -1) {
             raise (errno_erc{errno}, "sysconf(_SC_PAGESIZE)");
         }
-        assert (result > 0 && result <= std::numeric_limits<unsigned>::max ());
+        PSTORE_ASSERT (result > 0 && result <= std::numeric_limits<unsigned>::max ());
 #    endif // PSTORE_HAVE_GETPAGESIZE
         return static_cast<unsigned> (result);
     }

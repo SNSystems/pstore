@@ -70,7 +70,7 @@ case repo::section_kind::a:                                                     
                         PSTORE_MCREPO_SECTION_KINDS
                     case repo::section_kind::last:
                         // unreachable...
-                        assert (false);
+                        PSTORE_ASSERT (false);
                         break;
                     }
 #undef X

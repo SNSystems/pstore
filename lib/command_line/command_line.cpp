@@ -110,7 +110,7 @@ namespace pstore {
                 // handler_set_value
                 // ~~~~~~~~~~~~~~~~~
                 bool handler_set_value (maybe<option *> handler, std::string const & value) {
-                    assert (handler_takes_argument (handler));
+                    PSTORE_ASSERT (handler_takes_argument (handler));
                     if (!(*handler)->add_occurrence ()) {
                         return false;
                     }
@@ -130,11 +130,11 @@ namespace pstore {
                             arg.erase (0U, double_dash_len);
                         } else {
                             value = just (arg.substr (equal_pos + 1, std::string::npos));
-                            assert (equal_pos >= double_dash_len);
+                            PSTORE_ASSERT (equal_pos >= double_dash_len);
                             arg = arg.substr (double_dash_len, equal_pos - double_dash_len);
                         }
                     } else {
-                        assert (starts_with (arg, "-"));
+                        PSTORE_ASSERT (starts_with (arg, "-"));
                         arg.erase (0U, 1U);
                     }
                     return std::make_tuple (arg, value);

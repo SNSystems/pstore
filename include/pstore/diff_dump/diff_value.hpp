@@ -180,7 +180,7 @@ namespace pstore {
                                          revision_number const new_revision,
                                          revision_number const old_revision,
                                          GetIndexFunction get_index) {
-            assert (new_revision >= old_revision);
+            PSTORE_ASSERT (new_revision >= old_revision);
 
             details::revision_restorer const _{db};
             db.sync (new_revision);

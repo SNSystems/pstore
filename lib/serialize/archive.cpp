@@ -60,7 +60,7 @@ namespace {
         using value_type = typename std::iterator_traits<InputIterator>::value_type;
         char const * separator = "";
         std::for_each (first, last, [&] (value_type v) {
-            assert (v >= 0 && v <= 0xff);
+            PSTORE_ASSERT (v >= 0 && v <= 0xff);
             os << separator << std::setw (2) << unsigned{v};
             separator = " ";
         });

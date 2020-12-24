@@ -43,9 +43,10 @@
 //===----------------------------------------------------------------------===//
 #include "to_value_pair.hpp"
 
-#include <cassert>
 #include <cstring>
 #include <utility>
+
+#include "pstore/support/assert.hpp"
 
 std::pair<std::string, std::string> to_value_pair (char const * option) {
     std::string key;
@@ -53,7 +54,7 @@ std::pair<std::string, std::string> to_value_pair (char const * option) {
 
     if (option != nullptr && option[0] != '\0') {
         if (char const * comma = std::strchr (option, ',')) {
-            assert (comma >= option);
+            PSTORE_ASSERT (comma >= option);
             key.assign (option, static_cast<std::string::size_type> (comma - option));
             value.assign (comma + 1);
         } else {

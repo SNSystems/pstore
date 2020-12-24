@@ -94,7 +94,7 @@ namespace pstore {
         switch (::WaitForSingleObject (this->wait_descriptor ().native_handle (), INFINITE)) {
         case WAIT_ABANDONED:
         case WAIT_OBJECT_0: return;
-        case WAIT_TIMEOUT: assert (0);
+        case WAIT_TIMEOUT: PSTORE_ASSERT (0);
         // fallthrough
         case WAIT_FAILED: raise (win32_erc (::GetLastError ()), "WaitForSingleObject");
         }

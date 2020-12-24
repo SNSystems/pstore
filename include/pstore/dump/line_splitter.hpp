@@ -96,7 +96,7 @@ namespace pstore {
         template <typename OperationFunc>
         void line_splitter::append (gsl::span<char const> const chars,
                                     OperationFunc const operation) {
-            assert (chars.size () >= 0);
+            PSTORE_ASSERT (chars.size () >= 0);
             sstring_view<char const *> sv (
                 chars.data (), static_cast<sstring_view<char const *>::size_type> (chars.size ()));
             for (;;) {

@@ -123,7 +123,8 @@ namespace pstore {
                         } else {
                             // Push the command buffer on to the queue for processing and pull
                             // an new read buffer from the pool.
-                            assert (static_cast<std::size_t> (bytes_read) <= sizeof (*readbuf));
+                            PSTORE_ASSERT (static_cast<std::size_t> (bytes_read) <=
+                                           sizeof (*readbuf));
                             cp->push_command (std::move (readbuf), record_file.get ());
 
                             readbuf = pool.get_from_pool ();

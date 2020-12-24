@@ -287,7 +287,7 @@ namespace {
         using return_type = error_or<inst_printer_ptr>;
 
         llvm::MCAsmInfo const * const asm_info = context.getAsmInfo ();
-        assert (asm_info != nullptr);
+        PSTORE_ASSERT (asm_info != nullptr);
         if (inst_printer_ptr instruction_printer{
                 target.createMCInstPrinter (triple, asm_info->getAssemblerDialect (), *asm_info,
                                             instructions, *context.getRegisterInfo ())}) {

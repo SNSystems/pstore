@@ -114,7 +114,7 @@ namespace pstore {
                            "mib must be a span of integers");
 
             auto read_link = [&mib, &ctl] (gsl::span<char> const b) {
-                assert (b.size () >= 0);
+                PSTORE_ASSERT (b.size () >= 0);
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;
                 errno = 0;

@@ -72,7 +72,7 @@ namespace pstore {
             , first_ (rhs.first_) {
         rhs.first_ = address::null ();
 
-        assert (!rhs.is_open ()); //! OCLINT(PH - don't warn about the assert macro)
+        PSTORE_ASSERT (!rhs.is_open ()); //! OCLINT(PH - don't warn about the assert macro)
     }
 
     // allocate
@@ -93,7 +93,7 @@ namespace pstore {
         // allocated. This may be greater than the number requested to
         // allow for alignment.
         auto const bytes_allocated = db.size () - old_size;
-        assert (bytes_allocated >= size);
+        PSTORE_ASSERT (bytes_allocated >= size);
         size_ += bytes_allocated;
         return result;
     }
@@ -166,7 +166,7 @@ namespace pstore {
 
         // That's the end of this transaction.
         first_ = address::null ();
-        assert (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
+        PSTORE_ASSERT (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
         return *this;
     }
 
@@ -175,11 +175,11 @@ namespace pstore {
     transaction_base & transaction_base::rollback () noexcept {
         if (this->is_open ()) {
             first_ = address::null ();
-            assert (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
+            PSTORE_ASSERT (!this->is_open ()); //! OCLINT(PH - don't warn about the assert macro)
             // if we grew the db, truncate it back
             if (db_.size () > dbsize_) {
                 db_.truncate (dbsize_);
-                assert (db_.size () == dbsize_);
+                PSTORE_ASSERT (db_.size () == dbsize_);
             }
         }
         return *this;

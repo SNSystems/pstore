@@ -99,7 +99,7 @@ namespace {
     }
 
     file_mapping::~file_mapping () noexcept {
-        assert (mapping_ != nullptr);
+        PSTORE_ASSERT (mapping_ != nullptr);
         ::CloseHandle (mapping_);
     }
 
@@ -138,7 +138,7 @@ namespace pstore {
         SYSTEM_INFO system_info;
         ::GetSystemInfo (&system_info);
         auto const result = system_info.dwPageSize;
-        assert (result > 0 && result <= std::numeric_limits<unsigned>::max ());
+        PSTORE_ASSERT (result > 0 && result <= std::numeric_limits<unsigned>::max ());
         return static_cast<unsigned> (result);
     }
 

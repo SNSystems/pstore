@@ -103,10 +103,10 @@ namespace pstore {
             *(out++) = '=';
         } break;
         default:
-            assert (false); //! OCLINT(PH - don't warn about a conditional constant)
+            PSTORE_ASSERT (false); //! OCLINT(PH - don't warn about a conditional constant)
             break;
         }
-        assert (first == last);
+        PSTORE_ASSERT (first == last);
         return out;
     }
 

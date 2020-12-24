@@ -192,7 +192,7 @@ namespace pstore {
             container (const_pointer begin, const_pointer end)
                     : begin_{begin}
                     , end_{end} {
-                assert (end >= begin);
+                PSTORE_ASSERT (end >= begin);
             }
             iterator begin () const { return begin_; }
             iterator end () const { return end_; }
@@ -202,7 +202,7 @@ namespace pstore {
             const_pointer data () const { return begin_; }
 
             size_type size () const noexcept {
-                assert (end_ >= begin_);
+                PSTORE_ASSERT (end_ >= begin_);
                 return static_cast<size_type> (end_ - begin_);
             }
             bool empty () const noexcept { return size () == 0U; }

@@ -44,9 +44,10 @@
 #ifndef PSTORE_BROKER_INTRUSIVE_LIST_HPP
 #define PSTORE_BROKER_INTRUSIVE_LIST_HPP
 
-#include <cassert>
 #include <iterator>
 #include <memory>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace broker {
@@ -140,12 +141,12 @@ namespace pstore {
         template <typename T>
         void intrusive_list<T>::check () noexcept {
 #ifndef NDEBUG
-            assert (!head_->get_list_member ().prev);
+            PSTORE_ASSERT (!head_->get_list_member ().prev);
             T * prev = nullptr;
             for (auto p = head_.get (); p; prev = p, p = p->get_list_member ().next) {
-                assert (p->get_list_member ().prev == prev);
+                PSTORE_ASSERT (p->get_list_member ().prev == prev);
             }
-            assert (prev == tail_.get ());
+            PSTORE_ASSERT (prev == tail_.get ());
 #endif
         }
 
@@ -161,8 +162,8 @@ namespace pstore {
             before_member.prev = element;
             element_member.next = before;
 
-            assert (element_member.next->get_list_member ().prev == element);
-            assert (element_member.prev->get_list_member ().next == element);
+            PSTORE_ASSERT (element_member.next->get_list_member ().prev == element);
+            PSTORE_ASSERT (element_member.prev->get_list_member ().next == element);
             this->check ();
         }
 

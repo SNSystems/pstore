@@ -45,7 +45,6 @@
 
 // Standard Library includes
 #include <algorithm>
-#include <cassert>
 #include <cerrno>
 #include <cstring>
 #include <string>

@@ -231,8 +231,8 @@ namespace {
 
 
 TEST_F (JsonNumber, Uint64Max) {
-    assert (uint64_max_str == std::to_string (uint64_max) &&
-            "The hard-wired unsigned 64-bit max string seems to be incorrect");
+    PSTORE_ASSERT (uint64_max_str == std::to_string (uint64_max) &&
+                   "The hard-wired unsigned 64-bit max string seems to be incorrect");
     EXPECT_CALL (callbacks_, uint64_value (uint64_max)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{uint64_max_str}).eof ();
@@ -240,8 +240,8 @@ TEST_F (JsonNumber, Uint64Max) {
 }
 
 TEST_F (JsonNumber, Int64Min) {
-    assert (int64_min_str == std::to_string (int64_min) &&
-           "The hard-wired signed 64-bit min string seems to be incorrect");
+    PSTORE_ASSERT (int64_min_str == std::to_string (int64_min) &&
+                   "The hard-wired signed 64-bit min string seems to be incorrect");
     EXPECT_CALL (callbacks_, int64_value (int64_min)).Times (1);
     json::parser<decltype (proxy_)> p (proxy_);
     p.input (std::string{int64_min_str}).eof ();

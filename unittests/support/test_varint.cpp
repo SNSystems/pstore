@@ -53,12 +53,12 @@ namespace {
     class VarInt : public ::testing::Test {
     protected:
         static std::uint64_t all_ones (unsigned places) {
-            assert (places < 64);
+            PSTORE_ASSERT (places < 64);
             return (UINT64_C (1) << places) - 1;
         }
 
         static std::uint64_t power (unsigned exponent) {
-            assert (exponent < 64);
+            PSTORE_ASSERT (exponent < 64);
             return UINT64_C (1) << exponent;
         }
 

@@ -131,8 +131,8 @@ namespace pstore {
         template <typename T>
         maybe<T> parser<T, typename std::enable_if<std::is_integral<T>::value>::type>::operator() (
             std::string const & v) const {
-            assert (std::distance (this->begin (), this->end ()) == 0 &&
-                    "Don't specify literal values for an integral option!");
+            PSTORE_ASSERT (std::distance (this->begin (), this->end ()) == 0 &&
+                           "Don't specify literal values for an integral option!");
             if (v.length () == 0) {
                 return nothing<T> ();
             }

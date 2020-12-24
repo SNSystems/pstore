@@ -173,7 +173,7 @@ namespace pstore {
             void database_reader::get (Ty & v) {
 
                 auto const extra_for_alignment = calc_alignment (addr_.absolute (), alignof (Ty));
-                assert (extra_for_alignment < sizeof (Ty));
+                PSTORE_ASSERT (extra_for_alignment < sizeof (Ty));
                 addr_ += extra_for_alignment;
                 // Load the data.
                 auto result = db_.getro (typed_address<Ty> (addr_));
@@ -191,7 +191,7 @@ namespace pstore {
                 // Adjust addr_ so that it is correctly aligned for element_type.
                 auto const extra_for_alignment =
                     calc_alignment (addr_.absolute (), alignof (element_type));
-                assert (extra_for_alignment < sizeof (element_type));
+                PSTORE_ASSERT (extra_for_alignment < sizeof (element_type));
                 addr_ += extra_for_alignment;
 
                 // Load the data.

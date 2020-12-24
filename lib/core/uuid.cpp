@@ -56,7 +56,7 @@
 namespace {
 
     constexpr char digit_to_hex (unsigned const v) noexcept {
-        assert (v < 0x10);
+        PSTORE_ASSERT (v < 0x10);
         return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
     }
 
@@ -68,7 +68,7 @@ namespace {
                 : out_{out} {}
 
         OutputIterator append (unsigned const value) noexcept {
-            assert (value < 16U);
+            PSTORE_ASSERT (value < 16U);
             if (is_high_) {
                 *out_ = static_cast<std::uint8_t> (value << 4);
             } else {
@@ -112,8 +112,8 @@ namespace pstore {
         data_[version_octet] &= 0x4F; // 0b01001111;
         data_[version_octet] |= static_cast<std::uint8_t> (version_type::random_number_based) << 4;
 
-        assert (this->variant () == uuid::variant_type::rfc_4122);
-        assert (this->version () == uuid::version_type::random_number_based);
+        PSTORE_ASSERT (this->variant () == uuid::variant_type::rfc_4122);
+        PSTORE_ASSERT (this->version () == uuid::version_type::random_number_based);
     }
 
 #ifdef _WIN32
@@ -134,9 +134,9 @@ namespace pstore {
         *(out++) = get_byte (u.Data3, 0);
 
         // Guarantee that we'll interpret the fields of the UUID struct as 16 bytes.
-        assert (std::distance (std::begin (data_), out) +
-                    std::distance (std::begin (u.Data4), std::end (u.Data4)) ==
-                elements);
+        PSTORE_ASSERT (std::distance (std::begin (data_), out) +
+                           std::distance (std::begin (u.Data4), std::end (u.Data4)) ==
+                       elements);
         PSTORE_STATIC_ASSERT (sizeof (u.Data4[0]) == sizeof (std::uint8_t));
         std::copy (std::begin (u.Data4), std::end (u.Data4), out);
     }
@@ -176,7 +176,7 @@ namespace pstore {
                 if (digit != '-') {
                     return nothing<uuid> ();
                 }
-                assert (out.is_high ());
+                PSTORE_ASSERT (out.is_high ());
                 break;
             default:
                 if (digit >= 'a' && digit <= 'f') {
@@ -212,7 +212,8 @@ namespace pstore {
             return variant_type::microsoft;
         }
         // 0b111xxxx
-        assert ((octet & 0b11100000) == 0b11100000); //! OCLINT (PH - bitwise operator is just fine)
+        PSTORE_ASSERT ((octet & 0b11100000) ==
+                       0b11100000); //! OCLINT (PH - bitwise operator is just fine)
         return variant_type::future;
     }
 
@@ -249,7 +250,7 @@ namespace pstore {
             resl += digit_to_hex ((c >> 4) & 0x0F);
             resl += digit_to_hex (c & 0x0F);
         });
-        assert (resl.length () == string_length);
+        PSTORE_ASSERT (resl.length () == string_length);
         return resl;
     }
 

@@ -191,7 +191,7 @@ namespace pstore {
             /// \name Element access
             ///@{
             definition const & operator[] (std::size_t const i) const {
-                assert (i < size_);
+                PSTORE_ASSERT (i < size_);
                 return members_[i];
             }
             ///@}
@@ -303,7 +303,7 @@ namespace pstore {
 
             // This check can safely be an assertion because the method is private and alloc(),
             // the sole caller, performs a full run-time check of the size.
-            assert (unsigned_cast (std::distance (first_member, last_member)) == size);
+            PSTORE_ASSERT (unsigned_cast (std::distance (first_member, last_member)) == size);
 
             std::copy (first_member, last_member, this->begin ());
         }
@@ -316,7 +316,7 @@ namespace pstore {
                                  Iterator last_member) -> extent<compilation> {
             // First work out its size.
             auto const dist = std::distance (first_member, last_member);
-            assert (dist >= 0);
+            PSTORE_ASSERT (dist >= 0);
 
             if (dist > std::numeric_limits<size_type>::max ()) {
                 raise (error_code::too_many_members_in_compilation);

@@ -250,7 +250,7 @@ int main (int argc, char * argv[]) {
 
         log (priority::notice, "waiting");
         for (auto & f : futures) {
-            assert (f.valid ());
+            PSTORE_ASSERT (f.valid ());
             f.get ();
         }
         log (priority::notice, "worker threads done: stopping quit thread");

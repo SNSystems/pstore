@@ -226,7 +226,7 @@ namespace {
                    pstore::httpd::channel_container const & channels) {
         using return_type = pstore::error_or<std::unique_ptr<std::thread>>;
         using priority = pstore::logger::priority;
-        assert (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
+        PSTORE_ASSERT (header_contents.connection_upgrade && header_contents.upgrade_to_websocket);
 
         log (priority::info, "WebSocket upgrade requested");
         // Validate the request headers
@@ -273,7 +273,7 @@ namespace {
 
                 log (priority::info, "Started WebSockets session");
 
-                assert (io2.valid ());
+                PSTORE_ASSERT (io2.valid ());
                 ws_server_loop (std::move (reader2), pstore::httpd::net::network_sender,
                                 std::ref (io2), uri, channels);
 
@@ -292,13 +292,13 @@ namespace {
         // Spawn a thread to manage this WebSockets session.
         auto const create_ws_server = [&reader, server_loop_thread,
                                        &request] (socket_descriptor & s) {
-            assert (s.valid ());
+            PSTORE_ASSERT (s.valid ());
             return return_type{pstore::in_place,
                                new std::thread (server_loop_thread, std::move (reader),
                                                 std::move (s), request.uri ())};
         };
 
-        assert (io.get ().valid ());
+        PSTORE_ASSERT (io.get ().valid ());
         return accept_ws_connection () >>= create_ws_server;
     }
 
@@ -344,7 +344,7 @@ namespace {
         }
 
         // Determine who sent the message.
-        assert (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
+        PSTORE_ASSERT (clientlen == static_cast<socklen_t> (sizeof (client_addr)));
         pstore::error_or<std::string> ename = get_client_name (client_addr);
         if (!ename) {
             return return_type{pstore::httpd::get_last_error ()};
@@ -388,7 +388,7 @@ namespace pstore {
                 // Get the HTTP request line.
                 auto reader = make_buffered_reader<socket_descriptor &> (net::refiller);
 
-                assert (childfd.valid ());
+                PSTORE_ASSERT (childfd.valid ());
                 pstore::error_or_n<socket_descriptor &, request_info> eri =
                     read_request (reader, std::ref (childfd));
                 if (!eri) {
@@ -436,7 +436,7 @@ namespace pstore {
                 };
 
                 // Scan the HTTP headers.
-                assert (childfd.valid ());
+                PSTORE_ASSERT (childfd.valid ());
                 std::error_code const err = read_headers (
                     reader, std::ref (childfd),
                     [] (header_info io, std::string const & key, std::string const & value) {
@@ -449,7 +449,7 @@ namespace pstore {
                     report_error (err, request, childfd);
                 }
 
-                assert (input_is_empty (reader, childfd));
+                PSTORE_ASSERT (input_is_empty (reader, childfd));
             }
 
             for (std::unique_ptr<std::thread> const & worker : websockets_workers) {

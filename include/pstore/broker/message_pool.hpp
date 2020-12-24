@@ -83,7 +83,7 @@ namespace pstore {
 
         inline void message_pool::return_to_pool (brokerface::message_ptr && ptr) {
             std::unique_lock<std::mutex> const lock (mut_);
-            assert (ptr.get () != nullptr);
+            PSTORE_ASSERT (ptr.get () != nullptr);
             queue_.push (std::move (ptr));
         }
 

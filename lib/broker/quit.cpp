@@ -78,7 +78,7 @@ namespace {
 
         log (priority::info, "push command ", pstore::logger::quoted{message.c_str ()});
 
-        assert (message.length () <= pstore::brokerface::message_type::payload_chars);
+        PSTORE_ASSERT (message.length () <= pstore::brokerface::message_type::payload_chars);
         auto msg = std::make_unique<pstore::brokerface::message_type> (mid++, std::uint16_t{0},
                                                                        std::uint16_t{1}, message);
         cp->push_command (std::move (msg), nullptr);

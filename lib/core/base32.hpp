@@ -64,7 +64,7 @@ namespace pstore {
         OutputIterator convert (IntType val, OutputIterator out) {
             PSTORE_STATIC_ASSERT (std::is_unsigned<IntType>::value);
             constexpr auto mask = (1U << 5) - 1U;
-            assert (mask == alphabet.size () - 1U);
+            PSTORE_ASSERT (mask == alphabet.size () - 1U);
             do {
                 *(out++) = alphabet[val & mask];
             } while (val >>= 5);
@@ -76,7 +76,7 @@ namespace pstore {
             auto high = wide.high ();
             auto low = wide.low ();
             constexpr auto mask = (1U << 5) - 1U;
-            assert (mask == alphabet.size () - 1U);
+            PSTORE_ASSERT (mask == alphabet.size () - 1U);
             do {
                 *(out++) = alphabet[low & mask];
                 low >>= 5;
@@ -93,7 +93,7 @@ namespace pstore {
         std::string convert (IntType val) {
             std::string result;
             auto const max_length = 26;
-            assert (std::pow (32.0, max_length) >= std::pow (2.0, 128));
+            PSTORE_ASSERT (std::pow (32.0, max_length) >= std::pow (2.0, 128));
             result.reserve (max_length);
             convert (val, std::back_inserter (result));
             return result;

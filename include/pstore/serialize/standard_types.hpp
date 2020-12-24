@@ -86,8 +86,8 @@ namespace pstore {
                 auto first = std::begin (encoded_length);
                 auto last = varint::encode (length, first);
                 auto length_bytes = std::distance (first, last);
-                assert (length_bytes > 0 &&
-                        static_cast<std::size_t> (length_bytes) <= encoded_length.size ());
+                PSTORE_ASSERT (length_bytes > 0 &&
+                               static_cast<std::size_t> (length_bytes) <= encoded_length.size ());
                 if (length_bytes == 1) {
                     *(last++) = 0;
                 }
@@ -111,11 +111,11 @@ namespace pstore {
                                         gsl::make_span (encoded_length.data (), 2));
 
                 auto const varint_length = varint::decode_size (std::begin (encoded_length));
-                assert (varint_length > 0);
+                PSTORE_ASSERT (varint_length > 0);
                 // Was that initial read of 2 bytes enough? If not get the rest of the
                 // length value.
                 if (varint_length > 2) {
-                    assert (varint_length <= encoded_length.size ());
+                    PSTORE_ASSERT (varint_length <= encoded_length.size ());
                     serialize::read_uninit (
                         std::forward<Archive> (archive),
                         gsl::make_span (encoded_length.data () + 2, varint_length - 2));

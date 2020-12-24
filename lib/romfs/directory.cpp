@@ -73,7 +73,7 @@ auto pstore::romfs::directory::end () const -> dirent const * {
 // operator[]
 // ~~~~~~~~~~
 auto pstore::romfs::directory::operator[] (std::size_t const pos) const noexcept -> dirent const & {
-    assert (pos < size ());
+    PSTORE_ASSERT (pos < size ());
     return members_[pos];
 }
 

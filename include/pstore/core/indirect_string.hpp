@@ -81,7 +81,7 @@ namespace pstore {
                 : db_{db}
                 , is_pointer_{true}
                 , str_{str} {
-            assert ((reinterpret_cast<std::uintptr_t> (str.get ()) & in_heap_mask) == 0);
+            PSTORE_ASSERT ((reinterpret_cast<std::uintptr_t> (str.get ()) & in_heap_mask) == 0);
         }
 
         bool operator== (indirect_string const & rhs) const;
@@ -212,9 +212,9 @@ namespace pstore {
             -> archive_result_type<DBArchive> {
 
             // The body of an indirect string must be written separately by the caller.
-            assert (value.is_pointer_);
+            PSTORE_ASSERT (value.is_pointer_);
             constexpr auto mask = indirect_string::in_heap_mask;
-            assert (!(reinterpret_cast<std::uintptr_t> (value.str_) & mask));
+            PSTORE_ASSERT (!(reinterpret_cast<std::uintptr_t> (value.str_) & mask));
 
             return archive.put (address{reinterpret_cast<std::uintptr_t> (value.str_) | mask});
         }

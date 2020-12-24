@@ -1,10 +1,10 @@
-//*                  *
-//*   ___ _____   __ *
-//*  / __/ __\ \ / / *
-//* | (__\__ \\ V /  *
-//*  \___|___/ \_/   *
-//*                  *
-//===- lib/command_line/csv.cpp -------------------------------------------===//
+//*                          _    *
+//*   __ _ ___ ___  ___ _ __| |_  *
+//*  / _` / __/ __|/ _ \ '__| __| *
+//* | (_| \__ \__ \  __/ |  | |_  *
+//*  \__,_|___/___/\___|_|   \__| *
+//*                               *
+//===- include/pstore/support/assert.hpp ----------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -41,18 +41,23 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
-#include "pstore/command_line/csv.hpp"
+#ifndef PSTORE_SUPPORT_ASSERT_HPP
+#define PSTORE_SUPPORT_ASSERT_HPP
 
-#include "pstore/support/assert.hpp"
+#include "pstore/support/portab.hpp"
 
-std::list<std::string> pstore::command_line::csv (std::string const & s) {
-    std::list<std::string> result;
-    auto spos = std::string::size_type{0};
-    while (spos != std::string::npos) {
-        auto const epos = s.find (',', spos);
-        PSTORE_ASSERT (epos >= spos);
-        result.emplace_back (s.substr (spos, epos - spos));
-        spos = (epos == std::string::npos) ? epos : epos + 1;
-    }
-    return result;
-}
+namespace pstore {
+
+    PSTORE_NO_RETURN
+    void assert_failed (char const * str, char const * file, int line);
+
+} // end namespace pstore
+
+#define PSTORE_ASSERT(x)                                                                           \
+    do {                                                                                           \
+        if (!(x)) {                                                                                \
+            ::pstore::assert_failed (#x, __FILE__, __LINE__);                                      \
+        }                                                                                          \
+    } while (0)
+
+#endif // PSTORE_SUPPORT_ASSERT_HPP

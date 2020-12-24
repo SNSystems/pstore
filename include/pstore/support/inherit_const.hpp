@@ -113,7 +113,7 @@
 ///         template <typename Vector, typename ResultType = typename inherit_const<Vector,
 ///             reference>::type>
 ///         static ResultType index_impl (Vector & v, size_type pos) {
-///             assert (pos < v.size ());
+///             PSTORE_ASSERT (pos < v.size ());
 ///             return v.base_ + pos;
 ///         }
 ///     };

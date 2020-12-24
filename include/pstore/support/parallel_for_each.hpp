@@ -46,13 +46,11 @@
 #define PSTORE_SUPPORT_PARALLEL_FOR_EACH_HPP
 
 #include <algorithm>
-#include <cassert>
 #include <future>
 #include <iterator>
 #include <vector>
 
-// To ensure that min and max are not macros on Windows.
-#include "pstore/support/portab.hpp"
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 
@@ -76,7 +74,7 @@ namespace pstore {
 
         // The number of work items to be processed by each worker thread.
         auto const partition_size = (num_elements + num_threads - 1) / num_threads;
-        assert (partition_size * num_threads >= num_elements);
+        PSTORE_ASSERT (partition_size * num_threads >= num_elements);
 
         // TODO: use small_vector<>.
         std::vector<std::future<void>> futures;
@@ -85,8 +83,9 @@ namespace pstore {
         while (first != last) {
             wide_type const distance = std::min (partition_size, num_elements);
             auto next = first;
-            assert (distance >= 0 && distance < static_cast<udifference_type> (
-                                                    std::numeric_limits<difference_type>::max ()));
+            PSTORE_ASSERT (distance >= 0 &&
+                           distance < static_cast<udifference_type> (
+                                          std::numeric_limits<difference_type>::max ()));
 
             std::advance (next, static_cast<difference_type> (distance));
             using value_type = typename std::iterator_traits<InputIt>::value_type;
@@ -99,14 +98,14 @@ namespace pstore {
             futures.emplace_back (std::async (std::launch::async, per_thread_fn, first, next));
 
             first = next;
-            assert (num_elements >= distance);
+            PSTORE_ASSERT (num_elements >= distance);
             num_elements -= distance;
         }
-        assert (num_elements == 0 && futures.size () <= num_threads);
+        PSTORE_ASSERT (num_elements == 0 && futures.size () <= num_threads);
 
         // Join
         for (auto & f : futures) {
-            assert (f.valid ());
+            PSTORE_ASSERT (f.valid ());
             // Note that future::get<> is normally used to retreive the future's result, but
             // here I'm calling it to ensure that an exception stored in the future's state is
             // raised.

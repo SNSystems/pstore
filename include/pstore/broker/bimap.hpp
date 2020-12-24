@@ -46,11 +46,10 @@
 #ifndef PSTORE_BROKER_BIMAP_HPP
 #define PSTORE_BROKER_BIMAP_HPP
 
-#include <cassert>
 #include <functional>
 #include <map>
 
-#include "pstore/config/config.hpp"
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace broker {
@@ -159,7 +158,7 @@ namespace pstore {
                 // We inserted a new key-value pair. Update right_ to match.
                 right_.emplace (it->second, &it->first);
             }
-            assert (left_.size () == right_.size ());
+            PSTORE_ASSERT (left_.size () == right_.size ());
 
 #ifndef PSTORE_STD_MAP_HAS_INSERT_OR_ASSIGN
             it->second = right;
@@ -176,7 +175,7 @@ namespace pstore {
                 // We inserted a new key-value pair. Update r_ to match.
                 right_.emplace (it->second, &it->first);
             }
-            assert (left_.size () == right_.size ());
+            PSTORE_ASSERT (left_.size () == right_.size ());
             return it->second;
         }
         template <typename L, typename R, typename Lcmp, typename Rcmp>
@@ -185,13 +184,13 @@ namespace pstore {
             auto & it = emplace_res.first;
             if (emplace_res.second) {
                 // We inserted a new key-value pair. Update l_ to match.
-                assert (it->second == nullptr);
+                PSTORE_ASSERT (it->second == nullptr);
                 auto r_a = left_.emplace (L{}, right);
-                assert (r_a.second);
+                PSTORE_ASSERT (r_a.second);
                 // Point r_.second at the new L instance.
                 it->second = &r_a.first->first;
             }
-            assert (left_.size () == right_.size ());
+            PSTORE_ASSERT (left_.size () == right_.size ());
             return *it->second;
         }
 

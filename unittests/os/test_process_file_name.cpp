@@ -61,7 +61,7 @@ namespace {
     template <typename T>
     typename std::make_unsigned<T>::type as_unsigned (T x) {
         using utype = typename std::make_unsigned<T>::type;
-        assert (x >= 0);
+        PSTORE_ASSERT (x >= 0);
         return static_cast<utype> (x);
     }
 

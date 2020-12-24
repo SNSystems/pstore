@@ -120,7 +120,7 @@ namespace pstore {
         OutputIterator traverser<Index>::visit_node (index_pointer node, unsigned shifts,
                                                      OutputIterator out) const {
             if (node.is_leaf ()) {
-                assert (node.is_address ());
+                PSTORE_ASSERT (node.is_address ());
                 // If this leaf is not in the "old" byte range then add it to the output
                 // collection.
                 if (this->is_new (node)) {
@@ -147,7 +147,7 @@ namespace pstore {
                                               unsigned const shifts, OutputIterator out) const {
             std::pair<std::shared_ptr<void const>, Node const *> const p =
                 Node::get_node (db_, node);
-            assert (std::get<Node const *> (p) != nullptr);
+            PSTORE_ASSERT (std::get<Node const *> (p) != nullptr);
             for (auto child : *std::get<Node const *> (p)) {
                 if (this->is_new (node)) {
                     out = this->visit_node (index_pointer{child},

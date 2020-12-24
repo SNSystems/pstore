@@ -75,7 +75,7 @@ namespace {
             std::strncpy (buffer->data (), "(unknown)", buffer->size ());
         }
         // Guarantee that the string is null terminated.
-        assert (buffer->size () > 0);
+        PSTORE_ASSERT (buffer->size () > 0);
         (*buffer)[buffer->size () - 1] = '\0';
         return buffer->data ();
     }
@@ -100,8 +100,8 @@ namespace pstore {
                 , uptime_done_{uptime_done}
                 , delete_threshold_{delete_threshold}
                 , num_read_threads_{num_read_threads} {
-            assert (std::is_sorted (std::begin (commands_), std::end (commands_),
-                                    command_entry_compare));
+            PSTORE_ASSERT (std::is_sorted (std::begin (commands_), std::end (commands_),
+                                           command_entry_compare));
         }
 
         // suicide
@@ -146,7 +146,7 @@ namespace pstore {
                 std::ostringstream os;
                 os << "{ \"commits\": " << commits_ << " }";
                 std::string const & str = os.str ();
-                assert (json::is_valid (str));
+                PSTORE_ASSERT (json::is_valid (str));
                 return str;
             });
         }
@@ -242,7 +242,7 @@ namespace pstore {
                 pstore::log (priority::info, "Waiting for commands");
                 while (!commands_done_) {
                     brokerface::message_ptr msg = messages_.pop ();
-                    assert (msg);
+                    PSTORE_ASSERT (msg);
                     this->process_command (fifo, *msg);
                     pool.return_to_pool (std::move (msg));
                 }

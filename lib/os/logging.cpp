@@ -124,7 +124,7 @@ namespace pstore {
             static constexpr char const * iso8601_format = "%FT%T%z";
             std::size_t const r =
                 std::strftime (buffer.data (), time_buffer_size, iso8601_format, &tm_time);
-            assert (buffer.size () >= 1);
+            PSTORE_ASSERT (buffer.size () >= 1);
             // guarantee NUL termination.
             buffer[buffer.size () - 1] = '\0';
             return r;
@@ -380,7 +380,7 @@ namespace pstore {
             std::array<char, time_buffer_size> time_buffer;
             std::size_t const r = time_string (std::time (nullptr), ::gsl::make_span (time_buffer));
             (void) r;
-            assert (r == sizeof (time_buffer) - 1);
+            PSTORE_ASSERT (r == sizeof (time_buffer) - 1);
             gsl::czstring const time_str = time_buffer.data ();
             std::ostringstream str;
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
@@ -403,7 +403,7 @@ namespace pstore {
             case priority::info: return "info";
             case priority::debug: return "debug";
             }
-            assert (0);
+            PSTORE_ASSERT (0);
             return "emergency";
         }
 
