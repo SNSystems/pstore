@@ -53,11 +53,15 @@ namespace pstore {
 
 } // end namespace pstore
 
-#define PSTORE_ASSERT(x)                                                                           \
-    do {                                                                                           \
-        if (!(x)) {                                                                                \
-            ::pstore::assert_failed (#x, __FILE__, __LINE__);                                      \
-        }                                                                                          \
-    } while (0)
+#ifndef NDEBUG
+#    define PSTORE_ASSERT(x)                                                                       \
+        do {                                                                                       \
+            if (!(x)) {                                                                            \
+                ::pstore::assert_failed (#x, __FILE__, __LINE__);                                  \
+            }                                                                                      \
+        } while (0)
+#else
+#    define PSTORE_ASSERT(x)
+#endif // NDEBUG
 
 #endif // PSTORE_SUPPORT_ASSERT_HPP
