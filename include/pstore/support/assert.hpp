@@ -54,12 +54,10 @@ namespace pstore {
 } // end namespace pstore
 
 #ifndef NDEBUG
-#    define PSTORE_ASSERT(x)                                                                       \
-        do {                                                                                       \
-            if (!(x)) {                                                                            \
-                ::pstore::assert_failed (#x, __FILE__, __LINE__);                                  \
-            }                                                                                      \
-        } while (0)
+
+#    define PSTORE_ASSERT(expr)                                                                    \
+        ((expr) ? static_cast<void> (0) : ::pstore::assert_failed (#expr, __FILE__, __LINE__))
+
 #else
 #    define PSTORE_ASSERT(x)
 #endif // NDEBUG
