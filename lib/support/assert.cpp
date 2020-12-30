@@ -47,15 +47,34 @@
 #include <iostream>
 #include <cstdlib>
 
+#ifdef _WIN32
+#    include <tchar.h>
+#endif // _WIN32
+
 #include "pstore/support/gsl.hpp"
+
 #include "backtrace.hpp"
+
+#ifndef NDEBUG
+
+namespace {
+
+#    ifdef _WIN32
+    auto & out_stream = std::wcerr;
+#        define NATIVE_TEXT(str) _TEXT (str)
+#    else
+    auto & out_stream = std::cerr;
+#        define NATIVE_TEXT(str) str
+#    endif
+
+} // end anonymous namespace
 
 namespace pstore {
 
-    void assert_failed (char const * str, char const * file, int line) {
-        std::cerr << "Assert failed: (" << str << "), file " << file << ", line " << line
-                  << std::endl;
-#if PSTORE_HAVE_BACKTRACE
+    void assert_failed (gsl::czstring str, gsl::czstring file, int line) {
+        out_stream << NATIVE_TEXT ("Assert failed: (") << str << NATIVE_TEXT ("), file ") << file
+                   << NATIVE_TEXT (", line ") << line << std::endl;
+#    if PSTORE_HAVE_BACKTRACE
         std::array<void *, 64U> callstack;
         void ** const out = callstack.data ();
         int const frames = ::backtrace (out, static_cast<int> (callstack.size ()));
@@ -65,13 +84,15 @@ namespace pstore {
                 std::free (p);
             }
         };
-        std::unique_ptr<char *, decltype (deleter)> strs{::backtrace_symbols (out, frames),
-                                                         deleter};
-        for (auto ctr = 0; ctr < frames; ++ctr) {
-            std::cerr << strs.get ()[ctr] << '\n';
-        }
-#endif
+        std::unique_ptr<gsl::zstring, decltype (deleter)> strs{::backtrace_symbols (out, frames),
+                                                               deleter};
+        auto begin = strs.get ();
+        std::copy (begin, begin + frames,
+                   std::ostream_iterator<gsl::czstring> (out_stream, NATIVE_TEXT ("\n")));
+#    endif // PSTORE_HAVE_BACKTRACE
         std::abort ();
     }
 
 } // end namespace pstore
+
+#endif // NDEBUG

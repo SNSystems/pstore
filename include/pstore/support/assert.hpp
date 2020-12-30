@@ -41,10 +41,16 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file assert.hpp
+/// \brief An implementation of the standard assert() macro with the exception that it will, on
+/// failure, dump a backtrace on platforms with the appropriate support library.
+
 #ifndef PSTORE_SUPPORT_ASSERT_HPP
 #define PSTORE_SUPPORT_ASSERT_HPP
 
 #include "pstore/support/portab.hpp"
+
+#ifndef NDEBUG
 
 namespace pstore {
 
@@ -53,11 +59,8 @@ namespace pstore {
 
 } // end namespace pstore
 
-#ifndef NDEBUG
-
 #    define PSTORE_ASSERT(expr)                                                                    \
         ((expr) ? static_cast<void> (0) : ::pstore::assert_failed (#expr, __FILE__, __LINE__))
-
 #else
 #    define PSTORE_ASSERT(x)
 #endif // NDEBUG
