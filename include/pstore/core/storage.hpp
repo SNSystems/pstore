@@ -202,6 +202,8 @@ namespace pstore {
         region_container const & regions () const { return regions_; }
 
     private:
+        void shrink (std::uint64_t new_size);
+
         static sat_iterator
         slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
                                     sat_iterator segment_it, sat_iterator segment_end);

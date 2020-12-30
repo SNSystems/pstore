@@ -1,3 +1,4 @@
+#include <iostream>
 //*      _                              *
 //*  ___| |_ ___  _ __ __ _  __ _  ___  *
 //* / __| __/ _ \| '__/ _` |/ _` |/ _ \ *
@@ -78,43 +79,51 @@ namespace pstore {
     constexpr std::uint64_t storage::full_region_size;
     constexpr std::uint64_t storage::min_region_size;
 
-    // map_bytes
+    // map bytes
     // ~~~~~~~~~
     void storage::map_bytes (std::uint64_t const new_size) {
         // Get the file offset of the end of the last memory mapped region.
         std::uint64_t const old_size =
             regions_.size () == 0 ? std::uint64_t{0} : regions_.back ()->end ();
-        // if growing the storage
+
         if (new_size > old_size) {
+            // if growing the storage
             auto const old_num_regions = regions_.size ();
             // Allocate new memory region(s) to accommodate the additional bytes requested.
             region_factory_->add (&regions_, old_size, new_size);
             this->update_master_pointers (old_num_regions);
-        } else if (new_size < old_size) { // if shrinking the storage
-            bool done = false;
-            // we now look backwards through the regions, discarding segments and regions introduced
-            // by this transaction
-            while (!done && (regions_.size () > 0)) {
-                if (regions_.back ()->offset () <= new_size) {
-                    done = true;
-                } else {
-                    // destroy our use of the shared ptr
-                    auto const region = regions_.back ();
-                    // remove segments
-                    for (auto sat_segment : *sat_) {
-                        if (sat_segment.region && sat_segment.region->data () == region->data ()) {
-                            sat_segment.region = nullptr;
-                            sat_segment.value = nullptr;
-                        }
-                    }
-                    // remove region
-                    regions_.pop_back ();
-                }
-            }
+        } else if (new_size < old_size) {
+            // if shrinking the storage
+            this->shrink (new_size);
         }
     }
 
-    // update_master_pointers
+    // shrink
+    // ~~~~~~
+    void storage::shrink (std::uint64_t const new_size) {
+        // We now look backwards through the regions, discarding segments and regions introduced
+        // by this transaction
+        while (regions_.size () > 0) {
+            auto const region = regions_.back ();
+            if (region->offset () <= new_size) {
+                return;
+            }
+
+            // remove segments
+            // TODO: there's no need to repeatedly iterate over the entire table here!
+            for (auto & sat_segment : *sat_) {
+                if (sat_segment.region != nullptr &&
+                    sat_segment.region->data () == region->data ()) {
+                    sat_segment.region = nullptr;
+                    sat_segment.value = nullptr;
+                }
+            }
+            // remove region
+            regions_.pop_back ();
+        }
+    }
+
+    // update master pointers
     // ~~~~~~~~~~~~~~~~~~~~~~
     void storage::update_master_pointers (std::size_t const old_length) {
 
@@ -156,7 +165,7 @@ namespace pstore {
 #endif
     }
 
-    // slice_region_into_segments
+    // slice region into segments
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     auto storage::slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
                                               sat_iterator segment_it,
