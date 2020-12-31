@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bitset>
 #include <cstdio>
 #include <cstring>
@@ -412,16 +413,23 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~~~~~~
         std::string basic_logger::get_current_thread_name () {
             std::string name = threads::get_name ();
-            if (name.size () == 0) {
-                // If a thread name hasn't been explicitly set (or has been explictly set
-                // to an empty string), then construct something that allows us to
-                // identify this thread in the logs.
-                std::ostringstream str;
-                str << '(' << threads::get_id () << ')';
-                return str.str ();
+            if (!name.empty ()) {
+                return name;
             }
 
-            return name;
+            // If a thread name hasn't been explicitly set (or has been explictly set
+            // to an empty string), then construct something that allows us to
+            // identify this thread in the logs.
+            thread_local auto id = -1;
+            if (id == -1) {
+                static std::atomic<int> nextid;
+                id = nextid++;
+                PSTORE_ASSERT (id != -1);
+            }
+
+            std::ostringstream str;
+            str << '(' << id << ')';
+            return str.str ();
         }
 
 

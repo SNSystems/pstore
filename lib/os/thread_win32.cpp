@@ -58,9 +58,6 @@
 namespace pstore {
     namespace threads {
 
-        thread_id_type get_id () { return ::GetCurrentThreadId (); }
-
-
         static thread_local char thread_name[name_size];
 
         void set_name (gsl::not_null<gsl::czstring> name) {
