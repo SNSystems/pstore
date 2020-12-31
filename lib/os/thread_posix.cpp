@@ -79,9 +79,10 @@ namespace pstore {
 
         void set_name (gsl::not_null<gsl::czstring> const name) {
             // pthread support for setting thread names comes in various non-portable forms.
-            // Here I'm supporting three versions:
-            // - the single argument version used by Mac OS X
-            // - two argument form supported by Linux
+            // Here I'm supporting four versions:
+            // - the single argument version used by macOS.
+            // - two argument form supported by Linux.
+            // - three argument form supported by NetBSD.
             // - the slightly differently named form used in FreeBSD.
 #    ifdef __FreeBSD__
             std::strncpy (thread_name, name, name_size);
@@ -92,6 +93,8 @@ namespace pstore {
             err = pthread_setname_np (name);
 #        elif defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS)
             err = pthread_setname_np (pthread_self (), name);
+#        elif defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
+            err = pthread_setname_np (pthread_self (), name, nullptr);
 #        elif defined(PSTORE_PTHREAD_SET_NAME_NP)
             pthread_set_name_np (pthread_self (), name);
 #        else

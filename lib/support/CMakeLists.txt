@@ -237,6 +237,16 @@ check_cxx_source_compiles (
     #include <pthread_np.h>
     #endif
     int main () {
+        pthread_setname_np (pthread_self (), \"foo\", nullptr);
+    }"
+    PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
+
+check_cxx_source_compiles (
+    "#include <pthread.h>
+    #ifdef __FreeBSD__
+    #include <pthread_np.h>
+    #endif
+    int main () {
         pthread_set_name_np (pthread_self (), \"foo\");
     }"
     PSTORE_PTHREAD_SET_NAME_NP)
@@ -264,7 +274,6 @@ set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 
 find_package (Backtrace)
 set (PSTORE_HAVE_BACKTRACE  ${Backtrace_FOUND})
-message (STATUS "Backtrace=${PSTORE_HAVE_BACKTRACE}")
 
 configure_file (
     "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
@@ -326,6 +335,10 @@ add_pstore_library (
 )
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 target_include_directories (pstore-support PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+if (Backtrace_FOUND)
+    target_include_directories (pstore-support PRIVATE ${Backtrace_INCLUDE_DIRS})
+    target_link_libraries (pstore-support PRIVATE ${Backtrace_LIBRARY})
+endif ()
 add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM

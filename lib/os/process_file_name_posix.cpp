@@ -78,7 +78,7 @@ namespace pstore {
 
 } // end namespace pstore
 
-#    elif defined(__FreeBSD__)
+#    elif defined(__FreeBSD__) || defined(__NetBSD__)
 
 // System-specific includes
 #        include <sys/types.h>
