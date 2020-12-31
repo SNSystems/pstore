@@ -54,7 +54,7 @@ set (CMAKE_REQUIRED_LIBRARIES )
 # restoring it at the end. See also <https://gitlab.kitware.com/cmake/cmake/issues/15361>.
 set (OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 if (NOT MSVC)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif (NOT MSVC)
 
 include (CheckCXXSourceCompiles)
