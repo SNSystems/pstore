@@ -61,7 +61,7 @@ namespace pstore {
         thread_id_type get_id () { return ::GetCurrentThreadId (); }
 
 
-        static PSTORE_THREAD_LOCAL char thread_name[name_size];
+        static thread_local char thread_name[name_size];
 
         void set_name (gsl::not_null<gsl::czstring> name) {
             // This code taken from http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx

@@ -54,17 +54,14 @@
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN
 #    include <Windows.h>
-#    define PSTORE_THREAD_LOCAL __declspec(thread)
-#else
-#    define PSTORE_THREAD_LOCAL __thread
-#endif
+#endif // _WIN32
 
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace threads {
 
-#ifdef _WIN32
+#if defined(_WIN32)
         using thread_id_type = DWORD;
 #elif defined(__APPLE__)
         using thread_id_type = std::uint64_t;
@@ -76,6 +73,8 @@ namespace pstore {
         using thread_id_type = std::uint32_t;
         static_assert (sizeof (thread_id_type) == sizeof (pthread_t),
                        "expected pthread_t to be 32-bits");
+#elif defined(__CYGWIN__)
+        using thread_id_type = pthread_t;
 #else
 #    error "Don't know how to represent a thread-id on this OS"
 #endif

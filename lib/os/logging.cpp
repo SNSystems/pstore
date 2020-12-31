@@ -311,14 +311,15 @@ namespace {
         last
     };
 
-} // namespace
+} // end anonymous namespace
 
 namespace pstore {
 
         namespace details {
-            PSTORE_THREAD_LOCAL logger_collection * log_destinations = nullptr;
-        } // namespace details
 
+            thread_local logger_collection * log_destinations = nullptr;
+
+        } // end namespace details
 
 
         // TODO: allow user control over where the log ends up.

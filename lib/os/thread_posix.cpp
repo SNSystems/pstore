@@ -89,6 +89,8 @@ namespace pstore {
             id = pthread_getthreadid_np ();
 #    elif defined(__sun__)
             id = static_cast<thread_id_type> (pthread_self ());
+#    elif defined(__CYGWIN__)
+            id = pthread_self ();
 #    else
 #        error "Don't know how to produce a thread-id for the target OS"
 #    endif
@@ -97,7 +99,7 @@ namespace pstore {
 
 
 #    ifdef __FreeBSD__
-        static PSTORE_THREAD_LOCAL char thread_name[name_size];
+        static thread_local char thread_name[name_size];
 #    endif // __FreeBSD__
 
         void set_name (gsl::not_null<gsl::czstring> const name) {
