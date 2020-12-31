@@ -587,8 +587,8 @@ namespace pstore {
                                                                 InputIterator last) {
             using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
             auto op = [] (BitmapType mm, iter_value_type v) {
-                auto idx = static_cast<unsigned> (v);
-                PSTORE_ASSERT (idx >= 0 && idx < max_size ());
+                auto const idx = static_cast<unsigned> (v);
+                PSTORE_ASSERT (idx < max_size ());
                 auto const mask = BitmapType{1U} << idx;
                 PSTORE_ASSERT ((mm & mask) == 0U &&
                                "The same index must not appear more than once in the "
