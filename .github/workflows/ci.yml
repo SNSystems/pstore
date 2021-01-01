@@ -5,29 +5,54 @@ jobs:
     strategy:
       matrix:
         include:
-          - name        : Windows Latest MSVC
+          - name        : Windows-latest/MSVC/Debug
+            os          : windows-latest
+            build_type  : Debug
+            generator   : Visual Studio 16 2019
+            options     : '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+          - name        : Windows-latest/MSVC/Release
             os          : windows-latest
             build_type  : Release
             generator   : Visual Studio 16 2019
-            cxx_compiler: ''
-            
-          - name        : Ubuntu-latest/gcc-10
+
+          - name        : Ubuntu-latest/gcc-10/Debug
+            os          : ubuntu-latest
+            build_type  : Debug
+            generator   : Unix Makefiles
+            cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+            options     : '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+          - name        : Ubuntu-latest/gcc-10/Release
             os          : ubuntu-latest
             build_type  : Release
             generator   : Unix Makefiles
             cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
 
-          - name        : Ubuntu-latest/gcc-7.5
+          - name        : Ubuntu-latest/gcc-7.5/Debug
+            os          : ubuntu-latest
+            build_type  : Debug
+            generator   : Unix Makefiles
+            cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
+            options     : '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+          - name        : Ubuntu-latest/gcc-7.5/Release
             os          : ubuntu-latest
             build_type  : Release
             generator   : Unix Makefiles
             cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
 
-          - name      : macOS Latest Xcode
+          - name      : macOS-latest/Xcode/Debug
+            os        : macos-latest
+            build_type: Debug
+            generator : Xcode
+            options   : '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+          - name      : macOS-latest/Xcode/Release
             os        : macos-latest
             build_type: Release
             generator : Xcode
-            cxx_compiler: ''
+
 
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
@@ -44,7 +69,7 @@ jobs:
       - name: Configure CMake
         shell: bash
         working-directory: ${{ runner.workspace }}/build
-        run: cmake $GITHUB_WORKSPACE -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cxx_compiler }}
+        run: cmake $GITHUB_WORKSPACE -G "${{ matrix.generator }}" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} ${{ matrix.cxx_compiler }} ${{ matrix.options }} -D PSTORE_EXAMPLES=Yes
 
       - name: Build
         working-directory: ${{ runner.workspace }}/build
