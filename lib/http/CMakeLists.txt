@@ -136,6 +136,10 @@ if (PSTORE_BITCODE)
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
+    set_target_properties (pstore-http-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
+    )
     target_link_libraries (pstore-http-bc PUBLIC
         pstore-brokerface-bc
         pstore-romfs-bc

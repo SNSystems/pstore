@@ -56,3 +56,4 @@ target_link_libraries (pstore-os-unit-tests
         pstore-os
         pstore-unit-test-common
 )
+add_subdirectory (klee EXCLUDE_FROM_ALL)

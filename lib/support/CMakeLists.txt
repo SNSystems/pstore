@@ -375,5 +375,10 @@ if (PSTORE_BITCODE)
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
+    set_target_properties (pstore-support-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
+    )
+    target_include_directories (pstore-support-bc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
     target_link_libraries (pstore-support-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_BITCODE)

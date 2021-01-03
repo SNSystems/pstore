@@ -160,7 +160,7 @@ function (pstore_configure_klee_test_target name)
     )
     set_target_properties (${name} PROPERTIES
         FOLDER "pstore-klee"
-        CXX_STANDARD 11
+        CXX_STANDARD ${pstore_cxx_version}
         CXX_STANDARD_REQUIRED Yes
     )
 
@@ -199,7 +199,6 @@ function (pstore_add_klee_test )
 
         add_library ("${bc_tname}" OBJECT
             ${name}.cpp
-
         )
         pstore_configure_klee_test_target ("${bc_tname}")
         target_compile_options ("${bc_tname}" PRIVATE -emit-llvm)

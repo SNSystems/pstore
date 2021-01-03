@@ -48,5 +48,9 @@ if (can_klee)
     set (target pstore-klee-cxxstdlib)
     add_library (${target}-bc OBJECT cxxstdlib.cpp)
     target_compile_options (${target}-bc PRIVATE -emit-llvm)
+    set_target_properties (${target}-bc PROPERTIES
+        CXX_STANDARD ${pstore_cxx_version}
+        CXXSTANDARD_REQUIRED Yes
+    )
     pstore_configure_klee_test_target (${target}-bc)
 endif (can_klee)

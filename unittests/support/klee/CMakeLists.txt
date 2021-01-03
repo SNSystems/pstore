@@ -41,6 +41,5 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-add_subdirectory (path)
 add_subdirectory (uint128)
 add_subdirectory (utf)

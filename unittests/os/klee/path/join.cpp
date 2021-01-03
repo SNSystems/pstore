@@ -49,7 +49,7 @@
 
 #include <klee/klee.h>
 
-#include "pstore/support/path.hpp"
+#include "pstore/os/path.hpp"
 
 constexpr std::size_t size = 5;
 

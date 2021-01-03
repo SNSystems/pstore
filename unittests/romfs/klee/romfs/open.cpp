@@ -78,7 +78,7 @@ namespace {
 } // end anonymous namespace
 
 int main (int argc, char * argv[]) {
-    constexpr auto buffer_size = 20U;
+    constexpr auto buffer_size = 7U;
     char path[buffer_size];
     klee_make_symbolic (&path, sizeof (path), "path");
     klee_assume (path[buffer_size - 1U] == '\0');
