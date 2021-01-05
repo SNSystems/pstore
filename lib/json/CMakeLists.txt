@@ -85,3 +85,26 @@ if (NOT PSTORE_EXCEPTIONS)
 
     target_link_libraries (pstore-json-lib-ex PUBLIC pstore-adt-ex pstore-support-ex)
 endif ()
+
+
+if (PSTORE_BITCODE)
+    add_pstore_library (
+        TARGET pstore-json-lib-bc
+        NAME json
+        SOURCES "${pstore_json_sources}"
+        HEADER_DIR "${pstore_json_include_dir}"
+        INCLUDES "${pstore_json_includes}"
+    )
+    target_compile_options (pstore-json-lib-bc PRIVATE
+        -emit-llvm
+        -target x86_64-pc-linux-gnu
+        -fsanitize=signed-integer-overflow
+        -fsanitize=unsigned-integer-overflow
+        -fno-threadsafe-statics
+    )
+    set_target_properties (pstore-json-lib-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
+    )
+    target_link_libraries (pstore-json-lib-bc PUBLIC pstore-adt-bc pstore-support-bc)
+endif (PSTORE_BITCODE)
