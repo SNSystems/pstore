@@ -1,10 +1,10 @@
-//*    _       _        *
-//*   (_) ___ (_)_ __   *
-//*   | |/ _ \| | '_ \  *
-//*   | | (_) | | | | | *
-//*  _/ |\___/|_|_| |_| *
-//* |__/                *
-//===- unittests/os/klee/path/join.cpp ------------------------------------===//
+//*      _        _              *
+//*  ___| |_ _ __(_)_ __   __ _  *
+//* / __| __| '__| | '_ \ / _` | *
+//* \__ \ |_| |  | | | | | (_| | *
+//* |___/\__|_|  |_|_| |_|\__, | *
+//*                       |___/  *
+//===- unittests/json/klee/string.cpp -------------------------------------===//
 // Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
@@ -44,24 +44,25 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstdio>
-#include <cstring>
-#include <string>
+
+#ifdef PSTORE_KLEE_RUN
+#    include <iostream>
+#endif
 
 #include <klee/klee.h>
 
-#include "pstore/os/path.hpp"
-
-constexpr std::size_t size = 5;
+#include "pstore/json/utility.hpp"
 
 int main (int argc, char * argv[]) {
-    char str1[size];
-    char str2[size];
+    constexpr auto buffer_size = 7U;
+    char buffer[buffer_size];
+    klee_make_symbolic (&buffer, sizeof (buffer), "buffer");
+    klee_assume (buffer[0] == '"');
+    klee_assume (buffer[buffer_size - 1U] == '\0');
 
-    klee_make_symbolic (&str1, sizeof (str1), "str1");
-    klee_assume (str1[size - 1] == '\0');
+#ifdef PSTORE_KLEE_RUN
+    std::cout << buffer << '\n';
+#endif
 
-    klee_make_symbolic (&str2, sizeof (str2), "str2");
-    klee_assume (str2[size - 1] == '\0');
-
-    std::string resl = pstore::path::posix::join (str1, str2);
+    pstore::json::is_valid (buffer);
 }

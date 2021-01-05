@@ -1,5 +1,6 @@
 name: CI Build/Test
-on: [ push ]
+# Triggers the workflow on push or pull request events
+on: [push, pull_request]
 jobs:
   build:
     strategy:

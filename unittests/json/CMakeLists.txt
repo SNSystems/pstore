@@ -50,3 +50,5 @@ add_pstore_unit_test (pstore-json-unit-tests
     test_number.cpp
 )
 target_link_libraries (pstore-json-unit-tests PRIVATE pstore-json-lib)
+
+add_subdirectory (klee)
