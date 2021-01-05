@@ -1,7 +1,7 @@
 name: KLEE Test
 on:
     push:
-        branches: [ master ]
+        branches: [ klee ]
 jobs:
     klee-test:
         runs-on: ubuntu-latest
