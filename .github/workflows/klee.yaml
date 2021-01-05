@@ -2,6 +2,9 @@ name: KLEE Test
 on:
     push:
         branches: [ klee ]
+    pull_request:
+        branches: [ klee ]
+    workflow_dispatch:
 jobs:
     klee-test:
         runs-on: ubuntu-latest
