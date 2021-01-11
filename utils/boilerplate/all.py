@@ -6,7 +6,7 @@
 # *  \__,_|_|_| *
 # *             *
 # ===- utils/boilerplate/all.py -------------------------------------------===//
-#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

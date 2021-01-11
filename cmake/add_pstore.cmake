@@ -5,7 +5,7 @@
 #*  \__,_|\__,_|\__,_| | .__/|___/\__\___/|_|  \___| *
 #*                     |_|                           *
 #===- cmake/add_pstore.cmake ----------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

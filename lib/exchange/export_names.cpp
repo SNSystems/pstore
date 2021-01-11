@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*           |_|                                                      *
 //===- lib/exchange/export_names.cpp --------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -11,7 +11,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
 //===- lib/mcrepo/linked_definitions_section.cpp --------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

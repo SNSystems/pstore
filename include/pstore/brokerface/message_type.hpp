@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___|  \__|\__, | .__/ \___| *
 //*                                |___/            |___/|_|          *
 //===- include/pstore/brokerface/message_type.hpp -------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

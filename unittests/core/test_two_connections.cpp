@@ -5,7 +5,7 @@
 //*  \__| \_/\_/ \___/   \___\___/|_| |_|_| |_|\___|\___|\__|_|\___/|_| |_|___/ *
 //*                                                                             *
 //===- unittests/core/test_two_connections.cpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

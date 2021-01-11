@@ -11,7 +11,7 @@
 //*  \___\___/|_| |_|\__\___|_| |_|\__| *
 //*                                     *
 //===- include/pstore/http/serve_dynamic_content.hpp ----------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

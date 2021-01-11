@@ -5,7 +5,7 @@
 //*  \___/| .__/ \___|_| |_| *
 //*       |_|                *
 //===- unittests/romfs/klee/romfs/open.cpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

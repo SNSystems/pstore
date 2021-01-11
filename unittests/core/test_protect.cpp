@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \__\___|\___|\__| *
 //* |_|                                *
 //===- unittests/core/test_protect.cpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

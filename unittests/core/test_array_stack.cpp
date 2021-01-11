@@ -5,7 +5,7 @@
 //*  \__,_|_|  |_|  \__,_|\__, | |___/\__\__,_|\___|_|\_\ *
 //*                       |___/                           *
 //===- unittests/core/test_array_stack.cpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

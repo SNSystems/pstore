@@ -6,7 +6,7 @@
 # * |_| |_|\__|\__| .__/ \__,_| *
 # *               |_|           *
 # ===- system_tests/broker/httpd.py ---------------------------------------===//
-#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

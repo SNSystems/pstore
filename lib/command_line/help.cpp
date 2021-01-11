@@ -5,7 +5,7 @@
 //* |_| |_|\___|_| .__/  *
 //*              |_|     *
 //===- lib/command_line/help.cpp ------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -5,7 +5,7 @@
 # *   \_/\_/ \__,_|\__\___|_| |_|\__,_|\___/ \__, |  \__|_|_| |_| |_|\___|_|    *
 # *                                          |___/                              *
 # ===- system_tests/broker/watchdog_timer.py ------------------------------===//
-#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

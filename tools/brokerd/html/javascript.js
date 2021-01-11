@@ -5,7 +5,7 @@
 //*  _/ |\__,_| \_/ \__,_|___/\___|_|  |_| .__/ \__| *
 //* |__/                                 |_|         *
 //===- tools/brokerd/html/javascript.js -----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -11,7 +11,7 @@
 //* |_|_| |_| |_| .__/ \___/|_|   \__\___|_|    *
 //*             |_|                             *
 //===- include/pstore/exchange/import_section_to_importer.hpp -------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

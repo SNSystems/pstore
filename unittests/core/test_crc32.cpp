@@ -5,7 +5,7 @@
 //*  \___|_|  \___|____/_____| *
 //*                            *
 //===- unittests/core/test_crc32.cpp --------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

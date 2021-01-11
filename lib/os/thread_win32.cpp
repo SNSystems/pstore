@@ -5,7 +5,7 @@
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
 //===- lib/os/thread_win32.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

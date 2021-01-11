@@ -5,7 +5,7 @@
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
 //===- lib/os/signal_cv_posix.cpp -----------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

@@ -11,7 +11,7 @@
 //* |_| |_| |_|\___/ \___|_|\_\___/ *
 //*                                 *
 //===- unittests/http/buffered_reader_mocks.hpp ---------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
