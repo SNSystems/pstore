@@ -52,13 +52,15 @@
 
 #include "pstore/command_line/tchar.hpp"
 #include "pstore/os/descriptor.hpp" // for in_port_t
+#include "pstore/support/maybe.hpp"
 
 struct switches {
-    std::unique_ptr<std::string> playback_path;
-    std::unique_ptr<std::string> record_path;
-    std::unique_ptr<std::string> pipe_path;
+    pstore::maybe<std::string> playback_path;
+    pstore::maybe<std::string> record_path;
+    pstore::maybe<std::string> pipe_path;
     unsigned num_read_threads = 2U;
-    in_port_t http_port = 8080;
+    bool announce_http_port = false;
+    pstore::maybe<in_port_t> http_port;
     std::chrono::seconds scavenge_time;
 };
 

@@ -52,5 +52,7 @@ namespace pstore {
         std::atomic<bool> done;
         std::atomic<int> exit_code (EXIT_SUCCESS);
 
+        std::mutex iomut;
+
     } // namespace broker
 } // namespace pstore

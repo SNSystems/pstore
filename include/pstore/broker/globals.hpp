@@ -47,12 +47,16 @@
 #define PSTORE_BROKER_GLOBALS_HPP
 
 #include <atomic>
+#include <mutex>
 
 namespace pstore {
     namespace broker {
 
         extern std::atomic<bool> done;
         extern std::atomic<int> exit_code;
+
+        /// A mutex to guard any use of stdout or stderr.
+        extern std::mutex iomut;
 
     } // namespace broker
 } // namespace pstore

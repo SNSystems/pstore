@@ -54,47 +54,44 @@ using namespace pstore::command_line;
 
 namespace {
 
-    opt<std::string> record_path ("record",
-                                  desc ("Record received messages in the named output file"));
-    alias record_path2 ("r", desc ("Alias for --record"), aliasopt (record_path));
+    opt<std::string> record_path{"record",
+                                 desc{"Record received messages in the named output file"}};
+    alias record_path2{"r", desc{"Alias for --record"}, aliasopt{record_path}};
 
-    opt<std::string> playback_path ("playback", desc ("Play back messages from the named file"));
-    alias playback_path2 ("p", desc ("Alias for --playback"), aliasopt (playback_path));
+    opt<std::string> playback_path{"playback", desc{"Play back messages from the named file"}};
+    alias playback_path2{"p", desc{"Alias for --playback"}, aliasopt{playback_path}};
 
-    opt<std::string>
-        pipe_path ("pipe-path",
-                   desc ("Overrides the path of the FIFO from which commands will be read"));
+    opt<std::string> pipe_path{
+        "pipe-path", desc{"Overrides the path of the FIFO from which commands will be read"}};
 
-    opt<unsigned> num_read_threads ("read-threads", desc ("The number of pipe reading threads"),
-                                    init (2U));
+    opt<unsigned> num_read_threads{"read-threads", desc{"The number of pipe reading threads"},
+                                   init (2U)};
 
-    opt<std::uint16_t>
-        http_port ("http-port",
-                   desc ("The port on which to listen for HTTP connections (0 to disable)"),
-                   init (in_port_t{8080}));
+    opt<std::uint16_t> http_port{"http-port",
+                                 desc{"The port on which to listen for HTTP connections"},
+                                 init (in_port_t{8080})};
+    opt<bool> disable_http{"disable-http", desc{"Disable the HTTP server"}, init (false)};
 
-    opt<unsigned>
-        scavenge_time ("scavenge-time",
-                       desc ("The time in seconds that a message will spend in the command "
-                             "queue before being removed by the scavenger"),
-                       init (4U * 60U * 60U));
+    opt<bool> announce_http_port{"announce-http-port",
+                                 desc{"Display a message when the HTTP server is available"},
+                                 init (false)};
 
-    std::unique_ptr<std::string> path_option (std::string const & path) {
-        std::unique_ptr<std::string> result;
-        if (path.length () > 0) {
-            result = std::make_unique<std::string> (path);
+    opt<unsigned> scavenge_time{"scavenge-time",
+                                desc{"The time in seconds that a message will spend in the command "
+                                     "queue before being removed by the scavenger"},
+                                init (4U * 60U * 60U)};
+
+    pstore::maybe<std::string> path_option (opt<std::string> const & path) {
+        if (path.get_num_occurrences () == 0U) {
+            return pstore::nothing<std::string> ();
         }
-        return result;
-    }
-
-    std::unique_ptr<std::string> path_option (opt<std::string> const & o) {
-        return path_option (o.get ());
+        return pstore::just (path.get ());
     }
 
 } // end anonymous namespace
 
 
-std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
+std::pair<switches, int> get_switches (int const argc, tchar * argv[]) {
     parse_command_line_options (argc, argv, "pstore broker agent");
 
     switches result;
@@ -102,7 +99,9 @@ std::pair<switches, int> get_switches (int argc, tchar * argv[]) {
     result.record_path = path_option (record_path);
     result.pipe_path = path_option (pipe_path);
     result.num_read_threads = num_read_threads.get ();
-    result.http_port = http_port.get ();
+    result.announce_http_port = announce_http_port.get ();
+    result.http_port =
+        disable_http ? pstore::nothing<in_port_t> () : pstore::just (http_port.get ());
     result.scavenge_time = std::chrono::seconds{scavenge_time.get ()};
     return {std::move (result), EXIT_SUCCESS};
 }

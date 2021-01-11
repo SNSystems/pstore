@@ -78,12 +78,14 @@
 
 #include "switches.hpp"
 
-extern pstore::romfs::romfs fs;
 using namespace std::string_literals;
+using namespace pstore;
+
+extern romfs::romfs fs;
 
 namespace {
 
-    // create_thread
+    // create thread
     // ~~~~~~~~~~~~~
     template <class Function, class... Args>
     auto create_thread (Function && f, Args &&... args)
@@ -100,6 +102,8 @@ namespace {
         return fut;
     }
 
+    // make weak
+    // ~~~~~~~~~
     /// Creates a weak_ptr from a shared_ptr. This can be done implicitly, but I want to make the
     /// conversion explicit.
     template <typename T>
@@ -107,20 +111,50 @@ namespace {
         return {p};
     }
 
+    // thread init
+    // ~~~~~~~~~~~
     void thread_init (std::string const & name) {
-        pstore::threads::set_name (name.c_str ());
-        pstore::create_log_stream ("broker." + name);
+        threads::set_name (name.c_str ());
+        create_log_stream ("broker." + name);
     }
 
+    // create http worker thread
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    void create_http_worker_thread (gsl::not_null<std::vector<std::future<void>> *> const futures,
+                                    gsl::not_null<maybe<httpd::server_status> *> http_status,
+                                    bool announce_port) {
+        if (!http_status->has_value ()) {
+            return;
+        }
+        futures->push_back (create_thread (
+            [announce_port] (maybe<httpd::server_status> * const status) {
+                thread_init ("http");
+                PSTORE_ASSERT (status->has_value ());
 
-    std::vector<std::future<void>>
-    create_worker_threads (std::shared_ptr<pstore::broker::command_processor> const & commands,
-                           pstore::brokerface::fifo_path & fifo,
-                           std::shared_ptr<pstore::broker::scavenger> const & scav,
-                           std::unique_ptr<pstore::httpd::server_status> const & http_status,
-                           std::atomic<bool> * const uptime_done) {
+                httpd::channel_container channels{
+                    {"commits",
+                     httpd::channel_container_entry{&broker::commits_channel, &broker::commits_cv}},
+                    {"uptime",
+                     httpd::channel_container_entry{&broker::uptime_channel, &broker::uptime_cv}},
+                };
 
-        using namespace pstore;
+                httpd::server (
+                    fs, &status->value (), channels, [announce_port] (in_port_t const port) {
+                        if (announce_port) {
+                            std::lock_guard<decltype (broker::iomut)> lock{broker::iomut};
+                            std::cout << "HTTP listening on port " << port << std::endl;
+                        }
+                    });
+            },
+            http_status.get ()));
+    }
+
+    // create worker threads
+    // ~~~~~~~~~~~~~~~~~~~~~
+    std::vector<std::future<void>> create_worker_threads (
+        std::shared_ptr<broker::command_processor> const & commands, brokerface::fifo_path & fifo,
+        std::shared_ptr<broker::scavenger> const & scav, std::atomic<bool> * const uptime_done) {
+
         std::vector<std::future<void>> futures;
 
         futures.push_back (create_thread ([&fifo, commands] () {
@@ -138,23 +172,6 @@ namespace {
             broker::gc_process_watch_thread ();
         }));
 
-        if (http_status) {
-            futures.push_back (create_thread (
-                [](httpd::server_status * const status) {
-                    thread_init ("http");
-                    pstore::httpd::channel_container channels{
-                        {"commits",
-                         pstore::httpd::channel_container_entry{&pstore::broker::commits_channel,
-                                                                &pstore::broker::commits_cv}},
-                        {"uptime",
-                         pstore::httpd::channel_container_entry{&pstore::broker::uptime_channel,
-                                                                &pstore::broker::uptime_cv}},
-                    };
-                    httpd::server (fs, status, channels);
-                },
-                http_status.get ()));
-        }
-
         futures.push_back (create_thread (
             [] (std::atomic<bool> * const done) {
                 thread_init ("uptime");
@@ -165,14 +182,24 @@ namespace {
         return futures;
     }
 
+    // get http server status
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    /// Create an HTTP server_status object which reflects the user's choice of port.
+    decltype (auto) get_http_server_status (maybe<in_port_t> const & port) {
+        if (port.has_value ()) {
+            return maybe<httpd::server_status>{in_place, *port};
+        }
+        return nothing<httpd::server_status> ();
+    }
+
 } // end anonymous namespace
+
 
 #if defined(_WIN32)
 int _tmain (int argc, TCHAR * argv[]) {
 #else
 int main (int argc, char * argv[]) {
 #endif
-    using namespace pstore;
     using priority = logger::priority;
 
     try {
@@ -187,7 +214,7 @@ int main (int argc, char * argv[]) {
         }
 
 #ifdef _WIN32
-        pstore::wsa_startup startup;
+        wsa_startup startup;
         if (!startup.started ()) {
             log (priority::error, "WSAStartup() failed");
             log (priority::info, "broker exited");
@@ -198,44 +225,41 @@ int main (int argc, char * argv[]) {
         // If we're recording the messages we receive, then create the file in which they will be
         // stored.
         std::shared_ptr<broker::recorder> record_file;
-        if (opt.record_path) {
+        if (opt.record_path.has_value ()) {
             record_file = std::make_shared<broker::recorder> (*opt.record_path);
         }
 
         // TODO: ensure that this is a singleton process?
-        // auto const path = std::make_unique<fifo_path> ();
         log (priority::notice, "opening pipe");
 
-        pstore::brokerface::fifo_path fifo{opt.pipe_path ? opt.pipe_path->c_str () : nullptr};
+        brokerface::fifo_path fifo{opt.pipe_path.has_value () ? opt.pipe_path->c_str () : nullptr};
 
         std::vector<std::future<void>> futures;
         std::thread quit;
 
-        auto http_status = opt.http_port == 0U
-                               ? std::unique_ptr<pstore::httpd::server_status>{}
-                               : std::make_unique<pstore::httpd::server_status> (opt.http_port);
+        maybe<httpd::server_status> http_status = get_http_server_status (opt.http_port);
         std::atomic<bool> uptime_done{false};
 
+        log (priority::notice, "starting threads");
         {
             auto commands = std::make_shared<broker::command_processor> (
-                opt.num_read_threads, http_status.get (), &uptime_done, opt.scavenge_time);
+                opt.num_read_threads, &http_status, &uptime_done, opt.scavenge_time);
             auto scav = std::make_shared<broker::scavenger> (commands);
             commands->attach_scavenger (scav);
 
-
-            log (priority::notice, "starting threads");
             quit = create_quit_thread (make_weak (commands), make_weak (scav), opt.num_read_threads,
-                                       http_status.get (), &uptime_done);
+                                       &http_status, &uptime_done);
 
-            futures = create_worker_threads (commands, fifo, scav, http_status, &uptime_done);
+            futures = create_worker_threads (commands, fifo, scav, &uptime_done);
+            create_http_worker_thread (&futures, &http_status, opt.announce_http_port);
 
-            if (opt.playback_path) {
+            if (opt.playback_path.has_value ()) {
                 broker::player playback_file (*opt.playback_path);
                 while (auto msg = playback_file.read ()) {
                     commands->push_command (std::move (msg), record_file.get ());
                 }
                 shutdown (commands.get (), scav.get (), -1 /*signum*/, 0U /*num read threads*/,
-                          http_status.get (), &uptime_done);
+                          &http_status, &uptime_done);
             } else {
                 for (auto ctr = 0U; ctr < opt.num_read_threads; ++ctr) {
                     futures.push_back (create_thread ([ctr, &fifo, &record_file, commands] () {

@@ -72,6 +72,7 @@ set (pstore_http_lib_src
     net_txrx.cpp
     quit.cpp
     server.cpp
+    server_status.cpp
     ws_server.cpp
     wskey.cpp
     "${pstore_http_fs_source}"

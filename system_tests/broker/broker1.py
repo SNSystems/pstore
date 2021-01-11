@@ -65,7 +65,7 @@ POKER_ARGS = ['--flood', '100', '--kill', '--pipe-path', PIPE_PATH]
 
 # Specify an explicit pipe path to avoid collisions with other tests that may
 # be running. Disable the HTTP server for the same reason.
-BROKER_ARGS = ['--pipe-path', PIPE_PATH, '--http-port', '0']
+BROKER_ARGS = ['--pipe-path', PIPE_PATH, '--disable-http']
 
 
 def main(argv):

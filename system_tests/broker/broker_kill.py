@@ -84,7 +84,7 @@ def main(argv):
     paths = get_tool_paths(args.exe_path)
 
     pipe_path = os.path.join(common.pipe_root_dir(), 'pstore_broker_kill')
-    broker_command = [paths.broker, '--pipe-path', pipe_path, '--http-port', '0']
+    broker_command = [paths.broker, '--pipe-path', pipe_path, '--disable-http']
     print("Popen: ", ' '.join(broker_command), file=sys.stderr)
 
     broker_process = timed_process.TimedProcess(args=broker_command,

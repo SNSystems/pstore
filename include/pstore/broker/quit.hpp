@@ -42,6 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file broker/quit.hpp
+/// \brief The broker's shutdown thread.
 
 #ifndef PSTORE_BROKER_QUIT_HPP
 #define PSTORE_BROKER_QUIT_HPP
@@ -52,6 +53,7 @@
 #include <thread>
 
 #include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace httpd {
@@ -68,18 +70,19 @@ namespace pstore {
         /// The pretend signal number that's raised when a remote shutdown request is received.
         constexpr int sig_self_quit = -1;
 
-        void shutdown (command_processor * const cp, scavenger * const scav, int signum,
-                       unsigned num_read_threads, pstore::httpd::server_status * http_status,
-                       gsl::not_null<std::atomic<bool> *> uptime_done);
+        void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
+                       unsigned const num_read_threads,
+                       gsl::not_null<maybe<httpd::server_status> *> const http_status,
+                       gsl::not_null<std::atomic<bool> *> const uptime_done);
 
         /// Wakes up the quit thread to start the process of shutting down the server.
         void notify_quit_thread ();
 
         std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
                                         std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        pstore::httpd::server_status * http_status,
+                                        gsl::not_null<maybe<httpd::server_status> *> http_status,
                                         gsl::not_null<std::atomic<bool> *> uptime_done);
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_QUIT_HPP

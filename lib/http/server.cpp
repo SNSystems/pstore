@@ -176,7 +176,7 @@ namespace {
                     error.message ().c_str ());
         };
 
-        log (pstore::logger::priority::error, "Error:", error.message ());
+        log (pstore::logger::priority::error, "http error: ", error.message ());
         if (error.category () == pstore::httpd::get_error_category ()) {
             switch (static_cast<pstore::httpd::error_code> (error.value ())) {
             case pstore::httpd::error_code::bad_request: report (400, "Bad request"); return;
@@ -359,19 +359,23 @@ namespace pstore {
     namespace httpd {
 
         int server (romfs::romfs & file_system, gsl::not_null<server_status *> const status,
-                    channel_container const & channels) {
+                    channel_container const & channels,
+                    std::function<void (in_port_t)> notify_listening) {
             using priority = logger::priority;
 
             error_or<socket_descriptor> const eparentfd = initialize_socket (status->port ());
             if (!eparentfd) {
-                log (priority::error, "opening socket", eparentfd.get_error ().message ());
+                log (priority::error, "opening socket: ", eparentfd.get_error ().message ());
                 return 0;
             }
-            socket_descriptor const & parentfd = eparentfd.get ();
 
-            log (priority::info, "starting server-loop");
+            socket_descriptor const & parentfd = eparentfd.get ();
+            status->set_real_port_number (parentfd);
+
+            log (priority::info, "starting server-loop on port ", status->port ());
 
             std::vector<std::unique_ptr<std::thread>> websockets_workers;
+            notify_listening (status->port ());
 
             for (auto expected_state = server_status::http_state::initializing;
                  status->listening (expected_state);
@@ -380,7 +384,8 @@ namespace pstore {
                 // Wait for a connection request.
                 pstore::error_or<socket_descriptor> echildfd = wait_for_connection (parentfd);
                 if (!echildfd) {
-                    log (priority::error, "wait_for_connection", echildfd.get_error ().message ());
+                    log (priority::error,
+                         "wait_for_connection: ", echildfd.get_error ().message ());
                     continue;
                 }
                 socket_descriptor & childfd = *echildfd;

@@ -68,11 +68,13 @@
 namespace {
 
     using priority = pstore::logger::priority;
+    template <typename T>
+    using not_null = pstore::gsl::not_null<T>;
 
     // push
     // ~~~~
     /// Push a simple message onto the command queue.
-    void push (pstore::gsl::not_null<pstore::broker::command_processor *> const cp,
+    void push (not_null<pstore::broker::command_processor *> const cp,
                std::string const & message) {
         static std::atomic<std::uint32_t> mid{0};
 
@@ -94,8 +96,8 @@ namespace pstore {
         // ~~~~~~~~
         void shutdown (command_processor * const cp, scavenger * const scav, int const signum,
                        unsigned const num_read_threads,
-                       pstore::httpd::server_status * const http_status,
-                       gsl::not_null<std::atomic<bool> *> const uptime_done) {
+                       not_null<maybe<pstore::httpd::server_status> *> const http_status,
+                       not_null<std::atomic<bool> *> const uptime_done) {
 
             // Set the global "done" flag unless we're already shutting down. The latter condition
             // happens if a "SUICIDE" command is received and the quit thread is woken in response.
@@ -196,8 +198,8 @@ namespace {
     void quit_thread (std::weak_ptr<pstore::broker::command_processor> const cp,
                       std::weak_ptr<pstore::broker::scavenger> const scav,
                       unsigned const num_read_threads,
-                      pstore::httpd::server_status * const http_status,
-                      pstore::gsl::not_null<std::atomic<bool> *> const uptime_done) {
+                      not_null<pstore::maybe<pstore::httpd::server_status> *> http_status,
+                      not_null<std::atomic<bool> *> const uptime_done) {
         try {
             pstore::threads::set_name ("quit");
             pstore::create_log_stream ("broker.quit");
@@ -253,10 +255,11 @@ namespace pstore {
 
         // create_quit_thread
         // ~~~~~~~~~~~~~~~~~~
-        std::thread create_quit_thread (std::weak_ptr<command_processor> cp,
-                                        std::weak_ptr<scavenger> scav, unsigned num_read_threads,
-                                        pstore::httpd::server_status * const http_status,
-                                        gsl::not_null<std::atomic<bool> *> uptime_done) {
+        std::thread
+        create_quit_thread (std::weak_ptr<command_processor> cp, std::weak_ptr<scavenger> scav,
+                            unsigned num_read_threads,
+                            gsl::not_null<maybe<pstore::httpd::server_status> *> http_status,
+                            gsl::not_null<std::atomic<bool> *> uptime_done) {
             std::thread quit (quit_thread, std::move (cp), std::move (scav), num_read_threads,
                               http_status, uptime_done);
 
