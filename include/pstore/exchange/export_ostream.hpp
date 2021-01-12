@@ -82,7 +82,7 @@ namespace pstore {
                         v /= 10U;
                     }
                     ++ptr;
-                    assert (ptr >= out->data ());
+                    PSTORE_ASSERT (ptr >= out->data ());
                     return {ptr, end};
                 }
 
@@ -116,7 +116,7 @@ namespace pstore {
                 ostream_base & write (gsl::span<char const, Extent> const s);
 
                 ostream_base & write (char const * s, std::streamsize const length) {
-                    assert (length >= 0);
+                    PSTORE_ASSERT (length >= 0);
                     return this->write (gsl::make_span (s, length));
                 }
 
@@ -160,13 +160,13 @@ namespace pstore {
                     if (available == 0U) {
                         available = this->flush ();
                     }
-                    assert (available > 0U);
+                    PSTORE_ASSERT (available > 0U);
 
                     // Copy as many characters as we can from the input span to the buffer.
                     auto const count = std::min (remaining, available);
                     auto ss = s.subspan (index, count);
                     ptr_ = std::copy (ss.begin (), ss.end (), ptr_);
-                    assert (ptr_ <= end_);
+                    PSTORE_ASSERT (ptr_ <= end_);
 
                     // Adjust our view of the characters remaining to be copied.
                     remaining -= count;
