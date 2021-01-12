@@ -11,7 +11,7 @@
 //* |_|_|_| |_|\___| |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                                    *
 //===- include/pstore/exchange/import_debug_line_section.hpp --------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -72,7 +72,7 @@ namespace pstore {
                                     OutputIterator * const out)
                         : generic_section<OutputIterator> (ctxt, kind, names, content, out)
                         , out_{out} {
-                    assert (kind == repo::section_kind::debug_line);
+                    PSTORE_ASSERT (kind == repo::section_kind::debug_line);
                 }
                 debug_line_section (debug_line_section const &) = delete;
                 debug_line_section (debug_line_section &&) noexcept = delete;

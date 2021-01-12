@@ -5,7 +5,7 @@
 //*   \_/ \__,_|_|  |_|_| |_|\__| *
 //*                               *
 //===- unittests/support/test_varint.cpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -53,12 +53,12 @@ namespace {
     class VarInt : public ::testing::Test {
     protected:
         static std::uint64_t all_ones (unsigned places) {
-            assert (places < 64);
+            PSTORE_ASSERT (places < 64);
             return (UINT64_C (1) << places) - 1;
         }
 
         static std::uint64_t power (unsigned exponent) {
-            assert (exponent < 64);
+            PSTORE_ASSERT (exponent < 64);
             return UINT64_C (1) << exponent;
         }
 

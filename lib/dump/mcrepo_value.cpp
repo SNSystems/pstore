@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___|_|  \___| .__/ \___/    \_/ \__,_|_|\__,_|\___| *
 //*                         |_|                                     *
 //===- lib/dump/mcrepo_value.cpp ------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -142,7 +142,7 @@ namespace pstore {
         value_ptr make_section_value (database const & db, repo::debug_line_section const & section,
                                       repo::section_kind const sk, gsl::czstring const triple,
                                       bool const hex_mode) {
-            assert (sk == repo::section_kind::debug_line);
+            PSTORE_ASSERT (sk == repo::section_kind::debug_line);
             return make_value (object::container{
                 {"digest", make_value (section.header_digest ())},
                 {"header", make_value (section.header_extent ())},
@@ -154,7 +154,7 @@ namespace pstore {
                                       repo::section_kind const sk, gsl::czstring const /*triple*/,
                                       bool const /*hex_mode*/) {
             (void) sk;
-            assert (sk == repo::section_kind::bss);
+            PSTORE_ASSERT (sk == repo::section_kind::bss);
             return make_value (object::container{
                 {"align", make_value (section.align ())},
                 {"size", make_value (section.size ())},
@@ -172,12 +172,12 @@ namespace pstore {
 
             array::container array;
             for (repo::section_kind const kind : fragment) {
-                assert (fragment.has_section (kind));
+                PSTORE_ASSERT (fragment.has_section (kind));
                 value_ptr contents;
                 switch (kind) {
                     PSTORE_MCREPO_SECTION_KINDS
                 case repo::section_kind::last:
-                    assert (false); //! OCLINT(PH - don't warn about the assert macro)
+                    PSTORE_ASSERT (false); //! OCLINT(PH - don't warn about the assert macro)
                     break;
                 }
                 array.emplace_back (make_value (

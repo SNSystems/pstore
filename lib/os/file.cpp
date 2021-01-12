@@ -5,7 +5,7 @@
 //* |_| |_|_|\___| *
 //*                *
 //===- lib/os/file.cpp ----------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -218,7 +218,7 @@ namespace pstore {
 #ifndef NDEBUG
             {
                 constexpr auto max = std::numeric_limits<index_type>::max ();
-                assert (length_ <= max && pos_ <= max && nbytes <= max);
+                PSTORE_ASSERT (length_ <= max && pos_ <= max && nbytes <= max);
             }
 #endif
             auto const length = static_cast<index_type> (length_);
@@ -228,7 +228,7 @@ namespace pstore {
             std::copy (std::begin (span), std::end (span),
                        static_cast<element_type *> (ptr.get ()));
 
-            assert (pos_ + nbytes >= pos_);
+            PSTORE_ASSERT (pos_ + nbytes >= pos_);
             pos_ += nbytes;
             return nbytes;
         }
@@ -238,7 +238,7 @@ namespace pstore {
         void in_memory::write_buffer (gsl::not_null<void const *> const ptr,
                                       std::size_t const nbytes) {
             this->check_writable ();
-            assert (length_ > pos_);
+            PSTORE_ASSERT (length_ > pos_);
             if (nbytes > length_ - pos_) {
                 raise (std::errc::invalid_argument);
             }
@@ -250,7 +250,7 @@ namespace pstore {
                 // TODO: if nbytes > index_type max if would be much better to split the
                 // write into two pieces rather than just fail...
                 constexpr auto max = std::numeric_limits<index_type>::max ();
-                assert (length_ <= max && pos_ <= max && nbytes <= max);
+                PSTORE_ASSERT (length_ <= max && pos_ <= max && nbytes <= max);
             }
 #endif
             auto dest_span =
@@ -263,7 +263,7 @@ namespace pstore {
                            "expected index_type of src_span and dest_span to be the same");
 
             std::copy (std::begin (src_span), std::end (src_span), std::begin (dest_span));
-            assert (pos_ + nbytes >= pos_);
+            PSTORE_ASSERT (pos_ + nbytes >= pos_);
             pos_ += nbytes;
             if (pos_ > eof_) {
                 eof_ = pos_;
@@ -282,8 +282,8 @@ namespace pstore {
         // truncate
         // ~~~~~~~~
         void in_memory::truncate (std::uint64_t const size) {
-            assert (eof_ <= length_);
-            assert (pos_ <= eof_);
+            PSTORE_ASSERT (eof_ <= length_);
+            PSTORE_ASSERT (pos_ <= eof_);
             this->check_writable ();
 
             if (size > length_) {

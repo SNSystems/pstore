@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___||___/___/\__,_|\__, |\___| | .__/ \___/ \___/|_| *
 //*                                |___/       |_|                   *
 //===- include/pstore/broker/message_pool.hpp -----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -83,7 +83,7 @@ namespace pstore {
 
         inline void message_pool::return_to_pool (brokerface::message_ptr && ptr) {
             std::unique_lock<std::mutex> const lock (mut_);
-            assert (ptr.get () != nullptr);
+            PSTORE_ASSERT (ptr.get () != nullptr);
             queue_.push (std::move (ptr));
         }
 

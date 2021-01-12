@@ -5,7 +5,7 @@
 //*  \___|_|  |_|  \___/|_|     \___/|_|    *
 //*                                         *
 //===- include/pstore/adt/error_or.hpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -44,14 +44,13 @@
 #ifndef PSTORE_ADT_ERROR_OR_HPP
 #define PSTORE_ADT_ERROR_OR_HPP
 
-#include <cassert>
 #include <new>
 #include <system_error>
 #include <tuple>
 
 #include "pstore/adt/utility.hpp"
+#include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
-#include "pstore/support/portab.hpp"
 
 namespace pstore {
 
@@ -216,7 +215,7 @@ namespace pstore {
         template <typename ErrorOr,
                   typename ResultType = typename inherit_const<ErrorOr, storage_type>::type>
         static ResultType * PSTORE_NONNULL value_storage_impl (ErrorOr && e) noexcept {
-            assert (!e.has_error_);
+            PSTORE_ASSERT (!e.has_error_);
             return reinterpret_cast<ResultType *> (&e.storage_);
         }
 
@@ -228,7 +227,7 @@ namespace pstore {
         template <typename ErrorOr,
                   typename ResultType = typename inherit_const<ErrorOr, std::error_code>::type>
         static ResultType * PSTORE_NONNULL error_storage_impl (ErrorOr && e) noexcept {
-            assert (e.has_error_);
+            PSTORE_ASSERT (e.has_error_);
             return reinterpret_cast<ResultType *> (&e.error_storage_);
         }
         std::error_code * PSTORE_NONNULL get_error_storage () noexcept;

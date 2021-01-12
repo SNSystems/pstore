@@ -5,7 +5,7 @@
 //* |_| |_|\___|\__,_|\__,_|\___|_|  |___/ *
 //*                                        *
 //===- lib/http/headers.cpp -----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -152,7 +152,7 @@ namespace {
                 if (num > std::numeric_limits<unsigned>::max () / 10U - 10U) {
                     break; // overflow.
                 }
-                assert (v[pos] >= '0');
+                PSTORE_ASSERT (v[pos] >= '0');
                 num = num * 10U + static_cast<unsigned> (v[pos] - '0');
             }
             return pos == last ? pstore::just (num) : pstore::nothing<unsigned> ();

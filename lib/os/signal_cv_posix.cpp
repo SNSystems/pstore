@@ -5,7 +5,7 @@
 //* |___/_|\__, |_| |_|\__,_|_|  \___| \_/   *
 //*        |___/                             *
 //===- lib/os/signal_cv_posix.cpp -----------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -81,8 +81,8 @@ namespace pstore {
 
         read_fd_.reset (fds_[read_index]);
         write_fd_.reset (fds_[write_index]);
-        assert (read_fd_.valid ());
-        assert (write_fd_.valid ());
+        PSTORE_ASSERT (read_fd_.valid ());
+        PSTORE_ASSERT (write_fd_.valid ());
 
         // Make both pipe descriptors non-blocking.
         descriptor_condition_variable::make_non_blocking (read_fd_.native_handle ());

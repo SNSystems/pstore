@@ -11,7 +11,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
 //===- lib/mcrepo/debug_line_section.cpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -58,7 +58,7 @@ namespace pstore {
 
         std::uint8_t *
         debug_line_section_creation_dispatcher::write (std::uint8_t * const out) const {
-            assert (this->aligned (out) == out);
+            PSTORE_ASSERT (this->aligned (out) == out);
             auto * const scn = new (out) debug_line_section (
                 header_digest_, header_, section_->make_sources (), section_->align);
             return out + scn->size_bytes ();

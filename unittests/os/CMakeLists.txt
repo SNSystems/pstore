@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/os/CMakeLists.txt -----------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -56,3 +56,4 @@ target_link_libraries (pstore-os-unit-tests
         pstore-os
         pstore-unit-test-common
 )
+add_subdirectory (klee EXCLUDE_FROM_ALL)

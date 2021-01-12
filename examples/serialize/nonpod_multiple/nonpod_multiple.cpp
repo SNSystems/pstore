@@ -5,7 +5,7 @@
 //* |_| |_|\___/|_| |_| .__/ \___/ \__,_| |_| |_| |_|\__,_|_|\__|_| .__/|_|\___| *
 //*                   |_|                                         |_|            *
 //===- examples/serialize/nonpod_multiple/nonpod_multiple.cpp -------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

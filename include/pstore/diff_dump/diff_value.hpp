@@ -5,7 +5,7 @@
 //*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
 //*                                             *
 //===- include/pstore/diff_dump/diff_value.hpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -180,7 +180,7 @@ namespace pstore {
                                          revision_number const new_revision,
                                          revision_number const old_revision,
                                          GetIndexFunction get_index) {
-            assert (new_revision >= old_revision);
+            PSTORE_ASSERT (new_revision >= old_revision);
 
             details::revision_restorer const _{db};
             db.sync (new_revision);

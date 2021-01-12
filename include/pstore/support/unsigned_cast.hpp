@@ -5,7 +5,7 @@
 //*  \__,_|_| |_|___/_|\__, |_| |_|\___|\__,_|  \___\__,_|___/\__| *
 //*                    |___/                                       *
 //===- include/pstore/support/unsigned_cast.hpp ---------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -59,7 +59,7 @@ namespace pstore {
             std::numeric_limits<DestT>::max () >=
                 std::numeric_limits<std::make_unsigned_t<typename std::remove_cv_t<SrcT>>>::max (),
             "DestT cannot hold all of the values of SrcT");
-        assert (value >= SrcT{0});
+        PSTORE_ASSERT (value >= SrcT{0});
         return static_cast<DestT> (value);
     }
 

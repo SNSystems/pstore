@@ -5,7 +5,7 @@
 //*  \__,_|_.__/    \_/ \__,_|_|\__,_|\___| *
 //*                                         *
 //===- lib/dump/db_value.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -94,7 +94,7 @@ namespace pstore {
                     value_ = make_value (addr_.absolute ());
                 }
             }
-            assert (value_.get () != nullptr);
+            PSTORE_ASSERT (value_.get () != nullptr);
             return value_;
         }
 

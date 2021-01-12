@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/http/CMakeLists.txt ---------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -72,6 +72,7 @@ set (pstore_http_lib_src
     net_txrx.cpp
     quit.cpp
     server.cpp
+    server_status.cpp
     ws_server.cpp
     wskey.cpp
     "${pstore_http_fs_source}"
@@ -135,6 +136,10 @@ if (PSTORE_BITCODE)
         -fsanitize=signed-integer-overflow
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
+    )
+    set_target_properties (pstore-http-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
     )
     target_link_libraries (pstore-http-bc PUBLIC
         pstore-brokerface-bc

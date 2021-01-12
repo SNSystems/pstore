@@ -5,7 +5,7 @@
 //* |_.__/|_|\__| |_| |_|\___|_|\__,_| *
 //*                                    *
 //===- include/pstore/support/bit_field.hpp -------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -81,11 +81,12 @@
 #ifndef PSTORE_SUPPORT_BIT_FIELD_HPP
 #define PSTORE_SUPPORT_BIT_FIELD_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 

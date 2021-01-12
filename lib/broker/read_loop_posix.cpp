@@ -5,7 +5,7 @@
 //* |_|  \___|\__,_|\__,_| |_|\___/ \___/| .__/  *
 //*                                      |_|     *
 //===- lib/broker/read_loop_posix.cpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -123,7 +123,8 @@ namespace pstore {
                         } else {
                             // Push the command buffer on to the queue for processing and pull
                             // an new read buffer from the pool.
-                            assert (static_cast<std::size_t> (bytes_read) <= sizeof (*readbuf));
+                            PSTORE_ASSERT (static_cast<std::size_t> (bytes_read) <=
+                                           sizeof (*readbuf));
                             cp->push_command (std::move (readbuf), record_file.get ());
 
                             readbuf = pool.get_from_pool ();

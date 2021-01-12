@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__|  \___|_| |_| |_|_|\__| *
 //*           |_|                                           *
 //===- include/pstore/exchange/export_emit.hpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -129,7 +129,7 @@ namespace pstore {
                 std::array<char, uint128::hex_string_length> hex;
                 auto const out = d.to_hex (hex.begin ());
                 (void) out;
-                assert (out == hex.end ());
+                PSTORE_ASSERT (out == hex.end ());
                 os << '"';
                 details::write_span (os, gsl::make_span (hex));
                 os << '"';

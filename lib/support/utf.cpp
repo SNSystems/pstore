@@ -5,7 +5,7 @@
 //*  \__,_|\__|_|   *
 //*                 *
 //===- lib/support/utf.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -47,10 +47,11 @@
 #include "pstore/support/utf.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cctype>
 #include <cstring>
 #include <type_traits>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace utf {

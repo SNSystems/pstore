@@ -5,7 +5,7 @@
 //* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*                |___/                           *
 //===- include/pstore/mcrepo/fragment.hpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -234,7 +234,7 @@ namespace pstore {
                         , it_{it} {}
                 constexpr explicit const_iterator (wrapped_iterator const & it) noexcept
                         : const_iterator (static_cast<section_kind> (*it), it) {
-                    assert (*it < static_cast<std::uint64_t> (section_kind::last));
+                    PSTORE_ASSERT (*it < static_cast<std::uint64_t> (section_kind::last));
                 }
 
                 bool operator== (const_iterator const & rhs) const noexcept {
@@ -350,7 +350,7 @@ namespace pstore {
                       typename ResultType = typename inherit_const<
                           Fragment, typename enum_to_section<Key>::type>::type>
             static ResultType & at_impl (Fragment && f) noexcept {
-                assert (f.has_section (Key));
+                PSTORE_ASSERT (f.has_section (Key));
                 using utype = std::underlying_type<section_kind>::type;
                 return f.template offset_to_instance<ResultType> (f.arr_[static_cast<utype> (Key)]);
             }
@@ -405,7 +405,7 @@ namespace pstore {
 case section_kind::k: name = #k; break;
             switch (kind) {
                 PSTORE_MCREPO_SECTION_KINDS
-            case section_kind::last: assert (false); break;
+            case section_kind::last: PSTORE_ASSERT (false); break;
             }
 #undef X
             os << name;
@@ -436,9 +436,10 @@ case section_kind::k: name = #k; break;
 #ifndef NDEBUG
             {
                 auto const size = fragment::size_bytes (first, last);
-                assert (out >= ptr && static_cast<std::size_t> (
-                                          out - reinterpret_cast<std::uint8_t *> (ptr)) == size);
-                assert (size == fragment_ptr->size_bytes ());
+                PSTORE_ASSERT (out >= ptr &&
+                               static_cast<std::size_t> (
+                                   out - reinterpret_cast<std::uint8_t *> (ptr)) == size);
+                PSTORE_ASSERT (size == fragment_ptr->size_bytes ());
             }
 #endif
         }
@@ -508,12 +509,13 @@ case section_kind::k: name = #k; break;
             (void) last;
 #ifndef NDEBUG
             using value_type = typename std::iterator_traits<Iterator>::value_type;
-            assert (std::is_sorted (first, last, [] (value_type const & a, value_type const & b) {
-                section_kind const akind = a.kind ();
-                section_kind const bkind = b.kind ();
-                using utype = std::underlying_type<section_kind>::type;
-                return static_cast<utype> (akind) < static_cast<utype> (bkind);
-            }));
+            PSTORE_ASSERT (
+                std::is_sorted (first, last, [] (value_type const & a, value_type const & b) {
+                    section_kind const akind = a.kind ();
+                    section_kind const bkind = b.kind ();
+                    using utype = std::underlying_type<section_kind>::type;
+                    return static_cast<utype> (akind) < static_cast<utype> (bkind);
+                }));
 #endif
         }
 
@@ -524,7 +526,7 @@ case section_kind::k: name = #k; break;
             fragment::check_range_is_sorted (first, last);
 
             auto const num_contents = std::distance (first, last);
-            assert (num_contents >= 0);
+            PSTORE_ASSERT (num_contents >= 0);
             auto const unum_contents =
                 static_cast<typename std::make_unsigned<decltype (num_contents)>::type> (
                     num_contents);

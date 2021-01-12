@@ -5,7 +5,7 @@
 //* |___/_| |_|_|_|  \__|_|  |_|\__, |_| |_|\__\__,_|___/___/_|\__, |_| |_| *
 //*                             |___/                          |___/        *
 //===- unittests/support/klee/uint128/shiftrightassign.cpp ----------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

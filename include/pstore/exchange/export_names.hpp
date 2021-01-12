@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*           |_|                                                      *
 //===- include/pstore/exchange/export_names.hpp ---------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -103,7 +103,7 @@ namespace pstore {
             void emit_names (OStream & os, indent ind, database const & db,
                              unsigned const generation, name_mapping * const string_table) {
                 auto const names_index = index::get_index<trailer::indices::name> (db);
-                assert (generation > 0);
+                PSTORE_ASSERT (generation > 0);
 
                 auto const * separator = "";
                 auto const * tail_separator = "";

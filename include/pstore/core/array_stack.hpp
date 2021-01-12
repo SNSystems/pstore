@@ -5,7 +5,7 @@
 //*  \__,_|_|  |_|  \__,_|\__, | |___/\__\__,_|\___|_|\_\ *
 //*                       |___/                           *
 //===- include/pstore/core/array_stack.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -49,8 +49,9 @@
 #define PSTORE_CORE_ARRAY_STACK_HPP
 
 #include <array>
-#include <cassert>
 #include <cstdlib>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 
@@ -103,12 +104,12 @@ namespace pstore {
 
         /// Acceses the top element
         reference top () noexcept {
-            assert (elements_ > 0);
+            PSTORE_ASSERT (elements_ > 0);
             return c_[elements_ - 1];
         }
         /// Acceses the top element
         const_reference top () const noexcept {
-            assert (elements_ > 0);
+            PSTORE_ASSERT (elements_ > 0);
             return c_[elements_ - 1];
         }
 
@@ -118,19 +119,19 @@ namespace pstore {
         /// Inserts an element at the top of the container.
         /// \param value The value of the element to push
         void push (value_type const & value) {
-            assert (elements_ < Size);
+            PSTORE_ASSERT (elements_ < Size);
             c_[elements_++] = value;
         }
         /// Inserts an element at the top of the container.
         /// \param value The value of the element to push
         void push (value_type && value) {
-            assert (elements_ < Size);
+            PSTORE_ASSERT (elements_ < Size);
             c_[elements_++] = std::move (value);
         }
 
         /// Remove the top element from the stack.
         void pop () {
-            assert (elements_ > 0);
+            PSTORE_ASSERT (elements_ > 0);
             --elements_;
         }
         ///@}

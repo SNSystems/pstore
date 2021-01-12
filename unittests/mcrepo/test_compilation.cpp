@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_| .__/|_|_|\__,_|\__|_|\___/|_| |_| *
 //*                     |_|                                 *
 //===- unittests/mcrepo/test_compilation.cpp ------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -68,10 +68,10 @@ TEST_F (CompilationTest, Empty) {
                             indirect_string_address (0U), std::begin (m), std::end (m));
     auto t = reinterpret_cast<compilation const *> (extent.addr.absolute ());
 
-    assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (t));
-    assert (transaction_.get_storage ().begin ()->second.get () ==
-            reinterpret_cast<std::uint8_t const *> (t));
+    PSTORE_ASSERT (transaction_.get_storage ().begin ()->first ==
+                   reinterpret_cast<std::uint8_t const *> (t));
+    PSTORE_ASSERT (transaction_.get_storage ().begin ()->second.get () ==
+                   reinterpret_cast<std::uint8_t const *> (t));
     EXPECT_EQ (0U, t->size ());
     EXPECT_TRUE (t->empty ());
 }

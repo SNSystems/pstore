@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|\__,_|_|  \___||___/___/ *
 //*                                       *
 //===- include/pstore/core/address.hpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -88,7 +88,6 @@
 #ifndef PSTORE_CORE_ADDRESS_HPP
 #define PSTORE_CORE_ADDRESS_HPP
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -97,7 +96,7 @@
 #include <ostream>
 #include <type_traits>
 
-#include "pstore/support/portab.hpp"
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 
@@ -155,13 +154,13 @@ namespace pstore {
         }
 
         address operator+= (std::uint64_t const distance) noexcept {
-            assert (a_ <= std::numeric_limits<std::uint64_t>::max () - distance);
+            PSTORE_ASSERT (a_ <= std::numeric_limits<std::uint64_t>::max () - distance);
             a_ += distance;
             return *this;
         }
 
         address operator-= (std::uint64_t const distance) noexcept {
-            assert (a_ >= distance);
+            PSTORE_ASSERT (a_ >= distance);
             a_ -= distance;
             return *this;
         }
@@ -190,8 +189,8 @@ namespace pstore {
 
         static constexpr std::uint64_t as_absolute (segment_type const segment,
                                                     offset_type const offset) noexcept {
-            assert (std::uint64_t{segment} <= max_segment + UINT64_C (1));
-            assert (std::uint64_t{offset} <= max_offset + UINT64_C (1));
+            PSTORE_ASSERT (std::uint64_t{segment} <= max_segment + UINT64_C (1));
+            PSTORE_ASSERT (std::uint64_t{offset} <= max_offset + UINT64_C (1));
             return (std::uint64_t{segment} << offset_number_bits) | std::uint64_t{offset};
         }
     };
@@ -228,11 +227,11 @@ namespace pstore {
     // arithmetic
 
     inline address operator- (address const lhs, std::uint64_t const rhs) noexcept {
-        assert (lhs.absolute () >= rhs);
+        PSTORE_ASSERT (lhs.absolute () >= rhs);
         return address{lhs.absolute () - rhs};
     }
     inline address operator- (address const lhs, address const rhs) noexcept {
-        assert (lhs.absolute () >= rhs.absolute ());
+        PSTORE_ASSERT (lhs.absolute () >= rhs.absolute ());
         return address{lhs.absolute () - rhs.absolute ()};
     }
 
@@ -345,7 +344,7 @@ namespace pstore {
     inline typed_address<T> operator- (typed_address<T> const lhs,
                                        std::uint64_t const rhs) noexcept {
         auto const delta = rhs * sizeof (T);
-        assert (lhs.absolute () >= delta);
+        PSTORE_ASSERT (lhs.absolute () >= delta);
         return typed_address<T> (lhs.to_address () - delta);
     }
 

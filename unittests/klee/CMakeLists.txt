@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/klee/CMakeLists.txt ---------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -48,5 +48,9 @@ if (can_klee)
     set (target pstore-klee-cxxstdlib)
     add_library (${target}-bc OBJECT cxxstdlib.cpp)
     target_compile_options (${target}-bc PRIVATE -emit-llvm)
+    set_target_properties (${target}-bc PROPERTIES
+        CXX_STANDARD ${pstore_cxx_version}
+        CXXSTANDARD_REQUIRED Yes
+    )
     pstore_configure_klee_test_target (${target}-bc)
 endif (can_klee)

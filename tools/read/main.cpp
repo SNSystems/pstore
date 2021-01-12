@@ -5,7 +5,7 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/read/main.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -135,7 +135,7 @@ namespace {
             while (size > 0) {
                 std::streamsize const size_to_write =
                     size > stream_size_max ? stream_size_max : static_cast<std::streamsize> (size);
-                assert (size_to_write > 0);
+                PSTORE_ASSERT (size_to_write > 0);
                 out.write (reinterpret_cast<char const *> (ptr.get ()), size_to_write);
                 size -= static_cast<
                     std::make_unsigned<std::remove_const<decltype (size_to_write)>::type>::type> (

@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*           |_|                                   |___/                           *
 //===- lib/exchange/export_fragment.cpp -----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -53,7 +53,7 @@ namespace pstore {
                 auto const fragments = index::get_index<trailer::indices::fragment> (db);
                 if (!fragments->empty ()) {
                     auto const * fragment_sep = "\n";
-                    assert (generation > 0U);
+                    PSTORE_ASSERT (generation > 0U);
 
                     auto const out_fn = [&] (address addr) {
                         auto const & kvp = fragments->load_leaf_node (db, addr);

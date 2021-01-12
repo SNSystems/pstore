@@ -5,7 +5,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| |_| |_|\___|_| .__/ \___|_|    *
 //*                                                |_|               *
 //===- unittests/exchange/section_helper.hpp ------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -60,7 +60,7 @@ dispatch_new_section (Dispatcher const & dispatcher,
                       pstore::gsl::not_null<std::vector<std::uint8_t> *> const buffer) {
     buffer->resize (dispatcher.size_bytes ());
     auto * const data = buffer->data ();
-    assert (data != nullptr);
+    PSTORE_ASSERT (data != nullptr);
     dispatcher.write (data);
 
     using section_type = typename pstore::repo::enum_to_section_t<Kind>;

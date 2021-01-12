@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/support/CMakeLists.txt ------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -54,7 +54,7 @@ set (CMAKE_REQUIRED_LIBRARIES )
 # restoring it at the end. See also <https://gitlab.kitware.com/cmake/cmake/issues/15361>.
 set (OLD_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 if (NOT MSVC)
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 endif (NOT MSVC)
 
 include (CheckCXXSourceCompiles)
@@ -237,6 +237,16 @@ check_cxx_source_compiles (
     #include <pthread_np.h>
     #endif
     int main () {
+        pthread_setname_np (pthread_self (), \"foo\", nullptr);
+    }"
+    PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
+
+check_cxx_source_compiles (
+    "#include <pthread.h>
+    #ifdef __FreeBSD__
+    #include <pthread_np.h>
+    #endif
+    int main () {
         pthread_set_name_np (pthread_self (), \"foo\");
     }"
     PSTORE_PTHREAD_SET_NAME_NP)
@@ -259,8 +269,17 @@ configure_file (
 set (CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS}")
 
 #
-# -- Thats's the end of the code setting up config.hpp
+# -- That's the end of the code setting up config.hpp
 #
+
+find_package (Backtrace)
+set (PSTORE_HAVE_BACKTRACE  ${Backtrace_FOUND})
+
+configure_file (
+    "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/backtrace.hpp"
+    ESCAPE_QUOTES
+    )
 
 include (add_pstore)
 include (clang_tidy)
@@ -268,6 +287,7 @@ include (clang_tidy)
 set (PSTORE_SUPPORT_INCLUDES
     aligned.hpp
     array_elements.hpp
+    assert.hpp
     base64.hpp
     bit_count.hpp
     bit_field.hpp
@@ -296,6 +316,10 @@ set (PSTORE_SUPPORT_LIB_SRC
     config.hpp.in
     "${PSTORE_CONFIG_DIR}/pstore/config/config.hpp"
 
+    "${CMAKE_CURRENT_SOURCE_DIR}/backtrace.hpp.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/backtrace.hpp"
+
+    assert.cpp
     error.cpp
     fnv.cpp
     uint128.cpp
@@ -310,6 +334,11 @@ add_pstore_library (
     INCLUDES "${PSTORE_SUPPORT_INCLUDES}"
 )
 target_link_libraries (pstore-support PUBLIC ${CMAKE_THREAD_LIBS_INIT})
+target_include_directories (pstore-support PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+if (Backtrace_FOUND)
+    target_include_directories (pstore-support PRIVATE ${Backtrace_INCLUDE_DIRS})
+    target_link_libraries (pstore-support PRIVATE ${Backtrace_LIBRARY})
+endif ()
 add_clang_tidy_target (pstore-support)
 
 # Add the exception-handling-enabled pstore-support-ex if we're building inside LLVM
@@ -346,5 +375,10 @@ if (PSTORE_BITCODE)
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
+    set_target_properties (pstore-support-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
+    )
+    target_include_directories (pstore-support-bc PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
     target_link_libraries (pstore-support-bc PUBLIC ${CMAKE_THREAD_LIBS_INIT})
 endif (PSTORE_BITCODE)

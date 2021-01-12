@@ -11,7 +11,7 @@
 //* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*                |___/                           *
 //===- lib/exchange/import_fragment.cpp -----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -110,7 +110,7 @@ namespace pstore {
                     , names_{names}
                     , digest_{digest}
                     , oit_{dispatchers_} {
-                assert (&transaction->db () == ctxt->db);
+                PSTORE_ASSERT (&transaction->db () == ctxt->db);
             }
 
             // name
@@ -135,7 +135,8 @@ namespace pstore {
     case section_kind::a: return this->create_section_importer<section_kind::a> ();
                 switch (pos->second) {
                     PSTORE_MCREPO_SECTION_KINDS
-                case section_kind::last: assert (false && "Illegal section kind"); // unreachable
+                case section_kind::last:
+                    PSTORE_ASSERT (false && "Illegal section kind"); // unreachable
                 }
 #undef X
                 return error::unknown_section_name;
@@ -145,7 +146,7 @@ namespace pstore {
             // ~~~~~~~~~~
             std::error_code fragment_sections::end_object () {
                 context * const ctxt = this->get_context ();
-                assert (ctxt->db == &transaction_->db ());
+                PSTORE_ASSERT (ctxt->db == &transaction_->db ());
 
                 auto const dispatchers_begin = make_pointee_adaptor (dispatchers_.begin ());
                 auto const dispatchers_end = make_pointee_adaptor (dispatchers_.end ());

@@ -5,7 +5,7 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/vacuum/main.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -150,7 +150,7 @@ int main (int argc, char * argv[]) {
 
         std::unique_lock<pstore::file::range_lock> * file_lock = src_db->upgrade_to_write_lock ();
         if (file_lock == nullptr) {
-            assert (0);
+            PSTORE_ASSERT (0);
         }
 
         if (file_lock->try_lock ()) {

@@ -5,7 +5,7 @@
 //*  \__,_|_|_|  \___|\___|\__\___/|_|   \__, | *
 //*                                      |___/  *
 //===- lib/romfs/directory.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -73,7 +73,7 @@ auto pstore::romfs::directory::end () const -> dirent const * {
 // operator[]
 // ~~~~~~~~~~
 auto pstore::romfs::directory::operator[] (std::size_t const pos) const noexcept -> dirent const & {
-    assert (pos < size ());
+    PSTORE_ASSERT (pos < size ());
     return members_[pos];
 }
 

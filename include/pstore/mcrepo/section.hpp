@@ -5,7 +5,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
 //===- include/pstore/mcrepo/section.hpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -192,7 +192,7 @@ namespace pstore {
             container (const_pointer begin, const_pointer end)
                     : begin_{begin}
                     , end_{end} {
-                assert (end >= begin);
+                PSTORE_ASSERT (end >= begin);
             }
             iterator begin () const { return begin_; }
             iterator end () const { return end_; }
@@ -202,7 +202,7 @@ namespace pstore {
             const_pointer data () const { return begin_; }
 
             size_type size () const noexcept {
-                assert (end_ >= begin_);
+                PSTORE_ASSERT (end_ >= begin_);
                 return static_cast<size_type> (end_ - begin_);
             }
             bool empty () const noexcept { return size () == 0U; }

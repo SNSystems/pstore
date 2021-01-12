@@ -5,7 +5,7 @@
 //*  \__,_|_|_| |_|\__|_|_____\___/  *
 //*                                  *
 //===- lib/support/uint128.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -63,7 +63,7 @@ namespace {
     }
 
     maybe<std::uint64_t> get64 (std::string const & str, unsigned index) {
-        assert (index < str.length ());
+        PSTORE_ASSERT (index < str.length ());
         auto result = std::uint64_t{0};
         for (auto shift = 60; shift >= 0; shift -= 4, ++index) {
             auto const digit = hex_to_digit (str[index]);

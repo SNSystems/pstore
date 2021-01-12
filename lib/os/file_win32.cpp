@@ -5,7 +5,7 @@
 //* |_| |_|_|\___| *
 //*                *
 //===- lib/os/file_win32.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -275,8 +275,8 @@ namespace pstore {
             using quad_part_type = decltype (LARGE_INTEGER::QuadPart);
             static_assert (sizeof (quad_part_type) == sizeof (LARGE_INTEGER),
                            "QuadPart may not be the largest member of LARGE_INTEGER");
-            assert (position < static_cast<std::make_unsigned<quad_part_type>::type> (
-                                   std::numeric_limits<quad_part_type>::max ()));
+            PSTORE_ASSERT (position < static_cast<std::make_unsigned<quad_part_type>::type> (
+                                          std::numeric_limits<quad_part_type>::max ()));
 
             LARGE_INTEGER distance;
             distance.QuadPart = static_cast<quad_part_type> (position);
@@ -335,7 +335,7 @@ namespace pstore {
                 raise (std::errc::invalid_argument,
                        "Didn't write the number of bytes that were requested");
             }
-            assert (is_writable_);
+            PSTORE_ASSERT (is_writable_);
         }
 
         // size

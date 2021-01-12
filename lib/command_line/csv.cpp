@@ -5,7 +5,7 @@
 //*  \___|___/ \_/   *
 //*                  *
 //===- lib/command_line/csv.cpp -------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -43,14 +43,14 @@
 //===----------------------------------------------------------------------===//
 #include "pstore/command_line/csv.hpp"
 
-#include <cassert>
+#include "pstore/support/assert.hpp"
 
 std::list<std::string> pstore::command_line::csv (std::string const & s) {
     std::list<std::string> result;
     auto spos = std::string::size_type{0};
     while (spos != std::string::npos) {
         auto const epos = s.find (',', spos);
-        assert (epos >= spos);
+        PSTORE_ASSERT (epos >= spos);
         result.emplace_back (s.substr (spos, epos - spos));
         spos = (epos == std::string::npos) ? epos : epos + 1;
     }

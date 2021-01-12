@@ -5,7 +5,7 @@
 //*   \_/\_/ |_|  |_|\__\___| |_.__/ \__,_|___/_|\___| *
 //*                                                    *
 //===- examples/write_basic/write_basic.cpp -------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

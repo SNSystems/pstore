@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|\__\__,_|_.__/ \__,_|___/\___| *
 //*                                             *
 //===- lib/core/database.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -76,11 +76,11 @@ namespace pstore {
     // get_shared
     // ~~~~~~~~~~
     shared const * database::get_shared () const {
-        assert (shared_.get () != nullptr);
+        PSTORE_ASSERT (shared_.get () != nullptr);
         return shared_.get ();
     }
     shared * database::get_shared () {
-        assert (shared_.get () != nullptr);
+        PSTORE_ASSERT (shared_.get () != nullptr);
         return shared_.get ();
     }
 
@@ -105,7 +105,7 @@ namespace pstore {
     void database::finish_init (bool const access_tick_enabled) {
         (void) access_tick_enabled;
 
-        assert (file ()->is_open ());
+        PSTORE_ASSERT (file ()->is_open ());
 
         // Build the initial segment address table.
         storage_.update_master_pointers (0);
@@ -227,7 +227,7 @@ namespace pstore {
         // If we're asked for a revision _newer_ that the currently synced number then we need
         // to hunt backwards starting at the head. Syncing to an older revision is simpler because
         // we can work back from the current revision.
-        assert (is_newer || footer_pos != typed_address<trailer>::null ());
+        PSTORE_ASSERT (is_newer || footer_pos != typed_address<trailer>::null ());
         if (is_newer) {
             // This atomic read of footer_pos fixes our view of the head-revision. Any transactions
             // after this point won't be seen by this process.
@@ -285,7 +285,8 @@ namespace pstore {
             lock_block const lb{};
             file.write (lb);
 
-            assert (header.footer_pos.load () == typed_address<trailer>::make (file.tell ()));
+            PSTORE_ASSERT (header.footer_pos.load () ==
+                           typed_address<trailer>::make (file.tell ()));
 
             trailer t{};
             std::fill (std::begin (t.a.index_records), std::end (t.a.index_records),
@@ -296,7 +297,7 @@ namespace pstore {
         }
         // Make sure that the file is at least large enough for the minimum region size.
         {
-            assert (file.size () == leader_size + sizeof (trailer));
+            PSTORE_ASSERT (file.size () == leader_size + sizeof (trailer));
             // TODO: ask the region factory what the min region size is.
             if (file.size () < storage::min_region_size && !database::small_files_enabled ()) {
                 file.truncate (storage::min_region_size);
@@ -352,7 +353,7 @@ namespace pstore {
             temp_file_deleter.release ();
         }
         file->open (create_mode, write_mode, file::file_handle::present_mode::must_exist);
-        assert (file->is_open () && file->path () == path);
+        PSTORE_ASSERT (file->is_open () && file->path () == path);
         return file;
     }
 
@@ -373,7 +374,7 @@ namespace pstore {
                 // Check that this code is not trying to write back to read-only storage. This error
                 // can occur if a non-const pointer is being destroyed after the containing
                 // transaction has been committed.
-                assert (addr >= this->first_writable_address ());
+                PSTORE_ASSERT (addr >= this->first_writable_address ());
 
                 // If we're returning a writable pointer then we must copy the (potentially
                 // modified) contents back to the data store.
@@ -427,17 +428,17 @@ namespace pstore {
     // allocate
     // ~~~~~~~~
     pstore::address database::allocate (std::uint64_t const bytes, unsigned const align) {
-        assert (is_power_of_two (align));
+        PSTORE_ASSERT (is_power_of_two (align));
         if (closed_) {
             raise (error_code::store_closed);
         }
         modified_ = true;
 
         std::uint64_t const result = size_.logical_size ();
-        assert (result >= size_.footer_pos ().absolute () + sizeof (trailer));
+        PSTORE_ASSERT (result >= size_.footer_pos ().absolute () + sizeof (trailer));
 
         std::uint64_t const extra_for_alignment = calc_alignment (result, std::uint64_t{align});
-        assert (extra_for_alignment < align);
+        PSTORE_ASSERT (extra_for_alignment < align);
 
         // Increase the number of bytes being requested by enough to ensure that result is
         // properly aligned.

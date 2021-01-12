@@ -12,7 +12,7 @@
 # * |_|_| |_|\___|_|\__,_|\__,_|\___||___/ *
 # *                                        *
 # ===- utils/redundant_includes/redundant_includes.py ---------------------===//
-#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:

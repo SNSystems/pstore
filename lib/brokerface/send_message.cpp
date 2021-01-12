@@ -5,7 +5,7 @@
 //* |___/\___|_| |_|\__,_| |_| |_| |_|\___||___/___/\__,_|\__, |\___| *
 //*                                                       |___/       *
 //===- lib/brokerface/send_message.cpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -62,7 +62,7 @@ namespace pstore {
 
         void send_message (writer & wr, bool const error_on_timeout, gsl::czstring const verb,
                            gsl::czstring const path) {
-            assert (verb != nullptr);
+            PSTORE_ASSERT (verb != nullptr);
 
             auto payload = std::string{verb};
             if (path != nullptr && path[0] != '\0') {
@@ -90,7 +90,7 @@ namespace pstore {
 
             for (auto part = num_parts_type{0}; part < num_parts; ++part) {
                 auto const remaining = std::distance (first, std::end (payload));
-                assert (remaining > 0);
+                PSTORE_ASSERT (remaining > 0);
 
                 auto last = first;
                 std::advance (last, std::min (remaining, static_cast<difference_type> (

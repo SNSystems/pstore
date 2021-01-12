@@ -5,7 +5,7 @@
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
 //===- include/pstore/os/logging.hpp --------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -204,8 +204,10 @@ namespace pstore {
 
 
         namespace details {
+
             using logger_collection = std::vector<std::unique_ptr<logger>>;
-            extern PSTORE_THREAD_LOCAL logger_collection * log_destinations;
+            extern thread_local logger_collection * log_destinations;
+
         } // end namespace details
 
 

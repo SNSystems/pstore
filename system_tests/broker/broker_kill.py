@@ -6,7 +6,7 @@
 # * |_.__/|_|  \___/|_|\_\___|_|    |_|\_\_|_|_| *
 # *                                              *
 # ===- system_tests/broker/broker_kill.py ---------------------------------===//
-#  Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#  Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 #  All rights reserved.
 #
 #  Developed by:
@@ -84,7 +84,7 @@ def main(argv):
     paths = get_tool_paths(args.exe_path)
 
     pipe_path = os.path.join(common.pipe_root_dir(), 'pstore_broker_kill')
-    broker_command = [paths.broker, '--pipe-path', pipe_path, '--http-port', '0']
+    broker_command = [paths.broker, '--pipe-path', pipe_path, '--disable-http']
     print("Popen: ", ' '.join(broker_command), file=sys.stderr)
 
     broker_process = timed_process.TimedProcess(args=broker_command,

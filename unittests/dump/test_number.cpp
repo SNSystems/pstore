@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|_.__/ \___|_|    *
 //*                                         *
 //===- unittests/dump/test_number.cpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -42,13 +42,15 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 #include "pstore/dump/value.hpp"
+
 // System includes
-#include <cassert>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
+
 // 3rd party includes
 #include "gtest/gtest.h"
+
 // Local includes
 #include "convert.hpp"
 
@@ -65,7 +67,7 @@ namespace {
             case 8: number_base::oct (); break;
             case 10: number_base::dec (); break;
             case 16: number_base::hex (); break;
-            default: assert (false); break;
+            default: PSTORE_ASSERT (false); break;
             }
         }
 

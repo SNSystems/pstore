@@ -5,7 +5,7 @@
 //*  \__,_|_|_|\__, |_| |_|\___|\__,_| *
 //*            |___/                   *
 //===- include/pstore/support/aligned.hpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -47,9 +47,10 @@
 #ifndef PSTORE_SUPPORT_ALIGNED_HPP
 #define PSTORE_SUPPORT_ALIGNED_HPP
 
-#include <cassert>
 #include <cstdint>
 #include <type_traits>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 
@@ -68,7 +69,7 @@ namespace pstore {
     constexpr IntType aligned (IntType const v, AlignType const align) noexcept {
         static_assert (std::is_unsigned<IntType>::value, "aligned() IntType must be unsigned");
         static_assert (std::is_unsigned<AlignType>::value, "aligned() AlignType must be unsigned");
-        assert (is_power_of_two (align));
+        PSTORE_ASSERT (is_power_of_two (align));
 
         return (v + align - 1U) & static_cast<IntType> (~(align - 1U));
     }
@@ -111,7 +112,7 @@ namespace pstore {
     /// \p align.
     template <typename Ty>
     constexpr Ty calc_alignment (Ty const v, std::size_t const align) noexcept {
-        assert (is_power_of_two (align));
+        PSTORE_ASSERT (is_power_of_two (align));
         return (align == 0U) ? 0U : ((v + align - 1U) & ~(align - 1U)) - v;
     }
 

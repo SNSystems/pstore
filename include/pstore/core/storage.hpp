@@ -5,7 +5,7 @@
 //* |___/\__\___/|_|  \__,_|\__, |\___| *
 //*                         |___/       *
 //===- include/pstore/core/storage.hpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -49,7 +49,7 @@
 #include "pstore/core/address.hpp"
 #include "pstore/core/region.hpp"
 #include "pstore/support/aligned.hpp"
-#include "pstore/support/portab.hpp"
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
 
@@ -202,6 +202,8 @@ namespace pstore {
         region_container const & regions () const { return regions_; }
 
     private:
+        void shrink (std::uint64_t new_size);
+
         static sat_iterator
         slice_region_into_segments (std::shared_ptr<memory_mapper_base> const & region,
                                     sat_iterator segment_it, sat_iterator segment_end);
@@ -236,9 +238,9 @@ namespace pstore {
     inline auto storage::segment_base_impl (Storage & storage,
                                             address::segment_type const segment) noexcept
         -> ResultType {
-        assert (segment < storage.sat_->size ());
+        PSTORE_ASSERT (segment < storage.sat_->size ());
         auto & e = (*storage.sat_)[segment];
-        assert (e.is_valid ());
+        PSTORE_ASSERT (e.is_valid ());
         return e.value;
     }
 
@@ -279,16 +281,16 @@ namespace pstore {
         address::segment_type segment = addr.segment ();
         PSTORE_STATIC_ASSERT (std::numeric_limits<decltype (segment)>::max () <= sat_elements);
         sat_entry const & segment_pointer = (*sat_)[segment];
-        assert (segment_pointer.value != nullptr && segment_pointer.region != nullptr &&
-                segment_pointer.is_valid ());
+        PSTORE_ASSERT (segment_pointer.value != nullptr && segment_pointer.region != nullptr &&
+                       segment_pointer.is_valid ());
 
         auto in_store_ptr =
             static_cast<typename Traits::in_store_pointer> (segment_pointer.value.get ()) +
             addr.offset ();
         auto region_base =
             static_cast<typename Traits::in_store_pointer> (segment_pointer.region->data ().get ());
-        assert (in_store_ptr >= region_base &&
-                in_store_ptr <= region_base + segment_pointer.region->size ());
+        PSTORE_ASSERT (in_store_ptr >= region_base &&
+                       in_store_ptr <= region_base + segment_pointer.region->size ());
 
         std::uint64_t copy_size = segment_pointer.region->size () -
                                   static_cast<std::uintptr_t> (in_store_ptr - region_base);
@@ -308,12 +310,12 @@ namespace pstore {
             // region and do the same.
             std::uint64_t const inc =
                 (copy_size + address::segment_size - 1) / address::segment_size;
-            assert (inc < std::numeric_limits<address::segment_type>::max ());
-            assert (segment + inc < sat_elements);
+            PSTORE_ASSERT (inc < std::numeric_limits<address::segment_type>::max ());
+            PSTORE_ASSERT (segment + inc < sat_elements);
             segment += static_cast<address::segment_type> (inc);
 
             region::memory_mapper_ptr const & region = (*sat_)[segment].region;
-            assert (region != nullptr);
+            PSTORE_ASSERT (region != nullptr);
 
             copy_size = std::min (static_cast<std::uint64_t> (size), region->size ());
             in_store_ptr = static_cast<typename Traits::in_store_pointer> (region->data ().get ());

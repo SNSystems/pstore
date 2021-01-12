@@ -5,7 +5,7 @@
 //* |___/ \_/\_/ |_|\__\___|_| |_|\___||___/ *
 //*                                          *
 //===- tools/index_structure/switches.hpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -61,7 +61,7 @@ struct switches {
     bool test (pstore::trailer::indices idx) const {
         auto const position =
             static_cast<std::underlying_type<pstore::trailer::indices>::type> (idx);
-        assert (idx < pstore::trailer::indices::last);
+        PSTORE_ASSERT (idx < pstore::trailer::indices::last);
         return selected.test (position);
     }
 };

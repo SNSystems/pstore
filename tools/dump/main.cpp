@@ -5,7 +5,7 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/dump/main.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -264,7 +264,7 @@ namespace {
 
         switch (kind) {
             PSTORE_INDICES
-        case pstore::trailer::indices::last: assert (false); break;
+        case pstore::trailer::indices::last: PSTORE_ASSERT (false); break;
         }
 #undef X
         return name;

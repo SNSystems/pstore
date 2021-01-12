@@ -5,7 +5,7 @@
 //* |_.__/ \__,_|___/\___|\___/   |_|   *
 //*                                     *
 //===- include/pstore/support/base64.hpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -103,10 +103,10 @@ namespace pstore {
             *(out++) = '=';
         } break;
         default:
-            assert (false); //! OCLINT(PH - don't warn about a conditional constant)
+            PSTORE_ASSERT (false); //! OCLINT(PH - don't warn about a conditional constant)
             break;
         }
-        assert (first == last);
+        PSTORE_ASSERT (first == last);
         return out;
     }
 

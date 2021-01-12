@@ -1,0 +1,119 @@
+name: CI Build/Test
+# Triggers the workflow on push or pull request events
+on: [push, pull_request]
+jobs:
+    build:
+        strategy:
+            matrix:
+                include:
+                    - name: macOS-latest/Xcode/Debug
+                      os: macos-latest
+                      build_type: Debug
+                      generator: Xcode
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: macOS-latest/Xcode/Release
+                      os: macos-latest
+                      build_type: Release
+                      generator: Xcode
+
+
+                    - name: Ubuntu-latest/gcc-7.5/Debug
+                      os: ubuntu-latest
+                      build_type: Debug
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: Ubuntu-latest/gcc-7.5/Release
+                      os: ubuntu-latest
+                      build_type: Release
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-7 -DCMAKE_C_COMPILER=gcc-7
+
+
+                    - name: Ubuntu-latest/gcc-10/Debug
+                      os: ubuntu-latest
+                      build_type: Debug
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: Ubuntu-latest/gcc-10/Release
+                      os: ubuntu-latest
+                      build_type: Release
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=g++-10 -DCMAKE_C_COMPILER=gcc-10
+
+
+                    - name: Ubuntu-latest/clang-8/Debug
+                      os: ubuntu-latest
+                      build_type: Debug
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: Ubuntu-latest/clang-8/Release
+                      os: ubuntu-latest
+                      build_type: Release
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8
+
+
+                    - name: Ubuntu-latest/clang-9/Debug
+                      os: ubuntu-latest
+                      build_type: Debug
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: Ubuntu-latest/clang-9/Release
+                      os: ubuntu-latest
+                      build_type: Release
+                      generator: Unix Makefiles
+                      cxx_compiler: -DCMAKE_CXX_COMPILER=clang++-9 -DCMAKE_C_COMPILER=clang-9
+
+
+                    - name: Windows-latest/MSVC/Debug
+                      os: windows-latest
+                      build_type: Debug
+                      generator: Visual Studio 16 2019
+                      options: '-DPSTORE_ALWAYS_SPANNING=Yes'
+
+                    - name: Windows-latest/MSVC/Release
+                      os: windows-latest
+                      build_type: Release
+                      generator: Visual Studio 16 2019
+
+        name: ${{ matrix.name }}
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - uses: actions/checkout@v2
+            - uses: actions/setup-node@v1
+              with:
+                  node-version: 12
+
+            - name: Create Build Environment
+              run: cmake -E make_directory ${{ runner.workspace }}/build
+
+            - name: Configure CMake
+              shell: bash
+              working-directory: ${{ runner.workspace }}/build
+              run: |
+                  cmake $GITHUB_WORKSPACE \
+                        -G "${{ matrix.generator }}" \
+                        -D PSTORE_EXAMPLES=Yes \
+                        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                        ${{ matrix.cxx_compiler }} \
+                        ${{ matrix.options }}
+
+            - name: Build
+              working-directory: ${{ runner.workspace }}/build
+              shell: bash
+              run: cmake --build . --config ${{ matrix.build_type }}
+
+            - name: System Tests
+              working-directory: ${{ runner.workspace }}/build
+              shell: bash
+              run: cmake --build . --config ${{ matrix.build_type }} --target pstore-system-tests

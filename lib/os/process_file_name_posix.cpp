@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
 //===- lib/os/process_file_name_posix.cpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -71,14 +71,14 @@ namespace pstore {
             buffer.resize (buffer_size);
             ::_NSGetExecutablePath (buffer.data (), &buffer_size);
         }
-        assert (buffer_size > 1U);
+        PSTORE_ASSERT (buffer_size > 1U);
         buffer[buffer_size - 1] = '\0'; // guarantee null termination.
         return {buffer.data ()};
     }
 
 } // end namespace pstore
 
-#    elif defined(__FreeBSD__)
+#    elif defined(__FreeBSD__) || defined(__NetBSD__)
 
 // System-specific includes
 #        include <sys/types.h>
@@ -140,7 +140,7 @@ namespace pstore {
         std::string const path = link_path ();
         auto read_link = [&path] (gsl::span<char> const buffer) {
             auto const buffer_size = buffer.size ();
-            assert (buffer_size >= 0);
+            PSTORE_ASSERT (buffer_size >= 0);
             ssize_t const num_chars = ::readlink (path.c_str (), buffer.data (),
                                                   clamp (static_cast<std::size_t> (buffer_size),
                                                          std::size_t{0}, std::size_t{SSIZE_MAX}));

@@ -5,7 +5,7 @@
 //* |_| |_|\__|\__| .__/ \__,_| *
 //*               |_|           *
 //===- tools/httpd/httpd.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -68,10 +68,10 @@ using namespace pstore::command_line;
 
 namespace {
 
-    opt<in_port_t> port ("port", desc ("The port number on which the server will listen"),
-                         init (in_port_t{8080}));
+    opt<in_port_t> http_port ("port", desc ("The port number on which the server will listen"),
+                              init (in_port_t{8080}));
 
-    alias port2 ("p", desc ("Alias for --port"), aliasopt (port));
+    alias http_port2 ("p", desc ("Alias for --port"), aliasopt (http_port));
 
 } // end anonymous namespace
 
@@ -101,12 +101,15 @@ int main (int argc, char * argv[]) {
         pstore::threads::set_name (ident);
         pstore::create_log_stream (ident);
 
-        pstore::httpd::server_status status{port.get ()};
+        pstore::httpd::server_status status{http_port.get ()};
         std::thread ([&status] () {
-            static constexpr auto name = "http";
+            static constexpr auto * const name = "http";
             pstore::threads::set_name (name);
             pstore::create_log_stream (name);
-            pstore::httpd::server (fs, &status, pstore::httpd::channel_container{});
+            pstore::httpd::server (
+                fs, &status, pstore::httpd::channel_container{}, [] (in_port_t const port) {
+                    out_stream << NATIVE_TEXT ("Listening on port ") << port << std::endl;
+                });
         }).join ();
     }
     // clang-format off

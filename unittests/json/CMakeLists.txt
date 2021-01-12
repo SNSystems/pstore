@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- unittests/json/CMakeLists.txt ---------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -50,3 +50,5 @@ add_pstore_unit_test (pstore-json-unit-tests
     test_number.cpp
 )
 target_link_libraries (pstore-json-unit-tests PRIVATE pstore-json-lib)
+
+add_subdirectory (klee)

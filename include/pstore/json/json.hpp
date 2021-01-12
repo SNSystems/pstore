@@ -5,7 +5,7 @@
 //*  _/ |___/\___/|_| |_| *
 //* |__/                  *
 //===- include/pstore/json/json.hpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -249,7 +249,7 @@ namespace pstore {
             ///
             /// \param err  The json error code to be stored in the parser.
             bool set_error (std::error_code const err) noexcept {
-                assert (!error_ || err);
+                PSTORE_ASSERT (!error_ || err);
                 error_ = err;
                 return this->has_error ();
             }
@@ -365,7 +365,7 @@ namespace pstore {
 
                 template <typename Matcher, typename... Args>
                 pointer make_terminal_matcher (parser<Callbacks> & parser, Args &&... args) {
-                    assert (this != parser.get_terminal_storage ());
+                    PSTORE_ASSERT (this != parser.get_terminal_storage ());
                     return parser.template make_terminal_matcher<Matcher, Args...> (
                         std::forward<Args> (args)...);
                 }
@@ -447,7 +447,7 @@ namespace pstore {
                     this->set_error (parser, done_ (parser));
                     this->set_state (done_state);
                     break;
-                case done_state: assert (false); break;
+                case done_state: PSTORE_ASSERT (false); break;
                 }
                 return {nullptr, match};
             }
@@ -643,8 +643,8 @@ namespace pstore {
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_frac_digit_state (parser<Callbacks> & parser,
                                                                  char const c) {
-                assert (this->get_state () == frac_initial_digit_state ||
-                        this->get_state () == frac_digit_state);
+                PSTORE_ASSERT (this->get_state () == frac_initial_digit_state ||
+                               this->get_state () == frac_digit_state);
 
                 bool match = true;
                 if (c == 'e' || c == 'E') {
@@ -700,9 +700,9 @@ namespace pstore {
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_exponent_digit_state (parser<Callbacks> & parser,
                                                                      char const c) {
-                assert (this->get_state () == exponent_digit_state ||
-                        this->get_state () == exponent_initial_digit_state);
-                assert (!is_integer_);
+                PSTORE_ASSERT (this->get_state () == exponent_digit_state ||
+                               this->get_state () == exponent_initial_digit_state);
+                PSTORE_ASSERT (!is_integer_);
 
                 bool match = true;
                 if (c >= '0' && c <= '9') {
@@ -725,12 +725,12 @@ namespace pstore {
             bool
             number_matcher<Callbacks>::do_integer_initial_digit_state (parser<Callbacks> & parser,
                                                                        char const c) {
-                assert (this->get_state () == integer_initial_digit_state);
-                assert (is_integer_);
+                PSTORE_ASSERT (this->get_state () == integer_initial_digit_state);
+                PSTORE_ASSERT (is_integer_);
                 if (c == '0') {
                     this->set_state (frac_state);
                 } else if (c >= '1' && c <= '9') {
-                    assert (int_acc_ == 0);
+                    PSTORE_ASSERT (int_acc_ == 0);
                     int_acc_ = static_cast<unsigned> (c - '0');
                     this->set_state (integer_digit_state);
                 } else {
@@ -744,8 +744,8 @@ namespace pstore {
             template <typename Callbacks>
             bool number_matcher<Callbacks>::do_integer_digit_state (parser<Callbacks> & parser,
                                                                     char const c) {
-                assert (this->get_state () == integer_digit_state);
-                assert (is_integer_);
+                PSTORE_ASSERT (this->get_state () == integer_digit_state);
+                PSTORE_ASSERT (is_integer_);
 
                 bool match = true;
                 if (c == '.') {
@@ -796,10 +796,10 @@ namespace pstore {
                     case exponent_digit_state:
                         match = this->do_exponent_digit_state (parser, c);
                         break;
-                    case done_state: assert (false); break;
+                    case done_state: PSTORE_ASSERT (false); break;
                     }
                 } else {
-                    assert (!parser.has_error ());
+                    PSTORE_ASSERT (!parser.has_error ());
                     if (!this->in_terminal_state ()) {
                         this->set_error (parser, error_code::expected_digits);
                     }
@@ -815,7 +815,7 @@ namespace pstore {
                 if (parser.has_error ()) {
                     return;
                 }
-                assert (this->in_terminal_state ());
+                PSTORE_ASSERT (this->in_terminal_state ());
 
                 if (is_integer_) {
                     constexpr auto min = std::numeric_limits<std::int64_t>::min ();
@@ -1033,7 +1033,7 @@ namespace pstore {
 
                     return hex_value (code_point, hex) >>=
                            [state] (unsigned value) {
-                               assert (value <= std::numeric_limits<std::uint16_t>::max ());
+                               PSTORE_ASSERT (value <= std::numeric_limits<std::uint16_t>::max ());
                                auto next_state = state;
                                switch (state) {
                                case hex1_state: next_state = hex2_state; break;
@@ -1045,7 +1045,7 @@ namespace pstore {
                                case normal_char_state:
                                case escape_state:
                                case done_state:
-                                   assert (false);
+                                   PSTORE_ASSERT (false);
                                    return nothing<std::tuple<unsigned, enum state>> ();
                                }
 
@@ -1080,7 +1080,7 @@ namespace pstore {
                 auto append = [&app] (std::tuple<char32_t, state> const & s) {
                     char32_t const cp = std::get<0> (s);
                     state const next_state = std::get<1> (s);
-                    assert (next_state == normal_char_state || next_state == hex1_state);
+                    PSTORE_ASSERT (next_state == normal_char_state || next_state == hex1_state);
                     if (next_state == normal_char_state) {
                         if (!app.append32 (cp)) {
                             return nothing<state> ();
@@ -1110,7 +1110,7 @@ namespace pstore {
                     // Matches the opening quote.
                     case start_state:
                         if (*code_point == '"') {
-                            assert (!app_.has_high_surrogate ());
+                            PSTORE_ASSERT (!app_.has_high_surrogate ());
                             this->set_state (normal_char_state);
                         } else {
                             this->set_error (parser, error_code::expected_token);
@@ -1154,7 +1154,7 @@ namespace pstore {
                         }
                     } break;
 
-                    case done_state: assert (false); break;
+                    case done_state: PSTORE_ASSERT (false); break;
                     }
                 }
                 return {nullptr, true};
@@ -1203,7 +1203,7 @@ namespace pstore {
                 char const c = *ch;
                 switch (this->get_state ()) {
                 case start_state:
-                    assert (c == '[');
+                    PSTORE_ASSERT (c == '[');
                     if (this->set_error (parser, parser.callbacks ().begin_array ())) {
                         break;
                     }
@@ -1233,7 +1233,7 @@ namespace pstore {
                     default: this->set_error (parser, error_code::expected_array_member); break;
                     }
                     break;
-                case done_state: assert (false); break;
+                case done_state: PSTORE_ASSERT (false); break;
                 }
                 return {nullptr, true};
             }
@@ -1279,7 +1279,7 @@ namespace pstore {
             std::pair<typename matcher<Callbacks>::pointer, bool>
             object_matcher<Callbacks>::consume (parser<Callbacks> & parser, maybe<char> ch) {
                 if (this->get_state () == done_state) {
-                    assert (parser.last_error ());
+                    PSTORE_ASSERT (parser.last_error ());
                     return {nullptr, true};
                 }
                 if (!ch) {
@@ -1289,7 +1289,7 @@ namespace pstore {
                 char const c = *ch;
                 switch (this->get_state ()) {
                 case start_state:
-                    assert (c == '{');
+                    PSTORE_ASSERT (c == '{');
                     this->set_state (first_key_state);
                     if (this->set_error (parser, parser.callbacks ().begin_object ())) {
                         break;
@@ -1334,7 +1334,7 @@ namespace pstore {
                         this->set_error (parser, error_code::expected_object_member);
                     }
                     break;
-                case done_state: assert (false); break;
+                case done_state: PSTORE_ASSERT (false); break;
                 }
                 return {nullptr, true};
             }
@@ -1386,8 +1386,8 @@ namespace pstore {
                 multi_line_comment_body (parser<Callbacks> & parser, char c);
 
                 void cr (parser<Callbacks> & parser, state next) {
-                    assert (this->get_state () == multi_line_comment_body_state ||
-                            this->get_state () == body_state);
+                    PSTORE_ASSERT (this->get_state () == multi_line_comment_body_state ||
+                                   this->get_state () == body_state);
                     parser.advance_row ();
                     this->set_state (next);
                 }
@@ -1425,7 +1425,7 @@ namespace pstore {
                     case comment_start_state: return this->consume_comment_start (parser, c);
 
                     case multi_line_comment_ending_state:
-                        assert (multi_line_comments_enabled (parser.extensions ()));
+                        PSTORE_ASSERT (multi_line_comments_enabled (parser.extensions ()));
                         this->set_state (c == details::char_set::slash
                                              ? body_state
                                              : multi_line_comment_body_state);
@@ -1440,9 +1440,9 @@ namespace pstore {
                     case multi_line_comment_body_state:
                         return this->multi_line_comment_body (parser, c);
                     case single_line_comment_state:
-                        assert (bash_comments_enabled (parser.extensions ()) ||
-                                single_line_comments_enabled (parser.extensions ()) ||
-                                multi_line_comments_enabled (parser.extensions ()));
+                        PSTORE_ASSERT (bash_comments_enabled (parser.extensions ()) ||
+                                       single_line_comments_enabled (parser.extensions ()) ||
+                                       multi_line_comments_enabled (parser.extensions ()));
                         if (c == details::char_set::cr || c == details::char_set::lf) {
                             // This character marks a bash/single-line comment end. Go back to
                             // normal whitespace handling. Retry with the same character.
@@ -1452,7 +1452,7 @@ namespace pstore {
                         // Just consume the character.
                         break;
 
-                    case done_state: assert (false); break;
+                    case done_state: PSTORE_ASSERT (false); break;
                     }
                 }
                 return {nullptr, true};
@@ -1530,8 +1530,8 @@ namespace pstore {
             whitespace_matcher<Callbacks>::multi_line_comment_body (parser<Callbacks> & parser,
                                                                     char c) {
                 using details::char_set;
-                assert (multi_line_comments_enabled (parser.extensions ()));
-                assert (this->get_state () == multi_line_comment_body_state);
+                PSTORE_ASSERT (multi_line_comments_enabled (parser.extensions ()));
+                PSTORE_ASSERT (this->get_state () == multi_line_comment_body_state);
                 switch (c) {
                 case char_set::star:
                     // This could be a standalone star character or be followed by a slash
@@ -1675,9 +1675,9 @@ namespace pstore {
                         return {nullptr, true};
                     }
                 } break;
-                case done_state: assert (false); break;
+                case done_state: PSTORE_ASSERT (false); break;
                 }
-                assert (false); // unreachable.
+                PSTORE_ASSERT (false); // unreachable.
                 return {nullptr, true};
             }
 
@@ -1803,7 +1803,7 @@ namespace pstore {
                 return *this;
             }
             while (first != last) {
-                assert (!stack_.empty ());
+                PSTORE_ASSERT (!stack_.empty ());
                 auto & handler = stack_.top ();
                 auto res = handler->consume (*this, just (*first));
                 if (handler->is_done ()) {
@@ -1817,7 +1817,7 @@ namespace pstore {
                     if (stack_.size () > max_stack_depth_) {
                         // We've already hit the maximum allowed parse stack depth. Reject this new
                         // matcher.
-                        assert (!error_);
+                        PSTORE_ASSERT (!error_);
                         error_ = make_error_code (error_code::nesting_too_deep);
                         break;
                     }
@@ -1844,8 +1844,8 @@ namespace pstore {
             while (!stack_.empty () && !has_error ()) {
                 auto & handler = stack_.top ();
                 auto res = handler->consume (*this, nothing<char> ());
-                assert (handler->is_done ());
-                assert (res.second);
+                PSTORE_ASSERT (handler->is_done ());
+                PSTORE_ASSERT (res.second);
                 stack_.pop (); // release the topmost matcher object.
             }
             return has_error () ? details::default_return<result_type>::get ()

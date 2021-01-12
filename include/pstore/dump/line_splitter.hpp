@@ -5,7 +5,7 @@
 //* |_|_|_| |_|\___| |___/ .__/|_|_|\__|\__\___|_|    *
 //*                      |_|                          *
 //===- include/pstore/dump/line_splitter.hpp ------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -96,7 +96,7 @@ namespace pstore {
         template <typename OperationFunc>
         void line_splitter::append (gsl::span<char const> const chars,
                                     OperationFunc const operation) {
-            assert (chars.size () >= 0);
+            PSTORE_ASSERT (chars.size () >= 0);
             sstring_view<char const *> sv (
                 chars.data (), static_cast<sstring_view<char const *>::size_type> (chars.size ()));
             for (;;) {

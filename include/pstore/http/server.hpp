@@ -5,7 +5,7 @@
 //* |___/\___|_|    \_/ \___|_|    *
 //*                                *
 //===- include/pstore/http/server.hpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -46,9 +46,7 @@
 #define PSTORE_HTTP_SERVER_HPP
 
 #include "pstore/http/ws_server.hpp"
-#include "pstore/os/descriptor.hpp"
 #include "pstore/romfs/romfs.hpp"
-#include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace httpd {
@@ -56,7 +54,8 @@ namespace pstore {
         class server_status;
 
         int server (romfs::romfs & file_system, gsl::not_null<server_status *> status,
-                    channel_container const & channels);
+                    channel_container const & channels,
+                    std::function<void (in_port_t)> notify_listening);
 
         void quit (in_port_t port_number);
 

@@ -5,7 +5,7 @@
 //*  \__|_|_| |_| |_|\___| *
 //*                        *
 //===- lib/core/time.cpp --------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -43,9 +43,11 @@
 //===----------------------------------------------------------------------===//
 
 #include "pstore/core/time.hpp"
-#include <cassert>
+
 #include <chrono>
 #include <limits>
+
+#include "pstore/support/assert.hpp"
 
 namespace {
 
@@ -67,7 +69,7 @@ namespace pstore {
         using urep = std::make_unsigned<rep>::type;
 
         rep const result = ms.count ();
-        assert (result >= 0);
+        PSTORE_ASSERT (result >= 0);
 
         static_assert (type_max<rep> () >= 0 &&
                            type_max<rep, urep> () <= type_max<std::uint64_t> (),

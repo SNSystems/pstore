@@ -5,7 +5,7 @@
 #*  \___|_|\__,_|_| |_|\__, |  \__|_|\__,_|\__, | *
 #*                     |___/               |___/  *
 #===- cmake/clang_tidy.cmake ----------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:

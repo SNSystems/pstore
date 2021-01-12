@@ -5,7 +5,7 @@
 //* |___/_| |_|\__,_|_|  \___|\__,_| |_| |_| |_|\___|_| |_| |_|\___/|_|   \__, | *
 //*                                                                       |___/  *
 //===- include/pstore/os/shared_memory.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -91,8 +91,8 @@ namespace pstore {
 
             auto name_begin = std::begin (name);
             auto name_end = name_begin;
-            assert (name.length () <=
-                    static_cast<udifference_type> (std::numeric_limits<difference_type>::max ()));
+            PSTORE_ASSERT (name.length () <= static_cast<udifference_type> (
+                                                 std::numeric_limits<difference_type>::max ()));
             auto const name_length = static_cast<difference_type> (name.length ());
             std::advance (name_end, std::min (SpanType::extent - 2, name_length));
             out = std::copy (name_begin, name_end, out);

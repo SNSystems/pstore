@@ -5,7 +5,7 @@
 //*  \__, |\__,_|\___|_|   \__, |  \__\___/  |_|\_\  \_/ | .__/  *
 //*     |_|                |___/                         |_|     *
 //===- include/pstore/http/query_to_kvp.hpp -------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -156,7 +156,7 @@ namespace pstore {
 
             template <typename CharType>
             int hex_digit (CharType c) noexcept {
-                assert (std::isxdigit (c));
+                PSTORE_ASSERT (std::isxdigit (c));
                 if (c >= '0' && c <= '9') {
                     return c - '0';
                 }
@@ -166,7 +166,7 @@ namespace pstore {
                 if (c >= 'A' && c <= 'F') {
                     return c - 'A' + 10;
                 }
-                assert (false);
+                PSTORE_ASSERT (false);
                 return 0;
             }
 

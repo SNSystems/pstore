@@ -5,7 +5,7 @@
 //*  \__|\__, | .__/ \___||___/ *
 //*      |___/|_|               *
 //===- include/pstore/serialize/types.hpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -179,7 +179,7 @@ namespace pstore {
             ///   type Ty.
             template <typename Archive>
             static void read (Archive && archive, Ty & v) {
-                assert (reinterpret_cast<std::uintptr_t> (&v) % alignof (Ty) == 0);
+                PSTORE_ASSERT (reinterpret_cast<std::uintptr_t> (&v) % alignof (Ty) == 0);
                 new (&v) Ty (std::forward<Archive> (archive));
             }
         };
@@ -326,7 +326,7 @@ namespace pstore {
             ///                 will be read.
             template <typename Archive>
             static void read (Archive && archive, Ty & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (Ty) == 0);
+                PSTORE_ASSERT (reinterpret_cast<std::uintptr_t> (&out) % alignof (Ty) == 0);
                 archive.get (out);
             }
 
@@ -457,7 +457,7 @@ namespace pstore {
         /// This is optimized as a read of a single value.
         template <typename Archive, typename Ty>
         void read (Archive && archive, gsl::span<Ty, 1> span) {
-            assert (span.size () == 1U);
+            PSTORE_ASSERT (span.size () == 1U);
             span[0] = read<Ty> (std::forward<Archive> (archive));
         }
 
@@ -533,7 +533,7 @@ namespace pstore {
         void write_range (Archive && archive, InputIterator begin, InputIterator end) {
 
             auto const distance = std::distance (begin, end);
-            assert (distance >= 0);
+            PSTORE_ASSERT (distance >= 0);
             write (archive, static_cast<std::size_t> (distance));
 
             using value_type = typename std::iterator_traits<InputIterator>::value_type;

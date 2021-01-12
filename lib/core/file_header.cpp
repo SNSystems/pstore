@@ -5,7 +5,7 @@
 //* |_| |_|_|\___| |_| |_|\___|\__,_|\__,_|\___|_|    *
 //*                                                   *
 //===- lib/core/file_header.cpp -------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -74,7 +74,7 @@ namespace pstore {
 
         PSTORE_STATIC_ASSERT (sizeof (file_signature1[0]) == sizeof (a.signature1[0]));
         PSTORE_STATIC_ASSERT (sizeof (file_signature1) == sizeof (a.signature1));
-        assert (footer_pos.is_lock_free ());
+        PSTORE_ASSERT (footer_pos.is_lock_free ());
 
         a.signature1 = file_signature1;
         a.signature2 = file_signature2;

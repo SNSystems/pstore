@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
 //===- include/pstore/os/process_file_name.hpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -114,7 +114,7 @@ namespace pstore {
                            "mib must be a span of integers");
 
             auto read_link = [&mib, &ctl] (gsl::span<char> const b) {
-                assert (b.size () >= 0);
+                PSTORE_ASSERT (b.size () >= 0);
                 auto const buffer_size = static_cast<std::size_t> (b.size ());
                 auto length = buffer_size;
                 errno = 0;

@@ -5,7 +5,7 @@
 //* |_|  \___| \_/ |_|___/_|\___/|_| |_|  \___/| .__/ \__| *
 //*                                            |_|         *
 //===- include/pstore/command_line/revision_opt.hpp -----------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

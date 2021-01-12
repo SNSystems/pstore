@@ -5,7 +5,7 @@
 //* |_|_| |_| |_| .__/ \___/|_|   \__|  \___\___/|_| |_|\__\___/_/\_\\__| *
 //*             |_|                                                       *
 //===- include/pstore/exchange/import_context.hpp -------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

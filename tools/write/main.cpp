@@ -5,7 +5,7 @@
 //* |_| |_| |_|\__,_|_|_| |_| *
 //*                           *
 //===- tools/write/main.cpp -----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -92,7 +92,7 @@ namespace {
             std::size_t const bytes_read = file.read_span (span);
 
             auto const expected_size = span.size_bytes ();
-            assert (expected_size >= 0);
+            PSTORE_ASSERT (expected_size >= 0);
             if (bytes_read !=
                 static_cast<
                     std::make_unsigned<std::remove_const<decltype (expected_size)>::type>::type> (

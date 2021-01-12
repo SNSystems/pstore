@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___|\__,_|_|\__,_|  \__|\__, | .__/ \___| *
 //*                                     |___/|_|          *
 //===- lib/http/media_type.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -79,7 +79,7 @@ namespace pstore {
             static auto const begin = std::begin (media_types);
             static auto const end = std::end (media_types);
 
-            assert (std::is_sorted (
+            PSTORE_ASSERT (std::is_sorted (
                 begin, end,
                 [] (media_type_entry const & lhs, media_type_entry const & rhs) noexcept {
                     return std::strcmp (lhs.name, rhs.name) < 0;

@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|_|_|  \___|\___|\__| |___/\__|_|  |_|_| |_|\__, | *
 //*                                                           |___/  *
 //===- lib/core/indirect_string.cpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -61,7 +61,7 @@ namespace pstore {
         if (address_ & in_heap_mask) {
             return *reinterpret_cast<sstring_view<char const *> const *> (address_ & ~in_heap_mask);
         }
-        assert (this->is_in_store ());
+        PSTORE_ASSERT (this->is_in_store ());
         *owner = serialize::read<shared_sstring_view> (
             serialize::archive::make_reader (db_, address{address_}));
         return {owner->data (), owner->length ()};
@@ -70,7 +70,7 @@ namespace pstore {
     // operator<
     // ~~~~~~~~~
     bool indirect_string::operator< (indirect_string const & rhs) const {
-        assert (&db_ == &rhs.db_);
+        PSTORE_ASSERT (&db_ == &rhs.db_);
         shared_sstring_view lhs_owner;
         shared_sstring_view rhs_owner;
         return this->as_string_view (&lhs_owner) < rhs.as_string_view (&rhs_owner);
@@ -79,20 +79,20 @@ namespace pstore {
     // operator==
     // ~~~~~~~~~~
     bool indirect_string::operator== (indirect_string const & rhs) const {
-        assert (&db_ == &rhs.db_);
+        PSTORE_ASSERT (&db_ == &rhs.db_);
         if (!is_pointer_ && !rhs.is_pointer_) {
             // We define that all strings in the database are unique. That means
             // that if both this and the rhs string are in the store then we can
             // simply compare their addresses.
             auto const equal = address_ == rhs.address_;
-            assert (this->equal_contents (rhs) == equal);
+            PSTORE_ASSERT (this->equal_contents (rhs) == equal);
             return equal;
         }
         if (is_pointer_ && rhs.is_pointer_ && str_ == rhs.str_) {
             // Note that we can't immediately return false if str_ != rhs.str_
             // because two strings with different address may still have identical
             // contents.
-            assert (this->equal_contents (rhs));
+            PSTORE_ASSERT (this->equal_contents (rhs));
             return true;
         }
         return equal_contents (rhs);
@@ -112,7 +112,7 @@ namespace pstore {
     indirect_string::write_body_and_patch_address (transaction_base & transaction,
                                                    raw_sstring_view const & str,
                                                    typed_address<address> const address_to_patch) {
-        assert (address_to_patch != typed_address<address>::null ());
+        PSTORE_ASSERT (address_to_patch != typed_address<address>::null ());
 
         // Make sure the alignment of the string is 2 to ensure that the LSB is clear.
         constexpr auto aligned_to = std::size_t{1U << in_heap_mask};
@@ -175,7 +175,7 @@ namespace pstore {
     // ~~~~~
     void indirect_string_adder::flush (transaction_base & transaction) {
         for (auto const & v : views_) {
-            assert (v.second != typed_address<address>::null ());
+            PSTORE_ASSERT (v.second != typed_address<address>::null ());
             indirect_string::write_body_and_patch_address (transaction,
                                                            *std::get<0> (v), // string body
                                                            std::get<1> (v)   // address to patch

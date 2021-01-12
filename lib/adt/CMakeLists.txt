@@ -5,7 +5,7 @@
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
 #===- lib/adt/CMakeLists.txt ----------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -89,12 +89,16 @@ if (PSTORE_BITCODE)
         HEADER_DIR "${pstore_adt_include_dir}"
         INCLUDES ${pstore_adt_lib_includes}
     )
-    target_compile_options (pstore-os-bc PRIVATE
+    target_compile_options (pstore-adt-bc PRIVATE
         -emit-llvm
         -target x86_64-pc-linux-gnu
         -fsanitize=signed-integer-overflow
         -fsanitize=unsigned-integer-overflow
         -fno-threadsafe-statics
     )
-    target_link_libraries (pstore-os-bc PUBLIC pstore-support-bc)
+    set_target_properties (pstore-adt-bc PROPERTIES
+        CXX_STANDARD "${pstore_cxx_version}"
+        CXX_STANDARD_REQUIRED Yes
+    )
+    target_link_libraries (pstore-adt-bc PUBLIC pstore-support-bc)
 endif (PSTORE_BITCODE)

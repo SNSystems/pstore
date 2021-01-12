@@ -5,7 +5,7 @@
 //*  \___/| .__/ \___|_| |_| *
 //*       |_|                *
 //===- unittests/romfs/klee/romfs/open.cpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -78,7 +78,7 @@ namespace {
 } // end anonymous namespace
 
 int main (int argc, char * argv[]) {
-    constexpr auto buffer_size = 20U;
+    constexpr auto buffer_size = 7U;
     char path[buffer_size];
     klee_make_symbolic (&path, sizeof (path), "path");
     klee_assume (path[buffer_size - 1U] == '\0');

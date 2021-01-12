@@ -5,7 +5,7 @@
 //*  \__,_|_|_| |_|     \_/ \__,_|_|\__,_|\___| *
 //*                                             *
 //===- lib/diff_dump/diff_value.cpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -49,7 +49,7 @@ namespace pstore {
 
         dump::value_ptr make_indices_diff (database & db, revision_number const new_revision,
                                            revision_number const old_revision) {
-            assert (new_revision >= old_revision);
+            PSTORE_ASSERT (new_revision >= old_revision);
             return dump::make_value (
                 {make_index_diff<index::name_index> ("names", db, new_revision, old_revision,
                                                      index::get_index<trailer::indices::name>),

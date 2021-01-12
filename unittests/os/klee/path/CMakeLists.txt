@@ -4,8 +4,8 @@
 #* | |___| |  | | (_| |   <  __/ |___| \__ \ |_\__ \ *
 #*  \____|_|  |_|\__,_|_|\_\___|_____|_|___/\__|___/ *
 #*                                                   *
-#===- unittests/support/klee/path/CMakeLists.txt --------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+#===- unittests/os/klee/path/CMakeLists.txt -------------------------------===//
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -41,4 +41,4 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 #===----------------------------------------------------------------------===//
-pstore_add_klee_test (CATEGORY path NAME join DEPENDS pstore-support)
+pstore_add_klee_test (CATEGORY path NAME join DEPENDS pstore-os)

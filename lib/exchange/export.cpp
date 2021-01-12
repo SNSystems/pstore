@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__| *
 //*           |_|                    *
 //===- lib/exchange/export.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -60,7 +60,7 @@ namespace {
         pstore::generation_container transactions{db};
         std::copy (std::begin (transactions), std::end (transactions),
                    std::back_inserter (footers));
-        assert (footers.size () == num_transactions);
+        PSTORE_ASSERT (footers.size () == num_transactions);
         std::reverse (std::begin (footers), std::end (footers));
         return footers;
     }
@@ -78,7 +78,7 @@ namespace {
             pstore::index::get_index<pstore::trailer::indices::debug_line_header> (db);
         if (!debug_line_headers->empty ()) {
             auto const * sep = "\n";
-            assert (generation > 0);
+            PSTORE_ASSERT (generation > 0);
 
             auto const out_fn = [&] (pstore::address addr) {
                 auto const & kvp = debug_line_headers->load_leaf_node (db, addr);
@@ -114,7 +114,7 @@ namespace pstore {
                 os << ind << R"("transactions":)";
 
                 auto const f = footers (db);
-                assert (std::distance (std::begin (f), std::end (f)) >= 1);
+                PSTORE_ASSERT (std::distance (std::begin (f), std::end (f)) >= 1);
                 emit_array (os, ind, std::next (std::begin (f)), std::end (f),
                             [&] (ostream & os1, indent const ind1,
                                  pstore::typed_address<pstore::trailer> const footer_pos) {

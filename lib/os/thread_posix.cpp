@@ -5,7 +5,7 @@
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
 //===- lib/os/thread_posix.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -73,38 +73,16 @@
 namespace pstore {
     namespace threads {
 
-        thread_id_type get_id () {
-            auto id = thread_id_type{0};
-#    ifdef __APPLE__
-            // Looking at the source, this API has an extension which allows a NULL pthread_t to
-            // mean "current thread". I'm being pedantically correct here, but we could take
-            // advantage of that if it turns out that we're in a hurry.
-            int const err = pthread_threadid_np (pthread_self (), &id);
-            if (err != 0) {
-                raise (errno_erc{err});
-            }
-#    elif defined(__linux__)
-            id = static_cast<thread_id_type> (syscall (__NR_gettid));
-#    elif defined(__FreeBSD__)
-            id = pthread_getthreadid_np ();
-#    elif defined(__sun__)
-            id = static_cast<thread_id_type> (pthread_self ());
-#    else
-#        error "Don't know how to produce a thread-id for the target OS"
-#    endif
-            return id;
-        }
-
-
 #    ifdef __FreeBSD__
-        static PSTORE_THREAD_LOCAL char thread_name[name_size];
+        static thread_local char thread_name[name_size];
 #    endif // __FreeBSD__
 
         void set_name (gsl::not_null<gsl::czstring> const name) {
             // pthread support for setting thread names comes in various non-portable forms.
-            // Here I'm supporting three versions:
-            // - the single argument version used by Mac OS X
-            // - two argument form supported by Linux
+            // Here I'm supporting four versions:
+            // - the single argument version used by macOS.
+            // - two argument form supported by Linux.
+            // - three argument form supported by NetBSD.
             // - the slightly differently named form used in FreeBSD.
 #    ifdef __FreeBSD__
             std::strncpy (thread_name, name, name_size);
@@ -115,6 +93,8 @@ namespace pstore {
             err = pthread_setname_np (name);
 #        elif defined(PSTORE_PTHREAD_SETNAME_NP_2_ARGS)
             err = pthread_setname_np (pthread_self (), name);
+#        elif defined(PSTORE_PTHREAD_SETNAME_NP_3_ARGS)
+            err = pthread_setname_np (pthread_self (), name, nullptr);
 #        elif defined(PSTORE_PTHREAD_SET_NAME_NP)
             pthread_set_name_np (pthread_self (), name);
 #        else
@@ -134,7 +114,7 @@ namespace pstore {
 #    ifdef __FreeBSD__
             std::strncpy (name.data (), thread_name, static_cast<std::size_t> (length));
 #    else
-            assert (length == name.size_bytes ());
+            PSTORE_ASSERT (length == name.size_bytes ());
             int const err = pthread_getname_np (pthread_self (), name.data (),
                                                 static_cast<std::size_t> (length));
             if (err != 0) {

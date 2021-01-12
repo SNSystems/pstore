@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|\___/_/\_\ |___/\__|_|   \__,_|\___|\__|\__,_|_|  \___| *
 //*                                                                        *
 //===- tools/index_structure/index_structure.cpp --------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -140,14 +140,14 @@ namespace {
     template <typename NodeType, typename IndexType>
     std::string dump_intermediate (pstore::database const & db, IndexType const & index,
                                    std::ostream & os, index_pointer node, unsigned shifts) {
-        assert (!node.is_heap ());
+        PSTORE_ASSERT (!node.is_heap ());
         auto const this_id =
             node_type_name<NodeType>::name + std::to_string (node.addr.absolute ());
 
         std::shared_ptr<void const> store_ptr;
         NodeType const * ptr = nullptr;
         std::tie (store_ptr, ptr) = NodeType::get_node (db, node);
-        assert (ptr != nullptr);
+        PSTORE_ASSERT (ptr != nullptr);
 
         for (auto const & child : *ptr) {
             auto const child_id =
@@ -161,7 +161,7 @@ namespace {
     std::string dump (pstore::database const & db, IndexType const & index, std::ostream & os,
                       index_pointer node, unsigned shifts) {
         if (node.is_leaf ()) {
-            assert (node.is_address ());
+            PSTORE_ASSERT (node.is_address ());
             return dump_leaf (db, index, os, node.addr);
         }
         return depth_is_internal_node (shifts)

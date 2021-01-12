@@ -5,7 +5,7 @@
 //*  _/ |___/\___/|_| |_| *
 //* |__/                  *
 //===- tools/json/json.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -75,7 +75,7 @@ namespace {
         std::error_code end_object ();
 
         result_type result () const {
-            assert (out_.size () == 1U);
+            PSTORE_ASSERT (out_.size () == 1U);
             return out_.top ();
         }
 
@@ -154,9 +154,9 @@ namespace {
 
             auto key = out_.top ();
             out_.pop ();
-            assert (key);
+            PSTORE_ASSERT (key);
             auto key_str = key->dynamic_cast_string ();
-            assert (key_str);
+            PSTORE_ASSERT (key_str);
             object->insert (key_str->get (), value);
         }
         out_.emplace (std::move (object));

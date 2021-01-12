@@ -5,7 +5,7 @@
 //*  \___/| .__/ \__|_|\___/|_| |_| *
 //*       |_|                       *
 //===- lib/command_line/option.cpp ----------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -85,7 +85,7 @@ namespace pstore {
 
             std::string const & option::name () const { return name_; }
             void option::set_name (std::string const & name) {
-                assert ((name.empty () || name[0] != '-') && "Option can't start with '-");
+                PSTORE_ASSERT ((name.empty () || name[0] != '-') && "Option can't start with '-");
                 name_ = name;
             }
             std::string const & option::usage () const noexcept { return usage_; }
@@ -153,7 +153,7 @@ namespace pstore {
             //* \__,_|_|_\__,_/__/ *
             //*                    *
             void alias::set_original (option * const o) {
-                assert (o != nullptr);
+                PSTORE_ASSERT (o != nullptr);
                 original_ = o;
             }
             bool alias::add_occurrence () { return original_->add_occurrence (); }

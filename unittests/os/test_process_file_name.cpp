@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
 //===- unittests/os/test_process_file_name.cpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -61,7 +61,7 @@ namespace {
     template <typename T>
     typename std::make_unsigned<T>::type as_unsigned (T x) {
         using utype = typename std::make_unsigned<T>::type;
-        assert (x >= 0);
+        PSTORE_ASSERT (x >= 0);
         return static_cast<utype> (x);
     }
 

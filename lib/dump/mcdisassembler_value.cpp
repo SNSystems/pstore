@@ -11,7 +11,7 @@
 //*   \_/ \__,_|_|\__,_|\___| *
 //*                           *
 //===- lib/dump/mcdisassembler_value.cpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -287,7 +287,7 @@ namespace {
         using return_type = error_or<inst_printer_ptr>;
 
         llvm::MCAsmInfo const * const asm_info = context.getAsmInfo ();
-        assert (asm_info != nullptr);
+        PSTORE_ASSERT (asm_info != nullptr);
         if (inst_printer_ptr instruction_printer{
                 target.createMCInstPrinter (triple, asm_info->getAssemblerDialect (), *asm_info,
                                             instructions, *context.getRegisterInfo ())}) {

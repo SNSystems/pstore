@@ -5,7 +5,7 @@
 //*  \___\___/| .__/ \__, | *
 //*           |_|    |___/  *
 //===- tools/genromfs/copy.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -139,7 +139,7 @@ void copy (std::string const & path, unsigned file_no) {
             char const * cr;
             std::tie (width, cr) = getcr (width);
 
-            assert (std::strlen (separator) <= separator_size);
+            PSTORE_ASSERT (std::strlen (separator) <= separator_size);
             std::array<char, separator_size + crindent_size + byte_value_size + 1> vbuf{{0}};
             int written = std::snprintf (vbuf.data (), vbuf.size (), "%s%s%u", separator, cr,
                                          static_cast<unsigned> (buffer[n]));
@@ -147,8 +147,8 @@ void copy (std::string const & path, unsigned file_no) {
                 // Is there anything more sensible we can do?
                 pstore::raise_exception (snprintf_failed_error ());
             }
-            assert (vbuf[vbuf.size () - 1U] == '\0' && "vbuf was not big enough");
-            assert (static_cast<unsigned> (written) <= vbuf.size ());
+            PSTORE_ASSERT (vbuf[vbuf.size () - 1U] == '\0' && "vbuf was not big enough");
+            PSTORE_ASSERT (static_cast<unsigned> (written) <= vbuf.size ());
             // Absolute guarantee of nul termination.
             vbuf[vbuf.size () - 1U] = '\0';
             os << vbuf.data ();

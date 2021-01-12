@@ -5,7 +5,7 @@
 //*  \__,_|\__,_|_|\__,_| *
 //*                       *
 //===- include/pstore/core/uuid.hpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -156,7 +156,7 @@ namespace pstore {
         /// N is the number of bytes in Ty).
         template <typename Ty>
         static std::uint8_t get_byte (Ty const t, unsigned const num) noexcept {
-            assert (num < sizeof (Ty));
+            PSTORE_ASSERT (num < sizeof (Ty));
             return static_cast<std::uint8_t> ((t >> (num * 8)) & 0xff);
         }
     };

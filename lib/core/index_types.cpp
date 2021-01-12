@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|\___/_/\_\  \__|\__, | .__/ \___||___/ *
 //*                                |___/|_|               *
 //===- lib/core/index_types.cpp -------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -86,7 +86,7 @@ namespace pstore {
                 }
             }
 #undef X
-            assert (locations->size () == index_integral (trailer::indices::last));
+            PSTORE_ASSERT (locations->size () == index_integral (trailer::indices::last));
         }
 
     } // end namespace index

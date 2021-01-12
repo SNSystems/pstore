@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/   \__|\__, | .__/ \___||___/ *
 //*                                             |_|          |___/|_|               *
 //===- include/pstore/core/hamt_map_types.hpp -----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -379,11 +379,11 @@ namespace pstore {
                 /// \name Element access
                 ///@{
                 address operator[] (std::size_t const i) const noexcept {
-                    assert (i < size_);
+                    PSTORE_ASSERT (i < size_);
                     return leaves_[i];
                 }
                 address & operator[] (std::size_t const i) noexcept {
-                    assert (i < size_);
+                    PSTORE_ASSERT (i < size_);
                     return leaves_[i];
                 }
                 ///@}
@@ -640,7 +640,7 @@ namespace pstore {
                                                       internal_node const & internal) {
                     if (node.is_heap ()) {
                         internal_node * const inode = node.untag_node<internal_node *> ();
-                        assert (inode->signature_ == node_signature_);
+                        PSTORE_ASSERT (inode->signature_ == node_signature_);
                         return inode;
                     }
 
@@ -656,14 +656,14 @@ namespace pstore {
                 /// \return The number of bytes occupied by an in-store internal node with the given
                 /// number of child nodes.
                 static constexpr std::size_t size_bytes (std::size_t const num_children) noexcept {
-                    assert (num_children > 0 && num_children <= hash_size);
+                    PSTORE_ASSERT (num_children > 0 && num_children <= hash_size);
                     return sizeof (internal_node) - sizeof (internal_node::children_) +
                            sizeof (decltype (internal_node::children_[0])) * num_children;
                 }
 
                 /// Returns the number of children contained by this node.
                 unsigned size () const noexcept {
-                    assert (this->bitmap_ != hash_type{0});
+                    PSTORE_ASSERT (this->bitmap_ != hash_type{0});
                     return bit_count::pop_count (this->bitmap_);
                 }
 
@@ -684,12 +684,12 @@ namespace pstore {
 
 
                 index_pointer const & operator[] (std::size_t const i) const {
-                    assert (i < size ());
+                    PSTORE_ASSERT (i < size ());
                     return children_[i];
                 }
 
                 index_pointer & operator[] (std::size_t const i) {
-                    assert (i < size ());
+                    PSTORE_ASSERT (i < size ());
                     return children_[i];
                 }
 
@@ -739,7 +739,7 @@ namespace pstore {
             // ~~~~~~
             inline auto internal_node::lookup (hash_type const hash_index) const
                 -> std::pair<index_pointer, std::size_t> {
-                assert (hash_index < (hash_type{1} << hash_index_bits));
+                PSTORE_ASSERT (hash_index < (hash_type{1} << hash_index_bits));
                 auto const bit_pos = hash_type{1} << hash_index;
                 if ((bitmap_ & bit_pos) != 0) { //! OCLINT(PH - bitwise in conditional is ok)
                     std::size_t const index = bit_count::pop_count (bitmap_ & (bit_pos - 1U));

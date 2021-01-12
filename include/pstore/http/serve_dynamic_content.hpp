@@ -11,7 +11,7 @@
 //*  \___\___/|_| |_|\__\___|_| |_|\__| *
 //*                                     *
 //===- include/pstore/http/serve_dynamic_content.hpp ----------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -83,7 +83,7 @@ namespace pstore {
                 os << R"({ "version": ")" << header::major_version << '.' << header::minor_version
                    << "\" }";
                 auto const & v = os.str ();
-                assert (json::is_valid (v));
+                PSTORE_ASSERT (json::is_valid (v));
                 return v;
             };
             static std::string const version = version_string ();
@@ -148,7 +148,7 @@ namespace pstore {
         error_or<IO> serve_dynamic_content (Sender sender, IO io, std::string uri) {
 
             // Remove the common path prefix from the URI.
-            assert (details::starts_with (uri, dynamic_path));
+            PSTORE_ASSERT (details::starts_with (uri, dynamic_path));
             uri.erase (std::begin (uri),
                        std::begin (uri) + pstore::array_elements (dynamic_path) - 1U);
 
@@ -170,7 +170,7 @@ namespace pstore {
             auto const compare = [] (value_type const & a, value_type const & b) {
                 return std::get<0> (a) < std::get<0> (b);
             };
-            assert (std::is_sorted (std::begin (commands), std::end (commands), compare));
+            PSTORE_ASSERT (std::is_sorted (std::begin (commands), std::end (commands), compare));
 
             auto const lb = std::lower_bound (
                 std::begin (commands), std::end (commands),

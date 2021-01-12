@@ -5,7 +5,7 @@
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
 //===- include/pstore/os/thread.hpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -54,38 +54,17 @@
 #    define NOMINMAX
 #    define WIN32_LEAN_AND_MEAN
 #    include <Windows.h>
-#    define PSTORE_THREAD_LOCAL __declspec(thread)
-#else
-#    define PSTORE_THREAD_LOCAL __thread
-#endif
+#endif // _WIN32
 
 #include "pstore/support/gsl.hpp"
 
 namespace pstore {
     namespace threads {
 
-#ifdef _WIN32
-        using thread_id_type = DWORD;
-#elif defined(__APPLE__)
-        using thread_id_type = std::uint64_t;
-#elif defined(__linux__)
-        using thread_id_type = int;
-#elif defined(__FreeBSD__)
-        using thread_id_type = int;
-#elif defined(__sun__)
-        using thread_id_type = std::uint32_t;
-        static_assert (sizeof (thread_id_type) == sizeof (pthread_t),
-                       "expected pthread_t to be 32-bits");
-#else
-#    error "Don't know how to represent a thread-id on this OS"
-#endif
-
         constexpr std::size_t name_size = 16;
         void set_name (gsl::not_null<gsl::czstring> name);
         gsl::czstring get_name (gsl::span<char, name_size> name /*out*/);
         std::string get_name ();
-
-        thread_id_type get_id ();
 
     } // end namespace threads
 } // end namespace pstore

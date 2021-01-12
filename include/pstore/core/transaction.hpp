@@ -5,7 +5,7 @@
 //*  \__|_|  \__,_|_| |_|___/\__,_|\___|\__|_|\___/|_| |_| *
 //*                                                        *
 //===- include/pstore/core/transaction.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -95,7 +95,7 @@ namespace pstore {
 
         ///@{
         std::shared_ptr<void const> getro (address const addr, std::size_t const size) {
-            assert (addr >= first_ && addr + size <= first_ + size_);
+            PSTORE_ASSERT (addr >= first_ && addr + size <= first_ + size_);
             return db ().getro (addr, size);
         }
 
@@ -109,8 +109,8 @@ namespace pstore {
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T const> getro (typed_address<T> const addr,
                                         std::size_t const elements = 1) {
-            assert (addr.to_address () >= first_ &&
-                    (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
+            PSTORE_ASSERT (addr.to_address () >= first_ &&
+                           (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getro (addr, elements);
         }
         ///@}
@@ -118,7 +118,7 @@ namespace pstore {
 
         ///@{
         std::shared_ptr<void> getrw (address const addr, std::size_t const size) {
-            assert (addr >= first_ && addr + size <= first_ + size_);
+            PSTORE_ASSERT (addr >= first_ && addr + size <= first_ + size_);
             return db_.getrw (addr, size);
         }
 
@@ -131,8 +131,8 @@ namespace pstore {
         template <typename T,
                   typename = typename std::enable_if<std::is_standard_layout<T>::value>::type>
         std::shared_ptr<T> getrw (typed_address<T> const addr, std::size_t const elements = 1) {
-            assert (addr.to_address () >= first_ &&
-                    (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
+            PSTORE_ASSERT (addr.to_address () >= first_ &&
+                           (addr.to_address () + elements * sizeof (T)) <= first_ + size_);
             return db_.getrw (addr, elements);
         }
         ///@}
@@ -240,7 +240,7 @@ namespace pstore {
             : transaction_base (db)
             , lock_{std::move (lock)} {
 
-        assert (!this->is_open ());
+        PSTORE_ASSERT (!this->is_open ());
     }
 
     // (dtor)

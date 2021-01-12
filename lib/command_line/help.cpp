@@ -5,7 +5,7 @@
 //* |_| |_|\___|_| .__/  *
 //*              |_|     *
 //===- lib/command_line/help.cpp ------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -111,7 +111,7 @@ namespace {
             str += '>';
             code_points += pstore::utf::length (desc) + 2;
         }
-        assert (pstore::utf::length (str) == code_points);
+        PSTORE_ASSERT (pstore::utf::length (str) == code_points);
         return {str, code_points};
     }
 
@@ -163,8 +163,8 @@ namespace pstore {
                     switch_strings names;
                     for (option const * op : ops) {
                         std::pair<std::string, std::size_t> name = option_string (*op);
-                        assert (pstore::utf::length (std::get<std::string> (name)) ==
-                                std::get<std::size_t> (name));
+                        PSTORE_ASSERT (pstore::utf::length (std::get<std::string> (name)) ==
+                                       std::get<std::size_t> (name));
 
                         if (alias const * const alias = op->as_alias ()) {
                             op = alias->original ();
@@ -182,7 +182,8 @@ namespace pstore {
                                 prev_string += separator + std::get<std::string> (name);
                                 prev_code_points += separator_len + std::get<std::size_t> (name);
 
-                                assert (pstore::utf::length (prev_string) == prev_code_points);
+                                PSTORE_ASSERT (pstore::utf::length (prev_string) ==
+                                               prev_code_points);
                                 continue;
                             }
                         }

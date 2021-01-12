@@ -5,7 +5,7 @@
 //* |_.__/|_|\__|  \___\___/ \__,_|_| |_|\__| *
 //*                                           *
 //===- include/pstore/support/bit_count.hpp -------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -69,27 +69,27 @@ namespace pstore {
 
 #ifdef _MSC_VER
         inline unsigned clz (std::uint32_t const x) noexcept {
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             unsigned long bit_position = 0;
             _BitScanReverse (&bit_position, x);
-            assert (bit_position < 32);
+            PSTORE_ASSERT (bit_position < 32);
             return 31 - bit_position;
         }
         inline unsigned clz (std::uint64_t const x) noexcept {
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             unsigned long bit_position = 0;
             _BitScanReverse64 (&bit_position, x);
-            assert (bit_position < 64);
+            PSTORE_ASSERT (bit_position < 64);
             return 63 - bit_position;
         }
         inline unsigned clz (std::uint8_t const x) noexcept {
             unsigned const r = clz (static_cast<std::uint32_t> (x));
-            assert (r >= 24U);
+            PSTORE_ASSERT (r >= 24U);
             return r - 24U;
         }
         inline unsigned clz (std::uint16_t const x) noexcept {
             unsigned const r = clz (static_cast<std::uint32_t> (x));
-            assert (r >= 16U);
+            PSTORE_ASSERT (r >= 16U);
             return r - 16U;
         }
         inline unsigned clz (uint128 const x) noexcept {
@@ -98,27 +98,27 @@ namespace pstore {
 #else
         constexpr unsigned clz (unsigned const x) noexcept {
             PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint32_t));
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             return static_cast<unsigned> (__builtin_clz (x));
         }
         constexpr unsigned clz (unsigned long const x) noexcept {
             PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             return static_cast<unsigned> (__builtin_clzl (x));
         }
         constexpr unsigned clz (unsigned long long const x) noexcept {
             PSTORE_STATIC_ASSERT (sizeof (x) == sizeof (std::uint64_t));
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             return static_cast<unsigned> (__builtin_clzll (x));
         }
         constexpr unsigned clz (std::uint8_t const x) noexcept {
             unsigned const r = clz (static_cast<std::uint32_t> (x));
-            assert (r >= 24U);
+            PSTORE_ASSERT (r >= 24U);
             return r - 24U;
         }
         constexpr unsigned clz (std::uint16_t const x) noexcept {
             unsigned const r = clz (static_cast<std::uint32_t> (x));
-            assert (r >= 16U);
+            PSTORE_ASSERT (r >= 16U);
             return r - 16U;
         }
         constexpr unsigned clz (uint128 const x) noexcept {
@@ -138,25 +138,25 @@ namespace pstore {
         /// It is undefined behavior if x is 0.
 #ifdef _MSC_VER
         inline unsigned ctz (std::uint64_t const x) noexcept {
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             unsigned long bit_position = 0;
             _BitScanForward64 (&bit_position, x);
-            assert (bit_position < 64);
+            PSTORE_ASSERT (bit_position < 64);
             return bit_position;
         }
         inline unsigned ctz (uint128 const x) noexcept {
-            assert (x != 0U);
+            PSTORE_ASSERT (x != 0U);
             return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
         }
 #else
         constexpr unsigned ctz (unsigned long long const x) noexcept {
             static_assert (sizeof (unsigned long long) == sizeof (std::uint64_t),
                            "use of ctzll requires unsigned long long to be 64 bits");
-            assert (x != 0);
+            PSTORE_ASSERT (x != 0);
             return static_cast<unsigned> (__builtin_ctzll (x));
         }
         constexpr unsigned ctz (uint128 const x) noexcept {
-            assert (x != 0U);
+            PSTORE_ASSERT (x != 0U);
             return x.low () == 0U ? 64U + ctz (x.high ()) : ctz (x.low ());
         }
 #endif //_MSC_VER

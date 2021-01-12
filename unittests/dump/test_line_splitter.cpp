@@ -5,7 +5,7 @@
 //* |_|_|_| |_|\___| |___/ .__/|_|_|\__|\__\___|_|    *
 //*                      |_|                          *
 //===- unittests/dump/test_line_splitter.cpp ------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

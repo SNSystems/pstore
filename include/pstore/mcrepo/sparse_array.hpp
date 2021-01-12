@@ -5,7 +5,7 @@
 //* |___/ .__/ \__,_|_|  |___/\___|  \__,_|_|  |_|  \__,_|\__, | *
 //*     |_|                                               |___/  *
 //===- include/pstore/mcrepo/sparse_array.hpp -----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -341,14 +341,14 @@ namespace pstore {
                 /// value that can be passed to operator[]. There must be at least one element in
                 /// the container.
                 unsigned front () const noexcept {
-                    assert (!empty ());
+                    PSTORE_ASSERT (!empty ());
                     return bit_count::ctz (bitmap_);
                 }
                 /// Returns the index of the last element in the container. This is the largest
                 /// value that can be passed to operator[]. There must be at least one element in
                 /// the container.
                 unsigned back () const noexcept {
-                    assert (!empty ());
+                    PSTORE_ASSERT (!empty ());
                     return sizeof (bitmap_) * 8U - bit_count::clz (bitmap_) - 1U;
                 }
 
@@ -380,25 +380,25 @@ namespace pstore {
             /// Returns a reference to the first element in the container. Calling front() on an
             /// empty container is undefined.
             reference front () {
-                assert (!empty ());
+                PSTORE_ASSERT (!empty ());
                 return (*this)[get_indices ().front ()];
             }
             /// Returns a reference to the first element in the container. Calling front() on an
             /// empty container is undefined.
             const_reference front () const {
-                assert (!empty ());
+                PSTORE_ASSERT (!empty ());
                 return (*this)[get_indices ().front ()];
             }
             /// Returns a reference to the last element in the container. Calling back() on an empty
             /// container is undefined.
             reference back () {
-                assert (!empty ());
+                PSTORE_ASSERT (!empty ());
                 return (*this)[get_indices ().back ()];
             }
             /// Returns a reference to the last element in the container. Calling back() on an empty
             /// container is undefined.
             const_reference back () const {
-                assert (!empty ());
+                PSTORE_ASSERT (!empty ());
                 return (*this)[get_indices ().back ()];
             }
 
@@ -587,11 +587,12 @@ namespace pstore {
                                                                 InputIterator last) {
             using iter_value_type = typename std::iterator_traits<InputIterator>::value_type;
             auto op = [] (BitmapType mm, iter_value_type v) {
-                auto idx = static_cast<unsigned> (v);
-                assert (idx >= 0 && idx < max_size ());
+                auto const idx = static_cast<unsigned> (v);
+                PSTORE_ASSERT (idx < max_size ());
                 auto const mask = BitmapType{1U} << idx;
-                assert ((mm & mask) == 0U && "The same index must not appear more than once in the "
-                                             "collection of sparse indices");
+                PSTORE_ASSERT ((mm & mask) == 0U &&
+                               "The same index must not appear more than once in the "
+                               "collection of sparse indices");
                 return static_cast<BitmapType> (mm | mask);
             };
             return std::accumulate (first, last, BitmapType{0U}, op);
@@ -603,9 +604,9 @@ namespace pstore {
         template <typename SparseArray, typename ResultType>
         ResultType & sparse_array<ValueType, BitmapType>::index_impl (SparseArray && sa,
                                                                       size_type pos) noexcept {
-            assert (pos < max_size ());
+            PSTORE_ASSERT (pos < max_size ());
             auto mask = BitmapType{1U} << pos;
-            assert ((sa.bitmap_ & mask) != 0U);
+            PSTORE_ASSERT ((sa.bitmap_ & mask) != 0U);
             mask--;
             return sa.elements_[bit_count::pop_count (static_cast<BitmapType> (sa.bitmap_ & mask))];
         }

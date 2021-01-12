@@ -5,7 +5,7 @@
 //* |_|_| |_|\__,_|\___/_/\_\  \__|\__, | .__/ \___||___/ *
 //*                                |___/|_|               *
 //===- include/pstore/core/index_types.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -90,7 +90,7 @@ namespace pstore {
             /// read.
             template <typename Archive>
             static void read (Archive && archive, uint128 & out) {
-                assert (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
+                PSTORE_ASSERT (reinterpret_cast<std::uintptr_t> (&out) % alignof (uint128) == 0);
                 archive.get (out);
             }
 
@@ -169,8 +169,8 @@ namespace pstore {
             }
 
 #ifdef PSTORE_CPP_RTTI
-            assert ((!create && dx.get () == nullptr) ||
-                    dynamic_cast<Return *> (dx.get ()) != nullptr);
+            PSTORE_ASSERT ((!create && dx.get () == nullptr) ||
+                           dynamic_cast<Return *> (dx.get ()) != nullptr);
 #endif
             return std::static_pointer_cast<Return> (dx);
         }

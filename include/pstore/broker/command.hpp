@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- include/pstore/broker/command.hpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -53,13 +53,10 @@
 #include "pstore/broker/parser.hpp"
 #include "pstore/brokerface/fifo_path.hpp"
 #include "pstore/brokerface/pubsub.hpp"
+#include "pstore/http/server_status.hpp"
 #include "pstore/os/signal_cv.hpp"
 
 namespace pstore {
-    namespace httpd {
-        class server_status;
-    } // end namespace httpd
-
     namespace broker {
 
         class recorder;
@@ -76,7 +73,8 @@ namespace pstore {
             ///   uptime thread to exit.
             /// \param scavenge_threshold  The time for which messages are
             ///   allowed to wait in the message queue before the scavenger will delete them.
-            command_processor (unsigned num_read_threads, httpd::server_status * http_status,
+            command_processor (unsigned num_read_threads,
+                               gsl::not_null<maybe<httpd::server_status> *> const http_status,
                                gsl::not_null<std::atomic<bool> *> uptime_done,
                                std::chrono::seconds scavenge_threshold);
             // No copying or assignment.
@@ -133,7 +131,7 @@ namespace pstore {
             std::atomic<bool> commands_done_{false};
 
             /// A pointer to an object which can be used to tell the http server to exit.
-            httpd::server_status * http_status_;
+            gsl::not_null<maybe<httpd::server_status> *> const http_status_;
             /// A pointer to a bool which, when set, will tell the uptime thread to exit.
             gsl::not_null<std::atomic<bool> *> uptime_done_;
             /// The time for which messages are allowed to wait in the message queue before the

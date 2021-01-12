@@ -5,7 +5,7 @@
 //*  \__, |\___|_| |_|\___|_|  |_|\___| |___/\___|\___|\__|_|\___/|_| |_| *
 //*  |___/                                                                *
 //===- include/pstore/mcrepo/generic_section.hpp --------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -333,7 +333,7 @@ namespace pstore {
 #endif
             // Note that the memory pointed to by 'p' is uninitialized.
             auto * p = reinterpret_cast<std::uint8_t *> (this + 1);
-            assert (bit_count::pop_count (align) == 1);
+            PSTORE_ASSERT (bit_count::pop_count (align) == 1);
 
             if (d.first != d.second) {
                 data_size_ = generic_section::set_size<decltype (data_size_)> (d.first, d.second);
@@ -360,7 +360,8 @@ namespace pstore {
                 num_xfixups_ =
                     generic_section::set_size<decltype (num_xfixups_)> (x.first, x.second);
             }
-            assert (p >= start && static_cast<std::size_t> (p - start) == size_bytes (d, i, x));
+            PSTORE_ASSERT (p >= start &&
+                           static_cast<std::size_t> (p - start) == size_bytes (d, i, x));
         }
 
         // set_size
@@ -387,7 +388,7 @@ namespace pstore {
             auto const data_size = std::distance (d.first, d.second);
             auto const num_ifixups = std::distance (i.first, i.second);
             auto const num_xfixups = std::distance (x.first, x.second);
-            assert (data_size >= 0 && num_ifixups >= 0 && num_xfixups >= 0);
+            PSTORE_ASSERT (data_size >= 0 && num_ifixups >= 0 && num_xfixups >= 0);
             return size_bytes (static_cast<std::size_t> (data_size),
                                static_cast<std::size_t> (num_ifixups),
                                static_cast<std::size_t> (num_xfixups));

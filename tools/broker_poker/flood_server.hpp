@@ -5,7 +5,7 @@
 //* |_| |_|\___/ \___/ \__,_| |___/\___|_|    \_/ \___|_|    *
 //*                                                          *
 //===- tools/broker_poker/flood_server.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

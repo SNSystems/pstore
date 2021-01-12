@@ -5,7 +5,7 @@
 //* |_|  \___/|_| |_| |_|_| |___/ *
 //*                               *
 //===- lib/romfs/romfs.cpp ------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -61,7 +61,7 @@ namespace {
     }
 
     pstore::gsl::czstring PSTORE_NONNULL next_component (pstore::gsl::czstring PSTORE_NONNULL p) {
-        assert (p != nullptr);
+        PSTORE_ASSERT (p != nullptr);
         while (*p == '/') {
             ++p;
         }
@@ -268,7 +268,7 @@ namespace pstore {
         romfs::romfs (directory const * PSTORE_NONNULL const root)
                 : root_{root}
                 , cwd_{root} {
-            assert (this->fsck ());
+            PSTORE_ASSERT (this->fsck ());
         }
 
         // open
@@ -325,7 +325,7 @@ namespace pstore {
         dirent const * PSTORE_NONNULL
         romfs::directory_to_dirent (directory const * const PSTORE_NONNULL d) {
             auto * const r = d->find ("..");
-            assert (r != nullptr && r->is_directory ());
+            PSTORE_ASSERT (r != nullptr && r->is_directory ());
             return static_cast<dirent const *> (r);
         }
 
@@ -345,7 +345,7 @@ namespace pstore {
             }
 
             dirent const * PSTORE_NULLABLE current_de = directory_to_dirent (dir);
-            assert (current_de->is_directory ());
+            PSTORE_ASSERT (current_de->is_directory ());
             while (*p != '\0') {
                 char const * component;
                 char const * tail;
@@ -353,7 +353,7 @@ namespace pstore {
                 // note that component is not null terminated!
                 p = next_component (tail);
 
-                assert (tail > component);
+                PSTORE_ASSERT (tail > component);
                 current_de = dir->find (
                     component,
                     static_cast<std::make_unsigned<std::ptrdiff_t>::type> (tail - component));
@@ -385,17 +385,17 @@ namespace pstore {
                 return error_or<std::string>{"/"};
             }
             dirent const * const parent_de = dir->find ("..");
-            assert (parent_de != nullptr);
+            PSTORE_ASSERT (parent_de != nullptr);
             return parent_de->opendir () >>=
                    [this, dir] (directory const * const PSTORE_NONNULL parent) {
                        return this->dir_to_string (parent) >>= [dir, parent] (std::string s) {
-                           assert (s.length () > 0);
+                           PSTORE_ASSERT (s.length () > 0);
                            if (s.back () != '/') {
                                s += '/';
                            }
 
                            dirent const * const p = parent->find (dir);
-                           assert (p != nullptr);
+                           PSTORE_ASSERT (p != nullptr);
                            return error_or<std::string> (s + p->name ());
                        };
                    };

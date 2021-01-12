@@ -5,7 +5,7 @@
 //* |_|\___/ \__, |\__, |_|_| |_|\__, | *
 //*          |___/ |___/         |___/  *
 //===- lib/os/logging.cpp -------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -47,6 +47,7 @@
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <bitset>
 #include <cstdio>
 #include <cstring>
@@ -124,7 +125,7 @@ namespace pstore {
             static constexpr char const * iso8601_format = "%FT%T%z";
             std::size_t const r =
                 std::strftime (buffer.data (), time_buffer_size, iso8601_format, &tm_time);
-            assert (buffer.size () >= 1);
+            PSTORE_ASSERT (buffer.size () >= 1);
             // guarantee NUL termination.
             buffer[buffer.size () - 1] = '\0';
             return r;
@@ -311,14 +312,15 @@ namespace {
         last
     };
 
-} // namespace
+} // end anonymous namespace
 
 namespace pstore {
 
         namespace details {
-            PSTORE_THREAD_LOCAL logger_collection * log_destinations = nullptr;
-        } // namespace details
 
+            thread_local logger_collection * log_destinations = nullptr;
+
+        } // end namespace details
 
 
         // TODO: allow user control over where the log ends up.
@@ -380,7 +382,7 @@ namespace pstore {
             std::array<char, time_buffer_size> time_buffer;
             std::size_t const r = time_string (std::time (nullptr), ::gsl::make_span (time_buffer));
             (void) r;
-            assert (r == sizeof (time_buffer) - 1);
+            PSTORE_ASSERT (r == sizeof (time_buffer) - 1);
             gsl::czstring const time_str = time_buffer.data ();
             std::ostringstream str;
             str << time_str << " - " << thread_name_ << " - " << priority_string (p) << " - "
@@ -403,7 +405,7 @@ namespace pstore {
             case priority::info: return "info";
             case priority::debug: return "debug";
             }
-            assert (0);
+            PSTORE_ASSERT (0);
             return "emergency";
         }
 
@@ -411,16 +413,23 @@ namespace pstore {
         // ~~~~~~~~~~~~~~~~~~~~~~~
         std::string basic_logger::get_current_thread_name () {
             std::string name = threads::get_name ();
-            if (name.size () == 0) {
-                // If a thread name hasn't been explicitly set (or has been explictly set
-                // to an empty string), then construct something that allows us to
-                // identify this thread in the logs.
-                std::ostringstream str;
-                str << '(' << threads::get_id () << ')';
-                return str.str ();
+            if (!name.empty ()) {
+                return name;
             }
 
-            return name;
+            // If a thread name hasn't been explicitly set (or has been explictly set
+            // to an empty string), then construct something that allows us to
+            // identify this thread in the logs.
+            thread_local auto id = -1;
+            if (id == -1) {
+                static std::atomic<int> nextid;
+                id = nextid++;
+                PSTORE_ASSERT (id != -1);
+            }
+
+            std::ostringstream str;
+            str << '(' << id << ')';
+            return str.str ();
         }
 
 

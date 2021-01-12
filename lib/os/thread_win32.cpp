@@ -5,7 +5,7 @@
 //*  \__|_| |_|_|  \___|\__,_|\__,_| *
 //*                                  *
 //===- lib/os/thread_win32.cpp --------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -58,10 +58,7 @@
 namespace pstore {
     namespace threads {
 
-        thread_id_type get_id () { return ::GetCurrentThreadId (); }
-
-
-        static PSTORE_THREAD_LOCAL char thread_name[name_size];
+        static thread_local char thread_name[name_size];
 
         void set_name (gsl::not_null<gsl::czstring> name) {
             // This code taken from http://msdn.microsoft.com/en-us/library/xcb2z8hs.aspx

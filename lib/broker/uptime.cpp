@@ -5,7 +5,7 @@
 //*  \__,_| .__/ \__|_|_| |_| |_|\___| *
 //*       |_|                          *
 //===- lib/broker/uptime.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -70,7 +70,7 @@ namespace pstore {
                     std::ostringstream os;
                     os << "{ \"uptime\": " << seconds << " }";
                     std::string const & str = os.str ();
-                    assert (json::is_valid (str));
+                    PSTORE_ASSERT (json::is_valid (str));
                     return str;
                 });
             }

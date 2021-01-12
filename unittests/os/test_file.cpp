@@ -5,7 +5,7 @@
 //* |_| |_|_|\___| *
 //*                *
 //===- unittests/os/test_file.cpp -----------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -716,14 +716,14 @@ namespace {
             return {};
         } else if (sz > buffer.size ()) {
             buffer.resize (sz);
-            assert (buffer.size () == sz);
+            PSTORE_ASSERT (buffer.size () == sz);
             sz = ::GetEnvironmentVariableW (key.c_str (), buffer.data (), sz);
             if (sz == 0) {
                 return {};
             }
         }
 
-        assert (buffer.data ()[sz] == L'\0');
+        PSTORE_ASSERT (buffer.data ()[sz] == L'\0');
         return {buffer.data (), sz};
     }
 

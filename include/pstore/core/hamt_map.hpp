@@ -5,7 +5,7 @@
 //* |_| |_|\__,_|_| |_| |_|\__| |_| |_| |_|\__,_| .__/  *
 //*                                             |_|     *
 //===- include/pstore/core/hamt_map.hpp -----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -189,9 +189,9 @@ namespace pstore {
                 /// Returns the pstore address of the serialized value_type instance to which the
                 /// iterator is currently pointing.
                 address get_address () const {
-                    assert (visited_parents_.size () >= 1);
+                    PSTORE_ASSERT (visited_parents_.size () >= 1);
                     details::parent_type const & parent = visited_parents_.top ();
-                    assert (parent.node.is_leaf () && parent.position == details::not_found);
+                    PSTORE_ASSERT (parent.node.is_leaf () && parent.position == details::not_found);
                     return parent.node.addr;
                 }
 
@@ -204,7 +204,7 @@ namespace pstore {
                 void move_to_left_most_child (index_pointer node);
 
                 unsigned get_shift_bits () const {
-                    assert (visited_parents_.size () >= 1);
+                    PSTORE_ASSERT (visited_parents_.size () >= 1);
                     return static_cast<unsigned> ((visited_parents_.size () - 1) *
                                                   details::hash_index_bits);
                 }
@@ -262,7 +262,7 @@ namespace pstore {
 
             /// Checks whether the container is empty
             bool empty () const noexcept {
-                assert (root_.is_empty () == (size_ == 0));
+                PSTORE_ASSERT (root_.is_empty () == (size_ == 0));
                 return size_ == 0;
             }
 
@@ -528,7 +528,7 @@ namespace pstore {
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::iterator_base<IsConstIterator>::operator++ ()
             -> iterator_base & {
             pos_.reset ();
-            assert (!visited_parents_.empty ());
+            PSTORE_ASSERT (!visited_parents_.empty ());
             this->increment_internal_node ();
             return *this;
         }
@@ -561,15 +561,15 @@ namespace pstore {
                 std::size_t size = 0;
                 if (is_internal_node) {
                     std::tie (node, internal) = internal_node::get_node (db_, parent.node);
-                    assert (internal != nullptr);
+                    PSTORE_ASSERT (internal != nullptr);
                     size = internal->size ();
                 } else {
                     std::tie (node, linear) = linear_node::get_node (db_, parent.node);
-                    assert (linear != nullptr);
+                    PSTORE_ASSERT (linear != nullptr);
                     size = linear->size ();
                 }
 
-                assert (!parent.node.is_leaf () && parent.position < size);
+                PSTORE_ASSERT (!parent.node.is_leaf () && parent.position < size);
                 ++parent.position;
 
                 if (parent.position >= size) {
@@ -606,7 +606,7 @@ namespace pstore {
                 if (visited_parents_.size () <= details::max_internal_depth) {
                     internal_node const * internal = nullptr;
                     std::tie (store_node, internal) = internal_node::get_node (db_, node);
-                    assert (!store_node || store_node.get () == internal);
+                    PSTORE_ASSERT (!store_node || store_node.get () == internal);
                     node = (*internal)[0];
                 } else {
                     linear_node const * linear = nullptr;
@@ -668,7 +668,7 @@ namespace pstore {
         template <typename KeyType, typename ValueType, typename Hash, typename KeyEqual>
         void hamt_map<KeyType, ValueType, Hash, KeyEqual>::clear (index_pointer node,
                                                                   unsigned shifts) {
-            assert (node.is_heap () && !node.is_leaf ());
+            PSTORE_ASSERT (node.is_heap () && !node.is_leaf ());
             if (details::depth_is_internal_node (shifts)) {
                 auto * const internal = node.untag_node<internal_node *> ();
                 // Recursively release the children of this internal node.
@@ -721,7 +721,7 @@ namespace pstore {
             // Now write the node and return where it went.
             address const result =
                 serialize::write (serialize::archive::make_writer (transaction), v);
-            assert ((result.absolute () & (aligned_to - 1U)) == 0U);
+            PSTORE_ASSERT ((result.absolute () & (aligned_to - 1U)) == 0U);
             parents->push ({index_pointer{result}});
 
             return result;
@@ -785,7 +785,7 @@ namespace pstore {
         void hamt_map<KeyType, ValueType, Hash, KeyEqual>::delete_node (index_pointer const node,
                                                                         unsigned const shifts) {
             if (node.is_heap ()) {
-                assert (!node.is_leaf ());
+                PSTORE_ASSERT (!node.is_leaf ());
                 if (details::depth_is_internal_node (shifts)) {
                     // Internal nodes are owned by internals_container_. Don't delete them here. If
                     // this ever changes, then add something like: delete
@@ -808,7 +808,7 @@ namespace pstore {
             std::shared_ptr<internal_node const> iptr;
             internal_node const * internal = nullptr;
             std::tie (iptr, internal) = internal_node::get_node (transaction.db (), node);
-            assert (internal != nullptr);
+            PSTORE_ASSERT (internal != nullptr);
 
             // Now work out which of the children we're going to be visiting next.
             index_pointer child_slot;
@@ -871,7 +871,7 @@ namespace pstore {
             std::shared_ptr<linear_node const> lptr;
             linear_node const * orig_node = nullptr;
             std::tie (lptr, orig_node) = linear_node::get_node (transaction.db (), node);
-            assert (orig_node != nullptr);
+            PSTORE_ASSERT (orig_node != nullptr);
 
             index_pointer child_slot;
             auto index = std::size_t{0};
@@ -1040,9 +1040,9 @@ namespace pstore {
             // If the root is a leaf node, there's nothing to do. If not, we start to recursively
             // flush the tree.
             if (!root_.is_address ()) {
-                assert (root_.is_internal ());
+                PSTORE_ASSERT (root_.is_internal ());
                 root_ = root_.untag_node<internal_node *> ()->flush (transaction, 0 /*shifts*/);
-                assert (root_.is_address ());
+                PSTORE_ASSERT (root_.is_address ());
                 // Don't delete the internal node here. They are owned by internals_container_. If
                 // this ever changes, then use something like 'delete internal' here.
             }
@@ -1065,7 +1065,7 @@ namespace pstore {
         typed_address<header_block>
         hamt_map<KeyType, ValueType, Hash, KeyEqual>::write_header_block (
             transaction_base & transaction) {
-            assert (this->root ().is_address ());
+            PSTORE_ASSERT (this->root ().is_address ());
             auto const pos = transaction.alloc_rw<header_block> ();
             pos.first->signature = index_signature;
             pos.first->size = this->size ();
@@ -1118,7 +1118,7 @@ namespace pstore {
                 hash >>= details::hash_index_bits;
             }
             // It's a leaf node.
-            assert (node.is_leaf ());
+            PSTORE_ASSERT (node.is_leaf ());
             key_type const existing_key = get_key (db, node.addr);
             if (equal_ (existing_key, key)) {
                 parents.push ({node});

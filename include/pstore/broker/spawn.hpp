@@ -5,7 +5,7 @@
 //* |___/ .__/ \__,_| \_/\_/ |_| |_| *
 //*     |_|                          *
 //===- include/pstore/broker/spawn.hpp ------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -136,10 +136,10 @@ namespace pstore {
 
         inline process_identifier spawn (std::initializer_list<gsl::czstring> argv) {
             // There must be at least two entries (the process path and terminating null).
-            assert (argv.size () >= 2);
+            PSTORE_ASSERT (argv.size () >= 2);
             gsl::czstring const * const begin = std::begin (argv);
             // The last array element must be null.
-            assert (*(begin + argv.size () - 1) == nullptr);
+            PSTORE_ASSERT (*(begin + argv.size () - 1) == nullptr);
             return spawn (*begin, begin);
         }
 

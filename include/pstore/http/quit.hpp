@@ -5,7 +5,7 @@
 //*  \__, |\__,_|_|\__| *
 //*     |_|             *
 //===- include/pstore/http/quit.hpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -44,14 +44,14 @@
 #ifndef PSTORE_HTTP_QUIT_HPP
 #define PSTORE_HTTP_QUIT_HPP
 
-#include <string>
-
 #include "pstore/http/server_status.hpp"
+#include "pstore/support/gsl.hpp"
+#include "pstore/support/maybe.hpp"
 
 namespace pstore {
     namespace httpd {
 
-        void quit (server_status * http_status);
+        void quit (gsl::not_null<maybe<server_status> *> http_status);
 
     } // end namespace httpd
 } // end namespace pstore

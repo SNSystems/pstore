@@ -11,7 +11,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
 //===- lib/mcrepo/linked_definitions_section.cpp --------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -112,7 +112,7 @@ namespace pstore {
         std::size_t linked_definitions_creation_dispatcher::size_bytes () const {
             static_assert (sizeof (std::uint64_t) >= sizeof (std::uintptr_t),
                            "sizeof uint64_t should be at least sizeof uintptr_t");
-            assert (std::distance (begin_, end_) >= 0);
+            PSTORE_ASSERT (std::distance (begin_, end_) >= 0);
             return linked_definitions::size_bytes (
                 static_cast<std::uint64_t> (std::distance (begin_, end_)));
         }
@@ -121,7 +121,7 @@ namespace pstore {
         // ~~~~~
         std::uint8_t *
         linked_definitions_creation_dispatcher::write (std::uint8_t * const out) const {
-            assert (this->aligned (out) == out);
+            PSTORE_ASSERT (this->aligned (out) == out);
             auto * const dependent = new (out) linked_definitions (begin_, end_);
             return out + dependent->size_bytes ();
         }

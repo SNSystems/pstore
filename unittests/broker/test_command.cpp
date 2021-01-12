@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- unittests/broker/test_command.cpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -59,9 +59,9 @@ namespace {
     class mock_cp : public pstore::broker::command_processor {
     public:
         explicit mock_cp (unsigned const num_read_threads,
-                          pstore::httpd::server_status * const status,
+                          pstore::maybe<pstore::httpd::server_status> * const http_status,
                           std::atomic<bool> * const uptime_done)
-                : command_processor (num_read_threads, status, uptime_done, 4h) {}
+                : command_processor (num_read_threads, http_status, uptime_done, 4h) {}
 
         MOCK_METHOD2 (suicide, void (pstore::brokerface::fifo_path const &,
                                      pstore::broker::broker_command const &));
@@ -86,7 +86,7 @@ namespace {
     class Command : public ::testing::Test {
     public:
         Command ()
-                : http_status_{8080}
+                : http_status_{pstore::in_place, in_port_t{8080}}
                 , uptime_done_{false}
                 , cp_{1U, &http_status_, &uptime_done_}
                 , fifo_{nullptr} {}
@@ -99,7 +99,7 @@ namespace {
         static constexpr std::uint16_t num_parts = 1;
 
     private:
-        pstore::httpd::server_status http_status_;
+        pstore::maybe<pstore::httpd::server_status> http_status_;
         std::atomic<bool> uptime_done_;
 
         mock_cp cp_;

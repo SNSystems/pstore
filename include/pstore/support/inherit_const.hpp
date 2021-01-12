@@ -5,7 +5,7 @@
 //* |_|_| |_|_| |_|\___|_|  |_|\__|  \___\___/|_| |_|___/\__| *
 //*                                                           *
 //===- include/pstore/support/inherit_const.hpp ---------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -113,7 +113,7 @@
 ///         template <typename Vector, typename ResultType = typename inherit_const<Vector,
 ///             reference>::type>
 ///         static ResultType index_impl (Vector & v, size_type pos) {
-///             assert (pos < v.size ());
+///             PSTORE_ASSERT (pos < v.size ());
 ///             return v.base_ + pos;
 ///         }
 ///     };

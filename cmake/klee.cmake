@@ -5,7 +5,7 @@
 #* |_|\_\_|\___|\___| *
 #*                    *
 #===- cmake/klee.cmake ----------------------------------------------------===//
-# Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+# Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 # All rights reserved.
 #
 # Developed by:
@@ -160,7 +160,7 @@ function (pstore_configure_klee_test_target name)
     )
     set_target_properties (${name} PROPERTIES
         FOLDER "pstore-klee"
-        CXX_STANDARD 11
+        CXX_STANDARD ${pstore_cxx_version}
         CXX_STANDARD_REQUIRED Yes
     )
 
@@ -199,7 +199,6 @@ function (pstore_add_klee_test )
 
         add_library ("${bc_tname}" OBJECT
             ${name}.cpp
-
         )
         pstore_configure_klee_test_target ("${bc_tname}")
         target_compile_options ("${bc_tname}" PRIVATE -emit-llvm)

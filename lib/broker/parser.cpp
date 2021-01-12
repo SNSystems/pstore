@@ -5,7 +5,7 @@
 //* | .__/ \__,_|_|  |___/\___|_|    *
 //* |_|                              *
 //===- lib/broker/parser.cpp ----------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -128,7 +128,7 @@ namespace pstore {
                 if (std::all_of (std::begin (value), std::end (value), not_null)) {
                     std::string complete_command;
                     for (auto const & c : value) {
-                        assert (c.get () != nullptr);
+                        PSTORE_ASSERT (c.get () != nullptr);
                         complete_command += *c;
                     }
 

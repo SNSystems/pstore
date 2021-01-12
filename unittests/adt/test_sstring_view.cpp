@@ -5,7 +5,7 @@
 //* |___/___/\__|_|  |_|_| |_|\__, |   \_/ |_|\___| \_/\_/   *
 //*                           |___/                          *
 //===- unittests/adt/test_sstring_view.cpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

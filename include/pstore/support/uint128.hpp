@@ -5,7 +5,7 @@
 //*  \__,_|_|_| |_|\__|_|_____\___/  *
 //*                                  *
 //===- include/pstore/support/uint128.hpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -211,7 +211,7 @@ namespace pstore {
 #endif // PSTORE_HAVE_UINT128_T
 
         static constexpr char digit_to_hex (unsigned const v) noexcept {
-            assert (v < 0x10);
+            PSTORE_ASSERT (v < 0x10);
             return static_cast<char> (v + ((v < 10) ? '0' : 'a' - 10));
         }
     };
@@ -374,7 +374,7 @@ namespace pstore {
     // ~~~~~~~~~~
     template <typename Other>
     uint128 uint128::operator<< (Other const n) const noexcept {
-        assert (n <= 128);
+        PSTORE_ASSERT (n <= 128);
 #ifdef PSTORE_HAVE_UINT128_T
         return {v_ << n};
 #else
@@ -395,7 +395,7 @@ namespace pstore {
     // operator>>=
     // ~~~~~~~~~~~
     inline uint128 & uint128::operator>>= (unsigned const n) noexcept {
-        assert (n <= 128);
+        PSTORE_ASSERT (n <= 128);
 #ifdef PSTORE_HAVE_UINT128_T
         v_ >>= n;
 #else
@@ -459,7 +459,7 @@ namespace pstore {
 #    endif
         }
 #endif
-        assert (emitted == hex_string_length);
+        PSTORE_ASSERT (emitted == hex_string_length);
         return out;
     }
 

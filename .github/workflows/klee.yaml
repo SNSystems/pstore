@@ -1,0 +1,36 @@
+name: KLEE Test
+on:
+    push:
+        branches: [ klee ]
+    pull_request:
+        branches: [ klee ]
+    workflow_dispatch:
+jobs:
+    klee-test:
+        runs-on: ubuntu-latest
+        container:
+            image: klee/klee:2.1
+            options: -u 0 --ulimit="stack=-1:-1"
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Create Build Environment
+              run: cmake -E make_directory "${{ runner.workspace }}/build"
+
+            - name: Configure
+              run: |
+                  cd "${{ runner.workspace }}/build"
+                  cmake -G "Unix Makefiles"             \
+                        -D CMAKE_BUILD_TYPE=Debug       \
+                        -D CMAKE_CXX_COMPILER=clang++   \
+                        -D CMAKE_C_COMPILER=clang       \
+                        -D PSTORE_BITCODE=Yes           \
+                        -D PSTORE_DISABLE_UINT128_T=Yes \
+                        -D PSTORE_EXAMPLES=No           \
+                        -D PSTORE_EXCEPTIONS=No         \
+                        "$GITHUB_WORKSPACE"
+
+            - name: Build
+              run: |
+                  cd "${{ runner.workspace }}/build"
+                  cmake --build . --target pstore-klee-run-all

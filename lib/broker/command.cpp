@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_| |_|_| |_| |_|\__,_|_| |_|\__,_| *
 //*                                                   *
 //===- lib/broker/command.cpp ---------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -75,7 +75,7 @@ namespace {
             std::strncpy (buffer->data (), "(unknown)", buffer->size ());
         }
         // Guarantee that the string is null terminated.
-        assert (buffer->size () > 0);
+        PSTORE_ASSERT (buffer->size () > 0);
         (*buffer)[buffer->size () - 1] = '\0';
         return buffer->data ();
     }
@@ -92,16 +92,17 @@ namespace pstore {
 
         // ctor
         // ~~~~
-        command_processor::command_processor (unsigned const num_read_threads,
-                                              httpd::server_status * const http_status,
-                                              gsl::not_null<std::atomic<bool> *> const uptime_done,
-                                              std::chrono::seconds const delete_threshold)
+        command_processor::command_processor (
+            unsigned const num_read_threads,
+            gsl::not_null<maybe<httpd::server_status> *> const http_status,
+            gsl::not_null<std::atomic<bool> *> const uptime_done,
+            std::chrono::seconds const delete_threshold)
                 : http_status_{http_status}
                 , uptime_done_{uptime_done}
                 , delete_threshold_{delete_threshold}
                 , num_read_threads_{num_read_threads} {
-            assert (std::is_sorted (std::begin (commands_), std::end (commands_),
-                                    command_entry_compare));
+            PSTORE_ASSERT (std::is_sorted (std::begin (commands_), std::end (commands_),
+                                           command_entry_compare));
         }
 
         // suicide
@@ -146,7 +147,7 @@ namespace pstore {
                 std::ostringstream os;
                 os << "{ \"commits\": " << commits_ << " }";
                 std::string const & str = os.str ();
-                assert (json::is_valid (str));
+                PSTORE_ASSERT (json::is_valid (str));
                 return str;
             });
         }
@@ -154,6 +155,7 @@ namespace pstore {
         // echo
         // ~~~~
         void command_processor::echo (brokerface::fifo_path const &, broker_command const & c) {
+            std::lock_guard<decltype (iomut)> lock{iomut};
             std::printf ("ECHO:%s\n", c.path.c_str ());
         }
 
@@ -242,7 +244,7 @@ namespace pstore {
                 pstore::log (priority::info, "Waiting for commands");
                 while (!commands_done_) {
                     brokerface::message_ptr msg = messages_.pop ();
-                    assert (msg);
+                    PSTORE_ASSERT (msg);
                     this->process_command (fifo, *msg);
                     pool.return_to_pool (std::move (msg));
                 }

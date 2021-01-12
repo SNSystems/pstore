@@ -11,7 +11,7 @@
 //* |___/\___|\___|\__|_|\___/|_| |_| *
 //*                                   *
 //===- include/pstore/mcrepo/linked_definitions_section.hpp ---------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -65,7 +65,7 @@ namespace pstore {
             template <typename InputIt>
             auto udistance (InputIt first, InputIt last) {
                 auto d = std::distance (first, last);
-                assert (d >= 0);
+                PSTORE_ASSERT (d >= 0);
                 return static_cast<std::make_unsigned_t<decltype (d)>> (d);
             }
 
@@ -182,7 +182,7 @@ namespace pstore {
             template <typename LinkedDefinitions, typename ResultType = typename inherit_const<
                                                       LinkedDefinitions, value_type>::type>
             static ResultType & index_impl (LinkedDefinitions & v, std::size_t pos) {
-                assert (pos < v.size ());
+                PSTORE_ASSERT (pos < v.size ());
                 return v.definitions_[pos];
             }
 
@@ -240,8 +240,9 @@ namespace pstore {
                     : section_creation_dispatcher (section_kind::linked_definitions)
                     , begin_ (begin)
                     , end_ (end) {
-                assert (std::distance (begin, end) > 0 && "a linked_definitions section must hold "
-                                                          "at least one reference to a definition");
+                PSTORE_ASSERT (std::distance (begin, end) > 0 &&
+                               "a linked_definitions section must hold "
+                               "at least one reference to a definition");
             }
             linked_definitions_creation_dispatcher (
                 linked_definitions_creation_dispatcher const &) = delete;

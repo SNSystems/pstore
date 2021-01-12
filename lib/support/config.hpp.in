@@ -5,7 +5,7 @@
 //*  \___\___/|_| |_|_| |_|\__, | *
 //*                        |___/  *
 //===- lib/support/config.hpp ---------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -104,8 +104,9 @@
 /// or st_Xtime (and be of type time_t). This macro is defined in the former situation.
 #cmakedefine PSTORE_STAT_TIMESPEC 1
 
-#cmakedefine PSTORE_PTHREAD_SETNAME_NP_2_ARGS 1
 #cmakedefine PSTORE_PTHREAD_SETNAME_NP_1_ARG 1
+#cmakedefine PSTORE_PTHREAD_SETNAME_NP_2_ARGS 1
+#cmakedefine PSTORE_PTHREAD_SETNAME_NP_3_ARGS 1
 #cmakedefine PSTORE_PTHREAD_SET_NAME_NP 1
 
 /// Is the macOS _NSGetExecutablePath() function available?

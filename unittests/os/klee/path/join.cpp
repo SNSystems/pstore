@@ -4,8 +4,8 @@
 //*   | | (_) | | | | | *
 //*  _/ |\___/|_|_| |_| *
 //* |__/                *
-//===- unittests/support/klee/path/join.cpp -------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+//===- unittests/os/klee/path/join.cpp ------------------------------------===//
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -49,7 +49,7 @@
 
 #include <klee/klee.h>
 
-#include "pstore/support/path.hpp"
+#include "pstore/os/path.hpp"
 
 constexpr std::size_t size = 5;
 

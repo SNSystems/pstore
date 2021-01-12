@@ -5,7 +5,7 @@
 //*   \_/\_/ |_|  |_|\__\___| |_|_| |_|\__\___|\__, |\___|_|  |___/ *
 //*                                            |___/                *
 //===- examples/serialize/write_integers/write_integers.cpp ---------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

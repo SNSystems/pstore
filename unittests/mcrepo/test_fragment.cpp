@@ -5,7 +5,7 @@
 //* |_| |_|  \__,_|\__, |_| |_| |_|\___|_| |_|\__| *
 //*                |___/                           *
 //===- unittests/mcrepo/test_fragment.cpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -74,7 +74,7 @@ namespace {
         static_assert ((std::is_same<typename std::iterator_traits<Iterator>::value_type,
                                      section_content>::value),
                        "Iterator value_type must be section_content pointer");
-        assert (std::distance (begin, end) >= 0);
+        PSTORE_ASSERT (std::distance (begin, end) >= 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers;
         std::for_each (begin, end, [&dispatchers] (section_content const & section) {
@@ -101,7 +101,7 @@ namespace {
     build_fragment (transaction & transaction, SectionIterator section_begin,
                     SectionIterator section_end, DefinitionIterator definition_begin,
                     DefinitionIterator definition_end) {
-        assert (std::distance (definition_begin, definition_end) > 0);
+        PSTORE_ASSERT (std::distance (definition_begin, definition_end) > 0);
 
         std::vector<std::unique_ptr<section_creation_dispatcher>> dispatchers =
             build_sections (section_begin, section_end);
@@ -121,8 +121,8 @@ TEST_F (FragmentTest, Empty) {
                                    pstore::make_pointee_adaptor (std::end (c)));
 
     auto f = reinterpret_cast<fragment const *> (extent.addr.absolute ());
-    assert (transaction_.get_storage ().begin ()->first ==
-            reinterpret_cast<std::uint8_t const *> (f));
+    PSTORE_ASSERT (transaction_.get_storage ().begin ()->first ==
+                   reinterpret_cast<std::uint8_t const *> (f));
     EXPECT_EQ (0U, f->size ());
 }
 

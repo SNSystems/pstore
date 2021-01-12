@@ -5,7 +5,7 @@
 //* | .__/|_|  \___/ \___\___||___/___/ |_| |_|_|\___| |_| |_|\__,_|_| |_| |_|\___| *
 //* |_|                                                                             *
 //===- lib/os/process_file_name_win32.cpp ---------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -60,7 +60,7 @@
 namespace {
 
     DWORD get_module_file_name (pstore::small_vector<wchar_t> & buffer) {
-        assert (buffer.size () <= std::numeric_limits<DWORD>::max ());
+        PSTORE_ASSERT (buffer.size () <= std::numeric_limits<DWORD>::max ());
         DWORD const num_wchars =
             ::GetModuleFileNameW (nullptr, buffer.data (), static_cast<DWORD> (buffer.size ()));
         if (num_wchars == 0) {

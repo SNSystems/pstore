@@ -5,7 +5,7 @@
 //*  \__, |\___|_| |_|\___|_|  |_|\___| |___/\___|\___|\__|_|\___/|_| |_| *
 //*  |___/                                                                *
 //===- lib/mcrepo/generic_section.cpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -120,7 +120,7 @@ namespace pstore {
         }
 
         std::uint8_t * generic_section_creation_dispatcher::write (std::uint8_t * const out) const {
-            assert (this->aligned (out) == out);
+            PSTORE_ASSERT (this->aligned (out) == out);
             auto * const scn =
                 new (out) generic_section (section_->make_sources (), section_->align);
             return out + scn->size_bytes ();

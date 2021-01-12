@@ -5,7 +5,7 @@
 //*  \___/_/\_\ .__/ \___/|_|   \__| |_| |_|\__,_|_| |_| |_|\___||___/ *
 //*           |_|                                                      *
 //===- lib/exchange/export_names.cpp --------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -62,8 +62,8 @@ namespace pstore {
             // add
             // ~~~
             void name_mapping::add (address const addr) {
-                assert (names_.find (addr) == names_.end ());
-                assert (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
+                PSTORE_ASSERT (names_.find (addr) == names_.end ());
+                PSTORE_ASSERT (names_.size () <= std::numeric_limits<std::uint64_t>::max ());
                 auto const index = static_cast<std::uint64_t> (names_.size ());
                 names_[addr] = index;
             }
@@ -72,7 +72,7 @@ namespace pstore {
             // ~~~~~
             std::uint64_t name_mapping::index (typed_address<indirect_string> const addr) const {
                 auto const pos = names_.find (addr.to_address ());
-                assert (pos != names_.end ());
+                PSTORE_ASSERT (pos != names_.end ());
                 return pos->second;
             }
 

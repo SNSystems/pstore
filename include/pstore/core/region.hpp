@@ -5,7 +5,7 @@
 //* |_|  \___|\__, |_|\___/|_| |_| *
 //*           |___/                *
 //===- include/pstore/core/region.hpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -140,7 +140,7 @@ namespace pstore {
                 , full_size_ (full_size)
                 , minimum_size_ (minimum_size) {
 
-            assert (full_size >= minimum_size && full_size_ % minimum_size_ == 0);
+            PSTORE_ASSERT (full_size >= minimum_size && full_size_ % minimum_size_ == 0);
         }
 
         // append
@@ -149,10 +149,10 @@ namespace pstore {
         void region_builder<File, MemoryMapper>::append (gsl::not_null<container_type *> regions,
                                                          std::uint64_t offset,
                                                          std::uint64_t bytes_to_map) {
-            assert (regions != nullptr);
-            assert (offset % minimum_size_ == 0);
+            PSTORE_ASSERT (regions != nullptr);
+            PSTORE_ASSERT (offset % minimum_size_ == 0);
             bytes_to_map = round_up (bytes_to_map, minimum_size_);
-            assert (bytes_to_map % minimum_size_ == 0);
+            PSTORE_ASSERT (bytes_to_map % minimum_size_ == 0);
 
             // Zero or more regions whose size is a multiple of minimum-size but no
             // more than full-size.
@@ -186,8 +186,8 @@ namespace pstore {
         region_builder<File, MemoryMapper>::push (gsl::not_null<container_type *> const regions,
                                                   std::uint64_t const /*file_size*/,
                                                   std::uint64_t offset, std::uint64_t size) {
-            assert (regions != nullptr);
-            assert (size >= minimum_size_);
+            PSTORE_ASSERT (regions != nullptr);
+            PSTORE_ASSERT (size >= minimum_size_);
             // (Note that we separately make pages read-only to guard against writing to committed
             // transactions: that's done by database::protect() rather than here.)
             regions->push_back (
@@ -205,7 +205,7 @@ namespace pstore {
             // Check that the regions are contiguous and sorted.
             std::uint64_t p = 0;
             for (pstore::region::memory_mapper_ptr const & region : regions) {
-                assert (region->offset () == p);
+                PSTORE_ASSERT (region->offset () == p);
                 p += region->size ();
             }
 #endif
@@ -260,7 +260,7 @@ namespace pstore {
             constexpr factory (std::uint64_t const full_size, std::uint64_t const min_size) noexcept
                     : full_size_{full_size}
                     , min_size_{min_size} {
-                assert (full_size_ % min_size_ == 0);
+                PSTORE_ASSERT (full_size_ % min_size_ == 0);
             }
 
             template <typename File, typename MemoryMapper>
@@ -298,7 +298,7 @@ namespace pstore {
                               gsl::not_null<std::vector<memory_mapper_ptr> *> regions,
                               std::uint64_t original_size, std::uint64_t new_size) {
 
-            assert (new_size >= original_size);
+            PSTORE_ASSERT (new_size >= original_size);
 
             auto const min_size = this->min_size ();
             region_builder<File, MemoryMapper> builder (file, this->full_size (), min_size);

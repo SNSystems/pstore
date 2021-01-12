@@ -5,7 +5,7 @@
 //*   \_/ \__,_|_|\__,_|\___| *
 //*                           *
 //===- include/pstore/dump/value.hpp --------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -48,7 +48,6 @@
 
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <ctime>
 #include <ios>
@@ -58,6 +57,7 @@
 #include <utility>
 #include <vector>
 
+#include "pstore/support/assert.hpp"
 #include "pstore/support/ios_state.hpp"
 
 namespace pstore {
@@ -187,7 +187,7 @@ namespace pstore {
                     os << std::oct;
                     break;
                 case 10: os << std::dec; break;
-                default: assert (0); break;
+                default: PSTORE_ASSERT (0); break;
                 }
                 return os << value;
             }

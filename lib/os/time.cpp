@@ -5,7 +5,7 @@
 //*  \__|_|_| |_| |_|\___| *
 //*                        *
 //===- lib/os/time.cpp ----------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -67,7 +67,7 @@ namespace pstore {
         if (res == nullptr) {
             raise (errno_erc{errno}, "localtime_r");
         }
-        assert (res == &result);
+        PSTORE_ASSERT (res == &result);
         return result;
     }
 #else
@@ -90,7 +90,7 @@ namespace pstore {
         if (res == nullptr) {
             raise (errno_erc{errno}, "gmtime_r");
         }
-        assert (res == &result);
+        PSTORE_ASSERT (res == &result);
         return result;
     }
 #else

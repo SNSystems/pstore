@@ -6,7 +6,7 @@
 //* |___/\___|_| |_|\___|_| |_| |_|\__,_|  \___|_| |_|\___|\___|_|\_\ *
 //*                                                                   *
 //===- utils/exchange_schema/schema_check.js ------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

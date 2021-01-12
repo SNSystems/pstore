@@ -5,7 +5,7 @@
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_|   \__,_|_|\___| *
 //*             |_|                                        *
 //===- include/pstore/exchange/import_rule.hpp ----------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -196,7 +196,7 @@ namespace pstore {
                 }
 
                 std::unique_ptr<rule> & top () {
-                    assert (!context_->stack.empty ());
+                    PSTORE_ASSERT (!context_->stack.empty ());
                     return context_->stack.top ();
                 }
                 std::shared_ptr<context> context_;

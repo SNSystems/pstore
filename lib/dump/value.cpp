@@ -5,7 +5,7 @@
 //*   \_/ \__,_|_|\__,_|\___| *
 //*                           *
 //===- lib/dump/value.cpp -------------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -64,7 +64,7 @@ namespace {
 
     template <typename CharType>
     constexpr CharType to_hex (unsigned const v) noexcept {
-        assert (v < 0x10);
+        PSTORE_ASSERT (v < 0x10);
         return static_cast<CharType> (v + ((v < 10) ? '0' : 'A' - 10));
     }
 
@@ -510,7 +510,7 @@ namespace pstore {
         object::member::member (std::string const & p, value_ptr const & v)
                 : property (p)
                 , val (v) {
-            assert (v.get () != nullptr);
+            PSTORE_ASSERT (v.get () != nullptr);
         }
 
         object::member::member (member && rhs)

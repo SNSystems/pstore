@@ -5,7 +5,7 @@
 //* |_|_| |_| |_| .__/ \___/|_|   \__| |_|   \__,_|_|\___| *
 //*             |_|                                        *
 //===- lib/exchange/import_rule.cpp ---------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -98,7 +98,7 @@ namespace pstore {
             std::error_code rule::end_object () { return error::unexpected_end_object; }
 
             void rule::log_top_impl (bool const is_push) const {
-                assert (logging_enabled ());
+                PSTORE_ASSERT (logging_enabled ());
                 std::ostringstream str;
                 auto const & stack = context_->stack;
                 str << indent{stack.size ()} << (is_push ? '+' : '-') << stack.top ()->name ();

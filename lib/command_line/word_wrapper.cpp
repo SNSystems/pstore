@@ -5,7 +5,7 @@
 //*   \_/\_/ \___/|_|  \__,_|   \_/\_/ |_|  \__,_| .__/| .__/ \___|_|    *
 //*                                              |_|   |_|               *
 //===- lib/command_line/word_wrapper.cpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -44,7 +44,8 @@
 #include "pstore/command_line/word_wrapper.hpp"
 
 #include <algorithm>
-#include <cassert>
+
+#include "pstore/support/assert.hpp"
 
 namespace pstore {
     namespace command_line {
@@ -107,7 +108,7 @@ namespace pstore {
                     }
                 }
 
-                assert (end_pos >= start_pos_);
+                PSTORE_ASSERT (end_pos >= start_pos_);
                 substr_ = text_.substr (start_pos_, end_pos - start_pos_);
 
                 while (end_pos < length && text_[end_pos] == ' ') {

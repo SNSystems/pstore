@@ -5,7 +5,7 @@
 //* |_| |_| |_|\___/ \__,_|_|_| |_|\___|_|  |___/ *
 //*                                               *
 //===- lib/command_line/modifiers.cpp -------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:

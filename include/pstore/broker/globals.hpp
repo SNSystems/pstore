@@ -5,7 +5,7 @@
 //*  \__, |_|\___/|_.__/ \__,_|_|___/ *
 //*  |___/                            *
 //===- include/pstore/broker/globals.hpp ----------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -47,12 +47,16 @@
 #define PSTORE_BROKER_GLOBALS_HPP
 
 #include <atomic>
+#include <mutex>
 
 namespace pstore {
     namespace broker {
 
         extern std::atomic<bool> done;
         extern std::atomic<int> exit_code;
+
+        /// A mutex to guard any use of stdout or stderr.
+        extern std::mutex iomut;
 
     } // namespace broker
 } // namespace pstore

@@ -5,7 +5,7 @@
 //* |___/_| |_| |_|\__,_|_|_|   \_/ \___|\___|\__\___/|_|    *
 //*                                                          *
 //===- include/pstore/adt/small_vector.hpp --------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -49,11 +49,11 @@
 #define PSTORE_ADT_SMALL_VECTOR_HPP
 
 #include <array>
-#include <cassert>
 #include <cstddef>
 #include <initializer_list>
 #include <vector>
 
+#include "pstore/support/assert.hpp"
 #include "pstore/support/inherit_const.hpp"
 
 namespace pstore {
@@ -203,7 +203,7 @@ namespace pstore {
         template <typename SmallVector,
                   typename ResultType = typename inherit_const<SmallVector, ElementType>::type>
         static ResultType & index (SmallVector && sm, std::size_t const n) noexcept {
-            assert (n < sm.size ());
+            PSTORE_ASSERT (n < sm.size ());
             return sm.buffer_[n];
         }
 

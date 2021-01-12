@@ -11,7 +11,7 @@
 //* |_| |_| |_|\__,_| .__/| .__/ \___|_|    *
 //*                 |_|   |_|               *
 //===- lib/os/memory_mapper.cpp -------------------------------------------===//
-// Copyright (c) 2017-2020 by Sony Interactive Entertainment, Inc.
+// Copyright (c) 2017-2021 by Sony Interactive Entertainment, Inc.
 // All rights reserved.
 //
 // Developed by:
@@ -62,7 +62,7 @@ namespace pstore {
         {
             auto * const addr8 = static_cast<std::uint8_t *> (addr);
             auto * const data8 = static_cast<std::uint8_t *> (this->data ().get ());
-            assert (addr8 >= data8 && addr8 + len <= data8 + this->size ());
+            PSTORE_ASSERT (addr8 >= data8 && addr8 + len <= data8 + this->size ());
         }
 #endif
         this->read_only_impl (addr, len);
