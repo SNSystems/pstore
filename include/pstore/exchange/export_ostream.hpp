@@ -58,6 +58,8 @@ namespace pstore {
                 template <typename T>
                 using enable_if_unsigned = typename std::enable_if_t<std::is_unsigned<T>::value>;
 
+                /// Returns the number of characters (in base 10) that a value of type Unsigned
+                /// will occupy.
                 template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
                 constexpr unsigned
                 base10digits (Unsigned value = std::numeric_limits<Unsigned>::max ()) noexcept {
@@ -67,9 +69,15 @@ namespace pstore {
                 template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
                 using base10storage = std::array<char, base10digits<Unsigned> ()>;
 
+                /// Converts an unsigned numeric value to an array of characters.
+                ///
+                /// \param v  The unsigned number value to be converted.
+                /// \param out  A character buffer to which the output is written.
+                /// \result  A pair denoting the range of valid characters in the \p out buffer.
                 template <typename Unsigned, typename = enable_if_unsigned<Unsigned>>
                 std::pair<char const *, char const *>
-                u2s (Unsigned v, gsl::not_null<base10storage<Unsigned> *> const out) noexcept {
+                to_characters (Unsigned v,
+                               gsl::not_null<base10storage<Unsigned> *> const out) noexcept {
                     char * const end = out->data () + out->size ();
                     char * ptr = end - 1;
                     if (v == 0U) {
@@ -95,7 +103,9 @@ namespace pstore {
             //*                                                      *
             class ostream_base {
             public:
-                ostream_base ();
+                /// \param buffer_size  The number of characters in the output buffer.
+                explicit ostream_base (std::size_t buffer_size);
+
                 ostream_base (ostream_base const &) = delete;
                 ostream_base (ostream_base &&) = delete;
 
@@ -104,21 +114,24 @@ namespace pstore {
                 ostream_base & operator= (ostream_base const &) = delete;
                 ostream_base & operator= (ostream_base &&) = delete;
 
+                /// Writes a single character to the output.
                 ostream_base & write (char c);
+                /// Writes a null-terminated string to the output.
                 ostream_base & write (gsl::czstring str);
+                /// Writes a string to the output.
                 ostream_base & write (std::string const & str);
+                ostream_base & write (char const * s, std::streamsize length);
 
+                /// Writes an unsigned numeric value to the output.
                 template <typename Unsigned,
                           typename = typename std::enable_if_t<std::is_unsigned<Unsigned>::value>>
                 ostream_base & write (Unsigned const v);
 
+                /// Writes a span of characters to the output.
                 template <std::ptrdiff_t Extent>
                 ostream_base & write (gsl::span<char const, Extent> const s);
 
-                ostream_base & write (char const * s, std::streamsize const length) {
-                    PSTORE_ASSERT (length >= 0);
-                    return this->write (gsl::make_span (s, length));
-                }
+                std::size_t flush ();
 
             protected:
                 virtual void flush_buffer (std::vector<char> const & buffer,
@@ -131,9 +144,6 @@ namespace pstore {
                     return buffer_.size () - this->buffered_chars ();
                 }
 
-                std::size_t flush ();
-
-                static constexpr std::size_t buffer_size_ = 1U;
                 std::vector<char> buffer_;
                 char * ptr_ = nullptr;
                 char * end_ = nullptr;
@@ -142,10 +152,9 @@ namespace pstore {
             template <typename Unsigned, typename>
             ostream_base & ostream_base::write (Unsigned const v) {
                 details::base10storage<Unsigned> str{{}};
-                auto res = details::u2s (v, &str);
+                auto res = details::to_characters (v, &str);
                 return this->write (gsl::make_span (res.first, res.second));
             }
-
 
             template <std::ptrdiff_t Extent>
             ostream_base & ostream_base::write (gsl::span<char const, Extent> const s) {
@@ -174,7 +183,6 @@ namespace pstore {
                 }
                 return *this;
             }
-
 
             inline ostream_base & operator<< (ostream_base & os, char const c) {
                 return os.write (c);
