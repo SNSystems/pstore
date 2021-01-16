@@ -11,7 +11,12 @@ namespace {
 
 } // end anonymous namespace
 
+
+#ifdef PSTORE_IS_INSIDE_LLVM
+TYPED_TEST_CASE_P (UnsignedToString);
+#else
 TYPED_TEST_SUITE_P (UnsignedToString);
+#endif
 
 TYPED_TEST_P (UnsignedToString, Zero) {
     using namespace pstore::exchange::export_ns::details;
@@ -43,10 +48,17 @@ TYPED_TEST_P (UnsignedToString, Max) {
     EXPECT_EQ ((std::string{x.first, x.second}), std::to_string (max));
 }
 
-REGISTER_TYPED_TEST_SUITE_P (UnsignedToString, Zero, One, Ten, Max);
 using UnsignedTypes =
     testing::Types<unsigned char, unsigned int, unsigned long, unsigned long long>;
+
+#if PSTORE_IS_INSIDE_LLVM
+REGISTER_TYPED_TEST_CASE_P (UnsignedToString, Zero, One, Ten, Max);
+INSTANTIATE_TYPED_TEST_CASE_P (U2S, UnsignedToString, UnsignedTypes);
+#else
+REGISTER_TYPED_TEST_SUITE_P (UnsignedToString, Zero, One, Ten, Max);
 INSTANTIATE_TYPED_TEST_SUITE_P (U2S, UnsignedToString, UnsignedTypes, );
+#endif
+
 
 namespace {
 
