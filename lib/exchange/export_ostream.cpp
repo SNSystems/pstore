@@ -62,6 +62,10 @@ namespace pstore {
                 end_ = ptr_ + buffer_.size ();
             }
 
+            // dtor
+            // ~~~~
+            ostream_base::~ostream_base () noexcept = default;
+
             // write
             // ~~~~~
             ostream_base & ostream_base::write (char const c) {
@@ -105,6 +109,17 @@ namespace pstore {
             ostream::ostream (FILE * const os)
                     : ostream_base (std::size_t{256 * 1024})
                     , os_ (os) {}
+
+            // dtor
+            // ~~~~
+            ostream::~ostream () noexcept {
+                PSTORE_TRY {
+                    this->flush ();
+                    // clang-format off
+                } PSTORE_CATCH (..., {
+                                       // clang-format on
+                                   })
+            }
 
             // flush buffer
             // ~~~~~~~~~~~~

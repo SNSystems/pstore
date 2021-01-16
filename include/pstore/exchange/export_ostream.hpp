@@ -109,7 +109,7 @@ namespace pstore {
                 ostream_base (ostream_base const &) = delete;
                 ostream_base (ostream_base &&) = delete;
 
-                virtual ~ostream_base () noexcept = default;
+                virtual ~ostream_base () noexcept = 0;
 
                 ostream_base & operator= (ostream_base const &) = delete;
                 ostream_base & operator= (ostream_base &&) = delete;
@@ -212,13 +212,13 @@ namespace pstore {
             //* / _ (_-<  _| '_/ -_) _` | '  \  *
             //* \___/__/\__|_| \___\__,_|_|_|_| *
             //*                                 *
-            class ostream : public ostream_base {
+            class ostream final : public ostream_base {
             public:
                 explicit ostream (FILE * const os);
                 ostream (ostream const &) = delete;
                 ostream (ostream &&) = delete;
 
-                ~ostream () noexcept override = default;
+                ~ostream () noexcept override;
 
                 ostream & operator= (ostream const &) = delete;
                 ostream & operator= (ostream &&) = delete;

@@ -69,6 +69,7 @@ int main (int argc, char * argv[]) {
         pstore::exchange::export_ns::ostream os{stdout};
         pstore::database db{db_path.get (), pstore::database::access_mode::read_only};
         pstore::exchange::export_ns::emit_database (db, os, true);
+        os.flush ();
     }
     // clang-format off
     PSTORE_CATCH (std::exception const & ex, { // clang-format on
