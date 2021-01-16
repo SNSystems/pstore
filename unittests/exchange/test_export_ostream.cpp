@@ -140,13 +140,13 @@ TEST (OStream, Span) {
                                     string_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"d"s}), std::size_t{1}));
 
-    std::vector<char const> v{{'a', 'b', 'c', 'd'}};
+    std::array<char const, 4U> const v{{'a', 'b', 'c', 'd'}};
     str.write (pstore::gsl::make_span (v));
     str.flush ();
 }
 
 TEST (OStream, LargeSpan) {
-    std::vector<char const> v{{'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
+    std::array<char const, 7U> const v{{'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
 
     string_ostream str;
 
