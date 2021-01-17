@@ -139,10 +139,10 @@ namespace pstore {
 
             private:
                 /// Returns the number of characters held in the output buffer.
-                std::size_t buffered_chars () const noexcept { return ptr_ - buffer_.data (); }
-                std::size_t available_space () const noexcept {
-                    return buffer_.size () - this->buffered_chars ();
-                }
+                std::size_t buffered_chars () const noexcept;
+                /// Returns the number of characters that the buffer can accommodate before it is
+                /// full.
+                std::size_t available_space () const noexcept;
 
                 std::vector<char> buffer_;
                 char * ptr_ = nullptr;
@@ -173,7 +173,10 @@ namespace pstore {
 
                     // Copy as many characters as we can from the input span to the buffer.
                     auto const count = std::min (remaining, available);
-                    auto ss = s.subspan (index, count);
+                    using span_index_type = gsl::span<char const>::index_type;
+                    PSTORE_ASSERT (count <=
+                                   unsigned_cast (std::numeric_limits<span_index_type>::max ()));
+                    auto ss = s.subspan (index, static_cast<span_index_type> (count));
                     ptr_ = std::copy (ss.begin (), ss.end (), ptr_);
                     PSTORE_ASSERT (ptr_ <= end_);
 

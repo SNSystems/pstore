@@ -57,7 +57,10 @@ namespace pstore {
             // ctor
             // ~~~~
             ostream_base::ostream_base (std::size_t const buffer_size) {
-                buffer_.resize (buffer_size);
+                buffer_.resize (
+                    std::min (buffer_size,
+                              unsigned_cast (
+                                  std::numeric_limits<gsl::span<char const>::index_type>::max ())));
                 ptr_ = buffer_.data ();
                 end_ = ptr_ + buffer_.size ();
             }
@@ -91,6 +94,20 @@ namespace pstore {
                 return this->write (gsl::make_span (s, length));
             }
 
+            // buffered chars
+            // ~~~~~~~~~~~~~~
+            std::size_t ostream_base::buffered_chars () const noexcept {
+                auto const * const data = buffer_.data ();
+                PSTORE_ASSERT (ptr_ >= data && ptr_ <= data + buffer_.size ());
+                return static_cast<std::size_t> (ptr_ - data);
+            }
+
+            // available space
+            // ~~~~~~~~~~~~~~~
+            std::size_t ostream_base::available_space () const noexcept {
+                return buffer_.size () - this->buffered_chars ();
+            }
+
             // flush
             // ~~~~~
             std::size_t ostream_base::flush () {
@@ -116,9 +133,8 @@ namespace pstore {
                 PSTORE_TRY {
                     this->flush ();
                     // clang-format off
-                } PSTORE_CATCH (..., {
-                                       // clang-format on
-                                   })
+                } PSTORE_CATCH (..., {})
+                // clang-format on
             }
 
             // flush buffer
