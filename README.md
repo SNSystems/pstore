@@ -59,8 +59,8 @@ pstore may be built either as a standalone collection of libraries, header files
 The pstore build system uses cmake. If you’re not very familiar with cmake, there’s a small utility (found in `utils/make_build.py`) which will create an out-of-tree directory in which to build the project and run cmake with the correct arguments for your platform.
 
 ~~~bash
-$ python ./utils/make_build.py
-$ cmake ‑‑build build_linux
+python ./utils/make_build.py
+cmake ‑‑build build_linux
 ~~~
 
 The build directory will be one of `build_linux`, `build_mac`, `build_win32`, and so on.
@@ -70,23 +70,23 @@ The build directory will be one of `build_linux`, `build_mac`, `build_win32`, an
 Make sure that pstore is located within the llvm-project directory tree. For example, to build pstore inside LLVM with Program Repository Support ([llvm-project-prepo](https://github.com/SNSystems/llvm-project-prepo)):
 
 ~~~bash
-$ git clone http://github.com/SNSystems/llvm-project-prepo.git
-$ cd llvm
-$ git clone http://github.com/SNSystems/pstore.git
-$ cd -
+git clone http://github.com/SNSystems/llvm-project-prepo.git
+cd llvm
+git clone http://github.com/SNSystems/pstore.git
+cd -
 ~~~
 
 Build LLVM as [normal](https://llvm.org/docs/CMake.html) enabling the pstore subproject in addition to any others. For example:
 
 ~~~~bash
-$ mkdir build
-$ cd build
-$ cmake -G Ninja \
-        -D LLVM_ENABLE_PROJECTS="clang;pstore" \
-        -D LLVM_TARGETS_TO_BUILD=X86 \
-        -D LLVM_TOOL_CLANG_TOOLS_EXTRA_BUILD=Off \
-        ../llvm
-$ ninja
+mkdir build
+cd build
+cmake -G Ninja \
+      -D LLVM_ENABLE_PROJECTS="clang;pstore" \
+      -D LLVM_TARGETS_TO_BUILD=X86 \
+      -D LLVM_TOOL_CLANG_TOOLS_EXTRA_BUILD=Off \
+      ../llvm
+ninja
 ~~~~
 
 # Getting started
