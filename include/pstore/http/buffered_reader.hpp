@@ -204,7 +204,7 @@ namespace pstore {
             this->check_invariants ();
         }
 
-        // get_span_impl
+        // get span impl
         // ~~~~~~~~~~~~~
         template <typename IO, typename RefillFunction>
         auto buffered_reader<IO, RefillFunction>::get_span_impl (IO io, byte_span const & sp)
@@ -229,8 +229,8 @@ namespace pstore {
                     if (end == span_.begin ()) {
                         // that's the end of the source data.
                         is_eof_ = true;
-                        return {in_place, io,
-                                byte_span{sp.data (), available.data () - sp.data ()}};
+                        return error_or_n<IO, byte_span>{
+                            in_place, io, byte_span{sp.data (), available.data () - sp.data ()}};
                     }
 
                     end_ = end;
@@ -245,10 +245,11 @@ namespace pstore {
                 pos_ += to_copy;
                 available = available.subspan (to_copy);
             }
-            return {in_place, io, byte_span{sp.data (), available.data () - sp.data ()}};
+            return error_or_n<IO, byte_span>{in_place, io,
+                                             byte_span{sp.data (), available.data () - sp.data ()}};
         }
 
-        // get_span
+        // get span
         // ~~~~~~~~
         template <typename IO, typename RefillFunction>
         template <typename SpanType>

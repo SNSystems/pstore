@@ -118,15 +118,17 @@ namespace {
         explicit reader (std::string const & src) noexcept
                 : src_{src} {}
 
-        pstore::error_or_n<state_type, pstore::maybe<std::string>> gets (state_type const start) {
+        decltype (auto) gets (state_type const start) {
+            using result_type = pstore::error_or_n<state_type, pstore::maybe<std::string>>;
+
             static auto const crlf = pstore::httpd::crlf;
             static auto const crlf_len = std::strlen (crlf);
 
             PSTORE_ASSERT (start != std::string::npos);
             auto const pos = src_.find (crlf, start);
             PSTORE_ASSERT (pos != std::string::npos);
-            return {pstore::in_place, pos + crlf_len,
-                    pstore::just (src_.substr (start, pos - start))};
+            return result_type{pstore::in_place, pos + crlf_len,
+                               pstore::just (src_.substr (start, pos - start))};
         }
 
     private:

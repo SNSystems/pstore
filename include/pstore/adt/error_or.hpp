@@ -97,7 +97,7 @@ namespace pstore {
         }
 
         template <typename... Args>
-        error_or (in_place_t const, Args &&... args)
+        explicit error_or (in_place_t const, Args &&... args)
                 : has_error_{false} {
             new (get_storage ()) storage_type (std::forward<Args> (args)...);
         }
