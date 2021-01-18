@@ -125,11 +125,11 @@ namespace pstore {
                 /// Writes an unsigned numeric value to the output.
                 template <typename Unsigned,
                           typename = typename std::enable_if_t<std::is_unsigned<Unsigned>::value>>
-                ostream_base & write (Unsigned const v);
+                ostream_base & write (Unsigned v);
 
                 /// Writes a span of characters to the output.
                 template <std::ptrdiff_t Extent>
-                ostream_base & write (gsl::span<char const, Extent> const s);
+                ostream_base & write (gsl::span<char const, Extent> s);
 
                 std::size_t flush ();
 
@@ -216,7 +216,7 @@ namespace pstore {
             //*                                 *
             class ostream final : public ostream_base {
             public:
-                explicit ostream (FILE * const os);
+                explicit ostream (FILE * os);
                 ostream (ostream const &) = delete;
                 ostream (ostream &&) = delete;
 
@@ -226,8 +226,7 @@ namespace pstore {
                 ostream & operator= (ostream &&) = delete;
 
             private:
-                void flush_buffer (std::vector<char> const & buffer,
-                                   std::size_t const size) override;
+                void flush_buffer (std::vector<char> const & buffer, std::size_t size) override;
 
                 FILE * const os_;
             };
