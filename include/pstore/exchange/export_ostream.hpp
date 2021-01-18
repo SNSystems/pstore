@@ -157,7 +157,7 @@ namespace pstore {
 
             template <std::ptrdiff_t Extent>
             ostream_base & ostream_base::write (gsl::span<char const, Extent> const s) {
-                if (s.size () <= 0) {
+                if (s.empty ()) {
                     return *this;
                 }
                 auto index = typename gsl::span<char const, Extent>::index_type{0};
