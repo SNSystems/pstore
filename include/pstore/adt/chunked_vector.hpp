@@ -367,10 +367,11 @@ namespace pstore {
         iterator_base (list_iterator const it, std::size_t const index)
                 : it_{it}
                 , index_{index} {}
-        iterator_base (iterator_base<false> const & rhs)
+        // Note that we want to allow implicit conversions from non-const to const iterators.
+        iterator_base (iterator_base<false> const & rhs) // NOLINT(hicpp-explicit-conversions)
                 : it_{rhs.it_}
                 , index_{rhs.index_} {}
-        iterator_base (iterator_base<false> && rhs)
+        iterator_base (iterator_base<false> && rhs) // NOLINT(hicpp-explicit-conversions)
                 : it_{std::move (rhs.it_)}
                 , index_{std::move (rhs.index_)} {}
 
