@@ -62,19 +62,19 @@ INSTANTIATE_TYPED_TEST_SUITE_P (U2S, UnsignedToString, UnsignedTypes, );
 
 namespace {
 
-    class string_ostream : public pstore::exchange::export_ns::ostream_base {
+    class test_ostream : public pstore::exchange::export_ns::ostream_base {
     public:
         static constexpr auto buffer_size = std::size_t{3};
 
-        string_ostream ()
+        test_ostream ()
                 : ostream_base{buffer_size} {}
-        string_ostream (string_ostream const &) = delete;
-        string_ostream (string_ostream &&) = delete;
+        test_ostream (test_ostream const &) = delete;
+        test_ostream (test_ostream &&) = delete;
 
-        ~string_ostream () noexcept override = default;
+        ~test_ostream () noexcept override = default;
 
-        string_ostream & operator= (string_ostream const &) = delete;
-        string_ostream & operator= (string_ostream &&) = delete;
+        test_ostream & operator= (test_ostream const &) = delete;
+        test_ostream & operator= (test_ostream &&) = delete;
 
         MOCK_METHOD2 (flush_buffer, void (std::vector<char> const & buffer, std::size_t size));
     };
@@ -97,11 +97,11 @@ namespace {
 } // end anonymous namespace
 
 TEST (OStream, WriteUnsigned) {
-    string_ostream str;
+    test_ostream str;
 
     testing::InSequence seq;
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"123"s}),
-                                    string_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"123"s}), test_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"4"s}), std::size_t{1}));
 
     str << 1234U;
@@ -109,11 +109,11 @@ TEST (OStream, WriteUnsigned) {
 }
 
 TEST (OStream, CZString) {
-    string_ostream str;
+    test_ostream str;
 
     testing::InSequence seq;
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"abc"s}),
-                                    string_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"abc"s}), test_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"de"s}), std::size_t{2}));
 
     str << "abcde";
@@ -121,11 +121,11 @@ TEST (OStream, CZString) {
 }
 
 TEST (OStream, String) {
-    string_ostream str;
+    test_ostream str;
 
     testing::InSequence seq;
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"abc"s}),
-                                    string_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"abc"s}), test_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"de"s}), std::size_t{2}));
 
     str << "abcde"s;
@@ -133,11 +133,11 @@ TEST (OStream, String) {
 }
 
 TEST (OStream, Span) {
-    string_ostream str;
+    test_ostream str;
 
     testing::InSequence seq;
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"abc"s}),
-                                    string_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"abc"s}), test_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"d"s}), std::size_t{1}));
 
     std::array<char const, 4U> const v{{'a', 'b', 'c', 'd'}};
@@ -148,15 +148,15 @@ TEST (OStream, Span) {
 TEST (OStream, LargeSpan) {
     std::array<char const, 7U> const v{{'a', 'b', 'c', 'd', 'e', 'f', 'g'}};
 
-    string_ostream str;
+    test_ostream str;
 
     // TODO: here the code could optimize the case where more than a buffer's worth of data is
     // being written.
     testing::InSequence seq;
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"abc"s}),
-                                    string_ostream::buffer_size));
-    EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"def"s}),
-                                    string_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"abc"s}), test_ostream::buffer_size));
+    EXPECT_CALL (
+        str, flush_buffer (testing::Truly (first_elements_are{"def"s}), test_ostream::buffer_size));
     EXPECT_CALL (str, flush_buffer (testing::Truly (first_elements_are{"g"s}), std::size_t{1}));
 
     str.write (pstore::gsl::make_span (v));
