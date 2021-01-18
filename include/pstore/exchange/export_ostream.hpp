@@ -134,8 +134,7 @@ namespace pstore {
                 std::size_t flush ();
 
             protected:
-                virtual void flush_buffer (std::vector<char> const & buffer,
-                                           std::size_t const size) = 0;
+                virtual void flush_buffer (std::vector<char> const & buffer, std::size_t size) = 0;
 
             private:
                 /// Returns the number of characters held in the output buffer.
