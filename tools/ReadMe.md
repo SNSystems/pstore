@@ -37,7 +37,7 @@ The utility programs in this group enable you to inspect and explore the content
 
 | Name | Description |
 | --- | --- |
-| [pstore&#8209;brokerd](broker/) | The pstore message broker. The broker is a service which is used to manage the garbage collection processes. |
+| [pstore&#8209;brokerd](brokerd/) | The pstore message broker. The broker is a service which is used to manage the garbage collection processes. |
 | [pstore&#8209;ui](broker_ui)    | The pstore broker dashboard application. |
 | [pstore&#8209;vacuumd](vacuum/) | Data store garbage collector. |
 
