@@ -138,8 +138,8 @@ TEST_F (FragmentTest, MakeReadOnlySection) {
 
     std::vector<std::size_t> const expected{static_cast<std::size_t> (section_kind::read_only)};
     auto indices = f->members ().get_indices ();
-    std::vector<std::size_t> Actual (std::begin (indices), std::end (indices));
-    EXPECT_THAT (Actual, ::testing::ContainerEq (expected));
+    std::vector<std::size_t> const actual (std::begin (indices), std::end (indices));
+    EXPECT_THAT (actual, ::testing::ContainerEq (expected));
 
     generic_section const & s = f->at<section_kind::read_only> ();
 
