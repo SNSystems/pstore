@@ -59,7 +59,10 @@ function createWindow () {
         width : 800,
         height : 600,
         show : false,
-        webPreferences : {nodeIntegration : true},
+        webPreferences : {
+            nodeIntegration : true,
+            enableRemoteModule: true
+        },
     });
     main_window.once('ready-to-show', () => {
         dark_side ();
@@ -70,7 +73,7 @@ function createWindow () {
     main_window.loadFile('index.html');
 
     // Open the DevTools.
-    main_window.webContents.openDevTools();
+    //main_window.webContents.openDevTools();
 
     // Emitted when the window is closed.
     main_window.on('closed', function () {
