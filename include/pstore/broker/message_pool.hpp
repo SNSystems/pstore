@@ -42,6 +42,7 @@
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
 /// \file message_pool.hpp
+/// \brief Stores messages after receipt and before processing by the command thread.
 ///
 /// Buffer Life-Cycle
 /// -----------------
@@ -73,6 +74,15 @@ namespace pstore {
 
         class message_pool {
         public:
+            message_pool () = default;
+            message_pool (message_pool const &) = delete;
+            message_pool (message_pool &&) = delete;
+
+            ~message_pool () noexcept = default;
+
+            message_pool & operator= (message_pool const &) = delete;
+            message_pool & operator= (message_pool &&) = delete;
+
             void return_to_pool (brokerface::message_ptr && ptr);
             brokerface::message_ptr get_from_pool ();
 
@@ -101,7 +111,7 @@ namespace pstore {
 
         extern message_pool pool;
 
-    } // namespace broker
-} // namespace pstore
+    } // end namespace broker
+} // end namespace pstore
 
 #endif // PSTORE_BROKER_MESSAGE_POOL_HPP

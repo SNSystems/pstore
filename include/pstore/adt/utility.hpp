@@ -41,14 +41,20 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file adt/utility.hpp
+/// \brief  Provides definitions needed by the code that are available in C++17 <utility>.
+
 #ifndef PSTORE_ADT_UTILITY_HPP
 #define PSTORE_ADT_UTILITY_HPP
 
 namespace pstore {
+
     struct in_place_t {
         explicit in_place_t () = default;
     };
+
     constexpr in_place_t in_place{};
-} // namespace pstore
+
+} // end namespace pstore
 
 #endif // PSTORE_ADT_UTILITY_HPP

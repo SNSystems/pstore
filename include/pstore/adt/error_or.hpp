@@ -41,6 +41,9 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file error_or.hpp
+/// \brief error_or<T> holds either an instance of T or a std:error.
+
 #ifndef PSTORE_ADT_ERROR_OR_HPP
 #define PSTORE_ADT_ERROR_OR_HPP
 

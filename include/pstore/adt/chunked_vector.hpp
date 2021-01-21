@@ -41,6 +41,11 @@
 // TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 // SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE SOFTWARE.
 //===----------------------------------------------------------------------===//
+/// \file chunked_vector.hpp
+/// \brief Defines the chunked_vector sequence container.
+///
+/// Chunked vector ensures very fast append times at the expense of only permitting bi-directional
+/// iterators. Insertion preserves iterators.
 #ifndef PSTORE_ADT_CHUNKED_VECTOR_HPP
 #define PSTORE_ADT_CHUNKED_VECTOR_HPP
 
