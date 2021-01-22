@@ -23,6 +23,7 @@
 
 #include "pstore/adt/utility.hpp"
 #include "pstore/support/assert.hpp"
+#include "pstore/support/gsl.hpp"
 #include "pstore/support/inherit_const.hpp"
 
 namespace pstore {
@@ -45,8 +46,8 @@ namespace pstore {
         using value_type = T;
         using reference = T &;
         using const_reference = typename std::remove_reference<T>::type const &;
-        using pointer = typename std::remove_reference<T>::type * PSTORE_NONNULL;
-        using const_pointer = typename std::remove_reference<T>::type const * PSTORE_NONNULL;
+        using pointer = gsl::not_null<typename std::remove_reference<T>::type *>;
+        using const_pointer = gsl::not_null<typename std::remove_reference<T>::type const *>;
 
         // ****
         // construction
