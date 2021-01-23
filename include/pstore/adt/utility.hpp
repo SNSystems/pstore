@@ -12,7 +12,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //===----------------------------------------------------------------------===//
 /// \file adt/utility.hpp
-/// \brief  Provides definitions needed by the code that are available in C++17 <utility>.
+/// \brief  Provides definitions needed by the code that are available in C++17 \<utility>.
 
 #ifndef PSTORE_ADT_UTILITY_HPP
 #define PSTORE_ADT_UTILITY_HPP

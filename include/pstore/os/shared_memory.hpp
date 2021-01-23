@@ -195,10 +195,10 @@ namespace pstore {
             shm_name (shm_name const & rhs) = delete;
 
             shm_name & operator= (shm_name const & rhs) = delete;
-            shm_name & operator= (shm_name && rhs) = default;
+            shm_name & operator= (shm_name && rhs) noexcept = default;
 
-            char const * c_str () const;
-            bool empty () const;
+            gsl::czstring c_str () const noexcept { return name_.c_str (); }
+            bool empty () const noexcept { return name_.empty (); }
 
         private:
             std::string name_;
@@ -235,18 +235,6 @@ namespace pstore {
                      std::back_inserter (name_));
     }
 #endif
-    // c_str
-    // ~~~~~
-    template <typename Ty>
-    auto shared_memory<Ty>::shared_memory::shm_name::c_str () const -> char const * {
-        return name_.c_str ();
-    }
-    // empty
-    // ~~~~~
-    template <typename Ty>
-    auto shared_memory<Ty>::shared_memory::shm_name::empty () const -> bool {
-        return name_.empty ();
-    }
 
 
     //*****************
