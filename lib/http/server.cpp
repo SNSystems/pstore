@@ -361,7 +361,7 @@ namespace pstore {
                  expected_state = server_status::http_state::listening) {
 
                 // Wait for a connection request.
-                pstore::error_or<socket_descriptor> echildfd = wait_for_connection (parentfd);
+                error_or<socket_descriptor> echildfd = wait_for_connection (parentfd);
                 if (!echildfd) {
                     log (priority::error,
                          "wait_for_connection: ", echildfd.get_error ().message ());
@@ -373,7 +373,7 @@ namespace pstore {
                 auto reader = make_buffered_reader<socket_descriptor &> (net::refiller);
 
                 PSTORE_ASSERT (childfd.valid ());
-                pstore::error_or_n<socket_descriptor &, request_info> eri =
+                error_or_n<socket_descriptor &, request_info> eri =
                     read_request (reader, std::ref (childfd));
                 if (!eri) {
                     log (priority::error,
@@ -387,9 +387,8 @@ namespace pstore {
 
                 // We only currently support the GET method.
                 if (request.method () != "GET") {
-                    cerror (pstore::http::net::network_sender, std::ref (childfd),
-                            request.method ().c_str (), 501, "Not Implemented",
-                            "httpd does not implement this method");
+                    cerror (net::network_sender, std::ref (childfd), request.method ().c_str (),
+                            501, "Not Implemented", "httpd does not implement this method");
                     continue;
                 }
 
@@ -400,7 +399,7 @@ namespace pstore {
                     if (header_contents.connection_upgrade &&
                         header_contents.upgrade_to_websocket) {
 
-                        pstore::error_or<std::unique_ptr<std::thread>> p = upgrade_to_ws (
+                        error_or<std::unique_ptr<std::thread>> p = upgrade_to_ws (
                             reader, std::ref (childfd), request, header_contents, channels);
                         if (p) {
                             websockets_workers.emplace_back (std::move (*p));
@@ -409,12 +408,12 @@ namespace pstore {
                     }
 
                     if (!details::starts_with (request.uri (), dynamic_path)) {
-                        return serve_static_content (pstore::http::net::network_sender,
-                                                     std::ref (io2), request.uri (), file_system)
+                        return serve_static_content (net::network_sender, std::ref (io2),
+                                                     request.uri (), file_system)
                             .get_error ();
                     }
 
-                    return serve_dynamic_content (pstore::http::net::network_sender, std::ref (io2),
+                    return serve_dynamic_content (net::network_sender, std::ref (io2),
                                                   request.uri ())
                         .get_error ();
                 };
