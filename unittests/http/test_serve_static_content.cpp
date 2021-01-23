@@ -138,7 +138,7 @@ TEST_F (ServeStaticContent, Simple) {
                      string_pair{"content-length", "28"}, string_pair{"content-type", "text/html"},
                      string_pair{"date", ""}, string_pair{"connection", "close"},
                      string_pair{"last-modified", "Tue, 23 Apr 2019 09:10:27 GMT"},
-                     string_pair{"server", "pstore-httpd"}));
+                     string_pair{"server", "pstore-http"}));
     EXPECT_EQ ((std::string{*actual, std::get<0> (eo)}), index_html);
 }
 

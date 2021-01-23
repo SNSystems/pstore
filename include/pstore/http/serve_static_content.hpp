@@ -64,13 +64,16 @@ namespace pstore {
                 return file_system.open (path.c_str ()) >>= [&] (pstore::romfs::descriptor fd) {
                     // Send the response header.
                     std::ostringstream os;
-                    os << "HTTP/1.0 200 OK" << crlf << "Server: pstore-httpd" << crlf
-                       << "Content-length: " << stat.size << crlf
-                       << "Content-type: " << pstore::httpd::media_type_from_filename (path) << crlf
+                    os << "HTTP/1.0 200 OK" << crlf               //
+                       << "Server: " << server_name << crlf       //
+                       << "Content-length: " << stat.size << crlf //
+                       << "Content-type: " << pstore::httpd::media_type_from_filename (path)
+                       << crlf //
                        << "Connection: close"
                        << crlf // TODO remove this when we support persistent connections
-                       << "Date: " << http_date (std::chrono::system_clock::now ()) << crlf
-                       << "Last-Modified: " << http_date (stat.mtime) << crlf << crlf;
+                       << "Date: " << http_date (std::chrono::system_clock::now ()) << crlf //
+                       << "Last-Modified: " << http_date (stat.mtime) << crlf               //
+                       << crlf;
                     return send (sender, io, os.str ()) >>=
                            [&] (IO io2) { return details::read_and_send (sender, io2, fd); };
                 };

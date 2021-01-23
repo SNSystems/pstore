@@ -41,17 +41,22 @@ namespace {
     pstore::error_or<IO> cerror (Sender sender, IO io, pstore::gsl::czstring const cause,
                                  unsigned const error_no, pstore::gsl::czstring const shortmsg,
                                  pstore::gsl::czstring const longmsg) {
-        static auto const & crlf = pstore::httpd::crlf;
+        static constexpr auto crlf = pstore::httpd::crlf;
+        static constexpr auto server_name = pstore::httpd::server_name;
 
         std::ostringstream content;
         content << "<!DOCTYPE html>\n"
                    "<html lang=\"en\">"
                    "<head>\n"
                    "<meta charset=\"utf-8\">\n"
-                   "<title>pstore-httpd Error</title>\n"
+                   "<title>"
+                << server_name
+                << " Error</title>\n"
                    "</head>\n"
                    "<body>\n"
-                   "<h1>pstore-httpd Web Server Error</h1>\n"
+                   "<h1>"
+                << server_name
+                << " Web Server Error</h1>\n"
                    "<p>"
                 << error_no << ": " << shortmsg
                 << "</p>"
@@ -59,21 +64,23 @@ namespace {
                 << longmsg << ": " << cause
                 << "</p>\n"
                    "<hr>\n"
-                   "<em>The pstore-httpd Web server</em>\n"
+                   "<em>The "
+                << server_name
+                << " Web server</em>\n"
                    "</body>\n"
                    "</html>\n";
         std::string const & content_str = content.str ();
-        auto const now = std::chrono::system_clock::now ();
+        auto const now = pstore::httpd::http_date (std::chrono::system_clock::now ());
 
         std::ostringstream os;
         // clang-format off
         os << "HTTP/1.1 " << error_no << " OK" << crlf
-           << "Server: pstore-httpd" << crlf
+           << "Server: " << server_name << crlf
            << "Content-length: " << content_str.length () << crlf
            << "Connection: close" << crlf  // TODO remove this when we support persistent connections
            << "Content-type: " << "text/html" << crlf
-           << "Date: " << pstore::httpd::http_date (now) << crlf
-           << "Last-Modified: " << pstore::httpd::http_date (now) << crlf
+           << "Date: " << now << crlf
+           << "Last-Modified: " << now << crlf
            << crlf
            << content_str;
         // clang-format on

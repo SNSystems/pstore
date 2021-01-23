@@ -65,7 +65,7 @@ int main (int argc, char * argv[]) {
     PSTORE_TRY {
         parse_command_line_options (
             argc, argv,
-            "pstore httpd: A basic HTTP/WS server for testing the pstore-httpd library.\n");
+            "pstore httpd: A basic HTTP/WS server for testing the pstore-http library.\n");
 
         static constexpr auto ident = "main";
         pstore::threads::set_name (ident);

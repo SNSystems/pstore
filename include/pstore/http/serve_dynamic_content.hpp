@@ -66,7 +66,7 @@ namespace pstore {
                << "Content-type: application/json" << crlf                          //
                << "Date: " << http_date (std::chrono::system_clock::now ()) << crlf //
                << "Last-Modified: " << http_date (modified) << crlf                 //
-               << "Server: pstore-httpd" << crlf                                    //
+               << "Server: " << server_name << crlf                                 //
                << crlf // End of headers
                << version;
             return pstore::httpd::send (sender, io, os.str ());
